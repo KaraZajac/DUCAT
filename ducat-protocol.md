@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.24 — Consolidated**
+**Draft 0.25 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.25** — **Pre-split confirmed, and capacity is a count.** Seven consecutive payments of 0.0005 XMR each consumed exactly 0.005 of unlocked balance; the eighth was refused with 0.05 XMR still in the wallet. **A payment costs a whole output regardless of its size**, because the change returns locked — so consecutive capacity is `count(unlocked outputs)`, not a balance, and a float holding one large output makes exactly one payment per lock interval however much it holds. §17.2 now requires clients to surface single-payment capacity and consecutive capacity as two different numbers, since only the second answers *"how many more times can I pay before waiting."*
 - **0.24** — §8.7.2: relays fail non-adversarially, and clients must fail over silently. Observed directly — the public stagenet node under test dropped mid-session between two transactions, reporting only `no connection to daemon` while the wallet continued to serve a cached chain height. Two alternatives were live at the same height. A client with one configured relay has an unchosen availability dependency, and stale-but-plausible state is worse than a visible disconnection.
 - **0.23** — Canonical home recorded as **ducatproject.org**. Added a release-integrity requirement to §11: a distributed client must be reproducibly built where possible, signed by a key published independently of the site, and hash-verifiable before running — because verifying a hash over HTTPS from the same host that served the binary proves very little, and a domain hijack serving a wallet-draining lookalike is §2.5's lesson one layer up, cheaper to mount than anything else in the threat model.
 - **0.22** — **Review gaps closed.** §15.7: every meter is bounded at `start` — the payer confirms a rate, a **cap**, and a maximum duration, because an open-ended obligation cannot be consented to and §15.5 fails without it. Abandoned meters auto-stop, produce a single-sided receipt, and are **collectable only against collateral** — against an unbonded payer the provider bears the loss, as a bar bears a walked tab. §7.4: receipts as records — encrypted local storage of whole transcripts, opt-in backup presented as the privacy decision it is, role-differentiated retention (a consumer holding four years of coffee receipts has built the dossier the protocol avoided creating), and two export forms. §4.2: device delegation generalized from §7.1's staff terminals, covering identity but explicitly **not funds**. §7.3: refunds get a `terms.refund_window`. §18.4.2: a field-number registry reserving ranges for every object the document names, since unassigned numbers are how implementations collide silently. Open problems renumbered into order and all cross-references remapped.
@@ -1222,7 +1223,27 @@ FLOAT = {
              gated by unlocked_output_count ≥ 1
   ```
 
-  A client that reports capacity from `hot_balance` will promise fares it cannot pay. **Two traps, both observed on stagenet:**
+  **Measured on stagenet, and the rule is sharper than value arithmetic suggests.** Seven consecutive payments of 0.0005 XMR each consumed exactly 0.005 of unlocked balance — a tenfold discrepancy, identical every time — and the eighth was refused with nothing unlocked:
+
+  ```
+  payment 1 ok  unlocked 35000000000      payment 5 ok  unlocked 15000000000
+  payment 2 ok  unlocked 30000000000      payment 6 ok  unlocked 10000000000
+  payment 3 ok  unlocked 25000000000      payment 7 ok  unlocked  5000000000
+  payment 4 ok  unlocked 20000000000      payment 8 REFUSED       0
+  ```
+
+  **A payment costs an entire output regardless of its size**, because the change returns locked. Consecutive capacity is therefore a *count*, not a balance: seven unlocked outputs bought seven payments and an eighth was impossible while 0.05 XMR sat in the wallet. A float holding a single large output can make exactly one payment per lock interval no matter how much it holds.
+
+  So a client MUST surface two different numbers, and conflating them is the bug §17.2 exists to prevent:
+
+  ```
+  single payment capacity     = unlocked_output_value − fee_reserve
+  consecutive payment capacity = count(unlocked outputs)
+  ```
+
+  The second is what a user standing at a counter needs — *"you can pay 6 more times before waiting"* — and no balance figure expresses it.
+
+  A client that reports capacity from `hot_balance` will promise fares it cannot pay. **Two further traps, both observed:**
   - **The fee must be reserved.** A payment was refused with exactly its own amount sitting unlocked — the fee had nowhere to come from. Capacity computed as the full unlocked value overstates by at least one fee, and the failure surfaces at the moment of payment.
   - **"Available" does not mean unlocked.** `incoming_transfers` with `transfer_type: "available"` reported 13 outputs while `unlocked_balance` covered a fraction of them. A client counting outputs from that call will believe it has spendable funds it does not have. Count against `unlocked_balance`, not against an availability flag.
 - **Withdrawal** requires a cooldown (default 24 h) with no in-flight obligations, so a rider cannot ride and instantly drain the collateral backing that ride.

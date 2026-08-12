@@ -157,3 +157,43 @@ in both phases.
 unlocked count crossing a threshold, not by `unlocked_balance != 0`), and size
 payments so that unlocked *value* is never the binding constraint before
 unlocked *output count* is.
+
+
+---
+
+# Pre-split, take two — confirmed
+
+v1's faults fixed: wait on unlocked value crossing the split total (a threshold
+leftover change cannot satisfy), and payments sized at an eighth of one output
+so unlocked value could not run out before output count did.
+
+```
+payment 1 ok  unlocked 35000000000      payment 5 ok  unlocked 15000000000
+payment 2 ok  unlocked 30000000000      payment 6 ok  unlocked 10000000000
+payment 3 ok  unlocked 25000000000      payment 7 ok  unlocked  5000000000
+payment 4 ok  unlocked 20000000000      payment 8 REFUSED       0
+```
+
+**Each payment of 0.0005 XMR consumed exactly 0.005 of unlocked balance.** The
+same tenfold discrepancy every time, because a payment consumes a whole output
+and the change comes back locked for 10 blocks. Seven unlocked outputs bought
+seven payments; the eighth was impossible with 0.05 XMR still in the wallet.
+
+**Consecutive capacity is a count, not a balance.** A float holding one large
+output makes exactly one payment per lock interval regardless of its size.
+§17.2's pre-split requirement is confirmed, and its capacity formula now
+distinguishes single-payment capacity (a value) from consecutive capacity (a
+count).
+
+## The script's own verdict was wrong
+
+It printed *"unlocked value was nearly gone: this measured fee headroom, not
+output availability. Inconclusive again."* That heuristic checked whether value
+remained at the refusal, and concluded that an empty balance meant value
+exhaustion rather than output exhaustion.
+
+They are the same event. Value hit zero *because* every output had been consumed
+and its change locked. The stepwise 0.005 decrements are the evidence, and the
+detector was looking at the wrong variable — a reminder that an automated
+inconclusive-check is only as good as its model of the failure it is screening
+for.
