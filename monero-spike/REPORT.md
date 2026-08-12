@@ -305,3 +305,57 @@ execute one.
 escrow.** §4.3.3 records what bounds the exposure — escrow is not the default
 path, the window is short, and the value is known before entering — but none of
 those is a fix.
+
+### Correction: shares *are* recoverable — the earlier conclusion asked the wrong question
+
+The section above concluded that multisig shares could not be backed up, because
+`monero-wallet-rpc` has no restore method. The measurement was right and the
+conclusion was wrong. It assumed restoring a share means *reconstructing* it.
+
+**Reconstruction genuinely fails.** Two wallets given byte-identical key material
+(the same `.keys` file copied twice, so a perfect restore) each ran
+`prepare_multisig`:
+
+    a: MultisigxV2R16v4qNgoz4exPFek7tiUXs6XjEWAt3J87eifHwHGv4RG…  189 chars
+    b: MultisigxV2R16v4qNgoz4exPFek7tiUXs6XjEWAt3J87eifHwHGv4RG…  189 chars
+
+    common prefix: 101 chars, then 88 chars of divergence
+
+So the ceremony draws fresh randomness. Restoring a seed and replaying a recorded
+ceremony produces a *different* share. There is no derivation shortcut.
+
+**But reconstruction is unnecessary — the share is already a file.** Copying only
+the 2-of-3 wallet's `.keys` into a virgin directory and starting a wallet-rpc
+there:
+
+    is_multisig: {'multisig': True, 'ready': True, 'threshold': 2, 'total': 3}
+    address:     53hUxmYTwGtR44fhL8f7JLATagSwjtdLB6y4Q3wQQnbtUsDiLT…   (exact)
+    export_multisig_info:  2508 chars
+    balance:     96908580000 pXMR, scanned from the chain
+
+`restore_multisig_wallet` is never called. The missing method is not on the path.
+
+**Sizes decide feasibility:**
+
+    ms_user.keys      2,286 bytes    ← the share. Back this up.
+    ms_user      52,686,781 bytes    ← scan cache. Rebuilds itself. Do not.
+
+### What was not demonstrated
+
+An end-to-end multisig spend from the restored share. It refused with `-16 No
+transaction created` — **and so did the original wallet**, identically, because
+both need a fresh multisig-info exchange after the earlier spend test consumed
+theirs. So the copy is indistinguishable from the original at every point
+measured, which is the claim being made. It is not the same as having watched a
+restored share co-sign a real transaction, and that test is still owed.
+
+### Why this closed O22
+
+The problem was never that funds were locked. It was *who held the key*. A buyer
+who lost their device needed the **seller's signature** to receive a ruling in
+their own favour — an adversary asked to sign away their own claim, which nothing
+compels. Now they restore their own share and need the other participants to
+re-share multisig info, which endorses no outcome and authorises no transfer.
+
+The ask moved from an adversary's consent to a participant's cooperation in a
+mechanical step. That is the whole difference.

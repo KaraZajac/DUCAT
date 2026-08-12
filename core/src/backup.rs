@@ -70,6 +70,36 @@ mod k {
     pub const CVM_APP_SECRET_VALIDITY_S: u64 = 11;
     pub const CVM_CUMULATIVE_AT: u64 = 12;
     pub const CVM_CUMULATIVE_WINDOW_S: u64 = 13;
+    pub const ESCROW_SHARES: u64 = 14;
+    pub const ESCROW_ID: u64 = 0;
+    pub const ESCROW_KEY_FILE: u64 = 1;
+    pub const ESCROW_RESTORE_HEIGHT: u64 = 2;
+}
+
+/// One multisig membership, stored as the wallet's own key file (§4.3.3).
+///
+/// Not a seed. A share is **not** derivable from the wallet seed — measured on
+/// v0.18.5.1: two wallets with byte-identical key material produced
+/// `prepare_multisig` outputs sharing a 101-character prefix and then diverging
+/// for 88 characters of fresh randomness. Restoring the seed does not restore
+/// the share, so the share itself has to be carried.
+///
+/// Carrying it works because restore does not need an RPC method. `.keys` placed
+/// in a wallet directory and opened with `open_wallet` yields a wallet reporting
+/// `multisig: true, ready: true, threshold 2, total 3` at the correct group
+/// address — verified against stagenet. That routes entirely around the missing
+/// `restore_multisig_wallet` call.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EscrowShare {
+    /// Which escrow this belongs to.
+    pub escrow_id: Vec<u8>,
+    /// The wallet key file, opaque to DUCAT. About 2.3 KB for a 2-of-3 — the
+    /// multi-megabyte companion file next to it is scan cache, which rebuilds
+    /// itself and must not be backed up.
+    pub key_file: Vec<u8>,
+    /// Where a restored copy starts scanning. Same rule and the same asymmetry
+    /// as `monero_restore_height`.
+    pub restore_height: u64,
 }
 
 /// Everything a user needs to become themselves again on another device.
@@ -132,6 +162,18 @@ pub struct Backup {
     /// §15.5.1 keeps verification entirely off the wire, so these thresholds are
     /// only ever the user's own instruction to their own client.
     pub verification: VerificationPolicy,
+    /// Multisig memberships for escrows that are currently open (§4.3.3).
+    ///
+    /// The one part of this bundle with a *freshness* requirement. Everything
+    /// else stays valid indefinitely — a persona key from last year is still
+    /// the persona. An escrow share exists only for the life of one escrow, so
+    /// a bundle exported before an escrow opened does not contain it, and a
+    /// bundle is only as useful as its most recent export.
+    ///
+    /// Captured when the ceremony reports `ready`, never before: a half-formed
+    /// multisig restores as a half-formed multisig, which is the stranded state
+    /// §8.2 already warns about.
+    pub escrow_shares: Vec<EscrowShare>,
     pub created: u64,
 }
 
@@ -176,6 +218,21 @@ impl Backup {
         m.insert(
             k::CVM_CUMULATIVE_WINDOW_S,
             Value::Uint(self.verification.cumulative_window_s),
+        );
+        m.insert(
+            k::ESCROW_SHARES,
+            Value::Array(
+                self.escrow_shares
+                    .iter()
+                    .map(|e| {
+                        let mut em = BTreeMap::new();
+                        em.insert(k::ESCROW_ID, Value::Bytes(e.escrow_id.clone()));
+                        em.insert(k::ESCROW_KEY_FILE, Value::Bytes(e.key_file.clone()));
+                        em.insert(k::ESCROW_RESTORE_HEIGHT, Value::Uint(e.restore_height));
+                        Value::Map(em)
+                    })
+                    .collect(),
+            ),
         );
         m.insert(k::CREATED, Value::Uint(self.created));
         Value::Map(m)
@@ -238,6 +295,43 @@ impl Backup {
             attestation_records: arr(k::ATTESTATION_RECORDS)?,
             mandates: arr(k::MANDATES)?,
             verification: policy,
+            escrow_shares: {
+                let items = match get(k::ESCROW_SHARES)? {
+                    Value::Array(a) => a.clone(),
+                    _ => return Err(Reject::new(RejectCode::Malformed)),
+                };
+                let mut out = Vec::with_capacity(items.len());
+                for it in &items {
+                    let em = it.as_map().ok_or_else(|| Reject::new(RejectCode::Malformed))?;
+                    let fetch = |kk: u64| {
+                        em.get(&kk).ok_or_else(|| {
+                            Reject::with_detail(RejectCode::Malformed, "missing escrow share field")
+                        })
+                    };
+                    let key_file = fetch(k::ESCROW_KEY_FILE)?
+                        .as_bytes()
+                        .ok_or_else(|| Reject::new(RejectCode::Malformed))?
+                        .to_vec();
+                    // An empty key file is not a share. Accepting one would put
+                    // an entry in the user's escrow list that restores to
+                    // nothing, which reads as recoverable and is not.
+                    if key_file.is_empty() {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "an escrow share with no key file restores nothing",
+                        ));
+                    }
+                    out.push(EscrowShare {
+                        escrow_id: fetch(k::ESCROW_ID)?
+                            .as_bytes()
+                            .ok_or_else(|| Reject::new(RejectCode::Malformed))?
+                            .to_vec(),
+                        key_file,
+                        restore_height: fetch(k::ESCROW_RESTORE_HEIGHT)?.as_uint().unwrap_or(0),
+                    });
+                }
+                out
+            },
             created: get(k::CREATED)?.as_uint().unwrap_or(0),
         })
     }

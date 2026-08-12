@@ -17,6 +17,11 @@ fn sample() -> Backup {
         attestation_records: vec![vec![0xDD; 32]],
         mandates: vec![vec![0xCC; 48]],
         verification: VerificationPolicy::default(),
+        escrow_shares: vec![EscrowShare {
+            escrow_id: vec![0xEE; 16],
+            key_file: vec![0x9F; 2286], // the measured size of a real 2-of-3 .keys
+            restore_height: 2_183_000,
+        }],
         created: 1_800_000_000,
     }
 }
@@ -145,7 +150,7 @@ fn the_format_is_frozen() {
     let digest = Sha256::digest(&blob);
     assert_eq!(
         hex(&digest),
-        "f7283d78b570259944dc5fac415383ab2dcfc6b9276d845c9d3c633b24532857",
+        "ddd2a4b11c42fb7cbd62b9d994983a0513aa5163d0ac45dd21e02e14ab3a8341",
         "the backup format changed — every existing backup would fail to import"
     );
 }
@@ -187,4 +192,47 @@ fn an_inverted_policy_is_refused_at_import() {
         import(&blob, b"passphrase here").unwrap_err().code,
         RejectCode::PolicyRefused
     );
+}
+
+/// O22. A share is not derivable from the seed — measured, two wallets with
+/// byte-identical key material produced `prepare_multisig` outputs that agreed
+/// for 101 characters and then diverged for 88 of fresh randomness. So the share
+/// itself has to travel, and it travels as the wallet's own key file.
+#[test]
+fn an_escrow_share_survives_the_round_trip() {
+    let b = sample();
+    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
+    let back = import(&blob, b"passphrase here").unwrap();
+    assert_eq!(back.escrow_shares, b.escrow_shares);
+    assert_eq!(back.escrow_shares[0].key_file.len(), 2286);
+    assert_ne!(
+        back.escrow_shares[0].restore_height, 0,
+        "a restored share still has to find its own outputs"
+    );
+}
+
+/// An entry that restores to nothing is worse than no entry: it appears in the
+/// user's escrow list as recoverable.
+#[test]
+fn an_empty_key_file_is_not_a_share() {
+    let mut b = sample();
+    b.escrow_shares[0].key_file.clear();
+    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
+    assert_eq!(
+        import(&blob, b"passphrase here").unwrap_err().code,
+        RejectCode::Malformed
+    );
+}
+
+/// Escrow shares are the only part of the bundle with a freshness requirement.
+/// A persona key from last year is still the persona; a bundle exported before
+/// an escrow opened simply does not contain it.
+#[test]
+fn a_bundle_with_no_open_escrows_is_still_valid() {
+    let mut b = sample();
+    b.escrow_shares.clear();
+    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
+    let back = import(&blob, b"passphrase here").unwrap();
+    assert!(back.escrow_shares.is_empty());
+    assert_eq!(back.persona_secret, b.persona_secret);
 }

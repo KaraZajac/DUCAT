@@ -705,6 +705,11 @@ fn backup_cases() -> Vec<J> {
         attestation_records: vec![vec![0xDD; 32]],
         mandates: vec![vec![0xCC; 48]],
         verification: VerificationPolicy::default(),
+        escrow_shares: vec![ducat_core::backup::EscrowShare {
+            escrow_id: vec![0xEE; 16],
+            key_file: vec![0x9F; 64],
+            restore_height: 2_183_000,
+        }],
         created: 1_800_000_000,
     };
     let pass = b"a fixed passphrase";
