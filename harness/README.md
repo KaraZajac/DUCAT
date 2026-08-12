@@ -237,6 +237,39 @@ the world may hold a session open.** It is the same failure as a server that die
 on malformed input — both turn a counterparty's message into an outage, and both
 stay invisible until somebody hostile sends one.
 
+## The paths where nobody co-signs
+
+    ducat-harness --edges
+
+§6.2 calls post-`FUND`/pre-`RECEIPT` the dangerous window — the payer's money is
+gone and the co-signed record does not exist. Every other mode runs a flow where
+both parties stay. These are the ones where somebody leaves.
+
+The machinery is §6.2's **two unilateral receipts, which assert opposite things**:
+
+- **Payment evidence** — the payer saying *"I paid and hold no co-signature."*
+  Emitted when the payee vanishes after funding. 166 bytes, flagged `unilateral`.
+  It proves what the payer signed and paid; it cannot prove delivery and does not
+  claim to.
+- **Debt evidence** — the payee saying *"you owe me and never stopped the
+  meter."* Emitted when a payer walks out on a tab.
+
+Conflating them has a merchant filing a payment it never received, or a payer
+recording a debt it does not owe — which is why the state machine picks, and not
+whoever is writing the UI.
+
+Also confirmed here: `METERING` survives an hour of wall clock (a tab that died
+after sixty seconds was a real bug, §18.4.1(8)); a payer cannot abort a live
+meter while an operator can void one cleanly (§18.4.1(7)); and a refund is
+refused when redirected — BIP-70's published hole — when larger than the payment,
+when the payer signed no address, and when late.
+
+**One finding came from the fixture, not the code:** `Terms::default()` grants a
+**zero** refund window, so a client shipping default terms has silently made
+every sale final. Defensible as a default, easy to ship without noticing. §7.3
+now requires the window be shown on the confirm screen — "no refunds" is a term
+of the sale, not the absence of one.
+
 ## Requirements
 
 `monero-wallet-rpc` on ports 28101 (payer, `user_01`) and 28104 (payee,
