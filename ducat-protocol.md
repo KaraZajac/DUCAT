@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.9 — Consolidated**
+**Draft 0.10 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Status: Pre-alpha design document. Nothing here is final. Several sections rest on primitives that are not production-grade; §14 is the real agenda.
 
@@ -25,6 +25,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.10** — **First implementation, and the gaps it found.** `ducat-core` implements §18.1–18.5: deterministic CBOR, domain-separated signing, the contract state machine, and reject codes, with 35 tests. Added §18.4.1 for six rules the transition table left open — message direction (only the payer may `ACCEPT`), `CANCEL`'s closing bound, the mode-dependent post-`ACCEPT` deadline (60 s direct/fast, 300 s escrow with fund recovery), the `FUNDED` deadline applying only under `fast/1`, terminal-state absorption with `CLOSED` deliberately excluded, and elapsed time in unbounded states being a no-op. Also established that no serde CBOR crate can satisfy §18.1, since none reject non-canonical input on decode.
 - **0.9** — **Phase 0 completed; all three experiments have numbers.** 0a measured on veilid-core 0.5.7: `token` mode 190 B, `inline` mode 877–1669 B, **non-monotonic in hop count** with within-hop variance exceeding between-hop differences, because size tracks which peer was selected rather than how many hops were requested. This invalidated 0.5's claim that QR level H clears inline mode at every hop count — across two runs it passed in one and failed in the other, minutes apart. Tags now ship tokens; `token` mode reframed as the *privacy-preserving* choice since its size is constant regardless of hop count. 0b measured: 135–204 KB/s at 32 KB payloads, latency-dominated, adequate for incremental sync and not for a full chain — which is what §17.1's restore height already assumes. O11 and O14 closed. The earlier claim that Veilid needs inbound port forwarding was wrong and is retracted.
 - **0.8** — **First empirical results (Phase 0).** 0c answered: Veilid #395 is open, milestoned to 0.13.0 against a current 0.5.7 — no near-term fix, and remote hail (§5.2) is gated on it (O19). **Corrected §15.10:** `token` mode does *not* mitigate hostile-route deanonymization, contrary to 0.5's claim — the exposure is in using the route, not in how the blob arrived. 0a dissolved rather than answered O11: `inline` blobs have no fixed size because the entry hop carries a third party's peer info, so §15.3.2 now mandates measure-and-degrade instead of a budget. 0b remains blocked on a host with inbound reachability. Harness and full results in `phase0/`.
 - **0.7** — **Renamed SPECIE → DUCAT.** The old name was semantically exact and practically hostile: one letter from "species," pronounced *SPEE-shee* by almost nobody, and search-polluted by both biology and finance. Wire constants changed with it — domain-separation prefix `DUCAT-v1` (§18.3), NFC AID `F0 44 43 41 54` (§18.7), QR magic `DCAT`, URI scheme `ducat:`. Also: §9.4 scoped — the safety floor binds the high-exposure tier (rides, lodging, tasks) and not commerce as a whole, which narrows O5 and removes the apparent tension with §1's reframe. Four remaining gaps closed. §4.1: key storage, and the P-256 suite iOS's Secure Enclave forces into the registry. §6.2: clock skew — monotonic for elapsed time, ±120 s tolerance for absolute, both directions failing closed, skew detected but never applied. §8.8: transaction fees, `fee_policy`, the WYSIWYS requirement to display total outlay, and minimum-fee-tier refusal closing §17.8's cure-window abuse. §10.1: the market descriptor — self-certifying `market_id`, threshold-signed rotation chained from genesis. O8 narrowed from unspecified to mechanism-specified-accountability-open.
@@ -1176,6 +1177,19 @@ with `object_type` a fixed short ASCII label per message type (`"TapPresent"`, `
 | `CLOSED` | cure window expiry, unconfirmed | `fast/1` | `CLAIMED` (§17.5) |
 | `FUNDED` … `DELIVERED` | `DISPUTE` | Escrow modes only | `DISPUTED` |
 | `CLOSED` | `CONTACT_OFFER` / `CONTACT_ACCEPT` | Within the 120 s contact window (§4) | `CLOSED` — contact is a side effect, not a state change |
+
+### 18.4.1 Rules the table does not show
+
+Implementing §18.4 surfaced six decisions the transition table leaves open. Each is now normative, because an implementer who guesses differently produces a client that interoperates until it suddenly doesn't.
+
+1. **Direction is checked, not assumed.** The table is role-agnostic, but not every message is legal from every side. **Only the payer may emit `ACCEPT`**; a payee able to accept its own offer could drive the entire flow with no human checkpoint, which defeats §15.5. Likewise only the payee may emit `REFUND` (§7.3). Wrong-direction messages are `STATE_VIOLATION`.
+2. **`CANCEL` has a closing bound as well as an opening one.** It is legal only between `ACCEPTED` and `FUND` — before the price is locked `ABORT` is the free exit and there are no cancellation terms yet, and once funds have moved cancellation is not a thing that exists. Post-`FUND` recourse is dispute (escrow) or slash (`fast/1`).
+3. **The post-`ACCEPT` deadline is mode-dependent.** §6.2 lists "FUND after ACCEPT: 60 s" and "multisig setup: 300 s" as though they were different states. They are the same state under different settlement modes: 60 s for `direct` and `fast`, **300 s for `escrow`**, whose window is spent on multi-round multisig setup (§8.2). Its expiry MUST run the fund-recovery path, not a bare abort.
+4. **The `FUNDED` deadline applies only under `fast/1`.** That 30 s bounds the wait for `TXPROOF`. Under `direct` and `escrow`, `FUNDED` awaits profile-defined delivery and carries no wall-clock deadline.
+5. **Terminal states are absorbing.** `ABORTED`, `CANCELLED`, `DISPUTED`, `SETTLED`, and `CLAIMED` accept no further events, including timeouts. `CLOSED` is deliberately *not* terminal: it still admits the contact coda and `fast/1` finality.
+6. **Elapsed time in an unbounded state is a no-op, not an error.** Clients poll on their own schedule, and a client that polls more often than another must not thereby reach a different state.
+
+---
 
 ## 18.5 Rejects and Error Codes
 
