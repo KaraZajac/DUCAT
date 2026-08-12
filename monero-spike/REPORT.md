@@ -244,3 +244,64 @@ can be taken over an objection is collateral.
 Funding a bond needs no coordination — the multisig sees incoming funds on a
 plain refresh, and `multisig_import_needed` is a spend-time cost only. A freshly
 funded bond is not slashable for ~10 blocks, like any other output.
+
+
+---
+
+## Multisig backup: exportable, and not importable where it matters
+
+Prompted by §4.3. If a bond or escrow share could be backed up, the backup bundle
+should carry it. Measured on v0.18.5.1/stagenet against the existing 2-of-3
+`ms_user` wallet.
+
+**A multisig wallet has a seed, and it is not 25 words.**
+
+    query_key {"key_type":"mnemonic"}  →  592 hex chars (296 bytes)
+
+**The seed is sufficient.** Restored into a fresh directory, nothing copied:
+
+    monero-wallet-cli --stagenet --restore-multisig-wallet \
+      --generate-new-wallet /tmp/ms-cli/restored --restore-height 2183000
+
+    Generated new 2/3 multisig wallet:
+      53hUxmYTwGtR44fhL8f7JLATagSwjtdLB6y4Q3wQQnbtUsDiLTLCzwnKr2gtBRAAUdgWmD22pJ3GK5Z52sJpgiK624iqtKh
+
+Byte-identical to the original group address. The multisig restore path works.
+
+**`monero-wallet-rpc` cannot use it.**
+
+    restore_multisig_wallet  →  -32601 Method not found
+
+Not an argument error — the method does not exist. The binary's own method table
+confirms the asymmetry: `prepare`, `make`, `exchange`, `export`, `import`,
+`sign`, `submit`, `is_multisig`. There is an export and no restore. Only the
+interactive CLI, behind a `Y/N` experimental-feature prompt, can reconstruct a
+share.
+
+Two gates, not one: the CLI also refuses outright with `Error: Multisig is
+disabled.` until the prompt is answered, and `--enable-multisig-experimental` is
+a **wallet-rpc** flag that the CLI rejects as an unknown option. Anyone
+automating this will hit both.
+
+### Why this changed the spec rather than the backup format
+
+wallet-rpc is the integration surface a phone client has. A multisig share in the
+backup bundle would be a field a client can write and can never read back —
+advertising a recovery that does not exist, discovered at the one moment the user
+depends on it. So the bundle omits it deliberately (§4.3.3).
+
+For **bonds** that costs nothing: §17.2 puts both non-user keys in the market's
+arbiter set, so a bond never needed the user's signature to move. Losing the
+device loses no capability the user had.
+
+For **escrow** it is a real hole. §8.2's 2-of-3 is buyer, seller, arbiter. A
+buyer who loses their device leaves every buyer-favourable outcome needing the
+*seller's* signature — including a `RULING` for the buyer, since a ruling **is** a
+co-signature and the arbiter provides only one of two. §9.3.4's expiry rule
+cannot rescue it: it guarantees a ruling exists, not that two live keys remain to
+execute one.
+
+**DUCAT can restore a lost identity and a lost wallet. It cannot restore a lost
+escrow.** §4.3.3 records what bounds the exposure — escrow is not the default
+path, the window is short, and the value is known before entering — but none of
+those is a fix.

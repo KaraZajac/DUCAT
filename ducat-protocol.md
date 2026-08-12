@@ -277,13 +277,36 @@ Implementations SHOULD recompute this on each export rather than stamping a crea
 
 **Parameters and field numbering are frozen once shipped.** A changed KDF constant or a reordered CBOR key derives a different key or a different plaintext, and every backup any user has ever exported becomes permanently unopenable — while reporting nothing but "wrong passphrase" to people typing the correct one. The failure is indistinguishable from user error and would be diagnosed late, if at all. Implementations MUST hold a known-answer vector over the complete artifact so this breaks a test rather than a person's wallet. A format change is a new version identifier, with the old version still decryptable.
 
-#### 4.3.3 What this does not solve, stated plainly
+#### 4.3.3 Multisig shares are deliberately absent, and the reason is not simplicity
+
+A bond (§17.2) and an escrow (§8.2) are Monero **multisig** wallets, and a multisig key share is not derivable from the 25-word seed. So the obvious question is whether the bundle should carry those shares too. It should not, for two independent reasons — one mechanical, one structural.
+
+**Mechanically, a share can be exported and cannot be imported.** Measured on v0.18.5.1/stagenet:
+
+- A multisig wallet *does* have a seed. `query_key mnemonic` on a 2-of-3 returns 592 hex characters (296 bytes) rather than 25 words, and it is sufficient: `monero-wallet-cli --restore-multisig-wallet` reconstructed the exact group address `53hUxmYTwGtR44fh…` from that blob alone.
+- **`monero-wallet-rpc` has no method to restore it.** `restore_multisig_wallet` returns `-32601 Method not found`, and the binary's method table confirms it: `prepare`, `make`, `exchange`, `export`, `import`, `sign`, `submit`, `is_multisig` — export exists, restore does not. Only the interactive CLI can do it.
+
+Since wallet-rpc is the integration surface a mobile client actually has, a bundled multisig share would be a field the client can write and can never read back. That is worse than omitting it: it advertises a recovery that does not exist, and the user discovers this at the one moment they are relying on it.
+
+**Structurally, the bond does not need it.** §17.2 places *both* non-user keys in the market's arbiter set. A bond therefore never required the user's signature to move — that is the entire point of a slashable deposit — so a user who loses their device has lost no capability they had. An honest bond return is signed by two arbiter-set keys and paid to an address the user supplies from their restored wallet. This grants the market no authority it did not already hold in order to slash.
+
+**Escrow is where this bites, and there is no clean answer.** §8.2's 2-of-3 is buyer, seller, and arbiter. A buyer who loses their device mid-escrow leaves every buyer-favourable outcome requiring the *seller's* signature — including a `RULING` in the buyer's favour, since a ruling **is** a co-signature (§9.3.2) and the arbiter supplies only one of the two needed. The seller has no incentive to provide the other, and the protocol has no way to compel it. This is not a deadlock the timeout rules can break: §9.3.4 makes expiry emit a real ruling precisely so nothing freezes, but an executable ruling still needs two live keys and only one remains.
+
+Three things bound it, and they are mitigations rather than a fix:
+
+- **Escrow is not the default path.** §8.6's `fast/1` and the ordinary bilateral flow hold no multisig at all, so the exposed window does not exist for most transactions.
+- **The window is short.** Exposure lasts only from FUND to release, which §6.2 already bounds; it is not a standing risk the way a lost persona is.
+- **Value is visible in advance.** A client can decline to enter escrow for an amount whose loss it would not accept, which is the same calculation §17.2 already asks of bond posting.
+
+Stated plainly: **DUCAT can restore a lost identity and a lost wallet, and cannot restore a lost escrow.** Anyone implementing §8.2 should know that before a user does.
+
+#### 4.3.4 What this does not solve, stated plainly
 
 - **A forgotten passphrase is unrecoverable.** There is no operator to appeal to; that is the same property that makes the system uncustodied. Clients SHOULD say this at export, in those terms, rather than in the language of a password reset the user might expect to exist.
 - **The passphrase is the whole of the protection.** Argon2id raises the cost per guess; it does not rescue a passphrase drawn from a small space. Clients SHOULD refuse trivially short passphrases at export rather than producing an artifact whose protection is nominal.
 - **A backup is a spending credential.** Anyone with the file and the passphrase becomes the user completely. It is not a receipt or an archive, and should not be treated as safe to store casually.
 - **A credential backup is not a record backup.** This bundle answers *who the user is, what they can spend, who can reach them, and what they have authorised*. It does not carry transaction history; receipts are a separate growing archive with its own export (§7.4), and §7.4's warning that losing receipts loses evidentiary reputation still stands in full. The split is not only about size — the two have opposite refresh needs. A credential bundle exported a year ago is still entirely valid; a receipt archive from a year ago is a year out of date. Merging them would force constant re-export of a bundle whose important half never changes.
-- **Restore does not recover in-flight state.** Open sessions, undelivered receipts, and disputes in progress are not in the bundle. A restore recovers identity, funds, contacts, and standing authorizations — not the transaction that was mid-flight when the device died.
+- **Restore does not recover in-flight state, and for escrow that is permanent.** Open sessions and undelivered receipts are merely absent; a restored user re-establishes them. An escrow is different in kind — §4.3.3 — because the multisig share cannot be reconstructed and funds favouring the lost party need a signature only their counterparty can give. A restore recovers identity, funds, contacts, and standing authorizations. It does not recover an escrow that was open when the device died.
 - **The old device is not disabled by restoring.** Import copies a persona; it does not revoke one. A user restoring because a device was *stolen* rather than lost MUST also revoke that device's delegation (§4.2) — and until every counterparty refreshes, the thief's device still verifies. Clients SHOULD prompt for revocation as part of the import flow, because a user who has just recovered their money will not think of it unprompted.
 
 ---
@@ -584,6 +607,8 @@ Consumer sends XMR to a provider subaddress conveyed in QUOTE. No recourse. Corr
 
 ### 8.2 Escrow — 2-of-3 Multisig
 Buyer, seller, and a mutually chosen arbiter (§9.3) form a Monero 2-of-3 multisig. Happy path: buyer + seller co-sign RELEASE, arbiter never touches it. Dispute: arbiter co-signs with the party it rules for.
+
+**A participant who loses their device mid-escrow cannot be restored into it.** A multisig share is not derivable from the wallet seed, and `monero-wallet-rpc` exposes no method to restore one from a multisig seed either — only the interactive CLI does (§4.3.3, measured). "The arbiter co-signs with the party it rules for" therefore fails when that party is the one who lost their key: the arbiter supplies one signature of the two required, and the remaining key belongs to the counterparty, who has no reason to sign away their own claim. §9.3.4's expiry rule cannot break this, because it produces a ruling and a ruling still needs two live keys. Escrow is the one part of DUCAT with no recovery story; §4.3.3 states what bounds it.
 
 **Known hazards (must be engineered around, not assumed away):**
 - **Monero ships multisig disabled by default, and says why.** Quoted from v0.18.5.1's own refusal, because a protocol whose escrow depends on this feature should carry its maintainers' assessment verbatim rather than paraphrased: *"Multisig is an experimental feature and may have bugs. Things that could go wrong include: funds sent to a multisig wallet can't be spent at all, can only be spent with the participation of a malicious group member, or can be stolen by a malicious group member."* Enabling it requires a per-wallet flag set through `monero-wallet-cli`; **there is no RPC method**, so a client must drive the CLI out-of-band or link the wallet library and bypass the RPC. This constrains client architecture more than any fragility does.
