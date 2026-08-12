@@ -3,25 +3,27 @@
     "codec": 39,
     "negotiate": 6,
     "signing": 17,
-    "state": 26
+    "state": 26,
+    "transcript": 4
   },
   "covers": {
     "18.9(1) encoding round-trips and integer boundaries": true,
-    "18.9(2) per-object-type valid plus invalid mutations": "partial — signature and encoding mutations only",
+    "18.9(2) per-object-type valid plus invalid mutations": true,
     "18.9(3) cross-context signature replay": true,
+    "18.9(4) full per-profile transcripts": "xfer/1, pos/1, ride/1",
     "18.9(5) failure paths and the single-sided receipt": true,
     "18.9(6) negotiation including a downgrade attempt": true,
     "18.9(7) piconero amounts that defeat a float implementation": true
   },
   "deterministic": "all keys derive from fixed seeds; no clock or RNG is consulted, so regeneration is byte-identical on an unchanged implementation",
   "does_not_yet_cover": {
-    "18.9(4) full per-profile transcripts": "blocked: TapPresent/FullOffer/ACCEPT field numbering is not yet fixed in the spec, so there is no wire object to build a transcript from. This is the largest remaining gap in the vector set.",
     "O18 caveat": "a vector set validated by one implementation encodes that implementation's bugs. These close O18 only when a second, independent client runs them.",
+    "escrow and fast/1 transcripts": "only direct settlement is covered; TXPROOF and escrow objects are unimplemented",
     "suite 2 key agreement": "only signatures are covered; X25519/ECDH is unimplemented"
   },
   "generated_by": "ducat-core examples/gen_vectors.rs",
-  "protocol_draft": "0.12",
+  "protocol_draft": "0.14",
   "reject_codes_are": "§18.5 wire codes. Two clients must agree an input is MALFORMED; they need not agree on which internal decoder rule said so. The non-normative `hint` field names the rule.",
-  "total_cases": 88,
+  "total_cases": 92,
   "vector_set": "1"
 }

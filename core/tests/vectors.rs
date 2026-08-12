@@ -14,6 +14,7 @@ use ducat_core::cbor::decode;
 use ducat_core::commit::{commit, Purpose};
 use ducat_core::sig::{ObjectType, PublicKey, SignedBytes, Suite};
 use ducat_core::state::{transition, Event, Role, SettleMode, State};
+use ducat_core::wire::*;
 use serde_json::Value as J;
 use std::time::Duration;
 
@@ -41,7 +42,7 @@ fn manifest_is_self_consistent() {
     let m = load("manifest");
     let total = m["total_cases"].as_u64().unwrap() as usize;
     let mut sum = 0;
-    for name in ["codec", "signing", "state", "negotiate"] {
+    for name in ["codec", "signing", "state", "negotiate", "transcript"] {
         let n = cases(name).len();
         assert_eq!(
             m["counts"][name].as_u64().unwrap() as usize,
@@ -56,7 +57,6 @@ fn manifest_is_self_consistent() {
 
     // The manifest must keep admitting what it does not cover. If this ever
     // disappears, someone has quietly claimed more coverage than exists.
-    assert!(m["does_not_yet_cover"]["18.9(4) full per-profile transcripts"].is_string());
     assert!(m["does_not_yet_cover"]["O18 caveat"].is_string());
 }
 
@@ -317,5 +317,48 @@ fn commitment_domain_separation_vector_passes() {
         for j in (i + 1)..all.len() {
             assert_ne!(all[i], all[j], "two purposes produced the same digest");
         }
+    }
+}
+
+/// §18.9(4) — replay each published transcript through the verifier.
+#[test]
+fn transcript_vectors_pass() {
+    for c in cases("transcript") {
+        let name = c["name"].as_str().unwrap();
+
+        // The tampered case carries only the commitment and the swapped offer.
+        let Some(tap_hex) = c["tap_present_hex"].as_str() else {
+            let expected: [u8; 32] = unhex(c["tap_offer_commit_hex"].as_str().unwrap())
+                .try_into().unwrap();
+            let delivered = FullOffer::from_value(
+                decode(&unhex(c["delivered_offer_hex"].as_str().unwrap())).unwrap()
+            ).unwrap();
+            assert_ne!(delivered.commitment(), expected, "{}: swap should not match", name);
+            continue;
+        };
+
+        let tap = TapPresent::from_value(decode(&unhex(tap_hex)).unwrap()).unwrap();
+        let offer = FullOffer::from_value(
+            decode(&unhex(c["full_offer_hex"].as_str().unwrap())).unwrap()).unwrap();
+        let accept_bytes = unhex(c["accept_hex"].as_str().unwrap());
+        let accept = Accept::from_value(decode(&accept_bytes).unwrap()).unwrap();
+        let receipt = Receipt::from_value(
+            decode(&unhex(c["receipt_hex"].as_str().unwrap())).unwrap()).unwrap();
+
+        verify_transcript(&tap, &offer, &accept, &accept_bytes, &receipt)
+            .unwrap_or_else(|e| panic!("{}: {:?}", name, e));
+
+        // The published intermediate digests must match ours, or two clients
+        // agree the transcript is valid while disagreeing on what it hashes to.
+        assert_eq!(
+            hex::encode(offer.commitment()),
+            c["expect"]["offer_commit_hex"].as_str().unwrap(),
+            "{}: offer commitment differs", name
+        );
+        assert_eq!(
+            accept.amount_final,
+            c["expect"]["amount_pxmr"].as_u64().unwrap(),
+            "{}: amount differs", name
+        );
     }
 }
