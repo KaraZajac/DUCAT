@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.42 — Consolidated**
+**Draft 0.43 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.43** — **Added §4.4, custody modes — external hardware wallets, and the two limits that make them narrower than they sound.** "Hardware keys" names two opposite things: a secure element dies with the phone, which is what made §4.1 unrecoverable, while an external hardware wallet *is* its own backup. Supporting the second is worth a first-run choice. But a Monero hardware wallet **cannot hold the persona key** — it signs Monero transactions, not DUCAT's domain-separated objects — so no mode moves identity off the phone and §4.3 remains the only answer for it in every mode; and it **cannot hold a multisig share**, since Monero multisig on hardware is unshipped, which bars escrow and bonds. Three modes result, and the recommended one is the hybrid: float on the phone, reserve on the device. That is not generic defence in depth — it closes something §4.3 could not, because "a backup is a complete spending credential" becomes false when the reserve sits behind a device seed DUCAT never sees, making **the amount at risk a number the user chose** and bounding a stolen phone, a leaked backup, and a compromised client with one number. It needs no new machinery either, since §17.2 already models the float. Two rules earn their place from failure modes: the capability check happens **before an offer is presented**, not at FUND, because a hardware-only user discovering at a counter that escrow cannot fund has failed in front of a queue; and **role matters for `fast/1`**, where the bond is the provider's, so a hardware-only consumer can pay a bonded merchant and only the provider side is barred.
 - **0.42** — **Added §4.3, encrypted persona backup, closing O12 — and reversed §4.1's persona storage rule to make it possible.** §4.1 recommended hardware-backing persona keys, and hardware backing means a key cannot be extracted; the recommendation therefore made every persona permanently unrecoverable on device loss, silently, and no backup mechanism could have rescued it. Keys are now split by **replaceability**: device keys stay hardware-backed because losing one costs a device (§4.2), persona keys become software and exportable because losing one costs an identity. Backup is one Argon2id + XChaCha20-Poly1305 file the user exports and keeps — not social recovery, not custody, nothing uploaded. Three contents earn their place by being invisible when missing: the **Monero restore height**, without which a restore rescans from genesis at a measured ~106 hours instead of 35 seconds and the user concludes their money is gone; **rendezvous keys** (§16.4), without which a restored persona can be paid but nobody it knows can reach it; and **attestation record writer keys** (§9.2), which are not derived from the persona key — omit them and reputation is readable but frozen at the moment the device died. KDF parameters and CBOR field numbers are pinned by format version and covered by a known-answer vector, because changing either derives a different key and turns every existing backup into a "wrong passphrase" error for people typing the correct one. Records are explicitly *not* in the bundle: receipts keep §7.4's separate export, since a credential backup from a year ago is still valid and a receipt archive from a year ago is not. **Multisig shares are not in it either, and that turned out to be the interesting part.** Measured: a multisig wallet has a seed (592 hex chars for a 2-of-3, not 25 words) and `monero-wallet-cli --restore-multisig-wallet` rebuilds the exact group address from it — but `monero-wallet-rpc`, the integration surface a phone client actually has, exposes no restore method at all (`-32601`). Bundling a share would advertise a recovery that does not exist. For bonds this costs nothing, since §17.2 already puts both non-user keys in the arbiter set. For escrow it is a hole with no clean answer: §8.2's 2-of-3 makes every buyer-favourable outcome need the *seller's* signature once the buyer's key is gone — including a `RULING` for the buyer, since a ruling **is** a co-signature — and §9.3.4's expiry rule cannot help, because it guarantees a ruling exists rather than two live keys to execute one. Raised as **O22**: the only place in DUCAT where a lost device loses money rather than convenience.
 - **0.41** — **Added §15.5.1, payer verification — the question WYSIWYS never asked.** WYSIWYS proves a payer sees what they sign; nothing established that the person holding the device should be signing. A stolen unlocked phone was a valid payer. Adopts EMV's CVM *shape*: three tiers with user-set, value-scaled thresholds, where the gap between "device happens to be unlocked" (passive, a thief has it) and "secret entered in-app just now" (a knowledge factor they do not) is the load-bearing distinction. Four rules are not the user's to relax — thresholds must ascend, in-app secrets expire, velocity is checked alongside per-payment value, and **a stale exchange rate escalates rather than relaxes**, since failing the other way would let anyone who can stall a rate feed lower the security requirement. None of it touches the wire: a payee that could influence verification would ask for the weakest.
 - **0.40** — **A refund had nowhere to go.** Nothing in the transcript carried the payer's address, so a merchant willing to refund had to obtain one out of band — the exact ambiguity a published attack on BIP-70 exploited by substituting the destination. `ACCEPT` now carries an optional signed `refund_to` and a refund must have gone there. Optional deliberately: supplying it lets the payee learn a payer address even when no refund happens, so omitting it is a legitimate choice of unlinkability over refundability, and clients must present it as a trade rather than filling it silently.
@@ -218,6 +219,8 @@ The rule that resolves it is **replaceability**:
 
 Hardware backing where it is disposable, exportability where it is not.
 
+This governs the *persona* key specifically. Where the user's **money** lives is a separate choice with its own trade-offs, including an external hardware wallet — §4.4. Note that no custody mode moves the persona off the phone: a Monero hardware wallet signs Monero transactions, not DUCAT's domain-separated objects.
+
 **The honest limit:** hardware backing prevents key *extraction*. It does not prevent malware from asking the enclave to sign while the user is looking at something else. It raises the cost of a stolen phone, not of a compromised one — and §2.2 already places endpoint compromise out of scope. This is defense in depth, not a new guarantee. The corollary is that moving personas out of hardware gives up less than it first appears: against the threat hardware actually addresses, a persona key's exposure now rests on the encrypted backup and the device's own storage protections rather than on an enclave.
 
 **Cross-platform consequence:** a persona created under the P-256 suite is unverifiable by a client implementing only the Ed25519 suite, which would fragment personas by platform. Core conformance therefore requires *both* suites (§18.10).
@@ -306,10 +309,56 @@ Stated plainly: **DUCAT can restore a lost identity and a lost wallet, and canno
 
 - **A forgotten passphrase is unrecoverable.** There is no operator to appeal to; that is the same property that makes the system uncustodied. Clients SHOULD say this at export, in those terms, rather than in the language of a password reset the user might expect to exist.
 - **The passphrase is the whole of the protection.** Argon2id raises the cost per guess; it does not rescue a passphrase drawn from a small space. Clients SHOULD refuse trivially short passphrases at export rather than producing an artifact whose protection is nominal.
-- **A backup is a spending credential.** Anyone with the file and the passphrase becomes the user completely. It is not a receipt or an archive, and should not be treated as safe to store casually.
+- **A backup is a spending credential — in software custody, for the whole balance.** Anyone with the file and the passphrase becomes the user completely. It is not a receipt or an archive, and should not be treated as safe to store casually. Under §4.4's hardware-reserve mode this bound shrinks to the float, since the reserve sits behind a device seed DUCAT never sees; a client MUST NOT show the same warning in both modes, because it is false in one of them.
 - **A credential backup is not a record backup.** This bundle answers *who the user is, what they can spend, who can reach them, and what they have authorised*. It does not carry transaction history; receipts are a separate growing archive with its own export (§7.4), and §7.4's warning that losing receipts loses evidentiary reputation still stands in full. The split is not only about size — the two have opposite refresh needs. A credential bundle exported a year ago is still entirely valid; a receipt archive from a year ago is a year out of date. Merging them would force constant re-export of a bundle whose important half never changes.
 - **Restore does not recover in-flight state, and for escrow that is permanent.** Open sessions and undelivered receipts are merely absent; a restored user re-establishes them. An escrow is different in kind — §4.3.3 — because the multisig share cannot be reconstructed and funds favouring the lost party need a signature only their counterparty can give. A restore recovers identity, funds, contacts, and standing authorizations. It does not recover an escrow that was open when the device died.
 - **The old device is not disabled by restoring.** Import copies a persona; it does not revoke one. A user restoring because a device was *stolen* rather than lost MUST also revoke that device's delegation (§4.2) — and until every counterparty refreshes, the thief's device still verifies. Clients SHOULD prompt for revocation as part of the import flow, because a user who has just recovered their money will not think of it unprompted.
+
+
+### 4.4 Custody Modes — Where the Spend Key Lives
+
+§4.1 and §4.3 settled identity: the persona is software, exportable, and protected by a passphrase. They said nothing about the *money*, and the two are not the same question.
+
+**Two different things are called "hardware keys", and they behave oppositely.**
+
+| | Secure element (Secure Enclave, StrongBox) | External hardware wallet (Ledger, Trezor) |
+|---|---|---|
+| Key can be extracted | No | No |
+| **Survives losing the phone** | **No** | **Yes** |
+| Has its own backup | No | Yes — its own seed phrase |
+
+The first is what made §4.1's original rule unrecoverable. The second has no backup problem at all, because **the device is the backup**. That distinction is the whole reason a custody choice is worth offering.
+
+#### 4.4.1 What a Monero hardware wallet cannot do
+
+Two hard limits, both external to DUCAT, and both narrower than "use a hardware wallet" suggests:
+
+- **It cannot hold the persona key.** A Ledger or Trezor running the Monero app signs Monero transactions. It does not produce Ed25519 or P-256 signatures over DUCAT's domain-separated objects (§18.3). **No custody mode moves the persona off the phone**, so §4.3's export/import remains the only answer for identity in every mode. This choice is about money, not about who you are.
+- **It cannot hold a multisig share.** Monero multisig on hardware is roadmap, not shipped — consistent with §4.3.3's finding that even `monero-wallet-rpc` cannot restore one. Escrow (§8.2) and bonds (§17.2) are multisig, so a device-held spend key can enter neither.
+
+A third limit is practical rather than cryptographic: a hardware wallet needs a physical connection and a button press. That is not a slow tap, it is a different interaction, and it does not fit §15's budget.
+
+#### 4.4.2 The three modes
+
+A client SHOULD offer this choice at first run, and MUST make the consequences visible rather than presenting three security levels.
+
+| Mode | Spend key | Tap (§15) | Escrow / bond | A leaked backup costs |
+|---|---|---|---|---|
+| **Software** | On the phone | Yes | Yes | **The whole balance** |
+| **Hardware reserve** *(recommended)* | Float on the phone, reserve on the device | Yes | Yes | The float |
+| **Hardware only** | On the device | No | No | Nothing |
+
+**Hardware reserve is the recommended shape, and not as generic defence in depth.** It closes something §4.3 could not close on its own. §4.3.4 must warn that a backup file is a complete spending credential — anyone with the file and the passphrase becomes the user entirely. Behind a reserve that sentence is simply false: the bundle carries the hot wallet's seed, and the reserve sits behind a device seed phrase DUCAT never sees or stores. **The amount at risk becomes a number the user chose**, and the same bound covers a stolen phone, a leaked backup, and a compromised client at once.
+
+It also needs no new machinery. §17.2 already models a float as a count of pre-split unlocked outputs sized for expected consecutive payments; a reserve is simply where that float is topped up from. Top-up is an ordinary on-chain transfer, so it costs a fee and ten blocks of lock time, which is the real argument for sizing the float generously rather than topping up per purchase.
+
+**Clients MUST refuse an impossible combination before presenting an offer, not at FUND.** A hardware-only user who reaches a counter and discovers that escrow cannot be funded has failed in front of a queue with a customer already committed. The capability check belongs where the settlement mode is chosen.
+
+**Role matters, for exactly one mode.** Under `fast/1` the bond is the *provider's* (§17), so a payer holds no multisig share: **a hardware-only consumer can pay a bonded merchant perfectly well**, and only the provider side is barred. Refusing both sides would be simpler and would lock hardware users out of the flow they are best suited to.
+
+#### 4.4.3 What this means for O22
+
+§4.3.3 raised O22 — an escrow participant who loses their device strands the escrow. Hardware-only mode does not solve it; it makes the situation *unreachable*, since such a user can never enter escrow at all. That is a real reduction in exposure and it is not a fix, because the mode it requires is also the one that cannot tap. Hardware reserve, the recommended mode, holds its multisig shares in software and carries O22's full exposure — bounded, as §4.3.3 says, by escrow being off the default path and by the value being known before entering.
 
 ---
 
