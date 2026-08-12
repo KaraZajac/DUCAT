@@ -124,6 +124,7 @@ pub fn transact(
         timestamp: 1_800_000_005,
         chosen_version: 1,
         chosen_suite: 1,
+        refund_to: Some(b"payer-refund-addr".to_vec()),
     };
     let accept_bytes = accept.to_value().encode();
     let accept_env = seal(

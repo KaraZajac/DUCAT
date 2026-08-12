@@ -70,6 +70,7 @@ fn accept(o: &FullOffer) -> Accept {
         timestamp: 1_800_000_005,
         chosen_version: 1,
         chosen_suite: 1,
+        refund_to: Some(b"payer-refund-addr".to_vec()),
     }
 }
 
@@ -463,6 +464,7 @@ fn refund_for(receipt_bytes: &[u8], amount: u64, at: u64) -> Refund {
         prior_receipt: commit(Purpose::ChainLink, receipt_bytes),
         amount_pxmr: amount,
         txid: [0xCC; 32],
+        paid_to: b"payer-refund-addr".to_vec(),
         timestamp: at,
     }
 }
@@ -475,7 +477,7 @@ fn a_full_refund_within_the_window_is_valid() {
     let rb = r.to_value().encode();
 
     let refund = refund_for(&rb, FARE, r.timestamp + 3600);
-    check_refund(&refund, &r, &rb, &o.terms).expect("refund should be accepted");
+    check_refund(&refund, &r, &rb, &o.terms, &accept(&o)).expect("refund should be accepted");
 }
 
 #[test]
@@ -486,7 +488,7 @@ fn a_partial_refund_is_valid() {
     let rb = r.to_value().encode();
 
     let refund = refund_for(&rb, FARE / 3, r.timestamp + 60);
-    check_refund(&refund, &r, &rb, &o.terms).expect("partial refunds are ordinary commerce");
+    check_refund(&refund, &r, &rb, &o.terms, &accept(&o)).expect("partial refunds are ordinary commerce");
 }
 
 /// A payee refunding more than was paid is either confused or draining a float.
@@ -499,7 +501,7 @@ fn a_refund_cannot_exceed_the_original() {
 
     let refund = refund_for(&rb, FARE + 1, r.timestamp + 60);
     assert_eq!(
-        check_refund(&refund, &r, &rb, &o.terms).unwrap_err().code,
+        check_refund(&refund, &r, &rb, &o.terms, &accept(&o)).unwrap_err().code,
         RejectCode::PriceMismatch
     );
 }
@@ -514,11 +516,11 @@ fn a_refund_outside_the_window_is_refused() {
     let rb = r.to_value().encode();
 
     let inside = refund_for(&rb, FARE, r.timestamp + o.terms.refund_window_s);
-    assert!(check_refund(&inside, &r, &rb, &o.terms).is_ok(), "boundary is inclusive");
+    assert!(check_refund(&inside, &r, &rb, &o.terms, &accept(&o)).is_ok(), "boundary is inclusive");
 
     let outside = refund_for(&rb, FARE, r.timestamp + o.terms.refund_window_s + 1);
     assert_eq!(
-        check_refund(&outside, &r, &rb, &o.terms).unwrap_err().code,
+        check_refund(&outside, &r, &rb, &o.terms, &accept(&o)).unwrap_err().code,
         RejectCode::PolicyRefused
     );
 }
@@ -534,9 +536,9 @@ fn a_zero_window_means_final_sale() {
     let rb = r.to_value().encode();
 
     // Same instant still works; anything later does not.
-    assert!(check_refund(&refund_for(&rb, FARE, r.timestamp), &r, &rb, &o.terms).is_ok());
+    assert!(check_refund(&refund_for(&rb, FARE, r.timestamp), &r, &rb, &o.terms, &accept(&o)).is_ok());
     assert_eq!(
-        check_refund(&refund_for(&rb, FARE, r.timestamp + 1), &r, &rb, &o.terms)
+        check_refund(&refund_for(&rb, FARE, r.timestamp + 1), &r, &rb, &o.terms, &accept(&o))
             .unwrap_err()
             .code,
         RejectCode::PolicyRefused
@@ -557,7 +559,7 @@ fn a_refund_must_name_the_receipt_it_refunds() {
     let wrong = refund_for(&other.to_value().encode(), FARE, r.timestamp + 60);
 
     assert_eq!(
-        check_refund(&wrong, &r, &rb, &o.terms).unwrap_err().code,
+        check_refund(&wrong, &r, &rb, &o.terms, &accept(&o)).unwrap_err().code,
         RejectCode::CommitMismatch
     );
 }
@@ -573,7 +575,7 @@ fn a_refund_timestamped_before_the_receipt_does_not_underflow() {
     // saturating_sub gives 0 elapsed rather than a huge number, so this is
     // accepted rather than wrapping into an apparently-expired window.
     let early = refund_for(&rb, FARE, r.timestamp.saturating_sub(10_000));
-    assert!(check_refund(&early, &r, &rb, &o.terms).is_ok());
+    assert!(check_refund(&early, &r, &rb, &o.terms, &accept(&o)).is_ok());
 }
 
 #[test]
@@ -594,5 +596,41 @@ fn refund_round_trips_and_rejects_unknown_fields() {
     assert_eq!(
         Refund::from_value(v).unwrap_err().code,
         RejectCode::UnknownField
+    );
+}
+
+/// A refund must go where the payer said it should. Nothing previously carried
+/// that address, so a merchant had to obtain it out of band — the ambiguity a
+/// published attack on BIP-70 exploited by substituting the destination.
+#[test]
+fn a_refund_must_go_to_the_address_the_payer_signed() {
+    let o = offer();
+    let a = accept(&o);
+    let r = receipt_for(&a.to_value().encode(), FARE, false);
+    let rb = r.to_value().encode();
+
+    let mut redirected = refund_for(&rb, FARE, r.timestamp + 60);
+    redirected.paid_to = b"attacker-address".to_vec();
+    assert_eq!(
+        check_refund(&redirected, &r, &rb, &o.terms, &a).unwrap_err().code,
+        RejectCode::PolicyRefused
+    );
+}
+
+/// Omitting the address is a legitimate privacy choice, and it means refunds
+/// are not payable — which a client must present as the trade it is rather than
+/// filling the field silently.
+#[test]
+fn a_payer_who_supplied_no_address_cannot_be_refunded() {
+    let o = offer();
+    let mut a = accept(&o);
+    a.refund_to = None;
+    let r = receipt_for(&a.to_value().encode(), FARE, false);
+    let rb = r.to_value().encode();
+
+    assert_eq!(
+        check_refund(&refund_for(&rb, FARE, r.timestamp + 60), &r, &rb, &o.terms, &a)
+            .unwrap_err().code,
+        RejectCode::PolicyRefused
     );
 }

@@ -439,25 +439,45 @@ fn scenarios_main() {
         };
         let rb = receipt.to_value().encode();
 
+        // The payer named a refund address when accepting, which is what makes
+        // a refund payable at all (§7.3).
+        let payer_accept = Accept {
+            version: 1, suite: 1, nonce: [0; 16], offer_hash: [0; 32],
+            amount_final: 600_000_000, dest: None,
+            reader_session_pk: vec![0x7; 32], timestamp: receipt.timestamp,
+            chosen_version: 1, chosen_suite: 1,
+            refund_to: Some(b"customer-refund-addr".to_vec()),
+        };
         let good = Refund {
             version: 1, suite: 1,
             prior_receipt: commit(Purpose::ChainLink, &rb),
             amount_pxmr: 600_000_000, txid: [0x1; 32],
+            paid_to: b"customer-refund-addr".to_vec(),
             timestamp: receipt.timestamp + 3600,
         };
         check("refund next day is honoured",
-              check_refund(&good, &receipt, &rb, &terms).is_ok(),
+              check_refund(&good, &receipt, &rb, &terms, &payer_accept).is_ok(),
               "a merchant must be able to refund", &mut failures);
 
         let late = Refund { timestamp: receipt.timestamp + 86_400 * 15, ..good.clone() };
         check("refund after the window is refused",
-              check_refund(&late, &receipt, &rb, &terms).map_err(|e| e.code)
+              check_refund(&late, &receipt, &rb, &terms, &payer_accept).map_err(|e| e.code)
                   == Err(RejectCode::PolicyRefused),
               "an unbounded liability", &mut failures);
 
         let final_sale = Terms { refund_window_s: 0, ..Terms::default() };
+        let mut no_addr = payer_accept.clone();
+        no_addr.refund_to = None;
+        check("a payer who gave no address cannot be refunded",
+              check_refund(&good, &receipt, &rb, &terms, &no_addr).is_err(),
+              "refund with nowhere to go", &mut failures);
+        let mut redirected = good.clone();
+        redirected.paid_to = b"attacker".to_vec();
+        check("a refund cannot be redirected",
+              check_refund(&redirected, &receipt, &rb, &terms, &payer_accept).is_err(),
+              "BIP-70's refund attack", &mut failures);
         check("final sale accepts no refund later",
-              check_refund(&good, &receipt, &rb, &final_sale).is_err(),
+              check_refund(&good, &receipt, &rb, &final_sale, &payer_accept).is_err(),
               "zero window must mean zero", &mut failures);
     }
 

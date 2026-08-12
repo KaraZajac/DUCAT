@@ -71,6 +71,10 @@ pub mod f {
     pub const TIMESTAMP: u64 = 25;
     pub const CHOSEN_VERSION: u64 = 26;
     pub const CHOSEN_SUITE: u64 = 27;
+    /// Where a refund should be sent (§7.3). Optional — see `Accept`.
+    pub const REFUND_TO: u64 = 102;
+    /// Where a refund actually went, checked against the above.
+    pub const REFUND_PAID_TO: u64 = 103;
 
     /// Nested terms map (§7.3, §15.7, §8.8). Its inner keys are their own
     /// namespace, defined in `terms`.
@@ -652,6 +656,20 @@ pub struct Accept {
     pub timestamp: u64,
     pub chosen_version: u64,
     pub chosen_suite: u64,
+    /// Where a refund should be sent, if the payer wants one to be possible.
+    ///
+    /// Nothing previously carried this, so a merchant willing to refund had no
+    /// address to refund *to* and had to obtain one out of band. That ambiguity
+    /// is what a published attack on Bitcoin's BIP-70 exploited: if the refund
+    /// destination is not bound to the transaction the payer signed, it can be
+    /// substituted.
+    ///
+    /// Optional, because supplying it costs privacy — the payee learns a payer
+    /// address even when no refund ever happens, which §15.10 otherwise avoids.
+    /// A payer who omits it has chosen unlinkability over refundability, and a
+    /// client MUST present that as the trade it is rather than filling the field
+    /// silently.
+    pub refund_to: Option<Vec<u8>>,
 }
 
 impl Accept {
@@ -673,6 +691,9 @@ impl Accept {
         m.insert(f::TIMESTAMP, Value::Uint(self.timestamp));
         m.insert(f::CHOSEN_VERSION, Value::Uint(self.chosen_version));
         m.insert(f::CHOSEN_SUITE, Value::Uint(self.chosen_suite));
+        if let Some(r) = &self.refund_to {
+            m.insert(f::REFUND_TO, Value::Bytes(r.clone()));
+        }
         Value::Map(m)
     }
 
@@ -695,6 +716,7 @@ impl Accept {
             timestamp: r.uint(f::TIMESTAMP)?,
             chosen_version: r.uint(f::CHOSEN_VERSION)?,
             chosen_suite: r.uint(f::CHOSEN_SUITE)?,
+            refund_to: r.opt_bytes(f::REFUND_TO, None)?,
         };
         r.finish()?;
         Ok(out)
@@ -885,6 +907,9 @@ pub struct Refund {
     /// The settling transaction. A refund that claims to have paid and has not
     /// is just a message.
     pub txid: [u8; 32],
+    /// Where the refund was actually sent. Checked against the `refund_to` the
+    /// payer signed, so a refund cannot be redirected after the fact.
+    pub paid_to: Vec<u8>,
     pub timestamp: u64,
 }
 
@@ -897,6 +922,7 @@ impl Refund {
         m.insert(f::PRIOR_RECEIPT, Value::Bytes(self.prior_receipt.to_vec()));
         m.insert(f::REFUND_AMOUNT, Value::Uint(self.amount_pxmr));
         m.insert(f::REFUND_TXID, Value::Bytes(self.txid.to_vec()));
+        m.insert(f::REFUND_PAID_TO, Value::Bytes(self.paid_to.clone()));
         m.insert(f::REFUND_TS, Value::Uint(self.timestamp));
         Value::Map(m)
     }
@@ -915,6 +941,7 @@ impl Refund {
             prior_receipt: r.bytes(f::PRIOR_RECEIPT, Some(32))?.try_into().unwrap(),
             amount_pxmr: r.uint(f::REFUND_AMOUNT)?,
             txid: r.bytes(f::REFUND_TXID, Some(32))?.try_into().unwrap(),
+            paid_to: r.bytes(f::REFUND_PAID_TO, None)?,
             timestamp: r.uint(f::REFUND_TS)?,
         };
         r.finish()?;
@@ -932,7 +959,27 @@ pub fn check_refund(
     original_receipt: &Receipt,
     original_receipt_bytes: &[u8],
     original_terms: &Terms,
+    original_accept: &Accept,
 ) -> Result<(), Reject> {
+    // 0. It must have gone where the payer said, and the payer must have said.
+    //    Without this the destination comes from outside the signed transcript,
+    //    which is the substitution a published attack on BIP-70 exploited.
+    match &original_accept.refund_to {
+        None => {
+            return Err(Reject::with_detail(
+                RejectCode::PolicyRefused,
+                "this payer supplied no refund address, so no refund is payable",
+            ))
+        }
+        Some(addr) if addr.as_slice() != refund.paid_to.as_slice() => {
+            return Err(Reject::with_detail(
+                RejectCode::PolicyRefused,
+                "refund was sent somewhere other than the address the payer signed",
+            ))
+        }
+        Some(_) => {}
+    }
+
     // 1. It must name *this* receipt.
     let link = commit(Purpose::ChainLink, original_receipt_bytes);
     if !commit_eq(&refund.prior_receipt, &link) {

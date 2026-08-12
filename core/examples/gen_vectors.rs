@@ -622,6 +622,7 @@ fn transcript_cases() -> Vec<J> {
             dest: dest.clone(),
             reader_session_pk: SecretKey::ed25519_from_bytes(&[2u8; 32]).public().to_bytes(),
             timestamp: 1_800_000_005, chosen_version: 1, chosen_suite: 1,
+        refund_to: Some(b"payer-refund-addr".to_vec()),
         };
         let accept_bytes = accept.to_value().encode();
         let link = commit(Purpose::ChainLink, &accept_bytes);
