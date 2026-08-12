@@ -12,6 +12,8 @@
 
 use ducat_core::{bond, float, verify};
 
+pub mod node;
+
 uniffi::setup_scaffolding!();
 
 // ---------------------------------------------------------------------------
@@ -578,5 +580,108 @@ mod restore_height_tests {
             create_persona_secret(),
         )
         .is_ok());
+    }
+}
+
+// ---------------------------------------------------------------------------
+// §4.3 — importing one back
+// ---------------------------------------------------------------------------
+
+/// What a bundle restores.
+#[derive(uniffi::Record)]
+pub struct RestoredBackup {
+    pub spend_key_hex: String,
+    pub restore_height: u64,
+    pub persona_secret: Vec<u8>,
+    /// Escrow shares carried in the bundle (§4.3.3). Zero is the normal case.
+    pub escrow_count: u32,
+}
+
+/// Open a bundle.
+///
+/// A wrong passphrase and a tampered file are the same error, deliberately: the
+/// AEAD cannot distinguish them, and reporting them differently would tell an
+/// attacker whether a guess was close.
+#[uniffi::export]
+pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup, BackupError> {
+    let b = ducat_core::backup::import(&blob, passphrase.as_bytes())
+        .map_err(|e| BackupError::Failed(format!("{:?}", e.code)))?;
+    Ok(RestoredBackup {
+        spend_key_hex: b.monero_seed,
+        restore_height: b.monero_restore_height,
+        persona_secret: b.persona_secret,
+        escrow_count: b.escrow_shares.len() as u32,
+    })
+}
+
+/// The address a restored key controls, so a user can confirm they restored what
+/// they meant to before trusting it with anything.
+#[uniffi::export]
+pub fn address_for_spend_key(spend_key_hex: String, stagenet: bool) -> Result<String, BackupError> {
+    use curve25519_dalek::constants::ED25519_BASEPOINT_TABLE;
+    use monero_wallet::address::Network;
+    use monero_wallet::ed25519::Scalar;
+    use zeroize::Zeroizing;
+
+    let bytes = hex_to_bytes(&spend_key_hex).ok_or(BackupError::BadKey)?;
+    if bytes.len() != 32 {
+        return Err(BackupError::BadKey);
+    }
+    let spend = Zeroizing::new(
+        Scalar::read(&mut bytes.as_slice()).map_err(|_| BackupError::BadKey)?,
+    );
+    let mut sb = Vec::new();
+    spend.write(&mut sb).map_err(|_| BackupError::BadKey)?;
+    let view = Zeroizing::new(Scalar::hash(&sb));
+    let spend_pub = monero_wallet::ed25519::Point::from(&(*spend).into() * ED25519_BASEPOINT_TABLE);
+    let vp = monero_wallet::ViewPair::new(spend_pub, view)
+        .map_err(|_| BackupError::BadKey)?;
+    let network = if stagenet { Network::Stagenet } else { Network::Mainnet };
+    Ok(vp.legacy_address(network).to_string())
+}
+
+#[cfg(test)]
+mod import_tests {
+    use super::*;
+
+    /// The round trip that matters: the restored key must control the same
+    /// address, or the backup restored *something* and not the wallet.
+    #[test]
+    fn a_restored_key_controls_the_same_address() {
+        let w = create_wallet(1000, true);
+        let blob = export_backup(
+            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: 1000 },
+            "a real passphrase".into(),
+            create_persona_secret(),
+        )
+        .unwrap();
+        let r = import_backup(blob, "a real passphrase".into()).unwrap();
+        assert_eq!(r.spend_key_hex, w.spend_key_hex);
+        assert_eq!(
+            address_for_spend_key(r.spend_key_hex, true).unwrap(),
+            w.address,
+            "a restored key that controls a different address has restored nothing"
+        );
+    }
+
+    #[test]
+    fn a_wrong_passphrase_is_indistinguishable_from_tampering() {
+        let w = create_wallet(1, true);
+        let blob = export_backup(
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1 },
+            "a real passphrase".into(),
+            create_persona_secret(),
+        )
+        .unwrap();
+        let wrong = import_backup(blob.clone(), "not the passphrase".into())
+            .err()
+            .map(|e| e.to_string());
+        let mut torn = blob;
+        let n = torn.len() - 1;
+        torn[n] ^= 1;
+        let tampered = import_backup(torn, "a real passphrase".into())
+            .err()
+            .map(|e| e.to_string());
+        assert!(wrong.is_some() && wrong == tampered, "{wrong:?} vs {tampered:?}");
     }
 }

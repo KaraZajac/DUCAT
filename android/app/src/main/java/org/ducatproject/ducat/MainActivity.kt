@@ -14,7 +14,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import org.ducatproject.ducat.ui.BackupSettings
 import org.ducatproject.ducat.ui.BalanceCard
+import org.ducatproject.ducat.ui.NetworkPanel
 import org.ducatproject.ducat.ui.Onboarding
 import org.ducatproject.ducat.ui.OnboardingFlow
 import org.ducatproject.ducat.ui.Step
@@ -193,7 +196,13 @@ private fun RowScope.NavItem(
 
 @Composable
 private fun MenuScreen(mode: ThemeMode, onChange: (ThemeMode) -> Unit) {
+    val context = LocalContext.current
     Column(Modifier.fillMaxWidth().padding(20.dp)) {
+        // The transport, first: nothing else here matters if a route cannot be
+        // built, and this is the screen a person troubleshoots from.
+        NetworkPanel(storageDir = context.filesDir.absolutePath + "/veilid")
+        BackupSettings(spendKeyHex = null, restoreHeight = 0uL, personaSecret = null)
+        Spacer(Modifier.height(16.dp))
         Text("Appearance", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
         ThemeMode.entries.forEach { m ->

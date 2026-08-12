@@ -243,3 +243,52 @@ The general shape, which is not specific to Monero: **when a placeholder must
 stand in for a real value, pick the one that fails loudly and slowly, not the one
 that fails silently and fast.** A sentinel chosen for being obviously-not-a-real
 value is chosen for a property nothing downstream checks.
+
+---
+
+## 11. Personas need names, and a name is not an identity
+
+On the roadmap: knowing *who* you are paying. Worth writing down now because the
+obvious implementations are the dangerous ones.
+
+**§15.9 already taught this lesson in a different shape.** A signed static tag
+proves who owns an address and never that the tag is the one the venue put there
+— a swapped tag carries the attacker's persona with a perfectly valid signature
+over the attacker's own address, and verifies. A self-asserted display name has
+exactly the same property: **anyone can call themselves anything**, and a
+signature over a name proves only that the holder of a key chose that string.
+
+Two designs to avoid:
+
+- **A global name registry.** That is a directory, and a directory is the thing
+  this protocol deletes. It also becomes the chokepoint everything else was
+  designed to avoid.
+- **Trusting a display name on first contact.** A name shown before a
+  relationship exists is a claim with nothing behind it, and putting it beside a
+  payment amount lends it authority the protocol cannot support.
+
+The design that fits what already exists is **petnames**:
+
+1. A persona may carry a self-asserted display name in its contact card.
+2. §16.3's post-receipt coda is where it is exchanged — after the transaction
+   completes anonymously, which is already the ordering.
+3. **The receiver stores it locally and may rename it.** What the user sees is
+   their own label for a key they have transacted with, not a claim the network
+   vouches for.
+4. Two contacts may share a display name; they can never share a key.
+
+This is the Zooko trade taken deliberately: names that are secure and meaningful
+to *you*, given up as globally unique. It is also how people already reason about
+their phone's contact list.
+
+### VeilidChat interop
+
+Attractive because it is where a Veilid identity already exists, and a payment
+that lands next to a conversation is a payment with a face on it. It is also a
+dependency on another project's contact schema and identity model, which is a
+larger commitment than it looks — §11's many-clients goal cuts both ways.
+
+Recorded as **roadmap, not requirement**: implement petnames and the profile
+first, since they are needed regardless, and treat interop as an integration to
+evaluate once there is something to integrate. Messaging between friends is a
+genuinely good reason to want it, and it is not on the path to a working payment.

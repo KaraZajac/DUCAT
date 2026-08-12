@@ -733,6 +733,18 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -748,6 +760,8 @@ internal interface UniffiLib : Library {
         
     }
 
+    fun uniffi_ducat_mobile_fn_func_address_for_spend_key(`spendKeyHex`: RustBuffer.ByValue,`stagenet`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_approx_payments_supported(`unlockedOutputs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
     fun uniffi_ducat_mobile_fn_func_capacity_bucket(`capacityPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -764,6 +778,16 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_export_backup(`input`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_import_backup(`blob`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_start(`storageDir`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    fun uniffi_ducat_mobile_fn_func_node_status(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_stop(uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    fun uniffi_ducat_mobile_fn_func_node_test_route(uniffi_out_err: UniffiRustCallStatus, 
+    ): Int
     fun uniffi_ducat_mobile_fn_func_plan_float(`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_protocol_version(uniffi_out_err: UniffiRustCallStatus, 
@@ -882,6 +906,8 @@ internal interface UniffiLib : Library {
     ): Unit
     fun ffi_ducat_mobile_rust_future_complete_void(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
+    fun uniffi_ducat_mobile_checksum_func_address_for_spend_key(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_approx_payments_supported(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_bucket(
@@ -897,6 +923,16 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_default_verification_policy(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_export_backup(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_import_backup(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_start(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_status(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_stop(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_test_route(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_plan_float(
     ): Short
@@ -921,6 +957,9 @@ private fun uniffiCheckContractApiVersion(lib: UniffiLib) {
 
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: UniffiLib) {
+    if (lib.uniffi_ducat_mobile_checksum_func_address_for_spend_key() != 43862.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_approx_payments_supported() != 28086.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -943,6 +982,21 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_export_backup() != 50604.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_import_backup() != 12814.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_start() != 34295.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_status() != 13257.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_stop() != 20027.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_test_route() != 9881.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_plan_float() != 49046.toShort()) {
@@ -1315,6 +1369,74 @@ public object FfiConverterTypeNewWallet: FfiConverterRustBuffer<NewWallet> {
 
 
 /**
+ * What the UI can show and a person can troubleshoot from.
+ */
+data class NodeStatus (
+    var `running`: kotlin.Boolean, 
+    /**
+     * Attached to the network at all.
+     */
+    var `attached`: kotlin.Boolean, 
+    /**
+     * **The one that matters for routes.** A node that has not determined its
+     * network class cannot allocate a private route, and every DUCAT reach mode
+     * depends on one. Attachment alone is not enough and looks identical from
+     * a status line that only reports "connected".
+     */
+    var `publicInternetReady`: kotlin.Boolean, 
+    var `peers`: kotlin.UInt, 
+    var `reliablePeers`: kotlin.UInt, 
+    var `state`: kotlin.String, 
+    /**
+     * Present when startup failed, because a node that silently did not start
+     * is indistinguishable from a network with no peers.
+     */
+    var `error`: kotlin.String?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeNodeStatus: FfiConverterRustBuffer<NodeStatus> {
+    override fun read(buf: ByteBuffer): NodeStatus {
+        return NodeStatus(
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: NodeStatus) = (
+            FfiConverterBoolean.allocationSize(value.`running`) +
+            FfiConverterBoolean.allocationSize(value.`attached`) +
+            FfiConverterBoolean.allocationSize(value.`publicInternetReady`) +
+            FfiConverterUInt.allocationSize(value.`peers`) +
+            FfiConverterUInt.allocationSize(value.`reliablePeers`) +
+            FfiConverterString.allocationSize(value.`state`) +
+            FfiConverterOptionalString.allocationSize(value.`error`)
+    )
+
+    override fun write(value: NodeStatus, buf: ByteBuffer) {
+            FfiConverterBoolean.write(value.`running`, buf)
+            FfiConverterBoolean.write(value.`attached`, buf)
+            FfiConverterBoolean.write(value.`publicInternetReady`, buf)
+            FfiConverterUInt.write(value.`peers`, buf)
+            FfiConverterUInt.write(value.`reliablePeers`, buf)
+            FfiConverterString.write(value.`state`, buf)
+            FfiConverterOptionalString.write(value.`error`, buf)
+    }
+}
+
+
+
+/**
  * Whether a stated risk cap can support a stated usage pattern.
  *
  * The two are set in different places by different reasoning — a security
@@ -1356,6 +1478,52 @@ public object FfiConverterTypeReconciliation: FfiConverterRustBuffer<Reconciliat
             FfiConverterBoolean.write(value.`ok`, buf)
             FfiConverterTypeFloatPlan.write(value.`plan`, buf)
             FfiConverterULong.write(value.`shortfallPxmr`, buf)
+    }
+}
+
+
+
+/**
+ * What a bundle restores.
+ */
+data class RestoredBackup (
+    var `spendKeyHex`: kotlin.String, 
+    var `restoreHeight`: kotlin.ULong, 
+    var `personaSecret`: kotlin.ByteArray, 
+    /**
+     * Escrow shares carried in the bundle (§4.3.3). Zero is the normal case.
+     */
+    var `escrowCount`: kotlin.UInt
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBackup> {
+    override fun read(buf: ByteBuffer): RestoredBackup {
+        return RestoredBackup(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: RestoredBackup) = (
+            FfiConverterString.allocationSize(value.`spendKeyHex`) +
+            FfiConverterULong.allocationSize(value.`restoreHeight`) +
+            FfiConverterByteArray.allocationSize(value.`personaSecret`) +
+            FfiConverterUInt.allocationSize(value.`escrowCount`)
+    )
+
+    override fun write(value: RestoredBackup, buf: ByteBuffer) {
+            FfiConverterString.write(value.`spendKeyHex`, buf)
+            FfiConverterULong.write(value.`restoreHeight`, buf)
+            FfiConverterByteArray.write(value.`personaSecret`, buf)
+            FfiConverterUInt.write(value.`escrowCount`, buf)
     }
 }
 
@@ -1551,6 +1719,65 @@ public object FfiConverterTypeBackupError : FfiConverterRustBuffer<BackupExcepti
 
 
 
+
+
+sealed class NodeException: kotlin.Exception() {
+    
+    class Failed(
+        
+        val v1: kotlin.String
+        ) : NodeException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<NodeException> {
+        override fun lift(error_buf: RustBuffer.ByValue): NodeException = FfiConverterTypeNodeError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeNodeError : FfiConverterRustBuffer<NodeException> {
+    override fun read(buf: ByteBuffer): NodeException {
+        
+
+        return when(buf.getInt()) {
+            1 -> NodeException.Failed(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: NodeException): ULong {
+        return when(value) {
+            is NodeException.Failed -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+        }
+    }
+
+    override fun write(value: NodeException, buf: ByteBuffer) {
+        when(value) {
+            is NodeException.Failed -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
 /**
  * Assurance that the person present may spend, weakest first.
  */
@@ -1625,6 +1852,52 @@ public object FfiConverterOptionalULong: FfiConverterRustBuffer<kotlin.ULong?> {
         }
     }
 }
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?> {
+    override fun read(buf: ByteBuffer): kotlin.String? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterString.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.String?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterString.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.String?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterString.write(value, buf)
+        }
+    }
+}
+        /**
+         * The address a restored key controls, so a user can confirm they restored what
+         * they meant to before trusting it with anything.
+         */
+    @Throws(BackupException::class) fun `addressForSpendKey`(`spendKeyHex`: kotlin.String, `stagenet`: kotlin.Boolean): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(BackupException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_address_for_spend_key(
+        FfiConverterString.lower(`spendKeyHex`),FfiConverterBoolean.lower(`stagenet`),_status)
+}
+    )
+    }
+    
+
         /**
          * **About** how many consecutive payments a given count of unlocked outputs buys.
          *
@@ -1743,6 +2016,76 @@ public object FfiConverterOptionalULong: FfiConverterRustBuffer<kotlin.ULong?> {
     uniffiRustCallWithError(BackupException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_export_backup(
         FfiConverterTypeBackupInput.lower(`input`),FfiConverterString.lower(`passphrase`),FfiConverterByteArray.lower(`personaSecret`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Open a bundle.
+         *
+         * A wrong passphrase and a tampered file are the same error, deliberately: the
+         * AEAD cannot distinguish them, and reporting them differently would tell an
+         * attacker whether a guess was close.
+         */
+    @Throws(BackupException::class) fun `importBackup`(`blob`: kotlin.ByteArray, `passphrase`: kotlin.String): RestoredBackup {
+            return FfiConverterTypeRestoredBackup.lift(
+    uniffiRustCallWithError(BackupException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_import_backup(
+        FfiConverterByteArray.lower(`blob`),FfiConverterString.lower(`passphrase`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Start the node, storing its state under `storage_dir`.
+         *
+         * Returns as soon as startup is under way rather than when the network is
+         * usable: readiness takes seconds to minutes and a UI that blocks on it is a UI
+         * that appears frozen. Poll [`node_status`].
+         */
+    @Throws(NodeException::class) fun `nodeStart`(`storageDir`: kotlin.String)
+        = 
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_start(
+        FfiConverterString.lower(`storageDir`),_status)
+}
+    
+    
+
+        /**
+         * A snapshot. Cheap, and safe to call from a recomposition.
+         */ fun `nodeStatus`(): NodeStatus {
+            return FfiConverterTypeNodeStatus.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_status(
+        _status)
+}
+    )
+    }
+    
+ fun `nodeStop`()
+        = 
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_stop(
+        _status)
+}
+    
+    
+
+        /**
+         * Allocate a private route and return its blob size.
+         *
+         * The blob is what §15.3 puts inside a tap, so its size is the tap's size — and
+         * a route that will not allocate is the difference between a client that can
+         * transact and one that can only receive.
+         */
+    @Throws(NodeException::class) fun `nodeTestRoute`(): kotlin.UInt {
+            return FfiConverterUInt.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_test_route(
+        _status)
 }
     )
     }
