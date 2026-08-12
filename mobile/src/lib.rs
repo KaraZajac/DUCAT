@@ -389,8 +389,14 @@ pub struct BackupInput {
     pub restore_height: u64,
 }
 
+/// Roughly four centuries of two-minute blocks. Anything beyond this is not a
+/// height, it is a sentinel or a mistake — and both restore to nothing.
+const MAX_PLAUSIBLE_HEIGHT: u64 = 100_000_000;
+
 #[derive(uniffi::Error, Debug, thiserror::Error)]
 pub enum BackupError {
+    #[error("restore height is above any plausible chain height")]
+    ImplausibleRestoreHeight,
     #[error("passphrase is too short to protect a wallet")]
     WeakPassphrase,
     #[error("malformed key material")]
@@ -422,6 +428,20 @@ pub fn export_backup(
     }
     if hex_to_bytes(&input.spend_key_hex).map(|b| b.len()) != Some(32) {
         return Err(BackupError::BadKey);
+    }
+    // **A restore height above the chain is the silent, total failure.**
+    //
+    // §4.3.1: too low costs ~106 hours of rescan; too high means the wallet
+    // scans forward from after every output it owns, finds nothing, and reports
+    // a zero balance with no error anywhere. The app's first version passed 0
+    // (genesis — expensive), so it was "fixed" with a u64::MAX sentinel, which
+    // is the catastrophic direction. A phone-written backup carrying
+    // 18446744073709551615 was opened here and proved it.
+    //
+    // Genesis is slow and recoverable. A height above the tip is fast and
+    // unrecoverable. Between those, refuse the second.
+    if input.restore_height > MAX_PLAUSIBLE_HEIGHT {
+        return Err(BackupError::ImplausibleRestoreHeight);
     }
 
     let bundle = Backup {
@@ -525,5 +545,38 @@ mod backup_tests {
             ),
             Err(BackupError::BadKey)
         ));
+    }
+}
+
+#[cfg(test)]
+mod restore_height_tests {
+    use super::*;
+
+    /// The direction that loses money silently.
+    #[test]
+    fn a_height_above_the_chain_is_refused() {
+        let w = create_wallet(1, true);
+        assert!(matches!(
+            export_backup(
+                BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: u64::MAX },
+                "a real passphrase".into(),
+                create_persona_secret(),
+            ),
+            Err(BackupError::ImplausibleRestoreHeight)
+        ));
+    }
+
+    /// Genesis is slow and recoverable, so it is allowed. §4.3.1's two
+    /// directions are not symmetric and the API must not treat them as if they
+    /// were.
+    #[test]
+    fn genesis_is_slow_but_permitted() {
+        let w = create_wallet(0, true);
+        assert!(export_backup(
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 0 },
+            "a real passphrase".into(),
+            create_persona_secret(),
+        )
+        .is_ok());
     }
 }

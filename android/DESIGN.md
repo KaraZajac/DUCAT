@@ -209,3 +209,37 @@ So the order is deliberate: the backup step comes **before** the wallet can be
 funded. A user with nothing to lose has no reason to skip it and no reason to
 resent it; a user with money in the float has both. The one moment when the cost
 of doing it is zero is the moment before there is anything to protect.
+
+
+---
+
+## 10. The restore height, and a fix that was worse than the bug
+
+Recorded because the reasoning was plausible at every step and still arrived
+somewhere unrecoverable.
+
+1. The app passed `0` as the restore height for a new wallet, with a comment
+   claiming that was correct.
+2. `0` is genesis, and §4.3.1 measures genesis at roughly **106 hours** of
+   rescan. So it was "fixed" with a sentinel — `ULong.MAX_VALUE` — meaning
+   *unknown*.
+3. A backup written on a handset was then opened on a desktop, and carried
+   `18446744073709551615`.
+
+**That sentinel is the catastrophic direction.** §4.3.1's two failures are not
+symmetric and treating them as interchangeable is the mistake:
+
+| | Cost |
+|---|---|
+| Height too low (genesis) | Slow. ~106 hours. **Recoverable.** |
+| Height too high | A wallet scanning forward from after every output it owns. Finds nothing. Reports zero, with no error anywhere. **Unrecoverable by the user.** |
+
+So the app records genesis when no node has been asked, and `export_backup`
+**refuses** a height beyond any plausible chain. A slow restore is a bad
+afternoon; an empty one is a lost wallet, and the user's conclusion will be that
+the software took their money.
+
+The general shape, which is not specific to Monero: **when a placeholder must
+stand in for a real value, pick the one that fails loudly and slowly, not the one
+that fails silently and fast.** A sentinel chosen for being obviously-not-a-real
+value is chosen for a property nothing downstream checks.

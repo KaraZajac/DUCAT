@@ -38,13 +38,20 @@ import uniffi.ducat_mobile.exportBackup
 enum class Step { Persona, Wallet, Limits, Backup, Done }
 
 /**
- * No node has been asked yet.
+ * No node has been asked yet, so the backup records genesis.
  *
- * Deliberately not zero. Zero is a *valid* restore height meaning genesis, and
- * genesis means a ~106-hour rescan — so a placeholder of zero is not a
- * placeholder, it is the expensive answer wearing one's clothes.
+ * This was `ULong.MAX_VALUE` for exactly one build, reasoning that zero means
+ * genesis and genesis costs ~106 hours of rescan. That reasoning was right about
+ * zero and wrong about the alternative: §4.3.1's two directions are **not
+ * symmetric**. Too low is slow and recoverable. Too high means a restored wallet
+ * scans forward from after every output it owns, finds nothing, and shows a zero
+ * balance with no error anywhere.
+ *
+ * A backup written by the phone carrying 18446744073709551615 was opened on a
+ * desktop and proved it. Between an expensive restore and an empty one, take the
+ * expensive one.
  */
-const val UNKNOWN_TIP: ULong = ULong.MAX_VALUE
+const val UNKNOWN_TIP: ULong = 0uL
 
 data class Onboarding(
     val step: Step = Step.Persona,
@@ -77,13 +84,9 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                 body = "Monero keys, generated here and held here. This is the money.",
                 action = "Create wallet",
                 onAction = {
-                    // §4.3.1: the restore height is wrong in both directions. Too
-                    // high is silent and total; too low costs ~106 hours of
-                    // rescan. **Zero is genesis**, which is the expensive
-                    // direction — and the first version passed zero while a
-                    // comment claimed it was correct. Until a node supplies the
-                    // tip, this is honestly marked as unknown rather than baked
-                    // in as a number that happens to be catastrophic.
+                    // Genesis until a node supplies a real tip — slow to
+                    // restore, and recoverable, which is the side of §4.3.1's
+                    // asymmetry to be on.
                     val w = createWallet(tipHeight = UNKNOWN_TIP, stagenet = true)
                     onState(state.copy(step = Step.Limits, wallet = w))
                 },

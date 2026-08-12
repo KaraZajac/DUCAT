@@ -1451,6 +1451,12 @@ public object FfiConverterTypeVerificationPolicy: FfiConverterRustBuffer<Verific
 
 sealed class BackupException: kotlin.Exception() {
     
+    class ImplausibleRestoreHeight(
+        ) : BackupException() {
+        override val message
+            get() = ""
+    }
+    
     class WeakPassphrase(
         ) : BackupException() {
         override val message
@@ -1487,9 +1493,10 @@ public object FfiConverterTypeBackupError : FfiConverterRustBuffer<BackupExcepti
         
 
         return when(buf.getInt()) {
-            1 -> BackupException.WeakPassphrase()
-            2 -> BackupException.BadKey()
-            3 -> BackupException.Failed(
+            1 -> BackupException.ImplausibleRestoreHeight()
+            2 -> BackupException.WeakPassphrase()
+            3 -> BackupException.BadKey()
+            4 -> BackupException.Failed(
                 FfiConverterString.read(buf),
                 )
             else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
@@ -1498,6 +1505,10 @@ public object FfiConverterTypeBackupError : FfiConverterRustBuffer<BackupExcepti
 
     override fun allocationSize(value: BackupException): ULong {
         return when(value) {
+            is BackupException.ImplausibleRestoreHeight -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
             is BackupException.WeakPassphrase -> (
                 // Add the size for the Int that specifies the variant plus the size needed for all fields
                 4UL
@@ -1516,16 +1527,20 @@ public object FfiConverterTypeBackupError : FfiConverterRustBuffer<BackupExcepti
 
     override fun write(value: BackupException, buf: ByteBuffer) {
         when(value) {
-            is BackupException.WeakPassphrase -> {
+            is BackupException.ImplausibleRestoreHeight -> {
                 buf.putInt(1)
                 Unit
             }
-            is BackupException.BadKey -> {
+            is BackupException.WeakPassphrase -> {
                 buf.putInt(2)
                 Unit
             }
-            is BackupException.Failed -> {
+            is BackupException.BadKey -> {
                 buf.putInt(3)
+                Unit
+            }
+            is BackupException.Failed -> {
+                buf.putInt(4)
                 FfiConverterString.write(value.v1, buf)
                 Unit
             }
