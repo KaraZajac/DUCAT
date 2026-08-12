@@ -5,6 +5,8 @@
 //! Part V (§18) of the protocol document.
 
 pub mod backup;
+pub mod bond;
+pub mod burning;
 pub mod cbor;
 pub mod custody;
 pub mod escrow;
