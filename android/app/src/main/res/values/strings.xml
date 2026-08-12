@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">DUCAT</string>
+    <string name="nfc_service_description">DUCAT proximity payments</string>
+    <string name="nfc_aid_group_description">DUCAT</string>
+</resources>

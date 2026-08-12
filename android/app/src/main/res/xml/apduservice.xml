@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  §18.7. The AID is 0xF0 + "DUCAT" = F0445543 4154.
+
+  Android requires AIDs here as an even-length hex string with no separators.
+  This value is immutable: iOS readers declare selectable AIDs at build time, so
+  a change is a simultaneous update of every client that exists.
+-->
+<host-apdu-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/nfc_service_description"
+    android:requireDeviceUnlock="false">
+    <aid-group
+        android:description="@string/nfc_aid_group_description"
+        android:category="other">
+        <aid-filter android:name="F04455434154" />
+    </aid-group>
+</host-apdu-service>

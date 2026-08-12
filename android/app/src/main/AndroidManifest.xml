@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- §15.3.2's transport ladder. NFC is preferred and never assumed:
+         an iPhone cannot present over NFC at all (O19), and plenty of Android
+         hardware lacks HCE, so QR is the floor that always works. -->
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-feature android:name="android.hardware.nfc.hce" android:required="false" />
+
+    <!-- BLE, for the §18.7 service. Not required: a device without it falls to QR. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <application
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Ducat"
+        android:allowBackup="false">
+
+        <!-- allowBackup is false on purpose: §4.3 makes backup an explicit,
+             passphrase-protected export the user performs. Letting the OS sweep
+             wallet keys into cloud backup would defeat the whole design. -->
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- §18.7 QR token mode: ducat:<base64url>. A URI is shareable and
+                 openable by a handler registration, which is the whole reason
+                 token mode is a URI and inline mode is raw bytes. -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="ducat" />
+            </intent-filter>
+        </activity>
+
+        <!-- §15.3: presenting over NFC. The AID is F0 44 55 43 41 54 —
+             0xF0 + "DUCAT", in ISO/IEC 7816-5's registration-free proprietary
+             range. It cannot be discovered at runtime and changing it would be a
+             simultaneous update of every client in existence, so it is declared
+             here exactly as §18.7 pins it and never edited. -->
+        <service
+            android:name=".nfc.DucatHostApduService"
+            android:exported="true"
+            android:permission="android.permission.BIND_NFC_SERVICE">
+            <intent-filter>
+                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.nfc.cardemulation.host_apdu_service"
+                android:resource="@xml/apduservice" />
+        </service>
+    </application>
+</manifest>
