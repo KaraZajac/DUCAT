@@ -16,10 +16,13 @@ use serde_json::{json, Value};
 /// A client with one configured relay has an availability dependency it did not
 /// choose and cannot see. This list is not redundancy for its own sake: during
 /// this project's own testing two of these went down mid-run, minutes apart.
+/// Ordered by observed stability during this project's testing, not
+/// alphabetically. The first entry is tried first, so a flapping relay at the
+/// head costs a timeout on every single call.
 pub const RELAYS: &[&str] = &[
-    "node.monerodevs.org:38089",
     "stagenet.xmr-tw.org:38081",
     "xmr-lux.boldsuck.org:38081",
+    "node.monerodevs.org:38089",
     "node2.monerodevs.org:38089",
 ];
 

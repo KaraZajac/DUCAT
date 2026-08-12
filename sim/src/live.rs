@@ -253,17 +253,22 @@ pub fn transact_live(
 /// is not measuring the block clock instead of the protocol.
 pub fn wait_for_outputs(parties: &BTreeMap<String, u16>, need: usize, max_wait_s: u64) -> bool {
     let deadline = std::time::Instant::now() + Duration::from_secs(max_wait_s);
+    // Build the wallets once. Recreating them each poll resets the relay index,
+    // so a flapping relay at the head of the list is retried — and paid for in
+    // timeouts — on every single cycle. A client that forgets which relay works
+    // has not really implemented failover.
+    let wallets: Vec<Wallet> = parties
+        .iter()
+        .filter_map(|(name, port)| Wallet::new(name, *port).ok())
+        .collect();
+    if wallets.len() != parties.len() {
+        return false;
+    }
     loop {
         let mut all = true;
         let mut line = Vec::new();
-        for (name, port) in parties {
-            let w = match Wallet::new(name, *port) {
-                Ok(w) => w,
-                Err(_) => {
-                    all = false;
-                    continue;
-                }
-            };
+        for w in &wallets {
+            let name = &w.name;
             let _ = w.refresh();
             let b = w.balance().unwrap_or(crate::wallet::Balance {
                 total: 0,
@@ -276,6 +281,7 @@ pub fn wait_for_outputs(parties: &BTreeMap<String, u16>, need: usize, max_wait_s
                 all = false;
             }
         }
+        let _ = &wallets;
         println!("    {}", line.join("  "));
         if all {
             return true;
