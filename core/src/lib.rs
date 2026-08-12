@@ -10,6 +10,7 @@ pub mod burning;
 pub mod cbor;
 pub mod custody;
 pub mod escrow;
+pub mod float;
 pub mod commit;
 pub mod negotiate;
 pub mod reject;
