@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.53 — Consolidated**
+**Draft 0.54 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.54** — **The document is now audited against the implementation (§18.12), and the first run found a normative section that did not exist.** §15.5.1 — payer verification — was announced in 0.41's changelog, implemented in `core/src/verify.rs`, tested, and cited from §4.3 and O10, but **never written**. An implementer following the reference found nothing. Nothing was inconsistent, no test failed, and the absence was invisible precisely because everything around it was correct; §15.5.1 is written now, with the tier ladder, the four rules a user may not relax, and the reason none of it touches the wire. `conformance/audit_spec.py` checks section and open-problem references, reject codes against `core::reject`, field-number collisions **within a namespace**, object type codes and labels, vector `kind` agreement across the schema and both runners, the draft version against the newest changelog entry, and the transport identifiers against `core::transport`. Its own first run is recorded too: eight reports, of which **three were checker bugs** — an RFC citation read as a DUCAT section, the field registry's table matched by a pattern meant for §18.5, and `Terms`' nested key space read as five collisions. One real defect against three false alarms is the normal shape of a first audit, and the discipline is fixing the checker rather than loosening it until it agrees.
 - **0.53** — **Veilid #395 checked upstream, and the answer changes how it should be treated.** O17 said the fix was "still required"; the issue has in fact been **open since July 2024**, sits on milestone *Release 0.13.0 — Private Routing 2.0* **due 1 March 2027**, while `veilid-core` ships 0.5.7. A milestone named 2.0 two years out is a redesign, not a patch — so §5.2's inversion is not a stopgap pending an upstream fix, it is the answer, and **nothing further should be designed on the assumption that #395 lands.** Also recorded: O16's throughput figures were measured against `veilid-core` 0.5.3 and four releases have shipped since, so they are stale as a budget even though nothing suggests they are wrong.
 - **0.52** — **O9 quantified and O13 stated as a trade rather than a worry.** O9 said hot-wallet exposure was "mitigated by keeping it small", which is true and hides the important half: **the float is bounded from below by usage.** §17.2 makes consecutive capacity a count of unlocked outputs and `sim --drain` measured ~1.5 consumed per payment, so *k* payments before a top-up costs about `1.5k × typical payment` of exposure and no risk preference can reduce it. `core::float` computes the number and reconciles a risk cap against a usage pattern, because the two are set in different places by different reasoning and otherwise contradict each other silently until the user is at a counter. O13 gains the resolution its flag implied: **the accountable relay and the private relay are not the same relay.** A staked `relay/1` announces "DUCAT user" to a few-hundred-person set; a public Monero node announces "Monero user" and is accountable to nobody. 0.51 measured both halves — a public node accepted two transactions and propagated neither, and the client caught it by asking *other public nodes* rather than by holding anyone accountable. So: submit through several public nodes by default, since redundancy is free and defeats a silent drop without accountability, and buy accountability only when routing around the failure is impossible or a dispute needs behaviour attributable to a stake. Neither problem closes — the float stays reachable, and using the relay set remains the signal however narrow the audience.
 - **0.51** — **A 3-of-5 FROSTLASS group funded and spent on stagenet, and 0.50's DKG claim retracted.** Three of five signers produced a valid CLSAG in 0.088 s, mined at height 2,183,934 — settling the signing half of O1 for a threshold Monero's native multisig cannot express. 0.50 recorded that "`dkg` 0.6.1 ships no interactive DKG" and called it §8.2's largest gap; **that was wrong.** The DKG was split into its own crate: `dkg-pedpop` 0.6.0 implements PedPoP, three rounds with blame assignment, which is what mutually distrusting parties need. The real problem is narrower and more awkward — **it does not link with the wallet**: `dkg-pedpop` declares `multiexp` without the `batch` feature its own source uses, so it does not build standalone, and it pins `multiexp 0.4` while `modular-frost 0.11.1` (required by `monero-wallet` for multisig) pins 0.5, making their `BatchVerifier` types incompatible. The correction matters because the two situations demand opposite responses: designing and auditing a DKG is a research project; pinning a source and verifying a build is an afternoon. Also from the same run: **the send side of §8.7.2**, where one relay accepted two transactions with `Ok(())` and propagated neither, and where a propagation check built on a confirmed-only lookup reported a live mempool transaction as lost — a false negative indistinguishable from the true one without an independent query.
@@ -1232,6 +1233,41 @@ Periods anchor to the first draw rather than to a calendar, which keeps timezone
 
 ---
 
+### 15.5.1 Payer Verification — the question WYSIWYS never asked
+
+**This section was referenced from 0.41 and never written.** The rule was implemented and tested (`core/src/verify.rs`); the normative text was missing, so an implementer following the reference found nothing. Found by §18.12's audit, which exists because that is not a mistake a careful reading catches.
+
+§15.5 establishes that a payer sees exactly what they sign. It says nothing about **whether the person holding the device should be signing at all.** A stolen unlocked phone is a bearer instrument: A1 working as designed, and also how people lose money.
+
+EMV's answer is proportionality — no verification below a floor, stronger verification above it — and this takes the same shape with the thresholds moved into the user's hands.
+
+#### Tiers
+
+| Tier | Meaning |
+|---|---|
+| `None` | Tap and go, as contactless does below its floor limit |
+| `DeviceUnlocked` | The OS reports the device unlocked — biometric or passcode, satisfied **passively** and possibly some time ago |
+| `AppSecret` | A secret entered **into this application, deliberately, recently** |
+
+**The gap between the last two is the load-bearing one and is easy to collapse by accident.** A device unlocked twenty minutes ago is a passive fact that a thief holding the phone already satisfies. A secret entered into this app just now is an active knowledge factor they do not have. A client that treats "unlocked" as sufficient at every value has built a bearer instrument with extra steps.
+
+#### Policy
+
+Thresholds are **user-settable** and denominated in the **reference currency's minor units**, never piconero — a threshold stored in piconero silently drifts every time the rate moves, so a "$100 limit" quietly becomes a $70 one after a price rise.
+
+Four rules are **not** the user's to relax:
+
+1. **Thresholds must ascend.** A policy where a larger payment demands less than a smaller one is rejected at construction, not quietly normalised.
+2. **In-app secrets expire.** Without a validity window, "deliberate" decays into "happened at some point today."
+3. **Velocity counts alongside per-payment value**, and the payment under consideration is included in the window — otherwise the transaction that crosses the line is the one that gets through. A per-transaction limit alone does not stop twenty payments just under it, which is how a lifted phone is actually drained.
+4. **A stale exchange rate escalates to the strongest tier** (§17.7). The thresholds are denominated in real money, so without a trustworthy rate the client cannot know which rung it is on. Failing the other way would let anyone who can stall a rate feed *lower* the verification requirement, turning a liveness problem into a security one.
+
+#### This never touches the wire
+
+Verification is evaluated entirely by the payer's own client. **The payee never learns which tier was satisfied and cannot request one.** A counterparty able to influence verification would ask for the weakest, which is a downgrade attack EMV spent years patching. A payee's only options remain accept or decline.
+
+The consequence for §4.3 is that these thresholds are safe to carry in a backup: they are the user's instruction to their own client and nothing else.
+
 ## 15.6 The response leg, and "the other person gets a notification"
 
 ```
@@ -2039,6 +2075,41 @@ One item is left as prose because it is non-normative: **the transcript cases na
 ### What still stands between this and O21 closing
 
 Only the thing that cannot be engineered away: **an implementer who has never read `core/`.** The schema, the `kind` discriminator, and the two validation commands remove the accidental difficulty; the remaining gap is authorship, and no amount of tooling substitutes for a second pair of eyes on the same document.
+
+---
+
+## 18.12 Auditing the Document Against the Implementation
+
+§18.9 checks artifacts against each other and §18.11 checks two implementations against each other. Neither checks that **this document still describes what was built**, and prose drifts from code silently — a stale sentence throws no exception.
+
+`conformance/audit_spec.py` is that check. It is a script rather than a review because a review is true on the day it happens.
+
+| Check | What it catches |
+|---|---|
+| Every `§N.M` reference resolves | Sections renumbered, or never written |
+| Every `O`*n* reference resolves | Open problems renumbered or removed |
+| §18.5's reject codes match `core::reject` | A code changed on one side |
+| Field numbers do not collide **within a namespace** | Two objects claiming one key |
+| Object type codes unique; every type has a label | The §18.3 gap fixed at 0.47, mechanised |
+| Vector `kind`s agree across schema, generator, and both runners | A case nobody executes |
+| Header draft matches newest changelog entry | A version bump applied in one place |
+| Transport identifiers in §18.7 match `core::transport` | An AID or UUID edited on one side |
+
+### What the first run found
+
+**A normative section that was referenced three times and did not exist.** §15.5.1 was announced in 0.41's changelog, implemented in `core/src/verify.rs`, tested, and cited by §4.3 and by O10 — but never written. An implementer following the reference found nothing. It is written now.
+
+That is the failure mode this check is for: nothing was inconsistent, no test failed, and the missing text was invisible precisely because everything *around* it was correct.
+
+### What it got wrong, and why that is recorded
+
+The first version reported eight problems. **Three were real only in the sense that the checker was wrong**, and each is worth naming, because a checker that cries wolf gets ignored and then the one real finding is lost with it:
+
+- It flagged `§4.2.1` — a reference to **RFC 8949's** section, not a DUCAT one. External citations are now skipped by line.
+- It reported a reject code called `TERMS`, having matched the field registry's `| number | NAME |` rows with a pattern meant for §18.5's table. The search is now scoped to that section.
+- It reported five field-number collisions between `TYPE`/`VERSION`/`SUITE` and Terms' keys. **Not collisions:** `Terms` is a *nested* map with its own key space, which legitimately restarts at 0. Field numbers are now compared within a namespace rather than across the file.
+
+The ratio matters more than the count. One real defect against three checker bugs is the normal shape of a first audit, and the discipline is to fix the checker rather than to loosen it until it agrees.
 
 ---
 
