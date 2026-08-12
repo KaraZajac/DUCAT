@@ -93,3 +93,63 @@ standard.
 Everything requiring funds: spending from a FROSTLASS multisig, output locks and
 pre-splitting (§17.2), and restore-height sync cost. Those need a stagenet
 faucet and are the next step.
+
+---
+
+## O14 revisited against 0.2.0 — one gap is smaller than recorded
+
+`monero-wallet` is still at 0.2.0 (published 2026-07-31), so O14's assessment was
+re-checked against the actual source rather than carried forward.
+
+### Gap 2 stands: there are no transaction proofs
+
+Grepping 0.2.0 for proof support turns up exactly one match — `Bulletproof::prove_plus`
+in `send/tx.rs`, which is a range proof, not a transaction proof. No `OutProof`,
+no `InProof`, no `check_tx_key`.
+
+**But the gap is narrower than "DUCAT must build this".** `monero-wallet-rpc`
+exposes `get_tx_proof` and `check_tx_proof`, and §17.5's arbitration path was
+measured working through them (`monero-spike/REPORT.md`). The work is owed only
+by a client that embeds a wallet, which is §8.2's intended path — so it is real,
+and it is not a blocker for anything driving wallet-rpc.
+
+### Gap 1 is not what it looked like
+
+O14 said unconfirmed scanning has no public API, because `scan_transaction` is
+private and `Scanner::scan` takes a block. The first half is true —
+`scan.rs:121`, no `pub`. The conclusion does not follow.
+
+`ScannableBlock` is re-exported as `monero_wallet::interface::ScannableBlock`
+with **all three fields public**, and the crate's own tests build one with struct
+literal syntax. So a caller can wrap a mempool transaction in a synthetic block
+and hand it to the public `Scanner::scan`:
+
+```rust
+let synthetic = ScannableBlock {
+    block,
+    transactions: vec![tx],
+    output_index_for_first_ringct_output: None,
+};
+scanner.scan(synthetic)
+```
+
+**Verified by compiling against the real crate** — `mempool-probe/` in this
+directory, `cargo check` clean. `output_index_for_first_ringct_output` is `None`
+because an unconfirmed transaction has no global output index yet, and the crate
+documents that it never verifies the field anyway.
+
+### What this does not establish
+
+Compiling proves the path is **reachable**, not that it is **correct**. Two things
+remain unverified and both would be found only against real data:
+
+- Whether scanning a synthetic block detects outputs correctly for an unconfirmed
+  transaction — the `fast/1` question is *does this pay me, and how much*, which
+  needs no output indices, but that reasoning is untested.
+- What `Scanner::scan` reads out of the `Block` header. A fabricated header is
+  fine only if nothing depends on it; if unlock-time or height handling consults
+  it, a synthetic block could mislead the scan in a way that fails open.
+
+So O14's first gap moves from *blocked* to *a public path exists and needs an
+empirical test*, which is a smaller and much more tractable problem than "the API
+does not permit this".
