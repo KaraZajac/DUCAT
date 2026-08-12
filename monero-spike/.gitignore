@@ -1,0 +1,10 @@
+monero-cli.tar.bz2
+monero-x86_64-linux-gnu-*/
+wallets/
+w_user/
+w_arbiter/
+w_recovery/
+clitest/
+make_info.txt
+*.out
+*.log
