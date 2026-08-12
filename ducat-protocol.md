@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.8 — Consolidated**
+**Draft 0.9 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Status: Pre-alpha design document. Nothing here is final. Several sections rest on primitives that are not production-grade; §14 is the real agenda.
 
@@ -25,6 +25,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.9** — **Phase 0 completed; all three experiments have numbers.** 0a measured on veilid-core 0.5.7: `token` mode 190 B, `inline` mode 877–1669 B, **non-monotonic in hop count** with within-hop variance exceeding between-hop differences, because size tracks which peer was selected rather than how many hops were requested. This invalidated 0.5's claim that QR level H clears inline mode at every hop count — across two runs it passed in one and failed in the other, minutes apart. Tags now ship tokens; `token` mode reframed as the *privacy-preserving* choice since its size is constant regardless of hop count. 0b measured: 135–204 KB/s at 32 KB payloads, latency-dominated, adequate for incremental sync and not for a full chain — which is what §17.1's restore height already assumes. O11 and O14 closed. The earlier claim that Veilid needs inbound port forwarding was wrong and is retracted.
 - **0.8** — **First empirical results (Phase 0).** 0c answered: Veilid #395 is open, milestoned to 0.13.0 against a current 0.5.7 — no near-term fix, and remote hail (§5.2) is gated on it (O19). **Corrected §15.10:** `token` mode does *not* mitigate hostile-route deanonymization, contrary to 0.5's claim — the exposure is in using the route, not in how the blob arrived. 0a dissolved rather than answered O11: `inline` blobs have no fixed size because the entry hop carries a third party's peer info, so §15.3.2 now mandates measure-and-degrade instead of a budget. 0b remains blocked on a host with inbound reachability. Harness and full results in `phase0/`.
 - **0.7** — **Renamed SPECIE → DUCAT.** The old name was semantically exact and practically hostile: one letter from "species," pronounced *SPEE-shee* by almost nobody, and search-polluted by both biology and finance. Wire constants changed with it — domain-separation prefix `DUCAT-v1` (§18.3), NFC AID `F0 44 43 41 54` (§18.7), QR magic `DCAT`, URI scheme `ducat:`. Also: §9.4 scoped — the safety floor binds the high-exposure tier (rides, lodging, tasks) and not commerce as a whole, which narrows O5 and removes the apparent tension with §1's reframe. Four remaining gaps closed. §4.1: key storage, and the P-256 suite iOS's Secure Enclave forces into the registry. §6.2: clock skew — monotonic for elapsed time, ±120 s tolerance for absolute, both directions failing closed, skew detected but never applied. §8.8: transaction fees, `fee_policy`, the WYSIWYS requirement to display total outlay, and minimum-fee-tier refusal closing §17.8's cure-window abuse. §10.1: the market descriptor — self-certifying `market_id`, threshold-signed rotation chained from genesis. O8 narrowed from unspecified to mechanism-specified-accountability-open.
 - **0.6** — **Added Part V (§18): wire format and conformance.** Canonical CBOR rules, integer-piconero money (correcting the float hazard in `amount_xmr`, now `amount_pxmr`), signature domain separation and the verify-received-bytes rule, the normative state transition table, reject codes, downgrade-resistant version negotiation, transport bindings (NFC AID, BLE UUIDs, QR envelopes with per-EC-level capacities), strict rejection of unknown fields, required test-vector coverage, and four conformance levels. §11's many-clients claim now points at something payable. Phase 1 ships the codec and identifiers rather than retrofitting them. O17–O18 added.
@@ -366,7 +367,20 @@ Carrying Monero's peer-to-peer traffic over Veilid would change what a spy node 
 
 **Submission.** The payer sends the signed transaction blob over a **fresh Veilid private route** to a relay, which admits it to the Monero network; Dandelion++ proceeds normally from there. Both layers stay intact. A hostile relay's powers are thin by construction: it can refuse to relay — detectable, since the payer is already watching for the transaction to appear, and under `fast/1` non-appearance is exactly what the cure window (§17.5) handles — or it can record that *someone* submitted this transaction. It never holds a view key and cannot attribute the submission to a person.
 
-**Scanning.** The harder half, and Part IV already solved it without saying so. A float wallet has a restore height of *now* (§17.1), so "fetch every block since bond creation" is a bounded, affordable request rather than a years-long sync. Pulling full blocks over a Veilid route leaks no query pattern, discloses no view key, and exposes no address — the three things a light-wallet server would otherwise learn. **Clients MUST NOT disclose a view key to a remote node.** The restore-height property is what makes that prohibition practical rather than aspirational.
+**Scanning.** The harder half, and Part IV already solved it without saying so. A float wallet has a restore height of *now* (§17.1), so "fetch every block since bond creation" is a bounded, affordable request rather than a years-long sync.
+
+**Phase 0b measured this, and the answer is cautiously yes.** Round trips over a private route on veilid-core 0.5.7:
+
+| Payload | RTT | Throughput |
+|---|---|---|
+| 1 KB | 186–235 ms | 4.3–5.4 KB/s |
+| 4 KB | 217–325 ms | 12.3–18.4 KB/s |
+| 16 KB | 164–262 ms | 61.0–97.2 KB/s |
+| 32 KB | 157–237 ms | 134.7–203.7 KB/s |
+
+**Latency dominates; payload size is nearly free.** RTT barely moves from 1 KB to 32 KB, so throughput scales almost linearly with request size — which means a scanning client should request the largest blocks it can per round trip and pipeline aggressively, not stream small reads. At 32 KB requests a day of Monero blocks moves in minutes, which is exactly the workload restore-height-of-now creates. A *full-chain* sync at these rates would take hours to days, which is precisely why §17.1's restore height is load-bearing rather than a convenience.
+
+Caveats, since these are two samples: measured against a self-route rather than a real `relay/1` peer, sequential and unpipelined, and `app_call` caps payloads near 32 KB so bulk transfer means many calls rather than a stream. O14 is answered well enough to proceed and not well enough to design against. Pulling full blocks over a Veilid route leaks no query pattern, discloses no view key, and exposes no address — the three things a light-wallet server would otherwise learn. **Clients MUST NOT disclose a view key to a remote node.** The restore-height property is what makes that prohibition practical rather than aspirational.
 
 #### 8.7.2 `relay/1`
 
@@ -498,9 +512,9 @@ Multiple independent client implementations are a design goal: a protocol with m
 Grounded in what current primitives actually support (veilid-core 0.5.x is stable; Monero multisig is not):
 
 **Phase 0 — Measure before building (cheap, blocking)**
-0a. **Done, and it dissolved the question** (O11). `token` mode is 190 B; `inline` has no fixed size because the entry hop carries a third party's peer info. §15.3.2 now specifies a runtime check rather than a budget. A live inline sample is still wanted but gates nothing.
+0a. **Done** (O11). Measured on veilid-core 0.5.7: `token` mode 190 B, `inline` mode 877–1669 B and non-monotonic in hop count. §15.3.1 carries the numbers; §15.3.2 specifies measure-and-degrade instead of a budget.
 0c. **Done, and it found the worst result available** (O19). Veilid #395 is open against milestone 0.13.0 while the current release is 0.5.7. Remote hail (§5.2) should not ship until that lands. Proximity profiles proceed with the residual documented in §15.10.
-0b. **Still open — blocked, not skipped** (O14). Measure Veilid throughput at **block-sync volumes** (§8.7.1). §8.7 assumes a wallet can pull full blocks over a private route using application-level messaging; Veilid is not a stream transport, and if bulk transfer is impractical, `relay/1`'s scanning half needs a different shape. The harness in `phase0/` performs this measurement but requires a host with inbound reachability on UDP+TCP 5150 — route allocation needs a determined network class, which a NAT'd machine with only bootstrap peers never obtains. This gates Phase 1, not Phase 3.
+0b. **Done** (O14). 135–204 KB/s at 32 KB payloads over a private route, latency-dominated (§8.7.1). Adequate for incremental sync from a restore height of now; inadequate for a full chain, which the design already avoids. Re-measure against a real `relay/1` peer before Phase 3.
 
 **Phase 1 — Buildable now on stable primitives**
 1. `chat/1` — Veilid E2EE session. Proves L0–L1. **Ships with the Part V codec, not after it**: canonical CBOR, domain-separated signatures, strict rejection, and the first test vectors. Retrofitting canonicality onto a working implementation means re-signing every transcript format already in the field — cheap now, expensive at Phase 3. Assign the §18.7 identifiers (NFC AID, BLE UUIDs) here too, since the AID cannot change without a simultaneous update to every iOS client.
@@ -539,10 +553,10 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O8.** **Arbiter-set governance is load-bearing** (§17.8), and now *half* specified. §10.1 gives the mechanism — a self-certifying `market_id`, threshold-signed rotation chained from genesis, forks detectable. What remains open is **accountability**: the chain proves continuity, not honesty, and a market captured at genesis or rotating itself into capture produces valid signatures throughout. Fast settlement is worthless in such a market because a slash would never pay out, and a participant's only recourse is to leave.
 - **O9.** Hot-wallet exposure (§17.2): a small float on a phone is malware- and seizure-reachable. Mitigated by keeping it small; not eliminated.
 - **O10.** Price-oracle integrity and the `capacity_remaining` side channel (§17.7, §17.8) — both leak or can be manipulated in ways that are mitigated, not closed.
-- **O11.** **Route-blob size — resolved as a question, by dissolving it.** Phase 0a confirmed `token` mode at exactly 190 B (fails NTAG213, passes everything else) and established from veilid-core's route assembly that `inline` size is *inherently variable*: the entry hop embeds peer info belonging to a node the client does not choose. There is no constant to measure. §15.3.2 now requires a runtime check and degradation to `token` mode instead, which is the more robust answer. A live inline sample is still wanted for sizing intuition but no longer gates anything.
+- **O11.** **Route-blob size — measured, and it resists being a constant.** Phase 0a: `token` mode is exactly 190 B; `inline` mode ranged 877–1669 B for a `TapPresent` across two runs, non-monotonic in hop count, with within-hop-count spread exceeding between-hop-count differences. Size tracks *which peer was selected*, not how many hops were asked for. §15.3.1 therefore specifies measure-and-degrade rather than a budget. Closed as a question; the variance itself is the finding.
 - **O12.** Persona loss and recovery (§16.8): losing a device loses the persona and every rendezvous keyed to it. Signed key-rotation announcements to existing contacts are an unsolved sub-problem of L1.
 - **O13.** **Relay anonymity set** (§8.7.3): routing settlement through DUCAT relays makes "is a DUCAT user" observable to anyone watching the relay set, and a seed market's set is a few hundred people. Mitigated by preferring Tor and by growth; not solved. Note this compounds O7 — the smallest markets have both the thinnest liquidity and the thinnest cover.
-- **O14.** **Veilid at sync volumes** (§8.7.1, Phase 0b): scanning means pulling block data over application-level messaging, not a stream transport. Whether that is practical on a phone remains **entirely unmeasured** — Phase 0b was blocked because route allocation requires a determined network class this test host never reached. The harness exists and runs; it needs a host with inbound reachability. `relay/1`'s scanning half still depends on the answer.
+- **O14.** **Veilid at sync volumes — measured, provisionally adequate.** Phase 0b: 135–204 KB/s at 32 KB payloads, latency-dominated so throughput scales with request size (§8.7.1). A day of blocks moves in minutes; a full chain would not, which is why §17.1's restore-height-of-now is load-bearing. Two samples, self-route, unpipelined — enough to proceed, not enough to design against. Re-measure against a real `relay/1` peer before Phase 3.
 - **O19.** **Remote hail is gated on an upstream fix** (§15.10, Phase 0c). Veilid #395 lets any advert publisher learn the address of everyone who hails them, and it is open against a milestone eight minor versions out. Proximity profiles degrade gracefully — the counterparty is co-present anyway, and the residual harm is cross-visit linkability. Remote hail does not degrade: it is the one flow where the leak is disqualifying, and §5.2 should not ship until 0.13.0 lands or a client-side mitigation is found.
 - **O15.** **Cancellation fees erode the permissionless lane.** §7.3 makes no-show fees enforceable only against collateral. The pressure this creates — providers preferring bonded counterparties precisely because cancellation *costs* them something — pushes the network toward the collateralized lane and quietly hollows out the slow permissionless one A4 depends on (§17.6). Whether the unbonded lane survives contact with real no-show rates is an empirical question no amount of spec work answers.
 - **O16.** **iOS cannot present over NFC, permanently.** Apple's HCE entitlement is conditioned on EEA establishment, organization enrollment, and financial-regulatory standing (§15.3.2) — structurally incompatible with A4, and not a hurdle an open protocol clears. The best-UX medium is therefore available to roughly half the supply side, and QR carries the rest. This is outside DUCAT's control and will not improve through protocol design; it is stated so no one plans around a tap that cannot exist.
@@ -635,15 +649,29 @@ Everything else is fixed-size and small — 158 bytes total, of which the signat
 | `session_ref` | 32 | present only when `intent = stop`; ties this tap to its `start` |
 | `sig` | 64 | Ed25519 over all the above |
 
-Which gives two sizes to design against: **`token` mode = 190 bytes exactly**, and **`inline` mode ≈ 360–960 bytes — but variable in a way no client can predict.**
+**Measured against veilid-core 0.5.7 (Phase 0a), across two runs.** An earlier draft estimated inline mode at 360–960 bytes. That was optimistic by roughly a factor of two — and, more importantly, the estimate was the wrong *shape*:
 
-**Inline size is not a constant, and Phase 0 established why.** A Veilid route blob is nested onion encryption, one layer per hop. Intermediate hops compress to a bare 32-byte node id under route optimization, but **the entry hop always embeds full peer info** — dial addresses and signatures belonging to a peer the allocating client neither chooses nor controls. Hop count is capped at 5 and defaults to 4, so the layer count is bounded; the entry hop's advertised dial info is not.
+| Reach mode | Route blob | `TapPresent` |
+|---|---|---|
+| `token` | 32 B | **190 B**, deterministic |
+| `inline`, 1 hop | 719–728 B | **877–886 B** |
+| `inline`, 2 hops | 1097–1292 B | **1255–1450 B** |
+| `inline`, 3 hops | 963–1401 B | **1121–1559 B** |
+| `inline`, 4 hops | 1049–1511 B | **1207–1669 B** |
+
+**Size is not monotonic in hop count, and the spread within one hop count exceeds the gap between hop counts.** One run produced a 3-hop blob (963 B) *smaller* than its own 2-hop blob (1097 B). The cause is structural: a route blob is nested onion encryption, one layer per hop, and while intermediate hops compress to a bare 32-byte node id under route optimization, **the entry hop embeds full peer info** — dial addresses and signatures belonging to a peer the allocating client neither chooses nor controls. Blob size is therefore dominated by *which peer happened to be selected*, not by how many hops were requested.
+
+Three consequences, and the first invalidates a claim this document previously made:
+
+1. **Whether a given QR error-correction level suffices is luck, not arithmetic.** §15.3.2 once asserted that even level H clears inline mode at every hop count. Across two runs, level H (1273 B) passed at every hop count in one and failed from 2 hops up in the other — same code, same host, minutes apart. No table can answer "will this fit"; only the blob in hand can.
+2. **NFC's single-contact budget reliably fits only a 1-hop route.** At ~1 KB per 300 ms of contact, every measured multi-hop route overflowed it in both runs.
+3. **There is a privacy/reach trade, and it should be stated rather than discovered.** More hops means better route anonymity and (on average) a bigger blob, and media narrow as blobs grow. A merchant on a printed tag is pushed toward one hop — the weakest anonymity — or toward `token` mode. **`token` mode is the privacy-preserving choice, not merely the compact one**, because its 190 bytes are constant regardless of hop count, decoupling anonymity from the medium entirely.
 
 Clients therefore MUST NOT assume a fixed inline budget. The normative behavior is a runtime check:
 
 > **Measure the blob you actually received, and degrade to `token` mode when it overflows the medium in hand.**
 
-This is more robust than a measured constant would have been, since it stays correct as Veilid's peer-info encoding changes underneath.
+This stays correct as Veilid's peer-info encoding and hop defaults change underneath, which a measured constant would not.
 
 ### 15.3.2 The transport ladder
 
@@ -669,7 +697,7 @@ Clients try media in order and settle on the first both devices support. All fou
 
 **This promotes `presenter_role` from convenience to load-bearing.** §15.2 observes that the presenter is almost always the payee — the driver, the merchant, the busker. That is the supply side, and on iOS it cannot present over NFC. Two escapes, both already in the protocol: invert the roles so the payer presents (works when the payer is on Android), or fall to QR (works always). An iPhone merchant serving iPhone customers is a QR deployment, and the protocol should say so rather than let an implementer discover it at a market stall.
 
-**Static tag sizing.** A bare `TapStatic` (§15.9) fits the commodity NTAG213's 144 bytes. A full `TapPresent` does not: `token` mode needs an NTAG215 (504 B) and `inline` mode an NTAG216 (888 B), marginally. Specify the chip, or ship tokens.
+**Static tag sizing, measured.** A bare `TapStatic` (§15.9) fits the commodity NTAG213's 144 bytes. A `TapPresent` does not: `token` mode (190 B) needs an NTAG215, and `inline` mode cleared the NTAG216's 888 bytes only at one hop, by 2–11 bytes across runs. That is not a margin, it is a coin flip. **Tags ship tokens.**
 
 **Securing the BLE channel.** When the session runs over BLE rather than Veilid — offline, or while a route is still building — the channel needs its own encryption, and the spec previously left this unstated. DUCAT adopts **`Noise_XX_25519_ChaChaPoly_SHA256`**: mutual authentication and forward secrecy, with the presenter's `session_pk` from the `TapPresent` as the expected static key, which binds the BLE session to the bootstrap that started it. This is the same construction bitchat uses for live BLE sessions, and reusing a Noise pattern with existing cross-platform implementations is the point. Note the negative lesson from the same source: bitchat's *offline* courier envelopes use the `X` pattern and knowingly give up forward secrecy — acceptable for undelivered chat, not for a payment authorization sitting in someone's outbox. DUCAT's store-and-forward work (§8.4) MUST NOT inherit that trade.
 
@@ -1187,7 +1215,7 @@ Behavior is portable; identifiers are not. These must be pinned before any cross
 - **`inline` mode:** raw binary in QR byte mode behind a 4-byte magic `DCAT`. No text encoding, no base64 — the payload is bytes and byte mode carries them at full density.
 - **`token` mode:** a `ducat:<base64url>` URI. The ~33% expansion is irrelevant at ~190 bytes, and a URI is shareable, linkable, and openable by a handler registration.
 
-Error correction is a capacity trade worth stating precisely, since §15.3.2's 2,953-byte figure is the level-L best case: v40 byte mode carries **2,953 / 2,331 / 1,663 / 1,273** bytes at EC levels L / M / Q / H. Screen-displayed codes SHOULD use level M; printed codes exposed to wear and poor light SHOULD use Q. Even level H clears `inline` mode's ~960-byte worst case, so the conclusion in §15.3.2 holds at every error-correction level.
+Error correction is a capacity trade worth stating precisely, since §15.3.2's 2,953-byte figure is the level-L best case: v40 byte mode carries **2,953 / 2,331 / 1,663 / 1,273** bytes at EC levels L / M / Q / H. Screen-displayed codes SHOULD use level M; printed codes exposed to wear and poor light SHOULD use Q. Measured inline routes reached 1,669 B against level Q's 1,663 B (§15.3.1), so a printed code SHOULD carry a `token` rather than gamble error correction against a blob size nobody controls.
 
 ## 18.8 Strictness: Postel's Law Is Wrong Here
 

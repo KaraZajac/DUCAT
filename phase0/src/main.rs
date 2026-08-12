@@ -175,6 +175,15 @@ async fn phase_0b(api: &VeilidAPI, mut calls: mpsc::UnboundedReceiver<(Operation
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "warn".into()),
+        )
+        .with_target(true)
+        .compact()
+        .init();
+
     println!("DUCAT Phase 0 harness — veilid-core {}", veilid_version_string());
 
     let dir = std::env::temp_dir().join(format!("ducat-phase0-{}", std::process::id()));
