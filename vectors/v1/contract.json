@@ -1,0 +1,599 @@
+{
+  "cases": [
+    {
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "kind": "escrow.ceremony",
+      "name": "ceremony_two_rounds_converge",
+      "rounds_required": 2,
+      "steps": [
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 0,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 0
+        },
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 1,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 0
+        },
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 2,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 0
+        },
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 0,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 1
+        },
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 1,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 1
+        },
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 2,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 1
+        }
+      ],
+      "why": "a 2-of-3 ceremony closes in two rounds, each participant contributing once per round"
+    },
+    {
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "kind": "escrow.ceremony",
+      "name": "ceremony_out_of_order_round_refused",
+      "rounds_required": 2,
+      "steps": [
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 0,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 0
+        },
+        {
+          "expect": {
+            "ok": false,
+            "reject_code": 11,
+            "reject_name": "StateViolation"
+          },
+          "from_index": 1,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 1
+        }
+      ],
+      "why": "§2.5: RetoSwap — this exact structure in production — was drained of ~$2.7M by a forged, out-of-order message overwriting settled state. Round 1 arriving while round 0 is open has that shape whatever the payload says."
+    },
+    {
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "kind": "escrow.ceremony",
+      "name": "ceremony_duplicate_contribution_refused",
+      "rounds_required": 2,
+      "steps": [
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 0,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 0
+        },
+        {
+          "expect": {
+            "ok": false,
+            "reject_code": 3,
+            "reject_name": "Replay"
+          },
+          "from_index": 0,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 0
+        }
+      ],
+      "why": "a second contribution from one participant in one round would revise state the ceremony has already settled"
+    },
+    {
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "kind": "escrow.ceremony",
+      "name": "ceremony_rejects_contributions_after_completion",
+      "rounds_required": 2,
+      "steps": [
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 0,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 0
+        },
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 1,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 0
+        },
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 2,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 0
+        },
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 0,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 1
+        },
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 1,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 1
+        },
+        {
+          "expect": {
+            "ok": true
+          },
+          "from_index": 2,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 1
+        },
+        {
+          "expect": {
+            "ok": false,
+            "reject_code": 11,
+            "reject_name": "StateViolation"
+          },
+          "from_index": 0,
+          "info_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "round": 2
+        }
+      ],
+      "why": "a finished ceremony has nothing left to contribute to"
+    },
+    {
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "expect": {
+        "agreed_address": "53multisigaddress",
+        "ok": true
+      },
+      "kind": "escrow.ready",
+      "name": "ready_all_three_agree",
+      "reports": [
+        {
+          "arbiter": "arbiter-key-1",
+          "from_index": 0,
+          "ms_address": "53multisigaddress",
+          "threshold": 2,
+          "total": 3
+        },
+        {
+          "arbiter": "arbiter-key-1",
+          "from_index": 1,
+          "ms_address": "53multisigaddress",
+          "threshold": 2,
+          "total": 3
+        },
+        {
+          "arbiter": "arbiter-key-1",
+          "from_index": 2,
+          "ms_address": "53multisigaddress",
+          "threshold": 2,
+          "total": 3
+        }
+      ],
+      "trusted_arbiters": [
+        "arbiter-key-1"
+      ],
+      "why": "every participant must report what it formed, and the reports must match"
+    },
+    {
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "expect": {
+        "ok": false,
+        "reject_code": 4,
+        "reject_name": "CommitMismatch"
+      },
+      "kind": "escrow.ready",
+      "name": "ready_divergent_address_refused",
+      "reports": [
+        {
+          "arbiter": "arbiter-key-1",
+          "from_index": 0,
+          "ms_address": "53multisigaddress",
+          "threshold": 2,
+          "total": 3
+        },
+        {
+          "arbiter": "arbiter-key-1",
+          "from_index": 1,
+          "ms_address": "53multisigaddress",
+          "threshold": 2,
+          "total": 3
+        },
+        {
+          "arbiter": "arbiter-key-1",
+          "from_index": 2,
+          "ms_address": "53someotheraddress",
+          "threshold": 2,
+          "total": 3
+        }
+      ],
+      "trusted_arbiters": [
+        "arbiter-key-1"
+      ],
+      "why": "three ceremonies can each succeed and form two different groups — the funds then land in a wallet the payer holds no share of"
+    },
+    {
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "expect": {
+        "ok": false,
+        "reject_code": 13,
+        "reject_name": "UntrustedArbiterSet"
+      },
+      "kind": "escrow.ready",
+      "name": "ready_untrusted_arbiter_refused",
+      "reports": [
+        {
+          "arbiter": "attacker-key",
+          "from_index": 0,
+          "ms_address": "53multisigaddress",
+          "threshold": 2,
+          "total": 3
+        },
+        {
+          "arbiter": "attacker-key",
+          "from_index": 1,
+          "ms_address": "53multisigaddress",
+          "threshold": 2,
+          "total": 3
+        },
+        {
+          "arbiter": "attacker-key",
+          "from_index": 2,
+          "ms_address": "53multisigaddress",
+          "threshold": 2,
+          "total": 3
+        }
+      ],
+      "trusted_arbiters": [
+        "arbiter-key-1"
+      ],
+      "why": "§2.5's other half: the arbiter comes from the market descriptor, never from a message — the forged message in the real exploit was well-formed"
+    },
+    {
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "expect": {
+        "ok": false,
+        "reject_code": 16,
+        "reject_name": "PolicyRefused"
+      },
+      "kind": "escrow.ready",
+      "name": "ready_silent_participant_refused",
+      "reports": [
+        {
+          "arbiter": "arbiter-key-1",
+          "from_index": 0,
+          "ms_address": "53multisigaddress",
+          "threshold": 2,
+          "total": 3
+        },
+        {
+          "arbiter": "arbiter-key-1",
+          "from_index": 1,
+          "ms_address": "53multisigaddress",
+          "threshold": 2,
+          "total": 3
+        }
+      ],
+      "trusted_arbiters": [
+        "arbiter-key-1"
+      ],
+      "why": "a participant that reported nothing has agreed to nothing"
+    },
+    {
+      "allowed_destinations": [
+        "seller-payout",
+        "buyer-refund"
+      ],
+      "amount_pxmr": 800000000,
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "escrowed_pxmr": 800000000,
+      "expect": {
+        "ok": true
+      },
+      "kind": "escrow.release",
+      "name": "release_to_a_party_is_allowed",
+      "to": "seller-payout",
+      "why": "the ordinary close of an escrow"
+    },
+    {
+      "allowed_destinations": [
+        "seller-payout",
+        "buyer-refund"
+      ],
+      "amount_pxmr": 400000000,
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "escrowed_pxmr": 800000000,
+      "expect": {
+        "ok": true
+      },
+      "kind": "escrow.release",
+      "name": "release_partial_is_allowed",
+      "to": "buyer-refund",
+      "why": "a ruling can award less than the whole"
+    },
+    {
+      "allowed_destinations": [
+        "seller-payout",
+        "buyer-refund"
+      ],
+      "amount_pxmr": 800000000,
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "escrowed_pxmr": 800000000,
+      "expect": {
+        "ok": false,
+        "reject_code": 16,
+        "reject_name": "PolicyRefused"
+      },
+      "kind": "escrow.release",
+      "name": "release_to_a_stranger_refused",
+      "to": "attacker-addr",
+      "why": "the check a rushed implementation drops, because the happy path never exercises it: both parties co-signing a release to the seller looks identical whether or not the destination was ever constrained"
+    },
+    {
+      "allowed_destinations": [
+        "seller-payout",
+        "buyer-refund"
+      ],
+      "amount_pxmr": 900000000,
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "escrowed_pxmr": 800000000,
+      "expect": {
+        "ok": false,
+        "reject_code": 5,
+        "reject_name": "PriceMismatch"
+      },
+      "kind": "escrow.release",
+      "name": "release_over_the_balance_refused",
+      "to": "seller-payout",
+      "why": "an escrow cannot pay out more than it holds"
+    },
+    {
+      "allowed_destinations": [
+        "seller-payout",
+        "buyer-refund"
+      ],
+      "amount_pxmr": 0,
+      "escrow_id_hex": "e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "escrowed_pxmr": 800000000,
+      "expect": {
+        "ok": false,
+        "reject_code": 5,
+        "reject_name": "PriceMismatch"
+      },
+      "kind": "escrow.release",
+      "name": "release_of_zero_refused",
+      "to": "seller-payout",
+      "why": "a release of zero moves nothing and closes nothing"
+    },
+    {
+      "arbiter_set_id_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "bond_amount_pxmr": 100000000000,
+      "capacity_bucket": 50000000000,
+      "expect": {
+        "ok": true
+      },
+      "fare_pxmr": 20000000000,
+      "issued": 1800000000,
+      "kind": "bond.check",
+      "max_age_s": 300,
+      "name": "bond_fresh_and_sufficient",
+      "now": 1800000030,
+      "trusted_arbiter_sets": [
+        "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+      ],
+      "why": "the ordinary case"
+    },
+    {
+      "arbiter_set_id_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "bond_amount_pxmr": 100000000000,
+      "capacity_bucket": 50000000000,
+      "expect": {
+        "ok": false,
+        "reject_code": 2,
+        "reject_name": "Expired"
+      },
+      "fare_pxmr": 1000,
+      "issued": 1800000000,
+      "kind": "bond.check",
+      "max_age_s": 300,
+      "name": "bond_stale_refused",
+      "now": 1800000400,
+      "trusted_arbiter_sets": [
+        "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+      ],
+      "why": "a bond proof is a claim about a balance that moves, so an old one says nothing"
+    },
+    {
+      "arbiter_set_id_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "bond_amount_pxmr": 100000000000,
+      "capacity_bucket": 50000000000,
+      "expect": {
+        "ok": false,
+        "reject_code": 2,
+        "reject_name": "Expired"
+      },
+      "fare_pxmr": 1000,
+      "issued": 1800010000,
+      "kind": "bond.check",
+      "max_age_s": 300,
+      "name": "bond_from_the_future_refused",
+      "now": 1800000000,
+      "trusted_arbiter_sets": [
+        "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+      ],
+      "why": "a proof dated ahead of now is not fresh, it is wrong — skew is tolerated in one direction only"
+    },
+    {
+      "arbiter_set_id_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "bond_amount_pxmr": 100000000000,
+      "capacity_bucket": 49999999999,
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "fare_pxmr": 1000,
+      "issued": 1800000000,
+      "kind": "bond.check",
+      "max_age_s": 300,
+      "name": "bond_exact_balance_is_not_a_bucket",
+      "now": 1800000000,
+      "trusted_arbiter_sets": [
+        "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+      ],
+      "why": "§17.8: an arbitrary integer here defeats bucketing entirely — a rider could publish their balance exactly and call it a ladder value"
+    },
+    {
+      "arbiter_set_id_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "bond_amount_pxmr": 50000000000,
+      "capacity_bucket": 100000000000,
+      "expect": {
+        "ok": false,
+        "reject_code": 12,
+        "reject_name": "InsufficientCapacity"
+      },
+      "fare_pxmr": 1000,
+      "issued": 1800000000,
+      "kind": "bond.check",
+      "max_age_s": 300,
+      "name": "bond_capacity_above_the_bond_refused",
+      "now": 1800000000,
+      "trusted_arbiter_sets": [
+        "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+      ],
+      "why": "capacity is what remains of the bond, so a capacity above it is incoherent — and it is the direction a liar benefits from"
+    },
+    {
+      "arbiter_set_id_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "bond_amount_pxmr": 100000000000,
+      "capacity_bucket": 50000000000,
+      "expect": {
+        "ok": false,
+        "reject_code": 13,
+        "reject_name": "UntrustedArbiterSet"
+      },
+      "fare_pxmr": 1000,
+      "issued": 1800000000,
+      "kind": "bond.check",
+      "max_age_s": 300,
+      "name": "bond_untrusted_arbiter_set_refused",
+      "now": 1800000000,
+      "trusted_arbiter_sets": [
+        "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+      ],
+      "why": "§2.5: the arbiter set is named by the market, not by the party who benefits from a friendly one"
+    },
+    {
+      "agreed_pxmr": 21000000000,
+      "claim_pxmr": 21000000000,
+      "cure_blocks": 20,
+      "elapsed_blocks": 19,
+      "expect": {
+        "ok": false,
+        "reject_code": 16,
+        "reject_name": "PolicyRefused"
+      },
+      "kind": "slash.check",
+      "name": "slash_cure_window_not_expired",
+      "reason": 1,
+      "why": "non-confirmation is usually a fee or propagation problem, not fraud — the window exists so an honest payer can re-broadcast"
+    },
+    {
+      "agreed_pxmr": 21000000000,
+      "claim_pxmr": 21000000000,
+      "cure_blocks": 20,
+      "elapsed_blocks": 20,
+      "expect": {
+        "ok": true
+      },
+      "kind": "slash.check",
+      "name": "slash_cure_window_expired",
+      "reason": 1,
+      "why": "the boundary is inclusive"
+    },
+    {
+      "agreed_pxmr": 21000000000,
+      "claim_pxmr": 21000000000,
+      "cure_blocks": 20,
+      "elapsed_blocks": 0,
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "kind": "slash.check",
+      "name": "slash_double_spend_needs_its_evidence",
+      "reason": 2,
+      "why": "this reason skips the waiting period, which makes it the one worth forging — so it is the one that must carry the conflicting key image"
+    },
+    {
+      "agreed_pxmr": 21000000000,
+      "claim_pxmr": 21000000000,
+      "cure_blocks": 20,
+      "elapsed_blocks": 0,
+      "expect": {
+        "ok": true
+      },
+      "key_image_hex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "kind": "slash.check",
+      "name": "slash_double_spend_with_evidence_skips_the_cure_window",
+      "reason": 2,
+      "why": "a conflicting key image is on-chain and self-authenticating"
+    },
+    {
+      "agreed_pxmr": 21000000000,
+      "claim_pxmr": 21000000001,
+      "cure_blocks": 20,
+      "elapsed_blocks": 30,
+      "expect": {
+        "ok": false,
+        "reject_code": 5,
+        "reject_name": "PriceMismatch"
+      },
+      "kind": "slash.check",
+      "name": "slash_claim_over_the_agreed_amount_refused",
+      "reason": 1,
+      "why": "a claim exceeding what was agreed is a claimant helping themselves"
+    }
+  ],
+  "category": "contract"
+}

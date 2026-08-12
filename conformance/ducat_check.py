@@ -788,7 +788,146 @@ OBJECT_TYPE_CODES = {
 }
 
 
+# --- §8.2 / §17.4 / §17.5 contract logic ----------------------------------
+#
+# Reimplemented from the spec, not from core/. These are the decisions money
+# depends on, and two clients that encode identically can still decide
+# differently — which is the whole reason O21 exists.
+
+BUYER, SELLER, ARBITER = 0, 1, 2
+
+
+def run_escrow_ceremony(cases, r):
+    for c in cases:
+        eid = c["escrow_id_hex"]
+        rounds_required = c["rounds_required"]
+        rnd, seen, done = 0, [False] * 3, False
+        ok = True
+        for step in c["steps"]:
+            want_ok = step["expect"].get("ok", True)
+            err = None
+            if done:
+                err = ("StateViolation", "ceremony finished")
+            elif step["round"] != rnd:
+                err = ("StateViolation", "out-of-order round")
+            elif seen[step["from_index"]]:
+                err = ("Replay", "duplicate contribution")
+            if err is None:
+                seen[step["from_index"]] = True
+                if all(seen):
+                    rnd += 1
+                    seen = [False] * 3
+                    if rnd >= rounds_required:
+                        done = True
+            if want_ok != (err is None):
+                r.bad("contract", c["name"], c.get("why", ""),
+                      f"round {step['round']} from {step['from_index']}: "
+                      f"we {'accepted' if err is None else 'refused'}, vector says otherwise")
+                ok = False
+                break
+            if err and CODES[err[0]] != step["expect"]["reject_code"]:
+                r.bad("contract", c["name"], c.get("why", ""),
+                      f"we said {err[0]}, vector says {step['expect']['reject_name']}")
+                ok = False
+                break
+        if ok:
+            r.ok()
+
+
+def run_escrow_ready(cases, r):
+    for c in cases:
+        def go(c=c):
+            reports = c["reports"]
+            if len(reports) != 3:
+                raise Reject("PolicyRefused", "every participant must report")
+            seen = set()
+            for rep in reports:
+                if rep["from_index"] in seen:
+                    raise Reject("Replay", "two reports from one participant")
+                seen.add(rep["from_index"])
+                if rep["threshold"] != 2 or rep["total"] != 3:
+                    raise Reject("PolicyRefused", "escrow must be 2-of-3")
+                if rep["ms_address"] != reports[0]["ms_address"]:
+                    raise Reject("CommitMismatch", "different wallets formed")
+                if rep["arbiter"] != reports[0]["arbiter"]:
+                    raise Reject("UntrustedArbiterSet", "arbiter disagreement")
+            if reports[0]["arbiter"] not in c["trusted_arbiters"]:
+                raise Reject("UntrustedArbiterSet", "arbiter not in the market's set")
+            return reports[0]["ms_address"]
+        got = expect_reject(r, "contract", c, go)
+        want = c["expect"].get("agreed_address")
+        if got is not None and want is not None and got != want:
+            r.passed -= 1
+            r.bad("contract", c["name"], c.get("why", ""),
+                  f"agreed on {got}, vector says {want}")
+
+
+def run_escrow_release(cases, r):
+    for c in cases:
+        def go(c=c):
+            if c["amount_pxmr"] == 0:
+                raise Reject("PriceMismatch", "a release of zero closes nothing")
+            if c["amount_pxmr"] > c["escrowed_pxmr"]:
+                raise Reject("PriceMismatch", "release exceeds what is held")
+            if c["to"] not in c["allowed_destinations"]:
+                raise Reject("PolicyRefused", "destination is not a party to this escrow")
+            return True
+        expect_reject(r, "contract", c, go)
+
+
+# §17.8's ladder. Reproduced here rather than imported, so a divergence shows up.
+CAPACITY_BUCKETS = [0, 1_000_000_000, 2_000_000_000, 5_000_000_000,
+                    10_000_000_000, 20_000_000_000, 50_000_000_000,
+                    100_000_000_000, 200_000_000_000, 500_000_000_000,
+                    1_000_000_000_000, 2_000_000_000_000, 5_000_000_000_000,
+                    10_000_000_000_000, 20_000_000_000_000, 50_000_000_000_000,
+                    100_000_000_000_000]
+
+
+def run_bond_check(cases, r):
+    for c in cases:
+        def go(c=c):
+            if c["issued"] > c["now"] + 120:
+                raise Reject("Expired", "dated in the future")
+            if c["now"] - c["issued"] > c["max_age_s"]:
+                raise Reject("Expired", "stale")
+            if c["arbiter_set_id_hex"] not in c["trusted_arbiter_sets"]:
+                raise Reject("UntrustedArbiterSet", "unknown arbiter set")
+            if c["capacity_bucket"] not in CAPACITY_BUCKETS:
+                raise Reject("Malformed", "not a ladder value")
+            if c["capacity_bucket"] < c["fare_pxmr"]:
+                raise Reject("InsufficientCapacity", "bucket does not cover the fare")
+            if c["capacity_bucket"] > c["bond_amount_pxmr"]:
+                raise Reject("InsufficientCapacity", "capacity above the bond")
+            if c["bond_amount_pxmr"] < c["fare_pxmr"]:
+                raise Reject("InsufficientCapacity", "bond smaller than the fare")
+            return True
+        expect_reject(r, "contract", c, go)
+
+
+def run_slash_check(cases, r):
+    for c in cases:
+        def go(c=c):
+            if c["claim_pxmr"] > c["agreed_pxmr"]:
+                raise Reject("PriceMismatch", "claim exceeds what was agreed")
+            if c["reason"] == 1:
+                if c["elapsed_blocks"] < c["cure_blocks"]:
+                    raise Reject("PolicyRefused", "cure window has not expired")
+                if "key_image_hex" in c:
+                    raise Reject("Malformed", "a cure-window claim carries no key image")
+            else:
+                if "key_image_hex" not in c:
+                    raise Reject("Malformed", "a double-spend claim must carry the key image")
+            return True
+        expect_reject(r, "contract", c, go)
+
+
 BY_KIND = {
+    "escrow.ceremony": run_escrow_ceremony,
+    "escrow.ready": run_escrow_ready,
+    "escrow.release": run_escrow_release,
+    "bond.check": run_bond_check,
+    "slash.check": run_slash_check,
     "object.roundtrip": run_object,
     "codec.decode": run_codec,
     "signing.verify": run_signing_verify,

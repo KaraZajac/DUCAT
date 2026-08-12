@@ -42,7 +42,7 @@ fn manifest_is_self_consistent() {
     let m = load("manifest");
     let total = m["total_cases"].as_u64().unwrap() as usize;
     let mut sum = 0;
-    for name in ["codec", "signing", "state", "negotiate", "commit", "transcript", "backup", "object"] {
+    for name in ["codec", "signing", "state", "negotiate", "commit", "transcript", "backup", "object", "contract"] {
         let n = cases(name).len();
         assert_eq!(
             m["counts"][name].as_u64().unwrap() as usize,
@@ -434,7 +434,8 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "codec.decode", "signing.verify", "signing.pubkey", "negotiate.select",
         "commit.purposes", "commit.substitution", "state.sequence",
         "transcript.replay", "transcript.substitution", "backup.import",
-        "object.roundtrip",
+        "object.roundtrip", "escrow.ceremony", "escrow.ready", "escrow.release",
+        "bond.check", "slash.check",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -496,5 +497,176 @@ fn object_vectors_pass() {
             "{}: re-encoding is not stable",
             name
         );
+    }
+}
+
+
+/// §8.2 / §17.4 / §17.5 contract logic, replayed through `core` itself.
+///
+/// The published cases are executed twice: here against the library, and in
+/// `conformance/ducat_check.py` against an implementation written from the spec.
+/// Encoding agreement was never the hard part — two clients can serialise
+/// identically and still *decide* differently, and these are the decisions money
+/// depends on.
+#[test]
+fn contract_vectors_pass() {
+    use ducat_core::escrow::*;
+
+    for c in cases("contract") {
+        let name = c["name"].as_str().unwrap();
+        match c["kind"].as_str().unwrap() {
+            "escrow.ceremony" => {
+                let eid: [u8; 32] = unhex(c["escrow_id_hex"].as_str().unwrap()).try_into().unwrap();
+                let mut t = RoundTracker::new(eid, c["rounds_required"].as_u64().unwrap());
+                for step in c["steps"].as_array().unwrap() {
+                    let s = EscrowSetup {
+                        version: 1,
+                        suite: 1,
+                        escrow_id: eid,
+                        round: step["round"].as_u64().unwrap(),
+                        info: unhex(step["info_hex"].as_str().unwrap_or("ab")),
+                        from_index: step["from_index"].as_u64().unwrap() as u8,
+                        timestamp: 1_800_000_000,
+                    };
+                    let got = t.accept(&s);
+                    let want_ok = step["expect"]["ok"].as_bool().unwrap_or(true);
+                    assert_eq!(got.is_ok(), want_ok, "{name}: round {}", s.round);
+                    if let Err(e) = got {
+                        assert_eq!(
+                            e.code as u8,
+                            step["expect"]["reject_code"].as_u64().unwrap() as u8,
+                            "{name}: wrong reject code"
+                        );
+                        break;
+                    }
+                }
+            }
+            "escrow.ready" => {
+                let eid: [u8; 32] = unhex(c["escrow_id_hex"].as_str().unwrap()).try_into().unwrap();
+                let reports: Vec<EscrowReady> = c["reports"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|r| EscrowReady {
+                        version: 1,
+                        suite: 1,
+                        escrow_id: eid,
+                        ms_address: r["ms_address"].as_str().unwrap().as_bytes().to_vec(),
+                        threshold: r["threshold"].as_u64().unwrap() as u8,
+                        total: r["total"].as_u64().unwrap() as u8,
+                        arbiter: r["arbiter"].as_str().unwrap().as_bytes().to_vec(),
+                        from_index: r["from_index"].as_u64().unwrap() as u8,
+                        timestamp: 1_800_000_000,
+                    })
+                    .collect();
+                let trusted: Vec<Vec<u8>> = c["trusted_arbiters"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|a| a.as_str().unwrap().as_bytes().to_vec())
+                    .collect();
+                let got = check_escrow_ready(&reports, &eid, &trusted);
+                check_outcome(name, &c["expect"], got.map(|a| a.to_vec()).map_err(|e| e.code as u8));
+            }
+            "escrow.release" => {
+                let eid: [u8; 32] = unhex(c["escrow_id_hex"].as_str().unwrap()).try_into().unwrap();
+                let ready = EscrowReady {
+                    version: 1, suite: 1, escrow_id: eid,
+                    ms_address: b"53multisigaddress".to_vec(),
+                    threshold: 2, total: 3,
+                    arbiter: b"arbiter-key-1".to_vec(),
+                    from_index: 0, timestamp: 1_800_000_000,
+                };
+                let rb = ready.to_value().encode();
+                let rel = Release {
+                    version: 1, suite: 1, escrow_id: eid,
+                    ready_link: commit(Purpose::ChainLink, &rb),
+                    to: c["to"].as_str().unwrap().as_bytes().to_vec(),
+                    amount_pxmr: c["amount_pxmr"].as_u64().unwrap(),
+                    timestamp: 1_800_000_000,
+                };
+                let dests: Vec<Vec<u8>> = c["allowed_destinations"]
+                    .as_array().unwrap().iter()
+                    .map(|d| d.as_str().unwrap().as_bytes().to_vec()).collect();
+                let got = check_release(&rel, &ready, &rb,
+                    c["escrowed_pxmr"].as_u64().unwrap(), &dests);
+                check_outcome(name, &c["expect"], got.map(|_| vec![]).map_err(|e| e.code as u8));
+            }
+            "bond.check" => {
+                let bond = BondProof {
+                    version: 1, suite: 1,
+                    bond_ms_address: b"53multisigbondaddress".to_vec(),
+                    bond_amount_pxmr: c["bond_amount_pxmr"].as_u64().unwrap(),
+                    arbiter_set_id: unhex(c["arbiter_set_id_hex"].as_str().unwrap())
+                        .try_into().unwrap(),
+                    capacity_bucket: c["capacity_bucket"].as_u64().unwrap(),
+                    issued: c["issued"].as_u64().unwrap(),
+                };
+                let trusted: Vec<[u8; 32]> = c["trusted_arbiter_sets"].as_array().unwrap()
+                    .iter().map(|t| unhex(t.as_str().unwrap()).try_into().unwrap()).collect();
+                let got = check_bond_proof(
+                    &bond,
+                    c["fare_pxmr"].as_u64().unwrap(),
+                    c["now"].as_u64().unwrap(),
+                    c["max_age_s"].as_u64().unwrap(),
+                    &trusted,
+                );
+                check_outcome(name, &c["expect"], got.map(|_| vec![]).map_err(|e| e.code as u8));
+            }
+            "slash.check" => {
+                let accept_bytes = b"accept".to_vec();
+                let receipt_bytes = b"receipt".to_vec();
+                let agreed = c["agreed_pxmr"].as_u64().unwrap();
+                let accept = Accept {
+                    version: 1, suite: 1, nonce: [0x22; 16], offer_hash: [0x11; 32],
+                    amount_final: agreed, dest: None,
+                    reader_session_pk: vec![0x33; 32], timestamp: 1_800_000_000,
+                    chosen_version: 1, chosen_suite: 1, refund_to: None,
+                };
+                let receipt = Receipt {
+                    version: 1, suite: 1,
+                    accept_hash: commit(Purpose::ChainLink, &accept_bytes),
+                    prev: commit(Purpose::ChainLink, &accept_bytes),
+                    amount_final: agreed, timestamp: 1_800_000_005, unilateral: false,
+                };
+                let claim = SlashClaim {
+                    version: 1, suite: 1,
+                    accept_link: commit(Purpose::ChainLink, &accept_bytes),
+                    receipt_link: commit(Purpose::ChainLink, &receipt_bytes),
+                    txid: [0x77; 32],
+                    reason: if c["reason"].as_u64().unwrap() == 1 {
+                        SlashReason::CureWindowExpired
+                    } else {
+                        SlashReason::ConflictingKeyImage
+                    },
+                    key_image: c["key_image_hex"].as_str()
+                        .map(|k| unhex(k).try_into().unwrap()),
+                    claim_pxmr: c["claim_pxmr"].as_u64().unwrap(),
+                    timestamp: 1_800_000_100,
+                };
+                let got = check_slash_claim(
+                    &claim, &accept, &accept_bytes, &receipt, &receipt_bytes,
+                    c["elapsed_blocks"].as_u64().unwrap(),
+                    c["cure_blocks"].as_u64().unwrap(),
+                );
+                check_outcome(name, &c["expect"], got.map(|_| vec![]).map_err(|e| e.code as u8));
+            }
+            other => panic!("{name}: unhandled contract kind {other}"),
+        }
+    }
+}
+
+fn check_outcome(name: &str, expect: &J, got: Result<Vec<u8>, u8>) {
+    let want_ok = expect["ok"].as_bool().unwrap_or(true);
+    match got {
+        Ok(_) => assert!(want_ok, "{name}: accepted where the vector expects a refusal"),
+        Err(code) => {
+            assert!(!want_ok, "{name}: refused where the vector expects success");
+            assert_eq!(
+                code,
+                expect["reject_code"].as_u64().unwrap() as u8,
+                "{name}: wrong reject code"
+            );
+        }
     }
 }

@@ -3,101 +3,193 @@
   "$id": "https://ducatproject.org/vectors/v1/schema.json",
   "title": "DUCAT conformance vector files",
   "description": "Every file in this directory except manifest.json and this schema. A case's `kind` selects which fields are required; nothing else discriminates, and nothing is optional-by-convention. This schema is hand-written rather than emitted by the generator, deliberately: a schema produced by the same program that produces the vectors would agree with that program's mistakes, which is O21's objection in a smaller frame.",
-
   "type": "object",
-  "required": ["category", "cases"],
+  "required": [
+    "category",
+    "cases"
+  ],
   "additionalProperties": false,
   "properties": {
     "category": {
       "type": "string",
-      "enum": ["codec", "signing", "negotiate", "commit", "state", "transcript", "backup", "object"]
+      "enum": [
+        "codec",
+        "signing",
+        "negotiate",
+        "commit",
+        "state",
+        "transcript",
+        "backup",
+        "object",
+        "contract"
+      ]
     },
     "cases": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/case" }
+      "items": {
+        "$ref": "#/$defs/case"
+      }
     }
   },
-
   "$defs": {
     "hex": {
       "type": "string",
       "pattern": "^([0-9a-f][0-9a-f])*$",
       "description": "Lower-case hex, even length. Never prefixed."
     },
-    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
     "rejectCode": {
       "type": "integer",
       "minimum": 1,
       "maximum": 16,
-      "description": "A §18.5 wire code. Two clients must agree that an input is rejected and with which code; they need not agree on which internal rule said so."
+      "description": "A \u00a718.5 wire code. Two clients must agree that an input is rejected and with which code; they need not agree on which internal rule said so."
     },
-
     "outcome": {
       "type": "object",
       "description": "Either a success or a typed refusal, never both. `ok: false` requires the code, because 'it failed somehow' is not an interoperable assertion.",
       "properties": {
-        "ok": { "type": "boolean" },
-        "reject_code": { "$ref": "#/$defs/rejectCode" },
-        "reject_name": { "type": "string" }
+        "ok": {
+          "type": "boolean"
+        },
+        "reject_code": {
+          "$ref": "#/$defs/rejectCode"
+        },
+        "reject_name": {
+          "type": "string"
+        }
       },
-      "if": { "properties": { "ok": { "const": false } }, "required": ["ok"] },
-      "then": { "required": ["ok", "reject_code", "reject_name"] }
+      "if": {
+        "properties": {
+          "ok": {
+            "const": false
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "then": {
+        "required": [
+          "ok",
+          "reject_code",
+          "reject_name"
+        ]
+      }
     },
-
     "event": {
       "type": "object",
-      "description": "One encoding, self-describing. Earlier releases spelled the same concept five ways ('Fund', 'Accept { from: Payer }', 'Elapsed(60s)', {\"Elapsed\": 60}, {\"Accept\": {\"from\": \"Payer\"}}), which a second implementer had to reverse-engineer (§18.11).",
-      "required": ["name"],
+      "description": "One encoding, self-describing. Earlier releases spelled the same concept five ways ('Fund', 'Accept { from: Payer }', 'Elapsed(60s)', {\"Elapsed\": 60}, {\"Accept\": {\"from\": \"Payer\"}}), which a second implementer had to reverse-engineer (\u00a718.11).",
+      "required": [
+        "name"
+      ],
       "additionalProperties": false,
       "properties": {
         "name": {
           "type": "string",
           "enum": [
-            "TapPresent", "FullOffer", "Accept", "Fund", "Cancel", "Abort",
-            "Proof", "TxId", "Receipt", "Dispute",
-            "EscrowSetup", "EscrowReady", "Release",
-            "MeterStart", "MeterStop", "MeterExpired", "DeliveryWindowExpired",
-            "ConfirmationsReached", "CureWindowExpired",
-            "ContactOffer", "ContactAccept", "Elapsed"
+            "TapPresent",
+            "FullOffer",
+            "Accept",
+            "Fund",
+            "Cancel",
+            "Abort",
+            "Proof",
+            "TxId",
+            "Receipt",
+            "Dispute",
+            "EscrowSetup",
+            "EscrowReady",
+            "Release",
+            "MeterStart",
+            "MeterStop",
+            "MeterExpired",
+            "DeliveryWindowExpired",
+            "ConfirmationsReached",
+            "CureWindowExpired",
+            "ContactOffer",
+            "ContactAccept",
+            "Elapsed"
           ]
         },
         "from": {
           "type": "string",
-          "enum": ["Payer", "Payee"],
-          "description": "The originator. §18.4.1(1): direction constrains who may *emit* a message, never who evaluates it, so this travels with the event and is established by signature before the machine sees it. A client that instead guards on its own role refuses every ACCEPT it receives."
+          "enum": [
+            "Payer",
+            "Payee"
+          ],
+          "description": "The originator. \u00a718.4.1(1): direction constrains who may *emit* a message, never who evaluates it, so this travels with the event and is established by signature before the machine sees it. A client that instead guards on its own role refuses every ACCEPT it receives."
         },
         "elapsed_s": {
           "type": "integer",
           "minimum": 0,
-          "description": "Seconds elapsed in the current state, for `Elapsed` only. Monotonic (§6.2). Deadline boundaries are inclusive: elapsed == deadline fires."
+          "description": "Seconds elapsed in the current state, for `Elapsed` only. Monotonic (\u00a76.2). Deadline boundaries are inclusive: elapsed == deadline fires."
         }
       },
       "allOf": [
         {
-          "if": { "properties": { "name": { "const": "Elapsed" } }, "required": ["name"] },
-          "then": { "required": ["elapsed_s"] },
-          "else": { "not": { "required": ["elapsed_s"] } }
+          "if": {
+            "properties": {
+              "name": {
+                "const": "Elapsed"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "then": {
+            "required": [
+              "elapsed_s"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "elapsed_s"
+              ]
+            }
+          }
         }
       ]
     },
-
     "case": {
       "type": "object",
-      "required": ["kind", "name", "why"],
-      "$comment": "`expect` is required for every kind except state.sequence, whose assertions live per-step — see the per-kind branches below.",
+      "required": [
+        "kind",
+        "name",
+        "why"
+      ],
+      "$comment": "`expect` is required for every kind except state.sequence, whose assertions live per-step \u2014 see the per-kind branches below.",
       "properties": {
         "kind": {
           "type": "string",
           "enum": [
-            "codec.decode", "signing.verify", "signing.pubkey",
-            "negotiate.select", "commit.purposes", "commit.substitution",
-            "state.sequence", "transcript.replay", "transcript.substitution",
-            "backup.import", "object.roundtrip"
+            "codec.decode",
+            "signing.verify",
+            "signing.pubkey",
+            "negotiate.select",
+            "commit.purposes",
+            "commit.substitution",
+            "state.sequence",
+            "transcript.replay",
+            "transcript.substitution",
+            "backup.import",
+            "object.roundtrip",
+            "escrow.ceremony",
+            "escrow.ready",
+            "escrow.release",
+            "bond.check",
+            "slash.check"
           ]
         },
-        "name": { "type": "string", "minLength": 1 },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
         "why": {
           "type": "string",
           "minLength": 1,
@@ -105,189 +197,305 @@
         },
         "hint": {
           "type": "string",
-          "description": "Non-normative. Names the rule that fired. MUST NOT be parsed or matched — two clients may reject the same input for differently-named internal reasons and still interoperate."
+          "description": "Non-normative. Names the rule that fired. MUST NOT be parsed or matched \u2014 two clients may reject the same input for differently-named internal reasons and still interoperate."
         },
-        "expect": { "type": "object" }
+        "expect": {
+          "type": "object"
+        }
       },
-
       "allOf": [
         {
-          "if": { "properties": { "kind": { "const": "codec.decode" } }, "required": ["kind"] },
-          "then": {
-            "required": ["expect", "input_hex"],
+          "if": {
             "properties": {
-              "input_hex": { "$ref": "#/$defs/hex" },
+              "kind": {
+                "const": "codec.decode"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "expect",
+              "input_hex"
+            ],
+            "properties": {
+              "input_hex": {
+                "$ref": "#/$defs/hex"
+              },
               "expect": {
-                "allOf": [{ "$ref": "#/$defs/outcome" }],
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/outcome"
+                  }
+                ],
                 "properties": {
                   "reencodes_to_hex": {
                     "$ref": "#/$defs/hex",
-                    "description": "Decode then re-encode must reproduce these exact bytes. §18.1 admits one encoding per value, so for a canonical input this equals input_hex — but the assertion is round-trip stability, not equality, and stating it separately keeps that visible."
+                    "description": "Decode then re-encode must reproduce these exact bytes. \u00a718.1 admits one encoding per value, so for a canonical input this equals input_hex \u2014 but the assertion is round-trip stability, not equality, and stating it separately keeps that visible."
                   }
                 },
-                "if": { "properties": { "ok": { "const": true } }, "required": ["ok"] },
-                "then": { "required": ["reencodes_to_hex"] }
+                "if": {
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "reencodes_to_hex"
+                  ]
+                }
               }
             }
           }
         },
-
         {
-          "if": { "properties": { "kind": { "const": "signing.verify" } }, "required": ["kind"] },
-          "then": {
-            "required": ["expect", "suite", "object_hex", "object_type", "verify_as", "pubkey_hex", "sig_hex"],
+          "if": {
             "properties": {
-              "suite": { "type": "integer", "enum": [1, 2] },
-              "object_hex": { "$ref": "#/$defs/hex" },
+              "kind": {
+                "const": "signing.verify"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "expect",
+              "suite",
+              "object_hex",
+              "object_type",
+              "verify_as",
+              "pubkey_hex",
+              "sig_hex"
+            ],
+            "properties": {
+              "suite": {
+                "type": "integer",
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "object_hex": {
+                "$ref": "#/$defs/hex"
+              },
               "object_type": {
                 "type": "string",
                 "description": "What the object actually is."
               },
               "verify_as": {
                 "type": "string",
-                "description": "The object_type label to bind into sig_input. Where this differs from object_type the case is a cross-context replay attempt (§18.3) and MUST fail — that difference is the whole test, so the two fields are separate on purpose."
+                "description": "The object_type label to bind into sig_input. Where this differs from object_type the case is a cross-context replay attempt (\u00a718.3) and MUST fail \u2014 that difference is the whole test, so the two fields are separate on purpose."
               },
-              "pubkey_hex": { "$ref": "#/$defs/hex" },
-              "sig_hex": { "$ref": "#/$defs/hex" },
-              "expect": { "$ref": "#/$defs/outcome" }
+              "pubkey_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "sig_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "expect": {
+                "$ref": "#/$defs/outcome"
+              }
             }
           }
         },
-
         {
-          "if": { "properties": { "kind": { "const": "signing.pubkey" } }, "required": ["kind"] },
-          "then": {
-            "description": "Public-key parsing alone: no object, no signature. §18.3(2) admits exactly one encoding — compressed, 33 bytes, tag checked explicitly — because a second encoding of one key is a second canonical object and a second transcript hash.",
-            "required": ["expect", "suite", "pubkey_hex"],
+          "if": {
             "properties": {
-              "suite": { "type": "integer", "enum": [1, 2] },
-              "pubkey_hex": { "$ref": "#/$defs/hex" },
-              "expect": { "$ref": "#/$defs/outcome" }
+              "kind": {
+                "const": "signing.pubkey"
+              }
             },
-            "not": { "anyOf": [{ "required": ["object_hex"] }, { "required": ["sig_hex"] }] }
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "description": "Public-key parsing alone: no object, no signature. \u00a718.3(2) admits exactly one encoding \u2014 compressed, 33 bytes, tag checked explicitly \u2014 because a second encoding of one key is a second canonical object and a second transcript hash.",
+            "required": [
+              "expect",
+              "suite",
+              "pubkey_hex"
+            ],
+            "properties": {
+              "suite": {
+                "type": "integer",
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "pubkey_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "expect": {
+                "$ref": "#/$defs/outcome"
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "object_hex"
+                  ]
+                },
+                {
+                  "required": [
+                    "sig_hex"
+                  ]
+                }
+              ]
+            }
           }
         },
-
         {
-          "if": { "properties": { "kind": { "const": "negotiate.select" } }, "required": ["kind"] },
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "negotiate.select"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
           "then": {
-            "required": ["expect", "offered", "local_versions", "payer_preference"],
+            "required": [
+              "expect",
+              "offered",
+              "local_versions",
+              "payer_preference"
+            ],
             "properties": {
               "offered": {
                 "type": "object",
-                "required": ["versions", "suites"],
+                "required": [
+                  "versions",
+                  "suites"
+                ],
                 "additionalProperties": false,
                 "properties": {
-                  "versions": { "type": "array", "items": { "type": "integer" }, "minItems": 1 },
-                  "suites": { "type": "array", "items": { "type": "integer" }, "minItems": 1 }
+                  "versions": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "minItems": 1
+                  },
+                  "suites": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "minItems": 1
+                  }
                 }
               },
-              "local_versions": { "type": "array", "items": { "type": "integer" }, "minItems": 1 },
+              "local_versions": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1
+              },
               "payer_preference": {
                 "type": "array",
-                "items": { "type": "integer" },
-                "description": "Ordered, most preferred first. §18.6: suite identifiers encode no preference and are never compared numerically — suite 2 is P-256, which exists only because iOS's Secure Enclave holds no Ed25519 key, so highest-wins would select the weaker option on every dual-capable pair."
+                "items": {
+                  "type": "integer"
+                },
+                "description": "Ordered, most preferred first. \u00a718.6: suite identifiers encode no preference and are never compared numerically \u2014 suite 2 is P-256, which exists only because iOS's Secure Enclave holds no Ed25519 key, so highest-wins would select the weaker option on every dual-capable pair."
               },
               "expect": {
-                "allOf": [{ "$ref": "#/$defs/outcome" }],
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/outcome"
+                  }
+                ],
                 "properties": {
-                  "version": { "type": "integer" },
-                  "suite": { "type": "integer" }
+                  "version": {
+                    "type": "integer"
+                  },
+                  "suite": {
+                    "type": "integer"
+                  }
                 },
-                "if": { "properties": { "ok": { "const": true } }, "required": ["ok"] },
-                "then": { "required": ["version", "suite"] }
+                "if": {
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "version",
+                    "suite"
+                  ]
+                }
               }
             }
           }
         },
-
         {
-          "if": { "properties": { "kind": { "const": "commit.purposes" } }, "required": ["kind"] },
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "commit.purposes"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
           "then": {
             "description": "One canonical byte string, four purposes, four distinct digests. commit = SHA-256(\"DUCAT-v1\" 0x00 purpose 0x00 canonical_bytes).",
-            "required": ["expect", "input_hex"],
+            "required": [
+              "expect",
+              "input_hex"
+            ],
             "properties": {
-              "input_hex": { "$ref": "#/$defs/hex" },
+              "input_hex": {
+                "$ref": "#/$defs/hex"
+              },
               "expect": {
                 "type": "object",
-                "required": ["digests_by_purpose"],
+                "required": [
+                  "digests_by_purpose"
+                ],
                 "properties": {
                   "digests_by_purpose": {
                     "type": "object",
-                    "description": "Keys are the wire labels from §18.3. These are the exact bytes hashed — not display names, and not an implementation's internal enum spellings, which is a confusion the prose has caused before.",
-                    "required": ["offer_commit", "receipt", "chain", "market_genesis"],
+                    "description": "Keys are the wire labels from \u00a718.3. These are the exact bytes hashed \u2014 not display names, and not an implementation's internal enum spellings, which is a confusion the prose has caused before.",
+                    "required": [
+                      "offer_commit",
+                      "receipt",
+                      "chain",
+                      "market_genesis"
+                    ],
                     "additionalProperties": false,
                     "properties": {
-                      "offer_commit": { "$ref": "#/$defs/digest" },
-                      "receipt": { "$ref": "#/$defs/digest" },
-                      "chain": { "$ref": "#/$defs/digest" },
-                      "market_genesis": { "$ref": "#/$defs/digest" }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-
-        {
-          "if": { "properties": { "kind": { "const": "commit.substitution" } }, "required": ["kind"] },
-          "then": {
-            "description": "§18.6's downgrade defence. offer_commit covers the whole FullOffer, so stripping a suite changes the digest. Clients MUST check the commitment BEFORE negotiating — negotiating first means selecting from an attacker-chosen menu and only then noticing.",
-            "required": ["expect", "genuine_offer_hex", "stripped_offer_hex", "offer_commit_hex"],
-            "properties": {
-              "genuine_offer_hex": { "$ref": "#/$defs/hex" },
-              "stripped_offer_hex": { "$ref": "#/$defs/hex" },
-              "offer_commit_hex": { "$ref": "#/$defs/digest" },
-              "expect": {
-                "type": "object",
-                "required": ["genuine", "stripped"],
-                "additionalProperties": false,
-                "properties": {
-                  "genuine": { "$ref": "#/$defs/outcome" },
-                  "stripped": { "$ref": "#/$defs/outcome" }
-                }
-              }
-            }
-          }
-        },
-
-        {
-          "if": { "properties": { "kind": { "const": "state.sequence" } }, "required": ["kind"] },
-          "then": {
-            "required": ["from", "mode", "role", "steps"],
-            "not": { "required": ["expect"] },
-            "properties": {
-              "from": { "type": "string", "$comment": "starting state, §18.4" },
-              "mode": { "type": "string", "enum": ["Direct", "Fast", "Escrow"] },
-              "role": {
-                "type": "string",
-                "enum": ["Payer", "Payee"],
-                "description": "The evaluating client. Never used to decide whether a message is legal — see event.from."
-              },
-              "deadline_s": {
-                "type": ["integer", "null"],
-                "description": "The §6.2 deadline for `from` under `mode`; null where the state is unbounded. An assertion about the pair, not about any step. A deadline whose effect is not a state change still belongs here — CLOSED's 120 s contact window changes no state and its omission left clients holding session keys open forever (§18.11)."
-              },
-              "steps": {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "object",
-                  "required": ["event", "expect"],
-                  "additionalProperties": false,
-                  "properties": {
-                    "event": { "$ref": "#/$defs/event" },
-                    "expect": {
-                      "allOf": [{ "$ref": "#/$defs/outcome" }],
-                      "properties": {
-                        "next": { "type": "string" },
-                        "effect": { "type": "string" }
+                      "offer_commit": {
+                        "$ref": "#/$defs/digest"
                       },
-                      "if": { "not": { "properties": { "ok": { "const": false } }, "required": ["ok"] } },
-                      "then": {
-                        "required": ["next", "effect"],
-                        "$comment": "A successful transition asserts both the state and the effect. Asserting only the state passes while a client emits the wrong evidence — and §6.2 has two unilateral receipts that assert opposite things, so getting the effect wrong means a payer recording a debt it does not owe."
+                      "receipt": {
+                        "$ref": "#/$defs/digest"
+                      },
+                      "chain": {
+                        "$ref": "#/$defs/digest"
+                      },
+                      "market_genesis": {
+                        "$ref": "#/$defs/digest"
                       }
                     }
                   }
@@ -296,134 +504,775 @@
             }
           }
         },
-
         {
-          "if": { "properties": { "kind": { "const": "transcript.replay" } }, "required": ["kind"] },
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "commit.substitution"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "description": "\u00a718.6's downgrade defence. offer_commit covers the whole FullOffer, so stripping a suite changes the digest. Clients MUST check the commitment BEFORE negotiating \u2014 negotiating first means selecting from an attacker-chosen menu and only then noticing.",
+            "required": [
+              "expect",
+              "genuine_offer_hex",
+              "stripped_offer_hex",
+              "offer_commit_hex"
+            ],
+            "properties": {
+              "genuine_offer_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "stripped_offer_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "offer_commit_hex": {
+                "$ref": "#/$defs/digest"
+              },
+              "expect": {
+                "type": "object",
+                "required": [
+                  "genuine",
+                  "stripped"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "genuine": {
+                    "$ref": "#/$defs/outcome"
+                  },
+                  "stripped": {
+                    "$ref": "#/$defs/outcome"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "state.sequence"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "from",
+              "mode",
+              "role",
+              "steps"
+            ],
+            "not": {
+              "required": [
+                "expect"
+              ]
+            },
+            "properties": {
+              "from": {
+                "type": "string",
+                "$comment": "starting state, \u00a718.4"
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "Direct",
+                  "Fast",
+                  "Escrow"
+                ]
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "Payer",
+                  "Payee"
+                ],
+                "description": "The evaluating client. Never used to decide whether a message is legal \u2014 see event.from."
+              },
+              "deadline_s": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "The \u00a76.2 deadline for `from` under `mode`; null where the state is unbounded. An assertion about the pair, not about any step. A deadline whose effect is not a state change still belongs here \u2014 CLOSED's 120 s contact window changes no state and its omission left clients holding session keys open forever (\u00a718.11)."
+              },
+              "steps": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "event",
+                    "expect"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "event": {
+                      "$ref": "#/$defs/event"
+                    },
+                    "expect": {
+                      "allOf": [
+                        {
+                          "$ref": "#/$defs/outcome"
+                        }
+                      ],
+                      "properties": {
+                        "next": {
+                          "type": "string"
+                        },
+                        "effect": {
+                          "type": "string"
+                        }
+                      },
+                      "if": {
+                        "not": {
+                          "properties": {
+                            "ok": {
+                              "const": false
+                            }
+                          },
+                          "required": [
+                            "ok"
+                          ]
+                        }
+                      },
+                      "then": {
+                        "required": [
+                          "next",
+                          "effect"
+                        ],
+                        "$comment": "A successful transition asserts both the state and the effect. Asserting only the state passes while a client emits the wrong evidence \u2014 and \u00a76.2 has two unilateral receipts that assert opposite things, so getting the effect wrong means a payer recording a debt it does not owe."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "transcript.replay"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
           "then": {
             "description": "A complete four-object transaction, replayed through the verifier. All four objects are required: a replay missing one is not a transcript, and the chain is only meaningful end to end.",
-            "required": ["expect", "chain", "profile", "tap_present_hex",
-                         "full_offer_hex", "accept_hex", "receipt_hex"],
+            "required": [
+              "expect",
+              "chain",
+              "profile",
+              "tap_present_hex",
+              "full_offer_hex",
+              "accept_hex",
+              "receipt_hex"
+            ],
             "properties": {
-              "profile": { "type": "string" },
-              "tap_present_hex": { "$ref": "#/$defs/hex" },
-              "full_offer_hex": { "$ref": "#/$defs/hex" },
-              "accept_hex": { "$ref": "#/$defs/hex" },
-              "receipt_hex": { "$ref": "#/$defs/hex" },
+              "profile": {
+                "type": "string"
+              },
+              "tap_present_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "full_offer_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "accept_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "receipt_hex": {
+                "$ref": "#/$defs/hex"
+              },
               "chain": {
                 "type": "array",
                 "minItems": 1,
-                "items": { "type": "string" },
+                "items": {
+                  "type": "string"
+                },
                 "description": "Non-normative prose naming each link the replay must check."
               }
             }
           }
         },
-
         {
-          "if": { "properties": { "kind": { "const": "transcript.substitution" } }, "required": ["kind"] },
-          "then": {
-            "description": "§15.3's tap-to-offer link: a presenter commits to an offer in the tap, then delivers a different one. Filed among transcripts historically and separated at 0.46 — it exercises one commitment rather than replaying a chain, and carries neither a tap object nor a receipt.",
-            "required": ["expect", "tap_offer_commit_hex", "delivered_offer_hex"],
+          "if": {
             "properties": {
-              "tap_offer_commit_hex": { "$ref": "#/$defs/digest" },
-              "delivered_offer_hex": { "$ref": "#/$defs/hex" },
-              "expect": { "$ref": "#/$defs/outcome" }
+              "kind": {
+                "const": "transcript.substitution"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "description": "\u00a715.3's tap-to-offer link: a presenter commits to an offer in the tap, then delivers a different one. Filed among transcripts historically and separated at 0.46 \u2014 it exercises one commitment rather than replaying a chain, and carries neither a tap object nor a receipt.",
+            "required": [
+              "expect",
+              "tap_offer_commit_hex",
+              "delivered_offer_hex"
+            ],
+            "properties": {
+              "tap_offer_commit_hex": {
+                "$ref": "#/$defs/digest"
+              },
+              "delivered_offer_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "expect": {
+                "$ref": "#/$defs/outcome"
+              }
             }
           }
         },
-
         {
-          "if": { "properties": { "kind": { "const": "object.roundtrip" } }, "required": ["kind"] },
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "object.roundtrip"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
           "then": {
             "description": "Decode one wire object and, on success, re-encode it to the same bytes. The narrowest thing two implementations must agree on before anything downstream can work, since every commitment in the protocol hashes canonical objects.",
-            "required": ["expect", "object_type", "object_hex"],
+            "required": [
+              "expect",
+              "object_type",
+              "object_hex"
+            ],
             "properties": {
               "object_type": {
                 "type": "string",
                 "description": "The registered type this decodes as. A case whose object declares a different type MUST fail: every object's `type` field is a registered code and decoders check it, which five objects did not do until 0.47."
               },
-              "object_hex": { "$ref": "#/$defs/hex" },
+              "object_hex": {
+                "$ref": "#/$defs/hex"
+              },
               "expect": {
-                "allOf": [{ "$ref": "#/$defs/outcome" }],
-                "properties": { "reencodes_to_hex": { "$ref": "#/$defs/hex" } },
-                "if": { "properties": { "ok": { "const": true } }, "required": ["ok"] },
-                "then": { "required": ["reencodes_to_hex"] }
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/outcome"
+                  }
+                ],
+                "properties": {
+                  "reencodes_to_hex": {
+                    "$ref": "#/$defs/hex"
+                  }
+                },
+                "if": {
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "reencodes_to_hex"
+                  ]
+                }
               }
             }
           }
         },
-
         {
-          "if": { "properties": { "kind": { "const": "backup.import" } }, "required": ["kind"] },
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "backup.import"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
           "then": {
-            "required": ["expect", "blob_hex", "passphrase_utf8"],
+            "required": [
+              "expect",
+              "blob_hex",
+              "passphrase_utf8"
+            ],
             "properties": {
               "blob_hex": {
                 "$ref": "#/$defs/hex",
                 "description": "The complete artifact: MAGIC(15) || salt(16) || nonce(24) || AEAD ciphertext."
               },
-              "passphrase_utf8": { "type": "string" },
-              "salt_hex": { "$ref": "#/$defs/hex" },
-              "nonce_hex": { "$ref": "#/$defs/hex" },
-              "aad_utf8": { "type": "string" },
-              "aead": { "type": "string", "enum": ["xchacha20poly1305"] },
+              "passphrase_utf8": {
+                "type": "string"
+              },
+              "salt_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "nonce_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "aad_utf8": {
+                "type": "string"
+              },
+              "aead": {
+                "type": "string",
+                "enum": [
+                  "xchacha20poly1305"
+                ]
+              },
               "kdf": {
                 "type": "object",
-                "description": "Pinned by format version, never inherited from a library default. A changed constant derives a different key and turns every existing backup into a 'wrong passphrase' error for people typing the correct one — indistinguishable from user error (§4.3.2).",
-                "required": ["algorithm", "version", "memory_kib", "iterations", "lanes", "output_len"],
+                "description": "Pinned by format version, never inherited from a library default. A changed constant derives a different key and turns every existing backup into a 'wrong passphrase' error for people typing the correct one \u2014 indistinguishable from user error (\u00a74.3.2).",
+                "required": [
+                  "algorithm",
+                  "version",
+                  "memory_kib",
+                  "iterations",
+                  "lanes",
+                  "output_len"
+                ],
                 "additionalProperties": false,
                 "properties": {
-                  "algorithm": { "type": "string", "enum": ["argon2id"] },
-                  "version": { "type": "integer", "enum": [19] },
-                  "memory_kib": { "type": "integer", "minimum": 19456 },
-                  "iterations": { "type": "integer", "minimum": 1 },
-                  "lanes": { "type": "integer", "minimum": 1 },
-                  "output_len": { "type": "integer", "const": 32 }
+                  "algorithm": {
+                    "type": "string",
+                    "enum": [
+                      "argon2id"
+                    ]
+                  },
+                  "version": {
+                    "type": "integer",
+                    "enum": [
+                      19
+                    ]
+                  },
+                  "memory_kib": {
+                    "type": "integer",
+                    "minimum": 19456
+                  },
+                  "iterations": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "lanes": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "output_len": {
+                    "type": "integer",
+                    "const": 32
+                  }
                 }
               },
               "expect": {
-                "allOf": [{ "$ref": "#/$defs/outcome" }],
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/outcome"
+                  }
+                ],
                 "properties": {
                   "decoded": {
                     "type": "object",
                     "required": [
-                      "persona_suite", "persona_secret_hex", "monero_seed",
-                      "monero_restore_height", "rendezvous_hex",
-                      "attestation_records_hex", "mandates_hex",
-                      "verification", "created"
+                      "persona_suite",
+                      "persona_secret_hex",
+                      "monero_seed",
+                      "monero_restore_height",
+                      "rendezvous_hex",
+                      "attestation_records_hex",
+                      "mandates_hex",
+                      "verification",
+                      "created"
                     ],
                     "properties": {
-                      "persona_suite": { "type": "integer" },
-                      "persona_secret_hex": { "$ref": "#/$defs/hex" },
-                      "monero_seed": { "type": "string" },
+                      "persona_suite": {
+                        "type": "integer"
+                      },
+                      "persona_secret_hex": {
+                        "$ref": "#/$defs/hex"
+                      },
+                      "monero_seed": {
+                        "type": "string"
+                      },
                       "monero_restore_height": {
                         "type": "integer",
-                        "description": "Wrong in both directions, asymmetrically. Too low costs ~106 hours of rescan; too high is silent and total — a wallet restored above its own outputs reports a zero balance with no error anywhere (§4.3.1)."
+                        "description": "Wrong in both directions, asymmetrically. Too low costs ~106 hours of rescan; too high is silent and total \u2014 a wallet restored above its own outputs reports a zero balance with no error anywhere (\u00a74.3.1)."
                       },
-                      "rendezvous_hex": { "type": "array", "items": { "$ref": "#/$defs/hex" } },
-                      "attestation_records_hex": { "type": "array", "items": { "$ref": "#/$defs/hex" } },
-                      "mandates_hex": { "type": "array", "items": { "$ref": "#/$defs/hex" } },
+                      "rendezvous_hex": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/hex"
+                        }
+                      },
+                      "attestation_records_hex": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/hex"
+                        }
+                      },
+                      "mandates_hex": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/hex"
+                        }
+                      },
                       "verification": {
                         "type": "object",
                         "required": [
-                          "device_unlock_at", "app_secret_at",
-                          "app_secret_validity_s", "cumulative_at", "cumulative_window_s"
+                          "device_unlock_at",
+                          "app_secret_at",
+                          "app_secret_validity_s",
+                          "cumulative_at",
+                          "cumulative_window_s"
                         ],
                         "additionalProperties": false,
                         "properties": {
-                          "device_unlock_at": { "type": "integer" },
-                          "app_secret_at": { "type": "integer" },
-                          "app_secret_validity_s": { "type": "integer", "minimum": 1 },
-                          "cumulative_at": { "type": "integer" },
-                          "cumulative_window_s": { "type": "integer" }
+                          "device_unlock_at": {
+                            "type": "integer"
+                          },
+                          "app_secret_at": {
+                            "type": "integer"
+                          },
+                          "app_secret_validity_s": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "cumulative_at": {
+                            "type": "integer"
+                          },
+                          "cumulative_window_s": {
+                            "type": "integer"
+                          }
                         }
                       },
-                      "created": { "type": "integer" }
+                      "created": {
+                        "type": "integer"
+                      }
                     }
                   }
                 },
-                "if": { "properties": { "ok": { "const": true } }, "required": ["ok"] },
-                "then": { "required": ["decoded"] }
+                "if": {
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "decoded"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "escrow.ceremony"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "description": "Feed each step to the round tracker in order. \u00a72.5's exploit was a forged, out-of-order message overwriting settled state, so the ordering rule is the security property \u2014 not the payload.",
+            "required": [
+              "escrow_id_hex",
+              "rounds_required",
+              "steps"
+            ],
+            "properties": {
+              "escrow_id_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "rounds_required": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "steps": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "round",
+                    "from_index",
+                    "expect"
+                  ],
+                  "properties": {
+                    "round": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "from_index": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 2
+                    },
+                    "info_hex": {
+                      "$ref": "#/$defs/hex"
+                    },
+                    "expect": {
+                      "$ref": "#/$defs/outcome"
+                    }
+                  }
+                }
+              }
+            },
+            "not": {
+              "required": [
+                "expect"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "escrow.ready"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "description": "Every participant reports what it formed; they must agree. Three ceremonies can each succeed and produce two different groups.",
+            "required": [
+              "expect",
+              "escrow_id_hex",
+              "trusted_arbiters",
+              "reports"
+            ],
+            "properties": {
+              "escrow_id_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "trusted_arbiters": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "From the market descriptor (\u00a710.1). Supplied as input on purpose: \u00a72.5 installed an arbitrator that arrived in a message and was well-formed."
+              },
+              "reports": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "from_index",
+                    "ms_address",
+                    "threshold",
+                    "total",
+                    "arbiter"
+                  ],
+                  "properties": {
+                    "from_index": {
+                      "type": "integer"
+                    },
+                    "ms_address": {
+                      "type": "string"
+                    },
+                    "threshold": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "arbiter": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "expect": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/outcome"
+                  }
+                ],
+                "properties": {
+                  "agreed_address": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "escrow.release"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "description": "An escrow that pays any address on request is not an escrow. The happy path never exercises this check, which is why it gets dropped.",
+            "required": [
+              "expect",
+              "escrow_id_hex",
+              "escrowed_pxmr",
+              "allowed_destinations",
+              "to",
+              "amount_pxmr"
+            ],
+            "properties": {
+              "escrow_id_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "escrowed_pxmr": {
+                "type": "integer"
+              },
+              "allowed_destinations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "to": {
+                "type": "string"
+              },
+              "amount_pxmr": {
+                "type": "integer"
+              },
+              "expect": {
+                "$ref": "#/$defs/outcome"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "bond.check"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "description": "\u00a717.4's bond attestation, as a provider checks it before handing over goods unconfirmed.",
+            "required": [
+              "expect",
+              "capacity_bucket",
+              "bond_amount_pxmr",
+              "issued",
+              "arbiter_set_id_hex",
+              "fare_pxmr",
+              "now",
+              "max_age_s",
+              "trusted_arbiter_sets"
+            ],
+            "properties": {
+              "capacity_bucket": {
+                "type": "integer",
+                "description": "A ladder value from \u00a717.8, never an exact balance \u2014 an exact figure shown to every provider is a running meter on the rider's spending."
+              },
+              "bond_amount_pxmr": {
+                "type": "integer"
+              },
+              "issued": {
+                "type": "integer"
+              },
+              "arbiter_set_id_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "fare_pxmr": {
+                "type": "integer"
+              },
+              "now": {
+                "type": "integer"
+              },
+              "max_age_s": {
+                "type": "integer"
+              },
+              "trusted_arbiter_sets": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/hex"
+                }
+              },
+              "expect": {
+                "$ref": "#/$defs/outcome"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "slash.check"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "description": "\u00a717.5's slash claim. Non-confirmation is usually a fee problem, so the cure window is not optional politeness.",
+            "required": [
+              "expect",
+              "reason",
+              "elapsed_blocks",
+              "cure_blocks",
+              "claim_pxmr",
+              "agreed_pxmr"
+            ],
+            "properties": {
+              "reason": {
+                "type": "integer",
+                "enum": [
+                  1,
+                  2
+                ],
+                "description": "1 = cure window expired, 2 = conflicting key image. Reason 2 skips the waiting period, which is why it must carry evidence."
+              },
+              "key_image_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "elapsed_blocks": {
+                "type": "integer"
+              },
+              "cure_blocks": {
+                "type": "integer"
+              },
+              "claim_pxmr": {
+                "type": "integer"
+              },
+              "agreed_pxmr": {
+                "type": "integer"
+              },
+              "expect": {
+                "$ref": "#/$defs/outcome"
               }
             }
           }

@@ -900,6 +900,19 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
         }
         "backup" => ("backup", "backup.import"),
         "object" => ("object", "object.roundtrip"),
+        "contract" => {
+            if obj.contains_key("rounds_required") {
+                ("contract", "escrow.ceremony")
+            } else if obj.contains_key("reports") {
+                ("contract", "escrow.ready")
+            } else if obj.contains_key("allowed_destinations") {
+                ("contract", "escrow.release")
+            } else if obj.contains_key("bond_amount_pxmr") {
+                ("contract", "bond.check")
+            } else {
+                ("contract", "slash.check")
+            }
+        }
         other => panic!("no normalization rule for category {}", other),
     };
     obj.insert("kind".into(), json!(kind));
@@ -1068,11 +1081,217 @@ fn object_cases() -> Vec<J> {
     v
 }
 
+/// §8.2 and §17.4/§17.5 contract logic, made language-neutral.
+///
+/// `object.roundtrip` proved two implementations encode these the same. It says
+/// nothing about whether they *decide* the same, and the decisions are where the
+/// money is: an out-of-order ceremony message, an arbiter nobody vouched for, a
+/// release to an address that is not a party, a bond attestation from the
+/// future, a double-spend claim with no evidence.
+fn contract_cases() -> Vec<J> {
+    use ducat_core::bond::bucket_floor;
+    use ducat_core::escrow::*;
+    let mut v = Vec::new();
+    const T0: u64 = 1_800_000_000;
+    let eid = [0xE5u8; 32];
+
+    // -- the ceremony (§2.5) ------------------------------------------------
+    let setup = |round: u64, from: u8| {
+        json!({ "round": round, "from_index": from, "info_hex": hex(&[0xAB; 64]) })
+    };
+    let ceremony = |name: &str, why: &str, steps: Vec<J>| {
+        json!({ "name": name, "why": why, "escrow_id_hex": hex(&eid),
+                "rounds_required": 2, "steps": steps })
+    };
+    let ok = |s: J| { let mut m = s.as_object().unwrap().clone();
+        m.insert("expect".into(), json!({"ok": true})); J::Object(m) };
+    let no = |s: J, code: RejectCode| { let mut m = s.as_object().unwrap().clone();
+        m.insert("expect".into(), json!({"ok": false, "reject_code": code as u8,
+            "reject_name": format!("{:?}", code)})); J::Object(m) };
+
+    v.push(ceremony(
+        "ceremony_two_rounds_converge",
+        "a 2-of-3 ceremony closes in two rounds, each participant contributing once per round",
+        vec![ok(setup(0, 0)), ok(setup(0, 1)), ok(setup(0, 2)),
+             ok(setup(1, 0)), ok(setup(1, 1)), ok(setup(1, 2))],
+    ));
+    v.push(ceremony(
+        "ceremony_out_of_order_round_refused",
+        "§2.5: RetoSwap — this exact structure in production — was drained of ~$2.7M by a \
+         forged, out-of-order message overwriting settled state. Round 1 arriving while \
+         round 0 is open has that shape whatever the payload says.",
+        vec![ok(setup(0, 0)), no(setup(1, 1), RejectCode::StateViolation)],
+    ));
+    v.push(ceremony(
+        "ceremony_duplicate_contribution_refused",
+        "a second contribution from one participant in one round would revise state the \
+         ceremony has already settled",
+        vec![ok(setup(0, 0)), no(setup(0, 0), RejectCode::Replay)],
+    ));
+    v.push(ceremony(
+        "ceremony_rejects_contributions_after_completion",
+        "a finished ceremony has nothing left to contribute to",
+        vec![ok(setup(0, 0)), ok(setup(0, 1)), ok(setup(0, 2)),
+             ok(setup(1, 0)), ok(setup(1, 1)), ok(setup(1, 2)),
+             no(setup(2, 0), RejectCode::StateViolation)],
+    ));
+
+    // -- agreement (§8.2) ---------------------------------------------------
+    let addr = "53multisigaddress";
+    let rdy = |from: u8, address: &str, arbiter: &str| {
+        json!({"from_index": from, "ms_address": address, "threshold": 2, "total": 3,
+               "arbiter": arbiter})
+    };
+    let ready_case = |name: &str, why: &str, reports: Vec<J>, expect: J| {
+        json!({"name": name, "why": why, "escrow_id_hex": hex(&eid),
+               "trusted_arbiters": ["arbiter-key-1"], "reports": reports, "expect": expect})
+    };
+    v.push(ready_case(
+        "ready_all_three_agree",
+        "every participant must report what it formed, and the reports must match",
+        vec![rdy(0, addr, "arbiter-key-1"), rdy(1, addr, "arbiter-key-1"), rdy(2, addr, "arbiter-key-1")],
+        json!({"ok": true, "agreed_address": addr}),
+    ));
+    v.push(ready_case(
+        "ready_divergent_address_refused",
+        "three ceremonies can each succeed and form two different groups — the funds then \
+         land in a wallet the payer holds no share of",
+        vec![rdy(0, addr, "arbiter-key-1"), rdy(1, addr, "arbiter-key-1"),
+             rdy(2, "53someotheraddress", "arbiter-key-1")],
+        json!({"ok": false, "reject_code": RejectCode::CommitMismatch as u8,
+               "reject_name": "CommitMismatch"}),
+    ));
+    v.push(ready_case(
+        "ready_untrusted_arbiter_refused",
+        "§2.5's other half: the arbiter comes from the market descriptor, never from a \
+         message — the forged message in the real exploit was well-formed",
+        vec![rdy(0, addr, "attacker-key"), rdy(1, addr, "attacker-key"), rdy(2, addr, "attacker-key")],
+        json!({"ok": false, "reject_code": RejectCode::UntrustedArbiterSet as u8,
+               "reject_name": "UntrustedArbiterSet"}),
+    ));
+    v.push(ready_case(
+        "ready_silent_participant_refused",
+        "a participant that reported nothing has agreed to nothing",
+        vec![rdy(0, addr, "arbiter-key-1"), rdy(1, addr, "arbiter-key-1")],
+        json!({"ok": false, "reject_code": RejectCode::PolicyRefused as u8,
+               "reject_name": "PolicyRefused"}),
+    ));
+
+    // -- release (§8.2) -----------------------------------------------------
+    let rel_case = |name: &str, why: &str, to: &str, amount: u64, expect: J| {
+        json!({"name": name, "why": why, "escrow_id_hex": hex(&eid),
+               "escrowed_pxmr": 800_000_000u64,
+               "allowed_destinations": ["seller-payout", "buyer-refund"],
+               "to": to, "amount_pxmr": amount, "expect": expect})
+    };
+    v.push(rel_case("release_to_a_party_is_allowed",
+        "the ordinary close of an escrow", "seller-payout", 800_000_000, json!({"ok": true})));
+    v.push(rel_case("release_partial_is_allowed",
+        "a ruling can award less than the whole", "buyer-refund", 400_000_000, json!({"ok": true})));
+    v.push(rel_case("release_to_a_stranger_refused",
+        "the check a rushed implementation drops, because the happy path never exercises it: \
+         both parties co-signing a release to the seller looks identical whether or not the \
+         destination was ever constrained",
+        "attacker-addr", 800_000_000,
+        json!({"ok": false, "reject_code": RejectCode::PolicyRefused as u8,
+               "reject_name": "PolicyRefused"})));
+    v.push(rel_case("release_over_the_balance_refused",
+        "an escrow cannot pay out more than it holds", "seller-payout", 900_000_000,
+        json!({"ok": false, "reject_code": RejectCode::PriceMismatch as u8,
+               "reject_name": "PriceMismatch"})));
+    v.push(rel_case("release_of_zero_refused",
+        "a release of zero moves nothing and closes nothing", "seller-payout", 0,
+        json!({"ok": false, "reject_code": RejectCode::PriceMismatch as u8,
+               "reject_name": "PriceMismatch"})));
+
+    // -- bond_proof (§17.4, §17.8) -----------------------------------------
+    let bond_case = |name: &str, why: &str, bucket: u64, amount: u64, issued: u64,
+                     arbiter_set: &str, fare: u64, now: u64, expect: J| {
+        json!({"name": name, "why": why, "capacity_bucket": bucket,
+               "bond_amount_pxmr": amount, "issued": issued,
+               "arbiter_set_id_hex": arbiter_set, "fare_pxmr": fare, "now": now,
+               "max_age_s": 300, "trusted_arbiter_sets": [hex(&[0xA5u8; 32])],
+               "expect": expect})
+    };
+    let good_set = hex(&[0xA5u8; 32]);
+    v.push(bond_case("bond_fresh_and_sufficient", "the ordinary case",
+        bucket_floor(60_000_000_000), 100_000_000_000, T0, &good_set,
+        20_000_000_000, T0 + 30, json!({"ok": true})));
+    v.push(bond_case("bond_stale_refused",
+        "a bond proof is a claim about a balance that moves, so an old one says nothing",
+        bucket_floor(60_000_000_000), 100_000_000_000, T0, &good_set,
+        1_000, T0 + 400, json!({"ok": false, "reject_code": RejectCode::Expired as u8,
+            "reject_name": "Expired"})));
+    v.push(bond_case("bond_from_the_future_refused",
+        "a proof dated ahead of now is not fresh, it is wrong — skew is tolerated in one \
+         direction only",
+        bucket_floor(60_000_000_000), 100_000_000_000, T0 + 10_000, &good_set,
+        1_000, T0, json!({"ok": false, "reject_code": RejectCode::Expired as u8,
+            "reject_name": "Expired"})));
+    v.push(bond_case("bond_exact_balance_is_not_a_bucket",
+        "§17.8: an arbitrary integer here defeats bucketing entirely — a rider could publish \
+         their balance exactly and call it a ladder value",
+        49_999_999_999, 100_000_000_000, T0, &good_set,
+        1_000, T0, json!({"ok": false, "reject_code": RejectCode::Malformed as u8,
+            "reject_name": "Malformed"})));
+    v.push(bond_case("bond_capacity_above_the_bond_refused",
+        "capacity is what remains of the bond, so a capacity above it is incoherent — and it \
+         is the direction a liar benefits from",
+        100_000_000_000, 50_000_000_000, T0, &good_set,
+        1_000, T0, json!({"ok": false, "reject_code": RejectCode::InsufficientCapacity as u8,
+            "reject_name": "InsufficientCapacity"})));
+    v.push(bond_case("bond_untrusted_arbiter_set_refused",
+        "§2.5: the arbiter set is named by the market, not by the party who benefits from a \
+         friendly one",
+        bucket_floor(60_000_000_000), 100_000_000_000, T0, &hex(&[0xFFu8; 32]),
+        1_000, T0, json!({"ok": false, "reject_code": RejectCode::UntrustedArbiterSet as u8,
+            "reject_name": "UntrustedArbiterSet"})));
+
+    // -- slash claims (§17.5) ----------------------------------------------
+    let slash = |name: &str, why: &str, reason: u8, key_image: Option<&str>,
+                 elapsed: u64, claim: u64, expect: J| {
+        let mut m = serde_json::Map::new();
+        m.insert("name".into(), json!(name));
+        m.insert("why".into(), json!(why));
+        m.insert("reason".into(), json!(reason));
+        if let Some(k) = key_image { m.insert("key_image_hex".into(), json!(k)); }
+        m.insert("elapsed_blocks".into(), json!(elapsed));
+        m.insert("cure_blocks".into(), json!(20));
+        m.insert("claim_pxmr".into(), json!(claim));
+        m.insert("agreed_pxmr".into(), json!(21_000_000_000u64));
+        m.insert("expect".into(), expect);
+        J::Object(m)
+    };
+    v.push(slash("slash_cure_window_not_expired",
+        "non-confirmation is usually a fee or propagation problem, not fraud — the window \
+         exists so an honest payer can re-broadcast",
+        1, None, 19, 21_000_000_000,
+        json!({"ok": false, "reject_code": RejectCode::PolicyRefused as u8,
+               "reject_name": "PolicyRefused"})));
+    v.push(slash("slash_cure_window_expired",
+        "the boundary is inclusive", 1, None, 20, 21_000_000_000, json!({"ok": true})));
+    v.push(slash("slash_double_spend_needs_its_evidence",
+        "this reason skips the waiting period, which makes it the one worth forging — so it \
+         is the one that must carry the conflicting key image",
+        2, None, 0, 21_000_000_000,
+        json!({"ok": false, "reject_code": RejectCode::Malformed as u8,
+               "reject_name": "Malformed"})));
+    v.push(slash("slash_double_spend_with_evidence_skips_the_cure_window",
+        "a conflicting key image is on-chain and self-authenticating",
+        2, Some(&hex(&[0x5Au8; 32])), 0, 21_000_000_000, json!({"ok": true})));
+    v.push(slash("slash_claim_over_the_agreed_amount_refused",
+        "a claim exceeding what was agreed is a claimant helping themselves",
+        1, None, 30, 21_000_000_001,
+        json!({"ok": false, "reject_code": RejectCode::PriceMismatch as u8,
+               "reject_name": "PriceMismatch"})));
+    v
+}
+
 fn main() -> std::io::Result<()> {
     let dir = std::path::Path::new("../vectors").join(format!("v{}", VECTOR_SET_VERSION));
     std::fs::create_dir_all(&dir)?;
 
-    let files: [(&str, Vec<J>); 7] = [
+    let files: [(&str, Vec<J>); 8] = [
         ("codec", codec_cases()),
         ("signing", signing_cases()),
         ("state", state_cases()),
@@ -1080,6 +1299,7 @@ fn main() -> std::io::Result<()> {
         ("transcript", transcript_cases()),
         ("backup", backup_cases()),
         ("object", object_cases()),
+        ("contract", contract_cases()),
     ];
 
     // Normalize and route. A case's authored category is not necessarily the

@@ -1,5 +1,7 @@
 //! The reading side: import a route, verify, confirm, pay.
 
+use std::time::Instant;
+
 use ducat_core::commit::{commit, commit_eq, Purpose};
 use ducat_core::sig::{ObjectType, PublicKey, SecretKey, SignedBytes};
 use ducat_core::verify::{check_verification, VerificationPolicy, VerificationState};
@@ -36,12 +38,20 @@ pub async fn run(tap_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     println!("  wallet   {}…", &w.address[..20]);
 
     let (api, _calls) = crate::veilid::start("payer").await?;
+
+    // §15.3's budget starts here, not at node startup. A phone app keeps its
+    // node attached; the three seconds are the user's wait from presenting the
+    // device to seeing a confirm screen, so the clock starts at the tap.
+    let t_tap = Instant::now();
     let rc = api.routing_context()?;
     let route_id = api.import_remote_private_route(tap.route.clone())?;
-    println!("  route    imported\n");
+    let d_import = t_tap.elapsed();
+    println!("  route    imported ({:.0} ms)\n", d_import.as_secs_f64() * 1000.0);
 
     // 1. Ask for the offer the tap committed to.
+    let t_call = Instant::now();
     let reply = rc.app_call(Target::RouteId(route_id.clone()), frame(MSG_REQUEST_OFFER, b"")).await?;
+    let d_roundtrip = t_call.elapsed();
     let (kind, body) = unframe(&reply)?;
     if kind != MSG_FULL_OFFER {
         return Err(format!("expected FullOffer, got {kind}").into());
@@ -54,7 +64,16 @@ pub async fn run(tap_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     if !commit_eq(&tap.offer_commit, &commit(Purpose::Offer, offer_body.bytes())) {
         return Err("offer does not match the tap's commitment".into());
     }
+    let d_to_confirm = t_tap.elapsed();
     println!("  offer    verified against the tap: {} pXMR", offer.amount_pxmr);
+    println!(
+        "\n  \x1b[1mtap budget (§15.3)\x1b[0m  route import {:.0} ms + round trip {:.0} ms \
+         + verify = \x1b[1m{:.2} s\x1b[0m to confirm screen  [{}]\n",
+        d_import.as_secs_f64() * 1000.0,
+        d_roundtrip.as_secs_f64() * 1000.0,
+        d_to_confirm.as_secs_f64(),
+        if d_to_confirm.as_secs_f64() <= 3.0 { "within budget" } else { "OVER BUDGET" }
+    );
 
     // §17.4: under fast/1 the provider hands over goods before confirmation, so
     // it wants collateral first. The bond is posted before the ACCEPT, because a
@@ -162,7 +181,11 @@ pub async fn run(tap_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     verify_transcript(&tap, &offer, &accept, &accept_bytes, &receipt)
         .map_err(|e| format!("transcript failed: {e:?}"))?;
 
-    println!("\n  \x1b[32mCLOSED\x1b[0m — transcript verified end to end");
+    println!(
+        "\n  total    {:.2} s from tap to CLOSED (settlement included)",
+        t_tap.elapsed().as_secs_f64()
+    );
+    println!("  \x1b[32mCLOSED\x1b[0m — transcript verified end to end");
     println!("  {} pXMR settled to {}…", receipt.amount_final, &payto[..20]);
     println!("  txid {txid}\n");
 

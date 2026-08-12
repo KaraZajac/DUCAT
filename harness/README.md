@@ -133,6 +133,26 @@ what this demonstrates.
   the model was wrong: a participant records its own contribution locally and
   collects the others.
 
+## Tap latency (§15.3)
+
+The payer times from tap-read to confirm screen. Node startup is excluded — a
+phone keeps its node attached, and the three seconds are the *user's* wait.
+
+```
+run 1   route import 0 ms + round trip  34 ms  →  0.03 s
+run 2   route import 0 ms + round trip 221 ms  →  0.22 s
+run 3   route import 0 ms + round trip 297 ms  →  0.30 s
+```
+
+All well inside budget. **The spread is the finding, not the best case** — an
+order of magnitude across three consecutive runs on identical hardware. A budget
+argued from 34 ms would be a budget argued from a sample. Route import costs
+nothing because it is local parsing, not a network call.
+
+What this does not cover: a phone, a cold node, cellular, more hops, or a route
+that must be re-established. Each is additive and the last is bounded below by a
+full round trip. **The protocol is not the problem; that is all this shows.**
+
 ## Requirements
 
 `monero-wallet-rpc` on ports 28101 (payer, `user_01`) and 28104 (payee,
