@@ -6,6 +6,7 @@
 mod flow;
 mod live;
 mod persona;
+mod restore;
 mod transport;
 mod wallet;
 
@@ -38,6 +39,10 @@ fn main() {
     }
     if std::env::args().any(|a| a == "--drain") {
         drain_main();
+        return;
+    }
+    if std::env::args().any(|a| a == "--restore") {
+        restore::restore_main();
         return;
     }
     if std::env::args().any(|a| a == "--scenarios") {

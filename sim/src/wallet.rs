@@ -33,7 +33,7 @@ pub struct Wallet {
     /// Index into RELAYS. Rotated on refresh failure rather than retried,
     /// because retrying against a dead endpoint is how a wallet ends up
     /// reporting stale-but-plausible state.
-    relay: std::cell::Cell<usize>,
+    pub relay: std::cell::Cell<usize>,
 }
 
 #[derive(Debug)]

@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.41 — Consolidated**
+**Draft 0.42 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.42** — **Added §4.3, encrypted persona backup, closing O12 — and reversed §4.1's persona storage rule to make it possible.** §4.1 recommended hardware-backing persona keys, and hardware backing means a key cannot be extracted; the recommendation therefore made every persona permanently unrecoverable on device loss, silently, and no backup mechanism could have rescued it. Keys are now split by **replaceability**: device keys stay hardware-backed because losing one costs a device (§4.2), persona keys become software and exportable because losing one costs an identity. Backup is one Argon2id + XChaCha20-Poly1305 file the user exports and keeps — not social recovery, not custody, nothing uploaded. Three contents earn their place by being invisible when missing: the **Monero restore height**, without which a restore rescans from genesis at a measured ~106 hours instead of 35 seconds and the user concludes their money is gone; **rendezvous keys** (§16.4), without which a restored persona can be paid but nobody it knows can reach it; and **attestation record writer keys** (§9.2), which are not derived from the persona key — omit them and reputation is readable but frozen at the moment the device died. KDF parameters and CBOR field numbers are pinned by format version and covered by a known-answer vector, because changing either derives a different key and turns every existing backup into a "wrong passphrase" error for people typing the correct one. Records are explicitly *not* in the bundle: receipts keep §7.4's separate export, since a credential backup from a year ago is still valid and a receipt archive from a year ago is not.
 - **0.41** — **Added §15.5.1, payer verification — the question WYSIWYS never asked.** WYSIWYS proves a payer sees what they sign; nothing established that the person holding the device should be signing. A stolen unlocked phone was a valid payer. Adopts EMV's CVM *shape*: three tiers with user-set, value-scaled thresholds, where the gap between "device happens to be unlocked" (passive, a thief has it) and "secret entered in-app just now" (a knowledge factor they do not) is the load-bearing distinction. Four rules are not the user's to relax — thresholds must ascend, in-app secrets expire, velocity is checked alongside per-payment value, and **a stale exchange rate escalates rather than relaxes**, since failing the other way would let anyone who can stall a rate feed lower the security requirement. None of it touches the wire: a payee that could influence verification would ask for the weakest.
 - **0.40** — **A refund had nowhere to go.** Nothing in the transcript carried the payer's address, so a merchant willing to refund had to obtain one out of band — the exact ambiguity a published attack on BIP-70 exploited by substituting the destination. `ACCEPT` now carries an optional signed `refund_to` and a refund must have gone there. Optional deliberately: supplying it lets the payee learn a payer address even when no refund happens, so omitting it is a legitimate choice of unlinkability over refundability, and clients must present it as a trade rather than filling it silently.
 - **0.39** — **Timeout audit: `FUNDED` and `PROVISIONAL` were dead ends holding the payer's money.** Applying cycle 9's rule — *nothing happens is not a safe default* — across §6.2 found that neither state had a deadline in any settlement mode. "Profile-defined" is a deferral, not an action, so a payer who funded and never received `PROOF` waited forever with the money gone and no evidence. Added `DeliveryWindowExpired` as a backstop closing to payment evidence, and the tested invariant that **no state holding committed funds may be a dead end** — every such state now has an exit reachable without the counterparty's cooperation, since a counterparty holding your money is precisely the one who may not cooperate. Also recorded: the 60-second `FUND` deadline is shorter than a Monero block and is therefore meaningful only against mempool visibility, and `TXPROOF` expiry named two actions where the machine can only take one.
@@ -204,10 +205,20 @@ Policy differs by key class, and the differences are not arbitrary:
 | Key class | Storage | Rationale |
 |---|---|---|
 | **Session** | Software, ephemeral | Lives minutes and dies at teardown; hardware backing buys almost nothing and costs generation latency inside a 3-second budget |
-| **Persona** | Hardware-backed where available | Long-lived, reputation-bearing, and the thing a lost device actually loses (O12) |
+| **Device** | Hardware-backed where available | Signs on a persona's behalf under §4.2; **disposable** — a lost device is revoked and replaced, so unextractability costs nothing |
+| **Persona** | Software, exportable, encrypted at rest | **Irreplaceable.** See below |
 | **Stake / bond** | Hardware-backed **and** biometric- or passcode-gated | Directly spendable collateral; the highest-value key on the device |
 
-**The honest limit:** hardware backing prevents key *extraction*. It does not prevent malware from asking the enclave to sign while the user is looking at something else. It raises the cost of a stolen phone, not of a compromised one — and §2.2 already places endpoint compromise out of scope. This is defense in depth, not a new guarantee.
+**Why the persona row does not say "hardware-backed", which it did until 0.42.** Hardware backing means the key cannot be extracted — that is the entire point of it — and a key that cannot be extracted cannot be backed up. Recommending it for personas therefore made every persona unrecoverable on device loss, silently and permanently, and no backup mechanism could have fixed it. That is not a defensible trade for the one key class the user cannot afford to lose: a destroyed persona takes every persistent contact (§16) with it, and ends the user's ability to accrue reputation at all (§9.2).
+
+The rule that resolves it is **replaceability**:
+
+- **Replaceable keys are hardware-backed.** Device keys are unextractable and never leave the device. Losing one costs a device: the persona revokes its delegation and issues another (§4.2).
+- **Irreplaceable keys are exportable and protected by a passphrase** (§4.3). Persona keys are software keys because they must be able to outlive the hardware they were created on.
+
+Hardware backing where it is disposable, exportability where it is not.
+
+**The honest limit:** hardware backing prevents key *extraction*. It does not prevent malware from asking the enclave to sign while the user is looking at something else. It raises the cost of a stolen phone, not of a compromised one — and §2.2 already places endpoint compromise out of scope. This is defense in depth, not a new guarantee. The corollary is that moving personas out of hardware gives up less than it first appears: against the threat hardware actually addresses, a persona key's exposure now rests on the encrypted backup and the device's own storage protections rather than on an enclave.
 
 **Cross-platform consequence:** a persona created under the P-256 suite is unverifiable by a client implementing only the Ed25519 suite, which would fragment personas by platform. Core conformance therefore requires *both* suites (§18.10).
 
@@ -222,6 +233,58 @@ Three limits, all load-bearing:
 - **Delegation covers identity, not funds.** A device key can present, negotiate, and co-sign receipts. It cannot spend the hot wallet or move the bond, because those are Monero keys and threshold membership, not delegable signatures. A second device is a second terminal, not a second purse.
 - **Delegations are visible to counterparties**, since a verifier must see the chain. A payer learns that they are dealing with device 3 of a persona — which is a small linkability cost and the reason a delegation carries no device metadata beyond a key.
 - **Revocation is only as fresh as the delegation set a counterparty has read.** A stolen device stays usable to anyone who has not refreshed. Short expiries bound this; nothing eliminates it, which is the same limit every revocation scheme has.
+
+### 4.3 Backup — Export and Import (closes O12)
+
+O12 asked what happens when a device is lost. Until 0.42 the answer was that the persona, its reputation, and every rendezvous keyed to it were gone. For a payment application that is disqualifying, and it is the failure users are least forgiving of, because it looks exactly like theft by the software.
+
+**What this deliberately is not.** Not social recovery: guardians, shard distribution, and quorum rejoin are a large amount of protocol and user-facing ceremony for a system with no operator to coordinate them, and they introduce a social attack surface — collusion, coercion, guardians who stop answering — where none existed. Not custody: there is no service to hold anything. Not automatic: nothing is uploaded, and no counterparty, relay, or DHT record ever holds any part of a backup.
+
+**What it is:** a single encrypted file the user exports and keeps, and can import on any device. The user chooses where it lives — password manager, cloud drive, offline media, printed. That choice is deliberately theirs; a protocol that also decided *where* would be back to needing a service.
+
+#### 4.3.1 Contents
+
+A backup MUST carry all four, and the reasons for the last three are not symmetric with the first:
+
+| Field | Why it must be there |
+|---|---|
+| **Persona secret key + suite** | The identity itself. Without it the restored user is a stranger with a new reputation. |
+| **Monero seed** (25-word Electrum-style) | The money. Restores spend and view keys. |
+| **Monero restore height** | See below — this is load-bearing, not metadata. |
+| **Rendezvous record keys** (§16.4) | Without them a restored persona keeps its identity and loses every contact. It can be paid and nobody it knows can reach it — a half-restore that is worse than a visible failure, because it looks like it worked. |
+| **Attestation record writer keys** (§9.2) | Attestations live in DHT records the persona *controls*, and control is the record's own writer key — which is **not** derived from the persona key. Restoring the persona without it leaves the existing attestations readable but frozen forever: the user can never add another, so their standing stops at the moment the device died. Nobody would attribute that to a backup. |
+| **Granted mandates** (§7.3) | A standing authorization the user can no longer see is one they cannot revoke. Dropping these leaves live drawing rights against the restored wallet, invisible to its owner. |
+
+**The restore height is not a convenience field.** A Monero wallet restored without one rescans from the genesis block. Phase 0b measured this directly against a remote stagenet node: **roughly 106 hours from genesis, against 35 seconds from a recent height.** Omitting an eight-byte integer therefore converts a restore into a four-day ordeal during which the user's balance reads zero — and they will conclude, reasonably, that the backup did not work and their money is gone. A backup format that stores the seed and not the height is technically complete and practically broken.
+
+**And the height must be *right*, not merely present — it is wrong in both directions, asymmetrically.**
+
+*Too late is silent and total.* The obvious implementation — stamp the current height at export — makes the restored wallet scan forward from after every output it owns. Demonstrated on stagenet: correct seed, correct address, **zero balance, and no error anywhere**. The money is untouched and the user is looking at an empty wallet. A restore height above the wallet's oldest unspent output does not degrade recovery; it silently cancels it.
+
+*Too early is merely expensive, and the price is measurable.* Backdating 500 blocks cost roughly two minutes of scanning (measured; ~4 blocks/second against a remote stagenet node). Extrapolated, "just use the genesis block to be safe" is the ~106-hour figure above, and even backdating a year of chain is on the order of a day.
+
+The rule is therefore exact: **`restore_height` MUST be at or below the block containing the wallet's oldest unspent output, and SHOULD be as close to it as possible.** Outputs older than that are by definition already spent — a restored wallet that never sees them loses nothing but the scanning time it would have cost to find them.
+
+Implementations SHOULD recompute this on each export rather than stamping a creation height once. A long-lived wallet that spends its early outputs can move its restore height forward over time, and a backup that keeps rescanning from a persona's first day gets slower every year for no benefit.
+
+#### 4.3.2 Construction
+
+- **KDF: Argon2id**, memory-hard, with parameters **pinned by the format version**, not inherited from a library default. A backup is an *offline* target: whoever holds the file can grind at it forever, on hardware of their choosing, with no rate limit anyone can impose. Memory hardness is what denies them cheap GPU and ASIC parallelism. The reference implementation uses 64 MiB, 3 passes, 1 lane — above OWASP's floor, and a cost the user pays once at import.
+- **AEAD: XChaCha20-Poly1305.** The 24-byte nonce removes any nonce-reuse concern across exports without a counter the format would have to maintain.
+- **Salt and nonce are fresh per export** and stored in the clear. They are not secrets; reusing either would be one. A consequence worth stating: two exports of an unchanged backup MUST differ, so possession of two files reveals nothing about whether anything changed between them.
+- **Plaintext is canonical CBOR** under §18.2's codec, so the artifact is self-describing and deterministic.
+- **The format identifier is authenticated as AAD**, so a file of another format cannot be coerced into decrypting as this one, and so the version selecting the KDF parameters is readable *before* any key is derived.
+
+**Parameters and field numbering are frozen once shipped.** A changed KDF constant or a reordered CBOR key derives a different key or a different plaintext, and every backup any user has ever exported becomes permanently unopenable — while reporting nothing but "wrong passphrase" to people typing the correct one. The failure is indistinguishable from user error and would be diagnosed late, if at all. Implementations MUST hold a known-answer vector over the complete artifact so this breaks a test rather than a person's wallet. A format change is a new version identifier, with the old version still decryptable.
+
+#### 4.3.3 What this does not solve, stated plainly
+
+- **A forgotten passphrase is unrecoverable.** There is no operator to appeal to; that is the same property that makes the system uncustodied. Clients SHOULD say this at export, in those terms, rather than in the language of a password reset the user might expect to exist.
+- **The passphrase is the whole of the protection.** Argon2id raises the cost per guess; it does not rescue a passphrase drawn from a small space. Clients SHOULD refuse trivially short passphrases at export rather than producing an artifact whose protection is nominal.
+- **A backup is a spending credential.** Anyone with the file and the passphrase becomes the user completely. It is not a receipt or an archive, and should not be treated as safe to store casually.
+- **A credential backup is not a record backup.** This bundle answers *who the user is, what they can spend, who can reach them, and what they have authorised*. It does not carry transaction history; receipts are a separate growing archive with its own export (§7.4), and §7.4's warning that losing receipts loses evidentiary reputation still stands in full. The split is not only about size — the two have opposite refresh needs. A credential bundle exported a year ago is still entirely valid; a receipt archive from a year ago is a year out of date. Merging them would force constant re-export of a bundle whose important half never changes.
+- **Restore does not recover in-flight state.** Open sessions, undelivered receipts, and disputes in progress are not in the bundle. A restore recovers identity, funds, contacts, and standing authorizations — not the transaction that was mid-flight when the device died.
+- **The old device is not disabled by restoring.** Import copies a persona; it does not revoke one. A user restoring because a device was *stolen* rather than lost MUST also revoke that device's delegation (§4.2) — and until every counterparty refreshes, the thief's device still verifies. Clients SHOULD prompt for revocation as part of the import flow, because a user who has just recovered their money will not think of it unprompted.
 
 ---
 
@@ -832,7 +895,7 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O9.** Hot-wallet exposure (§17.2): a small float on a phone is malware- and seizure-reachable. Mitigated by keeping it small; not eliminated.
 - **O10.** Price-oracle integrity and the `capacity_remaining` side channel (§17.7, §17.8) — both leak or can be manipulated in ways that are mitigated, not closed.
 - **O11.** **Route-blob size — measured, and it resists being a constant.** Phase 0a: `token` mode is exactly 190 B; `inline` mode ranged 877–1669 B for a `TapPresent` across two runs, non-monotonic in hop count, with within-hop-count spread exceeding between-hop-count differences. Size tracks *which peer was selected*, not how many hops were asked for. §15.3.1 therefore specifies measure-and-degrade rather than a budget. Closed as a question; the variance itself is the finding.
-- **O12.** Persona loss and recovery (§16.8): losing a device loses the persona and every rendezvous keyed to it. Signed key-rotation announcements to existing contacts are an unsolved sub-problem of L1.
+- **O12. (closed in 0.42, §4.3.)** Persona loss and recovery. Resolved by encrypted export/import rather than social recovery, at the cost of making persona keys software-held (§4.1) — a trade justified in that section. **The residue is key rotation:** a user who believes a backup was *compromised* rather than lost has no way to tell existing contacts "this persona now has a different key". Backup answers device loss; it does not answer key exposure, and signed rotation announcements to existing contacts remain an unsolved sub-problem of L1.
 - **O13.** **Relay anonymity set** (§8.7.3): routing settlement through DUCAT relays makes "is a DUCAT user" observable to anyone watching the relay set, and a seed market's set is a few hundred people. Mitigated by preferring Tor and by growth; not solved. Note this compounds O7 — the smallest markets have both the thinnest liquidity and the thinnest cover.
 - **O14.** **Two wallet-layer gaps block Phase 3** (`monero-rs/REPORT.md`). `monero-wallet` 0.2.0 exposes scanning only over blocks — `scan_transaction` exists but is private — so a driver cannot verify an *unconfirmed* payment through the public API, which is exactly what `fast/1` acceptance requires. And it implements no transaction proofs at all, so §17.5's arbitration evidence must be built. Neither blocks Phase 1, which needs no bonds and no zero-conf.
 - **O15.** **Burning bug versus the standard.** `monero-wallet` offers burning-bug-immune 'guaranteed' outputs, but its own source says they are *"not officially specified by the Monero project ... No support outside of monero-wallet is promised."* Adopting them would lock DUCAT funds to one implementation, cutting against A1's bearer property and §11's many-clients goal. The recommendation is to stay standard and have `pos/1` merchants **detect** duplicate one-time keys instead — but the underlying hazard, that an attacker can make a merchant see two payments they can spend only one of, is real and unmitigated by §15.10's fresh-subaddress rule, which narrows the window without closing it.

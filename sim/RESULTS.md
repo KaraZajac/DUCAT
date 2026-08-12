@@ -120,3 +120,51 @@ The refusal came from the client's **own pre-check**, before any offer was
 presented — not from a failed settlement with a customer waiting. That is the
 behaviour §17.2 asks for, and the negative path had never been exercised until
 this test.
+
+
+---
+
+# Device loss and restore — stagenet (§4.3)
+
+    cargo run -- --restore
+
+A backup is the one feature whose bugs surface only when it is already too late,
+so this exercises the claim rather than the cryptography: **one 368-byte
+encrypted file and a passphrase, restored onto a wallet-rpc instance in a fresh
+directory on an unused port that had never seen the seed.**
+
+```
+original    59jre4NqgtUWBYoz…   7560100000 pXMR   4 unlocked outputs
+exported    368 bytes            seed absent from the ciphertext
+restored    59jre4NqgtUWBYoz…   7560100000 pXMR   4 unlocked outputs
+```
+
+Address, balance, **and output count** all match. The third is not decoration:
+§17.2 makes consecutive payment capacity a function of output *count*, so a
+restore that recovered the right balance across the wrong number of outputs would
+mis-predict how many payments the user can make and fail at a counter.
+
+## The height is wrong in both directions, asymmetrically
+
+`restore_deterministic_wallet` from 500 blocks back took **118 seconds** — about
+4 blocks/second against a remote node. The subsequent `refresh` was 0.9s. That
+sets the price of backdating: 500 blocks ≈ 2 minutes, and the genesis case is the
+~106 hours Phase 0b measured.
+
+Then the failure the field exists to prevent, run deliberately:
+
+```
+restore_height = 2183821   (the height at export — the obvious implementation)
+balance  0 pXMR across 0 unlocked outputs
+```
+
+**Correct seed, correct address, zero balance, no error raised.** A wallet
+restored from a height above its own outputs scans forward past all of them and
+finds nothing to report. Nothing in the log, the RPC response, or the balance
+distinguishes this from a genuinely empty wallet — and the user's reasonable
+conclusion is that the backup lost their money.
+
+So "stamp the current height at export" is not a slow restore, it is a total one.
+§4.3.1 now states the exact rule — at or below the oldest unspent output, as
+close to it as possible — and both directions are demonstrated here rather than
+asserted.

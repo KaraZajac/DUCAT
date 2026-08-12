@@ -4,6 +4,7 @@
 //! that it is testable in isolation and reusable by any client. Corresponds to
 //! Part V (§18) of the protocol document.
 
+pub mod backup;
 pub mod cbor;
 pub mod commit;
 pub mod negotiate;
