@@ -226,6 +226,7 @@ fn every_state_event_pair_agrees_on_both_sides() {
         State::Funded,
         State::Provisional,
         State::Delivered,
+        State::Metering,
         State::Closed,
         State::Settled,
         State::Claimed,
@@ -249,6 +250,9 @@ fn every_state_event_pair_agrees_on_both_sides() {
         Event::ContactAccept,
         Event::ConfirmationsReached,
         Event::CureWindowExpired,
+        Event::MeterStart,
+        Event::MeterStop,
+        Event::MeterExpired,
         Event::Elapsed(Duration::from_secs(0)),
         Event::Elapsed(Duration::from_secs(600)),
     ];
@@ -279,4 +283,95 @@ fn every_state_event_pair_agrees_on_both_sides() {
         }
     }
     assert!(checked >= 600, "sweep covered only {} combinations", checked);
+}
+
+// -- metered sessions (§15.7) -----------------------------------------------
+
+/// A meter runs for as long as the service lasts. Before `Metering` existed the
+/// start leg landed in `Accepted`, whose 60-second deadline aborted a bar tab
+/// after one minute — §15.7's two-tap flow and §6.2's deadlines had been
+/// written independently and never checked against each other.
+#[test]
+fn a_metered_session_survives_longer_than_a_minute() {
+    let mut s = State::Idle;
+    for ev in [
+        Event::TapPresent,
+        Event::FullOffer,
+        Event::MeterStart,
+    ] {
+        s = transition(s, Role::Payer, SettleMode::Direct, &ev)
+            .unwrap_or_else(|e| panic!("{:?} rejected: {:?}", ev, e))
+            .next;
+    }
+    assert_eq!(s, State::Metering);
+
+    // Hours pass. A meter is not wall-clock bounded by §6.2, because its limit
+    // lives in terms and is signalled explicitly.
+    for secs in [60u64, 3600, 28_800] {
+        let t = transition(s, Role::Payer, SettleMode::Direct,
+                           &Event::Elapsed(Duration::from_secs(secs))).unwrap();
+        assert_eq!(t.next, State::Metering, "meter died after {}s", secs);
+    }
+}
+
+#[test]
+fn a_metered_session_settles_on_stop() {
+    let mut s = State::Idle;
+    for ev in [
+        Event::TapPresent,
+        Event::FullOffer,
+        Event::MeterStart,
+        Event::MeterStop,
+        Event::Fund,
+        Event::Proof,
+        Event::Receipt,
+    ] {
+        s = transition(s, Role::Payer, SettleMode::Direct, &ev)
+            .unwrap_or_else(|e| panic!("{:?} rejected: {:?}", ev, e))
+            .next;
+    }
+    assert_eq!(s, State::Closed);
+}
+
+/// §15.7: the customer walks out. The payee computes what accrued, capped by
+/// what the payer agreed to, and emits a unilateral record — which proves what
+/// was authorised and metered, not that the payer agreed to the total.
+#[test]
+fn an_abandoned_meter_yields_a_single_sided_receipt() {
+    let t = transition(State::Metering, Role::Payee, SettleMode::Direct, &Event::MeterExpired)
+        .unwrap();
+    assert_eq!(t.next, State::Closed);
+    assert_eq!(t.effect, Effect::EmitSingleSidedReceipt);
+}
+
+#[test]
+fn metered_transitions_agree_on_both_sides() {
+    both_agree(
+        SettleMode::Direct,
+        &[
+            Event::TapPresent,
+            Event::FullOffer,
+            Event::MeterStart,
+            Event::Elapsed(Duration::from_secs(7200)),
+            Event::MeterStop,
+            Event::Fund,
+            Event::Proof,
+            Event::Receipt,
+        ],
+    );
+}
+
+/// A `stop` for a meter that never started must be refused — §15.7's
+/// `session_ref` binding says you can only be billed for a meter you began.
+#[test]
+fn a_stop_without_a_start_is_refused() {
+    for s in [State::Idle, State::Offered, State::Quoted, State::Accepted, State::Funded] {
+        for who in [Role::Payer, Role::Payee] {
+            assert!(
+                transition(s, who, SettleMode::Direct, &Event::MeterStop).is_err(),
+                "MeterStop must be refused in {:?}",
+                s
+            );
+        }
+    }
 }

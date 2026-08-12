@@ -45,6 +45,13 @@ pub enum State {
     Quoted,
     /// Payer signed ACCEPT; price locked.
     Accepted,
+    /// §15.7: a meter is running. The payer confirmed a rate and a cap at
+    /// `start`; the total is not known until `stop`.
+    ///
+    /// This state exists because §15.7's two-tap flow and §6.2's deadlines were
+    /// written independently and disagreed: without it a metered session sits in
+    /// `Accepted` and its 60-second deadline aborts a bar tab after one minute.
+    Metering,
     /// Payment broadcast, or escrow funded.
     Funded,
     /// `fast/1` only: TXPROOF verified, service may proceed, awaiting finality.
@@ -103,6 +110,17 @@ pub enum Event {
     /// `fast/1`: cure window elapsed with the transaction still unconfirmed, or
     /// a conflicting key image was observed on-chain (§17.5).
     CureWindowExpired,
+    /// §15.7: the payer confirmed a rate and cap; the meter is now running.
+    MeterStart,
+    /// §15.7: a `stop` tap arrived carrying a matching `session_ref`, with the
+    /// total derived from elapsed time or distance.
+    MeterStop,
+    /// §15.7: the meter ran past `terms.meter_max_s` without a `stop`.
+    ///
+    /// Signalled by the caller rather than by a wall-clock deadline, because the
+    /// limit lives in `terms` and the machine holds no terms — the same pattern
+    /// as `ConfirmationsReached` and `CureWindowExpired`.
+    MeterExpired,
 }
 
 /// Consequences a transition demands of the caller. The machine decides these;
@@ -215,6 +233,20 @@ pub fn transition(
         )),
         (S::Quoted, E::Abort) => go(S::Aborted),
         (S::Quoted, E::Elapsed(d)) if past(*d, state, mode) => go(S::Aborted),
+
+        // -- metering (§15.7) ---------------------------------------------
+        // The rate and cap were confirmed at `start`; the total is not known
+        // until `stop`, so this state is deliberately not wall-clock bounded.
+        (S::Quoted, E::MeterStart) => go(S::Metering),
+        (S::Metering, E::MeterStop) => go(S::Accepted),
+        // Abandonment: the customer left without stopping the meter. The payee
+        // computes what accrued, capped by what the payer agreed to, and emits
+        // a unilateral record. Whether any of it is collectable depends
+        // entirely on collateral (§15.7) — against an unbonded payer it is not.
+        (S::Metering, E::MeterExpired) => {
+            go_with(S::Closed, Effect::EmitSingleSidedReceipt)
+        }
+        (S::Metering, E::Abort) => go(S::Aborted),
 
         // -- funding -----------------------------------------------------
         (S::Accepted, E::Fund) => go(S::Funded),
