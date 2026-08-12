@@ -212,6 +212,194 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         println!();
     }
 
+    // ---- 4. Arbitration: §2.5's surface -----------------------------------
+    println!("\x1b[1m  4. dispute and ruling (§9.3)\x1b[0m");
+    {
+        let arbiter_a = vec![0xA1u8; 32];
+        let arbiter_b = vec![0xB2u8; 32];
+        let outsider = vec![0xFFu8; 32];
+        // §10.1: the set comes from the signed market descriptor. Passing it as
+        // an argument is the point — §2.5 was drained by an arbitrator address
+        // that arrived in a message and was perfectly well-formed.
+        let set = vec![arbiter_a.clone(), arbiter_b.clone()];
+
+        let d = Dispute {
+            version: 1,
+            suite: 1,
+            class: DisputeClass::Mechanical,
+            transcript: [0x7A; 32],
+            claim_pxmr: 5_000_000_000,
+            timestamp: now(),
+        };
+        let db = d.to_value().encode();
+
+        let ruling = |outcome: Outcome, award: u64| Ruling {
+            version: 1,
+            suite: 1,
+            dispute: commit(Purpose::ChainLink, &db),
+            outcome,
+            award_pxmr: award,
+            timestamp: now() + 60,
+        };
+
+        match check_ruling(&ruling(Outcome::ForClaimant, 5_000_000_000), &d, &db, &set, &arbiter_a) {
+            Ok(()) => println!("    ruling by a named arbiter         → accepted"),
+            Err(e) => {
+                println!("    unexpected refusal {e:?}");
+                failures.push("a ruling from the market's own arbiter set must be accepted");
+            }
+        }
+        match check_ruling(&ruling(Outcome::ForClaimant, 5_000_000_000), &d, &db, &set, &outsider) {
+            Err(e) => println!("    ruling by an outsider             → refused {:?}", e.code),
+            Ok(()) => failures.push("§2.5: a ruling from outside the signed set must be refused"),
+        }
+        match check_ruling(&ruling(Outcome::ForClaimant, 5_000_000_001), &d, &db, &set, &arbiter_a) {
+            Err(e) => println!("    award exceeding the claim         → refused {:?}", e.code),
+            Ok(()) => failures.push("an arbiter must not award more than was claimed"),
+        }
+        match check_ruling(&ruling(Outcome::ForRespondent, 1), &d, &db, &set, &arbiter_a) {
+            Err(e) => println!("    award to the losing side          → refused {:?}", e.code),
+            Ok(()) => failures.push("only a ruling for the claimant may carry an award"),
+        }
+        let mut wrong_dispute = ruling(Outcome::ForClaimant, 1_000);
+        wrong_dispute.dispute = [0x00; 32];
+        match check_ruling(&wrong_dispute, &d, &db, &set, &arbiter_a) {
+            Err(e) => println!("    ruling on a different dispute     → refused {:?}", e.code),
+            Ok(()) => failures.push("a ruling must name the dispute it decides"),
+        }
+
+        // §9.3.4: expiry emits a real ruling. "Return to the pre-dispute
+        // allocation" *was* the deadlock — under escrow that means funds locked
+        // in a 2-of-3 awaiting a RELEASE two disagreeing parties will never
+        // co-sign, which is the outcome the timeout claims to prevent.
+        let expired = expired_dispute_ruling(&d, &db, now() + 100_000);
+        println!(
+            "    abandoned dispute expires         → {:?}, award {} — co-signable, not a deadlock",
+            expired.outcome, expired.award_pxmr
+        );
+        if expired.award_pxmr != 0 || expired.outcome != Outcome::ForRespondent {
+            failures.push("an expired dispute must resolve against the claimant, awarding zero");
+        }
+        if check_ruling(&expired, &d, &db, &set, &arbiter_a).is_err() {
+            failures.push("the ruling expiry produces must itself be valid");
+        }
+        println!();
+    }
+
+    // ---- 5. Mandates: standing authority, bounded ------------------------
+    println!("\x1b[1m  5. mandate draws (§7.3)\x1b[0m");
+    {
+        let payee = vec![0xC3u8; 32];
+        let stranger = vec![0xD4u8; 32];
+        let m = Mandate {
+            version: 1,
+            suite: 1,
+            payee_persona: payee.clone(),
+            cap_pxmr: 10_000_000_000,
+            period_s: 2_592_000, // a month
+            expiry: now() + 31_536_000,
+            nonce: [0x9E; 16],
+        };
+        let fresh = MandateUsage { period_start: now(), drawn_pxmr: 0 };
+
+        match check_mandate_draw(&m, &fresh, &payee, 4_000_000_000, now()) {
+            Ok(_) => println!("    draw within the cap               → accepted"),
+            Err(e) => {
+                println!("    unexpected refusal {e:?}");
+                failures.push("a draw inside the cap must be accepted");
+            }
+        }
+        let used = MandateUsage { period_start: now(), drawn_pxmr: 7_000_000_000 };
+        match check_mandate_draw(&m, &used, &payee, 4_000_000_000, now()) {
+            Err(e) => println!("    draw crossing the cap             → refused {:?}", e.code),
+            Ok(_) => failures.push("the cap must bind cumulatively, not per draw"),
+        }
+        match check_mandate_draw(&m, &fresh, &stranger, 1_000, now()) {
+            Err(e) => println!("    draw by someone else              → refused {:?}", e.code),
+            Ok(_) => failures.push("a mandate authorises one payee, not anyone holding a copy"),
+        }
+        match check_mandate_draw(&m, &fresh, &payee, 1_000, m.expiry + 1) {
+            Err(e) => println!("    draw after expiry                 → refused {:?}", e.code),
+            Ok(_) => failures.push("an expired mandate must not be drawable"),
+        }
+        // A new period resets the allowance — otherwise a monthly mandate is a
+        // one-off with extra steps.
+        let next = MandateUsage { period_start: now() - m.period_s - 1, drawn_pxmr: 10_000_000_000 };
+        match check_mandate_draw(&m, &next, &payee, 4_000_000_000, now()) {
+            Ok(_) => println!("    draw in a fresh period            → accepted, allowance reset"),
+            Err(e) => {
+                println!("    unexpected refusal {e:?}");
+                failures.push("a new period must reset the allowance");
+            }
+        }
+        println!();
+    }
+
+    // ---- 6. Static tags, and what a signature there is worth -------------
+    println!("\x1b[1m  6. static tag trust (§15.9)\x1b[0m");
+    {
+        let honest = vec![0xE1u8; 32];
+        let attacker = vec![0xE2u8; 32];
+
+        // A tag with nothing on it: the payer is trusting a physical object.
+        let bare = TapStatic {
+            version: 1, suite: 1,
+            payto: b"53buskers-address".to_vec(),
+            persona: None, sig: None,
+        };
+        match check_static_tag(&bare, |_, _, _| true) {
+            Ok(StaticTrust::Anonymous) => {
+                println!("    unsigned tag                      → Anonymous — nothing authenticated")
+            }
+            other => {
+                println!("    unexpected {other:?}");
+                failures.push("an unsigned tag must report that nothing is authenticated");
+            }
+        }
+
+        let signed = TapStatic {
+            version: 1, suite: 1,
+            payto: b"53buskers-address".to_vec(),
+            persona: Some(honest.clone()),
+            sig: Some(vec![0x01; 64]),
+        };
+        match check_static_tag(&signed, |_, _, _| true) {
+            Ok(StaticTrust::SignedBy(p)) if p == honest => {
+                println!("    signed tag                        → SignedBy(persona)")
+            }
+            other => {
+                println!("    unexpected {other:?}");
+                failures.push("a validly signed tag must name the persona that signed it");
+            }
+        }
+        match check_static_tag(&signed, |_, _, _| false) {
+            Err(e) => println!("    signed tag, bad signature         → refused {:?}", e.code),
+            Ok(_) => failures.push("a tag whose signature does not verify must be refused"),
+        }
+
+        // **The honest limit, demonstrated.** A swapped tag carries the
+        // attacker's persona and a perfectly valid signature over the
+        // attacker's own address. The check passes. It is worth something only
+        // to a payer who independently knows which persona to expect.
+        let swapped = TapStatic {
+            version: 1, suite: 1,
+            payto: b"53attackers-address".to_vec(),
+            persona: Some(attacker.clone()),
+            sig: Some(vec![0x02; 64]),
+        };
+        match check_static_tag(&swapped, |_, _, _| true) {
+            Ok(StaticTrust::SignedBy(p)) if p == attacker => println!(
+                "    swapped tag                       → SignedBy(ATTACKER) — verifies perfectly"
+            ),
+            other => {
+                println!("    unexpected {other:?}");
+                failures.push("a swapped tag verifies; the protocol cannot pretend otherwise");
+            }
+        }
+        println!("    a signature proves who owns the address, never that the tag is the");
+        println!("    one the venue put there. A first-time donor has nothing to compare.\n");
+    }
+
     if failures.is_empty() {
         println!("\x1b[32m  every abandonment path leaves the artifact §6.2 requires\x1b[0m\n");
         Ok(())

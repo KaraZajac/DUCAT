@@ -264,6 +264,28 @@ meter while an operator can void one cleanly (§18.4.1(7)); and a refund is
 refused when redirected — BIP-70's published hole — when larger than the payment,
 when the payer signed no address, and when late.
 
+Also covered, none of which had ever been run:
+
+- **Dispute and ruling (§9.3)** — a ruling from a named arbiter accepted; from an
+  outsider refused (`UntrustedArbiterSet`, §2.5's whole lesson); an award larger
+  than the claim refused; an award attached to a ruling for the *losing* side
+  refused; a ruling naming a different dispute refused. And §9.3.4's expiry
+  producing a **real ruling** — `ForRespondent`, award 0, co-signable — because
+  "return to the pre-dispute allocation" *was* the deadlock: under escrow that
+  means funds locked in a 2-of-3 awaiting a `RELEASE` two disagreeing parties
+  will never sign.
+- **Mandates (§7.3)** — a draw inside the cap accepted; one crossing it refused
+  (the cap binds cumulatively, not per draw); a draw by anyone other than the
+  named payee refused; a draw after expiry refused; and a draw in a fresh period
+  accepted with the allowance reset, because otherwise a monthly mandate is a
+  one-off with extra steps.
+- **Static tags (§15.9)** — `Anonymous` when nothing is signed, `SignedBy` when
+  it is, refused when the signature does not verify. **And the honest limit,
+  demonstrated rather than described:** a swapped tag carries the attacker's
+  persona and a perfectly valid signature over the attacker's own address, and
+  verifies. A signature proves who owns the address; it never proves the tag is
+  the one the venue put there.
+
 **One finding came from the fixture, not the code:** `Terms::default()` grants a
 **zero** refund window, so a client shipping default terms has silently made
 every sale final. Defensible as a default, easy to ship without noticing. §7.3
