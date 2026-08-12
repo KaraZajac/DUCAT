@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -70,35 +71,42 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 },
             )
         },
-        floatingActionButton = {
-            // The one verb that dominates, raised the way PayPal raises theirs.
-            ExtendedFloatingActionButton(
-                onClick = { /* tap flow */ },
-                icon = { Icon(Icons.Filled.SwapVert, contentDescription = null) },
-                text = { Text("Send / Request") },
-            )
-        },
-        floatingActionButtonPosition = FabPosition.Center,
         bottomBar = {
+            // PayPal seats its centre action *inside* the bar. Floating it above
+            // was a real bug on a real screen: the button covered the card
+            // beneath it, and on a payment screen the thing being covered is a
+            // number someone is about to act on.
             NavigationBar {
-                listOf(
-                    Tab.Home to Icons.Filled.Home,
-                    Tab.Accounts to Icons.Filled.AccountBalanceWallet,
-                    Tab.Activity to Icons.Filled.Receipt,
-                    Tab.Menu to Icons.Filled.Settings,
-                ).forEach { (t, icon) ->
-                    NavigationBarItem(
-                        selected = tab == t,
-                        onClick = { tab = t },
-                        icon = { Icon(icon, contentDescription = t.label) },
-                        label = { Text(t.label) },
-                    )
+                NavItem(Tab.Home, Icons.Filled.Home, tab) { tab = it }
+                NavItem(Tab.Accounts, Icons.Filled.AccountBalanceWallet, tab) { tab = it }
+
+                // The one verb that dominates, raised without leaving the bar.
+                // It is `presenter_role` (§15.2), not a mode we invented:
+                // Request means I present and you tap me, Send means I read
+                // your tap.
+                Box(
+                    Modifier.weight(1f).fillMaxHeight(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    FloatingActionButton(
+                        onClick = { /* tap flow */ },
+                        shape = CircleShape,
+                        modifier = Modifier.size(52.dp),
+                    ) {
+                        Icon(Icons.Filled.SwapVert, contentDescription = "Send or request")
+                    }
                 }
+
+                NavItem(Tab.Activity, Icons.Filled.Receipt, tab) { tab = it }
+                NavItem(Tab.Menu, Icons.Filled.Settings, tab) { tab = it }
             }
         },
     ) { padding ->
         Column(
-            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState())
+            Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
             when (tab) {
                 Tab.Home -> HomeScreen()
@@ -143,6 +151,22 @@ private fun HomeScreen() {
     // On the home screen for this build only. It answers the one question this
     // APK exists to answer, and it should be deleted the moment it has.
     BridgeSelfTest()
+}
+
+/** One bar slot, so the centre action can sit among them rather than over them. */
+@Composable
+private fun RowScope.NavItem(
+    target: Tab,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    current: Tab,
+    onSelect: (Tab) -> Unit,
+) {
+    NavigationBarItem(
+        selected = current == target,
+        onClick = { onSelect(target) },
+        icon = { Icon(icon, contentDescription = target.label) },
+        label = { Text(target.label) },
+    )
 }
 
 @Composable

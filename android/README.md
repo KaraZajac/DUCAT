@@ -74,13 +74,20 @@ therefore real — computed by the same code the vectors and the harness run —
 the wallet figures around it are still placeholders, because those come from a
 Monero wallet and that is the next piece.
 
-## Verified, and not
+## Verified
 
-The `.so` files are built, packaged for `arm64-v8a`, `armeabi-v7a` and `x86_64`,
-and the bindings compile against them. **The bridge has not been executed on a
-device or emulator.** Marshalling across JNI is the one part these tests cannot
-reach, and claiming otherwise would be exactly the kind of untested assertion the
-harness exists to catch elsewhere.
+**The bridge runs on real hardware.** Six checks passed on a physical Android
+device: a string across `RustBuffer`, §17.2's capacity for six and one outputs, a
+record with a 64-bit field, §17.8's bucket floor, and §15.5.1's stale-rate
+escalation. JNI marshalling was the one layer the Rust tests could not reach, and
+it is no longer an assumption.
+
+The first run reported one failure that was the *test's*, not the bridge's: it
+compared `.name` against `"AppSecret"` while UniFFI renders Kotlin enum names in
+SCREAMING_SNAKE, so `APP_SECRET` arrived and looked wrong. The escalation had
+worked correctly. Now compared by enum identity, because a check that asserts how
+a value is spelled rather than which value it is will keep finding bugs that are
+not there — and be ignored on the day it finds one that is.
 
 ## Next
 
