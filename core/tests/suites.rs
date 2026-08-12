@@ -255,3 +255,65 @@ fn p256_keys_have_exactly_one_legal_encoding() {
         _ => unreachable!(),
     }
 }
+
+// -- the declared suite must match the key that signed ----------------------
+
+/// An object carries a `suite` field and is verified with a key that *is* of a
+/// suite. Nothing required them to agree, so a mismatch surfaced as `BAD_SIG`.
+///
+/// That is safe — a signature cannot verify under the wrong curve — but it is
+/// the wrong diagnostic, and §18.5 requires two implementations refuse the same
+/// object for the same stated reason. A client debugging a suite bug would have
+/// been told its signature was bad.
+#[test]
+fn a_mismatched_suite_declaration_is_refused_as_such() {
+    use ducat_core::wire::*;
+
+    let ed = SecretKey::ed25519_from_bytes(&[5u8; 32]);
+    let p256 = SecretKey::p256_from_bytes(&[5u8; 32]).unwrap();
+
+    // Build an offer that *claims* suite 1 but sign it with the P-256 key.
+    let offer = FullOffer {
+        version: 1,
+        suite: 1, // the lie
+        profile: 2,
+        payto: vec![0x42; 69],
+        amount_pxmr: 1_000_000_000,
+        supported_versions: vec![1],
+        supported_suites: vec![1, 2],
+        settle_mode: 0,
+        fee_policy: FeePolicy::PayerPays,
+        nonce_echo: [0x11; 16],
+        terms: Terms::default(),
+    };
+    let env = seal(
+        &SignedBytes::from_value(offer.to_value()),
+        ObjectType::FullOffer,
+        &p256,
+    );
+
+    let err = open(&env, &p256.public()).expect_err("suite mismatch must be refused");
+    assert_eq!(
+        err.code,
+        ducat_core::reject::RejectCode::UnsupportedSuite,
+        "must name the actual problem, not report a bad signature"
+    );
+
+    // Declaring the truth works.
+    let mut honest = offer.clone();
+    honest.suite = 2;
+    let env = seal(
+        &SignedBytes::from_value(honest.to_value()),
+        ObjectType::FullOffer,
+        &p256,
+    );
+    assert!(open(&env, &p256.public()).is_ok());
+
+    // And the Ed25519 path still works when it tells the truth.
+    let env = seal(
+        &SignedBytes::from_value(offer.to_value()),
+        ObjectType::FullOffer,
+        &ed,
+    );
+    assert!(open(&env, &ed.public()).is_ok());
+}

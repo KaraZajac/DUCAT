@@ -360,6 +360,25 @@ pub fn open(envelope: &[u8], key: &PublicKey) -> Result<(ObjectType, SignedBytes
     let object_type = type_from_code(raw_type)
         .ok_or_else(|| Reject::with_detail(RejectCode::UnsupportedProfile, "unknown object type"))?;
 
+    // The object *declares* a suite and the key *is* of a suite. Nothing
+    // previously required them to agree, so a mismatch surfaced as `BAD_SIG` —
+    // technically safe, since the signature cannot verify under the wrong key,
+    // but a misleading diagnostic and a place two implementations could refuse
+    // the same object for different stated reasons. §18.5 wants them to agree.
+    let declared = body
+        .value()
+        .as_map()
+        .and_then(|m| m.get(&f::SUITE))
+        .and_then(|v| v.as_uint())
+        .ok_or_else(|| Reject::with_detail(RejectCode::Malformed, "missing suite"))?;
+    let actual = key.suite() as u64;
+    if declared != actual {
+        return Err(Reject::with_detail(
+            RejectCode::UnsupportedSuite,
+            format!("object declares suite {} but the key is suite {}", declared, actual),
+        ));
+    }
+
     let sig: [u8; 64] = sig_bytes.try_into().unwrap();
     body.verify(object_type, key, &sig)
         .map_err(|_| Reject::new(RejectCode::BadSig))?;
