@@ -282,3 +282,31 @@ mod spend {
         }
     }
 }
+
+// ---------------------------------------------------------------------------
+// A real ceremony: exists, does not compose (see README)
+// ---------------------------------------------------------------------------
+//
+// An earlier run of this spike reported that "dkg 0.6.1 ships no interactive
+// DKG", and the spec recorded that as the largest gap in §8.2's plan. **That was
+// wrong and is retracted.** The DKG was split into its own crate: `dkg-pedpop`
+// 0.6.0 implements PedPoP — Pedersen DKG with proof of possession, the
+// construction the FROST paper specifies — as a three-round protocol with blame
+// assignment, which is exactly what mutually distrusting parties need.
+//
+// The code to drive it was written and is not here, because it does not build.
+// Two independent defects, both established by compiling rather than reading:
+//
+//   1. `dkg-pedpop` 0.6.0 declares `multiexp` with `features = ["std"]` while
+//      its own source uses `multiexp::BatchVerifier`, which lives behind the
+//      `batch` feature. It does not build standalone at all.
+//
+//   2. Forcing that feature exposes the real problem. `dkg-pedpop` 0.6.0 pins
+//      `multiexp 0.4`, while `modular-frost 0.11.1` — which `monero-wallet`
+//      0.2.0 requires for multisig — pins `multiexp 0.5`. Both end up in the
+//      tree, and `dkg-pedpop` hands a `BatchVerifier` from 0.4.2 to
+//      `schnorr-signatures` 0.5.3, which wants the 0.5.1 type.
+//
+// So key generation and threshold signing cannot both be obtained from
+// crates.io today. The gap is smaller than "nobody has built this" and larger
+// than "add a dependency".

@@ -43,11 +43,31 @@ than needing §4.3.3's file-copy workaround, which exists only because
 
 ## What this run does not settle
 
-- **Keys come from a trusted dealer.** `dkg` 0.6.1 ships **no interactive DKG** —
-  the crate exposes `ThresholdKeys::new` and nothing that runs a ceremony. A real
-  deployment needs one, and a dealer who keeps the polynomial holds every share.
-  This is a genuine gap for §8.2's "embed a wallet" plan and is not visible from
-  the README's claims.
+- **Keys come from a trusted dealer** — but *not* because no interactive DKG
+  exists. An earlier version of this file said `dkg` 0.6.1 "ships no interactive
+  DKG", and the spec recorded that as §8.2's largest gap. **Retracted.** The DKG
+  was split into its own crate: `dkg-pedpop` 0.6.0 implements PedPoP, the
+  construction the FROST paper specifies, as a three-round protocol with blame
+  assignment — precisely what mutually distrusting parties need.
+
+  The real problem is narrower and more awkward: **it does not compose with the
+  wallet as published.** Two independent defects, both found by compiling:
+
+  1. `dkg-pedpop` 0.6.0 declares `multiexp` with `features = ["std"]` while its
+     own source uses `multiexp::BatchVerifier`, which lives behind the `batch`
+     feature. It does not build standalone at all.
+  2. Forcing that feature exposes the real conflict. `dkg-pedpop` pins
+     `multiexp 0.4`; `modular-frost 0.11.1` — which `monero-wallet` 0.2.0
+     requires for multisig — pins `multiexp 0.5`. Both land in the tree, and
+     `dkg-pedpop` hands a `BatchVerifier` from 0.4.2 to `schnorr-signatures`
+     0.5.3, which wants the 0.5.1 type.
+
+  So **key generation and threshold signing cannot both come from crates.io
+  today**. Untested but likely: building against the serai workspace from git,
+  where these are version-aligned. The gap is smaller than "nobody has built
+  this" and larger than "add a dependency", and the difference matters — the
+  first would mean DUCAT must design and audit a DKG, the second means it must
+  pin a source and verify a build.
 - **The view key is separate shared secret material.** The group *spend* key is
   the FROST group key, which nobody holds the private half of; the view key is
   distributed alongside. Every participant therefore sees every payment into the
