@@ -76,6 +76,13 @@ pub mod f {
     /// namespace, defined in `terms`.
     pub const TERMS: u64 = 96;
 
+    // MANDATE (§7.3)
+    pub const MANDATE_PAYEE: u64 = 97;
+    pub const MANDATE_CAP: u64 = 98;
+    pub const MANDATE_PERIOD: u64 = 99;
+    pub const MANDATE_EXPIRY: u64 = 100;
+    pub const MANDATE_NONCE: u64 = 101;
+
     // REFUND (§7.3) — reserved range 34-39
     pub const PRIOR_RECEIPT: u64 = 34;
     pub const REFUND_AMOUNT: u64 = 35;
@@ -932,4 +939,135 @@ pub fn check_refund(
     }
 
     Ok(())
+}
+
+// ----------------------------------------------------------------- MANDATE --
+
+/// §7.3. A payer-signed standing authorisation: a named payee may draw up to
+/// `cap_pxmr` per `period_s` until revoked.
+///
+/// **This is the one place the protocol authorises payment without a
+/// per-payment human checkpoint**, which §15.5 otherwise makes mandatory. The
+/// checkpoint moves rather than disappearing: the human confirms *the cap and
+/// the period*, once, and every later draw is bounded by what they saw. A
+/// mandate with no cap would be a blank cheque and is not representable.
+///
+/// Two properties are non-negotiable and are the whole difference from a
+/// card-network subscription: the cap is enforced by the **payer's own client**,
+/// and revocation is unilateral — you stop honouring requests, and that is the
+/// end of it. There is no cancellation flow to survive.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Mandate {
+    pub version: u64,
+    pub suite: u8,
+    /// The persona authorised to draw. Bound to a persona pair (§16), not a
+    /// session — a mandate outlives the transaction that created it.
+    pub payee_persona: Vec<u8>,
+    pub cap_pxmr: u64,
+    pub period_s: u64,
+    /// Absolute expiry. A mandate that never expires is one the user will
+    /// forget they granted.
+    pub expiry: u64,
+    pub nonce: [u8; 16],
+}
+
+impl Mandate {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Mandate)));
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::MANDATE_PAYEE, Value::Bytes(self.payee_persona.clone()));
+        m.insert(f::MANDATE_CAP, Value::Uint(self.cap_pxmr));
+        m.insert(f::MANDATE_PERIOD, Value::Uint(self.period_s));
+        m.insert(f::MANDATE_EXPIRY, Value::Uint(self.expiry));
+        m.insert(f::MANDATE_NONCE, Value::Bytes(self.nonce.to_vec()));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        if r.uint(f::TYPE)? != type_code(ObjectType::Mandate) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "object type is not MANDATE",
+            ));
+        }
+        let out = Mandate {
+            version: r.uint(f::VERSION)?,
+            suite: r.uint(f::SUITE)? as u8,
+            payee_persona: r.bytes(f::MANDATE_PAYEE, None)?,
+            cap_pxmr: r.uint(f::MANDATE_CAP)?,
+            period_s: r.uint(f::MANDATE_PERIOD)?,
+            expiry: r.uint(f::MANDATE_EXPIRY)?,
+            nonce: r.bytes(f::MANDATE_NONCE, Some(16))?.try_into().unwrap(),
+        };
+        r.finish()?;
+        // A capless or periodless mandate is a blank cheque. Refusing at parse
+        // time means such an object cannot exist in a client's store at all.
+        if out.cap_pxmr == 0 || out.period_s == 0 {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a mandate must declare a non-zero cap and period (§7.3)",
+            ));
+        }
+        Ok(out)
+    }
+}
+
+/// What a payer's client must track to enforce a mandate locally.
+#[derive(Debug, Clone, Default)]
+pub struct MandateUsage {
+    /// Start of the current period, in the same epoch as `now`.
+    pub period_start: u64,
+    /// Drawn so far within the current period.
+    pub drawn_pxmr: u64,
+}
+
+/// Authorise a draw against a mandate, or refuse it.
+///
+/// Run by the **payer's** client. §7.3 puts enforcement here deliberately: a cap
+/// the payee enforces is not a cap, it is a promise.
+pub fn check_mandate_draw(
+    mandate: &Mandate,
+    usage: &MandateUsage,
+    requesting_persona: &[u8],
+    amount_pxmr: u64,
+    now: u64,
+) -> Result<MandateUsage, Reject> {
+    if now >= mandate.expiry {
+        return Err(Reject::with_detail(
+            RejectCode::Expired,
+            "mandate has expired",
+        ));
+    }
+    // Only the named persona may draw. Without this a mandate is bearer paper.
+    if requesting_persona != mandate.payee_persona.as_slice() {
+        return Err(Reject::with_detail(
+            RejectCode::PolicyRefused,
+            "this persona is not the one the mandate names",
+        ));
+    }
+
+    // Roll the period forward if the last draw was in an earlier one. Periods
+    // are anchored to the first draw rather than to a calendar, so there is no
+    // timezone in the protocol and no midnight at which caps reset globally.
+    let mut next = usage.clone();
+    if usage.period_start == 0 || now.saturating_sub(usage.period_start) >= mandate.period_s {
+        next.period_start = now;
+        next.drawn_pxmr = 0;
+    }
+
+    let would_be = next.drawn_pxmr.saturating_add(amount_pxmr);
+    if would_be > mandate.cap_pxmr {
+        return Err(Reject::with_detail(
+            RejectCode::PolicyRefused,
+            format!(
+                "draw would exceed the mandate cap: {} + {} > {}",
+                next.drawn_pxmr, amount_pxmr, mandate.cap_pxmr
+            ),
+        ));
+    }
+    next.drawn_pxmr = would_be;
+    Ok(next)
 }

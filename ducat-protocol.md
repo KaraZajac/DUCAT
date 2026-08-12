@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.33 — Consolidated**
+**Draft 0.34 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.34** — **`MANDATE` implemented, and §15.5 amended to admit it.** §15.5 said the confirm tap is *the one mandatory human checkpoint*; §7.3's mandates authorise payment without one. That was a flat contradiction, resolved by stating that the checkpoint **moves rather than disappearing** — the human confirms a cap and a period once, and every later draw is bounded by what they signed. Holds only because a capless or periodless mandate is now *unparseable* rather than merely refused, the cap is enforced by the payer's own client, and only the named persona may draw. Periods anchor to the first draw, keeping timezones out of the protocol.
 - **0.33** — **`ABORT` made directional once a meter is running.** §6 lists it as available to either party with no penalty — correct before value accrues, and a free exit afterwards: a payer could open a tab, consume, abort, and owe nothing. From `METERING` only the operator may void cleanly; a payer leaving is abandonment via `MeterExpired`, which leaves evidence. Also recorded that `CANCEL` does not apply to a running meter, since stopping it and paying what accrued is the instrument that already exists.
 - **0.32** — **`METERING` state added; §15.7 and §6.2 had been contradicting each other.** A metered session's `start` leg landed in `ACCEPTED`, whose 60-second deadline aborted it — so a bar tab died one minute after being opened. The two sections were written independently and never checked against each other. `METERING` is deliberately not wall-clock bounded, because its limit lives in `terms.meter_max_s` and the machine holds no terms; expiry arrives as an explicit `MeterExpired` event, following `ConfirmationsReached`'s pattern. Abandonment routes to `CLOSED` with a single-sided receipt, per §15.7.
 - **0.31** — **Consecutive capacity corrected from an equality to a bound.** A drain test predicted six consecutive purchases from six unlocked outputs and achieved four: two of the payments consumed two outputs each. Input selection belongs to the wallet, not the client, so capacity is *at most* the output count and can be about half. The earlier seven-outputs-seven-payments result was over-fitted to a single run where one input happened to suffice each time. §17.2 now requires provisioning more finely than the naive calculation, checking capacity before presenting an offer, and never quoting an exact count to a user.
@@ -449,7 +450,7 @@ Four things every commercial profile needs, specified once instead of per-profil
 
 **Cancellation and no-show.** ABORT is free pre-FUND, which is correct and insufficient — a rider who cancels after the driver has driven ten minutes has imposed a real cost. `CANCEL` covers the post-ACCEPT window and invokes `terms.cancellation` from the offer the payer already signed: a fee schedule, typically time-graded, that was visible on the confirm screen. The fee settles from the canceling party's bond (§17) where one exists. **A cancellation fee is only enforceable against collateral** — against an unbonded counterparty it is uncollectable, and the spec does not pretend otherwise. Providers price that risk through `accept_unbonded` policy (§17.6).
 
-**Standing mandates.** Rent, dues, a weekly delivery, a subscription. A `MANDATE` is a payer-signed authorization for a named payee to request up to `cap` per `period` until revoked, bound to a persona pair (§16) rather than to a session. Two properties are non-negotiable, and together they are the entire difference from a card-network subscription: the cap is enforced by the payer's *own* client, and **revocation is unilateral, instant, and requires no cooperation from the payee.** You stop honoring requests and that is the end of it — no cancellation flow to navigate, no retention offer, no one to email.
+**Standing mandates.** *Implemented and tested.* Rent, dues, a weekly delivery, a subscription. A `MANDATE` is a payer-signed authorization for a named payee to request up to `cap` per `period` until revoked, bound to a persona pair (§16) rather than to a session. Two properties are non-negotiable, and together they are the entire difference from a card-network subscription: the cap is enforced by the payer's *own* client, and **revocation is unilateral, instant, and requires no cooperation from the payee.** You stop honoring requests and that is the end of it — no cancellation flow to navigate, no retention offer, no one to email.
 
 **Multi-payee splits.** §15.8 splits one bill across N payers. The mirror — one payer, N payees — is a band splitting a door take, a courier relay, a driver and a vehicle owner dividing a fare. Monero settles multiple outputs in a single transaction, so this is an offer field rather than new machinery: `payout_split : [ { payto, share } ]`, committed under `offer_commit` and verified by the payer's app before signing. Every payee's share is visible to the payer, which is the honest default — **a split you cannot see is a fee.**
 ### 7.4 Receipts as Records — Storage, Backup, Export
@@ -988,6 +989,16 @@ Concretely, the payer's app MUST:
 4. **Sign only what it displayed.** `ACCEPT` covers `{ tap.nonce, H(FullOffer), amount_final, dest, ts, reader_session_pk }`. If the presenter later claims a different price or destination, the payer's signed `ACCEPT` is the authoritative record — and the payer never signed anything they didn't see.
 
 Silence between the two humans is fine. A silent *payer's app* is not: the confirm tap is the one mandatory human checkpoint, and it renders solely from data the payer's own app parsed and verified.
+
+**One exception, and it is a moved checkpoint rather than a missing one.** §7.3's standing mandates authorise payment *without* a per-payment confirmation — that is their entire purpose, and it flatly contradicts the paragraph above as it was originally written. The resolution is that the human checkpoint happens **once, at mandate creation**, and what they confirm is not an amount but a **cap and a period**. Every later draw is bounded by what they saw and signed.
+
+This holds only because of three things, and a mandate missing any of them is a blank cheque signed once:
+
+- **A cap and period are structurally required.** A mandate declaring neither is not merely refused, it is unparseable — so one cannot exist in a client's store to be honoured by mistake.
+- **The cap is enforced by the payer's own client** (§7.3). A cap the payee enforces is not a cap, it is a promise.
+- **Only the named persona may draw**, or the mandate is bearer paper that anyone holding it can spend.
+
+Periods anchor to the first draw rather than to a calendar, which keeps timezones out of the protocol and means no global midnight at which every cap in a market resets at once.
 
 ---
 
@@ -1557,7 +1568,8 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 28–30 | `RECEIPT` (§6) | **Assigned** |
 | 31–33 | `TapStatic` (§15.9) | Reserved |
 | 34–37 | `REFUND` (§7.3) | **Assigned** |
-| 38–39 | `CANCEL`, `MANDATE` (§7.3) | Reserved |
+| 38–39 | `CANCEL` (§7.3) | Reserved |
+| 97–101 | `MANDATE` (§7.3) | **Assigned** |
 | 40–45 | `CONTACT_OFFER`, `CONTACT_ACCEPT` (§16.3) | Reserved |
 | 46–51 | `bond_proof`, `TXID` (§17.4) | Reserved |
 | 52–59 | `DISPUTE`, `EVIDENCE`, `RULING` (§9.3.2) | Reserved |
