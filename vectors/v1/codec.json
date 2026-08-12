@@ -8,6 +8,7 @@
       },
       "hint": "CBOR major type 1",
       "input_hex": "20",
+      "kind": "codec.decode",
       "name": "nint_minus_1_refused",
       "why": "no object in the protocol carries a negative number — money is unsigned piconero, map keys are unsigned, every timestamp is a count. Refusal is the reversible choice: accepting a type later extends the format, while refusing what was once accepted breaks every peer relying on it."
     },
@@ -19,6 +20,7 @@
       },
       "hint": "CBOR major type 1",
       "input_hex": "38ff",
+      "kind": "codec.decode",
       "name": "nint_minus_256_refused",
       "why": "no object in the protocol carries a negative number — money is unsigned piconero, map keys are unsigned, every timestamp is a count. Refusal is the reversible choice: accepting a type later extends the format, while refusing what was once accepted breaks every peer relying on it."
     },
@@ -28,6 +30,7 @@
         "reencodes_to_hex": "00"
       },
       "input_hex": "00",
+      "kind": "codec.decode",
       "name": "uint_0_shortest_form",
       "why": "each integer must use the shortest head that can carry it"
     },
@@ -37,6 +40,7 @@
         "reencodes_to_hex": "17"
       },
       "input_hex": "17",
+      "kind": "codec.decode",
       "name": "uint_23_shortest_form",
       "why": "each integer must use the shortest head that can carry it"
     },
@@ -46,6 +50,7 @@
         "reencodes_to_hex": "1818"
       },
       "input_hex": "1818",
+      "kind": "codec.decode",
       "name": "uint_24_shortest_form",
       "why": "each integer must use the shortest head that can carry it"
     },
@@ -55,6 +60,7 @@
         "reencodes_to_hex": "18ff"
       },
       "input_hex": "18ff",
+      "kind": "codec.decode",
       "name": "uint_255_shortest_form",
       "why": "each integer must use the shortest head that can carry it"
     },
@@ -64,6 +70,7 @@
         "reencodes_to_hex": "190100"
       },
       "input_hex": "190100",
+      "kind": "codec.decode",
       "name": "uint_256_shortest_form",
       "why": "each integer must use the shortest head that can carry it"
     },
@@ -73,6 +80,7 @@
         "reencodes_to_hex": "19ffff"
       },
       "input_hex": "19ffff",
+      "kind": "codec.decode",
       "name": "uint_65535_shortest_form",
       "why": "each integer must use the shortest head that can carry it"
     },
@@ -82,6 +90,7 @@
         "reencodes_to_hex": "1a00010000"
       },
       "input_hex": "1a00010000",
+      "kind": "codec.decode",
       "name": "uint_65536_shortest_form",
       "why": "each integer must use the shortest head that can carry it"
     },
@@ -91,6 +100,7 @@
         "reencodes_to_hex": "1affffffff"
       },
       "input_hex": "1affffffff",
+      "kind": "codec.decode",
       "name": "uint_4294967295_shortest_form",
       "why": "each integer must use the shortest head that can carry it"
     },
@@ -100,6 +110,7 @@
         "reencodes_to_hex": "1b0000000100000000"
       },
       "input_hex": "1b0000000100000000",
+      "kind": "codec.decode",
       "name": "uint_4294967296_shortest_form",
       "why": "each integer must use the shortest head that can carry it"
     },
@@ -109,6 +120,7 @@
         "reencodes_to_hex": "1bffffffffffffffff"
       },
       "input_hex": "1bffffffffffffffff",
+      "kind": "codec.decode",
       "name": "uint_18446744073709551615_shortest_form",
       "why": "each integer must use the shortest head that can carry it"
     },
@@ -120,6 +132,7 @@
       },
       "hint": "0 must use the immediate form",
       "input_hex": "1800",
+      "kind": "codec.decode",
       "name": "overlong_uint_0",
       "why": "a longer-than-necessary integer encoding is not canonical"
     },
@@ -131,6 +144,7 @@
       },
       "hint": "23 is the last immediate-form value",
       "input_hex": "1817",
+      "kind": "codec.decode",
       "name": "overlong_uint_23",
       "why": "a longer-than-necessary integer encoding is not canonical"
     },
@@ -142,6 +156,7 @@
       },
       "hint": "24 belongs in the 1-byte form",
       "input_hex": "190018",
+      "kind": "codec.decode",
       "name": "overlong_uint_24",
       "why": "a longer-than-necessary integer encoding is not canonical"
     },
@@ -153,6 +168,7 @@
       },
       "hint": "255 belongs in the 1-byte form",
       "input_hex": "1900ff",
+      "kind": "codec.decode",
       "name": "overlong_uint_255",
       "why": "a longer-than-necessary integer encoding is not canonical"
     },
@@ -164,6 +180,7 @@
       },
       "hint": "256 belongs in the 2-byte form",
       "input_hex": "1a00000100",
+      "kind": "codec.decode",
       "name": "overlong_uint_256",
       "why": "a longer-than-necessary integer encoding is not canonical"
     },
@@ -175,6 +192,7 @@
       },
       "hint": "65535 belongs in the 2-byte form",
       "input_hex": "1b000000000000ffff",
+      "kind": "codec.decode",
       "name": "overlong_uint_65535",
       "why": "a longer-than-necessary integer encoding is not canonical"
     },
@@ -184,6 +202,7 @@
         "reencodes_to_hex": "a201000200"
       },
       "input_hex": "a201000200",
+      "kind": "codec.decode",
       "name": "map_keys_ascending",
       "why": "canonical map key order is ascending and distinct"
     },
@@ -195,6 +214,7 @@
       },
       "hint": "keys must strictly ascend",
       "input_hex": "a202000100",
+      "kind": "codec.decode",
       "name": "map_keys_descending",
       "why": "map keys out of ascending order are not canonical"
     },
@@ -206,6 +226,7 @@
       },
       "hint": "duplicate map key",
       "input_hex": "a201000100",
+      "kind": "codec.decode",
       "name": "map_keys_duplicate",
       "why": "a repeated key must be an error, never a last-wins overwrite"
     },
@@ -217,6 +238,7 @@
       },
       "hint": "text key",
       "input_hex": "a1616100",
+      "kind": "codec.decode",
       "name": "map_key_not_integer",
       "why": "map keys are unsigned integers only (§18.1)"
     },
@@ -228,6 +250,7 @@
       },
       "hint": "float encountered",
       "input_hex": "f90000",
+      "kind": "codec.decode",
       "name": "float_half",
       "why": "money is integers; a float anywhere is malformed (§18.2)"
     },
@@ -239,6 +262,7 @@
       },
       "hint": "float encountered",
       "input_hex": "fa00000000",
+      "kind": "codec.decode",
       "name": "float_single",
       "why": "money is integers; a float anywhere is malformed (§18.2)"
     },
@@ -250,6 +274,7 @@
       },
       "hint": "float encountered",
       "input_hex": "fb0000000000000000",
+      "kind": "codec.decode",
       "name": "float_double",
       "why": "money is integers; a float anywhere is malformed (§18.2)"
     },
@@ -261,6 +286,7 @@
       },
       "hint": "float encountered",
       "input_hex": "a101f90000",
+      "kind": "codec.decode",
       "name": "float_nested_in_map",
       "why": "money is integers; a float anywhere is malformed (§18.2)"
     },
@@ -272,6 +298,7 @@
       },
       "hint": "the tag allowlist is empty",
       "input_hex": "c000",
+      "kind": "codec.decode",
       "name": "tag",
       "why": "restricted CBOR profile (§18.1)"
     },
@@ -283,6 +310,7 @@
       },
       "hint": "indefinite lengths are forbidden",
       "input_hex": "5f",
+      "kind": "codec.decode",
       "name": "indefinite_bytes",
       "why": "restricted CBOR profile (§18.1)"
     },
@@ -294,6 +322,7 @@
       },
       "hint": "indefinite lengths are forbidden",
       "input_hex": "9f",
+      "kind": "codec.decode",
       "name": "indefinite_array",
       "why": "restricted CBOR profile (§18.1)"
     },
@@ -305,6 +334,7 @@
       },
       "hint": "indefinite lengths are forbidden",
       "input_hex": "bf",
+      "kind": "codec.decode",
       "name": "indefinite_map",
       "why": "restricted CBOR profile (§18.1)"
     },
@@ -316,6 +346,7 @@
       },
       "hint": "a signed object is exactly its bytes",
       "input_hex": "0000",
+      "kind": "codec.decode",
       "name": "trailing_bytes",
       "why": "restricted CBOR profile (§18.1)"
     },
@@ -327,6 +358,7 @@
       },
       "hint": "input ended mid-item",
       "input_hex": "1901",
+      "kind": "codec.decode",
       "name": "truncated_head",
       "why": "restricted CBOR profile (§18.1)"
     },
@@ -338,6 +370,7 @@
       },
       "hint": "input ended mid-item",
       "input_hex": "42ff",
+      "kind": "codec.decode",
       "name": "truncated_bytes",
       "why": "restricted CBOR profile (§18.1)"
     },
@@ -349,6 +382,7 @@
       },
       "hint": "text must be valid UTF-8",
       "input_hex": "62fffe",
+      "kind": "codec.decode",
       "name": "invalid_utf8",
       "why": "restricted CBOR profile (§18.1)"
     },
@@ -360,6 +394,7 @@
       },
       "hint": "a length header must not drive allocation before data arrives",
       "input_hex": "9affffffff",
+      "kind": "codec.decode",
       "name": "oversized_array_header",
       "why": "restricted CBOR profile (§18.1)"
     },
@@ -371,6 +406,7 @@
       },
       "hint": "a length header must not drive allocation before data arrives",
       "input_hex": "5affffffff",
+      "kind": "codec.decode",
       "name": "oversized_bytes_header",
       "why": "restricted CBOR profile (§18.1)"
     },
@@ -382,6 +418,7 @@
       },
       "hint": "exceeds the 16-level nesting bound",
       "input_hex": "81818181818181818181818181818181818100",
+      "kind": "codec.decode",
       "name": "nesting_too_deep",
       "why": "a small payload must not be able to exhaust the stack during decode"
     },
@@ -392,6 +429,7 @@
         "reencodes_to_hex": "a10101"
       },
       "input_hex": "a10101",
+      "kind": "codec.decode",
       "name": "piconero_one",
       "why": "amounts are integer piconero; 2^53+1 is the first integer an f64 cannot represent, so a float-based client fails here"
     },
@@ -402,6 +440,7 @@
         "reencodes_to_hex": "a1011b00000246139ca800"
       },
       "input_hex": "a1011b00000246139ca800",
+      "kind": "codec.decode",
       "name": "piconero_2_5_xmr",
       "why": "amounts are integer piconero; 2^53+1 is the first integer an f64 cannot represent, so a float-based client fails here"
     },
@@ -412,6 +451,7 @@
         "reencodes_to_hex": "a1011b0020000000000001"
       },
       "input_hex": "a1011b0020000000000001",
+      "kind": "codec.decode",
       "name": "piconero_2pow53_plus_1",
       "why": "amounts are integer piconero; 2^53+1 is the first integer an f64 cannot represent, so a float-based client fails here"
     },
@@ -422,6 +462,7 @@
         "reencodes_to_hex": "a1011bffffffffffffffff"
       },
       "input_hex": "a1011bffffffffffffffff",
+      "kind": "codec.decode",
       "name": "piconero_u64_max",
       "why": "amounts are integer piconero; 2^53+1 is the first integer an f64 cannot represent, so a float-based client fails here"
     }

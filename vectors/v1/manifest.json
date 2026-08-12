@@ -2,7 +2,8 @@
   "counts": {
     "backup": 7,
     "codec": 41,
-    "negotiate": 6,
+    "commit": 2,
+    "negotiate": 4,
     "signing": 17,
     "state": 29,
     "transcript": 4
@@ -15,7 +16,8 @@
     "18.9(5) failure paths and the single-sided receipt": true,
     "18.9(6) negotiation including a downgrade attempt": true,
     "18.9(7) piconero amounts that defeat a float implementation": true,
-    "4.3 backup format known-answer and rejection cases": true
+    "4.3 backup format known-answer and rejection cases": true,
+    "every case carries a `kind` discriminator and validates against schema.json": true
   },
   "deterministic": "all keys derive from fixed seeds; no clock or RNG is consulted, so regeneration is byte-identical on an unchanged implementation",
   "does_not_yet_cover": {

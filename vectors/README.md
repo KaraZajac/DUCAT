@@ -5,19 +5,58 @@ Language-neutral test vectors for the DUCAT wire format and contract logic
 release.
 
     vectors/v1/
+      schema.json      the case format, normative — read this first
       manifest.json    metadata, counts, and an explicit statement of what is NOT covered
       codec.json       deterministic CBOR (§18.1) and integer-piconero money (§18.2)
       signing.json     domain separation, cross-context replay, key encoding (§18.3)
       state.json       transitions, deadlines, and refusals (§18.4, §6.2)
-      negotiate.json   suite/version selection and the downgrade attempt (§18.6)
+      negotiate.json   suite/version selection (§18.6)
+      commit.json      commitment domain separation and downgrade substitution (§18.3, §18.6)
       transcript.json  full per-profile transcripts, replayed end to end (§18.9(4))
-      backup.json      the persona backup format (§4.3) — see below
+      backup.json      the persona backup format (§4.3)
 
-A second implementation runs these files: `conformance/ducat_check.py`. It found
-three defects in the specification on its first pass (§18.11) — see
-`conformance/README.md`. **The case schema below is reverse-engineered from
-examples rather than specified, which is the largest remaining obstacle to a
-genuine third implementation.**
+## Building a client against these
+
+**Dispatch on `kind`, never on the filename.** Every case carries one, and it is
+the only discriminator. File names group cases for human convenience and carry no
+meaning to a consumer — a `commit.substitution` case would run identically if it
+lived in `negotiate.json`, which is exactly where it used to live.
+
+The ten kinds:
+
+| `kind` | What it asserts |
+|---|---|
+| `codec.decode` | Decode `input_hex`; on success re-encode and match `reencodes_to_hex` |
+| `signing.verify` | Verify `sig_hex` over `sig_input(verify_as, suite, object_hex)` |
+| `signing.pubkey` | Parse `pubkey_hex` alone — no object, no signature |
+| `negotiate.select` | Choose a version and suite from `offered` under `local_versions` and `payer_preference` |
+| `commit.purposes` | One byte string, four purposes, four distinct digests |
+| `commit.substitution` | The genuine offer reproduces `offer_commit_hex`; the stripped one does not |
+| `state.sequence` | Drive the machine through `steps`, checking `next` and `effect` at each |
+| `transcript.replay` | Replay a complete four-object transaction |
+| `transcript.substitution` | An offer delivered after the tap must not match the tap's commitment |
+| `backup.import` | Decrypt a backup bundle and compare every decoded field |
+
+Two conventions worth knowing before you start:
+
+- **`why` is required on every case and is not decorative.** An implementer who
+  knows what an input defends against finds the bug faster than one who sees only
+  a failing hex string. `hint` is the opposite — non-normative, names the internal
+  rule that fired, and MUST NOT be parsed. Two clients may reject the same input
+  for differently-named reasons and still interoperate.
+- **`expect.ok: false` always carries `reject_code` and `reject_name`.** "It
+  failed somehow" is not an interoperable assertion.
+
+Validate any changes you make:
+
+    python3 conformance/validate_vectors.py     # every case against schema.json
+    python3 conformance/ducat_check.py          # a second implementation runs them
+
+The schema is hand-written rather than emitted by the generator, deliberately: a
+schema produced by the same program that produces the vectors would agree with
+that program's mistakes. It has already earned that — on its first run it caught
+a negotiation case that never said which versions the local client supported, and
+an offer-substitution attack filed as a transcript replay.
 
 ## How to read a case
 

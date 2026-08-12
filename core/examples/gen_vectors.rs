@@ -519,7 +519,11 @@ fn negotiate_cases() -> Vec<J> {
         "why": "suite identifiers encode no preference. P-256 (2) exists only because iOS's Secure Enclave holds no Ed25519 key — a hardware-forced fallback, not an upgrade — so 'highest wins' would select the weaker option on every dual-capable pair.",
         "offered": { "versions": offered.versions, "suites": offered.suites.iter().map(|s| *s as u8).collect::<Vec<_>>() },
         "payer_preference": [ed as u8, p as u8],
-        "expect": { "version": sel.version, "suite": sel.suite as u8 }
+        // Every negotiation case carries all three inputs. A case that omits one
+        // forces the consumer to invent a default, which is exactly how two
+        // implementations diverge — the schema now requires them.
+        "local_versions": [1],
+        "expect": { "ok": true, "version": sel.version, "suite": sel.suite as u8 }
     }));
 
     let offered_hi = Supported { versions: vec![1, 2, 3], suites: vec![ed] };
@@ -530,7 +534,8 @@ fn negotiate_cases() -> Vec<J> {
         "why": "versions, unlike suites, are ordered by construction: higher means newer",
         "offered": { "versions": [1, 2, 3], "suites": [ed as u8] },
         "local_versions": [1, 2],
-        "expect": { "version": sel_hi.version, "suite": sel_hi.suite as u8 }
+        "payer_preference": [ed as u8],
+        "expect": { "ok": true, "version": sel_hi.version, "suite": sel_hi.suite as u8 }
     }));
 
     for (name, offered, why, code) in [
@@ -848,6 +853,125 @@ fn backup_cases() -> Vec<J> {
     cases
 }
 
+/// Rewrite an authored case into the published shape.
+///
+/// §18.11 recorded that the vector files were neither uniform nor documented: a
+/// second implementer met a non-uniform signing schema, two non-negotiation
+/// cases inside `negotiate.json`, and three spellings of one event. Documenting
+/// that in a schema would have formalised the mess. This normalises it instead,
+/// at emit time, so the authoring code stays readable and the published artifact
+/// stays uniform.
+///
+/// Returns the file the case belongs in and the rewritten case.
+fn normalize(category: &str, mut c: J) -> (&'static str, J) {
+    let obj = c.as_object_mut().unwrap();
+
+    let (file, kind): (&str, &str) = match category {
+        "codec" => ("codec", "codec.decode"),
+        "signing" => {
+            if obj.contains_key("object_hex") {
+                ("signing", "signing.verify")
+            } else {
+                // Four cases test public-key parsing alone and carry no object
+                // or signature. That is legitimate and was undiscoverable.
+                ("signing", "signing.pubkey")
+            }
+        }
+        "negotiate" => {
+            if obj.get("expect").and_then(|e| e.get("digests_by_purpose")).is_some() {
+                ("commit", "commit.purposes")
+            } else if obj.contains_key("genuine_offer_hex") {
+                ("commit", "commit.substitution")
+            } else {
+                ("negotiate", "negotiate.select")
+            }
+        }
+        "state" => ("state", "state.sequence"),
+        "transcript" => {
+            if obj.contains_key("tap_present_hex") {
+                ("transcript", "transcript.replay")
+            } else {
+                // An offer substituted after the tap. Filed under transcripts
+                // and not one: it exercises a single commitment link rather
+                // than replaying a whole chain, and it carries neither the tap
+                // nor the receipt.
+                ("transcript", "transcript.substitution")
+            }
+        }
+        "backup" => ("backup", "backup.import"),
+        other => panic!("no normalization rule for category {}", other),
+    };
+    obj.insert("kind".into(), json!(kind));
+
+    if kind == "state.sequence" {
+        // One event spelling, self-describing. Previously a step could say
+        // "Fund", "Accept { from: Payer }", "Elapsed(60s)", {"Elapsed": 60}, or
+        // {"Accept": {"from": "Payer"}} — five encodings of one concept.
+        let steps = match obj.remove("steps") {
+            Some(J::Array(a)) => a,
+            _ => {
+                let ev = obj.remove("event").expect("state case needs an event");
+                let expect = obj.remove("expect").expect("state case needs an expect");
+                vec![json!({ "event": ev, "expect": expect })]
+            }
+        };
+        let steps: Vec<J> = steps
+            .into_iter()
+            .map(|s| {
+                let sm = s.as_object().unwrap();
+                let ev = normalize_event(sm.get("event").unwrap());
+                // Older cases put next/effect beside the event; move them under
+                // `expect` so every case has exactly one place for assertions.
+                let expect = match sm.get("expect") {
+                    Some(e) => e.clone(),
+                    None => {
+                        let mut m = Map::new();
+                        for k in ["next", "effect", "ok", "reject_code", "reject_name"] {
+                            if let Some(val) = sm.get(k) {
+                                m.insert(k.into(), val.clone());
+                            }
+                        }
+                        J::Object(m)
+                    }
+                };
+                json!({ "event": ev, "expect": expect })
+            })
+            .collect();
+        obj.insert("steps".into(), json!(steps));
+
+        // A deadline is an assertion about (from, mode), not about any one step.
+        if let Some(d) = obj.remove("deadline_secs") {
+            obj.insert("deadline_s".into(), d);
+        }
+    }
+
+    (file, c)
+}
+
+/// `{"name": …, "from": …?, "elapsed_s": …?}` — the one event encoding.
+fn normalize_event(ev: &J) -> J {
+    if let Some(s) = ev.as_str() {
+        if let Some(rest) = s.strip_prefix("Elapsed(") {
+            let n: u64 = rest.trim_end_matches("s)").parse().expect("elapsed secs");
+            return json!({ "name": "Elapsed", "elapsed_s": n });
+        }
+        if let Some((name, rest)) = s.split_once('{') {
+            let from = rest.split(':').nth(1).unwrap().trim().trim_end_matches('}').trim();
+            return json!({ "name": name.trim(), "from": from });
+        }
+        return json!({ "name": s.trim() });
+    }
+    let m = ev.as_object().expect("event must be a string or an object");
+    let (name, arg) = m.iter().next().expect("event object is empty");
+    if name == "Elapsed" {
+        return json!({ "name": "Elapsed", "elapsed_s": arg.as_u64().unwrap() });
+    }
+    if let Some(from) = arg.get("from") {
+        return json!({ "name": name, "from": from });
+    }
+    json!({ "name": name })
+}
+
 fn main() -> std::io::Result<()> {
     let dir = std::path::Path::new("../vectors").join(format!("v{}", VECTOR_SET_VERSION));
     std::fs::create_dir_all(&dir)?;
@@ -861,8 +985,19 @@ fn main() -> std::io::Result<()> {
         ("backup", backup_cases()),
     ];
 
+    // Normalize and route. A case's authored category is not necessarily the
+    // file it belongs in — the two commitment cases were living inside
+    // negotiate.json, which is one of the things §18.11 recorded.
+    let mut by_file: std::collections::BTreeMap<&str, Vec<J>> = Default::default();
+    for (category, cases) in files {
+        for c in cases {
+            let (file, norm) = normalize(category, c);
+            by_file.entry(file).or_default().push(norm);
+        }
+    }
+
     let mut counts = Map::new();
-    for (name, cases) in &files {
+    for (name, cases) in &by_file {
         counts.insert(name.to_string(), json!(cases.len()));
         let body = json!({ "category": name, "cases": cases });
         std::fs::write(
@@ -871,7 +1006,7 @@ fn main() -> std::io::Result<()> {
         )?;
     }
 
-    let total: usize = files.iter().map(|(_, c)| c.len()).sum();
+    let total: usize = by_file.values().map(|c| c.len()).sum();
     let manifest = json!({
         "vector_set": VECTOR_SET_VERSION,
         "protocol_draft": PROTOCOL_DRAFT,
@@ -888,7 +1023,8 @@ fn main() -> std::io::Result<()> {
             "18.9(5) failure paths and the single-sided receipt": true,
             "18.9(6) negotiation including a downgrade attempt": true,
             "18.9(7) piconero amounts that defeat a float implementation": true,
-            "4.3 backup format known-answer and rejection cases": true
+            "4.3 backup format known-answer and rejection cases": true,
+            "every case carries a `kind` discriminator and validates against schema.json": true
         },
         "does_not_yet_cover": {
             "escrow and fast/1 transcripts": "only direct settlement is covered; TXPROOF and escrow objects are unimplemented",
@@ -903,8 +1039,8 @@ fn main() -> std::io::Result<()> {
     )?;
 
     println!("wrote {} cases to {}", total, dir.display());
-    for (name, cases) in &files {
-        println!("  {:<10} {}", name, cases.len());
+    for (name, cases) in &by_file {
+        println!("  {:<12} {}", name, cases.len());
     }
     Ok(())
 }

@@ -1,0 +1,412 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ducatproject.org/vectors/v1/schema.json",
+  "title": "DUCAT conformance vector files",
+  "description": "Every file in this directory except manifest.json and this schema. A case's `kind` selects which fields are required; nothing else discriminates, and nothing is optional-by-convention. This schema is hand-written rather than emitted by the generator, deliberately: a schema produced by the same program that produces the vectors would agree with that program's mistakes, which is O21's objection in a smaller frame.",
+
+  "type": "object",
+  "required": ["category", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": ["codec", "signing", "negotiate", "commit", "state", "transcript", "backup"]
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+
+  "$defs": {
+    "hex": {
+      "type": "string",
+      "pattern": "^([0-9a-f][0-9a-f])*$",
+      "description": "Lower-case hex, even length. Never prefixed."
+    },
+    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+
+    "rejectCode": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 16,
+      "description": "A §18.5 wire code. Two clients must agree that an input is rejected and with which code; they need not agree on which internal rule said so."
+    },
+
+    "outcome": {
+      "type": "object",
+      "description": "Either a success or a typed refusal, never both. `ok: false` requires the code, because 'it failed somehow' is not an interoperable assertion.",
+      "properties": {
+        "ok": { "type": "boolean" },
+        "reject_code": { "$ref": "#/$defs/rejectCode" },
+        "reject_name": { "type": "string" }
+      },
+      "if": { "properties": { "ok": { "const": false } }, "required": ["ok"] },
+      "then": { "required": ["ok", "reject_code", "reject_name"] }
+    },
+
+    "event": {
+      "type": "object",
+      "description": "One encoding, self-describing. Earlier releases spelled the same concept five ways ('Fund', 'Accept { from: Payer }', 'Elapsed(60s)', {\"Elapsed\": 60}, {\"Accept\": {\"from\": \"Payer\"}}), which a second implementer had to reverse-engineer (§18.11).",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "TapPresent", "FullOffer", "Accept", "Fund", "Cancel", "Abort",
+            "Proof", "TxProof", "Receipt", "Dispute",
+            "MeterStart", "MeterStop", "MeterExpired", "DeliveryWindowExpired",
+            "ConfirmationsReached", "CureWindowExpired",
+            "ContactOffer", "ContactAccept", "Elapsed"
+          ]
+        },
+        "from": {
+          "type": "string",
+          "enum": ["Payer", "Payee"],
+          "description": "The originator. §18.4.1(1): direction constrains who may *emit* a message, never who evaluates it, so this travels with the event and is established by signature before the machine sees it. A client that instead guards on its own role refuses every ACCEPT it receives."
+        },
+        "elapsed_s": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Seconds elapsed in the current state, for `Elapsed` only. Monotonic (§6.2). Deadline boundaries are inclusive: elapsed == deadline fires."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "name": { "const": "Elapsed" } }, "required": ["name"] },
+          "then": { "required": ["elapsed_s"] },
+          "else": { "not": { "required": ["elapsed_s"] } }
+        }
+      ]
+    },
+
+    "case": {
+      "type": "object",
+      "required": ["kind", "name", "why"],
+      "$comment": "`expect` is required for every kind except state.sequence, whose assertions live per-step — see the per-kind branches below.",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "codec.decode", "signing.verify", "signing.pubkey",
+            "negotiate.select", "commit.purposes", "commit.substitution",
+            "state.sequence", "transcript.replay", "transcript.substitution",
+            "backup.import"
+          ]
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "why": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Required, not decorative. A case without a stated reason is a case nobody can safely change: an implementer who understands what an input defends against finds the bug faster than one who sees only a failing hex string, and a maintainer who does not know why a case exists will eventually 'fix' it."
+        },
+        "hint": {
+          "type": "string",
+          "description": "Non-normative. Names the rule that fired. MUST NOT be parsed or matched — two clients may reject the same input for differently-named internal reasons and still interoperate."
+        },
+        "expect": { "type": "object" }
+      },
+
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "codec.decode" } }, "required": ["kind"] },
+          "then": {
+            "required": ["expect", "input_hex"],
+            "properties": {
+              "input_hex": { "$ref": "#/$defs/hex" },
+              "expect": {
+                "allOf": [{ "$ref": "#/$defs/outcome" }],
+                "properties": {
+                  "reencodes_to_hex": {
+                    "$ref": "#/$defs/hex",
+                    "description": "Decode then re-encode must reproduce these exact bytes. §18.1 admits one encoding per value, so for a canonical input this equals input_hex — but the assertion is round-trip stability, not equality, and stating it separately keeps that visible."
+                  }
+                },
+                "if": { "properties": { "ok": { "const": true } }, "required": ["ok"] },
+                "then": { "required": ["reencodes_to_hex"] }
+              }
+            }
+          }
+        },
+
+        {
+          "if": { "properties": { "kind": { "const": "signing.verify" } }, "required": ["kind"] },
+          "then": {
+            "required": ["expect", "suite", "object_hex", "object_type", "verify_as", "pubkey_hex", "sig_hex"],
+            "properties": {
+              "suite": { "type": "integer", "enum": [1, 2] },
+              "object_hex": { "$ref": "#/$defs/hex" },
+              "object_type": {
+                "type": "string",
+                "description": "What the object actually is."
+              },
+              "verify_as": {
+                "type": "string",
+                "description": "The object_type label to bind into sig_input. Where this differs from object_type the case is a cross-context replay attempt (§18.3) and MUST fail — that difference is the whole test, so the two fields are separate on purpose."
+              },
+              "pubkey_hex": { "$ref": "#/$defs/hex" },
+              "sig_hex": { "$ref": "#/$defs/hex" },
+              "expect": { "$ref": "#/$defs/outcome" }
+            }
+          }
+        },
+
+        {
+          "if": { "properties": { "kind": { "const": "signing.pubkey" } }, "required": ["kind"] },
+          "then": {
+            "description": "Public-key parsing alone: no object, no signature. §18.3(2) admits exactly one encoding — compressed, 33 bytes, tag checked explicitly — because a second encoding of one key is a second canonical object and a second transcript hash.",
+            "required": ["expect", "suite", "pubkey_hex"],
+            "properties": {
+              "suite": { "type": "integer", "enum": [1, 2] },
+              "pubkey_hex": { "$ref": "#/$defs/hex" },
+              "expect": { "$ref": "#/$defs/outcome" }
+            },
+            "not": { "anyOf": [{ "required": ["object_hex"] }, { "required": ["sig_hex"] }] }
+          }
+        },
+
+        {
+          "if": { "properties": { "kind": { "const": "negotiate.select" } }, "required": ["kind"] },
+          "then": {
+            "required": ["expect", "offered", "local_versions", "payer_preference"],
+            "properties": {
+              "offered": {
+                "type": "object",
+                "required": ["versions", "suites"],
+                "additionalProperties": false,
+                "properties": {
+                  "versions": { "type": "array", "items": { "type": "integer" }, "minItems": 1 },
+                  "suites": { "type": "array", "items": { "type": "integer" }, "minItems": 1 }
+                }
+              },
+              "local_versions": { "type": "array", "items": { "type": "integer" }, "minItems": 1 },
+              "payer_preference": {
+                "type": "array",
+                "items": { "type": "integer" },
+                "description": "Ordered, most preferred first. §18.6: suite identifiers encode no preference and are never compared numerically — suite 2 is P-256, which exists only because iOS's Secure Enclave holds no Ed25519 key, so highest-wins would select the weaker option on every dual-capable pair."
+              },
+              "expect": {
+                "allOf": [{ "$ref": "#/$defs/outcome" }],
+                "properties": {
+                  "version": { "type": "integer" },
+                  "suite": { "type": "integer" }
+                },
+                "if": { "properties": { "ok": { "const": true } }, "required": ["ok"] },
+                "then": { "required": ["version", "suite"] }
+              }
+            }
+          }
+        },
+
+        {
+          "if": { "properties": { "kind": { "const": "commit.purposes" } }, "required": ["kind"] },
+          "then": {
+            "description": "One canonical byte string, four purposes, four distinct digests. commit = SHA-256(\"DUCAT-v1\" 0x00 purpose 0x00 canonical_bytes).",
+            "required": ["expect", "input_hex"],
+            "properties": {
+              "input_hex": { "$ref": "#/$defs/hex" },
+              "expect": {
+                "type": "object",
+                "required": ["digests_by_purpose"],
+                "properties": {
+                  "digests_by_purpose": {
+                    "type": "object",
+                    "description": "Keys are the wire labels from §18.3. These are the exact bytes hashed — not display names, and not an implementation's internal enum spellings, which is a confusion the prose has caused before.",
+                    "required": ["offer_commit", "receipt", "chain", "market_genesis"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "offer_commit": { "$ref": "#/$defs/digest" },
+                      "receipt": { "$ref": "#/$defs/digest" },
+                      "chain": { "$ref": "#/$defs/digest" },
+                      "market_genesis": { "$ref": "#/$defs/digest" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+
+        {
+          "if": { "properties": { "kind": { "const": "commit.substitution" } }, "required": ["kind"] },
+          "then": {
+            "description": "§18.6's downgrade defence. offer_commit covers the whole FullOffer, so stripping a suite changes the digest. Clients MUST check the commitment BEFORE negotiating — negotiating first means selecting from an attacker-chosen menu and only then noticing.",
+            "required": ["expect", "genuine_offer_hex", "stripped_offer_hex", "offer_commit_hex"],
+            "properties": {
+              "genuine_offer_hex": { "$ref": "#/$defs/hex" },
+              "stripped_offer_hex": { "$ref": "#/$defs/hex" },
+              "offer_commit_hex": { "$ref": "#/$defs/digest" },
+              "expect": {
+                "type": "object",
+                "required": ["genuine", "stripped"],
+                "additionalProperties": false,
+                "properties": {
+                  "genuine": { "$ref": "#/$defs/outcome" },
+                  "stripped": { "$ref": "#/$defs/outcome" }
+                }
+              }
+            }
+          }
+        },
+
+        {
+          "if": { "properties": { "kind": { "const": "state.sequence" } }, "required": ["kind"] },
+          "then": {
+            "required": ["from", "mode", "role", "steps"],
+            "not": { "required": ["expect"] },
+            "properties": {
+              "from": { "type": "string", "$comment": "starting state, §18.4" },
+              "mode": { "type": "string", "enum": ["Direct", "Fast", "Escrow"] },
+              "role": {
+                "type": "string",
+                "enum": ["Payer", "Payee"],
+                "description": "The evaluating client. Never used to decide whether a message is legal — see event.from."
+              },
+              "deadline_s": {
+                "type": ["integer", "null"],
+                "description": "The §6.2 deadline for `from` under `mode`; null where the state is unbounded. An assertion about the pair, not about any step. A deadline whose effect is not a state change still belongs here — CLOSED's 120 s contact window changes no state and its omission left clients holding session keys open forever (§18.11)."
+              },
+              "steps": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["event", "expect"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "event": { "$ref": "#/$defs/event" },
+                    "expect": {
+                      "allOf": [{ "$ref": "#/$defs/outcome" }],
+                      "properties": {
+                        "next": { "type": "string" },
+                        "effect": { "type": "string" }
+                      },
+                      "if": { "not": { "properties": { "ok": { "const": false } }, "required": ["ok"] } },
+                      "then": {
+                        "required": ["next", "effect"],
+                        "$comment": "A successful transition asserts both the state and the effect. Asserting only the state passes while a client emits the wrong evidence — and §6.2 has two unilateral receipts that assert opposite things, so getting the effect wrong means a payer recording a debt it does not owe."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+
+        {
+          "if": { "properties": { "kind": { "const": "transcript.replay" } }, "required": ["kind"] },
+          "then": {
+            "description": "A complete four-object transaction, replayed through the verifier. All four objects are required: a replay missing one is not a transcript, and the chain is only meaningful end to end.",
+            "required": ["expect", "chain", "profile", "tap_present_hex",
+                         "full_offer_hex", "accept_hex", "receipt_hex"],
+            "properties": {
+              "profile": { "type": "string" },
+              "tap_present_hex": { "$ref": "#/$defs/hex" },
+              "full_offer_hex": { "$ref": "#/$defs/hex" },
+              "accept_hex": { "$ref": "#/$defs/hex" },
+              "receipt_hex": { "$ref": "#/$defs/hex" },
+              "chain": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string" },
+                "description": "Non-normative prose naming each link the replay must check."
+              }
+            }
+          }
+        },
+
+        {
+          "if": { "properties": { "kind": { "const": "transcript.substitution" } }, "required": ["kind"] },
+          "then": {
+            "description": "§15.3's tap-to-offer link: a presenter commits to an offer in the tap, then delivers a different one. Filed among transcripts historically and separated at 0.46 — it exercises one commitment rather than replaying a chain, and carries neither a tap object nor a receipt.",
+            "required": ["expect", "tap_offer_commit_hex", "delivered_offer_hex"],
+            "properties": {
+              "tap_offer_commit_hex": { "$ref": "#/$defs/digest" },
+              "delivered_offer_hex": { "$ref": "#/$defs/hex" },
+              "expect": { "$ref": "#/$defs/outcome" }
+            }
+          }
+        },
+
+        {
+          "if": { "properties": { "kind": { "const": "backup.import" } }, "required": ["kind"] },
+          "then": {
+            "required": ["expect", "blob_hex", "passphrase_utf8"],
+            "properties": {
+              "blob_hex": {
+                "$ref": "#/$defs/hex",
+                "description": "The complete artifact: MAGIC(15) || salt(16) || nonce(24) || AEAD ciphertext."
+              },
+              "passphrase_utf8": { "type": "string" },
+              "salt_hex": { "$ref": "#/$defs/hex" },
+              "nonce_hex": { "$ref": "#/$defs/hex" },
+              "aad_utf8": { "type": "string" },
+              "aead": { "type": "string", "enum": ["xchacha20poly1305"] },
+              "kdf": {
+                "type": "object",
+                "description": "Pinned by format version, never inherited from a library default. A changed constant derives a different key and turns every existing backup into a 'wrong passphrase' error for people typing the correct one — indistinguishable from user error (§4.3.2).",
+                "required": ["algorithm", "version", "memory_kib", "iterations", "lanes", "output_len"],
+                "additionalProperties": false,
+                "properties": {
+                  "algorithm": { "type": "string", "enum": ["argon2id"] },
+                  "version": { "type": "integer", "enum": [19] },
+                  "memory_kib": { "type": "integer", "minimum": 19456 },
+                  "iterations": { "type": "integer", "minimum": 1 },
+                  "lanes": { "type": "integer", "minimum": 1 },
+                  "output_len": { "type": "integer", "const": 32 }
+                }
+              },
+              "expect": {
+                "allOf": [{ "$ref": "#/$defs/outcome" }],
+                "properties": {
+                  "decoded": {
+                    "type": "object",
+                    "required": [
+                      "persona_suite", "persona_secret_hex", "monero_seed",
+                      "monero_restore_height", "rendezvous_hex",
+                      "attestation_records_hex", "mandates_hex",
+                      "verification", "created"
+                    ],
+                    "properties": {
+                      "persona_suite": { "type": "integer" },
+                      "persona_secret_hex": { "$ref": "#/$defs/hex" },
+                      "monero_seed": { "type": "string" },
+                      "monero_restore_height": {
+                        "type": "integer",
+                        "description": "Wrong in both directions, asymmetrically. Too low costs ~106 hours of rescan; too high is silent and total — a wallet restored above its own outputs reports a zero balance with no error anywhere (§4.3.1)."
+                      },
+                      "rendezvous_hex": { "type": "array", "items": { "$ref": "#/$defs/hex" } },
+                      "attestation_records_hex": { "type": "array", "items": { "$ref": "#/$defs/hex" } },
+                      "mandates_hex": { "type": "array", "items": { "$ref": "#/$defs/hex" } },
+                      "verification": {
+                        "type": "object",
+                        "required": [
+                          "device_unlock_at", "app_secret_at",
+                          "app_secret_validity_s", "cumulative_at", "cumulative_window_s"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "device_unlock_at": { "type": "integer" },
+                          "app_secret_at": { "type": "integer" },
+                          "app_secret_validity_s": { "type": "integer", "minimum": 1 },
+                          "cumulative_at": { "type": "integer" },
+                          "cumulative_window_s": { "type": "integer" }
+                        }
+                      },
+                      "created": { "type": "integer" }
+                    }
+                  }
+                },
+                "if": { "properties": { "ok": { "const": true } }, "required": ["ok"] },
+                "then": { "required": ["decoded"] }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

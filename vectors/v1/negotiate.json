@@ -2,9 +2,14 @@
   "cases": [
     {
       "expect": {
+        "ok": true,
         "suite": 1,
         "version": 1
       },
+      "kind": "negotiate.select",
+      "local_versions": [
+        1
+      ],
       "name": "suite_selection_follows_payer_preference_not_identifier",
       "offered": {
         "suites": [
@@ -23,9 +28,11 @@
     },
     {
       "expect": {
+        "ok": true,
         "suite": 1,
         "version": 2
       },
+      "kind": "negotiate.select",
       "local_versions": [
         1,
         2
@@ -41,6 +48,9 @@
           3
         ]
       },
+      "payer_preference": [
+        1
+      ],
       "why": "versions, unlike suites, are ordered by construction: higher means newer"
     },
     {
@@ -49,6 +59,7 @@
         "reject_code": 6,
         "reject_name": "UnsupportedVersion"
       },
+      "kind": "negotiate.select",
       "local_versions": [
         1
       ],
@@ -72,6 +83,7 @@
         "reject_code": 7,
         "reject_name": "UnsupportedSuite"
       },
+      "kind": "negotiate.select",
       "local_versions": [
         1
       ],
@@ -88,37 +100,6 @@
         1
       ],
       "why": "the only offered suite is one this client will not speak"
-    },
-    {
-      "expect": {
-        "genuine": {
-          "ok": true
-        },
-        "stripped": {
-          "ok": false,
-          "reject_code": 4,
-          "reject_name": "CommitMismatch"
-        }
-      },
-      "genuine_offer_hex": "a40101021b00000246139ca80003810104820102",
-      "hint": "commit = SHA-256(\"DUCAT-v1\" 0x00 purpose 0x00 canonical_bytes)",
-      "name": "downgrade_stripped_suite_fails_commitment",
-      "offer_commit_hex": "64a8e7c7e947c593665cffef022b114be9d63a7ff9ec6474a95f0e2a96991872",
-      "stripped_offer_hex": "a40101021b00000246139ca800038101048102",
-      "why": "a MITM removes the strong suite so the payer sees a menu of one. offer_commit covers the whole FullOffer, so the substitution is caught BEFORE any suite is chosen — negotiating first would mean selecting from an attacker-chosen menu and only then noticing."
-    },
-    {
-      "expect": {
-        "digests_by_purpose": {
-          "chain": "d6bed9b6f8ead25e1a1654280f721c043e6b46510a2331f0ade44beb0a435434",
-          "market_genesis": "e04b6a60b1b8f00aedd9f00424f1daad52166428c57571610317d0b6625005ef",
-          "offer_commit": "64a8e7c7e947c593665cffef022b114be9d63a7ff9ec6474a95f0e2a96991872",
-          "receipt": "6d71e0f5d872cd69259192efe9885f4d0e98259a7189a0ab4e46d655d7091d1f"
-        }
-      },
-      "input_hex": "a40101021b00000246139ca80003810104820102",
-      "name": "commitments_are_domain_separated_by_purpose",
-      "why": "the same canonical bytes must produce a different digest per role, so a commitment computed for one purpose cannot be presented as another"
     }
   ],
   "category": "negotiate"

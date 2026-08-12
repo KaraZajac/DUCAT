@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.45 — Consolidated**
+**Draft 0.46 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.46** — **Vector schema published (§18.9.1), and the harness normalised rather than documented.** §18.11 recorded that most of the second implementation's effort went into the *test harness*, not the protocol: `signing.json` had two undeclared shapes, `negotiate.json` held two cases that were not negotiations, `transcript.json` held one that was not a transcript, and the state event grammar had **five spellings of one concept**. Writing a schema that documented five spellings would have formalised the mess, so the format was normalised first — **every case now carries a `kind`, and `kind` is the only discriminator; file names carry no meaning to a consumer** — and then specified in a normative `vectors/v1/schema.json`. **The schema is hand-written, not emitted by the generator**, because a schema produced by the same program that produces the vectors agrees with that program's mistakes, and it earned the distinction immediately: it caught a negotiation case that never declared which versions the local client supported (forcing consumers to invent a default, which is how two implementations diverge) and a `state.sequence` shape that let a case assert a transition without asserting the effect — which passes while a client emits the wrong evidence, and §6.2's two unilateral receipts assert opposite things. `why` is now required on every case and `hint` explicitly unparseable. Both implementations and the validator agree at 104/104. O21 remains open, and what is left cannot be engineered away: an implementer who has never read `core/`. Everything accidental is now out of their path.
 - **0.45** — **A second implementation ran the vectors, and found three defects in this document (§18.11, O21 advanced).** `conformance/ducat_check.py` is written from Part V rather than from `core/`; it agreed on 101 of 104 cases. Two disagreements were plain omissions where the reference was right and the text was silent: **§18.1 had no nesting bound** — the word did not appear in the document, while the vector's own hint cited "the 16-level nesting bound" as though specified — and **§18.4's self-described exhaustive table listed `CLOSED`'s 120 s contact window only as a guard, never as a deadline**, which changes no state and therefore leaves a client holding session keys open forever. The third is why the exercise was worth doing: **negative integers were unspecified**, so the reference accepted CBOR major type 1 and the second implementation refused it and *both were conformant*. No vector set could have caught that, because there was no correct answer to test against — it is only visible when two implementations read the same text and reach different conclusions. Resolved toward refusal, with a rule for every future §18.1 addition: **later accepting a value type extends the format, later refusing one breaks every peer already relying on it, so strict first is the only reversible choice.** 104/104 after correction. O21 remains open for an honest reason — same author, not clean-room — and the cheapest step toward closing it is publishing a schema for the vector files, whose shape a second implementer currently reverse-engineers from examples.
 - **0.44** — **O22 closed: an escrow share is recoverable after all, and the earlier reasoning was wrong in an instructive way.** 0.42 concluded shares could not be backed up because `monero-wallet-rpc` cannot restore one. Sound reasoning, wrong conclusion — it assumed restoring a share means *reconstructing* it. Measured both halves: reconstruction genuinely fails, since two wallets with byte-identical key material produce `prepare_multisig` outputs agreeing for 101 characters and then diverging for 88 of fresh randomness. But reconstruction is unnecessary. A share is already a **2,286-byte `.keys` file**, and copying it into a virgin directory yielded `multisig: true, ready: true, threshold 2, total 3` at the correct group address, producing valid `export_multisig_info` — the missing RPC method is simply not on the path. The multi-megabyte companion file is scan cache and must not be backed up. **What actually changed is the trust ask**: recovery used to require the *counterparty's signature*, an adversary being asked to sign away their own claim, which nothing can compel; it now requires the other participants to re-share multisig info, which endorses no outcome and is a routine mechanical step. Four rules from observation — capture at `ready` so a half-formed ceremony is not backed up as one, never back up the cache, re-export when an escrow opens since this is the bundle's only freshness-sensitive content, and note that restoring membership is not yet the ability to spend. Residue recorded rather than hidden: a stale bundle still misses escrows opened after it, and an end-to-end spend from a restored share is undemonstrated — the restored wallet refused to build one, and so did the original, for the same unrelated reason.
 - **0.43** — **Added §4.4, custody modes — external hardware wallets, and the two limits that make them narrower than they sound.** "Hardware keys" names two opposite things: a secure element dies with the phone, which is what made §4.1 unrecoverable, while an external hardware wallet *is* its own backup. Supporting the second is worth a first-run choice. But a Monero hardware wallet **cannot hold the persona key** — it signs Monero transactions, not DUCAT's domain-separated objects — so no mode moves identity off the phone and §4.3 remains the only answer for it in every mode; and it **cannot hold a multisig share**, since Monero multisig on hardware is unshipped, which bars escrow and bonds. Three modes result, and the recommended one is the hybrid: float on the phone, reserve on the device. That is not generic defence in depth — it closes something §4.3 could not, because "a backup is a complete spending credential" becomes false when the reserve sits behind a device seed DUCAT never sees, making **the amount at risk a number the user chose** and bounding a stolen phone, a leaked backup, and a compromised client with one number. It needs no new machinery either, since §17.2 already models the float. Two rules earn their place from failure modes: the capability check happens **before an offer is presented**, not at FUND, because a hardware-only user discovering at a counter that escrow cannot fund has failed in front of a queue; and **role matters for `fast/1`**, where the bond is the provider's, so a hardware-only consumer can pay a bonded merchant and only the provider side is barred.
@@ -990,7 +991,7 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O18.** **Cancellation fees erode the permissionless lane.** §7.3 makes no-show fees enforceable only against collateral. The pressure this creates — providers preferring bonded counterparties precisely because cancellation *costs* them something — pushes the network toward the collateralized lane and quietly hollows out the slow permissionless one A4 depends on (§17.6). Whether the unbonded lane survives contact with real no-show rates is an empirical question no amount of spec work answers.
 - **O19.** **iOS cannot present over NFC, permanently.** Apple's HCE entitlement is conditioned on EEA establishment, organization enrollment, and financial-regulatory standing (§15.3.2) — structurally incompatible with A4, and not a hurdle an open protocol clears. The best-UX medium is therefore available to roughly half the supply side, and QR carries the rest. This is outside DUCAT's control and will not improve through protocol design; it is stated so no one plans around a tap that cannot exist.
 - **O20.** **Identifiers are unassigned** (§18.7): the NFC AID is a placeholder pending real RID registration, and the BLE service/characteristic UUIDs are unallocated. Neither is hard, both are blocking for cross-implementation testing, and the AID is effectively immutable once iOS clients ship with it declared at build time.
-- **O21. Conformance suite exists; a second implementation now runs it (§18.11).** 104 vectors in `vectors/v1/`, executable and language-neutral. A second implementation written from Part V rather than from `core/` agreed on 101 cases and disagreed on 3 — **all three defects in this document.** Two were omissions the reference had right and the text did not state (§18.1's nesting bound, §18.4's `CLOSED` deadline). The third is the one that justifies the exercise: negative integers were **unspecified**, so the reference accepted them and the second implementation refused them and *both were conformant* — a divergence no vector set could detect, because there was no correct answer to test against. After correction, 104/104. **Still not closed**, and for an honest reason: the second implementation has the same author as the first, which is not clean-room. It closes when someone with no knowledge of `core/` reads this document and runs these files. Cheapest remaining step: publish a schema for the vector files, whose shape is currently reverse-engineered from examples (§18.11).
+- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 104 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
 - **O22. (closed in 0.44, §4.3.3.)** An escrow participant who loses their device. Resolved once the question was asked correctly: a share cannot be *reconstructed* — measured, `prepare_multisig` draws 88 characters of fresh randomness beyond what the wallet keys determine — but it does not need to be, because it is already a 2,286-byte file that a virgin `wallet-rpc` will open directly. The recovery ask therefore moved from **the counterparty's signature**, which no protocol can compel from an adversary, to **the other participants re-sharing multisig info**, which endorses no outcome and is a step every participant performs routinely. **Residue:** a stale bundle still cannot recover an escrow opened after it, so this now depends on a client prompting for re-export at ceremony completion — a UX obligation rather than a protocol impossibility. And an end-to-end spend from a restored share is still undemonstrated (§4.3.3's last limit).
 ---
 *End of Part I. The remaining parts specify the three mechanisms Part I leans on hardest: the tap that opens every transaction, the identity that optionally survives one, and the settlement that makes it fast enough to matter.*
@@ -1858,6 +1859,40 @@ Required coverage:
 
 Format: a JSON manifest of cases with hex-encoded inputs, expected outputs, and expected reject codes, one directory per cipher suite. Vectors are versioned with the protocol and a client claims conformance against a named vector-set release.
 
+### 18.9.1 The Vector Schema
+
+`vectors/v1/schema.json` is normative for the vector files, and it exists because §18.11's second implementation spent most of its effort on the *harness* rather than on the protocol.
+
+**Every case carries a `kind`, and `kind` is the only discriminator.** File names group cases for human convenience and carry no meaning to a consumer: a `commit.substitution` case runs identically wherever it lives, which is worth stating because it used to live in `negotiate.json`.
+
+| `kind` | Asserts |
+|---|---|
+| `codec.decode` | Decode, and on success re-encode to the published bytes |
+| `signing.verify` | A signature over `sig_input(verify_as, suite, object)` |
+| `signing.pubkey` | Public-key parsing alone — no object, no signature |
+| `negotiate.select` | Version and suite chosen from an offer under a local policy |
+| `commit.purposes` | One byte string, four purposes, four distinct digests |
+| `commit.substitution` | A stripped offer fails the published commitment |
+| `state.sequence` | A run through the machine, checking `next` and `effect` at each step |
+| `transcript.replay` | A complete four-object transaction |
+| `transcript.substitution` | An offer delivered after the tap fails the tap's commitment |
+| `backup.import` | A backup bundle decrypts to the published fields |
+
+Three rules about the cases themselves, each earned:
+
+- **`why` is required.** A case with no stated reason is one nobody can safely change: an implementer who knows what an input defends against finds the bug faster than one who sees a failing hex string, and a maintainer who does not know why a case exists will eventually "fix" it.
+- **`hint` is non-normative and MUST NOT be parsed.** It names the internal rule that fired. Two clients may reject the same input for differently-named reasons and still interoperate — §18.5 requires agreement on the code, not on the explanation.
+- **`expect.ok: false` always carries `reject_code` and `reject_name`.** "It failed somehow" is not an interoperable assertion.
+
+**The schema is hand-written, not emitted by the generator.** A schema produced by the same program that produces the vectors would agree with that program's mistakes — O21's objection in a smaller frame. It earned that on its first run, catching a negotiation case that never said which versions the local client supported (forcing a consumer to invent a default, which is how two implementations diverge) and an offer-substitution attack filed as a transcript replay.
+
+Validation is two commands, and both are cheap enough to run on every change:
+
+    python3 conformance/validate_vectors.py     # cases against the schema
+    python3 conformance/ducat_check.py          # a second implementation runs them
+
+`cargo test` additionally enforces the half that must never be skippable: every case declares a known `kind`, carries a non-empty `why`, and has a name unique across the whole set — because a third-party client hits a broken discriminator before we do, and their first experience of DUCAT should not be a file they cannot dispatch on.
+
 ## 18.10 Conformance Levels
 
 So that "DUCAT client" means something specific:
@@ -1897,16 +1932,24 @@ This is the finding that justifies the exercise. The first two were omissions a 
 
     104 vector cases — 104 agreed, 0 disagreements
 
-### What remains for a genuine second implementer
+### What the harness cost, and what was done about it (0.46)
 
-Recorded because these are friction a real one pays, and because none of it is expensive to fix:
+Most of the second implementation's effort went into the *harness*, not the protocol. Four obstacles, none of them protocol bugs — the vector files were simply neither uniform nor described:
 
-- **The vector schema is neither documented nor uniform.** Most `signing.json` cases carry `object_hex` and `sig_hex`; four carry only `pubkey_hex`, testing key parsing alone. Nothing announces which shape a case has.
-- **`negotiate.json` contains cases that are not negotiations** — a commitment substitution and a purpose-separation case, each with its own field names.
-- **The state event grammar has three spellings for one thing.**
-- **The transcript vector's prose names commitment purposes `Offer` and `ChainLink`**, which are the reference's internal enum names rather than the wire labels §18.3 specifies. The wire labels are correct, but the prose sends a reader looking for the wrong strings.
+- `signing.json` had two shapes with nothing announcing which; the first encounter was a crash.
+- `negotiate.json` contained two cases that were not negotiations.
+- `transcript.json` contained one case that was not a transcript.
+- The state event grammar had **five spellings of one concept**.
 
-Publishing a schema for the vector files is the cheapest remaining step toward closing O21.
+Writing a schema that *documented* five spellings of one event would have formalised the mess. The format was normalised first and then specified (§18.9.1): every case carries a `kind`, and `kind` is the only discriminator.
+
+**The schema then found two more defects on its first run**, which is the argument for hand-writing it rather than generating it from the same program that writes the vectors. A negotiation case never said which versions the local client supported — a negotiation is a function of three inputs, and a case omitting one forces the consumer to invent a default, which is exactly how two implementations diverge. And `state.sequence` assertions were split between the case and its steps, so a case could assert a state transition without asserting the effect — which passes while a client emits the wrong evidence, and §6.2 has two unilateral receipts that assert opposite things.
+
+One item is left as prose because it is non-normative: **the transcript cases name commitment purposes `Offer` and `ChainLink`**, the reference's internal enum spellings rather than §18.3's wire labels. The labels are correct — confirmed against `commitments_are_domain_separated_by_purpose`, which publishes all four digests — but the prose sends a reader looking for the wrong strings, and it cost time.
+
+### What still stands between this and O21 closing
+
+Only the thing that cannot be engineered away: **an implementer who has never read `core/`.** The schema, the `kind` discriminator, and the two validation commands remove the accidental difficulty; the remaining gap is authorship, and no amount of tooling substitutes for a second pair of eyes on the same document.
 
 ---
 

@@ -1,6 +1,7 @@
 # A second implementation
 
-    python3 conformance/ducat_check.py
+    python3 conformance/ducat_check.py          # run the vectors
+    python3 conformance/validate_vectors.py     # check them against schema.json
 
 Runs `vectors/v1/` against an implementation written from the specification
 rather than from `core/`. O21 exists because a vector set validated by one
@@ -93,25 +94,49 @@ accepting a value type extends the format; later refusing one breaks every peer
 already relying on it.** Strict first is the only reversible choice. §18.1 now
 says so, the reference rejects, and two vectors pin it.
 
-## Things a second implementer stumbles over that are not bugs
+## Friction that was fixed rather than documented (0.46)
 
-Recorded because they are friction a real second implementer pays, and because
-fixing them is cheap:
+The first pass hit four obstacles that were not protocol bugs — they were the
+vector files being neither uniform nor described. Writing a schema that *documented*
+three spellings of one event would have formalised the mess, so the format was
+normalised and then specified in `vectors/v1/schema.json`. Every case now carries
+a `kind`, and `kind` is the only discriminator a consumer needs.
 
-- **The vector schema is not documented and is not uniform.** `signing.json`
-  cases mostly carry `object_hex` and `sig_hex`; four carry only `pubkey_hex`,
-  because they test key parsing alone. Nothing announces which shape a case has,
-  so the first encounter is a `KeyError`.
-- **`negotiate.json` contains cases that are not negotiations** — one commitment
-  substitution and one purpose-separation case, each with its own field names.
-- **The state event grammar has three spellings for one thing**: `"Fund"`,
-  `"Accept { from: Payer }"`, `"Elapsed(60s)"`, and the JSON forms
-  `{"Accept": {"from": "Payer"}}` and `{"Elapsed": 60}`.
-- **The transcript vector's prose names purposes `Offer` and `ChainLink`**, which
-  are the first implementation's enum names rather than the wire labels §18.3
-  specifies. The wire labels are correct — confirmed against
-  `commitments_are_domain_separated_by_purpose`, which publishes all four digests
-  — but the prose sends a reader looking for the wrong strings.
+What was wrong, and what it is now:
+
+- **`signing.json` had two shapes with nothing announcing which.** Most cases
+  carry `object_hex` and `sig_hex`; four carry only `pubkey_hex`, testing key
+  parsing alone. The first encounter was a `KeyError`. Now `signing.verify` and
+  `signing.pubkey`.
+- **`negotiate.json` contained cases that were not negotiations** — a commitment
+  substitution and a purpose-separation case, each with its own field names. Now
+  `commit.json`, kinds `commit.substitution` and `commit.purposes`.
+- **`transcript.json` contained a case that was not a transcript** — an offer
+  substituted after the tap, carrying neither a tap object nor a receipt. Now
+  `transcript.substitution`, and `transcript.replay` requires all four objects.
+- **The state event grammar had five spellings of one concept**: `"Fund"`,
+  `"Accept { from: Payer }"`, `"Elapsed(60s)"`, `{"Accept": {"from": "Payer"}}`,
+  `{"Elapsed": 60}`. Now one: `{"name": …, "from": …?, "elapsed_s": …?}`.
+
+Two more that the schema itself caught on its first run, which is the argument for
+hand-writing it rather than generating it:
+
+- **A negotiation case never said which versions the local client supported.**
+  A negotiation is a function of three inputs; a case omitting one forces the
+  consumer to invent a default, which is precisely how two implementations
+  diverge. All three are now required.
+- **`state.sequence` assertions were split between the case and its steps** —
+  some cases put `next`/`effect` beside the event, others under `expect`. Now
+  always under `expect`, and a successful transition must assert both, because a
+  case checking only the state passes while a client emits the wrong evidence —
+  and §6.2 has two unilateral receipts that assert opposite things.
+
+**The transcript prose still names commitment purposes `Offer` and `ChainLink`**,
+which are the reference's internal enum names rather than the wire labels §18.3
+specifies. The labels are correct — confirmed against
+`commitments_are_domain_separated_by_purpose`, which publishes all four digests —
+but the prose sends a reader looking for the wrong strings. Left as prose because
+it is non-normative; noted because it cost time.
 
 ## Where guesses were made
 

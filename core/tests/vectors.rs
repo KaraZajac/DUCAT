@@ -13,7 +13,7 @@
 use ducat_core::cbor::decode;
 use ducat_core::commit::{commit, Purpose};
 use ducat_core::sig::{ObjectType, PublicKey, SignedBytes, Suite};
-use ducat_core::state::{transition, Event, Role, SettleMode, State};
+use ducat_core::state::{deadline, transition, Event, Role, SettleMode, State};
 use ducat_core::wire::*;
 use serde_json::Value as J;
 use std::time::Duration;
@@ -42,7 +42,7 @@ fn manifest_is_self_consistent() {
     let m = load("manifest");
     let total = m["total_cases"].as_u64().unwrap() as usize;
     let mut sum = 0;
-    for name in ["codec", "signing", "state", "negotiate", "transcript", "backup"] {
+    for name in ["codec", "signing", "state", "negotiate", "commit", "transcript", "backup"] {
         let n = cases(name).len();
         assert_eq!(
             m["counts"][name].as_u64().unwrap() as usize,
@@ -154,49 +154,37 @@ fn parse_state(s: &str) -> State {
 }
 
 fn parse_event(v: &J) -> Event {
-    // {"Accept": {"from": "Payer"}} — the originator is part of the event.
-    if let Some(a) = v.get("Accept") {
-        let from = match a.get("from").and_then(|x| x.as_str()) {
-            Some("Payee") => Role::Payee,
-            _ => Role::Payer,
-        };
-        return Event::Accept { from };
-    }
-    // Timeouts arrive as {"Elapsed": secs}; everything else as a bare string.
-    if let Some(secs) = v.get("Elapsed").and_then(|x| x.as_u64()) {
-        return Event::Elapsed(Duration::from_secs(secs));
-    }
-    let s = v.as_str().expect("event must be a string or {Elapsed}");
-    if let Some(rest) = s.strip_prefix("Elapsed(") {
-        // Debug form "Elapsed(30s)" produced by the generator.
-        let secs: u64 = rest
-            .trim_end_matches(')')
-            .trim_end_matches('s')
-            .parse()
-            .unwrap_or_else(|_| panic!("cannot parse duration from {}", s));
-        return Event::Elapsed(Duration::from_secs(secs));
-    }
-    // Sequence cases serialise events with Debug, so an Accept arrives as
-    // "Accept { from: Payer }" rather than as a JSON object.
-    if let Some(rest) = s.strip_prefix("Accept") {
-        let from = if rest.contains("Payee") { Role::Payee } else { Role::Payer };
-        return Event::Accept { from };
-    }
-    match s {
+    // One shape, per `vectors/v1/schema.json#/$defs/event`:
+    //   {"name": "...", "from": "Payer"?, "elapsed_s": N?}
+    // Until 0.46 this had to accept five spellings of the same concept, which is
+    // what a second implementer met and had to reverse-engineer (§18.11).
+    let name = v["name"].as_str().expect("event needs a name");
+    let from = match v.get("from").and_then(|x| x.as_str()) {
+        Some("Payee") => Role::Payee,
+        _ => Role::Payer,
+    };
+    match name {
+        "Elapsed" => Event::Elapsed(Duration::from_secs(
+            v["elapsed_s"].as_u64().expect("Elapsed needs elapsed_s"),
+        )),
         "TapPresent" => Event::TapPresent,
         "FullOffer" => Event::FullOffer,
-        "Accept" => Event::Accept { from: Role::Payer },
+        "Accept" => Event::Accept { from },
+        "Abort" => Event::Abort { from },
         "Fund" => Event::Fund,
         "TxProof" => Event::TxProof,
         "Proof" => Event::Proof,
         "Receipt" => Event::Receipt,
         "Cancel" => Event::Cancel,
         "Dispute" => Event::Dispute,
-        "Abort" => Event::Abort { from: Role::Payer },
         "ContactOffer" => Event::ContactOffer,
         "ContactAccept" => Event::ContactAccept,
         "ConfirmationsReached" => Event::ConfirmationsReached,
         "CureWindowExpired" => Event::CureWindowExpired,
+        "MeterStart" => Event::MeterStart,
+        "MeterStop" => Event::MeterStop,
+        "MeterExpired" => Event::MeterExpired,
+        "DeliveryWindowExpired" => Event::DeliveryWindowExpired,
         other => panic!("unknown event {}", other),
     }
 }
@@ -206,7 +194,7 @@ fn parse_mode(s: &str) -> SettleMode {
         "Direct" => SettleMode::Direct,
         "Fast" => SettleMode::Fast,
         "Escrow" => SettleMode::Escrow,
-        other => panic!("unknown mode {}", other),
+        other => panic!("unknown settlement mode {}", other),
     }
 }
 
@@ -226,63 +214,48 @@ fn state_vectors_pass() {
         let role = parse_role(c["role"].as_str().unwrap());
         let mut s = parse_state(c["from"].as_str().unwrap());
 
-        // Multi-step sequences.
-        if let Some(steps) = c["steps"].as_array() {
-            for step in steps {
-                let ev = parse_event(&step["event"]);
-                let t = transition(s, role, mode, &ev)
-                    .unwrap_or_else(|e| panic!("{}: {:?} rejected: {:?}", name, ev, e));
-                assert_eq!(
-                    format!("{:?}", t.next),
-                    step["next"].as_str().unwrap(),
-                    "{}: wrong next state after {:?}",
-                    name,
-                    ev
-                );
-                assert_eq!(
-                    format!("{:?}", t.effect),
-                    step["effect"].as_str().unwrap(),
-                    "{}: wrong effect after {:?}",
-                    name,
-                    ev
-                );
-                s = t.next;
-            }
-            continue;
+        if let Some(d) = c.get("deadline_s") {
+            let got = deadline(s, mode).map(|x| x.as_secs());
+            assert_eq!(
+                got, d.as_u64(),
+                "{}: deadline for {:?}/{:?}", name, s, mode
+            );
         }
 
-        // Single transitions.
-        let ev = parse_event(&c["event"]);
-        let got = transition(s, role, mode, &ev);
-        if c["expect"]["ok"].as_bool() == Some(false) {
-            let err = got.expect_err(&format!("{}: expected rejection", name));
-            assert_eq!(
-                err.code as u8,
-                c["expect"]["reject_code"].as_u64().unwrap() as u8,
-                "{}: wrong reject code",
-                name
-            );
-        } else {
-            let t = got.unwrap_or_else(|e| panic!("{}: unexpected rejection {:?}", name, e));
+        for step in c["steps"].as_array().expect("steps") {
+            let ev = parse_event(&step["event"]);
+            let expect = &step["expect"];
+            let got = transition(s, role, mode, &ev);
+            if expect["ok"].as_bool() == Some(false) {
+                let err = got.unwrap_err();
+                assert_eq!(
+                    err.code as u8,
+                    expect["reject_code"].as_u64().unwrap() as u8,
+                    "{}: wrong reject code for {:?}", name, ev
+                );
+                break;
+            }
+            let t = got.unwrap_or_else(|e| panic!("{}: {:?} rejected: {:?}", name, ev, e));
             assert_eq!(
                 format!("{:?}", t.next),
-                c["expect"]["next"].as_str().unwrap(),
-                "{}: wrong next state",
-                name
+                expect["next"].as_str().unwrap(),
+                "{}: wrong next state after {:?}", name, ev
             );
             assert_eq!(
                 format!("{:?}", t.effect),
-                c["expect"]["effect"].as_str().unwrap(),
-                "{}: wrong effect",
-                name
+                expect["effect"].as_str().unwrap(),
+                "{}: wrong effect after {:?}", name, ev
             );
+            s = t.next;
         }
     }
 }
 
 #[test]
 fn negotiation_downgrade_vector_passes() {
-    let c = cases("negotiate")
+    // Moved out of negotiate.json at 0.46: it is a commitment case, not a
+    // negotiation. §18.11 recorded that a second implementer met it there.
+    let c = cases("commit")
         .into_iter()
         .find(|c| c["name"] == "downgrade_stripped_suite_fails_commitment")
         .expect("downgrade vector missing");
@@ -307,7 +280,7 @@ fn negotiation_downgrade_vector_passes() {
 
 #[test]
 fn commitment_domain_separation_vector_passes() {
-    let c = cases("negotiate")
+    let c = cases("commit")
         .into_iter()
         .find(|c| c["name"] == "commitments_are_domain_separated_by_purpose")
         .expect("domain separation vector missing");
@@ -445,4 +418,54 @@ fn backup_vectors_pass() {
 
 fn hexs(b: &[u8]) -> String {
     b.iter().map(|x| format!("{:02x}", x)).collect()
+}
+
+/// Every published case carries a `kind`, and every kind is one a consumer has
+/// been told about.
+///
+/// `vectors/v1/schema.json` is the authority and `conformance/validate_vectors.py`
+/// enforces it, but that runs outside `cargo test` and can be skipped. This is
+/// the cheap half that cannot be: if the generator invents a kind, or drops the
+/// discriminator, or reuses a case name, a third-party client hits it before we
+/// do — and their first experience of DUCAT is a file they cannot dispatch on.
+#[test]
+fn every_case_declares_a_known_kind_and_a_unique_name() {
+    const KINDS: &[&str] = &[
+        "codec.decode", "signing.verify", "signing.pubkey", "negotiate.select",
+        "commit.purposes", "commit.substitution", "state.sequence",
+        "transcript.replay", "transcript.substitution", "backup.import",
+    ];
+    let dir = std::path::Path::new("../vectors/v1");
+    let mut seen: std::collections::HashMap<String, String> = Default::default();
+    let mut count = 0;
+    for entry in std::fs::read_dir(dir).expect("vector dir") {
+        let path = entry.expect("dir entry").path();
+        let file = path.file_name().unwrap().to_string_lossy().to_string();
+        if path.extension().and_then(|e| e.to_str()) != Some("json")
+            || file == "manifest.json"
+            || file == "schema.json"
+        {
+            continue;
+        }
+        let doc: J = serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
+        for c in doc["cases"].as_array().expect("cases array") {
+            count += 1;
+            let kind = c["kind"].as_str().unwrap_or_else(|| {
+                panic!("{}: case {} has no kind", file, c["name"])
+            });
+            assert!(KINDS.contains(&kind), "{}: unknown kind {}", file, kind);
+            let name = c["name"].as_str().expect("case name").to_string();
+            assert!(
+                c["why"].as_str().map(|w| !w.is_empty()).unwrap_or(false),
+                "{}: case {} has no `why` — a case nobody can explain is a case \
+                 nobody can safely change",
+                file,
+                name
+            );
+            if let Some(prev) = seen.insert(name.clone(), file.clone()) {
+                panic!("duplicate case name {} in {} and {}", name, file, prev);
+            }
+        }
+    }
+    assert!(count >= 100, "vector set unexpectedly small: {}", count);
 }

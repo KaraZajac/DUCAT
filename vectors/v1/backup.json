@@ -40,6 +40,7 @@
         "output_len": 32,
         "version": 19
       },
+      "kind": "backup.import",
       "name": "canonical_bundle",
       "nonce_hex": "373737373737373737373737373737373737373737373737",
       "passphrase_utf8": "a fixed passphrase",
@@ -53,6 +54,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "backup.import",
       "name": "wrong_passphrase",
       "passphrase_utf8": "not the passphrase",
       "why": "must be indistinguishable from a tampered file — reporting them differently leaks whether a guess was close"
@@ -64,6 +66,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "backup.import",
       "name": "tampered_ciphertext",
       "passphrase_utf8": "a fixed passphrase",
       "why": "the AEAD tag covers the payload; a single flipped bit must not decrypt"
@@ -75,6 +78,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "backup.import",
       "name": "tampered_nonce",
       "passphrase_utf8": "a fixed passphrase",
       "why": "the nonce is stored in the clear and is not secret, but altering it must still fail closed rather than decrypting to something else"
@@ -86,6 +90,7 @@
         "reject_code": 10,
         "reject_name": "Malformed"
       },
+      "kind": "backup.import",
       "name": "foreign_format",
       "passphrase_utf8": "a fixed passphrase",
       "why": "the magic is authenticated as AAD, so a file of another format cannot be coerced into decrypting as this one. Rejected before any key derivation, so a wrong file does not cost the user an Argon2 pass."
@@ -97,6 +102,7 @@
         "reject_code": 10,
         "reject_name": "Malformed"
       },
+      "kind": "backup.import",
       "name": "truncated",
       "passphrase_utf8": "a fixed passphrase",
       "why": "a file shorter than header plus AEAD tag cannot be a bundle; length must be checked before slicing"
@@ -109,6 +115,7 @@
         "reject_name": "PolicyRefused"
       },
       "hint": "app_secret_at (1000) is below device_unlock_at (50000)",
+      "kind": "backup.import",
       "name": "inverted_verification_ladder",
       "passphrase_utf8": "a fixed passphrase",
       "why": "an import is a trust boundary. This file decrypts perfectly and carries a policy where a larger payment demands less than a smaller one. Authenticity is not sanity: fields with construction rules are re-validated on the way in."

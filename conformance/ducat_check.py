@@ -560,152 +560,156 @@ def unhex(s):
 def run_codec(cases, r):
     for c in cases:
         def go(c=c):
-            v = decode_canonical(unhex(c["input_hex"]))
-            return encode(v)
+            return encode(decode_canonical(unhex(c["input_hex"])))
         out = expect_reject(r, "codec", c, go)
-        if out is not None and "reencodes_to_hex" in c["expect"]:
-            want = c["expect"]["reencodes_to_hex"]
-            if out.hex() != want:
-                r.passed -= 1
-                r.bad("codec", c["name"], c.get("why", ""),
-                      f"re-encoded to {out.hex()}, vector says {want}")
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("codec", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, vector says "
+                  f"{c['expect']['reencodes_to_hex']}")
 
 
-def run_signing(cases, r):
+def run_signing_verify(cases, r):
     for c in cases:
         def go(c=c):
-            # Some cases carry no object or signature at all: they test public
-            # key parsing alone. Nothing in the vector schema announces which
-            # shape a case has — a second implementer discovers it by crashing.
-            if "object_hex" not in c:
-                verify_sig(c["suite"], unhex(c["pubkey_hex"]), b"\x00" * 64, b"")
-                return True
-            obj = unhex(c["object_hex"])
-            pk = unhex(c["pubkey_hex"])
-            sig = unhex(c.get("sig_hex", ""))
-            msg = sig_input(c["verify_as"], c["suite"], obj)
-            verify_sig(c["suite"], pk, sig, msg)
+            msg = sig_input(c["verify_as"], c["suite"], unhex(c["object_hex"]))
+            verify_sig(c["suite"], unhex(c["pubkey_hex"]), unhex(c["sig_hex"]), msg)
+            return True
+        expect_reject(r, "signing", c, go)
+
+
+def run_signing_pubkey(cases, r):
+    """Key parsing alone. The signature is deliberately junk: these cases must
+    fail on the encoding of the key, before any verification is attempted."""
+    for c in cases:
+        def go(c=c):
+            verify_sig(c["suite"], unhex(c["pubkey_hex"]), b"\x00" * 64, b"")
             return True
         expect_reject(r, "signing", c, go)
 
 
 def run_negotiate(cases, r):
     for c in cases:
-        # negotiate.json also carries two cases that are not negotiations: a
-        # commitment-substitution case and a purpose-separation case, each with
-        # its own field names. Routing by shape because nothing declares it.
-        if "digests_by_purpose" in c.get("expect", {}):
-            body = unhex(c["input_hex"])
-            bad = [p for p, want in c["expect"]["digests_by_purpose"].items()
-                   if commit(p, body).hex() != want]
-            if bad:
-                r.bad("negotiate", c["name"], c.get("why", ""),
-                      f"purpose labels disagree: {bad}")
-            else:
-                r.ok()
-            continue
-        if "genuine_offer_hex" in c:
-            want = unhex(c["offer_commit_hex"])
-            good = commit("offer_commit", unhex(c["genuine_offer_hex"])) == want
-            bad = commit("offer_commit", unhex(c["stripped_offer_hex"])) == want
-            if good and not bad:
-                r.ok()
-            else:
-                r.bad("negotiate", c["name"], c.get("why", ""),
-                      f"genuine matches={good}, stripped matches={bad}")
-            continue
-
         def go(c=c):
-            v, s = negotiate(
-                c["offered"]["versions"], c["offered"]["suites"],
-                c.get("local_versions", c["offered"]["versions"]),
-                c.get("payer_preference", c["offered"]["suites"]),
-            )
-            return {"version": v, "suite": s}
+            v, sui = negotiate(c["offered"]["versions"], c["offered"]["suites"],
+                               c["local_versions"], c["payer_preference"])
+            return {"version": v, "suite": sui}
         got = expect_reject(r, "negotiate", c, go)
-        if got is not None:
-            for k in ("version", "suite"):
-                if k in c["expect"] and got[k] != c["expect"][k]:
-                    r.passed -= 1
-                    r.bad("negotiate", c["name"], c.get("why", ""),
-                          f"{k}: we chose {got[k]}, vector says {c['expect'][k]}")
-                    break
+        if got is None:
+            continue
+        for k in ("version", "suite"):
+            if got[k] != c["expect"][k]:
+                r.passed -= 1
+                r.bad("negotiate", c["name"], c.get("why", ""),
+                      f"{k}: we chose {got[k]}, vector says {c['expect'][k]}")
+                break
 
 
-def parse_event(ev):
-    """Vector events come in three spellings for the same thing: "Fund",
-    "Accept { from: Payer }", "Elapsed(60s)", and the JSON-object forms
-    {"Accept": {"from": "Payer"}} and {"Elapsed": 60}. A second implementer has
-    to reverse-engineer this from examples — the vector README documents the case
-    fields but not the event grammar."""
-    if isinstance(ev, dict):
-        (name, arg), = ev.items()
-        if name == "Elapsed":
-            return "Elapsed", None, int(arg)
-        if isinstance(arg, dict) and "from" in arg:
-            return name, arg["from"], 0
-        return name, None, 0
-    s = ev.strip()
-    if s.startswith("Elapsed(") and s.endswith("s)"):
-        return "Elapsed", None, int(s[len("Elapsed("):-2])
-    if "{" in s:
-        name, rest = s.split("{", 1)
-        return name.strip(), rest.split(":")[1].strip().rstrip("}").strip(), 0
-    return s, None, 0
+def run_commit_purposes(cases, r):
+    for c in cases:
+        body = unhex(c["input_hex"])
+        wrong = {p: (commit(p, body).hex(), want)
+                 for p, want in c["expect"]["digests_by_purpose"].items()
+                 if commit(p, body).hex() != want}
+        if wrong:
+            r.bad("commit", c["name"], c.get("why", ""),
+                  f"purpose digests disagree: {wrong}")
+        else:
+            r.ok()
 
 
-def check_step(r, c, state, mode, role, ev_raw, expect):
-    """Returns the next state, or None if the case is finished/failed."""
-    ev, origin, elapsed = parse_event(ev_raw)
+def run_commit_substitution(cases, r):
+    for c in cases:
+        want = unhex(c["offer_commit_hex"])
+        genuine = commit("offer_commit", unhex(c["genuine_offer_hex"])) == want
+        stripped = commit("offer_commit", unhex(c["stripped_offer_hex"])) == want
+        if genuine == c["expect"]["genuine"]["ok"] and stripped == c["expect"]["stripped"]["ok"]:
+            r.ok()
+        else:
+            r.bad("commit", c["name"], c.get("why", ""),
+                  f"genuine matches={genuine}, stripped matches={stripped}")
+
+
+def run_transcript_substitution(cases, r):
+    for c in cases:
+        matches = commit("offer_commit", unhex(c["delivered_offer_hex"])) \
+            == unhex(c["tap_offer_commit_hex"])
+        # The delivered offer must NOT match the tap's commitment.
+        if matches == c["expect"]["ok"]:
+            r.ok()
+        else:
+            r.bad("transcript", c["name"], c.get("why", ""),
+                  f"delivered offer matches tap commitment: {matches}")
+
+
+def run_transcript_replay(cases, r):
+    """Recompute the published commitments. That is where two implementations
+    actually diverge, and it is the part the vector pins."""
+    for c in cases:
+        exp = c["expect"]
+        want = exp.get("accept_chain_link_hex")
+        if want is None:
+            r.ok()
+            continue
+        got = commit(PURPOSE_SPEC["chain"], unhex(c["accept_hex"])).hex()
+        if got == want:
+            r.ok()
+        else:
+            alt = commit(PURPOSE_ALT["chain"], unhex(c["accept_hex"])).hex()
+            r.bad("transcript", c["name"], c.get("why", ""),
+                  f"chain link: vector says {want}; §18.3 labels give {got}, "
+                  f"the prose's enum names give {alt}")
+
+
+def check_step(r, c, state, mode, role, ev, expect):
+    """Returns the next state, or None if the case failed."""
+    name = ev["name"]
+    origin = ev.get("from")
+    elapsed = ev.get("elapsed_s", 0)
     want_ok = expect.get("ok", True)
     try:
-        nxt, eff = transition(state, ev, origin, mode, role, elapsed)
+        nxt, eff = transition(state, name, origin, mode, role, elapsed)
     except Reject as ex:
         if want_ok:
             r.bad("state", c["name"], c.get("why", ""),
-                  f"{ev} from {state}: we rejected ({ex.detail}), "
+                  f"{name} from {state}: we rejected ({ex.detail}), "
                   f"vector expects {expect.get('next')}")
             return None
-        if ex.code != expect.get("reject_code", ex.code):
+        if ex.code != expect["reject_code"]:
             r.bad("state", c["name"], c.get("why", ""),
-                  f"{ev} from {state}: we said {ex.name}({ex.code}), "
-                  f"vector says {expect.get('reject_name')}({expect.get('reject_code')})")
+                  f"{name} from {state}: we said {ex.name}({ex.code}), "
+                  f"vector says {expect['reject_name']}({expect['reject_code']})")
             return None
         return "__rejected__"
     if not want_ok:
         r.bad("state", c["name"], c.get("why", ""),
-              f"{ev} from {state}: we reached {nxt}, vector expects "
-              f"{expect.get('reject_name')}")
+              f"{name} from {state}: we reached {nxt}, vector expects "
+              f"{expect['reject_name']}")
         return None
-    if "next" in expect and nxt != expect["next"]:
+    if nxt != expect["next"]:
         r.bad("state", c["name"], c.get("why", ""),
-              f"{ev} from {state}: we reached {nxt}, vector says {expect['next']}")
+              f"{name} from {state}: we reached {nxt}, vector says {expect['next']}")
         return None
-    if "effect" in expect and eff != expect["effect"]:
+    if eff != expect["effect"]:
         r.bad("state", c["name"], c.get("why", ""),
-              f"{ev} from {state}: effect {eff}, vector says {expect['effect']}")
+              f"{name} from {state}: effect {eff}, vector says {expect['effect']}")
         return None
     return nxt
 
 
 def run_state(cases, r):
     for c in cases:
-        state, mode, role = c["from"], c.get("mode", "Direct"), c.get("role", "Payer")
-        if "deadline_secs" in c:
+        state, mode, role = c["from"], c["mode"], c["role"]
+        ok = True
+        if "deadline_s" in c:
             got = deadline(state, mode)
-            if got != c["deadline_secs"]:
+            if got != c["deadline_s"]:
                 r.bad("state", c["name"], c.get("why", ""),
                       f"deadline for {state}/{mode}: we say {got}, "
-                      f"vector says {c['deadline_secs']}")
-                # Deliberately keep going: a deadline disagreement must not mask
-                # a behavioural one behind it.
-        steps = c["steps"] if "steps" in c else [
-            {"event": c["event"], **{k: v for k, v in c["expect"].items()}}
-        ]
-        ok = True
-        for step in steps:
-            expect = {k: v for k, v in step.items() if k != "event"}
-            nxt = check_step(r, c, state, mode, role, step["event"], expect)
+                      f"vector says {c['deadline_s']}")
+                ok = False
+        for step in c["steps"]:
+            nxt = check_step(r, c, state, mode, role, step["event"], step["expect"])
             if nxt is None:
                 ok = False
                 break
@@ -725,91 +729,61 @@ def run_backup(cases, r):
             return backup_import(unhex(c["blob_hex"]),
                                  c["passphrase_utf8"].encode(), kdf)
         got = expect_reject(r, "backup", c, go)
-        if got is not None and "decoded" in c["expect"]:
-            d = c["expect"]["decoded"]
-            checks = [
-                (1, d["persona_suite"], "persona_suite"),
-                (4, d["monero_restore_height"], "monero_restore_height"),
-                (7, d["created"], "created"),
-            ]
-            for key, want, label in checks:
-                if got[key][1] != want:
-                    r.passed -= 1
-                    r.bad("backup", c["name"], c.get("why", ""),
-                          f"{label}: we read {got[key][1]}, vector says {want}")
-                    break
-            else:
-                if got[3][1] != d["monero_seed"]:
-                    r.passed -= 1
-                    r.bad("backup", c["name"], c.get("why", ""), "monero_seed differs")
-
-
-def run_transcript(cases, r):
-    """§18.9(4). Only the commitments are recomputed — that is where two
-    implementations actually diverge, and it is the part the vector publishes."""
-    for c in cases:
-        exp = c.get("expect", {})
-        if "accept_chain_link_hex" not in c.get("expect", {}):
-            r.ok()
+        if got is None or "decoded" not in c["expect"]:
             continue
-        accept = unhex(c["accept_hex"])
-        want = exp["accept_chain_link_hex"]
-        tried = {}
-        for label, table in (("spec", PURPOSE_SPEC), ("alt", PURPOSE_ALT)):
-            tried[label] = commit(table["chain"], accept).hex()
-        if want in tried.values():
-            which = [k for k, v in tried.items() if v == want][0]
-            if which != "spec":
-                r.bad("transcript", c["name"], c.get("why", ""),
-                      f"chain-link commitment matches only the '{which}' purpose "
-                      f"label; §18.3 names the labels offer_commit/receipt/chain/"
-                      f"market_genesis, which produce {tried['spec']}")
-            else:
-                r.ok()
-        else:
-            r.bad("transcript", c["name"], c.get("why", ""),
-                  f"chain link: vector says {want}; spec labels give {tried['spec']}, "
-                  f"alt labels give {tried['alt']}")
+        d = c["expect"]["decoded"]
+        for key, want, label in [
+            (1, d["persona_suite"], "persona_suite"),
+            (3, d["monero_seed"], "monero_seed"),
+            (4, d["monero_restore_height"], "monero_restore_height"),
+            (7, d["created"], "created"),
+        ]:
+            if got[key][1] != want:
+                r.passed -= 1
+                r.bad("backup", c["name"], c.get("why", ""),
+                      f"{label}: we read {got[key][1]!r}, vector says {want!r}")
+                break
 
 
-# ---------------------------------------------------------------------------
-# Findings (§18.11)
-#
-# Two disagreements survived, and both were spec gaps rather than code bugs —
-# the first implementation was right and the document did not say so:
-#
-#   1. codec/nesting_too_deep. §18.1 listed no nesting bound. A decoder written
-#      from that section accepts arbitrarily deep structures, which is a stack
-#      exhaustion route on an unauthenticated transport, and — worse for
-#      interop — two clients picking their own limits disagree about the same
-#      signed bytes. Now normative at 16 levels.
-#
-#   2. state/closed_Direct_fires_at_deadline. §18.4's table calls itself
-#      exhaustive and carried CLOSED's 120 s contact window only as a *guard* on
-#      CONTACT_OFFER, never as a deadline. §6.2 had it all along. It changes no
-#      state, so it is easy to omit and still wrong to: without it a client
-#      keeps session keys alive forever and accepts contact offers forever.
-#
-# Both were invisible from inside the first implementation, where the code was
-# the answer to the question.
-# ---------------------------------------------------------------------------
+# `kind` is the single discriminator. Nothing is routed by filename or by
+# guessing at which fields a case happens to carry — which is what a second
+# implementer had to do before 0.46 (§18.11).
+BY_KIND = {
+    "codec.decode": run_codec,
+    "signing.verify": run_signing_verify,
+    "signing.pubkey": run_signing_pubkey,
+    "negotiate.select": run_negotiate,
+    "commit.purposes": run_commit_purposes,
+    "commit.substitution": run_commit_substitution,
+    "state.sequence": run_state,
+    "transcript.replay": run_transcript_replay,
+    "transcript.substitution": run_transcript_substitution,
+    "backup.import": run_backup,
+}
 
 
 def main():
     root = Path(__file__).resolve().parent.parent / "vectors" / "v1"
     r = Results()
-    runners = {
-        "codec": run_codec, "signing": run_signing, "negotiate": run_negotiate,
-        "state": run_state, "backup": run_backup, "transcript": run_transcript,
-    }
+
+    # Group every case in the set by kind, then dispatch. File names carry no
+    # meaning to a consumer: a case's kind decides how to run it, which is the
+    # point of publishing a schema.
+    grouped = {}
     total = 0
-    for name, fn in runners.items():
-        path = root / f"{name}.json"
-        if not path.exists():
+    for path in sorted(root.glob("*.json")):
+        if path.name in ("manifest.json", "schema.json"):
             continue
-        cases = json.loads(path.read_text())["cases"]
-        total += len(cases)
-        fn(cases, r)
+        for case in json.loads(path.read_text())["cases"]:
+            kind = case.get("kind")
+            if kind not in BY_KIND:
+                print(f"  unknown kind {kind!r} in {path.name} "
+                      f"({case.get('name')}) — refusing to guess")
+                return 2
+            grouped.setdefault(kind, []).append(case)
+            total += 1
+    for kind, cases in grouped.items():
+        BY_KIND[kind](cases, r)
 
     print(f"\nDUCAT second implementation — {total} vector cases\n")
     print(f"  agreed:        {r.passed}")

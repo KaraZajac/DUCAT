@@ -4,6 +4,7 @@
       "expect": {
         "ok": true
       },
+      "kind": "signing.verify",
       "name": "suite1_accept_valid",
       "object_hex": "a20101021b00000246139ca800",
       "object_type": "ACCEPT",
@@ -19,6 +20,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "signing.verify",
       "name": "suite1_accept_replayed_as_TapPresent",
       "object_hex": "a20101021b00000246139ca800",
       "object_type": "ACCEPT",
@@ -34,6 +36,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "signing.verify",
       "name": "suite1_accept_replayed_as_RECEIPT",
       "object_hex": "a20101021b00000246139ca800",
       "object_type": "ACCEPT",
@@ -49,6 +52,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "signing.verify",
       "name": "suite1_accept_replayed_as_bond_proof",
       "object_hex": "a20101021b00000246139ca800",
       "object_type": "ACCEPT",
@@ -64,6 +68,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "signing.verify",
       "name": "suite1_accept_replayed_as_CONTACT_OFFER",
       "object_hex": "a20101021b00000246139ca800",
       "object_type": "ACCEPT",
@@ -79,6 +84,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "signing.verify",
       "name": "suite1_tampered_amount",
       "object_hex": "a20101021b00000246139ca801",
       "object_type": "ACCEPT",
@@ -92,6 +98,7 @@
       "expect": {
         "ok": true
       },
+      "kind": "signing.verify",
       "name": "suite2_accept_valid",
       "object_hex": "a20101021b00000246139ca800",
       "object_type": "ACCEPT",
@@ -107,6 +114,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "signing.verify",
       "name": "suite2_accept_replayed_as_TapPresent",
       "object_hex": "a20101021b00000246139ca800",
       "object_type": "ACCEPT",
@@ -122,6 +130,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "signing.verify",
       "name": "suite2_accept_replayed_as_RECEIPT",
       "object_hex": "a20101021b00000246139ca800",
       "object_type": "ACCEPT",
@@ -137,6 +146,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "signing.verify",
       "name": "suite2_accept_replayed_as_bond_proof",
       "object_hex": "a20101021b00000246139ca800",
       "object_type": "ACCEPT",
@@ -152,6 +162,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "signing.verify",
       "name": "suite2_accept_replayed_as_CONTACT_OFFER",
       "object_hex": "a20101021b00000246139ca800",
       "object_type": "ACCEPT",
@@ -167,6 +178,7 @@
         "reject_code": 1,
         "reject_name": "BadSig"
       },
+      "kind": "signing.verify",
       "name": "suite2_tampered_amount",
       "object_hex": "a20101021b00000246139ca801",
       "object_type": "ACCEPT",
@@ -183,6 +195,7 @@
         "reject_name": "BadSig"
       },
       "hint": "reject high-s; do not normalize on receipt",
+      "kind": "signing.verify",
       "name": "suite2_high_s_twin_refused",
       "object_hex": "a20101021b00000246139ca800",
       "object_type": "ACCEPT",
@@ -199,6 +212,7 @@
         "reject_name": "Malformed"
       },
       "hint": "check the SEC1 tag explicitly rather than delegating to the parser",
+      "kind": "signing.pubkey",
       "name": "suite2_pubkey_tag_0x04_refused",
       "pubkey_hex": "047135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
       "suite": 2,
@@ -211,6 +225,7 @@
         "reject_name": "Malformed"
       },
       "hint": "check the SEC1 tag explicitly rather than delegating to the parser",
+      "kind": "signing.pubkey",
       "name": "suite2_pubkey_tag_0x05_refused",
       "pubkey_hex": "057135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
       "suite": 2,
@@ -223,6 +238,7 @@
         "reject_name": "Malformed"
       },
       "hint": "check the SEC1 tag explicitly rather than delegating to the parser",
+      "kind": "signing.pubkey",
       "name": "suite2_pubkey_tag_0x06_refused",
       "pubkey_hex": "067135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
       "suite": 2,
@@ -235,6 +251,7 @@
         "reject_name": "Malformed"
       },
       "hint": "check the SEC1 tag explicitly rather than delegating to the parser",
+      "kind": "signing.pubkey",
       "name": "suite2_pubkey_tag_0x07_refused",
       "pubkey_hex": "077135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
       "suite": 2,
