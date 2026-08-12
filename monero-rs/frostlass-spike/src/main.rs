@@ -62,6 +62,11 @@ fn save_group(keys: &HashMap<Participant, ThresholdKeys<Ed25519>>, view: &Zeroiz
 }
 
 fn main() {
+    if let Some(i) = std::env::args().position(|a| a == "--spend") {
+        let to = std::env::args().nth(i + 1).expect("--spend <address>");
+        tokio::runtime::Runtime::new().unwrap().block_on(spend::run(&to));
+        return;
+    }
     if std::env::args().any(|a| a == "--keygen") {
         let (keys, secs) = keygen(3, 5);
         let view = Zeroizing::new(Scalar::random(&mut OsRng));
@@ -112,4 +117,128 @@ fn main() {
     println!("    dkg 0.6.1 ships no interactive DKG. A real deployment needs one, and");
     println!("    a dealer who keeps the polynomial holds every share. Signing and");
     println!("    settlement are exercised separately.");
+}
+
+// ---------------------------------------------------------------------------
+// --spend: the half that actually exercises FROSTLASS
+// ---------------------------------------------------------------------------
+//
+// Forming a group tests key generation. Signing a real CLSAG with a subset of
+// that group tests the thing §8.2 wants to ship, on the chain, with money.
+
+mod spend {
+    use super::*;
+    use monero_simple_request_rpc::{prelude::*, SimpleRequestTransport};
+    use monero_wallet::{
+        address::MoneroAddress,
+        ringct::RctType,
+        send::{Change, SignableTransaction},
+        OutputWithDecoys, Scanner,
+    };
+
+    const RELAYS: &[&str] = &[
+        "http://xmr-lux.boldsuck.org:38081",
+        "http://node.monerodevs.org:38089",
+        "http://stagenet.xmr-tw.org:38081",
+    ];
+
+    fn load() -> (HashMap<Participant, ThresholdKeys<Ed25519>>, Zeroizing<Scalar>, String) {
+        let mut keys = HashMap::new();
+        for i in 1u16..=5 {
+            let raw = std::fs::read(format!("group/share-{i}.bin")).expect("run --keygen first");
+            let k = ThresholdKeys::<Ed25519>::read(&mut raw.as_slice()).expect("share");
+            keys.insert(Participant::new(i).unwrap(), k);
+        }
+        let vh = std::fs::read_to_string("group/view.hex").unwrap();
+        let vb = hex::decode(vh.trim()).unwrap();
+        let view = Zeroizing::new(Scalar::read(&mut vb.as_slice()).unwrap());
+        let addr = std::fs::read_to_string("group/address.txt").unwrap();
+        (keys, view, addr)
+    }
+
+    pub async fn run(pay_to: &str) {
+        let (keys, view, addr) = load();
+        let one = &keys[&Participant::new(1).unwrap()];
+        let vp = ViewPair::new(Point::from(one.group_key().0), view.clone()).unwrap();
+        println!("\n\x1b[1mFROSTLASS — signing a real CLSAG with 3 of 5\x1b[0m\n");
+        println!("  group    {}…", &addr[..28]);
+
+        let mut rpc = None;
+        for r in RELAYS {
+            if let Ok(c) = SimpleRequestTransport::new(r.to_string()).await {
+                if c.latest_block_number().await.is_ok() {
+                    println!("  node     {r}");
+                    rpc = Some(c);
+                    break;
+                }
+            }
+        }
+        let rpc = rpc.expect("no stagenet node reachable");
+        let tip = rpc.latest_block_number().await.unwrap();
+
+        // Find the funding output. Scanning a window back from the tip rather
+        // than tracking a height: the funding is recent by construction, and a
+        // client that cannot find its own money without external bookkeeping
+        // has not really scanned.
+        let mut scanner = Scanner::new(vp.clone());
+        let mut found = None;
+        let start = tip.saturating_sub(40);
+        for h in start..=tip {
+            let block = match rpc.block_by_number(h).await {
+                Ok(b) => b,
+                Err(_) => continue,
+            };
+            let sb = match rpc.expand_to_scannable_block(block).await {
+                Ok(b) => b,
+                Err(_) => continue,
+            };
+            let outs = scanner.scan(sb).unwrap().not_additionally_locked();
+            if let Some(o) = outs.into_iter().next() {
+                println!("  found    {} pXMR at height {}", o.commitment().amount, h);
+                found = Some((o, h));
+                break;
+            }
+        }
+        let (output, height) = found.expect("no unlocked output for the group — still locked?");
+
+        // Build.
+        let decoyed = OutputWithDecoys::new(&mut OsRng, &rpc, 16, height, output.clone())
+            .await
+            .expect("decoy selection");
+        let dest = MoneroAddress::from_str_with_unchecked_network(pay_to).expect("address");
+        let fee_rate = rpc.fee_rate(FeePriority::Unimportant, u64::MAX).await.unwrap();
+        let mut outgoing = Zeroizing::new([0u8; 32]);
+        OsRng.fill_bytes(outgoing.as_mut());
+        let amount = output.commitment().amount / 2;
+
+        let tx = SignableTransaction::new(
+            RctType::ClsagBulletproofPlus,
+            outgoing,
+            vec![decoyed],
+            vec![(dest, amount)],
+            Change::new(vp.clone(), None),
+            vec![],
+            fee_rate,
+        )
+        .expect("signable transaction");
+
+        // Sign with participants 1, 2, 3 — three of five. wallet2 has no such
+        // configuration to sign with.
+        let signers = [1u16, 2, 3];
+        println!("  signers  {:?} of 5", signers);
+        let started = Instant::now();
+        let mut machines = HashMap::new();
+        for i in signers {
+            let p = Participant::new(i).unwrap();
+            machines.insert(p, tx.clone().multisig(keys[&p].clone()).expect("multisig machine"));
+        }
+        let signed = modular_frost::tests::sign_without_caching(&mut OsRng, machines, &[]);
+        println!("  signed   in {:.3}s", started.elapsed().as_secs_f64());
+        println!("  txid     {}", hex::encode(signed.hash()));
+
+        match rpc.publish_transaction(&signed).await {
+            Ok(()) => println!("\n  \x1b[32mbroadcast accepted by the network\x1b[0m"),
+            Err(e) => println!("\n  \x1b[31mbroadcast refused:\x1b[0m {e:?}"),
+        }
+    }
 }
