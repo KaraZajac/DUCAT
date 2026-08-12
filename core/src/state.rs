@@ -100,7 +100,12 @@ pub enum Event {
     Receipt,
     Cancel,
     Dispute,
-    Abort,
+    /// `from` is the originator. Direction is unconstrained before value
+    /// accrues, and payee-only once a meter is running — see the `METERING`
+    /// arm, and §18.4.1.
+    Abort {
+        from: Role,
+    },
     ContactOffer,
     ContactAccept,
     /// Monotonic time in the current state.
@@ -231,7 +236,7 @@ pub fn transition(
             RejectCode::StateViolation,
             "ACCEPT may only originate from the payer",
         )),
-        (S::Quoted, E::Abort) => go(S::Aborted),
+        (S::Quoted, E::Abort { .. }) => go(S::Aborted),
         (S::Quoted, E::Elapsed(d)) if past(*d, state, mode) => go(S::Aborted),
 
         // -- metering (§15.7) ---------------------------------------------
@@ -246,14 +251,24 @@ pub fn transition(
         (S::Metering, E::MeterExpired) => {
             go_with(S::Closed, Effect::EmitSingleSidedReceipt)
         }
-        (S::Metering, E::Abort) => go(S::Aborted),
+        // Only the meter's operator may void it cleanly — a bartender comping a
+        // tab is ordinary. A *payer* aborting a running meter would be a free
+        // exit from an obligation that has been accruing in real time: start a
+        // tab, consume, abort, owe nothing. That path is abandonment, and it
+        // goes through `MeterExpired` so it leaves a single-sided receipt as
+        // evidence rather than a clean exit with no record (§15.7).
+        (S::Metering, E::Abort { from: Role::Payee }) => go(S::Aborted),
+        (S::Metering, E::Abort { .. }) => Err(Reject::with_detail(
+            RejectCode::StateViolation,
+            "a payer cannot abort a running meter; leaving is abandonment (§15.7)",
+        )),
 
         // -- funding -----------------------------------------------------
         (S::Accepted, E::Fund) => go(S::Funded),
         // Cancellation is legal only once a price is locked and before funds
         // move; its fee comes from terms the payer already signed (§7.3).
         (S::Accepted, E::Cancel) => go(S::Cancelled),
-        (S::Accepted, E::Abort) => go(S::Aborted),
+        (S::Accepted, E::Abort { .. }) => go(S::Aborted),
         (S::Accepted, E::Elapsed(d)) if past(*d, state, mode) => {
             if mode == SettleMode::Escrow {
                 // Multisig setup stalled with funds possibly committed; the

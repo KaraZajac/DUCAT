@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.32 — Consolidated**
+**Draft 0.33 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.33** — **`ABORT` made directional once a meter is running.** §6 lists it as available to either party with no penalty — correct before value accrues, and a free exit afterwards: a payer could open a tab, consume, abort, and owe nothing. From `METERING` only the operator may void cleanly; a payer leaving is abandonment via `MeterExpired`, which leaves evidence. Also recorded that `CANCEL` does not apply to a running meter, since stopping it and paying what accrued is the instrument that already exists.
 - **0.32** — **`METERING` state added; §15.7 and §6.2 had been contradicting each other.** A metered session's `start` leg landed in `ACCEPTED`, whose 60-second deadline aborted it — so a bar tab died one minute after being opened. The two sections were written independently and never checked against each other. `METERING` is deliberately not wall-clock bounded, because its limit lives in `terms.meter_max_s` and the machine holds no terms; expiry arrives as an explicit `MeterExpired` event, following `ConfirmationsReached`'s pattern. Abandonment routes to `CLOSED` with a single-sided receipt, per §15.7.
 - **0.31** — **Consecutive capacity corrected from an equality to a bound.** A drain test predicted six consecutive purchases from six unlocked outputs and achieved four: two of the payments consumed two outputs each. Input selection belongs to the wallet, not the client, so capacity is *at most* the output count and can be about half. The earlier seven-outputs-seven-payments result was over-fitted to a single run where one input happened to suffice each time. §17.2 now requires provisioning more finely than the naive calculation, checking capacity before presenting an offer, and never quoting an exact count to a user.
 - **0.30** — `REFUND` implemented (§7.3, field keys 34–37) with the three checks a signature cannot make: it must name *this* receipt by chain-link commitment, must not exceed the original amount, and must fall inside `terms.refund_window_s`. Window boundary is inclusive; a refund timestamped before its receipt yields zero elapsed rather than underflowing into an apparently-expired window.
@@ -1513,7 +1514,7 @@ with `purpose` a fixed label (`"offer_commit"`, `"receipt"`, `"chain"`, `"market
 | `QUOTED` | `MeterStart` | Payer confirmed rate and cap; `terms` carries both | `METERING` |
 | `METERING` | `MeterStop` | `stop` tap with a matching `session_ref` | `ACCEPTED` |
 | `METERING` | `MeterExpired` | Ran past `terms.meter_max_s` without a stop | `CLOSED`, single-sided receipt |
-| `METERING` | `ABORT` | — | `ABORTED` |
+| `METERING` | `ABORT` | **Payee only** — see below | `ABORTED` |
 | `ACCEPTED` | timeout 60 s | — | `ABORTED` |
 | `FUNDED` | `TXPROOF` | `fast/1`; proof verifies and tx is in mempool | `PROVISIONAL` |
 | `FUNDED` / `PROVISIONAL` | `PROOF` | Profile-defined | `DELIVERED` |
@@ -1536,7 +1537,8 @@ Implementing §18.4 surfaced six decisions the transition table leaves open. Eac
 4. **The `FUNDED` deadline applies only under `fast/1`.** That 30 s bounds the wait for `TXPROOF`. Under `direct` and `escrow`, `FUNDED` awaits profile-defined delivery and carries no wall-clock deadline.
 5. **Terminal states are absorbing.** `ABORTED`, `CANCELLED`, `DISPUTED`, `SETTLED`, and `CLAIMED` accept no further events, including timeouts. `CLOSED` is deliberately *not* terminal: it still admits the contact coda and `fast/1` finality.
 6. **Elapsed time in an unbounded state is a no-op, not an error.** Clients poll on their own schedule, and a client that polls more often than another must not thereby reach a different state.
-7. **A metered session needs its own state, and this was found the hard way.** §15.7's two-tap flow and §6.2's deadlines were written independently and disagreed: a `start` leg landed in `ACCEPTED`, whose 60-second deadline aborted a bar tab after one minute. `METERING` is therefore **not wall-clock bounded** — its limit lives in `terms.meter_max_s`, which the machine does not hold, so expiry arrives as an explicit `MeterExpired` event from the caller. That is the same pattern as `ConfirmationsReached` and `CureWindowExpired`: the caller establishes the condition, the machine decides the consequence.
+7. **`ABORT` is directional once a meter is running.** §6 lists `ABORT` as available to either party with no penalty, which is right before value accrues and wrong afterwards: a payer able to abort a live meter would start a tab, consume, abort, and owe nothing. From `METERING` only the **operator** may void cleanly — comping a drink is ordinary commerce — while a payer leaving is **abandonment**, which routes through `MeterExpired` and leaves a single-sided receipt as evidence rather than a clean exit with no record. `CANCEL` likewise does not apply to a running meter: §7.3's fixed cancellation schedule is the wrong instrument when the correct one already exists, which is stopping the meter and paying what accrued.
+8. **A metered session needs its own state, and this was found the hard way.** §15.7's two-tap flow and §6.2's deadlines were written independently and disagreed: a `start` leg landed in `ACCEPTED`, whose 60-second deadline aborted a bar tab after one minute. `METERING` is therefore **not wall-clock bounded** — its limit lives in `terms.meter_max_s`, which the machine does not hold, so expiry arrives as an explicit `MeterExpired` event from the caller. That is the same pattern as `ConfirmationsReached` and `CureWindowExpired`: the caller establishes the condition, the machine decides the consequence.
 
 ---
 

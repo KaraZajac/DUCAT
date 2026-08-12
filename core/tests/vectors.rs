@@ -184,7 +184,7 @@ fn parse_event(v: &J) -> Event {
         "Receipt" => Event::Receipt,
         "Cancel" => Event::Cancel,
         "Dispute" => Event::Dispute,
-        "Abort" => Event::Abort,
+        "Abort" => Event::Abort { from: Role::Payer },
         "ContactOffer" => Event::ContactOffer,
         "ContactAccept" => Event::ContactAccept,
         "ConfirmationsReached" => Event::ConfirmationsReached,

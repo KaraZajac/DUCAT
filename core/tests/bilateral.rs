@@ -245,7 +245,8 @@ fn every_state_event_pair_agrees_on_both_sides() {
         Event::Receipt,
         Event::Cancel,
         Event::Dispute,
-        Event::Abort,
+        Event::Abort { from: Role::Payer },
+        Event::Abort { from: Role::Payee },
         Event::ContactOffer,
         Event::ContactAccept,
         Event::ConfirmationsReached,
@@ -373,5 +374,64 @@ fn a_stop_without_a_start_is_refused() {
                 s
             );
         }
+    }
+}
+
+/// §6 says ABORT is available to either party with no penalty. That is right
+/// before value accrues and wrong once a meter is running: a payer who could
+/// abort a live meter would start a tab, consume, abort, and owe nothing.
+///
+/// So from `METERING` only the operator may void cleanly. A payer leaving is
+/// abandonment, which goes through `MeterExpired` and leaves a single-sided
+/// receipt as evidence rather than a clean exit with no record.
+#[test]
+fn a_payer_cannot_abort_a_running_meter() {
+    // The operator may void the tab — comping a drink is ordinary commerce.
+    let t = transition(State::Metering, Role::Payee, SettleMode::Direct,
+                       &Event::Abort { from: Role::Payee }).unwrap();
+    assert_eq!(t.next, State::Aborted);
+
+    // The payer may not, and both parties agree about that.
+    for who in [Role::Payer, Role::Payee] {
+        let err = transition(State::Metering, who, SettleMode::Direct,
+                             &Event::Abort { from: Role::Payer })
+            .expect_err("a payer must not be able to walk away for free");
+        assert_eq!(err.code, RejectCode::StateViolation);
+    }
+
+    // Abandonment remains available and is *not* free — it produces evidence.
+    let t = transition(State::Metering, Role::Payee, SettleMode::Direct,
+                       &Event::MeterExpired).unwrap();
+    assert_eq!(t.effect, Effect::EmitSingleSidedReceipt);
+}
+
+/// Before anything accrues, either party may walk away. The asymmetry above is
+/// specific to a meter that is running, not a general rule about aborts.
+#[test]
+fn either_party_may_abort_before_value_accrues() {
+    for state in [State::Quoted, State::Accepted] {
+        for originator in [Role::Payer, Role::Payee] {
+            for evaluator in [Role::Payer, Role::Payee] {
+                let t = transition(state, evaluator, SettleMode::Direct,
+                                   &Event::Abort { from: originator })
+                    .unwrap_or_else(|e| panic!("{:?} abort by {:?}: {:?}", state, originator, e));
+                assert_eq!(t.next, State::Aborted);
+            }
+        }
+    }
+}
+
+/// A running meter cannot be CANCELled either. §7.3's cancellation fee is a
+/// fixed schedule agreed in advance; a meter already has the right mechanism
+/// for partial consumption, which is stopping it and paying what accrued.
+#[test]
+fn cancel_does_not_apply_to_a_running_meter() {
+    for who in [Role::Payer, Role::Payee] {
+        assert_eq!(
+            transition(State::Metering, who, SettleMode::Direct, &Event::Cancel)
+                .unwrap_err()
+                .code,
+            RejectCode::StateViolation
+        );
     }
 }
