@@ -435,3 +435,58 @@ fn cancel_does_not_apply_to_a_running_meter() {
         );
     }
 }
+
+// -- the timeout audit (§6.2) ------------------------------------------------
+
+/// Cycle 9 produced a rule: in a system with no operator, "nothing happens" is
+/// not a safe default, so every deadline must name the action it triggers.
+/// Auditing §6.2 against it found `FUNDED` and `PROVISIONAL` had no deadline at
+/// all under any mode — a payer who had already paid and never received proof
+/// waited forever, with the money gone and no evidence to show for it.
+#[test]
+fn a_funded_payer_can_always_close_out() {
+    for mode in [SettleMode::Direct, SettleMode::Fast, SettleMode::Escrow] {
+        for state in [State::Funded, State::Provisional] {
+            for who in [Role::Payer, Role::Payee] {
+                let t = transition(state, who, mode, &Event::DeliveryWindowExpired)
+                    .unwrap_or_else(|e| panic!("{:?}/{:?} has no exit: {:?}", mode, state, e));
+                assert_eq!(t.next, State::Closed);
+                assert_eq!(
+                    t.effect,
+                    Effect::EmitPaymentEvidence,
+                    "the payer must leave holding proof of what they paid"
+                );
+            }
+        }
+    }
+}
+
+/// Every state that can hold committed funds must have *some* exit. A state
+/// with money in it and no way out is the failure cycle 9 named.
+#[test]
+fn no_state_holding_funds_is_a_dead_end() {
+    let funded_states = [
+        State::Accepted,    // escrow may already be locking
+        State::Funded,
+        State::Provisional,
+        State::Delivered,
+        State::Metering,    // value accruing
+    ];
+    for mode in [SettleMode::Direct, SettleMode::Fast, SettleMode::Escrow] {
+        for s in funded_states {
+            // At least one event must move this state somewhere terminal or
+            // closing, without requiring the counterparty's cooperation.
+            let escapes = [
+                Event::Elapsed(Duration::from_secs(86_400)),
+                Event::DeliveryWindowExpired,
+                Event::MeterExpired,
+                Event::Abort { from: Role::Payee },
+            ];
+            let has_exit = escapes.iter().any(|ev| {
+                matches!(transition(s, Role::Payer, mode, ev), Ok(t) if t.next != s)
+                    || matches!(transition(s, Role::Payee, mode, ev), Ok(t) if t.next != s)
+            });
+            assert!(has_exit, "{:?}/{:?} has no unilateral exit", mode, s);
+        }
+    }
+}

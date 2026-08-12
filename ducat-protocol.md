@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.38 — Consolidated**
+**Draft 0.39 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.39** — **Timeout audit: `FUNDED` and `PROVISIONAL` were dead ends holding the payer's money.** Applying cycle 9's rule — *nothing happens is not a safe default* — across §6.2 found that neither state had a deadline in any settlement mode. "Profile-defined" is a deferral, not an action, so a payer who funded and never received `PROOF` waited forever with the money gone and no evidence. Added `DeliveryWindowExpired` as a backstop closing to payment evidence, and the tested invariant that **no state holding committed funds may be a dead end** — every such state now has an exit reachable without the counterparty's cooperation, since a counterparty holding your money is precisely the one who may not cooperate. Also recorded: the 60-second `FUND` deadline is shorter than a Monero block and is therefore meaningful only against mempool visibility, and `TXPROOF` expiry named two actions where the machine can only take one.
 - **0.38** — **The single-sided receipt was one effect covering two opposite claims.** A `DELIVERED` timeout means *the payer paid and holds no co-signature*; an abandoned meter means *the payee is owed and the customer left*. Both emitted the same instruction, so a client had to infer direction from the state it had just left — putting the decision back where a state machine exists to remove it from. Now split into payment evidence and debt evidence. Conflating them would have a payer's client record a debt it does not owe, or a merchant file a payment it never received.
 - **0.37** — **`CANCEL` and `TapStatic` implemented; §15.9's persona pinning was weaker than stated.** Pinning was offered as the mitigation for a swapped tag, but an attacker replacing the tag replaces the persona too — so the warning fires only for someone who already knows which persona to expect, and never for a first-time donor. A pinned persona without a signature is a *claim*: an attacker can print a charity's name over their own address. `TapStatic` now requires a signature by the pinned persona over the address, and an unsigned pin MUST be shown as unauthenticated rather than as an identity. The residual is stated rather than left to be found: a wholly replaced tag verifies under the attacker's own persona, and only a payer who knows what to expect is protected. `CANCEL` fixes the fee to the signed `terms`, so a cancelling party cannot invent a figure the confirm screen never showed.
 - **0.36** — **Hail objects implemented; "no route" made structural rather than prescribed.** §5.2's inversion depends entirely on providers never supplying a route — a provider able to smuggle one into a reply would deanonymise every consumer who used it, reinstating the harvesting the section was rewritten to remove. Neither `Hail` nor its reply now *has* a route field, because a prohibition can go unimplemented while a missing field cannot be populated. Also enforced at parse time: replies must echo the hail's nonce, or a stale quote can be replayed against a fresh hail; and geocell precision is capped, since §5.2.3's ladder begins at a district and one generous client's users pay for its generosity.
@@ -378,7 +379,7 @@ A state machine without deadlines is unimplementable. **Every await has a deadli
 | ACCEPT (offer displayed) | `TapPresent.expiry` (≤ 30 s) | ABORT, no penalty |
 | FUND after ACCEPT | 60 s | ABORT, no penalty |
 | TXPROOF (`fast/1`) | 30 s | Provider falls back to `direct` (wait for confirmations) or ABORTs |
-| PROOF of delivery | Profile-defined | Profile-defined; `ride/1` falls to single-sided receipt |
+| PROOF of delivery | Profile-defined, **bounded** | `CLOSED` + payment evidence — see the audit below |
 | RECEIPT co-signature | 120 s | **Single-sided receipt** (below) |
 | Multisig setup (escrow) | 300 s | ABORT + fund recovery path (§8.2) |
 | RELEASE (escrow) | Profile-defined | DISPUTE becomes eligible (§9.3) |
@@ -388,6 +389,21 @@ A state machine without deadlines is unimplementable. **Every await has a deadli
 **The dangerous window is post-FUND, pre-RECEIPT** — the payer's money is gone and the co-signed record does not yet exist. A counterparty that vanishes here must not be able to erase the transaction, so the payer's client emits a **single-sided receipt**: its own signed record of `{ ACCEPT, TXID, timestamp }`, valid as dispute evidence (§9.3) and as an attestation input (§9.2), and explicitly flagged as unilateral. It proves what the payer signed and paid; it cannot prove delivery, and it does not claim to.
 
 **There are two unilateral receipts and they assert opposite things.** This one is *payment evidence* — the payer saying "I paid and hold no co-signature". An abandoned meter (§15.7) produces *debt evidence* — the payee saying "you owe me and never stopped the meter". A client is told which to write, because inferring the direction from the state it just left would put the decision back in the place a state machine exists to remove it from. Conflating them would have a payer's client recording a debt it does not owe, or a merchant filing a payment it never received.
+
+#### The audit: every deadline must name an action
+
+Cycle 9 of this document's development produced a rule while fixing dispute expiry: **in a system with no operator, "nothing happens" is not a safe default.** Auditing the rest of §6.2 against it found the same class of failure in a worse place.
+
+**`FUNDED` and `PROVISIONAL` had no deadline at all, under any settlement mode.** The row above previously read "profile-defined", which is a deferral rather than an action — and an undefined profile meant unbounded. A payer who had funded and never received `PROOF` waited **forever**: the money already gone, no exit, and no record to show for it. That is strictly worse than the post-`FUND` window §6.2 already worried about, because there at least a deadline existed.
+
+The backstop is `DeliveryWindowExpired`, which closes the transaction and emits **payment evidence**. A profile sets the window; the protocol requires that one exist. The event is signalled by the caller rather than fired by a wall-clock deadline, because the window belongs to the profile and the machine holds no profile — the same reasoning as `MeterExpired`.
+
+The general invariant, now tested: **no state that can hold committed funds may be a dead end.** Every such state has an exit reachable without the counterparty's cooperation, because a counterparty who has your money is exactly the one who may not cooperate.
+
+Two smaller findings from the same audit:
+
+- **The 60-second `FUND` deadline is shorter than a Monero block.** It therefore cannot be satisfied by waiting for confirmation, and a payee that watches only confirmed blocks will abort every transaction it ever receives. The deadline is meaningful only against **mempool** visibility (§17.3), which is why the payer sends a `TXID` and why the payee scans rather than waits.
+- **The `TXPROOF` expiry named two actions** — "falls back to `direct` or aborts" — where the state machine can only do one. Falling back is a *policy choice made before the deadline*, not an outcome of it: a provider willing to wait for confirmations should not have set a 30-second window in the first place. Expiry aborts.
 
 **Clocks, and what happens when they disagree.** Every deadline above, plus `expiry` (§15.3), `rate_ts` (§17.7), and bond-attestation freshness (§17.4), depends on time — and phones have wrong clocks. NTP cannot be assumed: a device at the curb may have no network, and an NTP call is itself a network fetch with the leak profile §17.7 exists to avoid.
 

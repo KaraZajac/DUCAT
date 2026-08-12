@@ -120,6 +120,17 @@ pub enum Event {
     /// §15.7: a `stop` tap arrived carrying a matching `session_ref`, with the
     /// total derived from elapsed time or distance.
     MeterStop,
+    /// The profile's delivery window elapsed with no `PROOF`.
+    ///
+    /// A backstop, and the audit in §6.2 exists because it was missing: before
+    /// this, `FUNDED` had no deadline under `direct` or `escrow`, so a payer who
+    /// had already paid and never received proof waited **forever** with no exit
+    /// and no evidence. "Profile-defined" is a deferral, not an action, and an
+    /// undefined profile meant unbounded.
+    ///
+    /// Signalled by the caller because the window belongs to the profile, which
+    /// the machine does not hold — the same reason `MeterExpired` is an event.
+    DeliveryWindowExpired,
     /// §15.7: the meter ran past `terms.meter_max_s` without a `stop`.
     ///
     /// Signalled by the caller rather than by a wall-clock deadline, because the
@@ -303,6 +314,12 @@ pub fn transition(
 
         // -- delivery ----------------------------------------------------
         (S::Funded, E::Proof) | (S::Provisional, E::Proof) => go(S::Delivered),
+        // The backstop. The payer has paid; if delivery never comes they must
+        // still be able to close out holding evidence of what they paid, rather
+        // than waiting on a counterparty that may never return.
+        (S::Funded, E::DeliveryWindowExpired) | (S::Provisional, E::DeliveryWindowExpired) => {
+            go_with(S::Closed, Effect::EmitPaymentEvidence)
+        }
 
         // -- closure -----------------------------------------------------
         (S::Delivered, E::Receipt) => go(S::Closed),
