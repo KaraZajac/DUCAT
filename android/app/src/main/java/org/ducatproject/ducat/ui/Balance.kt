@@ -7,7 +7,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,7 +64,10 @@ fun BalanceCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         Modifier.size(8.dp)
-                            .background(Color(0xFFB08900), RoundedCornerShape(4.dp))
+                            // Change coming back has its own colour because it
+                            // carries a meaning, not a mood: it is a consequence
+                            // of having spent, and not a warning.
+                            .background(MaterialTheme.ducat.changePending, RoundedCornerShape(4.dp))
                     )
                     Spacer(Modifier.width(8.dp))
                     // "Change coming back" rather than "locked": the lock is a

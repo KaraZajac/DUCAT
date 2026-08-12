@@ -14,6 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.ui.BalanceCard
+import org.ducatproject.ducat.ui.DucatTheme
+import org.ducatproject.ducat.ui.ThemeMode
+import org.ducatproject.ducat.ui.ThemePreference
+import org.ducatproject.ducat.ui.ducat
 import org.ducatproject.ducat.ui.BridgeSelfTest
 import uniffi.ducat_mobile.approxPaymentsSupported
 import uniffi.ducat_mobile.protocolVersion
@@ -34,7 +38,17 @@ import uniffi.ducat_mobile.protocolVersion
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { MaterialTheme { DucatApp() } }
+        val prefs = ThemePreference(this)
+        setContent {
+            // Follows the system unless the user has said otherwise (Menu).
+            var mode by remember { mutableStateOf(prefs.mode) }
+            DucatTheme(mode) {
+                DucatApp(
+                    themeMode = mode,
+                    onThemeChange = { mode = it; prefs.mode = it },
+                )
+            }
+        }
     }
 }
 
@@ -42,7 +56,7 @@ enum class Tab(val label: String) { Home("Home"), Accounts("Accounts"), Activity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DucatApp() {
+fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     var tab by remember { mutableStateOf(Tab.Home) }
 
     Scaffold(
@@ -97,13 +111,7 @@ fun DucatApp() {
                     "Mostly nameless by design: a name exists only where §16.3's " +
                         "post-receipt coda established a contact."
                 )
-                Tab.Menu -> Placeholder(
-                    "Menu",
-                    "Personas, backup, custody, verification thresholds, markets, relays, records.\n\n" +
-                        // Proof the native core is loaded and answering, from the
-                        // one call that cannot be faked by a stub.
-                        "speaking ${protocolVersion()}"
-                )
+                Tab.Menu -> MenuScreen(themeMode, onThemeChange)
             }
         }
     }
@@ -135,6 +143,38 @@ private fun HomeScreen() {
     // On the home screen for this build only. It answers the one question this
     // APK exists to answer, and it should be deleted the moment it has.
     BridgeSelfTest()
+}
+
+@Composable
+private fun MenuScreen(mode: ThemeMode, onChange: (ThemeMode) -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(20.dp)) {
+        Text("Appearance", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        ThemeMode.entries.forEach { m ->
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(selected = mode == m, onClick = { onChange(m) })
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    when (m) {
+                        ThemeMode.System -> "Follow system"
+                        ThemeMode.Latte -> "Latte (light)"
+                        ThemeMode.Mocha -> "Mocha (dark)"
+                    }
+                )
+            }
+        }
+        Spacer(Modifier.height(24.dp))
+        Text(
+            "Personas, backup, custody, verification thresholds, markets, relays, records.",
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Spacer(Modifier.height(8.dp))
+        // Proof the native core is loaded and answering.
+        Text("speaking ${protocolVersion()}", style = MaterialTheme.typography.bodySmall)
+    }
 }
 
 @Composable

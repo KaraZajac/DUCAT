@@ -62,15 +62,26 @@ fun bridgeChecks(): List<Check> = listOf(
     },
 
     // §15.5.1's rule that costs most to get backwards: a stale rate escalates.
-    run("stale rate escalates", "AppSecret") {
-        checkVerification(
+    //
+    // Compared by **enum identity**, not by `.name`. The first version compared
+    // the rendered string and reported a failure on a phone where the bridge had
+    // worked perfectly — UniFFI renders Kotlin enum names in SCREAMING_SNAKE, so
+    // `AppSecret` arrives as `APP_SECRET`. A test that asserts on how a value is
+    // spelled rather than which value it is will keep finding bugs that are not
+    // there, and eventually be ignored when it finds one that is.
+    run("stale rate escalates", "escalated") {
+        val out = checkVerification(
             defaultVerificationPolicy(),
             deviceUnlocked = true,
             appSecretAgeS = null,
             amountMinor = 1uL,
             spentInWindowMinor = 0uL,
             rateIsFresh = false,
-        ).required.name
+        )
+        // Two assertions in one: the strongest tier is demanded, and
+        // device-unlocked alone does not satisfy it.
+        if (out.required == Verification.APP_SECRET && !out.permitted) "escalated"
+        else "required=${out.required}, permitted=${out.permitted}"
     },
 )
 

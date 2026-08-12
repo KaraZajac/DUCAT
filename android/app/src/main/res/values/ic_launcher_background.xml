@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Catppuccin Mocha base. The mark reads in mauve against it in both
+         system themes, so the icon does not change identity with the wallpaper. -->
+    <color name="ic_launcher_background">#1E1E2E</color>
+</resources>
