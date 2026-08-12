@@ -164,3 +164,48 @@ that is the product, not a gap to fill.
   desktop with an attached node. A cold node, cellular, and route
   re-establishment are all additive, and the last is bounded below by a full
   round trip.
+
+---
+
+## 8. Both dependencies cross-compile — checked, not assumed
+
+Before designing anything on top of them:
+
+| | `aarch64-linux-android` |
+|---|---|
+| `veilid-core` 0.5.7 | **builds** |
+| `monero-wallet` 0.2.0 with `multisig` (FROSTLASS) | **builds** |
+
+Neither is free. `veilid-core` pulls `libsqlite3-sys`, whose build script needs
+the NDK's C compiler — `CC_*`, `CXX_*`, `AR_*` for the target, not just a linker.
+That is a real setup step and it fails with an unhelpful "custom build command
+failed" if it is missing, so `mobile/build-android.sh` exports them.
+
+This settles §8.2's open question for Android specifically: **there is no
+`monero-wallet-rpc` on a phone**, so the choice was never embedded-versus-RPC. It
+was embedded or nothing, and embedded builds.
+
+What it does **not** settle, and both are recorded elsewhere rather than
+rediscovered here: `dkg-pedpop` still does not link alongside `monero-wallet`
+(§8.2 — a `multiexp` major-version conflict), so key generation for a threshold
+group has no crates.io path yet. And FROSTLASS groups cannot co-sign with
+wallet2 groups, so a market's declared scheme is load-bearing (§10.1).
+
+## 9. Onboarding is four steps, and the fourth is the one that matters
+
+PayPal's "Set up your account 3/4" card is the right pattern. Ours:
+
+1. **Create a persona** — a keypair, instant, nothing to explain.
+2. **Create a wallet** — a Monero spend key and its seed.
+3. **Set spending limits** — §15.5.1's thresholds, with the defaults already safe.
+4. **Export a backup** — §4.3.
+
+**Step 4 is the one users skip and the only one whose absence is unrecoverable.**
+A persona lost with no backup takes its reputation and every persistent contact
+with it, and no operator exists to appeal to — that is the same property that
+makes the system uncustodied.
+
+So the order is deliberate: the backup step comes **before** the wallet can be
+funded. A user with nothing to lose has no reason to skip it and no reason to
+resent it; a user with money in the float has both. The one moment when the cost
+of doing it is zero is the moment before there is anything to protect.

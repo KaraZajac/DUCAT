@@ -84,8 +84,12 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 // It is `presenter_role` (§15.2), not a mode we invented:
                 // Request means I present and you tap me, Send means I read
                 // your tap.
+                // NOT fillMaxHeight: NavigationBar does not constrain its
+                // children's height, so filling it expanded the bar to the whole
+                // screen and left the content with none. Shipped once, visible
+                // immediately on a device and invisible from here.
                 Box(
-                    Modifier.weight(1f).fillMaxHeight(),
+                    Modifier.weight(1f),
                     contentAlignment = Alignment.Center,
                 ) {
                     FloatingActionButton(
