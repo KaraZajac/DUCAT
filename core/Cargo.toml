@@ -1,0 +1,12 @@
+[package]
+name = "ducat-core"
+version = "0.1.0"
+edition = "2021"
+description = "DUCAT protocol core: deterministic codec, domain-separated signing, contract state machine"
+
+[dependencies]
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+sha2 = "0.10"
+
+[dev-dependencies]
+hex = "0.4"
