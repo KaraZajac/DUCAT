@@ -1,5 +1,6 @@
 {
   "counts": {
+    "backup": 7,
     "codec": 39,
     "negotiate": 6,
     "signing": 17,
@@ -13,17 +14,19 @@
     "18.9(4) full per-profile transcripts": "xfer/1, pos/1, ride/1",
     "18.9(5) failure paths and the single-sided receipt": true,
     "18.9(6) negotiation including a downgrade attempt": true,
-    "18.9(7) piconero amounts that defeat a float implementation": true
+    "18.9(7) piconero amounts that defeat a float implementation": true,
+    "4.3 backup format known-answer and rejection cases": true
   },
   "deterministic": "all keys derive from fixed seeds; no clock or RNG is consulted, so regeneration is byte-identical on an unchanged implementation",
   "does_not_yet_cover": {
-    "O18 caveat": "a vector set validated by one implementation encodes that implementation's bugs. These close O18 only when a second, independent client runs them.",
+    "O21 caveat": "a vector set validated by one implementation encodes that implementation's bugs. These close O21 only when a second, independent client runs them.",
     "escrow and fast/1 transcripts": "only direct settlement is covered; TXPROOF and escrow objects are unimplemented",
+    "multisig backup": "§4.3.3 — a bond or escrow share is deliberately absent from the bundle, because monero-wallet-rpc has no method to restore one. Nothing here to test.",
     "suite 2 key agreement": "only signatures are covered; X25519/ECDH is unimplemented"
   },
   "generated_by": "ducat-core examples/gen_vectors.rs",
-  "protocol_draft": "0.14",
+  "protocol_draft": "0.42",
   "reject_codes_are": "§18.5 wire codes. Two clients must agree an input is MALFORMED; they need not agree on which internal decoder rule said so. The non-normative `hint` field names the rule.",
-  "total_cases": 95,
+  "total_cases": 102,
   "vector_set": "1"
 }

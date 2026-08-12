@@ -1,0 +1,118 @@
+{
+  "cases": [
+    {
+      "aad_utf8": "DUCAT-BACKUP-v1",
+      "aead": "xchacha20poly1305",
+      "blob_hex": "44554341542d4241434b55502d76314242424242424242424242424242424237373737373737373737373737373737373737373737373739a9436b092e538de4905cf48b83e9f60b0fe10143b13c670148704163edbd5f3bfb780805d89b3cd3ed201b8b5eccc59a5001c60d55e04a3fdc73dc0adf4158bcaff94b4e5a4e0a362259482995bf37d605a29ad4ca5715836346621968387d70f6449a8d79330a46beb8f0566c796b2596cd8e417ef060416b9f631ccd81fa912308315354c3c131fc1a01e338ed9c78bf008bb2aa6e7c4b0658dc015950f9d619b2e68d47451083e9db6169c8bd1b3c2c683e1c0915f2d9cadac40cf6d6d88c640a7b090d1009a91897709cc4c961771a1db4c5ebdf1440107be384adcdf1c5efacd506bb3cbe1410a22f8cdd9b2e96eafaadd88a020adeaf6fb9ce34b7b2efe4c2a12b454c3a09106ff5aa82dc5ebc65247b4315babacf9997c4149e7a96803c70ddbeda0eedcd6aec2ba0626dd513cb4c670bfeafdad461cd0c9b00c6631d546ca83ad0ce22ac13de4de8f59203de856cafb140b7544c7208663212740253a720017a5f4015edd6700253dd646f2b66372630ff3029317a2f06122574cc852f03a29c90fd7a5f37dbd52302ab4058205228056482a85033fadcdfd8bcc5e3e9fe520d",
+      "expect": {
+        "decoded": {
+          "attestation_records_hex": [
+            "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+          ],
+          "created": 1800000000,
+          "mandates_hex": [
+            "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+          ],
+          "monero_restore_height": 2183500,
+          "monero_seed": "abbey abducts ability able abnormal abort about above absurd abyss academy accent acid acoustic acquire across actress acute adapt addicted adept adhesive adjust adopt abbey",
+          "persona_secret_hex": "1111111111111111111111111111111111111111111111111111111111111111",
+          "persona_suite": 1,
+          "rendezvous_hex": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          ],
+          "verification": {
+            "app_secret_at": 10000,
+            "app_secret_validity_s": 120,
+            "cumulative_at": 20000,
+            "cumulative_window_s": 3600,
+            "device_unlock_at": 2000
+          }
+        },
+        "ok": true
+      },
+      "hint": "the layout is MAGIC(15) || salt(16) || nonce(24) || AEAD ciphertext",
+      "kdf": {
+        "algorithm": "argon2id",
+        "iterations": 3,
+        "lanes": 1,
+        "memory_kib": 65536,
+        "output_len": 32,
+        "version": 19
+      },
+      "name": "canonical_bundle",
+      "nonce_hex": "373737373737373737373737373737373737373737373737",
+      "passphrase_utf8": "a fixed passphrase",
+      "salt_hex": "42424242424242424242424242424242",
+      "why": "the whole format at once — Argon2id parameters, XChaCha20-Poly1305, the AAD, and every CBOR field number. An implementation that differs anywhere produces a file no other client can open, reporting only 'wrong passphrase'."
+    },
+    {
+      "blob_hex": "44554341542d4241434b55502d76314242424242424242424242424242424237373737373737373737373737373737373737373737373739a9436b092e538de4905cf48b83e9f60b0fe10143b13c670148704163edbd5f3bfb780805d89b3cd3ed201b8b5eccc59a5001c60d55e04a3fdc73dc0adf4158bcaff94b4e5a4e0a362259482995bf37d605a29ad4ca5715836346621968387d70f6449a8d79330a46beb8f0566c796b2596cd8e417ef060416b9f631ccd81fa912308315354c3c131fc1a01e338ed9c78bf008bb2aa6e7c4b0658dc015950f9d619b2e68d47451083e9db6169c8bd1b3c2c683e1c0915f2d9cadac40cf6d6d88c640a7b090d1009a91897709cc4c961771a1db4c5ebdf1440107be384adcdf1c5efacd506bb3cbe1410a22f8cdd9b2e96eafaadd88a020adeaf6fb9ce34b7b2efe4c2a12b454c3a09106ff5aa82dc5ebc65247b4315babacf9997c4149e7a96803c70ddbeda0eedcd6aec2ba0626dd513cb4c670bfeafdad461cd0c9b00c6631d546ca83ad0ce22ac13de4de8f59203de856cafb140b7544c7208663212740253a720017a5f4015edd6700253dd646f2b66372630ff3029317a2f06122574cc852f03a29c90fd7a5f37dbd52302ab4058205228056482a85033fadcdfd8bcc5e3e9fe520d",
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "wrong_passphrase",
+      "passphrase_utf8": "not the passphrase",
+      "why": "must be indistinguishable from a tampered file — reporting them differently leaks whether a guess was close"
+    },
+    {
+      "blob_hex": "44554341542d4241434b55502d76314242424242424242424242424242424237373737373737373737373737373737373737373737373739a9436b092e538de4905cf48b83e9f60b0fe10143b13c670148704163edbd5f3bfb780805d89b3cd3ed201b8b5eccc59a5001c60d55e04a3fdc73dc0adf4158bcaff94b4e5a4e0a362259482995bf37d605a29ad4ca5715836346621968387d70f6449a8d79330a46beb8f0566c796b2596cd8e417ef060416b9f631ccd81fa912308315354c3c131fc1a01e338ed9c78bf008bb2aa6e7c4b0658dc015950f9d619b2e68d47451083e9db6169c8bd1b3c2c683e1c0915f2d9cadac40cf6d6d88c640a7b090d1009a91897709cc4c961771a1db4c5ebdf1440107be384adcdf1c5efacd506bb3cbe1410a22f8cdd9b2e96eafaadd88a020adeaf6fb9ce34b7b2efe4c2a12b454c3a09106ff5aa82dc5ebc65247b4315babacf9997c4149e7a96803c70ddbeda0eedcd6aec2ba0626dd513cb4c670bfeafdad461cd0c9b00c6631d546ca83ad0ce22ac13de4de8f59203de856cafb140b7544c7208663212740253a720017a5f4015edd6700253dd646f2b66372630ff3029317a2f06122574cc852f03a29c90fd7a5f37dbd52302ab4058205228056482a85033fadcdfd8bcc5e3e9fe520c",
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "tampered_ciphertext",
+      "passphrase_utf8": "a fixed passphrase",
+      "why": "the AEAD tag covers the payload; a single flipped bit must not decrypt"
+    },
+    {
+      "blob_hex": "44554341542d4241434b55502d76314242424242434242424242424242424237373737373737373737373737373737373737373737373739a9436b092e538de4905cf48b83e9f60b0fe10143b13c670148704163edbd5f3bfb780805d89b3cd3ed201b8b5eccc59a5001c60d55e04a3fdc73dc0adf4158bcaff94b4e5a4e0a362259482995bf37d605a29ad4ca5715836346621968387d70f6449a8d79330a46beb8f0566c796b2596cd8e417ef060416b9f631ccd81fa912308315354c3c131fc1a01e338ed9c78bf008bb2aa6e7c4b0658dc015950f9d619b2e68d47451083e9db6169c8bd1b3c2c683e1c0915f2d9cadac40cf6d6d88c640a7b090d1009a91897709cc4c961771a1db4c5ebdf1440107be384adcdf1c5efacd506bb3cbe1410a22f8cdd9b2e96eafaadd88a020adeaf6fb9ce34b7b2efe4c2a12b454c3a09106ff5aa82dc5ebc65247b4315babacf9997c4149e7a96803c70ddbeda0eedcd6aec2ba0626dd513cb4c670bfeafdad461cd0c9b00c6631d546ca83ad0ce22ac13de4de8f59203de856cafb140b7544c7208663212740253a720017a5f4015edd6700253dd646f2b66372630ff3029317a2f06122574cc852f03a29c90fd7a5f37dbd52302ab4058205228056482a85033fadcdfd8bcc5e3e9fe520d",
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "tampered_nonce",
+      "passphrase_utf8": "a fixed passphrase",
+      "why": "the nonce is stored in the clear and is not secret, but altering it must still fail closed rather than decrypting to something else"
+    },
+    {
+      "blob_hex": "45554341542d4241434b55502d76314242424242424242424242424242424237373737373737373737373737373737373737373737373739a9436b092e538de4905cf48b83e9f60b0fe10143b13c670148704163edbd5f3bfb780805d89b3cd3ed201b8b5eccc59a5001c60d55e04a3fdc73dc0adf4158bcaff94b4e5a4e0a362259482995bf37d605a29ad4ca5715836346621968387d70f6449a8d79330a46beb8f0566c796b2596cd8e417ef060416b9f631ccd81fa912308315354c3c131fc1a01e338ed9c78bf008bb2aa6e7c4b0658dc015950f9d619b2e68d47451083e9db6169c8bd1b3c2c683e1c0915f2d9cadac40cf6d6d88c640a7b090d1009a91897709cc4c961771a1db4c5ebdf1440107be384adcdf1c5efacd506bb3cbe1410a22f8cdd9b2e96eafaadd88a020adeaf6fb9ce34b7b2efe4c2a12b454c3a09106ff5aa82dc5ebc65247b4315babacf9997c4149e7a96803c70ddbeda0eedcd6aec2ba0626dd513cb4c670bfeafdad461cd0c9b00c6631d546ca83ad0ce22ac13de4de8f59203de856cafb140b7544c7208663212740253a720017a5f4015edd6700253dd646f2b66372630ff3029317a2f06122574cc852f03a29c90fd7a5f37dbd52302ab4058205228056482a85033fadcdfd8bcc5e3e9fe520d",
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "name": "foreign_format",
+      "passphrase_utf8": "a fixed passphrase",
+      "why": "the magic is authenticated as AAD, so a file of another format cannot be coerced into decrypting as this one. Rejected before any key derivation, so a wrong file does not cost the user an Argon2 pass."
+    },
+    {
+      "blob_hex": "44554341542d4241434b55502d763142424242424242424242424242424242373737373737373737",
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "name": "truncated",
+      "passphrase_utf8": "a fixed passphrase",
+      "why": "a file shorter than header plus AEAD tag cannot be a bundle; length must be checked before slicing"
+    },
+    {
+      "blob_hex": "44554341542d4241434b55502d763143434343434343434343434343434343383838383838383838383838383838383838383838383838210170e04912550ecb57a14a9da0874a7778092cd3a2540a3b5c29950b2a72107c2a693690343fac9e726a8820a51379717f0e38e4d0c0069d9db861f9b62f35ee35d71c047f3ba8fd0de1da7ec0a8620b9549d9058f1a8ca8048a35b229ca45ba1b774b454fd54c50cca3d288e9e88298350e379985fcb8e3d8f55b679e9344a40a1b8e25cd6216cf6222db7c8e0e0bc173a8b3f2184fe3a19b2ee399199d3a24b30e6ab63b9382d0a3a7361a56930e318ce4a107526589e9115807fdcda1cf0f65773d085fc17c84aaa41835e21257d20f6f54d93d27a42137f99a0f96969b49a722251b29ff235f176ba8d530c707731243006f29f29c7ac1926548533c4c68cda9608cec40fc89f0f49da7146016fc21e9e2a9cb640b17f27546d501d799cea8b8717306b822569286472c17d5da419cf39e2bbab061209cc1d0497941590b9e91f58b12f0f83a50d58ee4472cec2a5db0bea1e15a7605c08b3fa3d29fc8ee8b2610dffafbbff515d8cf51969cbfdff5e467715859dd045d5e497a79fe5c608574ceab7679db7468fb37ba3c28a68335a006c6d07256909942cb756e0f94af50c312cc",
+      "expect": {
+        "ok": false,
+        "reject_code": 16,
+        "reject_name": "PolicyRefused"
+      },
+      "hint": "app_secret_at (1000) is below device_unlock_at (50000)",
+      "name": "inverted_verification_ladder",
+      "passphrase_utf8": "a fixed passphrase",
+      "why": "an import is a trust boundary. This file decrypts perfectly and carries a policy where a larger payment demands less than a smaller one. Authenticity is not sanity: fields with construction rules are re-validated on the way in."
+    }
+  ],
+  "category": "backup"
+}

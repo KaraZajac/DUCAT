@@ -23,7 +23,7 @@ use serde_json::{json, Map, Value as J};
 use std::time::Duration;
 
 const VECTOR_SET_VERSION: &str = "1";
-const PROTOCOL_DRAFT: &str = "0.14";
+const PROTOCOL_DRAFT: &str = "0.42";
 
 fn hex(b: &[u8]) -> String {
     b.iter().map(|x| format!("{:02x}", x)).collect()
@@ -681,16 +681,159 @@ fn transcript_cases() -> Vec<J> {
 
 // ------------------------------------------------------------------- main --
 
+/// §4.3 backup format.
+///
+/// The one place in this vector set where the artifact under test is not a wire
+/// object. It is here for the same reason §18.9 exists: two implementations that
+/// disagree about Argon2 parameters, CBOR field numbering, or what is covered by
+/// the AEAD will each produce a file the other cannot open, and neither will see
+/// an error more informative than "wrong passphrase". That is not a bug a user
+/// can report usefully.
+fn backup_cases() -> Vec<J> {
+    use ducat_core::backup::{export, Backup};
+    use ducat_core::verify::VerificationPolicy;
+
+    let seed = "abbey abducts ability able abnormal abort about above absurd abyss \
+                academy accent acid acoustic acquire across actress acute adapt \
+                addicted adept adhesive adjust adopt abbey";
+    let base = Backup {
+        persona_suite: 1,
+        persona_secret: vec![0x11; 32],
+        monero_seed: seed.to_string(),
+        monero_restore_height: 2_183_500,
+        rendezvous: vec![vec![0xAA; 32], vec![0xBB; 32]],
+        attestation_records: vec![vec![0xDD; 32]],
+        mandates: vec![vec![0xCC; 48]],
+        verification: VerificationPolicy::default(),
+        created: 1_800_000_000,
+    };
+    let pass = b"a fixed passphrase";
+    let salt = [0x42u8; 16];
+    let nonce = [0x37u8; 24];
+    let blob = export(&base, pass, salt, nonce).expect("export");
+
+    let mut cases = vec![json!({
+        "name": "canonical_bundle",
+        "why": "the whole format at once — Argon2id parameters, XChaCha20-Poly1305, the AAD, \
+                and every CBOR field number. An implementation that differs anywhere produces \
+                a file no other client can open, reporting only 'wrong passphrase'.",
+        "passphrase_utf8": String::from_utf8_lossy(pass),
+        "salt_hex": hex(&salt),
+        "nonce_hex": hex(&nonce),
+        "kdf": {"algorithm": "argon2id", "version": 19, "memory_kib": 65536, "iterations": 3, "lanes": 1, "output_len": 32},
+        "aead": "xchacha20poly1305",
+        "aad_utf8": "DUCAT-BACKUP-v1",
+        "blob_hex": hex(&blob),
+        "expect": {
+            "ok": true,
+            "decoded": {
+                "persona_suite": 1,
+                "persona_secret_hex": hex(&base.persona_secret),
+                "monero_seed": seed,
+                "monero_restore_height": 2_183_500u64,
+                "rendezvous_hex": base.rendezvous.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "attestation_records_hex": base.attestation_records.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "mandates_hex": base.mandates.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "verification": {
+                    "device_unlock_at": base.verification.device_unlock_at,
+                    "app_secret_at": base.verification.app_secret_at,
+                    "app_secret_validity_s": base.verification.app_secret_validity_s,
+                    "cumulative_at": base.verification.cumulative_at,
+                    "cumulative_window_s": base.verification.cumulative_window_s
+                },
+                "created": 1_800_000_000u64
+            }
+        },
+        "hint": "the layout is MAGIC(15) || salt(16) || nonce(24) || AEAD ciphertext"
+    })];
+
+    cases.push(json!({
+        "name": "wrong_passphrase",
+        "why": "must be indistinguishable from a tampered file — reporting them differently \
+                leaks whether a guess was close",
+        "passphrase_utf8": "not the passphrase",
+        "blob_hex": hex(&blob),
+        "expect": {"ok": false, "reject_code": RejectCode::BadSig as u8, "reject_name": "BadSig"}
+    }));
+
+    // One flipped bit in the ciphertext body.
+    let mut flipped = blob.clone();
+    let last = flipped.len() - 1;
+    flipped[last] ^= 0x01;
+    cases.push(json!({
+        "name": "tampered_ciphertext",
+        "why": "the AEAD tag covers the payload; a single flipped bit must not decrypt",
+        "passphrase_utf8": String::from_utf8_lossy(pass),
+        "blob_hex": hex(&flipped),
+        "expect": {"ok": false, "reject_code": RejectCode::BadSig as u8, "reject_name": "BadSig"}
+    }));
+
+    // One flipped bit in the nonce, which is outside the ciphertext.
+    let mut bad_nonce = blob.clone();
+    bad_nonce[20] ^= 0x01;
+    cases.push(json!({
+        "name": "tampered_nonce",
+        "why": "the nonce is stored in the clear and is not secret, but altering it must still \
+                fail closed rather than decrypting to something else",
+        "passphrase_utf8": String::from_utf8_lossy(pass),
+        "blob_hex": hex(&bad_nonce),
+        "expect": {"ok": false, "reject_code": RejectCode::BadSig as u8, "reject_name": "BadSig"}
+    }));
+
+    let mut bad_magic = blob.clone();
+    bad_magic[0] ^= 0x01;
+    cases.push(json!({
+        "name": "foreign_format",
+        "why": "the magic is authenticated as AAD, so a file of another format cannot be \
+                coerced into decrypting as this one. Rejected before any key derivation, so a \
+                wrong file does not cost the user an Argon2 pass.",
+        "passphrase_utf8": String::from_utf8_lossy(pass),
+        "blob_hex": hex(&bad_magic),
+        "expect": {"ok": false, "reject_code": RejectCode::Malformed as u8, "reject_name": "Malformed"}
+    }));
+
+    cases.push(json!({
+        "name": "truncated",
+        "why": "a file shorter than header plus AEAD tag cannot be a bundle; length must be \
+                checked before slicing",
+        "passphrase_utf8": String::from_utf8_lossy(pass),
+        "blob_hex": hex(&blob[..40]),
+        "expect": {"ok": false, "reject_code": RejectCode::Malformed as u8, "reject_name": "Malformed"}
+    }));
+
+    // Contents that decrypt cleanly and are nonsense.
+    let mut inverted = base.clone();
+    inverted.verification = VerificationPolicy {
+        device_unlock_at: 50_000,
+        app_secret_at: 1_000,
+        ..VerificationPolicy::default()
+    };
+    let inv_blob = export(&inverted, pass, [0x43; 16], [0x38; 24]).expect("export");
+    cases.push(json!({
+        "name": "inverted_verification_ladder",
+        "why": "an import is a trust boundary. This file decrypts perfectly and carries a \
+                policy where a larger payment demands less than a smaller one. Authenticity is \
+                not sanity: fields with construction rules are re-validated on the way in.",
+        "passphrase_utf8": String::from_utf8_lossy(pass),
+        "blob_hex": hex(&inv_blob),
+        "expect": {"ok": false, "reject_code": RejectCode::PolicyRefused as u8, "reject_name": "PolicyRefused"},
+        "hint": "app_secret_at (1000) is below device_unlock_at (50000)"
+    }));
+
+    cases
+}
+
 fn main() -> std::io::Result<()> {
     let dir = std::path::Path::new("../vectors").join(format!("v{}", VECTOR_SET_VERSION));
     std::fs::create_dir_all(&dir)?;
 
-    let files: [(&str, Vec<J>); 5] = [
+    let files: [(&str, Vec<J>); 6] = [
         ("codec", codec_cases()),
         ("signing", signing_cases()),
         ("state", state_cases()),
         ("negotiate", negotiate_cases()),
         ("transcript", transcript_cases()),
+        ("backup", backup_cases()),
     ];
 
     let mut counts = Map::new();
@@ -719,12 +862,14 @@ fn main() -> std::io::Result<()> {
             "18.9(3) cross-context signature replay": true,
             "18.9(5) failure paths and the single-sided receipt": true,
             "18.9(6) negotiation including a downgrade attempt": true,
-            "18.9(7) piconero amounts that defeat a float implementation": true
+            "18.9(7) piconero amounts that defeat a float implementation": true,
+            "4.3 backup format known-answer and rejection cases": true
         },
         "does_not_yet_cover": {
             "escrow and fast/1 transcripts": "only direct settlement is covered; TXPROOF and escrow objects are unimplemented",
             "suite 2 key agreement": "only signatures are covered; X25519/ECDH is unimplemented",
-            "O18 caveat": "a vector set validated by one implementation encodes that implementation's bugs. These close O18 only when a second, independent client runs them."
+            "O21 caveat": "a vector set validated by one implementation encodes that implementation's bugs. These close O21 only when a second, independent client runs them.",
+            "multisig backup": "§4.3.3 — a bond or escrow share is deliberately absent from the bundle, because monero-wallet-rpc has no method to restore one. Nothing here to test."
         }
     });
     std::fs::write(

@@ -42,7 +42,7 @@ fn manifest_is_self_consistent() {
     let m = load("manifest");
     let total = m["total_cases"].as_u64().unwrap() as usize;
     let mut sum = 0;
-    for name in ["codec", "signing", "state", "negotiate", "transcript"] {
+    for name in ["codec", "signing", "state", "negotiate", "transcript", "backup"] {
         let n = cases(name).len();
         assert_eq!(
             m["counts"][name].as_u64().unwrap() as usize,
@@ -57,7 +57,15 @@ fn manifest_is_self_consistent() {
 
     // The manifest must keep admitting what it does not cover. If this ever
     // disappears, someone has quietly claimed more coverage than exists.
-    assert!(m["does_not_yet_cover"]["O18 caveat"].is_string());
+    //
+    // Keyed on the conformance open problem by number, which is O21 — this
+    // asserted "O18" until 0.42 and passed anyway, because the manifest text was
+    // wrong in the same direction. A self-consistency test that only compares
+    // the artifact against itself agrees with its own mistakes.
+    assert!(
+        m["does_not_yet_cover"]["O21 caveat"].is_string(),
+        "the manifest stopped admitting that one implementation cannot validate its own vectors"
+    );
 }
 
 #[test]
@@ -375,4 +383,66 @@ fn transcript_vectors_pass() {
             "{}: amount differs", name
         );
     }
+}
+
+/// §4.3.2 — the backup format, replayed from the published artifact.
+///
+/// The point is not to re-test the crypto, which `tests/backup.rs` covers. It is
+/// to prove the *file* in `vectors/v1/` is the file this implementation actually
+/// produces and consumes, so a second client has something real to disagree
+/// with. A vector nobody executes is documentation with a `.json` extension.
+#[test]
+fn backup_vectors_pass() {
+    use ducat_core::backup::import;
+
+    let mut saw_canonical = false;
+    for c in cases("backup") {
+        let name = c["name"].as_str().unwrap();
+        let blob = unhex(c["blob_hex"].as_str().unwrap());
+        let pass = c["passphrase_utf8"].as_str().unwrap().as_bytes();
+        let got = import(&blob, pass);
+
+        if !expects_ok(&c) {
+            let want = c["expect"]["reject_code"].as_u64().unwrap() as u8;
+            let err = got.unwrap_err();
+            assert_eq!(
+                err.code as u8, want,
+                "{name}: expected {} got {:?}",
+                c["expect"]["reject_name"], err.code
+            );
+            continue;
+        }
+
+        let b = got.unwrap_or_else(|e| panic!("{name}: {e:?}"));
+        let d = &c["expect"]["decoded"];
+        assert_eq!(b.persona_suite as u64, d["persona_suite"].as_u64().unwrap(), "{name}");
+        assert_eq!(hexs(&b.persona_secret), d["persona_secret_hex"].as_str().unwrap(), "{name}");
+        assert_eq!(b.monero_seed, d["monero_seed"].as_str().unwrap(), "{name}");
+        assert_eq!(
+            b.monero_restore_height,
+            d["monero_restore_height"].as_u64().unwrap(),
+            "{name}: the field whose absence costs 106 hours and whose overshoot costs everything"
+        );
+        let listed = |k: &str| -> Vec<String> {
+            d[k].as_array().unwrap().iter().map(|v| v.as_str().unwrap().to_string()).collect()
+        };
+        assert_eq!(b.rendezvous.iter().map(|r| hexs(r)).collect::<Vec<_>>(), listed("rendezvous_hex"), "{name}");
+        assert_eq!(
+            b.attestation_records.iter().map(|r| hexs(r)).collect::<Vec<_>>(),
+            listed("attestation_records_hex"),
+            "{name}"
+        );
+        assert_eq!(b.mandates.iter().map(|r| hexs(r)).collect::<Vec<_>>(), listed("mandates_hex"), "{name}");
+        let v = &d["verification"];
+        assert_eq!(b.verification.device_unlock_at, v["device_unlock_at"].as_u64().unwrap(), "{name}");
+        assert_eq!(b.verification.app_secret_at, v["app_secret_at"].as_u64().unwrap(), "{name}");
+        assert_eq!(b.verification.cumulative_at, v["cumulative_at"].as_u64().unwrap(), "{name}");
+        assert_eq!(b.created, d["created"].as_u64().unwrap(), "{name}");
+        saw_canonical = true;
+    }
+    assert!(saw_canonical, "no positive backup vector ran — a suite of only rejections proves nothing");
+}
+
+fn hexs(b: &[u8]) -> String {
+    b.iter().map(|x| format!("{:02x}", x)).collect()
 }

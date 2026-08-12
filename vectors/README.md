@@ -10,6 +10,8 @@ release.
       signing.json     domain separation, cross-context replay, key encoding (§18.3)
       state.json       transitions, deadlines, and refusals (§18.4, §6.2)
       negotiate.json   suite/version selection and the downgrade attempt (§18.6)
+      transcript.json  full per-profile transcripts, replayed end to end (§18.9(4))
+      backup.json      the persona backup format (§4.3) — see below
 
 ## How to read a case
 
@@ -58,3 +60,32 @@ not before.
 full per-profile transcripts, which is blocked on the spec fixing field
 numbering for `TapPresent`, `FullOffer`, and `ACCEPT`. Until those exist there
 is no wire object to build a transcript from.
+
+
+## Why a backup vector is here, when a backup is not a wire object
+
+Every other file in this set describes bytes two clients exchange. `backup.json`
+describes a file one client writes and the *same user* reads back later, possibly
+on a different client, possibly years later.
+
+It is here because the failure mode is uniquely bad. Two implementations that
+disagree about Argon2 parameters, CBOR field numbering, or what the AEAD covers
+will each produce a file the other cannot open — and the only error either can
+report is "wrong passphrase", because an AEAD genuinely cannot distinguish a
+wrong key from a wrong format. The user is told they mistyped. They did not.
+Nothing in the system can tell them what actually happened.
+
+So the canonical case publishes the complete artifact — salt, nonce, KDF
+parameters, AAD, the whole ciphertext, and every decoded field — rather than a
+description of the format. An implementation either opens that exact file or it
+does not.
+
+The rejection cases carry the other half. `wrong_passphrase` and
+`tampered_ciphertext` must be indistinguishable, since reporting them differently
+tells an attacker whether a guess was close. `inverted_verification_ladder`
+decrypts perfectly and carries nonsense: authenticity is not sanity, and fields
+with construction rules are re-validated on import.
+
+**Not covered:** multisig key shares. §4.3.3 leaves them out of the bundle
+deliberately — `monero-wallet-rpc` has no method to restore one — so there is
+nothing here to test.
