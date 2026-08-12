@@ -2,6 +2,28 @@
   "cases": [
     {
       "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "CBOR major type 1",
+      "input_hex": "20",
+      "name": "nint_minus_1_refused",
+      "why": "no object in the protocol carries a negative number — money is unsigned piconero, map keys are unsigned, every timestamp is a count. Refusal is the reversible choice: accepting a type later extends the format, while refusing what was once accepted breaks every peer relying on it."
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "CBOR major type 1",
+      "input_hex": "38ff",
+      "name": "nint_minus_256_refused",
+      "why": "no object in the protocol carries a negative number — money is unsigned piconero, map keys are unsigned, every timestamp is a count. Refusal is the reversible choice: accepting a type later extends the format, while refusing what was once accepted breaks every peer relying on it."
+    },
+    {
+      "expect": {
         "ok": true,
         "reencodes_to_hex": "00"
       },

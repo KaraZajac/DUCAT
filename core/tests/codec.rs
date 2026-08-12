@@ -285,3 +285,12 @@ fn piconero_amounts_survive_exactly() {
         );
     }
 }
+#[test]
+fn negative_integers_are_refused() {
+    // 0x20 is CBOR -1. §18.1 never named negative integers as illegal, which a
+    // second implementation flagged as an unspecified behaviour (§18.11): money
+    // is unsigned piconero and map keys are unsigned, so nothing in the protocol
+    // has a use for them, but "no use for it" is not the same as "rejected".
+    assert!(ducat_core::cbor::decode(&[0x20]).is_err(), "-1 was accepted");
+    assert!(ducat_core::cbor::decode(&[0x38, 0xff]).is_err(), "-256 was accepted");
+}

@@ -53,6 +53,26 @@ fn reject_case(name: &str, why: &str, input: &[u8], code: RejectCode, hint: &str
 fn codec_cases() -> Vec<J> {
     let mut v = Vec::new();
 
+    // §18.1 negative integers. Added at 0.45 because two implementations
+    // disagreed here and *neither was wrong*: the spec said nothing, so one
+    // accepted them and one refused. An unspecified behaviour with no vector is
+    // exactly how a conformance suite certifies a divergence.
+    for (name, enc) in [
+        ("nint_minus_1_refused", vec![0x20u8]),
+        ("nint_minus_256_refused", vec![0x38, 0xFF]),
+    ] {
+        v.push(reject_case(
+            name,
+            "no object in the protocol carries a negative number — money is unsigned \
+             piconero, map keys are unsigned, every timestamp is a count. Refusal is the \
+             reversible choice: accepting a type later extends the format, while refusing \
+             what was once accepted breaks every peer relying on it.",
+            &enc,
+            RejectCode::Malformed,
+            "CBOR major type 1",
+        ));
+    }
+
     // §18.9(1) — integer boundaries, both directions.
     for (n, enc) in [
         (0u64, vec![0x00]),

@@ -58,6 +58,19 @@ pub enum CodecError {
     FloatForbidden,
     /// A tag appeared. The allowlist is empty (§18.1).
     TagForbidden,
+    /// A negative integer appeared. Never legal (§18.1).
+    ///
+    /// No object in the protocol carries one: money is unsigned piconero
+    /// (§18.2), map keys are unsigned (§18.1), and every timestamp and duration
+    /// is a count. This decoder accepted them until 0.45, when a second
+    /// implementation written from §18.1 refused them and the spec turned out to
+    /// say nothing either way (§18.11).
+    ///
+    /// Resolved toward refusal because the two directions are not symmetric:
+    /// a decoder that starts accepting a value type later is a clean extension,
+    /// while one that starts refusing what it used to accept breaks every peer
+    /// already relying on it. Strict first is the only reversible choice.
+    NegativeInteger,
     /// A map key was not an unsigned integer.
     NonIntegerMapKey,
     /// Reserved/unassigned simple value or additional-information pattern.
@@ -240,7 +253,10 @@ impl<'a> Decoder<'a> {
         let (major, n) = self.head()?;
         match major {
             0 => Ok(Value::Uint(n)),
-            1 => Ok(Value::Nint(n)),
+            1 => {
+                let _ = n;
+                Err(CodecError::NegativeInteger)
+            }
             2 => {
                 let b = self.take(usize_of(n)?)?;
                 Ok(Value::Bytes(b.to_vec()))

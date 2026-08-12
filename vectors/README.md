@@ -13,6 +13,12 @@ release.
       transcript.json  full per-profile transcripts, replayed end to end (§18.9(4))
       backup.json      the persona backup format (§4.3) — see below
 
+A second implementation runs these files: `conformance/ducat_check.py`. It found
+three defects in the specification on its first pass (§18.11) — see
+`conformance/README.md`. **The case schema below is reverse-engineered from
+examples rather than specified, which is the largest remaining obstacle to a
+genuine third implementation.**
+
 ## How to read a case
 
 Every case carries a `why` explaining what it defends against — these are not

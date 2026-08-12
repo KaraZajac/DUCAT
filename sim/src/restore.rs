@@ -66,6 +66,9 @@ pub fn restore_main() {
         attestation_records: vec![vec![0x02; 32]],
         mandates: vec![],
         verification: ducat_core::verify::VerificationPolicy::default(),
+        // No escrow open in this scenario. §4.3.3: shares are per-escrow and
+        // short-lived, so an empty list is the normal case, not a gap.
+        escrow_shares: vec![],
         created: 0,
     };
     let passphrase = b"the correct passphrase";
