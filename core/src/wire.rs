@@ -76,6 +76,12 @@ pub mod f {
     /// namespace, defined in `terms`.
     pub const TERMS: u64 = 96;
 
+    // REFUND (§7.3) — reserved range 34-39
+    pub const PRIOR_RECEIPT: u64 = 34;
+    pub const REFUND_AMOUNT: u64 = 35;
+    pub const REFUND_TXID: u64 = 36;
+    pub const REFUND_TS: u64 = 37;
+
     // RECEIPT
     pub const ACCEPT_HASH: u64 = 28;
     pub const PREV: u64 = 29;
@@ -822,4 +828,108 @@ pub fn abandoned_meter_claim(
     let capped_time = elapsed_s.min(offer.terms.meter_max_s);
     let accrued = rate_pxmr_per_s.saturating_mul(capped_time);
     accrued.min(offer.terms.meter_cap_pxmr)
+}
+
+// ------------------------------------------------------------------ REFUND --
+
+/// §7.3. A refund is not a reversal — A2's finality is a property of the
+/// ledger, not a prohibition on commerce. It is a **new, voluntary payment**
+/// bound to a prior receipt, payee-initiated only, and never compellable.
+///
+/// Building the clawback would mean building the arbiter that can seize funds,
+/// which is precisely the party this protocol deletes. A customer refused a
+/// refund has the recourse they have at a market stall: reputation (§9.2).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Refund {
+    pub version: u64,
+    pub suite: u8,
+    /// Commitment to the receipt being refunded.
+    pub prior_receipt: [u8; 32],
+    /// Partial or full. Never more than the original — checked separately,
+    /// since the original amount lives in a different object.
+    pub amount_pxmr: u64,
+    /// The settling transaction. A refund that claims to have paid and has not
+    /// is just a message.
+    pub txid: [u8; 32],
+    pub timestamp: u64,
+}
+
+impl Refund {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Refund)));
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::PRIOR_RECEIPT, Value::Bytes(self.prior_receipt.to_vec()));
+        m.insert(f::REFUND_AMOUNT, Value::Uint(self.amount_pxmr));
+        m.insert(f::REFUND_TXID, Value::Bytes(self.txid.to_vec()));
+        m.insert(f::REFUND_TS, Value::Uint(self.timestamp));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        if r.uint(f::TYPE)? != type_code(ObjectType::Refund) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "object type is not REFUND",
+            ));
+        }
+        let out = Refund {
+            version: r.uint(f::VERSION)?,
+            suite: r.uint(f::SUITE)? as u8,
+            prior_receipt: r.bytes(f::PRIOR_RECEIPT, Some(32))?.try_into().unwrap(),
+            amount_pxmr: r.uint(f::REFUND_AMOUNT)?,
+            txid: r.bytes(f::REFUND_TXID, Some(32))?.try_into().unwrap(),
+            timestamp: r.uint(f::REFUND_TS)?,
+        };
+        r.finish()?;
+        Ok(out)
+    }
+}
+
+/// Check a refund against the transaction it claims to refund.
+///
+/// Three rules, each a way a refund can be wrong that a signature alone will not
+/// catch — the object is perfectly valid while referring to the wrong thing,
+/// too much of it, or too late.
+pub fn check_refund(
+    refund: &Refund,
+    original_receipt: &Receipt,
+    original_receipt_bytes: &[u8],
+    original_terms: &Terms,
+) -> Result<(), Reject> {
+    // 1. It must name *this* receipt.
+    let link = commit(Purpose::ChainLink, original_receipt_bytes);
+    if !commit_eq(&refund.prior_receipt, &link) {
+        return Err(Reject::with_detail(
+            RejectCode::CommitMismatch,
+            "refund does not reference this receipt",
+        ));
+    }
+
+    // 2. Partial is fine; more than the original is not. A payee refunding more
+    //    than was paid is either confused or draining someone's float.
+    if refund.amount_pxmr > original_receipt.amount_final {
+        return Err(Reject::with_detail(
+            RejectCode::PriceMismatch,
+            "refund exceeds the original amount",
+        ));
+    }
+
+    // 3. §7.3's window, which the payer signed as part of `terms`. Without it a
+    //    merchant carries an unbounded open liability; zero is legitimate and
+    //    means final sale.
+    let elapsed = refund.timestamp.saturating_sub(original_receipt.timestamp);
+    if elapsed > original_terms.refund_window_s {
+        return Err(Reject::with_detail(
+            RejectCode::PolicyRefused,
+            format!(
+                "refund window closed: {} s elapsed, {} s allowed",
+                elapsed, original_terms.refund_window_s
+            ),
+        ));
+    }
+
+    Ok(())
 }

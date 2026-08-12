@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.29 — Consolidated**
+**Draft 0.30 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.30** — `REFUND` implemented (§7.3, field keys 34–37) with the three checks a signature cannot make: it must name *this* receipt by chain-link commitment, must not exceed the original amount, and must fall inside `terms.refund_window_s`. Window boundary is inclusive; a refund timestamped before its receipt yields zero elapsed rather than underflowing into an apparently-expired window.
 - **0.29** — §8.7.2's relay-rotation guidance promoted from SHOULD to **MUST**, after the failure was reproduced against the market simulator rather than merely reasoned about. A relay died mid-scan; one participant's wallet stopped four blocks short, kept answering `get_height` with a plausible number, and never saw funds that had already settled on chain. Nothing surfaced as an error. Added the detection rule — compare the wallet's height against the relay's own, since a stalled wallet and a synced one give identical answers alone — and the observation that silent divergence is worse for a payee, who ends up telling a customer "not received" about money that is already settled.
 - **0.28** — **`FullOffer.terms` added; several requirements were previously unimplementable.** §7.3's cancellation fee and refund window, §15.7's mandatory meter cap and duration limit, and §8.8's minimum fee tier were all written as `terms.*` while no such field existed — rules no conforming client could obey. They now live in a nested map inside the signed offer, so altering them breaks `offer_commit` like any other tampering. The meter requirement is a *pairing* rule: whether a cap is required depends on `amount_authority`, which lives in `TapPresent`, so it cannot be enforced by parsing either object alone.
 - **0.27** — **§18.4.1 rule 1 corrected: direction constrains the originator, not the evaluator.** "Only the payer may emit `ACCEPT`" was implemented as a check on the *local* role, so a payee refused every `ACCEPT` it received and no transaction could complete. Both parties run the same machine over the same message and must reach the same verdict, so the originator now travels with the event, established by signature. The bug survived a 75-test suite because every test drove the machine from one side only; a five-party market simulation caught it on the first run — which is the argument for simulating a market rather than testing a state machine.
@@ -437,9 +438,11 @@ To transact, a consumer needs XMR; to transact *fast*, they also need a bond (§
 
 Four things every commercial profile needs, specified once instead of per-profile.
 
-**Refunds.** A2's finality is a property of the *ledger*, not a prohibition on commerce. A merchant issuing a refund is not reversing a transaction — they are making a new, voluntary one. `REFUND` (§6) is an `xfer` bound to a prior receipt: `{ prior_receipt_hash, amount, txid, out_proof, sig }`, partial or full, producing its own co-signed receipt. It is payee-initiated only and can never be compelled; a customer refused a refund has exactly the recourse they have at a market stall today, which is reputation (§9.2).
+**Refunds.** *Implemented and tested; see `core/src/wire.rs`.* A2's finality is a property of the *ledger*, not a prohibition on commerce. A merchant issuing a refund is not reversing a transaction — they are making a new, voluntary one. `REFUND` (§6) is an `xfer` bound to a prior receipt: `{ prior_receipt_hash, amount, txid, out_proof, sig }`, partial or full, producing its own co-signed receipt. It is payee-initiated only and can never be compelled; a customer refused a refund has exactly the recourse they have at a market stall today, which is reputation (§9.2).
 
-  **A refund has a window, declared in the offer the payer already signed.** `terms.refund_window` bounds how long a prior receipt can be referenced — without it, "can I refund a two-year-old receipt?" has no answer and a merchant carries an unbounded open liability. Referencing a receipt outside its window is refused with `POLICY_REFUSED`. A window of zero is legitimate and means final sale, provided it was on the confirm screen. Building the clawback would mean building the arbiter that can seize funds — that is precisely the party DUCAT deletes.
+  **A refund has a window, declared in the offer the payer already signed.** `terms.refund_window` bounds how long a prior receipt can be referenced — without it, "can I refund a two-year-old receipt?" has no answer and a merchant carries an unbounded open liability. Referencing a receipt outside its window is refused with `POLICY_REFUSED`. A window of zero is legitimate and means final sale, provided it was on the confirm screen — which it was, because `terms` lives inside the signed offer.
+
+  Three checks a signature alone cannot make, since a refund object can be perfectly valid while referring to the wrong thing, too much of it, or too late: it must name **this** receipt by chain-link commitment, it must not exceed the original amount, and it must fall inside the window. The window boundary is **inclusive**, and a refund timestamped *before* its receipt is treated as zero elapsed rather than being allowed to underflow into an apparently-expired window. Building the clawback would mean building the arbiter that can seize funds — that is precisely the party DUCAT deletes.
 
 **Cancellation and no-show.** ABORT is free pre-FUND, which is correct and insufficient — a rider who cancels after the driver has driven ten minutes has imposed a real cost. `CANCEL` covers the post-ACCEPT window and invokes `terms.cancellation` from the offer the payer already signed: a fee schedule, typically time-graded, that was visible on the confirm screen. The fee settles from the canceling party's bond (§17) where one exists. **A cancellation fee is only enforceable against collateral** — against an unbonded counterparty it is uncollectable, and the spec does not pretend otherwise. Providers price that risk through `accept_unbonded` policy (§17.6).
 
@@ -1527,7 +1530,8 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 22–27 | `ACCEPT` (§15.5) | **Assigned** |
 | 28–30 | `RECEIPT` (§6) | **Assigned** |
 | 31–33 | `TapStatic` (§15.9) | Reserved |
-| 34–39 | `REFUND`, `CANCEL`, `MANDATE` (§7.3) | Reserved |
+| 34–37 | `REFUND` (§7.3) | **Assigned** |
+| 38–39 | `CANCEL`, `MANDATE` (§7.3) | Reserved |
 | 40–45 | `CONTACT_OFFER`, `CONTACT_ACCEPT` (§16.3) | Reserved |
 | 46–51 | `bond_proof`, `TXID` (§17.4) | Reserved |
 | 52–59 | `DISPUTE`, `EVIDENCE`, `RULING` (§9.3.2) | Reserved |

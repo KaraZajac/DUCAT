@@ -453,3 +453,146 @@ fn terms_round_trip_and_reject_unknown_fields() {
         RejectCode::UnknownField
     );
 }
+
+// -- REFUND (§7.3) ----------------------------------------------------------
+
+fn refund_for(receipt_bytes: &[u8], amount: u64, at: u64) -> Refund {
+    Refund {
+        version: 1,
+        suite: 1,
+        prior_receipt: commit(Purpose::ChainLink, receipt_bytes),
+        amount_pxmr: amount,
+        txid: [0xCC; 32],
+        timestamp: at,
+    }
+}
+
+#[test]
+fn a_full_refund_within_the_window_is_valid() {
+    let o = offer();
+    let a = accept(&o);
+    let r = receipt_for(&a.to_value().encode(), FARE, false);
+    let rb = r.to_value().encode();
+
+    let refund = refund_for(&rb, FARE, r.timestamp + 3600);
+    check_refund(&refund, &r, &rb, &o.terms).expect("refund should be accepted");
+}
+
+#[test]
+fn a_partial_refund_is_valid() {
+    let o = offer();
+    let a = accept(&o);
+    let r = receipt_for(&a.to_value().encode(), FARE, false);
+    let rb = r.to_value().encode();
+
+    let refund = refund_for(&rb, FARE / 3, r.timestamp + 60);
+    check_refund(&refund, &r, &rb, &o.terms).expect("partial refunds are ordinary commerce");
+}
+
+/// A payee refunding more than was paid is either confused or draining a float.
+#[test]
+fn a_refund_cannot_exceed_the_original() {
+    let o = offer();
+    let a = accept(&o);
+    let r = receipt_for(&a.to_value().encode(), FARE, false);
+    let rb = r.to_value().encode();
+
+    let refund = refund_for(&rb, FARE + 1, r.timestamp + 60);
+    assert_eq!(
+        check_refund(&refund, &r, &rb, &o.terms).unwrap_err().code,
+        RejectCode::PriceMismatch
+    );
+}
+
+/// §7.3's window exists so a merchant does not carry an unbounded open
+/// liability. It was signed by the payer as part of `terms`.
+#[test]
+fn a_refund_outside_the_window_is_refused() {
+    let o = offer(); // 14-day window
+    let a = accept(&o);
+    let r = receipt_for(&a.to_value().encode(), FARE, false);
+    let rb = r.to_value().encode();
+
+    let inside = refund_for(&rb, FARE, r.timestamp + o.terms.refund_window_s);
+    assert!(check_refund(&inside, &r, &rb, &o.terms).is_ok(), "boundary is inclusive");
+
+    let outside = refund_for(&rb, FARE, r.timestamp + o.terms.refund_window_s + 1);
+    assert_eq!(
+        check_refund(&outside, &r, &rb, &o.terms).unwrap_err().code,
+        RejectCode::PolicyRefused
+    );
+}
+
+/// A zero window is legitimate and means final sale — provided it was on the
+/// confirm screen, which it was, because terms are inside the signed offer.
+#[test]
+fn a_zero_window_means_final_sale() {
+    let mut o = offer();
+    o.terms.refund_window_s = 0;
+    let a = accept(&o);
+    let r = receipt_for(&a.to_value().encode(), FARE, false);
+    let rb = r.to_value().encode();
+
+    // Same instant still works; anything later does not.
+    assert!(check_refund(&refund_for(&rb, FARE, r.timestamp), &r, &rb, &o.terms).is_ok());
+    assert_eq!(
+        check_refund(&refund_for(&rb, FARE, r.timestamp + 1), &r, &rb, &o.terms)
+            .unwrap_err()
+            .code,
+        RejectCode::PolicyRefused
+    );
+}
+
+/// A refund naming some other transaction must not attach to this one —
+/// otherwise a payee could satisfy many customers with one refund.
+#[test]
+fn a_refund_must_name_the_receipt_it_refunds() {
+    let o = offer();
+    let a = accept(&o);
+    let r = receipt_for(&a.to_value().encode(), FARE, false);
+    let rb = r.to_value().encode();
+
+    let mut other = r.clone();
+    other.timestamp += 1;
+    let wrong = refund_for(&other.to_value().encode(), FARE, r.timestamp + 60);
+
+    assert_eq!(
+        check_refund(&wrong, &r, &rb, &o.terms).unwrap_err().code,
+        RejectCode::CommitMismatch
+    );
+}
+
+/// A clock that runs backwards must not silently widen the window.
+#[test]
+fn a_refund_timestamped_before_the_receipt_does_not_underflow() {
+    let o = offer();
+    let a = accept(&o);
+    let r = receipt_for(&a.to_value().encode(), FARE, false);
+    let rb = r.to_value().encode();
+
+    // saturating_sub gives 0 elapsed rather than a huge number, so this is
+    // accepted rather than wrapping into an apparently-expired window.
+    let early = refund_for(&rb, FARE, r.timestamp.saturating_sub(10_000));
+    assert!(check_refund(&early, &r, &rb, &o.terms).is_ok());
+}
+
+#[test]
+fn refund_round_trips_and_rejects_unknown_fields() {
+    let o = offer();
+    let a = accept(&o);
+    let r = receipt_for(&a.to_value().encode(), FARE, false);
+    let refund = refund_for(&r.to_value().encode(), FARE / 2, 1_800_000_100);
+
+    let enc = refund.to_value().encode();
+    assert_eq!(Refund::from_value(decode(&enc).unwrap()).unwrap(), refund);
+    assert_eq!(decode(&enc).unwrap().encode(), enc);
+
+    let mut v = refund.to_value();
+    if let Value::Map(m) = &mut v {
+        m.insert(77, Value::Uint(1));
+    }
+    assert_eq!(
+        Refund::from_value(v).unwrap_err().code,
+        RejectCode::UnknownField
+    );
+}
