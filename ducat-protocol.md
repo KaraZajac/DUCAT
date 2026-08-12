@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.36 — Consolidated**
+**Draft 0.37 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.37** — **`CANCEL` and `TapStatic` implemented; §15.9's persona pinning was weaker than stated.** Pinning was offered as the mitigation for a swapped tag, but an attacker replacing the tag replaces the persona too — so the warning fires only for someone who already knows which persona to expect, and never for a first-time donor. A pinned persona without a signature is a *claim*: an attacker can print a charity's name over their own address. `TapStatic` now requires a signature by the pinned persona over the address, and an unsigned pin MUST be shown as unauthenticated rather than as an identity. The residual is stated rather than left to be found: a wholly replaced tag verifies under the attacker's own persona, and only a payer who knows what to expect is protected. `CANCEL` fixes the fee to the signed `terms`, so a cancelling party cannot invent a figure the confirm screen never showed.
 - **0.36** — **Hail objects implemented; "no route" made structural rather than prescribed.** §5.2's inversion depends entirely on providers never supplying a route — a provider able to smuggle one into a reply would deanonymise every consumer who used it, reinstating the harvesting the section was rewritten to remove. Neither `Hail` nor its reply now *has* a route field, because a prohibition can go unimplemented while a missing field cannot be populated. Also enforced at parse time: replies must echo the hail's nonce, or a stale quote can be replayed against a fresh hail; and geocell precision is capped, since §5.2.3's ladder begins at a district and one generous client's users pay for its generosity.
 - **0.35** — **`DISPUTE`/`RULING` implemented, and §9.3.4's expiry rule was a deadlock.** It said an abandoned dispute returns funds to "the pre-dispute allocation" — but under escrow that *is* funds locked in a 2-of-3 awaiting a `RELEASE` two disagreeing parties will never co-sign, so doing nothing freezes them permanently, the exact outcome the timeout claims to prevent. Expiry now emits a real ruling: for the respondent, award zero, co-signable against the escrow. Generalised as a rule for the whole protocol — **in a system with no operator, "nothing happens" is never a safe default**, so every deadline must name the action it triggers. Also enforced: a ruling from outside the market's signed arbiter set is refused (§2.5's lesson in one check), an award cannot exceed the claim, and only a ruling for the claimant may carry one.
 - **0.34** — **`MANDATE` implemented, and §15.5 amended to admit it.** §15.5 said the confirm tap is *the one mandatory human checkpoint*; §7.3's mandates authorise payment without one. That was a flat contradiction, resolved by stating that the checkpoint **moves rather than disappearing** — the human confirms a cap and a period once, and every later draw is bounded by what they signed. Holds only because a capless or periodless mandate is now *unparseable* rather than merely refused, the cap is enforced by the payer's own client, and only the named persona may draw. Periods anchor to the first draw, keeping timezones out of the protocol.
@@ -1065,7 +1066,13 @@ A passive NFC tag or printed QR can hold a **`TapStatic`** — a receive-only ca
 - **No co-signed receipt, no meter, no negotiation.** For anything with a price to verify or a service to deliver, the payee needs a live phone emitting a fresh `TapPresent`.
 - **Chip capacity is the deciding constraint.** A `TapStatic` fits the commodity NTAG213 (144 B user memory). Anything richer does not — `TapPresent` needs an NTAG215 or NTAG216 (§15.3.2). Printed QR sidesteps this entirely at 2,953 bytes and is the better static medium wherever a printed sticker is acceptable.
 
-Use static tags only where the worst case of a swapped tag is "money went to the wrong subaddress" — i.e. pin the persona and let the payer's app warn on an unrecognized one.
+**Persona pinning is weaker than earlier drafts implied, and the difference matters.** This section suggested pinning a persona and warning on an unrecognised one. An attacker who replaces the physical tag replaces the persona too, so that warning fires only for a payer who already knows which persona to expect — for a stranger tapping a donation box it fires never.
+
+A pinned persona is therefore worth nothing on its own: it is a *claim*, and an attacker can print a charity's name over their own address. A `TapStatic` MUST carry a **signature by the pinned persona over the address**, which raises it from a claim to evidence: `payto` provably belongs to that persona, and substituting the address under a borrowed name fails. A persona pinned without a signature MUST be reported to the payer as unauthenticated rather than shown as an identity.
+
+What that still does not fix, stated plainly rather than left to be discovered: an attacker who replaces the whole tag supplies their own persona *and* a valid signature over it, and the result verifies. The only remaining defence is that it is a **different** persona than expected, which protects a repeat donor or someone who learned the persona out of band, and nobody else.
+
+Use static tags only where the worst case of a swapped tag is "money went to the wrong address" — a donation, a tip. Anything with a price to verify or a service to deliver needs a live phone emitting a fresh `TapPresent`.
 
 ---
 
@@ -1579,9 +1586,9 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 15–21 | `FullOffer` (§15.4) | **Assigned** |
 | 22–27 | `ACCEPT` (§15.5) | **Assigned** |
 | 28–30 | `RECEIPT` (§6) | **Assigned** |
-| 31–33 | `TapStatic` (§15.9) | Reserved |
+| 31–33 | `TapStatic` (§15.9) | **Assigned** |
 | 34–37 | `REFUND` (§7.3) | **Assigned** |
-| 38–39 | `CANCEL` (§7.3) | Reserved |
+| 38–39 | `CANCEL` (§7.3) | **Assigned** |
 | 97–101 | `MANDATE` (§7.3) | **Assigned** |
 | 40–45 | `CONTACT_OFFER`, `CONTACT_ACCEPT` (§16.3) | Reserved |
 | 46–51 | `bond_proof`, `TXID` (§17.4) | Reserved |

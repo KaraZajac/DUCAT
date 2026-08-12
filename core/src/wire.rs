@@ -76,6 +76,15 @@ pub mod f {
     /// namespace, defined in `terms`.
     pub const TERMS: u64 = 96;
 
+    // CANCEL (§7.3) — reserved range 38-39
+    pub const CANCEL_PRIOR: u64 = 38;
+    pub const CANCEL_FEE: u64 = 39;
+
+    // TapStatic (§15.9) — reserved range 31-33
+    pub const STATIC_PAYTO: u64 = 31;
+    pub const STATIC_PERSONA: u64 = 32;
+    pub const STATIC_SIG: u64 = 33;
+
     // HAIL and its sealed reply (§5.2.1) — reserved range 60-67
     pub const HAIL_GEOCELL: u64 = 60;
     pub const HAIL_EPHEMERAL_PK: u64 = 61;
@@ -1407,4 +1416,191 @@ pub fn check_hail_reply(hail: &Hail, reply: &HailReply, now: u64) -> Result<(), 
         ));
     }
     Ok(())
+}
+
+// ------------------------------------------------------------------ CANCEL --
+
+/// §7.3. Cancellation after `ACCEPT` and before `FUND`, invoking the fee
+/// schedule the payer already signed in `terms`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Cancel {
+    pub version: u64,
+    pub suite: u8,
+    /// The ACCEPT being cancelled.
+    pub prior_accept: [u8; 32],
+    /// Must equal `terms.cancellation_pxmr` — a cancelling party cannot invent
+    /// a different figure than the one on the confirm screen.
+    pub fee_pxmr: u64,
+    pub timestamp: u64,
+}
+
+impl Cancel {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Cancel)));
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::CANCEL_PRIOR, Value::Bytes(self.prior_accept.to_vec()));
+        m.insert(f::CANCEL_FEE, Value::Uint(self.fee_pxmr));
+        m.insert(f::TIMESTAMP, Value::Uint(self.timestamp));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        if r.uint(f::TYPE)? != type_code(ObjectType::Cancel) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "object type is not CANCEL",
+            ));
+        }
+        let out = Cancel {
+            version: r.uint(f::VERSION)?,
+            suite: r.uint(f::SUITE)? as u8,
+            prior_accept: r.bytes(f::CANCEL_PRIOR, Some(32))?.try_into().unwrap(),
+            fee_pxmr: r.uint(f::CANCEL_FEE)?,
+            timestamp: r.uint(f::TIMESTAMP)?,
+        };
+        r.finish()?;
+        Ok(out)
+    }
+}
+
+/// A cancelling party cannot name a fee other than the one already agreed.
+pub fn check_cancel(
+    cancel: &Cancel,
+    accept_bytes: &[u8],
+    terms: &Terms,
+) -> Result<(), Reject> {
+    if !commit_eq(&cancel.prior_accept, &commit(Purpose::ChainLink, accept_bytes)) {
+        return Err(Reject::with_detail(
+            RejectCode::CommitMismatch,
+            "cancellation does not reference this ACCEPT",
+        ));
+    }
+    if cancel.fee_pxmr != terms.cancellation_pxmr {
+        return Err(Reject::with_detail(
+            RejectCode::PriceMismatch,
+            "cancellation fee differs from the signed terms",
+        ));
+    }
+    Ok(())
+}
+
+// -------------------------------------------------------------- TapStatic --
+
+/// §15.9. A passive tag or printed code holding a receive-only capability.
+///
+/// **A different object type from `TapPresent`, and readers must never confuse
+/// them**: there is no session key, no channel, no negotiation, and no
+/// co-signed receipt. Whatever a payer sends here, they send into the dark.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TapStatic {
+    pub version: u64,
+    pub suite: u8,
+    pub payto: Vec<u8>,
+    /// Optional pinned persona. See `check_static_tag` for what this is and is
+    /// not worth.
+    pub persona: Option<Vec<u8>>,
+    /// Signature by `persona` over the canonical body. Present only when a
+    /// persona is pinned.
+    pub sig: Option<Vec<u8>>,
+}
+
+impl TapStatic {
+    /// The body a pinned persona signs: everything except the signature.
+    pub fn signing_body(&self) -> Vec<u8> {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::TapPresent) + 500));
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::STATIC_PAYTO, Value::Bytes(self.payto.clone()));
+        if let Some(p) = &self.persona {
+            m.insert(f::STATIC_PERSONA, Value::Bytes(p.clone()));
+        }
+        Value::Map(m).encode()
+    }
+
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::TapPresent) + 500));
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::STATIC_PAYTO, Value::Bytes(self.payto.clone()));
+        if let Some(p) = &self.persona {
+            m.insert(f::STATIC_PERSONA, Value::Bytes(p.clone()));
+        }
+        if let Some(s) = &self.sig {
+            m.insert(f::STATIC_SIG, Value::Bytes(s.clone()));
+        }
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let _ = r.uint(f::TYPE)?;
+        let out = TapStatic {
+            version: r.uint(f::VERSION)?,
+            suite: r.uint(f::SUITE)? as u8,
+            payto: r.bytes(f::STATIC_PAYTO, None)?,
+            persona: r.opt_bytes(f::STATIC_PERSONA, None)?,
+            sig: r.opt_bytes(f::STATIC_SIG, Some(64))?,
+        };
+        r.finish()?;
+        // A signature without a persona names nobody, so it can prove nothing.
+        if out.sig.is_some() && out.persona.is_none() {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a static tag signature requires a pinned persona",
+            ));
+        }
+        Ok(out)
+    }
+}
+
+/// How much a static tag is worth trusting.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum StaticTrust {
+    /// No persona, no signature. **Nothing is authenticated.** The payer is
+    /// trusting a physical object, and a swapped tag is undetectable.
+    Anonymous,
+    /// A persona is pinned and has signed the address, so `payto` provably
+    /// belongs to that persona. This is worth something **only to a payer who
+    /// knows independently which persona to expect** — a swapped tag carries
+    /// the attacker's persona and a valid signature over it, and a first-time
+    /// donor has nothing to compare against.
+    SignedBy(Vec<u8>),
+}
+
+/// §15.9's mitigation, and its honest limit.
+///
+/// The section suggested pinning a persona and warning on an unrecognised one.
+/// That is weaker than it sounds: an attacker who replaces the physical tag
+/// replaces the persona too, so the warning only fires for a payer who has seen
+/// the *expected* persona before or learned it out of band. For a stranger
+/// tapping a donation box it fires never.
+///
+/// A signature at least closes the gap between "claims persona X" and "is
+/// persona X". Without one, an attacker can print X's name over their own
+/// address.
+pub fn check_static_tag(
+    tag: &TapStatic,
+    verify: impl Fn(&[u8], &[u8], &[u8]) -> bool,
+) -> Result<StaticTrust, Reject> {
+    match (&tag.persona, &tag.sig) {
+        (None, _) => Ok(StaticTrust::Anonymous),
+        (Some(p), None) => {
+            // A pinned persona with no signature is a claim, not evidence.
+            // Treating it as authentication is the trap §15.9 walked into.
+            let _ = p;
+            Ok(StaticTrust::Anonymous)
+        }
+        (Some(p), Some(s)) => {
+            if verify(p, &tag.signing_body(), s) {
+                Ok(StaticTrust::SignedBy(p.clone()))
+            } else {
+                Err(Reject::new(RejectCode::BadSig))
+            }
+        }
+    }
 }
