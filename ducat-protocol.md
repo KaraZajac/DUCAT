@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.18 — Consolidated**
+**Draft 0.19 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Status: Pre-alpha design document. Nothing here is final. Several sections rest on primitives that are not production-grade; §14 is the real agenda.
 
@@ -25,6 +25,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.19** — **§5.2 replaced: providers listen instead of advertising.** Two observations drive it — reading a DHT record imports nothing, so matching can run with zero route imports; and the *publisher* learns the *importer's* address, so publishing is safe and importing is what exposes you. Hail is therefore inverted: providers watch a market record and publish nothing, consumers post a hail carrying a coarse cell and an ephemeral key but no route, providers answer sealed to that key, and only after mutual selection does one import occur — by the party that chose to initiate. **Providers become invisible**, which substantially retires O3 and removes hail's dependency on the Veilid 0.13.0 milestone (O19 contained rather than blocking). Also added §5.2.3: there is no map of nearby drivers, because a live driver map is a published surveillance database of workers' movements — strictly worse than the operator it replaces. The map lives *after* matching, over E2EE, where it is safe and expected. Optional provider visibility is excluded because in a competitive market it is not optional.
 - **0.18** — **Added §2.5, the RetoSwap case study.** A Haveno-derived Monero DEX using 2-of-3 arbitrated multisig — §17.2's structure in production — was drained of ~7,000 XMR in May 2026 by a forged, out-of-order ACK that overwrote the arbitrator's address without any check against a known key. **Nothing about Monero failed**; the break was in the messaging layer, which here is Veilid. Route anonymity is not authentication. Four existing rules are the direct countermeasures (§18.3, §18.4, §18.8, §10.1), and §9.3 now states explicitly that arbiters come from the signed market descriptor and never from an address in a message. Second lesson recorded: Haveno was mature, had a prior exploit to learn from, and was breached again — this document's equivalent surface has had no adversarial review at all.
 - **0.17** — **`fast/1` acceptance simplified: the recipient scans, the payer does not prove.** Source review of `monero-wallet` 0.2.0 found no transaction-proof support at all — and most of the requirement dissolved on inspection, because a tx proof exists to convince a non-recipient and the driver *is* the recipient. §17.3's Layer 1 and §17.4's flow now have the driver scan the mempool transaction with their own view key; `TXPROOF` becomes `TXID`. Proofs remain necessary for arbitration (§17.5) and are now DUCAT's to implement. Added O20 (scanning is block-oriented, so unconfirmed verification has no public API; plus the missing proof work) and O21 (burning-bug-immune outputs exist but are unspecified outside one implementation, so staying standard and detecting the attack beats adopting them).
 - **0.16** — **Client architecture decided: embed a wallet, do not drive `monero-wallet-rpc`.** This dissolves the missing-API and halfway-stranding problems from 0.15 by construction, and permits FROSTLASS (`monero-oxide`, audited May 2025, O(1) per-signer vs native O(n!)) in place of wallet2's experimental multisig — the upstream warning in §8.2 describes wallet2's implementation, not threshold signing on Monero generally. Added the constraint this creates: **bond parties cannot mix schemes**, so `multisig_scheme` joins the market descriptor (§10.1). Also separated the `FLOAT`'s two halves in §17.2's user-facing guidance — "only load what you'll spend" describes `hot_wallet` and mislabels `bond_ms`, which is locked collateral backing fast-settle capacity. O1 reframed.
@@ -211,16 +212,76 @@ TapPresent {
 
 Tap → both devices open a Veilid (or direct BLE L2CAP, if offline) session → L3 contract state machine runs. Total target time to fare-lock: **< 3 seconds**.
 
-### 5.2 DHT Discovery (remote hail)
+### 5.2 Remote Hail — Providers Listen, They Do Not Advertise
 
-For "find a ride to the airport" rather than "I'm standing at the taxi line":
+For "find a ride to the airport" rather than "I'm standing at the taxi line."
 
-- Providers publish **Adverts** to DHT records keyed by `H(profile_id ‖ geocell ‖ epoch)`.
-- **Geocells** are truncated geohashes (precision set per profile; rides ≈ 5 chars / ~5 km cell) — coarse enough that an advert reveals a district, not a position.
-- **Epochs** rotate the record keyspace (default 1 h) so harvested keys go stale; adverts are re-signed per epoch by the persona key.
-- A consumer queries their cell + neighbors, receives adverts, hails via each advert's route blob. Precise location is exchanged only inside the E2EE session, only after mutual accept.
+Earlier drafts had providers publish signed adverts — profile, geocell, route — into rotating DHT keyspaces, and consumers read them and hailed. That design is withdrawn. It made supply a public bulletin board, which is the entire reason O3's harvesting problem existed, and it pointed Veilid #395 (§15.10) at exactly the wrong party: a provider could learn the network address of everyone who hailed them, while the consumer — who had more to lose and merely wanted a ride — carried the risk.
 
-Anti-harvesting is a first-class requirement (T4): rate-limited record subkeys, advert payload encryption to a per-cell derived key (raises harvest cost without gating honest queries), and mandatory client-side jitter of query timing.
+**Two observations reshape it.**
+
+First, **reading a DHT record does not import a route.** Veilid #395 bites only on *importing* a counterparty-supplied route to open a channel. So the entire matching phase can run over DHT reads and writes with no imports at all, and the single import that remains happens after both parties have chosen each other.
+
+Second, **the publisher learns the importer's address, not the reverse.** Publishing is safe; importing is what exposes you. So the consumer publishes a route and the provider reaches back — inverting the direction of risk onto whoever chooses to initiate contact.
+
+#### 5.2.1 The flow
+
+```
+  provider          market hail record (DHT)          consumer
+     │                        │                          │
+     │◀── watch_dht_values ───┤                          │
+     │   (publishes nothing)  │                          │
+     │                        │◀── 1. HAIL ──────────────┤
+     │                        │    profile, coarse cell, │
+     │                        │    nonce, ephemeral pk   │
+     │                        │    NO ROUTE              │
+     │                        │                          │
+     ├── 2. OFFER ───────────▶│                          │
+     │   sealed to consumer's │──────────────────────────▶
+     │   ephemeral pk         │   only the consumer       │
+     │   NO ROUTE             │   can read it             │
+     │                        │                          │
+     │                        │◀── 3. route, sealed to ──┤
+     │                        │    the chosen provider   │
+     │◀───────────────────────┤                          │
+     │                                                   │
+     └── 4. imports it, opens the channel ──────────────▶│
+                    one import, mutually consented
+```
+
+Providers subscribe to their market's hail record for a geocell (§10.1) and publish nothing. A consumer writes a hail carrying a coarse cell and an ephemeral public key but **no route**. Interested providers answer with an offer sealed to that ephemeral key — readable only by the consumer, and still carrying no route. The consumer selects one, seals its own route to that provider's key, and the provider imports it.
+
+#### 5.2.2 What this fixes, and what it does not
+
+**Providers become invisible.** A harvester watching a market learns nothing about supply — there is no advert, no persistent presence, no standing dossier of who works where. It learns only that *someone* hailed from a coarse cell at a time, which is ephemeral and unattributed. This is the substance of O3's improvement, and it also retires geocell epoch rotation, per-cell advert encryption, and the rate-card distribution sub-problem, all of which existed only to make persistent adverts survivable.
+
+**#395 is contained, not closed.** One exposure per real transaction, to a counterparty the exposed party selected, instead of one per browse to anyone watching. That is the same posture the proximity tap already has and §15.10 already accepts. The upstream fix is still needed before the final import is clean.
+
+**Hail spam is unsolved.** Anyone can write to a market record. Per-subkey rate limits in the record schema are the cheap mitigation; requiring a stake or bond proof to post is the strong one, at the cost of pulling consumers toward collateral — the same pressure O15 describes.
+
+**Latency is two DHT round trips plus watch propagation.** Seconds, not milliseconds. Fine for summoning a ride, far too slow for a tap, which is why §5.1 remains the primary primitive.
+
+#### 5.2.3 Location disclosure, and why there is no map of drivers
+
+The obvious product question is whether a rider can see nearby drivers on a map. **No, and not because of an implementation gap.**
+
+A live map of drivers requires drivers to continuously publish their positions. That is precisely the persistent advert this section removes, and in a permissionless system it is strictly worse than the platform it replaces: a centralized operator holds that data privately, whereas a DHT-published one hands every worker's movement history to anyone who cares to watch. A protocol that deletes the operator and then publishes the surveillance database has achieved nothing.
+
+What is available instead is a **disclosure ladder**, tightening only as consent is given:
+
+| Stage | Consumer reveals | Provider reveals |
+|---|---|---|
+| Hail | Coarse geocell (district) | Nothing |
+| Offer | Nothing further | Session key, terms, offer |
+| Selection | Route, sealed to the chosen provider | Nothing further |
+| After mutual accept | Precise pickup point, over E2EE | Precise position, over E2EE |
+| During service | Live position, over E2EE | Live position, over E2EE |
+
+**The map exists — it just lives after the match rather than before it.** Once two parties have selected each other, live position sharing over the E2EE session is both safe and expected: they have consented, and they are about to be physically co-present anyway (§2.3). Watching your driver approach works exactly as riders expect. What does not exist is browsing strangers' locations before any relationship exists.
+
+Before matching, the honest UI is *"looking for a driver"* rather than a map of six of them — which is what hailing a cab has always looked like. A market MAY publish a coarse aggregate supply signal ("providers active in this cell in the last 15 minutes") to distinguish thin supply from none, but only above a k-anonymity floor: a count of one in a small cell identifies a person.
+
+**Optional visibility is not optional.** If providers may opt into publishing position, those who do will win more work, and the pressure to opt in becomes economic rather than free. Any such feature therefore re-creates the harvesting problem for the whole market, not just for volunteers, and is excluded for the same reason one-way contact is (§16.8).
 
 ---
 
@@ -248,7 +309,7 @@ CONTACT_OFFER   either → either           optional post-RECEIPT identity coda 
 CONTACT_ACCEPT  either → either           completes the mutual contact (§16.3)
 ```
 
-**The in-person tap collapses the first three.** `TapPresent` (§15.3) carries the advert commitment and the hail in one gesture; `FullOffer` (§15.4) *is* the QUOTE, delivered over the channel the tap just opened. The remote-hail path (§5.2) runs ADVERT/HAIL/QUOTE as three separate messages. One state machine, two entry paths — this equivalence is normative, and a client that implements only the tap path must still produce transcripts a remote-hail client can verify.
+**The in-person tap collapses the first three.** `TapPresent` (§15.3) carries the advert commitment and the hail in one gesture; `FullOffer` (§15.4) *is* the QUOTE, delivered over the channel the tap just opened. The remote-hail path (§5.2) runs the same three roles over DHT records rather than a channel: the consumer's HAIL is a record write carrying no route, the provider's QUOTE is a sealed reply, and no ADVERT exists at all because providers no longer advertise. One state machine, two entry paths — this equivalence is normative, and a client that implements only the tap path must still produce transcripts a remote-hail client can verify.
 
 ### 6.1 Deterministic Pricing
 
@@ -591,7 +652,7 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 
 - **O1.** **Multisig — reframed twice, now largely a client-architecture question.** A 2-of-3 ceremony on wallet2 v0.18.5.1 converged in 2 rounds and 134 seconds, so round-trip fragility was overstated (`monero-spike/REPORT.md`). The remaining wallet2 problems — disabled by default, no RPC enablement, halfway-stranding — are dissolved by the decision to **embed a wallet rather than drive the RPC**, which further permits FROSTLASS (audited May 2025, O(1) per-signer) in place of wallet2's experimental implementation. What stays open: `monero-oxide` is pre-1.0, an embedded wallet means owning wallet correctness directly, and **cross-scheme interoperability is undocumented**, so a bond's parties must all run the same scheme (§10.1).
 - **O2.** Offline settlement (A5) has no trust-minimized answer yet.
-- **O3.** DHT advert harvesting (T4) is mitigated, not solved; coarse location still leaks district-level presence.
+- **O3.** **DHT harvesting — largely retired by §5.2's inversion.** Providers no longer advertise; they watch. A harvester learns nothing about supply, only that someone hailed from a coarse cell at a time — ephemeral and unattributed, rather than a standing dossier of who works where. What remains: hail traffic is observable in aggregate, and hail spam is unsolved (rate limits are cheap, stake is strong but pulls consumers toward collateral, per O15).
 - **O4.** Reputation vs. unlinkability is a genuine trade with no free lunch (§4, §9.2).
 - **O5.** The safety floor (§9.4) structurally caps the addressable market **for high-exposure profiles** — rides, lodging, open-ended tasks. Scoped in 0.7: it does not bind the no-exposure tier (`pos`, `xfer`, `goods`, `file`, `chat`), which is where most of §1's addressable surface now lives. The cap is no smaller where it applies; it simply applies to less of the protocol than first stated.
 - **O6.** Open-ended PROOF for `task/1` (what counts as "done"?) resists specification.
@@ -605,7 +666,7 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O20.** **Two wallet-layer gaps block Phase 3** (`monero-rs/REPORT.md`). `monero-wallet` 0.2.0 exposes scanning only over blocks — `scan_transaction` exists but is private — so a driver cannot verify an *unconfirmed* payment through the public API, which is exactly what `fast/1` acceptance requires. And it implements no transaction proofs at all, so §17.5's arbitration evidence must be built. Neither blocks Phase 1, which needs no bonds and no zero-conf.
 - **O21.** **Burning bug versus the standard.** `monero-wallet` offers burning-bug-immune 'guaranteed' outputs, but its own source says they are *"not officially specified by the Monero project ... No support outside of monero-wallet is promised."* Adopting them would lock DUCAT funds to one implementation, cutting against A1's bearer property and §11's many-clients goal. The recommendation is to stay standard and have `pos/1` merchants **detect** duplicate one-time keys instead — but the underlying hazard, that an attacker can make a merchant see two payments they can spend only one of, is real and unmitigated by §15.10's fresh-subaddress rule, which narrows the window without closing it.
 - **O14.** **Veilid at sync volumes — measured, provisionally adequate.** Phase 0b: 135–204 KB/s at 32 KB payloads, latency-dominated so throughput scales with request size (§8.7.1). A day of blocks moves in minutes; a full chain would not, which is why §17.1's restore-height-of-now is load-bearing. Two samples, self-route, unpipelined — enough to proceed, not enough to design against. Re-measure against a real `relay/1` peer before Phase 3.
-- **O19.** **Remote hail is gated on an upstream fix** (§15.10, Phase 0c). Veilid #395 lets any advert publisher learn the address of everyone who hails them, and it is open against a milestone eight minor versions out. Proximity profiles degrade gracefully — the counterparty is co-present anyway, and the residual harm is cross-visit linkability. Remote hail does not degrade: it is the one flow where the leak is disqualifying, and §5.2 should not ship until 0.13.0 lands or a client-side mitigation is found.
+- **O19.** **Veilid #395 is contained, not closed.** §5.2's inversion means matching runs entirely over DHT reads — which import nothing — and the single remaining import happens after mutual selection, by the party that chose to initiate. Exposure is now one per real transaction to a chosen counterparty, the same posture the tap already carries (§15.10), rather than one per browse to anyone watching. Remote hail therefore no longer waits on the 0.13.0 milestone. The upstream fix is still required before that last import is clean.
 - **O15.** **Cancellation fees erode the permissionless lane.** §7.3 makes no-show fees enforceable only against collateral. The pressure this creates — providers preferring bonded counterparties precisely because cancellation *costs* them something — pushes the network toward the collateralized lane and quietly hollows out the slow permissionless one A4 depends on (§17.6). Whether the unbonded lane survives contact with real no-show rates is an empirical question no amount of spec work answers.
 - **O16.** **iOS cannot present over NFC, permanently.** Apple's HCE entitlement is conditioned on EEA establishment, organization enrollment, and financial-regulatory standing (§15.3.2) — structurally incompatible with A4, and not a hurdle an open protocol clears. The best-UX medium is therefore available to roughly half the supply side, and QR carries the rest. This is outside DUCAT's control and will not improve through protocol design; it is stated so no one plans around a tap that cannot exist.
 - **O17.** **Identifiers are unassigned** (§18.7): the NFC AID is a placeholder pending real RID registration, and the BLE service/characteristic UUIDs are unallocated. Neither is hard, both are blocking for cross-implementation testing, and the AID is effectively immutable once iOS clients ship with it declared at build time.
