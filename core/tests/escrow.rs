@@ -436,3 +436,99 @@ fn a_release_against_a_different_formation_is_refused() {
         RejectCode::PolicyRefused
     );
 }
+
+// ------------------------------------------------------------ bond_proof ---
+
+fn bond(bucket: u64, amount: u64, issued: u64) -> BondProof {
+    BondProof {
+        version: 1, suite: 1,
+        bond_ms_address: b"53multisigbondaddress".to_vec(),
+        bond_amount_pxmr: amount,
+        arbiter_set_id: [0xA5; 32],
+        capacity_bucket: bucket,
+        issued,
+    }
+}
+
+fn sets() -> Vec<[u8; 32]> { vec![[0xA5; 32]] }
+
+#[test]
+fn a_bond_proof_round_trips() {
+    let b = bond(50_000_000_000, 100_000_000_000, T0);
+    let enc = b.to_value().encode();
+    assert_eq!(BondProof::from_value(decode(&enc).unwrap()).unwrap(), b);
+}
+
+#[test]
+fn a_provider_accepts_a_fresh_sufficient_bond() {
+    let b = bond(50_000_000_000, 100_000_000_000, T0);
+    assert!(check_bond_proof(&b, 20_000_000_000, T0 + 30, 300, &sets()).is_ok());
+}
+
+/// A bond proof is a claim about a balance that moves, so an old one says
+/// nothing — and one dated in the future is not fresh, it is wrong.
+#[test]
+fn staleness_is_bounded_in_both_directions() {
+    let b = bond(50_000_000_000, 100_000_000_000, T0);
+    assert_eq!(
+        check_bond_proof(&b, 1_000, T0 + 400, 300, &sets()).unwrap_err().code,
+        RejectCode::Expired
+    );
+    let future = bond(50_000_000_000, 100_000_000_000, T0 + 10_000);
+    assert_eq!(
+        check_bond_proof(&future, 1_000, T0, 300, &sets()).unwrap_err().code,
+        RejectCode::Expired
+    );
+    // Ordinary clock skew is tolerated (§6.2's ±120s).
+    let skewed = bond(50_000_000_000, 100_000_000_000, T0 + 60);
+    assert!(check_bond_proof(&skewed, 1_000, T0, 300, &sets()).is_ok());
+}
+
+/// §2.5: the arbiter set comes from the market descriptor, never from the
+/// message that would benefit from naming a friendly one.
+#[test]
+fn a_bond_under_an_unknown_arbiter_set_is_refused() {
+    let mut b = bond(50_000_000_000, 100_000_000_000, T0);
+    b.arbiter_set_id = [0xFF; 32];
+    assert_eq!(
+        check_bond_proof(&b, 1_000, T0, 300, &sets()).unwrap_err().code,
+        RejectCode::UntrustedArbiterSet
+    );
+}
+
+/// §17.8: an exact balance is not a bucket. Allowing one would undo the whole
+/// point of bucketing, since a rider could publish their balance and call it a
+/// ladder value.
+#[test]
+fn capacity_must_be_a_ladder_value_and_must_cover_the_fare() {
+    let exact = bond(49_999_999_999, 100_000_000_000, T0);
+    assert_eq!(
+        check_bond_proof(&exact, 1_000, T0, 300, &sets()).unwrap_err().code,
+        RejectCode::Malformed
+    );
+    let small = bond(1_000_000_000, 100_000_000_000, T0);
+    assert_eq!(
+        check_bond_proof(&small, 50_000_000_000, T0, 300, &sets()).unwrap_err().code,
+        RejectCode::InsufficientCapacity
+    );
+}
+
+/// Capacity is what remains of the bond, so a capacity above the bond is
+/// incoherent — and it is the direction a liar benefits from.
+#[test]
+fn capacity_cannot_exceed_the_bond_backing_it() {
+    let b = bond(100_000_000_000, 50_000_000_000, T0);
+    assert_eq!(
+        check_bond_proof(&b, 1_000, T0, 300, &sets()).unwrap_err().code,
+        RejectCode::InsufficientCapacity
+    );
+}
+
+#[test]
+fn a_bond_smaller_than_the_fare_is_no_protection() {
+    let b = bond(1_000_000_000, 2_000_000_000, T0);
+    assert_eq!(
+        check_bond_proof(&b, 50_000_000_000, T0, 300, &sets()).unwrap_err().code,
+        RejectCode::InsufficientCapacity
+    );
+}

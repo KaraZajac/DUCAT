@@ -16,6 +16,7 @@ pub const MSG_FULL_OFFER: u8 = 2;
 pub const MSG_ACCEPT: u8 = 3;
 pub const MSG_TXID: u8 = 4;
 pub const MSG_RECEIPT: u8 = 5;
+pub const MSG_BOND: u8 = 6;
 pub const MSG_REJECT: u8 = 0xFF;
 
 pub fn frame(kind: u8, body: &[u8]) -> Vec<u8> {

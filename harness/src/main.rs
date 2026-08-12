@@ -43,11 +43,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .and_then(|i| args.get(i + 1))
             .and_then(|v| v.parse::<u64>().ok())
             .unwrap_or(600_000_000); // 0.0006 XMR, the coffee from the market run
-        payee::run(&tap_path, amount).await
+        let fast = args.iter().any(|a| a == "--fast");
+        payee::run(&tap_path, amount, fast).await
     } else if args.iter().any(|a| a == "--payer") {
         payer::run(&tap_path).await
     } else {
-        eprintln!("usage: ducat-harness --payee [amount_pxmr] | --payer");
+        eprintln!("usage: ducat-harness --payee [amount_pxmr] [--fast] | --payer");
         eprintln!("       DUCAT_TAP=<path> selects the tap file (default /tmp/ducat-tap.blob)");
         std::process::exit(2);
     }

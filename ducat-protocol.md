@@ -793,6 +793,10 @@ The resolution is that these answer different questions and a client SHOULD use 
 
 **What this does not do is let a client have both at once.** A transaction submitted to a staked relay is submitted to a staked relay, whoever else also sees it. §8.7.3's guidance to prefer Tor narrows *who* observes the set; it does not change that using the set is the signal. O13 stands.
 
+**Veilid's own delivery is not reliable either, and a client must treat it that way.** The integration harness ran the same `fast/1` flow twice with no change between attempts: the first lost a single `app_call` — the second round trip of five, on an already-working route — and the second completed all five. Route establishment succeeded both times; it was one message that went nowhere.
+
+A private route is not a connection, and §6.2's deadlines exist partly for this. **A client MUST retry a lost round trip rather than failing the transaction**, and MUST treat a timeout as a transport event rather than as a counterparty refusal — the two are indistinguishable at the API and lead to opposite actions. This bears on the tap budget: §15.3's three seconds must cover at least one retry, or the first flaky message turns into a declined payment at a counter.
+
 Two consequences worth writing down:
 
 - **A height that looks plausible is the failure mode.** Detection requires comparing the wallet's height against the relay's own, because a stalled wallet and a synced one are indistinguishable from the wallet's answer alone.

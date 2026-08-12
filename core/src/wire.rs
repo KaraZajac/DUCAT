@@ -113,6 +113,13 @@ pub mod f {
     pub const PRF_AMOUNT: u64 = 129;
     pub const PRF_TS: u64 = 130;
 
+    // bond_proof (§17.4)
+    pub const BND_MS_ADDRESS: u64 = 140;
+    pub const BND_AMOUNT: u64 = 141;
+    pub const BND_ARBITER_SET: u64 = 142;
+    pub const BND_CAPACITY_BUCKET: u64 = 143;
+    pub const BND_ISSUED: u64 = 144;
+
     // SLASH_CLAIM (§17.5)
     pub const SLC_ACCEPT_LINK: u64 = 132;
     pub const SLC_RECEIPT_LINK: u64 = 133;

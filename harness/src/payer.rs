@@ -56,6 +56,38 @@ pub async fn run(tap_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     }
     println!("  offer    verified against the tap: {} pXMR", offer.amount_pxmr);
 
+    // §17.4: under fast/1 the provider hands over goods before confirmation, so
+    // it wants collateral first. The bond is posted before the ACCEPT, because a
+    // provider that learns the bond is inadequate *after* accepting has already
+    // made the decision the bond exists to inform.
+    if offer.settle_mode == 1 {
+        let bond_total = 100_000_000_000u64;              // 0.1 XMR posted
+        let remaining = 60_000_000_000u64;                // what is left of it
+        let bp = ducat_core::escrow::BondProof {
+            version: 1,
+            suite: 1,
+            bond_ms_address: b"53multisigbondaddress".to_vec(),
+            bond_amount_pxmr: bond_total,
+            arbiter_set_id: [0xA5; 32],
+            // §17.8: the floor of a ladder, never the exact figure — an exact
+            // balance shown to every provider is a running meter on spending.
+            capacity_bucket: ducat_core::bond::bucket_floor(remaining),
+            issued: now(),
+        };
+        println!(
+            "  bond     {} pXMR posted; publishing capacity bucket {} (true remaining {} withheld)",
+            bp.bond_amount_pxmr, bp.capacity_bucket, remaining
+        );
+        let reply = rc
+            .app_call(Target::RouteId(route_id.clone()), frame(MSG_BOND, &bp.to_value().encode()))
+            .await?;
+        let (kind, body) = unframe(&reply)?;
+        if kind == MSG_REJECT {
+            return Err(format!("bond refused: {}", String::from_utf8_lossy(body)).into());
+        }
+        println!("  bond     accepted by the provider");
+    }
+
     // §15.5.1 — is the person holding this device entitled to spend?
     let policy = VerificationPolicy::default();
     let state = VerificationState { device_unlocked: true, app_secret_age_s: Some(5) };

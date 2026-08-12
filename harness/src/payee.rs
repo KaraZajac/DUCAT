@@ -11,8 +11,15 @@ use veilid_core::*;
 use crate::flow::*;
 use crate::wallet::Wallet;
 
-pub async fn run(tap_path: &str, amount_pxmr: u64) -> Result<(), Box<dyn std::error::Error>> {
-    println!("\n\x1b[1mDUCAT harness — payee\x1b[0m\n");
+pub async fn run(
+    tap_path: &str,
+    amount_pxmr: u64,
+    fast: bool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    println!(
+        "\n\x1b[1mDUCAT harness — payee ({})\x1b[0m\n",
+        if fast { "fast/1" } else { "direct" }
+    );
 
     let w = Wallet::open("coffee_01", 28104)?;
     println!("  wallet   {}…", &w.address[..20]);
@@ -35,7 +42,7 @@ pub async fn run(tap_path: &str, amount_pxmr: u64) -> Result<(), Box<dyn std::er
         amount_pxmr,
         supported_versions: vec![1],
         supported_suites: vec![1, 2],
-        settle_mode: 0,
+        settle_mode: if fast { 1 } else { 0 },
         fee_policy: FeePolicy::PayerPays,
         nonce_echo: [0x5A; 16],
         terms: Terms::default(),
@@ -79,6 +86,9 @@ pub async fn run(tap_path: &str, amount_pxmr: u64) -> Result<(), Box<dyn std::er
     println!("  offering {amount_pxmr} pXMR — waiting for a payer\n");
 
     let mut accept: Option<(Accept, Vec<u8>)> = None;
+    // §17.4: under fast/1 the provider will hand over goods before confirmation,
+    // so it wants collateral standing behind the payment first.
+    let mut bonded = !fast;
     let deadline = Instant::now() + Duration::from_secs(600);
 
     while Instant::now() < deadline {
@@ -99,6 +109,44 @@ pub async fn run(tap_path: &str, amount_pxmr: u64) -> Result<(), Box<dyn std::er
             MSG_REQUEST_OFFER => {
                 println!("  → offer requested; replying with FullOffer");
                 api.app_call_reply(id, frame(MSG_FULL_OFFER, &offer_env)).await?;
+            }
+            MSG_BOND => {
+                let parsed = decode(body)
+                    .map_err(|e| format!("{e:?}"))
+                    .and_then(|v| {
+                        ducat_core::escrow::BondProof::from_value(v)
+                            .map_err(|e| format!("{e:?}"))
+                    });
+                match parsed {
+                    Ok(b) => {
+                        // The arbiter set is supplied here, not read from the
+                        // message — §2.5's exploit installed one that arrived in
+                        // a message and was well-formed.
+                        let trusted = [[0xA5u8; 32]];
+                        match ducat_core::escrow::check_bond_proof(
+                            &b, amount_pxmr, now(), 300, &trusted,
+                        ) {
+                            Ok(()) => {
+                                println!(
+                                    "  → bond accepted: {} pXMR posted, capacity bucket {}",
+                                    b.bond_amount_pxmr, b.capacity_bucket
+                                );
+                                bonded = true;
+                                api.app_call_reply(id, frame(MSG_BOND, b"ok")).await?;
+                            }
+                            Err(e) => {
+                                println!("  → bond refused: {e:?}");
+                                api.app_call_reply(id, reject(&format!("{e:?}"))).await.ok();
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        api.app_call_reply(id, reject(&e)).await.ok();
+                    }
+                }
+            }
+            MSG_ACCEPT if !bonded => {
+                api.app_call_reply(id, reject("fast/1 requires a bond first")).await.ok();
             }
             MSG_ACCEPT => {
                 // §18.4.1(1): only the payer may emit ACCEPT, and the guard is on
@@ -174,9 +222,15 @@ pub async fn run(tap_path: &str, amount_pxmr: u64) -> Result<(), Box<dyn std::er
                 };
                 let txid = hex::encode(t.txid);
                 println!("  → TXID {}… — scanning for {want} pXMR with my own view key", &txid[..16]);
-                match w.scan_for(&txid, 30) {
+                let tries = if fast { 12 } else { 30 };
+                match w.scan_for(&txid, tries) {
                     Ok(got) if got >= want => {
-                        println!("  ✓ observed {got} pXMR on chain");
+                        if fast {
+                            println!("  ✓ observed {got} pXMR — accepting at mempool visibility");
+                            println!("    (PROVISIONAL: service proceeds, finality still pending)");
+                        } else {
+                            println!("  ✓ observed {got} pXMR on chain");
+                        }
                         let receipt = Receipt {
                             version: 1,
                             suite: 1,

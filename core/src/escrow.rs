@@ -774,3 +774,124 @@ pub fn check_release(
     }
     Ok(())
 }
+
+// ---------------------------------------------------------------------------
+// bond_proof (§17.4)
+// ---------------------------------------------------------------------------
+
+/// A rider's attestation that collateral stands behind this payment.
+///
+/// Specified in §17.4 from 0.2 and unimplemented until 0.55, which is why
+/// `fast/1` had no end-to-end path: the payee had nothing to check.
+///
+/// **`capacity_bucket`, never an exact balance** (§17.8, O10). An exact figure
+/// shown to every provider a rider taps is a running meter on their spending —
+/// two merchants comparing notes recover what was spent between the taps. The
+/// bucket is the floor of a fixed ladder, which drops the leak from 64 bits to
+/// under 4.1 at the cost of a rider just under a rung being unable to prove what
+/// they can in fact afford.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BondProof {
+    pub version: u64,
+    pub suite: u8,
+    /// The multisig holding the collateral.
+    pub bond_ms_address: Vec<u8>,
+    pub bond_amount_pxmr: u64,
+    /// Which arbiter set governs it — checked against the market descriptor
+    /// (§10.1), never trusted from the message (§2.5).
+    pub arbiter_set_id: [u8; 32],
+    /// A ladder value from [`crate::bond::CAPACITY_BUCKETS`].
+    pub capacity_bucket: u64,
+    /// When this attestation was signed. Freshness-bounded: a bond proof is a
+    /// claim about a balance that moves.
+    pub issued: u64,
+}
+
+impl BondProof {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::BondProof)));
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::BND_MS_ADDRESS, Value::Bytes(self.bond_ms_address.clone()));
+        m.insert(f::BND_AMOUNT, Value::Uint(self.bond_amount_pxmr));
+        m.insert(f::BND_ARBITER_SET, Value::Bytes(self.arbiter_set_id.to_vec()));
+        m.insert(f::BND_CAPACITY_BUCKET, Value::Uint(self.capacity_bucket));
+        m.insert(f::BND_ISSUED, Value::Uint(self.issued));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        if r.uint(f::TYPE)? != type_code(ObjectType::BondProof) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "object type is not bond_proof",
+            ));
+        }
+        let out = BondProof {
+            version: r.uint(f::VERSION)?,
+            suite: r.uint(f::SUITE)? as u8,
+            bond_ms_address: r.bytes(f::BND_MS_ADDRESS, None)?,
+            bond_amount_pxmr: r.uint(f::BND_AMOUNT)?,
+            arbiter_set_id: r.bytes(f::BND_ARBITER_SET, Some(32))?.try_into().unwrap(),
+            capacity_bucket: r.uint(f::BND_CAPACITY_BUCKET)?,
+            issued: r.uint(f::BND_ISSUED)?,
+        };
+        r.finish()?;
+        Ok(out)
+    }
+}
+
+/// What a provider checks before accepting an unconfirmed payment.
+///
+/// `trusted_arbiter_sets` comes from the market descriptor and is an argument
+/// for the same reason [`check_escrow_ready`]'s is: §2.5's exploit installed an
+/// arbitrator that arrived in a message.
+pub fn check_bond_proof(
+    bond: &BondProof,
+    fare_pxmr: u64,
+    now: u64,
+    max_age_s: u64,
+    trusted_arbiter_sets: &[[u8; 32]],
+) -> Result<(), Reject> {
+    // A bond proof is a claim about a balance that moves, so an old one says
+    // nothing. Skew is tolerated in one direction only: a proof from the future
+    // is not fresh, it is wrong.
+    if bond.issued > now.saturating_add(120) {
+        return Err(Reject::with_detail(
+            RejectCode::Expired,
+            "bond attestation is dated in the future",
+        ));
+    }
+    if now.saturating_sub(bond.issued) > max_age_s {
+        return Err(Reject::with_detail(
+            RejectCode::Expired,
+            "bond attestation is stale",
+        ));
+    }
+    if !trusted_arbiter_sets.contains(&bond.arbiter_set_id) {
+        return Err(Reject::with_detail(
+            RejectCode::UntrustedArbiterSet,
+            "bond is governed by an arbiter set this provider does not accept",
+        ));
+    }
+    // §17.8: the published figure must be a ladder value. An arbitrary integer
+    // here would let a rider publish their balance exactly and call it a bucket.
+    crate::bond::check_published_bucket(bond.capacity_bucket, fare_pxmr)?;
+    // The bond itself must cover what it is backing. Capacity is what remains;
+    // the bond is the ceiling, and a capacity above it is incoherent.
+    if bond.capacity_bucket > bond.bond_amount_pxmr {
+        return Err(Reject::with_detail(
+            RejectCode::InsufficientCapacity,
+            "claimed capacity exceeds the bond backing it",
+        ));
+    }
+    if bond.bond_amount_pxmr < fare_pxmr {
+        return Err(Reject::with_detail(
+            RejectCode::InsufficientCapacity,
+            "bond is smaller than the fare it would have to cover",
+        ));
+    }
+    Ok(())
+}
