@@ -197,3 +197,50 @@ and its change locked. The stepwise 0.005 decrements are the evidence, and the
 detector was looking at the wrong variable — a reminder that an automated
 inconclusive-check is only as good as its model of the failure it is screening
 for.
+
+
+---
+
+# Slashing — a bond can be seized over its holder's objection
+
+Two tests, the second stricter than the first.
+
+**Test 1** signed with `arbiter + recovery`, excluding the user from signing —
+but all three wallets exchanged key images beforehand. That is not the slash
+scenario. A rider facing a slash does not help.
+
+**Test 2** never contacted the user wallet at all:
+
+```
+arbiter exported  1800 chars
+recovery exported 1800 chars
+arbiter imported recovery's only:  n_outputs=2
+recovery imported arbiter's only:  n_outputs=2
+submitted: 16bd0ee2f57fb777636c05b981091609d5a4571646abb345941d528ba1ce42a7
+```
+
+**Key-image reconstruction needs only the threshold count, not all
+participants.** This was the open question and it was not guaranteed: Monero
+builds key images from participants' partial ones, and had all three exports
+been required, a 2-of-3 bond could only have been seized with the cooperation of
+the party being seized from. §17.2's deposit model would have collapsed.
+
+It requires two. Seizure over the holder's objection works, and collateral that
+can be taken over an objection is collateral.
+
+## What this does not establish
+
+- **This was wallet2's multisig, not FROSTLASS.** §8.2 intends to ship
+  monero-oxide's implementation. The *mechanism* is proven; the *code path* is
+  not, and the two are different protocols producing the same on-chain result.
+- **Nothing about arbiter honesty.** O8 is untouched. This shows a market
+  *can* seize a bond, which is exactly as true for an honest market as a
+  captured one.
+- **Nothing under adversarial timing.** Both parties here were cooperative and
+  online.
+
+## Incidental
+
+Funding a bond needs no coordination — the multisig sees incoming funds on a
+plain refresh, and `multisig_import_needed` is a spend-time cost only. A freshly
+funded bond is not slashable for ~10 blocks, like any other output.
