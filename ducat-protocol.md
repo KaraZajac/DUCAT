@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.16 — Consolidated**
+**Draft 0.17 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Status: Pre-alpha design document. Nothing here is final. Several sections rest on primitives that are not production-grade; §14 is the real agenda.
 
@@ -25,6 +25,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.17** — **`fast/1` acceptance simplified: the recipient scans, the payer does not prove.** Source review of `monero-wallet` 0.2.0 found no transaction-proof support at all — and most of the requirement dissolved on inspection, because a tx proof exists to convince a non-recipient and the driver *is* the recipient. §17.3's Layer 1 and §17.4's flow now have the driver scan the mempool transaction with their own view key; `TXPROOF` becomes `TXID`. Proofs remain necessary for arbitration (§17.5) and are now DUCAT's to implement. Added O20 (scanning is block-oriented, so unconfirmed verification has no public API; plus the missing proof work) and O21 (burning-bug-immune outputs exist but are unspecified outside one implementation, so staying standard and detecting the attack beats adopting them).
 - **0.16** — **Client architecture decided: embed a wallet, do not drive `monero-wallet-rpc`.** This dissolves the missing-API and halfway-stranding problems from 0.15 by construction, and permits FROSTLASS (`monero-oxide`, audited May 2025, O(1) per-signer vs native O(n!)) in place of wallet2's experimental multisig — the upstream warning in §8.2 describes wallet2's implementation, not threshold signing on Monero generally. Added the constraint this creates: **bond parties cannot mix schemes**, so `multisig_scheme` joins the market descriptor (§10.1). Also separated the `FLOAT`'s two halves in §17.2's user-facing guidance — "only load what you'll spend" describes `hot_wallet` and mislabels `bond_ms`, which is locked collateral backing fast-settle capacity. O1 reframed.
 - **0.15** — **Monero multisig measured (O1).** A 2-of-3 ceremony converged in 2 rounds and 134 s on v0.18.5.1/stagenet — round-trip fragility was overstated. The real obstacles are that Monero ships multisig **disabled by default** with an upstream warning that funds may be unspendable or stealable (now quoted verbatim in §8.2), that **no RPC method enables it**, and that a wallet can be stranded halfway because `prepare` and `make` succeed while `exchange` refuses. O1 reframed from fragility to availability.
 - **0.14** — **Field numbering fixed; transcripts exist.** Integer keys assigned for `TapPresent`, `FullOffer`, `ACCEPT`, and `RECEIPT`, with signed objects carried in an envelope `{1: body, 2: sig}` rather than a `sig` field inside the signed map. Encoded sizes measured and replacing estimates: token mode 217 B (was 190), inline 1-hop 915 B (was 886) — the earlier figures counted payload and omitted CBOR key and type headers. **Inline routes now fit no commodity tag at any hop count**, retiring the last argument against token-only tags. §18.9(4) closed: full `xfer/1`, `pos/1`, and `ride/1` transcripts ship in `vectors/v1/transcript.json`, chained and verified end to end, plus a tampered case. 92 vectors, 75 tests.
@@ -574,6 +575,8 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O11.** **Route-blob size — measured, and it resists being a constant.** Phase 0a: `token` mode is exactly 190 B; `inline` mode ranged 877–1669 B for a `TapPresent` across two runs, non-monotonic in hop count, with within-hop-count spread exceeding between-hop-count differences. Size tracks *which peer was selected*, not how many hops were asked for. §15.3.1 therefore specifies measure-and-degrade rather than a budget. Closed as a question; the variance itself is the finding.
 - **O12.** Persona loss and recovery (§16.8): losing a device loses the persona and every rendezvous keyed to it. Signed key-rotation announcements to existing contacts are an unsolved sub-problem of L1.
 - **O13.** **Relay anonymity set** (§8.7.3): routing settlement through DUCAT relays makes "is a DUCAT user" observable to anyone watching the relay set, and a seed market's set is a few hundred people. Mitigated by preferring Tor and by growth; not solved. Note this compounds O7 — the smallest markets have both the thinnest liquidity and the thinnest cover.
+- **O20.** **Two wallet-layer gaps block Phase 3** (`monero-rs/REPORT.md`). `monero-wallet` 0.2.0 exposes scanning only over blocks — `scan_transaction` exists but is private — so a driver cannot verify an *unconfirmed* payment through the public API, which is exactly what `fast/1` acceptance requires. And it implements no transaction proofs at all, so §17.5's arbitration evidence must be built. Neither blocks Phase 1, which needs no bonds and no zero-conf.
+- **O21.** **Burning bug versus the standard.** `monero-wallet` offers burning-bug-immune 'guaranteed' outputs, but its own source says they are *"not officially specified by the Monero project ... No support outside of monero-wallet is promised."* Adopting them would lock DUCAT funds to one implementation, cutting against A1's bearer property and §11's many-clients goal. The recommendation is to stay standard and have `pos/1` merchants **detect** duplicate one-time keys instead — but the underlying hazard, that an attacker can make a merchant see two payments they can spend only one of, is real and unmitigated by §15.10's fresh-subaddress rule, which narrows the window without closing it.
 - **O14.** **Veilid at sync volumes — measured, provisionally adequate.** Phase 0b: 135–204 KB/s at 32 KB payloads, latency-dominated so throughput scales with request size (§8.7.1). A day of blocks moves in minutes; a full chain would not, which is why §17.1's restore-height-of-now is load-bearing. Two samples, self-route, unpipelined — enough to proceed, not enough to design against. Re-measure against a real `relay/1` peer before Phase 3.
 - **O19.** **Remote hail is gated on an upstream fix** (§15.10, Phase 0c). Veilid #395 lets any advert publisher learn the address of everyone who hails them, and it is open against a milestone eight minor versions out. Proximity profiles degrade gracefully — the counterparty is co-present anyway, and the residual harm is cross-visit linkability. Remote hail does not degrade: it is the one flow where the leak is disqualifying, and §5.2 should not ship until 0.13.0 lands or a client-side mitigation is found.
 - **O15.** **Cancellation fees erode the permissionless lane.** §7.3 makes no-show fees enforceable only against collateral. The pressure this creates — providers preferring bonded counterparties precisely because cancellation *costs* them something — pushes the network toward the collateralized lane and quietly hollows out the slow permissionless one A4 depends on (§17.6). Whether the unbonded lane survives contact with real no-show rates is an empirical question no amount of spec work answers.
@@ -998,8 +1001,10 @@ FLOAT = {
 
 The driver accepts instantly not because double-spend is impossible, but because it is *bounded, detectable, and collateralized*.
 
-**Layer 1 — Broadcast + transaction proof.**
-Rider broadcasts, then hands the driver a Monero **tx proof** (`OutProofV2`-style: proof the tx pays *this* amount to *this* subaddress) over the already-open Veilid session. The driver's own node — or a node they trust — verifies the proof and sees the tx in its mempool. Defeats "I sent it, honest" and wrong-address fraud outright. A genuine double-spend now requires racing a conflicting key image to miners, which is hard *and* self-revealing: the conflicting key image is visible on-chain and permanently attributable to the bond.
+**Layer 1 — Broadcast, and the recipient scans.**
+Rider broadcasts and hands the driver the txid over the already-open Veilid session. **The driver then determines for themselves whether it pays them**, by scanning the mempool transaction with their own view key.
+
+Earlier drafts had the rider supply an `OutProofV2`-style tx proof here. That was redundant: a tx proof exists to convince someone who is *not* the recipient, and the driver **is** the recipient — their own keys answer the question directly, unforgeably, and without trusting anything the payer says. A proof handed over by the payer is a claim the driver would have to validate independently anyway. Proofs remain genuinely necessary for **arbitration** (§17.5), where an arbiter is not the recipient and must verify payment without being handed the driver's view key, which would expose their entire income. Defeats "I sent it, honest" and wrong-address fraud outright. A genuine double-spend now requires racing a conflicting key image to miners, which is hard *and* self-revealing: the conflicting key image is visible on-chain and permanently attributable to the bond.
 
 **Layer 2 — Bounded exposure.**
 `in_flight_obligations` is tracked locally and asserted in the offer; capacity shrinks as unconfirmed rides stack up. One float cannot underwrite unlimited simultaneous fraud.
@@ -1029,9 +1034,10 @@ Additions to `FullOffer` / `ACCEPT`:
         │
   FUND        rider broadcasts tx to the Monero network
         │
-  TXPROOF     rider → driver    { txid, out_proof, amount, payto }   ← NEW
+  TXID        rider → driver    { txid }
         │
-        │  driver verifies proof + sees tx in mempool  →  ACCEPTS RIDE (seconds)
+        │  driver scans the mempool tx with its own view key,
+        │  confirming amount and destination  →  ACCEPTS RIDE (seconds)
         │
   RECEIPT     co-signed, marked provisional (unconfirmed)
         │
@@ -1069,7 +1075,7 @@ Rules that keep this honest:
 
 - **Cure window.** Non-confirmation is usually a fee or propagation problem, not fraud. The rider gets a window (default 20 blocks ≈ 40 min) to re-broadcast or bump. Only then does a claim mature.
 - **Conflicting key image skips the cure window.** It is unambiguous evidence of a double-spend attempt, on-chain and self-authenticating. Straight to `CLAIMED`.
-- **Evidence is compact and verifiable.** The claim carries `{ signed ACCEPT, TXPROOF, RECEIPT, txid }` — the arbiter only needs to check signatures and query the chain. No he-said/she-said; this is the *easiest* possible dispute class, which is why fast-settle disputes are cheap to arbitrate.
+- **Evidence is compact and verifiable.** The claim carries `{ signed ACCEPT, tx proof, RECEIPT, txid }` — and this is the one place a proof is irreplaceable, since the arbiter is not the recipient and cannot scan for itself. **`monero-wallet` provides no proof implementation, so this is DUCAT's own work** (`monero-rs/REPORT.md`) — the arbiter only needs to check signatures and query the chain. No he-said/she-said; this is the *easiest* possible dispute class, which is why fast-settle disputes are cheap to arbitrate.
 - **Frivolous claims cost.** The claimant's own provider stake (9.1) is at risk on dismissal, so drivers can't grief riders with bogus claims.
 - **Degraded bonds.** A slashed rider's bond is marked; drivers may set policy to refuse degraded bonds or demand confirmations. Reputation without identity, again — the bond *is* the reputation.
 
