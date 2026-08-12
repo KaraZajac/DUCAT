@@ -122,3 +122,38 @@ unspendable is making a bet that belongs in the document, not in a footnote.
 
 Both need three `monero-wallet-rpc` instances on ports 28088–28090.
 **Check `pgrep -f monero-wallet-rpc` first** — see the correction above.
+
+
+---
+
+# Pre-split measurement — inconclusive, and why
+
+Attempted: measure consecutive payments before and after splitting the float,
+expecting the count to track unlocked outputs.
+
+Result as printed: `2 outputs -> 1 payment`, `13 outputs -> 1 payment`. **Do not
+read that as "pre-splitting does not help."** The test did not isolate the
+variable, for two reasons, both mine:
+
+1. **The wait loop exits on any unlocked balance.** In phase C it fired when
+   phase A's *change* unlocked, while the ten split outputs still had a block to
+   run. Phase C therefore never exercised the split outputs.
+2. **`incoming_transfers` with `transfer_type: "available"` includes locked
+   outputs.** It reported 13 while `unlocked_balance` covered a fraction of
+   them, so the "13 unlocked outputs" figure was never real.
+
+Two genuine findings survive, and both belong in a client:
+
+- **Fees must be reserved in the capacity calculation.** The final refusal came
+  with exactly the payment amount unlocked and nothing for the fee. A client
+  computing capacity as the full unlocked value overstates by at least one fee.
+- **"Available" is not "unlocked."** A client counting spendable outputs from
+  that RPC field will believe it holds funds it cannot spend.
+
+The lock itself was confirmed twice — a second consecutive payment was refused
+in both phases.
+
+**Redesign needed:** wait on the specific split outputs (track by height or by
+unlocked count crossing a threshold, not by `unlocked_balance != 0`), and size
+payments so that unlocked *value* is never the binding constraint before
+unlocked *output count* is.

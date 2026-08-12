@@ -1078,11 +1078,14 @@ FLOAT = {
 - **Bond ≠ balance.** The bond is locked collateral; the hot wallet holds spendable XMR. A rider's *fast-settle capacity* is therefore computed over **unlocked outputs**, never over balance:
 
   ```
-  capacity = min( unlocked_output_value, bond_amount − in_flight_obligations )
+  capacity = min( unlocked_output_value − fee_reserve,
+                  bond_amount − in_flight_obligations )
              gated by unlocked_output_count ≥ 1
   ```
 
-  A client that reports capacity from `hot_balance` will promise fares it cannot pay.
+  A client that reports capacity from `hot_balance` will promise fares it cannot pay. **Two traps, both observed on stagenet:**
+  - **The fee must be reserved.** A payment was refused with exactly its own amount sitting unlocked — the fee had nowhere to come from. Capacity computed as the full unlocked value overstates by at least one fee, and the failure surfaces at the moment of payment.
+  - **"Available" does not mean unlocked.** `incoming_transfers` with `transfer_type: "available"` reported 13 outputs while `unlocked_balance` covered a fraction of them. A client counting outputs from that call will believe it has spendable funds it does not have. Count against `unlocked_balance`, not against an availability flag.
 - **Withdrawal** requires a cooldown (default 24 h) with no in-flight obligations, so a rider cannot ride and instantly drain the collateral backing that ride.
 
 ---
