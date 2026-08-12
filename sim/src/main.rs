@@ -36,6 +36,10 @@ fn main() {
         live_main();
         return;
     }
+    if std::env::args().any(|a| a == "--drain") {
+        drain_main();
+        return;
+    }
     let verbose = std::env::args().any(|a| a == "-v" || a == "--verbose");
     let mut wire = Wire::new(verbose);
 
@@ -320,5 +324,80 @@ fn live_main() {
     println!("  {} settled, {} failed", settled.len(), failures.len());
     for f in &failures {
         println!("    - {}", f);
+    }
+}
+
+/// Drain mode: one participant buys until it cannot.
+///
+/// §17.2 predicts the failure precisely — a payment consumes a whole output and
+/// its change returns locked, so consecutive capacity is a count. This exercises
+/// the *negative* path, which the happy-path run never reaches: does the client
+/// detect exhaustion before promising a fare, or discover it at settlement with
+/// a customer waiting?
+fn drain_main() {
+    use live::{transact_live, Party};
+    use persona::Persona;
+    use wallet::Wallet;
+
+    banner("DUCAT — spending to output exhaustion");
+    println!("  §17.2: consecutive capacity is a count of unlocked outputs,");
+    println!("  not a balance. A payment costs a whole output whatever its size.\n");
+
+    let buyer_w = match Wallet::new("user_01", 28101) {
+        Ok(w) => w,
+        Err(e) => { println!("  user_01 unavailable: {}", e); return; }
+    };
+    let seller_w = match Wallet::new("coffee_01", 28104) {
+        Ok(w) => w,
+        Err(e) => { println!("  coffee_01 unavailable: {}", e); return; }
+    };
+
+    let _ = buyer_w.refresh();
+    let start = match buyer_w.balance() {
+        Ok(b) => b,
+        Err(e) => { println!("  balance unavailable: {}", e); return; }
+    };
+    println!(
+        "  user_01 starts with {} XMR across {} unlocked output(s)",
+        format!("{:.6}", start.unlocked as f64 / 1e12),
+        start.unlocked_outputs
+    );
+    println!("  predicted consecutive purchases: {}\n", start.unlocked_outputs);
+
+    let mut buyer = Party {
+        persona: Persona::new("user_01", persona::Kind::Consumer, 11, buyer_w.address.as_bytes().to_vec()),
+        wallet: buyer_w,
+    };
+    let mut seller = Party {
+        persona: Persona::new("coffee_01", persona::Kind::Coffee, 22, seller_w.address.as_bytes().to_vec()),
+        wallet: seller_w,
+    };
+
+    let mut wire = Wire::new(false);
+    let mut bought = 0usize;
+    let mut n = 200u8;
+
+    for i in 1..=12 {
+        n += 1;
+        banner(&format!("purchase {}", i));
+        match transact_live(&mut wire, &mut seller, &mut buyer, xmr(0.0003), [n; 16], None, "coffee") {
+            Ok(_) => bought += 1,
+            Err(e) => {
+                println!("    \x1b[33mrefused\x1b[0m: {}", e);
+                break;
+            }
+        }
+    }
+
+    banner("Result");
+    println!("  predicted: {} consecutive purchases", start.unlocked_outputs);
+    println!("  actual:    {} consecutive purchases", bought);
+    if bought == start.unlocked_outputs {
+        println!("\n  \x1b[32mexact match\x1b[0m — capacity is the output count, as §17.2 states.");
+        println!("  The refusal came from the client's own pre-check, before any");
+        println!("  offer was accepted, rather than from a failed settlement with");
+        println!("  a customer waiting.");
+    } else {
+        println!("\n  \x1b[33mdiverged\x1b[0m — worth understanding before trusting the model.");
     }
 }

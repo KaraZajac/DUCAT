@@ -80,3 +80,43 @@ really implemented failover.
 
 Needs five `monero-wallet-rpc` instances on ports 28101–28105 with funded,
 pre-split wallets. `monero-spike/` holds the setup.
+
+
+---
+
+# Drain to exhaustion — the model was too confident
+
+The market run showed `user_01` consuming one output per purchase and looked
+like clean confirmation of §17.2. A dedicated drain test, spending until
+refused, disagreed:
+
+```
+starting: 0.008909 XMR across 6 unlocked outputs
+predicted: 6 consecutive purchases
+
+purchase 1:  6 outputs → 4 outputs    (consumed 2)
+purchase 2:  4 outputs → 2 outputs    (consumed 2)
+purchase 3:  2 outputs → 1 output     (consumed 1)
+purchase 4:  1 output  → 0 outputs    (consumed 1)
+purchase 5:  refused
+
+actual: 4
+```
+
+**A payment can consume more than one output.** Input selection is the wallet's
+decision — fee coverage, consolidation, or a preference for multiple inputs — and
+the client does not control it. So `capacity = count(unlocked outputs)` is an
+upper bound, and the earlier seven-outputs-seven-payments result was a run in
+which one input happened to suffice every time. Reading it as an equality was
+over-fitting to a single sample.
+
+§17.2 now states the bound rather than the equality, requires provisioning more
+outputs than the naive calculation suggests, and forbids promising an exact
+count to a user: *"about 4 more payments"* is honest, *"4 more payments"* is not.
+
+## The part that worked
+
+The refusal came from the client's **own pre-check**, before any offer was
+presented — not from a failed settlement with a customer waiting. That is the
+behaviour §17.2 asks for, and the negative path had never been exercised until
+this test.
