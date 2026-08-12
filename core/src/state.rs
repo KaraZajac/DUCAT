@@ -137,10 +137,20 @@ pub enum Effect {
     /// or malfunctioning tap must never be able to put a screen in front of a
     /// user, since the confirm screen is the security boundary (§15.5).
     DiscardSilently,
-    /// Emit a unilateral record of `{ACCEPT, TXPROOF, timestamp}` (§6.2). The
-    /// counterparty vanished after taking payment and before co-signing; this
-    /// keeps the payer's evidence intact without claiming delivery occurred.
-    EmitSingleSidedReceipt,
+    /// §6.2. The counterparty vanished *after taking payment* and before
+    /// co-signing. The **payer** records `{ACCEPT, TXID, timestamp}`, which
+    /// proves what they paid without claiming delivery occurred.
+    EmitPaymentEvidence,
+    /// §15.7. The payer walked away from a running meter. The **payee** records
+    /// what accrued, capped by what was agreed.
+    ///
+    /// Deliberately distinct from `EmitPaymentEvidence` although both produce a
+    /// unilateral receipt: they are opposite claims. One says *I paid and hold
+    /// no co-signature*; the other says *you owe me and never stopped the
+    /// meter*. A single effect covering both would leave a client to infer the
+    /// direction from the state it just left, which defeats the point of
+    /// returning an instruction at all.
+    EmitDebtEvidence,
     /// `fast/1`: obligation cleared, bond capacity restored (§17.2).
     ReleaseCapacity,
     /// `fast/1`: a slash claim is now fileable against the payer's bond.
@@ -249,7 +259,7 @@ pub fn transition(
         // a unilateral record. Whether any of it is collectable depends
         // entirely on collateral (§15.7) — against an unbonded payer it is not.
         (S::Metering, E::MeterExpired) => {
-            go_with(S::Closed, Effect::EmitSingleSidedReceipt)
+            go_with(S::Closed, Effect::EmitDebtEvidence)
         }
         // Only the meter's operator may void it cleanly — a bartender comping a
         // tab is ordinary. A *payer* aborting a running meter would be a free
@@ -299,7 +309,7 @@ pub fn transition(
         // The counterparty went silent holding the money. The payer keeps a
         // signed record of what it paid; it proves payment, not delivery.
         (S::Delivered, E::Elapsed(d)) if past(*d, state, mode) => {
-            go_with(S::Closed, Effect::EmitSingleSidedReceipt)
+            go_with(S::Closed, Effect::EmitPaymentEvidence)
         }
 
         // -- fast/1 finality ---------------------------------------------

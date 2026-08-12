@@ -164,7 +164,7 @@ fn vanishing_counterparty_yields_a_single_sided_receipt() {
     )
     .unwrap();
     assert_eq!(t.next, State::Closed);
-    assert_eq!(t.effect, Effect::EmitSingleSidedReceipt);
+    assert_eq!(t.effect, Effect::EmitPaymentEvidence);
 }
 
 // -- strictness --------------------------------------------------------------

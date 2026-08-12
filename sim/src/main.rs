@@ -523,8 +523,8 @@ fn scenarios_main() {
 
         let walked = ducat_core::state::transition(
             s, Role::Payee, SettleMode::Direct, &Event::MeterExpired).unwrap();
-        check("walking out leaves evidence, not a clean exit",
-              walked.effect == ducat_core::state::Effect::EmitSingleSidedReceipt,
+        check("walking out leaves a DEBT record, not a payment record",
+              walked.effect == ducat_core::state::Effect::EmitDebtEvidence,
               "no record of what was owed", &mut failures);
 
         let offer = FullOffer {

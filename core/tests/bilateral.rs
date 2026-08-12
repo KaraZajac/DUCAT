@@ -342,7 +342,7 @@ fn an_abandoned_meter_yields_a_single_sided_receipt() {
     let t = transition(State::Metering, Role::Payee, SettleMode::Direct, &Event::MeterExpired)
         .unwrap();
     assert_eq!(t.next, State::Closed);
-    assert_eq!(t.effect, Effect::EmitSingleSidedReceipt);
+    assert_eq!(t.effect, Effect::EmitDebtEvidence);
 }
 
 #[test]
@@ -402,7 +402,7 @@ fn a_payer_cannot_abort_a_running_meter() {
     // Abandonment remains available and is *not* free — it produces evidence.
     let t = transition(State::Metering, Role::Payee, SettleMode::Direct,
                        &Event::MeterExpired).unwrap();
-    assert_eq!(t.effect, Effect::EmitSingleSidedReceipt);
+    assert_eq!(t.effect, Effect::EmitDebtEvidence);
 }
 
 /// Before anything accrues, either party may walk away. The asymmetry above is

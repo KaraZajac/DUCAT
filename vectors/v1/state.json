@@ -253,7 +253,7 @@
         "Elapsed": 120
       },
       "expect": {
-        "effect": "EmitSingleSidedReceipt",
+        "effect": "EmitPaymentEvidence",
         "next": "Closed"
       },
       "from": "Delivered",
@@ -306,7 +306,7 @@
     {
       "event": "Elapsed(120s)",
       "expect": {
-        "effect": "EmitSingleSidedReceipt",
+        "effect": "EmitPaymentEvidence",
         "next": "Closed"
       },
       "from": "Delivered",
