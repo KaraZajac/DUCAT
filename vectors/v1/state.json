@@ -1,0 +1,422 @@
+{
+  "cases": [
+    {
+      "from": "Idle",
+      "mode": "Direct",
+      "name": "happy_path_direct",
+      "role": "Payer",
+      "steps": [
+        {
+          "effect": "None",
+          "event": "TapPresent",
+          "next": "Offered"
+        },
+        {
+          "effect": "None",
+          "event": "FullOffer",
+          "next": "Quoted"
+        },
+        {
+          "effect": "None",
+          "event": "Accept",
+          "next": "Accepted"
+        },
+        {
+          "effect": "None",
+          "event": "Fund",
+          "next": "Funded"
+        },
+        {
+          "effect": "None",
+          "event": "Proof",
+          "next": "Delivered"
+        },
+        {
+          "effect": "None",
+          "event": "Receipt",
+          "next": "Closed"
+        }
+      ],
+      "why": "the ordinary course of a direct-settlement transaction"
+    },
+    {
+      "from": "Idle",
+      "mode": "Fast",
+      "name": "happy_path_fast",
+      "role": "Payer",
+      "steps": [
+        {
+          "effect": "None",
+          "event": "TapPresent",
+          "next": "Offered"
+        },
+        {
+          "effect": "None",
+          "event": "FullOffer",
+          "next": "Quoted"
+        },
+        {
+          "effect": "None",
+          "event": "Accept",
+          "next": "Accepted"
+        },
+        {
+          "effect": "None",
+          "event": "Fund",
+          "next": "Funded"
+        },
+        {
+          "effect": "None",
+          "event": "TxProof",
+          "next": "Provisional"
+        },
+        {
+          "effect": "None",
+          "event": "Proof",
+          "next": "Delivered"
+        },
+        {
+          "effect": "None",
+          "event": "Receipt",
+          "next": "Closed"
+        },
+        {
+          "effect": "ReleaseCapacity",
+          "event": "ConfirmationsReached",
+          "next": "Settled"
+        }
+      ],
+      "why": "fast/1 adds TXPROOF before delivery and reaches SETTLED on finality"
+    },
+    {
+      "event": {
+        "Elapsed": 9
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Offered"
+      },
+      "from": "Offered",
+      "mode": "Direct",
+      "name": "offered_Direct_holds_before_deadline",
+      "role": "Payer",
+      "why": "a timeout must not fire early"
+    },
+    {
+      "deadline_secs": 10,
+      "event": {
+        "Elapsed": 10
+      },
+      "expect": {
+        "effect": "DiscardSilently",
+        "next": "Idle"
+      },
+      "from": "Offered",
+      "mode": "Direct",
+      "name": "offered_Direct_fires_at_deadline",
+      "role": "Payer",
+      "why": "§6.2 deadline, inclusive at the boundary"
+    },
+    {
+      "event": {
+        "Elapsed": 29
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Quoted"
+      },
+      "from": "Quoted",
+      "mode": "Direct",
+      "name": "quoted_Direct_holds_before_deadline",
+      "role": "Payer",
+      "why": "a timeout must not fire early"
+    },
+    {
+      "deadline_secs": 30,
+      "event": {
+        "Elapsed": 30
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Aborted"
+      },
+      "from": "Quoted",
+      "mode": "Direct",
+      "name": "quoted_Direct_fires_at_deadline",
+      "role": "Payer",
+      "why": "§6.2 deadline, inclusive at the boundary"
+    },
+    {
+      "event": {
+        "Elapsed": 59
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Accepted"
+      },
+      "from": "Accepted",
+      "mode": "Direct",
+      "name": "accepted_Direct_holds_before_deadline",
+      "role": "Payer",
+      "why": "a timeout must not fire early"
+    },
+    {
+      "deadline_secs": 60,
+      "event": {
+        "Elapsed": 60
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Aborted"
+      },
+      "from": "Accepted",
+      "mode": "Direct",
+      "name": "accepted_Direct_fires_at_deadline",
+      "role": "Payer",
+      "why": "§6.2 deadline, inclusive at the boundary"
+    },
+    {
+      "event": {
+        "Elapsed": 299
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Accepted"
+      },
+      "from": "Accepted",
+      "mode": "Escrow",
+      "name": "accepted_Escrow_holds_before_deadline",
+      "role": "Payer",
+      "why": "a timeout must not fire early"
+    },
+    {
+      "deadline_secs": 300,
+      "event": {
+        "Elapsed": 300
+      },
+      "expect": {
+        "effect": "RecoverEscrowFunds",
+        "next": "Aborted"
+      },
+      "from": "Accepted",
+      "mode": "Escrow",
+      "name": "accepted_Escrow_fires_at_deadline",
+      "role": "Payer",
+      "why": "§6.2 deadline, inclusive at the boundary"
+    },
+    {
+      "event": {
+        "Elapsed": 29
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Funded"
+      },
+      "from": "Funded",
+      "mode": "Fast",
+      "name": "funded_Fast_holds_before_deadline",
+      "role": "Payer",
+      "why": "a timeout must not fire early"
+    },
+    {
+      "deadline_secs": 30,
+      "event": {
+        "Elapsed": 30
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Aborted"
+      },
+      "from": "Funded",
+      "mode": "Fast",
+      "name": "funded_Fast_fires_at_deadline",
+      "role": "Payer",
+      "why": "§6.2 deadline, inclusive at the boundary"
+    },
+    {
+      "event": {
+        "Elapsed": 119
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Delivered"
+      },
+      "from": "Delivered",
+      "mode": "Direct",
+      "name": "delivered_Direct_holds_before_deadline",
+      "role": "Payer",
+      "why": "a timeout must not fire early"
+    },
+    {
+      "deadline_secs": 120,
+      "event": {
+        "Elapsed": 120
+      },
+      "expect": {
+        "effect": "EmitSingleSidedReceipt",
+        "next": "Closed"
+      },
+      "from": "Delivered",
+      "mode": "Direct",
+      "name": "delivered_Direct_fires_at_deadline",
+      "role": "Payer",
+      "why": "§6.2 deadline, inclusive at the boundary"
+    },
+    {
+      "event": {
+        "Elapsed": 119
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Closed"
+      },
+      "from": "Closed",
+      "mode": "Direct",
+      "name": "closed_Direct_holds_before_deadline",
+      "role": "Payer",
+      "why": "a timeout must not fire early"
+    },
+    {
+      "deadline_secs": 120,
+      "event": {
+        "Elapsed": 120
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Closed"
+      },
+      "from": "Closed",
+      "mode": "Direct",
+      "name": "closed_Direct_fires_at_deadline",
+      "role": "Payer",
+      "why": "§6.2 deadline, inclusive at the boundary"
+    },
+    {
+      "event": "Elapsed(10s)",
+      "expect": {
+        "effect": "DiscardSilently",
+        "next": "Idle"
+      },
+      "from": "Offered",
+      "mode": "Direct",
+      "name": "abandoned_tap_discards_silently",
+      "role": "Payer",
+      "why": "a tap that never delivers its offer must leave no trace and must never put a screen in front of the human — the confirm screen is the security boundary (§15.5)"
+    },
+    {
+      "event": "Elapsed(120s)",
+      "expect": {
+        "effect": "EmitSingleSidedReceipt",
+        "next": "Closed"
+      },
+      "from": "Delivered",
+      "mode": "Direct",
+      "name": "vanishing_counterparty_single_sided_receipt",
+      "role": "Payer",
+      "why": "money gone, no co-signed record: the payer keeps signed evidence of what it paid, which proves payment and not delivery"
+    },
+    {
+      "event": "Elapsed(300s)",
+      "expect": {
+        "effect": "RecoverEscrowFunds",
+        "next": "Aborted"
+      },
+      "from": "Accepted",
+      "mode": "Escrow",
+      "name": "escrow_setup_timeout_recovers_funds",
+      "role": "Payer",
+      "why": "multisig setup is multi-round; its expiry must run the recovery path rather than a bare abort"
+    },
+    {
+      "event": "CureWindowExpired",
+      "expect": {
+        "effect": "FileSlashClaim",
+        "next": "Claimed"
+      },
+      "from": "Closed",
+      "mode": "Fast",
+      "name": "cure_window_expiry_enables_slash",
+      "role": "Payee",
+      "why": "fast/1: unconfirmed past the cure window makes a slash claim fileable (§17.5)"
+    },
+    {
+      "event": "Accept",
+      "expect": {
+        "ok": false,
+        "reject_code": 11,
+        "reject_name": "StateViolation"
+      },
+      "from": "Idle",
+      "mode": "Direct",
+      "name": "violation_idle_Accept",
+      "role": "Payer",
+      "why": "ACCEPT before any offer exists"
+    },
+    {
+      "event": "Fund",
+      "expect": {
+        "ok": false,
+        "reject_code": 11,
+        "reject_name": "StateViolation"
+      },
+      "from": "Quoted",
+      "mode": "Direct",
+      "name": "violation_quoted_Fund",
+      "role": "Payer",
+      "why": "funding before the price is locked"
+    },
+    {
+      "event": "Cancel",
+      "expect": {
+        "ok": false,
+        "reject_code": 11,
+        "reject_name": "StateViolation"
+      },
+      "from": "Funded",
+      "mode": "Direct",
+      "name": "violation_funded_Cancel",
+      "role": "Payer",
+      "why": "cancellation after funds have moved"
+    },
+    {
+      "event": "Fund",
+      "expect": {
+        "ok": false,
+        "reject_code": 11,
+        "reject_name": "StateViolation"
+      },
+      "from": "Closed",
+      "mode": "Direct",
+      "name": "violation_closed_Fund",
+      "role": "Payer",
+      "why": "funding a closed transaction"
+    },
+    {
+      "event": "ContactOffer",
+      "expect": {
+        "ok": false,
+        "reject_code": 11,
+        "reject_name": "StateViolation"
+      },
+      "from": "Delivered",
+      "mode": "Direct",
+      "name": "violation_delivered_ContactOffer",
+      "role": "Payer",
+      "why": "identity exchange must follow closure, never precede it (§16.3)"
+    },
+    {
+      "event": "Accept",
+      "expect": {
+        "ok": false,
+        "reject_code": 11,
+        "reject_name": "StateViolation"
+      },
+      "from": "Quoted",
+      "mode": "Direct",
+      "name": "payee_may_not_accept",
+      "role": "Payee",
+      "why": "a payee able to accept its own offer drives the whole flow with no human checkpoint (§18.4.1)"
+    }
+  ],
+  "category": "state"
+}

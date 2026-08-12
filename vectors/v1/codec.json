@@ -1,0 +1,408 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "00"
+      },
+      "input_hex": "00",
+      "name": "uint_0_shortest_form",
+      "why": "each integer must use the shortest head that can carry it"
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "17"
+      },
+      "input_hex": "17",
+      "name": "uint_23_shortest_form",
+      "why": "each integer must use the shortest head that can carry it"
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "1818"
+      },
+      "input_hex": "1818",
+      "name": "uint_24_shortest_form",
+      "why": "each integer must use the shortest head that can carry it"
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "18ff"
+      },
+      "input_hex": "18ff",
+      "name": "uint_255_shortest_form",
+      "why": "each integer must use the shortest head that can carry it"
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "190100"
+      },
+      "input_hex": "190100",
+      "name": "uint_256_shortest_form",
+      "why": "each integer must use the shortest head that can carry it"
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "19ffff"
+      },
+      "input_hex": "19ffff",
+      "name": "uint_65535_shortest_form",
+      "why": "each integer must use the shortest head that can carry it"
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "1a00010000"
+      },
+      "input_hex": "1a00010000",
+      "name": "uint_65536_shortest_form",
+      "why": "each integer must use the shortest head that can carry it"
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "1affffffff"
+      },
+      "input_hex": "1affffffff",
+      "name": "uint_4294967295_shortest_form",
+      "why": "each integer must use the shortest head that can carry it"
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "1b0000000100000000"
+      },
+      "input_hex": "1b0000000100000000",
+      "name": "uint_4294967296_shortest_form",
+      "why": "each integer must use the shortest head that can carry it"
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "1bffffffffffffffff"
+      },
+      "input_hex": "1bffffffffffffffff",
+      "name": "uint_18446744073709551615_shortest_form",
+      "why": "each integer must use the shortest head that can carry it"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "0 must use the immediate form",
+      "input_hex": "1800",
+      "name": "overlong_uint_0",
+      "why": "a longer-than-necessary integer encoding is not canonical"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "23 is the last immediate-form value",
+      "input_hex": "1817",
+      "name": "overlong_uint_23",
+      "why": "a longer-than-necessary integer encoding is not canonical"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "24 belongs in the 1-byte form",
+      "input_hex": "190018",
+      "name": "overlong_uint_24",
+      "why": "a longer-than-necessary integer encoding is not canonical"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "255 belongs in the 1-byte form",
+      "input_hex": "1900ff",
+      "name": "overlong_uint_255",
+      "why": "a longer-than-necessary integer encoding is not canonical"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "256 belongs in the 2-byte form",
+      "input_hex": "1a00000100",
+      "name": "overlong_uint_256",
+      "why": "a longer-than-necessary integer encoding is not canonical"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "65535 belongs in the 2-byte form",
+      "input_hex": "1b000000000000ffff",
+      "name": "overlong_uint_65535",
+      "why": "a longer-than-necessary integer encoding is not canonical"
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a201000200"
+      },
+      "input_hex": "a201000200",
+      "name": "map_keys_ascending",
+      "why": "canonical map key order is ascending and distinct"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "keys must strictly ascend",
+      "input_hex": "a202000100",
+      "name": "map_keys_descending",
+      "why": "map keys out of ascending order are not canonical"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "duplicate map key",
+      "input_hex": "a201000100",
+      "name": "map_keys_duplicate",
+      "why": "a repeated key must be an error, never a last-wins overwrite"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "text key",
+      "input_hex": "a1616100",
+      "name": "map_key_not_integer",
+      "why": "map keys are unsigned integers only (§18.1)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "float encountered",
+      "input_hex": "f90000",
+      "name": "float_half",
+      "why": "money is integers; a float anywhere is malformed (§18.2)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "float encountered",
+      "input_hex": "fa00000000",
+      "name": "float_single",
+      "why": "money is integers; a float anywhere is malformed (§18.2)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "float encountered",
+      "input_hex": "fb0000000000000000",
+      "name": "float_double",
+      "why": "money is integers; a float anywhere is malformed (§18.2)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "float encountered",
+      "input_hex": "a101f90000",
+      "name": "float_nested_in_map",
+      "why": "money is integers; a float anywhere is malformed (§18.2)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "the tag allowlist is empty",
+      "input_hex": "c000",
+      "name": "tag",
+      "why": "restricted CBOR profile (§18.1)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "indefinite lengths are forbidden",
+      "input_hex": "5f",
+      "name": "indefinite_bytes",
+      "why": "restricted CBOR profile (§18.1)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "indefinite lengths are forbidden",
+      "input_hex": "9f",
+      "name": "indefinite_array",
+      "why": "restricted CBOR profile (§18.1)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "indefinite lengths are forbidden",
+      "input_hex": "bf",
+      "name": "indefinite_map",
+      "why": "restricted CBOR profile (§18.1)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "a signed object is exactly its bytes",
+      "input_hex": "0000",
+      "name": "trailing_bytes",
+      "why": "restricted CBOR profile (§18.1)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "input ended mid-item",
+      "input_hex": "1901",
+      "name": "truncated_head",
+      "why": "restricted CBOR profile (§18.1)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "input ended mid-item",
+      "input_hex": "42ff",
+      "name": "truncated_bytes",
+      "why": "restricted CBOR profile (§18.1)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "text must be valid UTF-8",
+      "input_hex": "62fffe",
+      "name": "invalid_utf8",
+      "why": "restricted CBOR profile (§18.1)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "a length header must not drive allocation before data arrives",
+      "input_hex": "9affffffff",
+      "name": "oversized_array_header",
+      "why": "restricted CBOR profile (§18.1)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "a length header must not drive allocation before data arrives",
+      "input_hex": "5affffffff",
+      "name": "oversized_bytes_header",
+      "why": "restricted CBOR profile (§18.1)"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "exceeds the 16-level nesting bound",
+      "input_hex": "81818181818181818181818181818181818100",
+      "name": "nesting_too_deep",
+      "why": "a small payload must not be able to exhaust the stack during decode"
+    },
+    {
+      "expect": {
+        "amount_at_key_1": 1,
+        "ok": true,
+        "reencodes_to_hex": "a10101"
+      },
+      "input_hex": "a10101",
+      "name": "piconero_one",
+      "why": "amounts are integer piconero; 2^53+1 is the first integer an f64 cannot represent, so a float-based client fails here"
+    },
+    {
+      "expect": {
+        "amount_at_key_1": 2500000000000,
+        "ok": true,
+        "reencodes_to_hex": "a1011b00000246139ca800"
+      },
+      "input_hex": "a1011b00000246139ca800",
+      "name": "piconero_2_5_xmr",
+      "why": "amounts are integer piconero; 2^53+1 is the first integer an f64 cannot represent, so a float-based client fails here"
+    },
+    {
+      "expect": {
+        "amount_at_key_1": 9007199254740993,
+        "ok": true,
+        "reencodes_to_hex": "a1011b0020000000000001"
+      },
+      "input_hex": "a1011b0020000000000001",
+      "name": "piconero_2pow53_plus_1",
+      "why": "amounts are integer piconero; 2^53+1 is the first integer an f64 cannot represent, so a float-based client fails here"
+    },
+    {
+      "expect": {
+        "amount_at_key_1": 18446744073709551615,
+        "ok": true,
+        "reencodes_to_hex": "a1011bffffffffffffffff"
+      },
+      "input_hex": "a1011bffffffffffffffff",
+      "name": "piconero_u64_max",
+      "why": "amounts are integer piconero; 2^53+1 is the first integer an f64 cannot represent, so a float-based client fails here"
+    }
+  ],
+  "category": "codec"
+}

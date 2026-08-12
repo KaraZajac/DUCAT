@@ -32,7 +32,7 @@ non-integer map key, or a duplicate key. Non-canonical objects are not
 | Reject codes (§18.5) | done |
 | Version negotiation (§18.6) | done, 10 tests |
 | Domain-separated commitments (§18.3) | done |
-| Exported test vectors (§18.9) | not started — tests are in-tree only |
+| Exported vectors (§18.9) | done — 88 cases in `../vectors/v1/` |
 
 ## Test
 

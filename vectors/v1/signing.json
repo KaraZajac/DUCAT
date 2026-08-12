@@ -1,0 +1,245 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "ok": true
+      },
+      "name": "suite1_accept_valid",
+      "object_hex": "a20101021b00000246139ca800",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "fd1724385aa0c75b64fb78cd602fa1d991fdebf76b13c58ed702eac835e9f618",
+      "sig_hex": "a4c5ddd13c862e949235832827539e269b44b16695e316b072ad2c71ccf0e1e86d8080b617134e0234f59e511f8b7a4adca5f3df0a9b5cfbf123f03b3aec1101",
+      "suite": 1,
+      "verify_as": "ACCEPT",
+      "why": "baseline: a correctly domain-separated signature verifies"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "suite1_accept_replayed_as_TapPresent",
+      "object_hex": "a20101021b00000246139ca800",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "fd1724385aa0c75b64fb78cd602fa1d991fdebf76b13c58ed702eac835e9f618",
+      "sig_hex": "a4c5ddd13c862e949235832827539e269b44b16695e316b072ad2c71ccf0e1e86d8080b617134e0234f59e511f8b7a4adca5f3df0a9b5cfbf123f03b3aec1101",
+      "suite": 1,
+      "verify_as": "TapPresent",
+      "why": "a signature must not transfer between object types: same key, same bytes, different domain"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "suite1_accept_replayed_as_RECEIPT",
+      "object_hex": "a20101021b00000246139ca800",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "fd1724385aa0c75b64fb78cd602fa1d991fdebf76b13c58ed702eac835e9f618",
+      "sig_hex": "a4c5ddd13c862e949235832827539e269b44b16695e316b072ad2c71ccf0e1e86d8080b617134e0234f59e511f8b7a4adca5f3df0a9b5cfbf123f03b3aec1101",
+      "suite": 1,
+      "verify_as": "RECEIPT",
+      "why": "a signature must not transfer between object types: same key, same bytes, different domain"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "suite1_accept_replayed_as_bond_proof",
+      "object_hex": "a20101021b00000246139ca800",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "fd1724385aa0c75b64fb78cd602fa1d991fdebf76b13c58ed702eac835e9f618",
+      "sig_hex": "a4c5ddd13c862e949235832827539e269b44b16695e316b072ad2c71ccf0e1e86d8080b617134e0234f59e511f8b7a4adca5f3df0a9b5cfbf123f03b3aec1101",
+      "suite": 1,
+      "verify_as": "bond_proof",
+      "why": "a signature must not transfer between object types: same key, same bytes, different domain"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "suite1_accept_replayed_as_CONTACT_OFFER",
+      "object_hex": "a20101021b00000246139ca800",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "fd1724385aa0c75b64fb78cd602fa1d991fdebf76b13c58ed702eac835e9f618",
+      "sig_hex": "a4c5ddd13c862e949235832827539e269b44b16695e316b072ad2c71ccf0e1e86d8080b617134e0234f59e511f8b7a4adca5f3df0a9b5cfbf123f03b3aec1101",
+      "suite": 1,
+      "verify_as": "CONTACT_OFFER",
+      "why": "a signature must not transfer between object types: same key, same bytes, different domain"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "suite1_tampered_amount",
+      "object_hex": "a20101021b00000246139ca801",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "fd1724385aa0c75b64fb78cd602fa1d991fdebf76b13c58ed702eac835e9f618",
+      "sig_hex": "a4c5ddd13c862e949235832827539e269b44b16695e316b072ad2c71ccf0e1e86d8080b617134e0234f59e511f8b7a4adca5f3df0a9b5cfbf123f03b3aec1101",
+      "suite": 1,
+      "verify_as": "ACCEPT",
+      "why": "flipping the lowest bit of the amount must invalidate the signature"
+    },
+    {
+      "expect": {
+        "ok": true
+      },
+      "name": "suite2_accept_valid",
+      "object_hex": "a20101021b00000246139ca800",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "027135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
+      "sig_hex": "b01326287fd482663355d8b5d8a453fe46c08cb59f1dfe85b040c3d998eac59b3c588ef0d822919e36667ac3b33f25871949c075b2d62cf18af4dfd659e83d60",
+      "suite": 2,
+      "verify_as": "ACCEPT",
+      "why": "baseline: a correctly domain-separated signature verifies"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "suite2_accept_replayed_as_TapPresent",
+      "object_hex": "a20101021b00000246139ca800",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "027135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
+      "sig_hex": "b01326287fd482663355d8b5d8a453fe46c08cb59f1dfe85b040c3d998eac59b3c588ef0d822919e36667ac3b33f25871949c075b2d62cf18af4dfd659e83d60",
+      "suite": 2,
+      "verify_as": "TapPresent",
+      "why": "a signature must not transfer between object types: same key, same bytes, different domain"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "suite2_accept_replayed_as_RECEIPT",
+      "object_hex": "a20101021b00000246139ca800",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "027135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
+      "sig_hex": "b01326287fd482663355d8b5d8a453fe46c08cb59f1dfe85b040c3d998eac59b3c588ef0d822919e36667ac3b33f25871949c075b2d62cf18af4dfd659e83d60",
+      "suite": 2,
+      "verify_as": "RECEIPT",
+      "why": "a signature must not transfer between object types: same key, same bytes, different domain"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "suite2_accept_replayed_as_bond_proof",
+      "object_hex": "a20101021b00000246139ca800",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "027135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
+      "sig_hex": "b01326287fd482663355d8b5d8a453fe46c08cb59f1dfe85b040c3d998eac59b3c588ef0d822919e36667ac3b33f25871949c075b2d62cf18af4dfd659e83d60",
+      "suite": 2,
+      "verify_as": "bond_proof",
+      "why": "a signature must not transfer between object types: same key, same bytes, different domain"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "suite2_accept_replayed_as_CONTACT_OFFER",
+      "object_hex": "a20101021b00000246139ca800",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "027135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
+      "sig_hex": "b01326287fd482663355d8b5d8a453fe46c08cb59f1dfe85b040c3d998eac59b3c588ef0d822919e36667ac3b33f25871949c075b2d62cf18af4dfd659e83d60",
+      "suite": 2,
+      "verify_as": "CONTACT_OFFER",
+      "why": "a signature must not transfer between object types: same key, same bytes, different domain"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "name": "suite2_tampered_amount",
+      "object_hex": "a20101021b00000246139ca801",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "027135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
+      "sig_hex": "b01326287fd482663355d8b5d8a453fe46c08cb59f1dfe85b040c3d998eac59b3c588ef0d822919e36667ac3b33f25871949c075b2d62cf18af4dfd659e83d60",
+      "suite": 2,
+      "verify_as": "ACCEPT",
+      "why": "flipping the lowest bit of the amount must invalidate the signature"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 1,
+        "reject_name": "BadSig"
+      },
+      "hint": "reject high-s; do not normalize on receipt",
+      "name": "suite2_high_s_twin_refused",
+      "object_hex": "a20101021b00000246139ca800",
+      "object_type": "ACCEPT",
+      "pubkey_hex": "027135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
+      "sig_hex": "b01326287fd482663355d8b5d8a453fe46c08cb59f1dfe85b040c3d998eac59bc3a7710e27dd6e62c999853c4cc0da78a39d3a37f441719368c4eaeca27ae7f1",
+      "suite": 2,
+      "verify_as": "ACCEPT",
+      "why": "ECDSA admits (r, n-s) as an equally valid signature. Accepting both would give one message two valid encodings and diverge the transcript hash, so the high-s form is refused rather than normalized."
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "check the SEC1 tag explicitly rather than delegating to the parser",
+      "name": "suite2_pubkey_tag_0x04_refused",
+      "pubkey_hex": "047135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
+      "suite": 2,
+      "why": "exactly one public key encoding is legal (compressed, 33 bytes). Common parsers accept 0x05 by reading y-parity from the low bit, yielding the same key as 0x03 — a second encoding of one key is a second canonical object and a second hash."
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "check the SEC1 tag explicitly rather than delegating to the parser",
+      "name": "suite2_pubkey_tag_0x05_refused",
+      "pubkey_hex": "057135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
+      "suite": 2,
+      "why": "exactly one public key encoding is legal (compressed, 33 bytes). Common parsers accept 0x05 by reading y-parity from the low bit, yielding the same key as 0x03 — a second encoding of one key is a second canonical object and a second hash."
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "check the SEC1 tag explicitly rather than delegating to the parser",
+      "name": "suite2_pubkey_tag_0x06_refused",
+      "pubkey_hex": "067135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
+      "suite": 2,
+      "why": "exactly one public key encoding is legal (compressed, 33 bytes). Common parsers accept 0x05 by reading y-parity from the low bit, yielding the same key as 0x03 — a second encoding of one key is a second canonical object and a second hash."
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "check the SEC1 tag explicitly rather than delegating to the parser",
+      "name": "suite2_pubkey_tag_0x07_refused",
+      "pubkey_hex": "077135fa4fd93a09dce98bbf681b4bfcf50e7c0d6354e62afb0bff2a3429617865",
+      "suite": 2,
+      "why": "exactly one public key encoding is legal (compressed, 33 bytes). Common parsers accept 0x05 by reading y-parity from the low bit, yielding the same key as 0x03 — a second encoding of one key is a second canonical object and a second hash."
+    }
+  ],
+  "category": "signing"
+}
