@@ -772,6 +772,12 @@ The failure is also *loud* in exactly the wrong way: a wallet whose relay has di
 
 **This was subsequently reproduced against the market simulator, which is why the rule is now a MUST.** A relay died mid-scan during a funding round. One participant's wallet stopped four blocks short of the chain, kept answering `get_height` with a plausible number, and simply never saw the funds it had been sent — while four other wallets on healthier relays completed normally. Nothing surfaced as an error. The participant appeared, to itself and to the simulator, to be a wallet that had received nothing, and the run stalled waiting for a balance that had in fact already arrived on chain.
 
+**And the same failure exists on the *send* side, which 0.50 hit head-on.** A funding transaction was accepted by a relay, returned a txid, and never propagated: fifteen minutes and four blocks later two independent nodes reported `NOT FOUND` while the sending wallet still displayed `pending`. Nothing had failed from the wallet's point of view — it had a transaction hash and a plausible status.
+
+This is worse than the scan-side case, because a payer holds evidence that looks like a payment. §6.2's 60-second `FUND` deadline is measured against **mempool visibility** precisely so this is caught, but that only works if the payee is scanning; a payer watching only its own wallet sees `pending` indefinitely and has no way to distinguish "propagating" from "dropped on the floor".
+
+Therefore: **a client MUST confirm its own transaction is visible on a relay it did not submit through**, and MUST resubmit rather than wait if it is not. Submitting to several relays at once (above) makes this cheap and is the reason that guidance exists — deduplication means the only cost of redundant submission is bandwidth, while the cost of trusting one relay's acceptance is a payment that never happened. Re-broadcasting through a different node put the same transaction in two independent pools immediately.
+
 Two consequences worth writing down:
 
 - **A height that looks plausible is the failure mode.** Detection requires comparing the wallet's height against the relay's own, because a stalled wallet and a synced one are indistinguishable from the wallet's answer alone.

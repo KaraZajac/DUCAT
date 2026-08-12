@@ -206,7 +206,57 @@ impl Wallet {
         })
     }
 
+    /// Confirm a transaction is visible on a relay we did **not** submit through.
+    ///
+    /// §8.7.2, added after a funding transaction was accepted by a relay,
+    /// returned a txid, and never propagated — fifteen minutes and four blocks
+    /// later two independent nodes said `NOT FOUND` while the sending wallet
+    /// still displayed `pending`. Nothing looked like a failure from the
+    /// sender's side: it held a transaction hash and a plausible status.
+    ///
+    /// That is worse than the scan-side stall this client already handles,
+    /// because the payer holds something that resembles evidence of payment.
+    /// A wallet cannot tell "propagating" from "dropped on the floor" by
+    /// looking at itself, so it has to ask someone else.
+    pub fn confirm_propagated(&self, txid: &str) -> Result<String, String> {
+        let submitted_via = self.relay.get();
+        let mut checked = Vec::new();
+        for offset in 1..RELAYS.len() {
+            let idx = (submitted_via + offset) % RELAYS.len();
+            let relay = RELAYS[idx];
+            let (host, port) = relay.split_once(':').unwrap_or((relay, "38081"));
+            let out = std::process::Command::new("curl")
+                .args([
+                    "-s", "-m", "20", "-X", "POST",
+                    &format!("http://{}:{}/get_transactions", host, port),
+                    "-H", "Content-Type: application/json",
+                    "-d", &format!("{{\"txs_hashes\":[\"{}\"]}}", txid),
+                ])
+                .output()
+                .map_err(|e| format!("{}: {}", self.name, e))?;
+            let v: Value = serde_json::from_slice(&out.stdout).unwrap_or(Value::Null);
+            let txs = v["txs"].as_array().cloned().unwrap_or_default();
+            if let Some(t) = txs.first() {
+                let pooled = t["in_pool"].as_bool().unwrap_or(false);
+                let height = t["block_height"].as_u64().unwrap_or(0);
+                if pooled || height > 0 {
+                    return Ok(relay.to_string());
+                }
+            }
+            checked.push(relay);
+        }
+        Err(format!(
+            "{}: {} is not visible on any relay other than the one it was \
+             submitted through ({}); checked {:?} — resubmit rather than wait",
+            self.name, &txid[..16.min(txid.len())], RELAYS[submitted_via], checked
+        ))
+    }
+
     /// Settle. Returns the transaction hash.
+    ///
+    /// The caller MUST follow this with [`Wallet::confirm_propagated`]: a txid
+    /// from one relay is that relay's word that it accepted the transaction,
+    /// not evidence the network has it.
     pub fn pay(&self, to: &str, amount_pxmr: u64) -> Result<String, String> {
         let r = self.call(
             "transfer",

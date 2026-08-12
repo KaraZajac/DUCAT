@@ -185,6 +185,17 @@ pub fn transact_live(
     let payto = String::from_utf8(offer_seen.payto.clone())
         .map_err(|_| "payto is not a valid address string".to_string())?;
     let txid = payer.wallet.pay(&payto, accept_seen.amount_final)?;
+    // §8.7.2: a txid is one relay's word that it accepted the transaction, not
+    // evidence the network has it. Confirmed against a relay we did not submit
+    // through, because a wallet cannot tell "propagating" from "dropped" by
+    // looking at itself.
+    match payer.wallet.confirm_propagated(&txid) {
+        Ok(seen_on) => println!("    propagation confirmed on {seen_on}"),
+        Err(e) => {
+            eprintln!("    \x1b[33m{e}\x1b[0m");
+            return Err(e);
+        }
+    }
     wire.note(
         &payer.persona.name,
         &payee.persona.name,
