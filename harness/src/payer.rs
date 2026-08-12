@@ -175,7 +175,40 @@ pub async fn run(tap_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         return Err(format!("payee refused: {}", String::from_utf8_lossy(body)).into());
     }
 
-    // 5. RECEIPT — and the whole transcript verified as one artifact.
+    // 5. Collect the receipt. Separate from the TXID call on purpose: the
+    //    payee's answer waits on a chain scan, and an `app_call` timeout has
+    //    nothing to do with how long Monero takes. Folding the two together
+    //    delivers a slow confirmation and a fabricated TXID to the payer as the
+    //    same `Timeout`, pointing at the network rather than at the payment.
+    let mut body_owned = Vec::new();
+    let mut have = false;
+    for _ in 0..25 {
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        let Ok(reply) = rc
+            .app_call(Target::RouteId(route_id.clone()), frame(MSG_RECEIPT_Q, b""))
+            .await
+        else {
+            continue; // a lost poll is a transport event (§8.7.2)
+        };
+        let (kind, b) = unframe(&reply)?;
+        match kind {
+            MSG_RECEIPT => {
+                body_owned = b.to_vec();
+                have = true;
+                break;
+            }
+            MSG_REJECT => {
+                return Err(format!("payee refused: {}", String::from_utf8_lossy(b)).into())
+            }
+            _ => continue, // still scanning
+        }
+    }
+    if !have {
+        return Err("no receipt within the window".into());
+    }
+    let body = body_owned.as_slice();
+
+    // 6. RECEIPT — and the whole transcript verified as one artifact.
     let (_, receipt_body) = open(body, &payee_pk).map_err(|e| format!("{e:?}"))?;
     let receipt = decode_receipt(receipt_body.bytes())?;
     verify_transcript(&tap, &offer, &accept, &accept_bytes, &receipt)

@@ -132,8 +132,14 @@ impl Wallet {
     /// **The payee's own answer to "was I paid".**
     ///
     /// §17.4: the payee *is* the recipient, so it scans with its own view key
-    /// rather than trusting anything in the payer's message. Returns the amount
-    /// actually received against this txid.
+    /// rather than trusting anything in the payer's message.
+    ///
+    /// **Bounded by §6.2's window, and the bound is a security property.** The
+    /// first version scanned 30 times at 10-second intervals — five minutes of
+    /// blocking on a value the counterparty supplies. An attacker sends a TXID
+    /// naming a transaction that does not exist and the terminal is frozen for
+    /// the cost of one message. Mempool visibility is near-immediate when a
+    /// payment is real; a long wait is evidence of absence, not of slowness.
     pub fn scan_for(&self, txid: &str, tries: u32) -> Result<u64, String> {
         for _ in 0..tries {
             let _ = self.call("refresh", json!({}));
@@ -142,7 +148,7 @@ impl Wallet {
                     return Ok(a);
                 }
             }
-            std::thread::sleep(Duration::from_secs(10));
+            std::thread::sleep(Duration::from_secs(3));
         }
         Err(format!("{}: never observed {txid}", self.name))
     }

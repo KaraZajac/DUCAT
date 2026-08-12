@@ -1,5 +1,6 @@
 //! The presenting side: allocate a route, publish a tap, serve the protocol.
 
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use ducat_core::cbor::decode;
@@ -86,6 +87,8 @@ pub async fn run(
     println!("  offering {amount_pxmr} pXMR — waiting for a payer\n");
 
     let mut accept: Option<(Accept, Vec<u8>)> = None;
+    // The receipt is produced asynchronously — see the TXID handler.
+    let receipt_slot: Arc<Mutex<Option<Result<Vec<u8>, String>>>> = Arc::new(Mutex::new(None));
     // §17.4: under fast/1 the provider will hand over goods before confirmation,
     // so it wants collateral standing behind the payment first.
     let mut bonded = !fast;
@@ -220,42 +223,86 @@ pub async fn run(
                         continue;
                     }
                 };
+
+                // **Acknowledge now, scan after.**
+                //
+                // The payee's answer depends on a chain scan, and an `app_call`
+                // has a transport timeout that has nothing to do with how long
+                // Monero takes. Holding the call open until the scan finishes
+                // means a legitimate slow confirmation and a fabricated TXID are
+                // both delivered to the payer as `Timeout` — indistinguishable,
+                // and pointing at the network rather than at the payment.
+                //
+                // Worse, it is a denial of service: the first version blocked for
+                // five minutes on a TXID naming a transaction that does not
+                // exist, so one message froze the terminal. Structural checks are
+                // synchronous and cheap; anything that waits on the world is not
+                // allowed to hold the session.
                 let txid = hex::encode(t.txid);
-                println!("  → TXID {}… — scanning for {want} pXMR with my own view key", &txid[..16]);
-                let tries = if fast { 12 } else { 30 };
-                match w.scan_for(&txid, tries) {
-                    Ok(got) if got >= want => {
-                        if fast {
-                            println!("  ✓ observed {got} pXMR — accepting at mempool visibility");
-                            println!("    (PROVISIONAL: service proceeds, finality still pending)");
-                        } else {
-                            println!("  ✓ observed {got} pXMR on chain");
+                println!("  → TXID {}… — acknowledged; scanning for {want} pXMR", &txid[..16]);
+                api.app_call_reply(id, frame(MSG_TXID, b"scanning")).await?;
+
+                let slot = receipt_slot.clone();
+                let port = w.port;
+                let wname = w.name.clone();
+                let key2 = SecretKey::ed25519_from_bytes(&[0x21; 32]);
+                let fastc = fast;
+                tokio::task::spawn_blocking(move || {
+                    let Ok(w2) = Wallet::open(&wname, port) else {
+                        *slot.lock().unwrap() = Some(Err("wallet unavailable".into()));
+                        return;
+                    };
+                    let tries = if fastc { 10 } else { 15 };
+                    match w2.scan_for(&txid, tries) {
+                        Ok(got) if got >= want => {
+                            if fastc {
+                                println!("  ✓ observed {got} pXMR — accepting at mempool visibility");
+                                println!("    (PROVISIONAL: service proceeds, finality still pending)");
+                            } else {
+                                println!("  ✓ observed {got} pXMR on chain");
+                            }
+                            let receipt = Receipt {
+                                version: 1,
+                                suite: 1,
+                                accept_hash: commit(Purpose::ChainLink, &acc_bytes),
+                                prev: commit(Purpose::ChainLink, &acc_bytes),
+                                amount_final: acc.amount_final,
+                                timestamp: now(),
+                                unilateral: false,
+                            };
+                            let rb = receipt.to_value().encode();
+                            let env = seal(
+                                &SignedBytes::from_received(rb).unwrap(),
+                                ObjectType::Receipt,
+                                &key2,
+                            );
+                            *slot.lock().unwrap() = Some(Ok(env));
                         }
-                        let receipt = Receipt {
-                            version: 1,
-                            suite: 1,
-                            accept_hash: commit(Purpose::ChainLink, &acc_bytes),
-                            prev: commit(Purpose::ChainLink, &acc_bytes),
-                            amount_final: acc.amount_final,
-                            timestamp: now(),
-                            unilateral: false,
-                        };
-                        let rb = receipt.to_value().encode();
-                        let env = seal(
-                            &SignedBytes::from_received(rb).unwrap(),
-                            ObjectType::Receipt,
-                            &key,
-                        );
-                        api.app_call_reply(id, frame(MSG_RECEIPT, &env)).await?;
+                        Ok(got) => {
+                            println!("  → underpaid: {got} < {want}");
+                            *slot.lock().unwrap() =
+                                Some(Err(format!("underpaid: {got} < {want}")));
+                        }
+                        Err(e) => {
+                            println!("  → \x1b[33m{e}\x1b[0m");
+                            *slot.lock().unwrap() = Some(Err(e));
+                        }
+                    }
+                });
+            }
+            MSG_RECEIPT_Q => {
+                let current = receipt_slot.lock().unwrap().clone();
+                match current {
+                    None => {
+                        api.app_call_reply(id, frame(MSG_PENDING, b"scanning")).await.ok();
+                    }
+                    Some(Ok(env)) => {
+                        api.app_call_reply(id, frame(MSG_RECEIPT, &env)).await.ok();
                         println!("\n  \x1b[32mCLOSED\x1b[0m — receipt co-signed and returned\n");
                         break;
                     }
-                    Ok(got) => {
-                        api.app_call_reply(id, reject(&format!("underpaid: {got} < {want}")))
-                            .await?;
-                    }
-                    Err(e) => {
-                        api.app_call_reply(id, reject(&e)).await?;
+                    Some(Err(e)) => {
+                        api.app_call_reply(id, reject(&e)).await.ok();
                     }
                 }
             }

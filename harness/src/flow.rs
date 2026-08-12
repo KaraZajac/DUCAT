@@ -17,6 +17,10 @@ pub const MSG_ACCEPT: u8 = 3;
 pub const MSG_TXID: u8 = 4;
 pub const MSG_RECEIPT: u8 = 5;
 pub const MSG_BOND: u8 = 6;
+/// Payer → payee: "is my receipt ready?" See payee.rs for why this exists.
+pub const MSG_RECEIPT_Q: u8 = 7;
+/// Payee → payer: acknowledged, scanning; ask again.
+pub const MSG_PENDING: u8 = 8;
 pub const MSG_REJECT: u8 = 0xFF;
 
 pub fn frame(kind: u8, body: &[u8]) -> Vec<u8> {

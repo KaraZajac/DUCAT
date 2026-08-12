@@ -195,6 +195,48 @@ The presenter supplies *reachability*, so the reader drives — and here that me
 
 A UI written against one direction will assume symmetry and be wrong.
 
+## Attacks
+
+    ducat-harness --payee 300000000
+    ducat-harness --attack
+
+Every refusal in this protocol is unit-tested. None had ever been *sent*. That
+gap is not academic: the `dest` bug was a check that existed, was tested, and
+rejected every real payment — because the fixtures agreed with the mistake.
+
+A hostile payer runs ten attacks against the same honest payee the other modes
+use, unmodified. All ten refused, with the codes the spec names:
+
+```
+refused  accept_underpays                      price mismatch
+refused  accept_overpays                       price mismatch
+refused  accept_names_another_offer            ACCEPT names another offer
+refused  accept_signed_by_a_stranger           BadSig
+refused  accept_signed_in_another_context      BadSig      (§18.3 domain separation)
+refused  accept_with_an_unknown_field          UnknownField (§18.8 strictness)
+refused  txid_before_any_accept                no ACCEPT on file
+refused  txid_for_another_transaction          CommitMismatch
+refused  txid_announces_an_underpayment        PriceMismatch
+refused  txid_for_a_transaction_that_does_not_exist   never observed
+```
+
+### The last one found a denial of service
+
+The payee originally scanned **inside the request**: 30 attempts at 10-second
+intervals. So a TXID naming a transaction that does not exist froze the terminal
+for **five minutes, for the cost of 40 bytes** — and to the payer, a slow
+confirmation and a fabricated TXID arrived as the same `Timeout`, pointing at the
+network rather than at the payment.
+
+`TXID` and `RECEIPT` are now two exchanges. Structural checks are cheap and
+synchronous; the payee acknowledges immediately, scans off the session, and the
+payer collects the receipt separately.
+
+The general rule, which this is the third instance of: **nothing that waits on
+the world may hold a session open.** It is the same failure as a server that dies
+on malformed input — both turn a counterparty's message into an outage, and both
+stay invisible until somebody hostile sends one.
+
 ## Requirements
 
 `monero-wallet-rpc` on ports 28101 (payer, `user_01`) and 28104 (payee,
