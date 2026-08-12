@@ -684,7 +684,7 @@ Buyer, seller, and a mutually chosen arbiter (§9.3) form a Monero 2-of-3 multis
 
 **The intended path avoids wallet2's multisig entirely.** DUCAT clients embed a wallet rather than driving `monero-wallet-rpc`, which removes the missing-API problem by construction and — more importantly — allows a different multisig implementation. `monero-oxide`'s `monero-wallet` implements **FROSTLASS**, a formalized threshold signing protocol for CLSAGs, audited by Cypher Stack in May 2025, with O(1) per-signer upload against Monero's native O(n!). The upstream warning quoted above describes *wallet2's* implementation; it is not a statement about threshold signing on Monero in general.
 
-**Measured at 0.50** (`monero-rs/frostlass-spike`), because these claims had been carried on the strength of a README:
+**Measured at 0.50** (`monero-rs/frostlass-spike`), because these claims had been carried on the strength of a README. A **3-of-5 group was funded and spent on stagenet** — a configuration native multisig cannot express — with three of five signers producing a valid CLSAG in **0.088 s**, mined at height 2,183,934. Key generation:
 
 | Group | Share | Key generation |
 |---|---|---|

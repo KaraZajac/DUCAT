@@ -236,9 +236,49 @@ mod spend {
         println!("  signed   in {:.3}s", started.elapsed().as_secs_f64());
         println!("  txid     {}", hex::encode(signed.hash()));
 
-        match rpc.publish_transaction(&signed).await {
-            Ok(()) => println!("\n  \x1b[32mbroadcast accepted by the network\x1b[0m"),
-            Err(e) => println!("\n  \x1b[31mbroadcast refused:\x1b[0m {e:?}"),
+        // §8.7.2, learned the hard way twice in this spike: one relay accepted a
+        // transaction, returned success, and propagated nothing. `Ok(())` from a
+        // single node means that node took it, not that the network has it.
+        // So submit everywhere — nodes deduplicate, making this free — and then
+        // verify on a node we did not submit through.
+        let mut accepted_by = Vec::new();
+        for r in RELAYS {
+            let Ok(t) = SimpleRequestTransport::new(r.to_string()).await else { continue };
+            if t.publish_transaction(&signed).await.is_ok() {
+                accepted_by.push(*r);
+            }
+        }
+        println!("  submitted to {} relay(s)", accepted_by.len());
+
+        let hash = hex::encode(signed.hash());
+        let mut seen_on = Vec::new();
+        for r in RELAYS {
+            // Asking the relay that accepted it whether it has it proves nothing.
+            if accepted_by.len() == 1 && accepted_by.first() == Some(r) {
+                continue;
+            }
+            let Ok(t) = SimpleRequestTransport::new(r.to_string()).await else { continue };
+            // `get_transactions` with the pool included. The typed
+            // `transaction()` helper resolves only *confirmed* transactions, so
+            // using it here reported every freshly-broadcast transaction as lost
+            // — a false negative this program printed once before this comment
+            // existed. A propagation check that cannot see the mempool is
+            // checking the wrong thing: propagation is precisely the window
+            // before confirmation.
+            let body = format!("{{\"txs_hashes\":[\"{hash}\"]}}");
+            let Ok(raw) = t.rpc_call("get_transactions", Some(body), 1 << 20).await
+            else { continue };
+            let parsed: serde_json::Value =
+                serde_json::from_str(&raw).unwrap_or(serde_json::Value::Null);
+            let found = parsed["txs"].as_array().map(|a| !a.is_empty()).unwrap_or(false);
+            if found {
+                seen_on.push(*r);
+            }
+        }
+        if seen_on.is_empty() {
+            println!("\n  \x1b[31mnot visible on any relay\x1b[0m — {hash} went nowhere");
+        } else {
+            println!("\n  \x1b[32mpropagated\x1b[0m — visible on {} relay(s): {:?}", seen_on.len(), seen_on);
         }
     }
 }

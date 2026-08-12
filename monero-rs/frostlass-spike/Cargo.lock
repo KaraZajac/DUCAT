@@ -438,6 +438,7 @@ dependencies = [
  "monero-simple-request-rpc",
  "monero-wallet",
  "rand_core",
+ "serde_json",
  "tokio",
  "zeroize",
 ]

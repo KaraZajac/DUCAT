@@ -53,4 +53,42 @@ than needing §4.3.3's file-copy workaround, which exists only because
   distributed alongside. Every participant therefore sees every payment into the
   escrow. Correct for an escrow, wrong for a bond, and the spec does not currently
   distinguish them.
-- **Signing and settlement** are exercised by `--spend`, separately.
+## Signing and settlement — done, on stagenet
+
+A 3-of-5 group was funded and spent. **This is a configuration Monero's native
+multisig cannot express at all.**
+
+```
+group    525uzvqwmLVVTGiMhqwizL3dA2hR…
+found    800000000 pXMR at height 2183921
+signers  [1, 2, 3] of 5
+signed   in 0.088s
+txid     3e29714d4ebf28d608804a87b841880fc5077b1ef89d0bf7d8b2cc396559d0fa
+mined    height 2183934
+```
+
+`user_01` received 400000000 pXMR; the remainder returned to the group as change.
+So FROSTLASS forms a threshold wallet2 cannot, and that wallet spends real funds
+under a real CLSAG, signed by a subset in under a tenth of a second.
+
+## Two things this run got wrong before it got them right
+
+**A relay accepted transactions and dropped them — twice.** The funding
+transaction and the first signed spend were both accepted by
+`xmr-lux.boldsuck.org` with `Ok(())` returned, and neither ever appeared on any
+other node. The second one never appeared on the accepting node either. This is
+§8.7.2's rule earning itself: *a txid from one relay is that relay's word that it
+took the transaction, not evidence the network has it.* The spike now submits to
+every reachable relay and verifies elsewhere.
+
+**And then the verification lied in the other direction.** The first version
+checked propagation with the typed `transaction()` helper, which resolves only
+*confirmed* transactions — so it reported a freshly-broadcast transaction as lost
+while that transaction was sitting in two independent mempools. A propagation
+check that cannot see the mempool is checking the wrong thing, since propagation
+is precisely the window before confirmation. Ground truth via `get_transactions`
+corrected it.
+
+Worth stating plainly because the two failures look identical from inside the
+program: *nothing visible on any relay* was true once and false once, and only an
+independent query could tell them apart.
