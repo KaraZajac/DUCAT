@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.ui.BalanceCard
+import uniffi.ducat_mobile.approxPaymentsSupported
+import uniffi.ducat_mobile.protocolVersion
 
 /**
  * One activity, one app.
@@ -96,7 +98,10 @@ fun DucatApp() {
                 )
                 Tab.Menu -> Placeholder(
                     "Menu",
-                    "Personas, backup, custody, verification thresholds, markets, relays, records."
+                    "Personas, backup, custody, verification thresholds, markets, relays, records.\n\n" +
+                        // Proof the native core is loaded and answering, from the
+                        // one call that cannot be faked by a stub.
+                        "speaking ${protocolVersion()}"
                 )
             }
         }
@@ -105,22 +110,23 @@ fun DucatApp() {
 
 @Composable
 private fun HomeScreen() {
-    // ---------------------------------------------------------------------
-    // STUB. These values belong to `core::float`, which owns §17.2's capacity
-    // arithmetic. Reimplementing it here would create a second thing to keep in
-    // step, which is the drift §18.12 exists to catch. Replaced by the UniFFI
-    // bridge; deliberately not "temporarily" computed in Kotlin, because
-    // temporary arithmetic is how two implementations begin.
-    // ---------------------------------------------------------------------
+    // The wallet figures are still placeholders — they arrive from a Monero
+    // wallet, which is the next piece. **The capacity is not a placeholder.**
+    // It comes from `core::float` across the bridge, so the one number §17.2
+    // forbids overstating is computed by the same code the conformance vectors
+    // and the harness run, rather than by a second implementation in Kotlin.
     val float = Float(
         spendablePxmr = 40_000_000_000,
         lockedPxmr = 12_000_000_000,
         blocksToUnlock = 7,
         unlockedOutputs = 4,
     )
+    val approx = remember(float.unlockedOutputs) {
+        approxPaymentsSupported(float.unlockedOutputs.toUInt()).toInt()
+    }
     BalanceCard(
         spendable = Money(4000),
-        capacity = Capacity(approxPayments = 2),
+        capacity = Capacity(approxPayments = approx),
         float = float,
         locked = Money(1200),
         onTopUp = {},

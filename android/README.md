@@ -49,7 +49,40 @@ and signed by a key published independently of the site — a pre-release task, 
 a pre-build one. **It stops being acceptable the moment an APK leaves this
 machine.**
 
+## The bridge
+
+`mobile/` wraps `core` with UniFFI and builds to a `.so` per ABI. **It adds no
+logic** — every function forwards, because a wrapper is exactly where a quiet
+second implementation appears: one rounding choice, one "+1 for safety", and the
+app is answering a different question from the vectors. `cargo test -p
+ducat-mobile` compares the bridge against `core` directly rather than against
+expected constants, so it fails if the wrapper starts having opinions.
+
+```sh
+./mobile/build-android.sh     # rebuild all three ABIs, regenerate bindings
+```
+
+Run it after **any** change to `core/` or `mobile/`. Nothing checks that the
+`.so` in `jniLibs` matches the current source: the app will happily load a stale
+one and behave like an older protocol, which is §18.12's drift wearing different
+clothes. `jniLibs/` is gitignored for the same reason — a committed binary is a
+binary nobody rebuilds.
+
+What crosses the bridge today: §17.2's capacity arithmetic, §15.5.1's
+verification tiers, §17.8's capacity buckets. The home screen's *capacity* is
+therefore real — computed by the same code the vectors and the harness run — while
+the wallet figures around it are still placeholders, because those come from a
+Monero wallet and that is the next piece.
+
+## Verified, and not
+
+The `.so` files are built, packaged for `arm64-v8a`, `armeabi-v7a` and `x86_64`,
+and the bindings compile against them. **The bridge has not been executed on a
+device or emulator.** Marshalling across JNI is the one part these tests cannot
+reach, and claiming otherwise would be exactly the kind of untested assertion the
+harness exists to catch elsewhere.
+
 ## Next
 
-The UniFFI bridge to `core`, so the balance screen shows measured capacity rather
-than a stub. That is the seam the whole app hangs off, and it is the next thing.
+A Monero wallet behind the balance screen, and the tap flow carrying real
+`TapPresent` bytes over the AID already declared.

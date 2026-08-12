@@ -1,0 +1,18 @@
+[package]
+name = "ducat-mobile"
+version = "0.1.0"
+edition = "2021"
+
+# cdylib for the JNI .so the app loads; staticlib kept so an iOS target can use
+# the same crate without a second wrapper.
+[lib]
+name = "ducat_mobile"
+crate-type = ["cdylib", "staticlib", "lib"]
+
+[dependencies]
+ducat-core = { path = "../core" }
+uniffi = { version = "0.28", features = ["cli"] }
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi-bindgen.rs"

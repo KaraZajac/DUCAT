@@ -40,6 +40,8 @@ android {
 }
 
 dependencies {
+    // UniFFI's generated bindings need JNA on Android.
+    implementation("net.java.dev.jna:jna:5.15.0@aar")
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))

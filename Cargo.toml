@@ -7,5 +7,5 @@
 # they measured.
 [workspace]
 resolver = "2"
-members = ["core", "sim", "harness"]
+members = ["core", "sim", "harness", "mobile"]
 exclude = ["research"]

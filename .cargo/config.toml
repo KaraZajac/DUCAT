@@ -1,0 +1,13 @@
+# Android cross-compilation for ducat-mobile.
+#
+# minSdk is 26 (app/build.gradle.kts), so the API-26 clang wrappers are the
+# right ones: a lower one links against symbols the app does not promise, and a
+# higher one refuses to run on devices the manifest claims to support.
+[target.aarch64-linux-android]
+linker = "/home/kara/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang"
+
+[target.armv7-linux-androideabi]
+linker = "/home/kara/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang"
+
+[target.x86_64-linux-android]
+linker = "/home/kara/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang"
