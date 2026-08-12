@@ -4,8 +4,10 @@
 //! Run with `cargo run` for a summary, `cargo run -- -v` to watch every message.
 
 mod flow;
+mod live;
 mod persona;
 mod transport;
+mod wallet;
 
 use ducat_core::state::{Event, Role, SettleMode};
 use persona::{Kind, Persona};
@@ -30,6 +32,10 @@ fn banner(title: &str) {
 }
 
 fn main() {
+    if std::env::args().any(|a| a == "--live") {
+        live_main();
+        return;
+    }
     let verbose = std::env::args().any(|a| a == "-v" || a == "--verbose");
     let mut wire = Wire::new(verbose);
 
@@ -202,4 +208,116 @@ fn swap_attack(wire: &mut Wire, payee: &mut Persona, payer: &mut Persona) -> Res
 
 fn hex8(b: &[u8]) -> String {
     b.iter().take(4).map(|x| format!("{:02x}", x)).collect::<String>() + "…"
+}
+
+/// Live mode: the same market, settled on stagenet.
+fn live_main() {
+    use live::{transact_live, Party};
+    use persona::Persona;
+    use std::collections::BTreeMap;
+    use wallet::Wallet;
+
+    let ports: BTreeMap<String, u16> = [
+        ("user_01", 28101u16),
+        ("user_02", 28102),
+        ("taxi_01", 28103),
+        ("coffee_01", 28104),
+        ("shopkeep_01", 28105),
+    ]
+    .iter()
+    .map(|(n, p)| (n.to_string(), *p))
+    .collect();
+
+    banner("DUCAT market — live settlement on stagenet");
+    println!("  five wallets, real sXMR, real transcripts\n");
+
+    let mut parties: BTreeMap<String, Party> = BTreeMap::new();
+    let mut seed = 11u8;
+    for (name, port) in &ports {
+        match Wallet::new(name, *port) {
+            Ok(w) => {
+                println!("  {:<12} port {}  {}…", name, port, &w.address[..12]);
+                let persona =
+                    Persona::new(name, live::kind_of(name), seed, w.address.as_bytes().to_vec());
+                parties.insert(name.clone(), Party { persona, wallet: w });
+                seed += 1;
+            }
+            Err(e) => {
+                println!("  {:<12} UNAVAILABLE: {}", name, e);
+                std::process::exit(1);
+            }
+        }
+    }
+
+    banner("Waiting for spendable outputs");
+    println!("  §17.2: one output funds one payment per lock interval\n");
+    if !live::wait_for_outputs(&ports, 1, 2400) {
+        println!("\n  gave up waiting for outputs to unlock");
+        std::process::exit(1);
+    }
+
+    let mut wire = Wire::new(true);
+    let mut settled: Vec<live::Settled> = Vec::new();
+    let mut failures: Vec<String> = Vec::new();
+    let mut n = 100u8;
+
+    let plan: Vec<(&str, &str, f64, Option<Vec<u8>>, &str)> = vec![
+        ("coffee_01", "user_01", 0.0006, None, "coffee"),
+        ("taxi_01", "user_02", 0.0009, Some(vec![0x0D; 16]), "ride"),
+        ("shopkeep_01", "user_01", 0.0005, None, "bread"),
+        ("shopkeep_01", "user_01", 0.0007, None, "cheese"),
+        ("user_01", "user_02", 0.0008, None, "payback"),
+        ("shopkeep_01", "coffee_01", 0.0005, None, "vendor-to-vendor"),
+    ];
+
+    for (i, (payee, payer, amt, dest, label)) in plan.into_iter().enumerate() {
+        banner(&format!("{}. {} — {} pays {}", i + 1, label, payer, payee));
+        n += 1;
+        let nonce = [n; 16];
+        let mut a = parties.remove(payee).unwrap();
+        let mut b = parties.remove(payer).unwrap();
+        match transact_live(&mut wire, &mut a, &mut b, xmr(amt), nonce, dest, label) {
+            Ok(s) => settled.push(s),
+            Err(e) => {
+                println!("    \x1b[31mfailed\x1b[0m: {}", e);
+                failures.push(format!("{}: {}", label, e));
+            }
+        }
+        parties.insert(payee.to_string(), a);
+        parties.insert(payer.to_string(), b);
+    }
+
+    banner("Settled on chain");
+    for s in &settled {
+        println!(
+            "  {:<18} {:>10} XMR  {} → {}  {}…",
+            s.label,
+            format!("{:.6}", s.amount as f64 / 1e12),
+            s.payer,
+            s.payee,
+            &s.txid[..16]
+        );
+    }
+
+    banner("Final balances (from the chain)");
+    for (name, port) in &ports {
+        if let Ok(w) = Wallet::new(name, *port) {
+            let _ = w.refresh();
+            if let Ok(b) = w.balance() {
+                println!(
+                    "  {:<12} total {:>10}  unlocked {:>10}  outputs {}",
+                    name,
+                    format!("{:.6}", b.total as f64 / 1e12),
+                    format!("{:.6}", b.unlocked as f64 / 1e12),
+                    b.unlocked_outputs
+                );
+            }
+        }
+    }
+
+    banner("Result");
+    println!("  {} settled, {} failed", settled.len(), failures.len());
+    for f in &failures {
+        println!("    - {}", f);
+    }
 }
