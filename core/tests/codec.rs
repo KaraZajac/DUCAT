@@ -3,12 +3,11 @@
 
 use ducat_core::cbor::{decode, CodecError, Value, MAX_DEPTH};
 use ducat_core::cbor_map;
-use ducat_core::sig::{sig_input, ObjectType, SignedBytes, Suite};
-use ed25519_dalek::SigningKey;
+use ducat_core::sig::{sig_input, ObjectType, SecretKey, SignedBytes, Suite};
 use std::collections::BTreeMap;
 
-fn key(seed: u8) -> SigningKey {
-    SigningKey::from_bytes(&[seed; 32])
+fn key(seed: u8) -> SecretKey {
+    SecretKey::ed25519_from_bytes(&[seed; 32])
 }
 
 // §18.9(1) — integer boundaries. Each value must use the shortest head, and
@@ -190,15 +189,13 @@ fn insertion_order_does_not_affect_encoding() {
 #[test]
 fn signature_does_not_transfer_across_object_types() {
     let sk = key(7);
-    let vk = sk.verifying_key();
+    let vk = sk.public();
     let obj = SignedBytes::from_value(cbor_map! { 1 => Value::Uint(42) });
 
-    let sig = obj.sign(ObjectType::TapPresent, Suite::Ed25519X25519, &sk).unwrap();
+    let sig = obj.sign(ObjectType::TapPresent, &sk);
 
     // Valid in its own context.
-    assert!(obj
-        .verify(ObjectType::TapPresent, Suite::Ed25519X25519, &vk, &sig)
-        .is_ok());
+    assert!(obj.verify(ObjectType::TapPresent, &vk, &sig).is_ok());
 
     // Presented as any other type, it must fail — same key, same bytes.
     for other in [
@@ -209,7 +206,7 @@ fn signature_does_not_transfer_across_object_types() {
         ObjectType::Attestation,
     ] {
         assert!(
-            obj.verify(other, Suite::Ed25519X25519, &vk, &sig).is_err(),
+            obj.verify(other, &vk, &sig).is_err(),
             "TapPresent signature must not verify as {:?}",
             other
         );
@@ -251,20 +248,18 @@ fn non_canonical_bytes_are_rejected_on_receipt() {
 #[test]
 fn tampering_with_any_byte_invalidates_the_signature() {
     let sk = key(3);
-    let vk = sk.verifying_key();
+    let vk = sk.public();
     let obj = SignedBytes::from_value(cbor_map! {
         1 => Value::Uint(1),
         2 => Value::Uint(2_500_000_000_000u64), // an amount in piconero
     });
-    let sig = obj.sign(ObjectType::Accept, Suite::Ed25519X25519, &sk).unwrap();
+    let sig = obj.sign(ObjectType::Accept, &sk);
 
     let mut bytes = obj.bytes().to_vec();
     let last = bytes.len() - 1;
     bytes[last] ^= 0x01; // smallest possible change to the amount
     let tampered = SignedBytes::from_received(bytes).unwrap();
-    assert!(tampered
-        .verify(ObjectType::Accept, Suite::Ed25519X25519, &vk, &sig)
-        .is_err());
+    assert!(tampered.verify(ObjectType::Accept, &vk, &sig).is_err());
 }
 
 /// §18.2 — a fare expressed in piconero must survive exactly. This vector
