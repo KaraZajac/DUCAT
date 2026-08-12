@@ -76,6 +76,16 @@ pub mod f {
     /// namespace, defined in `terms`.
     pub const TERMS: u64 = 96;
 
+    // DISPUTE / RULING (§9.3.2) — reserved range 52-59
+    pub const DISPUTE_CLASS: u64 = 52;
+    pub const DISPUTE_TRANSCRIPT: u64 = 53;
+    pub const DISPUTE_CLAIM_PXMR: u64 = 54;
+    pub const DISPUTE_TS: u64 = 55;
+    pub const RULING_DISPUTE: u64 = 56;
+    pub const RULING_OUTCOME: u64 = 57;
+    pub const RULING_AWARD: u64 = 58;
+    pub const RULING_TS: u64 = 59;
+
     // MANDATE (§7.3)
     pub const MANDATE_PAYEE: u64 = 97;
     pub const MANDATE_CAP: u64 = 98;
@@ -1070,4 +1080,195 @@ pub fn check_mandate_draw(
     }
     next.drawn_pxmr = would_be;
     Ok(next)
+}
+
+// ------------------------------------------------------- DISPUTE / RULING --
+
+/// §9.3.1. The distinction that governs everything else about arbitration.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum DisputeClass {
+    /// Decidable from the signed transcript plus public chain state — *did this
+    /// confirm, does a conflicting key image exist*. The arbiter exercises no
+    /// discretion and a wrong ruling is **provably** wrong.
+    Mechanical = 0,
+    /// Turns on facts neither party can prove — *was the room clean*. A wrong
+    /// ruling here is not provable, only unpopular.
+    Judgment = 1,
+}
+
+/// §9.3.2. Carries the transcript, not a story.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Dispute {
+    pub version: u64,
+    pub suite: u8,
+    pub class: DisputeClass,
+    /// Commitment to the transaction being disputed.
+    pub transcript: [u8; 32],
+    pub claim_pxmr: u64,
+    pub timestamp: u64,
+}
+
+/// §9.3.2. A ruling is **not an instruction** — it is a co-signature. The
+/// arbiter's authority is exactly its key in the relevant multisig, so it
+/// cannot rule beyond funds it can already move.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum Outcome {
+    ForClaimant = 0,
+    ForRespondent = 1,
+    /// Frivolous. §17.5: the claimant's own stake is at risk on dismissal, so
+    /// providers cannot grief payers with bogus claims.
+    Dismissed = 2,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Ruling {
+    pub version: u64,
+    pub suite: u8,
+    pub dispute: [u8; 32],
+    pub outcome: Outcome,
+    pub award_pxmr: u64,
+    pub timestamp: u64,
+}
+
+impl Dispute {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Cancel) + 100)); // distinct code
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::DISPUTE_CLASS, Value::Uint(self.class as u64));
+        m.insert(f::DISPUTE_TRANSCRIPT, Value::Bytes(self.transcript.to_vec()));
+        m.insert(f::DISPUTE_CLAIM_PXMR, Value::Uint(self.claim_pxmr));
+        m.insert(f::DISPUTE_TS, Value::Uint(self.timestamp));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let _ = r.uint(f::TYPE)?;
+        let out = Dispute {
+            version: r.uint(f::VERSION)?,
+            suite: r.uint(f::SUITE)? as u8,
+            class: match r.uint(f::DISPUTE_CLASS)? {
+                0 => DisputeClass::Mechanical,
+                1 => DisputeClass::Judgment,
+                n => {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        format!("no such dispute class: {}", n),
+                    ))
+                }
+            },
+            transcript: r.bytes(f::DISPUTE_TRANSCRIPT, Some(32))?.try_into().unwrap(),
+            claim_pxmr: r.uint(f::DISPUTE_CLAIM_PXMR)?,
+            timestamp: r.uint(f::DISPUTE_TS)?,
+        };
+        r.finish()?;
+        Ok(out)
+    }
+}
+
+impl Ruling {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Cancel) + 200));
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::RULING_DISPUTE, Value::Bytes(self.dispute.to_vec()));
+        m.insert(f::RULING_OUTCOME, Value::Uint(self.outcome as u64));
+        m.insert(f::RULING_AWARD, Value::Uint(self.award_pxmr));
+        m.insert(f::RULING_TS, Value::Uint(self.timestamp));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let _ = r.uint(f::TYPE)?;
+        let out = Ruling {
+            version: r.uint(f::VERSION)?,
+            suite: r.uint(f::SUITE)? as u8,
+            dispute: r.bytes(f::RULING_DISPUTE, Some(32))?.try_into().unwrap(),
+            outcome: match r.uint(f::RULING_OUTCOME)? {
+                0 => Outcome::ForClaimant,
+                1 => Outcome::ForRespondent,
+                2 => Outcome::Dismissed,
+                n => {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        format!("no such outcome: {}", n),
+                    ))
+                }
+            },
+            award_pxmr: r.uint(f::RULING_AWARD)?,
+            timestamp: r.uint(f::RULING_TS)?,
+        };
+        r.finish()?;
+        Ok(out)
+    }
+}
+
+/// Validate a ruling against the dispute it answers.
+pub fn check_ruling(
+    ruling: &Ruling,
+    dispute: &Dispute,
+    dispute_bytes: &[u8],
+    arbiter_set: &[Vec<u8>],
+    arbiter_persona: &[u8],
+) -> Result<(), Reject> {
+    // §2.5's lesson, in one check: the arbiter is whoever the *market
+    // descriptor* says it is. A ruling from a key that is not in the signed set
+    // is a stranger's opinion, however well-formed. RetoSwap was drained by
+    // accepting an arbitrator's address from a message.
+    if !arbiter_set.iter().any(|k| k.as_slice() == arbiter_persona) {
+        return Err(Reject::with_detail(
+            RejectCode::UntrustedArbiterSet,
+            "ruling is from a persona outside the market's signed arbiter set",
+        ));
+    }
+    if !commit_eq(&ruling.dispute, &commit(Purpose::ChainLink, dispute_bytes)) {
+        return Err(Reject::with_detail(
+            RejectCode::CommitMismatch,
+            "ruling does not answer this dispute",
+        ));
+    }
+    // An arbiter cannot award more than was claimed. It has no authority to
+    // invent an obligation neither party asserted.
+    if ruling.award_pxmr > dispute.claim_pxmr {
+        return Err(Reject::with_detail(
+            RejectCode::PriceMismatch,
+            "award exceeds the amount claimed",
+        ));
+    }
+    // A ruling for the respondent or a dismissal awards nothing; anything else
+    // is an outcome disagreeing with its own award.
+    if ruling.outcome != Outcome::ForClaimant && ruling.award_pxmr != 0 {
+        return Err(Reject::with_detail(
+            RejectCode::Malformed,
+            "only a ruling for the claimant may carry an award",
+        ));
+    }
+    Ok(())
+}
+
+/// §9.3.4: what an abandoned dispute produces.
+///
+/// The section said funds "return to the pre-dispute allocation, claim
+/// abandoned". Under escrow that is a deadlock rather than a resolution: the
+/// pre-dispute allocation *is* funds locked in a 2-of-3 awaiting a RELEASE that
+/// two disagreeing parties will never co-sign. Doing nothing freezes them
+/// permanently — the exact outcome §9.3.4 claims to avoid.
+///
+/// So expiry must produce an actual ruling. It resolves **for the respondent**,
+/// which is a co-signature that moves the funds, not an absence of one.
+pub fn expired_dispute_ruling(dispute: &Dispute, dispute_bytes: &[u8], now: u64) -> Ruling {
+    Ruling {
+        version: 1,
+        suite: dispute.suite,
+        dispute: commit(Purpose::ChainLink, dispute_bytes),
+        outcome: Outcome::ForRespondent,
+        award_pxmr: 0,
+        timestamp: now,
+    }
 }

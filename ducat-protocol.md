@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.34 — Consolidated**
+**Draft 0.35 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.35** — **`DISPUTE`/`RULING` implemented, and §9.3.4's expiry rule was a deadlock.** It said an abandoned dispute returns funds to "the pre-dispute allocation" — but under escrow that *is* funds locked in a 2-of-3 awaiting a `RELEASE` two disagreeing parties will never co-sign, so doing nothing freezes them permanently, the exact outcome the timeout claims to prevent. Expiry now emits a real ruling: for the respondent, award zero, co-signable against the escrow. Generalised as a rule for the whole protocol — **in a system with no operator, "nothing happens" is never a safe default**, so every deadline must name the action it triggers. Also enforced: a ruling from outside the market's signed arbiter set is refused (§2.5's lesson in one check), an award cannot exceed the claim, and only a ruling for the claimant may carry one.
 - **0.34** — **`MANDATE` implemented, and §15.5 amended to admit it.** §15.5 said the confirm tap is *the one mandatory human checkpoint*; §7.3's mandates authorise payment without one. That was a flat contradiction, resolved by stating that the checkpoint **moves rather than disappearing** — the human confirms a cap and a period once, and every later draw is bounded by what they signed. Holds only because a capless or periodless mandate is now *unparseable* rather than merely refused, the cap is enforced by the payer's own client, and only the named persona may draw. Periods anchor to the first draw, keeping timezones out of the protocol.
 - **0.33** — **`ABORT` made directional once a meter is running.** §6 lists it as available to either party with no penalty — correct before value accrues, and a free exit afterwards: a payer could open a tab, consume, abort, and owe nothing. From `METERING` only the operator may void cleanly; a payer leaving is abandonment via `MeterExpired`, which leaves evidence. Also recorded that `CANCEL` does not apply to a running meter, since stopping it and paying what accrued is the instrument that already exists.
 - **0.32** — **`METERING` state added; §15.7 and §6.2 had been contradicting each other.** A metered session's `start` leg landed in `ACCEPTED`, whose 60-second deadline aborted it — so a bar tab died one minute after being opened. The two sections were written independently and never checked against each other. `METERING` is deliberately not wall-clock bounded, because its limit lives in `terms.meter_max_s` and the machine holds no terms; expiry arrives as an explicit `MeterExpired` event, following `ConfirmationsReached`'s pattern. Abandonment routes to `CLOSED` with a single-sided receipt, per §15.7.
@@ -654,9 +655,13 @@ A dispute that never resolves is worse than one resolved badly, because the fund
 | Arbiter acknowledges `DISPUTE` | 24 h | Escalate to the next arbiter in the set |
 | `EVIDENCE` from either party | 72 h | Rule on what was disclosed |
 | `RULING` after evidence closes | 72 h | Escalate; the silent arbiter's stake is at risk |
-| Whole dispute, all escalations | 14 d | Funds return to the pre-dispute allocation, claim abandoned |
+| Whole dispute, all escalations | 14 d | **Arbiter rules for the respondent**, award zero — see below |
 
 The final row is the uncomfortable one: **an unresolvable dispute resolves against the claimant**, because the alternative is indefinitely frozen funds and there is no higher court to appeal to. A protocol without an operator has no one to escalate to when its own dispute mechanism fails, and that has to be a stated outcome rather than a hang.
+
+**It also has to be an *action*, and an earlier draft got this exactly backwards.** That row previously read "funds return to the pre-dispute allocation, claim abandoned." Under escrow the pre-dispute allocation *is* funds sitting in a 2-of-3 awaiting a `RELEASE` that two disagreeing parties will never co-sign — so returning to it and doing nothing freezes them permanently, which is precisely the outcome this timeout exists to prevent. Abandonment must therefore emit a **real ruling**: for the respondent, award zero, signed by an arbiter and co-signable against the escrow. A ruling moves funds; an absence of one does not.
+
+The general form is worth stating, because it will recur wherever this protocol has a timeout: **in a system with no operator, "nothing happens" is not a safe default.** Every deadline must name the action it triggers, because there is nobody to sort out the mess afterwards.
 
 ### 9.4 Safety Floor (honest limit, and where it actually binds)
 
@@ -1572,7 +1577,7 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 97–101 | `MANDATE` (§7.3) | **Assigned** |
 | 40–45 | `CONTACT_OFFER`, `CONTACT_ACCEPT` (§16.3) | Reserved |
 | 46–51 | `bond_proof`, `TXID` (§17.4) | Reserved |
-| 52–59 | `DISPUTE`, `EVIDENCE`, `RULING` (§9.3.2) | Reserved |
+| 52–59 | `DISPUTE`, `RULING` (§9.3.2) | **Assigned** (`EVIDENCE` still reserved) |
 | 60–67 | `HAIL`, sealed offer record (§5.2.1) | Reserved |
 | 68–79 | `MarketDescriptor` (§10.1) | Reserved |
 | 80–95 | Delegations (§4.2), attestations (§9.2) | Reserved |
