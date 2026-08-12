@@ -36,6 +36,18 @@ Four transactions across three profiles, plus two attacks that must be refused:
 an offer swapped after the tap committed to it (§15.3), and an out-of-order
 message — the shape that drained RetoSwap (§2.5).
 
+## Modes
+
+    cargo run                 offline market, five participants
+    cargo run -- --live       same market, settled on stagenet
+    cargo run -- --drain      spend to output exhaustion (§17.2)
+    cargo run -- --scenarios  the four situations DUCAT must work in
+
+The last one is the robustness bar: a merchant, a taxi, a bar tab, and a
+payment between friends, each driven end to end including the ways they go
+wrong. Unit tests check a rule; these check that a rule survives contact with
+the others, which is where every bug in this project has actually lived.
+
 ## What it has already found
 
 The originator-versus-evaluator bug in §18.4.1, on its first run. The rule

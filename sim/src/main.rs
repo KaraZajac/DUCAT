@@ -40,6 +40,10 @@ fn main() {
         drain_main();
         return;
     }
+    if std::env::args().any(|a| a == "--scenarios") {
+        scenarios_main();
+        return;
+    }
     let verbose = std::env::args().any(|a| a == "-v" || a == "--verbose");
     let mut wire = Wire::new(verbose);
 
@@ -399,5 +403,197 @@ fn drain_main() {
         println!("  a customer waiting.");
     } else {
         println!("\n  \x1b[33mdiverged\x1b[0m — worth understanding before trusting the model.");
+    }
+}
+
+/// The four situations DUCAT has to actually work in, driven end to end.
+///
+/// Unit tests check a rule; these check that a rule survives contact with the
+/// others. Every bug found in this project so far has lived between two
+/// sections that were each correct alone.
+fn scenarios_main() {
+    use ducat_core::commit::{commit, Purpose};
+    use ducat_core::reject::RejectCode;
+    use ducat_core::state::{Event, Role, SettleMode, State};
+    use ducat_core::wire::*;
+
+    let mut failures: Vec<String> = Vec::new();
+    let mut check = |name: &str, ok: bool, why: &str, failures: &mut Vec<String>| {
+        if ok {
+            println!("    \x1b[32m✓\x1b[0m {}", name);
+        } else {
+            println!("    \x1b[31m✗\x1b[0m {} — {}", name, why);
+            failures.push(name.to_string());
+        }
+    };
+
+    // ---------------------------------------------------------------- shop --
+    banner("A merchant: coffee, a refund, a final-sale item");
+    {
+        let terms = Terms { refund_window_s: 86_400 * 14, ..Terms::default() };
+        let accept_bytes = b"accept-coffee".to_vec();
+        let link = commit(Purpose::ChainLink, &accept_bytes);
+        let receipt = Receipt {
+            version: 1, suite: 1, accept_hash: link, prev: link,
+            amount_final: 600_000_000, timestamp: 1_800_000_000, unilateral: false,
+        };
+        let rb = receipt.to_value().encode();
+
+        let good = Refund {
+            version: 1, suite: 1,
+            prior_receipt: commit(Purpose::ChainLink, &rb),
+            amount_pxmr: 600_000_000, txid: [0x1; 32],
+            timestamp: receipt.timestamp + 3600,
+        };
+        check("refund next day is honoured",
+              check_refund(&good, &receipt, &rb, &terms).is_ok(),
+              "a merchant must be able to refund", &mut failures);
+
+        let late = Refund { timestamp: receipt.timestamp + 86_400 * 15, ..good.clone() };
+        check("refund after the window is refused",
+              check_refund(&late, &receipt, &rb, &terms).map_err(|e| e.code)
+                  == Err(RejectCode::PolicyRefused),
+              "an unbounded liability", &mut failures);
+
+        let final_sale = Terms { refund_window_s: 0, ..Terms::default() };
+        check("final sale accepts no refund later",
+              check_refund(&good, &receipt, &rb, &final_sale).is_err(),
+              "zero window must mean zero", &mut failures);
+    }
+
+    // ---------------------------------------------------------------- taxi --
+    banner("A taxi: a ride, and a cancellation before it starts");
+    {
+        let mut s = State::Idle;
+        for ev in [Event::TapPresent, Event::FullOffer,
+                   Event::Accept { from: Role::Payer }, Event::Fund,
+                   Event::Proof, Event::Receipt] {
+            s = match ducat_core::state::transition(s, Role::Payer, SettleMode::Direct, &ev) {
+                Ok(t) => t.next,
+                Err(e) => { failures.push(format!("ride: {:?}", e.code)); State::Aborted }
+            };
+        }
+        check("ride settles", s == State::Closed, "ride did not close", &mut failures);
+
+        // The rider changes their mind after the fare is locked.
+        let mut s = State::Idle;
+        for ev in [Event::TapPresent, Event::FullOffer, Event::Accept { from: Role::Payer }] {
+            s = ducat_core::state::transition(s, Role::Payer, SettleMode::Direct, &ev).unwrap().next;
+        }
+        let c = ducat_core::state::transition(s, Role::Payer, SettleMode::Direct, &Event::Cancel);
+        check("cancel after fare-lock invokes terms",
+              c.map(|t| t.next) == Ok(State::Cancelled),
+              "a rider must be able to cancel", &mut failures);
+
+        let terms = Terms { cancellation_pxmr: 500_000_000, ..Terms::default() };
+        let ab = b"accept-ride".to_vec();
+        let cancel = Cancel {
+            version: 1, suite: 1,
+            prior_accept: commit(Purpose::ChainLink, &ab),
+            fee_pxmr: 500_000_000, timestamp: 1,
+        };
+        check("cancellation fee is the one that was signed",
+              check_cancel(&cancel, &ab, &terms).is_ok(), "fee mismatch", &mut failures);
+        let inflated = Cancel { fee_pxmr: 9_000_000_000, ..cancel.clone() };
+        check("an inflated cancellation fee is refused",
+              check_cancel(&inflated, &ab, &terms).is_err(),
+              "a driver could invent a penalty", &mut failures);
+    }
+
+    // ------------------------------------------------------------- bar tab --
+    banner("A bar tab: open, run long, and the customer walks out");
+    {
+        let mut s = State::Idle;
+        for ev in [Event::TapPresent, Event::FullOffer, Event::MeterStart] {
+            s = ducat_core::state::transition(s, Role::Payer, SettleMode::Direct, &ev).unwrap().next;
+        }
+        check("tab opens into METERING", s == State::Metering, "no metering state", &mut failures);
+
+        let three_hours = ducat_core::state::transition(
+            s, Role::Payer, SettleMode::Direct,
+            &Event::Elapsed(std::time::Duration::from_secs(10_800))).unwrap();
+        check("tab survives three hours",
+              three_hours.next == State::Metering,
+              "the meter died while the customer was still drinking", &mut failures);
+
+        check("a payer cannot abort a running tab",
+              ducat_core::state::transition(s, Role::Payer, SettleMode::Direct,
+                  &Event::Abort { from: Role::Payer }).is_err(),
+              "drink now, abort later", &mut failures);
+
+        let walked = ducat_core::state::transition(
+            s, Role::Payee, SettleMode::Direct, &Event::MeterExpired).unwrap();
+        check("walking out leaves evidence, not a clean exit",
+              walked.effect == ducat_core::state::Effect::EmitSingleSidedReceipt,
+              "no record of what was owed", &mut failures);
+
+        let offer = FullOffer {
+            version: 1, suite: 1, profile: 2, payto: vec![0x1; 8],
+            amount_pxmr: 0, supported_versions: vec![1], supported_suites: vec![1],
+            settle_mode: 0, fee_policy: FeePolicy::PayerPays, nonce_echo: [0; 16],
+            terms: Terms { meter_cap_pxmr: 20_000_000_000, meter_max_s: 14_400, ..Terms::default() },
+        };
+        check("an abandoned tab is capped at what was agreed",
+              abandoned_meter_claim(&offer, 1_000_000_000, 999_999) == 20_000_000_000,
+              "unbounded liability", &mut failures);
+
+        let mut uncapped = offer.clone();
+        uncapped.terms.meter_cap_pxmr = 0;
+        let mut tap_rated = TapPresent {
+            version: 1, suite: 1, profile: 2,
+            presenter_role: PresenterRole::Payee,
+            amount_authority: AmountAuthority::Rated,
+            intent: Intent::Start, rmode: ReachMode::Token,
+            nonce: [0; 16], expiry: 0, session_pk: vec![0x2; 32],
+            route: vec![0x3; 32], offer_commit: [0; 32], dest: None, session_ref: None,
+        };
+        tap_rated.intent = Intent::Start;
+        check("a tab with no cap cannot be opened",
+              check_meter_terms(&tap_rated, &uncapped).is_err(),
+              "open-ended obligation", &mut failures);
+    }
+
+    // ------------------------------------------------------------- friends --
+    banner("Between friends: a payback, and a standing arrangement");
+    {
+        let mut s = State::Idle;
+        for ev in [Event::TapPresent, Event::FullOffer,
+                   Event::Accept { from: Role::Payer }, Event::Fund,
+                   Event::Proof, Event::Receipt] {
+            s = ducat_core::state::transition(s, Role::Payer, SettleMode::Direct, &ev).unwrap().next;
+        }
+        check("payback settles", s == State::Closed, "xfer failed", &mut failures);
+
+        check("identity exchange is possible only after the money",
+              ducat_core::state::transition(s, Role::Payer, SettleMode::Direct,
+                  &Event::ContactOffer).is_ok()
+              && ducat_core::state::transition(State::Funded, Role::Payer, SettleMode::Direct,
+                  &Event::ContactOffer).is_err(),
+              "contact must follow closure", &mut failures);
+
+        let flatmate = vec![0xF1; 32];
+        let m = Mandate {
+            version: 1, suite: 1, payee_persona: flatmate.clone(),
+            cap_pxmr: 50_000_000_000, period_s: 86_400 * 30,
+            expiry: 1_800_000_000 + 86_400 * 365, nonce: [0x9; 16],
+        };
+        let u = MandateUsage::default();
+        let after = check_mandate_draw(&m, &u, &flatmate, 50_000_000_000, 1_800_000_000).unwrap();
+        check("a standing arrangement draws within its cap",
+              after.drawn_pxmr == m.cap_pxmr, "draw refused", &mut failures);
+        check("and refuses a second draw past it",
+              check_mandate_draw(&m, &after, &flatmate, 1, 1_800_000_100).is_err(),
+              "cap did not bind", &mut failures);
+        check("a stranger cannot draw on it",
+              check_mandate_draw(&m, &u, &[0xEE; 32], 1, 1_800_000_000).is_err(),
+              "mandate is bearer paper", &mut failures);
+    }
+
+    banner("Result");
+    if failures.is_empty() {
+        println!("  \x1b[32mall four situations behave\x1b[0m");
+    } else {
+        println!("  \x1b[31m{} failed\x1b[0m: {}", failures.len(), failures.join(", "));
+        std::process::exit(1);
     }
 }
