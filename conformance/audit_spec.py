@@ -136,6 +136,15 @@ for missing in sorted(schema_kinds - rs_kinds):
 for extra in sorted(gen_kinds - schema_kinds):
     bad("vectors", f"the generator emits {extra}, which the schema does not describe")
 
+# §18.9.1's table is normative: a kind the schema accepts but the document never
+# names is a case an implementer cannot know exists. This drifted by six kinds
+# before anyone checked.
+_k = SPEC.find("18.9.1")
+_ktable = SPEC[_k : SPEC.find("## 18.10", _k)] if _k >= 0 else ""
+for k in sorted(schema_kinds):
+    if f"`{k}`" not in _ktable:
+        bad("vectors", f"{k} is in the schema but §18.9.1's table does not list it")
+
 # --- 7. Draft version matches the newest changelog entry -------------------
 hdr = re.search(r"\*\*Draft (\d+\.\d+)", SPEC)
 first = re.search(r"^- \*\*(\d+\.\d+)\*\* —", SPEC, re.M)
@@ -155,6 +164,46 @@ if aid:
 for uuid in re.findall(r'BLE_\w+_UUID: &str = "([0-9a-f-]+)"', tr):
     if uuid not in SPEC:
         bad("transport", f"BLE UUID {uuid} is in code but not in §18.7")
+
+# --- 9. Numeric claims about the vector set --------------------------------
+# The spec quotes counts in prose. Those go stale the moment a case is added,
+# and a document that miscounts its own artifacts is one a reader stops trusting.
+manifest = json.loads(read("vectors/v1/manifest.json") or "{}")
+total = manifest.get("total_cases")
+for line in SPEC.splitlines():
+    # Changelog entries are history and are supposed to say what was true then.
+    # Only live prose is checked, or every release note becomes a false alarm and
+    # the check gets ignored.
+    if re.match(r"- \*\*\d+\.\d+\*\* —", line.strip()):
+        continue
+    for m in re.finditer(r"(\d+)\s+vectors\b", line):
+        n = int(m.group(1))
+        if n != total and n > 20:
+            bad("counts", f"live prose says '{n} vectors'; the manifest has {total}")
+
+# --- 10. Every object type appears in §6's message table -------------------
+# A type with a label and a code that no table lists is an object an implementer
+# cannot discover exists.
+_msg = SPEC[SPEC.find("## 6."):SPEC.find("## 7.")]
+LABEL_EXEMPT = {"attestation", "bond_proof"}  # carried inside other objects
+for label in re.findall(r'ObjectType::\w+ => b"([^"]+)"', sig):
+    if label in LABEL_EXEMPT:
+        continue
+    if label not in _msg and label not in SPEC:
+        bad("messages", f"object type {label} appears nowhere in the document")
+
+# --- 11. Field numbers fall inside a declared registry range ---------------
+_reg = SPEC[SPEC.find("Field-Number Registry"):]
+_reg = _reg[: _reg.find("## 18.5")]
+ranges = []
+for a, b in re.findall(r"\|\s*(\d+)[–-](\d+)\s*\|", _reg):
+    ranges.append((int(a), int(b)))
+for a in re.findall(r"\|\s*(\d+)\s*\|", _reg):
+    ranges.append((int(a), int(a)))
+if ranges:
+    for n, name in sorted(namespaces.get("f", {}).items()):
+        if not any(lo <= n <= hi for lo, hi in ranges):
+            bad("registry", f"field {n} ({name}) is outside every range §18.4.2 declares")
 
 print(f"\nspec audit — {len(problems)} problem(s)\n")
 for p in problems:

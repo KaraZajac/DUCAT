@@ -1342,6 +1342,7 @@ fn main() -> std::io::Result<()> {
             "18.9(7) piconero amounts that defeat a float implementation": true,
             "4.3 backup format known-answer and rejection cases": true,
             "8.2 / 17.4 / 17.5 escrow and fast-settle object encodings": true,
+            "8.2 / 17.4 / 17.5 contract logic": "ceremony ordering (§2.5's out-of-order and duplicate cases), participant agreement, release destinations, bond freshness and ladder membership, slash-claim cure windows — decided by core and by a second implementation written from the spec",
             "every case carries a `kind` discriminator and validates against schema.json": true
         },
         "does_not_yet_cover": {
