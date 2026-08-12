@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.ui.BalanceCard
+import org.ducatproject.ducat.ui.BridgeSelfTest
 import uniffi.ducat_mobile.approxPaymentsSupported
 import uniffi.ducat_mobile.protocolVersion
 
@@ -131,6 +132,9 @@ private fun HomeScreen() {
         locked = Money(1200),
         onTopUp = {},
     )
+    // On the home screen for this build only. It answers the one question this
+    // APK exists to answer, and it should be deleted the moment it has.
+    BridgeSelfTest()
 }
 
 @Composable
