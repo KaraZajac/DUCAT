@@ -94,9 +94,11 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
 
 @Composable
 private fun Progress(step: Step) {
+    // The step you are *on*, not the number completed. "0 of 4" on the first
+    // screen reads as though nothing has started and something has gone wrong.
     val n = when (step) {
-        Step.Persona -> 0; Step.Wallet -> 1; Step.Limits -> 2
-        Step.Backup -> 3; Step.Done -> 4
+        Step.Persona -> 1; Step.Wallet -> 2; Step.Limits -> 3
+        Step.Backup -> 4; Step.Done -> 4
     }
     Column {
         Text("Set up DUCAT", style = MaterialTheme.typography.headlineSmall)
@@ -106,7 +108,10 @@ private fun Progress(step: Step) {
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(4.dp))
-        Text("$n of 4", style = MaterialTheme.typography.bodySmall)
+        Text(
+            if (step == Step.Done) "Done" else "Step $n of 4",
+            style = MaterialTheme.typography.bodySmall,
+        )
     }
 }
 

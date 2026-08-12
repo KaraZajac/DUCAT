@@ -2,7 +2,10 @@ package org.ducatproject.ducat.ui
 
 import android.content.Context
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -73,10 +76,17 @@ fun DucatTheme(mode: ThemeMode = ThemeMode.System, content: @Composable () -> Un
         ThemeMode.Mocha -> true
     }
     CompositionLocalProvider(LocalDucatColors provides if (dark) MochaMeaning else LatteMeaning) {
-        MaterialTheme(
-            colorScheme = if (dark) mochaScheme() else latteScheme(),
-            content = content,
-        )
+        MaterialTheme(colorScheme = if (dark) mochaScheme() else latteScheme()) {
+            // The Surface is not decoration. Without it only screens that bring
+            // their own Scaffold get a background, and the rest show the
+            // Activity's window colour through — which is how onboarding
+            // rendered in Latte while the app behind it was Mocha.
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background,
+                content = content,
+            )
+        }
     }
 }
 

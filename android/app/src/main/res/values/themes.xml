@@ -1,3 +1,12 @@
 <resources>
-    <style name="Theme.Ducat" parent="android:Theme.Material.Light.NoActionBar" />
+    <!--
+      DayNight, so the window the system paints before Compose draws matches the
+      theme Compose is about to apply. A light window flashing behind a dark app
+      is the same class of mistake as the missing Surface: nothing is wrong with
+      the theme, it just is not being applied to everything.
+    -->
+    <style name="Theme.Ducat" parent="android:Theme.DeviceDefault.DayNight">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 </resources>
