@@ -24,7 +24,7 @@ fn happy_path_direct() {
         &[
             (Event::TapPresent, State::Offered),
             (Event::FullOffer, State::Quoted),
-            (Event::Accept, State::Accepted),
+            (Event::Accept { from: Role::Payer }, State::Accepted),
             (Event::Fund, State::Funded),
             (Event::Proof, State::Delivered),
             (Event::Receipt, State::Closed),
@@ -40,7 +40,7 @@ fn happy_path_fast_reaches_settled() {
         &[
             (Event::TapPresent, State::Offered),
             (Event::FullOffer, State::Quoted),
-            (Event::Accept, State::Accepted),
+            (Event::Accept { from: Role::Payer }, State::Accepted),
             (Event::Fund, State::Funded),
             (Event::TxProof, State::Provisional),
             (Event::Proof, State::Delivered),
@@ -174,13 +174,13 @@ fn vanishing_counterparty_yields_a_single_sided_receipt() {
 #[test]
 fn unexpected_messages_are_state_violations_not_ignores() {
     let bad = [
-        (State::Idle, Event::Accept),
+        (State::Idle, Event::Accept { from: Role::Payer }),
         (State::Idle, Event::Fund),
         (State::Idle, Event::Receipt),
-        (State::Offered, Event::Accept),
+        (State::Offered, Event::Accept { from: Role::Payer }),
         (State::Quoted, Event::Fund),
         (State::Accepted, Event::Receipt),
-        (State::Funded, Event::Accept),
+        (State::Funded, Event::Accept { from: Role::Payer }),
         (State::Closed, Event::Fund),
     ];
     for (state, ev) in bad {
@@ -190,14 +190,30 @@ fn unexpected_messages_are_state_violations_not_ignores() {
     }
 }
 
-/// Only the payer signs ACCEPT. A payee able to accept its own offer could
-/// drive the whole flow with no human checkpoint.
+/// Only the payer may *originate* an ACCEPT. A payee able to accept its own
+/// offer could drive the whole flow with no human checkpoint.
+///
+/// The constraint is on the originator, not the evaluator — both parties must
+/// reach the same verdict about the same message. An earlier version guarded on
+/// the local role, so a payee refused every ACCEPT it received and no
+/// transaction could ever complete; the simulator caught it on its first run.
 #[test]
-fn only_the_payer_may_accept() {
-    assert!(transition(State::Quoted, Role::Payer, SettleMode::Direct, &Event::Accept).is_ok());
-    let err = transition(State::Quoted, Role::Payee, SettleMode::Direct, &Event::Accept)
-        .expect_err("payee must not ACCEPT");
-    assert_eq!(err.code, RejectCode::StateViolation);
+fn accept_is_constrained_by_originator_not_evaluator() {
+    // A payer-originated ACCEPT is accepted by BOTH parties.
+    for who in [Role::Payer, Role::Payee] {
+        assert!(
+            transition(State::Quoted, who, SettleMode::Direct,
+                       &Event::Accept { from: Role::Payer }).is_ok(),
+            "{:?} must be able to process a payer-originated ACCEPT", who
+        );
+    }
+    // A payee-originated one is refused by BOTH.
+    for who in [Role::Payer, Role::Payee] {
+        let err = transition(State::Quoted, who, SettleMode::Direct,
+                             &Event::Accept { from: Role::Payee })
+            .expect_err("payee-originated ACCEPT must be refused");
+        assert_eq!(err.code, RejectCode::StateViolation);
+    }
 }
 
 /// Under direct and fast settlement there is nothing for an arbiter to move —
@@ -247,7 +263,7 @@ fn terminal_states_absorb_everything() {
         State::Claimed,
     ];
     let events = [
-        Event::Accept,
+        Event::Accept { from: Role::Payer },
         Event::Fund,
         Event::Receipt,
         Event::Proof,

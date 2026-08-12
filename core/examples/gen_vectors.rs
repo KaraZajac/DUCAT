@@ -324,7 +324,7 @@ fn state_cases() -> Vec<J> {
     let direct = [
         (Event::TapPresent, State::Offered),
         (Event::FullOffer, State::Quoted),
-        (Event::Accept, State::Accepted),
+        (Event::Accept { from: Role::Payer }, State::Accepted),
         (Event::Fund, State::Funded),
         (Event::Proof, State::Delivered),
         (Event::Receipt, State::Closed),
@@ -340,7 +340,7 @@ fn state_cases() -> Vec<J> {
     let fast = [
         (Event::TapPresent, State::Offered),
         (Event::FullOffer, State::Quoted),
-        (Event::Accept, State::Accepted),
+        (Event::Accept { from: Role::Payer }, State::Accepted),
         (Event::Fund, State::Funded),
         (Event::TxProof, State::Provisional),
         (Event::Proof, State::Delivered),
@@ -412,7 +412,7 @@ fn state_cases() -> Vec<J> {
 
     // §18.4: unlisted pairings are refusals, never silent ignores.
     for (state, ev, why) in [
-        (State::Idle, Event::Accept, "ACCEPT before any offer exists"),
+        (State::Idle, Event::Accept { from: Role::Payer }, "ACCEPT before any offer exists"),
         (State::Quoted, Event::Fund, "funding before the price is locked"),
         (State::Funded, Event::Cancel, "cancellation after funds have moved"),
         (State::Closed, Event::Fund, "funding a closed transaction"),
@@ -428,15 +428,31 @@ fn state_cases() -> Vec<J> {
         }));
     }
 
-    // Direction matters: only the payer may ACCEPT.
-    let err = transition(State::Quoted, Role::Payee, SettleMode::Direct, &Event::Accept).unwrap_err();
-    v.push(json!({
-        "name": "payee_may_not_accept",
-        "why": "a payee able to accept its own offer drives the whole flow with no human checkpoint (§18.4.1)",
-        "from": "Quoted", "role": "Payee", "mode": "Direct",
-        "event": "Accept",
-        "expect": { "ok": false, "reject_code": err.code as u8, "reject_name": format!("{:?}", err.code) }
-    }));
+    // Direction constrains the ORIGINATOR, not the evaluator. A payee-originated
+    // ACCEPT is refused by both parties; a payer-originated one is accepted by
+    // both. Guarding on the local role instead means a payee refuses every
+    // ACCEPT it receives and no transaction can complete — a bug the market
+    // simulator caught on its first run.
+    for who in [Role::Payer, Role::Payee] {
+        let t = transition(State::Quoted, who, SettleMode::Direct,
+                           &Event::Accept { from: Role::Payer }).unwrap();
+        v.push(json!({
+            "name": format!("payer_originated_accept_processed_by_{:?}", who).to_lowercase(),
+            "why": "both parties must reach the same verdict about the same message; the payee has to process the ACCEPT it receives",
+            "from": "Quoted", "role": format!("{:?}", who), "mode": "Direct",
+            "event": { "Accept": { "from": "Payer" } },
+            "expect": { "next": format!("{:?}", t.next), "effect": format!("{:?}", t.effect) }
+        }));
+        let err = transition(State::Quoted, who, SettleMode::Direct,
+                             &Event::Accept { from: Role::Payee }).unwrap_err();
+        v.push(json!({
+            "name": format!("payee_originated_accept_refused_by_{:?}", who).to_lowercase(),
+            "why": "a payee able to accept its own offer drives the whole flow with no human checkpoint (§18.4.1)",
+            "from": "Quoted", "role": format!("{:?}", who), "mode": "Direct",
+            "event": { "Accept": { "from": "Payee" } },
+            "expect": { "ok": false, "reject_code": err.code as u8, "reject_name": format!("{:?}", err.code) }
+        }));
+    }
 
     v
 }

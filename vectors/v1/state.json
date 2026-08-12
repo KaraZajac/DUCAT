@@ -18,7 +18,7 @@
         },
         {
           "effect": "None",
-          "event": "Accept",
+          "event": "Accept { from: Payer }",
           "next": "Accepted"
         },
         {
@@ -57,7 +57,7 @@
         },
         {
           "effect": "None",
-          "event": "Accept",
+          "event": "Accept { from: Payer }",
           "next": "Accepted"
         },
         {
@@ -340,7 +340,7 @@
       "why": "fast/1: unconfirmed past the cure window makes a slash claim fileable (§17.5)"
     },
     {
-      "event": "Accept",
+      "event": "Accept { from: Payer }",
       "expect": {
         "ok": false,
         "reject_code": 11,
@@ -348,7 +348,7 @@
       },
       "from": "Idle",
       "mode": "Direct",
-      "name": "violation_idle_Accept",
+      "name": "violation_idle_Accept { from: Payer }",
       "role": "Payer",
       "why": "ACCEPT before any offer exists"
     },
@@ -405,7 +405,27 @@
       "why": "identity exchange must follow closure, never precede it (§16.3)"
     },
     {
-      "event": "Accept",
+      "event": {
+        "Accept": {
+          "from": "Payer"
+        }
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Accepted"
+      },
+      "from": "Quoted",
+      "mode": "Direct",
+      "name": "payer_originated_accept_processed_by_payer",
+      "role": "Payer",
+      "why": "both parties must reach the same verdict about the same message; the payee has to process the ACCEPT it receives"
+    },
+    {
+      "event": {
+        "Accept": {
+          "from": "Payee"
+        }
+      },
       "expect": {
         "ok": false,
         "reject_code": 11,
@@ -413,7 +433,40 @@
       },
       "from": "Quoted",
       "mode": "Direct",
-      "name": "payee_may_not_accept",
+      "name": "payee_originated_accept_refused_by_payer",
+      "role": "Payer",
+      "why": "a payee able to accept its own offer drives the whole flow with no human checkpoint (§18.4.1)"
+    },
+    {
+      "event": {
+        "Accept": {
+          "from": "Payer"
+        }
+      },
+      "expect": {
+        "effect": "None",
+        "next": "Accepted"
+      },
+      "from": "Quoted",
+      "mode": "Direct",
+      "name": "payer_originated_accept_processed_by_payee",
+      "role": "Payee",
+      "why": "both parties must reach the same verdict about the same message; the payee has to process the ACCEPT it receives"
+    },
+    {
+      "event": {
+        "Accept": {
+          "from": "Payee"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reject_code": 11,
+        "reject_name": "StateViolation"
+      },
+      "from": "Quoted",
+      "mode": "Direct",
+      "name": "payee_originated_accept_refused_by_payee",
       "role": "Payee",
       "why": "a payee able to accept its own offer drives the whole flow with no human checkpoint (§18.4.1)"
     }

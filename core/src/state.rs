@@ -14,11 +14,14 @@
 use crate::reject::{Reject, RejectCode};
 use std::time::Duration;
 
-/// Which side of the transaction this client is running.
+/// Which side of the transaction a party is on.
 ///
-/// Both sides run the same machine over the same events, but not every message
-/// is legal from every side — only the payer may ACCEPT, only the payee may
-/// REFUND — so direction is checked rather than assumed.
+/// Used two ways, and conflating them is a bug the simulator caught: `role` in
+/// `transition` is *who is running this machine*, while `Event::Accept { from }`
+/// is *who originated the message*. Directional rules constrain the originator,
+/// never the evaluator — both parties must reach the same verdict about the
+/// same message, and a payee that refused every ACCEPT because it was not the
+/// payer could never complete a transaction.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Role {
     Payer,
@@ -78,7 +81,12 @@ impl State {
 pub enum Event {
     TapPresent,
     FullOffer,
-    Accept,
+    /// `from` is the originator, established by signature before the machine
+    /// sees it. §18.4.1 constrains who may *emit* an ACCEPT, not who may
+    /// process one.
+    Accept {
+        from: Role,
+    },
     Fund,
     TxProof,
     Proof,
@@ -172,7 +180,7 @@ pub fn deadline(state: State, mode: SettleMode) -> Option<Duration> {
 /// settlement mode named in ACCEPT (before ACCEPT it is the mode being offered).
 pub fn transition(
     state: State,
-    role: Role,
+    _role: Role,
     mode: SettleMode,
     event: &Event,
 ) -> Result<Transition, Reject> {
@@ -198,8 +206,10 @@ pub fn transition(
         // -- quote and lock ----------------------------------------------
         // Only the payer signs ACCEPT. A payee "accepting" its own offer would
         // let a hostile terminal drive the flow without the human checkpoint.
-        (S::Quoted, E::Accept) if role == Role::Payer => go(S::Accepted),
-        (S::Quoted, E::Accept) => Err(Reject::with_detail(
+        // Both parties evaluate this identically: the constraint is on the
+        // originator, which the signature establishes, not on who is asking.
+        (S::Quoted, E::Accept { from: Role::Payer }) => go(S::Accepted),
+        (S::Quoted, E::Accept { .. }) => Err(Reject::with_detail(
             RejectCode::StateViolation,
             "ACCEPT may only originate from the payer",
         )),

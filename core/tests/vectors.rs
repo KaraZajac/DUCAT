@@ -146,6 +146,14 @@ fn parse_state(s: &str) -> State {
 }
 
 fn parse_event(v: &J) -> Event {
+    // {"Accept": {"from": "Payer"}} — the originator is part of the event.
+    if let Some(a) = v.get("Accept") {
+        let from = match a.get("from").and_then(|x| x.as_str()) {
+            Some("Payee") => Role::Payee,
+            _ => Role::Payer,
+        };
+        return Event::Accept { from };
+    }
     // Timeouts arrive as {"Elapsed": secs}; everything else as a bare string.
     if let Some(secs) = v.get("Elapsed").and_then(|x| x.as_u64()) {
         return Event::Elapsed(Duration::from_secs(secs));
@@ -160,10 +168,16 @@ fn parse_event(v: &J) -> Event {
             .unwrap_or_else(|_| panic!("cannot parse duration from {}", s));
         return Event::Elapsed(Duration::from_secs(secs));
     }
+    // Sequence cases serialise events with Debug, so an Accept arrives as
+    // "Accept { from: Payer }" rather than as a JSON object.
+    if let Some(rest) = s.strip_prefix("Accept") {
+        let from = if rest.contains("Payee") { Role::Payee } else { Role::Payer };
+        return Event::Accept { from };
+    }
     match s {
         "TapPresent" => Event::TapPresent,
         "FullOffer" => Event::FullOffer,
-        "Accept" => Event::Accept,
+        "Accept" => Event::Accept { from: Role::Payer },
         "Fund" => Event::Fund,
         "TxProof" => Event::TxProof,
         "Proof" => Event::Proof,
