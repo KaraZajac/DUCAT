@@ -1219,6 +1219,7 @@ dependencies = [
  "ducat-core",
  "monero-wallet",
  "rand_core 0.6.4",
+ "thiserror 1.0.69",
  "uniffi",
  "zeroize",
 ]

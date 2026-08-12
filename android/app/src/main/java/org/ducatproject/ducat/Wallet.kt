@@ -31,10 +31,25 @@ data class Capacity(val approxPayments: Int, val exact: Boolean = false)
 
 /** Reference-currency display (§17.7). Never piconero, never "ducats". */
 data class Money(val minorUnits: Long, val symbol: String = "$", val exponent: Int = 2) {
+    /**
+     * Honours `exponent` and survives a negative.
+     *
+     * The first version divided by 100 and formatted two places regardless,
+     * ignoring the field beside it — so a zero-decimal currency printed
+     * hundredths of itself. It also rendered -150 as "$-1.-50", because the
+     * remainder of a negative is negative. A refund is a negative amount and
+     * would have shipped looking like that.
+     */
     override fun toString(): String {
-        val whole = minorUnits / 1_00
-        val cents = (minorUnits % 1_00).toInt()
-        return "%s%,d.%02d".format(symbol, whole, cents)
+        var scale = 1L
+        repeat(exponent) { scale *= 10 }
+        val negative = minorUnits < 0
+        val abs = if (negative) -minorUnits else minorUnits
+        val whole = abs / scale
+        val sign = if (negative) "-" else ""
+        if (exponent == 0) return "$sign$symbol%,d".format(whole)
+        val frac = abs % scale
+        return "$sign$symbol%,d.%0${exponent}d".format(whole, frac)
     }
 }
 

@@ -729,6 +729,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -752,9 +756,13 @@ internal interface UniffiLib : Library {
     ): Double
     fun uniffi_ducat_mobile_fn_func_check_verification(`policy`: RustBuffer.ByValue,`deviceUnlocked`: Byte,`appSecretAgeS`: RustBuffer.ByValue,`amountMinor`: Long,`spentInWindowMinor`: Long,`rateIsFresh`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_create_persona_secret(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_create_wallet(`tipHeight`: Long,`stagenet`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_default_verification_policy(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_export_backup(`input`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_plan_float(`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -882,9 +890,13 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_check_verification(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_create_persona_secret(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_create_wallet(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_default_verification_policy(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_export_backup(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_plan_float(
     ): Short
@@ -921,10 +933,16 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_check_verification() != 369.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_create_persona_secret() != 62676.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_create_wallet() != 2937.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_default_verification_policy() != 11081.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_export_backup() != 50604.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_plan_float() != 49046.toShort()) {
@@ -1132,6 +1150,63 @@ public object FfiConverterString: FfiConverter<String, RustBuffer.ByValue> {
     }
 }
 
+/**
+ * @suppress
+ */
+public object FfiConverterByteArray: FfiConverterRustBuffer<ByteArray> {
+    override fun read(buf: ByteBuffer): ByteArray {
+        val len = buf.getInt()
+        val byteArr = ByteArray(len)
+        buf.get(byteArr)
+        return byteArr
+    }
+    override fun allocationSize(value: ByteArray): ULong {
+        return 4UL + value.size.toULong()
+    }
+    override fun write(value: ByteArray, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        buf.put(value)
+    }
+}
+
+
+
+/**
+ * What onboarding has to protect.
+ */
+data class BackupInput (
+    /**
+     * Hex, from [`create_wallet`].
+     */
+    var `spendKeyHex`: kotlin.String, 
+    var `restoreHeight`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
+    override fun read(buf: ByteBuffer): BackupInput {
+        return BackupInput(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: BackupInput) = (
+            FfiConverterString.allocationSize(value.`spendKeyHex`) +
+            FfiConverterULong.allocationSize(value.`restoreHeight`)
+    )
+
+    override fun write(value: BackupInput, buf: ByteBuffer) {
+            FfiConverterString.write(value.`spendKeyHex`, buf)
+            FfiConverterULong.write(value.`restoreHeight`, buf)
+    }
+}
+
 
 
 /**
@@ -1188,10 +1263,15 @@ data class NewWallet (
      */
     var `address`: kotlin.String, 
     /**
-     * The 25-word Electrum-style mnemonic. Shown once, then the user's problem —
-     * which is the point of §4.3 existing.
+     * The private spend key, hex-encoded. **This restores the wallet.**
+     *
+     * Not a 25-word mnemonic: `monero-wallet` implements none, and §4.3's
+     * bundle is an encrypted *file* rather than something transcribed by hand,
+     * so the key material is what belongs in it. A word list is a human
+     * encoding for paper backup — a different feature, wanted by some people,
+     * and not a substitute for this.
      */
-    var `seedWords`: kotlin.String, 
+    var `spendKeyHex`: kotlin.String, 
     /**
      * The height to restore from.
      *
@@ -1221,13 +1301,13 @@ public object FfiConverterTypeNewWallet: FfiConverterRustBuffer<NewWallet> {
 
     override fun allocationSize(value: NewWallet) = (
             FfiConverterString.allocationSize(value.`address`) +
-            FfiConverterString.allocationSize(value.`seedWords`) +
+            FfiConverterString.allocationSize(value.`spendKeyHex`) +
             FfiConverterULong.allocationSize(value.`restoreHeight`)
     )
 
     override fun write(value: NewWallet, buf: ByteBuffer) {
             FfiConverterString.write(value.`address`, buf)
-            FfiConverterString.write(value.`seedWords`, buf)
+            FfiConverterString.write(value.`spendKeyHex`, buf)
             FfiConverterULong.write(value.`restoreHeight`, buf)
     }
 }
@@ -1363,6 +1443,95 @@ public object FfiConverterTypeVerificationPolicy: FfiConverterRustBuffer<Verific
             FfiConverterULong.write(value.`cumulativeAt`, buf)
             FfiConverterULong.write(value.`cumulativeWindowS`, buf)
     }
+}
+
+
+
+
+
+sealed class BackupException: kotlin.Exception() {
+    
+    class WeakPassphrase(
+        ) : BackupException() {
+        override val message
+            get() = ""
+    }
+    
+    class BadKey(
+        ) : BackupException() {
+        override val message
+            get() = ""
+    }
+    
+    class Failed(
+        
+        val v1: kotlin.String
+        ) : BackupException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<BackupException> {
+        override fun lift(error_buf: RustBuffer.ByValue): BackupException = FfiConverterTypeBackupError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeBackupError : FfiConverterRustBuffer<BackupException> {
+    override fun read(buf: ByteBuffer): BackupException {
+        
+
+        return when(buf.getInt()) {
+            1 -> BackupException.WeakPassphrase()
+            2 -> BackupException.BadKey()
+            3 -> BackupException.Failed(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: BackupException): ULong {
+        return when(value) {
+            is BackupException.WeakPassphrase -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is BackupException.BadKey -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is BackupException.Failed -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+        }
+    }
+
+    override fun write(value: BackupException, buf: ByteBuffer) {
+        when(value) {
+            is BackupException.WeakPassphrase -> {
+                buf.putInt(1)
+                Unit
+            }
+            is BackupException.BadKey -> {
+                buf.putInt(2)
+                Unit
+            }
+            is BackupException.Failed -> {
+                buf.putInt(3)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
 }
 
 
@@ -1507,6 +1676,18 @@ public object FfiConverterOptionalULong: FfiConverterRustBuffer<kotlin.ULong?> {
     
 
         /**
+         * A persona key. Thirty-two bytes of nothing in particular, which is the point.
+         */ fun `createPersonaSecret`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_create_persona_secret(
+        _status)
+}
+    )
+    }
+    
+
+        /**
          * Create a wallet.
          *
          * `tip_height` comes from a node the caller already talks to. It is a parameter
@@ -1526,6 +1707,27 @@ public object FfiConverterOptionalULong: FfiConverterRustBuffer<kotlin.ULong?> {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_default_verification_policy(
         _status)
+}
+    )
+    }
+    
+
+        /**
+         * Produce the encrypted bundle §4.3 specifies.
+         *
+         * Returns the bytes; writing them somewhere is the caller's job, because the
+         * user chooses where a backup lives and a protocol that also decided *where*
+         * would be back to needing a service.
+         *
+         * The persona key is generated here and returned inside the bundle rather than
+         * separately: it is the thing whose loss is unrecoverable, and an API that
+         * hands it back for the caller to store invites the caller to store it badly.
+         */
+    @Throws(BackupException::class) fun `exportBackup`(`input`: BackupInput, `passphrase`: kotlin.String, `personaSecret`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(BackupException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_export_backup(
+        FfiConverterTypeBackupInput.lower(`input`),FfiConverterString.lower(`passphrase`),FfiConverterByteArray.lower(`personaSecret`),_status)
 }
     )
     }

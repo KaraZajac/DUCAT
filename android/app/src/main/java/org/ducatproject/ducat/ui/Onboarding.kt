@@ -11,8 +11,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.content.Context
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import java.io.File
+import uniffi.ducat_mobile.BackupInput
 import uniffi.ducat_mobile.NewWallet
+import uniffi.ducat_mobile.createPersonaSecret
 import uniffi.ducat_mobile.createWallet
+import uniffi.ducat_mobile.exportBackup
 
 /**
  * Four steps, and the order is an argument rather than a sequence.
@@ -29,8 +37,18 @@ import uniffi.ducat_mobile.createWallet
  */
 enum class Step { Persona, Wallet, Limits, Backup, Done }
 
+/**
+ * No node has been asked yet.
+ *
+ * Deliberately not zero. Zero is a *valid* restore height meaning genesis, and
+ * genesis means a ~106-hour rescan — so a placeholder of zero is not a
+ * placeholder, it is the expensive answer wearing one's clothes.
+ */
+const val UNKNOWN_TIP: ULong = ULong.MAX_VALUE
+
 data class Onboarding(
     val step: Step = Step.Persona,
+    val persona: ByteArray? = null,
     val wallet: NewWallet? = null,
     val backupConfirmed: Boolean = false,
 )
@@ -49,7 +67,9 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                 body = "A keypair on this phone. No email, no phone number, nobody to " +
                     "register with — which is also why nobody can restore it for you.",
                 action = "Create",
-                onAction = { onState(state.copy(step = Step.Wallet)) },
+                onAction = {
+                    onState(state.copy(step = Step.Wallet, persona = createPersonaSecret()))
+                },
             )
 
             Step.Wallet -> StepCard(
@@ -57,11 +77,14 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                 body = "Monero keys, generated here and held here. This is the money.",
                 action = "Create wallet",
                 onAction = {
-                    // Real keys from the native core. The height is the chain tip
-                    // a node reports; for a *fresh* wallet that is correct, since
-                    // it has no earlier outputs to miss — the one case where
-                    // "now" is right rather than catastrophic (§4.3.1).
-                    val w = createWallet(tipHeight = 0uL, stagenet = true)
+                    // §4.3.1: the restore height is wrong in both directions. Too
+                    // high is silent and total; too low costs ~106 hours of
+                    // rescan. **Zero is genesis**, which is the expensive
+                    // direction — and the first version passed zero while a
+                    // comment claimed it was correct. Until a node supplies the
+                    // tip, this is honestly marked as unknown rather than baked
+                    // in as a number that happens to be catastrophic.
+                    val w = createWallet(tipHeight = UNKNOWN_TIP, stagenet = true)
                     onState(state.copy(step = Step.Limits, wallet = w))
                 },
             )
@@ -77,7 +100,7 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
 
             // Deliberately before funding, and deliberately not skippable.
             Step.Backup -> BackupStep(
-                wallet = state.wallet,
+                state = state,
                 onDone = { onState(state.copy(step = Step.Done, backupConfirmed = true)) },
             )
 
@@ -137,9 +160,11 @@ private fun StepCard(title: String, body: String, action: String, onAction: () -
  * unrecoverable, and there is no operator to appeal to.
  */
 @Composable
-private fun BackupStep(wallet: NewWallet?, onDone: () -> Unit) {
+private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
+    val context = LocalContext.current
     var passphrase by remember { mutableStateOf("") }
-    var confirmed by remember { mutableStateOf(false) }
+    var written by remember { mutableStateOf<File?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
     val longEnough = passphrase.length >= 8
 
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
@@ -167,24 +192,19 @@ private fun BackupStep(wallet: NewWallet?, onDone: () -> Unit) {
                 }
             }
 
-            if (wallet != null) {
+            state.wallet?.let { w ->
                 Spacer(Modifier.height(12.dp))
                 Text("Your address", style = MaterialTheme.typography.labelMedium)
-                Text(
-                    wallet.address,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontFamily = FontFamily.Monospace,
-                )
+                Text(w.address, style = MaterialTheme.typography.bodySmall,
+                    fontFamily = FontFamily.Monospace)
             }
 
             Spacer(Modifier.height(16.dp))
             OutlinedTextField(
                 value = passphrase,
-                onValueChange = { passphrase = it },
+                onValueChange = { passphrase = it; error = null },
                 label = { Text("Passphrase") },
                 supportingText = {
-                    // §4.3.2 refuses trivially short passphrases at export rather
-                    // than producing an artifact whose protection is nominal.
                     Text(
                         if (longEnough) "Good" else "At least 8 characters",
                         color = if (longEnough) MaterialTheme.ducat.settled
@@ -195,16 +215,80 @@ private fun BackupStep(wallet: NewWallet?, onDone: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = confirmed, onCheckedChange = { confirmed = it })
-                Text("I've saved the file somewhere I can find it")
+            error?.let {
+                Spacer(Modifier.height(8.dp))
+                Text(it, color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall)
             }
 
-            Spacer(Modifier.height(8.dp))
-            Button(onClick = onDone, enabled = longEnough && confirmed) {
-                Text("Export backup")
+            Spacer(Modifier.height(12.dp))
+
+            if (written == null) {
+                // **A file is written before anything is claimed about one.**
+                // The first version asked the user to tick "I've saved the file"
+                // when no file had ever existed. Someone who ticked it and later
+                // lost the phone would have lost everything while believing they
+                // were covered — which is worse than having no backup step at
+                // all, because it also removes the worry that would have made
+                // them do something about it.
+                Button(
+                    onClick = {
+                        val w = state.wallet
+                        val persona = state.persona
+                        if (w == null || persona == null) {
+                            error = "Setup is incomplete"
+                            return@Button
+                        }
+                        error = try {
+                            val bytes = exportBackup(
+                                BackupInput(w.spendKeyHex, w.restoreHeight),
+                                passphrase,
+                                persona,
+                            )
+                            val dir = File(context.filesDir, "backups").apply { mkdirs() }
+                            val f = File(dir, "ducat-backup.ducatbak")
+                            f.writeBytes(bytes)
+                            written = f
+                            null
+                        } catch (t: Throwable) {
+                            t.message ?: t::class.simpleName
+                        }
+                    },
+                    enabled = longEnough,
+                ) { Text("Create backup") }
+            } else {
+                Text(
+                    "Backup created — ${written!!.length()} bytes.",
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    "It is on this phone, which is not a backup yet. Send it " +
+                        "somewhere else: a password manager, a drive, another device.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Spacer(Modifier.height(8.dp))
+                Row {
+                    Button(onClick = { shareBackup(context, written!!) }) { Text("Send it somewhere") }
+                    Spacer(Modifier.width(8.dp))
+                    TextButton(onClick = onDone) { Text("Done") }
+                }
             }
         }
     }
+}
+
+/**
+ * Hand the file to whatever the user already trusts with important things.
+ *
+ * §4.3 is deliberate that the user chooses where a backup lives — a protocol
+ * that also decided *where* would be back to needing a service.
+ */
+private fun shareBackup(context: Context, file: File) {
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.backups", file)
+    val send = Intent(Intent.ACTION_SEND).apply {
+        type = "application/octet-stream"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(send, "Save your DUCAT backup"))
 }

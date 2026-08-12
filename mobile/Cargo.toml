@@ -15,6 +15,7 @@ ducat-core = { path = "../core" }
 monero-wallet = { version = "0.2.0", features = ["multisig"] }
 rand_core = { version = "0.6", features = ["getrandom"] }
 zeroize = "1"
+thiserror = "1"
 curve25519-dalek = { version = "4", features = ["precomputed-tables"] }
 uniffi = { version = "0.28", features = ["cli"] }
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Only the backups directory is shared, and only through a content URI granted
+  per-share. A backup is a spending credential (§4.3.4) — anyone with the file
+  and the passphrase becomes the user completely — so it is handed to one chosen
+  app at a time rather than left anywhere readable.
+-->
+<paths>
+    <files-path name="backups" path="backups/" />
+</paths>

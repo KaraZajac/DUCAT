@@ -121,10 +121,17 @@ fun BalanceCard(
  * is an upper bound on payments, not an equality — six bought four in the drain
  * test — so the copy says "about".
  */
-internal fun notesPhrase(outputs: Int, approxPayments: Int): String = when {
-    outputs == 0 -> "No notes left — everything is out as change"
-    approxPayments <= 1 -> "1 note left, so about one more payment"
-    else -> "$outputs notes, so about $approxPayments more payments"
+internal fun notesPhrase(outputs: Int, approxPayments: Int): String {
+    // Notes and payments are different quantities and the first version conflated
+    // them: with two notes the capacity is one, and it printed "1 note left" —
+    // understating what the user has on the one screen §17.2 cares most about.
+    val notes = if (outputs == 1) "1 note" else "$outputs notes"
+    return when {
+        outputs == 0 -> "No notes left — everything is out as change"
+        approxPayments == 0 -> "$notes, but not enough to cover a payment yet"
+        approxPayments == 1 -> "$notes, so about one more payment"
+        else -> "$notes, so about $approxPayments more payments"
+    }
 }
 
 /** Monero stagenet and mainnet both target two-minute blocks. */

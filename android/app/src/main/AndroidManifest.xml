@@ -50,6 +50,17 @@
             </intent-filter>
         </activity>
 
+        <!-- Sharing the backup out, one recipient at a time. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.backups"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <!-- §15.3: presenting over NFC. The AID is F0 44 55 43 41 54 —
              0xF0 + "DUCAT", in ISO/IEC 7816-5's registration-free proprietary
              range. It cannot be discovered at runtime and changing it would be a

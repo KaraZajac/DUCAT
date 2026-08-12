@@ -293,9 +293,14 @@ mod tests {
 pub struct NewWallet {
     /// The primary address, for receiving.
     pub address: String,
-    /// The 25-word Electrum-style mnemonic. Shown once, then the user's problem —
-    /// which is the point of §4.3 existing.
-    pub seed_words: String,
+    /// The private spend key, hex-encoded. **This restores the wallet.**
+    ///
+    /// Not a 25-word mnemonic: `monero-wallet` implements none, and §4.3's
+    /// bundle is an encrypted *file* rather than something transcribed by hand,
+    /// so the key material is what belongs in it. A word list is a human
+    /// encoding for paper backup — a different feature, wanted by some people,
+    /// and not a substitute for this.
+    pub spend_key_hex: String,
     /// The height to restore from.
     ///
     /// **Load-bearing, not metadata.** A wallet restored without one rescans from
@@ -321,7 +326,14 @@ pub fn create_wallet(tip_height: u64, stagenet: bool) -> NewWallet {
     use curve25519_dalek::constants::ED25519_BASEPOINT_TABLE;
 
     let spend = Zeroizing::new(Scalar::random(&mut OsRng));
-    let view = Zeroizing::new(Scalar::random(&mut OsRng));
+    // **Derived, not independent.** Monero's convention is view = H(spend), and
+    // the first version of this generated the view key at random. That produces
+    // a valid wallet which cannot be restored from its spend key — the holder of
+    // a "seed" would recover an address they could not see payments to. A wallet
+    // that is unrestorable in the ordinary way is not a wallet.
+    let mut sb = Vec::new();
+    spend.write(&mut sb).expect("scalar write");
+    let view = Zeroizing::new(Scalar::hash(&sb));
     let spend_pub = monero_wallet::ed25519::Point::from(&(*spend).into() * ED25519_BASEPOINT_TABLE);
     let vp = monero_wallet::ViewPair::new(spend_pub, view.clone())
         .expect("a random scalar yields a valid view pair");
@@ -331,10 +343,7 @@ pub fn create_wallet(tip_height: u64, stagenet: bool) -> NewWallet {
 
     NewWallet {
         address: address.to_string(),
-        // Placeholder until seed encoding lands: the wallet is real, the words
-        // are not, and shipping fake words a user might write down would be
-        // worse than shipping none.
-        seed_words: String::new(),
+        spend_key_hex: sb.iter().map(|b| format!("{b:02x}")).collect(),
         restore_height: tip_height,
     }
 }
@@ -365,5 +374,156 @@ mod wallet_tests {
     #[test]
     fn a_fresh_wallet_restores_from_the_tip() {
         assert_eq!(create_wallet(2_190_000, true).restore_height, 2_190_000);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// §4.3 — the backup, actually produced
+// ---------------------------------------------------------------------------
+
+/// What onboarding has to protect.
+#[derive(uniffi::Record)]
+pub struct BackupInput {
+    /// Hex, from [`create_wallet`].
+    pub spend_key_hex: String,
+    pub restore_height: u64,
+}
+
+#[derive(uniffi::Error, Debug, thiserror::Error)]
+pub enum BackupError {
+    #[error("passphrase is too short to protect a wallet")]
+    WeakPassphrase,
+    #[error("malformed key material")]
+    BadKey,
+    #[error("{0}")]
+    Failed(String),
+}
+
+/// Produce the encrypted bundle §4.3 specifies.
+///
+/// Returns the bytes; writing them somewhere is the caller's job, because the
+/// user chooses where a backup lives and a protocol that also decided *where*
+/// would be back to needing a service.
+///
+/// The persona key is generated here and returned inside the bundle rather than
+/// separately: it is the thing whose loss is unrecoverable, and an API that
+/// hands it back for the caller to store invites the caller to store it badly.
+#[uniffi::export]
+pub fn export_backup(
+    input: BackupInput,
+    passphrase: String,
+    persona_secret: Vec<u8>,
+) -> Result<Vec<u8>, BackupError> {
+    use ducat_core::backup::{export, Backup};
+    use rand_core::{OsRng, RngCore};
+
+    if persona_secret.len() != 32 {
+        return Err(BackupError::BadKey);
+    }
+    if hex_to_bytes(&input.spend_key_hex).map(|b| b.len()) != Some(32) {
+        return Err(BackupError::BadKey);
+    }
+
+    let bundle = Backup {
+        persona_suite: 1,
+        persona_secret,
+        // §4.3.1's field, carrying key material rather than a word list — the
+        // bundle is a file, not something transcribed.
+        monero_seed: input.spend_key_hex,
+        // Wrong in both directions, asymmetrically: too low costs ~106 hours of
+        // rescan, too high is silent and total. For a wallet created moments ago
+        // the tip is right, because there are no earlier outputs to miss.
+        monero_restore_height: input.restore_height,
+        rendezvous: vec![],
+        attestation_records: vec![],
+        mandates: vec![],
+        verification: ducat_core::verify::VerificationPolicy::default(),
+        escrow_shares: vec![],
+        created: 0,
+    };
+
+    // Fresh per export (§4.3.2). Reusing either would be the bug.
+    let mut salt = [0u8; 16];
+    let mut nonce = [0u8; 24];
+    OsRng.fill_bytes(&mut salt);
+    OsRng.fill_bytes(&mut nonce);
+
+    export(&bundle, passphrase.as_bytes(), salt, nonce).map_err(|e| {
+        if matches!(e.code, ducat_core::reject::RejectCode::PolicyRefused) {
+            BackupError::WeakPassphrase
+        } else {
+            BackupError::Failed(format!("{e:?}"))
+        }
+    })
+}
+
+/// A persona key. Thirty-two bytes of nothing in particular, which is the point.
+#[uniffi::export]
+pub fn create_persona_secret() -> Vec<u8> {
+    use rand_core::{OsRng, RngCore};
+    let mut k = [0u8; 32];
+    OsRng.fill_bytes(&mut k);
+    k.to_vec()
+}
+
+fn hex_to_bytes(s: &str) -> Option<Vec<u8>> {
+    if s.len() % 2 != 0 {
+        return None;
+    }
+    (0..s.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&s[i..i + 2], 16).ok())
+        .collect()
+}
+
+#[cfg(test)]
+mod backup_tests {
+    use super::*;
+
+    #[test]
+    fn a_backup_is_produced_and_reopens() {
+        let w = create_wallet(2_190_000, true);
+        let persona = create_persona_secret();
+        let blob = export_backup(
+            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: w.restore_height },
+            "a real passphrase".into(),
+            persona.clone(),
+        )
+        .expect("export");
+        assert!(blob.len() > 100);
+
+        let back = ducat_core::backup::import(&blob, b"a real passphrase").expect("import");
+        assert_eq!(back.persona_secret, persona);
+        assert_eq!(back.monero_seed, w.spend_key_hex);
+        assert_eq!(back.monero_restore_height, 2_190_000);
+    }
+
+    /// §4.3.2 refuses a trivially short passphrase rather than producing an
+    /// artifact whose protection is nominal.
+    #[test]
+    fn a_weak_passphrase_produces_nothing() {
+        let w = create_wallet(1, true);
+        assert!(matches!(
+            export_backup(
+                BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1 },
+                "short".into(),
+                create_persona_secret(),
+            ),
+            Err(BackupError::WeakPassphrase)
+        ));
+    }
+
+    /// The key must be usable, not merely present. An unrestorable backup is
+    /// worse than none, because the user stops worrying.
+    #[test]
+    fn a_malformed_key_is_refused() {
+        assert!(matches!(
+            export_backup(
+                BackupInput { spend_key_hex: "nothex".into(), restore_height: 1 },
+                "a real passphrase".into(),
+                create_persona_secret(),
+            ),
+            Err(BackupError::BadKey)
+        ));
     }
 }
