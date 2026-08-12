@@ -1,100 +1,99 @@
 #!/usr/bin/env bash
-# DUCAT Monero spike — validate §17.2's pre-split requirement.
+# DUCAT Monero spike — quantify §17.2's pre-split requirement.
 #
-# The claim under test: "A float held as a single output funds exactly one
-# payment per lock interval: the second tap fails with a full balance showing
-# on screen. This is not a corner case, it is the second ride."
+# The claim under test: a float held as too few outputs cannot fund consecutive
+# payments, because every spend locks its change for 10 blocks
+# (CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE).
 #
-# Sequence:
-#   1. wait for the single received output to unlock
-#   2. confirm the single-output failure: two payments back to back, second fails
-#   3. pre-split into N outputs, wait for them to unlock
-#   4. confirm the fix: N payments back to back all succeed
+# Rather than demonstrate one failure, this measures the actual limit: make
+# payments until one fails, and count. The prediction is that the count equals
+# the number of unlocked outputs, before and after splitting.
 set -uo pipefail
 
 PORT=28100
 SELF=$(cat w_fund/fund.address.txt)
-N=8
+PAY=1000000000        # 0.001 XMR per payment
+SPLIT_N=10
+SPLIT_EACH=5000000000 # 0.005 XMR per split output
 
 rpc(){ curl -s -m 120 -X POST "http://127.0.0.1:$PORT/json_rpc" \
         -H 'Content-Type: application/json' \
         -d "{\"jsonrpc\":\"2.0\",\"id\":\"0\",\"method\":\"$1\",\"params\":$2}"; }
 
 bal(){ rpc get_balance '{"account_index":0}' | jq -c '.result | {balance, unlocked_balance, blocks_to_unlock}'; }
+unlocked(){ rpc get_balance '{"account_index":0}' | jq -r '.result.unlocked_balance // 0'; }
 
-unlocked(){ rpc get_balance '{"account_index":0}' | jq -r '.result.unlocked_balance'; }
+# Count outputs the wallet considers spendable right now.
+avail(){ rpc incoming_transfers '{"transfer_type":"available","account_index":0}' \
+          | jq -r '[.result.transfers // [] | .[] | select(.spent==false)] | length'; }
 
-outputs(){ # count of unlocked, spendable outputs
-  rpc incoming_transfers '{"transfer_type":"available","account_index":0}' \
-    | jq -r '[.result.transfers // [] | .[] | select(.spent==false)] | length'
-}
-
-wait_unlock(){ # label
+wait_unlock(){
   echo "  waiting for unlock ($1)..."
   local i=0
   while [ "$(unlocked)" = "0" ]; do
     i=$((i+1))
-    [ $((i % 6)) -eq 1 ] && echo "    $(date +%H:%M:%S) $(bal)"
-    sleep 20
+    [ $((i % 5)) -eq 1 ] && echo "    $(date +%H:%M:%S) $(bal)"
+    sleep 25
     rpc refresh '{}' >/dev/null
-    [ $i -gt 200 ] && { echo "  gave up waiting" >&2; return 1; }
+    [ $i -gt 160 ] && { echo "  gave up" >&2; return 1; }
   done
-  echo "  unlocked: $(bal)"
+  echo "    unlocked: $(bal)"
 }
 
-echo "=== state at start ==="
+# Spend repeatedly until refused. Returns the number that succeeded.
+drain(){
+  local n=0 i
+  for i in $(seq 1 20); do
+    local r
+    r=$(rpc transfer "{\"destinations\":[{\"amount\":$PAY,\"address\":\"$SELF\"}],\"account_index\":0,\"priority\":1}")
+    if echo "$r" | jq -e '.error' >/dev/null 2>&1; then
+      echo "    payment $i REFUSED: $(echo "$r" | jq -r '.error.message')" >&2
+      echo "    balance at refusal: $(bal)" >&2
+      break
+    fi
+    n=$((n+1))
+    echo "    payment $i ok  txid=$(echo "$r" | jq -r '.result.tx_hash' | cut -c1-16)..." >&2
+  done
+  echo "$n"
+}
+
 rpc refresh '{}' >/dev/null
-echo "  $(bal)"
-echo "  spendable outputs: $(outputs)"
+echo "=== start ==="
+echo "  $(bal)   spendable outputs: $(avail)"
 
-wait_unlock "initial output" || exit 1
-
-echo
-echo "=== 2. single-output behaviour: two payments back to back ==="
-echo "  outputs available: $(outputs)"
-for i in 1 2; do
-  r=$(rpc transfer "{\"destinations\":[{\"amount\":1000000000,\"address\":\"$SELF\"}],\"account_index\":0,\"priority\":1,\"get_tx_key\":true}")
-  if echo "$r" | jq -e '.error' >/dev/null; then
-    echo "  payment $i: FAILED — $(echo "$r" | jq -r '.error.message')"
-    echo "             balance at failure: $(bal)"
-  else
-    echo "  payment $i: ok  txid=$(echo "$r" | jq -r '.result.tx_hash' | cut -c1-16)... fee=$(echo "$r" | jq -r '.result.fee')"
-  fi
-done
+wait_unlock "initial outputs" || exit 1
 
 echo
-echo "=== 3. pre-split into $N outputs ==="
-wait_unlock "post-payment change" || exit 1
-DEST=$(python3 - "$SELF" "$N" <<'PY'
-import sys, json
-addr, n = sys.argv[1], int(sys.argv[2])
-print(json.dumps([{"amount": 500000000, "address": addr} for _ in range(n)]))
-PY
-)
-r=$(rpc transfer "{\"destinations\":$DEST,\"account_index\":0,\"priority\":1,\"get_tx_key\":true}")
-if echo "$r" | jq -e '.error' >/dev/null; then
-  echo "  split FAILED — $(echo "$r" | jq -r '.error.message')"
-else
-  echo "  split ok: txid=$(echo "$r" | jq -r '.result.tx_hash' | cut -c1-16)... fee=$(echo "$r" | jq -r '.result.fee')"
+echo "=== A. consecutive payments BEFORE splitting ==="
+BEFORE_OUTPUTS=$(avail)
+echo "  unlocked outputs: $BEFORE_OUTPUTS"
+BEFORE=$(drain)
+echo "  --> $BEFORE consecutive payments from $BEFORE_OUTPUTS unlocked output(s)"
+
+echo
+echo "=== B. pre-split into $SPLIT_N outputs ==="
+wait_unlock "change from phase A" || exit 1
+DEST=$(python3 -c "
+import json,sys
+print(json.dumps([{'amount': $SPLIT_EACH, 'address': '$SELF'} for _ in range($SPLIT_N)]))
+")
+r=$(rpc transfer "{\"destinations\":$DEST,\"account_index\":0,\"priority\":1}")
+if echo "$r" | jq -e '.error' >/dev/null 2>&1; then
+  echo "  split REFUSED: $(echo "$r" | jq -r '.error.message')"; exit 1
 fi
+echo "  split ok: txid=$(echo "$r" | jq -r '.result.tx_hash' | cut -c1-16)... fee=$(echo "$r" | jq -r '.result.fee')"
 
 wait_unlock "split outputs" || exit 1
-echo "  spendable outputs after split: $(outputs)"
 
 echo
-echo "=== 4. with a pre-split float: consecutive payments ==="
-OK=0; FAIL=0
-for i in $(seq 1 4); do
-  r=$(rpc transfer "{\"destinations\":[{\"amount\":200000000,\"address\":\"$SELF\"}],\"account_index\":0,\"priority\":1}")
-  if echo "$r" | jq -e '.error' >/dev/null; then
-    FAIL=$((FAIL+1)); echo "  payment $i: FAILED — $(echo "$r" | jq -r '.error.message')"
-  else
-    OK=$((OK+1)); echo "  payment $i: ok  txid=$(echo "$r" | jq -r '.result.tx_hash' | cut -c1-16)..."
-  fi
-done
+echo "=== C. consecutive payments AFTER splitting ==="
+AFTER_OUTPUTS=$(avail)
+echo "  unlocked outputs: $AFTER_OUTPUTS"
+AFTER=$(drain)
+echo "  --> $AFTER consecutive payments from $AFTER_OUTPUTS unlocked output(s)"
 
 echo
 echo "=== RESULT ==="
-echo "  consecutive payments from a pre-split float: $OK ok, $FAIL failed"
+printf "  before split: %s outputs -> %s consecutive payments\n" "$BEFORE_OUTPUTS" "$BEFORE"
+printf "  after  split: %s outputs -> %s consecutive payments\n" "$AFTER_OUTPUTS" "$AFTER"
 echo "  final: $(bal)"
-echo "  outputs: $(outputs)"

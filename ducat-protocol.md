@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.17 — Consolidated**
+**Draft 0.18 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Status: Pre-alpha design document. Nothing here is final. Several sections rest on primitives that are not production-grade; §14 is the real agenda.
 
@@ -10,7 +10,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 ## Contents
 
 **Part I — Core Protocol**
-1. Vision · 2. Threat Model · 3. Layered Architecture · 4. L1 Identity · 5. L2 Discovery · 6. L3 Contract State Machine · 7. Profiles · 8. L4 Settlement · 9. L5 Trust · 10. Federation & Cold Start (+10.1 market descriptor) · 11. Sustainability · 12. Regulatory Posture · 13. Build Order · 14. Open Problems
+1. Vision · 2. Threat Model (+2.5 RetoSwap case study) · 3. Layered Architecture · 4. L1 Identity · 5. L2 Discovery · 6. L3 Contract State Machine · 7. Profiles · 8. L4 Settlement · 9. L5 Trust · 10. Federation & Cold Start (+10.1 market descriptor) · 11. Sustainability · 12. Regulatory Posture · 13. Build Order · 14. Open Problems
 
 **Part II — The Tap** (L2/L3 detail)
 15.1 Tap as bootstrap · 15.2 The generating grid · 15.3 `TapPresent` + transport ladder · 15.4 `FullOffer` · 15.5 WYSIWYS · 15.6 Response leg · 15.7 Metered · 15.8 Split · 15.9 Static tags · 15.10 Residual attacks
@@ -25,6 +25,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.18** — **Added §2.5, the RetoSwap case study.** A Haveno-derived Monero DEX using 2-of-3 arbitrated multisig — §17.2's structure in production — was drained of ~7,000 XMR in May 2026 by a forged, out-of-order ACK that overwrote the arbitrator's address without any check against a known key. **Nothing about Monero failed**; the break was in the messaging layer, which here is Veilid. Route anonymity is not authentication. Four existing rules are the direct countermeasures (§18.3, §18.4, §18.8, §10.1), and §9.3 now states explicitly that arbiters come from the signed market descriptor and never from an address in a message. Second lesson recorded: Haveno was mature, had a prior exploit to learn from, and was breached again — this document's equivalent surface has had no adversarial review at all.
 - **0.17** — **`fast/1` acceptance simplified: the recipient scans, the payer does not prove.** Source review of `monero-wallet` 0.2.0 found no transaction-proof support at all — and most of the requirement dissolved on inspection, because a tx proof exists to convince a non-recipient and the driver *is* the recipient. §17.3's Layer 1 and §17.4's flow now have the driver scan the mempool transaction with their own view key; `TXPROOF` becomes `TXID`. Proofs remain necessary for arbitration (§17.5) and are now DUCAT's to implement. Added O20 (scanning is block-oriented, so unconfirmed verification has no public API; plus the missing proof work) and O21 (burning-bug-immune outputs exist but are unspecified outside one implementation, so staying standard and detecting the attack beats adopting them).
 - **0.16** — **Client architecture decided: embed a wallet, do not drive `monero-wallet-rpc`.** This dissolves the missing-API and halfway-stranding problems from 0.15 by construction, and permits FROSTLASS (`monero-oxide`, audited May 2025, O(1) per-signer vs native O(n!)) in place of wallet2's experimental multisig — the upstream warning in §8.2 describes wallet2's implementation, not threshold signing on Monero generally. Added the constraint this creates: **bond parties cannot mix schemes**, so `multisig_scheme` joins the market descriptor (§10.1). Also separated the `FLOAT`'s two halves in §17.2's user-facing guidance — "only load what you'll spend" describes `hot_wallet` and mislabels `bond_ms`, which is locked collateral backing fast-settle capacity. O1 reframed.
 - **0.15** — **Monero multisig measured (O1).** A 2-of-3 ceremony converged in 2 rounds and 134 s on v0.18.5.1/stagenet — round-trip fragility was overstated. The real obstacles are that Monero ships multisig **disabled by default** with an upstream warning that funds may be unspendable or stealable (now quoted verbatim in §8.2), that **no RPC method enables it**, and that a wallet can be stranded halfway because `prepare` and `make` succeed while `exchange` refuses. O1 reframed from fragility to availability.
@@ -112,6 +113,30 @@ DUCAT composes two systems and inherits the weaknesses of both. Two consequences
 
 - **The settlement leg is a second network path.** Contract negotiation rides Veilid; transaction broadcast and wallet sync reach the **Monero P2P network** separately, by a different route, with a different fingerprint. A device mid-transaction is running two clients, and T1's guarantee is only as strong as the weaker path. Left unaddressed, a clearnet monerod connection undoes every metadata property Parts I–III establish, precisely at the moment of payment. Addressed in §8.7.
 - **Maturity is asymmetric, with a concrete instance.** Veilid issue #395 describes an importer-deanonymization side channel: liveness pings to a maliciously-supplied private route's first hop reveal the importer's address to whoever published the route. DUCAT's tap does exactly this — it imports a route handed over by an untrusted counterparty (§15.10). This is one open issue, not a verdict on the project, but it is the right kind of reminder that the newer half of the composite has not been through the adversarial decade the older half has. More generally: Monero's anonymity set is large and adversarially tested, while Veilid is young, and private-route safety is a function of network size — there must be enough nodes to route through. For the *metadata* properties, the composite is only as strong as the newer half, and at seed-market scale (§10) the Veilid network DUCAT runs on may be small. This is an upstream dependency risk on par with §2.2's Monero entry, and it cuts against the cold-start strategy: the smallest markets are the ones with the weakest routing.
+
+### 2.5 Case Study: RetoSwap, May 2026
+
+The closest production analogue to this protocol's trust machinery was drained of roughly 7,000 XMR (~$2.7 M). It is worth stating precisely, because it is the nearest thing to a real-world attack on the architecture described here — and because the layer it broke is the one people assume is the safe half.
+
+**RetoSwap** is a Monero DEX forked from **Haveno**: peer-to-peer trades settled into a **2-of-3 multisig** between buyer, seller, and an arbitrator, messaged over Tor. That is §17.2's `FLOAT` and §9.3's arbitration, in production, since 2024.
+
+The root cause, from the published post-mortems: a client **accepted a forged, out-of-order ACK message** and overwrote the arbitrator's stored network address with an attacker-controlled one, **without verifying the sender against the arbitrator's known public key**. The attacker then stood in as arbitrator, hijacked multisig wallet creation, and took the funds as they were deposited. It was the second exploit in the same protocol.
+
+**Nothing about Monero failed.** The multisig performed exactly as instructed; it was instructed by an impostor. The break was in the *messaging layer* — which in DUCAT is Veilid, not Monero. A privacy-preserving transport carries an attacker's messages as faithfully as anyone else's, and route anonymity is not authentication.
+
+Four rules in this document are the direct countermeasures, and this is the evidence they earn their cost:
+
+| Rule | What it refuses |
+|---|---|
+| §18.4 — an unlisted message in a state is `STATE_VIOLATION`, **never a silent ignore** | An out-of-order ACK is exactly this. The state machine rejects it before it can mean anything. |
+| §18.3 — domain-separated verification over **bytes as received** | A message accepted without checking the signer against a known key |
+| §10.1 — the arbiter set is pinned in a **threshold-signed market descriptor** | Learning an arbiter's address from a message that can be spoofed |
+| §18.8 — strict rejection of unknown fields and messages | Anything that "looked close enough to work" |
+
+Two lessons that outlive the patch:
+
+- **Peer addresses must never be learned from unauthenticated messages.** Any party whose identity matters is pinned by key, in a signed object, before the exchange begins. If a message can change who you are talking to, it can change who you are paying.
+- **Maturity is not protection.** Haveno had years of development, a live user base, and a prior exploit to learn from, and was breached again. This document's arbitration and multisig surface is comparable in complexity and has had **no adversarial review whatsoever**. Nothing here should hold anyone's money until that changes.
 
 ---
 
@@ -446,7 +471,7 @@ A provider locks XMR against a stake key. Fraud, adjudicated via escrow dispute,
 Attestations = RECEIPTs, optionally rated, signed to a persona key, stored in DHT records the persona controls. A consumer weighs advert stake + attestation history. Caveats made explicit in §4: reputation and unlinkability trade against each other; attestation-stuffing is countered by weighting attestations by *counterparty stake* (a review from a bonded counterparty costs something to forge), not by raw count.
 
 ### 9.3 Arbitration Market
-Arbiters are DUCAT participants running an `arbiter/1` profile. Chosen per-transaction, before FUND, from the DHT by their own stake + reputation. Paid per dispute. They see only what disputants disclose (T5). Multiple arbiters can co-sign for higher-value escrows. This dogfoods the protocol — the dispute layer is itself a P2P service market — and means no central court, only a competitive field of stakers whose own bonds are slashable for provable misconduct.
+Arbiters are DUCAT participants running an `arbiter/1` profile. Chosen per-transaction, before FUND, from the **market descriptor's signed arbiter set** (§10.1) by their own stake + reputation — *never* from an address supplied in a message, which is precisely how RetoSwap was drained (§2.5). Paid per dispute. They see only what disputants disclose (T5). Multiple arbiters can co-sign for higher-value escrows. This dogfoods the protocol — the dispute layer is itself a P2P service market — and means no central court, only a competitive field of stakers whose own bonds are slashable for provable misconduct.
 
 ### 9.4 Safety Floor (honest limit, and where it actually binds)
 
