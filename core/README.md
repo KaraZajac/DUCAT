@@ -30,7 +30,8 @@ non-integer map key, or a duplicate key. Non-canonical objects are not
 | P-256 suite (§4.1, Core conformance) | **not implemented** |
 | State machine (§18.4) | done, 17 tests |
 | Reject codes (§18.5) | done |
-| Version negotiation (§18.6) | not started |
+| Version negotiation (§18.6) | done, 10 tests |
+| Domain-separated commitments (§18.3) | done |
 | Exported test vectors (§18.9) | not started — tests are in-tree only |
 
 ## Test

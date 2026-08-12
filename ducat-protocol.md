@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.10 — Consolidated**
+**Draft 0.11 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Status: Pre-alpha design document. Nothing here is final. Several sections rest on primitives that are not production-grade; §14 is the real agenda.
 
@@ -25,6 +25,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.11** — **Negotiation implemented, and §18.6's suite rule corrected.** "Highest mutually supported" is right for versions and wrong for suites: identifiers are allocated in registration order and encode no preference, so highest-wins would have silently selected P-256 — a fallback forced by iOS hardware (§4.1) — over Ed25519 on every dual-capable pair. Suites are now chosen from an explicit preference list held by the payer. Also established that downgrade resistance needs no new machinery, since `offer_commit` already covers the advertised set — but the commitment MUST be checked *before* negotiating, not after. Extended §18.3's domain separation to commitments as well as signatures, since `offer_commit`, `H(RECEIPT)`, chain links, and `market_id` all hash canonical objects and a bare digest records which role it was for.
 - **0.10** — **First implementation, and the gaps it found.** `ducat-core` implements §18.1–18.5: deterministic CBOR, domain-separated signing, the contract state machine, and reject codes, with 35 tests. Added §18.4.1 for six rules the transition table left open — message direction (only the payer may `ACCEPT`), `CANCEL`'s closing bound, the mode-dependent post-`ACCEPT` deadline (60 s direct/fast, 300 s escrow with fund recovery), the `FUNDED` deadline applying only under `fast/1`, terminal-state absorption with `CLOSED` deliberately excluded, and elapsed time in unbounded states being a no-op. Also established that no serde CBOR crate can satisfy §18.1, since none reject non-canonical input on decode.
 - **0.9** — **Phase 0 completed; all three experiments have numbers.** 0a measured on veilid-core 0.5.7: `token` mode 190 B, `inline` mode 877–1669 B, **non-monotonic in hop count** with within-hop variance exceeding between-hop differences, because size tracks which peer was selected rather than how many hops were requested. This invalidated 0.5's claim that QR level H clears inline mode at every hop count — across two runs it passed in one and failed in the other, minutes apart. Tags now ship tokens; `token` mode reframed as the *privacy-preserving* choice since its size is constant regardless of hop count. 0b measured: 135–204 KB/s at 32 KB payloads, latency-dominated, adequate for incremental sync and not for a full chain — which is what §17.1's restore height already assumes. O11 and O14 closed. The earlier claim that Veilid needs inbound port forwarding was wrong and is retracted.
 - **0.8** — **First empirical results (Phase 0).** 0c answered: Veilid #395 is open, milestoned to 0.13.0 against a current 0.5.7 — no near-term fix, and remote hail (§5.2) is gated on it (O19). **Corrected §15.10:** `token` mode does *not* mitigate hostile-route deanonymization, contrary to 0.5's claim — the exposure is in using the route, not in how the blob arrived. 0a dissolved rather than answered O11: `inline` blobs have no fixed size because the entry hop carries a third party's peer info, so §15.3.2 now mandates measure-and-degrade instead of a budget. 0b remains blocked on a host with inbound reachability. Harness and full results in `phase0/`.
@@ -1142,6 +1143,14 @@ sig_input = "DUCAT-v1" ‖ 0x00 ‖ object_type ‖ 0x00 ‖ suite_id ‖ 0x00 �
 
 with `object_type` a fixed short ASCII label per message type (`"TapPresent"`, `"ACCEPT"`, …). The `0x00` separators prevent concatenation ambiguity between adjacent variable-length fields. `suite_id` is bound in so a signature is not portable across cipher suites — which is half of §18.6's downgrade defense.
 
+**The same rule governs commitments, not just signatures.** The protocol hashes canonical objects in several unrelated roles — `offer_commit = H(FullOffer)` (§15.3), `H(RECEIPT)` inside the CONTACT bind (§16.3), the predecessor link in §6's message chain, `H(genesis descriptor)` for `market_id` (§10.1) — and a bare digest records none of that. Every commitment is therefore computed as:
+
+```
+commit = SHA-256( "DUCAT-v1" ‖ 0x00 ‖ purpose ‖ 0x00 ‖ canonical_bytes )
+```
+
+with `purpose` a fixed label (`"offer_commit"`, `"receipt"`, `"chain"`, `"market_genesis"`). Domain separation costs nothing here, and without it a digest computed for one role can be presented as another wherever an attacker can arrange for the underlying bytes to coincide.
+
 ## 18.4 The State Transition Table
 
 §6 lists messages and §6.2 gives deadlines. Neither says which message is legal in which state, so this table is normative and exhaustive. **Any message not listed for the current state is a `STATE_VIOLATION` reject (§18.5), never a silent ignore** — silently ignoring unexpected messages is the single most reliable way for two implementations to diverge invisibly.
@@ -1213,9 +1222,10 @@ A typed `REJECT { code, object_type, detail? }` is emitted on every refusal. Two
 §3 mandates crypto agility and every object carries `v` and `suite`. Neither is negotiated, and an unnegotiated agility field is the classic downgrade surface.
 
 - The presenter advertises `supported = { versions[], suites[] }` in `FullOffer`.
-- The reader selects the **highest mutually supported** of each and names its choice in `ACCEPT`.
-- **The full advertised sets are bound into the signed transcript**, so a MITM that strips strong options from `supported` produces a set the presenter never signed, and verification fails. Negotiating without binding the offer is equivalent to not negotiating.
-- Clients MUST refuse a suite below their configured floor even when both sides "support" it. Backward compatibility is not a reason to accept broken cryptography. The floor is the stricter of the client's own policy and the market's `suite_floor` (§10.1) — a market can raise the bar for its participants but never lower a client's.
+- **Versions:** the reader selects the **highest mutually supported**. Version numbers are ordered by construction — higher means newer, which is the entire point of a version number.
+- **Suites: highest-wins is wrong, and this document said so until 0.11.** Suite identifiers are allocated in registration order and encode no preference. Suite 1 is Ed25519/X25519; suite 2 is P-256, which exists *only* because iOS's Secure Enclave holds no Ed25519 key (§4.1). P-256 is a fallback forced by hardware, not an upgrade — so "highest wins" would silently select the weaker option on every platform pair supporting both. Worse, any suite added later for being cheaper or narrower would outrank its predecessors purely by arriving late. **Suites are therefore selected from an explicit preference list held by the payer**, over the intersection of offered and permitted; the numeric identifier is never compared. The payer decides because the payer's money is at risk — the same reasoning that puts `ACCEPT` in the payer's hands (§18.4.1).
+- **Downgrade resistance needs no new machinery.** The advertised set lives inside `FullOffer`, and `TapPresent.offer_commit` already commits to the whole of it (§15.3). Stripping a suite changes the offer, changes its digest, and fails the commitment check. **Clients MUST verify the commitment before negotiating**, not after: negotiating first means selecting from an attacker-chosen menu and only then noticing.
+- Clients MUST refuse an impermissible suite even when both sides "support" it. Backward compatibility is not a reason to accept broken cryptography. The permitted set is the intersection of the client's own policy with the market's (§10.1) — **a market narrows what its participants accept and can never widen it.** A market naming a suite the client excludes does not re-enable it.
 
 ## 18.7 Transport Bindings
 

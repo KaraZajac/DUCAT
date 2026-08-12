@@ -5,6 +5,8 @@
 //! Part V (§18) of the protocol document.
 
 pub mod cbor;
+pub mod commit;
+pub mod negotiate;
 pub mod reject;
 pub mod sig;
 pub mod state;

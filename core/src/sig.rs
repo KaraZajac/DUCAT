@@ -60,7 +60,10 @@ impl ObjectType {
 /// suite 2 is P-256, required by Core conformance because iOS's Secure Enclave
 /// holds no Ed25519 key (§4.1) and personas would otherwise fragment by
 /// platform.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// `Ord` is derived so suites can live in sets and maps. It carries **no**
+/// preference meaning: suite selection uses the payer's explicit preference
+/// list, never the numeric identifier (see `negotiate`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum Suite {
     Ed25519X25519 = 1,
