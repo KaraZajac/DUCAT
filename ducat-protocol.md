@@ -2149,7 +2149,7 @@ Only the thing that cannot be engineered away: **an implementer who has never re
 
 The checks grew as the failures did. §18.12's second pass added three that the first lacked, and each caught something:
 
-- **Numeric claims about the vector set.** O21's live text still said "104 vectors" after the set reached 136. A document that miscounts its own artifacts is one a reader stops trusting, and prose counts go stale the moment a case is added. Changelog entries are exempt: they are history, and are supposed to say what was true then.
+- **Numeric claims about the vector set.** O21's live text still quoted the count from four drafts earlier, after the set had grown by a third. A document that miscounts its own artifacts is one a reader stops trusting, and prose counts go stale the moment a case is added. Changelog entries are exempt: they are history, and are supposed to say what was true then.
 - **Field numbers outside every declared range.** `bond_proof` was allocated 140–144 in code while §18.4.2 still read "140+ Unallocated" — the exact collision hazard that registry exists to prevent, reintroduced by the person maintaining it.
 - **Vector kinds the document never names.** §18.9.1's table listed ten kinds while the schema accepted sixteen. Six kinds — every escrow and bond case — were executable, published, and undiscoverable from the specification.
 
