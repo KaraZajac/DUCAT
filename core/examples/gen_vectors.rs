@@ -1029,8 +1029,8 @@ fn main() -> std::io::Result<()> {
         "does_not_yet_cover": {
             "escrow and fast/1 transcripts": "only direct settlement is covered; TXPROOF and escrow objects are unimplemented",
             "suite 2 key agreement": "only signatures are covered; X25519/ECDH is unimplemented",
-            "O21 caveat": "a vector set validated by one implementation encodes that implementation's bugs. These close O21 only when a second, independent client runs them.",
-            "multisig backup": "§4.3.3 — a bond or escrow share is deliberately absent from the bundle, because monero-wallet-rpc has no method to restore one. Nothing here to test."
+            "O21 caveat": "a vector set validated by one implementation encodes that implementation's bugs. A second implementation (conformance/ducat_check.py) now runs these and agrees at 104/104, having found three spec defects on its first pass — but it shares an author with the reference, so O21 stays open until someone who has never read core/ runs them.",
+            "multisig backup": "§4.3.3 — escrow shares are carried in the bundle as opaque key-file bytes, but no vector exercises one: a share is a Monero wallet key file, not a DUCAT object, so there is nothing language-neutral to assert. Verified against stagenet instead (monero-spike/REPORT.md)."
         }
     });
     std::fs::write(
