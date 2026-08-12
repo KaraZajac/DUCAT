@@ -97,7 +97,7 @@ pub fn restore_main() {
     let _ = std::fs::remove_dir_all(dir);
     std::fs::create_dir_all(dir).expect("wallet dir");
 
-    let bin = "/home/kara/Projects/SPECIE/monero-spike/monero-x86_64-linux-gnu-v0.18.5.1/monero-wallet-rpc";
+    let bin = "/home/kara/Projects/SPECIE/research/monero-spike/monero-x86_64-linux-gnu-v0.18.5.1/monero-wallet-rpc";
     let mut child = Command::new(bin)
         .args([
             "--stagenet",

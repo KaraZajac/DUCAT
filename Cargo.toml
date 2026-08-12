@@ -1,0 +1,11 @@
+# One workspace, so `cargo test` at the root covers everything that must agree
+# and every crate shares a target directory rather than keeping its own.
+#
+# The research crates are deliberately excluded: they pin old dependency
+# versions on purpose (they are measurements of what a version did), and
+# unifying their features with the working crates would silently change what
+# they measured.
+[workspace]
+resolver = "2"
+members = ["core", "sim", "harness"]
+exclude = ["research"]
