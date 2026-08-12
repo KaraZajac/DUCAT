@@ -46,6 +46,7 @@ use chacha20poly1305::{XChaCha20Poly1305, XNonce};
 
 use crate::cbor::{decode, Value};
 use crate::reject::{Reject, RejectCode};
+use crate::verify::VerificationPolicy;
 use std::collections::BTreeMap;
 
 /// Format version, bound as additional authenticated data so a backup cannot be
@@ -64,6 +65,11 @@ mod k {
     pub const MANDATES: u64 = 6;
     pub const CREATED: u64 = 7;
     pub const ATTESTATION_RECORDS: u64 = 8;
+    pub const CVM_DEVICE_UNLOCK_AT: u64 = 9;
+    pub const CVM_APP_SECRET_AT: u64 = 10;
+    pub const CVM_APP_SECRET_VALIDITY_S: u64 = 11;
+    pub const CVM_CUMULATIVE_AT: u64 = 12;
+    pub const CVM_CUMULATIVE_WINDOW_S: u64 = 13;
 }
 
 /// Everything a user needs to become themselves again on another device.
@@ -112,6 +118,20 @@ pub struct Backup {
     /// A standing authorisation the user can no longer see is one they cannot
     /// revoke.
     pub mandates: Vec<Vec<u8>>,
+    /// The user's verification thresholds (§15.5.1).
+    ///
+    /// Not a credential, and included anyway. Losing it is not a security
+    /// failure — the defaults are stricter than most users' settings, so a
+    /// restore without it fails safe — but it is an operational one. A merchant
+    /// who raised their floor limit for a high-volume counter and restores to
+    /// the default finds their terminal demanding a secret on every sale, with
+    /// nothing to explain why. Silently reverting a deliberate setting is its
+    /// own kind of data loss.
+    ///
+    /// Restoring a policy cannot weaken anything a counterparty could exploit:
+    /// §15.5.1 keeps verification entirely off the wire, so these thresholds are
+    /// only ever the user's own instruction to their own client.
+    pub verification: VerificationPolicy,
     pub created: u64,
 }
 
@@ -142,6 +162,20 @@ impl Backup {
                     .map(|r| Value::Bytes(r.clone()))
                     .collect(),
             ),
+        );
+        m.insert(
+            k::CVM_DEVICE_UNLOCK_AT,
+            Value::Uint(self.verification.device_unlock_at),
+        );
+        m.insert(k::CVM_APP_SECRET_AT, Value::Uint(self.verification.app_secret_at));
+        m.insert(
+            k::CVM_APP_SECRET_VALIDITY_S,
+            Value::Uint(self.verification.app_secret_validity_s),
+        );
+        m.insert(k::CVM_CUMULATIVE_AT, Value::Uint(self.verification.cumulative_at));
+        m.insert(
+            k::CVM_CUMULATIVE_WINDOW_S,
+            Value::Uint(self.verification.cumulative_window_s),
         );
         m.insert(k::CREATED, Value::Uint(self.created));
         Value::Map(m)
@@ -175,6 +209,20 @@ impl Backup {
                 _ => Err(Reject::new(RejectCode::Malformed)),
             }
         };
+        let policy = VerificationPolicy {
+            device_unlock_at: get(k::CVM_DEVICE_UNLOCK_AT)?.as_uint().unwrap_or(0),
+            app_secret_at: get(k::CVM_APP_SECRET_AT)?.as_uint().unwrap_or(0),
+            app_secret_validity_s: get(k::CVM_APP_SECRET_VALIDITY_S)?.as_uint().unwrap_or(0),
+            cumulative_at: get(k::CVM_CUMULATIVE_AT)?.as_uint().unwrap_or(0),
+            cumulative_window_s: get(k::CVM_CUMULATIVE_WINDOW_S)?.as_uint().unwrap_or(0),
+        };
+        // A policy that fails §15.5.1's own construction check must not be
+        // installed just because it arrived in a bundle. An import is a trust
+        // boundary like any other, and an inverted ladder — a larger payment
+        // asking less than a smaller one — is exactly the state that check
+        // exists to prevent.
+        policy.validate()?;
+
         Ok(Backup {
             persona_suite: get(k::PERSONA_SUITE)?.as_uint().unwrap_or(0) as u8,
             persona_secret: get(k::PERSONA_SECRET)?
@@ -189,6 +237,7 @@ impl Backup {
             rendezvous: arr(k::RENDEZVOUS)?,
             attestation_records: arr(k::ATTESTATION_RECORDS)?,
             mandates: arr(k::MANDATES)?,
+            verification: policy,
             created: get(k::CREATED)?.as_uint().unwrap_or(0),
         })
     }

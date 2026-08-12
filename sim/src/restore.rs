@@ -65,6 +65,7 @@ pub fn restore_main() {
         rendezvous: vec![vec![0x01; 32]],
         attestation_records: vec![vec![0x02; 32]],
         mandates: vec![],
+        verification: ducat_core::verify::VerificationPolicy::default(),
         created: 0,
     };
     let passphrase = b"the correct passphrase";

@@ -63,7 +63,7 @@ impl VerificationState {
 /// A user thinks in money, not in atomic units, and a threshold stored in
 /// piconero would silently drift every time the exchange rate moved — a "$100
 /// limit" quietly becoming a $70 one after a price rise.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VerificationPolicy {
     /// At or above this, the device must be unlocked.
     pub device_unlock_at: u64,

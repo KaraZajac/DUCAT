@@ -2,6 +2,7 @@
 
 use ducat_core::backup::*;
 use ducat_core::reject::RejectCode;
+use ducat_core::verify::VerificationPolicy;
 
 fn sample() -> Backup {
     Backup {
@@ -15,6 +16,7 @@ fn sample() -> Backup {
         rendezvous: vec![vec![0xAA; 32], vec![0xBB; 32]],
         attestation_records: vec![vec![0xDD; 32]],
         mandates: vec![vec![0xCC; 48]],
+        verification: VerificationPolicy::default(),
         created: 1_800_000_000,
     }
 }
@@ -143,11 +145,46 @@ fn the_format_is_frozen() {
     let digest = Sha256::digest(&blob);
     assert_eq!(
         hex(&digest),
-        "bd797f6143ae98d83317b9b34fda1b62362aa64f81800ca1e46c93cdcdbfecb4",
+        "f7283d78b570259944dc5fac415383ab2dcfc6b9276d845c9d3c633b24532857",
         "the backup format changed — every existing backup would fail to import"
     );
 }
 
 fn hex(b: &[u8]) -> String {
     b.iter().map(|x| format!("{:02x}", x)).collect()
+}
+
+/// A merchant who raised their floor limit and restores to defaults finds their
+/// terminal demanding a secret on every sale, with nothing to explain it.
+/// Silently reverting a deliberate setting is its own kind of data loss.
+#[test]
+fn verification_thresholds_survive() {
+    let mut b = sample();
+    b.verification = VerificationPolicy {
+        device_unlock_at: 15_000,
+        app_secret_at: 50_000,
+        app_secret_validity_s: 300,
+        cumulative_at: 100_000,
+        cumulative_window_s: 7_200,
+    };
+    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
+    assert_eq!(import(&blob, b"passphrase here").unwrap().verification, b.verification);
+}
+
+/// An import is a trust boundary. A policy whose ladder inverts — a larger
+/// payment asking less than a smaller one — must be refused on the way in, not
+/// installed because it arrived in a bundle that decrypted cleanly.
+#[test]
+fn an_inverted_policy_is_refused_at_import() {
+    let mut b = sample();
+    b.verification = VerificationPolicy {
+        device_unlock_at: 50_000,
+        app_secret_at: 1_000, // below the weaker tier
+        ..VerificationPolicy::default()
+    };
+    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
+    assert_eq!(
+        import(&blob, b"passphrase here").unwrap_err().code,
+        RejectCode::PolicyRefused
+    );
 }
