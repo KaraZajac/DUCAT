@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.20 — Consolidated**
+**Draft 0.21 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Status: Pre-alpha design document. Nothing here is final. Several sections rest on primitives that are not production-grade; §14 is the real agenda.
 
@@ -25,6 +25,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.21** — **The recovery-key contradiction resolved, and arbitration specified.** §17.2's third multisig key could not be filled as written: a user-held key defeats slashing, a stranger-held one recreates §2.5's structure, and a pre-signed timelocked refund is impossible because Monero's custom `unlock_time` is already blocked by relay rule and removed at FCMP++. Resolution is to name the structure honestly — **both non-user keys belong to the market's arbiter set**, making a bond *a deposit under the market's threshold control rather than self-custodied collateral*. A dead market forfeits its bonds; there is no recovery path, because any key that provided one would also defeat slashing. Scoped hard in compensation: zero-conf risk is bounded by transaction value, so most users should never form a bond at all. §9.3 expanded from four lines to a protocol — two dispute classes (mechanical claims are decidable from transcript plus chain and provably wrong when mis-ruled; judgment claims are neither), `DISPUTE`/`EVIDENCE`/`RULING`, the rule that a ruling *is* a co-signature rather than an instruction, staged timeouts, and the uncomfortable terminal case that an unresolvable dispute resolves against the claimant because there is no higher court.
 - **0.20** — **Pricing model made explicit.** §6.1: fixed and metered are not redundant, they allocate route risk — fixed puts traffic on the provider, metered on the consumer. Fixed is the default for rides because WYSIWYS is strongest there. Added the condition `rated` mode always depended on and never stated: **a meter is verifiable only where the payer independently observes what is metered.** A ride qualifies — the rider's phone measures the journey itself. A bar tab does not, and profiles using `rated` must now say what the payer measures. §12: a market-published *fare* rate would be price coordination among independent providers and is excluded at every layer; §17.7's *currency* rate is a different object and stays. Price discovery already falls out of §5.2's sealed-bid offers. §11: the take-rate arithmetic stated plainly, with the honest half — the platform cut also buys insurance and trust-and-safety, which this protocol does not replace.
 - **0.19** — **§5.2 replaced: providers listen instead of advertising.** Two observations drive it — reading a DHT record imports nothing, so matching can run with zero route imports; and the *publisher* learns the *importer's* address, so publishing is safe and importing is what exposes you. Hail is therefore inverted: providers watch a market record and publish nothing, consumers post a hail carrying a coarse cell and an ephemeral key but no route, providers answer sealed to that key, and only after mutual selection does one import occur — by the party that chose to initiate. **Providers become invisible**, which substantially retires O3 and removes hail's dependency on the Veilid 0.13.0 milestone (O19 contained rather than blocking). Also added §5.2.3: there is no map of nearby drivers, because a live driver map is a published surveillance database of workers' movements — strictly worse than the operator it replaces. The map lives *after* matching, over E2EE, where it is safe and expected. Optional provider visibility is excluded because in a competitive market it is not optional.
 - **0.18** — **Added §2.5, the RetoSwap case study.** A Haveno-derived Monero DEX using 2-of-3 arbitrated multisig — §17.2's structure in production — was drained of ~7,000 XMR in May 2026 by a forged, out-of-order ACK that overwrote the arbitrator's address without any check against a known key. **Nothing about Monero failed**; the break was in the messaging layer, which here is Veilid. Route anonymity is not authentication. Four existing rules are the direct countermeasures (§18.3, §18.4, §18.8, §10.1), and §9.3 now states explicitly that arbiters come from the signed market descriptor and never from an address in a message. Second lesson recorded: Haveno was mature, had a prior exploit to learn from, and was breached again — this document's equivalent surface has had no adversarial review at all.
@@ -302,7 +303,9 @@ RELEASE         consumer → escrow         escrow disbursal (escrow mode only)
 RECEIPT         both                      co-signed closure; input to attestation
 SETTLED         local                     finality observed; fast/1 obligation clears (§17.4)
 ABORT           either                    pre-FUND cancellation, no penalty
-DISPUTE         either → arbiter          post-FUND escrow contest (§9.3)
+DISPUTE         claimant → arbiter set    contest carrying the transcript (§9.3.2)
+EVIDENCE        either → arbiter set      voluntary disclosure, judgment class only (§9.3.2)
+RULING          arbiter → both            outcome; *is* a multisig co-signature (§9.3.2)
 CANCEL          either                    post-ACCEPT cancellation; invokes terms.cancellation (§7.3)
 REFUND          payee → payer             voluntary, receipt-bound reverse payment (§7.3)
 MANDATE         payer → payee             capped standing authorization; unilaterally revocable (§7.3)
@@ -544,7 +547,53 @@ A provider locks XMR against a stake key. Fraud, adjudicated via escrow dispute,
 Attestations = RECEIPTs, optionally rated, signed to a persona key, stored in DHT records the persona controls. A consumer weighs advert stake + attestation history. Caveats made explicit in §4: reputation and unlinkability trade against each other; attestation-stuffing is countered by weighting attestations by *counterparty stake* (a review from a bonded counterparty costs something to forge), not by raw count.
 
 ### 9.3 Arbitration Market
-Arbiters are DUCAT participants running an `arbiter/1` profile. Chosen per-transaction, before FUND, from the **market descriptor's signed arbiter set** (§10.1) by their own stake + reputation — *never* from an address supplied in a message, which is precisely how RetoSwap was drained (§2.5). Paid per dispute. They see only what disputants disclose (T5). Multiple arbiters can co-sign for higher-value escrows. This dogfoods the protocol — the dispute layer is itself a P2P service market — and means no central court, only a competitive field of stakers whose own bonds are slashable for provable misconduct.
+
+Arbiters are DUCAT participants running an `arbiter/1` profile. They are named by key in the market descriptor's signed arbiter set (§10.1) and selected from it before FUND — **never from an address supplied in a message, which is precisely how RetoSwap was drained (§2.5)**. They see only what disputants disclose (T5). Multiple arbiters can co-sign for higher-value escrows. This dogfoods the protocol: the dispute layer is itself a P2P service market, with no central court, only a competitive field of stakers whose own bonds are slashable.
+
+#### 9.3.1 Two classes of dispute, and only one needs judgment
+
+The distinction governs everything else, because it decides whether an arbiter is checking arithmetic or weighing testimony:
+
+- **Mechanical.** The claim is decidable from the signed transcript plus public chain state. *Did this transaction confirm? Does a conflicting key image exist?* Every `fast/1` slash claim (§17.5) is of this class. The transcript is self-verifying (§6, Part V), so the arbiter checks signatures and queries the chain — no discretion, no testimony, and a wrong ruling is **provably** wrong because the chain disagrees.
+- **Judgment.** The claim turns on facts neither party can prove. *Was the room clean? Was the task complete?* Escrow disputes over `lodging/1` and `task/1` are of this class. An arbiter here is weighing disclosed evidence, and a wrong ruling is not provable — only unpopular.
+
+**Only the mechanical class is in scope for Phase 3.** It is what bonded fast settlement needs, it is automatable, and its arbiters are accountable in a way judgment arbiters are not. Judgment arbitration ships with escrow or not at all, and §14's O6 — what counts as "done" — is the reason it cannot ship sooner.
+
+#### 9.3.2 Messages
+
+```
+DISPUTE    claimant → arbiter set   { transcript, class, claim, evidence?, sig }
+EVIDENCE   either → arbiter set     { dispute_hash, disclosed_material, sig }   (judgment class only)
+RULING     arbiter → both parties   { dispute_hash, outcome, awarded_pxmr, sig }
+```
+
+- **`DISPUTE` carries the transcript, not a story.** Signed `ACCEPT`, `TXID`, `RECEIPT`, and the chain link between them. For a mechanical claim that is the entire case; the arbiter needs nothing the claimant asserts.
+- **`EVIDENCE` is voluntary and one-way.** Disclosing it to an arbiter is a privacy decision the discloser makes (T5), and there is no compulsion, no discovery, and no penalty for withholding beyond losing the point it would have made.
+- **A `RULING` is not an instruction — it is a co-signature.** The arbiter's authority is exactly its key in the bond multisig (§17.2). It does not order a transfer; it signs one, and the ruling object is the audit record of why. Nothing enforces a ruling that the arbiter did not itself sign, which means an arbiter cannot rule beyond the funds it can already move.
+
+#### 9.3.3 Accountability, and its honest limit
+
+An arbiter's own stake is slashable for **provable** misconduct — and per §9.3.1 that word only bites for mechanical claims, where the chain contradicts the ruling. A market's arbiter set can be slashed by its own peers on that evidence.
+
+For judgment claims there is no such proof, so the only accountability is reputational: participants leave a market whose arbiters rule badly, and §10.1 makes leaving a matter of ceasing to read a keyspace. **That is weaker than a court and should not be described otherwise.** It is roughly the accountability a market stall has, which is the comparison §9.4 already draws.
+
+Two further limits worth stating rather than discovering:
+
+- **Arbiters are paid per dispute, and the fee comes from the disputed amount** before disbursal, with the schedule published in the market descriptor. An arbiter paid by one side is not neutral, and an arbiter paid nothing does not answer.
+- **O8 remains open.** A captured arbiter set can rule dishonestly on mechanical claims and merely be caught afterwards; it can rule dishonestly on judgment claims and not be caught at all. §10.1's descriptor chain proves continuity, not honesty, and nothing here changes that.
+
+#### 9.3.4 Timeouts
+
+A dispute that never resolves is worse than one resolved badly, because the funds stay frozen. Each stage is bounded and expiry has a defined outcome, on the same principle as §6.2:
+
+| Awaiting | Default | On expiry |
+|---|---|---|
+| Arbiter acknowledges `DISPUTE` | 24 h | Escalate to the next arbiter in the set |
+| `EVIDENCE` from either party | 72 h | Rule on what was disclosed |
+| `RULING` after evidence closes | 72 h | Escalate; the silent arbiter's stake is at risk |
+| Whole dispute, all escalations | 14 d | Funds return to the pre-dispute allocation, claim abandoned |
+
+The final row is the uncomfortable one: **an unresolvable dispute resolves against the claimant**, because the alternative is indefinitely frozen funds and there is no higher court to appeal to. A protocol without an operator has no one to escalate to when its own dispute mechanism fails, and that has to be a stated outcome rather than a hang.
 
 ### 9.4 Safety Floor (honest limit, and where it actually binds)
 
@@ -570,6 +619,7 @@ Two-sided markets die empty; there is no treasury to subsidize both sides. So DU
 
 - A **market** is a namespace over geocells + profiles (e.g. a single conference, a single city's couriers). Adverts and reputation are scoped to it.
 - Markets are discovered by well-known DHT keys; joining is subscribing to a market's keyspace. No global order book ever exists.
+- **Joining a market you have bonded into is a financial commitment, not just a subscription.** The arbiter set holds two of three keys on your deposit (§17.2), so a market that dies takes its bonds with it and a market that is captured can take them deliberately. Leaving is free only until you have posted a bond.
 - Reputation is portable across markets at the persona's option (linkability trade again).
 - Ideal seed markets are ideologically-motivated dense venues (hacker cons, privacy-community meetups) where both sides already want this to exist. Design for "works at one con," not "beats Uber in a metro."
 
@@ -674,7 +724,7 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O5.** The safety floor (§9.4) structurally caps the addressable market **for high-exposure profiles** — rides, lodging, open-ended tasks. Scoped in 0.7: it does not bind the no-exposure tier (`pos`, `xfer`, `goods`, `file`, `chat`), which is where most of §1's addressable surface now lives. The cap is no smaller where it applies; it simply applies to less of the protocol than first stated.
 - **O6.** Open-ended PROOF for `task/1` (what counts as "done"?) resists specification.
 - **O7.** Cold start still requires a real, motivated seed community; the protocol enables it but cannot manufacture it.
-- **O8.** **Arbiter-set governance is load-bearing** (§17.8), and now *half* specified. §10.1 gives the mechanism — a self-certifying `market_id`, threshold-signed rotation chained from genesis, forks detectable. What remains open is **accountability**: the chain proves continuity, not honesty, and a market captured at genesis or rotating itself into capture produces valid signatures throughout. Fast settlement is worthless in such a market because a slash would never pay out, and a participant's only recourse is to leave.
+- **O8.** **Arbiter-set governance — mechanism specified, honesty still unenforceable.** §10.1 gives self-certifying `market_id` and threshold-signed rotation chained from genesis; §9.3 gives the dispute protocol, and §9.3.3 draws the line that matters: a **mechanical** ruling contradicted by the chain is provably wrong and slashable, a **judgment** ruling is neither. A captured set can therefore be caught late on mechanical claims and never on judgment ones. Since a market's arbiter set now also holds two of three keys on every bond it custodies (§17.2), capture is a custody risk and not only an adjudication one. Bounded by keeping bonds small; not closed.
 - **O9.** Hot-wallet exposure (§17.2): a small float on a phone is malware- and seizure-reachable. Mitigated by keeping it small; not eliminated.
 - **O10.** Price-oracle integrity and the `capacity_remaining` side channel (§17.7, §17.8) — both leak or can be manipulated in ways that are mitigated, not closed.
 - **O11.** **Route-blob size — measured, and it resists being a constant.** Phase 0a: `token` mode is exactly 190 B; `inline` mode ranged 877–1669 B for a `TapPresent` across two runs, non-monotonic in hop count, with within-hop-count spread exceeding between-hop-count differences. Size tracks *which peer was selected*, not how many hops were asked for. §15.3.1 therefore specifies measure-and-degrade rather than a budget. Closed as a question; the variance itself is the finding.
@@ -1081,11 +1131,28 @@ Consequences, all favorable:
 FLOAT = {
   hot_wallet     : fresh Monero wallet, restore_height = creation block
   outputs        : N pre-split spendable outputs (see below) — NOT one lump
-  bond_ms        : 2-of-3 multisig { user, market_arbiter_set, (recovery) }
+  bond_ms        : 2-of-3 multisig { user, arbiter_key_A, arbiter_key_B }
+                   both arbiter keys independently held by the market's
+                   arbiter set (§10.1) — see "what the bond actually is"
+
   bond_amount    : user-chosen, e.g. ~$100 equivalent
   spend_ledger   : local record of in-flight (unconfirmed) obligations
 }
 ```
+
+- **What the bond actually is, stated plainly.** Earlier drafts wrote the third key as `(recovery)` and never said who held it. That could not be filled. If the user holds it, `user + recovery` lets them empty the bond before being slashed and collateral means nothing. If a stranger holds it, that stranger plus the arbiter set can move the user's funds — the exact 2-of-3 structure exploited in §2.5. A pre-signed timelocked refund would have squared the circle, but **Monero's custom `unlock_time` is already unusable**: a relay rule blocks such transactions today and the feature is removed at consensus with FCMP++.
+
+  So the honest resolution is to name the structure rather than disguise it. **Both non-user keys belong to the market's arbiter set**, independently held. That yields:
+
+  | Pair | Effect |
+  |---|---|
+  | `arbiter_A + arbiter_B` | The market can slash without the user — which is what §17.5 requires |
+  | `user + either arbiter` | Normal withdrawal, needing the market's cooperation |
+  | `user` alone | Nothing. The user cannot outrun a claim |
+
+  **A bond is therefore a deposit held under the market's threshold control, not self-custodied collateral.** This costs A1: while locked, the bond is not bearer-held, and the user depends on the arbiter set both to survive and not to collude. **If a market dies, its bonds are forfeit** — there is no recovery path, and inventing one would hand the user a key that defeats slashing. The mitigations are that bonds are small by design and that market choice is now visibly a financial commitment, not just a namespace subscription (§10.1).
+
+- **Most users should never form one.** Zero-conf risk is bounded by the transaction value: a merchant accepting a $4 coffee unconfirmed risks $4, and no collateral improves that trade. Bonds earn their complexity only where a single transaction's value is large relative to the deposit — rides, not coffees. Providers set `accept_unbonded` accordingly (§17.6), and a client SHOULD NOT prompt for a bond that the user's transaction sizes do not justify. This scopes the deposit problem out of most of the protocol's surface rather than solving it everywhere.
 
 - **Recommended, not mandated, cap.** The spec RECOMMENDS a small float (order $100) and the UX should discourage loading savings. This is a hot wallet on a phone: malware-reachable and seizure-reachable in ways cold funds are not. Keep the mass of funds elsewhere.
 - **The two halves carry different risks, and UX must not blur them.** "Only load what you intend to spend" is correct guidance for `hot_wallet` and incomplete for `bond_ms`. The bond is *locked collateral held in threshold multisig* — it is not spendable pocket money, it backs the user's fast-settle capacity, and a defect in the multisig implementation strands it rather than merely losing a fare (§8.2). Both are small by design, so the worst case is bounded at roughly a float's worth; but a client that tells the user "this is just spending money" has described one half and mislabelled the other. Say plainly: *this much is spendable, this much is posted as a deposit and locked until you withdraw it.*
