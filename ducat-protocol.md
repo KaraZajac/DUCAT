@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.28 — Consolidated**
+**Draft 0.29 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.29** — §8.7.2's relay-rotation guidance promoted from SHOULD to **MUST**, after the failure was reproduced against the market simulator rather than merely reasoned about. A relay died mid-scan; one participant's wallet stopped four blocks short, kept answering `get_height` with a plausible number, and never saw funds that had already settled on chain. Nothing surfaced as an error. Added the detection rule — compare the wallet's height against the relay's own, since a stalled wallet and a synced one give identical answers alone — and the observation that silent divergence is worse for a payee, who ends up telling a customer "not received" about money that is already settled.
 - **0.28** — **`FullOffer.terms` added; several requirements were previously unimplementable.** §7.3's cancellation fee and refund window, §15.7's mandatory meter cap and duration limit, and §8.8's minimum fee tier were all written as `terms.*` while no such field existed — rules no conforming client could obey. They now live in a nested map inside the signed offer, so altering them breaks `offer_commit` like any other tampering. The meter requirement is a *pairing* rule: whether a cap is required depends on `amount_authority`, which lives in `TapPresent`, so it cannot be enforced by parsing either object alone.
 - **0.27** — **§18.4.1 rule 1 corrected: direction constrains the originator, not the evaluator.** "Only the payer may emit `ACCEPT`" was implemented as a check on the *local* role, so a payee refused every `ACCEPT` it received and no transaction could complete. Both parties run the same machine over the same message and must reach the same verdict, so the originator now travels with the event, established by signature. The bug survived a 75-test suite because every test drove the machine from one side only; a five-party market simulation caught it on the first run — which is the argument for simulating a market rather than testing a state machine.
 - **0.26** — **Slashing demonstrated: a bond can be seized over its holder's objection.** A funded 2-of-3 bond was spent by `arbiter + recovery` with the user's wallet never contacted, for signing *or* for key images. The second half was the open question — Monero reconstructs key images from partial ones, and had all three exports been required, a bond could only have been taken with the cooperation of the party being taken from, collapsing §17.2's deposit model. It needs only the threshold count. O1 updated: mechanically validated end to end, with the caveat that this exercised wallet2's multisig rather than the FROSTLASS path §8.2 intends to ship — the mechanism is proven, the code path is not.
@@ -555,7 +556,14 @@ Relay selection SHOULD be per-transaction and drawn at random from a market's ad
 
 **Relays fail, and not only adversarially.** The public stagenet node this project tested against went down mid-session, between one transaction and the next, with no warning and no error other than `no connection to daemon`. Two alternatives were reachable at the same chain height and the work resumed against one of them. That is the ordinary case, and it means a client MUST hold **several relays and fail over silently**, rather than surfacing an infrastructure outage to a user standing at a counter. A client with one configured relay has an availability dependency it did not choose and cannot see.
 
-The failure is also *loud* in exactly the wrong way: a wallet whose relay has died reports a cached chain height and refuses to refresh, so a naive client shows stale-but-plausible state rather than "disconnected." Clients SHOULD treat a refresh failure as a reason to rotate relays immediately, not as a transient to retry against the same endpoint.
+The failure is also *loud* in exactly the wrong way: a wallet whose relay has died reports a cached chain height and refuses to refresh, so a naive client shows stale-but-plausible state rather than "disconnected." Clients MUST treat a refresh failure as grounds to rotate relays immediately, not as a transient to retry against the same endpoint.
+
+**This was subsequently reproduced against the market simulator, which is why the rule is now a MUST.** A relay died mid-scan during a funding round. One participant's wallet stopped four blocks short of the chain, kept answering `get_height` with a plausible number, and simply never saw the funds it had been sent — while four other wallets on healthier relays completed normally. Nothing surfaced as an error. The participant appeared, to itself and to the simulator, to be a wallet that had received nothing, and the run stalled waiting for a balance that had in fact already arrived on chain.
+
+Two consequences worth writing down:
+
+- **A height that looks plausible is the failure mode.** Detection requires comparing the wallet's height against the relay's own, because a stalled wallet and a synced one are indistinguishable from the wallet's answer alone.
+- **Silent divergence is worse for a payee than a payer.** A payer discovers the problem when a payment fails. A payee shows a customer "not received" for money that is already settled, which is a dispute manufactured out of an infrastructure fault.
 
 #### 8.7.3 Recommended posture, and its honest limit
 

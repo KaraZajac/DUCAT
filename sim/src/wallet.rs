@@ -11,10 +11,26 @@ use std::time::Duration;
 
 use serde_json::{json, Value};
 
+/// Relays this client will fail over between (§8.7.2).
+///
+/// A client with one configured relay has an availability dependency it did not
+/// choose and cannot see. This list is not redundancy for its own sake: during
+/// this project's own testing two of these went down mid-run, minutes apart.
+pub const RELAYS: &[&str] = &[
+    "node.monerodevs.org:38089",
+    "stagenet.xmr-tw.org:38081",
+    "xmr-lux.boldsuck.org:38081",
+    "node2.monerodevs.org:38089",
+];
+
 pub struct Wallet {
     pub port: u16,
     pub name: String,
     pub address: String,
+    /// Index into RELAYS. Rotated on refresh failure rather than retried,
+    /// because retrying against a dead endpoint is how a wallet ends up
+    /// reporting stale-but-plausible state.
+    relay: std::cell::Cell<usize>,
 }
 
 #[derive(Debug)]
@@ -34,6 +50,7 @@ impl Wallet {
             port,
             name: name.to_string(),
             address: String::new(),
+            relay: std::cell::Cell::new(0),
         };
         w.call("open_wallet", json!({"filename": name, "password": ""}))
             .ok(); // already open is fine
@@ -85,8 +102,70 @@ impl Wallet {
         Ok(v["result"].clone())
     }
 
+    /// Refresh, rotating relays on failure.
+    ///
+    /// §8.7.2: relays fail non-adversarially and the failure is loud in the
+    /// wrong way — a wallet whose daemon has died keeps serving a cached height
+    /// and merely stops advancing, so a client that retries the same endpoint
+    /// silently falls behind the chain. Observed directly: one persona wallet
+    /// sat four blocks stale through an entire funding round because its node
+    /// had gone down and nothing rotated.
     pub fn refresh(&self) -> Result<(), String> {
-        self.call("refresh", json!({})).map(|_| ())
+        let mut last = String::new();
+        for attempt in 0..RELAYS.len() {
+            match self.call("refresh", json!({})) {
+                Ok(_) => {
+                    if attempt > 0 {
+                        eprintln!(
+                            "    [{}] recovered on relay {}",
+                            self.name,
+                            RELAYS[self.relay.get()]
+                        );
+                    }
+                    return Ok(());
+                }
+                Err(e) => {
+                    last = e;
+                    let next = (self.relay.get() + 1) % RELAYS.len();
+                    self.relay.set(next);
+                    eprintln!(
+                        "    [{}] refresh failed, rotating to {}",
+                        self.name, RELAYS[next]
+                    );
+                    let _ = self.call(
+                        "set_daemon",
+                        json!({"address": RELAYS[next], "trusted": false}),
+                    );
+                }
+            }
+        }
+        Err(format!("{}: all relays failed ({})", self.name, last))
+    }
+
+    /// Confirm the wallet is actually keeping up with the chain.
+    ///
+    /// A height that merely *looks* plausible is the failure mode; comparing
+    /// against the relay's own height is what distinguishes "synced" from
+    /// "stopped".
+    pub fn sync_lag(&self) -> Result<u64, String> {
+        let w = self.call("get_height", json!({}))?["height"]
+            .as_u64()
+            .unwrap_or(0);
+        // Ask the daemon the wallet is actually using.
+        let relay = RELAYS[self.relay.get()];
+        let (host, port) = relay.split_once(':').unwrap_or((relay, "38081"));
+        let out = std::process::Command::new("curl")
+            .args([
+                "-s", "-m", "10", "-X", "POST",
+                &format!("http://{}:{}/json_rpc", host, port),
+                "-H", "Content-Type: application/json",
+                "-d", "{\"jsonrpc\":\"2.0\",\"id\":\"0\",\"method\":\"get_info\"}",
+            ])
+            .output()
+            .map_err(|e| format!("{}: {}", self.name, e))?;
+        let v: Value = serde_json::from_slice(&out.stdout).unwrap_or(Value::Null);
+        let chain = v["result"]["height"].as_u64().unwrap_or(0);
+        Ok(chain.saturating_sub(w))
     }
 
     pub fn balance(&self) -> Result<Balance, String> {
