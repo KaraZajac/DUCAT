@@ -1,0 +1,54 @@
+//! DUCAT end to end: two parties, real Veilid routes, real Monero settlement.
+//!
+//! Everything before this exercised the protocol against an in-process queue
+//! (`sim`) or the transport against synthetic payloads (`phase0`). Neither
+//! answers the question the spec is actually making claims about: **does a
+//! DUCAT transaction complete between two nodes that have never met, over an
+//! anonymous route, ending in money moving on chain?**
+//!
+//! The two halves are deliberately separate processes. A tap is an out-of-band
+//! channel — a QR code or an NFC exchange (§15.3) — and modelling it as a file
+//! written by one process and read by the other is more faithful than passing a
+//! struct between threads. It also means the payer genuinely starts knowing
+//! nothing but the bytes in that file.
+//!
+//!   ducat-harness --payee   [amount_pxmr]   writes tap.blob, then serves
+//!   ducat-harness --payer   [tap.blob]      reads it, transacts, settles
+//!
+//! Settlement uses `monero-wallet-rpc` on the ports `monero-spike/` sets up.
+
+mod flow;
+mod payee;
+mod payer;
+mod veilid;
+mod wallet;
+
+#[tokio::main(flavor = "multi_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "error".into()),
+        )
+        .compact()
+        .init();
+
+    let args: Vec<String> = std::env::args().collect();
+    let tap_path = std::env::var("DUCAT_TAP").unwrap_or_else(|_| "/tmp/ducat-tap.blob".into());
+
+    if args.iter().any(|a| a == "--payee") {
+        let amount = args
+            .iter()
+            .position(|a| a == "--payee")
+            .and_then(|i| args.get(i + 1))
+            .and_then(|v| v.parse::<u64>().ok())
+            .unwrap_or(600_000_000); // 0.0006 XMR, the coffee from the market run
+        payee::run(&tap_path, amount).await
+    } else if args.iter().any(|a| a == "--payer") {
+        payer::run(&tap_path).await
+    } else {
+        eprintln!("usage: ducat-harness --payee [amount_pxmr] | --payer");
+        eprintln!("       DUCAT_TAP=<path> selects the tap file (default /tmp/ducat-tap.blob)");
+        std::process::exit(2);
+    }
+}

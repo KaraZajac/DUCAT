@@ -26,6 +26,10 @@ pub const RELAYS: &[&str] = &[
     "node2.monerodevs.org:38089",
 ];
 
+/// How long to wait for a transaction to appear somewhere it was not sent.
+const PROPAGATION_TRIES: u64 = 8;
+const PROPAGATION_GAP_S: u64 = 5;
+
 pub struct Wallet {
     pub port: u16,
     pub name: String,
@@ -218,12 +222,41 @@ impl Wallet {
     /// because the payer holds something that resembles evidence of payment.
     /// A wallet cannot tell "propagating" from "dropped on the floor" by
     /// looking at itself, so it has to ask someone else.
+    /// §8.7.2: a txid from the submitting node is that node's word that it
+    /// accepted the transaction, not evidence the network has it. Confirmed
+    /// against relays we did **not** submit through — asking the acceptor
+    /// answers the wrong question.
+    ///
+    /// **Bounded retry, not a single shot.** Propagation is not instantaneous,
+    /// and a check that fires the moment `transfer` returns reports every
+    /// healthy transaction as lost. The integration harness did exactly that on
+    /// its first end-to-end run; the transaction was in two independent pools
+    /// seconds later. The failure worth catching is a transaction that is
+    /// *never* visible, and only waiting distinguishes that from one that is
+    /// not visible *yet*.
     pub fn confirm_propagated(&self, txid: &str) -> Result<String, String> {
+        for attempt in 0..PROPAGATION_TRIES {
+            if attempt > 0 {
+                std::thread::sleep(Duration::from_secs(PROPAGATION_GAP_S));
+            }
+            if let Some(relay) = self.seen_elsewhere(txid) {
+                return Ok(relay);
+            }
+        }
+        Err(format!(
+            "{}: {} was not visible on any relay other than {} after {}s — \
+             resubmit rather than wait",
+            self.name,
+            &txid[..16.min(txid.len())],
+            RELAYS[self.relay.get()],
+            PROPAGATION_TRIES * PROPAGATION_GAP_S
+        ))
+    }
+
+    fn seen_elsewhere(&self, txid: &str) -> Option<String> {
         let submitted_via = self.relay.get();
-        let mut checked = Vec::new();
         for offset in 1..RELAYS.len() {
-            let idx = (submitted_via + offset) % RELAYS.len();
-            let relay = RELAYS[idx];
+            let relay = RELAYS[(submitted_via + offset) % RELAYS.len()];
             let (host, port) = relay.split_once(':').unwrap_or((relay, "38081"));
             let out = std::process::Command::new("curl")
                 .args([
@@ -233,23 +266,17 @@ impl Wallet {
                     "-d", &format!("{{\"txs_hashes\":[\"{}\"]}}", txid),
                 ])
                 .output()
-                .map_err(|e| format!("{}: {}", self.name, e))?;
+                .ok()?;
             let v: Value = serde_json::from_slice(&out.stdout).unwrap_or(Value::Null);
-            let txs = v["txs"].as_array().cloned().unwrap_or_default();
-            if let Some(t) = txs.first() {
-                let pooled = t["in_pool"].as_bool().unwrap_or(false);
-                let height = t["block_height"].as_u64().unwrap_or(0);
-                if pooled || height > 0 {
-                    return Ok(relay.to_string());
+            if let Some(t) = v["txs"].as_array().and_then(|a| a.first()) {
+                if t["in_pool"].as_bool().unwrap_or(false)
+                    || t["block_height"].as_u64().unwrap_or(0) > 0
+                {
+                    return Some(relay.to_string());
                 }
             }
-            checked.push(relay);
         }
-        Err(format!(
-            "{}: {} is not visible on any relay other than the one it was \
-             submitted through ({}); checked {:?} — resubmit rather than wait",
-            self.name, &txid[..16.min(txid.len())], RELAYS[submitted_via], checked
-        ))
+        None
     }
 
     /// Settle. Returns the transaction hash.

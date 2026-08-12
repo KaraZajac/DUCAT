@@ -576,7 +576,13 @@ impl TapPresent {
         let session_pk = r.bytes(f::SESSION_PK, None)?;
         let route = r.bytes(f::ROUTE, None)?;
         let offer_commit: [u8; 32] = r.bytes(f::OFFER_COMMIT, Some(32))?.try_into().unwrap();
-        let dest = r.opt_bytes(f::DEST, Some(16))?;
+        // Length is NOT constrained: `dest` is a payment address, and a Monero
+        // stagenet address is 95 characters. This read `Some(16)` until 0.55 —
+        // copied from the nonce line above it — so any tap carrying a real
+        // destination was rejected as malformed. Every test passed `None` or a
+        // 16-byte placeholder, so nothing caught it until two processes
+        // exchanged a genuine address over a live route.
+        let dest = r.opt_bytes(f::DEST, None)?;
         let session_ref = r
             .opt_bytes(f::SESSION_REF, Some(32))?
             .map(|b| b.try_into().unwrap());
@@ -767,7 +773,9 @@ impl Accept {
             nonce: r.bytes(f::NONCE, Some(16))?.try_into().unwrap(),
             offer_hash: r.bytes(f::OFFER_HASH, Some(32))?.try_into().unwrap(),
             amount_final: r.uint(f::AMOUNT_FINAL)?,
-            dest: r.opt_bytes(f::DEST, Some(16))?,
+            // See TapPresent::from_value — the same copy-paste, in the object
+            // where it actually costs a payment.
+            dest: r.opt_bytes(f::DEST, None)?,
             reader_session_pk: r.bytes(f::READER_SESSION_PK, None)?,
             timestamp: r.uint(f::TIMESTAMP)?,
             chosen_version: r.uint(f::CHOSEN_VERSION)?,

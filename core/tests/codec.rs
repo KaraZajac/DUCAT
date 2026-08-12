@@ -294,3 +294,60 @@ fn negative_integers_are_refused() {
     assert!(ducat_core::cbor::decode(&[0x20]).is_err(), "-1 was accepted");
     assert!(ducat_core::cbor::decode(&[0x38, 0xff]).is_err(), "-256 was accepted");
 }
+
+/// `dest` is a payment address, not a nonce.
+///
+/// Both `TapPresent` and `Accept` length-checked it as 16 bytes until 0.55 — the
+/// line was copied from the nonce read above it — so an object carrying a real
+/// Monero address decoded as MALFORMED. Every test in this suite passed `None`
+/// or a 16-byte placeholder, which is exactly why it survived: the fixtures
+/// agreed with the bug. Found when two processes exchanged a genuine address
+/// over a live Veilid route.
+#[test]
+fn a_real_address_survives_dest_in_every_object_that_carries_it() {
+    use ducat_core::commit::{commit, Purpose};
+    use ducat_core::wire::*;
+    // 95 characters, the length of a Monero stagenet address.
+    let addr = b"59jre4NqgtUWBYozP7Lino5uueB11UyEfXFJ3s7mYDYtU1TDnvxubGhfZ64TfS14Sw4HRZWpjdGHG1VKQoUCgK6f239Ecd2".to_vec();
+    assert_eq!(addr.len(), 95);
+
+    let a = Accept {
+        version: 1,
+        suite: 1,
+        nonce: [0x22; 16],
+        offer_hash: [0x11; 32],
+        amount_final: 600_000_000,
+        dest: Some(addr.clone()),
+        reader_session_pk: vec![0x33; 32],
+        timestamp: 1_800_000_000,
+        chosen_version: 1,
+        chosen_suite: 1,
+        refund_to: Some(addr.clone()),
+    };
+    let enc = a.to_value().encode();
+    let back = Accept::from_value(ducat_core::cbor::decode(&enc).unwrap())
+        .expect("an ACCEPT naming a real destination must decode");
+    assert_eq!(back.dest.as_deref(), Some(addr.as_slice()));
+    assert_eq!(back.refund_to.as_deref(), Some(addr.as_slice()));
+
+    let t = TapPresent {
+        version: 1,
+        suite: 1,
+        profile: 2,
+        presenter_role: PresenterRole::Payee,
+        amount_authority: AmountAuthority::Fixed,
+        intent: Intent::Oneshot,
+        rmode: ReachMode::Inline,
+        nonce: [0x5A; 16],
+        expiry: 1_800_000_030,
+        session_pk: vec![0x44; 32],
+        route: vec![0x55; 832],
+        offer_commit: commit(Purpose::Offer, b"offer"),
+        dest: Some(addr.clone()),
+        session_ref: None,
+    };
+    let enc = t.to_value().encode();
+    let back = TapPresent::from_value(ducat_core::cbor::decode(&enc).unwrap())
+        .expect("a tap naming a real destination must decode");
+    assert_eq!(back.dest.as_deref(), Some(addr.as_slice()));
+}
