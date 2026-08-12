@@ -7,6 +7,7 @@
 pub mod backup;
 pub mod cbor;
 pub mod custody;
+pub mod escrow;
 pub mod commit;
 pub mod negotiate;
 pub mod reject;

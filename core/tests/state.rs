@@ -42,7 +42,7 @@ fn happy_path_fast_reaches_settled() {
             (Event::FullOffer, State::Quoted),
             (Event::Accept { from: Role::Payer }, State::Accepted),
             (Event::Fund, State::Funded),
-            (Event::TxProof, State::Provisional),
+            (Event::TxId, State::Provisional),
             (Event::Proof, State::Delivered),
             (Event::Receipt, State::Closed),
             (Event::ConfirmationsReached, State::Settled),
@@ -232,7 +232,7 @@ fn disputes_require_escrow() {
 #[test]
 fn txproof_is_meaningless_outside_fast_mode() {
     for mode in [SettleMode::Direct, SettleMode::Escrow] {
-        let err = transition(State::Funded, Role::Payer, mode, &Event::TxProof)
+        let err = transition(State::Funded, Role::Payer, mode, &Event::TxId)
             .expect_err("TXPROOF should be fast/1 only");
         assert_eq!(err.code, RejectCode::StateViolation);
     }

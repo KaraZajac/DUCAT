@@ -428,7 +428,7 @@ def transition(state, event, origin, mode, role, elapsed=0):
                              "a payer leaving a live meter is abandonment, not an abort")
             return "Aborted", "None"
     if state == "Funded":
-        if e == "TxProof" and mode == "Fast":
+        if e == "TxId" and mode == "Fast":
             return "Provisional", "None"
         if e == "Proof":
             return "Delivered", "None"
@@ -748,7 +748,48 @@ def run_backup(cases, r):
 # `kind` is the single discriminator. Nothing is routed by filename or by
 # guessing at which fields a case happens to carry — which is what a second
 # implementer had to do before 0.46 (§18.11).
+def run_object(cases, r):
+    """Decode one wire object, re-encode, compare. The narrowest agreement two
+    implementations need — everything downstream hashes canonical objects.
+
+    This decoder is generic: it checks canonical form and the declared type
+    against the registry, without modelling each object's fields. That is
+    enough to catch the encoding divergences that matter and honest about what
+    it does not check."""
+    for c in cases:
+        def go(c=c):
+            v = decode_canonical(unhex(c["object_hex"]))
+            body = dict(v[1])
+            declared = body.get(0, (None, None))[1]
+            want = OBJECT_TYPE_CODES.get(c["object_type"])
+            if want is None:
+                raise Reject("Malformed", f"unregistered type {c['object_type']}")
+            if declared != want:
+                raise Reject("Malformed",
+                             f"object declares type {declared}, expected {want}")
+            return encode(v)
+        out = expect_reject(r, "object", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("object", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, vector says "
+                  f"{c['expect']['reencodes_to_hex']}")
+
+
+# §18.4.2's type registry. Codes 13-22 were added at 0.47, replacing improvised
+# `CANCEL + 100` values that decoders never checked.
+OBJECT_TYPE_CODES = {
+    "TapPresent": 1, "FullOffer": 2, "ACCEPT": 3, "RECEIPT": 4, "TXPROOF": 5,
+    "REFUND": 6, "CANCEL": 7, "MANDATE": 8, "CONTACT_OFFER": 9,
+    "CONTACT_ACCEPT": 10, "bond_proof": 11, "attestation": 12,
+    "DISPUTE": 13, "RULING": 14, "HAIL": 15, "HAIL_REPLY": 16, "TapStatic": 17,
+    "TXID": 18, "ESCROW_SETUP": 19, "ESCROW_READY": 20, "RELEASE": 21,
+    "SLASH_CLAIM": 22,
+}
+
+
 BY_KIND = {
+    "object.roundtrip": run_object,
     "codec.decode": run_codec,
     "signing.verify": run_signing_verify,
     "signing.pubkey": run_signing_pubkey,

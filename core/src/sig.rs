@@ -40,6 +40,23 @@ pub enum ObjectType {
     ContactAccept,
     BondProof,
     Attestation,
+    Dispute,
+    Ruling,
+    Hail,
+    HailReply,
+    TapStatic,
+    /// `fast/1`'s mempool pointer (§17.4).
+    ///
+    /// Distinct from `TxProof`, and the distinction is the whole point. Draft
+    /// 0.17 established that the payee *is* the recipient and can scan with its
+    /// own view key, so acceptance needs a transaction identifier rather than a
+    /// proof. A proof exists to convince someone who is not the recipient —
+    /// which is an arbiter (§17.5), and nobody else.
+    TxId,
+    EscrowSetup,
+    EscrowReady,
+    Release,
+    SlashClaim,
 }
 
 impl ObjectType {
@@ -57,6 +74,16 @@ impl ObjectType {
             ObjectType::ContactAccept => b"CONTACT_ACCEPT",
             ObjectType::BondProof => b"bond_proof",
             ObjectType::Attestation => b"attestation",
+            ObjectType::Dispute => b"DISPUTE",
+            ObjectType::Ruling => b"RULING",
+            ObjectType::Hail => b"HAIL",
+            ObjectType::HailReply => b"HAIL_REPLY",
+            ObjectType::TapStatic => b"TapStatic",
+            ObjectType::TxId => b"TXID",
+            ObjectType::EscrowSetup => b"ESCROW_SETUP",
+            ObjectType::EscrowReady => b"ESCROW_READY",
+            ObjectType::Release => b"RELEASE",
+            ObjectType::SlashClaim => b"SLASH_CLAIM",
         }
     }
 }

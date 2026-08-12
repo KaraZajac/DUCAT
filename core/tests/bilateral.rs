@@ -64,7 +64,7 @@ fn fast_settlement_agrees_on_both_sides() {
             Event::FullOffer,
             Event::Accept { from: Role::Payer },
             Event::Fund,
-            Event::TxProof,
+            Event::TxId,
             Event::Proof,
             Event::Receipt,
             Event::ConfirmationsReached,
@@ -193,7 +193,7 @@ fn mode_specific_rules_agree_on_both_sides() {
     for mode in [SettleMode::Direct, SettleMode::Escrow] {
         for who in [Role::Payer, Role::Payee] {
             assert_eq!(
-                transition(State::Funded, who, mode, &Event::TxProof)
+                transition(State::Funded, who, mode, &Event::TxId)
                     .unwrap_err()
                     .code,
                 RejectCode::StateViolation
@@ -240,7 +240,7 @@ fn every_state_event_pair_agrees_on_both_sides() {
         Event::Accept { from: Role::Payer },
         Event::Accept { from: Role::Payee },
         Event::Fund,
-        Event::TxProof,
+        Event::TxId,
         Event::Proof,
         Event::Receipt,
         Event::Cancel,

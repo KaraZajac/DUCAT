@@ -359,3 +359,51 @@ re-share multisig info, which endorses no outcome and authorises no transfer.
 
 The ask moved from an adversary's consent to a participant's cooperation in a
 mechanical step. That is the whole difference.
+
+---
+
+## Transaction proofs: §17.5's premise, measured
+
+§17.5 assumes an arbiter can verify a payment without being handed the payee's
+view key — which would expose their entire income. That assumption had never
+been executed. Run against a real settled stagenet transaction from the market
+run (`332e95263326bd23…`, 0.0006 sXMR, user_01 → coffee_01).
+
+**The payer generates a proof bound to the transcript:**
+
+    get_tx_proof { txid, address, message: <transcript chain link> }
+    → OutProofV2gtxRYPBZJN5AfGH6LsGyFTemrmHYKbukYQ…   (142 chars)
+
+**A third wallet — `taxi_01`, neither payer nor payee — verifies it:**
+
+    check_tx_proof → { good: true, received: 600000000, confirmations: 370 }
+
+That is the whole of §17.5's premise, confirmed: a party with no relationship to
+the transaction, holding no view key, established that a specific amount reached
+a specific address.
+
+### The message binding is enforced by Monero, not by us
+
+Re-running the same check with a different message:
+
+    check_tx_proof → { good: false, received: 0 }
+
+Monero's proof covers an arbitrary `message` chosen at generation time. The
+obvious implementation leaves it empty — and then **any proof the payer ever
+generated for that transaction replays into an unrelated claim**. Setting it to
+the transcript's chain link makes the proof non-transferable between disputes,
+and costs one field.
+
+§17.5 now requires it, and `escrow::check_tx_proof_binding` refuses a proof whose
+message is not the chain link before an arbiter spends anything querying a node.
+
+### Correcting an earlier claim
+
+§17.5 said proofs were "DUCAT's own work" because `monero-wallet` provides no
+implementation. True of `monero-oxide`'s crate; **not** true of
+`monero-wallet-rpc`, which exposes `get_tx_proof` and `check_tx_proof` and is
+what this measurement used. A client embedding a wallet (§8.2's intended path)
+still owes the work. A client driving wallet-rpc does not, and the spec said
+otherwise.
+
+At 142 characters, carrying a proof inside a slash claim costs nothing.

@@ -10,7 +10,7 @@
   "properties": {
     "category": {
       "type": "string",
-      "enum": ["codec", "signing", "negotiate", "commit", "state", "transcript", "backup"]
+      "enum": ["codec", "signing", "negotiate", "commit", "state", "transcript", "backup", "object"]
     },
     "cases": {
       "type": "array",
@@ -56,7 +56,8 @@
           "type": "string",
           "enum": [
             "TapPresent", "FullOffer", "Accept", "Fund", "Cancel", "Abort",
-            "Proof", "TxProof", "Receipt", "Dispute",
+            "Proof", "TxId", "Receipt", "Dispute",
+            "EscrowSetup", "EscrowReady", "Release",
             "MeterStart", "MeterStop", "MeterExpired", "DeliveryWindowExpired",
             "ConfirmationsReached", "CureWindowExpired",
             "ContactOffer", "ContactAccept", "Elapsed"
@@ -93,7 +94,7 @@
             "codec.decode", "signing.verify", "signing.pubkey",
             "negotiate.select", "commit.purposes", "commit.substitution",
             "state.sequence", "transcript.replay", "transcript.substitution",
-            "backup.import"
+            "backup.import", "object.roundtrip"
           ]
         },
         "name": { "type": "string", "minLength": 1 },
@@ -327,6 +328,27 @@
               "tap_offer_commit_hex": { "$ref": "#/$defs/digest" },
               "delivered_offer_hex": { "$ref": "#/$defs/hex" },
               "expect": { "$ref": "#/$defs/outcome" }
+            }
+          }
+        },
+
+        {
+          "if": { "properties": { "kind": { "const": "object.roundtrip" } }, "required": ["kind"] },
+          "then": {
+            "description": "Decode one wire object and, on success, re-encode it to the same bytes. The narrowest thing two implementations must agree on before anything downstream can work, since every commitment in the protocol hashes canonical objects.",
+            "required": ["expect", "object_type", "object_hex"],
+            "properties": {
+              "object_type": {
+                "type": "string",
+                "description": "The registered type this decodes as. A case whose object declares a different type MUST fail: every object's `type` field is a registered code and decoders check it, which five objects did not do until 0.47."
+              },
+              "object_hex": { "$ref": "#/$defs/hex" },
+              "expect": {
+                "allOf": [{ "$ref": "#/$defs/outcome" }],
+                "properties": { "reencodes_to_hex": { "$ref": "#/$defs/hex" } },
+                "if": { "properties": { "ok": { "const": true } }, "required": ["ok"] },
+                "then": { "required": ["reencodes_to_hex"] }
+              }
             }
           }
         },

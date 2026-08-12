@@ -95,7 +95,19 @@ pub enum Event {
         from: Role,
     },
     Fund,
-    TxProof,
+    /// The payer's mempool pointer under `fast/1` (§17.4).
+    ///
+    /// Named `TxProof` until 0.47, which was wrong in a way that would have
+    /// shipped: draft 0.17 established that the payee **is** the recipient and
+    /// scans with its own view key, so acceptance needs a transaction
+    /// identifier, not a proof. A proof exists to convince someone who is not
+    /// the recipient — an arbiter (§17.5) — and §6's message table plus §18.4's
+    /// transition table both kept saying `TXPROOF` for three drafts after §17.4
+    /// said otherwise.
+    ///
+    /// The event does not mean "the payment is good". It means the payee has
+    /// something to scan for; the scan decides (`escrow::check_txid`).
+    TxId,
     Proof,
     Receipt,
     Cancel,
@@ -301,10 +313,11 @@ pub fn transition(
         }
 
         // -- fast/1 zero-conf --------------------------------------------
-        (S::Funded, E::TxProof) if mode == SettleMode::Fast => go(S::Provisional),
-        (S::Funded, E::TxProof) => Err(Reject::with_detail(
+        (S::Funded, E::TxId) if mode == SettleMode::Fast => go(S::Provisional),
+        (S::Funded, E::TxId) => Err(Reject::with_detail(
             RejectCode::StateViolation,
-            "TXPROOF is only meaningful under fast/1",
+            "TXID is only meaningful under fast/1: in the other modes there is \
+             nothing to accept provisionally",
         )),
         // No proof inside the window: fall back to waiting for confirmations
         // rather than accepting unbacked risk.

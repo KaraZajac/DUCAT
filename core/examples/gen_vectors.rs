@@ -362,7 +362,7 @@ fn state_cases() -> Vec<J> {
         (Event::FullOffer, State::Quoted),
         (Event::Accept { from: Role::Payer }, State::Accepted),
         (Event::Fund, State::Funded),
-        (Event::TxProof, State::Provisional),
+        (Event::TxId, State::Provisional),
         (Event::Proof, State::Delivered),
         (Event::Receipt, State::Closed),
         (Event::ConfirmationsReached, State::Settled),
@@ -899,6 +899,7 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
             }
         }
         "backup" => ("backup", "backup.import"),
+        "object" => ("object", "object.roundtrip"),
         other => panic!("no normalization rule for category {}", other),
     };
     obj.insert("kind".into(), json!(kind));
@@ -972,17 +973,113 @@ fn normalize_event(ev: &J) -> J {
     json!({ "name": name })
 }
 
+/// §8.2 and §17.4/§17.5 objects, round-tripped.
+///
+/// The manifest said escrow and `fast/1` had no coverage at all. Full
+/// transcripts for them still need `FUND`/`RELEASE` orchestration, but the part
+/// a second implementer needs first is smaller and sharper: **do we encode these
+/// objects to the same bytes?** If not, nothing downstream can agree, because
+/// every commitment in the protocol hashes canonical objects.
+fn object_cases() -> Vec<J> {
+    use ducat_core::escrow::*;
+    let mut v = Vec::new();
+
+    let accept_link = commit(Purpose::ChainLink, &[0xA1u8; 16]);
+
+    let txid = TxId {
+        version: 1, suite: 1, accept_link,
+        txid: [0x77; 32], amount_pxmr: 21_000_000_000, timestamp: 1_800_000_000,
+    };
+    let proof = TxProof {
+        version: 1, suite: 1, txid: [0x77; 32],
+        proof: b"OutProofV2gtxRYPBZJN5AfGH6LsGyFTemrmHYKbukYQ".to_vec(),
+        destination: b"driver-addr".to_vec(),
+        proof_message: accept_link,
+        amount_pxmr: 21_000_000_000, timestamp: 1_800_000_009,
+    };
+    let claim = SlashClaim {
+        version: 1, suite: 1, accept_link,
+        receipt_link: commit(Purpose::ChainLink, &[0xB2u8; 16]),
+        txid: [0x77; 32], reason: SlashReason::ConflictingKeyImage,
+        key_image: Some([0x5A; 32]),
+        claim_pxmr: 21_000_000_000, timestamp: 1_800_000_100,
+    };
+    let claim_cure = SlashClaim { reason: SlashReason::CureWindowExpired, key_image: None, ..claim.clone() };
+    let setup = EscrowSetup {
+        version: 1, suite: 1, escrow_id: [0xE5; 32], round: 0,
+        info: vec![0xAB; 64], from_index: BUYER, timestamp: 1_800_000_000,
+    };
+    let ready = EscrowReady {
+        version: 1, suite: 1, escrow_id: [0xE5; 32],
+        ms_address: b"53multisigaddress".to_vec(), threshold: 2, total: 3,
+        arbiter: b"arbiter-key-1".to_vec(), from_index: BUYER, timestamp: 1_800_000_200,
+    };
+    let release = Release {
+        version: 1, suite: 1, escrow_id: [0xE5; 32],
+        ready_link: commit(Purpose::ChainLink, &ready.to_value().encode()),
+        to: b"seller-payout".to_vec(), amount_pxmr: 21_000_000_000, timestamp: 1_800_000_300,
+    };
+
+    let items: Vec<(&str, &str, Vec<u8>)> = vec![
+        ("TXID", "fast/1's mempool pointer. Carries no evidence: the payee scans with its own \
+                  view key, and this object only says what to look for.", txid.to_value().encode()),
+        ("TXPROOF", "arbitration evidence only. `proof_message` MUST be the transcript chain \
+                     link — Monero enforces the binding, so an unbound proof can be replayed \
+                     into an unrelated dispute.", proof.to_value().encode()),
+        ("SLASH_CLAIM", "a double-spend claim skips the cure window, which makes it the one \
+                         worth forging, which is why it must carry the conflicting key image.",
+         claim.to_value().encode()),
+        ("SLASH_CLAIM", "the cure-window variant carries no key image: non-confirmation is \
+                         usually a fee problem, not fraud.", claim_cure.to_value().encode()),
+        ("ESCROW_SETUP", "one contribution to one ceremony round. Rounds are strictly \
+                          sequential — §2.5's exploit was a forged out-of-order message.",
+         setup.to_value().encode()),
+        ("ESCROW_READY", "one participant's report of what the ceremony formed. All three must \
+                          match, or the funds land in a wallet the payer holds no share of.",
+         ready.to_value().encode()),
+        ("RELEASE", "an escrow payout. The destination must be a party to the escrow — the \
+                     check a rushed implementation drops, because the happy path never \
+                     exercises it.", release.to_value().encode()),
+    ];
+    for (i, (ty, why, enc)) in items.into_iter().enumerate() {
+        v.push(json!({
+            "name": format!("object_{}_{}", ty.to_lowercase(), i),
+            "why": why,
+            "object_type": ty,
+            "object_hex": hex(&enc),
+            "expect": { "ok": true, "reencodes_to_hex": hex(&enc) }
+        }));
+    }
+
+    // The type field is checked, not discarded — five objects got this wrong
+    // until 0.47 and two byte strings decoded to one object.
+    let mut m = match setup.to_value() { Value::Map(m) => m, _ => unreachable!() };
+    m.insert(0u64, Value::Uint(3));
+    v.push(json!({
+        "name": "object_wrong_type_code_refused",
+        "why": "an object declaring another type must not decode. Until 0.47 five objects read \
+                the type field and threw it away, so two byte strings differing only in their \
+                declared type produced one object — both verifying, both hashing differently.",
+        "object_type": "ESCROW_SETUP",
+        "object_hex": hex(&Value::Map(m).encode()),
+        "expect": { "ok": false, "reject_code": RejectCode::Malformed as u8, "reject_name": "Malformed" },
+        "hint": "type field says 3 (ACCEPT)"
+    }));
+    v
+}
+
 fn main() -> std::io::Result<()> {
     let dir = std::path::Path::new("../vectors").join(format!("v{}", VECTOR_SET_VERSION));
     std::fs::create_dir_all(&dir)?;
 
-    let files: [(&str, Vec<J>); 6] = [
+    let files: [(&str, Vec<J>); 7] = [
         ("codec", codec_cases()),
         ("signing", signing_cases()),
         ("state", state_cases()),
         ("negotiate", negotiate_cases()),
         ("transcript", transcript_cases()),
         ("backup", backup_cases()),
+        ("object", object_cases()),
     ];
 
     // Normalize and route. A case's authored category is not necessarily the
@@ -1024,10 +1121,11 @@ fn main() -> std::io::Result<()> {
             "18.9(6) negotiation including a downgrade attempt": true,
             "18.9(7) piconero amounts that defeat a float implementation": true,
             "4.3 backup format known-answer and rejection cases": true,
+            "8.2 / 17.4 / 17.5 escrow and fast-settle object encodings": true,
             "every case carries a `kind` discriminator and validates against schema.json": true
         },
         "does_not_yet_cover": {
-            "escrow and fast/1 transcripts": "only direct settlement is covered; TXPROOF and escrow objects are unimplemented",
+            "escrow and fast/1 end-to-end transcripts": "the objects are implemented and their encodings are covered (object.roundtrip), but no vector drives a full escrow ceremony or a fast/1 settlement from tap to SETTLED. The contract logic — ordered ceremony rounds, arbiter-set membership, release destinations, cure windows — is tested in core/tests/escrow.rs and is not yet language-neutral.",
             "suite 2 key agreement": "only signatures are covered; X25519/ECDH is unimplemented",
             "O21 caveat": "a vector set validated by one implementation encodes that implementation's bugs. A second implementation (conformance/ducat_check.py) now runs these and agrees at 104/104, having found three spec defects on its first pass — but it shares an author with the reference, so O21 stays open until someone who has never read core/ runs them.",
             "multisig backup": "§4.3.3 — escrow shares are carried in the bundle as opaque key-file bytes, but no vector exercises one: a share is a Monero wallet key file, not a DUCAT object, so there is nothing language-neutral to assert. Verified against stagenet instead (monero-spike/REPORT.md)."

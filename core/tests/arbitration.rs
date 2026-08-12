@@ -155,3 +155,30 @@ fn unknown_class_and_outcome_values_are_refused() {
     if let Value::Map(m) = &mut v { m.insert(57, Value::Uint(9)); }
     assert_eq!(Ruling::from_value(v).unwrap_err().code, RejectCode::Malformed);
 }
+
+/// Two type codes, one Dispute — §18.3's transcript-divergence rule says this
+/// cannot be allowed to exist.
+#[test]
+fn a_dispute_is_pinned_to_exactly_one_type_code() {
+    use ducat_core::cbor::Value;
+    use std::collections::BTreeMap;
+    let d = Dispute {
+        version: 1, suite: 1, class: DisputeClass::Mechanical,
+        transcript: [7u8; 32], claim_pxmr: 1000, timestamp: 100,
+    };
+    let genuine = d.to_value().encode();
+    // Same fields, different declared type.
+    let mut m = match d.to_value() { Value::Map(m) => m, _ => unreachable!() };
+    m.insert(0u64, Value::Uint(3)); // claim to be an ACCEPT
+    let impostor = Value::Map(m).encode();
+    assert_ne!(genuine, impostor, "the two encodings differ");
+    let a = Dispute::from_value(ducat_core::cbor::decode(&genuine).unwrap()).unwrap();
+    let b = Dispute::from_value(ducat_core::cbor::decode(&impostor).unwrap());
+    assert!(
+        b.is_err(),
+        "two distinct byte strings both decode to the same DISPUTE: {:?} — \
+         §18.3: anywhere the protocol admits two byte representations of one \
+         value, it has a transcript-divergence bug",
+        a
+    );
+}

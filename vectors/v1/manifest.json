@@ -4,6 +4,7 @@
     "codec": 41,
     "commit": 2,
     "negotiate": 4,
+    "object": 8,
     "signing": 17,
     "state": 29,
     "transcript": 4
@@ -17,18 +18,19 @@
     "18.9(6) negotiation including a downgrade attempt": true,
     "18.9(7) piconero amounts that defeat a float implementation": true,
     "4.3 backup format known-answer and rejection cases": true,
+    "8.2 / 17.4 / 17.5 escrow and fast-settle object encodings": true,
     "every case carries a `kind` discriminator and validates against schema.json": true
   },
   "deterministic": "all keys derive from fixed seeds; no clock or RNG is consulted, so regeneration is byte-identical on an unchanged implementation",
   "does_not_yet_cover": {
     "O21 caveat": "a vector set validated by one implementation encodes that implementation's bugs. A second implementation (conformance/ducat_check.py) now runs these and agrees at 104/104, having found three spec defects on its first pass — but it shares an author with the reference, so O21 stays open until someone who has never read core/ runs them.",
-    "escrow and fast/1 transcripts": "only direct settlement is covered; TXPROOF and escrow objects are unimplemented",
+    "escrow and fast/1 end-to-end transcripts": "the objects are implemented and their encodings are covered (object.roundtrip), but no vector drives a full escrow ceremony or a fast/1 settlement from tap to SETTLED. The contract logic — ordered ceremony rounds, arbiter-set membership, release destinations, cure windows — is tested in core/tests/escrow.rs and is not yet language-neutral.",
     "multisig backup": "§4.3.3 — escrow shares are carried in the bundle as opaque key-file bytes, but no vector exercises one: a share is a Monero wallet key file, not a DUCAT object, so there is nothing language-neutral to assert. Verified against stagenet instead (monero-spike/REPORT.md).",
     "suite 2 key agreement": "only signatures are covered; X25519/ECDH is unimplemented"
   },
   "generated_by": "ducat-core examples/gen_vectors.rs",
   "protocol_draft": "0.42",
   "reject_codes_are": "§18.5 wire codes. Two clients must agree an input is MALFORMED; they need not agree on which internal decoder rule said so. The non-normative `hint` field names the rule.",
-  "total_cases": 104,
+  "total_cases": 112,
   "vector_set": "1"
 }

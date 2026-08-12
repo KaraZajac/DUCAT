@@ -42,7 +42,7 @@ fn manifest_is_self_consistent() {
     let m = load("manifest");
     let total = m["total_cases"].as_u64().unwrap() as usize;
     let mut sum = 0;
-    for name in ["codec", "signing", "state", "negotiate", "commit", "transcript", "backup"] {
+    for name in ["codec", "signing", "state", "negotiate", "commit", "transcript", "backup", "object"] {
         let n = cases(name).len();
         assert_eq!(
             m["counts"][name].as_u64().unwrap() as usize,
@@ -172,7 +172,7 @@ fn parse_event(v: &J) -> Event {
         "Accept" => Event::Accept { from },
         "Abort" => Event::Abort { from },
         "Fund" => Event::Fund,
-        "TxProof" => Event::TxProof,
+        "TxId" => Event::TxId,
         "Proof" => Event::Proof,
         "Receipt" => Event::Receipt,
         "Cancel" => Event::Cancel,
@@ -434,6 +434,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "codec.decode", "signing.verify", "signing.pubkey", "negotiate.select",
         "commit.purposes", "commit.substitution", "state.sequence",
         "transcript.replay", "transcript.substitution", "backup.import",
+        "object.roundtrip",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -468,4 +469,32 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         }
     }
     assert!(count >= 100, "vector set unexpectedly small: {}", count);
+}
+
+
+/// §8.2 / §17.4 / §17.5 object encodings, replayed from the published artifact.
+#[test]
+fn object_vectors_pass() {
+    for c in cases("object") {
+        let name = c["name"].as_str().unwrap();
+        let raw = unhex(c["object_hex"].as_str().unwrap());
+        let got = decode(&raw);
+        if c["expect"]["ok"].as_bool() == Some(false) {
+            // The type check is the whole point of the negative case.
+            let v = got.expect("case should decode as CBOR");
+            assert!(
+                ducat_core::escrow::EscrowSetup::from_value(v).is_err(),
+                "{}: an object declaring another type must not decode",
+                name
+            );
+            continue;
+        }
+        let v = got.unwrap_or_else(|e| panic!("{}: {:?}", name, e));
+        assert_eq!(
+            hexs(&v.encode()),
+            c["expect"]["reencodes_to_hex"].as_str().unwrap(),
+            "{}: re-encoding is not stable",
+            name
+        );
+    }
 }

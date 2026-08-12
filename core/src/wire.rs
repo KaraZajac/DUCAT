@@ -76,6 +76,52 @@ pub mod f {
     /// Where a refund actually went, checked against the above.
     pub const REFUND_PAID_TO: u64 = 103;
 
+    // TXID (§17.4). A pointer into the mempool, not evidence — see escrow.rs.
+    pub const TXID_ACCEPT_LINK: u64 = 46;
+    pub const TXID_TXID: u64 = 47;
+    pub const TXID_AMOUNT: u64 = 48;
+    pub const TXID_TS: u64 = 49;
+
+    // ESCROW_SETUP (§8.2)
+    pub const ESC_ID: u64 = 104;
+    pub const ESC_ROUND: u64 = 105;
+    pub const ESC_INFO: u64 = 106;
+    pub const ESC_FROM: u64 = 107;
+    pub const ESC_TS: u64 = 108;
+
+    // ESCROW_READY (§8.2)
+    pub const RDY_ID: u64 = 111;
+    pub const RDY_ADDRESS: u64 = 112;
+    pub const RDY_THRESHOLD: u64 = 113;
+    pub const RDY_TOTAL: u64 = 114;
+    pub const RDY_ARBITER: u64 = 115;
+    pub const RDY_FROM: u64 = 116;
+    pub const RDY_TS: u64 = 117;
+
+    // RELEASE (§8.2)
+    pub const REL_ID: u64 = 119;
+    pub const REL_READY_LINK: u64 = 120;
+    pub const REL_TO: u64 = 121;
+    pub const REL_AMOUNT: u64 = 122;
+    pub const REL_TS: u64 = 123;
+
+    // TXPROOF (§17.5) — arbitration evidence only.
+    pub const PRF_TXID: u64 = 125;
+    pub const PRF_PROOF: u64 = 126;
+    pub const PRF_DESTINATION: u64 = 127;
+    pub const PRF_MESSAGE: u64 = 128;
+    pub const PRF_AMOUNT: u64 = 129;
+    pub const PRF_TS: u64 = 130;
+
+    // SLASH_CLAIM (§17.5)
+    pub const SLC_ACCEPT_LINK: u64 = 132;
+    pub const SLC_RECEIPT_LINK: u64 = 133;
+    pub const SLC_TXID: u64 = 134;
+    pub const SLC_REASON: u64 = 135;
+    pub const SLC_KEY_IMAGE: u64 = 136;
+    pub const SLC_AMOUNT: u64 = 137;
+    pub const SLC_TS: u64 = 138;
+
     /// Nested terms map (§7.3, §15.7, §8.8). Its inner keys are their own
     /// namespace, defined in `terms`.
     pub const TERMS: u64 = 96;
@@ -238,7 +284,7 @@ pub enum FeePolicy {
     PayeeAbsorbs = 1,
 }
 
-fn type_code(t: ObjectType) -> u64 {
+pub(crate) fn type_code(t: ObjectType) -> u64 {
     match t {
         ObjectType::TapPresent => 1,
         ObjectType::FullOffer => 2,
@@ -252,6 +298,16 @@ fn type_code(t: ObjectType) -> u64 {
         ObjectType::ContactAccept => 10,
         ObjectType::BondProof => 11,
         ObjectType::Attestation => 12,
+        ObjectType::Dispute => 13,
+        ObjectType::Ruling => 14,
+        ObjectType::Hail => 15,
+        ObjectType::HailReply => 16,
+        ObjectType::TapStatic => 17,
+        ObjectType::TxId => 18,
+        ObjectType::EscrowSetup => 19,
+        ObjectType::EscrowReady => 20,
+        ObjectType::Release => 21,
+        ObjectType::SlashClaim => 22,
     }
 }
 
@@ -278,12 +334,12 @@ fn type_from_code(c: u64) -> Option<ObjectType> {
 /// Consuming reader. Every field taken is removed, so `finish` can enforce
 /// §18.8's rule that an unknown field is a rejection: a client that tolerated
 /// fields it did not understand would be signing something it never displayed.
-struct Reader {
+pub(crate) struct Reader {
     m: BTreeMap<u64, Value>,
 }
 
 impl Reader {
-    fn new(v: Value) -> Result<Self, Reject> {
+    pub(crate) fn new(v: Value) -> Result<Self, Reject> {
         match v {
             Value::Map(m) => Ok(Reader { m }),
             _ => Err(Reject::with_detail(
@@ -300,7 +356,7 @@ impl Reader {
         Reject::with_detail(RejectCode::Malformed, format!("wrong type for field {}", k))
     }
 
-    fn uint(&mut self, k: u64) -> Result<u64, Reject> {
+    pub(crate) fn uint(&mut self, k: u64) -> Result<u64, Reject> {
         self.m
             .remove(&k)
             .ok_or_else(|| Self::missing(k))?
@@ -308,7 +364,7 @@ impl Reader {
             .ok_or_else(|| Self::wrong(k))
     }
 
-    fn bytes(&mut self, k: u64, len: Option<usize>) -> Result<Vec<u8>, Reject> {
+    pub(crate) fn bytes(&mut self, k: u64, len: Option<usize>) -> Result<Vec<u8>, Reject> {
         let b = self
             .m
             .remove(&k)
@@ -327,7 +383,7 @@ impl Reader {
         Ok(b)
     }
 
-    fn opt_bytes(&mut self, k: u64, len: Option<usize>) -> Result<Option<Vec<u8>>, Reject> {
+    pub(crate) fn opt_bytes(&mut self, k: u64, len: Option<usize>) -> Result<Option<Vec<u8>>, Reject> {
         if !self.m.contains_key(&k) {
             return Ok(None);
         }
@@ -345,7 +401,7 @@ impl Reader {
     }
 
     /// Reject anything left over (§18.8).
-    fn finish(self) -> Result<(), Reject> {
+    pub(crate) fn finish(self) -> Result<(), Reject> {
         if let Some((k, _)) = self.m.into_iter().next() {
             return Err(Reject::with_detail(
                 RejectCode::UnknownField,
@@ -1199,7 +1255,7 @@ pub struct Ruling {
 impl Dispute {
     pub fn to_value(&self) -> Value {
         let mut m = BTreeMap::new();
-        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Cancel) + 100)); // distinct code
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Dispute)));
         m.insert(f::VERSION, Value::Uint(self.version));
         m.insert(f::SUITE, Value::Uint(self.suite as u64));
         m.insert(f::DISPUTE_CLASS, Value::Uint(self.class as u64));
@@ -1211,7 +1267,17 @@ impl Dispute {
 
     pub fn from_value(v: Value) -> Result<Self, Reject> {
         let mut r = Reader::new(v)?;
-        let _ = r.uint(f::TYPE)?;
+        // Checked, not discarded. Until 0.47 these five objects — every one added
+        // after the original four — read the type field and threw it away, so a
+        // second byte string differing only in its declared type decoded to the
+        // same object. §18.3: anywhere the protocol admits two byte
+        // representations of one value, it has a transcript-divergence bug.
+        if r.uint(f::TYPE)? != type_code(ObjectType::Dispute) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "object type is not DISPUTE",
+            ));
+        }
         let out = Dispute {
             version: r.uint(f::VERSION)?,
             suite: r.uint(f::SUITE)? as u8,
@@ -1237,7 +1303,7 @@ impl Dispute {
 impl Ruling {
     pub fn to_value(&self) -> Value {
         let mut m = BTreeMap::new();
-        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Cancel) + 200));
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Ruling)));
         m.insert(f::VERSION, Value::Uint(self.version));
         m.insert(f::SUITE, Value::Uint(self.suite as u64));
         m.insert(f::RULING_DISPUTE, Value::Bytes(self.dispute.to_vec()));
@@ -1249,7 +1315,17 @@ impl Ruling {
 
     pub fn from_value(v: Value) -> Result<Self, Reject> {
         let mut r = Reader::new(v)?;
-        let _ = r.uint(f::TYPE)?;
+        // Checked, not discarded. Until 0.47 these five objects — every one added
+        // after the original four — read the type field and threw it away, so a
+        // second byte string differing only in its declared type decoded to the
+        // same object. §18.3: anywhere the protocol admits two byte
+        // representations of one value, it has a transcript-divergence bug.
+        if r.uint(f::TYPE)? != type_code(ObjectType::Ruling) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "object type is not RULING",
+            ));
+        }
         let out = Ruling {
             version: r.uint(f::VERSION)?,
             suite: r.uint(f::SUITE)? as u8,
@@ -1384,7 +1460,7 @@ pub struct HailReply {
 impl Hail {
     pub fn to_value(&self) -> Value {
         let mut m = BTreeMap::new();
-        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Cancel) + 300));
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Hail)));
         m.insert(f::VERSION, Value::Uint(self.version));
         m.insert(f::SUITE, Value::Uint(self.suite as u64));
         m.insert(f::PROFILE, Value::Uint(self.profile));
@@ -1397,7 +1473,17 @@ impl Hail {
 
     pub fn from_value(v: Value) -> Result<Self, Reject> {
         let mut r = Reader::new(v)?;
-        let _ = r.uint(f::TYPE)?;
+        // Checked, not discarded. Until 0.47 these five objects — every one added
+        // after the original four — read the type field and threw it away, so a
+        // second byte string differing only in its declared type decoded to the
+        // same object. §18.3: anywhere the protocol admits two byte
+        // representations of one value, it has a transcript-divergence bug.
+        if r.uint(f::TYPE)? != type_code(ObjectType::Hail) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "object type is not HAIL",
+            ));
+        }
         let out = Hail {
             version: r.uint(f::VERSION)?,
             suite: r.uint(f::SUITE)? as u8,
@@ -1424,7 +1510,7 @@ impl Hail {
 impl HailReply {
     pub fn to_value(&self) -> Value {
         let mut m = BTreeMap::new();
-        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Cancel) + 400));
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::HailReply)));
         m.insert(f::VERSION, Value::Uint(self.version));
         m.insert(f::SUITE, Value::Uint(self.suite as u64));
         m.insert(f::HAILREPLY_NONCE_ECHO, Value::Bytes(self.nonce_echo.to_vec()));
@@ -1435,7 +1521,17 @@ impl HailReply {
 
     pub fn from_value(v: Value) -> Result<Self, Reject> {
         let mut r = Reader::new(v)?;
-        let _ = r.uint(f::TYPE)?;
+        // Checked, not discarded. Until 0.47 these five objects — every one added
+        // after the original four — read the type field and threw it away, so a
+        // second byte string differing only in its declared type decoded to the
+        // same object. §18.3: anywhere the protocol admits two byte
+        // representations of one value, it has a transcript-divergence bug.
+        if r.uint(f::TYPE)? != type_code(ObjectType::HailReply) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "object type is not HAILREPLY",
+            ));
+        }
         let out = HailReply {
             version: r.uint(f::VERSION)?,
             suite: r.uint(f::SUITE)? as u8,
@@ -1558,7 +1654,7 @@ impl TapStatic {
     /// The body a pinned persona signs: everything except the signature.
     pub fn signing_body(&self) -> Vec<u8> {
         let mut m = BTreeMap::new();
-        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::TapPresent) + 500));
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::TapStatic)));
         m.insert(f::VERSION, Value::Uint(self.version));
         m.insert(f::SUITE, Value::Uint(self.suite as u64));
         m.insert(f::STATIC_PAYTO, Value::Bytes(self.payto.clone()));
@@ -1570,7 +1666,7 @@ impl TapStatic {
 
     pub fn to_value(&self) -> Value {
         let mut m = BTreeMap::new();
-        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::TapPresent) + 500));
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::TapStatic)));
         m.insert(f::VERSION, Value::Uint(self.version));
         m.insert(f::SUITE, Value::Uint(self.suite as u64));
         m.insert(f::STATIC_PAYTO, Value::Bytes(self.payto.clone()));
@@ -1585,7 +1681,17 @@ impl TapStatic {
 
     pub fn from_value(v: Value) -> Result<Self, Reject> {
         let mut r = Reader::new(v)?;
-        let _ = r.uint(f::TYPE)?;
+        // Checked, not discarded. Until 0.47 these five objects — every one added
+        // after the original four — read the type field and threw it away, so a
+        // second byte string differing only in its declared type decoded to the
+        // same object. §18.3: anywhere the protocol admits two byte
+        // representations of one value, it has a transcript-divergence bug.
+        if r.uint(f::TYPE)? != type_code(ObjectType::TapStatic) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "object type is not TAPSTATIC",
+            ));
+        }
         let out = TapStatic {
             version: r.uint(f::VERSION)?,
             suite: r.uint(f::SUITE)? as u8,

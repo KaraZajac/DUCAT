@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.46 — Consolidated**
+**Draft 0.47 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.47** — **`fast/1` and escrow implemented — the two paths the manifest admitted had no coverage — and three defects surfaced doing it.** First, **`TXID` and `TXPROOF` had been conflated since 0.17**: that draft established the payee *is* the recipient and scans with its own view key, so acceptance needs a mempool pointer rather than a proof — but §6's message table, §6.2's deadlines, and §18.4's transition table all kept saying `TXPROOF` for thirty drafts. They are now two objects with two jobs: `TXID` on the happy path carrying no evidence at all, and `TXPROOF` only inside a slash claim, for an arbiter who cannot scan. Second, **five objects had improvised type codes and discarded the type field on decode** — `DISPUTE`, `RULING`, `HAIL`, `HAIL_REPLY`, `TapStatic`, every one added after the original four, each written from the last rather than from the correct originals. Two byte strings differing only in declared type decoded to the same object: §18.3's transcript-divergence bug exactly. Third, **the field registry's `96+ Unallocated` row was stale from 0.14**, with 96–103 long in use, so a second implementer allocating from 96 would have collided head-on. Escrow's ceremony is built as a `RoundTracker` that accepts only the round it expects and only one contribution per participant per round, because **§2.5's exploit was a forged out-of-order message overwriting settled state** — and `check_escrow_ready` takes the trusted arbiter set as an argument so an arbiter can never arrive in a message. Verified on stagenet: a **third wallet, neither payer nor payee, checked a real `OutProofV2`** (`good: true, received: 600000000`) and rejected the same proof under a different message (`good: false`), confirming both §17.5's premise and the new requirement that **a proof be bound to its transcript** — without which any proof the payer ever generated replays into an unrelated claim.
 - **0.46** — **Vector schema published (§18.9.1), and the harness normalised rather than documented.** §18.11 recorded that most of the second implementation's effort went into the *test harness*, not the protocol: `signing.json` had two undeclared shapes, `negotiate.json` held two cases that were not negotiations, `transcript.json` held one that was not a transcript, and the state event grammar had **five spellings of one concept**. Writing a schema that documented five spellings would have formalised the mess, so the format was normalised first — **every case now carries a `kind`, and `kind` is the only discriminator; file names carry no meaning to a consumer** — and then specified in a normative `vectors/v1/schema.json`. **The schema is hand-written, not emitted by the generator**, because a schema produced by the same program that produces the vectors agrees with that program's mistakes, and it earned the distinction immediately: it caught a negotiation case that never declared which versions the local client supported (forcing consumers to invent a default, which is how two implementations diverge) and a `state.sequence` shape that let a case assert a transition without asserting the effect — which passes while a client emits the wrong evidence, and §6.2's two unilateral receipts assert opposite things. `why` is now required on every case and `hint` explicitly unparseable. Both implementations and the validator agree at 104/104. O21 remains open, and what is left cannot be engineered away: an implementer who has never read `core/`. Everything accidental is now out of their path.
 - **0.45** — **A second implementation ran the vectors, and found three defects in this document (§18.11, O21 advanced).** `conformance/ducat_check.py` is written from Part V rather than from `core/`; it agreed on 101 of 104 cases. Two disagreements were plain omissions where the reference was right and the text was silent: **§18.1 had no nesting bound** — the word did not appear in the document, while the vector's own hint cited "the 16-level nesting bound" as though specified — and **§18.4's self-described exhaustive table listed `CLOSED`'s 120 s contact window only as a guard, never as a deadline**, which changes no state and therefore leaves a client holding session keys open forever. The third is why the exercise was worth doing: **negative integers were unspecified**, so the reference accepted CBOR major type 1 and the second implementation refused it and *both were conformant*. No vector set could have caught that, because there was no correct answer to test against — it is only visible when two implementations read the same text and reach different conclusions. Resolved toward refusal, with a rule for every future §18.1 addition: **later accepting a value type extends the format, later refusing one breaks every peer already relying on it, so strict first is the only reversible choice.** 104/104 after correction. O21 remains open for an honest reason — same author, not clean-room — and the cheapest step toward closing it is publishing a schema for the vector files, whose shape a second implementer currently reverse-engineers from examples.
 - **0.44** — **O22 closed: an escrow share is recoverable after all, and the earlier reasoning was wrong in an instructive way.** 0.42 concluded shares could not be backed up because `monero-wallet-rpc` cannot restore one. Sound reasoning, wrong conclusion — it assumed restoring a share means *reconstructing* it. Measured both halves: reconstruction genuinely fails, since two wallets with byte-identical key material produce `prepare_multisig` outputs agreeing for 101 characters and then diverging for 88 of fresh randomness. But reconstruction is unnecessary. A share is already a **2,286-byte `.keys` file**, and copying it into a virgin directory yielded `multisig: true, ready: true, threshold 2, total 3` at the correct group address, producing valid `export_multisig_info` — the missing RPC method is simply not on the path. The multi-megabyte companion file is scan cache and must not be backed up. **What actually changed is the trust ask**: recovery used to require the *counterparty's signature*, an adversary being asked to sign away their own claim, which nothing can compel; it now requires the other participants to re-share multisig info, which endorses no outcome and is a routine mechanical step. Four rules from observation — capture at `ready` so a half-formed ceremony is not backed up as one, never back up the cache, re-export when an escrow opens since this is the bundle's only freshness-sensitive content, and note that restoring membership is not yet the ability to spend. Residue recorded rather than hidden: a stale bundle still misses escrows opened after it, and an end-to-end spend from a restored share is undemonstrated — the restored wallet refused to build one, and so did the original, for the same unrelated reason.
@@ -486,7 +487,8 @@ HAIL            consumer → provider       session pubkey, profile request
 QUOTE           provider → consumer       priced offer (deterministic from rate card + inputs)
 ACCEPT          consumer → provider       signed fare-lock; names settlement mode
 FUND            consumer → escrow/provider  settlement initiation (mode-dependent, §8)
-TXPROOF         payer → payee             tx proof enabling zero-conf accept (fast/1 only, §17.4)
+TXID            payer → payee             mempool pointer for zero-conf accept (fast/1 only, §17.4)
+TXPROOF         claimant → arbiter        transaction proof; arbitration evidence only (§17.5)
 PROOF           either → either           delivery evidence (profile-defined)
 RELEASE         consumer → escrow         escrow disbursal (escrow mode only)
 RECEIPT         both                      co-signed closure; input to attestation
@@ -528,7 +530,7 @@ A state machine without deadlines is unimplementable. **Every await has a deadli
 | `FullOffer` after tap | 10 s | Discard silently; no screen ever shown to the human |
 | ACCEPT (offer displayed) | `TapPresent.expiry` (≤ 30 s) | ABORT, no penalty |
 | FUND after ACCEPT | 60 s | ABORT, no penalty |
-| TXPROOF (`fast/1`) | 30 s | Provider falls back to `direct` (wait for confirmations) or ABORTs |
+| TXID (`fast/1`) | 30 s | Provider falls back to `direct` (wait for confirmations) or ABORTs |
 | PROOF of delivery | Profile-defined, **bounded** | `CLOSED` + payment evidence — see the audit below |
 | RECEIPT co-signature | 120 s | **Single-sided receipt** (below) |
 | Multisig setup (escrow) | 300 s | ABORT + fund recovery path (§8.2) |
@@ -553,7 +555,7 @@ The general invariant, now tested: **no state that can hold committed funds may 
 Two smaller findings from the same audit:
 
 - **The 60-second `FUND` deadline is shorter than a Monero block.** It therefore cannot be satisfied by waiting for confirmation, and a payee that watches only confirmed blocks will abort every transaction it ever receives. The deadline is meaningful only against **mempool** visibility (§17.3), which is why the payer sends a `TXID` and why the payee scans rather than waits.
-- **The `TXPROOF` expiry named two actions** — "falls back to `direct` or aborts" — where the state machine can only do one. Falling back is a *policy choice made before the deadline*, not an outcome of it: a provider willing to wait for confirmations should not have set a 30-second window in the first place. Expiry aborts.
+- **The `TXID` expiry named two actions** — "falls back to `direct` or aborts" — where the state machine can only do one. Falling back is a *policy choice made before the deadline*, not an outcome of it: a provider willing to wait for confirmations should not have set a 30-second window in the first place. Expiry aborts.
 
 **Clocks, and what happens when they disagree.** Every deadline above, plus `expiry` (§15.3), `rate_ts` (§17.7), and bond-attestation freshness (§17.4), depends on time — and phones have wrong clocks. NTP cannot be assumed: a device at the curb may have no network, and an NTP call is itself a network fetch with the leak profile §17.7 exists to avoid.
 
@@ -604,7 +606,7 @@ Merchant-specific needs, none of which require new layers:
 
 - **Staff terminals.** A merchant persona (§4) authorizes N *terminal keys*, each signing `TapPresent` on the persona's behalf under a signed delegation carrying its own expiry. Revoking a terminal is republishing the delegation set; a lost phone costs a device, not the persona or its accumulated reputation.
 - **Day-end reconciliation.** The merchant's receipts *are* the books, and because both parties co-sign, they are cryptographically stronger than a processor statement — while remaining the merchant's alone to keep or destroy. Worth stating plainly in §12: the protocol produces no record for anyone else and a *better* one for the person who actually needs it.
-- **Offline lane.** A stall or festival vendor with no connectivity is a common case, not an edge case. Until §8.4 resolves, `pos/1` degrades honestly rather than silently: the merchant holds the signed ACCEPT and TXPROOF and confirms when connectivity returns — bounded by the customer's bond where one exists (§17), and declined where it does not.
+- **Offline lane.** A stall or festival vendor with no connectivity is a common case, not an edge case. Until §8.4 resolves, `pos/1` degrades honestly rather than silently: the merchant holds the signed ACCEPT and TXID and confirms when connectivity returns — bounded by the customer's bond where one exists (§17), and declined where it does not.
 
 ### 7.2 `exchange/1` — The On-Ramp Is a Profile
 
@@ -1585,7 +1587,13 @@ Rules that keep this honest:
 
 - **Cure window.** Non-confirmation is usually a fee or propagation problem, not fraud. The rider gets a window (default 20 blocks ≈ 40 min) to re-broadcast or bump. Only then does a claim mature.
 - **Conflicting key image skips the cure window.** It is unambiguous evidence of a double-spend attempt, on-chain and self-authenticating. Straight to `CLAIMED`.
-- **Evidence is compact and verifiable.** The claim carries `{ signed ACCEPT, tx proof, RECEIPT, txid }` — and this is the one place a proof is irreplaceable, since the arbiter is not the recipient and cannot scan for itself. **`monero-wallet` provides no proof implementation, so this is DUCAT's own work** (`monero-rs/REPORT.md`) — the arbiter only needs to check signatures and query the chain. No he-said/she-said; this is the *easiest* possible dispute class, which is why fast-settle disputes are cheap to arbitrate.
+- **Evidence is compact and verifiable.** The claim carries `{ signed ACCEPT, TXPROOF, RECEIPT, txid }` — and this is the one place a proof is irreplaceable, since the arbiter is not the recipient and cannot scan for itself. No he-said/she-said; this is the *easiest* possible dispute class, which is why fast-settle disputes are cheap to arbitrate.
+
+  **Measured end to end on stagenet (0.47).** The payer generated an `OutProofV2` over a real settled transaction and a **third wallet — neither payer nor payee — verified it**: `good: true, received: 600000000, confirmations: 370`. The proof is 142 characters, so carrying it inside a claim costs nothing.
+
+  **The proof MUST be bound to the transcript.** Monero's proof covers an arbitrary `message` chosen at generation time, and the obvious implementation leaves it empty. Setting it to the transcript's chain link makes the proof non-transferable between disputes; leaving it empty means any proof the payer ever generated for that transaction can be replayed into an unrelated claim. **Monero enforces the binding itself** — the same measurement, re-run with a different message, returned `good: false, received: 0` — so this costs one field and nothing else.
+
+  **On implementation availability**, an earlier draft said proofs were DUCAT's own work. That is true of `monero-oxide`'s `monero-wallet`, which has no proof support, and **not** of `monero-wallet-rpc`, which exposes `get_tx_proof` and `check_tx_proof` and is what the measurement above used. A client embedding a wallet (§8.2's intended path) still owes this work; a client driving wallet-rpc does not.
 - **Frivolous claims cost.** The claimant's own provider stake (9.1) is at risk on dismissal, so drivers can't grief riders with bogus claims.
 - **Degraded bonds.** A slashed rider's bond is marked; drivers may set policy to refuse degraded bonds or demand confirmations. Reputation without identity, again — the bond *is* the reputation.
 
@@ -1716,7 +1724,7 @@ with `purpose` a fixed label (`"offer_commit"`, `"receipt"`, `"chain"`, `"market
 | `ACCEPTED` | Payer signed `ACCEPT`; price locked |
 | `METERING` | §15.7: a meter is running. The payer confirmed a rate and a cap; the total is unknown until `stop` |
 | `FUNDED` | Payment broadcast, or escrow funded |
-| `PROVISIONAL` | `fast/1` only: `TXPROOF` verified, service may proceed, awaiting finality |
+| `PROVISIONAL` | `fast/1` only: the payee has scanned and found the transaction; service may proceed, awaiting finality |
 | `DELIVERED` | Profile-defined `PROOF` exchanged |
 | `CLOSED` | `RECEIPT` co-signed — the transaction's normal terminal state |
 | `SETTLED` | `fast/1` only: finality observed, obligation cleared, capacity restored |
@@ -1736,7 +1744,7 @@ with `purpose` a fixed label (`"offer_commit"`, `"receipt"`, `"chain"`, `"market
 | `METERING` | `MeterExpired` | Ran past `terms.meter_max_s` without a stop | `CLOSED`, single-sided receipt |
 | `METERING` | `ABORT` | **Payee only** — see below | `ABORTED` |
 | `ACCEPTED` | timeout 60 s | — | `ABORTED` |
-| `FUNDED` | `TXPROOF` | `fast/1`; proof verifies and tx is in mempool | `PROVISIONAL` |
+| `FUNDED` | `TXID` | `fast/1`; **the payee's own scan** finds the transaction in the mempool at the accepted amount | `PROVISIONAL` |
 | `FUNDED` / `PROVISIONAL` | `PROOF` | Profile-defined | `DELIVERED` |
 | `DELIVERED` | `RECEIPT` | Both signatures present | `CLOSED` |
 | `DELIVERED` | timeout 120 s | — | `CLOSED`, single-sided receipt (§6.2) |
@@ -1757,7 +1765,7 @@ Implementing §18.4 surfaced six decisions the transition table leaves open. Eac
    **The guard is on who sent it, not on who is asking.** Both parties run the same machine over the same message and must reach the same verdict, so the originator travels *with* the event — established by signature before the machine sees it. A client that instead guards on its own role refuses every `ACCEPT` it receives, and no transaction can ever complete. This is not hypothetical: the first implementation of this rule made exactly that mistake, and it survived a 75-test suite because every test drove the machine from one side only. A five-party market simulation caught it on its first run.
 2. **`CANCEL` has a closing bound as well as an opening one.** It is legal only between `ACCEPTED` and `FUND` — before the price is locked `ABORT` is the free exit and there are no cancellation terms yet, and once funds have moved cancellation is not a thing that exists. Post-`FUND` recourse is dispute (escrow) or slash (`fast/1`).
 3. **The post-`ACCEPT` deadline is mode-dependent.** §6.2 lists "FUND after ACCEPT: 60 s" and "multisig setup: 300 s" as though they were different states. They are the same state under different settlement modes: 60 s for `direct` and `fast`, **300 s for `escrow`**, whose window is spent on multi-round multisig setup (§8.2). Its expiry MUST run the fund-recovery path, not a bare abort.
-4. **The `FUNDED` deadline applies only under `fast/1`.** That 30 s bounds the wait for `TXPROOF`. Under `direct` and `escrow`, `FUNDED` awaits profile-defined delivery and carries no wall-clock deadline.
+4. **The `FUNDED` deadline applies only under `fast/1`.** That 30 s bounds the wait for `TXID`. Under `direct` and `escrow`, `FUNDED` awaits profile-defined delivery and carries no wall-clock deadline.
 5. **Terminal states are absorbing.** `ABORTED`, `CANCELLED`, `DISPUTED`, `SETTLED`, and `CLAIMED` accept no further events, including timeouts. `CLOSED` is deliberately *not* terminal: it still admits the contact coda and `fast/1` finality.
 6. **Elapsed time in an unbounded state is a no-op, not an error.** Clients poll on their own schedule, and a client that polls more often than another must not thereby reach a different state.
 7. **`ABORT` is directional once a meter is running.** §6 lists `ABORT` as available to either party with no penalty, which is right before value accrues and wrong afterwards: a payer able to abort a live meter would start a tab, consume, abort, and owe nothing. From `METERING` only the **operator** may void cleanly — comping a drink is ordinary commerce — while a payer leaving is **abandonment**, which routes through `MeterExpired` and leaves a single-sided receipt as evidence rather than a clean exit with no record. `CANCEL` likewise does not apply to a running meter: §7.3's fixed cancellation schedule is the wrong instrument when the correct one already exists, which is stopping the meter and paying what accrued.
@@ -1783,12 +1791,25 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 38–39 | `CANCEL` (§7.3) | **Assigned** |
 | 97–101 | `MANDATE` (§7.3) | **Assigned** |
 | 40–45 | `CONTACT_OFFER`, `CONTACT_ACCEPT` (§16.3) | Reserved |
-| 46–51 | `bond_proof`, `TXID` (§17.4) | Reserved |
+| 46–49 | `TXID` (§17.4) | **Assigned** |
+| 50–51 | Unallocated | — |
 | 52–59 | `DISPUTE`, `RULING` (§9.3.2) | **Assigned** (`EVIDENCE` still reserved) |
 | 60–67 | `HAIL`, sealed reply (§5.2.1) | **Assigned** |
 | 68–79 | `MarketDescriptor` (§10.1) | Reserved |
 | 80–95 | Delegations (§4.2), attestations (§9.2) | Reserved |
-| 96+ | Unallocated | — |
+| 96 | `TERMS` (§7.3) | **Assigned** |
+| 97–101 | `MANDATE` (§7.3) | **Assigned** |
+| 102–103 | `REFUND_TO`, `REFUND_PAID_TO` (§7.3) | **Assigned** |
+| 104–108 | `ESCROW_SETUP` (§8.2) | **Assigned** |
+| 111–117 | `ESCROW_READY` (§8.2) | **Assigned** |
+| 119–123 | `RELEASE` (§8.2) | **Assigned** |
+| 125–130 | `TXPROOF` (§17.5) | **Assigned** |
+| 132–138 | `SLASH_CLAIM` (§17.5) | **Assigned** |
+| 140+ | Unallocated | — |
+
+The `96+ Unallocated` row above was stale from 0.14 onward: 96–103 had been in use since `TERMS` and `MANDATE` shipped, and a second implementer allocating from 96 would have collided head-on. Registries decay silently unless something checks them, which is the argument for the type-code rule below.
+
+**Every object's `type` field MUST be a registered code, and decoders MUST check it.** Five objects — `DISPUTE`, `RULING`, `HAIL`, `HAIL_REPLY`, `TapStatic`, every one added after the original four — carried improvised codes (`CANCEL + 100`, `+ 200`, …) and *discarded* the type field on decode rather than checking it. Two byte strings differing only in their declared type therefore decoded to the same object, which is §18.3's transcript-divergence bug in its purest form: both verify, both hash differently. Fixed at 0.47 with real codes 13–22. The pattern is worth naming because it was not one mistake but five copies of one — the later objects were written from each other rather than from the earlier, correct ones.
 
 **Reserved is not assigned.** A client MUST reject any field it does not recognise (§18.8), so an object using a reserved-but-unspecified number is malformed today and will not silently start working when that number is defined. Reservation prevents collision; it does not grant meaning.
 
@@ -1901,7 +1922,7 @@ So that "DUCAT client" means something specific:
 |---|---|
 | **Core** | §18.1–18.8 in full, **both the Ed25519/X25519 and P-256 suites** (§4.1 — otherwise personas fragment by platform), QR transport, `xfer/1`, `direct` settlement. The floor for using the name. |
 | **Proximity** | Core + NFC and/or BLE transport + `pos/1` |
-| **Fast** | Proximity + `fast/1`, bonded float, `TXPROOF` verification, slashing state machine |
+| **Fast** | Proximity + `fast/1`, bonded float, `TXID` scanning, slashing state machine |
 | **Full** | Fast + escrow modes, arbitration, escrow-gated profiles |
 
 A client MUST declare its level and the vector-set release it passes. A client that cannot pass Core vectors is not a DUCAT client regardless of what it implements — the point of levels is to make partial implementations legible rather than to make the name negotiable.

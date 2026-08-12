@@ -1,0 +1,95 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a7001201010201182e58208bc07176d66d00d8a2cb3cf6236d28e8d439be8ae457c35bcf4a00f7f559adad182f5820777777777777777777777777777777777777777777777777777777777777777718301b00000004e3b2920018311a6b49d200"
+      },
+      "kind": "object.roundtrip",
+      "name": "object_txid_0",
+      "object_hex": "a7001201010201182e58208bc07176d66d00d8a2cb3cf6236d28e8d439be8ae457c35bcf4a00f7f559adad182f5820777777777777777777777777777777777777777777777777777777777777777718301b00000004e3b2920018311a6b49d200",
+      "object_type": "TXID",
+      "why": "fast/1's mempool pointer. Carries no evidence: the payee scans with its own view key, and this object only says what to look for."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a9000501010201187d58207777777777777777777777777777777777777777777777777777777777777777187e582c4f757450726f6f665632677478525950425a4a4e3541664748364c7347794654656d726d48594b62756b5951187f4b6472697665722d61646472188058208bc07176d66d00d8a2cb3cf6236d28e8d439be8ae457c35bcf4a00f7f559adad18811b00000004e3b2920018821a6b49d209"
+      },
+      "kind": "object.roundtrip",
+      "name": "object_txproof_1",
+      "object_hex": "a9000501010201187d58207777777777777777777777777777777777777777777777777777777777777777187e582c4f757450726f6f665632677478525950425a4a4e3541664748364c7347794654656d726d48594b62756b5951187f4b6472697665722d61646472188058208bc07176d66d00d8a2cb3cf6236d28e8d439be8ae457c35bcf4a00f7f559adad18811b00000004e3b2920018821a6b49d209",
+      "object_type": "TXPROOF",
+      "why": "arbitration evidence only. `proof_message` MUST be the transcript chain link — Monero enforces the binding, so an unbound proof can be replayed into an unrelated dispute."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa001601010201188458208bc07176d66d00d8a2cb3cf6236d28e8d439be8ae457c35bcf4a00f7f559adad188558209d195b955c8e25a23a86fa0cb7d4398cc057501f13a4f6bcd98aa0d91a273076188658207777777777777777777777777777777777777777777777777777777777777777188702188858205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a18891b00000004e3b29200188a1a6b49d264"
+      },
+      "kind": "object.roundtrip",
+      "name": "object_slash_claim_2",
+      "object_hex": "aa001601010201188458208bc07176d66d00d8a2cb3cf6236d28e8d439be8ae457c35bcf4a00f7f559adad188558209d195b955c8e25a23a86fa0cb7d4398cc057501f13a4f6bcd98aa0d91a273076188658207777777777777777777777777777777777777777777777777777777777777777188702188858205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a18891b00000004e3b29200188a1a6b49d264",
+      "object_type": "SLASH_CLAIM",
+      "why": "a double-spend claim skips the cure window, which makes it the one worth forging, which is why it must carry the conflicting key image."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a9001601010201188458208bc07176d66d00d8a2cb3cf6236d28e8d439be8ae457c35bcf4a00f7f559adad188558209d195b955c8e25a23a86fa0cb7d4398cc057501f13a4f6bcd98aa0d91a27307618865820777777777777777777777777777777777777777777777777777777777777777718870118891b00000004e3b29200188a1a6b49d264"
+      },
+      "kind": "object.roundtrip",
+      "name": "object_slash_claim_3",
+      "object_hex": "a9001601010201188458208bc07176d66d00d8a2cb3cf6236d28e8d439be8ae457c35bcf4a00f7f559adad188558209d195b955c8e25a23a86fa0cb7d4398cc057501f13a4f6bcd98aa0d91a27307618865820777777777777777777777777777777777777777777777777777777777777777718870118891b00000004e3b29200188a1a6b49d264",
+      "object_type": "SLASH_CLAIM",
+      "why": "the cure-window variant carries no key image: non-confirmation is usually a fee problem, not fraud."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a800130101020118685820e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5186900186a5840abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab186b00186c1a6b49d200"
+      },
+      "kind": "object.roundtrip",
+      "name": "object_escrow_setup_4",
+      "object_hex": "a800130101020118685820e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5186900186a5840abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab186b00186c1a6b49d200",
+      "object_type": "ESCROW_SETUP",
+      "why": "one contribution to one ceremony round. Rounds are strictly sequential — §2.5's exploit was a forged out-of-order message."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa001401010201186f5820e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e518705135336d756c74697369676164647265737318710218720318734d617262697465722d6b65792d3118740018751a6b49d2c8"
+      },
+      "kind": "object.roundtrip",
+      "name": "object_escrow_ready_5",
+      "object_hex": "aa001401010201186f5820e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e518705135336d756c74697369676164647265737318710218720318734d617262697465722d6b65792d3118740018751a6b49d2c8",
+      "object_type": "ESCROW_READY",
+      "why": "one participant's report of what the ceremony formed. All three must match, or the funds land in a wallet the payer holds no share of."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a800150101020118775820e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e518785820f3210ab871871729a898decfb8d12dca2ff563113de1023a8af99e8a5fc8a17a18794d73656c6c65722d7061796f7574187a1b00000004e3b29200187b1a6b49d32c"
+      },
+      "kind": "object.roundtrip",
+      "name": "object_release_6",
+      "object_hex": "a800150101020118775820e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e518785820f3210ab871871729a898decfb8d12dca2ff563113de1023a8af99e8a5fc8a17a18794d73656c6c65722d7061796f7574187a1b00000004e3b29200187b1a6b49d32c",
+      "object_type": "RELEASE",
+      "why": "an escrow payout. The destination must be a party to the escrow — the check a rushed implementation drops, because the happy path never exercises it."
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "type field says 3 (ACCEPT)",
+      "kind": "object.roundtrip",
+      "name": "object_wrong_type_code_refused",
+      "object_hex": "a800030101020118685820e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5186900186a5840abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab186b00186c1a6b49d200",
+      "object_type": "ESCROW_SETUP",
+      "why": "an object declaring another type must not decode. Until 0.47 five objects read the type field and threw it away, so two byte strings differing only in their declared type produced one object — both verifying, both hashing differently."
+    }
+  ],
+  "category": "object"
+}
