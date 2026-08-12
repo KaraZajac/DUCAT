@@ -17,6 +17,7 @@
 //!
 //! Settlement uses `monero-wallet-rpc` on the ports `monero-spike/` sets up.
 
+mod escrow_role;
 mod flow;
 mod payee;
 mod payer;
@@ -36,6 +37,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
     let tap_path = std::env::var("DUCAT_TAP").unwrap_or_else(|_| "/tmp/ducat-tap.blob".into());
 
+    if let Some(i) = args.iter().position(|a| a == "--escrow-serve") {
+        let role = args.get(i + 1).cloned().unwrap_or_else(|| "seller".into());
+        return escrow_role::serve(&role, &tap_path).await;
+    }
+    if args.iter().any(|a| a == "--escrow-drive") {
+        let ms = std::env::var("DUCAT_MS_ADDRESS").unwrap_or_else(|_| {
+            "53hUxmYTwGtR44fhL8f7JLATagSwjtdLB6y4Q3wQQnbtUsDiLTLCzwnKr2gtBRAAUdgWmD22pJ3GK5Z52sJpgiK624iqtKh".into()
+        });
+        return escrow_role::drive(&tap_path, &ms).await;
+    }
     if args.iter().any(|a| a == "--payee") {
         let amount = args
             .iter()

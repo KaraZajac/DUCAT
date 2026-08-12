@@ -63,6 +63,76 @@ harness exists for.
   because the failure worth catching is a transaction that is *never* visible,
   and only waiting distinguishes that from one that is not visible *yet*.
 
+## fast/1
+
+    ducat-harness --payee 500000000 --fast
+    ducat-harness --payer
+
+Adds the bond leg (§17.4). The payer posts a `bond_proof` **before** the ACCEPT —
+a provider that learns the bond is inadequate *after* accepting has already made
+the decision the bond exists to inform — and publishes a **capacity bucket**
+rather than a balance:
+
+```
+bond 100000000000 pXMR posted; publishing capacity bucket 50000000000
+                              (true remaining 60000000000 withheld)
+```
+
+The provider learns "at least 0.05", not the running meter on the rider's
+spending that an exact figure would be (§17.8, O10). Settlement then accepts at
+**mempool visibility** rather than confirmation, which is what `fast/1` is for.
+
+txid `a467796245c1b83a2a7f42316703b7d512009a938e0d3df75d62bd6443932b79`.
+
+## Escrow
+
+    ducat-harness --escrow-serve seller
+    ducat-harness --escrow-serve arbiter     # start staggered; see below
+    ducat-harness --escrow-drive
+
+Three parties, three Veilid nodes. Escrow is the first flow where the *number of
+parties* is part of the security argument, and where the failure that matters is
+not a bad signature but a **message arriving out of turn** — §2.5's exploit
+drained a production system of ~$2.7M with a forged, out-of-order ACK.
+
+```
+ceremony — 2 rounds, strictly ordered
+  round 0 closed by all participants
+  round 1 closed by all participants
+
+attack — replaying a settled round (§2.5's shape)
+  refused — StateViolation: the ceremony is finished
+
+agreement
+  all three formed 53hUxmYTwGtR44fhL8f7JLAT…
+
+RELEASED — 500000000 pXMR to a bound party
+```
+
+**Precisely what that refusal proves:** the replay arrived *after* the ceremony
+closed, so the guard that fired was "finished", not "expected round 0, got 1".
+The mid-ceremony case — round *n+1* while *n* is still open, which is the exact
+shape of the RetoSwap message — is covered in `core/tests/escrow.rs`. Both are
+`RoundTracker` refusing, but they are different arms and it is worth not
+overstating which one ran on the wire.
+
+The Monero multisig underneath is the 2-of-3 already formed in `monero-spike/`;
+forming a fresh one needs the wallet2 CLI dance (§8.2), which is orthogonal to
+what this demonstrates.
+
+### Two harness bugs worth keeping
+
+- **Two nodes raced on Veilid's protected store** and one died with `Could not
+  initialize the protected store`. The store is keyed by *program name*, and both
+  roles shared one while differing only in namespace — a lock nobody declared.
+  Each role now has its own program name, and starts are staggered.
+- **A participant never receives its own ceremony contribution over the wire** —
+  it generates it. The first version only fed incoming messages to `RoundTracker`,
+  so each server saw two of three contributions, never closed a round, and
+  refused the next one as out of order. That made `RoundTracker` look broken when
+  the model was wrong: a participant records its own contribution locally and
+  collects the others.
+
 ## Requirements
 
 `monero-wallet-rpc` on ports 28101 (payer, `user_01`) and 28104 (payee,

@@ -14,7 +14,11 @@ pub async fn start(role: &str) -> Result<(VeilidAPI, Calls), Box<dyn std::error:
     std::fs::create_dir_all(&dir)?;
 
     let mut cfg: serde_json::Value = serde_json::from_str(&default_veilid_config())?;
-    cfg["program_name"] = serde_json::json!("ducat-harness");
+    // Per-role program name, not just per-role namespace. Two nodes starting at
+    // the same moment raced on the protected store and one failed outright with
+    // "Could not initialize the protected store" — the store is keyed by program
+    // name, so sharing it across concurrent roles is a lock nobody declared.
+    cfg["program_name"] = serde_json::json!(format!("ducat-harness-{role}"));
     cfg["namespace"] = serde_json::json!(role);
     for store in ["protected_store", "table_store", "block_store"] {
         cfg[store]["directory"] = serde_json::json!(dir.join(store).to_string_lossy());
