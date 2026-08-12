@@ -89,6 +89,7 @@ pub fn transact_live(
         settle_mode: 0,
         fee_policy: FeePolicy::PayerPays,
         nonce_echo: nonce,
+        terms: Terms::default(),
     };
     let offer_bytes = offer.to_value().encode();
     let tap = TapPresent {

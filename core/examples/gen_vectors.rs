@@ -603,6 +603,7 @@ fn transcript_cases() -> Vec<J> {
             payto: vec![0x42; 69], amount_pxmr: FARE,
             supported_versions: vec![1], supported_suites: vec![1, 2],
             settle_mode: 0, fee_policy: FeePolicy::PayerPays, nonce_echo: NONCE,
+        terms: Terms::default(),
         };
         let tap = TapPresent {
             version: 1, suite: 1, profile: profile_id,
@@ -662,6 +663,7 @@ fn transcript_cases() -> Vec<J> {
         payto: vec![0x42; 69], amount_pxmr: FARE,
         supported_versions: vec![1], supported_suites: vec![1, 2],
         settle_mode: 0, fee_policy: FeePolicy::PayerPays, nonce_echo: NONCE,
+        terms: Terms::default(),
     };
     let mut dearer = offer.clone();
     dearer.amount_pxmr = FARE * 10;

@@ -32,6 +32,10 @@ fn offer() -> FullOffer {
         settle_mode: 0, // direct
         fee_policy: FeePolicy::PayerPays,
         nonce_echo: NONCE,
+        terms: Terms {
+            refund_window_s: 86_400 * 14,
+            ..Terms::default()
+        },
     }
 }
 
@@ -325,4 +329,127 @@ fn report_measured_object_sizes() {
     // Token mode must clear an NTAG215 (504 B) with room to spare, since that
     // is the chip §15.3.2 says tags should use.
     assert!(sealed_token < 504, "token mode no longer fits an NTAG215: {} B", sealed_token);
+}
+
+// -- terms, and the meter rules that had nowhere to live --------------------
+
+/// §15.7 requires a metered offer to declare a cap and a maximum duration.
+/// Until `Terms` existed there was no field to put them in, so the requirement
+/// could not be obeyed by any conforming client — a rule about a field that
+/// does not exist.
+#[test]
+fn a_rated_offer_must_declare_a_cap_and_a_limit() {
+    let mut o = offer();
+    let mut t = tap(&o);
+    t.amount_authority = AmountAuthority::Rated;
+
+    // No cap: refused.
+    assert_eq!(
+        check_meter_terms(&t, &o).unwrap_err().code,
+        RejectCode::Malformed
+    );
+
+    // Cap but no duration limit: still refused — an unbounded meter with a
+    // ceiling is still unbounded in time, and the payer confirmed neither.
+    o.terms.meter_cap_pxmr = FARE;
+    assert_eq!(
+        check_meter_terms(&t, &o).unwrap_err().code,
+        RejectCode::Malformed
+    );
+
+    o.terms.meter_max_s = 3600;
+    assert!(check_meter_terms(&t, &o).is_ok());
+
+    // A fixed-price offer needs neither.
+    let fixed = tap(&offer());
+    assert!(check_meter_terms(&fixed, &offer()).is_ok());
+}
+
+/// §15.7: an abandoned meter accrues to the cap and no further. The customer
+/// who walks out owes what the meter says, bounded by what they agreed to —
+/// and whether any of it is collectable is a separate question about collateral.
+#[test]
+fn an_abandoned_meter_is_bounded_by_what_was_agreed() {
+    let mut o = offer();
+    o.terms.meter_cap_pxmr = 1_000_000_000_000; // 1 XMR
+    o.terms.meter_max_s = 3600;
+    let rate = 100_000_000; // 0.0001 XMR/s — low enough that time binds first
+
+    // Ordinary case: rate x time, under both limits.
+    assert_eq!(abandoned_meter_claim(&o, rate, 100), rate * 100);
+
+    // Past the duration limit: time is clamped, and the result stays under the
+    // cap so this isolates the time clamp.
+    assert_eq!(abandoned_meter_claim(&o, rate, 10_000), rate * 3600);
+    assert!(rate * 3600 < o.terms.meter_cap_pxmr);
+
+    // Both clamps at once: a high rate over a long abandonment. Time clamps to
+    // 3600 and the resulting 3.6 XMR then clamps to the 1 XMR cap — the cap
+    // binds second, and the payer owes only what they agreed to.
+    assert_eq!(
+        abandoned_meter_claim(&o, 1_000_000_000, 10_000),
+        o.terms.meter_cap_pxmr
+    );
+
+    // A rate high enough to blow the cap is clamped by the cap.
+    assert_eq!(
+        abandoned_meter_claim(&o, 500_000_000_000, 3600),
+        o.terms.meter_cap_pxmr
+    );
+
+    // Absurd inputs must not overflow into a small number, which would let a
+    // hostile rate wrap around into a trivial claim.
+    assert_eq!(
+        abandoned_meter_claim(&o, u64::MAX, u64::MAX),
+        o.terms.meter_cap_pxmr
+    );
+}
+
+/// Terms are part of the signed offer, so altering them after the fact breaks
+/// the commitment exactly as altering a price does.
+#[test]
+fn altering_terms_breaks_the_commitment() {
+    let honest = offer();
+    let t = tap(&honest);
+
+    let mut sneaky = offer();
+    // Silently shorten the refund window the payer thought they were getting.
+    sneaky.terms.refund_window_s = 60;
+
+    let a = accept(&sneaky);
+    let a_bytes = a.to_value().encode();
+    let r = receipt_for(&a_bytes, FARE, false);
+
+    assert_eq!(
+        verify_transcript(&t, &sneaky, &a, &a_bytes, &r).unwrap_err().code,
+        RejectCode::CommitMismatch
+    );
+}
+
+#[test]
+fn terms_round_trip_and_reject_unknown_fields() {
+    let mut o = offer();
+    o.terms = Terms {
+        cancellation_pxmr: 5_000_000_000,
+        refund_window_s: 86_400 * 30,
+        meter_cap_pxmr: 2 * FARE,
+        meter_max_s: 7200,
+        min_fee_tier: 2,
+    };
+    let enc = o.to_value().encode();
+    let back = FullOffer::from_value(decode(&enc).unwrap()).unwrap();
+    assert_eq!(back, o);
+    assert_eq!(back.to_value().encode(), enc);
+
+    // An unrecognised field inside terms is rejected like any other (§18.8).
+    let mut v = o.to_value();
+    if let Value::Map(m) = &mut v {
+        if let Some(Value::Map(t)) = m.get_mut(&f::TERMS) {
+            t.insert(99, Value::Uint(1));
+        }
+    }
+    assert_eq!(
+        FullOffer::from_value(v).unwrap_err().code,
+        RejectCode::UnknownField
+    );
 }

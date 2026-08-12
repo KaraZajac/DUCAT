@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.27 — Consolidated**
+**Draft 0.28 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.28** — **`FullOffer.terms` added; several requirements were previously unimplementable.** §7.3's cancellation fee and refund window, §15.7's mandatory meter cap and duration limit, and §8.8's minimum fee tier were all written as `terms.*` while no such field existed — rules no conforming client could obey. They now live in a nested map inside the signed offer, so altering them breaks `offer_commit` like any other tampering. The meter requirement is a *pairing* rule: whether a cap is required depends on `amount_authority`, which lives in `TapPresent`, so it cannot be enforced by parsing either object alone.
 - **0.27** — **§18.4.1 rule 1 corrected: direction constrains the originator, not the evaluator.** "Only the payer may emit `ACCEPT`" was implemented as a check on the *local* role, so a payee refused every `ACCEPT` it received and no transaction could complete. Both parties run the same machine over the same message and must reach the same verdict, so the originator now travels with the event, established by signature. The bug survived a 75-test suite because every test drove the machine from one side only; a five-party market simulation caught it on the first run — which is the argument for simulating a market rather than testing a state machine.
 - **0.26** — **Slashing demonstrated: a bond can be seized over its holder's objection.** A funded 2-of-3 bond was spent by `arbiter + recovery` with the user's wallet never contacted, for signing *or* for key images. The second half was the open question — Monero reconstructs key images from partial ones, and had all three exports been required, a bond could only have been taken with the cooperation of the party being taken from, collapsing §17.2's deposit model. It needs only the threshold count. O1 updated: mechanically validated end to end, with the caveat that this exercised wallet2's multisig rather than the FROSTLASS path §8.2 intends to ship — the mechanism is proven, the code path is not.
 - **0.25** — **Pre-split confirmed, and capacity is a count.** Seven consecutive payments of 0.0005 XMR each consumed exactly 0.005 of unlocked balance; the eighth was refused with 0.05 XMR still in the wallet. **A payment costs a whole output regardless of its size**, because the change returns locked — so consecutive capacity is `count(unlocked outputs)`, not a balance, and a float holding one large output makes exactly one payment per lock interval however much it holds. §17.2 now requires clients to surface single-payment capacity and consecutive capacity as two different numbers, since only the second answers *"how many more times can I pay before waiting."*
@@ -933,6 +934,7 @@ Delivered by the presenter immediately after the channel opens; the reader check
 
 | Field | Meaning |
 |---|---|
+| `terms` | cancellation fee, refund window, meter cap and duration limit, minimum fee tier — see below |
 | `payto` | **fresh** Monero subaddress, one per tap (unlinkable on-chain; never reuse) |
 | `amount_pxmr` | the number, when `amount_authority = fixed` — **unsigned integer piconero**, never a decimal (§18.2) |
 | `rate_card` | presenter's signed rate card (or hash + fetch ref) — lets the reader *reproduce* the price |
@@ -941,6 +943,20 @@ Delivered by the presenter immediately after the channel opens; the reader check
 | `persona` | optional long-lived key + its stake proof + attestation pointer (trust surface, §15.6) |
 | `terms` | profile-specific (cancellation, escrow flag, meter rate) |
 | `sig` | presenter session-key signature over the whole `FullOffer` |
+
+**`terms` is a single nested map, and it exists because several requirements referenced it before anything carried it.** §7.3's cancellation fee and refund window, §15.7's mandatory meter cap and duration limit, and §8.8's minimum fee tier were all specified as `terms.*` while `FullOffer` had no such field — rules about a field that did not exist, which no conforming client could obey. Its inner keys are their own namespace:
+
+| Field | Section | Meaning |
+|---|---|---|
+| `cancellation_pxmr` | §7.3 | Owed if the payer cancels after `ACCEPT`, before `FUND` |
+| `refund_window_s` | §7.3 | How long this receipt may be referenced by a `REFUND`; zero means final sale |
+| `meter_cap_pxmr` | §15.7 | **Required when `amount_authority = rated`** |
+| `meter_max_s` | §15.7 | **Required when `amount_authority = rated`** |
+| `min_fee_tier` | §8.8 | Below this the payee refuses with `POLICY_REFUSED` |
+
+Because `terms` is inside the signed offer, altering it after the fact breaks `offer_commit` exactly as altering a price does — a presenter cannot quietly shorten a refund window between the tap and the confirm screen.
+
+**The two meter fields are a pairing rule, not a field rule.** Whether they are required depends on `amount_authority`, which lives in `TapPresent` rather than `FullOffer`, so it cannot be enforced by parsing either object alone. A client MUST check the pair before rendering a confirm screen.
 
 ---
 

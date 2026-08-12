@@ -11,7 +11,7 @@
 
 use ducat_core::cbor::decode;
 use ducat_core::sig::{PublicKey, SignedBytes, Suite};
-use ducat_core::wire::{open, Accept, FullOffer, Receipt, TapPresent};
+use ducat_core::wire::{open, Accept, FullOffer, Receipt, TapPresent, Terms};
 
 /// xorshift64* — small, deterministic, adequate for shaking out parser bugs.
 struct Rng(u64);
@@ -78,6 +78,7 @@ fn corrupted_real_objects_never_panic() {
         settle_mode: 0,
         fee_policy: ducat_core::wire::FeePolicy::PayerPays,
         nonce_echo: [0xA5; 16],
+        terms: Terms::default(),
     };
     let good = offer.to_value().encode();
 

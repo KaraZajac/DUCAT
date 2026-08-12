@@ -72,6 +72,10 @@ pub mod f {
     pub const CHOSEN_VERSION: u64 = 26;
     pub const CHOSEN_SUITE: u64 = 27;
 
+    /// Nested terms map (§7.3, §15.7, §8.8). Its inner keys are their own
+    /// namespace, defined in `terms`.
+    pub const TERMS: u64 = 96;
+
     // RECEIPT
     pub const ACCEPT_HASH: u64 = 28;
     pub const PREV: u64 = 29;
@@ -108,6 +112,77 @@ pub enum ReachMode {
     Inline = 0,
     Token = 1,
     Ble = 2,
+}
+
+/// Terms the payer signs by accepting an offer.
+///
+/// Several requirements referenced `terms.*` before anything carried them:
+/// §7.3's cancellation schedule and refund window, §15.7's mandatory meter cap,
+/// §8.8's minimum fee tier. A rule about a field that does not exist cannot be
+/// obeyed, and this is where they live.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct Terms {
+    /// §7.3. Fee owed if the payer cancels after ACCEPT and before FUND.
+    /// Uncollectable against an unbonded counterparty, which is stated rather
+    /// than pretended otherwise.
+    pub cancellation_pxmr: u64,
+    /// §7.3. Seconds during which this receipt may be referenced by a REFUND.
+    /// Zero is legitimate and means final sale.
+    pub refund_window_s: u64,
+    /// §15.7. Ceiling on a metered total. **Required whenever
+    /// `amount_authority = rated`** — an open-ended obligation cannot be
+    /// consented to, and §15.5 fails without it.
+    pub meter_cap_pxmr: u64,
+    /// §15.7. Seconds after which an unstopped meter auto-stops.
+    pub meter_max_s: u64,
+    /// §8.8. Minimum fee tier the payee will accept, so fee underpayment is a
+    /// pre-condition rather than a cure-window problem after the fact.
+    pub min_fee_tier: u64,
+}
+
+mod terms_keys {
+    pub const CANCELLATION: u64 = 0;
+    pub const REFUND_WINDOW: u64 = 1;
+    pub const METER_CAP: u64 = 2;
+    pub const METER_MAX: u64 = 3;
+    pub const MIN_FEE_TIER: u64 = 4;
+}
+
+impl Terms {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(terms_keys::CANCELLATION, Value::Uint(self.cancellation_pxmr));
+        m.insert(terms_keys::REFUND_WINDOW, Value::Uint(self.refund_window_s));
+        m.insert(terms_keys::METER_CAP, Value::Uint(self.meter_cap_pxmr));
+        m.insert(terms_keys::METER_MAX, Value::Uint(self.meter_max_s));
+        m.insert(terms_keys::MIN_FEE_TIER, Value::Uint(self.min_fee_tier));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: &Value) -> Result<Self, Reject> {
+        let m = v.as_map().ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "terms must be a map")
+        })?;
+        let get = |k: u64| -> Result<u64, Reject> {
+            m.get(&k)
+                .and_then(|x| x.as_uint())
+                .ok_or_else(|| Reject::with_detail(RejectCode::Malformed, format!("terms field {}", k)))
+        };
+        let out = Terms {
+            cancellation_pxmr: get(terms_keys::CANCELLATION)?,
+            refund_window_s: get(terms_keys::REFUND_WINDOW)?,
+            meter_cap_pxmr: get(terms_keys::METER_CAP)?,
+            meter_max_s: get(terms_keys::METER_MAX)?,
+            min_fee_tier: get(terms_keys::MIN_FEE_TIER)?,
+        };
+        if m.len() != 5 {
+            return Err(Reject::with_detail(
+                RejectCode::UnknownField,
+                "unrecognised field in terms",
+            ));
+        }
+        Ok(out)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -433,6 +508,8 @@ pub struct FullOffer {
     /// Echoes the tap's nonce, binding this offer to the bootstrap that
     /// advertised it in the payer-visible direction as well as via the digest.
     pub nonce_echo: [u8; 16],
+    /// §7.3, §15.7, §8.8. Signed by the payer along with everything else.
+    pub terms: Terms,
 }
 
 impl FullOffer {
@@ -455,6 +532,7 @@ impl FullOffer {
         m.insert(f::SETTLE_MODE, Value::Uint(self.settle_mode));
         m.insert(f::FEE_POLICY, Value::Uint(self.fee_policy as u64));
         m.insert(f::NONCE_ECHO, Value::Bytes(self.nonce_echo.to_vec()));
+        m.insert(f::TERMS, self.terms.to_value());
         Value::Map(m)
     }
 
@@ -481,6 +559,13 @@ impl FullOffer {
                 &[(0, FeePolicy::PayerPays), (1, FeePolicy::PayeeAbsorbs)],
             )?,
             nonce_echo: r.bytes(f::NONCE_ECHO, Some(16))?.try_into().unwrap(),
+            terms: {
+                let v = r
+                    .m
+                    .remove(&f::TERMS)
+                    .ok_or_else(|| Reader::missing(f::TERMS))?;
+                Terms::from_value(&v)?
+            },
         };
         r.finish()?;
         Ok(out)
@@ -678,4 +763,44 @@ pub fn verify_transcript(
         ));
     }
     Ok(())
+}
+
+/// §15.7: a metered offer must carry a cap, because an open-ended obligation
+/// cannot be consented to and §15.5's argument collapses without one.
+///
+/// Checked separately from `FullOffer::from_value` because it is a *pairing*
+/// rule — it depends on the tap's `amount_authority`, which lives in a
+/// different object. A client MUST run this before rendering a confirm screen.
+pub fn check_meter_terms(tap: &TapPresent, offer: &FullOffer) -> Result<(), Reject> {
+    if tap.amount_authority == AmountAuthority::Rated {
+        if offer.terms.meter_cap_pxmr == 0 {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a rated offer must declare a meter cap (§15.7)",
+            ));
+        }
+        if offer.terms.meter_max_s == 0 {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a rated offer must declare a maximum duration (§15.7)",
+            ));
+        }
+    }
+    Ok(())
+}
+
+/// §15.7: what a payee may claim when a meter is never stopped.
+///
+/// Returns the accrued amount, capped. Collection is a separate matter and
+/// depends entirely on collateral — against an unbonded payer this figure is
+/// uncollectable and the provider bears the loss, exactly as a bar bears a
+/// walked tab.
+pub fn abandoned_meter_claim(
+    offer: &FullOffer,
+    rate_pxmr_per_s: u64,
+    elapsed_s: u64,
+) -> u64 {
+    let capped_time = elapsed_s.min(offer.terms.meter_max_s);
+    let accrued = rate_pxmr_per_s.saturating_mul(capped_time);
+    accrued.min(offer.terms.meter_cap_pxmr)
 }

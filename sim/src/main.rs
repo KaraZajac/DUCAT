@@ -175,6 +175,7 @@ fn swap_attack(wire: &mut Wire, payee: &mut Persona, payer: &mut Persona) -> Res
         payto: payee.payto.clone(), amount_pxmr: xmr(0.002),
         supported_versions: vec![1], supported_suites: vec![1, 2],
         settle_mode: 0, fee_policy: FeePolicy::PayerPays, nonce_echo: nonce,
+        terms: Terms::default(),
     };
     let mut dearer = honest.clone();
     dearer.amount_pxmr = xmr(0.02);
