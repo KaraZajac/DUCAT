@@ -20,6 +20,17 @@ android {
         versionName = "0.1.0"
     }
 
+    // One APK per ABI. A universal build carries every architecture's copy of a
+    // 12 MB native library, so a phone downloads three and uses one.
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = false
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false

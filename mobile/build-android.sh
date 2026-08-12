@@ -38,10 +38,15 @@ for t in $ABIS; do
   cp "target/$target/release/libducat_mobile.so" "android/app/src/main/jniLibs/$abi/"
 done
 rm -rf /tmp/uniffi-out
-# Bindings come from arm64: it is the target that always builds, and the
-# generated Kotlin is architecture-independent.
+# Bindings come from the **host debug** build, not from a shipped library.
+#
+# `--library` mode discovers the interface from the symbol table, and the release
+# profile strips symbols to get the .so from 30 MB to 12 MB. Generating from a
+# stripped library silently produces nothing, which then shows up as Kotlin
+# unable to see a function that plainly exists.
+cargo build -p ducat-mobile
 cargo run -p ducat-mobile --bin uniffi-bindgen -- generate \
-  --library target/aarch64-linux-android/release/libducat_mobile.so \
+  --library target/debug/libducat_mobile.so \
   --language kotlin --out-dir /tmp/uniffi-out
 rm -rf android/app/src/main/java/uniffi/ducat_mobile
 cp -r /tmp/uniffi-out/uniffi/ducat_mobile android/app/src/main/java/uniffi/

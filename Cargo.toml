@@ -9,3 +9,12 @@
 resolver = "2"
 members = ["core", "sim", "harness", "mobile"]
 exclude = ["research"]
+
+# The native library ships inside an APK, once per ABI, so its size is the app's
+# size three times over. Unstripped it was 30 MB per architecture.
+[profile.release]
+strip = true          # debug symbols are the bulk of it
+lto = true            # veilid pulls a large dependency tree; cross-crate inlining pays
+codegen-units = 1     # slower to build, smaller to ship
+opt-level = "z"       # size over speed: nothing here is compute-bound except
+                      # Argon2, which is deliberately slow anyway
