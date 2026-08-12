@@ -76,6 +76,14 @@ pub mod f {
     /// namespace, defined in `terms`.
     pub const TERMS: u64 = 96;
 
+    // HAIL and its sealed reply (§5.2.1) — reserved range 60-67
+    pub const HAIL_GEOCELL: u64 = 60;
+    pub const HAIL_EPHEMERAL_PK: u64 = 61;
+    pub const HAIL_EXPIRY: u64 = 62;
+    pub const HAILREPLY_NONCE_ECHO: u64 = 63;
+    pub const HAILREPLY_SESSION_PK: u64 = 64;
+    pub const HAILREPLY_QUOTE: u64 = 65;
+
     // DISPUTE / RULING (§9.3.2) — reserved range 52-59
     pub const DISPUTE_CLASS: u64 = 52;
     pub const DISPUTE_TRANSCRIPT: u64 = 53;
@@ -1271,4 +1279,132 @@ pub fn expired_dispute_ruling(dispute: &Dispute, dispute_bytes: &[u8], now: u64)
         award_pxmr: 0,
         timestamp: now,
     }
+}
+
+// -------------------------------------------------------------------- HAIL --
+
+/// §5.2.1. What a consumer writes into a market's hail record.
+///
+/// **Note what is absent: there is no route field, and that is the design.**
+/// §5.2's whole safety argument is that matching happens over DHT reads, which
+/// import nothing, and that the single route import happens only after mutual
+/// selection. If a `Hail` could carry a route, a provider could learn the
+/// consumer's address merely by watching — which is the harvesting this
+/// section was rewritten to eliminate.
+///
+/// Making the field unrepresentable is stronger than forbidding it. A rule can
+/// go unimplemented; a missing field cannot be populated.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Hail {
+    pub version: u64,
+    pub suite: u8,
+    pub profile: u64,
+    /// Coarse geocell — a district, not a position (§5.2.3).
+    pub geocell: Vec<u8>,
+    pub nonce: [u8; 16],
+    /// Ephemeral key that providers seal their replies to. Fresh per hail, so
+    /// two hails from the same consumer are unlinkable to a watcher.
+    pub ephemeral_pk: Vec<u8>,
+    pub expiry: u64,
+}
+
+/// §5.2.1. A provider's reply, sealed to the consumer's ephemeral key.
+///
+/// Also carries **no route**, for the same reason and by the same means. The
+/// provider learns the consumer's route only if selected, and only sealed to
+/// its own key.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HailReply {
+    pub version: u64,
+    pub suite: u8,
+    /// Echoes the hail's nonce. Without this a provider's old reply could be
+    /// replayed against a fresh hail, and a consumer would be choosing from
+    /// quotes nobody currently stands behind.
+    pub nonce_echo: [u8; 16],
+    pub session_pk: Vec<u8>,
+    pub quote_pxmr: u64,
+}
+
+impl Hail {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Cancel) + 300));
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::PROFILE, Value::Uint(self.profile));
+        m.insert(f::HAIL_GEOCELL, Value::Bytes(self.geocell.clone()));
+        m.insert(f::NONCE, Value::Bytes(self.nonce.to_vec()));
+        m.insert(f::HAIL_EPHEMERAL_PK, Value::Bytes(self.ephemeral_pk.clone()));
+        m.insert(f::HAIL_EXPIRY, Value::Uint(self.expiry));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let _ = r.uint(f::TYPE)?;
+        let out = Hail {
+            version: r.uint(f::VERSION)?,
+            suite: r.uint(f::SUITE)? as u8,
+            profile: r.uint(f::PROFILE)?,
+            geocell: r.bytes(f::HAIL_GEOCELL, None)?,
+            nonce: r.bytes(f::NONCE, Some(16))?.try_into().unwrap(),
+            ephemeral_pk: r.bytes(f::HAIL_EPHEMERAL_PK, None)?,
+            expiry: r.uint(f::HAIL_EXPIRY)?,
+        };
+        r.finish()?;
+        // A coarse cell is the point (§5.2.3). An over-precise one turns the
+        // disclosure ladder's first rung into a position fix, so precision is
+        // bounded here rather than left to a client's discretion.
+        if out.geocell.len() > 5 {
+            return Err(Reject::with_detail(
+                RejectCode::PolicyRefused,
+                "geocell is too precise for a hail (§5.2.3)",
+            ));
+        }
+        Ok(out)
+    }
+}
+
+impl HailReply {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Cancel) + 400));
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::HAILREPLY_NONCE_ECHO, Value::Bytes(self.nonce_echo.to_vec()));
+        m.insert(f::HAILREPLY_SESSION_PK, Value::Bytes(self.session_pk.clone()));
+        m.insert(f::HAILREPLY_QUOTE, Value::Uint(self.quote_pxmr));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let _ = r.uint(f::TYPE)?;
+        let out = HailReply {
+            version: r.uint(f::VERSION)?,
+            suite: r.uint(f::SUITE)? as u8,
+            nonce_echo: r.bytes(f::HAILREPLY_NONCE_ECHO, Some(16))?.try_into().unwrap(),
+            session_pk: r.bytes(f::HAILREPLY_SESSION_PK, None)?,
+            quote_pxmr: r.uint(f::HAILREPLY_QUOTE)?,
+        };
+        r.finish()?;
+        Ok(out)
+    }
+}
+
+/// A consumer's check before selecting a reply.
+pub fn check_hail_reply(hail: &Hail, reply: &HailReply, now: u64) -> Result<(), Reject> {
+    if now >= hail.expiry {
+        return Err(Reject::with_detail(RejectCode::Expired, "hail has expired"));
+    }
+    // Without the echo, a provider's stale reply could be replayed against a
+    // fresh hail and the consumer would be picking from quotes nobody
+    // currently stands behind.
+    if reply.nonce_echo != hail.nonce {
+        return Err(Reject::with_detail(
+            RejectCode::Replay,
+            "reply does not echo this hail's nonce",
+        ));
+    }
+    Ok(())
 }

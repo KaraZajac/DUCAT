@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.35 — Consolidated**
+**Draft 0.36 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.36** — **Hail objects implemented; "no route" made structural rather than prescribed.** §5.2's inversion depends entirely on providers never supplying a route — a provider able to smuggle one into a reply would deanonymise every consumer who used it, reinstating the harvesting the section was rewritten to remove. Neither `Hail` nor its reply now *has* a route field, because a prohibition can go unimplemented while a missing field cannot be populated. Also enforced at parse time: replies must echo the hail's nonce, or a stale quote can be replayed against a fresh hail; and geocell precision is capped, since §5.2.3's ladder begins at a district and one generous client's users pay for its generosity.
 - **0.35** — **`DISPUTE`/`RULING` implemented, and §9.3.4's expiry rule was a deadlock.** It said an abandoned dispute returns funds to "the pre-dispute allocation" — but under escrow that *is* funds locked in a 2-of-3 awaiting a `RELEASE` two disagreeing parties will never co-sign, so doing nothing freezes them permanently, the exact outcome the timeout claims to prevent. Expiry now emits a real ruling: for the respondent, award zero, co-signable against the escrow. Generalised as a rule for the whole protocol — **in a system with no operator, "nothing happens" is never a safe default**, so every deadline must name the action it triggers. Also enforced: a ruling from outside the market's signed arbiter set is refused (§2.5's lesson in one check), an award cannot exceed the claim, and only a ruling for the claimant may carry one.
 - **0.34** — **`MANDATE` implemented, and §15.5 amended to admit it.** §15.5 said the confirm tap is *the one mandatory human checkpoint*; §7.3's mandates authorise payment without one. That was a flat contradiction, resolved by stating that the checkpoint **moves rather than disappearing** — the human confirms a cap and a period once, and every later draw is bounded by what they signed. Holds only because a capless or periodless mandate is now *unparseable* rather than merely refused, the cap is enforced by the payer's own client, and only the named persona may draw. Periods anchor to the first draw, keeping timezones out of the protocol.
 - **0.33** — **`ABORT` made directional once a meter is running.** §6 lists it as available to either party with no penalty — correct before value accrues, and a free exit afterwards: a payer could open a tab, consume, abort, and owe nothing. From `METERING` only the operator may void cleanly; a payer leaving is abandonment via `MeterExpired`, which leaves evidence. Also recorded that `CANCEL` does not apply to a running meter, since stopping it and paying what accrued is the instrument that already exists.
@@ -280,6 +281,13 @@ Second, **the publisher learns the importer's address, not the reverse.** Publis
 ```
 
 Providers subscribe to their market's hail record for a geocell (§10.1) and publish nothing. A consumer writes a hail carrying a coarse cell and an ephemeral public key but **no route**. Interested providers answer with an offer sealed to that ephemeral key — readable only by the consumer, and still carrying no route. The consumer selects one, seals its own route to that provider's key, and the provider imports it.
+
+**"No route" is a property of the objects, not a rule about them.** Neither `Hail` nor its sealed reply has a route field to populate, so a provider cannot attach one and a consumer cannot helpfully import one. This matters because the entire inversion rests on it: a provider able to smuggle a route into a reply would deanonymise every consumer that used it (§15.10), reintroducing precisely the harvesting this section was rewritten to eliminate. A prohibition can go unimplemented; a missing field cannot be populated. An object carrying an unrecognised field is refused outright under §18.8 rather than parsed with the extra quietly ignored.
+
+Two further properties the objects enforce rather than request:
+
+- **A reply must echo the hail's nonce.** Without it a provider's stale reply could be replayed against a fresh hail, and a consumer would be selecting from quotes nobody currently stands behind.
+- **Geocell precision is bounded at parse time.** §5.2.3's ladder begins at a district; an over-precise cell turns its first rung into a position fix. Precision is therefore capped by the parser rather than left to each client's discretion, since the cost of one client being generous is borne by its user.
 
 #### 5.2.2 What this fixes, and what it does not
 
@@ -1578,7 +1586,7 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 40–45 | `CONTACT_OFFER`, `CONTACT_ACCEPT` (§16.3) | Reserved |
 | 46–51 | `bond_proof`, `TXID` (§17.4) | Reserved |
 | 52–59 | `DISPUTE`, `RULING` (§9.3.2) | **Assigned** (`EVIDENCE` still reserved) |
-| 60–67 | `HAIL`, sealed offer record (§5.2.1) | Reserved |
+| 60–67 | `HAIL`, sealed reply (§5.2.1) | **Assigned** |
 | 68–79 | `MarketDescriptor` (§10.1) | Reserved |
 | 80–95 | Delegations (§4.2), attestations (§9.2) | Reserved |
 | 96+ | Unallocated | — |
