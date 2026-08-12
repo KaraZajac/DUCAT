@@ -19,6 +19,7 @@
 
 mod escrow_role;
 mod flow;
+mod inverted;
 mod payee;
 mod payer;
 mod veilid;
@@ -46,6 +47,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "53hUxmYTwGtR44fhL8f7JLATagSwjtdLB6y4Q3wQQnbtUsDiLTLCzwnKr2gtBRAAUdgWmD22pJ3GK5Z52sJpgiK624iqtKh".into()
         });
         return escrow_role::drive(&tap_path, &ms).await;
+    }
+    if args.iter().any(|a| a == "--present") {
+        return inverted::present(&tap_path).await;
+    }
+    if let Some(i) = args.iter().position(|a| a == "--scan") {
+        let amount = args.get(i + 1).and_then(|v| v.parse().ok()).unwrap_or(300_000_000);
+        return inverted::scan(&tap_path, amount).await;
     }
     if args.iter().any(|a| a == "--payee") {
         let amount = args

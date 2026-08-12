@@ -153,6 +153,48 @@ What this does not cover: a phone, a cold node, cellular, more hops, or a route
 that must be re-established. Each is additive and the last is bounded below by a
 full round trip. **The protocol is not the problem; that is all this shows.**
 
+## The other direction: customer presents, till scans
+
+    DUCAT_PAYER_WALLET=user_02 DUCAT_PAYER_PORT=28102 ducat-harness --present
+    ducat-harness --scan 300000000
+
+Everything above has the *payee* presenting — which is a POS terminal, and §15.2
+calls it the normal case. This is the inversion familiar from Alipay and WeChat:
+the customer holds out a code, the till reads it and charges.
+
+It is not a curiosity. **§15.3.2 leans on it as the iOS escape hatch** — an
+iPhone cannot present over NFC (O19), so an iOS merchant either inverts the roles
+or falls back to QR. The variant existed in the enum and nothing had ever built
+one.
+
+```
+till                                    customer
+  tap: payer-presented, amount mine   ← presenting, waiting to be charged
+  charging 300000000 pXMR             → confirming (§15.5)
+  accept verified                     ← ACCEPT signed
+  (polls)                               funded e0df596201b500e0…, propagated
+  txid — scanning with my own view key
+  ✓ observed 300000000 pXMR
+  CLOSED, receipt issued              → CLOSED, receipt received
+```
+
+### What inverting taught
+
+The presenter supplies *reachability*, so the reader drives — and here that means
+**the till polls**, because the customer holds the route and cannot call out.
+
+- **A presenter's loop must stay responsive while it settles.** The first version
+  paid inline, blocking up to forty seconds on propagation retries, so the polls
+  went unanswered and the till abandoned a sale for a transaction that had
+  already been broadcast. Settlement now runs off the loop.
+- **`amount_authority` must be `open`**, and `offer_commit` is necessarily empty:
+  the offer does not exist until the till makes one. The till refuses a
+  payer-presented tap claiming otherwise.
+- **The confirm screen does not move.** `ACCEPT` is still the payer's alone.
+  Whoever held out a phone, the party whose money is at risk decides.
+
+A UI written against one direction will assume symmetry and be wrong.
+
 ## Requirements
 
 `monero-wallet-rpc` on ports 28101 (payer, `user_01`) and 28104 (payee,
