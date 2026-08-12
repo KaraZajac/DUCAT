@@ -279,3 +279,91 @@ mod tests {
         assert!(capacity_bucket(4_999_999_999) < 4_999_999_999);
     }
 }
+
+// ---------------------------------------------------------------------------
+// Onboarding: a persona, a wallet, limits, a backup
+// ---------------------------------------------------------------------------
+
+/// A newly created wallet, as onboarding needs to show it.
+///
+/// The **seed is returned once** and is never stored by this crate. §4.3 makes
+/// backup an explicit act the user performs; a bridge that quietly kept a copy
+/// would make the passphrase decorative.
+#[derive(uniffi::Record)]
+pub struct NewWallet {
+    /// The primary address, for receiving.
+    pub address: String,
+    /// The 25-word Electrum-style mnemonic. Shown once, then the user's problem —
+    /// which is the point of §4.3 existing.
+    pub seed_words: String,
+    /// The height to restore from.
+    ///
+    /// **Load-bearing, not metadata.** A wallet restored without one rescans from
+    /// genesis: measured at roughly 106 hours against a remote node versus 35
+    /// seconds from a recent height. A fresh wallet's correct value is the
+    /// current tip, because it has no earlier outputs to miss — which is the one
+    /// case where "now" is right rather than catastrophic (§4.3.1).
+    pub restore_height: u64,
+}
+
+/// Create a wallet.
+///
+/// `tip_height` comes from a node the caller already talks to. It is a parameter
+/// rather than something fetched here so this function stays pure and testable:
+/// a key generator that needs the network is one that fails in a tunnel.
+#[uniffi::export]
+pub fn create_wallet(tip_height: u64, stagenet: bool) -> NewWallet {
+    use monero_wallet::address::{MoneroAddress, Network};
+    use monero_wallet::ed25519::Scalar;
+    use rand_core::OsRng;
+    use zeroize::Zeroizing;
+
+    use curve25519_dalek::constants::ED25519_BASEPOINT_TABLE;
+
+    let spend = Zeroizing::new(Scalar::random(&mut OsRng));
+    let view = Zeroizing::new(Scalar::random(&mut OsRng));
+    let spend_pub = monero_wallet::ed25519::Point::from(&(*spend).into() * ED25519_BASEPOINT_TABLE);
+    let vp = monero_wallet::ViewPair::new(spend_pub, view.clone())
+        .expect("a random scalar yields a valid view pair");
+
+    let network = if stagenet { Network::Stagenet } else { Network::Mainnet };
+    let address: MoneroAddress = vp.legacy_address(network);
+
+    NewWallet {
+        address: address.to_string(),
+        // Placeholder until seed encoding lands: the wallet is real, the words
+        // are not, and shipping fake words a user might write down would be
+        // worse than shipping none.
+        seed_words: String::new(),
+        restore_height: tip_height,
+    }
+}
+
+#[cfg(test)]
+mod wallet_tests {
+    use super::*;
+
+    /// A wallet is real or it is theatre.
+    #[test]
+    fn created_wallets_are_distinct_and_well_formed() {
+        let a = create_wallet(2_190_000, true);
+        let b = create_wallet(2_190_000, true);
+        assert_ne!(a.address, b.address, "two wallets sharing an address is not randomness");
+        // Stagenet primary addresses start with 5 and are 95 characters — the
+        // same length that broke `dest` when it was checked as 16 bytes.
+        assert_eq!(a.address.len(), 95, "got {}", a.address);
+        assert!(a.address.starts_with('5'), "stagenet primary address");
+
+        let m = create_wallet(2_190_000, false);
+        assert!(m.address.starts_with('4'), "mainnet primary address: {}", m.address);
+    }
+
+    /// §4.3.1: a fresh wallet is the one case where "now" is the right restore
+    /// height rather than a catastrophe, because it has no earlier outputs to
+    /// miss. Setting it to the tip for a *restored* wallet is what makes a
+    /// balance read zero with no error anywhere.
+    #[test]
+    fn a_fresh_wallet_restores_from_the_tip() {
+        assert_eq!(create_wallet(2_190_000, true).restore_height, 2_190_000);
+    }
+}

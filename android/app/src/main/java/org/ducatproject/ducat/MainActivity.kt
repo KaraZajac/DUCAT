@@ -15,6 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.ui.BalanceCard
+import org.ducatproject.ducat.ui.Onboarding
+import org.ducatproject.ducat.ui.OnboardingFlow
+import org.ducatproject.ducat.ui.Step
 import org.ducatproject.ducat.ui.DucatTheme
 import org.ducatproject.ducat.ui.ThemeMode
 import org.ducatproject.ducat.ui.ThemePreference
@@ -43,11 +46,26 @@ class MainActivity : ComponentActivity() {
         setContent {
             // Follows the system unless the user has said otherwise (Menu).
             var mode by remember { mutableStateOf(prefs.mode) }
+            var onboarded by remember { mutableStateOf(prefs.onboarded) }
+            var setup by remember { mutableStateOf(Onboarding()) }
+
             DucatTheme(mode) {
-                DucatApp(
-                    themeMode = mode,
-                    onThemeChange = { mode = it; prefs.mode = it },
-                )
+                if (!onboarded) {
+                    // Nothing behind this until it is done. §4.3's backup step is
+                    // worthless if the user can reach a funded wallet without it.
+                    OnboardingFlow(setup) { next ->
+                        setup = next
+                        if (next.step == Step.Done && next.backupConfirmed) {
+                            prefs.onboarded = true
+                            onboarded = true
+                        }
+                    }
+                } else {
+                    DucatApp(
+                        themeMode = mode,
+                        onThemeChange = { mode = it; prefs.mode = it },
+                    )
+                }
             }
         }
     }

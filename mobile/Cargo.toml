@@ -11,6 +11,11 @@ crate-type = ["cdylib", "staticlib", "lib"]
 
 [dependencies]
 ducat-core = { path = "../core" }
+# A wallet on the phone, because there is no monero-wallet-rpc on a phone.
+monero-wallet = { version = "0.2.0", features = ["multisig"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+zeroize = "1"
+curve25519-dalek = { version = "4", features = ["precomputed-tables"] }
 uniffi = { version = "0.28", features = ["cli"] }
 
 [[bin]]

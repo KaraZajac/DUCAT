@@ -727,6 +727,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -749,6 +751,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_capacity_leak_bits(uniffi_out_err: UniffiRustCallStatus, 
     ): Double
     fun uniffi_ducat_mobile_fn_func_check_verification(`policy`: RustBuffer.ByValue,`deviceUnlocked`: Byte,`appSecretAgeS`: RustBuffer.ByValue,`amountMinor`: Long,`spentInWindowMinor`: Long,`rateIsFresh`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_create_wallet(`tipHeight`: Long,`stagenet`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_default_verification_policy(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -878,6 +882,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_check_verification(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_create_wallet(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_default_verification_policy(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_plan_float(
@@ -913,6 +919,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_check_verification() != 369.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_create_wallet() != 2937.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_default_verification_policy() != 11081.toShort()) {
@@ -1161,6 +1170,65 @@ public object FfiConverterTypeFloatPlan: FfiConverterRustBuffer<FloatPlan> {
     override fun write(value: FloatPlan, buf: ByteBuffer) {
             FfiConverterUInt.write(value.`outputs`, buf)
             FfiConverterULong.write(value.`totalPxmr`, buf)
+    }
+}
+
+
+
+/**
+ * A newly created wallet, as onboarding needs to show it.
+ *
+ * The **seed is returned once** and is never stored by this crate. §4.3 makes
+ * backup an explicit act the user performs; a bridge that quietly kept a copy
+ * would make the passphrase decorative.
+ */
+data class NewWallet (
+    /**
+     * The primary address, for receiving.
+     */
+    var `address`: kotlin.String, 
+    /**
+     * The 25-word Electrum-style mnemonic. Shown once, then the user's problem —
+     * which is the point of §4.3 existing.
+     */
+    var `seedWords`: kotlin.String, 
+    /**
+     * The height to restore from.
+     *
+     * **Load-bearing, not metadata.** A wallet restored without one rescans from
+     * genesis: measured at roughly 106 hours against a remote node versus 35
+     * seconds from a recent height. A fresh wallet's correct value is the
+     * current tip, because it has no earlier outputs to miss — which is the one
+     * case where "now" is right rather than catastrophic (§4.3.1).
+     */
+    var `restoreHeight`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeNewWallet: FfiConverterRustBuffer<NewWallet> {
+    override fun read(buf: ByteBuffer): NewWallet {
+        return NewWallet(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: NewWallet) = (
+            FfiConverterString.allocationSize(value.`address`) +
+            FfiConverterString.allocationSize(value.`seedWords`) +
+            FfiConverterULong.allocationSize(value.`restoreHeight`)
+    )
+
+    override fun write(value: NewWallet, buf: ByteBuffer) {
+            FfiConverterString.write(value.`address`, buf)
+            FfiConverterString.write(value.`seedWords`, buf)
+            FfiConverterULong.write(value.`restoreHeight`, buf)
     }
 }
 
@@ -1433,6 +1501,22 @@ public object FfiConverterOptionalULong: FfiConverterRustBuffer<kotlin.ULong?> {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_check_verification(
         FfiConverterTypeVerificationPolicy.lower(`policy`),FfiConverterBoolean.lower(`deviceUnlocked`),FfiConverterOptionalULong.lower(`appSecretAgeS`),FfiConverterULong.lower(`amountMinor`),FfiConverterULong.lower(`spentInWindowMinor`),FfiConverterBoolean.lower(`rateIsFresh`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Create a wallet.
+         *
+         * `tip_height` comes from a node the caller already talks to. It is a parameter
+         * rather than something fetched here so this function stays pure and testable:
+         * a key generator that needs the network is one that fails in a tunnel.
+         */ fun `createWallet`(`tipHeight`: kotlin.ULong, `stagenet`: kotlin.Boolean): NewWallet {
+            return FfiConverterTypeNewWallet.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_create_wallet(
+        FfiConverterULong.lower(`tipHeight`),FfiConverterBoolean.lower(`stagenet`),_status)
 }
     )
     }

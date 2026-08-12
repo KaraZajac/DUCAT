@@ -93,4 +93,16 @@ class ThemePreference(context: Context) {
         get() = runCatching { ThemeMode.valueOf(prefs.getString("theme", null) ?: "System") }
             .getOrDefault(ThemeMode.System)
         set(value) { prefs.edit().putString("theme", value.name).apply() }
+
+    /**
+     * Whether setup has been completed.
+     *
+     * A flag, not the keys: what onboarding *produces* — a persona, a wallet, a
+     * backup — belongs in encrypted storage, and putting any of it here would
+     * make §4.3's passphrase decorative. This only records that the user has
+     * been through the door.
+     */
+    var onboarded: Boolean
+        get() = prefs.getBoolean("onboarded", false)
+        set(value) { prefs.edit().putBoolean("onboarded", value).apply() }
 }
