@@ -15,7 +15,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
+import org.ducatproject.ducat.formatXmr
 
 /**
  * The money side.
@@ -31,6 +33,11 @@ import org.ducatproject.ducat.WalletStore
 @Composable
 fun AccountsScreen() {
     val context = LocalContext.current
+    // Recomputed on every store change, which the poller bumps after each scan
+    // window — so the figure climbs while syncing rather than appearing at the
+    // end.
+    val version by org.ducatproject.ducat.ContactStore.changes.collectAsState()
+    val balances = remember(version) { Wallet.balances(context) }
     val clipboard = LocalClipboardManager.current
     val wallet = remember { WalletStore(context) }
     val address = wallet.address()
@@ -109,12 +116,40 @@ fun AccountsScreen() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(12.dp))
-                // Not wired to a wallet yet, and labelled rather than faked with
-                // plausible figures — a number that looks real and is not is
-                // worse on a payments screen than an obvious blank.
-                BalanceRow("Float", "not connected")
-                BalanceRow("Reserve", "not connected")
-                BalanceRow("Bond", "none")
+                val b = balances
+                if (b.tip == 0L) {
+                    Text(
+                        "Waiting for a node.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    BalanceRow("Spendable", "${formatXmr(b.spendablePxmr)} XMR")
+                    if (b.lockedPxmr > 0) {
+                        BalanceRow(
+                            "Locked",
+                            "${formatXmr(b.lockedPxmr)} XMR · ~${b.blocksToUnlock * 2} min",
+                        )
+                    }
+                    BalanceRow("Notes", "${b.spendableOutputs}")
+                    BalanceRow("Bond", "none")
+                    if (b.syncing) {
+                        Spacer(Modifier.height(10.dp))
+                        val done = (b.scannedTo - 0).coerceAtLeast(0)
+                        Text(
+                            "Reading the chain — block $done of ${b.tip}. " +
+                                "A balance shown before this finishes is only what " +
+                                "has been seen so far.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.ducat.changePending,
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        LinearProgressIndicator(
+                            progress = { if (b.tip > 0) (b.scannedTo.toFloat() / b.tip) else 0f },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
             }
         }
     }

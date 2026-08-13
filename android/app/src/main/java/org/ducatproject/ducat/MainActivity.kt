@@ -31,6 +31,8 @@ import org.ducatproject.ducat.ui.BridgeSelfTest
 import androidx.activity.compose.BackHandler
 import kotlinx.coroutines.launch
 import org.ducatproject.ducat.ui.AccountsScreen
+import org.ducatproject.ducat.ui.ActivityScreen
+import org.ducatproject.ducat.ui.SendReceiveSheet
 import org.ducatproject.ducat.ui.ChatListScreen
 import org.ducatproject.ducat.ui.ChatScreen
 import org.ducatproject.ducat.ui.DrawerContent
@@ -116,6 +118,7 @@ enum class Tab(val label: String) {
 fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     var tab by remember { mutableStateOf(Tab.Home) }
     var overlay by remember { mutableStateOf<Overlay>(Overlay.None) }
+    var payOpen by remember { mutableStateOf(false) }
     val drawer = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -175,6 +178,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             Overlay.None -> {}
         }
 
+        if (payOpen) SendReceiveSheet { payOpen = false }
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -218,7 +223,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     // whole screen and left the content with none.
                     Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                         FloatingActionButton(
-                            onClick = { /* tap flow */ },
+                            onClick = { payOpen = true },
                             shape = CircleShape,
                             containerColor = MaterialTheme.colorScheme.tertiary,
                             contentColor = MaterialTheme.colorScheme.onTertiary,
@@ -240,16 +245,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     // gives it unbounded height — it renders every row at once
                     // and the list stops being lazy.
                     Tab.Home -> Column(Modifier.verticalScroll(rememberScrollState())) {
-                        HomeScreen()
+                        HomeScreen(onTopUp = { tab = Tab.Accounts })
                     }
                     Tab.Accounts -> AccountsScreen()
-                    Tab.Activity -> Column(Modifier.verticalScroll(rememberScrollState())) {
-                        Placeholder(
-                            "Activity",
-                            "Mostly nameless by design: a name exists only where a " +
-                                "contact was established (§16.3, §16.9).",
-                        )
-                    }
+                    Tab.Activity -> ActivityScreen()
                     Tab.Chat -> ChatListScreen(persona) { overlay = Overlay.Chat(it) }
                 }
             }
@@ -258,27 +257,31 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
 }
 
 @Composable
-private fun HomeScreen() {
-    // The wallet figures are still placeholders — they arrive from a Monero
-    // wallet, which is the next piece. **The capacity is not a placeholder.**
-    // It comes from `core::float` across the bridge, so the one number §17.2
-    // forbids overstating is computed by the same code the conformance vectors
-    // and the harness run, rather than by a second implementation in Kotlin.
+private fun HomeScreen(onTopUp: () -> Unit) {
+    val context = LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val b = remember(version) { Wallet.balances(context) }
+
+    // The capacity comes from `core::float` across the bridge, so the one number
+    // §17.2 forbids overstating is computed by the same code the conformance
+    // vectors and the harness run, rather than a second implementation in Kotlin.
     val float = Float(
-        spendablePxmr = 40_000_000_000,
-        lockedPxmr = 12_000_000_000,
-        blocksToUnlock = 7,
-        unlockedOutputs = 4,
+        spendablePxmr = b.spendablePxmr,
+        lockedPxmr = b.lockedPxmr,
+        blocksToUnlock = b.blocksToUnlock.toInt(),
+        unlockedOutputs = b.spendableOutputs,
     )
-    val approx = remember(float.unlockedOutputs) {
-        approxPaymentsSupported(float.unlockedOutputs.toUInt()).toInt()
+    val approx = remember(b.spendableOutputs) {
+        approxPaymentsSupported(b.spendableOutputs.toUInt()).toInt()
     }
     BalanceCard(
-        spendable = Money(4000),
+        // XMR, not a currency conversion. There is no rate source wired, and a
+        // dollar figure with no rate behind it is a number someone would act on.
+        spendable = Money(b.spendablePxmr / 1_000_000L, symbol = "", exponent = 6),
         capacity = Capacity(approxPayments = approx),
         float = float,
-        locked = Money(1200),
-        onTopUp = {},
+        locked = Money(b.lockedPxmr / 1_000_000L, symbol = "", exponent = 6),
+        onTopUp = onTopUp,
     )
 }
 

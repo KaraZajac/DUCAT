@@ -2,6 +2,7 @@ package org.ducatproject.ducat
 
 import android.content.Context
 import android.util.Base64
+import uniffi.ducat_mobile.OwnedOutput
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONArray
@@ -542,6 +543,66 @@ class WalletStore(context: Context) {
     }
 
     fun address(): String? = prefs.getString("wallet_address", null)
+
+    // --- scan state -------------------------------------------------------
+
+    fun scannedTo(): Long = prefs.getLong("wallet_scanned_to", 0L)
+    fun tip(): Long = prefs.getLong("wallet_tip", 0L)
+
+    /**
+     * Record a window's progress and anything it found.
+     *
+     * Outputs are keyed by key image so a rescan cannot double-count. A wallet
+     * that adds the same output twice reports a balance it does not have, and
+     * the mistake compounds every scan.
+     */
+    fun recordScan(scannedTo: Long, tip: Long, found: List<OwnedOutput>) {
+        val byKi = entries().associateBy { it.keyImage }.toMutableMap()
+        for (o in found) {
+            val ki = o.keyImageHex
+            if (ki.isEmpty()) continue
+            byKi[ki] = WalletEntry(
+                amountPxmr = o.amountPxmr.toLong(),
+                height = o.height.toLong(),
+                spent = byKi[ki]?.spent ?: false,
+                keyImage = ki,
+            )
+        }
+        writeEntries(byKi.values.toList())
+        prefs.edit()
+            .putLong("wallet_scanned_to", scannedTo)
+            .putLong("wallet_tip", tip)
+            .apply()
+    }
+
+    fun recordSpent(status: Map<String, Boolean>) {
+        writeEntries(entries().map { it.copy(spent = status[it.keyImage] ?: it.spent) })
+    }
+
+    fun entries(): List<WalletEntry> {
+        val raw = prefs.getString("wallet_outputs", null) ?: return emptyList()
+        val arr = JSONArray(raw)
+        return (0 until arr.length()).map {
+            val o = arr.getJSONObject(it)
+            WalletEntry(
+                amountPxmr = o.getLong("amt"),
+                height = o.getLong("h"),
+                spent = o.optBoolean("spent", false),
+                keyImage = o.getString("ki"),
+            )
+        }
+    }
+
+    private fun writeEntries(list: List<WalletEntry>) {
+        val arr = JSONArray()
+        list.forEach {
+            arr.put(JSONObject().apply {
+                put("amt", it.amountPxmr); put("h", it.height)
+                put("spent", it.spent); put("ki", it.keyImage)
+            })
+        }
+        prefs.edit().putString("wallet_outputs", arr.toString()).apply()
+    }
     fun spendKeyHex(): String? = prefs.getString("wallet_spend", null)
     fun stagenet(): Boolean = prefs.getBoolean("wallet_stagenet", true)
     fun restoreHeight(): ULong =

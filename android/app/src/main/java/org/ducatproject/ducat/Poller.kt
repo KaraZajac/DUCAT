@@ -35,6 +35,18 @@ class Poller(private val context: Context) {
                     val n = Mailbox.poll(context)
                     if (n > 0) Log.i(TAG, "collected $n message(s)")
                 }.onFailure { Log.w(TAG, "poll: ${it.message}") }
+
+                // The chain, in windows. Kept on the same loop as messages
+                // because both are "what happened while we were not looking",
+                // and a second timer would just be another thing to get wrong.
+                runCatching {
+                    val node = NodeStore(context).lastGood()
+                    if (node != null) {
+                        val moved = Wallet.scanStep(context, node)
+                        if (moved) Wallet.refreshSpent(context, node)
+                    }
+                }.onFailure { Log.w(TAG, "scan: ${it.message}") }
+
                 delay(10_000)
             }
         }

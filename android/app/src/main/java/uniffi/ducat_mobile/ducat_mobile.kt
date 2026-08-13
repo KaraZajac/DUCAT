@@ -811,6 +811,12 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -871,6 +877,12 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_monero_pick_node(`candidates`: RustBuffer.ByValue,`wantNettype`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_probe(`url`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_scan(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_scan_view_only(`nodeUrl`: RustBuffer.ByValue,`address`: RustBuffer.ByValue,`viewKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_spent(`nodeUrl`: RustBuffer.ByValue,`keyImagesHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_app_call(`routeBlob`: RustBuffer.ByValue,`message`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1084,6 +1096,12 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_probe(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_scan(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_scan_view_only(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_spent(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_app_call(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_close(
@@ -1222,6 +1240,15 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_probe() != 57591.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_scan() != 7265.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_scan_view_only() != 11816.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_spent() != 3803.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_app_call() != 36150.toShort()) {
@@ -2062,6 +2089,50 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
 
 
 /**
+ * One output we own.
+ */
+data class OwnedOutput (
+    var `amountPxmr`: kotlin.ULong, 
+    var `height`: kotlin.ULong, 
+    /**
+     * Hex key image, so spentness can be checked against the daemon. Derived
+     * from the spend secret, which is why scanning for a *balance* needs more
+     * than the view key that scanning for *receipts* does.
+     */
+    var `keyImageHex`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeOwnedOutput: FfiConverterRustBuffer<OwnedOutput> {
+    override fun read(buf: ByteBuffer): OwnedOutput {
+        return OwnedOutput(
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: OwnedOutput) = (
+            FfiConverterULong.allocationSize(value.`amountPxmr`) +
+            FfiConverterULong.allocationSize(value.`height`) +
+            FfiConverterString.allocationSize(value.`keyImageHex`)
+    )
+
+    override fun write(value: OwnedOutput, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`amountPxmr`, buf)
+            FfiConverterULong.write(value.`height`, buf)
+            FfiConverterString.write(value.`keyImageHex`, buf)
+    }
+}
+
+
+
+/**
  * The other side of that, for a subkey we just read.
  */
 data class PeerDetails (
@@ -2246,6 +2317,54 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterULong.write(value.`restoreHeight`, buf)
             FfiConverterByteArray.write(value.`personaSecret`, buf)
             FfiConverterUInt.write(value.`escrowCount`, buf)
+    }
+}
+
+
+
+/**
+ * How far a scan got, and what it found.
+ */
+data class ScanResult (
+    /**
+     * The height scanning reached. Persist this: rescanning from the restore
+     * height every time is the difference between a wallet that opens and one
+     * that appears to hang.
+     */
+    var `scannedTo`: kotlin.ULong, 
+    /**
+     * The chain tip when we started, so a caller can show progress honestly
+     * rather than implying it is finished.
+     */
+    var `tip`: kotlin.ULong, 
+    var `outputs`: List<OwnedOutput>
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeScanResult: FfiConverterRustBuffer<ScanResult> {
+    override fun read(buf: ByteBuffer): ScanResult {
+        return ScanResult(
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterSequenceTypeOwnedOutput.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ScanResult) = (
+            FfiConverterULong.allocationSize(value.`scannedTo`) +
+            FfiConverterULong.allocationSize(value.`tip`) +
+            FfiConverterSequenceTypeOwnedOutput.allocationSize(value.`outputs`)
+    )
+
+    override fun write(value: ScanResult, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`scannedTo`, buf)
+            FfiConverterULong.write(value.`tip`, buf)
+            FfiConverterSequenceTypeOwnedOutput.write(value.`outputs`, buf)
     }
 }
 
@@ -3045,6 +3164,62 @@ public object FfiConverterSequenceUInt: FfiConverterRustBuffer<List<kotlin.UInt>
 /**
  * @suppress
  */
+public object FfiConverterSequenceBoolean: FfiConverterRustBuffer<List<kotlin.Boolean>> {
+    override fun read(buf: ByteBuffer): List<kotlin.Boolean> {
+        val len = buf.getInt()
+        return List<kotlin.Boolean>(len) {
+            FfiConverterBoolean.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.Boolean>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterBoolean.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.Boolean>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterBoolean.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceString: FfiConverterRustBuffer<List<kotlin.String>> {
+    override fun read(buf: ByteBuffer): List<kotlin.String> {
+        val len = buf.getInt()
+        return List<kotlin.String>(len) {
+            FfiConverterString.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.String>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterString.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.String>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterString.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.ByteArray>> {
     override fun read(buf: ByteBuffer): List<kotlin.ByteArray> {
         val len = buf.getInt()
@@ -3091,6 +3266,34 @@ public object FfiConverterSequenceTypeNodeCandidate: FfiConverterRustBuffer<List
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypeNodeCandidate.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<OwnedOutput>> {
+    override fun read(buf: ByteBuffer): List<OwnedOutput> {
+        val len = buf.getInt()
+        return List<OwnedOutput>(len) {
+            FfiConverterTypeOwnedOutput.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<OwnedOutput>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeOwnedOutput.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<OwnedOutput>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeOwnedOutput.write(it, buf)
         }
     }
 }
@@ -3429,6 +3632,59 @@ public object FfiConverterSequenceTypeNodeCandidate: FfiConverterRustBuffer<List
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_probe(
         FfiConverterString.lower(`url`),FfiConverterUInt.lower(`timeoutMs`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Scan a bounded window for outputs belonging to this wallet.
+         *
+         * `spend_key_hex` is the **secret** spend key: key images cannot be derived
+         * without it, and without key images an output cannot be told from one already
+         * spent. A view-only scan shows every receipt and would call money that is
+         * already gone a balance.
+         */
+    @Throws(MoneroException::class) fun `moneroScan`(`nodeUrl`: kotlin.String, `spendKeyHex`: kotlin.String, `fromHeight`: kotlin.ULong, `maxBlocks`: kotlin.UInt): ScanResult {
+            return FfiConverterTypeScanResult.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_scan(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterULong.lower(`fromHeight`),FfiConverterUInt.lower(`maxBlocks`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Scan with a view key alone, for an address we cannot spend from.
+         *
+         * Finds every receipt and **cannot tell whether any of it is still there**,
+         * because key images need the spend secret. That is exactly what a watch-only
+         * wallet is, and the distinction has to reach the screen: this total is what
+         * arrived, not what is available.
+         */
+    @Throws(MoneroException::class) fun `moneroScanViewOnly`(`nodeUrl`: kotlin.String, `address`: kotlin.String, `viewKeyHex`: kotlin.String, `fromHeight`: kotlin.ULong, `maxBlocks`: kotlin.UInt): ScanResult {
+            return FfiConverterTypeScanResult.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_scan_view_only(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`address`),FfiConverterString.lower(`viewKeyHex`),FfiConverterULong.lower(`fromHeight`),FfiConverterUInt.lower(`maxBlocks`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Ask the daemon which of these key images are already spent.
+         *
+         * Separate from scanning because it is one request for the whole set rather
+         * than one per block, and because a wallet that has not asked cannot tell a
+         * balance from a history.
+         */
+    @Throws(MoneroException::class) fun `moneroSpent`(`nodeUrl`: kotlin.String, `keyImagesHex`: List<kotlin.String>): List<kotlin.Boolean> {
+            return FfiConverterSequenceBoolean.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_spent(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterSequenceString.lower(`keyImagesHex`),_status)
 }
     )
     }
