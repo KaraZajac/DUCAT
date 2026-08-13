@@ -398,6 +398,9 @@ pub struct BackupInput {
     /// it travels rather than silently reverting to a default the user did not
     /// pick — in either direction.
     pub publish_payto: bool,
+    /// §16.9's profile. Optional throughout, and carried so a restore does not
+    /// quietly drop what someone chose to publish about themselves.
+    pub profile: crate::contacts::Profile,
 }
 
 /// Roughly four centuries of two-minute blocks. Anything beyond this is not a
@@ -475,6 +478,11 @@ pub fn export_backup(
         // forgotten its name and its mind about being paid.
         display_name: input.display_name.clone(),
         publish_payto: input.publish_payto,
+        avatar: input.profile.avatar.clone(),
+        email: input.profile.email.clone(),
+        phone: input.profile.phone.clone(),
+        signal: input.profile.signal.clone(),
+        pronouns: input.profile.pronouns.map(|p| p as u64),
         created: 0,
     };
 
@@ -521,7 +529,7 @@ mod backup_tests {
         let w = create_wallet(2_190_000, true);
         let persona = create_persona_secret();
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: w.restore_height, display_name: None, publish_payto: false },
+            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: w.restore_height, display_name: None, publish_payto: false, profile: Default::default() },
             "a real passphrase".into(),
             persona.clone(),
         )
@@ -541,7 +549,7 @@ mod backup_tests {
         let w = create_wallet(1, true);
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false },
+                BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default() },
                 "short".into(),
                 create_persona_secret(),
             ),
@@ -555,7 +563,7 @@ mod backup_tests {
     fn a_malformed_key_is_refused() {
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: "nothex".into(), restore_height: 1, display_name: None, publish_payto: false },
+                BackupInput { spend_key_hex: "nothex".into(), restore_height: 1, display_name: None, publish_payto: false, profile: Default::default() },
                 "a real passphrase".into(),
                 create_persona_secret(),
             ),
@@ -574,7 +582,7 @@ mod restore_height_tests {
         let w = create_wallet(1, true);
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: u64::MAX, display_name: None, publish_payto: false },
+                BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: u64::MAX, display_name: None, publish_payto: false, profile: Default::default() },
                 "a real passphrase".into(),
                 create_persona_secret(),
             ),
@@ -589,7 +597,7 @@ mod restore_height_tests {
     fn genesis_is_slow_but_permitted() {
         let w = create_wallet(0, true);
         assert!(export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 0, display_name: None, publish_payto: false },
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 0, display_name: None, publish_payto: false, profile: Default::default() },
             "a real passphrase".into(),
             create_persona_secret(),
         )
@@ -609,6 +617,10 @@ pub struct RestoredBackup {
     pub persona_secret: Vec<u8>,
     pub display_name: Option<String>,
     pub publish_payto: bool,
+    /// §16.9's profile, restored with everything else. A persona that comes
+    /// back without its face and its pronouns is not the same person to anyone
+    /// who knew them.
+    pub profile: crate::contacts::Profile,
     /// Escrow shares carried in the bundle (§4.3.3). Zero is the normal case.
     pub escrow_count: u32,
 }
@@ -625,6 +637,13 @@ pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup
     Ok(RestoredBackup {
         display_name: b.display_name.clone(),
         publish_payto: b.publish_payto,
+        profile: crate::contacts::Profile {
+            avatar: b.avatar.clone(),
+            email: b.email.clone(),
+            phone: b.phone.clone(),
+            signal: b.signal.clone(),
+            pronouns: b.pronouns.map(|p| p as u32),
+        },
         spend_key_hex: b.monero_seed,
         restore_height: b.monero_restore_height,
         persona_secret: b.persona_secret,
@@ -668,7 +687,7 @@ mod import_tests {
     fn a_restored_key_controls_the_same_address() {
         let w = create_wallet(1000, true);
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: 1000, display_name: None, publish_payto: false },
+            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default() },
             "a real passphrase".into(),
             create_persona_secret(),
         )
@@ -686,7 +705,7 @@ mod import_tests {
     fn a_wrong_passphrase_is_indistinguishable_from_tampering() {
         let w = create_wallet(1, true);
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false },
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default() },
             "a real passphrase".into(),
             create_persona_secret(),
         )

@@ -829,6 +829,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -850,7 +852,7 @@ internal interface UniffiLib : Library {
     ): Byte
     fun uniffi_ducat_mobile_fn_func_approx_payments_supported(`unlockedOutputs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
-    fun uniffi_ducat_mobile_fn_func_build_contact_details(`personaSecret`: RustBuffer.ByValue,`outboxKey`: RustBuffer.ByValue,`prekeyBundle`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_build_contact_details(`personaSecret`: RustBuffer.ByValue,`outboxKey`: RustBuffer.ByValue,`prekeyBundle`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`profile`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_build_log_head(`nextSeq`: Long,`prekeyBundle`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -945,6 +947,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_persona_public_hex(`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_plan_float(`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_pronoun_options(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_protocol_version(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1176,6 +1180,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_plan_float(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_pronoun_options(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_protocol_version(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_prune_prekey(
@@ -1218,7 +1224,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_approx_payments_supported() != 28086.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_build_contact_details() != 60467.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_build_contact_details() != 30064.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_build_log_head() != 42400.toShort()) {
@@ -1360,6 +1366,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_plan_float() != 49046.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_pronoun_options() != 20135.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_protocol_version() != 58081.toShort()) {
@@ -1645,7 +1654,12 @@ data class BackupInput (
      * it travels rather than silently reverting to a default the user did not
      * pick — in either direction.
      */
-    var `publishPayto`: kotlin.Boolean
+    var `publishPayto`: kotlin.Boolean, 
+    /**
+     * §16.9's profile. Optional throughout, and carried so a restore does not
+     * quietly drop what someone chose to publish about themselves.
+     */
+    var `profile`: Profile
 ) {
     
     companion object
@@ -1661,6 +1675,7 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterULong.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterBoolean.read(buf),
+            FfiConverterTypeProfile.read(buf),
         )
     }
 
@@ -1668,7 +1683,8 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterString.allocationSize(value.`spendKeyHex`) +
             FfiConverterULong.allocationSize(value.`restoreHeight`) +
             FfiConverterOptionalString.allocationSize(value.`displayName`) +
-            FfiConverterBoolean.allocationSize(value.`publishPayto`)
+            FfiConverterBoolean.allocationSize(value.`publishPayto`) +
+            FfiConverterTypeProfile.allocationSize(value.`profile`)
     )
 
     override fun write(value: BackupInput, buf: ByteBuffer) {
@@ -1676,6 +1692,7 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterULong.write(value.`restoreHeight`, buf)
             FfiConverterOptionalString.write(value.`displayName`, buf)
             FfiConverterBoolean.write(value.`publishPayto`, buf)
+            FfiConverterTypeProfile.write(value.`profile`, buf)
     }
 }
 
@@ -2459,7 +2476,8 @@ data class PeerDetails (
     /**
      * Where they can be paid without asking, if they chose to publish it.
      */
-    var `payto`: kotlin.String?
+    var `payto`: kotlin.String?, 
+    var `profile`: Profile
 ) {
     
     companion object
@@ -2476,6 +2494,7 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
             FfiConverterByteArray.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterTypeProfile.read(buf),
         )
     }
 
@@ -2484,7 +2503,8 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
             FfiConverterString.allocationSize(value.`outboxKey`) +
             FfiConverterByteArray.allocationSize(value.`prekeyBundle`) +
             FfiConverterOptionalString.allocationSize(value.`assertedName`) +
-            FfiConverterOptionalString.allocationSize(value.`payto`)
+            FfiConverterOptionalString.allocationSize(value.`payto`) +
+            FfiConverterTypeProfile.allocationSize(value.`profile`)
     )
 
     override fun write(value: PeerDetails, buf: ByteBuffer) {
@@ -2493,6 +2513,7 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
             FfiConverterByteArray.write(value.`prekeyBundle`, buf)
             FfiConverterOptionalString.write(value.`assertedName`, buf)
             FfiConverterOptionalString.write(value.`payto`, buf)
+            FfiConverterTypeProfile.write(value.`profile`, buf)
     }
 }
 
@@ -2547,6 +2568,64 @@ public object FfiConverterTypePrekeyMaterial: FfiConverterRustBuffer<PrekeyMater
             FfiConverterByteArray.write(value.`signedSecret`, buf)
             FfiConverterSequenceByteArray.write(value.`oneTimeSecrets`, buf)
             FfiConverterSequenceUInt.write(value.`oneTimeIds`, buf)
+    }
+}
+
+
+
+/**
+ * Encode what goes into an inbox subkey: who I am, where to leave things, and
+ * Everything optional a person may publish about themselves (§16.9).
+ *
+ * One record so a caller passes a profile rather than eight arguments, and so
+ * adding a field later does not change every call site.
+ *
+ * **None of it is in the card.** The card is a QR code someone scans across a
+ * counter, and a picture does not fit in one. Profile travels on the record
+ * afterwards, which is also why it can change without reissuing anything.
+ */
+data class Profile (
+    var `avatar`: kotlin.ByteArray?, 
+    var `email`: kotlin.String?, 
+    var `phone`: kotlin.String?, 
+    var `signal`: kotlin.String?, 
+    /**
+     * 1 she/her, 2 she/they, 3 he/him, 4 he/they, 5 they/them, 6 any.
+     */
+    var `pronouns`: kotlin.UInt?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeProfile: FfiConverterRustBuffer<Profile> {
+    override fun read(buf: ByteBuffer): Profile {
+        return Profile(
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: Profile) = (
+            FfiConverterOptionalByteArray.allocationSize(value.`avatar`) +
+            FfiConverterOptionalString.allocationSize(value.`email`) +
+            FfiConverterOptionalString.allocationSize(value.`phone`) +
+            FfiConverterOptionalString.allocationSize(value.`signal`) +
+            FfiConverterOptionalUInt.allocationSize(value.`pronouns`)
+    )
+
+    override fun write(value: Profile, buf: ByteBuffer) {
+            FfiConverterOptionalByteArray.write(value.`avatar`, buf)
+            FfiConverterOptionalString.write(value.`email`, buf)
+            FfiConverterOptionalString.write(value.`phone`, buf)
+            FfiConverterOptionalString.write(value.`signal`, buf)
+            FfiConverterOptionalUInt.write(value.`pronouns`, buf)
     }
 }
 
@@ -2656,6 +2735,12 @@ data class RestoredBackup (
     var `displayName`: kotlin.String?, 
     var `publishPayto`: kotlin.Boolean, 
     /**
+     * §16.9's profile, restored with everything else. A persona that comes
+     * back without its face and its pronouns is not the same person to anyone
+     * who knew them.
+     */
+    var `profile`: Profile, 
+    /**
      * Escrow shares carried in the bundle (§4.3.3). Zero is the normal case.
      */
     var `escrowCount`: kotlin.UInt
@@ -2675,6 +2760,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterByteArray.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterBoolean.read(buf),
+            FfiConverterTypeProfile.read(buf),
             FfiConverterUInt.read(buf),
         )
     }
@@ -2685,6 +2771,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterByteArray.allocationSize(value.`personaSecret`) +
             FfiConverterOptionalString.allocationSize(value.`displayName`) +
             FfiConverterBoolean.allocationSize(value.`publishPayto`) +
+            FfiConverterTypeProfile.allocationSize(value.`profile`) +
             FfiConverterUInt.allocationSize(value.`escrowCount`)
     )
 
@@ -2694,6 +2781,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterByteArray.write(value.`personaSecret`, buf)
             FfiConverterOptionalString.write(value.`displayName`, buf)
             FfiConverterBoolean.write(value.`publishPayto`, buf)
+            FfiConverterTypeProfile.write(value.`profile`, buf)
             FfiConverterUInt.write(value.`escrowCount`, buf)
     }
 }
@@ -3541,6 +3629,38 @@ public object FfiConverterTypeVerification: FfiConverterRustBuffer<Verification>
 /**
  * @suppress
  */
+public object FfiConverterOptionalUInt: FfiConverterRustBuffer<kotlin.UInt?> {
+    override fun read(buf: ByteBuffer): kotlin.UInt? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterUInt.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.UInt?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterUInt.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.UInt?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterUInt.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalULong: FfiConverterRustBuffer<kotlin.ULong?> {
     override fun read(buf: ByteBuffer): kotlin.ULong? {
         if (buf.get().toInt() == 0) {
@@ -3934,14 +4054,13 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
     
 
         /**
-         * Encode what goes into an inbox subkey: who I am, where to leave things, and
          * the keys to seal with.
          */
-    @Throws(ContactException::class) fun `buildContactDetails`(`personaSecret`: kotlin.ByteArray, `outboxKey`: kotlin.String, `prekeyBundle`: kotlin.ByteArray, `displayName`: kotlin.String?, `payto`: kotlin.String?): kotlin.ByteArray {
+    @Throws(ContactException::class) fun `buildContactDetails`(`personaSecret`: kotlin.ByteArray, `outboxKey`: kotlin.String, `prekeyBundle`: kotlin.ByteArray, `displayName`: kotlin.String?, `payto`: kotlin.String?, `profile`: Profile): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_build_contact_details(
-        FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`outboxKey`),FfiConverterByteArray.lower(`prekeyBundle`),FfiConverterOptionalString.lower(`displayName`),FfiConverterOptionalString.lower(`payto`),_status)
+        FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`outboxKey`),FfiConverterByteArray.lower(`prekeyBundle`),FfiConverterOptionalString.lower(`displayName`),FfiConverterOptionalString.lower(`payto`),FfiConverterTypeProfile.lower(`profile`),_status)
 }
     )
     }
@@ -4652,6 +4771,19 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_plan_float(
         FfiConverterUInt.lower(`payments`),FfiConverterULong.lower(`typicalPxmr`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The labels, in the order a picker should show them. Kept here so the app and
+         * the protocol cannot drift on what a code means.
+         */ fun `pronounOptions`(): List<kotlin.String> {
+            return FfiConverterSequenceString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_pronoun_options(
+        _status)
 }
     )
     }

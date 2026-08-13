@@ -142,6 +142,159 @@ pub struct ContactDetails {
     /// talk to. Publishing it is the contact's own choice about their own
     /// linkability, and an implementation MUST let them decline.
     pub payto: Option<String>,
+    /// A small picture, so a contact list is faces rather than hex.
+    ///
+    /// **Hard-bounded, and format-checked.** These are attacker-supplied bytes
+    /// handed to an image decoder on someone else's phone, which is one of the
+    /// most reliably exploitable surfaces there is. The bound is small enough
+    /// that this is an avatar and not a file transfer, and the magic-number
+    /// check means a decoder is only ever asked to parse what it was told it
+    /// was getting.
+    pub avatar: Option<Vec<u8>>,
+    /// Optional contact details, each **validated on the wire** (§16.9).
+    ///
+    /// Validated here rather than at the screen, because these render as
+    /// identity: a "phone number" that is really a sentence, or an "email" that
+    /// is really a lookalike domain with control characters in it, is a claim
+    /// about who someone is being drawn by a client that did not check. A field
+    /// nobody validates is a field that says whatever the sender wants.
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub signal: Option<String>,
+    pub pronouns: Option<Pronouns>,
+}
+
+/// How to refer to someone.
+///
+/// A closed set rather than free text, because this is drawn next to a name on
+/// a stranger's screen and a free-text field there is a place to put a message.
+///
+/// The cost is real and worth stating: a closed list cannot express every
+/// pronoun anyone uses, and someone whose pronouns are not here has only
+/// [`Pronouns::Any`] or absence. Absence is not a failure state — a client MUST
+/// render a person with no pronouns set exactly as it renders anyone else, and
+/// MUST NOT substitute a guess.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Pronouns {
+    SheHer = 1,
+    SheThey = 2,
+    HeHim = 3,
+    HeThey = 4,
+    TheyThem = 5,
+    Any = 6,
+}
+
+impl Pronouns {
+    fn from_code(v: u64) -> Option<Self> {
+        Some(match v {
+            1 => Pronouns::SheHer,
+            2 => Pronouns::SheThey,
+            3 => Pronouns::HeHim,
+            4 => Pronouns::HeThey,
+            5 => Pronouns::TheyThem,
+            6 => Pronouns::Any,
+            _ => return None,
+        })
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Pronouns::SheHer => "she/her",
+            Pronouns::SheThey => "she/they",
+            Pronouns::HeHim => "he/him",
+            Pronouns::HeThey => "he/they",
+            Pronouns::TheyThem => "they/them",
+            Pronouns::Any => "any",
+        }
+    }
+}
+
+/// The most an avatar may weigh.
+///
+/// Sized for a contact-list thumbnail, not a photograph. It also has to fit in
+/// a DHT subkey alongside everything else in this record, and a profile that
+/// does not fit is a contact who cannot be reached at all.
+pub const MAX_AVATAR_BYTES: usize = 12 * 1024;
+
+pub const MAX_EMAIL_CHARS: usize = 254;
+pub const MAX_PHONE_DIGITS: usize = 15;
+pub const MAX_SIGNAL_CHARS: usize = 48;
+
+/// `local@domain.tld`, deliberately strict.
+///
+/// Not RFC 5322 — that grammar admits quoted strings, comments and characters
+/// that no client should be rendering as an identity. This accepts the shape
+/// people actually have and refuses the rest, which is the right trade for a
+/// field whose only job is to be displayed and copied.
+fn email_is_plausible(s: &str) -> bool {
+    let bytes = s.as_bytes();
+    if s.len() > MAX_EMAIL_CHARS || s.chars().any(|c| c.is_control() || c.is_whitespace()) {
+        return false;
+    }
+    let Some(at) = s.find('@') else { return false };
+    if s[at + 1..].contains('@') {
+        return false;
+    }
+    let (local, domain) = (&s[..at], &s[at + 1..]);
+    if local.is_empty() || domain.is_empty() {
+        return false;
+    }
+    let local_ok = local.chars().all(|c| {
+        c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '%' | '+' | '-' | '\'' )
+    }) && !local.starts_with('.')
+        && !local.ends_with('.')
+        && !local.contains("..");
+    // A domain needs a dot and a real TLD; `a@b` is not an address anyone has.
+    let Some(dot) = domain.rfind('.') else { return false };
+    let tld = &domain[dot + 1..];
+    let domain_ok = domain
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '.' || c == '-')
+        && !domain.starts_with(['.', '-'])
+        && !domain.ends_with(['.', '-'])
+        && !domain.contains("..")
+        && tld.len() >= 2
+        && tld.chars().all(|c| c.is_ascii_alphabetic());
+    let _ = bytes;
+    local_ok && domain_ok
+}
+
+/// Digits only.
+///
+/// No punctuation, no `+`, no spaces: one number has a dozen spellings, and a
+/// field that accepts all of them is a field two clients will render two ways
+/// and neither will match when someone searches. The country code is digits
+/// too, so nothing is lost.
+fn phone_is_plausible(s: &str) -> bool {
+    !s.is_empty()
+        && s.len() <= MAX_PHONE_DIGITS
+        && s.chars().all(|c| c.is_ascii_digit())
+}
+
+/// Signal's own shape: a username, a dot, then digits.
+fn signal_is_plausible(s: &str) -> bool {
+    if s.len() > MAX_SIGNAL_CHARS {
+        return false;
+    }
+    let Some((name, digits)) = s.split_once('.') else { return false };
+    // Signal requires at least three characters and at least two digits.
+    name.len() >= 3
+        && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
+        && name.chars().next().is_some_and(|c| c.is_ascii_alphabetic() || c == '_')
+        && digits.len() >= 2
+        && digits.chars().all(|c| c.is_ascii_digit())
+}
+
+/// What an avatar's first bytes must say it is.
+///
+/// PNG, JPEG or WebP. Checked because a decoder should never be handed bytes
+/// whose format it has to guess, and because "it is whatever it turns out to
+/// be" is how a picture becomes an exploit.
+fn avatar_format_is_known(b: &[u8]) -> bool {
+    const PNG: &[u8] = &[0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A];
+    b.starts_with(PNG)
+        || b.starts_with(&[0xFF, 0xD8, 0xFF])
+        || (b.len() > 12 && &b[0..4] == b"RIFF" && &b[8..12] == b"WEBP")
 }
 
 impl ContactDetails {
@@ -158,6 +311,21 @@ impl ContactDetails {
         }
         if let Some(p) = &self.payto {
             m.insert(f::DET_PAYTO, Value::Text(p.clone()));
+        }
+        if let Some(a) = &self.avatar {
+            m.insert(f::DET_AVATAR, Value::Bytes(a.clone()));
+        }
+        if let Some(e) = &self.email {
+            m.insert(f::DET_EMAIL, Value::Text(e.clone()));
+        }
+        if let Some(p) = &self.phone {
+            m.insert(f::DET_PHONE, Value::Text(p.clone()));
+        }
+        if let Some(sg) = &self.signal {
+            m.insert(f::DET_SIGNAL, Value::Text(sg.clone()));
+        }
+        if let Some(p) = self.pronouns {
+            m.insert(f::DET_PRONOUNS, Value::Uint(p as u64));
         }
         Value::Map(m)
     }
@@ -180,8 +348,56 @@ impl ContactDetails {
             prekey_bundle: r.bytes(f::DET_BUNDLE, None)?,
             display_name: r.opt_text(f::DET_NAME, MAX_DISPLAY_NAME_CHARS)?,
             payto: r.opt_text(f::DET_PAYTO, MAX_ADDRESS_CHARS)?,
+            avatar: r.opt_bytes(f::DET_AVATAR, None)?,
+            email: r.opt_text(f::DET_EMAIL, MAX_EMAIL_CHARS)?,
+            phone: r.opt_text(f::DET_PHONE, MAX_PHONE_DIGITS)?,
+            signal: r.opt_text(f::DET_SIGNAL, MAX_SIGNAL_CHARS)?,
+            pronouns: match r.opt_uint(f::DET_PRONOUNS)? {
+                None => None,
+                Some(v) => Some(Pronouns::from_code(v).ok_or_else(|| {
+                    Reject::with_detail(RejectCode::Malformed, "unknown pronouns code")
+                })?),
+            },
         };
         r.finish()?;
+        if let Some(a) = &out.avatar {
+            if a.is_empty() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "an empty avatar is not an avatar; omit the key instead",
+                ));
+            }
+            if a.len() > MAX_AVATAR_BYTES {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    format!("an avatar may be at most {MAX_AVATAR_BYTES} bytes"),
+                ));
+            }
+            if !avatar_format_is_known(a) {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "an avatar must be PNG, JPEG or WebP",
+                ));
+            }
+        }
+        if out.email.as_deref().is_some_and(|e| !email_is_plausible(e)) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "that is not the shape of an email address",
+            ));
+        }
+        if out.phone.as_deref().is_some_and(|p| !phone_is_plausible(p)) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a phone number is digits only, country code included",
+            ));
+        }
+        if out.signal.as_deref().is_some_and(|s| !signal_is_plausible(s)) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a Signal username is name.digits",
+            ));
+        }
         Ok(out)
     }
 }

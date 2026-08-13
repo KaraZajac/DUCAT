@@ -71,6 +71,7 @@ pub fn restore_main() {
         escrow_shares: vec![],
         display_name: None,
         publish_payto: false,
+        avatar: None, email: None, phone: None, signal: None, pronouns: None,
         created: 0,
     };
     let passphrase = b"the correct passphrase";

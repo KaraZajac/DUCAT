@@ -59,8 +59,21 @@ data class Onboarding(
     val wallet: NewWallet? = null,
     /** The name handed out on cards (§7.5). Optional, and it can change later. */
     val displayName: String? = null,
-    /** Whether contacts may pay without asking (§16.12). Off unless chosen. */
-    val publishPayto: Boolean = false,
+    /**
+     * Whether contacts may pay without asking (§16.12).
+     *
+     * **On by default**, and that is a reversal worth naming. It started off
+     * because a published address is a reused address, and a reused address is
+     * a public ledger entry linking everyone who ever paid this person. What
+     * changed is not the cost — the cost is the same — but who is being asked
+     * to understand it before they can send a friend twenty. The setup screen
+     * states it plainly and the switch is right there; nobody is uninformed,
+     * and nobody is stopped at the first step either.
+     */
+    val publishPayto: Boolean = true,
+    /** §16.9's optional profile, gathered at setup and editable afterwards. */
+    val profile: uniffi.ducat_mobile.Profile =
+        uniffi.ducat_mobile.Profile(null, null, null, null, null),
     val backupConfirmed: Boolean = false,
 )
 
@@ -278,6 +291,7 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                                     w.restoreHeight,
                                     state.displayName,
                                     state.publishPayto,
+                                    state.profile,
                                 ),
                                 passphrase,
                                 persona,

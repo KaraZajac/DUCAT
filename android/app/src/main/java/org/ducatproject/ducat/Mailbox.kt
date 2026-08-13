@@ -55,6 +55,9 @@ object Mailbox {
                 // Only if the user has opted in. §16.12 makes this a choice,
                 // and defaulting it on would be choosing for them.
                 if (store.publishAddress()) WalletStore(context).address() else null,
+                // §16.9: the profile rides the record, never the card. A card
+                // carrying a picture is a QR code nobody can scan.
+                MyProfile(context).toWire(),
             ),
         )
 
@@ -65,6 +68,7 @@ object Mailbox {
             inbox.key, writer.public, writer.secret,
             outbox.key, outbox.ownerPublic, outbox.ownerSecret,
         )
+        store.rememberCardUri(card.uri)
         DucatLog.i(TAG, "issued card: inbox=${inbox.key.take(24)}… outbox=${outbox.key.take(24)}…")
         return card
     }
@@ -110,6 +114,7 @@ object Mailbox {
             buildContactDetails(
                 persona, outbox.key, prekeys.bundle, petname,
                 if (store.publishAddress()) WalletStore(context).address() else null,
+                MyProfile(context).toWire(),
             ),
         )
 
@@ -123,6 +128,11 @@ object Mailbox {
             theirOutbox = theirs.outboxKey,
             theirBundle = theirs.prekeyBundle,
             theirAddress = theirs.payto,
+            avatar = theirs.profile.avatar,
+            email = theirs.profile.email,
+            phone = theirs.profile.phone,
+            signal = theirs.profile.signal,
+            pronouns = theirs.profile.pronouns?.toInt(),
         )
         store.add(c)
         DucatLog.i(TAG, "claimed: their outbox=${theirs.outboxKey.take(24)}…")
@@ -156,10 +166,22 @@ object Mailbox {
                     theirOutbox = theirs.outboxKey,
                     theirBundle = theirs.prekeyBundle,
                     theirAddress = theirs.payto,
+                    avatar = theirs.profile.avatar,
+                    email = theirs.profile.email,
+                    phone = theirs.profile.phone,
+                    signal = theirs.profile.signal,
+                    pronouns = theirs.profile.pronouns?.toInt(),
                 )
             )
             store.markIssuedCardAnswered()
             DucatLog.i(TAG, "card answered by ${theirs.assertedName}")
+            // A card is single use — its one reply subkey is now written, so
+            // the next person to scan the same code would have nowhere to
+            // answer. Issue the next one immediately rather than at the moment
+            // it is needed, which is while somebody is standing there.
+            runCatching { issueCard(context, NameStore(context).get(), 60uL * 60uL * 24uL) }
+                .onSuccess { DucatLog.i(TAG, "a fresh card is ready for the next person") }
+                .onFailure { DucatLog.w(TAG, "could not pre-issue the next card: ${it.message}") }
             1
         } catch (e: Exception) {
             DucatLog.w(TAG, "collectClaims: ${e.message}")

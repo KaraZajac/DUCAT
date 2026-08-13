@@ -90,6 +90,7 @@ fn details() -> ContactDetails {
         prekey_bundle: vec![0x01, 0x02, 0x03],
         display_name: Some("sam".into()),
         payto: None,
+        avatar: None, email: None, phone: None, signal: None, pronouns: None,
     }
 }
 

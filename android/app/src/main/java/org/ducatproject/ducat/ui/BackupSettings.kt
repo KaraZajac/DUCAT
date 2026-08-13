@@ -23,6 +23,7 @@ import uniffi.ducat_mobile.addressForSpendKey
 import uniffi.ducat_mobile.createPersonaSecret
 import uniffi.ducat_mobile.exportBackup
 import uniffi.ducat_mobile.importBackup
+import org.ducatproject.ducat.MyProfile
 
 /**
  * Backup, after onboarding.
@@ -84,6 +85,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                                     // a restore that quietly changed both.
                                     NameStore(context).get(),
                                     ContactStore(context).publishAddress(),
+                                    MyProfile(context).toWire(),
                                 ),
                                 passphrase,
                                 personaSecret!!,
@@ -136,6 +138,16 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
             // wrong direction is a silent disclosure.
             r.displayName?.let { NameStore(context).put(it) }
             ContactStore(context).setPublishAddress(r.publishPayto)
+            // §16.9's profile with it. A persona that comes back with the right
+            // money and no face is not the same person to anyone who knew them,
+            // and nothing else in the app would report that it had been lost.
+            MyProfile(context).let { p ->
+                p.setAvatar(r.profile.avatar)
+                p.setEmail(r.profile.email)
+                p.setPhone(r.profile.phone)
+                p.setSignal(r.profile.signal)
+                p.setPronouns(r.profile.pronouns?.toInt())
+            }
             // The address is the check that matters. A bundle that decrypts has
             // proved the passphrase, not that it holds the wallet you meant.
             restored = addressForSpendKey(r.spendKeyHex, stagenet = true)

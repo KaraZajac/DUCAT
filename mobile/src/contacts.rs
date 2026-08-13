@@ -9,7 +9,7 @@ use ducat_core::cbor::decode;
 use ducat_core::contact::{
     MessageKind,
     card_from_uri, card_to_uri, check_message, subkey_for as ring_subkey, still_in_ring,
-    thread_aad as pair_aad, ContactCard, ContactDetails, LineItem, LogHead, Message,
+    thread_aad as pair_aad, ContactCard, ContactDetails, LineItem, LogHead, Message, Pronouns,
     MAX_DISPLAY_NAME_CHARS, MAX_MESSAGE_CHARS, MAX_RECORD_KEY_CHARS,
 };
 use ducat_core::hpke::{self, PreKey, PreKeyBundle, PreKeyStore, SealedMessage};
@@ -157,6 +157,69 @@ pub fn read_contact_card(input: String) -> Result<ScannedCard, ContactError> {
 }
 
 /// Encode what goes into an inbox subkey: who I am, where to leave things, and
+/// Everything optional a person may publish about themselves (§16.9).
+///
+/// One record so a caller passes a profile rather than eight arguments, and so
+/// adding a field later does not change every call site.
+///
+/// **None of it is in the card.** The card is a QR code someone scans across a
+/// counter, and a picture does not fit in one. Profile travels on the record
+/// afterwards, which is also why it can change without reissuing anything.
+#[derive(uniffi::Record, Clone, Default)]
+pub struct Profile {
+    pub avatar: Option<Vec<u8>>,
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub signal: Option<String>,
+    /// 1 she/her, 2 she/they, 3 he/him, 4 he/they, 5 they/them, 6 any.
+    pub pronouns: Option<u32>,
+}
+
+impl Profile {
+    fn pronouns_enum(&self) -> Result<Option<Pronouns>, ContactError> {
+        Ok(match self.pronouns {
+            None => None,
+            Some(v) => Some(match v {
+                1 => Pronouns::SheHer,
+                2 => Pronouns::SheThey,
+                3 => Pronouns::HeHim,
+                4 => Pronouns::HeThey,
+                5 => Pronouns::TheyThem,
+                6 => Pronouns::Any,
+                _ => return Err(ContactError::Refused("unknown pronouns code".into())),
+            }),
+        })
+    }
+
+    fn code_of(p: Option<Pronouns>) -> Option<u32> {
+        p.map(|p| match p {
+            Pronouns::SheHer => 1,
+            Pronouns::SheThey => 2,
+            Pronouns::HeHim => 3,
+            Pronouns::HeThey => 4,
+            Pronouns::TheyThem => 5,
+            Pronouns::Any => 6,
+        })
+    }
+}
+
+/// The labels, in the order a picker should show them. Kept here so the app and
+/// the protocol cannot drift on what a code means.
+#[uniffi::export]
+pub fn pronoun_options() -> Vec<String> {
+    [
+        Pronouns::SheHer,
+        Pronouns::SheThey,
+        Pronouns::HeHim,
+        Pronouns::HeThey,
+        Pronouns::TheyThem,
+        Pronouns::Any,
+    ]
+    .iter()
+    .map(|p| p.label().to_string())
+    .collect()
+}
+
 /// the keys to seal with.
 #[uniffi::export]
 pub fn build_contact_details(
@@ -167,9 +230,14 @@ pub fn build_contact_details(
     // Optional (§16.12). Publishing lets contacts pay without asking, at the
     // cost of the address being reused — the caller decides, not this function.
     payto: Option<String>,
+    profile: Profile,
 ) -> Result<Vec<u8>, ContactError> {
     let sk = persona_key(&persona_secret)?;
-    Ok(ContactDetails {
+    let pronouns = profile.pronouns_enum()?;
+    // Round-tripped through the decoder before it goes out, so a malformed
+    // profile is caught on the device that composed it rather than refused on
+    // the device that receives it — where the person who could fix it is not.
+    let encoded = ContactDetails {
         version: 1,
         suite: 1,
         persona: sk.public().to_bytes().to_vec(),
@@ -177,9 +245,16 @@ pub fn build_contact_details(
         prekey_bundle,
         display_name,
         payto,
+        avatar: profile.avatar,
+        email: profile.email,
+        phone: profile.phone,
+        signal: profile.signal,
+        pronouns,
     }
     .to_value()
-    .encode())
+    .encode();
+    ContactDetails::from_value(decode(&encoded).map_err(refuse)?).map_err(refuse)?;
+    Ok(encoded)
 }
 
 /// The other side of that, for a subkey we just read.
@@ -191,6 +266,7 @@ pub struct PeerDetails {
     pub asserted_name: Option<String>,
     /// Where they can be paid without asking, if they chose to publish it.
     pub payto: Option<String>,
+    pub profile: Profile,
 }
 
 #[uniffi::export]
@@ -202,6 +278,13 @@ pub fn parse_contact_details(bytes: Vec<u8>) -> Result<PeerDetails, ContactError
         prekey_bundle: d.prekey_bundle,
         asserted_name: d.display_name,
         payto: d.payto,
+        profile: Profile {
+            avatar: d.avatar,
+            email: d.email,
+            phone: d.phone,
+            signal: d.signal,
+            pronouns: Profile::code_of(d.pronouns),
+        },
     })
 }
 

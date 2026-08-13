@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import org.ducatproject.ducat.ui.AccountsScreen
 import org.ducatproject.ducat.ui.ActivityScreen
 import org.ducatproject.ducat.ui.PaySheet
+import org.ducatproject.ducat.ui.QrHub
 import org.ducatproject.ducat.ui.ChatListScreen
 import org.ducatproject.ducat.ui.ChatScreen
 import org.ducatproject.ducat.ui.DrawerContent
@@ -126,6 +127,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     var tab by remember { mutableStateOf(Tab.Home) }
     var overlay by remember { mutableStateOf<Overlay>(Overlay.None) }
     var payOpen by remember { mutableStateOf(false) }
+    var payAddress by remember { mutableStateOf<String?>(null) }
+    var qrOpen by remember { mutableStateOf(false) }
     val drawer = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -188,7 +191,18 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         // The whole send/request flow: who first, then how much, with contacts
         // listed above an address field because a payment to a contact carries
         // a note and a thread and an address payment carries neither.
-        if (payOpen) PaySheet { payOpen = false }
+        if (payOpen) PaySheet(prefillAddress = payAddress) { payOpen = false; payAddress = null }
+
+        // Venmo puts this in the corner of every screen, and the reason it
+        // works is that "show me yours / here is mine" is one gesture between
+        // two people standing together — not two features in two menus.
+        if (qrOpen) {
+            QrHub(
+                onOpenChat = { qrOpen = false; overlay = Overlay.Chat(it) },
+                onScanAddress = { qrOpen = false; payAddress = it; payOpen = true },
+                onClose = { qrOpen = false },
+            )
+        }
 
         Scaffold(
             topBar = {
@@ -197,6 +211,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawer.open() } }) {
                             Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { qrOpen = true }) {
+                            Icon(Icons.Filled.QrCode2, contentDescription = "Codes")
                         }
                     },
                 )

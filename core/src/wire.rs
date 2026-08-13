@@ -159,6 +159,12 @@ pub mod f {
     pub const MSG_TAX: u64 = 184;
     pub const ITEM_DESC: u64 = 185;
     pub const ITEM_AMOUNT: u64 = 186;
+    // Profile, carried in the record rather than the card (§16.9).
+    pub const DET_AVATAR: u64 = 187;
+    pub const DET_EMAIL: u64 = 188;
+    pub const DET_PHONE: u64 = 189;
+    pub const DET_SIGNAL: u64 = 190;
+    pub const DET_PRONOUNS: u64 = 191;
 
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;

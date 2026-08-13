@@ -24,6 +24,7 @@ fn sample() -> Backup {
         }],
         display_name: None,
         publish_payto: false,
+        avatar: None, email: None, phone: None, signal: None, pronouns: None,
         created: 1_800_000_000,
     }
 }
@@ -269,4 +270,48 @@ fn publishing_defaults_to_off_and_survives_when_on() {
         b"correct horse battery",
     ).unwrap();
     assert!(on.publish_payto, "a deliberate choice must survive");
+}
+
+/// §16.9's profile survives a round trip.
+///
+/// The point of testing this separately from the keys: a profile is the part of
+/// a persona that is *not* a credential, so nothing else breaks when it is
+/// silently dropped. A restore that comes back with the right money and the
+/// wrong face still looks like it worked.
+#[test]
+fn a_profile_survives_export_and_import() {
+    const PNG: &[u8] = &[0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x01];
+    let mut b = sample();
+    b.display_name = Some("sam".into());
+    b.publish_payto = true;
+    b.avatar = Some(PNG.to_vec());
+    b.email = Some("sam@example.com".into());
+    b.phone = Some("14155550123".into());
+    b.signal = Some("sam_oc.42".into());
+    b.pronouns = Some(5);
+
+    let blob = export(&b, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase").expect("import");
+
+    assert_eq!(back.display_name.as_deref(), Some("sam"));
+    assert!(back.publish_payto);
+    assert_eq!(back.avatar.as_deref(), Some(PNG));
+    assert_eq!(back.email.as_deref(), Some("sam@example.com"));
+    assert_eq!(back.phone.as_deref(), Some("14155550123"));
+    assert_eq!(back.signal.as_deref(), Some("sam_oc.42"));
+    assert_eq!(back.pronouns, Some(5));
+}
+
+/// A bundle written before profiles existed still opens, and restores as
+/// someone who published nothing — never as someone who published a default.
+#[test]
+fn an_older_bundle_restores_with_an_empty_profile() {
+    let blob = export(&sample(), b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase").expect("import");
+    assert!(back.avatar.is_none());
+    assert!(back.email.is_none());
+    assert!(back.phone.is_none());
+    assert!(back.signal.is_none());
+    assert!(back.pronouns.is_none());
+    assert!(!back.publish_payto, "publishing must never default to on");
 }

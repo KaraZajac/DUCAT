@@ -947,6 +947,52 @@ MAX_ADDRESS_CHARS = 128
 CARD_PERSONA, CARD_INBOX, CARD_WRITER, CARD_NAME, CARD_EXPIRY = 167, 168, 169, 170, 171
 DET_PERSONA, DET_OUTBOX, DET_BUNDLE, DET_NAME = 172, 173, 174, 175
 DET_PAYTO = 182
+DET_AVATAR, DET_EMAIL, DET_PHONE, DET_SIGNAL, DET_PRONOUNS = 187, 188, 189, 190, 191
+MAX_AVATAR_BYTES = 12 * 1024
+MAX_EMAIL_CHARS, MAX_PHONE_DIGITS, MAX_SIGNAL_CHARS = 254, 15, 48
+
+
+def _email_is_plausible(s):
+    """Deliberately stricter than RFC 5322, which admits quoted strings and
+    comments no client should be rendering as an identity."""
+    if len(s) > MAX_EMAIL_CHARS or any(ch.isspace() or ord(ch) < 0x20 or
+                                       unicodedata.category(ch) == "Cf" for ch in s):
+        return False
+    if s.count("@") != 1:
+        return False
+    local, domain = s.split("@")
+    if not local or not domain:
+        return False
+    ok_local = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._%+-'")
+    if (not all(c in ok_local for c in local) or local.startswith(".")
+            or local.endswith(".") or ".." in local):
+        return False
+    if "." not in domain:
+        return False
+    tld = domain.rsplit(".", 1)[1]
+    ok_domain = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-")
+    return (all(c in ok_domain for c in domain) and not domain[0] in ".-"
+            and not domain[-1] in ".-" and ".." not in domain
+            and len(tld) >= 2 and tld.isalpha() and tld.isascii())
+
+
+def _phone_is_plausible(s):
+    return 0 < len(s) <= MAX_PHONE_DIGITS and s.isdigit() and s.isascii()
+
+
+def _signal_is_plausible(s):
+    if len(s) > MAX_SIGNAL_CHARS or "." not in s:
+        return False
+    name, _, digits = s.partition(".")
+    ok = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")
+    return (len(name) >= 3 and all(c in ok for c in name)
+            and (name[0].isalpha() or name[0] == "_")
+            and len(digits) >= 2 and digits.isdigit() and digits.isascii())
+
+
+def _avatar_format_is_known(b):
+    return (b.startswith(b"\x89PNG\r\n\x1a\n") or b.startswith(b"\xff\xd8\xff")
+            or (len(b) > 12 and b[0:4] == b"RIFF" and b[8:12] == b"WEBP"))
 HEAD_NEXT = 176
 
 
@@ -1032,8 +1078,32 @@ def parse_details(buf):
         # Optional: a contact may publish an address so they can be paid without
         # asking first, at the cost of that address being reused.
         "payto": _take_text(b, DET_PAYTO, MAX_ADDRESS_CHARS, "payout address", False),
+        # §16.9's profile. All of it optional, all of it validated here rather
+        # than at a screen: these render as identity, and a field nobody checks
+        # says whatever the sender wants.
+        "avatar": b.pop(DET_AVATAR, (None, None))[1],
+        "email": _take_text(b, DET_EMAIL, MAX_EMAIL_CHARS, "email", False),
+        "phone": _take_text(b, DET_PHONE, MAX_PHONE_DIGITS, "phone", False),
+        "signal": _take_text(b, DET_SIGNAL, MAX_SIGNAL_CHARS, "signal", False),
+        "pronouns": b.pop(DET_PRONOUNS, (None, None))[1],
     }
     _finish(b)
+    if out["avatar"] is not None:
+        a = out["avatar"]
+        if not a:
+            raise Reject("Malformed", "an empty avatar is not an avatar")
+        if len(a) > MAX_AVATAR_BYTES:
+            raise Reject("Malformed", f"an avatar may be at most {MAX_AVATAR_BYTES} bytes")
+        if not _avatar_format_is_known(a):
+            raise Reject("Malformed", "an avatar must be PNG, JPEG or WebP")
+    if out["email"] is not None and not _email_is_plausible(out["email"]):
+        raise Reject("Malformed", "that is not the shape of an email address")
+    if out["phone"] is not None and not _phone_is_plausible(out["phone"]):
+        raise Reject("Malformed", "a phone number is digits only")
+    if out["signal"] is not None and not _signal_is_plausible(out["signal"]):
+        raise Reject("Malformed", "a Signal username is name.digits")
+    if out["pronouns"] is not None and out["pronouns"] not in (1, 2, 3, 4, 5, 6):
+        raise Reject("Malformed", "unknown pronouns code")
     return out
 
 
@@ -1206,6 +1276,14 @@ def run_contact_details(cases, r):
                 m.append((DET_NAME, ("text", d["display_name"])))
             if d["payto"] is not None:
                 m.append((DET_PAYTO, ("text", d["payto"])))
+            if d["avatar"] is not None:
+                m.append((DET_AVATAR, ("bytes", d["avatar"])))
+            for key, field in (("email", DET_EMAIL), ("phone", DET_PHONE),
+                               ("signal", DET_SIGNAL)):
+                if d[key] is not None:
+                    m.append((field, ("text", d[key])))
+            if d["pronouns"] is not None:
+                m.append((DET_PRONOUNS, ("uint", d["pronouns"])))
             return _reencode_map(m)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

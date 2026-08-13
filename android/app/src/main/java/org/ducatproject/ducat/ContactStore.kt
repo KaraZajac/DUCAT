@@ -261,6 +261,19 @@ class ContactStore(context: Context) {
         )
     }
 
+    /**
+     * The URI of the card currently on offer, so it can be shown without being
+     * regenerated.
+     *
+     * Kept because publishing a card creates two DHT records: making a new one
+     * every time somebody opens the code screen would litter the network and
+     * hand out a different code each glance.
+     */
+    fun currentCardUri(): String? =
+        prefs.getString("my_card_uri", null)?.takeIf { !issuedCardAnswered() }
+
+    fun rememberCardUri(uri: String) = prefs.edit().putString("my_card_uri", uri).apply()
+
     fun issuedCardAnswered(): Boolean = prefs.getBoolean("issued_answered", false)
 
     fun markIssuedCardAnswered() = synchronized(lock) {
@@ -391,6 +404,18 @@ data class Contact(
      * who rotates addresses is not undone by the copy we kept.
      */
     val theirAddress: String? = null,
+    /**
+     * What they published about themselves (§16.9).
+     *
+     * Their claim, not a finding — nothing here is verified by anything. A
+     * screen showing an email beside a persona is showing what that persona
+     * said, which is worth having and is not identity.
+     */
+    val avatar: ByteArray? = null,
+    val email: String? = null,
+    val phone: String? = null,
+    val signal: String? = null,
+    val pronouns: Int? = null,
     /** Our next outgoing sequence number, and the link it must carry (§16.10). */
     val outSeq: Long = 0,
     val outPrevLink: ByteArray? = null,
@@ -418,6 +443,11 @@ data class Contact(
         put("their_outbox", theirOutbox)
         put("their_bundle", theirBundle?.let { b64(it) } ?: JSONObject.NULL)
         put("their_address", theirAddress ?: JSONObject.NULL)
+        put("avatar", avatar?.let { Base64.encodeToString(it, Base64.NO_WRAP) } ?: JSONObject.NULL)
+        put("email", email ?: JSONObject.NULL)
+        put("phone", phone ?: JSONObject.NULL)
+        put("signal", signal ?: JSONObject.NULL)
+        put("pronouns", pronouns ?: JSONObject.NULL)
         put("out_seq", outSeq)
         put("out_prev", outPrevLink?.let { b64(it) } ?: JSONObject.NULL)
         put("in_seq", inSeq)
@@ -430,6 +460,11 @@ data class Contact(
             personaHex = o.getString("persona"),
             petname = o.optStringOrNull("petname"),
             assertedName = o.optStringOrNull("asserted"),
+            avatar = o.optStringOrNull("avatar")?.let { Base64.decode(it, Base64.NO_WRAP) },
+            email = o.optStringOrNull("email"),
+            phone = o.optStringOrNull("phone"),
+            signal = o.optStringOrNull("signal"),
+            pronouns = if (o.isNull("pronouns")) null else o.optInt("pronouns").takeIf { it in 1..6 },
             myOutbox = o.optString("my_outbox", ""),
             myOutboxOwnerPublic = unb64(o.optString("my_outbox_pub", "")),
             myOutboxOwnerSecret = unb64(o.optString("my_outbox_sec", "")),

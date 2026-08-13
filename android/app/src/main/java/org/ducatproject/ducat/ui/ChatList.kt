@@ -17,6 +17,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.draw.clip
 
 /**
  * The chat tab: conversations, not people.
@@ -111,7 +113,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         },
-                        leadingContent = { Avatar(c.displayName()) },
+                        leadingContent = { Avatar(c.displayName(), c.avatar) },
                         trailingContent = {
                             IconButton(onClick = { confirm = c }) {
                                 Icon(Icons.Filled.DeleteOutline, "Delete conversation")
@@ -187,7 +189,7 @@ private fun RestoreChatSheet(
             hidden.forEach { c ->
                 ListItem(
                     headlineContent = { Text(c.displayName()) },
-                    leadingContent = { Avatar(c.displayName()) },
+                    leadingContent = { Avatar(c.displayName(), c.avatar) },
                     modifier = Modifier.clickable { onPick(c) },
                 )
             }
@@ -195,18 +197,41 @@ private fun RestoreChatSheet(
     }
 }
 
+/**
+ * Their face if they published one, their initial if not.
+ *
+ * The bytes came off a contact record written by someone else, so decoding is
+ * wrapped: a picture that will not parse falls back to the letter rather than
+ * taking the list down with it. Being unable to draw somebody's avatar is not
+ * a reason to be unable to draw the conversation.
+ */
 @Composable
-internal fun Avatar(name: String) {
+internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
+    val bmp = remember(picture) {
+        picture?.let {
+            runCatching { android.graphics.BitmapFactory.decodeByteArray(it, 0, it.size) }
+                .getOrNull()
+        }
+    }
     Box(
         Modifier
-            .size(40.dp)
-            .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(20.dp)),
+            .size(size.dp)
+            .clip(RoundedCornerShape(size.dp / 2))
+            .background(MaterialTheme.colorScheme.secondaryContainer),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            name.take(1).uppercase(),
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            fontWeight = FontWeight.Bold,
-        )
+        if (bmp != null) {
+            androidx.compose.foundation.Image(
+                bmp.asImageBitmap(), null,
+                Modifier.fillMaxSize(),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+            )
+        } else {
+            Text(
+                name.take(1).uppercase(),
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                fontWeight = FontWeight.Bold,
+            )
+        }
     }
 }

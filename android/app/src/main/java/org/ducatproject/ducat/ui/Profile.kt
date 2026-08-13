@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import androidx.compose.foundation.clickable
 
 /**
  * Who this contact is, as far as anything can actually be known.
@@ -59,16 +60,67 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 .padding(20.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Avatar(c.displayName())
+                Avatar(c.displayName(), c.avatar, size = 64)
                 Spacer(Modifier.width(14.dp))
                 Column {
-                    Text(c.displayName(), style = MaterialTheme.typography.headlineSmall)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(c.displayName(), style = MaterialTheme.typography.headlineSmall)
+                        c.pronouns?.let { code ->
+                            val labels = remember { uniffi.ducat_mobile.pronounOptions() }
+                            labels.getOrNull(code - 1)?.let {
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    it,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
                     c.assertedName?.takeIf { it != c.petname }?.let {
                         Text(
                             "calls themselves \"$it\"",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                    }
+                }
+            }
+
+            // Their claim about themselves, and labelled as one. Nothing here
+            // is verified by anything: DUCAT binds a persona to a key, and
+            // binds that key to nothing in the outside world. An email shown
+            // beside a persona is what that persona said, which is useful and
+            // is not identity.
+            val told = listOfNotNull(
+                c.email?.let { "Email" to it },
+                c.phone?.let { "Phone" to it },
+                c.signal?.let { "Signal" to it },
+            )
+            if (told.isNotEmpty()) {
+                Spacer(Modifier.height(18.dp))
+                Text("What they shared", style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    "Their claim, not a check. Nothing ties a DUCAT persona to an " +
+                        "email or a number — only to a key.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                )
+                Spacer(Modifier.height(8.dp))
+                told.forEach { (label, value) ->
+                    Row(
+                        Modifier.fillMaxWidth()
+                            .clickable { clipboard.setText(AnnotatedString(value)) }
+                            .padding(vertical = 6.dp),
+                    ) {
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(72.dp),
+                        )
+                        Text(value, style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }

@@ -747,6 +747,7 @@ fn backup_cases() -> Vec<J> {
                 academy accent acid acoustic acquire across actress acute adapt \
                 addicted adept adhesive adjust adopt abbey";
     let base = Backup {
+        avatar: None, email: None, phone: None, signal: None, pronouns: None,
         persona_suite: 1,
         persona_secret: vec![0x11; 32],
         monero_seed: seed.to_string(),
@@ -1195,6 +1196,7 @@ fn contact_cases() -> Vec<J> {
         prekey_bundle: vec![0xDD; 48],
         display_name: Some("sam".into()),
         payto: None,
+        avatar: None, email: None, phone: None, signal: None, pronouns: None,
     };
     let mut detail = |name: &str, why: &str, d: &ContactDetails, bad: Option<(RejectCode, &str)>| {
         let hex_body = hex(&d.to_value().encode());
@@ -1205,6 +1207,55 @@ fn contact_cases() -> Vec<J> {
                             "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
         });
     };
+    // §16.9's profile. Everything here rides the record, never the card: the
+    // card is a QR code someone has to scan across a counter.
+    const PNG1: &[u8] = &[0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 13];
+    let profiled = ContactDetails {
+        avatar: Some(PNG1.to_vec()),
+        email: Some("sam.oconnor+ducat@example.co.uk".into()),
+        phone: Some("14155550123".into()),
+        signal: Some("sam_oc.42".into()),
+        pronouns: Some(Pronouns::TheyThem),
+        ..det.clone()
+    };
+    detail("details_with_profile",
+        "A whole profile: a picture, ways to be reached, and how to be referred to. None of it is in the card — the card is a QR code scanned across a counter, and a profile does not fit in one. It arrives on the record afterwards, which is also why it can change without reissuing anything.",
+        &profiled, None);
+    detail("details_avatar_not_an_image",
+        "Bytes handed to an image decoder on someone else's phone are one of the most reliably exploitable surfaces there is. A decoder should never have to guess what it was given.",
+        &ContactDetails { avatar: Some(vec![0x00, 0x01, 0x02, 0x03]), ..profiled.clone() },
+        Some((RejectCode::Malformed, "avatar must be PNG, JPEG or WebP")));
+    detail("details_avatar_too_large",
+        "An avatar is a thumbnail, not a file transfer, and it has to fit in the record beside everything else — a profile that does not fit is a contact nobody can reach.",
+        &ContactDetails {
+            avatar: Some(PNG1.iter().copied().cycle().take(MAX_AVATAR_BYTES + 1).collect()),
+            ..profiled.clone()
+        },
+        Some((RejectCode::Malformed, "avatar over bound")));
+    detail("details_avatar_empty",
+        "Present-but-empty is a second spelling of 'no picture', and omitting the key is the first.",
+        &ContactDetails { avatar: Some(Vec::new()), ..profiled.clone() },
+        Some((RejectCode::Malformed, "empty avatar; omit the key")));
+    detail("details_email_not_an_email",
+        "These render as identity. An address with no domain is a claim about who someone is that no client checked.",
+        &ContactDetails { email: Some("sam@localhost".into()), ..profiled.clone() },
+        Some((RejectCode::Malformed, "not the shape of an email")));
+    detail("details_email_with_control_characters",
+        "The reason to validate rather than escape at the screen: a field that can hold control characters is a field that renders differently in every client that draws it.",
+        &ContactDetails { email: Some("sam\u{202E}@example.com".into()), ..profiled.clone() },
+        Some((RejectCode::Malformed, "not the shape of an email")));
+    detail("details_phone_not_digits",
+        "One number has a dozen spellings. Accepting all of them means two clients render it two ways and neither matches when somebody searches.",
+        &ContactDetails { phone: Some("+1 (415) 555-0123".into()), ..profiled.clone() },
+        Some((RejectCode::Malformed, "phone is digits only")));
+    detail("details_signal_without_digits",
+        "Signal's own shape is name.digits, and a username that cannot exist points at nobody.",
+        &ContactDetails { signal: Some("sam_oc".into()), ..profiled.clone() },
+        Some((RejectCode::Malformed, "signal is name.digits")));
+    detail("details_without_pronouns",
+        "A closed set, because this is drawn next to a name on a stranger's screen and free text there is a place to put a message. Absence is not a failure state — a person with none set renders like anyone else.",
+        &ContactDetails { pronouns: None, ..profiled.clone() },
+        None);
     detail("details_valid", "What each side writes into the contact inbox: who they are, where to leave things, and the keys to seal with.", &det, None);
     detail("details_no_name", "The name is optional here for the same reason it is on the card.",
         &ContactDetails { display_name: None, ..det.clone() }, None);

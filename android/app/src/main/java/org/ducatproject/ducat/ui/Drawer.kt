@@ -233,47 +233,29 @@ private fun RateSettings() {
 @Composable
 private fun ProfileSection() {
     val context = LocalContext.current
-    val store = remember { NameStore(context) }
-    var name by remember { mutableStateOf(store.get() ?: "") }
-    var saved by remember { mutableStateOf(false) }
     val persona = remember { PersonaStore(context).personaHex() }
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
-        Text("Your name", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(4.dp))
-        Text(
-            "Shown on cards you hand out. It is a suggestion, not an identity — " +
-                "whoever adds you can rename you, and that name is the one they see.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(12.dp))
-        OutlinedTextField(
-            value = name,
-            onValueChange = { if (it.length <= 32) { name = it; saved = false } },
-            label = { Text("Name") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(12.dp))
-        Button(onClick = { store.put(name.trim()); name = name.trim(); saved = true }) {
-            Text(if (saved) "Saved" else "Save")
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        // The whole profile, including the name — it used to live here as a
+        // lone text field, and splitting "what people see of you" across two
+        // screens is how a name and a picture end up disagreeing.
+        MyProfileEditor()
+
+        Column(Modifier.padding(20.dp)) {
+            PublishAddressSetting()
+
+            Spacer(Modifier.height(28.dp))
+            Text("Your persona", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "The key your cards are signed with. Nobody can find you by it — " +
+                    "it is what someone checks a card against once they have one.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            SelectionContainerText(persona)
         }
-
-        Spacer(Modifier.height(28.dp))
-        PublishAddressSetting()
-
-        Spacer(Modifier.height(28.dp))
-        Text("Your persona", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(4.dp))
-        Text(
-            "The key your cards are signed with. Nobody can find you by it — " +
-                "it is what someone checks a card against once they have one.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(8.dp))
-        SelectionContainerText(persona)
     }
 }
 

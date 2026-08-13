@@ -73,6 +73,13 @@ mod k {
     pub const ESCROW_SHARES: u64 = 14;
     pub const DISPLAY_NAME: u64 = 15;
     pub const PUBLISH_PAYTO: u64 = 16;
+    // §16.9's profile. Restored because a persona that comes back without its
+    // face and its pronouns is not the same person to anyone who knew them.
+    pub const AVATAR: u64 = 17;
+    pub const EMAIL: u64 = 18;
+    pub const PHONE: u64 = 19;
+    pub const SIGNAL: u64 = 20;
+    pub const PRONOUNS: u64 = 21;
     pub const ESCROW_ID: u64 = 0;
     pub const ESCROW_KEY_FILE: u64 = 1;
     pub const ESCROW_RESTORE_HEIGHT: u64 = 2;
@@ -191,6 +198,19 @@ pub struct Backup {
     /// deliberately kept it private; the decode therefore treats absence as
     /// off, which is the safe direction and the original default.
     pub publish_payto: bool,
+    /// §16.9's profile, so a restore is the same person rather than a stranger
+    /// with the same keys.
+    ///
+    /// These are **not** re-validated on the way out of a backup: they were
+    /// checked when they were entered and when they were published, and a
+    /// bundle that fails to open because an old email no longer parses is a
+    /// wallet held hostage to a formatting rule. Publishing them again puts
+    /// them through the decoder that does check.
+    pub avatar: Option<Vec<u8>>,
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub signal: Option<String>,
+    pub pronouns: Option<u64>,
     pub created: u64,
 }
 
@@ -205,6 +225,21 @@ impl Backup {
         // for a privacy setting and keeps one meaning to one encoding.
         if self.publish_payto {
             m.insert(k::PUBLISH_PAYTO, Value::Uint(1));
+        }
+        if let Some(a) = &self.avatar {
+            m.insert(k::AVATAR, Value::Bytes(a.clone()));
+        }
+        if let Some(e) = &self.email {
+            m.insert(k::EMAIL, Value::Text(e.clone()));
+        }
+        if let Some(p) = &self.phone {
+            m.insert(k::PHONE, Value::Text(p.clone()));
+        }
+        if let Some(sg) = &self.signal {
+            m.insert(k::SIGNAL, Value::Text(sg.clone()));
+        }
+        if let Some(p) = self.pronouns {
+            m.insert(k::PRONOUNS, Value::Uint(p));
         }
         m.insert(k::PERSONA_SUITE, Value::Uint(self.persona_suite as u64));
         m.insert(k::PERSONA_SECRET, Value::Bytes(self.persona_secret.clone()));
@@ -321,6 +356,11 @@ impl Backup {
             // rather than inventing either.
             display_name: m.get(&k::DISPLAY_NAME).and_then(|v| v.as_text()).map(|s| s.to_string()),
             publish_payto: m.get(&k::PUBLISH_PAYTO).and_then(|v| v.as_uint()).unwrap_or(0) == 1,
+            avatar: m.get(&k::AVATAR).and_then(|v| v.as_bytes()).map(|b| b.to_vec()),
+            email: m.get(&k::EMAIL).and_then(|v| v.as_text()).map(|s| s.to_string()),
+            phone: m.get(&k::PHONE).and_then(|v| v.as_text()).map(|s| s.to_string()),
+            signal: m.get(&k::SIGNAL).and_then(|v| v.as_text()).map(|s| s.to_string()),
+            pronouns: m.get(&k::PRONOUNS).and_then(|v| v.as_uint()),
             rendezvous: arr(k::RENDEZVOUS)?,
             attestation_records: arr(k::ATTESTATION_RECORDS)?,
             mandates: arr(k::MANDATES)?,
