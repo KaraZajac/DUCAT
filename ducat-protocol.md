@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.61 — Consolidated**
+**Draft 0.62 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.62** — **Chat folded into the protocol (§16.9, §16.10), and doing it exposed that §7.5's memos had no cross-implementation coverage at all.** DUCAT's contact machinery assumed §16.3's ordering — identity only *after* a receipt, bound by `H(RECEIPT) ‖ session_pk`. Paying a friend is a different relationship from paying a stall, so §16.9 adds the contact-first path: a card carried by NFC across a table, or as a `ducat:` URI through Signal. It is specified by what it **cannot** prove — key possession, yes; who handed it to you, no, because a card that arrived in a chat app was authenticated by *that app*. §15.9's lesson a third time. Invitations are **claim-once and expiring**, with the issuer storing only `H_chain(secret)`, so a screenshot in a group chat is not a standing offer to everyone who saw it and a stolen invitation list is not a set of usable claims; self-claim is refused so an interceptor cannot burn a card by claiming it back and leaving the intended recipient with one that silently fails. Donation QR codes on a website are **not** this — that is `TapStatic` (§15.9), reusable and public, and it keeps §15.9's admitted limit that a swapped tag verifies. Messages are 1:1 with **per-sender** sequences (a shared counter needs a round trip an offline sender does not have) and a `prev` link, so a message *removed and replaced* is caught where the sequence number still fits. Groups are out of scope and need no primitive: §15.2's `amount_authority: open` already splits a bill, one tap per person, which is how a table splits one anyway. **The finding:** `run_object` in the second implementation is generic over fields, so no vector had ever put text on the wire at the field level — §7.5's memo, added one draft earlier, was covered by *nothing*, and shipped accepting a present-but-empty string alongside an absent one. Two encodings of "no memo" makes `H(FullOffer)` depend on whether a client wrote `""` or nothing into a blank field, and the reference's own test asserted the wart was a feature. Empty text is now `MALFORMED` everywhere, and 18 vectors across three new kinds pin the text rules, the claim refusals, and the chain. 156/156, both implementations agreeing. Also fixed: `manifest_is_self_consistent` summed a **hardcoded list of vector files**, so `contact.json` was briefly uncounted — the precise staleness that test exists to catch, now derived from the manifest instead. Named honestly in §16.10: these messages are not forward-secret, and VeilidChat moved 1:1 conversation crypto to HPKE for exactly that reason.
 - **0.61** — **§7.5 added: memos and petnames — and putting text on the wire exposed a divergence between the two implementations.** A receipt list reading `£4.20` twelve times records nothing; `£4.20 — coffee, Tuesday` does. `FullOffer` and `ACCEPT` each gain an optional 128-character memo, **both** rather than one, because a payee's *"consulting, March"* and a payer's *"reimbursed by work"* are different claims and neither may overwrite the other. Advisory only, signed and therefore covered by `offer_commit`, bounded in **characters rather than bytes** — a byte bound silently shortens every language that does not fit one character per byte — and never written to the chain, since a memo in `tx_extra` publishes to everyone what the protocol keeps between two people. Names are **petnames**: §15.9's lesson applies unchanged, in that a signature over a display name proves only that a keyholder chose that string, so names are self-asserted in the contact card, exchanged in §16.3's post-receipt coda, and stored and renameable locally by the receiver. No global registry, because a registry is a directory. **Nobody can be addressed by name** — reaching a person requires a prior exchange, which is also how VeilidChat works, by invitation rather than lookup. The divergence: §18.1 has required NFC-normalized text since 0.14, the second implementation enforced it, and **the reference decoder did not** — invisible because no object carried a string until now. Two encodings of "café" are two canonical objects and two hashes, which is §18.3's transcript-divergence bug arriving through a display field nobody thought was load-bearing. Fixed, and pinned by vectors so the suite can catch it next time.
 - **0.60** — **Second audit pass; the checks grew and each new one caught something.** §18.12's first version verified that references *resolve* — it could not see a claim that had quietly stopped being true. Three checks added, three findings: O21's live text still said "104 vectors" against a set of 136 (changelog entries stay exempt, being history); `bond_proof` occupied fields 140–144 while §18.4.2 still read "140+ Unallocated", reintroducing the exact collision hazard the registry exists to prevent; and **§18.9.1's normative table listed ten vector kinds while the schema accepted sixteen** — every escrow and bond case was executable, published, and undiscoverable from the document. That last one names the pattern: **an artifact and its description drift toward the artifact**, because the artifact is what gets run, and only a mechanical comparison notices. Verified still true rather than assumed: §2.5's "no adversarial review whatsoever" (the user has deliberately deferred it), and suite 2's key agreement genuinely unimplemented — a suite named in the type system is not a suite that exists.
 - **0.59** — **Arbitration, mandates, and static tags exercised — the last three objects nothing had ever run.** §9.3: a ruling from a named arbiter is accepted and one from an outsider refused (`UNTRUSTED_ARBITER_SET`, which is §2.5 in a single check), an award larger than the claim refused, an award attached to a ruling for the *losing* side refused, a ruling naming another dispute refused — and §9.3.4's expiry confirmed to emit a **real, co-signable ruling** rather than nothing, since "return to the pre-dispute allocation" *was* the deadlock it claimed to prevent. §7.3: mandate caps bind **cumulatively** rather than per draw, only the named payee may draw, expiry is enforced, and a fresh period resets the allowance — otherwise a monthly mandate is a one-off with extra steps. §15.9: static tags report `Anonymous` or `SignedBy`, refuse a bad signature, and — **demonstrated rather than described** — a swapped tag carries the attacker's persona with a perfectly valid signature over the attacker's own address and verifies cleanly. A signature there proves who owns an address; it never proves the tag is the one the venue put there, and a first-time donor has nothing to compare against.
@@ -1133,7 +1134,7 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O18.** **Cancellation fees erode the permissionless lane.** §7.3 makes no-show fees enforceable only against collateral. The pressure this creates — providers preferring bonded counterparties precisely because cancellation *costs* them something — pushes the network toward the collateralized lane and quietly hollows out the slow permissionless one A4 depends on (§17.6). Whether the unbonded lane survives contact with real no-show rates is an empirical question no amount of spec work answers.
 - **O19.** **iOS cannot present over NFC, permanently.** Apple's HCE entitlement is conditioned on EEA establishment, organization enrollment, and financial-regulatory standing (§15.3.2) — structurally incompatible with A4, and not a hurdle an open protocol clears. The best-UX medium is therefore available to roughly half the supply side, and QR carries the rest. This is outside DUCAT's control and will not improve through protocol design; it is stated so no one plans around a tap that cannot exist.
 - **O20. (closed in 0.48, §18.7.)** Transport identifiers assigned. The NFC AID is `F0 44 55 43 41 54` (`0xF0` ‖ `"DUCAT"`), and the "pending real RID registration" caveat was mistaken — ISO/IEC 7816-5 reserves the `0xF…` range for **proprietary identifiers requiring no registration at all**, which is what Android HCE documents for exactly this case. There was nothing to wait for. BLE takes one random 128-bit service UUID and three characteristics sharing a base; the Bluetooth SIG registers only 16-bit UUIDs, and the 128-bit space exists so anyone can allocate without asking. **Residue, and it is a real one:** no registry means no uniqueness guarantee, so nothing prevents another vendor choosing the same AID bytes — mitigated by using the full name rather than the four-character contraction, since AIDs may run to 16 bytes and the 5-byte minimum was never a maximum. The L2CAP PSM stays deliberately unassigned: LE CoC PSMs are allocated dynamically by the local stack, so a spec pinning one would pin a value it does not control; it is published in a characteristic and read.
-- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 138 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
+- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 156 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
 - **O22. (closed in 0.44, §4.3.3.)** An escrow participant who loses their device. Resolved once the question was asked correctly: a share cannot be *reconstructed* — measured, `prepare_multisig` draws 88 characters of fresh randomness beyond what the wallet keys determine — but it does not need to be, because it is already a 2,286-byte file that a virgin `wallet-rpc` will open directly. The recovery ask therefore moved from **the counterparty's signature**, which no protocol can compel from an adversary, to **the other participants re-sharing multisig info**, which endorses no outcome and is a step every participant performs routinely. **Residue:** a stale bundle still cannot recover an escrow opened after it, so this now depends on a client prompting for re-export at ceremony completion — a UX obligation rather than a protocol impossibility. And an end-to-end spend from a restored share is still undemonstrated (§4.3.3's last limit).
 ---
 *End of Part I. The remaining parts specify the three mechanisms Part I leans on hardest: the tap that opens every transaction, the identity that optionally survives one, and the settlement that makes it fast enough to matter.*
@@ -1588,6 +1589,98 @@ The persona you exchange for chat is the same key that accrues receipts (§9.2).
 
 ---
 
+## 16.9 Contact cards — identity without a transaction
+
+§16.3 exchanges identity **after** a receipt, bound by `H(RECEIPT) ‖ session_pk`. That binding is what makes the coda strong: it proves *the persistent identity I am handing you is the same entity you just transacted with*.
+
+A card handed over at a table, or sent through Signal, has no receipt to bind to. It therefore proves strictly less, and the honest thing is to say exactly how much less:
+
+- **It proves key possession.** Whoever produced the card holds the persona key.
+- **It proves nothing about who handed it to you.** A card that arrived in a chat app was authenticated by *that app*, not by DUCAT. Received over NFC, the authentication is that a person was standing in front of you.
+
+This is §15.9's lesson for the third time: a signature proves who owns a key, never that the artifact carrying it is the one its author put there. What differs from a static tag is that the carrying channel is usually a person you already trust, which is why the pattern is worth having at all — and why the spec must not overstate it.
+
+**Contact-first is a legitimate ordering, not a weakening of §16.3.** Paying a stall and paying a friend are different relationships. §16.3's anonymity-first ordering remains mandatory for the transactional flows, where the counterparty is a stranger and the deal must close without either side learning who the other is. A card is for the case where you already know.
+
+```
+ContactInvite   { persona, rendezvous, display_name?, claim_commit, expiry }
+        │        carried by NFC, QR, or a `ducat:` URI (§18.7)
+        ▼
+ContactClaim    { persona, rendezvous, display_name?, claim_secret, timestamp }
+        │
+   both write initial routes into the shared rendezvous (§16.4)
+```
+
+### Single use, and why
+
+An invitation is claimable **once** and MUST carry an expiry.
+
+A card that could be claimed repeatedly is a standing offer to everyone who ever saw the message it arrived in: a screenshot in a group chat, a forwarded DM, someone else's phone backup. Claim-once means the issuer learns it was used and by whom, and a second attempt is refused rather than silently succeeding.
+
+The secret lives in the card; the issuer stores only `claim_commit = H_chain(secret)`. A stolen list of issued invitations is therefore not a set of usable claims.
+
+Four refusals are normative:
+
+| Condition | Reject | Why |
+|---|---|---|
+| Already claimed | `REPLAY` | The screenshot case. Reported ahead of expiry, because "spent" is the fact the issuer can act on. |
+| `now > expiry` | `EXPIRED` | A card that never expires is a credential its issuer has forgotten they published. |
+| Secret does not match | `BAD_SIG` | Personas are public by design, so knowing one proves nothing. |
+| Claimant persona equals issuer persona | `POLICY_REFUSED` | Otherwise an attacker who intercepts a card burns it by claiming it back, and the intended recipient's card silently fails. |
+
+A **public, reusable** artifact is a different object and already exists: `TapStatic` (§15.9), which receives money and establishes no relationship. A donation QR on a website is that, not this — and it inherits §15.9's stated limit, that a swapped tag verifies perfectly.
+
+### Carrying it
+
+A signed card measured **1007 bytes** in the harness, dominated by the Veilid route blob. What that means per channel:
+
+| Channel | Verdict |
+|---|---|
+| NFC | Comfortable. Well inside what §15.3's exchange already moves. |
+| QR | Fits, densely — roughly a version-27 symbol at L. Scannable from a phone screen, marginal from a printed card at small sizes. |
+| `ducat:` URI (§18.7) through a messaging app | No size constraint. This is the channel the format should be optimised for, and it is the one the user actually reaches for. |
+
+A **donation QR on a website is not this object**. That is `TapStatic` (§15.9): reusable, public, no relationship established, and carrying §15.9's admitted limit that a swapped tag verifies perfectly.
+
+### Display names are not names
+
+`display_name` is self-asserted and worth exactly what the channel that carried it is worth. The name a user actually sees MUST be the petname they assigned locally (§7.5). An unassigned contact MAY show the asserted name, and MUST show it as unverified.
+
+Bounded at 32 characters, counted in **characters, not bytes** — a byte bound silently shortens every script that needs more than one byte per character, so 32 Japanese characters would be refused while 32 Latin ones passed.
+
+---
+
+## 16.10 Messages
+
+A persistent contact carries `chat/1` (§16.5). One message, and what it must satisfy:
+
+```
+MESSAGE { seq, prev, body, timestamp }
+```
+
+**Per-sender sequences, not a shared one.** Each participant numbers their own messages. A shared counter needs agreement, agreement needs a round trip, and an offline sender does not have one.
+
+**`prev` chains to the sender's previous message**, or 32 zero bytes for the first. This makes a *dropped* message detectable rather than merely absent — the case worth catching is a message removed and replaced, where the sequence number still fits and only the link disagrees.
+
+**A gap is refused, not stored around.** A thread that silently skips a message displays a conversation that did not happen, and the reader cannot tell. `STATE_VIOLATION` on a sequence gap or a replayed sequence; `COMMIT_MISMATCH` on a link that does not follow.
+
+**Bodies are bounded at 2000 characters.** Larger than a memo because this is prose rather than a label, and still bounded: an unbounded field on a channel that persists is a file transfer nobody designed, with the storage and retention consequences of one.
+
+### One meaning, one encoding
+
+A present-but-empty text field is `MALFORMED` in every object that has one — memo, display name, message body. Omitting the key is already how you say nothing, and §18.1 admits one encoding per meaning. Without this rule `H(FullOffer)` would depend on whether a client wrote `""` or nothing into a field the user left blank, and two implementations would hash the same user intent differently.
+
+This was a real defect: §7.5's memo shipped at 0.61 accepting `Some("")`, with a test asserting the wart was a feature.
+
+### What this does not solve
+
+- **Forward secrecy.** The messages specified here are not forward-secret. §15.3.2 already warns that bitchat's offline envelopes give up forward secrecy, acceptable for undelivered chat and not for a payment authorization; carrying chat inside DUCAT turns that warning around. VeilidChat migrated 1:1 conversation crypto from Diffie-Hellman to HPKE for this reason, and DUCAT should adopt HPKE before messaging ships to users rather than after.
+- **Retention.** §7.4's dossier argument applies with more force to conversation content than to transcripts. A message log is the most sensitive thing the app will hold, and §2.2's endpoint-compromise scope now includes it.
+- **Groups.** 1:1 only. Splitting a bill does not need a group primitive — §15.2's `amount_authority: open` already covers it, with each person tapping the presenter separately, which is how a table splits a bill anyway.
+- **Store-and-forward delivery.** Both participants being online is assumed here. Deferred delivery is §8.4's research track and shares its unsolved parts.
+
+---
+
 # Part IV — Bonded Fast Settlement
 **L4/L5 detail: making the tap actually settle in seconds**
 
@@ -2002,7 +2095,10 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 132–138 | `SLASH_CLAIM` (§17.5) | **Assigned** |
 | 140–144 | `bond_proof` (§17.4) | **Assigned** |
 | 145–146 | `memo` on `FullOffer` and `ACCEPT` (§7.5) | **Assigned** |
-| 147+ | Unallocated | — |
+| 147–151 | `CONTACT_OFFER` as an out-of-band invitation (§16.9) | **Assigned** |
+| 152–156 | `CONTACT_ACCEPT` (§16.9) | **Assigned** |
+| 157–160 | `MESSAGE` (§16.10) | **Assigned** |
+| 161+ | Unallocated | — |
 
 The `96+ Unallocated` row above was stale from 0.14 onward: 96–103 had been in use since `TERMS` and `MANDATE` shipped, and a second implementer allocating from 96 would have collided head-on. Registries decay silently unless something checks them, which is the argument for the type-code rule below.
 
@@ -2121,6 +2217,9 @@ Format: a JSON manifest of cases with hex-encoded inputs, expected outputs, and 
 | `escrow.release` | A payout is bounded by the balance and confined to a party |
 | `bond.check` | A bond attestation is fresh, ladder-valued, and covers the fare (§17.4) |
 | `slash.check` | A claim respects the cure window, or carries the evidence that skips it (§17.5) |
+| `contact.invite` | An out-of-band contact card decodes and re-encodes to the same bytes, including its text-field rules (§16.9) |
+| `contact.claim` | A claim on an invitation is honoured, or refused as spent, expired, forged, or self-issued (§16.9) |
+| `message.chain` | A 1:1 message thread links and sequences without gaps or substitutions (§16.10) |
 
 Three rules about the cases themselves, each earned:
 

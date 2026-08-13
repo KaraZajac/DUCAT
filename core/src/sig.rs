@@ -57,6 +57,8 @@ pub enum ObjectType {
     EscrowReady,
     Release,
     SlashClaim,
+    /// One message on a persistent contact (§16.10).
+    Message,
 }
 
 impl ObjectType {
@@ -84,6 +86,7 @@ impl ObjectType {
             ObjectType::EscrowReady => b"ESCROW_READY",
             ObjectType::Release => b"RELEASE",
             ObjectType::SlashClaim => b"SLASH_CLAIM",
+            ObjectType::Message => b"MESSAGE",
         }
     }
 }

@@ -8,6 +8,7 @@ pub mod backup;
 pub mod bond;
 pub mod burning;
 pub mod cbor;
+pub mod contact;
 pub mod custody;
 pub mod escrow;
 pub mod float;

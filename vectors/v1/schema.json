@@ -21,7 +21,8 @@
         "transcript",
         "backup",
         "object",
-        "contract"
+        "contract",
+        "contact"
       ]
     },
     "cases": {
@@ -183,7 +184,10 @@
             "escrow.ready",
             "escrow.release",
             "bond.check",
-            "slash.check"
+            "slash.check",
+            "contact.invite",
+            "contact.claim",
+            "message.chain"
           ]
         },
         "name": {

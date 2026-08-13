@@ -42,10 +42,15 @@ fn manifest_is_self_consistent() {
     let m = load("manifest");
     let total = m["total_cases"].as_u64().unwrap() as usize;
     let mut sum = 0;
-    for name in ["codec", "signing", "state", "negotiate", "commit", "transcript", "backup", "object", "contract"] {
+    // Derived from the manifest rather than a list written here. A hardcoded
+    // list silently omits any vector file added later, which is how contact.json
+    // was briefly uncounted — the exact staleness this test exists to catch.
+    let names: Vec<String> = m["counts"].as_object().unwrap().keys().cloned().collect();
+    assert!(names.len() >= 9, "manifest lists suspiciously few files: {names:?}");
+    for name in &names {
         let n = cases(name).len();
         assert_eq!(
-            m["counts"][name].as_u64().unwrap() as usize,
+            m["counts"][name.as_str()].as_u64().unwrap() as usize,
             n,
             "manifest count for {} is stale",
             name
@@ -436,6 +441,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "transcript.replay", "transcript.substitution", "backup.import",
         "object.roundtrip", "escrow.ceremony", "escrow.ready", "escrow.release",
         "bond.check", "slash.check",
+        "contact.invite", "contact.claim", "message.chain",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -508,6 +514,75 @@ fn object_vectors_pass() {
 /// Encoding agreement was never the hard part — two clients can serialise
 /// identically and still *decide* differently, and these are the decisions money
 /// depends on.
+/// §16.9 / §16.10 — cards that travel out of band, and 1:1 message chains.
+#[test]
+fn contact_vectors_pass() {
+    use ducat_core::contact::*;
+
+    for c in cases("contact") {
+        let name = c["name"].as_str().unwrap();
+        let want_ok = c["expect"]["ok"].as_bool().unwrap();
+        let want_code = || c["expect"]["reject"].as_str().unwrap().to_string();
+        match c["kind"].as_str().unwrap() {
+            "contact.invite" => {
+                let raw = unhex(c["invite_hex"].as_str().unwrap());
+                let got = decode(&raw).map_err(|e| e.into())
+                    .and_then(ContactInvite::from_value);
+                assert_eq!(got.is_ok(), want_ok, "{name}: {got:?}");
+                match got {
+                    Ok(inv) => assert_eq!(
+                        hexs(&inv.to_value().encode()),
+                        c["expect"]["reencodes_to_hex"].as_str().unwrap(),
+                        "{name}: did not re-encode byte-identically"
+                    ),
+                    Err(e) => assert_eq!(
+                        format!("{:?}", e.code).to_uppercase(), want_code(),
+                        "{name}: wrong reject code"
+                    ),
+                }
+            }
+            "contact.claim" => {
+                let inv = ContactInvite::from_value(
+                    decode(&unhex(c["invite_hex"].as_str().unwrap())).unwrap()).unwrap();
+                let clm = ContactClaim::from_value(
+                    decode(&unhex(c["claim_hex"].as_str().unwrap())).unwrap()).unwrap();
+                let got = check_claim(&inv, &clm, c["now"].as_u64().unwrap(),
+                                      c["already_claimed"].as_bool().unwrap());
+                assert_eq!(got.is_ok(), want_ok, "{name}: {got:?}");
+                if let Err(e) = got {
+                    assert_eq!(format!("{:?}", e.code).to_uppercase(), want_code(),
+                               "{name}: wrong reject code");
+                }
+            }
+            "message.chain" => {
+                let msgs: Vec<Message> = c["messages_hex"].as_array().unwrap().iter()
+                    .map(|h| Message::from_value(
+                        decode(&unhex(h.as_str().unwrap())).unwrap()).unwrap())
+                    .collect();
+                let mut prev: Option<Message> = None;
+                let mut failed_at = None;
+                for (i, m) in msgs.iter().enumerate() {
+                    match check_message(m, i as u64, prev.as_ref()) {
+                        Ok(()) => prev = Some(m.clone()),
+                        Err(e) => { failed_at = Some((i, format!("{:?}", e.code).to_uppercase())); break }
+                    }
+                }
+                match (want_ok, failed_at) {
+                    (true, None) => {}
+                    (true, Some((i, code))) => panic!("{name}: unexpected reject {code} at {i}"),
+                    (false, None) => panic!("{name}: expected a reject, chain was accepted"),
+                    (false, Some((i, code))) => {
+                        assert_eq!(i as u64, c["expect"]["fails_at_index"].as_u64().unwrap(),
+                                   "{name}: failed at the wrong message");
+                        assert_eq!(code, want_code(), "{name}: wrong reject code");
+                    }
+                }
+            }
+            other => panic!("{name}: unhandled contact kind {other}"),
+        }
+    }
+}
+
 #[test]
 fn contract_vectors_pass() {
     use ducat_core::escrow::*;

@@ -124,6 +124,26 @@ pub mod f {
     pub const OFFER_MEMO: u64 = 145;
     pub const ACCEPT_MEMO: u64 = 146;
 
+    // CONTACT_OFFER as an out-of-band invitation (§16.9)
+    pub const INV_PERSONA: u64 = 147;
+    pub const INV_RENDEZVOUS: u64 = 148;
+    pub const INV_DISPLAY_NAME: u64 = 149;
+    pub const INV_CLAIM_COMMIT: u64 = 150;
+    pub const INV_EXPIRY: u64 = 151;
+
+    // CONTACT_ACCEPT (§16.9)
+    pub const CLM_PERSONA: u64 = 152;
+    pub const CLM_RENDEZVOUS: u64 = 153;
+    pub const CLM_DISPLAY_NAME: u64 = 154;
+    pub const CLM_SECRET: u64 = 155;
+    pub const CLM_TS: u64 = 156;
+
+    // MESSAGE (§16.10)
+    pub const MSG_SEQ: u64 = 157;
+    pub const MSG_PREV: u64 = 158;
+    pub const MSG_BODY: u64 = 159;
+    pub const MSG_TS: u64 = 160;
+
     // bond_proof (§17.4)
     pub const BND_MS_ADDRESS: u64 = 140;
     pub const BND_AMOUNT: u64 = 141;
@@ -326,6 +346,7 @@ pub(crate) fn type_code(t: ObjectType) -> u64 {
         ObjectType::EscrowReady => 20,
         ObjectType::Release => 21,
         ObjectType::SlashClaim => 22,
+        ObjectType::Message => 23,
     }
 }
 
@@ -432,6 +453,17 @@ impl Reader {
         let t = v.as_text().ok_or_else(|| {
             Reject::with_detail(RejectCode::Malformed, "expected text")
         })?;
+        // A present-but-empty text field is a second encoding of "nothing",
+        // and the other spelling is omitting the key. Two encodings of one
+        // meaning is exactly what §18.1 refuses everywhere else, so refuse it
+        // here rather than letting memos and names carry a canonicalisation
+        // wart that only shows up when two implementations disagree.
+        if t.is_empty() {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "text field is present but empty; omit the key instead",
+            ));
+        }
         // Characters, not bytes: a bound in bytes silently shortens every
         // language that does not fit in one byte per character.
         if t.chars().count() > max_chars {

@@ -19,6 +19,7 @@
 
 mod escrow_role;
 mod attack;
+mod contact;
 mod edges;
 mod flow;
 mod inverted;
@@ -49,6 +50,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "53hUxmYTwGtR44fhL8f7JLATagSwjtdLB6y4Q3wQQnbtUsDiLTLCzwnKr2gtBRAAUdgWmD22pJ3GK5Z52sJpgiK624iqtKh".into()
         });
         return escrow_role::drive(&tap_path, &ms).await;
+    }
+    if args.iter().any(|a| a == "--contact-share") {
+        return contact::share(&std::env::var("DUCAT_CARD")
+            .unwrap_or_else(|_| "/tmp/ducat-card.blob".into())).await;
+    }
+    if args.iter().any(|a| a == "--contact-claim") {
+        return contact::claim(&std::env::var("DUCAT_CARD")
+            .unwrap_or_else(|_| "/tmp/ducat-card.blob".into())).await;
     }
     if args.iter().any(|a| a == "--edges") {
         return edges::run().await;

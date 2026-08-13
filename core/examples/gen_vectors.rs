@@ -924,6 +924,15 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
             }
         }
         "backup" => ("backup", "backup.import"),
+        "contact" => {
+            if obj.contains_key("messages_hex") {
+                ("contact", "message.chain")
+            } else if obj.contains_key("claim_hex") {
+                ("contact", "contact.claim")
+            } else {
+                ("contact", "contact.invite")
+            }
+        }
         "object" => ("object", "object.roundtrip"),
         "contract" => {
             if obj.contains_key("rounds_required") {
@@ -1113,6 +1122,142 @@ fn object_cases() -> Vec<J> {
 /// money is: an out-of-order ceremony message, an arbiter nobody vouched for, a
 /// release to an address that is not a party, a bond attestation from the
 /// future, a double-spend claim with no evidence.
+/// §16.9 / §16.10 — out-of-band contact cards and 1:1 messages.
+///
+/// These exist because §7.5's memos shipped with *no* cross-implementation
+/// coverage: `run_object` in the second implementation is generic over fields,
+/// so no vector had ever put text on the wire and asked two decoders to agree.
+fn contact_cases() -> Vec<J> {
+    use ducat_core::contact::*;
+    let mut v = Vec::new();
+
+    let secret = [0x5Eu8; 32];
+    let base = ContactInvite {
+        version: 1, suite: 1,
+        persona: vec![0xAA; 32], rendezvous: vec![0xBB; 32],
+        display_name: Some("kara".into()),
+        claim_commit: claim_commitment(&secret),
+        expiry: 1_800_000_000,
+    };
+
+    let mut invite = |name: &str, why: &str, inv: &ContactInvite, bad: Option<(RejectCode, &str)>| {
+        let hex_body = hex(&inv.to_value().encode());
+        v.push(match bad {
+            None => json!({ "name": name, "why": why, "invite_hex": hex_body,
+                            "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+            Some((code, hint)) => json!({ "name": name, "why": why, "invite_hex": hex_body,
+                            "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+        });
+    };
+    invite("invite_valid", "A card with every field present decodes and re-encodes byte-identically.", &base, None);
+    invite("invite_no_display_name", "A name is optional; omitting the key is how you decline to assert one.", &ContactInvite { display_name: None, ..base.clone() }, None);
+    invite("invite_display_name_empty",
+        "A present-but-empty name is a second encoding of `absent`. §18.1 admits one encoding per meaning, so this is MALFORMED rather than a name of zero length.",
+        &ContactInvite { display_name: Some(String::new()), ..base.clone() },
+        Some((RejectCode::Malformed, "empty text field")));
+    invite("invite_display_name_too_long",
+        "Names are bounded in characters, not bytes, so the bound does not silently shorten scripts that need more than one byte per character.",
+        &ContactInvite { display_name: Some("x".repeat(MAX_DISPLAY_NAME_CHARS + 1)), ..base.clone() },
+        Some((RejectCode::Malformed, "text over bound")));
+    invite("invite_display_name_at_bound",
+        "Exactly at the bound is accepted; the bound is inclusive.",
+        &ContactInvite { display_name: Some("x".repeat(MAX_DISPLAY_NAME_CHARS)), ..base.clone() }, None);
+    invite("invite_display_name_multibyte",
+        "Thirty-two characters of Japanese is 96 bytes. A byte bound would reject a name that is within the stated limit, which is why the limit counts characters.",
+        &ContactInvite { display_name: Some("あ".repeat(MAX_DISPLAY_NAME_CHARS)), ..base.clone() }, None);
+
+    // §18.1's NFC rule, now that text is actually on the wire. "é" as e + U+0301
+    // is a legal UTF-8 string and a non-canonical one.
+    v.push(json!({
+        "name": "invite_display_name_not_nfc",
+        "why": "A decomposed name is valid UTF-8 and non-canonical. Two encodings of one name would make H(object) depend on the sender's keyboard, so §18.1 requires NFC and this is MALFORMED.",
+        "invite_hex": hex(&{
+            let mut b = base.clone().to_value().encode();
+            // Replace "kara" with "e\u{301}" by rebuilding through raw CBOR.
+            b = { let mut inv = base.clone(); inv.display_name = Some("e\u{301}".into()); inv.to_value().encode() };
+            b
+        }),
+        "expect": { "ok": false, "reject": "MALFORMED", "hint": "text is not NFC-normalized" }
+    }));
+
+    let good_claim = ContactClaim {
+        version: 1, suite: 1,
+        persona: vec![0xCC; 32], rendezvous: vec![0xDD; 32],
+        display_name: Some("sam".into()),
+        claim_secret: secret, timestamp: 1_700_000_000,
+    };
+    let mut claim_case = |name: &str, why: &str, inv: &ContactInvite, clm: &ContactClaim,
+                          now: u64, already: bool, bad: Option<(RejectCode, &str)>| {
+        v.push(json!({
+            "name": name, "why": why,
+            "invite_hex": hex(&inv.to_value().encode()),
+            "claim_hex": hex(&clm.to_value().encode()),
+            "now": now, "already_claimed": already,
+            "expect": match bad {
+                None => json!({ "ok": true }),
+                Some((code, hint)) => json!({ "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint }),
+            }
+        }));
+    };
+    claim_case("claim_valid", "The holder of the card presents the secret before expiry and the card is unused.",
+        &base, &good_claim, 1_700_000_000, false, None);
+    claim_case("claim_second_use",
+        "The screenshot case: someone else saw the card in a group chat. Single-use is what keeps a forwarded card from being a standing offer to everyone who ever saw the message it arrived in.",
+        &base, &good_claim, 1_700_000_000, true,
+        Some((RejectCode::Replay, "invitation already claimed")));
+    claim_case("claim_wrong_secret",
+        "Personas are public by design, so knowing one proves nothing. The secret is the only thing distinguishing someone who was handed the card.",
+        &base, &ContactClaim { claim_secret: [0x11; 32], ..good_claim.clone() }, 1_700_000_000, false,
+        Some((RejectCode::BadSig, "claim secret mismatch")));
+    claim_case("claim_expired",
+        "One second past expiry. A card that never expires is a credential its issuer has forgotten they published.",
+        &base, &good_claim, 1_800_000_001, false,
+        Some((RejectCode::Expired, "invitation expired")));
+    claim_case("claim_at_expiry",
+        "Exactly at expiry is still valid; the deadline is inclusive, matching every other deadline in §18.4.",
+        &base, &good_claim, 1_800_000_000, false, None);
+    claim_case("claim_self",
+        "Refused so that an attacker who intercepts a card cannot burn it by claiming it back to its issuer, leaving the intended recipient with a card that silently fails.",
+        &base, &ContactClaim { persona: base.persona.clone(), ..good_claim.clone() }, 1_700_000_000, false,
+        Some((RejectCode::PolicyRefused, "self-claim")));
+
+    // Message chains.
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000 };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060 };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120 };
+
+    let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
+        v.push(json!({
+            "name": name, "why": why,
+            "messages_hex": msgs.iter().map(|m| hex(&m.to_value().encode())).collect::<Vec<_>>(),
+            "expect": match fail_at {
+                None => json!({ "ok": true }),
+                Some((i, code, hint)) => json!({ "ok": false, "fails_at_index": i,
+                    "reject": format!("{:?}", code).to_uppercase(), "hint": hint }),
+            }
+        }));
+    };
+    chain("chain_three_messages", "A well-formed thread: each message links to the one before and the sequence has no gaps.", &[&m0, &m1, &m2], None);
+    chain("chain_first_must_link_to_nothing",
+        "The opening message of a thread has no predecessor, so its link is thirty-two zero bytes. Anything else claims a history that does not exist.",
+        &[&Message { prev: [0x99; 32], ..m0.clone() }],
+        Some((0, RejectCode::CommitMismatch, "first message links to nothing")));
+    chain("chain_gap_refused",
+        "A missing message is refused rather than stored around it: a thread that silently skips one shows a conversation that did not happen, and the reader cannot tell.",
+        &[&m0, &m2],
+        Some((1, RejectCode::StateViolation, "sequence gap")));
+    chain("chain_substituted_message",
+        "The sequence fits but the link does not, which is what a removed-and-replaced message looks like. This is the case the chain exists to catch.",
+        &[&m0, &Message { body: "different".into(), ..m1.clone() }, &m2],
+        Some((2, RejectCode::CommitMismatch, "link does not follow")));
+    chain("chain_replayed_message",
+        "Re-delivering a message already accepted is a stale sequence number, not a fresh one.",
+        &[&m0, &m1, &m1],
+        Some((2, RejectCode::StateViolation, "sequence replay")));
+
+    v
+}
+
 fn contract_cases() -> Vec<J> {
     use ducat_core::bond::bucket_floor;
     use ducat_core::escrow::*;
@@ -1316,7 +1461,8 @@ fn main() -> std::io::Result<()> {
     let dir = std::path::Path::new("../vectors").join(format!("v{}", VECTOR_SET_VERSION));
     std::fs::create_dir_all(&dir)?;
 
-    let files: [(&str, Vec<J>); 8] = [
+    let files: [(&str, Vec<J>); 9] = [
+        ("contact", contact_cases()),
         ("codec", codec_cases()),
         ("signing", signing_cases()),
         ("state", state_cases()),

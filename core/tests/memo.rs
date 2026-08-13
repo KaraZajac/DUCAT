@@ -53,14 +53,24 @@ fn the_two_memos_are_independent() {
     assert_ne!(ob.memo, ab.memo);
 }
 
-/// Absent is not empty. A memo nobody wrote should not decode as one somebody
-/// wrote and left blank.
+/// There is exactly one way to say "no memo", and it is omitting the key.
+///
+/// This test previously asserted the opposite — that `Some("")` decoded as an
+/// empty memo, distinct from absent. That gave one meaning two encodings, which
+/// is the thing §18.1 refuses everywhere else, and it would have made
+/// `H(FullOffer)` depend on whether a client wrote an empty string or nothing
+/// into a field the user left blank. Nobody writes a blank memo on purpose.
 #[test]
-fn no_memo_is_distinguishable_from_an_empty_one() {
+fn a_memo_has_exactly_one_spelling_for_nothing() {
     let none = FullOffer::from_value(decode(&offer(None).to_value().encode()).unwrap()).unwrap();
     assert_eq!(none.memo, None);
-    let empty = FullOffer::from_value(decode(&offer(Some("")).to_value().encode()).unwrap()).unwrap();
-    assert_eq!(empty.memo.as_deref(), Some(""));
+
+    let enc = offer(Some("")).to_value().encode();
+    assert_eq!(
+        FullOffer::from_value(decode(&enc).unwrap()).unwrap_err().code,
+        RejectCode::Malformed,
+        "a present-but-empty memo must be refused, not accepted as a second None"
+    );
 }
 
 /// An unbounded text field inside a signed object is a covert channel with a

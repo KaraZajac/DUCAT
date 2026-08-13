@@ -1,0 +1,232 @@
+{
+  "cases": [
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200"
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.invite",
+      "name": "invite_valid",
+      "why": "A card with every field present decodes and re-encodes byte-identically."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a700090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200"
+      },
+      "invite_hex": "a700090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.invite",
+      "name": "invite_no_display_name",
+      "why": "A name is optional; omitting the key is how you decline to assert one."
+    },
+    {
+      "expect": {
+        "hint": "empty text field",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb189560189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.invite",
+      "name": "invite_display_name_empty",
+      "why": "A present-but-empty name is a second encoding of `absent`. §18.1 admits one encoding per meaning, so this is MALFORMED rather than a name of zero length."
+    },
+    {
+      "expect": {
+        "hint": "text over bound",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18957821787878787878787878787878787878787878787878787878787878787878787878189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.invite",
+      "name": "invite_display_name_too_long",
+      "why": "Names are bounded in characters, not bytes, so the bound does not silently shorten scripts that need more than one byte per character."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb189578207878787878787878787878787878787878787878787878787878787878787878189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200"
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb189578207878787878787878787878787878787878787878787878787878787878787878189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.invite",
+      "name": "invite_display_name_at_bound",
+      "why": "Exactly at the bound is accepted; the bound is inclusive."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18957860e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200"
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18957860e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.invite",
+      "name": "invite_display_name_multibyte",
+      "why": "Thirty-two characters of Japanese is 96 bytes. A byte bound would reject a name that is within the stated limit, which is why the limit counts characters."
+    },
+    {
+      "expect": {
+        "hint": "text is not NFC-normalized",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18956365cc81189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.invite",
+      "name": "invite_display_name_not_nfc",
+      "why": "A decomposed name is valid UTF-8 and non-canonical. Two encodings of one name would make H(object) depend on the sender's keyboard, so §18.1 requires NFC and this is MALFORMED."
+    },
+    {
+      "already_claimed": false,
+      "claim_hex": "a8000a0101020118985820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58205e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e189c1a6553f100",
+      "expect": {
+        "ok": true
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.claim",
+      "name": "claim_valid",
+      "now": 1700000000,
+      "why": "The holder of the card presents the secret before expiry and the card is unused."
+    },
+    {
+      "already_claimed": true,
+      "claim_hex": "a8000a0101020118985820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58205e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e189c1a6553f100",
+      "expect": {
+        "hint": "invitation already claimed",
+        "ok": false,
+        "reject": "REPLAY"
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.claim",
+      "name": "claim_second_use",
+      "now": 1700000000,
+      "why": "The screenshot case: someone else saw the card in a group chat. Single-use is what keeps a forwarded card from being a standing offer to everyone who ever saw the message it arrived in."
+    },
+    {
+      "already_claimed": false,
+      "claim_hex": "a8000a0101020118985820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58201111111111111111111111111111111111111111111111111111111111111111189c1a6553f100",
+      "expect": {
+        "hint": "claim secret mismatch",
+        "ok": false,
+        "reject": "BADSIG"
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.claim",
+      "name": "claim_wrong_secret",
+      "now": 1700000000,
+      "why": "Personas are public by design, so knowing one proves nothing. The secret is the only thing distinguishing someone who was handed the card."
+    },
+    {
+      "already_claimed": false,
+      "claim_hex": "a8000a0101020118985820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58205e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e189c1a6553f100",
+      "expect": {
+        "hint": "invitation expired",
+        "ok": false,
+        "reject": "EXPIRED"
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.claim",
+      "name": "claim_expired",
+      "now": 1800000001,
+      "why": "One second past expiry. A card that never expires is a credential its issuer has forgotten they published."
+    },
+    {
+      "already_claimed": false,
+      "claim_hex": "a8000a0101020118985820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58205e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e189c1a6553f100",
+      "expect": {
+        "ok": true
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.claim",
+      "name": "claim_at_expiry",
+      "now": 1800000000,
+      "why": "Exactly at expiry is still valid; the deadline is inclusive, matching every other deadline in §18.4."
+    },
+    {
+      "already_claimed": false,
+      "claim_hex": "a8000a0101020118985820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58205e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e189c1a6553f100",
+      "expect": {
+        "hint": "self-claim",
+        "ok": false,
+        "reject": "POLICYREFUSED"
+      },
+      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
+      "kind": "contact.claim",
+      "name": "claim_self",
+      "now": 1700000000,
+      "why": "Refused so that an attacker who intercepts a card cannot burn it by claiming it back to its issuer, leaving the intended recipient with a card that silently fails."
+    },
+    {
+      "expect": {
+        "ok": true
+      },
+      "kind": "message.chain",
+      "messages_hex": [
+        "a7001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6368657918a01a6553f100",
+        "a7001701010201189d01189e58209b18e8e170a12da8610b1abfbc5d9d12b201fcf55b7760c9173d408cff12f5e3189f6b796f752061726f756e643f18a01a6553f13c",
+        "a7001701010201189d02189e582027d459c4992f9abb3a99bff6ac348254ba621e9ef1b42c653fb51ab0ccb30a70189f7268657265277320746865203230206261636b18a01a6553f178"
+      ],
+      "name": "chain_three_messages",
+      "why": "A well-formed thread: each message links to the one before and the sequence has no gaps."
+    },
+    {
+      "expect": {
+        "fails_at_index": 0,
+        "hint": "first message links to nothing",
+        "ok": false,
+        "reject": "COMMITMISMATCH"
+      },
+      "kind": "message.chain",
+      "messages_hex": [
+        "a7001701010201189d00189e58209999999999999999999999999999999999999999999999999999999999999999189f6368657918a01a6553f100"
+      ],
+      "name": "chain_first_must_link_to_nothing",
+      "why": "The opening message of a thread has no predecessor, so its link is thirty-two zero bytes. Anything else claims a history that does not exist."
+    },
+    {
+      "expect": {
+        "fails_at_index": 1,
+        "hint": "sequence gap",
+        "ok": false,
+        "reject": "STATEVIOLATION"
+      },
+      "kind": "message.chain",
+      "messages_hex": [
+        "a7001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6368657918a01a6553f100",
+        "a7001701010201189d02189e582027d459c4992f9abb3a99bff6ac348254ba621e9ef1b42c653fb51ab0ccb30a70189f7268657265277320746865203230206261636b18a01a6553f178"
+      ],
+      "name": "chain_gap_refused",
+      "why": "A missing message is refused rather than stored around it: a thread that silently skips one shows a conversation that did not happen, and the reader cannot tell."
+    },
+    {
+      "expect": {
+        "fails_at_index": 2,
+        "hint": "link does not follow",
+        "ok": false,
+        "reject": "COMMITMISMATCH"
+      },
+      "kind": "message.chain",
+      "messages_hex": [
+        "a7001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6368657918a01a6553f100",
+        "a7001701010201189d01189e58209b18e8e170a12da8610b1abfbc5d9d12b201fcf55b7760c9173d408cff12f5e3189f69646966666572656e7418a01a6553f13c",
+        "a7001701010201189d02189e582027d459c4992f9abb3a99bff6ac348254ba621e9ef1b42c653fb51ab0ccb30a70189f7268657265277320746865203230206261636b18a01a6553f178"
+      ],
+      "name": "chain_substituted_message",
+      "why": "The sequence fits but the link does not, which is what a removed-and-replaced message looks like. This is the case the chain exists to catch."
+    },
+    {
+      "expect": {
+        "fails_at_index": 2,
+        "hint": "sequence replay",
+        "ok": false,
+        "reject": "STATEVIOLATION"
+      },
+      "kind": "message.chain",
+      "messages_hex": [
+        "a7001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6368657918a01a6553f100",
+        "a7001701010201189d01189e58209b18e8e170a12da8610b1abfbc5d9d12b201fcf55b7760c9173d408cff12f5e3189f6b796f752061726f756e643f18a01a6553f13c",
+        "a7001701010201189d01189e58209b18e8e170a12da8610b1abfbc5d9d12b201fcf55b7760c9173d408cff12f5e3189f6b796f752061726f756e643f18a01a6553f13c"
+      ],
+      "name": "chain_replayed_message",
+      "why": "Re-delivering a message already accepted is a stale sequence number, not a fresh one."
+    }
+  ],
+  "category": "contact"
+}

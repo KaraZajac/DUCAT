@@ -784,7 +784,7 @@ OBJECT_TYPE_CODES = {
     "CONTACT_ACCEPT": 10, "bond_proof": 11, "attestation": 12,
     "DISPUTE": 13, "RULING": 14, "HAIL": 15, "HAIL_REPLY": 16, "TapStatic": 17,
     "TXID": 18, "ESCROW_SETUP": 19, "ESCROW_READY": 20, "RELEASE": 21,
-    "SLASH_CLAIM": 22,
+    "SLASH_CLAIM": 22, "MESSAGE": 23,
 }
 
 
@@ -922,7 +922,212 @@ def run_slash_check(cases, r):
         expect_reject(r, "contract", c, go)
 
 
+# --- §16.9 / §16.10 contacts and messages -----------------------------------
+#
+# Written from the spec text, not from core/contact.rs. These are the first
+# vectors that put *text* on the wire at the field level: §7.5's memos shipped
+# with no coverage here at all, because run_object is generic over fields, so
+# no two decoders had ever been asked to agree on a text bound.
+
+MAX_DISPLAY_NAME_CHARS = 32
+MAX_MESSAGE_CHARS = 2000
+
+# §18.4.2 field keys.
+INV_PERSONA, INV_RENDEZVOUS, INV_DISPLAY_NAME = 147, 148, 149
+INV_CLAIM_COMMIT, INV_EXPIRY = 150, 151
+CLM_PERSONA, CLM_RENDEZVOUS, CLM_DISPLAY_NAME = 152, 153, 154
+CLM_SECRET, CLM_TS = 155, 156
+MSG_SEQ, MSG_PREV, MSG_BODY, MSG_TS = 157, 158, 159, 160
+
+
+def _body(buf):
+    """Decode to a canonical map keyed by field number."""
+    v = decode_canonical(buf)
+    if v[0] != "map":
+        raise Reject("Malformed", "object is not a map")
+    return dict(v[1])
+
+
+def _take(body, key, kind, what):
+    if key not in body:
+        raise Reject("Malformed", f"missing {what}")
+    k, val = body.pop(key)
+    if k != kind:
+        raise Reject("Malformed", f"{what} has the wrong major type")
+    return val
+
+
+def _take_text(body, key, max_chars, what, required):
+    """§16.9's text rule.
+
+    Two halves, and the second one is the interesting half:
+      - bounded in *characters*, so the bound does not silently shorten a script
+        needing more than one byte per character;
+      - a present-but-empty field is MALFORMED, because omitting the key is
+        already how you say nothing and §18.1 admits one encoding per meaning.
+    NFC is enforced one layer down, by the decoder, for all text alike."""
+    if key not in body:
+        if required:
+            raise Reject("Malformed", f"missing {what}")
+        return None
+    k, val = body.pop(key)
+    if k != "text":
+        raise Reject("Malformed", f"{what} is not text")
+    if val == "":
+        raise Reject("Malformed", f"{what} is present but empty")
+    if len(val) > max_chars:
+        raise Reject("Malformed", f"{what} exceeds {max_chars} characters")
+    return val
+
+
+def _expect_type(body, want, name):
+    got = body.pop(0, (None, None))[1]
+    if got != OBJECT_TYPE_CODES[want]:
+        raise Reject("Malformed", f"object declares type {got}, expected {name}")
+
+
+def _finish(body):
+    if body:
+        raise Reject("Malformed", f"unexpected field {sorted(body)[0]}")
+
+
+def parse_invite(buf):
+    b = _body(buf)
+    _expect_type(b, "CONTACT_OFFER", "CONTACT_OFFER")
+    out = {
+        "version": _take(b, 1, "uint", "version"),
+        "suite": _take(b, 2, "uint", "suite"),
+        "persona": _take(b, INV_PERSONA, "bytes", "persona"),
+        "rendezvous": _take(b, INV_RENDEZVOUS, "bytes", "rendezvous"),
+        "display_name": _take_text(b, INV_DISPLAY_NAME, MAX_DISPLAY_NAME_CHARS,
+                                   "display name", False),
+        "claim_commit": _take(b, INV_CLAIM_COMMIT, "bytes", "claim commitment"),
+        "expiry": _take(b, INV_EXPIRY, "uint", "expiry"),
+    }
+    if len(out["claim_commit"]) != 32:
+        raise Reject("Malformed", "claim commitment is not 32 bytes")
+    _finish(b)
+    return out
+
+
+def parse_claim(buf):
+    b = _body(buf)
+    _expect_type(b, "CONTACT_ACCEPT", "CONTACT_ACCEPT")
+    out = {
+        "version": _take(b, 1, "uint", "version"),
+        "suite": _take(b, 2, "uint", "suite"),
+        "persona": _take(b, CLM_PERSONA, "bytes", "persona"),
+        "rendezvous": _take(b, CLM_RENDEZVOUS, "bytes", "rendezvous"),
+        "display_name": _take_text(b, CLM_DISPLAY_NAME, MAX_DISPLAY_NAME_CHARS,
+                                   "display name", False),
+        "claim_secret": _take(b, CLM_SECRET, "bytes", "claim secret"),
+        "timestamp": _take(b, CLM_TS, "uint", "timestamp"),
+    }
+    if len(out["claim_secret"]) != 32:
+        raise Reject("Malformed", "claim secret is not 32 bytes")
+    _finish(b)
+    return out
+
+
+def parse_message(buf):
+    b = _body(buf)
+    _expect_type(b, "MESSAGE", "MESSAGE")
+    out = {
+        "version": _take(b, 1, "uint", "version"),
+        "suite": _take(b, 2, "uint", "suite"),
+        "seq": _take(b, MSG_SEQ, "uint", "sequence"),
+        "prev": _take(b, MSG_PREV, "bytes", "previous link"),
+        "body": _take_text(b, MSG_BODY, MAX_MESSAGE_CHARS, "body", True),
+        "timestamp": _take(b, MSG_TS, "uint", "timestamp"),
+    }
+    if len(out["prev"]) != 32:
+        raise Reject("Malformed", "previous link is not 32 bytes")
+    _finish(b)
+    return out
+
+
+def check_claim(invite, claim, now, already_claimed):
+    """§16.9. Order matters and is chosen, not incidental: a card that is both
+    spent and expired reports spent, because that is the fact the issuer can
+    act on."""
+    if already_claimed:
+        raise Reject("Replay", "invitation already used")
+    if now > invite["expiry"]:
+        raise Reject("Expired", "invitation expired")
+    if commit(PURPOSE_SPEC["chain"], claim["claim_secret"]) != invite["claim_commit"]:
+        raise Reject("BadSig", "claim secret does not match")
+    if claim["persona"] == invite["persona"]:
+        raise Reject("PolicyRefused", "self-claim")
+
+
+def check_message(msg, expected_seq, previous_bytes):
+    """§16.10. A gap is refused rather than stored around: a thread that
+    silently skips a message shows a conversation that did not happen."""
+    if msg["seq"] != expected_seq:
+        raise Reject("StateViolation",
+                     f"expected message {expected_seq}, got {msg['seq']}")
+    want = (bytes(32) if previous_bytes is None
+            else commit(PURPOSE_SPEC["chain"], previous_bytes))
+    if msg["prev"] != want:
+        raise Reject("CommitMismatch", "message does not follow the one before it")
+
+
+def run_contact_invite(cases, r):
+    for c in cases:
+        def go(c=c):
+            inv = parse_invite(unhex(c["invite_hex"]))
+            # Re-encode from parsed fields, so agreement is on the *object*, not
+            # on having echoed back the bytes handed in.
+            m = [(1, ("uint", inv["version"])), (2, ("uint", inv["suite"])),
+                 (0, ("uint", OBJECT_TYPE_CODES["CONTACT_OFFER"])),
+                 (INV_PERSONA, ("bytes", inv["persona"])),
+                 (INV_RENDEZVOUS, ("bytes", inv["rendezvous"])),
+                 (INV_CLAIM_COMMIT, ("bytes", inv["claim_commit"])),
+                 (INV_EXPIRY, ("uint", inv["expiry"]))]
+            if inv["display_name"] is not None:
+                m.append((INV_DISPLAY_NAME, ("text", inv["display_name"])))
+            return encode(("map", m))
+        out = expect_reject(r, "contact", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, vector says "
+                  f"{c['expect']['reencodes_to_hex']}")
+
+
+def run_contact_claim(cases, r):
+    for c in cases:
+        def go(c=c):
+            check_claim(parse_invite(unhex(c["invite_hex"])),
+                        parse_claim(unhex(c["claim_hex"])),
+                        c["now"], c["already_claimed"])
+            return None
+        expect_reject(r, "contact", c, go)
+
+
+def run_message_chain(cases, r):
+    for c in cases:
+        def go(c=c):
+            prev_bytes = None
+            for i, h in enumerate(c["messages_hex"]):
+                raw = unhex(h)
+                m = parse_message(raw)
+                try:
+                    check_message(m, i, prev_bytes)
+                except Reject as e:
+                    if not c["expect"]["ok"] and i != c["expect"]["fails_at_index"]:
+                        raise Reject(e.name, f"failed at index {i}, vector says "
+                                            f"{c['expect']['fails_at_index']}")
+                    raise
+                prev_bytes = raw
+            return None
+        expect_reject(r, "contact", c, go)
+
+
 BY_KIND = {
+    "contact.invite": run_contact_invite,
+    "contact.claim": run_contact_claim,
+    "message.chain": run_message_chain,
     "escrow.ceremony": run_escrow_ceremony,
     "escrow.ready": run_escrow_ready,
     "escrow.release": run_escrow_release,
