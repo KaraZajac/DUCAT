@@ -229,6 +229,19 @@ pub struct OwnedOutput {
     /// chain — and none of that survives a summary. Keeping the bytes means a
     /// send does not have to rescan to find what the wallet already found.
     pub blob: Vec<u8>,
+    /// The transaction this output was created by.
+    ///
+    /// Without it an output list cannot be turned back into a list of payments.
+    /// Two outputs from one transaction look like two receipts, and *change* —
+    /// which is the wallet paying itself the remainder — looks like income. A
+    /// screen built on outputs alone told someone they had received twice and
+    /// spent nothing.
+    pub tx_hash_hex: String,
+    /// The block's own timestamp, in seconds. Zero if unknown.
+    ///
+    /// A height is not a time. Nobody reconciling a payment against a receipt
+    /// knows what block 2184652 means.
+    pub timestamp: u64,
 }
 
 /// How far a scan got, and what it found.
@@ -329,6 +342,8 @@ pub fn monero_scan(
                 }
             };
             read += 1;
+            // Read before `scan` consumes the block.
+            let block_time = sb.block.header.timestamp;
             if let Ok(found) = scanner.scan(sb) {
                 for o in found.not_additionally_locked() {
                     // KI = (spend + key_offset) · H_p(output key).
@@ -350,6 +365,8 @@ pub fn monero_scan(
                             .map(|k| hex_of(k.compress().to_bytes().as_slice()))
                             .unwrap_or_default(),
                         blob: o.serialize(),
+                        tx_hash_hex: hex_of(&o.transaction()),
+                        timestamp: block_time,
                     });
                 }
             }
@@ -423,6 +440,8 @@ pub fn monero_scan_view_only(
             let Ok(block) = rpc.block_by_number(h as usize).await else { failed += 1; h += 1; continue };
             let Ok(sb) = rpc.expand_to_scannable_block(block).await else { failed += 1; h += 1; continue };
             read += 1;
+            // Read before `scan` consumes the block.
+            let block_time = sb.block.header.timestamp;
             if let Ok(found) = scanner.scan(sb) {
                 for o in found.not_additionally_locked() {
                     outputs.push(OwnedOutput {
@@ -433,6 +452,8 @@ pub fn monero_scan_view_only(
                         // caller ask about spentness and believe the answer.
                         key_image_hex: String::new(),
                         blob: o.serialize(),
+                        tx_hash_hex: hex_of(&o.transaction()),
+                        timestamp: block_time,
                     });
                 }
             }
@@ -442,6 +463,160 @@ pub fn monero_scan_view_only(
             return Err(MoneroError::Failed(format!("could not read any of {failed} blocks")));
         }
         Ok(ScanResult { scanned_to: last, tip, outputs, blocks_read: read, blocks_failed: failed })
+    })
+}
+
+/// What a stored output says about itself.
+///
+/// Exists so a wallet that scanned before these fields were recorded does not
+/// have to read the chain again to get them: everything here was already inside
+/// the blob it kept in order to be able to spend. Re-scanning to recover data
+/// you already have on disk is a half-hour of someone's afternoon.
+#[derive(uniffi::Record, Clone)]
+pub struct OutputMeta {
+    pub tx_hash_hex: String,
+    /// Which output of that transaction this is.
+    pub index_in_transaction: u64,
+    /// The one-time key this output was paid to — its address on the chain.
+    /// Not the wallet's address: every output gets its own, which is what makes
+    /// two payments to the same person unlinkable.
+    pub stealth_key_hex: String,
+    pub amount_pxmr: u64,
+}
+
+/// Read an output's own record of itself, without touching the network.
+#[uniffi::export]
+pub fn monero_output_meta(blob: Vec<u8>) -> Result<OutputMeta, MoneroError> {
+    use monero_wallet::WalletOutput;
+
+    let o = WalletOutput::read(&mut blob.as_slice())
+        .map_err(|e| MoneroError::Failed(format!("output: {e}")))?;
+    Ok(OutputMeta {
+        tx_hash_hex: hex_of(&o.transaction()),
+        index_in_transaction: o.index_in_transaction(),
+        stealth_key_hex: hex_of(o.key().compress().to_bytes().as_slice()),
+        amount_pxmr: o.commitment().amount,
+    })
+}
+
+/// A transaction as the chain records it.
+///
+/// The point of `key_images` is not display: it is how a wallet works out that
+/// *it* sent a transaction. A spend leaves no receipt on the sender's side —
+/// the only local trace is that some of your outputs stop being unspent. Match
+/// this transaction's inputs against your own key images and the answer is
+/// exact, with no local record needed, which means a send made before the app
+/// recorded sends is still recoverable from the chain.
+#[derive(uniffi::Record, Clone)]
+pub struct TxDetails {
+    pub tx_hash_hex: String,
+    pub version: u32,
+    /// Fee paid, in piconero. Zero for a miner transaction.
+    pub fee_pxmr: u64,
+    /// Key images consumed. Empty for a miner transaction.
+    pub key_images_hex: Vec<String>,
+    pub input_count: u32,
+    pub output_count: u32,
+    /// Decoys plus the real spend, per input. Monero's anonymity set.
+    pub ring_size: u32,
+    /// A lock beyond the standard ten blocks, or zero.
+    pub additional_timelock: u64,
+    /// Bytes in `tx_extra` — where the transaction public key and any payment
+    /// ID live.
+    pub extra_len: u32,
+    /// Whether this is a coinbase transaction.
+    pub coinbase: bool,
+}
+
+/// Fetch one transaction from the daemon.
+#[uniffi::export]
+pub fn monero_tx_details(node_url: String, tx_hash_hex: String) -> Result<TxDetails, MoneroError> {
+    use monero_daemon_rpc::prelude::*;
+    use monero_wallet::transaction::{Input, Timelock, Transaction};
+
+    let raw = hex_to_bytes(&tx_hash_hex)
+        .filter(|b| b.len() == 32)
+        .ok_or_else(|| MoneroError::Failed("transaction id is not 32 bytes of hex".into()))?;
+    let mut hash = [0u8; 32];
+    hash.copy_from_slice(&raw);
+
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .map_err(|e| MoneroError::Failed(format!("runtime: {e}")))?;
+
+    rt.block_on(async {
+        let rpc = monero_daemon_rpc::MoneroDaemon::new(UreqTransport::new(node_url))
+            .await
+            .map_err(|e| MoneroError::Failed(format!("connect: {e:?}")))?;
+        let tx: Transaction = rpc
+            .transaction(hash)
+            .await
+            .map_err(|e| MoneroError::Failed(format!("transaction: {e:?}")))?;
+
+        let prefix = tx.prefix();
+        let mut kis = Vec::new();
+        let mut ring = 0u32;
+        let mut coinbase = false;
+        for i in &prefix.inputs {
+            match i {
+                Input::Gen(_) => coinbase = true,
+                Input::ToKey { key_image, key_offsets, .. } => {
+                    kis.push(hex_of(key_image.to_bytes().as_slice()));
+                    ring = ring.max(key_offsets.len() as u32);
+                }
+            }
+        }
+
+        // The fee lives in the RingCT base, not the prefix, and a pruned or v1
+        // transaction has none to report rather than a fee of zero.
+        let fee = match &tx {
+            Transaction::V2 { proofs: Some(p), .. } => p.base.fee,
+            _ => 0,
+        };
+
+        Ok(TxDetails {
+            tx_hash_hex,
+            version: tx.version() as u32,
+            fee_pxmr: fee,
+            key_images_hex: kis,
+            input_count: prefix.inputs.len() as u32,
+            output_count: prefix.outputs.len() as u32,
+            ring_size: ring,
+            additional_timelock: match prefix.additional_timelock {
+                Timelock::None => 0,
+                Timelock::Block(b) => b as u64,
+                Timelock::Time(t) => t,
+            },
+            extra_len: prefix.extra.len() as u32,
+            coinbase,
+        })
+    })
+}
+
+/// When a block was mined, in seconds.
+///
+/// For filling in times on outputs found before the scanner recorded them. One
+/// request per height, so callers ask about the few they are missing rather
+/// than the range.
+#[uniffi::export]
+pub fn monero_block_time(node_url: String, height: u64) -> Result<u64, MoneroError> {
+    use monero_daemon_rpc::prelude::*;
+
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .map_err(|e| MoneroError::Failed(format!("runtime: {e}")))?;
+
+    rt.block_on(async {
+        let rpc = monero_daemon_rpc::MoneroDaemon::new(UreqTransport::new(node_url))
+            .await
+            .map_err(|e| MoneroError::Failed(format!("connect: {e:?}")))?;
+        let block = rpc
+            .block_by_number(height as usize)
+            .await
+            .map_err(|e| MoneroError::Failed(format!("block: {e:?}")))?;
+        Ok(block.header.timestamp)
     })
 }
 

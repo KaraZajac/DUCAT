@@ -198,8 +198,13 @@ fun AccountsScreen() {
                     // used to live here measured progress as scannedTo/tip —
                     // the bug already fixed in `Balances.progress` — so this
                     // screen sat at 100% for a scan that had just begun.
-                    Spacer(Modifier.height(12.dp))
-                    SyncStatus(b)
+                    // The spacer belongs to the status, not to the card: with
+                    // no node yet SyncStatus draws nothing, and an unconditional
+                    // gap left the card ending in blank space.
+                    if (b.tip > 0) {
+                        Spacer(Modifier.height(12.dp))
+                        SyncStatus(b)
+                    }
                 }
             }
         }

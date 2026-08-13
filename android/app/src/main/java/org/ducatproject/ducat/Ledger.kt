@@ -1,0 +1,463 @@
+package org.ducatproject.ducat
+
+import android.content.Context
+import org.json.JSONArray
+import org.json.JSONObject
+
+private const val TAG = "Ledger"
+
+/**
+ * A history, rebuilt from outputs.
+ *
+ * A Monero wallet does not store transactions. It stores **outputs it can
+ * spend**, because that is all scanning can find, and a list of outputs is not
+ * a list of payments:
+ *
+ *  - Two outputs of one transaction are one event.
+ *  - **Change is not income.** Spending 0.010 to send 0.0025 puts 0.0074 back
+ *    in your own wallet, and an outputs-list shows that as money arriving. It
+ *    is the largest number on the screen and it is the wallet paying itself.
+ *  - **A send leaves no local receipt at all.** The only on-chain trace is that
+ *    one of your outputs stops being unspent.
+ *
+ * Reading outputs directly produced exactly those three errors at once: a
+ * receipt and its change shown as two deposits totalling more than the wallet
+ * held, and the send between them missing.
+ *
+ * ## How a send is identified without a local record
+ *
+ * Every output names the transaction that created it. Fetch that transaction
+ * and look at the key images it consumed: if any of them is ours, **we sent
+ * it** — no stored record required, so a payment made before the app kept
+ * records is still recoverable from the chain. Then
+ *
+ *     paid out = (our inputs it consumed) − (our outputs in it) − fee
+ *
+ * which is exact, and reconciles: summing every event's net effect gives the
+ * balance the Accounts screen shows. That reconciliation is the point. Two
+ * screens disagreeing about the same money is not a display bug, it is the
+ * wallet failing to know what it holds.
+ */
+object Ledger {
+
+    enum class Direction { Received, Sent }
+
+    /** Where a sender's name came from, if there is one. */
+    enum class Source {
+        /** A contact told us in the thread, naming this transaction (§16.13). */
+        Notice,
+        /** Our own record of having sent it. */
+        OurRecord,
+        /** Monero carries no sender. Nobody said. */
+        Unknown,
+    }
+
+    data class Event(
+        val txid: String,
+        val height: Long,
+        val timestamp: Long,
+        val direction: Direction,
+        /** What moved between this wallet and someone else. Never the change. */
+        val amountPxmr: Long,
+        /** Paid to the network. Sends only. */
+        val feePxmr: Long,
+        /** Signed effect on the wallet's total, change already netted out. */
+        val netPxmr: Long,
+        /** The wallet's total after this event — what Accounts would have said. */
+        val balanceAfterPxmr: Long,
+        val counterparty: String?,
+        val address: String?,
+        val source: Source,
+        val note: String?,
+        /** Our outputs created by this transaction. Includes change. */
+        val ours: List<WalletEntry>,
+        /** Our outputs it consumed. */
+        val consumed: List<WalletEntry>,
+        val chain: ChainTx?,
+        /** Broadcast, not yet seen in a block. */
+        val pending: Boolean,
+        /** Still inside the ten-block lock. */
+        val locked: Boolean,
+        val unlocksInBlocks: Long,
+        /**
+         * True when the transaction that spent our output could not be
+         * identified — the output is gone and we cannot say where.
+         *
+         * Shown rather than dropped. Silently omitting it would leave the
+         * running balance stepping down with nothing to explain it.
+         */
+        val unexplained: Boolean = false,
+        /**
+         * The transaction has not been read from the chain yet, so "received"
+         * is an assumption rather than a finding.
+         *
+         * It matters because the assumption is wrong precisely in the case
+         * that confuses people: change from your own send arrives as an output
+         * and looks exactly like income until the transaction is fetched and
+         * its inputs turn out to be yours. Rather than state a direction it
+         * cannot support, the row says it is still checking.
+         */
+        val provisional: Boolean = false,
+        /** Ordering only: where this belongs in the running balance. */
+        val sortHeight: Long = 0,
+    ) {
+        /** Change we paid to ourselves in this transaction, if any. */
+        val changePxmr: Long get() = if (direction == Direction.Sent) ours.sumOf { it.amountPxmr } else 0
+    }
+
+    /**
+     * Build the history, oldest first, each row carrying the balance after it.
+     *
+     * Pure: it reads the store and computes. Anything needing the network is
+     * [enrich], run by the poller.
+     */
+    fun build(context: Context): List<Event> {
+        val store = WalletStore(context)
+        val contacts = ContactStore(context)
+        val txs = TxStore(context)
+        // Read once. This used to be re-read inside the per-event loop, which
+        // re-parsed the whole contact file for every row on screen.
+        val everyone = contacts.all()
+
+        // Who told us they paid us, keyed by the transaction they named. This
+        // is the only way a received payment gets a name: Monero itself does
+        // not carry a sender, so an unnamed receipt is honest, not a gap.
+        val announced = HashMap<String, Pair<String, String?>>()
+        for (c in everyone) {
+            for (m in contacts.thread(c.personaHex)) {
+                val id = m.txidHex ?: continue
+                if (m.outgoing || m.kind != 2) continue
+                announced[id.lowercase()] = c.displayName() to m.body.takeIf { it.isNotBlank() }
+            }
+        }
+
+        return assemble(
+            entries = store.entries(),
+            tip = store.tip(),
+            chainOf = { txs.get(it) },
+            sendRecords = store.sends(),
+            nameOf = { h -> everyone.firstOrNull { it.personaHex == h }?.displayName() },
+            announced = announced,
+        )
+    }
+
+    /**
+     * The arithmetic, with nothing Android in it.
+     *
+     * Split out so it can be tested against real transactions rather than only
+     * looked at. The reconciliation this has to satisfy — every event's net
+     * effect summing to the wallet's balance — is not something you can check
+     * by reading the code.
+     */
+    internal fun assemble(
+        entries: List<WalletEntry>,
+        tip: Long,
+        chainOf: (String) -> ChainTx?,
+        sendRecords: List<SentPayment>,
+        nameOf: (String?) -> String?,
+        announced: Map<String, Pair<String, String?>> = emptyMap(),
+    ): List<Event> {
+        val sends = sendRecords.associateBy { it.txidHex.lowercase() }
+        val ourKeyImages = entries.mapNotNull { it.keyImage.takeIf { k -> k.isNotEmpty() } }.toSet()
+        val byKeyImage = entries.associateBy { it.keyImage }
+
+        // By transaction — except for outputs that have no transaction id yet,
+        // which each get their own row keyed by key image. Lumping those into
+        // one group keyed by the empty string would merge unrelated payments
+        // into a single row whose amount is their sum.
+        val grouped = entries.groupBy {
+            if (it.txHashHex.isEmpty()) "ki:${it.keyImage}" else it.txHashHex.lowercase()
+        }
+
+        val out = ArrayList<Event>()
+        val explainedSpends = HashSet<String>()
+
+        for ((key, group) in grouped) {
+            val txid = if (key.startsWith("ki:")) "" else key
+            val chain = if (txid.isEmpty()) null else chainOf(txid)
+            val received = group.sumOf { it.amountPxmr }
+            val height = group.minOf { it.height }
+            val ts = group.maxOf { it.timestamp }
+
+            val consumedKis = chain?.keyImages.orEmpty().filter { it in ourKeyImages }
+            if (consumedKis.isNotEmpty()) {
+                // Ours. The inputs it spent were ours to spend.
+                val consumed = consumedKis.mapNotNull { byKeyImage[it] }
+                explainedSpends += consumedKis
+                val spentTotal = consumed.sumOf { it.amountPxmr }
+                val fee = chain?.feePxmr ?: 0L
+                val paid = (spentTotal - received - fee).coerceAtLeast(0L)
+                val rec = sends[txid]
+                out += Event(
+                    txid = txid,
+                    height = height,
+                    timestamp = if (ts > 0) ts else (rec?.timestamp?.div(1000) ?: 0L),
+                    direction = Direction.Sent,
+                    amountPxmr = paid,
+                    feePxmr = fee,
+                    netPxmr = received - spentTotal,
+                    balanceAfterPxmr = 0,
+                    counterparty = nameOf(rec?.contactHex),
+                    address = rec?.toAddress,
+                    source = if (rec != null) Source.OurRecord else Source.Unknown,
+                    note = rec?.note,
+                    ours = group,
+                    consumed = consumed,
+                    chain = chain,
+                    pending = false,
+                    locked = false,
+                    unlocksInBlocks = 0,
+                    sortHeight = height,
+                )
+            } else {
+                val named = announced[txid]
+                out += Event(
+                    txid = txid,
+                    height = height,
+                    timestamp = ts,
+                    direction = Direction.Received,
+                    amountPxmr = received,
+                    feePxmr = 0,
+                    netPxmr = received,
+                    balanceAfterPxmr = 0,
+                    counterparty = named?.first,
+                    address = null,
+                    source = if (named != null) Source.Notice else Source.Unknown,
+                    note = named?.second,
+                    ours = group,
+                    consumed = emptyList(),
+                    chain = chain,
+                    pending = false,
+                    locked = tip > 0 && height > 0 && height + LOCK_BLOCKS > tip,
+                    unlocksInBlocks = (height + LOCK_BLOCKS - tip).coerceAtLeast(0),
+                    // An unread transaction cannot be called a receipt yet.
+                    provisional = txid.isNotEmpty() && chain == null,
+                    sortHeight = height,
+                )
+            }
+        }
+
+        // Outputs that are gone with nothing to account for them. Either the
+        // transaction has not been fetched yet, or it spent everything and left
+        // no change for the scanner to find. Either way the money left, and the
+        // running balance has to step down somewhere visible.
+        for (e in entries.filter { it.spent && it.keyImage !in explainedSpends }) {
+            // No attempt to guess which local record this was. An earlier
+            // version matched on `amount + fee == output`, which is only true
+            // when a send produced no change — so it was arithmetic that looked
+            // like identification and was wrong in the ordinary case.
+            out += Event(
+                txid = "",
+                // The output was *created* at e.height and spent later, so its
+                // own height is not where this belongs in the history. Placing
+                // it one block on at least keeps it after its own receipt; the
+                // real height arrives with the transaction.
+                height = 0,
+                timestamp = 0,
+                direction = Direction.Sent,
+                amountPxmr = e.amountPxmr,
+                feePxmr = 0,
+                netPxmr = -e.amountPxmr,
+                balanceAfterPxmr = 0,
+                counterparty = null,
+                address = null,
+                source = Source.Unknown,
+                note = null,
+                ours = emptyList(),
+                consumed = listOf(e),
+                chain = null,
+                pending = false,
+                locked = false,
+                unlocksInBlocks = 0,
+                unexplained = true,
+                sortHeight = e.height + 1,
+            )
+        }
+
+        // Broadcast but not yet on chain: our own record is the only evidence.
+        val onChain = out.map { it.txid }.filter { it.isNotEmpty() }.toSet()
+        // A spend we can see on chain but cannot attribute already accounts for
+        // the money, so a local record must not add a second row for it.
+        val unattributed = out.count { it.unexplained }
+        var absorbed = 0
+        for (s in sendRecords) {
+            if (s.txidHex.lowercase() in onChain) continue
+            if (absorbed < unattributed) { absorbed++; continue }
+            out += Event(
+                txid = s.txidHex,
+                height = 0,
+                timestamp = s.timestamp / 1000,
+                direction = Direction.Sent,
+                amountPxmr = s.amountPxmr,
+                feePxmr = s.feePxmr,
+                // Nothing has moved on chain yet as far as the wallet can see,
+                // so claiming a balance change here would double-count the
+                // moment the spend is observed.
+                netPxmr = 0,
+                balanceAfterPxmr = 0,
+                counterparty = nameOf(s.contactHex),
+                address = s.toAddress,
+                source = Source.OurRecord,
+                note = s.note,
+                ours = emptyList(),
+                consumed = emptyList(),
+                chain = null,
+                pending = true,
+                locked = false,
+                unlocksInBlocks = 0,
+                sortHeight = Long.MAX_VALUE,
+            )
+        }
+
+        // Oldest first to accumulate, newest first to display.
+        val ordered = out.sortedWith(compareBy({ it.sortHeight }, { it.timestamp }))
+        var running = 0L
+        val withBalance = ordered.map {
+            running += it.netPxmr
+            it.copy(balanceAfterPxmr = running)
+        }
+        return withBalance.reversed()
+    }
+
+    /**
+     * Fill in what only the network can answer: which transactions we sent, and
+     * when each block was mined.
+     *
+     * Bounded per call. This runs on the poll loop, and an unbounded backfill on
+     * a wallet with a long history is a phone that stops answering.
+     */
+    fun enrich(context: Context, node: String, budget: Int = 6): Boolean {
+        val store = WalletStore(context)
+        val txs = TxStore(context)
+        var changed = false
+
+        // Cheapest first, and it needs no network at all: the transaction id was
+        // already inside the blob the wallet kept in order to be able to spend.
+        // A wallet that scanned before the field existed does not have to read
+        // the chain again for it.
+        val entries = store.entries()
+        if (entries.any { it.txHashHex.isEmpty() && it.blob.isNotEmpty() }) {
+            var recovered = 0
+            val filled = entries.map { e ->
+                if (e.txHashHex.isNotEmpty() || e.blob.isEmpty()) e
+                else runCatching {
+                    val id = uniffi.ducat_mobile.moneroOutputMeta(e.blob).txHashHex
+                    if (id.isNotEmpty()) recovered++
+                    e.copy(txHashHex = id)
+                }.getOrElse { e }
+            }
+            // Only when something was actually recovered. Writing unconditionally
+            // meant a blob that would not parse rewrote identical data and raised
+            // the change flag every ten seconds — every screen watching the store
+            // redrawing forever over nothing.
+            if (recovered > 0) {
+                store.replaceEntries(filled)
+                DucatLog.i(TAG, "recovered $recovered transaction id(s) from stored outputs")
+                changed = true
+            }
+        }
+
+        var spent = 0
+        for (txid in store.entries().map { it.txHashHex.lowercase() }.distinct()) {
+            if (spent >= budget) break
+            if (txid.isEmpty() || txs.get(txid) != null) continue
+            spent++
+            runCatching { uniffi.ducat_mobile.moneroTxDetails(node, txid) }
+                .onSuccess { txs.put(ChainTx.of(it)); changed = true }
+                .onFailure { DucatLog.w(TAG, "tx $txid: ${it.message}") }
+        }
+
+        // Block times, for the outputs that have none.
+        val needTime = store.entries().filter { it.timestamp == 0L && it.height > 0 }
+            .map { it.height }.distinct().take((budget - spent).coerceAtLeast(0))
+        if (needTime.isNotEmpty()) {
+            val times = HashMap<Long, Long>()
+            for (h in needTime) {
+                runCatching { uniffi.ducat_mobile.moneroBlockTime(node, h.toULong()) }
+                    .onSuccess { times[h] = it.toLong() }
+                    .onFailure { DucatLog.w(TAG, "block $h time: ${it.message}") }
+            }
+            if (times.isNotEmpty()) {
+                store.replaceEntries(store.entries().map {
+                    if (it.timestamp == 0L) it.copy(timestamp = times[it.height] ?: 0L) else it
+                })
+                DucatLog.i(TAG, "filled in ${times.size} block time(s)")
+                changed = true
+            }
+        }
+        if (changed) ContactStore.bump()
+        return changed
+    }
+}
+
+/** What the chain says about one transaction. Cached: it never changes. */
+data class ChainTx(
+    val txid: String,
+    val version: Int,
+    val feePxmr: Long,
+    val keyImages: List<String>,
+    val inputCount: Int,
+    val outputCount: Int,
+    val ringSize: Int,
+    val additionalTimelock: Long,
+    val extraLen: Int,
+    val coinbase: Boolean,
+) {
+    fun toJson(): JSONObject = JSONObject().apply {
+        put("txid", txid); put("v", version); put("fee", feePxmr)
+        put("ki", JSONArray(keyImages)); put("in", inputCount); put("out", outputCount)
+        put("ring", ringSize); put("lock", additionalTimelock)
+        put("extra", extraLen); put("cb", coinbase)
+    }
+
+    companion object {
+        fun of(d: uniffi.ducat_mobile.TxDetails) = ChainTx(
+            txid = d.txHashHex.lowercase(),
+            version = d.version.toInt(),
+            feePxmr = d.feePxmr.toLong(),
+            keyImages = d.keyImagesHex,
+            inputCount = d.inputCount.toInt(),
+            outputCount = d.outputCount.toInt(),
+            ringSize = d.ringSize.toInt(),
+            additionalTimelock = d.additionalTimelock.toLong(),
+            extraLen = d.extraLen.toInt(),
+            coinbase = d.coinbase,
+        )
+
+        fun from(o: JSONObject): ChainTx {
+            val kis = o.optJSONArray("ki") ?: JSONArray()
+            return ChainTx(
+                txid = o.getString("txid"),
+                version = o.optInt("v", 2),
+                feePxmr = o.optLong("fee", 0L),
+                keyImages = (0 until kis.length()).map { kis.getString(it) },
+                inputCount = o.optInt("in", 0),
+                outputCount = o.optInt("out", 0),
+                ringSize = o.optInt("ring", 0),
+                additionalTimelock = o.optLong("lock", 0L),
+                extraLen = o.optInt("extra", 0),
+                coinbase = o.optBoolean("cb", false),
+            )
+        }
+    }
+}
+
+/**
+ * Transactions we have already looked up.
+ *
+ * Cached because a confirmed transaction is immutable — re-fetching it every
+ * time the Activity screen redraws would be one network round trip per row per
+ * recomposition.
+ */
+class TxStore(context: Context) {
+    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+
+    fun get(txid: String): ChainTx? =
+        prefs.getString("tx_${txid.lowercase()}", null)?.let {
+            runCatching { ChainTx.from(JSONObject(it)) }.getOrNull()
+        }
+
+    fun put(tx: ChainTx) {
+        prefs.edit().putString("tx_${tx.txid}", tx.toJson().toString()).apply()
+    }
+}

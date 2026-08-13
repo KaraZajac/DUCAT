@@ -182,6 +182,8 @@ object Mailbox {
         kind: Int = 0,
         amountPxmr: Long? = null,
         payto: String? = null,
+        /** The transaction a payment notice points at (§16.13). */
+        txidHex: String? = null,
     ): Contact {
         val store = ContactStore(context)
         val bundle = c.theirBundle
@@ -191,7 +193,8 @@ object Mailbox {
         val sealed = sealMessage(
             bundle, c.outSeq.toULong(), c.outPrevLink ?: ByteArray(32), body,
             threadAad(minePersonaHex, c.personaHex),
-            kind.toUByte(), amountPxmr?.toULong(), null, payto,
+            kind.toUByte(), amountPxmr?.toULong(),
+            txidHex?.let { hexToBytes(it) }, payto,
         )
         // Re-opened **as the owner**. Creating a record leaves it writable only
         // for that process; a plain re-open is read-only and the write comes
@@ -219,6 +222,7 @@ object Mailbox {
                 timestamp = System.currentTimeMillis() / 1000,
                 forwardSecret = sealed.forwardSecret,
                 kind = kind, amountPxmr = amountPxmr ?: 0L, payto = payto,
+                txidHex = txidHex,
             ),
         )
         store.advanceOutbound(c.personaHex, c.outSeq + 1, sealed.nextLink)
@@ -326,6 +330,7 @@ object Mailbox {
                     kind = opened.kind.toInt(),
                     amountPxmr = opened.amountPxmr?.toLong() ?: 0L,
                     payto = opened.payto,
+                    txidHex = opened.txid?.toHexString(),
                 ),
             )
             // A request carries a fresher address than anything stored (§16.12).
@@ -341,3 +346,13 @@ object Mailbox {
 }
 
 fun ByteArray.toHexString(): String = joinToString("") { "%02x".format(it) }
+
+/** Null rather than a partial array: a half-parsed transaction id is worse
+ *  than an absent one, because it points at nothing and looks like it points. */
+fun hexToBytes(s: String): ByteArray? {
+    val t = s.trim()
+    if (t.length % 2 != 0 || t.isEmpty()) return null
+    return runCatching {
+        ByteArray(t.length / 2) { t.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
+    }.getOrNull()
+}

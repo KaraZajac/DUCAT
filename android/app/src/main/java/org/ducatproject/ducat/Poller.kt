@@ -64,6 +64,11 @@ class Poller(private val context: Context) {
                     if (node != null) {
                         val moved = Wallet.scanStep(context, node)
                         if (moved) Wallet.refreshSpent(context, node)
+                        // Turn outputs back into transactions: which ones we
+                        // sent, and when each block was mined. A few per pass,
+                        // because each is a round trip and this loop also has
+                        // to stay responsive.
+                        Ledger.enrich(context, node)
                     }
                 }.onFailure { DucatLog.w(TAG, "scan: ${it.message}") }
 

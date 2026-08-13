@@ -455,6 +455,15 @@ data class StoredMessage(
     val amountPxmr: Long = 0,
     /** Where a request asks to be paid, if it named one. */
     val payto: String? = null,
+    /**
+     * The transaction a payment notice points at (§16.13).
+     *
+     * Advisory — the recipient verifies by finding the output, not by trusting
+     * this — but it is the only thing that connects an arriving output to a
+     * person. Monero does not carry a sender, so without a notice naming the
+     * transaction, "who paid me" has no answer at all.
+     */
+    val txidHex: String? = null,
     /** False means it went out under the signed prekey — no forward secrecy
      *  until that key rotates (§16.11). Shown, not hidden. */
     val forwardSecret: Boolean = true,
@@ -465,6 +474,7 @@ data class StoredMessage(
         put("ts", timestamp); put("fs", forwardSecret); put("delivered", delivered)
         put("kind", kind); put("amt", amountPxmr)
         put("payto", payto ?: JSONObject.NULL)
+        put("txid", txidHex ?: JSONObject.NULL)
     }
 
     companion object {
@@ -478,6 +488,7 @@ data class StoredMessage(
             kind = o.optInt("kind", 0),
             amountPxmr = o.optLong("amt", 0L),
             payto = o.optStringOrNull("payto"),
+            txidHex = o.optStringOrNull("txid"),
         )
     }
 }
@@ -716,6 +727,8 @@ class WalletStore(context: Context) {
                 spent = byKi[ki]?.spent ?: false,
                 keyImage = ki,
                 blob = o.blob,
+                txHashHex = o.txHashHex,
+                timestamp = o.timestamp.toLong(),
             )
         }
         writeEntries(byKi.values.toList())
@@ -724,6 +737,16 @@ class WalletStore(context: Context) {
             .putLong("wallet_tip", tip)
             .apply()
     }
+
+    /**
+     * Overwrite the output set wholesale.
+     *
+     * For backfills that add detail to outputs already found — a transaction id
+     * recovered from the blob, a block time looked up — rather than for anything
+     * that changes what the wallet owns. Callers pass a list derived from
+     * [entries]; passing a partial one drops money.
+     */
+    fun replaceEntries(list: List<WalletEntry>) = writeEntries(list)
 
     fun recordSpent(status: Map<String, Boolean>) {
         writeEntries(entries().map { it.copy(spent = status[it.keyImage] ?: it.spent) })
@@ -740,6 +763,8 @@ class WalletStore(context: Context) {
                 spent = o.optBoolean("spent", false),
                 keyImage = o.getString("ki"),
                 blob = Base64.decode(o.optString("blob", ""), Base64.NO_WRAP),
+                txHashHex = o.optString("tx", ""),
+                timestamp = o.optLong("ts", 0L),
             )
         }
     }
@@ -751,6 +776,7 @@ class WalletStore(context: Context) {
                 put("amt", it.amountPxmr); put("h", it.height)
                 put("spent", it.spent); put("ki", it.keyImage)
                 put("blob", Base64.encodeToString(it.blob, Base64.NO_WRAP))
+                put("tx", it.txHashHex); put("ts", it.timestamp)
             })
         }
         prefs.edit().putString("wallet_outputs", arr.toString()).apply()

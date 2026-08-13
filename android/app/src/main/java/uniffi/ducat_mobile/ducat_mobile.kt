@@ -823,6 +823,12 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -878,9 +884,13 @@ internal interface UniffiLib : Library {
     ): Byte
     fun uniffi_ducat_mobile_fn_func_log_subkey(`seq`: Long,`subkeyCount`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_monero_block_time(`nodeUrl`: RustBuffer.ByValue,`height`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
     fun uniffi_ducat_mobile_fn_func_monero_default_nodes(`ownUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_fee_estimate(`nodeUrl`: RustBuffer.ByValue,`inputs`: Int,`outputs`: Int,`priority`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_output_meta(`blob`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_pick_node(`candidates`: RustBuffer.ByValue,`wantNettype`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -895,6 +905,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_monero_send(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`inputBlobs`: RustBuffer.ByValue,`toAddress`: RustBuffer.ByValue,`amountPxmr`: Long,`priority`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_spent(`nodeUrl`: RustBuffer.ByValue,`keyImagesHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_tx_details(`nodeUrl`: RustBuffer.ByValue,`txHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_app_call(`routeBlob`: RustBuffer.ByValue,`message`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1102,9 +1114,13 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_log_subkey(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_block_time(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_default_nodes(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_fee_estimate(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_output_meta(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_pick_node(
     ): Short
@@ -1119,6 +1135,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_monero_send(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_spent(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_tx_details(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_app_call(
     ): Short
@@ -1251,10 +1269,16 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_log_subkey() != 6279.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_block_time() != 31246.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_default_nodes() != 12244.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_fee_estimate() != 30573.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_output_meta() != 44178.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_pick_node() != 51910.toShort()) {
@@ -1276,6 +1300,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_spent() != 3803.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_tx_details() != 54569.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_app_call() != 36150.toShort()) {
@@ -2240,6 +2267,62 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
 
 
 /**
+ * What a stored output says about itself.
+ *
+ * Exists so a wallet that scanned before these fields were recorded does not
+ * have to read the chain again to get them: everything here was already inside
+ * the blob it kept in order to be able to spend. Re-scanning to recover data
+ * you already have on disk is a half-hour of someone's afternoon.
+ */
+data class OutputMeta (
+    var `txHashHex`: kotlin.String, 
+    /**
+     * Which output of that transaction this is.
+     */
+    var `indexInTransaction`: kotlin.ULong, 
+    /**
+     * The one-time key this output was paid to — its address on the chain.
+     * Not the wallet's address: every output gets its own, which is what makes
+     * two payments to the same person unlinkable.
+     */
+    var `stealthKeyHex`: kotlin.String, 
+    var `amountPxmr`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeOutputMeta: FfiConverterRustBuffer<OutputMeta> {
+    override fun read(buf: ByteBuffer): OutputMeta {
+        return OutputMeta(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: OutputMeta) = (
+            FfiConverterString.allocationSize(value.`txHashHex`) +
+            FfiConverterULong.allocationSize(value.`indexInTransaction`) +
+            FfiConverterString.allocationSize(value.`stealthKeyHex`) +
+            FfiConverterULong.allocationSize(value.`amountPxmr`)
+    )
+
+    override fun write(value: OutputMeta, buf: ByteBuffer) {
+            FfiConverterString.write(value.`txHashHex`, buf)
+            FfiConverterULong.write(value.`indexInTransaction`, buf)
+            FfiConverterString.write(value.`stealthKeyHex`, buf)
+            FfiConverterULong.write(value.`amountPxmr`, buf)
+    }
+}
+
+
+
+/**
  * One output we own.
  */
 data class OwnedOutput (
@@ -2258,7 +2341,24 @@ data class OwnedOutput (
      * chain — and none of that survives a summary. Keeping the bytes means a
      * send does not have to rescan to find what the wallet already found.
      */
-    var `blob`: kotlin.ByteArray
+    var `blob`: kotlin.ByteArray, 
+    /**
+     * The transaction this output was created by.
+     *
+     * Without it an output list cannot be turned back into a list of payments.
+     * Two outputs from one transaction look like two receipts, and *change* —
+     * which is the wallet paying itself the remainder — looks like income. A
+     * screen built on outputs alone told someone they had received twice and
+     * spent nothing.
+     */
+    var `txHashHex`: kotlin.String, 
+    /**
+     * The block's own timestamp, in seconds. Zero if unknown.
+     *
+     * A height is not a time. Nobody reconciling a payment against a receipt
+     * knows what block 2184652 means.
+     */
+    var `timestamp`: kotlin.ULong
 ) {
     
     companion object
@@ -2274,6 +2374,8 @@ public object FfiConverterTypeOwnedOutput: FfiConverterRustBuffer<OwnedOutput> {
             FfiConverterULong.read(buf),
             FfiConverterString.read(buf),
             FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
         )
     }
 
@@ -2281,7 +2383,9 @@ public object FfiConverterTypeOwnedOutput: FfiConverterRustBuffer<OwnedOutput> {
             FfiConverterULong.allocationSize(value.`amountPxmr`) +
             FfiConverterULong.allocationSize(value.`height`) +
             FfiConverterString.allocationSize(value.`keyImageHex`) +
-            FfiConverterByteArray.allocationSize(value.`blob`)
+            FfiConverterByteArray.allocationSize(value.`blob`) +
+            FfiConverterString.allocationSize(value.`txHashHex`) +
+            FfiConverterULong.allocationSize(value.`timestamp`)
     )
 
     override fun write(value: OwnedOutput, buf: ByteBuffer) {
@@ -2289,6 +2393,8 @@ public object FfiConverterTypeOwnedOutput: FfiConverterRustBuffer<OwnedOutput> {
             FfiConverterULong.write(value.`height`, buf)
             FfiConverterString.write(value.`keyImageHex`, buf)
             FfiConverterByteArray.write(value.`blob`, buf)
+            FfiConverterString.write(value.`txHashHex`, buf)
+            FfiConverterULong.write(value.`timestamp`, buf)
     }
 }
 
@@ -2770,6 +2876,99 @@ public object FfiConverterTypeSendResult: FfiConverterRustBuffer<SendResult> {
             FfiConverterString.write(value.`txidHex`, buf)
             FfiConverterULong.write(value.`feePxmr`, buf)
             FfiConverterUInt.write(value.`acceptedBy`, buf)
+    }
+}
+
+
+
+/**
+ * A transaction as the chain records it.
+ *
+ * The point of `key_images` is not display: it is how a wallet works out that
+ * *it* sent a transaction. A spend leaves no receipt on the sender's side —
+ * the only local trace is that some of your outputs stop being unspent. Match
+ * this transaction's inputs against your own key images and the answer is
+ * exact, with no local record needed, which means a send made before the app
+ * recorded sends is still recoverable from the chain.
+ */
+data class TxDetails (
+    var `txHashHex`: kotlin.String, 
+    var `version`: kotlin.UInt, 
+    /**
+     * Fee paid, in piconero. Zero for a miner transaction.
+     */
+    var `feePxmr`: kotlin.ULong, 
+    /**
+     * Key images consumed. Empty for a miner transaction.
+     */
+    var `keyImagesHex`: List<kotlin.String>, 
+    var `inputCount`: kotlin.UInt, 
+    var `outputCount`: kotlin.UInt, 
+    /**
+     * Decoys plus the real spend, per input. Monero's anonymity set.
+     */
+    var `ringSize`: kotlin.UInt, 
+    /**
+     * A lock beyond the standard ten blocks, or zero.
+     */
+    var `additionalTimelock`: kotlin.ULong, 
+    /**
+     * Bytes in `tx_extra` — where the transaction public key and any payment
+     * ID live.
+     */
+    var `extraLen`: kotlin.UInt, 
+    /**
+     * Whether this is a coinbase transaction.
+     */
+    var `coinbase`: kotlin.Boolean
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeTxDetails: FfiConverterRustBuffer<TxDetails> {
+    override fun read(buf: ByteBuffer): TxDetails {
+        return TxDetails(
+            FfiConverterString.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterSequenceString.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: TxDetails) = (
+            FfiConverterString.allocationSize(value.`txHashHex`) +
+            FfiConverterUInt.allocationSize(value.`version`) +
+            FfiConverterULong.allocationSize(value.`feePxmr`) +
+            FfiConverterSequenceString.allocationSize(value.`keyImagesHex`) +
+            FfiConverterUInt.allocationSize(value.`inputCount`) +
+            FfiConverterUInt.allocationSize(value.`outputCount`) +
+            FfiConverterUInt.allocationSize(value.`ringSize`) +
+            FfiConverterULong.allocationSize(value.`additionalTimelock`) +
+            FfiConverterUInt.allocationSize(value.`extraLen`) +
+            FfiConverterBoolean.allocationSize(value.`coinbase`)
+    )
+
+    override fun write(value: TxDetails, buf: ByteBuffer) {
+            FfiConverterString.write(value.`txHashHex`, buf)
+            FfiConverterUInt.write(value.`version`, buf)
+            FfiConverterULong.write(value.`feePxmr`, buf)
+            FfiConverterSequenceString.write(value.`keyImagesHex`, buf)
+            FfiConverterUInt.write(value.`inputCount`, buf)
+            FfiConverterUInt.write(value.`outputCount`, buf)
+            FfiConverterUInt.write(value.`ringSize`, buf)
+            FfiConverterULong.write(value.`additionalTimelock`, buf)
+            FfiConverterUInt.write(value.`extraLen`, buf)
+            FfiConverterBoolean.write(value.`coinbase`, buf)
     }
 }
 
@@ -3905,6 +4104,23 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
     
 
         /**
+         * When a block was mined, in seconds.
+         *
+         * For filling in times on outputs found before the scanner recorded them. One
+         * request per height, so callers ask about the few they are missing rather
+         * than the range.
+         */
+    @Throws(MoneroException::class) fun `moneroBlockTime`(`nodeUrl`: kotlin.String, `height`: kotlin.ULong): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_block_time(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterULong.lower(`height`),_status)
+}
+    )
+    }
+    
+
+        /**
          * The list, in the order it should be tried.
          *
          * Own first, then onion, then clearnet — the order in which they give away
@@ -3935,6 +4151,19 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_fee_estimate(
         FfiConverterString.lower(`nodeUrl`),FfiConverterUInt.lower(`inputs`),FfiConverterUInt.lower(`outputs`),FfiConverterUInt.lower(`priority`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Read an output's own record of itself, without touching the network.
+         */
+    @Throws(MoneroException::class) fun `moneroOutputMeta`(`blob`: kotlin.ByteArray): OutputMeta {
+            return FfiConverterTypeOutputMeta.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_output_meta(
+        FfiConverterByteArray.lower(`blob`),_status)
 }
     )
     }
@@ -4050,6 +4279,19 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_spent(
         FfiConverterString.lower(`nodeUrl`),FfiConverterSequenceString.lower(`keyImagesHex`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Fetch one transaction from the daemon.
+         */
+    @Throws(MoneroException::class) fun `moneroTxDetails`(`nodeUrl`: kotlin.String, `txHashHex`: kotlin.String): TxDetails {
+            return FfiConverterTypeTxDetails.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_tx_details(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`txHashHex`),_status)
 }
     )
     }

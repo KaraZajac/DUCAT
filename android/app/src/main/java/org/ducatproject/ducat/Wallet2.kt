@@ -95,6 +95,18 @@ data class WalletEntry(
     val keyImage: String,
     /** The serialized output, needed to spend it. */
     val blob: ByteArray = ByteArray(0),
+    /**
+     * The transaction that created it.
+     *
+     * Two outputs of one transaction are one event, not two, and the wallet's
+     * own change is an output of a transaction the wallet sent. Without this
+     * an output list cannot be read back as a history — which is how a send
+     * plus its change came out as two receipts and a balance that looked
+     * doubled.
+     */
+    val txHashHex: String = "",
+    /** Block time in seconds, or 0 until it has been looked up. */
+    val timestamp: Long = 0,
 )
 
 /**

@@ -571,6 +571,11 @@ private fun AmountStep(
                                         note.ifBlank { "Payment" },
                                         PersonaStore(context).personaHex(),
                                         kind = 2, amountPxmr = pxmr,
+                                        // Names the transaction, which is what
+                                        // lets their wallet put our name on the
+                                        // output when it arrives. Monero carries
+                                        // no sender; this is the only channel.
+                                        txidHex = res.txidHex,
                                     )
                                 }.onFailure {
                                     DucatLog.w(
