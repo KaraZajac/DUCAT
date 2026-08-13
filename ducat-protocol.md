@@ -1643,6 +1643,19 @@ A signed card measured **1241 bytes** issued by a phone on a real network — 10
 
 **The route blob is the thing to watch.** It is 86% of the card and the only part that can grow, so QR carriage is one route-format change away from not fitting.
 
+### A card outlives its route, and that is a problem
+
+A private route does **not** survive the issuing node restarting. Observed on a device: the app crashed, and every card it had handed out became unclaimable — the signature still verified, the expiry was still hours away, and the rendezvous pointed nowhere. The claimant sees a timeout, which says nothing about why.
+
+So the 24-hour expiry in §16.9 is an **upper** bound on usefulness, not an estimate of it. In practice a card is good until the issuing app next restarts, which on a phone is a matter of hours at best and is not under the issuer's control.
+
+Two consequences, neither yet addressed:
+
+- **A claim failure cannot currently distinguish** "they are offline", "the route died", and "the card was already used". Only the last is a refusal the issuer sent; the other two are silence, and silence is what a timeout looks like too.
+- **Re-publishing a route** for an outstanding card needs somewhere stable to publish it — §16.4's rendezvous DHT record rather than an inline blob. That is the fix, and it is the difference between a card being an address and a card being a snapshot of one.
+
+Until then an implementation SHOULD issue cards with short expiries and expect to reissue, rather than presenting a card as something that keeps working for a day.
+
 A **donation QR on a website is not this object**. That is `TapStatic` (§15.9): reusable, public, no relationship established, and carrying §15.9's admitted limit that a swapped tag verifies perfectly.
 
 ### Display names are not names

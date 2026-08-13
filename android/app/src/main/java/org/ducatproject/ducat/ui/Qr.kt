@@ -1,85 +1,105 @@
 package org.ducatproject.ducat.ui
 
-import androidx.compose.foundation.Canvas
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
- * A QR of a contact card.
+ * A QR code, drawn as **one bitmap**.
+ *
+ * The first version drew the matrix cell by cell in a `Canvas`. That reads
+ * naturally and is catastrophic, for a reason worth writing down: ZXing's
+ * `encode(text, format, width, height)` returns a matrix at the **requested
+ * pixel size**, not at the QR's module count. Asking for 512×512 therefore
+ * produced a 512×512 matrix, and the loop issued up to **262,144 `drawRect`
+ * calls per frame**, on the main thread, on every recomposition. It lagged, and
+ * then it took the app down — which also killed the Veilid node and left the
+ * routes in every card that had been handed out pointing nowhere.
+ *
+ * Now: encoded once off the main thread, converted to a single bitmap, drawn
+ * with one call. `FilterQuality.None` because a QR must scale by nearest
+ * neighbour — smoothing blurs the module edges and scanners start failing.
  *
  * Always black on white regardless of theme. A Catppuccin-tinted QR is a QR
- * some scanners fail to read, and a code that looks right and does not scan is
- * worse than one that looks plain.
- *
- * Error correction is **L**. §16.9 measured the card near 1 KB, and a higher
- * level pushes past what fits a phone screen at scannable module size — the
- * trade is deliberate, not a default left alone.
+ * some scanners refuse, and a code that looks right and does not scan is worse
+ * than one that looks plain.
  */
 @Composable
 fun QrBlock(text: String) {
-    val matrix = remember(text) {
-        runCatching {
-            QRCodeWriter().encode(
-                text,
-                BarcodeFormat.QR_CODE,
-                512,
-                512,
-                mapOf(
-                    EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L,
-                    EncodeHintType.MARGIN to 1,
-                ),
-            )
-        }.getOrNull()
-    }
-
-    if (matrix == null) {
-        Box(
-            Modifier.fillMaxWidth().height(120.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                "Too large for a QR — use the link instead.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
-        return
+    val bitmap by produceState<Result<ImageBitmap>?>(null, text) {
+        value = withContext(Dispatchers.Default) { encodeQr(text) }
     }
 
     Box(
-        Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(16.dp),
+        Modifier.fillMaxWidth().background(Color.White).padding(16.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Canvas(Modifier.size(260.dp)) {
-            val cell = size.width / matrix.width
-            for (y in 0 until matrix.height) {
-                for (x in 0 until matrix.width) {
-                    if (matrix.get(x, y)) {
-                        drawRect(
-                            color = Color.Black,
-                            topLeft = Offset(x * cell, y * cell),
-                            size = Size(cell, cell),
-                        )
-                    }
-                }
+        val b = bitmap
+        when {
+            b == null -> Box(Modifier.size(260.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
+            b.isFailure -> Text(
+                "Too much data for a QR code — use the link instead.",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+            )
+            else -> Image(
+                bitmap = b.getOrThrow(),
+                contentDescription = "QR code",
+                modifier = Modifier.size(260.dp),
+                contentScale = ContentScale.Fit,
+                filterQuality = FilterQuality.None,
+            )
         }
     }
+}
+
+private fun encodeQr(text: String): Result<ImageBitmap> = runCatching {
+    // Error correction L: §16.9's card is already near a version-31 symbol, and
+    // a higher level pushes it past what scans from a phone screen. Chosen, not
+    // left at a default.
+    val matrix = QRCodeWriter().encode(
+        text,
+        BarcodeFormat.QR_CODE,
+        0, // zero asks ZXing for the natural module count rather than a
+        0, // pixel size, which is what makes the bitmap small and cheap.
+        mapOf(
+            EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L,
+            EncodeHintType.MARGIN to 1,
+        ),
+    )
+    val w = matrix.width
+    val h = matrix.height
+    val pixels = IntArray(w * h)
+    for (y in 0 until h) {
+        val row = y * w
+        for (x in 0 until w) {
+            pixels[row + x] = if (matrix.get(x, y)) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
+        }
+    }
+    Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565)
+        .apply { setPixels(pixels, 0, w, 0, 0, w, h) }
+        .asImageBitmap()
 }
