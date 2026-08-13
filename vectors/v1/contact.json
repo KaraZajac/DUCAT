@@ -1,157 +1,188 @@
 {
   "cases": [
     {
+      "card_hex": "a800090101020118a75820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18a8785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118a95820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18aa646b61726118ab1a6b49d200",
       "expect": {
         "ok": true,
-        "reencodes_to_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200"
+        "reencodes_to_hex": "a800090101020118a75820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18a8785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118a95820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18aa646b61726118ab1a6b49d200"
       },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.invite",
-      "name": "invite_valid",
+      "kind": "contact.card",
+      "name": "card_valid",
       "why": "A card with every field present decodes and re-encodes byte-identically."
     },
     {
+      "card_hex": "a700090101020118a75820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18a8785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118a95820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18ab1a6b49d200",
       "expect": {
         "ok": true,
-        "reencodes_to_hex": "a700090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200"
+        "reencodes_to_hex": "a700090101020118a75820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18a8785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118a95820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18ab1a6b49d200"
       },
-      "invite_hex": "a700090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.invite",
-      "name": "invite_no_display_name",
+      "kind": "contact.card",
+      "name": "card_no_display_name",
       "why": "A name is optional; omitting the key is how you decline to assert one."
     },
     {
+      "card_hex": "a800090101020118a75820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18a8785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118a95820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18aa6018ab1a6b49d200",
       "expect": {
         "hint": "empty text field",
         "ok": false,
         "reject": "MALFORMED"
       },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb189560189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.invite",
-      "name": "invite_display_name_empty",
+      "kind": "contact.card",
+      "name": "card_display_name_empty",
       "why": "A present-but-empty name is a second encoding of `absent`. §18.1 admits one encoding per meaning, so this is MALFORMED rather than a name of zero length."
     },
     {
+      "card_hex": "a800090101020118a75820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18a8785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118a95820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18aa782178787878787878787878787878787878787878787878787878787878787878787818ab1a6b49d200",
       "expect": {
         "hint": "text over bound",
         "ok": false,
         "reject": "MALFORMED"
       },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18957821787878787878787878787878787878787878787878787878787878787878787878189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.invite",
-      "name": "invite_display_name_too_long",
-      "why": "Names are bounded in characters, not bytes, so the bound does not silently shorten scripts that need more than one byte per character."
+      "kind": "contact.card",
+      "name": "card_display_name_too_long",
+      "why": "Names are bounded in characters, not bytes, so the bound does not silently shorten scripts needing more than one byte per character."
     },
     {
+      "card_hex": "a800090101020118a75820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18a8785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118a95820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18aa7860e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e3818218ab1a6b49d200",
       "expect": {
         "ok": true,
-        "reencodes_to_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb189578207878787878787878787878787878787878787878787878787878787878787878189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200"
+        "reencodes_to_hex": "a800090101020118a75820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18a8785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118a95820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18aa7860e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e3818218ab1a6b49d200"
       },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb189578207878787878787878787878787878787878787878787878787878787878787878189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.invite",
-      "name": "invite_display_name_at_bound",
-      "why": "Exactly at the bound is accepted; the bound is inclusive."
+      "kind": "contact.card",
+      "name": "card_display_name_multibyte",
+      "why": "Thirty-two characters of Japanese is 96 bytes. A byte bound would reject a name within the stated limit, which is why the limit counts characters."
     },
     {
-      "expect": {
-        "ok": true,
-        "reencodes_to_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18957860e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200"
-      },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18957860e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182e38182189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.invite",
-      "name": "invite_display_name_multibyte",
-      "why": "Thirty-two characters of Japanese is 96 bytes. A byte bound would reject a name that is within the stated limit, which is why the limit counts characters."
-    },
-    {
+      "card_hex": "a800090101020118a75820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18a8785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118a95820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18aa6365cc8118ab1a6b49d200",
       "expect": {
         "hint": "text is not NFC-normalized",
         "ok": false,
         "reject": "MALFORMED"
       },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18956365cc81189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.invite",
-      "name": "invite_display_name_not_nfc",
-      "why": "A decomposed name is valid UTF-8 and non-canonical. Two encodings of one name would make H(object) depend on the sender's keyboard, so §18.1 requires NFC and this is MALFORMED."
+      "kind": "contact.card",
+      "name": "card_display_name_not_nfc",
+      "why": "A decomposed name is valid UTF-8 and non-canonical. Two encodings of one name would make H(object) depend on the sender's keyboard, so §18.1 requires NFC."
     },
     {
-      "already_claimed": false,
-      "claim_hex": "a8000a0101020118985820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58205e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e189c1a6553f100",
+      "card_hex": "a800090101020118a75820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18a8788156565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565618a95820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18aa646b61726118ab1a6b49d200",
       "expect": {
-        "ok": true
-      },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.claim",
-      "name": "claim_valid",
-      "now": 1700000000,
-      "why": "The holder of the card presents the secret before expiry and the card is unused."
-    },
-    {
-      "already_claimed": true,
-      "claim_hex": "a8000a0101020118985820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58205e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e189c1a6553f100",
-      "expect": {
-        "hint": "invitation already claimed",
+        "hint": "text over bound",
         "ok": false,
-        "reject": "REPLAY"
+        "reject": "MALFORMED"
       },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.claim",
-      "name": "claim_second_use",
-      "now": 1700000000,
-      "why": "The screenshot case: someone else saw the card in a group chat. Single-use is what keeps a forwarded card from being a standing offer to everyone who ever saw the message it arrived in."
+      "kind": "contact.card",
+      "name": "card_inbox_key_too_long",
+      "why": "A record key is an address, and an address field long enough to hold a payload is a covert channel with a signature on it."
     },
     {
-      "already_claimed": false,
-      "claim_hex": "a8000a0101020118985820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58201111111111111111111111111111111111111111111111111111111111111111189c1a6553f100",
+      "card_hex": "a800090101020118a75820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18a86018a95820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18aa646b61726118ab1a6b49d200",
       "expect": {
-        "hint": "claim secret mismatch",
+        "hint": "empty text field",
         "ok": false,
-        "reject": "BADSIG"
+        "reject": "MALFORMED"
       },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.claim",
-      "name": "claim_wrong_secret",
-      "now": 1700000000,
-      "why": "Personas are public by design, so knowing one proves nothing. The secret is the only thing distinguishing someone who was handed the card."
+      "kind": "contact.card",
+      "name": "card_inbox_key_empty",
+      "why": "A card whose inbox is the empty string names nothing. Absent and empty must not both mean `no inbox`."
     },
     {
-      "already_claimed": false,
-      "claim_hex": "a8000a0101020118985820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58205e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e189c1a6553f100",
+      "details_hex": "a7000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d",
       "expect": {
-        "hint": "invitation expired",
+        "ok": true,
+        "reencodes_to_hex": "a7000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d"
+      },
+      "kind": "contact.details",
+      "name": "details_valid",
+      "why": "What each side writes into the contact inbox: who they are, where to leave things, and the keys to seal with."
+    },
+    {
+      "details_hex": "a6000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a6000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "kind": "contact.details",
+      "name": "details_no_name",
+      "why": "The name is optional here for the same reason it is on the card."
+    },
+    {
+      "details_hex": "a7000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad6018ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d",
+      "expect": {
+        "hint": "empty text field",
         "ok": false,
-        "reject": "EXPIRED"
+        "reject": "MALFORMED"
       },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.claim",
-      "name": "claim_expired",
-      "now": 1800000001,
-      "why": "One second past expiry. A card that never expires is a credential its issuer has forgotten they published."
+      "kind": "contact.details",
+      "name": "details_outbox_empty",
+      "why": "An empty outbox key would leave the other side with a contact it can never write to, reported as success."
     },
     {
-      "already_claimed": false,
-      "claim_hex": "a8000a0101020118985820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58205e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e189c1a6553f100",
       "expect": {
-        "ok": true
+        "ok": true,
+        "reencodes_to_hex": "a400181a0101020118b000"
       },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.claim",
-      "name": "claim_at_expiry",
-      "now": 1800000000,
-      "why": "Exactly at expiry is still valid; the deadline is inclusive, matching every other deadline in §18.4."
+      "head_hex": "a400181a0101020118b000",
+      "kind": "log.head",
+      "name": "head_zero",
+      "why": "A log nobody has written to yet: the next message will be sequence 0."
     },
     {
-      "already_claimed": false,
-      "claim_hex": "a8000a0101020118985820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18995820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd189a6373616d189b58205e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e189c1a6553f100",
       "expect": {
-        "hint": "self-claim",
-        "ok": false,
-        "reject": "POLICYREFUSED"
+        "ok": true,
+        "reencodes_to_hex": "a400181a0101020118b0182a"
       },
-      "invite_hex": "a800090101020118935820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18945820bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1895646b617261189658204d25f1e5ef2d3dfddae034034208c9decc440daca0f6dbad68647fb84cfb918518971a6b49d200",
-      "kind": "contact.claim",
-      "name": "claim_self",
-      "now": 1700000000,
-      "why": "Refused so that an attacker who intercepts a card cannot burn it by claiming it back to its issuer, leaving the intended recipient with a card that silently fails."
+      "head_hex": "a400181a0101020118b0182a",
+      "kind": "log.head",
+      "name": "head_mid",
+      "why": "next_seq doubles as the count of messages ever written, which is what makes a gap detectable."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "oldest_readable": 0,
+        "subkey": 1
+      },
+      "kind": "log.ring",
+      "name": "ring_first",
+      "seq": 0,
+      "subkey_count": 8,
+      "why": "The first message goes to subkey 1, immediately after the head."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "oldest_readable": 0,
+        "subkey": 7
+      },
+      "kind": "log.ring",
+      "name": "ring_last_slot",
+      "seq": 6,
+      "subkey_count": 8,
+      "why": "Seven slots in an eight-subkey record, so sequence 6 is the last before wrapping."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "oldest_readable": 1,
+        "subkey": 1
+      },
+      "kind": "log.ring",
+      "name": "ring_wraps",
+      "seq": 7,
+      "subkey_count": 8,
+      "why": "Sequence 7 wraps back to subkey 1 and overwrites sequence 0."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "oldest_readable": 8,
+        "subkey": 1
+      },
+      "kind": "log.ring",
+      "name": "ring_wraps_twice",
+      "seq": 14,
+      "subkey_count": 8,
+      "why": "Wrapping is modular, not a one-off."
     },
     {
       "expect": {
@@ -178,7 +209,7 @@
         "a7001701010201189d00189e58209999999999999999999999999999999999999999999999999999999999999999189f6368657918a01a6553f100"
       ],
       "name": "chain_first_must_link_to_nothing",
-      "why": "The opening message of a thread has no predecessor, so its link is thirty-two zero bytes. Anything else claims a history that does not exist."
+      "why": "The opening message has no predecessor, so its link is thirty-two zero bytes. Anything else claims a history that does not exist."
     },
     {
       "expect": {
@@ -193,7 +224,7 @@
         "a7001701010201189d02189e582027d459c4992f9abb3a99bff6ac348254ba621e9ef1b42c653fb51ab0ccb30a70189f7268657265277320746865203230206261636b18a01a6553f178"
       ],
       "name": "chain_gap_refused",
-      "why": "A missing message is refused rather than stored around it: a thread that silently skips one shows a conversation that did not happen, and the reader cannot tell."
+      "why": "A missing message is refused rather than stored around it: a thread that silently skips one shows a conversation that did not happen."
     },
     {
       "expect": {

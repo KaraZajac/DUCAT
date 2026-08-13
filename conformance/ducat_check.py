@@ -784,7 +784,8 @@ OBJECT_TYPE_CODES = {
     "CONTACT_ACCEPT": 10, "bond_proof": 11, "attestation": 12,
     "DISPUTE": 13, "RULING": 14, "HAIL": 15, "HAIL_REPLY": 16, "TapStatic": 17,
     "TXID": 18, "ESCROW_SETUP": 19, "ESCROW_READY": 20, "RELEASE": 21,
-    "SLASH_CLAIM": 22, "MESSAGE": 23,
+    "SLASH_CLAIM": 22, "MESSAGE": 23, "PREKEY_BUNDLE": 24,
+    "SEALED_MESSAGE": 25, "LOG_HEAD": 26,
 }
 
 
@@ -932,12 +933,15 @@ def run_slash_check(cases, r):
 MAX_DISPLAY_NAME_CHARS = 32
 MAX_MESSAGE_CHARS = 2000
 
-# §18.4.2 field keys.
-INV_PERSONA, INV_RENDEZVOUS, INV_DISPLAY_NAME = 147, 148, 149
-INV_CLAIM_COMMIT, INV_EXPIRY = 150, 151
-CLM_PERSONA, CLM_RENDEZVOUS, CLM_DISPLAY_NAME = 152, 153, 154
-CLM_SECRET, CLM_TS = 155, 156
+MAX_RECORD_KEY_CHARS = 128
+
+# §18.4.2 field keys. 147-156 held the route-blob card and are burned rather
+# than reused: an old card decoding as a new one under different meanings is the
+# divergence the registry exists to prevent.
 MSG_SEQ, MSG_PREV, MSG_BODY, MSG_TS = 157, 158, 159, 160
+CARD_PERSONA, CARD_INBOX, CARD_WRITER, CARD_NAME, CARD_EXPIRY = 167, 168, 169, 170, 171
+DET_PERSONA, DET_OUTBOX, DET_BUNDLE, DET_NAME = 172, 173, 174, 175
+HEAD_NEXT = 176
 
 
 def _body(buf):
@@ -991,40 +995,47 @@ def _finish(body):
         raise Reject("Malformed", f"unexpected field {sorted(body)[0]}")
 
 
-def parse_invite(buf):
+def parse_card(buf):
     b = _body(buf)
     _expect_type(b, "CONTACT_OFFER", "CONTACT_OFFER")
     out = {
         "version": _take(b, 1, "uint", "version"),
         "suite": _take(b, 2, "uint", "suite"),
-        "persona": _take(b, INV_PERSONA, "bytes", "persona"),
-        "rendezvous": _take(b, INV_RENDEZVOUS, "bytes", "rendezvous"),
-        "display_name": _take_text(b, INV_DISPLAY_NAME, MAX_DISPLAY_NAME_CHARS,
+        "persona": _take(b, CARD_PERSONA, "bytes", "persona"),
+        "inbox_key": _take_text(b, CARD_INBOX, MAX_RECORD_KEY_CHARS, "inbox key", True),
+        "writer_public": _take(b, CARD_WRITER, "bytes", "writer key"),
+        "display_name": _take_text(b, CARD_NAME, MAX_DISPLAY_NAME_CHARS,
                                    "display name", False),
-        "claim_commit": _take(b, INV_CLAIM_COMMIT, "bytes", "claim commitment"),
-        "expiry": _take(b, INV_EXPIRY, "uint", "expiry"),
+        "expiry": _take(b, CARD_EXPIRY, "uint", "expiry"),
     }
-    if len(out["claim_commit"]) != 32:
-        raise Reject("Malformed", "claim commitment is not 32 bytes")
     _finish(b)
     return out
 
 
-def parse_claim(buf):
+def parse_details(buf):
     b = _body(buf)
     _expect_type(b, "CONTACT_ACCEPT", "CONTACT_ACCEPT")
     out = {
         "version": _take(b, 1, "uint", "version"),
         "suite": _take(b, 2, "uint", "suite"),
-        "persona": _take(b, CLM_PERSONA, "bytes", "persona"),
-        "rendezvous": _take(b, CLM_RENDEZVOUS, "bytes", "rendezvous"),
-        "display_name": _take_text(b, CLM_DISPLAY_NAME, MAX_DISPLAY_NAME_CHARS,
+        "persona": _take(b, DET_PERSONA, "bytes", "persona"),
+        "outbox_key": _take_text(b, DET_OUTBOX, MAX_RECORD_KEY_CHARS, "outbox key", True),
+        "prekey_bundle": _take(b, DET_BUNDLE, "bytes", "prekey bundle"),
+        "display_name": _take_text(b, DET_NAME, MAX_DISPLAY_NAME_CHARS,
                                    "display name", False),
-        "claim_secret": _take(b, CLM_SECRET, "bytes", "claim secret"),
-        "timestamp": _take(b, CLM_TS, "uint", "timestamp"),
     }
-    if len(out["claim_secret"]) != 32:
-        raise Reject("Malformed", "claim secret is not 32 bytes")
+    _finish(b)
+    return out
+
+
+def parse_head(buf):
+    b = _body(buf)
+    _expect_type(b, "LOG_HEAD", "LOG_HEAD")
+    out = {
+        "version": _take(b, 1, "uint", "version"),
+        "suite": _take(b, 2, "uint", "suite"),
+        "next_seq": _take(b, HEAD_NEXT, "uint", "next sequence"),
+    }
     _finish(b)
     return out
 
@@ -1046,18 +1057,21 @@ def parse_message(buf):
     return out
 
 
-def check_claim(invite, claim, now, already_claimed):
-    """§16.9. Order matters and is chosen, not incidental: a card that is both
-    spent and expired reports spent, because that is the fact the issuer can
-    act on."""
-    if already_claimed:
-        raise Reject("Replay", "invitation already used")
-    if now > invite["expiry"]:
-        raise Reject("Expired", "invitation expired")
-    if commit(PURPOSE_SPEC["chain"], claim["claim_secret"]) != invite["claim_commit"]:
-        raise Reject("BadSig", "claim secret does not match")
-    if claim["persona"] == invite["persona"]:
-        raise Reject("PolicyRefused", "self-claim")
+def subkey_for(seq, subkey_count):
+    """§16.12's ring. Subkey 0 is the head, so messages start at 1 and wrap
+    without ever landing on it — an off-by-one here overwrites the head with a
+    message and loses the whole log rather than one entry."""
+    slots = subkey_count - 1
+    return (seq % slots) + 1
+
+
+def still_in_ring(seq, next_seq, subkey_count):
+    """Whether a reader can still fetch `seq`. A reader that was away long
+    enough has genuinely lost messages and must be able to tell: silently
+    showing a thread with a hole in it is §16.10's conversation that did not
+    happen."""
+    slots = subkey_count - 1
+    return seq < next_seq and next_seq - seq <= slots
 
 
 def check_message(msg, expected_seq, previous_bytes):
@@ -1072,21 +1086,25 @@ def check_message(msg, expected_seq, previous_bytes):
         raise Reject("CommitMismatch", "message does not follow the one before it")
 
 
-def run_contact_invite(cases, r):
+def _reencode_map(fields):
+    """Re-encode from parsed fields, so agreement is on the *object* rather than
+    on having echoed back the bytes handed in."""
+    return encode(("map", fields))
+
+
+def run_contact_card(cases, r):
     for c in cases:
         def go(c=c):
-            inv = parse_invite(unhex(c["invite_hex"]))
-            # Re-encode from parsed fields, so agreement is on the *object*, not
-            # on having echoed back the bytes handed in.
-            m = [(1, ("uint", inv["version"])), (2, ("uint", inv["suite"])),
-                 (0, ("uint", OBJECT_TYPE_CODES["CONTACT_OFFER"])),
-                 (INV_PERSONA, ("bytes", inv["persona"])),
-                 (INV_RENDEZVOUS, ("bytes", inv["rendezvous"])),
-                 (INV_CLAIM_COMMIT, ("bytes", inv["claim_commit"])),
-                 (INV_EXPIRY, ("uint", inv["expiry"]))]
-            if inv["display_name"] is not None:
-                m.append((INV_DISPLAY_NAME, ("text", inv["display_name"])))
-            return encode(("map", m))
+            k = parse_card(unhex(c["card_hex"]))
+            m = [(0, ("uint", OBJECT_TYPE_CODES["CONTACT_OFFER"])),
+                 (1, ("uint", k["version"])), (2, ("uint", k["suite"])),
+                 (CARD_PERSONA, ("bytes", k["persona"])),
+                 (CARD_INBOX, ("text", k["inbox_key"])),
+                 (CARD_WRITER, ("bytes", k["writer_public"])),
+                 (CARD_EXPIRY, ("uint", k["expiry"]))]
+            if k["display_name"] is not None:
+                m.append((CARD_NAME, ("text", k["display_name"])))
+            return _reencode_map(m)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
             r.passed -= 1
@@ -1095,12 +1113,58 @@ def run_contact_invite(cases, r):
                   f"{c['expect']['reencodes_to_hex']}")
 
 
-def run_contact_claim(cases, r):
+def run_contact_details(cases, r):
     for c in cases:
         def go(c=c):
-            check_claim(parse_invite(unhex(c["invite_hex"])),
-                        parse_claim(unhex(c["claim_hex"])),
-                        c["now"], c["already_claimed"])
+            d = parse_details(unhex(c["details_hex"]))
+            m = [(0, ("uint", OBJECT_TYPE_CODES["CONTACT_ACCEPT"])),
+                 (1, ("uint", d["version"])), (2, ("uint", d["suite"])),
+                 (DET_PERSONA, ("bytes", d["persona"])),
+                 (DET_OUTBOX, ("text", d["outbox_key"])),
+                 (DET_BUNDLE, ("bytes", d["prekey_bundle"]))]
+            if d["display_name"] is not None:
+                m.append((DET_NAME, ("text", d["display_name"])))
+            return _reencode_map(m)
+        out = expect_reject(r, "contact", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, vector says "
+                  f"{c['expect']['reencodes_to_hex']}")
+
+
+def run_log_head(cases, r):
+    for c in cases:
+        def go(c=c):
+            h = parse_head(unhex(c["head_hex"]))
+            return _reencode_map([
+                (0, ("uint", OBJECT_TYPE_CODES["LOG_HEAD"])),
+                (1, ("uint", h["version"])), (2, ("uint", h["suite"])),
+                (HEAD_NEXT, ("uint", h["next_seq"])),
+            ])
+        out = expect_reject(r, "contact", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, vector says "
+                  f"{c['expect']['reencodes_to_hex']}")
+
+
+def run_log_ring(cases, r):
+    for c in cases:
+        def go(c=c):
+            seq, count = c["seq"], c["subkey_count"]
+            got = subkey_for(seq, count)
+            if got != c["expect"]["subkey"]:
+                raise Reject("StateViolation",
+                             f"seq {seq} maps to subkey {got}, vector says "
+                             f"{c['expect']['subkey']}")
+            oldest = c["expect"]["oldest_readable"]
+            if not still_in_ring(oldest, seq + 1, count):
+                raise Reject("StateViolation", f"seq {oldest} should still be readable")
+            if oldest > 0 and still_in_ring(oldest - 1, seq + 1, count):
+                raise Reject("StateViolation",
+                             f"the ring should have passed seq {oldest - 1}")
             return None
         expect_reject(r, "contact", c, go)
 
@@ -1125,8 +1189,10 @@ def run_message_chain(cases, r):
 
 
 BY_KIND = {
-    "contact.invite": run_contact_invite,
-    "contact.claim": run_contact_claim,
+    "contact.card": run_contact_card,
+    "contact.details": run_contact_details,
+    "log.head": run_log_head,
+    "log.ring": run_log_ring,
     "message.chain": run_message_chain,
     "escrow.ceremony": run_escrow_ceremony,
     "escrow.ready": run_escrow_ready,

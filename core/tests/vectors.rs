@@ -441,7 +441,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "transcript.replay", "transcript.substitution", "backup.import",
         "object.roundtrip", "escrow.ceremony", "escrow.ready", "escrow.release",
         "bond.check", "slash.check",
-        "contact.invite", "contact.claim", "message.chain",
+        "contact.card", "contact.details", "log.head", "log.ring", "message.chain",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -514,7 +514,7 @@ fn object_vectors_pass() {
 /// Encoding agreement was never the hard part — two clients can serialise
 /// identically and still *decide* differently, and these are the decisions money
 /// depends on.
-/// §16.9 / §16.10 — cards that travel out of band, and 1:1 message chains.
+/// §16.9 / §16.12 — record-based cards, inbox details, the log ring, and chains.
 #[test]
 fn contact_vectors_pass() {
     use ducat_core::contact::*;
@@ -524,14 +524,14 @@ fn contact_vectors_pass() {
         let want_ok = c["expect"]["ok"].as_bool().unwrap();
         let want_code = || c["expect"]["reject"].as_str().unwrap().to_string();
         match c["kind"].as_str().unwrap() {
-            "contact.invite" => {
-                let raw = unhex(c["invite_hex"].as_str().unwrap());
-                let got = decode(&raw).map_err(|e| e.into())
-                    .and_then(ContactInvite::from_value);
+            "contact.card" => {
+                let got = decode(&unhex(c["card_hex"].as_str().unwrap()))
+                    .map_err(|e| e.into())
+                    .and_then(ContactCard::from_value);
                 assert_eq!(got.is_ok(), want_ok, "{name}: {got:?}");
                 match got {
-                    Ok(inv) => assert_eq!(
-                        hexs(&inv.to_value().encode()),
+                    Ok(card) => assert_eq!(
+                        hexs(&card.to_value().encode()),
                         c["expect"]["reencodes_to_hex"].as_str().unwrap(),
                         "{name}: did not re-encode byte-identically"
                     ),
@@ -541,17 +541,44 @@ fn contact_vectors_pass() {
                     ),
                 }
             }
-            "contact.claim" => {
-                let inv = ContactInvite::from_value(
-                    decode(&unhex(c["invite_hex"].as_str().unwrap())).unwrap()).unwrap();
-                let clm = ContactClaim::from_value(
-                    decode(&unhex(c["claim_hex"].as_str().unwrap())).unwrap()).unwrap();
-                let got = check_claim(&inv, &clm, c["now"].as_u64().unwrap(),
-                                      c["already_claimed"].as_bool().unwrap());
+            "contact.details" => {
+                let got = decode(&unhex(c["details_hex"].as_str().unwrap()))
+                    .map_err(|e| e.into())
+                    .and_then(ContactDetails::from_value);
                 assert_eq!(got.is_ok(), want_ok, "{name}: {got:?}");
-                if let Err(e) = got {
-                    assert_eq!(format!("{:?}", e.code).to_uppercase(), want_code(),
-                               "{name}: wrong reject code");
+                match got {
+                    Ok(d) => assert_eq!(
+                        hexs(&d.to_value().encode()),
+                        c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"
+                    ),
+                    Err(e) => assert_eq!(
+                        format!("{:?}", e.code).to_uppercase(), want_code(), "{name}"
+                    ),
+                }
+            }
+            "log.head" => {
+                let h = LogHead::from_value(
+                    decode(&unhex(c["head_hex"].as_str().unwrap())).unwrap()).unwrap();
+                assert_eq!(
+                    hexs(&h.to_value().encode()),
+                    c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"
+                );
+            }
+            "log.ring" => {
+                let seq = c["seq"].as_u64().unwrap();
+                let count = c["subkey_count"].as_u64().unwrap() as u32;
+                assert_eq!(
+                    subkey_for(seq, count) as u64,
+                    c["expect"]["subkey"].as_u64().unwrap(),
+                    "{name}: wrong subkey"
+                );
+                // Everything from `oldest_readable` up to seq must still be
+                // fetchable, and the one before it must not.
+                let oldest = c["expect"]["oldest_readable"].as_u64().unwrap();
+                assert!(still_in_ring(oldest, seq + 1, count), "{name}: oldest should be readable");
+                if oldest > 0 {
+                    assert!(!still_in_ring(oldest - 1, seq + 1, count),
+                            "{name}: the ring should have passed {}", oldest - 1);
                 }
             }
             "message.chain" => {

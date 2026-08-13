@@ -124,19 +124,23 @@ pub mod f {
     pub const OFFER_MEMO: u64 = 145;
     pub const ACCEPT_MEMO: u64 = 146;
 
-    // CONTACT_OFFER as an out-of-band invitation (§16.9)
-    pub const INV_PERSONA: u64 = 147;
-    pub const INV_RENDEZVOUS: u64 = 148;
-    pub const INV_DISPLAY_NAME: u64 = 149;
-    pub const INV_CLAIM_COMMIT: u64 = 150;
-    pub const INV_EXPIRY: u64 = 151;
+    // CONTACT_OFFER — the card (§16.9, §16.12). 147-151 held the route-blob
+    // form and are burned rather than reused: an old card decoding as a new one
+    // under different meanings is exactly the divergence §18.4.2 exists to stop.
+    pub const CARD_PERSONA: u64 = 167;
+    pub const CARD_INBOX: u64 = 168;
+    pub const CARD_WRITER: u64 = 169;
+    pub const CARD_NAME: u64 = 170;
+    pub const CARD_EXPIRY: u64 = 171;
 
-    // CONTACT_ACCEPT (§16.9)
-    pub const CLM_PERSONA: u64 = 152;
-    pub const CLM_RENDEZVOUS: u64 = 153;
-    pub const CLM_DISPLAY_NAME: u64 = 154;
-    pub const CLM_SECRET: u64 = 155;
-    pub const CLM_TS: u64 = 156;
+    // CONTACT_ACCEPT — inbox details, written by either side (§16.12)
+    pub const DET_PERSONA: u64 = 172;
+    pub const DET_OUTBOX: u64 = 173;
+    pub const DET_BUNDLE: u64 = 174;
+    pub const DET_NAME: u64 = 175;
+
+    // LOG_HEAD (§16.12)
+    pub const HEAD_NEXT: u64 = 176;
 
     // MESSAGE (§16.10)
     pub const MSG_SEQ: u64 = 157;
@@ -359,6 +363,7 @@ pub(crate) fn type_code(t: ObjectType) -> u64 {
         ObjectType::Message => 23,
         ObjectType::PreKeyBundle => 24,
         ObjectType::SealedMessage => 25,
+        ObjectType::LogHead => 26,
     }
 }
 

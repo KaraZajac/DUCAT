@@ -1,93 +1,154 @@
-//! Out-of-band contact cards and 1:1 messages (§16.9, §16.10).
+//! Record-based contact cards and 1:1 message chains (§16.9, §16.10, §16.12).
 
 use ducat_core::contact::*;
 
-fn invite(expiry: u64, secret: &[u8; 32]) -> ContactInvite {
-    ContactInvite {
+fn card(expiry: u64) -> ContactCard {
+    ContactCard {
         version: 1,
         suite: 1,
         persona: vec![0xAA; 32],
-        rendezvous: vec![0xBB; 32],
+        inbox_key: "VLD0:Qaq9to-SDiN5usgs4gxdmFDo-V8OH_xztMIcv8QWqPA:qqSJ7OtADw5pvvKc1Z3uISLsq-uOl1gmmL3r_8vhvkA".into(),
+        writer_public: vec![0xBB; 32],
         display_name: Some("kara".into()),
-        claim_commit: claim_commitment(secret),
         expiry,
     }
 }
 
-fn claim(secret: [u8; 32]) -> ContactClaim {
-    ContactClaim {
-        version: 1,
-        suite: 1,
-        persona: vec![0xCC; 32],
-        rendezvous: vec![0xDD; 32],
-        display_name: Some("sam".into()),
-        claim_secret: secret,
-        timestamp: 1000,
-    }
-}
-
 #[test]
-fn round_trips_through_canonical_cbor() {
-    let s = [7u8; 32];
-    let i = invite(9999, &s);
-    assert_eq!(ContactInvite::from_value(i.to_value()).unwrap(), i);
-    let c = claim(s);
-    assert_eq!(ContactClaim::from_value(c.to_value()).unwrap(), c);
+fn cards_round_trip_through_canonical_cbor() {
+    let c = card(9999);
+    assert_eq!(ContactCard::from_value(c.to_value()).unwrap(), c);
 }
 
 #[test]
 fn a_card_without_a_name_is_still_a_card() {
-    let mut i = invite(9999, &[1u8; 32]);
-    i.display_name = None;
-    assert_eq!(ContactInvite::from_value(i.to_value()).unwrap(), i);
+    let mut c = card(9999);
+    c.display_name = None;
+    assert_eq!(ContactCard::from_value(c.to_value()).unwrap(), c);
 }
 
 #[test]
-fn good_claim_is_accepted() {
-    let s = [7u8; 32];
-    check_claim(&invite(9999, &s), &claim(s), 1000, false).unwrap();
-}
-
-/// The screenshot case: someone else saw the card in a group chat.
-#[test]
-fn a_second_claim_is_refused() {
-    let s = [7u8; 32];
-    let err = check_claim(&invite(9999, &s), &claim(s), 1000, true).unwrap_err();
-    assert!(format!("{err:?}").contains("Replay"), "{err:?}");
-}
-
-/// Knowing the persona is not knowing the invitation. Personas are public.
-#[test]
-fn knowing_the_persona_is_not_enough() {
-    let s = [7u8; 32];
-    let err = check_claim(&invite(9999, &s), &claim([8u8; 32]), 1000, false).unwrap_err();
-    assert!(format!("{err:?}").contains("BadSig"), "{err:?}");
+fn a_card_must_carry_an_inbox() {
+    let mut v = card(9999).to_value();
+    if let ducat_core::cbor::Value::Map(m) = &mut v {
+        m.remove(&168);
+    }
+    assert!(ContactCard::from_value(v).is_err());
 }
 
 #[test]
-fn an_expired_card_is_refused() {
-    let s = [7u8; 32];
-    let err = check_claim(&invite(500, &s), &claim(s), 501, false).unwrap_err();
-    assert!(format!("{err:?}").contains("Expired"), "{err:?}");
-}
-
-/// Otherwise an attacker who intercepts a card can burn it by claiming it back
-/// to its issuer, and the intended recipient silently gets nothing.
-#[test]
-fn a_card_cannot_be_claimed_by_its_own_issuer() {
-    let s = [7u8; 32];
-    let i = invite(9999, &s);
-    let mut c = claim(s);
-    c.persona = i.persona.clone();
-    let err = check_claim(&i, &c, 1000, false).unwrap_err();
-    assert!(format!("{err:?}").contains("PolicyRefused"), "{err:?}");
+fn an_inbox_key_is_bounded() {
+    let mut c = card(9999);
+    c.inbox_key = "V".repeat(MAX_RECORD_KEY_CHARS + 1);
+    assert!(ContactCard::from_value(c.to_value()).is_err());
 }
 
 #[test]
 fn a_display_name_cannot_smuggle_a_paragraph() {
-    let mut i = invite(9999, &[1u8; 32]);
-    i.display_name = Some("x".repeat(MAX_DISPLAY_NAME_CHARS + 1));
-    assert!(ContactInvite::from_value(i.to_value()).is_err());
+    let mut c = card(9999);
+    c.display_name = Some("x".repeat(MAX_DISPLAY_NAME_CHARS + 1));
+    assert!(ContactCard::from_value(c.to_value()).is_err());
+}
+
+#[test]
+fn an_empty_display_name_is_refused() {
+    let mut c = card(9999);
+    c.display_name = Some(String::new());
+    assert!(ContactCard::from_value(c.to_value()).is_err());
+}
+
+/// The URI carries the writer secret beside the card, never inside it — so the
+/// signed object can be logged without becoming answerable.
+#[test]
+fn a_card_round_trips_through_its_uri() {
+    let env = b"pretend this is a signed envelope".to_vec();
+    let secret = [0x5E; 32];
+    let uri = card_to_uri(&env, &secret);
+    assert!(uri.starts_with(CARD_URI_PREFIX));
+    let (back_env, back_secret) = card_from_uri(&uri).unwrap();
+    assert_eq!(back_env, env);
+    assert_eq!(back_secret, secret);
+}
+
+#[test]
+fn a_truncated_uri_is_refused_rather_than_half_parsed() {
+    let uri = card_to_uri(b"envelope", &[1u8; 32]);
+    let cut = &uri[..uri.len() - 20];
+    assert!(card_from_uri(cut).is_err());
+    assert!(card_from_uri("ducat:card/nodotseparator").is_err());
+    assert!(card_from_uri("https://example.com/x.y").is_err());
+}
+
+// --- inbox details --------------------------------------------------------
+
+fn details() -> ContactDetails {
+    ContactDetails {
+        version: 1,
+        suite: 1,
+        persona: vec![0xCC; 32],
+        outbox_key: "VLD0:abc:def".into(),
+        prekey_bundle: vec![0x01, 0x02, 0x03],
+        display_name: Some("sam".into()),
+    }
+}
+
+#[test]
+fn details_round_trip() {
+    let d = details();
+    assert_eq!(ContactDetails::from_value(d.to_value()).unwrap(), d);
+}
+
+#[test]
+fn details_must_name_an_outbox() {
+    let mut v = details().to_value();
+    if let ducat_core::cbor::Value::Map(m) = &mut v {
+        m.remove(&173);
+    }
+    assert!(ContactDetails::from_value(v).is_err());
+}
+
+// --- the log ring ---------------------------------------------------------
+
+#[test]
+fn heads_round_trip() {
+    let h = LogHead { version: 1, suite: 1, next_seq: 42 };
+    assert_eq!(LogHead::from_value(h.to_value()).unwrap(), h);
+}
+
+/// Subkey 0 is the head, so messages start at 1 and wrap without ever landing
+/// on it. An off-by-one here overwrites the head with a message, which loses
+/// the whole log rather than one entry.
+#[test]
+fn messages_never_land_on_the_head_subkey() {
+    for count in [2u32, 3, 8, 64] {
+        for seq in 0u64..200 {
+            let sk = subkey_for(seq, count);
+            assert!(sk >= 1, "seq {seq} landed on the head with {count} subkeys");
+            assert!(sk < count, "seq {seq} ran past subkey {count}");
+        }
+    }
+}
+
+#[test]
+fn the_ring_wraps_at_the_slot_count() {
+    // 8 subkeys = 1 head + 7 slots.
+    assert_eq!(subkey_for(0, 8), 1);
+    assert_eq!(subkey_for(6, 8), 7);
+    assert_eq!(subkey_for(7, 8), 1);
+    assert_eq!(subkey_for(14, 8), 1);
+}
+
+/// A reader that was away long enough has genuinely lost messages, and must be
+/// able to tell — silently showing a thread with a hole in it is §16.10's
+/// "conversation that did not happen".
+#[test]
+fn a_reader_can_tell_when_the_ring_has_passed_it() {
+    // 8 subkeys, 7 slots. Writer is at 10, so 3..9 are still fetchable.
+    assert!(still_in_ring(9, 10, 8));
+    assert!(still_in_ring(3, 10, 8));
+    assert!(!still_in_ring(2, 10, 8), "seq 2 was overwritten by seq 9");
+    assert!(!still_in_ring(10, 10, 8), "seq 10 has not been written yet");
+    assert!(!still_in_ring(11, 10, 8));
 }
 
 // --- messages -------------------------------------------------------------
@@ -119,8 +180,6 @@ fn a_gap_is_refused_rather_than_papered_over() {
     assert!(format!("{err:?}").contains("StateViolation"), "{err:?}");
 }
 
-/// A message whose sequence fits but whose link does not means something was
-/// removed and replaced. That is the case worth catching.
 #[test]
 fn a_substituted_message_is_caught_by_the_link() {
     let m0 = msg(0, [0u8; 32], "hey");
@@ -141,18 +200,9 @@ fn a_message_body_is_bounded() {
     assert!(Message::from_value(m.to_value()).is_err());
 }
 
-/// "" and "key absent" would otherwise be two spellings of the same nothing.
 #[test]
 fn an_empty_body_is_refused_rather_than_being_a_second_spelling_of_none() {
-    let m = msg(0, [0u8; 32], "");
-    assert!(Message::from_value(m.to_value()).is_err());
-}
-
-#[test]
-fn an_empty_display_name_is_refused_too() {
-    let mut i = invite(9999, &[1u8; 32]);
-    i.display_name = Some(String::new());
-    assert!(ContactInvite::from_value(i.to_value()).is_err());
+    assert!(Message::from_value(msg(0, [0u8; 32], "").to_value()).is_err());
 }
 
 #[test]

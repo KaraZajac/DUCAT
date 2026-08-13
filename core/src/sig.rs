@@ -63,6 +63,8 @@ pub enum ObjectType {
     PreKeyBundle,
     /// A message encrypted to one of them (§16.11).
     SealedMessage,
+    /// The head subkey of an outbox log (§16.12).
+    LogHead,
 }
 
 impl ObjectType {
@@ -93,6 +95,7 @@ impl ObjectType {
             ObjectType::Message => b"MESSAGE",
             ObjectType::PreKeyBundle => b"PREKEY_BUNDLE",
             ObjectType::SealedMessage => b"SEALED_MESSAGE",
+            ObjectType::LogHead => b"LOG_HEAD",
         }
     }
 }

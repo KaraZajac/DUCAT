@@ -42,43 +42,48 @@ use crate::wire::{f, type_code, Reader};
 /// it cannot smuggle a paragraph. A name is a handle, not a bio.
 pub const MAX_DISPLAY_NAME_CHARS: usize = 32;
 
-/// An out-of-band offer of contact (§16.9).
+/// An out-of-band offer of contact (§16.9, §16.12).
 ///
-/// Carried by NFC, by QR, or as a `ducat:` URI through any channel the two
-/// people already trust.
+/// Carries a **DHT record key**, not a route blob. A record key is permanent; a
+/// route is a snapshot of a process, and §16.12 records what that cost.
+///
+/// The `writer_public` names the one other party allowed to write the inbox's
+/// reply subkey. The matching secret travels with the card and never appears
+/// here, so a card seen without its secret — in a log, in a screenshot of this
+/// object — cannot be answered.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ContactInvite {
+pub struct ContactCard {
     pub version: u64,
     pub suite: u8,
-    /// The persona being offered.
+    /// The persona being offered. The card is signed by it.
     pub persona: Vec<u8>,
-    /// Where to reach it (§16.4).
-    pub rendezvous: Vec<u8>,
-    /// **Self-asserted, and worth exactly what the channel that carried it is
-    /// worth.** A petname the receiver assigns locally is the real name (§7.5).
+    /// The contact-request inbox: `SMPL(1, [writer])`.
+    pub inbox_key: String,
+    /// The writer this inbox admits. Whoever holds the matching secret can
+    /// reply, and **Veilid enforces that** — it is not a check we perform and
+    /// could get wrong.
+    pub writer_public: Vec<u8>,
+    /// Self-asserted, and worth exactly what the channel that carried it is
+    /// worth. A petname the receiver assigns locally is the real name (§7.5).
     pub display_name: Option<String>,
-    /// Commitment to the claim secret. The secret travels with the card; this is
-    /// what the issuer stores, so a stolen invitation list is not a set of
-    /// usable claims.
-    pub claim_commit: [u8; 32],
-    /// Absolute expiry. An invitation that never expires is a credential the
-    /// issuer has forgotten they published.
+    /// Absolute expiry. A card that never expires is a credential the issuer
+    /// has forgotten they published.
     pub expiry: u64,
 }
 
-impl ContactInvite {
+impl ContactCard {
     pub fn to_value(&self) -> Value {
         let mut m = BTreeMap::new();
         m.insert(f::TYPE, Value::Uint(type_code(ObjectType::ContactOffer)));
         m.insert(f::VERSION, Value::Uint(self.version));
         m.insert(f::SUITE, Value::Uint(self.suite as u64));
-        m.insert(f::INV_PERSONA, Value::Bytes(self.persona.clone()));
-        m.insert(f::INV_RENDEZVOUS, Value::Bytes(self.rendezvous.clone()));
+        m.insert(f::CARD_PERSONA, Value::Bytes(self.persona.clone()));
+        m.insert(f::CARD_INBOX, Value::Text(self.inbox_key.clone()));
+        m.insert(f::CARD_WRITER, Value::Bytes(self.writer_public.clone()));
         if let Some(n) = &self.display_name {
-            m.insert(f::INV_DISPLAY_NAME, Value::Text(n.clone()));
+            m.insert(f::CARD_NAME, Value::Text(n.clone()));
         }
-        m.insert(f::INV_CLAIM_COMMIT, Value::Bytes(self.claim_commit.to_vec()));
-        m.insert(f::INV_EXPIRY, Value::Uint(self.expiry));
+        m.insert(f::CARD_EXPIRY, Value::Uint(self.expiry));
         Value::Map(m)
     }
 
@@ -90,50 +95,55 @@ impl ContactInvite {
                 "object type is not CONTACT_OFFER",
             ));
         }
-        let out = ContactInvite {
+        let out = ContactCard {
             version: r.uint(f::VERSION)?,
             suite: r.uint(f::SUITE)? as u8,
-            persona: r.bytes(f::INV_PERSONA, None)?,
-            rendezvous: r.bytes(f::INV_RENDEZVOUS, None)?,
-            display_name: r.opt_text(f::INV_DISPLAY_NAME, MAX_DISPLAY_NAME_CHARS)?,
-            claim_commit: r.bytes(f::INV_CLAIM_COMMIT, Some(32))?.try_into().unwrap(),
-            expiry: r.uint(f::INV_EXPIRY)?,
+            persona: r.bytes(f::CARD_PERSONA, None)?,
+            inbox_key: r
+                .opt_text(f::CARD_INBOX, MAX_RECORD_KEY_CHARS)?
+                .ok_or_else(|| Reject::with_detail(RejectCode::Malformed, "card has no inbox"))?,
+            writer_public: r.bytes(f::CARD_WRITER, None)?,
+            display_name: r.opt_text(f::CARD_NAME, MAX_DISPLAY_NAME_CHARS)?,
+            expiry: r.uint(f::CARD_EXPIRY)?,
         };
         r.finish()?;
         Ok(out)
     }
 }
 
-/// Claiming an invitation: the other half of the mutual exchange.
+/// A record key is `KIND:owner:value` in base64url. Bounded so a card cannot
+/// smuggle a payload through a field a reader will treat as an address.
+pub const MAX_RECORD_KEY_CHARS: usize = 128;
+
+/// What each side writes into the inbox: subkey 0 the issuer, subkey 1 the
+/// claimant. Identical in shape, because the exchange is symmetric — both are
+/// saying "here is who I am and where to leave things for me".
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ContactClaim {
+pub struct ContactDetails {
     pub version: u64,
     pub suite: u8,
-    /// The claimant's persona and reach, so contact is mutual rather than a
-    /// subscription. §16.3's rule holds: nothing about you persists unless you
-    /// affirmatively hand it over.
     pub persona: Vec<u8>,
-    pub rendezvous: Vec<u8>,
+    /// Where this party's messages will appear (§16.12). Their outbox, which
+    /// only they write and anyone holding the key may read.
+    pub outbox_key: String,
+    /// Encoded `PreKeyBundle` (§16.11), so the first message needs no extra
+    /// round trip — and can be written while this party is offline.
+    pub prekey_bundle: Vec<u8>,
     pub display_name: Option<String>,
-    /// The secret from the card. Presenting it is what proves the claimant
-    /// actually received the invitation rather than guessed at a persona.
-    pub claim_secret: [u8; 32],
-    pub timestamp: u64,
 }
 
-impl ContactClaim {
+impl ContactDetails {
     pub fn to_value(&self) -> Value {
         let mut m = BTreeMap::new();
         m.insert(f::TYPE, Value::Uint(type_code(ObjectType::ContactAccept)));
         m.insert(f::VERSION, Value::Uint(self.version));
         m.insert(f::SUITE, Value::Uint(self.suite as u64));
-        m.insert(f::CLM_PERSONA, Value::Bytes(self.persona.clone()));
-        m.insert(f::CLM_RENDEZVOUS, Value::Bytes(self.rendezvous.clone()));
+        m.insert(f::DET_PERSONA, Value::Bytes(self.persona.clone()));
+        m.insert(f::DET_OUTBOX, Value::Text(self.outbox_key.clone()));
+        m.insert(f::DET_BUNDLE, Value::Bytes(self.prekey_bundle.clone()));
         if let Some(n) = &self.display_name {
-            m.insert(f::CLM_DISPLAY_NAME, Value::Text(n.clone()));
+            m.insert(f::DET_NAME, Value::Text(n.clone()));
         }
-        m.insert(f::CLM_SECRET, Value::Bytes(self.claim_secret.to_vec()));
-        m.insert(f::CLM_TS, Value::Uint(self.timestamp));
         Value::Map(m)
     }
 
@@ -145,67 +155,77 @@ impl ContactClaim {
                 "object type is not CONTACT_ACCEPT",
             ));
         }
-        let out = ContactClaim {
+        let out = ContactDetails {
             version: r.uint(f::VERSION)?,
             suite: r.uint(f::SUITE)? as u8,
-            persona: r.bytes(f::CLM_PERSONA, None)?,
-            rendezvous: r.bytes(f::CLM_RENDEZVOUS, None)?,
-            display_name: r.opt_text(f::CLM_DISPLAY_NAME, MAX_DISPLAY_NAME_CHARS)?,
-            claim_secret: r.bytes(f::CLM_SECRET, Some(32))?.try_into().unwrap(),
-            timestamp: r.uint(f::CLM_TS)?,
+            persona: r.bytes(f::DET_PERSONA, None)?,
+            outbox_key: r
+                .opt_text(f::DET_OUTBOX, MAX_RECORD_KEY_CHARS)?
+                .ok_or_else(|| Reject::with_detail(RejectCode::Malformed, "no outbox"))?,
+            prekey_bundle: r.bytes(f::DET_BUNDLE, None)?,
+            display_name: r.opt_text(f::DET_NAME, MAX_DISPLAY_NAME_CHARS)?,
         };
         r.finish()?;
         Ok(out)
     }
 }
 
-/// Whether a claim may be honoured.
+/// Subkey 0 of an outbox: how far the log has been written.
 ///
-/// `already_claimed` is the issuer's own record. It is a parameter rather than
-/// state held here because single-use is only meaningful if somebody remembers,
-/// and the thing that remembers is the issuer's store — not a check that can be
-/// satisfied by asking the claimant.
-pub fn check_claim(
-    invite: &ContactInvite,
-    claim: &ContactClaim,
-    now: u64,
-    already_claimed: bool,
-) -> Result<(), Reject> {
-    if already_claimed {
-        return Err(Reject::with_detail(
-            RejectCode::Replay,
-            "this invitation has already been used",
-        ));
-    }
-    if now > invite.expiry {
-        return Err(Reject::with_detail(
-            RejectCode::Expired,
-            "invitation has expired",
-        ));
-    }
-    // The secret is what distinguishes someone who was given the card from
-    // someone who merely knows the persona, which is public by design.
-    let expect = commit(Purpose::ChainLink, &claim.claim_secret);
-    if !commit_eq(&invite.claim_commit, &expect) {
-        return Err(Reject::with_detail(
-            RejectCode::BadSig,
-            "claim secret does not match this invitation",
-        ));
-    }
-    // A contact with itself is not a contact, and accepting one would let a
-    // stolen card be "claimed" by its own issuer to burn it.
-    if claim.persona == invite.persona {
-        return Err(Reject::with_detail(
-            RejectCode::PolicyRefused,
-            "an invitation cannot be claimed by its own persona",
-        ));
-    }
-    Ok(())
+/// A reader polls this one subkey to learn whether there is anything new, which
+/// is one small read rather than a scan of the whole ring.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LogHead {
+    pub version: u64,
+    pub suite: u8,
+    /// The sequence number the *next* message will carry. Also the count of
+    /// messages ever written, which is what makes a gap detectable.
+    pub next_seq: u64,
 }
 
-/// Compute the commitment an issuer stores for a claim secret.
-pub fn claim_commitment(secret: &[u8; 32]) -> [u8; 32] {
-    commit(Purpose::ChainLink, secret)
+impl LogHead {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::LogHead)));
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::HEAD_NEXT, Value::Uint(self.next_seq));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        if r.uint(f::TYPE)? != type_code(ObjectType::LogHead) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "object type is not LOG_HEAD",
+            ));
+        }
+        let out = LogHead {
+            version: r.uint(f::VERSION)?,
+            suite: r.uint(f::SUITE)? as u8,
+            next_seq: r.uint(f::HEAD_NEXT)?,
+        };
+        r.finish()?;
+        Ok(out)
+    }
+}
+
+/// Which subkey a message with this sequence number occupies.
+///
+/// Subkey 0 is the head, so messages start at 1 and wrap. The ring means an old
+/// message is overwritten rather than kept — which §16.11 wants anyway, since a
+/// message is meant to stop being readable rather than accumulate.
+pub fn subkey_for(seq: u64, subkey_count: u32) -> u32 {
+    debug_assert!(subkey_count > 1, "a log needs a head and at least one slot");
+    let slots = (subkey_count - 1) as u64;
+    ((seq % slots) + 1) as u32
+}
+
+/// Whether a reader can still fetch `seq`, or the ring has passed it by.
+pub fn still_in_ring(seq: u64, next_seq: u64, subkey_count: u32) -> bool {
+    let slots = (subkey_count - 1) as u64;
+    seq < next_seq && next_seq - seq <= slots
 }
 
 // ---------------------------------------------------------------------------
@@ -320,16 +340,21 @@ pub fn check_message(
 
 pub const CARD_URI_PREFIX: &str = "ducat:card/";
 
-/// Format a signed card and its claim secret as a shareable link.
+/// Format a signed card and its **writer secret** as a shareable link.
+///
+/// The secret is the capability: it is what lets the holder write the inbox's
+/// reply subkey, and Veilid enforces that rather than this code checking it.
+/// Which is why it travels beside the card and never inside it — the signed
+/// object can be logged or screenshotted without becoming answerable.
 ///
 /// Lives in `core` rather than in the bridge because the harness and the app
 /// both need it, and two base64 implementations that disagree on padding is
 /// precisely the class of divergence this project keeps finding by accident.
-pub fn card_to_uri(envelope: &[u8], claim_secret: &[u8; 32]) -> String {
-    format!("{CARD_URI_PREFIX}{}.{}", b64(envelope), b64(claim_secret))
+pub fn card_to_uri(envelope: &[u8], writer_secret: &[u8; 32]) -> String {
+    format!("{CARD_URI_PREFIX}{}.{}", b64(envelope), b64(writer_secret))
 }
 
-/// Parse one. Returns the signed envelope and the claim secret.
+/// Parse one. Returns the signed envelope and the writer secret.
 pub fn card_from_uri(input: &str) -> Result<(Vec<u8>, [u8; 32]), Reject> {
     let t = input.trim();
     let rest = t.strip_prefix(CARD_URI_PREFIX).ok_or_else(|| {
@@ -342,7 +367,7 @@ pub fn card_from_uri(input: &str) -> Result<(Vec<u8>, [u8; 32]), Reject> {
     })?;
     let env = unb64(a)?;
     let secret: [u8; 32] = unb64(b)?.try_into().map_err(|_| {
-        Reject::with_detail(RejectCode::Malformed, "claim secret is not 32 bytes")
+        Reject::with_detail(RejectCode::Malformed, "writer secret is not 32 bytes")
     })?;
     Ok((env, secret))
 }

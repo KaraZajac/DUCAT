@@ -185,9 +185,11 @@
             "escrow.release",
             "bond.check",
             "slash.check",
-            "contact.invite",
-            "contact.claim",
-            "message.chain"
+            "message.chain",
+            "contact.card",
+            "contact.details",
+            "log.head",
+            "log.ring"
           ]
         },
         "name": {

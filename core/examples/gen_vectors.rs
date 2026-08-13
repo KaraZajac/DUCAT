@@ -927,10 +927,14 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
         "contact" => {
             if obj.contains_key("messages_hex") {
                 ("contact", "message.chain")
-            } else if obj.contains_key("claim_hex") {
-                ("contact", "contact.claim")
+            } else if obj.contains_key("details_hex") {
+                ("contact", "contact.details")
+            } else if obj.contains_key("head_hex") {
+                ("contact", "log.head")
+            } else if obj.contains_key("subkey_count") {
+                ("contact", "log.ring")
             } else {
-                ("contact", "contact.invite")
+                ("contact", "contact.card")
             }
         }
         "object" => ("object", "object.roundtrip"),
@@ -1122,106 +1126,113 @@ fn object_cases() -> Vec<J> {
 /// money is: an out-of-order ceremony message, an arbiter nobody vouched for, a
 /// release to an address that is not a party, a bond attestation from the
 /// future, a double-spend claim with no evidence.
-/// §16.9 / §16.10 — out-of-band contact cards and 1:1 messages.
+/// §16.9 / §16.10 / §16.12 — record-based cards, inbox details, and message
+/// chains.
 ///
 /// These exist because §7.5's memos shipped with *no* cross-implementation
-/// coverage: `run_object` in the second implementation is generic over fields,
-/// so no vector had ever put text on the wire and asked two decoders to agree.
+/// coverage: the object runner is generic over fields, so no vector had ever
+/// put text on the wire and asked two decoders to agree. Cards now carry a
+/// record key, which is text, so that gap would have reopened here.
 fn contact_cases() -> Vec<J> {
     use ducat_core::contact::*;
     let mut v = Vec::new();
 
-    let secret = [0x5Eu8; 32];
-    let base = ContactInvite {
+    const KEY: &str = "VLD0:Qaq9to-SDiN5usgs4gxdmFDo-V8OH_xztMIcv8QWqPA:qqSJ7OtADw5pvvKc1Z3uISLsq-uOl1gmmL3r_8vhvkA";
+
+    let base = ContactCard {
         version: 1, suite: 1,
-        persona: vec![0xAA; 32], rendezvous: vec![0xBB; 32],
+        persona: vec![0xAA; 32],
+        inbox_key: KEY.into(),
+        writer_public: vec![0xBB; 32],
         display_name: Some("kara".into()),
-        claim_commit: claim_commitment(&secret),
         expiry: 1_800_000_000,
     };
 
-    let mut invite = |name: &str, why: &str, inv: &ContactInvite, bad: Option<(RejectCode, &str)>| {
-        let hex_body = hex(&inv.to_value().encode());
+    let mut card = |name: &str, why: &str, c: &ContactCard, bad: Option<(RejectCode, &str)>| {
+        let hex_body = hex(&c.to_value().encode());
         v.push(match bad {
-            None => json!({ "name": name, "why": why, "invite_hex": hex_body,
+            None => json!({ "name": name, "why": why, "card_hex": hex_body,
                             "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
-            Some((code, hint)) => json!({ "name": name, "why": why, "invite_hex": hex_body,
+            Some((code, hint)) => json!({ "name": name, "why": why, "card_hex": hex_body,
                             "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
         });
     };
-    invite("invite_valid", "A card with every field present decodes and re-encodes byte-identically.", &base, None);
-    invite("invite_no_display_name", "A name is optional; omitting the key is how you decline to assert one.", &ContactInvite { display_name: None, ..base.clone() }, None);
-    invite("invite_display_name_empty",
+    card("card_valid", "A card with every field present decodes and re-encodes byte-identically.", &base, None);
+    card("card_no_display_name", "A name is optional; omitting the key is how you decline to assert one.",
+        &ContactCard { display_name: None, ..base.clone() }, None);
+    card("card_display_name_empty",
         "A present-but-empty name is a second encoding of `absent`. §18.1 admits one encoding per meaning, so this is MALFORMED rather than a name of zero length.",
-        &ContactInvite { display_name: Some(String::new()), ..base.clone() },
+        &ContactCard { display_name: Some(String::new()), ..base.clone() },
         Some((RejectCode::Malformed, "empty text field")));
-    invite("invite_display_name_too_long",
-        "Names are bounded in characters, not bytes, so the bound does not silently shorten scripts that need more than one byte per character.",
-        &ContactInvite { display_name: Some("x".repeat(MAX_DISPLAY_NAME_CHARS + 1)), ..base.clone() },
+    card("card_display_name_too_long",
+        "Names are bounded in characters, not bytes, so the bound does not silently shorten scripts needing more than one byte per character.",
+        &ContactCard { display_name: Some("x".repeat(MAX_DISPLAY_NAME_CHARS + 1)), ..base.clone() },
         Some((RejectCode::Malformed, "text over bound")));
-    invite("invite_display_name_at_bound",
-        "Exactly at the bound is accepted; the bound is inclusive.",
-        &ContactInvite { display_name: Some("x".repeat(MAX_DISPLAY_NAME_CHARS)), ..base.clone() }, None);
-    invite("invite_display_name_multibyte",
-        "Thirty-two characters of Japanese is 96 bytes. A byte bound would reject a name that is within the stated limit, which is why the limit counts characters.",
-        &ContactInvite { display_name: Some("あ".repeat(MAX_DISPLAY_NAME_CHARS)), ..base.clone() }, None);
+    card("card_display_name_multibyte",
+        "Thirty-two characters of Japanese is 96 bytes. A byte bound would reject a name within the stated limit, which is why the limit counts characters.",
+        &ContactCard { display_name: Some("あ".repeat(MAX_DISPLAY_NAME_CHARS)), ..base.clone() }, None);
+    card("card_display_name_not_nfc",
+        "A decomposed name is valid UTF-8 and non-canonical. Two encodings of one name would make H(object) depend on the sender's keyboard, so §18.1 requires NFC.",
+        &ContactCard { display_name: Some("e\u{301}".into()), ..base.clone() },
+        Some((RejectCode::Malformed, "text is not NFC-normalized")));
+    card("card_inbox_key_too_long",
+        "A record key is an address, and an address field long enough to hold a payload is a covert channel with a signature on it.",
+        &ContactCard { inbox_key: "V".repeat(MAX_RECORD_KEY_CHARS + 1), ..base.clone() },
+        Some((RejectCode::Malformed, "text over bound")));
+    card("card_inbox_key_empty",
+        "A card whose inbox is the empty string names nothing. Absent and empty must not both mean `no inbox`.",
+        &ContactCard { inbox_key: String::new(), ..base.clone() },
+        Some((RejectCode::Malformed, "empty text field")));
 
-    // §18.1's NFC rule, now that text is actually on the wire. "é" as e + U+0301
-    // is a legal UTF-8 string and a non-canonical one.
-    v.push(json!({
-        "name": "invite_display_name_not_nfc",
-        "why": "A decomposed name is valid UTF-8 and non-canonical. Two encodings of one name would make H(object) depend on the sender's keyboard, so §18.1 requires NFC and this is MALFORMED.",
-        "invite_hex": hex(&{
-            let mut b = base.clone().to_value().encode();
-            // Replace "kara" with "e\u{301}" by rebuilding through raw CBOR.
-            b = { let mut inv = base.clone(); inv.display_name = Some("e\u{301}".into()); inv.to_value().encode() };
-            b
-        }),
-        "expect": { "ok": false, "reject": "MALFORMED", "hint": "text is not NFC-normalized" }
-    }));
-
-    let good_claim = ContactClaim {
+    let det = ContactDetails {
         version: 1, suite: 1,
-        persona: vec![0xCC; 32], rendezvous: vec![0xDD; 32],
+        persona: vec![0xCC; 32],
+        outbox_key: KEY.into(),
+        prekey_bundle: vec![0xDD; 48],
         display_name: Some("sam".into()),
-        claim_secret: secret, timestamp: 1_700_000_000,
     };
-    let mut claim_case = |name: &str, why: &str, inv: &ContactInvite, clm: &ContactClaim,
-                          now: u64, already: bool, bad: Option<(RejectCode, &str)>| {
+    let mut detail = |name: &str, why: &str, d: &ContactDetails, bad: Option<(RejectCode, &str)>| {
+        let hex_body = hex(&d.to_value().encode());
+        v.push(match bad {
+            None => json!({ "name": name, "why": why, "details_hex": hex_body,
+                            "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+            Some((code, hint)) => json!({ "name": name, "why": why, "details_hex": hex_body,
+                            "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+        });
+    };
+    detail("details_valid", "What each side writes into the contact inbox: who they are, where to leave things, and the keys to seal with.", &det, None);
+    detail("details_no_name", "The name is optional here for the same reason it is on the card.",
+        &ContactDetails { display_name: None, ..det.clone() }, None);
+    detail("details_outbox_empty",
+        "An empty outbox key would leave the other side with a contact it can never write to, reported as success.",
+        &ContactDetails { outbox_key: String::new(), ..det.clone() },
+        Some((RejectCode::Malformed, "empty text field")));
+
+    for (name, why, seq) in [
+        ("head_zero", "A log nobody has written to yet: the next message will be sequence 0.", 0u64),
+        ("head_mid", "next_seq doubles as the count of messages ever written, which is what makes a gap detectable.", 42u64),
+    ] {
+        let h = LogHead { version: 1, suite: 1, next_seq: seq };
+        let hex_body = hex(&h.to_value().encode());
+        v.push(json!({ "name": name, "why": why, "head_hex": hex_body,
+                       "expect": { "ok": true, "reencodes_to_hex": hex_body } }));
+    }
+
+    // The ring. Subkey 0 is the head, so an off-by-one here overwrites it with a
+    // message and loses the whole log rather than one entry.
+    for (name, why, seq, count, subkey, reachable_from) in [
+        ("ring_first", "The first message goes to subkey 1, immediately after the head.", 0u64, 8u32, 1u32, 0u64),
+        ("ring_last_slot", "Seven slots in an eight-subkey record, so sequence 6 is the last before wrapping.", 6, 8, 7, 0),
+        ("ring_wraps", "Sequence 7 wraps back to subkey 1 and overwrites sequence 0.", 7, 8, 1, 1),
+        ("ring_wraps_twice", "Wrapping is modular, not a one-off.", 14, 8, 1, 8),
+    ] {
         v.push(json!({
             "name": name, "why": why,
-            "invite_hex": hex(&inv.to_value().encode()),
-            "claim_hex": hex(&clm.to_value().encode()),
-            "now": now, "already_claimed": already,
-            "expect": match bad {
-                None => json!({ "ok": true }),
-                Some((code, hint)) => json!({ "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint }),
-            }
+            "seq": seq, "subkey_count": count,
+            "expect": { "ok": true, "subkey": subkey, "oldest_readable": reachable_from }
         }));
-    };
-    claim_case("claim_valid", "The holder of the card presents the secret before expiry and the card is unused.",
-        &base, &good_claim, 1_700_000_000, false, None);
-    claim_case("claim_second_use",
-        "The screenshot case: someone else saw the card in a group chat. Single-use is what keeps a forwarded card from being a standing offer to everyone who ever saw the message it arrived in.",
-        &base, &good_claim, 1_700_000_000, true,
-        Some((RejectCode::Replay, "invitation already claimed")));
-    claim_case("claim_wrong_secret",
-        "Personas are public by design, so knowing one proves nothing. The secret is the only thing distinguishing someone who was handed the card.",
-        &base, &ContactClaim { claim_secret: [0x11; 32], ..good_claim.clone() }, 1_700_000_000, false,
-        Some((RejectCode::BadSig, "claim secret mismatch")));
-    claim_case("claim_expired",
-        "One second past expiry. A card that never expires is a credential its issuer has forgotten they published.",
-        &base, &good_claim, 1_800_000_001, false,
-        Some((RejectCode::Expired, "invitation expired")));
-    claim_case("claim_at_expiry",
-        "Exactly at expiry is still valid; the deadline is inclusive, matching every other deadline in §18.4.",
-        &base, &good_claim, 1_800_000_000, false, None);
-    claim_case("claim_self",
-        "Refused so that an attacker who intercepts a card cannot burn it by claiming it back to its issuer, leaving the intended recipient with a card that silently fails.",
-        &base, &ContactClaim { persona: base.persona.clone(), ..good_claim.clone() }, 1_700_000_000, false,
-        Some((RejectCode::PolicyRefused, "self-claim")));
+    }
 
-    // Message chains.
     let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000 };
     let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060 };
     let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120 };
@@ -1239,11 +1250,11 @@ fn contact_cases() -> Vec<J> {
     };
     chain("chain_three_messages", "A well-formed thread: each message links to the one before and the sequence has no gaps.", &[&m0, &m1, &m2], None);
     chain("chain_first_must_link_to_nothing",
-        "The opening message of a thread has no predecessor, so its link is thirty-two zero bytes. Anything else claims a history that does not exist.",
+        "The opening message has no predecessor, so its link is thirty-two zero bytes. Anything else claims a history that does not exist.",
         &[&Message { prev: [0x99; 32], ..m0.clone() }],
         Some((0, RejectCode::CommitMismatch, "first message links to nothing")));
     chain("chain_gap_refused",
-        "A missing message is refused rather than stored around it: a thread that silently skips one shows a conversation that did not happen, and the reader cannot tell.",
+        "A missing message is refused rather than stored around it: a thread that silently skips one shows a conversation that did not happen.",
         &[&m0, &m2],
         Some((1, RejectCode::StateViolation, "sequence gap")));
     chain("chain_substituted_message",
