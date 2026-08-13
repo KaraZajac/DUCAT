@@ -249,6 +249,12 @@ private fun AmountStep(
     val cur = remember { Amounts.currency(context) }
     var priority by remember { mutableIntStateOf(1) }
 
+    // A prefilled amount is a *bill* — somebody else's number, answered rather
+    // than edited. What stays yours is the tip. Editing the bill down and
+    // paying anyway would make a payment nothing on their side can match; the
+    // honest way to pay a different amount is a different payment.
+    val billed = prefillAmountPxmr > 0
+    var tipTyped by remember { mutableStateOf("") }
     var typed by remember {
         mutableStateOf(if (prefillAmountPxmr > 0) formatXmr(prefillAmountPxmr) else "")
     }
@@ -276,6 +282,7 @@ private fun AmountStep(
     val amountFocus = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
+        if (billed) return@LaunchedEffect
         kotlinx.coroutines.delay(150)
         runCatching { amountFocus.requestFocus() }
     }
@@ -311,7 +318,15 @@ private fun AmountStep(
         }
     }
 
-    val pxmr = remember(typed, fiatEntry, rate) {
+    val tipPxmr = remember(tipTyped, fiatEntry, rate) {
+        val v = tipTyped.toBigDecimalOrNull() ?: return@remember 0L
+        val xmr = if (fiatEntry && rate != null && rate > 0) {
+            v.divide(BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
+        } else if (fiatEntry) return@remember 0L else v
+        runCatching { xmr.movePointRight(12).toLong() }.getOrNull()?.coerceAtLeast(0) ?: 0L
+    }
+    val pxmr = remember(typed, fiatEntry, rate, tipPxmr, billed) {
+        if (billed) return@remember prefillAmountPxmr + tipPxmr
         val v = typed.trim().toBigDecimalOrNull() ?: return@remember null
         val xmr = if (fiatEntry && rate != null && rate > 0) {
             v.divide(BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
@@ -377,7 +392,41 @@ private fun AmountStep(
         }
 
         Spacer(Modifier.height(28.dp))
+        if (billed) {
+            // Their number, shown as a fact rather than a field. What is
+            // editable on a bill is the tip, and only the tip.
+            Text(
+                "Bill",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            val billShown = Amounts.show(context, prefillAmountPxmr)
+            Text(billShown.primary, style = MaterialTheme.typography.displayMedium)
+            billShown.secondary?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Spacer(Modifier.height(14.dp))
+            OutlinedTextField(
+                value = tipTyped,
+                onValueChange = { tipTyped = it.filter { c -> c.isDigit() || c == '.' } },
+                label = { Text("Add a tip (${if (fiatEntry) cur else "XMR"}) — optional") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            if (tipPxmr > 0) {
+                Spacer(Modifier.height(6.dp))
+                val t = Amounts.show(context, pxmr ?: 0L)
+                Text(
+                    "Total with tip: ${t.primary}" +
+                        (t.secondary?.let { " · $it" } ?: ""),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
+            if (!billed) {
             OutlinedTextField(
                 value = typed,
                 onValueChange = {
@@ -391,8 +440,9 @@ private fun AmountStep(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f).focusRequester(amountFocus),
             )
+            }
             Spacer(Modifier.width(10.dp))
-            if (rate != null) {
+            if (!billed && rate != null) {
                 AssistChip(
                     onClick = {
                     // Keep a locked maximum across the switch — it is the same
@@ -511,7 +561,7 @@ private fun AmountStep(
         Spacer(Modifier.height(16.dp))
         // The mode, where PayPal puts it: a pill above the action, so the two
         // verbs are one visible choice rather than two competing buttons.
-        if (canAsk) {
+        if (canAsk && !billed) {
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                 SegmentedButton(
                     selected = !asking,

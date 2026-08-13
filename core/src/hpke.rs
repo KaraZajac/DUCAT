@@ -79,6 +79,25 @@ pub fn derive_keypair(ikm: &[u8]) -> ([u8; 32], [u8; PUBKEY_LEN]) {
     )
 }
 
+/// The public half of an existing secret, for republishing a key rather than
+/// rotating it.
+///
+/// Exists because the alternative was observed: a caller that could only
+/// *generate* pairs replaced its signed prekey on every top-up, and every
+/// message already sealed to the old one — cached in a peer's copy of the
+/// bundle — arrived unreadable. A key that is still advertised somewhere must
+/// be reproducible, not just replaceable.
+pub fn public_of(secret: &[u8; 32]) -> [u8; PUBKEY_LEN] {
+    use hpke::Serializable;
+    let sk = <Kem as hpke::Kem>::PrivateKey::from_bytes(secret)
+        .expect("32 bytes is a valid X25519 secret");
+    <Kem as hpke::Kem>::sk_to_pk(&sk)
+        .to_bytes()
+        .as_slice()
+        .try_into()
+        .unwrap()
+}
+
 /// The `info` string binding a ciphertext to this protocol and purpose.
 ///
 /// Same shape as §18.3's signature domain separation, and for the same reason:
@@ -375,5 +394,20 @@ impl PreKeyStore {
             self.one_time.remove(&sealed.prekey_id);
         }
         Ok((pt, was_one_time))
+    }
+}
+
+#[cfg(test)]
+mod public_of_tests {
+    use super::*;
+
+    /// The property every caller depends on: the public half recovered from a
+    /// stored secret is the one that was originally advertised.
+    #[test]
+    fn public_of_matches_derivation() {
+        for seed in 0u8..8 {
+            let (sk, pk) = derive_keypair(&[seed; 32]);
+            assert_eq!(public_of(&sk), pk, "diverged at seed {seed}");
+        }
     }
 }

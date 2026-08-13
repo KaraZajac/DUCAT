@@ -153,32 +153,61 @@ class TabStore(private val context: Context) {
          */
         fun reconcile(context: Context) {
             val store = TabStore(context)
+            val contacts = ContactStore(context)
             val settled = store.all().filter { it.state == "settled" }.sortedBy { it.settledAt }
             if (settled.isEmpty()) return
             val entries = WalletStore(context).entries()
             val claimed = store.all().mapNotNull { it.paidKi }.toMutableSet()
 
             for (tab in settled) {
+                // Amounts this payer *said* they sent for this bill, from
+                // their PAYMENT_SENT notices in the thread after it went out.
+                // The notice is why a tip works at all: a tipped payment
+                // arrives larger than the bill, so exact-amount matching alone
+                // would never find it. Still §17.5 — the notice nominates an
+                // amount, the chain confirms it; a notice with no matching
+                // output settles nothing.
+                val said = contacts.thread(tab.personaHex)
+                    .filter {
+                        !it.outgoing && it.kind == 2 &&
+                            it.timestamp * 1000 >= tab.settledAt - 60_000 &&
+                            it.amountPxmr >= tab.settledTotal
+                    }
+                    .map { it.amountPxmr }
+                    .toSet()
+
                 val hit = entries.firstOrNull {
                     it.keyImage.isNotEmpty() &&
                         it.keyImage !in tab.knownKis &&
                         it.keyImage !in claimed &&
-                        it.amountPxmr == tab.settledTotal
+                        (it.amountPxmr == tab.settledTotal || it.amountPxmr in said)
                 } ?: continue
                 claimed += hit.keyImage
-                val contact = ContactStore(context).all()
+                val contact = contacts.all()
                     .firstOrNull { it.personaHex == tab.personaHex } ?: continue
+
+                // The receipt covers what actually arrived, and §16.13's sum
+                // rule still has to hold — so a tip becomes a visible line,
+                // which is also simply the truth of what was paid for.
+                val tip = hit.amountPxmr - tab.settledTotal
+                val receiptLines =
+                    if (tip > 0) tab.lines + BillItem("Tip — thank you", tip) else tab.lines
                 runCatching {
                     Mailbox.send(
                         context, contact, "Receipt — thank you",
                         PersonaStore(context).personaHex(),
-                        kind = 3, amountPxmr = tab.settledTotal,
-                        items = tab.lines, taxPxmr = tab.taxPxmr,
+                        kind = 3, amountPxmr = hit.amountPxmr,
+                        items = receiptLines, taxPxmr = tab.taxPxmr,
                         txidHex = hit.txHashHex.ifEmpty { null },
                     )
                 }.onSuccess {
                     store.update(tab.copy(state = "paid", paidKi = hit.keyImage))
-                    DucatLog.i(TAG, "${tab.origin} tab paid — receipt sent (${formatXmr(tab.settledTotal)} XMR)")
+                    DucatLog.i(
+                        TAG,
+                        "${tab.origin} paid ${formatXmr(hit.amountPxmr)} XMR" +
+                            (if (tip > 0) " (tip ${formatXmr(tip)})" else "") +
+                            " — receipt sent",
+                    )
                 }.onFailure {
                     // The payment is real either way; the receipt retries on the
                     // next poll rather than marking paid and losing it.

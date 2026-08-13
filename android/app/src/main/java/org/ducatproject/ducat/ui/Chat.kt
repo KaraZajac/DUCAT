@@ -226,8 +226,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     // no round trip to someone who may not be there.
 
     payRequest?.let { r ->
+        // The contact rides along, not just the address. Paying a request as a
+        // bare address silently dropped the payment notice — the vendor never
+        // learned which transaction answered their bill, and nothing could be
+        // marked paid. The request's own payto is already on the contact:
+        // receiving a request stores it as their freshest address (§16.12).
         PaySheet(
-            prefillAddress = r.payto,
+            prefillContact = c,
             prefillAmountPxmr = r.amountPxmr,
         ) { payRequest = null }
     }

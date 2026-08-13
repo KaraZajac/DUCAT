@@ -5,6 +5,9 @@ import uniffi.ducat_mobile.*
 
 private const val TAG = "DucatMailbox"
 
+/** A card just issued: what to show, and which claim is its answer. */
+data class IssuedHandle(val uri: String, val inboxKey: String)
+
 /** A head plus seven message slots. Small deliberately: §16.11 wants a message
  *  to stop being readable rather than accumulate, and a ring that wraps in
  *  ordinary use is a ring whose wrap gets exercised. */
@@ -31,7 +34,13 @@ object Mailbox {
      * pointing at a record that does not exist yet is a card that fails after
      * someone has already accepted it.
      */
-    fun issueCard(context: Context, displayName: String?, validSecs: ULong): IssuedCard {
+    fun issueCard(
+        context: Context,
+        displayName: String?,
+        validSecs: ULong,
+        /** "profile" for the standing code, "sale" for a till/tab/ride handshake. */
+        purpose: String = "profile",
+    ): IssuedHandle {
         val store = ContactStore(context)
         val persona = PersonaStore(context).secret()
 
@@ -39,7 +48,15 @@ object Mailbox {
         val inbox = nodeDhtCreateShared(writer.public)
         val outbox = createLog()
 
-        val prekeys = generatePrekeys(ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL)
+        // Fresh one-time ids from the device-wide counter, and the signed
+        // prekey *reused*: rotating it as a side effect of making a card was
+        // how messages sealed to the old one — cached in every peer's copy of
+        // our bundle — arrived unreadable.
+        val prekeys = generatePrekeys(
+            ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL,
+            store.nextPrekeyStart(ONE_TIME_KEYS.toInt()).toUInt(),
+            store.signedPrekeySecret(),
+        )
         store.savePrekeys(
             prekeys.bundle,
             prekeys.signedSecret,
@@ -67,10 +84,13 @@ object Mailbox {
         store.saveIssuedCard(
             inbox.key, writer.public, writer.secret,
             outbox.key, outbox.ownerPublic, outbox.ownerSecret,
+            card.uri, purpose,
         )
-        store.rememberCardUri(card.uri)
         DucatLog.i(TAG, "issued card: inbox=${inbox.key.take(24)}… outbox=${outbox.key.take(24)}…")
-        return card
+        // The inbox key rides along because it is the card's identity: a flow
+        // that shows this code must wait for *this card's* claimant, not for
+        // whichever contact appears next.
+        return IssuedHandle(card.uri, inbox.key)
     }
 
     /** A fresh append-only log with its head initialised. */
@@ -103,7 +123,11 @@ object Mailbox {
         val theirs = parseContactDetails(raw)
 
         val outbox = createLog()
-        val prekeys = generatePrekeys(ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL)
+        val prekeys = generatePrekeys(
+            ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL,
+            store.nextPrekeyStart(ONE_TIME_KEYS.toInt()).toUInt(),
+            store.signedPrekeySecret(),
+        )
         store.savePrekeys(
             prekeys.bundle,
             prekeys.signedSecret,
@@ -147,46 +171,52 @@ object Mailbox {
      */
     fun collectClaims(context: Context): Int {
         val store = ContactStore(context)
-        val issued = store.issuedCard() ?: return 0
-        if (store.issuedCardAnswered()) return 0
-
-        return try {
-            nodeDhtOpen(issued.inboxKey, null, null)
-            val raw = nodeDhtGet(issued.inboxKey, 1u, true) ?: return 0
-            if (raw.isEmpty()) return 0
-            val theirs = parseContactDetails(raw)
-            store.add(
-                Contact(
-                    personaHex = theirs.persona.toHexString(),
-                    petname = null,
-                    assertedName = theirs.assertedName,
-                    myOutbox = issued.outboxKey,
-                    myOutboxOwnerPublic = issued.outboxOwnerPublic,
-                    myOutboxOwnerSecret = issued.outboxOwnerSecret,
-                    theirOutbox = theirs.outboxKey,
-                    theirBundle = theirs.prekeyBundle,
-                    theirAddress = theirs.payto,
-                    avatar = theirs.profile.avatar,
-                    email = theirs.profile.email,
-                    phone = theirs.profile.phone,
-                    signal = theirs.profile.signal,
-                    pronouns = theirs.profile.pronouns?.toInt(),
+        var collected = 0
+        // Every outstanding card, not "the" card. A claim answers a specific
+        // card, and the registry is what lets a till's handshake and the
+        // profile code be outstanding at once without either stealing the
+        // other's claimant.
+        for (issued in store.issuedCards().filter { it.answeredBy == null }) {
+            try {
+                nodeDhtOpen(issued.inboxKey, null, null)
+                val raw = nodeDhtGet(issued.inboxKey, 1u, true) ?: continue
+                if (raw.isEmpty()) continue
+                val theirs = parseContactDetails(raw)
+                val personaHex = theirs.persona.toHexString()
+                store.add(
+                    Contact(
+                        personaHex = personaHex,
+                        petname = null,
+                        assertedName = theirs.assertedName,
+                        myOutbox = issued.outboxKey,
+                        myOutboxOwnerPublic = issued.outboxOwnerPublic,
+                        myOutboxOwnerSecret = issued.outboxOwnerSecret,
+                        theirOutbox = theirs.outboxKey,
+                        theirBundle = theirs.prekeyBundle,
+                        theirAddress = theirs.payto,
+                        avatar = theirs.profile.avatar,
+                        email = theirs.profile.email,
+                        phone = theirs.profile.phone,
+                        signal = theirs.profile.signal,
+                        pronouns = theirs.profile.pronouns?.toInt(),
+                    )
                 )
-            )
-            store.markIssuedCardAnswered()
-            DucatLog.i(TAG, "card answered by ${theirs.assertedName}")
-            // A card is single use — its one reply subkey is now written, so
-            // the next person to scan the same code would have nowhere to
-            // answer. Issue the next one immediately rather than at the moment
-            // it is needed, which is while somebody is standing there.
-            runCatching { issueCard(context, NameStore(context).get(), 60uL * 60uL * 24uL) }
-                .onSuccess { DucatLog.i(TAG, "a fresh card is ready for the next person") }
-                .onFailure { DucatLog.w(TAG, "could not pre-issue the next card: ${it.message}") }
-            1
-        } catch (e: Exception) {
-            DucatLog.w(TAG, "collectClaims: ${e.message}")
-            0
+                store.markCardAnswered(issued.inboxKey, personaHex)
+                collected++
+                DucatLog.i(TAG, "card (${issued.purpose}) answered by ${theirs.assertedName}")
+                // Only the standing profile code replaces itself — a sale's
+                // handshake was for that sale, and pre-issuing another would
+                // mint records nobody will ever scan.
+                if (issued.purpose == "profile") {
+                    runCatching { issueCard(context, NameStore(context).get(), 60uL * 60uL * 24uL) }
+                        .onSuccess { DucatLog.i(TAG, "a fresh profile code is ready") }
+                        .onFailure { DucatLog.w(TAG, "could not pre-issue: ${it.message}") }
+                }
+            } catch (e: Exception) {
+                DucatLog.w(TAG, "collectClaims(${issued.inboxKey.take(16)}…): ${e.message}")
+            }
         }
+        return collected
     }
 
     /**
@@ -280,7 +310,11 @@ object Mailbox {
      */
     private fun topUpIfLow(store: ContactStore): ByteArray? {
         if (store.oneTimeRemaining() > 6) return store.prekeyBundle()
-        val m = generatePrekeys(ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL)
+        val m = generatePrekeys(
+            ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL,
+            store.nextPrekeyStart(ONE_TIME_KEYS.toInt()).toUInt(),
+            store.signedPrekeySecret(),
+        )
         store.savePrekeys(
             m.bundle, m.signedSecret,
             m.oneTimeIds.mapIndexed { i, id -> id.toInt() to m.oneTimeSecrets[i] }.toMap(),

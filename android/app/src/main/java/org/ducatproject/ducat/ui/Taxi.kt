@@ -91,6 +91,7 @@ private fun NewRideScreen(rides: RideStore) {
     val rate = remember { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
     var cardUri by remember { mutableStateOf<String?>(null) }
+    var cardInbox by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
 
     fun toPxmr(text: String): Long? {
@@ -109,24 +110,28 @@ private fun NewRideScreen(rides: RideStore) {
     LaunchedEffect(Unit) {
         val r = withContext(Dispatchers.IO) {
             runCatching {
-                Mailbox.issueCard(context, MyProfile(context).name(), 60uL * 60uL * 12uL)
+                Mailbox.issueCard(
+                    context, MyProfile(context).name(), 60uL * 60uL * 12uL, purpose = "sale",
+                )
             }
         }
-        r.onSuccess { cardUri = it.uri }
+        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
             .onFailure { error = it.message ?: "could not publish a code" }
     }
 
     // Scan → terms into the thread → meter starts. The rider has the rate in
     // writing before the wheels move, which is the point.
-    LaunchedEffect(cardUri, ready, basePxmr, perMinPxmr) {
-        if (cardUri == null || !ready) return@LaunchedEffect
-        val before = ContactStore(context).all().map { it.personaHex }.toSet()
+    LaunchedEffect(cardInbox, ready, basePxmr, perMinPxmr) {
+        val inbox = cardInbox
+        if (inbox == null || !ready) return@LaunchedEffect
         while (true) {
             delay(2_000)
             val fresh = withContext(Dispatchers.IO) {
                 runCatching {
                     Mailbox.collectClaims(context)
-                    ContactStore(context).all().firstOrNull { it.personaHex !in before }
+                    ContactStore(context).claimantOf(inbox)?.let { hex ->
+                        ContactStore(context).all().firstOrNull { it.personaHex == hex }
+                    }
                 }.getOrNull()
             } ?: continue
             withContext(Dispatchers.IO) {

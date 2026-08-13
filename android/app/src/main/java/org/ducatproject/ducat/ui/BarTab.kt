@@ -201,6 +201,7 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     val store = remember { TabStore(context) }
     var cardUri by remember { mutableStateOf<String?>(null) }
+    var cardInbox by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
 
     BackHandler(onBack = onBack)
@@ -208,24 +209,28 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
     LaunchedEffect(Unit) {
         val r = withContext(Dispatchers.IO) {
             runCatching {
-                Mailbox.issueCard(context, MyProfile(context).name(), 60uL * 60uL * 12uL)
+                Mailbox.issueCard(
+                    context, MyProfile(context).name(), 60uL * 60uL * 12uL, purpose = "sale",
+                )
             }
         }
-        r.onSuccess { cardUri = it.uri }
+        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
             .onFailure { error = it.message ?: "could not publish a code" }
     }
 
     // A scan opens the tab by itself — the bartender should not need a second
-    // tap while holding a shaker.
-    LaunchedEffect(cardUri) {
-        if (cardUri == null) return@LaunchedEffect
-        val before = ContactStore(context).all().map { it.personaHex }.toSet()
+    // tap while holding a shaker. Bound to *this* card's claimant: someone
+    // scanning the profile code at the same moment must not land on a tab.
+    LaunchedEffect(cardInbox) {
+        val inbox = cardInbox ?: return@LaunchedEffect
         while (true) {
             delay(2_000)
             val fresh = withContext(Dispatchers.IO) {
                 runCatching {
                     Mailbox.collectClaims(context)
-                    ContactStore(context).all().firstOrNull { it.personaHex !in before }
+                    ContactStore(context).claimantOf(inbox)?.let { hex ->
+                        ContactStore(context).all().firstOrNull { it.personaHex == hex }
+                    }
                 }.getOrNull()
             } ?: continue
             DucatLog.i(TAG, "tab opened by ${fresh.displayName()}")
@@ -323,7 +328,25 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
 
         if (tab.state == "open") {
             PosAddLine { d, a ->
-                store.update(tab.copy(lines = tab.lines + BillItem(d, a)))
+                val updated = tab.copy(lines = tab.lines + BillItem(d, a))
+                store.update(updated)
+                // Tell them, so the tab is never a surprise at close. A text
+                // message, deliberately — §15.11 forbids per-line payment
+                // requests, because five confirm screens for one evening is
+                // five where one was owed. Best-effort: a notice that fails
+                // must not block the next order.
+                scope.launch(Dispatchers.IO) {
+                    runCatching {
+                        val c = ContactStore(context).all()
+                            .first { it.personaHex == tab.personaHex }
+                        Mailbox.send(
+                            context, c,
+                            "$d — ${formatXmr(a)} XMR · tab now " +
+                                "${formatXmr(updated.totalPxmr)} XMR",
+                            org.ducatproject.ducat.PersonaStore(context).personaHex(),
+                        )
+                    }.onFailure { DucatLog.w(TAG, "drink notice: ${it.message}") }
+                }
             }
         }
 

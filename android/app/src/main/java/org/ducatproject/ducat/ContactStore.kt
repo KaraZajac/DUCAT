@@ -228,7 +228,18 @@ class ContactStore(context: Context) {
 
     // --- prekeys ----------------------------------------------------------
 
-    /** The records behind the card we last handed out. */
+    /**
+     * Every card we have handed out and not yet seen answered.
+     *
+     * A *registry*, because the single slot this replaced was a live bug twice
+     * over. Issuing a card overwrote the previous card's keys, so a code still
+     * on somebody's screen — the profile QR, a till mid-sale — died the moment
+     * any other card was made, and its claimant connected into silence. And
+     * every flow that showed a card watched for "any new contact", so a
+     * profile-code scan during a sale would have been billed as the customer.
+     * A claim is an answer *to a specific card*, and the registry is what makes
+     * that sentence expressible.
+     */
     fun saveIssuedCard(
         inboxKey: String,
         writerPublic: ByteArray,
@@ -236,30 +247,52 @@ class ContactStore(context: Context) {
         outboxKey: String,
         outboxOwnerPublic: ByteArray,
         outboxOwnerSecret: ByteArray,
+        uri: String,
+        purpose: String,
     ) = synchronized(lock) {
-        prefs.edit()
-            .putString("issued_inbox", inboxKey)
-            .putString("issued_wpub", b64(writerPublic))
-            .putString("issued_wsec", b64(writerSecret))
-            .putString("issued_outbox", outboxKey)
-            .putString("issued_outbox_pub", b64(outboxOwnerPublic))
-            .putString("issued_outbox_sec", b64(outboxOwnerSecret))
-            .putBoolean("issued_answered", false)
-            .apply()
+        val arr = prefs.getString("issued_cards", null)?.let { JSONArray(it) } ?: JSONArray()
+        arr.put(JSONObject().apply {
+            put("inbox", inboxKey); put("wpub", b64(writerPublic)); put("wsec", b64(writerSecret))
+            put("outbox", outboxKey); put("opub", b64(outboxOwnerPublic)); put("osec", b64(outboxOwnerSecret))
+            put("uri", uri); put("purpose", purpose)
+            put("made", System.currentTimeMillis())
+            put("answered_by", JSONObject.NULL)
+        })
+        prefs.edit().putString("issued_cards", arr.toString()).apply()
         bump()
     }
 
-    fun issuedCard(): IssuedCardState? {
-        val inbox = prefs.getString("issued_inbox", null) ?: return null
-        return IssuedCardState(
-            inboxKey = inbox,
-            writerPublic = unb64(prefs.getString("issued_wpub", "") ?: ""),
-            writerSecret = unb64(prefs.getString("issued_wsec", "") ?: ""),
-            outboxKey = prefs.getString("issued_outbox", "") ?: "",
-            outboxOwnerPublic = unb64(prefs.getString("issued_outbox_pub", "") ?: ""),
-            outboxOwnerSecret = unb64(prefs.getString("issued_outbox_sec", "") ?: ""),
-        )
+    fun issuedCards(): List<IssuedCardState> {
+        val arr = prefs.getString("issued_cards", null)?.let { JSONArray(it) } ?: return emptyList()
+        return (0 until arr.length()).map { i ->
+            val o = arr.getJSONObject(i)
+            IssuedCardState(
+                inboxKey = o.getString("inbox"),
+                writerPublic = unb64(o.getString("wpub")),
+                writerSecret = unb64(o.getString("wsec")),
+                outboxKey = o.getString("outbox"),
+                outboxOwnerPublic = unb64(o.getString("opub")),
+                outboxOwnerSecret = unb64(o.getString("osec")),
+                uri = o.optString("uri", ""),
+                purpose = o.optString("purpose", "profile"),
+                answeredBy = if (o.isNull("answered_by")) null else o.optString("answered_by"),
+            )
+        }
     }
+
+    fun markCardAnswered(inboxKey: String, personaHex: String) = synchronized(lock) {
+        val arr = prefs.getString("issued_cards", null)?.let { JSONArray(it) } ?: return
+        for (i in 0 until arr.length()) {
+            val o = arr.getJSONObject(i)
+            if (o.getString("inbox") == inboxKey) o.put("answered_by", personaHex)
+        }
+        prefs.edit().putString("issued_cards", arr.toString()).apply()
+        bump()
+    }
+
+    /** Who answered a given card, if anyone has. */
+    fun claimantOf(inboxKey: String): String? =
+        issuedCards().firstOrNull { it.inboxKey == inboxKey }?.answeredBy
 
     /**
      * The URI of the card currently on offer, so it can be shown without being
@@ -270,27 +303,42 @@ class ContactStore(context: Context) {
      * hand out a different code each glance.
      */
     fun currentCardUri(): String? =
-        prefs.getString("my_card_uri", null)?.takeIf { !issuedCardAnswered() }
-
-    fun rememberCardUri(uri: String) = prefs.edit().putString("my_card_uri", uri).apply()
-
-    fun issuedCardAnswered(): Boolean = prefs.getBoolean("issued_answered", false)
-
-    fun markIssuedCardAnswered() = synchronized(lock) {
-        prefs.edit().putBoolean("issued_answered", true).apply()
-        bump()
-    }
+        issuedCards().lastOrNull { it.purpose == "profile" && it.answeredBy == null }
+            ?.uri?.takeIf { it.isNotEmpty() }
 
     /** Our own published bundle and its secrets. */
+    /**
+     * Merge new prekey material in. **Never replace.**
+     *
+     * This used to overwrite the whole record — one-time secrets *and* the
+     * signed secret — every time a card was issued or the supply topped up.
+     * Peers hold cached copies of old bundles and seal to the keys in them, so
+     * every overwrite turned messages already in flight into BadSig, including
+     * the signed-prekey fallback that exists precisely for "my other keys are
+     * gone". Secrets leave this store one way: [burnOneTime], §16.11's delete.
+     */
     fun savePrekeys(bundle: ByteArray, signedSecret: ByteArray, oneTime: Map<Int, ByteArray>) { synchronized(lock) {
-        val o = JSONObject()
+        val o = prefs.getString("prekeys", null)?.let { JSONObject(it) } ?: JSONObject()
         o.put("bundle", b64(bundle))
-        o.put("signed", b64(signedSecret))
-        val ot = JSONObject()
+        if (!o.has("signed")) o.put("signed", b64(signedSecret))
+        val ot = o.optJSONObject("one_time") ?: JSONObject()
         oneTime.forEach { (id, sk) -> ot.put(id.toString(), b64(sk)) }
         o.put("one_time", ot)
         prefs.edit().putString("prekeys", o.toString()).apply()
     } }
+
+    /**
+     * Ids for the next batch of one-time keys, globally unique on this device.
+     *
+     * Every batch used to start at 1, so a second card reused ids whose secrets
+     * the first card's peer still expected. An id is a name; two keys must
+     * never share one.
+     */
+    fun nextPrekeyStart(count: Int): Int = synchronized(lock) {
+        val next = prefs.getInt("prekey_next_id", 1)
+        prefs.edit().putInt("prekey_next_id", next + count).apply()
+        next
+    }
 
     fun prekeyBundle(): ByteArray? =
         prefs.getString("prekeys", null)?.let { unb64(JSONObject(it).getString("bundle")) }
@@ -570,6 +618,10 @@ data class IssuedCardState(
     val outboxKey: String,
     val outboxOwnerPublic: ByteArray,
     val outboxOwnerSecret: ByteArray,
+    val uri: String = "",
+    /** "profile" (the standing code) or "sale" (a till/tab/ride handshake). */
+    val purpose: String = "profile",
+    val answeredBy: String? = null,
 )
 
 class CardStore(context: Context) {

@@ -24,9 +24,8 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MyProfile
-import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.RateStore
-import org.ducatproject.ducat.WalletStore
+import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
 import java.math.BigDecimal
 
@@ -282,87 +281,76 @@ private fun PresentScreen(
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
-    var stage by remember { mutableStateOf(Sale.Waiting) }
+    val version by ContactStore.changes.collectAsState()
     var cardUri by remember { mutableStateOf<String?>(null) }
+    var cardInbox by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var customer by remember { mutableStateOf<Contact?>(null) }
+    var saleTabId by remember { mutableStateOf<String?>(null) }
 
-    // A card per sale. One card reused across customers would put the whole
-    // day in one conversation and reuse the address — §16.13's linkage.
+    // The stage is *derived* from the settlement store, which the poller
+    // drives — so a sale marked paid while this screen was backgrounded shows
+    // paid the moment it returns, and the receipt logic lives in exactly one
+    // place (TabStore.reconcile) for every vendor mode.
+    val stage = when {
+        saleTabId != null -> when (remember(version, saleTabId) {
+            TabStore(context).get(saleTabId!!)?.state
+        }) {
+            "paid" -> Sale.Paid
+            else -> Sale.Billed
+        }
+        else -> Sale.Waiting
+    }
+
+    // A card per sale, marked as one: a "sale" card never auto-reissues, and
+    // this flow waits for *its* claimant — a profile-code scan mid-sale must
+    // not be billed as the customer.
     LaunchedEffect(Unit) {
         val r = withContext(Dispatchers.IO) {
             runCatching {
-                Mailbox.issueCard(context, MyProfile(context).name(), 60uL * 60uL * 2uL)
+                Mailbox.issueCard(
+                    context, MyProfile(context).name(), 60uL * 60uL * 2uL, purpose = "sale",
+                )
             }
         }
-        r.onSuccess { cardUri = it.uri }
+        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
             .onFailure {
                 error = it.message ?: "could not publish the code"
                 DucatLog.e(TAG, "card: ${it.message}")
             }
     }
 
-    // Scan → bill. The claim makes them a contact; the bill is the first thing
-    // in the conversation, itemised, with the destination inside it.
-    LaunchedEffect(cardUri) {
-        if (cardUri == null) return@LaunchedEffect
-        val before = ContactStore(context).all().map { it.personaHex }.toSet()
+    // Scan → bill. The claim bound to this card makes them a contact; the
+    // bill lands in the new conversation, itemised, destination inside it,
+    // and the sale becomes a settlement the poller watches.
+    LaunchedEffect(cardInbox) {
+        val inbox = cardInbox ?: return@LaunchedEffect
         while (customer == null) {
             delay(2_000)
             val fresh = withContext(Dispatchers.IO) {
                 runCatching {
                     Mailbox.collectClaims(context)
-                    ContactStore(context).all().firstOrNull { it.personaHex !in before }
+                    ContactStore(context).claimantOf(inbox)?.let { hex ->
+                        ContactStore(context).all().firstOrNull { it.personaHex == hex }
+                    }
                 }.getOrNull()
             } ?: continue
             withContext(Dispatchers.IO) {
                 runCatching {
-                    Mailbox.send(
-                        context, fresh, "Your bill",
-                        PersonaStore(context).personaHex(),
-                        kind = 1, amountPxmr = totalPxmr,
-                        payto = WalletStore(context).address(),
-                        items = items, taxPxmr = taxPxmr,
-                    )
-                }.onSuccess {
+                    val store = TabStore(context)
+                    val tab = store.open(fresh.personaHex, "pos")
+                    store.update(store.get(tab.id)!!.copy(lines = items, taxPxmr = taxPxmr))
+                    store.settle(store.get(tab.id)!!)
+                    tab.id
+                }.onSuccess { id ->
                     customer = fresh
-                    stage = Sale.Billed
+                    saleTabId = id
                     DucatLog.i(TAG, "billed ${fresh.displayName()} ${formatXmr(totalPxmr)} XMR")
                 }.onFailure {
                     error = "They connected, but the bill did not send: ${it.message}"
                     DucatLog.e(TAG, "bill: ${it.message}")
                 }
             }
-        }
-    }
-
-    // Payment → receipt, automatically. The poller reads the chain; when an
-    // output of exactly the total appears, that is this sale settling, and the
-    // receipt goes into the same thread pointing at the transaction. Exact
-    // match only: a till with two customers mid-sale must not thank the wrong
-    // one, so anything else stays unmatched and shows up in Activity instead.
-    LaunchedEffect(stage) {
-        if (stage != Sale.Billed) return@LaunchedEffect
-        val already = WalletStore(context).entries().map { it.keyImage }.toSet()
-        while (stage == Sale.Billed) {
-            delay(3_000)
-            val paid = withContext(Dispatchers.IO) {
-                WalletStore(context).entries()
-                    .firstOrNull { it.keyImage !in already && it.amountPxmr == totalPxmr }
-            } ?: continue
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    Mailbox.send(
-                        context, customer!!, "Receipt — thank you",
-                        PersonaStore(context).personaHex(),
-                        kind = 3, amountPxmr = totalPxmr,
-                        items = items, taxPxmr = taxPxmr,
-                        txidHex = paid.txHashHex.ifEmpty { null },
-                    )
-                }.onSuccess { DucatLog.i(TAG, "receipt sent for ${formatXmr(totalPxmr)} XMR") }
-                    .onFailure { DucatLog.w(TAG, "receipt: ${it.message}") }
-            }
-            stage = Sale.Paid
         }
     }
 

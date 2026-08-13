@@ -876,7 +876,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_export_backup(`input`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_generate_prekeys(`count`: Int,`validSecs`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_generate_prekeys(`count`: Int,`validSecs`: Long,`startId`: Int,`reuseSignedSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_generate_writer_keys(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1260,7 +1260,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_export_backup() != 50604.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_generate_prekeys() != 34322.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_generate_prekeys() != 12451.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_generate_writer_keys() != 64976.toShort()) {
@@ -4235,11 +4235,11 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
     )
     }
     
- fun `generatePrekeys`(`count`: kotlin.UInt, `validSecs`: kotlin.ULong): PrekeyMaterial {
+ fun `generatePrekeys`(`count`: kotlin.UInt, `validSecs`: kotlin.ULong, `startId`: kotlin.UInt, `reuseSignedSecret`: kotlin.ByteArray?): PrekeyMaterial {
             return FfiConverterTypePrekeyMaterial.lift(
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_generate_prekeys(
-        FfiConverterUInt.lower(`count`),FfiConverterULong.lower(`validSecs`),_status)
+        FfiConverterUInt.lower(`count`),FfiConverterULong.lower(`validSecs`),FfiConverterUInt.lower(`startId`),FfiConverterOptionalByteArray.lower(`reuseSignedSecret`),_status)
 }
     )
     }

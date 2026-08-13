@@ -357,12 +357,33 @@ pub struct PrekeyMaterial {
 }
 
 #[uniffi::export]
-pub fn generate_prekeys(count: u32, valid_secs: u64) -> PrekeyMaterial {
-    let (signed_secret, signed_public) = hpke::derive_keypair(&random32());
+pub fn generate_prekeys(
+    count: u32,
+    valid_secs: u64,
+    // Where the ids begin. They were always 1..=count, which made every
+    // caller's ids collide with every other caller's: a second card, or a
+    // top-up, silently reused ids that peers' cached bundles still pointed at,
+    // and the secrets behind those ids were gone. Ids are cheap; uniqueness is
+    // the entire point of having them.
+    start_id: u32,
+    // An existing signed-prekey secret to keep, rather than rotating it as a
+    // side effect. Rotation is a real operation with a real cost — everything
+    // sealed to the old key stops opening — and it must never happen because a
+    // caller wanted more one-time keys.
+    reuse_signed_secret: Option<Vec<u8>>,
+) -> PrekeyMaterial {
+    let (signed_secret, signed_public) = match reuse_signed_secret
+        .as_deref()
+        .and_then(|b| <[u8; 32]>::try_from(b).ok())
+    {
+        Some(sk) => (sk, hpke::public_of(&sk)),
+        None => hpke::derive_keypair(&random32()),
+    };
     let mut one_time = Vec::new();
     let mut secrets = Vec::new();
     let mut ids = Vec::new();
-    for i in 1..=count {
+    let from = start_id.max(1);
+    for i in from..from.saturating_add(count) {
         let (sk, pk) = hpke::derive_keypair(&random32());
         one_time.push(PreKey { id: i, public: pk });
         secrets.push(sk.to_vec());
