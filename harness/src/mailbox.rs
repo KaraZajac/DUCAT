@@ -102,14 +102,28 @@ fn prekeys(seed: u8) -> (PreKeyStore, PreKeyBundle) {
     (store, bundle)
 }
 
-async fn make_log(rc: &RoutingContext) -> Result<RecordKey, Box<dyn std::error::Error>> {
+/// Create a log **under a keypair we generated**, so we can still write to it
+/// in a later process.
+///
+/// A record created with `None` is writable only by the process that made it:
+/// re-opening it afterwards yields a read-only handle, and the write comes back
+/// "value is not writable", which reads as the network refusing and is us
+/// having thrown the key away. The app hit this and left a comment about it;
+/// the harness had the same bug and no comment.
+async fn make_log(
+    rc: &RoutingContext,
+) -> Result<(RecordKey, KeyPair), Box<dyn std::error::Error>> {
+    let api = rc.api();
+    let cs = api.crypto()?;
+    let crypto = cs.get(CRYPTO_KIND_VLD0).ok_or("no VLD0")?;
+    let kp = crypto.generate_keypair();
     let desc = rc
-        .create_dht_record(CRYPTO_KIND_VLD0, DHTSchema::dflt(LOG_SUBKEYS as u16)?, None)
+        .create_dht_record(CRYPTO_KIND_VLD0, DHTSchema::dflt(LOG_SUBKEYS as u16)?, Some(kp.clone()))
         .await?;
     let head = LogHead { version: 1, suite: 1, next_seq: 0, prekey_bundle: None };
     rc.set_dht_value(desc.key().clone(), 0, head.to_value().encode(), None)
         .await?;
-    Ok(desc.key().clone())
+    Ok((desc.key().clone(), kp))
 }
 
 /// Append one sealed message and move the head.
@@ -150,7 +164,7 @@ pub async fn issue() -> Result<(), Box<dyn std::error::Error>> {
             None,
         )
         .await?;
-    let outbox = make_log(&rc).await?;
+    let (outbox, _outbox_kp) = make_log(&rc).await?;
     println!("  inbox    {}", inbox.key());
     println!("  outbox   {}", outbox);
     println!("  built    in {} ms", t0.elapsed().as_millis());
@@ -262,7 +276,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
     println!("  read 0   in {} ms — outbox {}", t0.elapsed().as_millis(), theirs.outbox_key);
 
     let persona = SecretKey::ed25519_from_bytes(&[0x72; 32]);
-    let outbox = make_log(&rc).await?;
+    let (outbox, outbox_kp) = make_log(&rc).await?;
     let (_, bundle) = prekeys(0x80);
     let mine = ContactDetails {
         version: 1,
@@ -337,13 +351,137 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
     // meant re-deriving it from the card, and a card is a one-shot thing handed
     // over in person. Keeping one line instead of two made every future read
     // depend on still having the URI.
+    // **Theirs first.** This wrote our own outbox in that slot, and `watch`
+    // reads slot one as the log to poll — so it sat decrypting our own
+    // outgoing messages with the receiving keys and reported BadSig on every
+    // one of them. Two record keys in scope named almost the same thing, and
+    // the wrong one is not a decode error anywhere: it is a valid record full
+    // of valid ciphertext that simply is not addressed to us.
     std::fs::write(
         state_path("claimant"),
-        format!("{}\n{}\n{}\n", outbox, hex::encode(&theirs.persona), inbox),
+        format!(
+            "{}\n{}\n{}\n{}\n",
+            theirs.outbox_key,          // the log we read
+            hex::encode(&theirs.persona),
+            outbox,                     // the log we write
+            format!(
+                "{}:{}",
+                hex::encode(outbox_kp.value().key().bytes()),
+                hex::encode(outbox_kp.value().secret().bytes()),
+            ),
+        ),
     )?;
     rc.close_dht_record(inbox).await?;
     rc.close_dht_record(outbox).await?;
     println!("\n  \x1b[32mclaimed and sent, with the issuer offline throughout\x1b[0m");
+    api.shutdown().await;
+    Ok(())
+}
+
+/// Say something in a thread that already exists.
+///
+/// The card is single use by design — it is the handshake, not the channel —
+/// so without this the harness could read a contact's messages forever and
+/// never answer one. Their current prekeys come from the head of their own log
+/// (§16.12's refresh), which is exactly what that field is for: no round trip
+/// to a peer who may not be there.
+pub async fn say(text: &str) -> Result<(), Box<dyn std::error::Error>> {
+    use std::str::FromStr;
+    println!("\n\x1b[1mDUCAT — say\x1b[0m\n");
+    if text.is_empty() {
+        return Err("nothing to say — pass the message after --say".into());
+    }
+    let st = std::fs::read_to_string(state_path("claimant"))
+        .map_err(|_| "no claimed contact on this machine")?;
+    let mut it = st.lines();
+    let their_log = it.next().unwrap_or_default().to_string();
+    let their_persona = hex::decode(it.next().unwrap_or_default())?;
+    let my_log = it.next().unwrap_or_default().to_string();
+    if my_log.is_empty() {
+        return Err("this contact predates the outbox being kept; re-claim a card".into());
+    }
+
+    let (api, _c) = crate::veilid::start("say").await?;
+    let rc = api.routing_context()?;
+    let theirs = RecordKey::from_str(&their_log)?;
+    rc.open_dht_record(theirs.clone(), None).await?;
+
+    // Their published keys, and our own next sequence number, both live in the
+    // head of a log rather than in anything we stored.
+    let their_head = match rc.get_dht_value(theirs.clone(), 0, true).await? {
+        Some(v) => LogHead::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?,
+        None => return Err("their log has no head".into()),
+    };
+    // §16.12 refreshes the bundle on every head write, which is what makes a
+    // reply possible without asking them for anything.
+    let raw = their_head
+        .prekey_bundle
+        .ok_or("their log head carries no prekeys — they have not written since claiming")?;
+    let their_bundle =
+        PreKeyBundle::from_value(decode(&raw).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?;
+
+    let mine = RecordKey::from_str(&my_log)?;
+    let owner = it.next().unwrap_or_default();
+    let (pk_hex, sk_hex) = owner
+        .split_once(':')
+        .ok_or("this contact predates the log key being kept; re-claim a fresh card")?;
+    let kp = KeyPair::new(
+        CRYPTO_KIND_VLD0,
+        BareKeyPair::new(
+            BarePublicKey::new(&hex::decode(pk_hex)?),
+            BareSecretKey::new(&hex::decode(sk_hex)?),
+        ),
+    );
+    rc.open_dht_record(mine.clone(), Some(kp)).await?;
+    let head = match rc.get_dht_value(mine.clone(), 0, true).await? {
+        Some(v) => LogHead::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?,
+        None => return Err("our own log has no head".into()),
+    };
+    let seq = head.next_seq;
+
+    let persona = SecretKey::ed25519_from_bytes(&[0x72; 32]);
+    let aad = thread_aad(
+        &hex::encode(persona.public().to_bytes()),
+        &hex::encode(&their_persona),
+    );
+    // The chain link has to be the previous message's, and we do not keep our
+    // own sent messages — so re-read the one we last wrote and take its link.
+    let prev = if seq == 0 {
+        [0u8; 32]
+    } else {
+        return Err(
+            "replying more than once needs the previous message's link, which this              harness does not keep yet — re-claim a fresh card to start a thread"
+                .into(),
+        );
+    };
+
+    let m = Message {
+        version: 1, suite: 1, seq, prev,
+        body: text.to_string(),
+        timestamp: std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_secs(),
+        kind: MessageKind::Text,
+        amount_pxmr: None, txid: None, payto: None,
+        items: Vec::new(), tax_pxmr: None,
+    };
+    let (chosen, fs) = their_bundle.select();
+    if !fs {
+        println!("  \x1b[33m!\x1b[0m one-time keys exhausted — no forward secrecy");
+    }
+    let mut rng = HarnessRng(0xC3 ^ seq as u8);
+    let (enc, ct) = hpke::seal(&mut rng, &chosen.public, &hpke::message_info(1), &aad,
+                               &m.to_value().encode())
+        .map_err(|e| format!("seal: {e:?}"))?;
+    let sealed = SealedMessage { version: 1, suite: 1, prekey_id: chosen.id, enc, ciphertext: ct };
+    append(&rc, &mine, seq, &sealed.to_value().encode()).await?;
+    println!("  \x1b[35m→\x1b[0m [{seq}] {text}");
+
+    rc.close_dht_record(theirs).await?;
+    rc.close_dht_record(mine).await?;
     api.shutdown().await;
     Ok(())
 }

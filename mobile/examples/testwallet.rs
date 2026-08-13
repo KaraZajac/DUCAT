@@ -34,23 +34,46 @@ fn main() {
 
         // Scan for what we can spend. One request per block, so this walks from
         // the recorded restore height rather than from genesis.
-        let mut from = restore;
+        // Same skip as `balance`: this walks one request per block, and a
+        // wallet whose restore height is a thousand blocks back should not
+        // re-read all of it to spend an output found ten minutes ago.
+        let mut from = std::env::var("SCAN_FROM")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(restore);
         let mut blobs = Vec::new();
         while from < st.height {
             let r = ducat_mobile::monero::monero_scan(NODE.into(), spend.clone(), from, 2_000)
                 .expect("scan");
             for o in &r.outputs {
                 println!("  found {} pXMR at {}", o.amount_pxmr, o.height);
-                blobs.push(o.blob.clone());
+                blobs.push((o.blob.clone(), o.key_image_hex.clone(), o.amount_pxmr));
             }
             if r.scanned_to <= from { break }
             from = r.scanned_to;
         }
+        // **Scanning finds outputs; it does not say which are still there.**
+        // Every found blob went straight in as an input, so a wallet that had
+        // ever spent anything built a transaction double-spending it, and the
+        // daemon's refusal arrived as "no node accepted it" — which reads as a
+        // network problem and is arithmetic.
+        let kis: Vec<String> = blobs.iter().map(|(_, k, _)| k.clone()).collect();
+        let spent = ducat_mobile::monero::monero_spent(NODE.into(), kis).expect("spent check");
+        let blobs: Vec<Vec<u8>> = blobs
+            .into_iter()
+            .zip(&spent)
+            .filter(|(_, s)| !**s)
+            .map(|((b, _, a), _)| {
+                println!("  spendable {a} pXMR");
+                b
+            })
+            .collect();
         if blobs.is_empty() {
             println!("nothing to spend — fund {address} first");
             return;
         }
-        match ducat_mobile::monero::monero_send(NODE.into(), spend, blobs, to, pxmr, 1) {
+        let priority: u32 = std::env::var("PRIORITY").ok().and_then(|v| v.parse().ok()).unwrap_or(1);
+        match ducat_mobile::monero::monero_send(NODE.into(), spend, blobs, to, pxmr, priority) {
             Ok(r) => println!(
                 "\n  txid {}\n  fee {} pXMR\n  accepted by {} node(s)",
                 r.txid_hex, r.fee_pxmr, r.accepted_by
