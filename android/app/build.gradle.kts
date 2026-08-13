@@ -67,6 +67,16 @@ dependencies {
     // symbol; the alternative was hand-rolling Reed-Solomon, which is not a
     // thing to hand-roll for a code someone scans to add a friend.
     implementation("com.google.zxing:core:3.5.3")
+    // Veilid's protected store is not a file it manages itself: on Android it
+    // reaches back through JNI for `androidx.security.crypto.MasterKey` and
+    // `EncryptedSharedPreferences`. Without this on the classpath the keyring
+    // fails, and because `allow_insecure_fallback` defaults to false the node
+    // refuses to start at all — "Could not initialize the protected store",
+    // which reads like a Veilid bug and is a missing dependency.
+    //
+    // The 1.1.0-alpha line specifically: 1.0.0 ships `MasterKeys` (plural,
+    // static helpers) and the JNI code loads `MasterKey$Builder`.
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("junit:junit:4.13.2")
 }
