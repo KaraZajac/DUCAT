@@ -78,7 +78,7 @@ pub async fn run(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     let (api, mut calls) = crate::veilid::start("peer").await?;
     let rc = api.routing_context()?;
-    let route = api.import_remote_private_route(invite.rendezvous.clone())?;
+    let their_blob = invite.rendezvous.clone();
     let my_route = api.new_custom_private_route(PrivateSpec::default()).await?;
 
     // Fixed so a restarted peer is the same contact on the phone rather than a
@@ -112,14 +112,24 @@ pub async fn run(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
     };
 
     println!("  claiming the card…");
-    let reply = rc
-        .app_call(Target::RouteId(route.clone()), frame(MSG_CLAIM, &claim.to_value().encode()))
-        .await?;
+    let reply = call(&api, &rc, &their_blob, frame(MSG_CLAIM, &claim.to_value().encode()))
+        .await
+        .map_err(|e| format!("claim: {e}"))?;
     let text = String::from_utf8_lossy(&reply).to_string();
-    if !text.starts_with("ok") {
+    if text.starts_with("ok") {
+        println!("  \x1b[32mclaimed\x1b[0m — you are now a contact on the phone\n");
+    } else if text.contains("Replay") {
+        // The card was already claimed, which on a restart means *we* claimed
+        // it. Sending still works — the receiver matches an inbound ciphertext
+        // by AAD against contacts it already has, and needs nothing from us to
+        // do that. What is stale is the route *they* hold for us, so their
+        // replies will not arrive until we are re-added from a fresh card.
+        println!("  \x1b[33malready claimed\x1b[0m — continuing as an existing contact");
+        println!("  \x1b[2mtheir route for us is from the previous run, so their");
+        println!("  replies will not arrive; sending still works\x1b[0m\n");
+    } else {
         return Err(format!("the phone refused: {text}").into());
     }
-    println!("  \x1b[32mclaimed\x1b[0m — you are now a contact on the phone\n");
 
     let peer = Arc::new(Mutex::new(Peer {
         store, bundle, in_seq: 0, in_prev: None, aad: aad.clone(),
@@ -158,10 +168,7 @@ pub async fn run(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
             continue;
         }
         if their_bundle.is_none() {
-            match rc
-                .app_call(Target::RouteId(route.clone()), frame(MSG_PREKEYS, b""))
-                .await
-            {
+            match call(&api, &rc, &their_blob, frame(MSG_PREKEYS, b"")).await {
                 Ok(raw) => match decode(&raw).ok().and_then(|v| PreKeyBundle::from_value(v).ok()) {
                     Some(b) => {
                         println!("  \x1b[2m{} one-time keys available\x1b[0m", b.one_time.len());
@@ -198,10 +205,7 @@ pub async fn run(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
         };
         b.one_time.retain(|k| k.id != chosen.id);
 
-        match rc
-            .app_call(Target::RouteId(route.clone()), frame(MSG_TEXT, &sealed.to_value().encode()))
-            .await
-        {
+        match call(&api, &rc, &their_blob, frame(MSG_TEXT, &sealed.to_value().encode())).await {
             Ok(r) => {
                 let t = String::from_utf8_lossy(&r).to_string();
                 if t.starts_with("ok") {
@@ -219,6 +223,29 @@ pub async fn run(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
     answer.abort();
     api.shutdown().await;
     Ok(())
+}
+
+/// One request, importing the remote route **fresh**.
+///
+/// Holding a `RouteId` and reusing it looks like the obvious optimisation and
+/// does not survive: the first call succeeded and every later one came back
+/// `could not get remote private route`, because veilid drops an imported
+/// remote route from its table once it is done with it. The Android bridge
+/// imports per call and worked throughout, which is what made the asymmetry
+/// visible — phone to desktop fine, desktop to phone dead after the first
+/// message.
+async fn call(
+    api: &VeilidAPI,
+    rc: &RoutingContext,
+    blob: &[u8],
+    payload: Vec<u8>,
+) -> Result<Vec<u8>, String> {
+    let route = api
+        .import_remote_private_route(blob.to_vec())
+        .map_err(|e| format!("import route: {e}"))?;
+    rc.app_call(Target::RouteId(route), payload)
+        .await
+        .map_err(|e| format!("{e}"))
 }
 
 /// Every branch replies. An `app_call` blocks its caller until answered, so
