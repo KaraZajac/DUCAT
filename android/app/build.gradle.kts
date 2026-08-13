@@ -67,6 +67,12 @@ dependencies {
     // symbol; the alternative was hand-rolling Reed-Solomon, which is not a
     // thing to hand-roll for a code someone scans to add a friend.
     implementation("com.google.zxing:core:3.5.3")
+    // CameraX plus the zxing decoder we already ship, rather than ML Kit.
+    // ML Kit is a Google binary blob, and this app is meant for F-Droid, whose
+    // inclusion policy is the reason the choice matters more than convenience.
+    implementation("androidx.camera:camera-camera2:1.4.1")
+    implementation("androidx.camera:camera-lifecycle:1.4.1")
+    implementation("androidx.camera:camera-view:1.4.1")
     // Veilid's protected store is not a file it manages itself: on Android it
     // reaches back through JNI for `androidx.security.crypto.MasterKey` and
     // `EncryptedSharedPreferences`. Without this on the classpath the keyring

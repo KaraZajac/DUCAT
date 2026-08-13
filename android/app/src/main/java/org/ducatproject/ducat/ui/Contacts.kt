@@ -209,8 +209,29 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
     var petname by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var adding by remember { mutableStateOf(false) }
+    var scanning by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    if (scanning) {
+        QrScanner(
+            prompt = "Point the camera at their DUCAT card",
+            onResult = { raw ->
+                scanning = false
+                // Read it here rather than dropping the text into the box: a
+                // scan that only fills a field makes the user press a button to
+                // find out it was the wrong code.
+                runCatching { readContactCard(raw) }
+                    .onSuccess {
+                        if (it.expired) error = "That card has expired. Ask for a new one."
+                        else { scanned = it; petname = it.assertedName ?: "" }
+                    }
+                    .onFailure { error = "That is not a DUCAT card"; text = raw }
+            },
+            onDismiss = { scanning = false },
+        )
+        return
+    }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(20.dp).verticalScroll(rememberScrollState())) {
@@ -226,9 +247,16 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                     minLines = 3,
                 )
                 Spacer(Modifier.height(8.dp))
-                TextButton(onClick = {
-                    clipboard.getText()?.let { text = it.text }
-                }) { Text("Paste from clipboard") }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = {
+                        clipboard.getText()?.let { text = it.text }
+                    }) { Text("Paste") }
+                    TextButton(onClick = { scanning = true }) {
+                        Icon(Icons.Filled.QrCodeScanner, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Scan")
+                    }
+                }
                 Spacer(Modifier.height(8.dp))
                 Button(
                     onClick = {

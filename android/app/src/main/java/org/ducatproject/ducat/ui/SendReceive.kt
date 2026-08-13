@@ -43,6 +43,17 @@ fun SendReceiveSheet(onDismiss: () -> Unit) {
     val wallet = remember { WalletStore(context) }
     val b = remember(version) { Wallet.balances(context) }
     var tab by remember { mutableIntStateOf(0) }
+    var scanning by remember { mutableStateOf(false) }
+    var scannedText by remember { mutableStateOf<String?>(null) }
+
+    if (scanning) {
+        QrScanner(
+            prompt = "Point the camera at a Monero address or a DUCAT card",
+            onResult = { scanning = false; scannedText = it },
+            onDismiss = { scanning = false },
+        )
+        return
+    }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(20.dp).verticalScroll(rememberScrollState())) {
@@ -106,6 +117,30 @@ fun SendReceiveSheet(onDismiss: () -> Unit) {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.ducat.changePending,
                     )
+                }
+                Spacer(Modifier.height(16.dp))
+                OutlinedButton(
+                    onClick = { scanning = true },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Filled.QrCodeScanner, null, Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Scan an address or card")
+                }
+                scannedText?.let {
+                    Spacer(Modifier.height(10.dp))
+                    Card(colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                        Column(Modifier.padding(12.dp)) {
+                            Text("Scanned", style = MaterialTheme.typography.labelMedium)
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                it.take(120) + if (it.length > 120) "…" else "",
+                                fontFamily = FontFamily.Monospace,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
                 }
                 Spacer(Modifier.height(20.dp))
                 NotBuilt(
