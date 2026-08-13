@@ -22,16 +22,34 @@ import org.json.JSONObject
 class ContactStore(context: Context) {
     private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
 
+    companion object {
+        /**
+         * One lock for the whole store, across every instance.
+         *
+         * Scoping the counters to their own helpers shrank the lost-update
+         * window but did not close it: read-modify-write is still three steps,
+         * and the responder's coroutine and a chat screen's coroutine both run
+         * on the IO dispatcher. A message arriving while a screen wrote back
+         * still lost one of the two updates, and the symptom was the *next*
+         * inbound message being refused as out of order — a report that points
+         * at the message rather than at the write that dropped a counter.
+         *
+         * The lock is on the companion because callers construct a fresh
+         * `ContactStore` per operation; a per-instance lock would guard nothing.
+         */
+        private val lock = Any()
+    }
+
     fun all(): List<Contact> {
         val raw = prefs.getString("contacts", null) ?: return emptyList()
         val arr = JSONArray(raw)
         return (0 until arr.length()).map { Contact.from(arr.getJSONObject(it)) }
     }
 
-    fun add(c: Contact) {
+    fun add(c: Contact) { synchronized(lock) {
         val existing = all().filterNot { it.personaHex == c.personaHex }
         save(existing + c)
-    }
+    } }
 
     fun update(c: Contact) = add(c)
 
@@ -45,24 +63,24 @@ class ContactStore(context: Context) {
      * of order, and the sender was told nothing useful. Read-modify-write on a
      * shared record needs the read to happen at write time, not at screen open.
      */
-    fun advanceOutbound(personaHex: String, seq: Long, prevLink: ByteArray) {
+    fun advanceOutbound(personaHex: String, seq: Long, prevLink: ByteArray) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
         save(all().filterNot { it.personaHex == personaHex } +
             c.copy(outSeq = seq, outPrevLink = prevLink))
-    }
+    } }
 
     /** The same, for the receiving counters. */
-    fun advanceInbound(personaHex: String, seq: Long, prevLink: ByteArray) {
+    fun advanceInbound(personaHex: String, seq: Long, prevLink: ByteArray) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
         save(all().filterNot { it.personaHex == personaHex } +
             c.copy(inSeq = seq, inPrevLink = prevLink))
-    }
+    } }
 
     /** Show or hide a conversation without touching the contact. */
-    fun setChatVisible(personaHex: String, visible: Boolean) {
+    fun setChatVisible(personaHex: String, visible: Boolean) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
         save(all().filterNot { it.personaHex == personaHex } + c.copy(chatVisible = visible))
-    }
+    } }
 
     /**
      * Delete a conversation's messages.
@@ -76,34 +94,34 @@ class ContactStore(context: Context) {
      * for the next message to follow, and leaving them would refuse everything
      * the other side sends afterwards.
      */
-    fun deleteThread(personaHex: String) {
+    fun deleteThread(personaHex: String) { synchronized(lock) {
         prefs.edit().remove("thread_$personaHex").apply()
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
         save(
             all().filterNot { it.personaHex == personaHex } +
                 c.copy(outSeq = 0, outPrevLink = null, inSeq = 0, inPrevLink = null)
         )
-    }
+    } }
 
     /** Forget a person entirely: the contact and everything they said. */
-    fun forget(personaHex: String) {
+    fun forget(personaHex: String) { synchronized(lock) {
         prefs.edit().remove("thread_$personaHex").apply()
         save(all().filterNot { it.personaHex == personaHex })
-    }
+    } }
 
     /** Record their published keys without touching any counter. */
-    fun setTheirBundle(personaHex: String, bundle: ByteArray) {
+    fun setTheirBundle(personaHex: String, bundle: ByteArray) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
         save(all().filterNot { it.personaHex == personaHex } + c.copy(theirBundle = bundle))
-    }
+    } }
 
     fun remove(personaHex: String) = save(all().filterNot { it.personaHex == personaHex })
 
-    private fun save(list: List<Contact>) {
+    private fun save(list: List<Contact>) { synchronized(lock) {
         val arr = JSONArray()
         list.forEach { arr.put(it.toJson()) }
         prefs.edit().putString("contacts", arr.toString()).apply()
-    }
+    } }
 
     // --- threads ----------------------------------------------------------
 
@@ -113,16 +131,16 @@ class ContactStore(context: Context) {
         return (0 until arr.length()).map { StoredMessage.from(arr.getJSONObject(it)) }
     }
 
-    fun append(personaHex: String, m: StoredMessage) {
+    fun append(personaHex: String, m: StoredMessage) { synchronized(lock) {
         val arr = JSONArray()
         (thread(personaHex) + m).forEach { arr.put(it.toJson()) }
         prefs.edit().putString("thread_$personaHex", arr.toString()).apply()
-    }
+    } }
 
     // --- prekeys ----------------------------------------------------------
 
     /** Our own published bundle and its secrets. */
-    fun savePrekeys(bundle: ByteArray, signedSecret: ByteArray, oneTime: Map<Int, ByteArray>) {
+    fun savePrekeys(bundle: ByteArray, signedSecret: ByteArray, oneTime: Map<Int, ByteArray>) { synchronized(lock) {
         val o = JSONObject()
         o.put("bundle", b64(bundle))
         o.put("signed", b64(signedSecret))
@@ -130,7 +148,7 @@ class ContactStore(context: Context) {
         oneTime.forEach { (id, sk) -> ot.put(id.toString(), b64(sk)) }
         o.put("one_time", ot)
         prefs.edit().putString("prekeys", o.toString()).apply()
-    }
+    } }
 
     fun prekeyBundle(): ByteArray? =
         prefs.getString("prekeys", null)?.let { unb64(JSONObject(it).getString("bundle")) }
@@ -149,12 +167,12 @@ class ContactStore(context: Context) {
      * secrecy consists of — after it, the message that key opened cannot be
      * opened again by anyone, including us.
      */
-    fun burnOneTime(id: Int) {
+    fun burnOneTime(id: Int) { synchronized(lock) {
         val raw = prefs.getString("prekeys", null) ?: return
         val o = JSONObject(raw)
         o.getJSONObject("one_time").remove(id.toString())
         prefs.edit().putString("prekeys", o.toString()).apply()
-    }
+    } }
 
     fun oneTimeRemaining(): Int {
         val raw = prefs.getString("prekeys", null) ?: return 0
