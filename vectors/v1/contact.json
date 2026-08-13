@@ -106,6 +106,27 @@
       "why": "The name is optional here for the same reason it is on the card."
     },
     {
+      "details_hex": "a8000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d18b6785f3541704a553862664a327362346547484e534363536a47483453784d67684c616864466f68334e4b706b5059684a4533414335366f784645466358344e6a374454443837335833706e776e575366703159554373673676654141766b776d39",
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a8000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d18b6785f3541704a553862664a327362346547484e534363536a47483453784d67684c616864466f68334e4b706b5059684a4533414335366f784645466358344e6a374454443837335833706e776e575366703159554373673676654141766b776d39"
+      },
+      "kind": "contact.details",
+      "name": "details_with_payto",
+      "why": "A contact may publish an address so they can be paid without asking first. Optional, and a real trade: a stored address is a reused address, and a reused address links every payment to that person on a public ledger."
+    },
+    {
+      "details_hex": "a8000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d18b660",
+      "expect": {
+        "hint": "empty text field",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "contact.details",
+      "name": "details_payto_empty",
+      "why": "Absent is how a contact declines to publish one. An empty string would be a second spelling of that."
+    },
+    {
       "details_hex": "a7000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad6018ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d",
       "expect": {
         "hint": "empty text field",

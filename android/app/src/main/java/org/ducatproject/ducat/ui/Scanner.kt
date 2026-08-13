@@ -19,6 +19,9 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import org.ducatproject.ducat.DucatLog
 import androidx.core.content.ContextCompat
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
@@ -59,6 +62,18 @@ fun QrScanner(
 
     LaunchedEffect(Unit) { if (!granted) ask.launch(Manifest.permission.CAMERA) }
 
+    // A Dialog, not a plain Surface. The caller renders this *before* the rest
+    // of its screen, so a Surface sits in the same layout slot and whatever
+    // comes after paints straight over it — the camera was running the whole
+    // time with the app drawn on top of it. A dialog floats, and takes the back
+    // gesture with it, which a Surface also did not.
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+        ),
+    ) {
     Surface(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -94,13 +109,23 @@ fun QrScanner(
                 return@Column
             }
 
-            CameraPreview(onResult)
+            var failure by remember { mutableStateOf<String?>(null) }
+            failure?.let {
+                Text(
+                    "The camera would not start: $it",
+                    Modifier.padding(20.dp),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            CameraPreview(onResult) { failure = it }
         }
+    }
     }
 }
 
 @Composable
-private fun CameraPreview(onResult: (String) -> Unit) {
+private fun CameraPreview(onResult: (String) -> Unit, onFailure: (String) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     // One frame is enough. Without this the callback fires repeatedly while the
@@ -134,11 +159,18 @@ private fun CameraPreview(onResult: (String) -> Unit) {
                     }
                     image.close()
                 }
+                // Reported rather than discarded. A swallowed bind failure is a
+                // black rectangle with no explanation, which is exactly how the
+                // last camera problem presented.
                 runCatching {
                     provider.unbindAll()
                     provider.bindToLifecycle(
                         lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis,
                     )
+                }.onFailure { e ->
+                    val msg = e.message ?: e.toString()
+                    DucatLog.w("Scanner", "camera bind failed: $msg")
+                    view.post { onFailure(msg) }
                 }
             }, ContextCompat.getMainExecutor(ctx))
             view

@@ -89,6 +89,7 @@ fn details() -> ContactDetails {
         outbox_key: "VLD0:abc:def".into(),
         prekey_bundle: vec![0x01, 0x02, 0x03],
         display_name: Some("sam".into()),
+        payto: None,
     }
 }
 
@@ -319,4 +320,25 @@ fn changing_the_destination_breaks_the_chain() {
     let mut b = a.clone();
     b.payto = Some("5Attacker".into());
     assert_ne!(a.link(), b.link());
+}
+
+/// A contact may publish an address so they can be paid without asking first.
+/// Optional, because §16.12 makes it a real trade against linkability.
+#[test]
+fn contact_details_may_carry_a_payout_address() {
+    let mut d = details();
+    assert_eq!(d.payto, None, "absent is the default");
+    assert_eq!(ContactDetails::from_value(d.to_value()).unwrap(), d);
+
+    d.payto = Some("5ApJU8bfJ2sb4eGHNSCcSjGH4SxMghLahdFoh3NKpkPYhJ".into());
+    assert_eq!(ContactDetails::from_value(d.to_value()).unwrap(), d);
+}
+
+#[test]
+fn a_published_address_is_bounded_and_never_empty() {
+    let mut d = details();
+    d.payto = Some("5".repeat(MAX_ADDRESS_CHARS + 1));
+    assert!(ContactDetails::from_value(d.to_value()).is_err());
+    d.payto = Some(String::new());
+    assert!(ContactDetails::from_value(d.to_value()).is_err());
 }

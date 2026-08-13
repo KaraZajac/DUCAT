@@ -138,6 +138,9 @@ pub async fn issue() -> Result<(), Box<dyn std::error::Error>> {
         outbox_key: outbox.to_string(),
         prekey_bundle: bundle.to_value().encode(),
         display_name: Some("kara".into()),
+        // The harness declines to publish an address: §16.12 makes that the
+        // default, and a test fixture that opts in tests the wrong shape.
+        payto: None,
     };
     rc.set_dht_value(inbox.key().clone(), 0, details.to_value().encode(), None)
         .await?;
@@ -243,6 +246,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
         outbox_key: outbox.to_string(),
         prekey_bundle: bundle.to_value().encode(),
         display_name: Some("desktop".into()),
+        payto: None,
     };
     rc.set_dht_value(inbox.clone(), 1, mine.to_value().encode(), None).await?;
     println!("  wrote    subkey 1 — the handshake is complete");

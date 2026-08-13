@@ -50,7 +50,12 @@ object Mailbox {
         // claimant reading it later needs nothing from us but the record.
         nodeDhtSet(
             inbox.key, 0u,
-            buildContactDetails(persona, outbox.key, prekeys.bundle, displayName),
+            buildContactDetails(
+                persona, outbox.key, prekeys.bundle, displayName,
+                // Only if the user has opted in. §16.12 makes this a choice,
+                // and defaulting it on would be choosing for them.
+                if (store.publishAddress()) WalletStore(context).address() else null,
+            ),
         )
 
         val card = createContactCard(
@@ -102,7 +107,10 @@ object Mailbox {
         )
         nodeDhtSet(
             scanned.inboxKey, 1u,
-            buildContactDetails(persona, outbox.key, prekeys.bundle, petname),
+            buildContactDetails(
+                persona, outbox.key, prekeys.bundle, petname,
+                if (store.publishAddress()) WalletStore(context).address() else null,
+            ),
         )
 
         val c = Contact(
@@ -114,6 +122,7 @@ object Mailbox {
             myOutboxOwnerSecret = outbox.ownerSecret,
             theirOutbox = theirs.outboxKey,
             theirBundle = theirs.prekeyBundle,
+            theirAddress = theirs.payto,
         )
         store.add(c)
         DucatLog.i(TAG, "claimed: their outbox=${theirs.outboxKey.take(24)}…")
@@ -146,6 +155,7 @@ object Mailbox {
                     myOutboxOwnerSecret = issued.outboxOwnerSecret,
                     theirOutbox = theirs.outboxKey,
                     theirBundle = theirs.prekeyBundle,
+                    theirAddress = theirs.payto,
                 )
             )
             store.markIssuedCardAnswered()
@@ -313,6 +323,8 @@ object Mailbox {
                     payto = opened.payto,
                 ),
             )
+            // A request carries a fresher address than anything stored (§16.12).
+            opened.payto?.let { store.setTheirAddress(c.personaHex, it) }
             if (opened.consumedOneTime) store.burnOneTime(opened.prekeyId.toInt())
             prev = opened.link
             seq += 1uL

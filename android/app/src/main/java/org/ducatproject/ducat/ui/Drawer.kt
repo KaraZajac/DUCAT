@@ -255,6 +255,9 @@ private fun ProfileSection() {
         }
 
         Spacer(Modifier.height(28.dp))
+        PublishAddressSetting()
+
+        Spacer(Modifier.height(28.dp))
         Text("Your persona", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(4.dp))
         Text(
@@ -265,6 +268,54 @@ private fun ProfileSection() {
         )
         Spacer(Modifier.height(8.dp))
         SelectionContainerText(persona)
+    }
+}
+
+/**
+ * Whether contacts may pay without asking first.
+ *
+ * Off by default, and the cost is stated once and plainly rather than buried:
+ * §16.12 makes this a choice about the user's own linkability, and choosing for
+ * them — in either direction — is not a choice they made.
+ */
+@Composable
+private fun PublishAddressSetting() {
+    val context = LocalContext.current
+    val store = remember { ContactStore(context) }
+    var on by remember { mutableStateOf(store.publishAddress()) }
+
+    Column {
+        Text("Being paid", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Switch(checked = on, onCheckedChange = { on = it; store.setPublishAddress(it) })
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text("Let contacts pay me directly")
+                Text(
+                    "Without this, someone paying you has to wait for a request.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        if (on) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Your address goes to each contact once, and gets reused. Anyone " +
+                    "who can see the chain can tell that the same person was paid " +
+                    "each time — including people who only ever paid you once. " +
+                    "Requests avoid that by carrying a fresh address each time.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.ducat.changePending,
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            "Only contacts added after this is on will have it.",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.outline,
+        )
     }
 }
 

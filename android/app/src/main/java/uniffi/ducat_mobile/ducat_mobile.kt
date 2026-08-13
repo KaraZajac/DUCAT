@@ -842,7 +842,7 @@ internal interface UniffiLib : Library {
     ): Byte
     fun uniffi_ducat_mobile_fn_func_approx_payments_supported(`unlockedOutputs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
-    fun uniffi_ducat_mobile_fn_func_build_contact_details(`personaSecret`: RustBuffer.ByValue,`outboxKey`: RustBuffer.ByValue,`prekeyBundle`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_build_contact_details(`personaSecret`: RustBuffer.ByValue,`outboxKey`: RustBuffer.ByValue,`prekeyBundle`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_build_log_head(`nextSeq`: Long,`prekeyBundle`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1194,7 +1194,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_approx_payments_supported() != 28086.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_build_contact_details() != 46604.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_build_contact_details() != 60467.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_build_log_head() != 42400.toShort()) {
@@ -2214,7 +2214,11 @@ data class PeerDetails (
     var `persona`: kotlin.ByteArray, 
     var `outboxKey`: kotlin.String, 
     var `prekeyBundle`: kotlin.ByteArray, 
-    var `assertedName`: kotlin.String?
+    var `assertedName`: kotlin.String?, 
+    /**
+     * Where they can be paid without asking, if they chose to publish it.
+     */
+    var `payto`: kotlin.String?
 ) {
     
     companion object
@@ -2230,6 +2234,7 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
             FfiConverterString.read(buf),
             FfiConverterByteArray.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
         )
     }
 
@@ -2237,7 +2242,8 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
             FfiConverterByteArray.allocationSize(value.`persona`) +
             FfiConverterString.allocationSize(value.`outboxKey`) +
             FfiConverterByteArray.allocationSize(value.`prekeyBundle`) +
-            FfiConverterOptionalString.allocationSize(value.`assertedName`)
+            FfiConverterOptionalString.allocationSize(value.`assertedName`) +
+            FfiConverterOptionalString.allocationSize(value.`payto`)
     )
 
     override fun write(value: PeerDetails, buf: ByteBuffer) {
@@ -2245,6 +2251,7 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
             FfiConverterString.write(value.`outboxKey`, buf)
             FfiConverterByteArray.write(value.`prekeyBundle`, buf)
             FfiConverterOptionalString.write(value.`assertedName`, buf)
+            FfiConverterOptionalString.write(value.`payto`, buf)
     }
 }
 
@@ -3532,11 +3539,11 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
          * Encode what goes into an inbox subkey: who I am, where to leave things, and
          * the keys to seal with.
          */
-    @Throws(ContactException::class) fun `buildContactDetails`(`personaSecret`: kotlin.ByteArray, `outboxKey`: kotlin.String, `prekeyBundle`: kotlin.ByteArray, `displayName`: kotlin.String?): kotlin.ByteArray {
+    @Throws(ContactException::class) fun `buildContactDetails`(`personaSecret`: kotlin.ByteArray, `outboxKey`: kotlin.String, `prekeyBundle`: kotlin.ByteArray, `displayName`: kotlin.String?, `payto`: kotlin.String?): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_build_contact_details(
-        FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`outboxKey`),FfiConverterByteArray.lower(`prekeyBundle`),FfiConverterOptionalString.lower(`displayName`),_status)
+        FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`outboxKey`),FfiConverterByteArray.lower(`prekeyBundle`),FfiConverterOptionalString.lower(`displayName`),FfiConverterOptionalString.lower(`payto`),_status)
 }
     )
     }

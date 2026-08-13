@@ -325,9 +325,12 @@ private fun AmountStep(
                     modifier = Modifier.weight(1f),
                 ) { Text("Request") }
             }
+            val payable = target !is PayTarget.ToContact ||
+                target.contact.theirAddress != null || prefillAmountPxmr > 0
             Button(
                 onClick = { confirming = true },
-                enabled = !busy && pxmr != null && b.spendablePxmr >= (pxmr ?: 0),
+                enabled = !busy && pxmr != null && payable &&
+                    b.spendablePxmr >= (pxmr ?: 0),
                 modifier = Modifier.weight(1f),
             ) {
                 if (busy) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
@@ -335,6 +338,17 @@ private fun AmountStep(
             }
         }
 
+        if (target is PayTarget.ToContact && target.contact.theirAddress == null &&
+            prefillAmountPxmr == 0L
+        ) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "${target.contact.displayName()} has not shared an address, so you can " +
+                    "ask but not send yet. A request carries one back.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         done?.let {
             Spacer(Modifier.height(12.dp))
             Text(it, color = MaterialTheme.ducat.settled)
@@ -348,7 +362,7 @@ private fun AmountStep(
 
     if (confirming && pxmr != null) {
         val dest = when (target) {
-            is PayTarget.ToContact -> null
+            is PayTarget.ToContact -> target.contact.theirAddress
             is PayTarget.ToAddress -> target.address
         }
         ConfirmSend(
@@ -367,10 +381,16 @@ private fun AmountStep(
                             // A contact payment still needs an address, and one
                             // only exists if they asked. §16.13 keeps addresses
                             // out of the contact record on purpose.
-                            val to = dest ?: throw IllegalStateException(
-                                "Ask them to send a request first — DUCAT does not " +
-                                    "store a contact's address."
-                            )
+                            // Their published address if they chose to publish
+                            // one, otherwise the one from a request. Neither
+                            // exists until they have offered it (§16.12).
+                            val to = dest
+                                ?: (target as? PayTarget.ToContact)?.contact?.theirAddress
+                                ?: throw IllegalStateException(
+                                    "They have not shared an address. Ask them to send " +
+                                        "a request, or to turn on \"let contacts pay me " +
+                                        "directly\"."
+                                )
                             Wallet.send(context, node, to, pxmr)
                         }
                     }

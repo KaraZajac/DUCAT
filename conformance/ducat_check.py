@@ -943,6 +943,7 @@ MSG_KIND, MSG_AMOUNT, MSG_TXID, MSG_PAYTO = 178, 179, 180, 181
 MAX_ADDRESS_CHARS = 128
 CARD_PERSONA, CARD_INBOX, CARD_WRITER, CARD_NAME, CARD_EXPIRY = 167, 168, 169, 170, 171
 DET_PERSONA, DET_OUTBOX, DET_BUNDLE, DET_NAME = 172, 173, 174, 175
+DET_PAYTO = 182
 HEAD_NEXT = 176
 
 
@@ -1025,6 +1026,9 @@ def parse_details(buf):
         "prekey_bundle": _take(b, DET_BUNDLE, "bytes", "prekey bundle"),
         "display_name": _take_text(b, DET_NAME, MAX_DISPLAY_NAME_CHARS,
                                    "display name", False),
+        # Optional: a contact may publish an address so they can be paid without
+        # asking first, at the cost of that address being reused.
+        "payto": _take_text(b, DET_PAYTO, MAX_ADDRESS_CHARS, "payout address", False),
     }
     _finish(b)
     return out
@@ -1157,6 +1161,8 @@ def run_contact_details(cases, r):
                  (DET_BUNDLE, ("bytes", d["prekey_bundle"]))]
             if d["display_name"] is not None:
                 m.append((DET_NAME, ("text", d["display_name"])))
+            if d["payto"] is not None:
+                m.append((DET_PAYTO, ("text", d["payto"])))
             return _reencode_map(m)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

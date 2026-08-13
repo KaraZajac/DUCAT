@@ -138,6 +138,7 @@ pub mod f {
     pub const DET_OUTBOX: u64 = 173;
     pub const DET_BUNDLE: u64 = 174;
     pub const DET_NAME: u64 = 175;
+    pub const DET_PAYTO: u64 = 182;
 
     // LOG_HEAD (§16.12)
     pub const HEAD_NEXT: u64 = 176;

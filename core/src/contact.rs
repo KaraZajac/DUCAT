@@ -130,6 +130,18 @@ pub struct ContactDetails {
     /// round trip — and can be written while this party is offline.
     pub prekey_bundle: Vec<u8>,
     pub display_name: Option<String>,
+    /// Where this party can be paid without asking first.
+    ///
+    /// **Optional, and a real trade.** A stored address is a reused address,
+    /// and a reused address is a public ledger entry linking every payment
+    /// anyone ever made to this person. §16.13's per-request destination avoids
+    /// that and should be preferred when the two sides can wait for a request.
+    ///
+    /// It exists because the alternative — "ask them to send a request first"
+    /// — is a wall in front of the ordinary case of paying someone you already
+    /// talk to. Publishing it is the contact's own choice about their own
+    /// linkability, and an implementation MUST let them decline.
+    pub payto: Option<String>,
 }
 
 impl ContactDetails {
@@ -143,6 +155,9 @@ impl ContactDetails {
         m.insert(f::DET_BUNDLE, Value::Bytes(self.prekey_bundle.clone()));
         if let Some(n) = &self.display_name {
             m.insert(f::DET_NAME, Value::Text(n.clone()));
+        }
+        if let Some(p) = &self.payto {
+            m.insert(f::DET_PAYTO, Value::Text(p.clone()));
         }
         Value::Map(m)
     }
@@ -164,6 +179,7 @@ impl ContactDetails {
                 .ok_or_else(|| Reject::with_detail(RejectCode::Malformed, "no outbox"))?,
             prekey_bundle: r.bytes(f::DET_BUNDLE, None)?,
             display_name: r.opt_text(f::DET_NAME, MAX_DISPLAY_NAME_CHARS)?,
+            payto: r.opt_text(f::DET_PAYTO, MAX_ADDRESS_CHARS)?,
         };
         r.finish()?;
         Ok(out)

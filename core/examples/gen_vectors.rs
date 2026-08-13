@@ -1192,6 +1192,7 @@ fn contact_cases() -> Vec<J> {
         outbox_key: KEY.into(),
         prekey_bundle: vec![0xDD; 48],
         display_name: Some("sam".into()),
+        payto: None,
     };
     let mut detail = |name: &str, why: &str, d: &ContactDetails, bad: Option<(RejectCode, &str)>| {
         let hex_body = hex(&d.to_value().encode());
@@ -1205,6 +1206,14 @@ fn contact_cases() -> Vec<J> {
     detail("details_valid", "What each side writes into the contact inbox: who they are, where to leave things, and the keys to seal with.", &det, None);
     detail("details_no_name", "The name is optional here for the same reason it is on the card.",
         &ContactDetails { display_name: None, ..det.clone() }, None);
+    detail("details_with_payto",
+        "A contact may publish an address so they can be paid without asking first. Optional, and a real trade: a stored address is a reused address, and a reused address links every payment to that person on a public ledger.",
+        &ContactDetails { payto: Some("5ApJU8bfJ2sb4eGHNSCcSjGH4SxMghLahdFoh3NKpkPYhJE3AC56oxFEFcX4Nj7DTD873X3pnwnWSfp1YUCsg6veAAvkwm9".into()), ..det.clone() }, None);
+    detail("details_payto_empty",
+        "Absent is how a contact declines to publish one. An empty string would be a second spelling of that.",
+        &ContactDetails { payto: Some(String::new()), ..det.clone() },
+        Some((RejectCode::Malformed, "empty text field")));
+
     detail("details_outbox_empty",
         "An empty outbox key would leave the other side with a contact it can never write to, reported as success.",
         &ContactDetails { outbox_key: String::new(), ..det.clone() },

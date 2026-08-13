@@ -182,6 +182,20 @@ class ContactStore(context: Context) {
         save(all().filterNot { it.personaHex == personaHex })
     } }
 
+    /** Take a fresher address for a contact, from details or a request. */
+    fun setTheirAddress(personaHex: String, address: String?) {
+        if (address.isNullOrBlank()) return
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
+        if (c.theirAddress == address) return
+        save(all().filterNot { it.personaHex == personaHex } + c.copy(theirAddress = address))
+    }
+
+    /** Whether we publish our own address so contacts can pay without asking. */
+    fun publishAddress(): Boolean = prefs.getBoolean("publish_address", false)
+
+    fun setPublishAddress(v: Boolean) = prefs.edit().putBoolean("publish_address", v).apply()
+        .also { ContactStore.bump() }
+
     /** Record their published keys without touching any counter. */
     fun setTheirBundle(personaHex: String, bundle: ByteArray) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
@@ -370,6 +384,13 @@ data class Contact(
     val theirOutbox: String,
     /** Their published prekeys, read out of the inbox at handshake time. */
     val theirBundle: ByteArray? = null,
+    /**
+     * Where they can be paid without asking first, if they published one.
+     *
+     * A newer per-request destination supersedes this (§16.12), so a contact
+     * who rotates addresses is not undone by the copy we kept.
+     */
+    val theirAddress: String? = null,
     /** Our next outgoing sequence number, and the link it must carry (§16.10). */
     val outSeq: Long = 0,
     val outPrevLink: ByteArray? = null,
@@ -396,6 +417,7 @@ data class Contact(
         put("my_outbox_sec", b64(myOutboxOwnerSecret))
         put("their_outbox", theirOutbox)
         put("their_bundle", theirBundle?.let { b64(it) } ?: JSONObject.NULL)
+        put("their_address", theirAddress ?: JSONObject.NULL)
         put("out_seq", outSeq)
         put("out_prev", outPrevLink?.let { b64(it) } ?: JSONObject.NULL)
         put("in_seq", inSeq)
@@ -413,6 +435,7 @@ data class Contact(
             myOutboxOwnerSecret = unb64(o.optString("my_outbox_sec", "")),
             theirOutbox = o.optString("their_outbox", ""),
             theirBundle = o.optStringOrNull("their_bundle")?.let { unb64(it) },
+            theirAddress = o.optStringOrNull("their_address"),
             outSeq = o.optLong("out_seq"),
             outPrevLink = o.optStringOrNull("out_prev")?.let { unb64(it) },
             inSeq = o.optLong("in_seq"),

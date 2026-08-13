@@ -164,6 +164,9 @@ pub fn build_contact_details(
     outbox_key: String,
     prekey_bundle: Vec<u8>,
     display_name: Option<String>,
+    // Optional (§16.12). Publishing lets contacts pay without asking, at the
+    // cost of the address being reused — the caller decides, not this function.
+    payto: Option<String>,
 ) -> Result<Vec<u8>, ContactError> {
     let sk = persona_key(&persona_secret)?;
     Ok(ContactDetails {
@@ -173,6 +176,7 @@ pub fn build_contact_details(
         outbox_key,
         prekey_bundle,
         display_name,
+        payto,
     }
     .to_value()
     .encode())
@@ -185,6 +189,8 @@ pub struct PeerDetails {
     pub outbox_key: String,
     pub prekey_bundle: Vec<u8>,
     pub asserted_name: Option<String>,
+    /// Where they can be paid without asking, if they chose to publish it.
+    pub payto: Option<String>,
 }
 
 #[uniffi::export]
@@ -195,6 +201,7 @@ pub fn parse_contact_details(bytes: Vec<u8>) -> Result<PeerDetails, ContactError
         outbox_key: d.outbox_key,
         prekey_bundle: d.prekey_bundle,
         asserted_name: d.display_name,
+        payto: d.payto,
     })
 }
 
