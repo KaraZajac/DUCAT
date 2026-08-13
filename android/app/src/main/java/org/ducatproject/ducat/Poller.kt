@@ -25,6 +25,22 @@ private const val TAG = "DucatPoller"
  */
 class Poller(private val context: Context) {
 
+    /** Probe the candidates and remember the first usable one. */
+    private fun pickNode(context: Context): String? = try {
+        val store = NodeStore(context)
+        val s = uniffi.ducat_mobile.moneroPickNode(
+            uniffi.ducat_mobile.moneroDefaultNodes(store.ownUrl()),
+            "stagenet",
+            8_000u,
+        )
+        store.rememberLastGood(s.url)
+        Log.i(TAG, "picked node ${s.url} at height ${s.height}")
+        s.url
+    } catch (e: Exception) {
+        Log.w(TAG, "no node: ${e.message}")
+        null
+    }
+
     fun start(scope: CoroutineScope) {
         scope.launch(Dispatchers.IO) {
             while (isActive) {
@@ -40,7 +56,12 @@ class Poller(private val context: Context) {
                 // because both are "what happened while we were not looking",
                 // and a second timer would just be another thing to get wrong.
                 runCatching {
-                    val node = NodeStore(context).lastGood()
+                    // Find a node ourselves rather than waiting for a screen to
+                    // do it. This used to read whatever the Status panel had
+                    // last stored, which meant the wallet did not sync until the
+                    // user happened to open that screen — a background job that
+                    // depends on a screen having run is not a background job.
+                    val node = NodeStore(context).lastGood() ?: pickNode(context)
                     if (node != null) {
                         val moved = Wallet.scanStep(context, node)
                         if (moved) Wallet.refreshSpent(context, node)

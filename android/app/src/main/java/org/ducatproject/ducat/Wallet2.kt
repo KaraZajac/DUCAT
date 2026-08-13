@@ -81,6 +81,22 @@ data class WalletEntry(
     val blob: ByteArray = ByteArray(0),
 )
 
+/**
+ * Why the wallet is not reading the chain, when it is not.
+ *
+ * The screen used to say "waiting for a node" for every case, which was a guess
+ * presented as a diagnosis — and wrong for the one case a user can actually do
+ * something about.
+ */
+enum class SyncBlocker {
+    /** Scanning, or caught up. Nothing wrong. */
+    None,
+    /** No wallet key on this device: onboarding predates wallet persistence. */
+    NoWallet,
+    /** No node has answered yet. Usually resolves on its own. */
+    NoNode,
+}
+
 /** What a send would use and cost, before anything is signed. */
 data class SendPlan(
     val notes: List<WalletEntry>,
@@ -102,7 +118,13 @@ object Wallet {
      */
     fun scanStep(context: Context, nodeUrl: String): Boolean {
         val store = WalletStore(context)
-        val spend = store.spendKeyHex() ?: return false
+        val spend = store.spendKeyHex()
+        if (spend == null) {
+            // Distinct from "no node", and the difference is everything: this
+            // wallet cannot ever scan, and no amount of waiting fixes it.
+            Log.w(TAG, "no spend key stored — this wallet predates wallet persistence")
+            return false
+        }
         val from = store.scannedTo().takeIf { it > 0 } ?: store.restoreHeight().toLong()
 
         return try {
@@ -155,6 +177,15 @@ object Wallet {
             tip = tip,
             scanRate = store.scanRate(),
         )
+    }
+
+    fun blocker(context: Context): SyncBlocker {
+        val store = WalletStore(context)
+        return when {
+            store.spendKeyHex() == null -> SyncBlocker.NoWallet
+            store.tip() == 0L -> SyncBlocker.NoNode
+            else -> SyncBlocker.None
+        }
     }
 
     fun entries(context: Context): List<WalletEntry> =

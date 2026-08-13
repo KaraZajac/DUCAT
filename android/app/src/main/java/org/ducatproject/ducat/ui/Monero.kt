@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.NodeStore
+import org.ducatproject.ducat.SyncBlocker
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.humanDuration
@@ -215,11 +216,29 @@ private fun WalletSync(nodeHeight: Long) {
     Spacer(Modifier.height(6.dp))
 
     when {
-        b.tip == 0L -> Text(
-            "Not started — waiting for a node.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        b.tip == 0L -> when (remember(version) { Wallet.blocker(context) }) {
+            SyncBlocker.NoWallet -> Column {
+                Text(
+                    "No wallet key on this device",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "This install finished setup before the app kept the wallet, so " +
+                        "there is nothing to scan with. Waiting will not fix it — " +
+                        "restore from a backup, or clear the app's data and set up " +
+                        "again.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            else -> Text(
+                "Not started — looking for a node.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         !b.syncing -> Row(verticalAlignment = Alignment.CenterVertically) {
             Text("✓", color = MaterialTheme.ducat.settled)
