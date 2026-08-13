@@ -312,3 +312,94 @@ pub fn check_message(
     }
     Ok(())
 }
+
+
+// ---------------------------------------------------------------------------
+// `ducat:` card URIs (§18.7)
+// ---------------------------------------------------------------------------
+
+pub const CARD_URI_PREFIX: &str = "ducat:card/";
+
+/// Format a signed card and its claim secret as a shareable link.
+///
+/// Lives in `core` rather than in the bridge because the harness and the app
+/// both need it, and two base64 implementations that disagree on padding is
+/// precisely the class of divergence this project keeps finding by accident.
+pub fn card_to_uri(envelope: &[u8], claim_secret: &[u8; 32]) -> String {
+    format!("{CARD_URI_PREFIX}{}.{}", b64(envelope), b64(claim_secret))
+}
+
+/// Parse one. Returns the signed envelope and the claim secret.
+pub fn card_from_uri(input: &str) -> Result<(Vec<u8>, [u8; 32]), Reject> {
+    let t = input.trim();
+    let rest = t.strip_prefix(CARD_URI_PREFIX).ok_or_else(|| {
+        Reject::with_detail(RejectCode::Malformed, "not a DUCAT contact link")
+    })?;
+    // `rsplit_once`, not `split_once`: base64 never contains a period, but a
+    // link pasted with trailing prose might, and the secret is the last field.
+    let (a, b) = rest.rsplit_once('.').ok_or_else(|| {
+        Reject::with_detail(RejectCode::Malformed, "contact link is incomplete")
+    })?;
+    let env = unb64(a)?;
+    let secret: [u8; 32] = unb64(b)?.try_into().map_err(|_| {
+        Reject::with_detail(RejectCode::Malformed, "claim secret is not 32 bytes")
+    })?;
+    Ok((env, secret))
+}
+
+/// URL-safe base64, no padding. Hand-rolled rather than adding a dependency for
+/// forty lines; padding is omitted because a card travels in a URI.
+fn b64(b: &[u8]) -> String {
+    const A: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    let mut out = String::new();
+    for c in b.chunks(3) {
+        let n = ((c[0] as u32) << 16)
+            | ((*c.get(1).unwrap_or(&0) as u32) << 8)
+            | (*c.get(2).unwrap_or(&0) as u32);
+        for i in 0..c.len() + 1 {
+            out.push(A[((n >> (18 - 6 * i)) & 0x3F) as usize] as char);
+        }
+    }
+    out
+}
+
+fn unb64(s: &str) -> Result<Vec<u8>, Reject> {
+    let bad = || Reject::with_detail(RejectCode::Malformed, "contact link is not valid base64");
+    let val = |c: u8| -> Result<u32, Reject> {
+        Ok(match c {
+            b'A'..=b'Z' => (c - b'A') as u32,
+            b'a'..=b'z' => (c - b'a' + 26) as u32,
+            b'0'..=b'9' => (c - b'0' + 52) as u32,
+            b'-' => 62,
+            b'_' => 63,
+            _ => return Err(bad()),
+        })
+    };
+    let mut out = Vec::new();
+    for c in s.as_bytes().chunks(4) {
+        if c.len() == 1 {
+            return Err(bad());
+        }
+        let mut n = 0u32;
+        for (i, &ch) in c.iter().enumerate() {
+            n |= val(ch)? << (18 - 6 * i);
+        }
+        for i in 0..c.len() - 1 {
+            out.push(((n >> (16 - 8 * i)) & 0xFF) as u8);
+        }
+    }
+    Ok(out)
+}
+
+/// The AAD binding a ciphertext to one conversation (§16.11).
+///
+/// **Symmetric by construction.** The first implementation used "the other
+/// party's persona", which reads correctly on each side and evaluates to a
+/// different value on each side — A sealed under B's key and B opened under A's,
+/// so nothing ever decrypted. Sorting the pair gives both ends the same bytes
+/// without either needing to know who started the conversation.
+pub fn thread_aad(one: &str, other: &str) -> Vec<u8> {
+    let mut pair = [one, other];
+    pair.sort_unstable();
+    pair.join(":").into_bytes()
+}

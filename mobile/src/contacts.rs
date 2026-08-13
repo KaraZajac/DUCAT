@@ -86,7 +86,7 @@ pub fn create_contact_card(
         &sk,
     );
     Ok(IssuedCard {
-        uri: to_uri(&bytes, &secret),
+        uri: ducat_core::contact::card_to_uri(&bytes, &secret),
         bytes,
         claim_secret: secret.to_vec(),
         claim_commit: invite.claim_commit.to_vec(),
@@ -114,7 +114,7 @@ pub struct ScannedCard {
 /// carrying channel supplies that, and the UI must not imply otherwise.
 #[uniffi::export]
 pub fn read_contact_card(input: String) -> Result<ScannedCard, ContactError> {
-    let (env, secret) = from_uri(&input)?;
+    let (env, secret) = ducat_core::contact::card_from_uri(&input).map_err(refuse)?;
     let invite = verify_card(&env)?;
     Ok(ScannedCard {
         persona: invite.persona.clone(),
@@ -295,6 +295,17 @@ pub fn seal_message(
     })
 }
 
+/// This persona's public key, hex, as contacts are keyed by it.
+#[uniffi::export]
+pub fn persona_public_hex(persona_secret: Vec<u8>) -> Result<String, ContactError> {
+    Ok(persona_key(&persona_secret)?
+        .public()
+        .to_bytes()
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect())
+}
+
 /// Which prekey a sealed message names, without opening it.
 ///
 /// The receiver must look up a secret *before* it can decrypt, and looking one
@@ -442,71 +453,6 @@ fn verify_card(envelope: &[u8]) -> Result<ContactInvite, ContactError> {
 fn decode_invite_unverified(envelope: &[u8]) -> Result<ContactInvite, ContactError> {
     let body = ducat_core::wire::peek_body(envelope).map_err(refuse)?;
     ContactInvite::from_value(decode(&body).map_err(refuse)?).map_err(refuse)
-}
-
-const URI_PREFIX: &str = "ducat:card/";
-
-fn to_uri(envelope: &[u8], secret: &[u8; 32]) -> String {
-    format!("{URI_PREFIX}{}.{}", b64(envelope), b64(secret))
-}
-
-fn from_uri(input: &str) -> Result<(Vec<u8>, [u8; 32]), ContactError> {
-    let t = input.trim();
-    let rest = t
-        .strip_prefix(URI_PREFIX)
-        .ok_or_else(|| ContactError::Refused("not a DUCAT contact link".into()))?;
-    let (a, b) = rest
-        .split_once('.')
-        .ok_or_else(|| ContactError::Refused("contact link is incomplete".into()))?;
-    let env = unb64(a)?;
-    let secret: [u8; 32] = unb64(b)?
-        .try_into()
-        .map_err(|_| ContactError::Refused("claim secret is not 32 bytes".into()))?;
-    Ok((env, secret))
-}
-
-/// URL-safe base64 without padding, hand-rolled to avoid a dependency for
-/// forty lines. `=` padding is omitted because a card goes in a URI.
-fn b64(b: &[u8]) -> String {
-    const A: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-    let mut out = String::new();
-    for c in b.chunks(3) {
-        let n = ((c[0] as u32) << 16)
-            | ((*c.get(1).unwrap_or(&0) as u32) << 8)
-            | (*c.get(2).unwrap_or(&0) as u32);
-        for i in 0..c.len() + 1 {
-            out.push(A[((n >> (18 - 6 * i)) & 0x3F) as usize] as char);
-        }
-    }
-    out
-}
-
-fn unb64(s: &str) -> Result<Vec<u8>, ContactError> {
-    let val = |c: u8| -> Result<u32, ContactError> {
-        Ok(match c {
-            b'A'..=b'Z' => (c - b'A') as u32,
-            b'a'..=b'z' => (c - b'a' + 26) as u32,
-            b'0'..=b'9' => (c - b'0' + 52) as u32,
-            b'-' => 62,
-            b'_' => 63,
-            _ => return Err(ContactError::Refused("contact link has invalid characters".into())),
-        })
-    };
-    let bytes = s.as_bytes();
-    let mut out = Vec::new();
-    for c in bytes.chunks(4) {
-        if c.len() == 1 {
-            return Err(ContactError::Refused("contact link is truncated".into()));
-        }
-        let mut n = 0u32;
-        for (i, &ch) in c.iter().enumerate() {
-            n |= val(ch)? << (18 - 6 * i);
-        }
-        for i in 0..c.len() - 1 {
-            out.push(((n >> (16 - 8 * i)) & 0xFF) as u8);
-        }
-    }
-    Ok(out)
 }
 
 /// The OS CSPRNG, presented through the trait version `hpke` expects.

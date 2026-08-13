@@ -775,6 +775,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -837,6 +839,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_node_test_route(uniffi_out_err: UniffiRustCallStatus, 
     ): Int
     fun uniffi_ducat_mobile_fn_func_open_message(`sealedBytes`: RustBuffer.ByValue,`prekeySecret`: RustBuffer.ByValue,`isOneTime`: Byte,`expectedSeq`: Long,`prevLink`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_persona_public_hex(`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_plan_float(`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1014,6 +1018,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_open_message(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_persona_public_hex(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_plan_float(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_protocol_version(
@@ -1117,6 +1123,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_open_message() != 55240.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_persona_public_hex() != 1339.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_plan_float() != 49046.toShort()) {
@@ -2879,6 +2888,19 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_open_message(
         FfiConverterByteArray.lower(`sealedBytes`),FfiConverterByteArray.lower(`prekeySecret`),FfiConverterBoolean.lower(`isOneTime`),FfiConverterULong.lower(`expectedSeq`),FfiConverterOptionalByteArray.lower(`prevLink`),FfiConverterByteArray.lower(`threadAad`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * This persona's public key, hex, as contacts are keyed by it.
+         */
+    @Throws(ContactException::class) fun `personaPublicHex`(`personaSecret`: kotlin.ByteArray): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_persona_public_hex(
+        FfiConverterByteArray.lower(`personaSecret`),_status)
 }
     )
     }

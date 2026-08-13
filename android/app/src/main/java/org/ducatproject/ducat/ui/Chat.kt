@@ -21,6 +21,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.PersonaStore
+import org.ducatproject.ducat.threadAad
 import org.ducatproject.ducat.StoredMessage
 import uniffi.ducat_mobile.nodeAppCall
 import uniffi.ducat_mobile.sealMessage
@@ -49,6 +51,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     val store = remember { ContactStore(context) }
     val scope = rememberCoroutineScope()
     var c by remember { mutableStateOf(contact) }
+    val mine = remember { PersonaStore(context).personaHex() }
     var messages by remember { mutableStateOf(store.thread(contact.personaHex)) }
     var draft by remember { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
@@ -99,7 +102,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 error = null
                                 scope.launch {
                                     val result = withContext(Dispatchers.IO) {
-                                        runCatching { sendOne(store, c, body) }
+                                        runCatching { sendOne(store, c, body, mine) }
                                     }
                                     sending = false
                                     result.onSuccess { updated ->
@@ -170,7 +173,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
 }
 
 /** Seal, chain, send, record. Fails as a unit — nothing is stored unsent. */
-private fun sendOne(store: ContactStore, c: Contact, body: String): Contact {
+private fun sendOne(store: ContactStore, c: Contact, body: String, minePersonaHex: String): Contact {
     val bundle = c.theirBundle ?: throw IllegalStateException("no keys for this contact yet")
     val sealed = sealMessage(
         bundle,
@@ -178,8 +181,8 @@ private fun sendOne(store: ContactStore, c: Contact, body: String): Contact {
         c.outPrevLink ?: ByteArray(32),
         body,
         // Binds the ciphertext to this pair, so it cannot be replayed into
-        // another conversation (§16.11).
-        c.personaHex.toByteArray(),
+        // another conversation (§16.11). Symmetric — see threadAad.
+        threadAad(minePersonaHex, c.personaHex),
     )
     val framed = byteArrayOf(MSG_TEXT) + sealed.bytes
     nodeAppCall(c.rendezvous, framed, 30_000u)

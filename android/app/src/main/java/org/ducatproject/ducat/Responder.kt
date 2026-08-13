@@ -102,6 +102,7 @@ class Responder(private val context: Context) {
 
     private fun handleText(body: ByteArray): ByteArray {
         val store = ContactStore(context)
+        val mine = PersonaStore(context).personaHex()
         val id = sealedPrekeyId(body).toInt()
         val isOneTime = id != 0
         val secret = (if (isOneTime) store.oneTimeSecret(id) else store.signedPrekeySecret())
@@ -116,7 +117,7 @@ class Responder(private val context: Context) {
                     body, secret, isOneTime,
                     c.inSeq.toULong(),
                     c.inPrevLink,
-                    c.personaHex.toByteArray(),
+                    threadAad(mine, c.personaHex),
                 )
             }.getOrNull() ?: continue
 

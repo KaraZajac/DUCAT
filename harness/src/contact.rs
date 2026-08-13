@@ -44,7 +44,7 @@ fn bundle_take(b: &mut PreKeyBundle, id: u32) {
 /// A deterministic CSPRNG stand-in, so a failed harness run reproduces exactly.
 /// Never appropriate outside a harness, which is why it lives here and not in
 /// `core` — `core` holds no randomness at all and takes it as a parameter.
-struct HarnessRng(u8);
+pub struct HarnessRng(pub u8);
 
 impl ducat_core::hpke::rand_core::TryRng for HarnessRng {
     type Error = core::convert::Infallible;

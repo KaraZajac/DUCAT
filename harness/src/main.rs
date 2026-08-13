@@ -20,6 +20,7 @@
 mod escrow_role;
 mod attack;
 mod contact;
+mod peer;
 mod edges;
 mod flow;
 mod inverted;
@@ -50,6 +51,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "53hUxmYTwGtR44fhL8f7JLATagSwjtdLB6y4Q3wQQnbtUsDiLTLCzwnKr2gtBRAAUdgWmD22pJ3GK5Z52sJpgiK624iqtKh".into()
         });
         return escrow_role::drive(&tap_path, &ms).await;
+    }
+    if let Some(i) = args.iter().position(|a| a == "--peer") {
+        let uri = args.get(i + 1).cloned().unwrap_or_default();
+        if uri.is_empty() {
+            eprintln!("usage: ducat-harness --peer '<ducat:card/… from the phone>'");
+            std::process::exit(2);
+        }
+        return peer::run(&uri).await;
     }
     if args.iter().any(|a| a == "--contact-share") {
         return contact::share(&std::env::var("DUCAT_CARD")

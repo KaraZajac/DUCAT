@@ -218,6 +218,10 @@ private fun unb64(s: String): ByteArray = Base64.decode(s, Base64.NO_WRAP)
 class PersonaStore(context: Context) {
     private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
 
+    /** Our own persona, in the same hex form contacts are keyed by. */
+    fun personaHex(): String =
+        uniffi.ducat_mobile.personaPublicHex(secret())
+
     fun secret(): ByteArray {
         prefs.getString("persona_secret", null)?.let { return unb64(it) }
         val fresh = uniffi.ducat_mobile.createPersonaSecret()
@@ -225,3 +229,15 @@ class PersonaStore(context: Context) {
         return fresh
     }
 }
+
+/**
+ * The AAD binding a ciphertext to one conversation (§16.11).
+ *
+ * **Must be symmetric.** The first version used "the other party's persona",
+ * which reads correctly on each side and is a different value on each side:
+ * A sealing to B used B's key, and B opening from A used A's. Nothing ever
+ * decrypted. Sorting the pair gives both ends the same bytes without either
+ * needing to know which of them started the conversation.
+ */
+fun threadAad(minePersonaHex: String, theirsPersonaHex: String): ByteArray =
+    listOf(minePersonaHex, theirsPersonaHex).sorted().joinToString(":").toByteArray()
