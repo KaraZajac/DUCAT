@@ -49,7 +49,13 @@ impl ducat_core::hpke::rand_core::TryCryptoRng for HarnessRng {}
 /// Enough subkeys for a head and seven messages. Small on purpose: a ring that
 /// wraps during a test is a ring whose wrap is tested.
 const LOG_SUBKEYS: u32 = 8;
-const ONE_TIME_KEYS: u32 = 4;
+// Sixteen, up from four. The app burns one per inbound message and refreshes
+// its cached copy of our bundle only from our log head — which this harness,
+// being mostly offline, rarely rewrites. Four keys was six messages of real
+// conversation before every send of theirs fell back to the signed prekey and
+// wore the open lock. A harness with fixed seeds has no real secrecy to
+// protect; what it owes the phone across the table is a supply that lasts.
+const ONE_TIME_KEYS: u32 = 16;
 
 /// Where the harness keeps who it has met.
 ///
@@ -139,7 +145,17 @@ async fn append(
 ) -> Result<(), Box<dyn std::error::Error>> {
     rc.set_dht_value(log.clone(), subkey_for(seq, LOG_SUBKEYS), body.to_vec(), None)
         .await?;
-    let head = LogHead { version: 1, suite: 1, next_seq: seq + 1, prekey_bundle: None };
+    // §16.12: the head carries our current bundle, so every poll a reader
+    // makes is also a prekey refresh. Writing None here was why the app's
+    // cached copy of this harness's bundle could only ever shrink — it burned
+    // a key per message and nothing ever restocked the shelf.
+    let (_, bundle) = prekeys(0x80);
+    let head = LogHead {
+        version: 1,
+        suite: 1,
+        next_seq: seq + 1,
+        prekey_bundle: Some(bundle.to_value().encode()),
+    };
     rc.set_dht_value(log.clone(), 0, head.to_value().encode(), None)
         .await?;
     Ok(())
@@ -449,15 +465,21 @@ pub async fn say(text: &str) -> Result<(), Box<dyn std::error::Error>> {
         &hex::encode(persona.public().to_bytes()),
         &hex::encode(&their_persona),
     );
-    // The chain link has to be the previous message's, and we do not keep our
-    // own sent messages — so re-read the one we last wrote and take its link.
-    let prev = if seq == 0 {
+    // The previous message's link, from state. Zero only opens a thread.
+    let stored_link = it.next().unwrap_or_default().to_string();
+    let prev: [u8; 32] = if seq == 0 {
         [0u8; 32]
+    } else if let Ok(b) = hex::decode(&stored_link) {
+        match b.try_into() {
+            Ok(l) => l,
+            Err(_) => return Err("stored chain link is not 32 bytes; re-claim a fresh card".into()),
+        }
     } else {
         return Err(
-            "replying more than once needs the previous message's link, which this              harness does not keep yet — re-claim a fresh card to start a thread"
+            "this thread predates link persistence — the harness can read it but \
+             cannot speak in it; re-claim a fresh card"
                 .into(),
-        );
+        )
     };
 
     let m = Message {
@@ -483,6 +505,60 @@ pub async fn say(text: &str) -> Result<(), Box<dyn std::error::Error>> {
     println!("  \x1b[35m→\x1b[0m [{seq}] {text}");
 
     rc.close_dht_record(theirs).await?;
+    rc.close_dht_record(mine).await?;
+    api.shutdown().await;
+    Ok(())
+}
+
+/// Rewrite our log head with the current sequence and a full prekey bundle.
+///
+/// The head is the only place a peer's client refreshes our keys from
+/// (§16.12), and this harness — mostly offline — left it carrying None, so a
+/// phone talking to us could only ever run its cached supply down to the
+/// signed-prekey fallback and the open lock. This restocks without sending:
+/// same `next_seq`, fresh bundle, no chain involvement, safe at any time.
+pub async fn refresh_keys() -> Result<(), Box<dyn std::error::Error>> {
+    use std::str::FromStr;
+    println!("\n\x1b[1mDUCAT — republish prekeys\x1b[0m\n");
+    let st = std::fs::read_to_string(state_path("claimant"))
+        .map_err(|_| "no claimed contact on this machine")?;
+    let mut it = st.lines();
+    let _their_log = it.next();
+    let _persona = it.next();
+    let my_log = it.next().unwrap_or_default().to_string();
+    let owner = it.next().unwrap_or_default().to_string();
+    let (pk_hex, sk_hex) = owner
+        .split_once(':')
+        .ok_or("this contact predates the log key being kept; re-claim a fresh card")?;
+    let kp = KeyPair::new(
+        CRYPTO_KIND_VLD0,
+        BareKeyPair::new(
+            BarePublicKey::new(&hex::decode(pk_hex)?),
+            BareSecretKey::new(&hex::decode(sk_hex)?),
+        ),
+    );
+
+    let (api, _c) = crate::veilid::start("refresh").await?;
+    let rc = api.routing_context()?;
+    let mine = RecordKey::from_str(&my_log)?;
+    rc.open_dht_record(mine.clone(), Some(kp)).await?;
+    let next = match rc.get_dht_value(mine.clone(), 0, true).await? {
+        Some(v) => LogHead::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?
+            .next_seq,
+        None => 0,
+    };
+    let (_, bundle) = prekeys(0x80);
+    let head = LogHead {
+        version: 1,
+        suite: 1,
+        next_seq: next,
+        prekey_bundle: Some(bundle.to_value().encode()),
+    };
+    rc.set_dht_value(mine.clone(), 0, head.to_value().encode(), None).await?;
+    println!(
+        "  head rewritten: next_seq {next} unchanged, {ONE_TIME_KEYS} one-time keys published"
+    );
     rc.close_dht_record(mine).await?;
     api.shutdown().await;
     Ok(())
