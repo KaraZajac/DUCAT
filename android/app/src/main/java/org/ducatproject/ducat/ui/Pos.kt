@@ -285,17 +285,19 @@ private fun PresentScreen(
         }
         Spacer(Modifier.height(16.dp))
 
-        SingleChoiceSegmentedButtonRow {
+        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
             SegmentedButton(
                 selected = mode == Present.Ducat,
                 onClick = { mode = Present.Ducat },
                 shape = SegmentedButtonDefaults.itemShape(0, 2),
-            ) { Text("DUCAT") }
+                modifier = Modifier.weight(1f),
+            ) { Text("DUCAT", maxLines = 1, softWrap = false) }
             SegmentedButton(
                 selected = mode == Present.Monero,
                 onClick = { mode = Present.Monero },
                 shape = SegmentedButtonDefaults.itemShape(1, 2),
-            ) { Text("Monero") }
+                modifier = Modifier.weight(1f),
+            ) { Text("Monero", maxLines = 1, softWrap = false) }
         }
 
         Spacer(Modifier.height(16.dp))

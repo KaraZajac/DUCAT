@@ -512,12 +512,14 @@ private fun AmountStep(
                     selected = !asking,
                     onClick = { asking = false },
                     shape = SegmentedButtonDefaults.itemShape(0, 2),
-                ) { Text("Send") }
+                    modifier = Modifier.weight(1f),
+                ) { Text("Send", maxLines = 1, softWrap = false) }
                 SegmentedButton(
                     selected = asking,
                     onClick = { asking = true },
                     shape = SegmentedButtonDefaults.itemShape(1, 2),
-                ) { Text("Request") }
+                    modifier = Modifier.weight(1f),
+                ) { Text("Request", maxLines = 1, softWrap = false) }
             }
             Spacer(Modifier.height(12.dp))
         }

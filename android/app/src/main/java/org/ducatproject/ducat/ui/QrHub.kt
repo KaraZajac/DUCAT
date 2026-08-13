@@ -100,22 +100,26 @@ fun QrHub(
                     // Above the content, centred, its own row. In the app bar's
                     // title slot it had to share the width with the back arrow
                     // and was squeezed to nothing.
-                    Row(
-                        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.Center,
+                    // Full width and one line each. Sized to content it was
+                    // narrow enough that both labels wrapped, so a two-word
+                    // button came out as two rows of text.
+                    SingleChoiceSegmentedButtonRow(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
                     ) {
-                        SingleChoiceSegmentedButtonRow {
-                            SegmentedButton(
-                                selected = scanning,
-                                onClick = { scanning = true },
-                                shape = SegmentedButtonDefaults.itemShape(0, 2),
-                            ) { Text("Scan code") }
-                            SegmentedButton(
-                                selected = !scanning,
-                                onClick = { scanning = false },
-                                shape = SegmentedButtonDefaults.itemShape(1, 2),
-                            ) { Text("My code") }
-                        }
+                        SegmentedButton(
+                            selected = scanning,
+                            onClick = { scanning = true },
+                            shape = SegmentedButtonDefaults.itemShape(0, 2),
+                            modifier = Modifier.weight(1f),
+                        ) { Text("Scan code", maxLines = 1, softWrap = false) }
+                        SegmentedButton(
+                            selected = !scanning,
+                            onClick = { scanning = false },
+                            shape = SegmentedButtonDefaults.itemShape(1, 2),
+                            modifier = Modifier.weight(1f),
+                        ) { Text("My code", maxLines = 1, softWrap = false) }
                     }
                     if (scanning) {
                         // One scanner for both kinds. A person holding a phone at
