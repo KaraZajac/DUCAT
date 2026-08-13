@@ -325,6 +325,24 @@ pub fn prune_prekey(bundle_bytes: Vec<u8>, id: u32) -> Result<Vec<u8>, ContactEr
     Ok(b.to_value().encode())
 }
 
+/// Which one-time ids a bundle advertises.
+///
+/// Needed to *repair* a bundle, not just to count it: a store that burned
+/// secrets without pruning has a bundle advertising keys it can no longer use,
+/// and no amount of correct behaviour from here on fixes the entries already
+/// written. Reconciling needs to know which ones they are.
+#[uniffi::export]
+pub fn bundle_one_time_ids(bundle_bytes: Vec<u8>) -> Result<Vec<u32>, ContactError> {
+    Ok(
+        PreKeyBundle::from_value(decode(&bundle_bytes).map_err(refuse)?)
+            .map_err(refuse)?
+            .one_time
+            .iter()
+            .map(|k| k.id)
+            .collect(),
+    )
+}
+
 /// How many one-time keys a bundle still advertises.
 #[uniffi::export]
 pub fn bundle_one_time_count(bundle_bytes: Vec<u8>) -> Result<u32, ContactError> {

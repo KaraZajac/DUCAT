@@ -77,6 +77,10 @@ dependencies {
     // The 1.1.0-alpha line specifically: 1.0.0 ships `MasterKeys` (plural,
     // static helpers) and the JNI code loads `MasterKey$Builder`.
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    // The system draws the splash before any of our code runs, so the icon is
+    // up during process start rather than after it. A Compose splash would only
+    // appear once the thing it is covering for had already finished.
+    implementation("androidx.core:core-splashscreen:1.0.1")
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("junit:junit:4.13.2")
 }

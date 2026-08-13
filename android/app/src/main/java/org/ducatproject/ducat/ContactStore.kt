@@ -208,6 +208,42 @@ class ContactStore(context: Context) {
     } }
 
     /**
+     * Drop advertised keys we no longer hold a secret for, and report what is
+     * left.
+     *
+     * Pruning on burn stops the corruption spreading; it does not undo what is
+     * already written. A store that burned before that fix existed still
+     * advertises those ids, senders take the first entry, and so it keeps
+     * handing out a key that cannot decrypt — forever, and identically after a
+     * re-fetch. Repair has to be explicit, and it has to run on load rather
+     * than on write, because the damage predates the code that would prevent it.
+     */
+    fun reconcilePrekeys(): Int = synchronized(lock) {
+        val raw = prefs.getString("prekeys", null) ?: return 0
+        val o = JSONObject(raw)
+        val secrets = o.getJSONObject("one_time")
+        var bundle = runCatching { unb64(o.getString("bundle")) }.getOrNull() ?: return 0
+        val advertised = runCatching {
+            uniffi.ducat_mobile.bundleOneTimeIds(bundle).map { it.toInt() }
+        }.getOrDefault(emptyList())
+
+        var dropped = 0
+        for (id in advertised) {
+            if (!secrets.has(id.toString())) {
+                bundle = runCatching {
+                    uniffi.ducat_mobile.prunePrekey(bundle, id.toUInt())
+                }.getOrDefault(bundle)
+                dropped++
+            }
+        }
+        if (dropped > 0) {
+            o.put("bundle", b64(bundle))
+            prefs.edit().putString("prekeys", o.toString()).apply()
+        }
+        return advertised.size - dropped
+    }
+
+    /**
      * How many usable one-time keys are left.
      *
      * Counted from the **bundle**, not the secret map, because the bundle is

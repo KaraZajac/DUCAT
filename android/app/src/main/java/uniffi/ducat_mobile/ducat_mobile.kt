@@ -781,6 +781,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -806,6 +808,8 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_bundle_one_time_count(`bundleBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_bundle_one_time_ids(`bundleBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_capacity_bucket(`capacityPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
     fun uniffi_ducat_mobile_fn_func_capacity_leak_bits(uniffi_out_err: UniffiRustCallStatus, 
@@ -988,6 +992,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_bundle_one_time_count(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_bundle_one_time_ids(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_bucket(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_leak_bits(
@@ -1078,6 +1084,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_bundle_one_time_count() != 35922.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_bundle_one_time_ids() != 16903.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_capacity_bucket() != 17889.toShort()) {
@@ -2627,6 +2636,24 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
             return FfiConverterUInt.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_bundle_one_time_count(
+        FfiConverterByteArray.lower(`bundleBytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Which one-time ids a bundle advertises.
+         *
+         * Needed to *repair* a bundle, not just to count it: a store that burned
+         * secrets without pruning has a bundle advertising keys it can no longer use,
+         * and no amount of correct behaviour from here on fixes the entries already
+         * written. Reconciling needs to know which ones they are.
+         */
+    @Throws(ContactException::class) fun `bundleOneTimeIds`(`bundleBytes`: kotlin.ByteArray): List<kotlin.UInt> {
+            return FfiConverterSequenceUInt.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_bundle_one_time_ids(
         FfiConverterByteArray.lower(`bundleBytes`),_status)
 }
     )

@@ -75,7 +75,18 @@ class Responder(private val context: Context) {
      */
     private fun ourBundle(): ByteArray {
         val store = ContactStore(context)
-        store.prekeyBundle()?.let { if (store.oneTimeRemaining() > 0) return it }
+        // Repair before serving. A bundle that advertises keys whose secrets are
+        // gone is worse than an empty one: senders take the first entry, so a
+        // single stale id at the front makes every message fail while the store
+        // reports a healthy supply.
+        if (store.prekeyBundle() != null) {
+            val usable = store.reconcilePrekeys()
+            if (usable > 0) {
+                Log.i(TAG, "serving $usable one-time keys")
+                return store.prekeyBundle()!!
+            }
+            Log.i(TAG, "no usable one-time keys left — regenerating")
+        }
 
         // Refilled when the supply runs out. §16.11's fallback exists so this
         // is never fatal, but running on the fallback is the weaker state and

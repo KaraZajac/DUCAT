@@ -3,6 +3,7 @@ package org.ducatproject.ducat
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
@@ -53,6 +54,9 @@ import uniffi.ducat_mobile.protocolVersion
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Before super, so the splash is installed for this start rather than
+        // the next one.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         val prefs = ThemePreference(this)
         setContent {

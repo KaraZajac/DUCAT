@@ -9,4 +9,19 @@
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
+
+    <!--
+      The launch theme. The system shows this from the moment the process starts,
+      which is the window a Compose splash cannot cover: by the time Compose can
+      draw, the wait it was meant to hide is over.
+
+      Held only until the first frame — Veilid takes seconds to attach and the
+      app is usable long before that, so blocking on the node would turn a
+      splash into a delay.
+    -->
+    <style name="Theme.Ducat.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/ic_launcher_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
+        <item name="postSplashScreenTheme">@style/Theme.Ducat</item>
+    </style>
 </resources>

@@ -18,6 +18,13 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
+    <!-- The node has to keep running when the app is not on screen: killing the
+         process destroys every private route, and a peer nobody can reach is
+         not a peer. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:name=".DucatApplication"
         android:label="@string/app_name"
@@ -37,6 +44,7 @@
         <activity
             android:windowSoftInputMode="adjustResize"
             android:name=".MainActivity"
+            android:theme="@style/Theme.Ducat.Splash"
             android:exported="true"
             android:launchMode="singleTask">
             <intent-filter>
@@ -82,5 +90,10 @@
                 android:name="android.nfc.cardemulation.host_apdu_service"
                 android:resource="@xml/apduservice" />
         </service>
+
+        <service
+            android:name=".NodeService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
 </manifest>
