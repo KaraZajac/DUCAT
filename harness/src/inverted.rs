@@ -139,6 +139,7 @@ pub async fn present(tap_path: &str) -> Result<(), Box<dyn std::error::Error>> {
                     chosen_version: 1,
                     chosen_suite: 1,
                     refund_to: Some(w.address.as_bytes().to_vec()),
+                    memo: None,
                 };
                 let ab = accept.to_value().encode();
                 let aenv = seal(
@@ -258,6 +259,7 @@ pub async fn scan(tap_path: &str, amount_pxmr: u64) -> Result<(), Box<dyn std::e
         fee_policy: FeePolicy::PayerPays,
         nonce_echo: tap.nonce,
         terms: Terms::default(),
+        memo: None,
     };
     let ob = offer.to_value().encode();
     let oenv = seal(

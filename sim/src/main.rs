@@ -189,6 +189,7 @@ fn swap_attack(wire: &mut Wire, payee: &mut Persona, payer: &mut Persona) -> Res
         supported_versions: vec![1], supported_suites: vec![1, 2],
         settle_mode: 0, fee_policy: FeePolicy::PayerPays, nonce_echo: nonce,
         terms: Terms::default(),
+        memo: None,
     };
     let mut dearer = honest.clone();
     dearer.amount_pxmr = xmr(0.02);
@@ -452,6 +453,7 @@ fn scenarios_main() {
             reader_session_pk: vec![0x7; 32], timestamp: receipt.timestamp,
             chosen_version: 1, chosen_suite: 1,
             refund_to: Some(b"customer-refund-addr".to_vec()),
+            memo: None,
         };
         let good = Refund {
             version: 1, suite: 1,
@@ -557,6 +559,7 @@ fn scenarios_main() {
             amount_pxmr: 0, supported_versions: vec![1], supported_suites: vec![1],
             settle_mode: 0, fee_policy: FeePolicy::PayerPays, nonce_echo: [0; 16],
             terms: Terms { meter_cap_pxmr: 20_000_000_000, meter_max_s: 14_400, ..Terms::default() },
+            memo: None,
         };
         check("an abandoned tab is capped at what was agreed",
               abandoned_meter_claim(&offer, 1_000_000_000, 999_999) == 20_000_000_000,

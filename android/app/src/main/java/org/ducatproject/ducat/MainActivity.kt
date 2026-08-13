@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import org.ducatproject.ducat.ui.BackupSettings
@@ -99,7 +100,21 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             // number someone is about to act on.
             NavigationBar {
                 NavItem(Tab.Home, Icons.Filled.Home, tab) { tab = it }
-                NavItem(Tab.Accounts, Icons.Filled.AccountBalanceWallet, tab) { tab = it }
+                // The coin, which we already draw for the launcher. Nothing in
+                // the core icon set means "your money" without borrowing a
+                // shopping metaphor this app is not about.
+                NavigationBarItem(
+                    selected = tab == Tab.Accounts,
+                    onClick = { tab = Tab.Accounts },
+                    icon = {
+                        Icon(
+                            painterResource(R.drawable.ic_ducat_coin),
+                            contentDescription = Tab.Accounts.label,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    },
+                    label = { Text(Tab.Accounts.label) },
+                )
 
                 // The one verb that dominates, raised without leaving the bar.
                 // It is `presenter_role` (§15.2), not a mode we invented:

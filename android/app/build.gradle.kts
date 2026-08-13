@@ -58,6 +58,9 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
+    // Worth ~30 MB of dex, which is a real cost and not the deciding one: the
+    // app is self-hosted rather than squeezed into a store limit, and picking a
+    // less apt glyph to save download size would be optimising the wrong thing.
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     debugImplementation("androidx.compose.ui:ui-tooling")

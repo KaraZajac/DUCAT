@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import uniffi.ducat_mobile.NodeStatus
+import uniffi.ducat_mobile.androidReady
 import uniffi.ducat_mobile.nodeStart
 import uniffi.ducat_mobile.nodeStatus
 import uniffi.ducat_mobile.nodeStop
@@ -35,6 +36,12 @@ fun NetworkPanel(storageDir: String) {
     var routeResult by remember { mutableStateOf<String?>(null) }
     var elapsed by remember { mutableStateOf(0) }
 
+    // The node is started by the Application, so this screen begins by asking
+    // what is already happening rather than by offering to start something.
+    LaunchedEffect(Unit) {
+        status = withContext(Dispatchers.IO) { nodeStatus() }
+    }
+
     // Poll while running. Readiness takes seconds to minutes, and a screen that
     // shows one sample tells you nothing about whether it is progressing.
     LaunchedEffect(status.running) {
@@ -56,6 +63,9 @@ fun NetworkPanel(storageDir: String) {
             )
             Spacer(Modifier.height(12.dp))
 
+            // "Not initialised" and "no peers" look identical in a status line
+            // and have nothing to do with each other.
+            Line("android bridge", if (androidReady()) "ready" else "NOT SET UP", androidReady())
             Line("node", if (status.running) "running" else "stopped", status.running)
             Line("attached", status.state, status.attached)
             // The distinction that matters, spelled out rather than merged.

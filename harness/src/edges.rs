@@ -137,6 +137,7 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
             reader_session_pk: vec![0x33; 32], timestamp: now(),
             chosen_version: 1, chosen_suite: 1,
             refund_to: Some(b"payer-refund-address".to_vec()),
+            memo: None,
         };
         let ab = accept.to_value().encode();
         let receipt = Receipt {

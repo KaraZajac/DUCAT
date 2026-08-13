@@ -75,6 +75,9 @@ pub enum CodecError {
     NonIntegerMapKey,
     /// Reserved/unassigned simple value or additional-information pattern.
     Malformed,
+    /// Text was not NFC-normalized (§18.1). Two encodings of one string are two
+    /// hashes, whatever the signatures say.
+    NotNfc,
     /// Text was not valid UTF-8.
     InvalidUtf8,
     /// Nesting deeper than the configured limit.
@@ -264,6 +267,16 @@ impl<'a> Decoder<'a> {
             3 => {
                 let b = self.take(usize_of(n)?)?;
                 let s = std::str::from_utf8(b).map_err(|_| CodecError::InvalidUtf8)?;
+                // §18.1: NFC-normalized. Unenforced here until 0.61, while the
+                // second implementation refused it all along — a divergence no
+                // vector could expose because no object carried text until
+                // memos did. Two encodings of "café" are two canonical objects
+                // and two hashes, which is §18.3's transcript-divergence bug
+                // arriving through a display field nobody thought was
+                // load-bearing.
+                if !unicode_normalization::is_nfc(s) {
+                    return Err(CodecError::NotNfc);
+                }
                 Ok(Value::Text(s.to_string()))
             }
             4 => {

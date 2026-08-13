@@ -36,6 +36,7 @@ fn offer() -> FullOffer {
             refund_window_s: 86_400 * 14,
             ..Terms::default()
         },
+        memo: None,
     }
 }
 
@@ -71,6 +72,7 @@ fn accept(o: &FullOffer) -> Accept {
         chosen_version: 1,
         chosen_suite: 1,
         refund_to: Some(b"payer-refund-addr".to_vec()),
+        memo: None,
     }
 }
 

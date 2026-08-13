@@ -745,6 +745,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -762,6 +764,8 @@ internal interface UniffiLib : Library {
 
     fun uniffi_ducat_mobile_fn_func_address_for_spend_key(`spendKeyHex`: RustBuffer.ByValue,`stagenet`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_android_ready(uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
     fun uniffi_ducat_mobile_fn_func_approx_payments_supported(`unlockedOutputs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
     fun uniffi_ducat_mobile_fn_func_capacity_bucket(`capacityPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -908,6 +912,8 @@ internal interface UniffiLib : Library {
     ): Unit
     fun uniffi_ducat_mobile_checksum_func_address_for_spend_key(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_android_ready(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_approx_payments_supported(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_bucket(
@@ -958,6 +964,9 @@ private fun uniffiCheckContractApiVersion(lib: UniffiLib) {
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_address_for_spend_key() != 43862.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_android_ready() != 7538.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_approx_payments_supported() != 28086.toShort()) {
@@ -1893,6 +1902,21 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
     uniffiRustCallWithError(BackupException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_address_for_spend_key(
         FfiConverterString.lower(`spendKeyHex`),FfiConverterBoolean.lower(`stagenet`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Whether the JNI handshake has happened.
+         *
+         * Exposed so the UI can distinguish "not set up" from "no peers yet". They look
+         * the same in a status line and have nothing to do with each other.
+         */ fun `androidReady`(): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_android_ready(
+        _status)
 }
     )
     }

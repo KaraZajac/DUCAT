@@ -79,6 +79,7 @@ fn corrupted_real_objects_never_panic() {
         fee_policy: ducat_core::wire::FeePolicy::PayerPays,
         nonce_echo: [0xA5; 16],
         terms: Terms::default(),
+        memo: None,
     };
     let good = offer.to_value().encode();
 

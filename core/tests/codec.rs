@@ -323,6 +323,7 @@ fn a_real_address_survives_dest_in_every_object_that_carries_it() {
         chosen_version: 1,
         chosen_suite: 1,
         refund_to: Some(addr.clone()),
+        memo: None,
     };
     let enc = a.to_value().encode();
     let back = Accept::from_value(ducat_core::cbor::decode(&enc).unwrap())

@@ -145,3 +145,52 @@ pub fn node_stop() {
         node.runtime.block_on(node.api.shutdown());
     }
 }
+
+// ---------------------------------------------------------------------------
+// Android: handing Veilid the JavaVM and Context
+// ---------------------------------------------------------------------------
+
+/// Register the app's JNI environment with veilid-core.
+///
+/// **Must run before any node starts.** Without it startup fails with
+/// `Internal: Android globals are not set up` — which names the cause exactly
+/// and still reads, from a Kotlin stack, like the library is broken rather than
+/// uninitialised.
+///
+/// Not a UniFFI export: an Android `Context` is a Java object rather than a
+/// value, so it cannot cross that boundary. This is the one hand-written JNI
+/// function in the crate, and its name encodes the Kotlin class that calls it —
+/// rename `VeilidInit` and this stops being found, at runtime, with
+/// `UnsatisfiedLinkError`.
+#[cfg(target_os = "android")]
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "system" fn Java_org_ducatproject_ducat_VeilidInit_setupAndroid(
+    env: jni::EnvUnowned,
+    _class: jni::objects::JClass,
+    ctx: jni::objects::JObject,
+) {
+    veilid_core::veilid_core_setup_android(env, ctx);
+    ANDROID_READY.store(true, std::sync::atomic::Ordering::SeqCst);
+}
+
+/// Tracked here rather than asked of veilid-core: it exports the setup function
+/// but not its `is_android_ready` companion, and a flag set at the one call site
+/// is more honest than inferring readiness from a later failure.
+static ANDROID_READY: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Whether the JNI handshake has happened.
+///
+/// Exposed so the UI can distinguish "not set up" from "no peers yet". They look
+/// the same in a status line and have nothing to do with each other.
+#[uniffi::export]
+pub fn android_ready() -> bool {
+    #[cfg(target_os = "android")]
+    {
+        ANDROID_READY.load(std::sync::atomic::Ordering::SeqCst)
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        true
+    }
+}

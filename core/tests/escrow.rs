@@ -24,6 +24,7 @@ fn accept_pair() -> (Accept, Vec<u8>) {
         chosen_version: 1,
         chosen_suite: 1,
         refund_to: Some(b"payer-refund-addr".to_vec()),
+        memo: None,
     };
     let b = a.to_value().encode();
     (a, b)

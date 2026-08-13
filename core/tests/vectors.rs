@@ -622,6 +622,7 @@ fn contract_vectors_pass() {
                     amount_final: agreed, dest: None,
                     reader_session_pk: vec![0x33; 32], timestamp: 1_800_000_000,
                     chosen_version: 1, chosen_suite: 1, refund_to: None,
+                    memo: None,
                 };
                 let receipt = Receipt {
                     version: 1, suite: 1,

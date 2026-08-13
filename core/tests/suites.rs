@@ -285,6 +285,7 @@ fn a_mismatched_suite_declaration_is_refused_as_such() {
         fee_policy: FeePolicy::PayerPays,
         nonce_echo: [0x11; 16],
         terms: Terms::default(),
+        memo: None,
     };
     let env = seal(
         &SignedBytes::from_value(offer.to_value()),

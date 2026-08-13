@@ -36,6 +36,13 @@ const ENV_BODY: u64 = 1;
 const ENV_SIG: u64 = 2;
 
 // Fields common to every object.
+/// A memo is a note, not a channel.
+///
+/// Bounded because §15.3's tap has a byte budget and because an unbounded text
+/// field inside a signed object is a covert channel with a signature on it. Long
+/// enough for "coffee and a pastry, Tuesday"; too short to smuggle anything.
+pub const MAX_MEMO_CHARS: usize = 128;
+
 pub mod f {
     pub const TYPE: u64 = 0;
     pub const VERSION: u64 = 1;
@@ -112,6 +119,10 @@ pub mod f {
     pub const PRF_MESSAGE: u64 = 128;
     pub const PRF_AMOUNT: u64 = 129;
     pub const PRF_TS: u64 = 130;
+
+    // Advisory display text (§7.5). Never a decision input.
+    pub const OFFER_MEMO: u64 = 145;
+    pub const ACCEPT_MEMO: u64 = 146;
 
     // bond_proof (§17.4)
     pub const BND_MS_ADDRESS: u64 = 140;
@@ -408,6 +419,30 @@ impl Reader {
     }
 
     /// Reject anything left over (§18.8).
+    /// Optional advisory text, with §18.1's rules enforced here rather than
+    /// trusted to a caller.
+    ///
+    /// The decoder already refuses non-UTF-8 and non-NFC text, so what remains
+    /// is the bound — and a bound that lives at the read site cannot be
+    /// forgotten by the next object that carries a memo.
+    pub(crate) fn opt_text(&mut self, k: u64, max_chars: usize) -> Result<Option<String>, Reject> {
+        let Some(v) = self.m.remove(&k) else {
+            return Ok(None);
+        };
+        let t = v.as_text().ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "expected text")
+        })?;
+        // Characters, not bytes: a bound in bytes silently shortens every
+        // language that does not fit in one byte per character.
+        if t.chars().count() > max_chars {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                format!("text exceeds {max_chars} characters"),
+            ));
+        }
+        Ok(Some(t.to_string()))
+    }
+
     pub(crate) fn finish(self) -> Result<(), Reject> {
         if let Some((k, _)) = self.m.into_iter().next() {
             return Err(Reject::with_detail(
@@ -642,6 +677,18 @@ pub struct FullOffer {
     pub nonce_echo: [u8; 16],
     /// §7.3, §15.7, §8.8. Signed by the payer along with everything else.
     pub terms: Terms,
+    /// What this payment is *for*, in the payee's words (§7.5).
+    ///
+    /// **Advisory display text and nothing else.** §18.1 confines text to fields
+    /// no decision depends on, and this is the archetype: a client MUST NOT
+    /// route, price, or authorise anything on its contents. It exists because
+    /// "£4.20" in a list of twelve is not a memory, and "coffee, Tuesday" is.
+    ///
+    /// It is signed, so it is part of what the payer sees and agrees to (§15.5),
+    /// and it stays in the transcript. **It never reaches the chain** — a memo in
+    /// Monero's `tx_extra` would publish to everyone what the protocol took
+    /// trouble to keep between two people.
+    pub memo: Option<String>,
 }
 
 impl FullOffer {
@@ -665,6 +712,9 @@ impl FullOffer {
         m.insert(f::FEE_POLICY, Value::Uint(self.fee_policy as u64));
         m.insert(f::NONCE_ECHO, Value::Bytes(self.nonce_echo.to_vec()));
         m.insert(f::TERMS, self.terms.to_value());
+        if let Some(memo) = &self.memo {
+            m.insert(f::OFFER_MEMO, Value::Text(memo.clone()));
+        }
         Value::Map(m)
     }
 
@@ -698,6 +748,7 @@ impl FullOffer {
                     .ok_or_else(|| Reader::missing(f::TERMS))?;
                 Terms::from_value(&v)?
             },
+            memo: r.opt_text(f::OFFER_MEMO, MAX_MEMO_CHARS)?,
         };
         r.finish()?;
         Ok(out)
@@ -739,6 +790,13 @@ pub struct Accept {
     /// client MUST present that as the trade it is rather than filling the field
     /// silently.
     pub refund_to: Option<Vec<u8>>,
+    /// The payer's own note, in their words (§7.5).
+    ///
+    /// Separate from the offer's memo on purpose: they are different claims by
+    /// different parties. A payee writing "consulting, March" and a payer
+    /// recording "reimbursed by work" are both true and neither should overwrite
+    /// the other. Same rules — advisory, signed, never on the chain.
+    pub memo: Option<String>,
 }
 
 impl Accept {
@@ -762,6 +820,9 @@ impl Accept {
         m.insert(f::CHOSEN_SUITE, Value::Uint(self.chosen_suite));
         if let Some(r) = &self.refund_to {
             m.insert(f::REFUND_TO, Value::Bytes(r.clone()));
+        }
+        if let Some(memo) = &self.memo {
+            m.insert(f::ACCEPT_MEMO, Value::Text(memo.clone()));
         }
         Value::Map(m)
     }
@@ -788,6 +849,7 @@ impl Accept {
             chosen_version: r.uint(f::CHOSEN_VERSION)?,
             chosen_suite: r.uint(f::CHOSEN_SUITE)?,
             refund_to: r.opt_bytes(f::REFUND_TO, None)?,
+            memo: r.opt_text(f::ACCEPT_MEMO, MAX_MEMO_CHARS)?,
         };
         r.finish()?;
         Ok(out)

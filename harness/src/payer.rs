@@ -135,6 +135,7 @@ pub async fn run(tap_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         chosen_version: 1,
         chosen_suite: 1,
         refund_to: Some(w.address.as_bytes().to_vec()),
+        memo: None,
     };
     let accept_bytes = accept.to_value().encode();
     let accept_env = seal(

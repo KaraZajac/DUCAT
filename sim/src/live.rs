@@ -90,6 +90,7 @@ pub fn transact_live(
         fee_policy: FeePolicy::PayerPays,
         nonce_echo: nonce,
         terms: Terms::default(),
+        memo: None,
     };
     let offer_bytes = offer.to_value().encode();
     let tap = TapPresent {
@@ -155,6 +156,7 @@ pub fn transact_live(
         chosen_version: 1,
         chosen_suite: 1,
         refund_to: Some(b"payer-refund-addr".to_vec()),
+        memo: None,
     };
     let accept_bytes = accept.to_value().encode();
     let env = seal(

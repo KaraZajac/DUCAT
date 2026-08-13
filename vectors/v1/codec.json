@@ -2,6 +2,28 @@
   "cases": [
     {
       "expect": {
+        "ok": true,
+        "reencodes_to_hex": "65636166c3a9"
+      },
+      "input_hex": "65636166c3a9",
+      "kind": "codec.decode",
+      "name": "text_nfc_composed",
+      "why": "composed form is the canonical one and decodes"
+    },
+    {
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "hint": "NFC normalization",
+      "input_hex": "6663616665cc81",
+      "kind": "codec.decode",
+      "name": "text_nfd_decomposed_refused",
+      "why": "the same string in decomposed form is a second encoding of one value, and two encodings of one value is a transcript-divergence bug whatever the signatures say"
+    },
+    {
+      "expect": {
         "ok": false,
         "reject_code": 10,
         "reject_name": "Malformed"

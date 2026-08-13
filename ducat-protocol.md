@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.60 — Consolidated**
+**Draft 0.61 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.61** — **§7.5 added: memos and petnames — and putting text on the wire exposed a divergence between the two implementations.** A receipt list reading `£4.20` twelve times records nothing; `£4.20 — coffee, Tuesday` does. `FullOffer` and `ACCEPT` each gain an optional 128-character memo, **both** rather than one, because a payee's *"consulting, March"* and a payer's *"reimbursed by work"* are different claims and neither may overwrite the other. Advisory only, signed and therefore covered by `offer_commit`, bounded in **characters rather than bytes** — a byte bound silently shortens every language that does not fit one character per byte — and never written to the chain, since a memo in `tx_extra` publishes to everyone what the protocol keeps between two people. Names are **petnames**: §15.9's lesson applies unchanged, in that a signature over a display name proves only that a keyholder chose that string, so names are self-asserted in the contact card, exchanged in §16.3's post-receipt coda, and stored and renameable locally by the receiver. No global registry, because a registry is a directory. **Nobody can be addressed by name** — reaching a person requires a prior exchange, which is also how VeilidChat works, by invitation rather than lookup. The divergence: §18.1 has required NFC-normalized text since 0.14, the second implementation enforced it, and **the reference decoder did not** — invisible because no object carried a string until now. Two encodings of "café" are two canonical objects and two hashes, which is §18.3's transcript-divergence bug arriving through a display field nobody thought was load-bearing. Fixed, and pinned by vectors so the suite can catch it next time.
 - **0.60** — **Second audit pass; the checks grew and each new one caught something.** §18.12's first version verified that references *resolve* — it could not see a claim that had quietly stopped being true. Three checks added, three findings: O21's live text still said "104 vectors" against a set of 136 (changelog entries stay exempt, being history); `bond_proof` occupied fields 140–144 while §18.4.2 still read "140+ Unallocated", reintroducing the exact collision hazard the registry exists to prevent; and **§18.9.1's normative table listed ten vector kinds while the schema accepted sixteen** — every escrow and bond case was executable, published, and undiscoverable from the document. That last one names the pattern: **an artifact and its description drift toward the artifact**, because the artifact is what gets run, and only a mechanical comparison notices. Verified still true rather than assumed: §2.5's "no adversarial review whatsoever" (the user has deliberately deferred it), and suite 2's key agreement genuinely unimplemented — a suite named in the type system is not a suite that exists.
 - **0.59** — **Arbitration, mandates, and static tags exercised — the last three objects nothing had ever run.** §9.3: a ruling from a named arbiter is accepted and one from an outsider refused (`UNTRUSTED_ARBITER_SET`, which is §2.5 in a single check), an award larger than the claim refused, an award attached to a ruling for the *losing* side refused, a ruling naming another dispute refused — and §9.3.4's expiry confirmed to emit a **real, co-signable ruling** rather than nothing, since "return to the pre-dispute allocation" *was* the deadlock it claimed to prevent. §7.3: mandate caps bind **cumulatively** rather than per draw, only the named payee may draw, expiry is enforced, and a fresh period resets the allowance — otherwise a monthly mandate is a one-off with extra steps. §15.9: static tags report `Anonymous` or `SignedBy`, refuse a bad signature, and — **demonstrated rather than described** — a swapped tag carries the attacker's persona with a perfectly valid signature over the attacker's own address and verifies cleanly. A signature there proves who owns an address; it never proves the tag is the one the venue put there, and a first-time donor has nothing to compare against.
 - **0.58** — **The paths where nobody co-signs, exercised: abandonment, meters, refunds.** §6.2 calls post-`FUND`/pre-`RECEIPT` the dangerous window and no harness had ever entered it. All three behave: a payee that vanishes after funding leaves the payer holding **payment evidence** — a 166-byte receipt flagged `unilateral`, proving what was signed and paid and claiming nothing about delivery; an abandoned meter leaves the payee holding **debt evidence**, the opposite assertion, which is why §6.2 keeps them distinct and lets the state machine choose rather than the UI. Confirmed alongside: `METERING` survives an hour of wall clock (§18.4.1(8) — a tab that died after sixty seconds was a real bug), a payer cannot abort a live meter while an operator can void one cleanly (§18.4.1(7)), and a refund is refused when redirected, when larger than the payment, when the payer signed no address, and when late. **One finding from the fixture rather than the code:** the default refund window is **zero**, so a client shipping default terms has silently made every sale final. Defensible as a default and easy to ship unknowingly, so §7.3 now requires the window be shown on the confirm screen — "no refunds" is a term of the sale, not the absence of one.
@@ -684,6 +685,73 @@ A co-signed `RECEIPT` is the only record a transaction produces (§1), and §12 
 **Losing your receipts loses your reputation.** Attestations (§9.2) reference receipts, so a device wiped without backup takes the user's accumulated standing with it — the same failure as O12's persona loss and worth stating in the same breath. This is a real cost of record-absence and the protocol does not soften it.
 
 
+### 7.5 Memos and Names — knowing what a payment was, and who it was with
+
+A list of twelve entries reading `£4.20` is not a record of anything. `£4.20 —
+coffee, Tuesday` is. §7.4 makes receipts the user's own records, and a record
+without a human handle on it is a number they will not recognise a month later.
+This is the smallest thing that fixes it, and it is deliberately small.
+
+#### Memos
+
+`FullOffer` and `ACCEPT` each carry an optional `memo`: bounded UTF-8, at most
+**128 characters**.
+
+**Both objects, not one**, because they are different claims by different
+parties. A payee writing *"consulting, March"* and a payer recording
+*"reimbursed by work"* are both true, and neither is entitled to overwrite the
+other.
+
+Four rules:
+
+- **Advisory only.** §18.1 confines text to fields no decision depends on, and
+  this is the archetype. A client MUST NOT route, price, filter, or authorise
+  anything on a memo's contents. It is for a person to read.
+- **Signed, therefore agreed.** The memo is inside the offer, so it is inside
+  `offer_commit`, so a payee cannot edit it after the payer saw it. §15.5's
+  confirm screen shows what is signed, and that now includes what the payment
+  says it is for.
+- **Bounded.** An unbounded text field inside a signed object is a covert
+  channel with a signature on it. The bound counts **characters, not bytes** —
+  counting bytes silently shortens every language that does not fit one
+  character per byte.
+- **Never on the chain.** A memo lives in the transcript and stays there. Writing
+  one into Monero's `tx_extra` would publish to everyone what the protocol took
+  considerable trouble to keep between two people.
+
+#### Names are petnames, and this is not a preference
+
+§15.9 already established the shape: a signature over a static tag proves who
+owns an address and never that the tag is the one the venue put there. **A
+display name has exactly that property.** A signature over a name proves only
+that the holder of a key chose that string, and anyone can choose any string.
+
+So a persona MAY carry a self-asserted display name in its contact card (§16.3),
+exchanged in the post-receipt coda — after the transaction has already completed
+anonymously, which is the existing ordering and the right one. **The receiver
+stores it locally and may rename it.** What a user sees is their own label for a
+key they have transacted with, not a claim the network vouches for. Two contacts
+may share a display name; they can never share a key.
+
+Two designs are excluded:
+
+- **A global name registry**, because that is a directory, and a directory is the
+  thing this protocol deletes. It would also become the chokepoint everything
+  else was arranged to avoid.
+- **Showing a name on first contact**, because a name displayed before any
+  relationship exists is a claim with nothing behind it, and putting it beside an
+  amount lends it authority the protocol cannot supply.
+
+This is the Zooko trade taken deliberately: names secure and meaningful **to
+you**, given up as globally unique — which is how people already reason about the
+contact list on their phone.
+
+**Nobody can be addressed by name.** Reaching a person requires a prior exchange,
+and that is true of VeilidChat as well, which uses invitations rather than lookup
+for the same reason. Messaging between contacts is a natural extension of the
+same rendezvous machinery (§16.4) and is deliberately not required for a payment.
+
+
 ---
 
 ## 8. L4 — Settlement (Monero)
@@ -1065,7 +1133,7 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O18.** **Cancellation fees erode the permissionless lane.** §7.3 makes no-show fees enforceable only against collateral. The pressure this creates — providers preferring bonded counterparties precisely because cancellation *costs* them something — pushes the network toward the collateralized lane and quietly hollows out the slow permissionless one A4 depends on (§17.6). Whether the unbonded lane survives contact with real no-show rates is an empirical question no amount of spec work answers.
 - **O19.** **iOS cannot present over NFC, permanently.** Apple's HCE entitlement is conditioned on EEA establishment, organization enrollment, and financial-regulatory standing (§15.3.2) — structurally incompatible with A4, and not a hurdle an open protocol clears. The best-UX medium is therefore available to roughly half the supply side, and QR carries the rest. This is outside DUCAT's control and will not improve through protocol design; it is stated so no one plans around a tap that cannot exist.
 - **O20. (closed in 0.48, §18.7.)** Transport identifiers assigned. The NFC AID is `F0 44 55 43 41 54` (`0xF0` ‖ `"DUCAT"`), and the "pending real RID registration" caveat was mistaken — ISO/IEC 7816-5 reserves the `0xF…` range for **proprietary identifiers requiring no registration at all**, which is what Android HCE documents for exactly this case. There was nothing to wait for. BLE takes one random 128-bit service UUID and three characteristics sharing a base; the Bluetooth SIG registers only 16-bit UUIDs, and the 128-bit space exists so anyone can allocate without asking. **Residue, and it is a real one:** no registry means no uniqueness guarantee, so nothing prevents another vendor choosing the same AID bytes — mitigated by using the full name rather than the four-character contraction, since AIDs may run to 16 bytes and the 5-byte minimum was never a maximum. The L2CAP PSM stays deliberately unassigned: LE CoC PSMs are allocated dynamically by the local stack, so a spec pinning one would pin a value it does not control; it is published in a characteristic and read.
-- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 136 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
+- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 138 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
 - **O22. (closed in 0.44, §4.3.3.)** An escrow participant who loses their device. Resolved once the question was asked correctly: a share cannot be *reconstructed* — measured, `prepare_multisig` draws 88 characters of fresh randomness beyond what the wallet keys determine — but it does not need to be, because it is already a 2,286-byte file that a virgin `wallet-rpc` will open directly. The recovery ask therefore moved from **the counterparty's signature**, which no protocol can compel from an adversary, to **the other participants re-sharing multisig info**, which endorses no outcome and is a step every participant performs routinely. **Residue:** a stale bundle still cannot recover an escrow opened after it, so this now depends on a client prompting for re-export at ceremony completion — a UX obligation rather than a protocol impossibility. And an end-to-end spend from a restored share is still undemonstrated (§4.3.3's last limit).
 ---
 *End of Part I. The remaining parts specify the three mechanisms Part I leans on hardest: the tap that opens every transaction, the identity that optionally survives one, and the settlement that makes it fast enough to matter.*
@@ -1933,7 +2001,8 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 125–130 | `TXPROOF` (§17.5) | **Assigned** |
 | 132–138 | `SLASH_CLAIM` (§17.5) | **Assigned** |
 | 140–144 | `bond_proof` (§17.4) | **Assigned** |
-| 145+ | Unallocated | — |
+| 145–146 | `memo` on `FullOffer` and `ACCEPT` (§7.5) | **Assigned** |
+| 147+ | Unallocated | — |
 
 The `96+ Unallocated` row above was stale from 0.14 onward: 96–103 had been in use since `TERMS` and `MANDATE` shipped, and a second implementer allocating from 96 would have collided head-on. Registries decay silently unless something checks them, which is the argument for the type-code rule below.
 

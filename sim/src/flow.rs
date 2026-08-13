@@ -50,6 +50,7 @@ pub fn transact(
         fee_policy: FeePolicy::PayerPays,
         nonce_echo: nonce,
         terms: Terms::default(),
+        memo: None,
     };
     let offer_bytes = offer.to_value().encode();
 
@@ -125,6 +126,7 @@ pub fn transact(
         chosen_version: 1,
         chosen_suite: 1,
         refund_to: Some(b"payer-refund-addr".to_vec()),
+        memo: None,
     };
     let accept_bytes = accept.to_value().encode();
     let accept_env = seal(

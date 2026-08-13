@@ -25,3 +25,10 @@ uniffi = { version = "0.28", features = ["cli"] }
 [[bin]]
 name = "uniffi-bindgen"
 path = "src/bin/uniffi-bindgen.rs"
+
+# Veilid needs the JavaVM and Android Context before a node can start, and that
+# cannot travel through UniFFI — a Context is a Java object, not a value. So one
+# hand-written JNI export, against the same jni version veilid-core uses;
+# a mismatch here is a silent ABI difference rather than a compile error.
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.22.4"

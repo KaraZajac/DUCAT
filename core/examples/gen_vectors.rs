@@ -53,6 +53,28 @@ fn reject_case(name: &str, why: &str, input: &[u8], code: RejectCode, hint: &str
 fn codec_cases() -> Vec<J> {
     let mut v = Vec::new();
 
+    // §18.1 text. No object carried a string until memos (§7.5), so nothing
+    // exercised the NFC rule — and the reference decoder did not enforce it
+    // while the second implementation did. A divergence no vector could reveal
+    // is a divergence the suite was not testing for.
+    //
+    // "café" composed and decomposed are the same string to a reader and
+    // different bytes to a hash, which is §18.3's transcript-divergence bug
+    // arriving through a display field.
+    v.push(ok_case(
+        "text_nfc_composed",
+        "composed form is the canonical one and decodes",
+        &Value::Text("caf\u{e9}".into()).encode(),
+    ));
+    v.push(reject_case(
+        "text_nfd_decomposed_refused",
+        "the same string in decomposed form is a second encoding of one value, and two \
+         encodings of one value is a transcript-divergence bug whatever the signatures say",
+        &Value::Text("cafe\u{301}".into()).encode(),
+        RejectCode::Malformed,
+        "NFC normalization",
+    ));
+
     // §18.1 negative integers. Added at 0.45 because two implementations
     // disagreed here and *neither was wrong*: the spec said nothing, so one
     // accepted them and one refused. An unspecified behaviour with no vector is
@@ -629,6 +651,7 @@ fn transcript_cases() -> Vec<J> {
             supported_versions: vec![1], supported_suites: vec![1, 2],
             settle_mode: 0, fee_policy: FeePolicy::PayerPays, nonce_echo: NONCE,
         terms: Terms::default(),
+            memo: None,
         };
         let tap = TapPresent {
             version: 1, suite: 1, profile: profile_id,
@@ -648,6 +671,7 @@ fn transcript_cases() -> Vec<J> {
             reader_session_pk: SecretKey::ed25519_from_bytes(&[2u8; 32]).public().to_bytes(),
             timestamp: 1_800_000_005, chosen_version: 1, chosen_suite: 1,
         refund_to: Some(b"payer-refund-addr".to_vec()),
+            memo: None,
         };
         let accept_bytes = accept.to_value().encode();
         let link = commit(Purpose::ChainLink, &accept_bytes);
@@ -690,6 +714,7 @@ fn transcript_cases() -> Vec<J> {
         supported_versions: vec![1], supported_suites: vec![1, 2],
         settle_mode: 0, fee_policy: FeePolicy::PayerPays, nonce_echo: NONCE,
         terms: Terms::default(),
+        memo: None,
     };
     let mut dearer = offer.clone();
     dearer.amount_pxmr = FARE * 10;

@@ -74,6 +74,7 @@ pub async fn run(tap_path: &str) -> Result<(), Box<dyn std::error::Error>> {
             reader_session_pk: session.public().to_bytes(), timestamp: now(),
             chosen_version: 1, chosen_suite: 1,
             refund_to: Some(b"refund-address-placeholder".to_vec()),
+            memo: None,
         };
         seal(&SignedBytes::from_received(a.to_value().encode()).unwrap(),
              ObjectType::Accept, k)
@@ -116,6 +117,7 @@ pub async fn run(tap_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         amount_final: offer.amount_pxmr, dest: Some(offer.payto.clone()),
         reader_session_pk: session.public().to_bytes(), timestamp: now(),
         chosen_version: 1, chosen_suite: 1, refund_to: None,
+        memo: None,
     };
     let body = SignedBytes::from_received(a.to_value().encode()).unwrap();
     let mislabelled = seal(&body, ObjectType::Receipt, &key);

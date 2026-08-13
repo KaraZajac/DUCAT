@@ -1,0 +1,35 @@
+package org.ducatproject.ducat
+
+import android.app.Application
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import uniffi.ducat_mobile.nodeStart
+
+/**
+ * The node starts with the app, not with a screen.
+ *
+ * A route takes seconds to build and a tap has three (§15.3). Starting Veilid
+ * when someone opens the payment screen would put the transport's startup
+ * directly into the budget the protocol spends most of its care on — and the
+ * user would experience it as the payment being slow.
+ *
+ * Startup is off the main thread and its failure is not fatal: the rest of the
+ * app works without a network, and a wallet that refuses to open because a
+ * transport is down would be worse than one that cannot currently tap.
+ */
+class DucatApplication : Application() {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun onCreate() {
+        super.onCreate()
+        VeilidInit.ensure(this)
+        scope.launch {
+            runCatching { nodeStart("${filesDir.absolutePath}/veilid") }
+            // Failure is surfaced by the status panel rather than thrown here.
+            // Nothing else can act on it, and crashing at launch over a
+            // transport is a wallet that will not open in a tunnel.
+        }
+    }
+}

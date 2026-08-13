@@ -47,6 +47,7 @@ pub async fn run(
         fee_policy: FeePolicy::PayerPays,
         nonce_echo: [0x5A; 16],
         terms: Terms::default(),
+        memo: None,
     };
     let offer_bytes = offer.to_value().encode();
     let offer_env = seal(

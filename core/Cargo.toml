@@ -10,6 +10,7 @@ chacha20poly1305 = "0.11.0"
 ed25519-dalek = { version = "2", features = ["rand_core"] }
 p256 = { version = "0.13", features = ["ecdsa"] }
 sha2 = "0.10"
+unicode-normalization = "0.1.25"
 
 [dev-dependencies]
 hex = "0.4"
