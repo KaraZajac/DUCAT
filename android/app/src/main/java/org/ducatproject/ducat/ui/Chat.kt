@@ -108,7 +108,10 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         modifier = Modifier.imePadding(),
         topBar = {
             TopAppBar(
-                title = { Text(c.displayName()) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background,
+            ),
+                            title = { Text(c.displayName()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Back") }
                 },
@@ -120,7 +123,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             )
         },
         bottomBar = {
-            Surface(tonalElevation = 3.dp) {
+            Surface(color = MaterialTheme.colorScheme.background) {
                 Column {
                     error?.let {
                         Text(

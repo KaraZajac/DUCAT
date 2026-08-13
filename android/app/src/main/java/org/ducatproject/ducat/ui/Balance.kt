@@ -83,7 +83,6 @@ fun BalanceCard(
 
     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Column(Modifier.padding(20.dp)) {
-
             // §17.2 forbids an exact promise, so the wording carries the
             // approximation rather than hiding it behind a precise-looking digit.
             Text(
@@ -111,36 +110,41 @@ fun BalanceCard(
                     )
                 }
             }
+        }
+    }
 
-            // §17.2 requires warning *before* the count reaches zero, not at the
-            // counter: "a client that funds a float and immediately offers to
-            // transact will fail at the curb with a full balance on screen."
-            if (float.unlockedOutputs == 0 || capacity.approxPayments <= 2) {
-                Spacer(Modifier.height(16.dp))
-                Surface(
-                    color = MaterialTheme.colorScheme.errorContainer,
-                    shape = RoundedCornerShape(12.dp),
-                ) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(
-                            if (float.unlockedOutputs == 0)
-                                "You can't pay right now"
-                            else
-                                "Running low on notes",
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            if (float.unlockedOutputs == 0)
-                                "Your money is here, but it's all tied up as change. " +
-                                    "Break a note to spend again."
-                            else
-                                "Break a note now so you're not caught out at a counter.",
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Button(onClick = onTopUp) { Text("Break a note") }
-                    }
-                }
+    // §17.2 requires warning *before* the count reaches zero, not at the
+    // counter. Its own surface rather than a box inside the card above: a
+    // warning nested two boxes deep reads as part of the furniture, and this
+    // one exists to interrupt.
+    if (float.unlockedOutputs == 0 || capacity.approxPayments <= 2) {
+        Spacer(Modifier.height(12.dp))
+        Surface(
+            color = MaterialTheme.colorScheme.errorContainer,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            Column(Modifier.padding(20.dp)) {
+                Text(
+                    if (float.unlockedOutputs == 0)
+                        "You can't pay right now"
+                    else
+                        "Running low on notes",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    if (float.unlockedOutputs == 0)
+                        "Your money is here, but it's all tied up as change. " +
+                            "Break a note to spend again."
+                    else
+                        "Break a note now so you're not caught out at a counter.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                )
+                Spacer(Modifier.height(12.dp))
+                Button(onClick = onTopUp) { Text("Break a note") }
             }
         }
     }

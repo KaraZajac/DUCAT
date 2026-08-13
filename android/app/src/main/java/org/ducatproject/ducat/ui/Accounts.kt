@@ -125,7 +125,7 @@ fun AccountsScreen() {
                 Text("Balances", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "§17.2 keeps these apart on purpose: what you can spend now is " +
+                    "Kept apart on purpose: what you can spend now is " +
                         "not what you own.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

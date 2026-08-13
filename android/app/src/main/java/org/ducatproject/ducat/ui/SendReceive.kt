@@ -187,7 +187,7 @@ fun SendReceiveSheet(
                     NotBuilt(
                         Icons.Filled.Nfc,
                         "Tap to be paid",
-                        "§15.2's presenter role over NFC. The AID is registered and " +
+                        "Tap to pay over NFC. The AID is registered and " +
                             "the flow runs in the harness; the phone side is not wired.",
                     )
                 }
@@ -205,7 +205,7 @@ fun SendReceiveSheet(
                 }
                 if (b.lockedPxmr > 0) {
                     Text(
-                        "${Amounts.show(context, b.lockedPxmr).primary} still locked — §17.2 keeps " +
+                        "${Amounts.show(context, b.lockedPxmr).primary} still locked — kept " +
                             "these apart because one is money you can hand over and " +
                             "the other is not.",
                         style = MaterialTheme.typography.bodySmall,

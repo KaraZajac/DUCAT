@@ -169,6 +169,9 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 Scaffold(
                     topBar = {
                         TopAppBar(
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.background,
+                            ),
                             title = { Text(o.section.label) },
                             navigationIcon = {
                                 IconButton(onClick = { overlay = Overlay.None }) {

@@ -316,7 +316,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                     value = petname,
                     onValueChange = { if (it.length <= 32) petname = it },
                     label = { Text("Save them as") },
-                    supportingText = { Text("Your name for them. Only you see it (§7.5).") },
+                    supportingText = { Text("Your name for them. Only you see it.") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )

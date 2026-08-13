@@ -61,7 +61,10 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(if (sent) "Payment sent" else "Payment received") },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
+                                    title = { Text(if (sent) "Payment sent" else "Payment received") },
                     navigationIcon = {
                         IconButton(onClick = onClose) {
                             Icon(Icons.Filled.ArrowBack, contentDescription = "Back")

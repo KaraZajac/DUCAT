@@ -87,7 +87,10 @@ fun QrHub(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = {},
+                        colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                    ),
+                                            title = {},
                         navigationIcon = {
                             IconButton(onClick = onClose) {
                                 Icon(Icons.Filled.ArrowBack, contentDescription = "Close")

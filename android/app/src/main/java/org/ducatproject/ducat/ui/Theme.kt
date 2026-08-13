@@ -88,7 +88,10 @@ private fun latteScheme() = lightColorScheme(
     outlineVariant = Latte.surface1,
     error = Latte.red,
     onError = Latte.base,
-    errorContainer = Latte.crust,
+    // A red-tinted fill rather than another grey. `errorContainer` mapped to a
+    // neutral surface, so every warning in the app was grey-on-grey — visually
+    // indistinguishable from information, which for a warning is a bug.
+    errorContainer = Color(0xFFF6DDE1),
     onErrorContainer = Latte.maroon,
 )
 
@@ -119,8 +122,8 @@ private fun mochaScheme() = darkColorScheme(
     outlineVariant = Mocha.surface1,
     error = Mocha.red,
     onError = Mocha.crust,
-    errorContainer = Mocha.surface0,
-    onErrorContainer = Mocha.maroon,
+    errorContainer = Color(0xFF45303A),
+    onErrorContainer = Mocha.red,
 )
 
 @Composable

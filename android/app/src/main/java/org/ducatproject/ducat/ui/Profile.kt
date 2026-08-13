@@ -45,7 +45,10 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(c.displayName()) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background,
+            ),
+                            title = { Text(c.displayName()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Back") }
                 },
@@ -130,7 +133,7 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 value = petname,
                 onValueChange = { if (it.length <= 32) { petname = it; saved = false } },
                 label = { Text("Your name for them") },
-                supportingText = { Text("Only you see this (§7.5). It is the name shown everywhere.") },
+                supportingText = { Text("Only you see this. It is the name shown everywhere.") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
