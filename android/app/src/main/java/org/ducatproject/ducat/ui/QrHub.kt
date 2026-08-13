@@ -87,20 +87,7 @@ fun QrHub(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = {
-                            SingleChoiceSegmentedButtonRow {
-                                SegmentedButton(
-                                    selected = scanning,
-                                    onClick = { scanning = true },
-                                    shape = SegmentedButtonDefaults.itemShape(0, 2),
-                                ) { Text("Scan code") }
-                                SegmentedButton(
-                                    selected = !scanning,
-                                    onClick = { scanning = false },
-                                    shape = SegmentedButtonDefaults.itemShape(1, 2),
-                                ) { Text("My code") }
-                            }
-                        },
+                        title = {},
                         navigationIcon = {
                             IconButton(onClick = onClose) {
                                 Icon(Icons.Filled.ArrowBack, contentDescription = "Close")
@@ -109,12 +96,35 @@ fun QrHub(
                     )
                 },
             ) { padding ->
-                Box(Modifier.padding(padding).fillMaxSize()) {
+                Column(Modifier.padding(padding).fillMaxSize()) {
+                    // Above the content, centred, its own row. In the app bar's
+                    // title slot it had to share the width with the back arrow
+                    // and was squeezed to nothing.
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        SingleChoiceSegmentedButtonRow {
+                            SegmentedButton(
+                                selected = scanning,
+                                onClick = { scanning = true },
+                                shape = SegmentedButtonDefaults.itemShape(0, 2),
+                            ) { Text("Scan code") }
+                            SegmentedButton(
+                                selected = !scanning,
+                                onClick = { scanning = false },
+                                shape = SegmentedButtonDefaults.itemShape(1, 2),
+                            ) { Text("My code") }
+                        }
+                    }
                     if (scanning) {
                         // One scanner for both kinds. A person holding a phone at
                         // a code does not know or care which sort it is, and two
                         // buttons for "scan" would make them guess.
-                        QrScanner(
+                        // Content, not a dialog: this screen already is one,
+                        // and a nested dialog painted over its own tab bar —
+                        // which is why the toggle appeared not to exist.
+                        QrScannerContent(
                             prompt = "A DUCAT card or a Monero address",
                             onResult = { raw ->
                                 val text = raw.trim()
@@ -143,7 +153,6 @@ fun QrHub(
                                     }
                                 }
                             },
-                            onDismiss = onClose,
                         )
                     } else {
                         MyCode(

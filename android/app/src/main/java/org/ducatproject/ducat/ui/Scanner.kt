@@ -49,6 +49,40 @@ fun QrScanner(
     onResult: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    // A Dialog, not a plain Surface. A caller renders this *before* the rest of
+    // its screen, so a Surface sits in the same layout slot and whatever comes
+    // after paints straight over it — the camera ran the whole time with the app
+    // drawn on top of it. A dialog floats, and takes the back gesture with it.
+    //
+    // Which is exactly why there is a second entry point below: a caller that
+    // already owns a full-screen dialog does **not** want another one floating
+    // over its own chrome. Nesting them hid a screen's tab bar completely, and
+    // the tabs looked like they had never been built.
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+        ),
+    ) {
+        Surface(Modifier.fillMaxSize()) {
+            QrScannerContent(prompt, onResult, onDismiss)
+        }
+    }
+}
+
+/**
+ * The scanner as ordinary content, for a screen that supplies its own frame.
+ *
+ * No dialog, no cancel row: whatever hosts this already has a way back, and a
+ * second one is a second thing to explain.
+ */
+@Composable
+fun QrScannerContent(
+    prompt: String,
+    onResult: (String) -> Unit,
+    onDismiss: (() -> Unit)? = null,
+) {
     val context = LocalContext.current
     var granted by remember {
         mutableStateOf(
@@ -62,23 +96,15 @@ fun QrScanner(
 
     LaunchedEffect(Unit) { if (!granted) ask.launch(Manifest.permission.CAMERA) }
 
-    // A Dialog, not a plain Surface. The caller renders this *before* the rest
-    // of its screen, so a Surface sits in the same layout slot and whatever
-    // comes after paints straight over it — the camera was running the whole
-    // time with the app drawn on top of it. A dialog floats, and takes the back
-    // gesture with it, which a Surface also did not.
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            dismissOnBackPress = true,
-        ),
-    ) {
-    Surface(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize()) {
-            Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onDismiss) { Text("Cancel") }
-                Spacer(Modifier.weight(1f))
+    Column(Modifier.fillMaxSize()) {
+            onDismiss?.let { cancel ->
+                Row(
+                    Modifier.fillMaxWidth().padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TextButton(onClick = cancel) { Text("Cancel") }
+                    Spacer(Modifier.weight(1f))
+                }
             }
             Text(
                 prompt,
@@ -119,8 +145,6 @@ fun QrScanner(
                 )
             }
             CameraPreview(onResult) { failure = it }
-        }
-    }
     }
 }
 
