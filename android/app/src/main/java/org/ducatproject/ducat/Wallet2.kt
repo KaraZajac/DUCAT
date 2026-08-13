@@ -45,7 +45,18 @@ data class WalletEntry(
     val height: Long,
     val spent: Boolean,
     val keyImage: String,
+    /** The serialized output, needed to spend it. */
+    val blob: ByteArray = ByteArray(0),
 )
+
+/** What a send would use and cost, before anything is signed. */
+data class SendPlan(
+    val notes: List<WalletEntry>,
+    val amountPxmr: Long,
+    val totalInPxmr: Long,
+) {
+    val enough: Boolean get() = totalInPxmr >= amountPxmr
+}
 
 object Wallet {
 
@@ -115,6 +126,61 @@ object Wallet {
 
     fun entries(context: Context): List<WalletEntry> =
         WalletStore(context).entries().sortedByDescending { it.height }
+
+    /**
+     * Choose notes to cover an amount.
+     *
+     * Largest first, so a payment uses as few notes as possible. §17.2's
+     * constraint is the count rather than the total: every note spent is one
+     * fewer person you can pay before waiting for change to unlock, and
+     * sweeping five small notes to pay for a coffee leaves you unable to buy
+     * the next one.
+     *
+     * The fee is not known until the transaction is built, so this deliberately
+     * does not pretend to: it reports what it selected and lets the build come
+     * back with the real number.
+     */
+    fun plan(context: Context, amountPxmr: Long): SendPlan {
+        val tip = WalletStore(context).tip()
+        val usable = WalletStore(context).entries()
+            .filter { !it.spent && it.blob.isNotEmpty() && tip > 0 && it.height + LOCK_BLOCKS <= tip }
+            .sortedByDescending { it.amountPxmr }
+        val picked = mutableListOf<WalletEntry>()
+        var total = 0L
+        for (n in usable) {
+            if (total >= amountPxmr) break
+            picked += n
+            total += n.amountPxmr
+        }
+        return SendPlan(picked, amountPxmr, total)
+    }
+
+    /** Build, sign and broadcast. Blocking; call it off the main thread. */
+    fun send(
+        context: Context,
+        nodeUrl: String,
+        toAddress: String,
+        amountPxmr: Long,
+    ): uniffi.ducat_mobile.SendResult {
+        val store = WalletStore(context)
+        val spend = store.spendKeyHex()
+            ?: throw IllegalStateException("no wallet on this device")
+        val plan = plan(context, amountPxmr)
+        if (!plan.enough) {
+            throw IllegalStateException(
+                "not enough unlocked — ${formatXmr(plan.totalInPxmr)} XMR available"
+            )
+        }
+        val r = uniffi.ducat_mobile.moneroSend(
+            nodeUrl, spend, plan.notes.map { it.blob }, toAddress, amountPxmr.toULong(),
+        )
+        // Mark the inputs spent immediately rather than waiting for a rescan.
+        // The daemon will confirm it, but until then a second send must not be
+        // offered the same notes — that builds a double spend the network will
+        // reject and the user will not understand.
+        store.recordSpent(plan.notes.associate { it.keyImage to true })
+        return r
+    }
 }
 
 /** Piconero to a human string. 1 XMR is 10^12 piconero. */

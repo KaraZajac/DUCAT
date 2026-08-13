@@ -572,6 +572,7 @@ class WalletStore(context: Context) {
                 height = o.height.toLong(),
                 spent = byKi[ki]?.spent ?: false,
                 keyImage = ki,
+                blob = o.blob,
             )
         }
         writeEntries(byKi.values.toList())
@@ -595,6 +596,7 @@ class WalletStore(context: Context) {
                 height = o.getLong("h"),
                 spent = o.optBoolean("spent", false),
                 keyImage = o.getString("ki"),
+                blob = Base64.decode(o.optString("blob", ""), Base64.NO_WRAP),
             )
         }
     }
@@ -605,6 +607,7 @@ class WalletStore(context: Context) {
             arr.put(JSONObject().apply {
                 put("amt", it.amountPxmr); put("h", it.height)
                 put("spent", it.spent); put("ki", it.keyImage)
+                put("blob", Base64.encodeToString(it.blob, Base64.NO_WRAP))
             })
         }
         prefs.edit().putString("wallet_outputs", arr.toString()).apply()

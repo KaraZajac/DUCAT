@@ -10,6 +10,9 @@ import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -18,6 +21,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.NodeStore
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.formatXmr
@@ -44,15 +48,78 @@ fun SendReceiveSheet(onDismiss: () -> Unit) {
     val b = remember(version) { Wallet.balances(context) }
     var tab by remember { mutableIntStateOf(0) }
     var scanning by remember { mutableStateOf(false) }
-    var scannedText by remember { mutableStateOf<String?>(null) }
+    var dest by remember { mutableStateOf("") }
+    var amount by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var confirming by remember { mutableStateOf(false) }
+    var sent by remember { mutableStateOf<uniffi.ducat_mobile.SendResult?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    val pxmr = remember(amount) {
+        amount.trim().toBigDecimalOrNull()
+            ?.multiply(java.math.BigDecimal(1_000_000_000_000L))
+            ?.toLong()?.takeIf { it > 0 }
+    }
 
     if (scanning) {
         QrScanner(
             prompt = "Point the camera at a Monero address or a DUCAT card",
-            onResult = { scanning = false; scannedText = it },
+            onResult = { raw ->
+                scanning = false
+                // A `monero:` URI is what a wallet QR usually carries; the
+                // address is the part after it.
+                dest = raw.removePrefix("monero:").substringBefore("?")
+            },
             onDismiss = { scanning = false },
         )
         return
+    }
+
+    if (confirming && pxmr != null) {
+        // §15.5's checkpoint. The party whose money is at risk decides, and
+        // nothing may shorten the path to here.
+        AlertDialog(
+            onDismissRequest = { confirming = false },
+            title = { Text("Send ${formatXmr(pxmr)} XMR?") },
+            text = {
+                Column {
+                    Text("To", style = MaterialTheme.typography.labelMedium)
+                    Text(dest, fontFamily = FontFamily.Monospace,
+                         style = MaterialTheme.typography.bodySmall)
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        "Monero payments cannot be reversed or cancelled. Check the " +
+                            "address — there is nobody to appeal to if it is wrong.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.ducat.changePending,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirming = false
+                    busy = true
+                    error = null
+                    scope.launch {
+                        val node = NodeStore(context).lastGood()
+                        val r = withContext(Dispatchers.IO) {
+                            runCatching {
+                                Wallet.send(
+                                    context,
+                                    node ?: throw IllegalStateException("no node — check Status"),
+                                    dest.trim(),
+                                    pxmr,
+                                )
+                            }
+                        }
+                        busy = false
+                        r.onSuccess { sent = it; amount = ""; dest = "" }
+                            .onFailure { error = it.message ?: "could not send" }
+                    }
+                }) { Text("Send") }
+            },
+            dismissButton = { TextButton(onClick = { confirming = false }) { Text("Cancel") } },
+        )
     }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -119,38 +186,89 @@ fun SendReceiveSheet(onDismiss: () -> Unit) {
                     )
                 }
                 Spacer(Modifier.height(16.dp))
-                OutlinedButton(
-                    onClick = { scanning = true },
+
+                OutlinedTextField(
+                    value = dest,
+                    onValueChange = { dest = it },
+                    label = { Text("To (Monero address)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2,
+                    trailingIcon = {
+                        IconButton(onClick = { scanning = true }) {
+                            Icon(Icons.Filled.QrCodeScanner, "Scan")
+                        }
+                    },
+                )
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount (XMR)") },
+                    singleLine = true,
+                    isError = amount.isNotBlank() && pxmr == null,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                val plan = remember(pxmr, version) {
+                    pxmr?.let { Wallet.plan(context, it) }
+                }
+                plan?.let { p ->
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        if (p.enough) {
+                            "Uses ${p.notes.size} note(s). The fee is added on top and " +
+                                "is only known once the transaction is built."
+                        } else {
+                            "Not enough unlocked — ${formatXmr(p.totalInPxmr)} XMR available."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (p.enough) MaterialTheme.colorScheme.onSurfaceVariant
+                                else MaterialTheme.colorScheme.error,
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+                Button(
+                    onClick = { confirming = true },
+                    enabled = !busy && dest.isNotBlank() && (plan?.enough == true),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Icon(Icons.Filled.QrCodeScanner, null, Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text("Scan an address or card")
+                    if (busy) {
+                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(10.dp))
+                        Text("Signing and sending…")
+                    } else {
+                        Text("Review")
+                    }
                 }
-                scannedText?.let {
-                    Spacer(Modifier.height(10.dp))
+
+                sent?.let { r ->
+                    Spacer(Modifier.height(14.dp))
                     Card(colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                        Column(Modifier.padding(12.dp)) {
-                            Text("Scanned", style = MaterialTheme.typography.labelMedium)
+                        Column(Modifier.padding(14.dp)) {
+                            Text("Sent", style = MaterialTheme.typography.labelLarge,
+                                 color = MaterialTheme.ducat.settled)
                             Spacer(Modifier.height(4.dp))
+                            Text(r.txidHex, fontFamily = FontFamily.Monospace,
+                                 style = MaterialTheme.typography.bodySmall)
+                            Spacer(Modifier.height(6.dp))
                             Text(
-                                it.take(120) + if (it.length > 120) "…" else "",
-                                fontFamily = FontFamily.Monospace,
+                                "fee ${formatXmr(r.feePxmr.toLong())} XMR · " +
+                                    "accepted by ${r.acceptedBy} node(s)",
                                 style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
                 }
-                Spacer(Modifier.height(20.dp))
-                NotBuilt(
-                    Icons.Filled.QrCodeScanner,
-                    "Sending is not built yet",
-                    "Reading the chain works; spending needs transaction " +
-                        "construction and broadcast, which is a larger step. A form " +
-                        "here would take an amount and fail at the end.",
-                )
+                error?.let {
+                    Spacer(Modifier.height(12.dp))
+                    Text(it, color = MaterialTheme.colorScheme.error,
+                         style = MaterialTheme.typography.bodySmall)
+                }
             }
+
             Spacer(Modifier.height(24.dp))
         }
     }

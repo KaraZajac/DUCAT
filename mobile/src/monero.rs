@@ -222,6 +222,12 @@ pub struct OwnedOutput {
     /// from the spend secret, which is why scanning for a *balance* needs more
     /// than the view key that scanning for *receipts* does.
     pub key_image_hex: String,
+    /// The output itself, serialized.
+    ///
+    /// Spending needs the whole thing — key offset, commitment, position on the
+    /// chain — and none of that survives a summary. Keeping the bytes means a
+    /// send does not have to rescan to find what the wallet already found.
+    pub blob: Vec<u8>,
 }
 
 /// How far a scan got, and what it found.
@@ -317,6 +323,7 @@ pub fn monero_scan(
                         key_image_hex: ki
                             .map(|k| hex_of(k.compress().to_bytes().as_slice()))
                             .unwrap_or_default(),
+                        blob: o.serialize(),
                     });
                 }
             }
@@ -390,6 +397,7 @@ pub fn monero_scan_view_only(
                         // key image, and inventing a placeholder would let a
                         // caller ask about spentness and believe the answer.
                         key_image_hex: String::new(),
+                        blob: o.serialize(),
                     });
                 }
             }
@@ -529,4 +537,163 @@ pub fn monero_rate(currency: String, timeout_ms: u32) -> Result<Rate, MoneroErro
     }
 
     Err(MoneroError::Failed("no price source answered".into()))
+}
+
+
+// ---------------------------------------------------------------------------
+// Spending (§17)
+// ---------------------------------------------------------------------------
+
+/// What a send would cost, or what one did.
+#[derive(uniffi::Record, Clone)]
+pub struct SendResult {
+    pub txid_hex: String,
+    pub fee_pxmr: u64,
+    /// How many nodes took it. **One is not the network.** §8.7.2 was learned
+    /// twice in this project: a relay returned success and propagated nothing.
+    pub accepted_by: u32,
+}
+
+/// Build, sign and broadcast a transaction.
+///
+/// `input_blobs` are outputs from a previous scan. The caller chooses which to
+/// spend, because that choice is §17.2's whole subject — one output pays one
+/// person at a time, and a wallet that silently consolidates has decided
+/// something about the user's privacy on their behalf.
+#[uniffi::export]
+pub fn monero_send(
+    node_url: String,
+    spend_key_hex: String,
+    input_blobs: Vec<Vec<u8>>,
+    to_address: String,
+    amount_pxmr: u64,
+) -> Result<SendResult, MoneroError> {
+    use monero_simple_request_rpc::prelude::*;
+    use monero_simple_request_rpc::SimpleRequestTransport;
+    use monero_wallet::address::MoneroAddress;
+    use monero_wallet::ed25519::Scalar;
+    use monero_wallet::send::{Change, SignableTransaction};
+    use monero_wallet::{OutputWithDecoys, ViewPair, WalletOutput};
+    use monero_wallet::ringct::RctType;
+    use rand_core::{OsRng, RngCore};
+    use zeroize::Zeroizing;
+
+    if input_blobs.is_empty() {
+        return Err(MoneroError::Failed("nothing to spend".into()));
+    }
+    let raw = hex_to_bytes(&spend_key_hex)
+        .ok_or_else(|| MoneroError::Failed("spend key is not hex".into()))?;
+    let spend = Zeroizing::new(
+        Scalar::read(&mut raw.as_slice())
+            .map_err(|_| MoneroError::Failed("spend key is not a valid scalar".into()))?,
+    );
+    let mut sb = Vec::new();
+    spend.write(&mut sb).map_err(|e| MoneroError::Failed(format!("scalar: {e}")))?;
+    let view = Zeroizing::new(Scalar::hash(&sb));
+    let spend_pub = monero_wallet::ed25519::Point::from(
+        &(*spend).into() * curve25519_dalek::constants::ED25519_BASEPOINT_TABLE,
+    );
+    let vp = ViewPair::new(spend_pub, view)
+        .map_err(|e| MoneroError::Failed(format!("view pair: {e:?}")))?;
+
+    let dest = MoneroAddress::from_str_with_unchecked_network(&to_address)
+        .map_err(|e| MoneroError::Failed(format!("address: {e:?}")))?;
+
+    let outputs: Vec<WalletOutput> = input_blobs
+        .iter()
+        .map(|b| WalletOutput::read(&mut b.as_slice()))
+        .collect::<Result<_, _>>()
+        .map_err(|e| MoneroError::Failed(format!("stored output: {e}")))?;
+
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .map_err(|e| MoneroError::Failed(format!("runtime: {e}")))?;
+
+    rt.block_on(async {
+        let rpc = SimpleRequestTransport::new(node_url.clone())
+            .await
+            .map_err(|e| MoneroError::Failed(format!("connect: {e:?}")))?;
+        let tip = rpc
+            .latest_block_number()
+            .await
+            .map_err(|e| MoneroError::Failed(format!("height: {e:?}")))?;
+
+        // Decoys are what make the spend indistinguishable from fifteen others.
+        // Selected per input and per send, never reused.
+        let mut decoyed = Vec::new();
+        for o in outputs {
+            decoyed.push(
+                OutputWithDecoys::new(&mut OsRng, &rpc, 16, tip, o)
+                    .await
+                    .map_err(|e| MoneroError::Failed(format!("decoys: {e:?}")))?,
+            );
+        }
+
+        let fee_rate = rpc
+            .fee_rate(FeePriority::Unimportant, u64::MAX)
+            .await
+            .map_err(|e| MoneroError::Failed(format!("fee rate: {e:?}")))?;
+
+        let mut outgoing = Zeroizing::new([0u8; 32]);
+        OsRng.fill_bytes(outgoing.as_mut());
+
+        let tx = SignableTransaction::new(
+            RctType::ClsagBulletproofPlus,
+            outgoing,
+            decoyed,
+            vec![(dest, amount_pxmr)],
+            // Change back to ourselves. Omitting it does not save a fee, it
+            // donates the remainder to the miners.
+            Change::new(vp.clone(), None),
+            vec![],
+            fee_rate,
+        )
+        .map_err(|e| MoneroError::Failed(describe_send_error(&format!("{e:?}"))))?;
+
+        let fee = tx.necessary_fee();
+        let signed = tx
+            .sign(&mut OsRng, &spend)
+            .map_err(|e| MoneroError::Failed(format!("signing: {e:?}")))?;
+        let txid = hex_of(&signed.hash());
+
+        // §8.7.2, learned twice here: one relay accepted a transaction, returned
+        // success, and propagated nothing. Ok from a single node means that node
+        // took it, not that the network has it. Nodes deduplicate, so submitting
+        // everywhere is free.
+        let mut accepted = 0u32;
+        for r in [
+            node_url.as_str(),
+            "http://xmr-lux.boldsuck.org:38081",
+            "http://node.monerodevs.org:38089",
+            "http://stagenet.xmr-tw.org:38081",
+        ] {
+            let Ok(t) = SimpleRequestTransport::new(r.to_string()).await else { continue };
+            if t.publish_transaction(&signed).await.is_ok() {
+                accepted += 1;
+            }
+        }
+        if accepted == 0 {
+            return Err(MoneroError::Failed(
+                "signed, but no node accepted it — it has not been sent".into(),
+            ));
+        }
+
+        Ok(SendResult { txid_hex: txid, fee_pxmr: fee, accepted_by: accepted })
+    })
+}
+
+/// Turn the library's error into something a person can act on.
+fn describe_send_error(raw: &str) -> String {
+    if raw.contains("NotEnoughFunds") || raw.contains("NotEnoughCoins") {
+        "not enough in the notes you picked, once the fee is counted".into()
+    } else if raw.contains("TooManyInputs") {
+        "too many notes at once — send in smaller batches".into()
+    } else if raw.contains("NoInputs") {
+        "no notes selected".into()
+    } else if raw.contains("NoOutputs") {
+        "no destination".into()
+    } else {
+        format!("could not build the transaction: {raw}")
+    }
 }

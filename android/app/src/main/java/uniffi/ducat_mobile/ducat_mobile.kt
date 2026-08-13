@@ -819,6 +819,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -885,6 +887,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_monero_scan(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_scan_view_only(`nodeUrl`: RustBuffer.ByValue,`address`: RustBuffer.ByValue,`viewKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_send(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`inputBlobs`: RustBuffer.ByValue,`toAddress`: RustBuffer.ByValue,`amountPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_spent(`nodeUrl`: RustBuffer.ByValue,`keyImagesHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1106,6 +1110,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_scan_view_only(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_send(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_spent(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_app_call(
@@ -1255,6 +1261,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_scan_view_only() != 11816.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_send() != 29256.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_spent() != 3803.toShort()) {
@@ -2146,7 +2155,15 @@ data class OwnedOutput (
      * from the spend secret, which is why scanning for a *balance* needs more
      * than the view key that scanning for *receipts* does.
      */
-    var `keyImageHex`: kotlin.String
+    var `keyImageHex`: kotlin.String, 
+    /**
+     * The output itself, serialized.
+     *
+     * Spending needs the whole thing — key offset, commitment, position on the
+     * chain — and none of that survives a summary. Keeping the bytes means a
+     * send does not have to rescan to find what the wallet already found.
+     */
+    var `blob`: kotlin.ByteArray
 ) {
     
     companion object
@@ -2161,19 +2178,22 @@ public object FfiConverterTypeOwnedOutput: FfiConverterRustBuffer<OwnedOutput> {
             FfiConverterULong.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
         )
     }
 
     override fun allocationSize(value: OwnedOutput) = (
             FfiConverterULong.allocationSize(value.`amountPxmr`) +
             FfiConverterULong.allocationSize(value.`height`) +
-            FfiConverterString.allocationSize(value.`keyImageHex`)
+            FfiConverterString.allocationSize(value.`keyImageHex`) +
+            FfiConverterByteArray.allocationSize(value.`blob`)
     )
 
     override fun write(value: OwnedOutput, buf: ByteBuffer) {
             FfiConverterULong.write(value.`amountPxmr`, buf)
             FfiConverterULong.write(value.`height`, buf)
             FfiConverterString.write(value.`keyImageHex`, buf)
+            FfiConverterByteArray.write(value.`blob`, buf)
     }
 }
 
@@ -2578,6 +2598,49 @@ public object FfiConverterTypeSealedOut: FfiConverterRustBuffer<SealedOut> {
             FfiConverterUInt.write(value.`prekeyId`, buf)
             FfiConverterBoolean.write(value.`forwardSecret`, buf)
             FfiConverterByteArray.write(value.`nextLink`, buf)
+    }
+}
+
+
+
+/**
+ * What a send would cost, or what one did.
+ */
+data class SendResult (
+    var `txidHex`: kotlin.String, 
+    var `feePxmr`: kotlin.ULong, 
+    /**
+     * How many nodes took it. **One is not the network.** §8.7.2 was learned
+     * twice in this project: a relay returned success and propagated nothing.
+     */
+    var `acceptedBy`: kotlin.UInt
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSendResult: FfiConverterRustBuffer<SendResult> {
+    override fun read(buf: ByteBuffer): SendResult {
+        return SendResult(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SendResult) = (
+            FfiConverterString.allocationSize(value.`txidHex`) +
+            FfiConverterULong.allocationSize(value.`feePxmr`) +
+            FfiConverterUInt.allocationSize(value.`acceptedBy`)
+    )
+
+    override fun write(value: SendResult, buf: ByteBuffer) {
+            FfiConverterString.write(value.`txidHex`, buf)
+            FfiConverterULong.write(value.`feePxmr`, buf)
+            FfiConverterUInt.write(value.`acceptedBy`, buf)
     }
 }
 
@@ -3776,6 +3839,24 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_scan_view_only(
         FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`address`),FfiConverterString.lower(`viewKeyHex`),FfiConverterULong.lower(`fromHeight`),FfiConverterUInt.lower(`maxBlocks`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Build, sign and broadcast a transaction.
+         *
+         * `input_blobs` are outputs from a previous scan. The caller chooses which to
+         * spend, because that choice is §17.2's whole subject — one output pays one
+         * person at a time, and a wallet that silently consolidates has decided
+         * something about the user's privacy on their behalf.
+         */
+    @Throws(MoneroException::class) fun `moneroSend`(`nodeUrl`: kotlin.String, `spendKeyHex`: kotlin.String, `inputBlobs`: List<kotlin.ByteArray>, `toAddress`: kotlin.String, `amountPxmr`: kotlin.ULong): SendResult {
+            return FfiConverterTypeSendResult.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_send(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterSequenceByteArray.lower(`inputBlobs`),FfiConverterString.lower(`toAddress`),FfiConverterULong.lower(`amountPxmr`),_status)
 }
     )
     }
