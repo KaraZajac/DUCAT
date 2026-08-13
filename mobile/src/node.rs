@@ -333,3 +333,177 @@ pub fn node_reply(id: u64, message: Vec<u8>) -> Result<(), NodeError> {
             .map_err(|e| NodeError::Failed(format!("reply: {e}")))
     })
 }
+
+// ---------------------------------------------------------------------------
+// DHT records (§16.12)
+// ---------------------------------------------------------------------------
+//
+// `app_call` is a live RPC and we had been using it as a mailbox. Every failure
+// in the first messaging build traced to that: a private route dies with the
+// process, so a card went stale the moment the app restarted, and both parties
+// had to be online at the same instant for anything to move.
+//
+// A DHT record key is **permanent**. The writer publishes into their own record
+// whenever they are online; the reader collects whenever *they* are. Neither
+// needs the other present, which is also what makes a payment request that
+// waits until someone reads it expressible at all.
+
+/// A record this node owns, and the credentials to write it.
+#[derive(uniffi::Record, Clone)]
+pub struct DhtRecord {
+    /// The permanent address. This is what goes in a contact card, in place of
+    /// a route blob that outlives nothing.
+    pub key: String,
+    pub owner_public: Vec<u8>,
+    pub owner_secret: Vec<u8>,
+    pub subkey_count: u32,
+}
+
+/// Create a record only we can write.
+///
+/// `subkey_count` bounds the log: subkey 0 is a head, the rest carry messages
+/// as a ring. Veilid caps a record's subkeys, so a conversation is a bounded
+/// buffer rather than an archive — which matches §16.11 anyway, where a message
+/// is meant to become unreadable rather than accumulate.
+#[uniffi::export]
+pub fn node_dht_create(subkey_count: u32) -> Result<DhtRecord, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let schema = DHTSchema::dflt(subkey_count as u16)
+            .map_err(|e| NodeError::Failed(format!("schema: {e}")))?;
+        let desc = rc
+            .create_dht_record(CRYPTO_KIND_VLD0, schema, None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("create: {e}")))?;
+        let owner = desc
+            .owner_secret()
+            .ok_or_else(|| NodeError::Failed("record has no owner secret".into()))?;
+        Ok(DhtRecord {
+            key: desc.key().to_string(),
+            owner_public: desc.owner().value().bytes().to_vec(),
+            owner_secret: owner.value().bytes().to_vec(),
+            subkey_count,
+        })
+    })
+}
+
+/// Create a record we own and **one other party may also write**.
+///
+/// This is the contact-request inbox: subkey 0 is ours, subkey 1 is theirs. The
+/// card carries the key and the writer secret, so whoever holds the card — and
+/// only they — can answer in place, without either side needing a live route.
+#[uniffi::export]
+pub fn node_dht_create_shared(
+    writer_public: Vec<u8>,
+) -> Result<DhtRecord, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        // A member id is the same bytes as the signing key; the type differs
+        // because the schema names writers rather than verifies signatures.
+        let member = BareMemberId::new(&writer_public);
+        let schema = DHTSchema::smpl(1, vec![DHTSchemaSMPLMember { m_key: member, m_cnt: 1 }])
+            .map_err(|e| NodeError::Failed(format!("schema: {e}")))?;
+        let desc = rc
+            .create_dht_record(CRYPTO_KIND_VLD0, schema, None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("create: {e}")))?;
+        let owner = desc
+            .owner_secret()
+            .ok_or_else(|| NodeError::Failed("record has no owner secret".into()))?;
+        Ok(DhtRecord {
+            key: desc.key().to_string(),
+            owner_public: desc.owner().value().bytes().to_vec(),
+            owner_secret: owner.value().bytes().to_vec(),
+            subkey_count: 2,
+        })
+    })
+}
+
+/// Open someone else's record, optionally as a writer.
+#[uniffi::export]
+pub fn node_dht_open(
+    key: String,
+    writer_public: Option<Vec<u8>>,
+    writer_secret: Option<Vec<u8>>,
+) -> Result<u32, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let rk = parse_key(&key)?;
+        let writer = match (writer_public, writer_secret) {
+            (Some(p), Some(s)) => Some(KeyPair::new(
+                CRYPTO_KIND_VLD0,
+                BareKeyPair::new(BarePublicKey::new(&p), BareSecretKey::new(&s)),
+            )),
+            _ => None,
+        };
+        let desc = rc
+            .open_dht_record(rk, writer)
+            .await
+            .map_err(|e| NodeError::Failed(format!("open: {e}")))?;
+        Ok(desc.schema().max_subkey())
+    })
+}
+
+#[uniffi::export]
+pub fn node_dht_set(key: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        rc.set_dht_value(parse_key(&key)?, subkey, data, None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("set: {e}")))?;
+        Ok(())
+    })
+}
+
+/// Read a subkey. `force_refresh` goes to the network rather than the local
+/// copy, which is what a poll for new messages needs and what a re-read of your
+/// own writes does not.
+#[uniffi::export]
+pub fn node_dht_get(
+    key: String,
+    subkey: u32,
+    force_refresh: bool,
+) -> Result<Option<Vec<u8>>, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let v = rc
+            .get_dht_value(parse_key(&key)?, subkey, force_refresh)
+            .await
+            .map_err(|e| NodeError::Failed(format!("get: {e}")))?;
+        Ok(v.map(|d| d.data().to_vec()))
+    })
+}
+
+#[uniffi::export]
+pub fn node_dht_close(key: String) -> Result<(), NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        rc.close_dht_record(parse_key(&key)?)
+            .await
+            .map_err(|e| NodeError::Failed(format!("close: {e}")))?;
+        Ok(())
+    })
+}
+
+fn parse_key(s: &str) -> Result<RecordKey, NodeError> {
+    use std::str::FromStr;
+    RecordKey::from_str(s).map_err(|e| NodeError::Failed(format!("bad record key: {e}")))
+}

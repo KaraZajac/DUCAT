@@ -20,6 +20,7 @@
 mod escrow_role;
 mod attack;
 mod contact;
+mod dht;
 mod peer;
 mod edges;
 mod flow;
@@ -51,6 +52,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "53hUxmYTwGtR44fhL8f7JLATagSwjtdLB6y4Q3wQQnbtUsDiLTLCzwnKr2gtBRAAUdgWmD22pJ3GK5Z52sJpgiK624iqtKh".into()
         });
         return escrow_role::drive(&tap_path, &ms).await;
+    }
+    if args.iter().any(|a| a == "--dht-write") {
+        return dht::write().await;
+    }
+    if let Some(i) = args.iter().position(|a| a == "--dht-read") {
+        let key = args.get(i + 1).cloned().unwrap_or_default();
+        if key.is_empty() {
+            eprintln!("usage: ducat-harness --dht-read <record key>");
+            std::process::exit(2);
+        }
+        return dht::read(&key).await;
     }
     if let Some(i) = args.iter().position(|a| a == "--peer") {
         let uri = args.get(i + 1).cloned().unwrap_or_default();
