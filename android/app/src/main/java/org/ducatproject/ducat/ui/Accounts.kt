@@ -46,6 +46,18 @@ fun AccountsScreen() {
     val wallet = remember { WalletStore(context) }
     val address = wallet.address()
     var showQr by remember { mutableStateOf(false) }
+    var rescanOpen by remember { mutableStateOf(false) }
+
+    if (rescanOpen) {
+        RescanDialog(
+            tip = balances.tip,
+            onPick = {
+                WalletStore(context).rescanFrom(it)
+                rescanOpen = false
+            },
+            onDismiss = { rescanOpen = false },
+        )
+    }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Card(Modifier.fillMaxWidth()) {
@@ -160,6 +172,32 @@ fun AccountsScreen() {
                     }
                     BalanceRow("Notes", "${b.spendableOutputs}")
                     BalanceRow("Bond", "none")
+                    // A wallet whose restore height is zero is scanning from
+                    // genesis, which looks exactly like having no money for the
+                    // day and a half it takes to arrive.
+                    if (b.scannedTo in 1..(b.tip - 100_000)) {
+                        Spacer(Modifier.height(12.dp))
+                        Card(colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer)) {
+                            Column(Modifier.padding(12.dp)) {
+                                Text(
+                                    "Scanning from the beginning of the chain",
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    "This wallet was made before the app could reach a " +
+                                        "node, so it does not know when it was created. " +
+                                        "At block ${b.scannedTo} of ${b.tip} that is more " +
+                                        "than a day of reading. Skip ahead if you know the " +
+                                        "wallet is newer than that.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                                Spacer(Modifier.height(10.dp))
+                                Button(onClick = { rescanOpen = true }) { Text("Skip ahead") }
+                            }
+                        }
+                    }
                     if (b.syncing) {
                         Spacer(Modifier.height(10.dp))
                         val done = (b.scannedTo - 0).coerceAtLeast(0)
@@ -193,4 +231,58 @@ private fun BalanceRow(label: String, value: String) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+
+/**
+ * Where to start reading from.
+ *
+ * The default is a day back rather than the tip: starting *at* the tip skips
+ * anything that arrived while the wallet was not looking, and a wallet that
+ * silently misses a payment is worse than one that takes a few minutes longer.
+ */
+@Composable
+private fun RescanDialog(tip: Long, onPick: (Long) -> Unit, onDismiss: () -> Unit) {
+    val suggestions = listOf(
+        720L to "about a day ago",
+        5_040L to "about a week ago",
+        21_600L to "about a month ago",
+    )
+    var custom by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Skip ahead to") },
+        text = {
+            Column {
+                Text(
+                    "Anything received before this point will not be found. Pick a " +
+                        "time you are sure is before the wallet existed.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(12.dp))
+                suggestions.forEach { (back, label) ->
+                    val h = (tip - back).coerceAtLeast(0)
+                    TextButton(onClick = { onPick(h) }, modifier = Modifier.fillMaxWidth()) {
+                        Text("$label  —  block $h", modifier = Modifier.fillMaxWidth())
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = custom,
+                    onValueChange = { custom = it.filter { c -> c.isDigit() } },
+                    label = { Text("or a block height") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { custom.toLongOrNull()?.let(onPick) },
+                enabled = custom.toLongOrNull()?.let { it in 0..tip } == true,
+            ) { Text("Use that height") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
 }

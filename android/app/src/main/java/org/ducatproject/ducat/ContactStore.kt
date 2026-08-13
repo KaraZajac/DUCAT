@@ -613,6 +613,30 @@ class WalletStore(context: Context) {
     fun stagenet(): Boolean = prefs.getBoolean("wallet_stagenet", true)
     fun restoreHeight(): ULong =
         prefs.getString("wallet_height", null)?.toULongOrNull() ?: 0uL
+
+    /**
+     * Move the scan back to a height and forget what was found after it.
+     *
+     * Needed because a wallet created before the app could reach a node has a
+     * restore height of zero, and scanning from genesis at a few hundred blocks
+     * a step is thirty hours of crawling to reach the present. That is
+     * indistinguishable, from the screen, from a wallet with no money.
+     *
+     * Outputs are cleared rather than kept: a rescan that starts before them
+     * would find them again, and they are keyed by key image so nothing would
+     * double — but leaving stale entries from a range about to be re-read makes
+     * "what has this scan actually seen" unanswerable.
+     */
+    fun rescanFrom(height: Long) {
+        prefs.edit()
+            .putString("wallet_height", height.toString())
+            .putLong("wallet_scanned_to", height)
+            .remove("wallet_outputs")
+            .apply()
+        // Same change signal the contact store uses, so every screen watching it
+        // re-reads rather than showing the balance it had a moment ago.
+        ContactStore.bump()
+    }
 }
 
 /**

@@ -87,7 +87,18 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                     // Genesis until a node supplies a real tip — slow to
                     // restore, and recoverable, which is the side of §4.3.1's
                     // asymmetry to be on.
-                    val w = createWallet(tipHeight = UNKNOWN_TIP, stagenet = true)
+                    // Ask a node where the chain is first. A wallet that does
+                    // not know its own creation height scans from genesis, which
+                    // is a day and a half of reading that looks exactly like
+                    // having no money.
+                    val tip = runCatching {
+                        uniffi.ducat_mobile.moneroPickNode(
+                            uniffi.ducat_mobile.moneroDefaultNodes(null),
+                            "stagenet",
+                            8000u,
+                        ).height
+                    }.getOrDefault(UNKNOWN_TIP)
+                    val w = createWallet(tipHeight = tip, stagenet = true)
                     onState(state.copy(step = Step.Limits, wallet = w))
                 },
             )
