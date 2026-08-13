@@ -326,7 +326,12 @@ private fun AmountStep(
         else withContext(Dispatchers.IO) { Wallet.quote(context, amt, priority) }
     }
 
-    val overMax = pxmr != null && maxPxmr > 0 && pxmr > maxPxmr
+    // Sending is capped by what this wallet holds; asking is not — the payer's
+    // balance is the payer's problem, and a request for more than *you* hold is
+    // the ordinary case (that is usually why you are asking). The red state
+    // keyed on the cap regardless of mode, so typing 50 into a request lit the
+    // field up as an error against a wallet that is not even the one paying.
+    val overMax = !asking && pxmr != null && maxPxmr > 0 && pxmr > maxPxmr
 
     Column(
         Modifier

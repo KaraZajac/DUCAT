@@ -138,10 +138,15 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         IconButton(onClick = { askOpen = true }, enabled = c.theirBundle != null) {
-                            Icon(
-                                Icons.Filled.RequestQuote,
-                                "Ask for money",
-                                tint = MaterialTheme.colorScheme.tertiary,
+                            // The cat, because it is the app's money button
+                            // everywhere now — the same mark as the bar's
+                            // centre. An Image: tinting it makes it a blob.
+                            androidx.compose.foundation.Image(
+                                androidx.compose.ui.res.painterResource(
+                                    org.ducatproject.ducat.R.drawable.ducat_cat
+                                ),
+                                contentDescription = "Send or ask for money",
+                                modifier = Modifier.size(30.dp),
                             )
                         }
                         OutlinedTextField(

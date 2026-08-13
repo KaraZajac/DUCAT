@@ -286,7 +286,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                                 )
                             }
                             NavItem(Tab.Activity, Icons.Filled.Receipt, tab) { tab = it }
-                            NavItem(Tab.Chat, Icons.Filled.ChatBubbleOutline, tab) { tab = it }
+                            NavItem(Tab.Chat, Icons.Filled.ChatBubble, tab) { tab = it }
                         }
                     }
                     Surface(
