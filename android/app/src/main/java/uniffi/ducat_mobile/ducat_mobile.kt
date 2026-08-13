@@ -954,7 +954,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_reconcile_float(`maxExposurePxmr`: Long,`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1374,7 +1374,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_reconcile_float() != 35020.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 27364.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 6125.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
@@ -1676,6 +1676,41 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterULong.write(value.`restoreHeight`, buf)
             FfiConverterOptionalString.write(value.`displayName`, buf)
             FfiConverterBoolean.write(value.`publishPayto`, buf)
+    }
+}
+
+
+
+/**
+ * One line on a bill, across the bridge (§16.13).
+ */
+data class BillLine (
+    var `description`: kotlin.String, 
+    var `amountPxmr`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeBillLine: FfiConverterRustBuffer<BillLine> {
+    override fun read(buf: ByteBuffer): BillLine {
+        return BillLine(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: BillLine) = (
+            FfiConverterString.allocationSize(value.`description`) +
+            FfiConverterULong.allocationSize(value.`amountPxmr`)
+    )
+
+    override fun write(value: BillLine, buf: ByteBuffer) {
+            FfiConverterString.write(value.`description`, buf)
+            FfiConverterULong.write(value.`amountPxmr`, buf)
     }
 }
 
@@ -2212,7 +2247,14 @@ data class OpenedMessage (
      * Where a request asks to be paid. Shown on the confirm screen, never
      * acted on without it.
      */
-    var `payto`: kotlin.String?
+    var `payto`: kotlin.String?, 
+    /**
+     * What the money is for, if the sender said. Already checked to add up to
+     * the amount — core refuses the message otherwise, so a caller rendering
+     * this does not have to re-derive the total to know it is honest.
+     */
+    var `items`: List<BillLine>, 
+    var `taxPxmr`: kotlin.ULong?
 ) {
     
     companion object
@@ -2234,6 +2276,8 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterSequenceTypeBillLine.read(buf),
+            FfiConverterOptionalULong.read(buf),
         )
     }
 
@@ -2247,7 +2291,9 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterUByte.allocationSize(value.`kind`) +
             FfiConverterOptionalULong.allocationSize(value.`amountPxmr`) +
             FfiConverterOptionalByteArray.allocationSize(value.`txid`) +
-            FfiConverterOptionalString.allocationSize(value.`payto`)
+            FfiConverterOptionalString.allocationSize(value.`payto`) +
+            FfiConverterSequenceTypeBillLine.allocationSize(value.`items`) +
+            FfiConverterOptionalULong.allocationSize(value.`taxPxmr`)
     )
 
     override fun write(value: OpenedMessage, buf: ByteBuffer) {
@@ -2261,6 +2307,8 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.write(value.`amountPxmr`, buf)
             FfiConverterOptionalByteArray.write(value.`txid`, buf)
             FfiConverterOptionalString.write(value.`payto`, buf)
+            FfiConverterSequenceTypeBillLine.write(value.`items`, buf)
+            FfiConverterOptionalULong.write(value.`taxPxmr`, buf)
     }
 }
 
@@ -3761,6 +3809,34 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypeBillLine: FfiConverterRustBuffer<List<BillLine>> {
+    override fun read(buf: ByteBuffer): List<BillLine> {
+        val len = buf.getInt()
+        return List<BillLine>(len) {
+            FfiConverterTypeBillLine.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<BillLine>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeBillLine.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<BillLine>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeBillLine.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypeNodeCandidate: FfiConverterRustBuffer<List<NodeCandidate>> {
     override fun read(buf: ByteBuffer): List<NodeCandidate> {
         val len = buf.getInt()
@@ -4645,11 +4721,11 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
         /**
          * Seal one message in a thread.
          */
-    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?): SealedOut {
+    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?): SealedOut {
             return FfiConverterTypeSealedOut.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
-        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),_status)
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),_status)
 }
     )
     }

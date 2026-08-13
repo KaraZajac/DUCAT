@@ -1246,9 +1246,9 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None };
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
         v.push(json!({
@@ -1293,7 +1293,7 @@ fn contact_cases() -> Vec<J> {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1_700_000_000,
         kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
-        payto: None,
+        payto: None, items: Vec::new(), tax_pxmr: None,
     };
     money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
     money("payment_sent",
@@ -1319,10 +1319,104 @@ fn contact_cases() -> Vec<J> {
         &Message { payto: Some("5".repeat(MAX_ADDRESS_CHARS + 1)), ..base_pay.clone() },
         Some((RejectCode::Malformed, "text over bound")));
 
+    // Itemisation (§16.13). A bill, and the receipt for one.
+    let drink = LineItem { description: "flat white".into(), amount_pxmr: 50_000_000_000 };
+    let shoes = LineItem { description: "2 × shoes".into(), amount_pxmr: 300_000_000_000 };
+    let billed = Message {
+        amount_pxmr: Some(352_000_000_000),
+        items: vec![drink.clone(), shoes.clone()],
+        tax_pxmr: Some(2_000_000_000),
+        ..base_pay.clone()
+    };
+    money("itemised_bill",
+        "A bill that says what the money is for. The items plus tax add up to the amount, which is the property that makes an itemisation worth carrying — a breakdown nobody can check is a breakdown that can say anything.",
+        &billed, None);
+    money("itemised_receipt",
+        "The same lines on a notice rather than a request: a receipt for a payment already made. The vendor issues it, and it remains their claim about what was bought — the chain records the amount and never the reason.",
+        &Message { kind: MessageKind::PaymentSent, txid: Some(vec![0x77; 32]), payto: None, ..billed.clone() }, None);
+    money("items_do_not_add_up",
+        "The one way an itemised bill is worse than none: a breakdown next to a total it disagrees with looks like a check that was performed. It was not, so the message is refused.",
+        &Message { amount_pxmr: Some(999_000_000_000), ..billed.clone() },
+        Some((RejectCode::Malformed, "items and tax must equal the amount")));
+    money("items_without_tax",
+        "Tax is optional. With none, the items alone must equal the amount.",
+        &Message { amount_pxmr: Some(350_000_000_000), tax_pxmr: None, ..billed.clone() }, None);
+    money("tax_without_items",
+        "Tax on nothing states a split of a total the message never breaks down, so the recipient has to take it on faith. Itemisation is only worth having when it is always arithmetic.",
+        &Message { items: Vec::new(), tax_pxmr: Some(1), amount_pxmr: Some(1), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "tax needs items")));
+    money("empty_item_list",
+        "Present-but-empty is a second spelling of 'not itemised' and omitting the key is the first. §18.1 allows one.",
+        &Message { items: Vec::new(), ..billed.clone() },
+        Some((RejectCode::Malformed, "empty item list; omit the key")));
+    money("item_without_description",
+        "A line with an amount and no words is a number on a receipt with nothing to say what it bought.",
+        &Message {
+            amount_pxmr: Some(1),
+            items: vec![LineItem { description: String::new(), amount_pxmr: 1 }],
+            tax_pxmr: None,
+            ..base_pay.clone()
+        },
+        Some((RejectCode::Malformed, "line item needs a description")));
+    money("item_description_too_long",
+        "A description field long enough to hold a payload is a covert channel on a receipt.",
+        &Message {
+            amount_pxmr: Some(1),
+            items: vec![LineItem { description: "x".repeat(MAX_ITEM_CHARS + 1), amount_pxmr: 1 }],
+            tax_pxmr: None,
+            ..base_pay.clone()
+        },
+        Some((RejectCode::Malformed, "text over bound")));
+    money("too_many_items",
+        "A receipt is rendered on someone else's phone, so the length of the list it has to draw is not the sender's to choose without bound.",
+        &Message {
+            amount_pxmr: Some((MAX_ITEMS as u64) + 1),
+            items: (0..=MAX_ITEMS)
+                .map(|i| LineItem { description: format!("item {i}"), amount_pxmr: 1 })
+                .collect(),
+            tax_pxmr: None,
+            ..base_pay.clone()
+        },
+        Some((RejectCode::Malformed, "too many items")));
+    money("text_with_items",
+        "A text message has no bill to itemise.",
+        &Message { kind: MessageKind::Text, amount_pxmr: None, items: vec![drink.clone()], tax_pxmr: None, ..base_pay.clone() },
+        Some((RejectCode::Malformed, "text has no bill")));
+    money("items_overflow_the_amount",
+        "Two lines that sum past u64 must not wrap into a total that matches.",
+        &Message {
+            amount_pxmr: Some(0),
+            items: vec![
+                LineItem { description: "a".into(), amount_pxmr: u64::MAX },
+                LineItem { description: "b".into(), amount_pxmr: 1 },
+            ],
+            tax_pxmr: None,
+            ..base_pay.clone()
+        },
+        Some((RejectCode::Malformed, "item amounts overflow")));
+
+    money("itemised_receipt_from_the_payee",
+        "A receipt is a different claim from a notice, and neither existing kind can make it: a vendor sending PAYMENT_SENT would be stating they sent money. This says 'I have your payment, and here is the breakdown it settles', and points at the transaction it acknowledges.",
+        &Message {
+            kind: MessageKind::Receipt,
+            txid: Some(vec![0x77; 32]),
+            payto: None,
+            body: "thanks!".into(),
+            ..billed.clone()
+        }, None);
+    money("receipt_without_amount",
+        "A receipt for an unstated amount settles nothing.",
+        &Message { kind: MessageKind::Receipt, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, ..base_pay.clone() },
+        Some((RejectCode::Malformed, "payment needs an amount")));
+    money("receipt_with_payto",
+        "Only a request names where to pay. A receipt doing so is asking again for money it says it already has.",
+        &Message { kind: MessageKind::Receipt, payto: Some("5ApJU8bf".into()), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "only a request names where to pay")));
+
     money("request_with_txid",
-        "Only a notice carries a transaction. A request pointing at one is claiming a payment it is simultaneously asking for.",
+        "A notice points at the transaction it made and a receipt at the one it acknowledges. A request pointing at either is claiming the payment it is simultaneously asking for.",
         &Message { txid: Some(vec![0x77; 32]), ..base_pay.clone() },
-        Some((RejectCode::Malformed, "only a notice carries a txid")));
+        Some((RejectCode::Malformed, "only a notice or receipt carries a txid")));
 
 
     v
@@ -1528,7 +1622,17 @@ fn contract_cases() -> Vec<J> {
 }
 
 fn main() -> std::io::Result<()> {
-    let dir = std::path::Path::new("../vectors").join(format!("v{}", VECTOR_SET_VERSION));
+    // Anchored to the crate, not to wherever this was run from. As a bare
+    // `../vectors` it silently wrote a complete, valid vector set *outside the
+    // repository* when invoked from the workspace root — and then the suite
+    // passed, because it was still checking the stale files it had not
+    // overwritten. A generator that can write the right bytes to the wrong
+    // place is worse than one that fails.
+    let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .expect("crate has a parent")
+        .join("vectors")
+        .join(format!("v{}", VECTOR_SET_VERSION));
     std::fs::create_dir_all(&dir)?;
 
     let files: [(&str, Vec<J>); 9] = [

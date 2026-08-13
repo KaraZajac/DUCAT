@@ -37,7 +37,8 @@ enum class Section(val label: String) {
     Contacts("Contacts"),
     Logs("Logs"),
     Settings("Settings"),
-    Modes("Operating modes"),
+    Pos("Point of sale"),
+    Modes("Other modes"),
 }
 
 @Composable
@@ -81,6 +82,7 @@ private fun iconFor(s: Section) = when (s) {
     Section.Contacts -> Icons.Filled.People
     Section.Logs -> Icons.Filled.Description
     Section.Settings -> Icons.Filled.Settings
+    Section.Pos -> Icons.Filled.PointOfSale
     Section.Modes -> Icons.Filled.Tune
 }
 
@@ -140,8 +142,12 @@ fun SectionScreen(
             )
         }
 
+        Section.Pos -> PosScreen()
         Section.Modes -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Not built yet.", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                "Bar tab, taxi and donation modes are not built yet.",
+                style = MaterialTheme.typography.bodyLarge,
+            )
         }
     }
 }

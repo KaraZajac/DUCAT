@@ -283,6 +283,8 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
             body: text.clone(),
             timestamp: crate::payee::now(),
             kind: MessageKind::Text,
+            items: Vec::new(),
+            tax_pxmr: None,
             amount_pxmr: None,
             txid: None,
             payto: None,
@@ -466,6 +468,7 @@ pub async fn watch(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
                             match m.kind {
                                 MessageKind::PaymentRequest => "asks for payment",
                                 MessageKind::PaymentSent => "says they sent",
+                                MessageKind::Receipt => "receipt for",
                                 MessageKind::Text => unreachable!(),
                             },
                             m.amount_pxmr
@@ -477,6 +480,16 @@ pub async fn watch(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
                         }
                         if let Some(t) = &m.txid {
                             println!("        txid:   {}", hex::encode(t));
+                        }
+                        for i in &m.items {
+                            println!(
+                                "        {:<28} {:>14.6}",
+                                i.description,
+                                i.amount_pxmr as f64 / 1e12
+                            );
+                        }
+                        if let Some(t) = m.tax_pxmr {
+                            println!("        {:<28} {:>14.6}", "tax", t as f64 / 1e12);
                         }
                     }
                     prev = Some(m);

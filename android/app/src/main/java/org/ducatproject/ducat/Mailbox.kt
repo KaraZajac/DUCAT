@@ -184,6 +184,11 @@ object Mailbox {
         payto: String? = null,
         /** The transaction a payment notice points at (§16.13). */
         txidHex: String? = null,
+        /** What the money is for. Must add up to [amountPxmr] plus [taxPxmr];
+         *  core refuses the message if it does not, so this cannot go out
+         *  disagreeing with the total it sits beside. */
+        items: List<BillItem> = emptyList(),
+        taxPxmr: Long? = null,
     ): Contact {
         val store = ContactStore(context)
         val bundle = c.theirBundle
@@ -195,6 +200,8 @@ object Mailbox {
             threadAad(minePersonaHex, c.personaHex),
             kind.toUByte(), amountPxmr?.toULong(),
             txidHex?.let { hexToBytes(it) }, payto,
+            items.map { uniffi.ducat_mobile.BillLine(it.description, it.amountPxmr.toULong()) },
+            taxPxmr?.toULong(),
         )
         // Re-opened **as the owner**. Creating a record leaves it writable only
         // for that process; a plain re-open is read-only and the write comes
@@ -222,7 +229,7 @@ object Mailbox {
                 timestamp = System.currentTimeMillis() / 1000,
                 forwardSecret = sealed.forwardSecret,
                 kind = kind, amountPxmr = amountPxmr ?: 0L, payto = payto,
-                txidHex = txidHex,
+                txidHex = txidHex, items = items, taxPxmr = taxPxmr,
             ),
         )
         store.advanceOutbound(c.personaHex, c.outSeq + 1, sealed.nextLink)
@@ -331,6 +338,8 @@ object Mailbox {
                     amountPxmr = opened.amountPxmr?.toLong() ?: 0L,
                     payto = opened.payto,
                     txidHex = opened.txid?.toHexString(),
+                    items = opened.items.map { BillItem(it.description, it.amountPxmr.toLong()) },
+                    taxPxmr = opened.taxPxmr?.toLong(),
                 ),
             )
             // A request carries a fresher address than anything stored (§16.12).

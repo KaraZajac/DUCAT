@@ -445,12 +445,15 @@ data class Contact(
     }
 }
 
+/** One line on a bill (§16.13). */
+data class BillItem(val description: String, val amountPxmr: Long)
+
 data class StoredMessage(
     val outgoing: Boolean,
     val seq: Long,
     val body: String,
     val timestamp: Long,
-    /** 0 text, 1 request, 2 notice (§16.13). */
+    /** 0 text, 1 request, 2 notice, 3 receipt (§16.13). */
     val kind: Int = 0,
     val amountPxmr: Long = 0,
     /** Where a request asks to be paid, if it named one. */
@@ -464,6 +467,15 @@ data class StoredMessage(
      * transaction, "who paid me" has no answer at all.
      */
     val txidHex: String? = null,
+    /**
+     * What the money was for, line by line (§16.13).
+     *
+     * Already checked to add up to the amount — core refuses the message
+     * otherwise — so a screen rendering this does not have to re-derive the
+     * total to know the breakdown is honest arithmetic.
+     */
+    val items: List<BillItem> = emptyList(),
+    val taxPxmr: Long? = null,
     /** False means it went out under the signed prekey — no forward secrecy
      *  until that key rotates (§16.11). Shown, not hidden. */
     val forwardSecret: Boolean = true,
@@ -475,6 +487,14 @@ data class StoredMessage(
         put("kind", kind); put("amt", amountPxmr)
         put("payto", payto ?: JSONObject.NULL)
         put("txid", txidHex ?: JSONObject.NULL)
+        if (items.isNotEmpty()) {
+            put("items", JSONArray().also { a ->
+                items.forEach { i ->
+                    a.put(JSONObject().put("d", i.description).put("a", i.amountPxmr))
+                }
+            })
+        }
+        taxPxmr?.let { put("tax", it) }
     }
 
     companion object {
@@ -489,6 +509,13 @@ data class StoredMessage(
             amountPxmr = o.optLong("amt", 0L),
             payto = o.optStringOrNull("payto"),
             txidHex = o.optStringOrNull("txid"),
+            items = o.optJSONArray("items")?.let { a ->
+                (0 until a.length()).map {
+                    val i = a.getJSONObject(it)
+                    BillItem(i.getString("d"), i.getLong("a"))
+                }
+            } ?: emptyList(),
+            taxPxmr = if (o.has("tax")) o.getLong("tax") else null,
         )
     }
 }

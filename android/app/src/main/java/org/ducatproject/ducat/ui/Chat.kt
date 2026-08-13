@@ -37,6 +37,11 @@ import org.ducatproject.ducat.Amounts
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import org.ducatproject.ducat.formatXmr
 
 /**
  * One conversation.
@@ -357,8 +362,11 @@ private fun Bubble(m: StoredMessage, onLongPress: () -> Unit, onPay: (StoredMess
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            if (m.kind == 1) Icons.Filled.RequestQuote
-                            else Icons.Filled.ArrowUpward,
+                            when (m.kind) {
+                                1 -> Icons.Filled.RequestQuote
+                                3 -> Icons.Filled.Receipt
+                                else -> Icons.Filled.ArrowUpward
+                            },
                             null,
                             Modifier.size(14.dp),
                             tint = fg.copy(alpha = 0.8f),
@@ -368,6 +376,11 @@ private fun Bubble(m: StoredMessage, onLongPress: () -> Unit, onPay: (StoredMess
                             when {
                                 m.kind == 1 && m.outgoing -> "You asked for"
                                 m.kind == 1 -> "Asked you for"
+                                // A receipt is issued by whoever *received* the
+                                // money, so the direction reads the other way
+                                // round from a notice.
+                                m.kind == 3 && m.outgoing -> "Receipt you issued"
+                                m.kind == 3 -> "Receipt"
                                 m.outgoing -> "You sent"
                                 else -> "Sent you"
                             },
@@ -388,6 +401,10 @@ private fun Bubble(m: StoredMessage, onLongPress: () -> Unit, onPay: (StoredMess
                     if (m.body.isNotBlank()) {
                         Spacer(Modifier.height(2.dp))
                         Text(m.body, color = fg, style = MaterialTheme.typography.bodySmall)
+                    }
+                    if (m.items.isNotEmpty()) {
+                        Spacer(Modifier.height(8.dp))
+                        Bill(m, fg)
                     }
                     // §16.13: a request carries no authority. An incoming one
                     // that offered a one-tap "pay" would be exactly the shortcut
@@ -432,6 +449,76 @@ private fun Bubble(m: StoredMessage, onLongPress: () -> Unit, onPay: (StoredMess
                     .format(Date(m.timestamp * 1000)),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
+            )
+        }
+    }
+}
+
+/**
+ * The breakdown, as a bill reads on paper.
+ *
+ * Monospace and right-aligned amounts, because a column of numbers that does
+ * not line up is a column nobody checks. And checking is the point: core
+ * refuses a message whose items and tax do not equal its amount (§16.13), so
+ * what is drawn here always adds up — the reader can confirm it by eye, which
+ * is a different and better thing from being told to trust it.
+ *
+ * The network fee is deliberately absent. A Monero fee is paid by the sender to
+ * the network, not by the payer to the vendor, so a fee line on a vendor's bill
+ * charges it twice: once in the total asked for and again when the payer's own
+ * wallet builds the transaction. What the transfer cost is on the payer's
+ * Activity screen, from their own record, which is the only place it can be
+ * stated truthfully.
+ */
+@Composable
+private fun Bill(m: StoredMessage, fg: androidx.compose.ui.graphics.Color) {
+    val context = LocalContext.current
+    val subtotal = m.items.sumOf { it.amountPxmr }
+
+    @Composable
+    fun line(label: String, pxmr: Long, strong: Boolean = false) {
+        Row(Modifier.fillMaxWidth()) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = fg.copy(alpha = if (strong) 1f else 0.85f),
+                fontWeight = if (strong) FontWeight.SemiBold else FontWeight.Normal,
+                modifier = Modifier.weight(1f),
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                formatXmr(pxmr),
+                style = MaterialTheme.typography.labelSmall,
+                fontFamily = FontFamily.Monospace,
+                color = fg.copy(alpha = if (strong) 1f else 0.85f),
+                fontWeight = if (strong) FontWeight.SemiBold else FontWeight.Normal,
+            )
+        }
+    }
+
+    Column(
+        Modifier
+            .background(fg.copy(alpha = 0.08f), RoundedCornerShape(8.dp))
+            .padding(10.dp)
+    ) {
+        m.items.forEach { line(it.description, it.amountPxmr) }
+        if (m.taxPxmr != null) {
+            Spacer(Modifier.height(4.dp))
+            HorizontalDivider(color = fg.copy(alpha = 0.25f))
+            Spacer(Modifier.height(4.dp))
+            line("subtotal", subtotal)
+            line("tax", m.taxPxmr)
+        }
+        Spacer(Modifier.height(4.dp))
+        HorizontalDivider(color = fg.copy(alpha = 0.25f))
+        Spacer(Modifier.height(4.dp))
+        line("total", m.amountPxmr, strong = true)
+        Amounts.show(context, m.amountPxmr).secondary?.let {
+            Text(
+                it,
+                style = MaterialTheme.typography.labelSmall,
+                color = fg.copy(alpha = 0.7f),
+                modifier = Modifier.align(Alignment.End),
             )
         }
     }

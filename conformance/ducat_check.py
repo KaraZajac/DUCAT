@@ -940,6 +940,9 @@ MAX_RECORD_KEY_CHARS = 128
 # divergence the registry exists to prevent.
 MSG_SEQ, MSG_PREV, MSG_BODY, MSG_TS = 157, 158, 159, 160
 MSG_KIND, MSG_AMOUNT, MSG_TXID, MSG_PAYTO = 178, 179, 180, 181
+MSG_ITEMS, MSG_TAX = 183, 184
+ITEM_DESC, ITEM_AMOUNT = 185, 186
+MAX_ITEM_CHARS, MAX_ITEMS = 64, 64
 MAX_ADDRESS_CHARS = 128
 CARD_PERSONA, CARD_INBOX, CARD_WRITER, CARD_NAME, CARD_EXPIRY = 167, 168, 169, 170, 171
 DET_PERSONA, DET_OUTBOX, DET_BUNDLE, DET_NAME = 172, 173, 174, 175
@@ -1069,7 +1072,7 @@ def parse_message(buf):
             raise Reject("Malformed", "kind is not an integer")
         if kind == 0:
             raise Reject("Malformed", "text is encoded by omitting the kind")
-        if kind not in (1, 2):
+        if kind not in (1, 2, 3):
             raise Reject("Malformed", "unknown message kind")
     else:
         kind = 0
@@ -1077,20 +1080,60 @@ def parse_message(buf):
     out["amount"] = b.pop(MSG_AMOUNT, (None, None))[1]
     out["txid"] = b.pop(MSG_TXID, (None, None))[1]
     out["payto"] = _take_text(b, MSG_PAYTO, MAX_ADDRESS_CHARS, "destination", False)
+
+    # §16.13's itemisation. Absent is "not itemised"; present-but-empty is the
+    # same claim spelled a second way, which §18.1 refuses everywhere else.
+    out["items"] = []
+    if MSG_ITEMS in b:
+        k, raw = b.pop(MSG_ITEMS)
+        if k != "array":
+            raise Reject("Malformed", "items is not an array")
+        if not raw:
+            raise Reject("Malformed", "an empty item list is not itemisation")
+        if len(raw) > MAX_ITEMS:
+            raise Reject("Malformed", f"a bill may carry at most {MAX_ITEMS} items")
+        for entry in raw:
+            ek, emap = entry
+            if ek != "map":
+                raise Reject("Malformed", "a line item is not a map")
+            eb = dict(emap)
+            desc = _take_text(eb, ITEM_DESC, MAX_ITEM_CHARS, "item description", True)
+            amt = _take(eb, ITEM_AMOUNT, "uint", "item amount")
+            _finish(eb)
+            out["items"].append({"description": desc, "amount": amt})
+    out["tax"] = b.pop(MSG_TAX, (None, None))[1]
     _finish(b)
 
     # A payment with no amount is a screen with a blank where the number goes;
     # an amount on text is a number nothing will honour. Neither is ignorable.
     if kind == 0 and out["amount"] is not None:
         raise Reject("Malformed", "text must not carry an amount")
-    if kind in (1, 2) and out["amount"] is None:
+    if kind in (1, 2, 3) and out["amount"] is None:
         raise Reject("Malformed", "a payment message must carry an amount")
-    if out["txid"] is not None and kind != 2:
-        raise Reject("Malformed", "only a payment notice carries a transaction")
+    # A notice points at the transaction it made; a receipt (§16.13) at the one
+    # it acknowledges. A request may point at neither.
+    if out["txid"] is not None and kind not in (2, 3):
+        raise Reject("Malformed", "only a notice or a receipt carries a transaction")
     # §16.13: a request says where to pay. A notice doing so would be describing
     # a payment it claims to have already made.
     if out["payto"] is not None and kind != 1:
         raise Reject("Malformed", "only a request names where to pay")
+
+    if kind == 0 and (out["items"] or out["tax"] is not None):
+        raise Reject("Malformed", "a text message has no bill to itemise")
+    # Tax only alongside items, so an itemisation is always arithmetic the
+    # recipient can check rather than a split they have to believe.
+    if out["tax"] is not None and not out["items"]:
+        raise Reject("Malformed", "tax needs items to be tax on")
+    if out["items"]:
+        subtotal = sum(i["amount"] for i in out["items"])
+        total = subtotal + (out["tax"] or 0)
+        # Python integers do not wrap, so the overflow the Rust side catches
+        # with checked_add is caught here by the bound the wire format implies.
+        if total >= 2 ** 64:
+            raise Reject("Malformed", "item amounts overflow")
+        if total != out["amount"]:
+            raise Reject("Malformed", "the items and tax do not add up to the amount")
     return out
 
 
@@ -1226,6 +1269,14 @@ def run_message_payment(cases, r):
                 fields.append((MSG_TXID, ("bytes", m["txid"])))
             if m["payto"] is not None:
                 fields.append((MSG_PAYTO, ("text", m["payto"])))
+            if m["items"]:
+                fields.append((MSG_ITEMS, ("array", [
+                    ("map", [(ITEM_DESC, ("text", i["description"])),
+                             (ITEM_AMOUNT, ("uint", i["amount"]))])
+                    for i in m["items"]
+                ])))
+            if m["tax"] is not None:
+                fields.append((MSG_TAX, ("uint", m["tax"])))
             return encode(("map", fields))
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

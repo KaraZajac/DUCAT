@@ -290,6 +290,19 @@ pub enum MessageKind {
     /// "I sent you this much", with a transaction to look for. Advisory: the
     /// recipient verifies by finding the output, never by believing the note.
     PaymentSent = 2,
+    /// "Here is what you paid me for" — issued by the party who *received* the
+    /// money.
+    ///
+    /// A separate kind because it is a different claim, and neither existing one
+    /// can make it. A vendor sending `PaymentSent` would be stating they sent
+    /// money, which is false; a `PaymentRequest` after the fact would be asking
+    /// again. What a receipt says is: I have your payment, and this is the
+    /// breakdown it settles.
+    ///
+    /// Advisory, like everything else here. §17.5 verifies a payment by finding
+    /// the output; a receipt is the vendor's account of what it was *for*, and
+    /// the chain records amounts and never reasons.
+    Receipt = 3,
 }
 
 impl MessageKind {
@@ -298,8 +311,52 @@ impl MessageKind {
             0 => MessageKind::Text,
             1 => MessageKind::PaymentRequest,
             2 => MessageKind::PaymentSent,
+            3 => MessageKind::Receipt,
             _ => return None,
         })
+    }
+}
+
+/// Longest a line item's description may be.
+///
+/// Short on purpose. This is a word for a thing on a bill — "large flat white",
+/// "2 × shoes" — not a place to put a paragraph, and a receipt has to render on
+/// a phone held at a counter.
+pub const MAX_ITEM_CHARS: usize = 64;
+
+/// Most line items one message may carry.
+///
+/// A bound because a receipt is displayed, and an unbounded list is a rendering
+/// job someone else's device has to do on your say-so.
+pub const MAX_ITEMS: usize = 64;
+
+/// One line on a bill (§16.13).
+///
+/// Deliberately just a description and an amount. No quantity field: "2 × shoes"
+/// is a description, and a separate `qty` would give a single line two encodings
+/// — `qty: 1` and omitted — which is the ambiguity §18.1 exists to remove.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LineItem {
+    pub description: String,
+    pub amount_pxmr: u64,
+}
+
+impl LineItem {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::ITEM_DESC, Value::Text(self.description.clone()));
+        m.insert(f::ITEM_AMOUNT, Value::Uint(self.amount_pxmr));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let description = r.opt_text(f::ITEM_DESC, MAX_ITEM_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a line item needs a description")
+        })?;
+        let amount_pxmr = r.uint(f::ITEM_AMOUNT)?;
+        r.finish()?;
+        Ok(LineItem { description, amount_pxmr })
     }
 }
 
@@ -339,6 +396,17 @@ pub struct Message {
     /// Monero address to a persona, so a compromised contact can ask you to pay
     /// a stranger. §15.5's confirm screen must show it.
     pub payto: Option<String>,
+    /// What the money is for, line by line (§16.13). Empty means not itemised.
+    ///
+    /// **Not the network fee.** A Monero fee is paid by the sender to the
+    /// network, not by the payer to the vendor, so a fee line inside a bill
+    /// charges it twice: once in the total requested and again when the payer's
+    /// wallet builds the transaction. There is deliberately no field for it —
+    /// the payer's own wallet knows what the transfer cost and is the only
+    /// party that can state it truthfully.
+    pub items: Vec<LineItem>,
+    /// Tax, if any, on top of the items. Only meaningful alongside them.
+    pub tax_pxmr: Option<u64>,
 }
 
 impl Message {
@@ -362,6 +430,15 @@ impl Message {
         }
         if let Some(p) = &self.payto {
             m.insert(f::MSG_PAYTO, Value::Text(p.clone()));
+        }
+        if !self.items.is_empty() {
+            m.insert(
+                f::MSG_ITEMS,
+                Value::Array(self.items.iter().map(|i| i.to_value()).collect()),
+            );
+        }
+        if let Some(t) = self.tax_pxmr {
+            m.insert(f::MSG_TAX, Value::Uint(t));
         }
         Value::Map(m)
     }
@@ -400,6 +477,28 @@ impl Message {
             amount_pxmr: r.opt_uint(f::MSG_AMOUNT)?,
             txid: r.opt_bytes(f::MSG_TXID, Some(32))?,
             payto: r.opt_text(f::MSG_PAYTO, MAX_ADDRESS_CHARS)?,
+            items: match r.opt_array(f::MSG_ITEMS)? {
+                None => Vec::new(),
+                // Present-but-empty is a second spelling of "not itemised", and
+                // omitting the key is the first. §18.1 allows one.
+                Some(a) if a.is_empty() => {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        "an empty item list is not itemisation; omit the key instead",
+                    ))
+                }
+                Some(a) if a.len() > MAX_ITEMS => {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        format!("a bill may carry at most {MAX_ITEMS} items"),
+                    ))
+                }
+                Some(a) => a
+                    .into_iter()
+                    .map(LineItem::from_value)
+                    .collect::<Result<Vec<_>, _>>()?,
+            },
+            tax_pxmr: r.opt_uint(f::MSG_TAX)?,
         };
         r.finish()?;
         // A payment with no amount is a payment screen with a blank on it, and
@@ -412,7 +511,9 @@ impl Message {
                     "a text message must not carry an amount",
                 ))
             }
-            (MessageKind::PaymentRequest, None) | (MessageKind::PaymentSent, None) => {
+            (MessageKind::PaymentRequest, None)
+            | (MessageKind::PaymentSent, None)
+            | (MessageKind::Receipt, None) => {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "a payment message must carry an amount",
@@ -420,10 +521,16 @@ impl Message {
             }
             _ => {}
         }
-        if out.txid.is_some() && out.kind != MessageKind::PaymentSent {
+        // A notice points at the transaction it made; a receipt points at the
+        // transaction it acknowledges. A request cannot point at either without
+        // claiming the payment it is simultaneously asking for.
+        if out.txid.is_some()
+            && out.kind != MessageKind::PaymentSent
+            && out.kind != MessageKind::Receipt
+        {
             return Err(Reject::with_detail(
                 RejectCode::Malformed,
-                "only a payment notice carries a transaction",
+                "only a notice or a receipt carries a transaction",
             ));
         }
         if out.payto.is_some() && out.kind != MessageKind::PaymentRequest {
@@ -431,6 +538,46 @@ impl Message {
                 RejectCode::Malformed,
                 "only a request names where to pay",
             ));
+        }
+        if out.kind == MessageKind::Text && (!out.items.is_empty() || out.tax_pxmr.is_some()) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a text message has no bill to itemise",
+            ));
+        }
+        // Tax only alongside items, so that itemisation is *always* arithmetic
+        // anyone can check. A tax line with nothing to tax states a split of a
+        // total the message never breaks down, which is a number the recipient
+        // has to take on faith — and a bill nobody can check is a bill that can
+        // say anything.
+        if out.tax_pxmr.is_some() && out.items.is_empty() {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "tax needs items to be tax on",
+            ));
+        }
+        if !out.items.is_empty() {
+            let mut subtotal: u64 = 0;
+            for i in &out.items {
+                subtotal = subtotal.checked_add(i.amount_pxmr).ok_or_else(|| {
+                    Reject::with_detail(RejectCode::Malformed, "item amounts overflow")
+                })?;
+            }
+            let total = subtotal
+                .checked_add(out.tax_pxmr.unwrap_or(0))
+                .ok_or_else(|| {
+                    Reject::with_detail(RejectCode::Malformed, "bill total overflows")
+                })?;
+            // The invariant that makes itemisation worth carrying. Without it a
+            // bill is decoration next to an amount, and the two can disagree —
+            // which is the one way an itemised receipt is worse than none,
+            // because it looks like a check that was never performed.
+            if Some(total) != out.amount_pxmr {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "the items and tax do not add up to the amount",
+                ));
+            }
         }
         Ok(out)
     }

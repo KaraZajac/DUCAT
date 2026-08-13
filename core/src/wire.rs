@@ -154,6 +154,11 @@ pub mod f {
     pub const MSG_AMOUNT: u64 = 179;
     pub const MSG_TXID: u64 = 180;
     pub const MSG_PAYTO: u64 = 181;
+    // Itemisation (§16.13). A bill, or the receipt for one.
+    pub const MSG_ITEMS: u64 = 183;
+    pub const MSG_TAX: u64 = 184;
+    pub const ITEM_DESC: u64 = 185;
+    pub const ITEM_AMOUNT: u64 = 186;
 
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;
@@ -465,6 +470,14 @@ impl Reader {
             return Ok(None);
         }
         self.bytes(k, len).map(Some)
+    }
+
+    pub(crate) fn opt_array(&mut self, k: u64) -> Result<Option<Vec<Value>>, Reject> {
+        match self.m.remove(&k) {
+            None => Ok(None),
+            Some(Value::Array(v)) => Ok(Some(v)),
+            Some(_) => Err(Self::wrong(k)),
+        }
     }
 
     fn uint_array(&mut self, k: u64) -> Result<Vec<u64>, Reject> {

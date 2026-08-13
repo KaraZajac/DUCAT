@@ -9,7 +9,7 @@ use ducat_core::cbor::decode;
 use ducat_core::contact::{
     MessageKind,
     card_from_uri, card_to_uri, check_message, subkey_for as ring_subkey, still_in_ring,
-    thread_aad as pair_aad, ContactCard, ContactDetails, LogHead, Message,
+    thread_aad as pair_aad, ContactCard, ContactDetails, LineItem, LogHead, Message,
     MAX_DISPLAY_NAME_CHARS, MAX_MESSAGE_CHARS, MAX_RECORD_KEY_CHARS,
 };
 use ducat_core::hpke::{self, PreKey, PreKeyBundle, PreKeyStore, SealedMessage};
@@ -318,6 +318,13 @@ pub struct SealedOut {
     pub next_link: Vec<u8>,
 }
 
+/// One line on a bill, across the bridge (§16.13).
+#[derive(uniffi::Record, Clone)]
+pub struct BillLine {
+    pub description: String,
+    pub amount_pxmr: u64,
+}
+
 /// Seal one message in a thread.
 #[uniffi::export]
 pub fn seal_message(
@@ -334,6 +341,10 @@ pub fn seal_message(
     // Only a request may name one (§16.13). Where to pay travels with the ask
     // so the payer needs nothing from a record that may be stale.
     payto: Option<String>,
+    // What the money is for. Empty means not itemised; the items plus tax MUST
+    // add up to `amount_pxmr`, and core refuses the message if they do not.
+    items: Vec<BillLine>,
+    tax_pxmr: Option<u64>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -355,11 +366,17 @@ pub fn seal_message(
         kind: match kind {
             1 => MessageKind::PaymentRequest,
             2 => MessageKind::PaymentSent,
+            3 => MessageKind::Receipt,
             _ => MessageKind::Text,
         },
         amount_pxmr,
         txid,
         payto,
+        items: items
+            .into_iter()
+            .map(|i| LineItem { description: i.description, amount_pxmr: i.amount_pxmr })
+            .collect(),
+        tax_pxmr,
     };
     let next_link = msg.link().to_vec();
     let (chosen, forward_secret) = bundle.select();
@@ -472,6 +489,11 @@ pub struct OpenedMessage {
     /// Where a request asks to be paid. Shown on the confirm screen, never
     /// acted on without it.
     pub payto: Option<String>,
+    /// What the money is for, if the sender said. Already checked to add up to
+    /// the amount — core refuses the message otherwise, so a caller rendering
+    /// this does not have to re-derive the total to know it is honest.
+    pub items: Vec<BillLine>,
+    pub tax_pxmr: Option<u64>,
 }
 
 /// Open an inbound sealed message and check it follows the thread.
@@ -538,6 +560,12 @@ pub fn open_message(
         amount_pxmr: msg.amount_pxmr,
         txid: msg.txid.clone(),
         payto: msg.payto.clone(),
+        items: msg
+            .items
+            .iter()
+            .map(|i| BillLine { description: i.description.clone(), amount_pxmr: i.amount_pxmr })
+            .collect(),
+        tax_pxmr: msg.tax_pxmr,
     })
 }
 
