@@ -195,6 +195,16 @@ object Mailbox {
             ),
         )
         store.advanceOutbound(c.personaHex, c.outSeq + 1, sealed.nextLink)
+
+        // Withdraw the key we just used from our *cached copy* of their bundle.
+        // select() takes the first one-time entry, so without this every message
+        // seals to the same key — the first is accepted, the receiver burns it,
+        // and every later one comes back as an unknown prekey. Exactly the bug
+        // that hit the published bundle earlier, on the other side of the wire.
+        if (sealed.prekeyId != 0u) {
+            runCatching { prunePrekey(bundle, sealed.prekeyId) }
+                .onSuccess { store.setTheirBundle(c.personaHex, it) }
+        }
         return store.all().first { it.personaHex == c.personaHex }
     }
 

@@ -277,3 +277,39 @@ fn a_consumed_prekey_must_not_stay_advertised() {
     bundle.one_time.retain(|k| k.id != 1);
     assert_eq!(bundle.select().0.id, 2);
 }
+
+
+/// The sender must withdraw a key from its *cached* copy of a bundle too.
+///
+/// `select` takes the first one-time entry, so a sender that never prunes seals
+/// every message to the same key: the first is accepted, the receiver burns it,
+/// and every message after that comes back as an unknown prekey. It looks like
+/// the receiver breaking after one message.
+///
+/// This is the same defect as `a_consumed_prekey_must_not_stay_advertised` on
+/// the opposite side of the wire — which is why fixing it there did not fix it
+/// here, and why both need a test.
+#[test]
+fn a_sender_must_prune_its_cached_bundle_after_each_message() {
+    let (_, pk1) = kp(30);
+    let (_, pk2) = kp(31);
+    let (_, signed_pk) = kp(32);
+    let mut bundle = PreKeyBundle {
+        version: 1, suite: 1, signed_prekey: signed_pk,
+        one_time: vec![PreKey { id: 1, public: pk1 }, PreKey { id: 2, public: pk2 }],
+        expiry: 9_999_999,
+    };
+
+    let first = bundle.select().0.id;
+    assert_eq!(first, 1);
+    // Without pruning, the very next call hands back the same key.
+    assert_eq!(bundle.select().0.id, 1, "select is not stateful, and must not be");
+
+    bundle.one_time.retain(|k| k.id != first);
+    assert_eq!(bundle.select().0.id, 2, "pruning is what advances the sender");
+
+    bundle.one_time.retain(|k| k.id != 2);
+    let (fallback, fs) = bundle.select();
+    assert_eq!(fallback.id, SIGNED_PREKEY_ID);
+    assert!(!fs, "an exhausted sender must be told it lost forward secrecy");
+}
