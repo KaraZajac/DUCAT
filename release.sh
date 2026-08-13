@@ -49,5 +49,11 @@ git tag -f "$TAG" >/dev/null
 git push -f origin "$TAG" >/dev/null 2>&1
 gh release create "$TAG" "${APKS[@]}" --title "DUCAT $TAG" --notes-file "$NOTES"
 rm -f "$NOTES"
+
+# The stable link is the one worth handing over. A release page keeps its
+# assets behind a collapsed dropdown, which on a phone is a link nobody finds;
+# /latest/download/ hits the file itself and never needs reissuing.
+REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 echo
-echo "installable from a phone browser at the URL above"
+echo "install (always the newest build):"
+echo "  https://github.com/$REPO/releases/latest/download/app-arm64-v8a-debug.apk"

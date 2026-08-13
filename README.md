@@ -1,5 +1,16 @@
 # DUCAT
 
+## Install
+
+Phone browser, newest build, no release page to navigate:
+
+    https://github.com/KaraZajac/DUCAT/releases/latest/download/app-arm64-v8a-debug.apk
+
+Use `armeabi-v7a` only for phones older than about 2016; `x86_64` is for emulators.
+
+**Debug-signed, stagenet only.** Not for real money.
+
+
 A peer-to-peer proximity commerce protocol: Veilid for transport, Monero for
 settlement, no operator in between.
 
