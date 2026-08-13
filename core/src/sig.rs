@@ -59,6 +59,10 @@ pub enum ObjectType {
     SlashClaim,
     /// One message on a persistent contact (§16.10).
     Message,
+    /// Published prekeys a sender may seal to (§16.11).
+    PreKeyBundle,
+    /// A message encrypted to one of them (§16.11).
+    SealedMessage,
 }
 
 impl ObjectType {
@@ -87,6 +91,8 @@ impl ObjectType {
             ObjectType::Release => b"RELEASE",
             ObjectType::SlashClaim => b"SLASH_CLAIM",
             ObjectType::Message => b"MESSAGE",
+            ObjectType::PreKeyBundle => b"PREKEY_BUNDLE",
+            ObjectType::SealedMessage => b"SEALED_MESSAGE",
         }
     }
 }

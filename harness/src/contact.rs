@@ -22,6 +22,7 @@ use std::time::{Duration, Instant};
 
 use ducat_core::cbor::decode;
 use ducat_core::contact::*;
+use ducat_core::hpke::{self, PreKey, PreKeyBundle, PreKeyStore, SealedMessage};
 use ducat_core::sig::{ObjectType, PublicKey, SecretKey, SignedBytes};
 use ducat_core::wire::{open, seal};
 use veilid_core::*;
@@ -31,6 +32,41 @@ use crate::payee::now;
 
 const MSG_CLAIM: u8 = 0x40;
 const MSG_TEXT: u8 = 0x41;
+const MSG_PREKEYS: u8 = 0x42;
+
+/// Drop a one-time key from the local copy of a bundle once it has been used.
+/// A sender that reuses one gets a `STATE_VIOLATION` from the receiver, which is
+/// correct but wasteful — the sender already knows it spent that key.
+fn bundle_take(b: &mut PreKeyBundle, id: u32) {
+    b.one_time.retain(|k| k.id != id);
+}
+
+/// A deterministic CSPRNG stand-in, so a failed harness run reproduces exactly.
+/// Never appropriate outside a harness, which is why it lives here and not in
+/// `core` — `core` holds no randomness at all and takes it as a parameter.
+struct HarnessRng(u8);
+
+impl ducat_core::hpke::rand_core::TryRng for HarnessRng {
+    type Error = core::convert::Infallible;
+    fn try_next_u32(&mut self) -> Result<u32, Self::Error> {
+        let mut b = [0u8; 4];
+        self.try_fill_bytes(&mut b)?;
+        Ok(u32::from_le_bytes(b))
+    }
+    fn try_next_u64(&mut self) -> Result<u64, Self::Error> {
+        let mut b = [0u8; 8];
+        self.try_fill_bytes(&mut b)?;
+        Ok(u64::from_le_bytes(b))
+    }
+    fn try_fill_bytes(&mut self, dst: &mut [u8]) -> Result<(), Self::Error> {
+        for d in dst.iter_mut() {
+            self.0 = self.0.wrapping_mul(31).wrapping_add(17);
+            *d = self.0;
+        }
+        Ok(())
+    }
+}
+impl ducat_core::hpke::rand_core::TryCryptoRng for HarnessRng {}
 
 /// Issuer: mint a card, hand it out, honour exactly one claim, then chat.
 pub async fn share(card_path: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -66,6 +102,27 @@ pub async fn share(card_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     println!("  card     {} B written to {card_path}", env.len());
     println!("  name     kara (self-asserted — §16.9 says this is worth what the channel is worth)");
     println!("  waiting for a claim\n");
+
+    // §16.11: the receiver's short-lived keys. Three one-time keys and a signed
+    // fallback, so the run can show both the consuming path and what happens
+    // after the supply is gone.
+    let (signed_sk, signed_pk) = hpke::derive_keypair(&[0x31; 32]);
+    let mut store = PreKeyStore::new(signed_sk);
+    let mut one_time = Vec::new();
+    for id in 1u32..=3 {
+        let (sk, pk) = hpke::derive_keypair(&[0x40 + id as u8; 32]);
+        store.insert_one_time(id, sk);
+        one_time.push(PreKey { id, public: pk });
+    }
+    let bundle = PreKeyBundle {
+        version: 1,
+        suite: 1,
+        signed_prekey: signed_pk,
+        one_time,
+        expiry: now() + 86_400,
+    };
+    println!("  prekeys  {} one-time + 1 signed (§16.11)", store.remaining());
+    let info = hpke::message_info(1);
 
     // The single-use state. A bool here, a row in the contacts table on a phone.
     let mut claimed = false;
@@ -119,8 +176,36 @@ pub async fn share(card_path: &str) -> Result<(), Box<dyn std::error::Error>> {
                     }
                 }
             }
+            MSG_PREKEYS => {
+                api.app_call_reply(id, bundle.to_value().encode()).await.ok();
+            }
             MSG_TEXT => {
                 let Ok(v) = decode(body) else {
+                    api.app_call_reply(id, reject("sealed decode")).await.ok();
+                    continue;
+                };
+                let Ok(sealed) = SealedMessage::from_value(v) else {
+                    api.app_call_reply(id, reject("sealed malformed")).await.ok();
+                    continue;
+                };
+                let before = store.remaining();
+                let opened = store.open_and_consume(&sealed, &info, b"");
+                let Ok((plain, was_one_time)) = opened else {
+                    let e = opened.unwrap_err();
+                    println!("  \x1b[31mrefused\x1b[0m a ciphertext: {:?} (prekeys still {before})", e.code);
+                    api.app_call_reply(id, reject(&format!("{:?}", e.code))).await.ok();
+                    continue;
+                };
+                if was_one_time {
+                    println!(
+                        "           prekey {} consumed — {} left, that ciphertext is now dead",
+                        sealed.prekey_id,
+                        store.remaining()
+                    );
+                } else {
+                    println!("           \x1b[33msigned prekey used\x1b[0m — no forward secrecy until rotation");
+                }
+                let Ok(v) = decode(&plain) else {
                     api.app_call_reply(id, reject("message decode")).await.ok();
                     continue;
                 };
@@ -239,6 +324,26 @@ pub async fn claim(card_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     }
     println!("  \x1b[32mclaimed\x1b[0m in {} ms\n", t0.elapsed().as_millis());
 
+    // §16.11: fetch the recipient's published prekeys before saying anything.
+    let raw = rc
+        .app_call(Target::RouteId(route.clone()), frame(MSG_PREKEYS, b""))
+        .await?;
+    let bundle = PreKeyBundle::from_value(
+        decode(&raw).map_err(|e| format!("bundle decode: {e:?}"))?,
+    )
+    .map_err(|e| format!("bundle malformed: {e:?}"))?;
+    println!(
+        "  prekeys  {} one-time available from kara",
+        bundle.one_time.len()
+    );
+    let mut bundle_state = bundle.clone();
+    let info = hpke::message_info(1);
+    // Deterministic only so a failed run reproduces. Real senders use OsRng;
+    // `core` takes the CSPRNG as a parameter precisely so this choice is the
+    // caller's and never buried in the library.
+    let mut rng = HarnessRng(0x5A);
+    let mut consumed: Vec<(u32, Vec<u8>)> = Vec::new();
+
     // Three round trips of actual conversation, each one a chained message.
     let mut my_seq = 0u64;
     let mut my_prev: Option<Message> = None;
@@ -258,8 +363,27 @@ pub async fn claim(card_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         my_seq += 1;
         my_prev = Some(m);
 
+        // Seal to a one-time key. `select` reports which kind it handed back,
+        // and a fallback is surfaced rather than silently accepted (§16.11).
+        let (chosen, is_one_time) = bundle_state.select();
+        if !is_one_time {
+            println!("  \x1b[33m!\x1b[0m one-time keys exhausted — falling back to the signed prekey");
+        }
+        let (ek, ct) = hpke::seal(&mut rng, &chosen.public, &info, b"", &enc)
+            .map_err(|e| format!("seal: {e:?}"))?;
+        let sealed = SealedMessage {
+            version: 1,
+            suite: 1,
+            prekey_id: chosen.id,
+            enc: ek,
+            ciphertext: ct,
+        };
+        let sealed_bytes = sealed.to_value().encode();
+        consumed.push((chosen.id, sealed_bytes.clone()));
+        bundle_take(&mut bundle_state, chosen.id);
+
         let reply = rc
-            .app_call(Target::RouteId(route.clone()), frame(MSG_TEXT, &enc))
+            .app_call(Target::RouteId(route.clone()), frame(MSG_TEXT, &sealed_bytes))
             .await?;
         let rm = Message::from_value(
             decode(&reply).map_err(|e| format!("reply decode: {e:?}"))?,
@@ -288,6 +412,24 @@ pub async fn claim(card_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     }
     println!("  \x1b[32mrefused\x1b[0m — {text}");
 
+    // §16.11's actual claim, observable from outside: the ciphertext that was
+    // already delivered cannot be delivered again, because the key it was sealed
+    // to no longer exists on the receiver. This is what "forward-secret" means
+    // operationally — not that an attacker fails to decrypt, but that *nobody*
+    // can, including the recipient who read it a moment ago.
+    println!("\n  replaying a delivered ciphertext (the seized-phone case)");
+    let (pid, bytes) = consumed[0].clone();
+    let r4 = rc
+        .app_call(Target::RouteId(route.clone()), frame(MSG_TEXT, &bytes))
+        .await?;
+    if decode(&r4).ok().and_then(|v| Message::from_value(v).ok()).is_some() {
+        return Err(format!("prekey {pid} was not consumed — no forward secrecy").into());
+    }
+    println!(
+        "  \x1b[32mundecryptable\x1b[0m — prekey {pid} is gone from the receiver: {}",
+        String::from_utf8_lossy(&r4)
+    );
+
     // And a substituted message: right sequence, wrong link.
     println!("\n  sending a message with a forged predecessor link");
     let forged = Message {
@@ -298,11 +440,14 @@ pub async fn claim(card_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         body: "make that 200".into(),
         timestamp: now(),
     };
+    let (fchosen, _) = bundle_state.select();
+    let (fek, fct) = hpke::seal(&mut rng, &fchosen.public, &info, b"", &forged.to_value().encode())
+        .map_err(|e| format!("seal: {e:?}"))?;
+    let fsealed = SealedMessage {
+        version: 1, suite: 1, prekey_id: fchosen.id, enc: fek, ciphertext: fct,
+    };
     let r3 = rc
-        .app_call(
-            Target::RouteId(route),
-            frame(MSG_TEXT, &forged.to_value().encode()),
-        )
+        .app_call(Target::RouteId(route), frame(MSG_TEXT, &fsealed.to_value().encode()))
         .await?;
     if Message::from_value(decode(&r3).unwrap_or(ducat_core::cbor::Value::Uint(0))).is_ok() {
         return Err("a substituted message was accepted".into());
@@ -312,7 +457,9 @@ pub async fn claim(card_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         String::from_utf8_lossy(&r3)
     );
 
-    println!("\n  \x1b[32mall four properties held over a real route\x1b[0m");
+    println!("\n  \x1b[32mfive properties held over a real route\x1b[0m");
+    println!("  claim-once, chained thread, replayed claim refused, delivered");
+    println!("  ciphertext undecryptable after its prekey was consumed, forged link refused");
     api.shutdown().await;
     Ok(())
 }

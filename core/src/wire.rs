@@ -144,6 +144,16 @@ pub mod f {
     pub const MSG_BODY: u64 = 159;
     pub const MSG_TS: u64 = 160;
 
+    // PREKEY_BUNDLE (§16.11)
+    pub const PKB_SIGNED: u64 = 161;
+    pub const PKB_ONETIME: u64 = 162;
+    pub const PKB_EXPIRY: u64 = 163;
+
+    // SEALED_MESSAGE (§16.11)
+    pub const SM_PREKEY_ID: u64 = 164;
+    pub const SM_ENC: u64 = 165;
+    pub const SM_CT: u64 = 166;
+
     // bond_proof (§17.4)
     pub const BND_MS_ADDRESS: u64 = 140;
     pub const BND_AMOUNT: u64 = 141;
@@ -347,6 +357,8 @@ pub(crate) fn type_code(t: ObjectType) -> u64 {
         ObjectType::Release => 21,
         ObjectType::SlashClaim => 22,
         ObjectType::Message => 23,
+        ObjectType::PreKeyBundle => 24,
+        ObjectType::SealedMessage => 25,
     }
 }
 
@@ -420,6 +432,13 @@ impl Reader {
             }
         }
         Ok(b)
+    }
+
+    pub(crate) fn array(&mut self, k: u64) -> Result<Vec<Value>, Reject> {
+        match self.m.remove(&k).ok_or_else(|| Self::missing(k))? {
+            Value::Array(v) => Ok(v),
+            _ => Err(Self::wrong(k)),
+        }
     }
 
     pub(crate) fn opt_bytes(&mut self, k: u64, len: Option<usize>) -> Result<Option<Vec<u8>>, Reject> {

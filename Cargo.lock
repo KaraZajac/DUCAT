@@ -1194,6 +1194,7 @@ dependencies = [
  "chacha20poly1305",
  "ed25519-dalek 2.2.0",
  "hex",
+ "hpke",
  "p256",
  "serde_json",
  "sha2 0.10.9",

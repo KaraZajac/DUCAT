@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.62 — Consolidated**
+**Draft 0.63 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.63** — **Message encryption (§16.11), and the correction that HPKE alone is the wrong half of forward secrecy.** 0.62 named HPKE as the fix because that is what VeilidChat migrated to. HPKE **base mode** uses an ephemeral *sender* key against a **static receiver** key: it protects against compromise of the sender and not at all against compromise of the receiver, so seizing a phone and recovering one long-term X25519 key decrypts every message ever sent to it. For a document whose threat model is §2.2's endpoint compromise that is the direction that matters least, and adopting HPKE and stopping would have let this spec **claim forward secrecy while providing the wrong half of it**. The property needs the *receiver's* key to be gone, so receivers publish **one-time prekeys** and delete each on successful decryption — after which the ciphertext is undecryptable by anyone, its recipient included — with a rotating signed prekey as the exhaustion fallback. X3DH's structure, named rather than reinvented, and its known weakness inherited with it. Consumption **only on success**, because burning a key on a failed open lets anyone who can reach the rendezvous exhaust a recipient's supply with garbage and force them onto the weaker fallback, which is precisely the state an attacker wants them in. Duplicate prekey ids and a one-time key claiming reserved id 0 are `MALFORMED`, since "delete after use" must be unambiguous when it is the only thing the property rests on. **The suite was chosen for checkability**: RFC 9180's A.2 configuration — DHKEM(X25519, HKDF-SHA256) / HKDF-SHA256 / ChaCha20Poly1305 — because A.2 publishes test vectors and **the vector set and the second implementation both share an author with the reference, which is why O21 is still open**. `core/tests/hpke.rs` reproduces the RFC's encapsulated key and ciphertext byte for byte, making this the **first externally-validated component in the project**. Stated rather than glossed: there is **no post-compromise security**, because there is no ratchet, and a Double Ratchet is not attempted here because it would turn §16.10's per-sender sequences into ratchet state and doing it badly is worse than not doing it. The harness demonstrates the claim from outside — a delivered ciphertext replayed after its prekey was consumed comes back `STATE_VIOLATION`, and the run exhausts its three one-time keys and falls back to the signed prekey with the downgrade printed rather than swallowed.
 - **0.62** — **Chat folded into the protocol (§16.9, §16.10), and doing it exposed that §7.5's memos had no cross-implementation coverage at all.** DUCAT's contact machinery assumed §16.3's ordering — identity only *after* a receipt, bound by `H(RECEIPT) ‖ session_pk`. Paying a friend is a different relationship from paying a stall, so §16.9 adds the contact-first path: a card carried by NFC across a table, or as a `ducat:` URI through Signal. It is specified by what it **cannot** prove — key possession, yes; who handed it to you, no, because a card that arrived in a chat app was authenticated by *that app*. §15.9's lesson a third time. Invitations are **claim-once and expiring**, with the issuer storing only `H_chain(secret)`, so a screenshot in a group chat is not a standing offer to everyone who saw it and a stolen invitation list is not a set of usable claims; self-claim is refused so an interceptor cannot burn a card by claiming it back and leaving the intended recipient with one that silently fails. Donation QR codes on a website are **not** this — that is `TapStatic` (§15.9), reusable and public, and it keeps §15.9's admitted limit that a swapped tag verifies. Messages are 1:1 with **per-sender** sequences (a shared counter needs a round trip an offline sender does not have) and a `prev` link, so a message *removed and replaced* is caught where the sequence number still fits. Groups are out of scope and need no primitive: §15.2's `amount_authority: open` already splits a bill, one tap per person, which is how a table splits one anyway. **The finding:** `run_object` in the second implementation is generic over fields, so no vector had ever put text on the wire at the field level — §7.5's memo, added one draft earlier, was covered by *nothing*, and shipped accepting a present-but-empty string alongside an absent one. Two encodings of "no memo" makes `H(FullOffer)` depend on whether a client wrote `""` or nothing into a blank field, and the reference's own test asserted the wart was a feature. Empty text is now `MALFORMED` everywhere, and 18 vectors across three new kinds pin the text rules, the claim refusals, and the chain. 156/156, both implementations agreeing. Also fixed: `manifest_is_self_consistent` summed a **hardcoded list of vector files**, so `contact.json` was briefly uncounted — the precise staleness that test exists to catch, now derived from the manifest instead. Named honestly in §16.10: these messages are not forward-secret, and VeilidChat moved 1:1 conversation crypto to HPKE for exactly that reason.
 - **0.61** — **§7.5 added: memos and petnames — and putting text on the wire exposed a divergence between the two implementations.** A receipt list reading `£4.20` twelve times records nothing; `£4.20 — coffee, Tuesday` does. `FullOffer` and `ACCEPT` each gain an optional 128-character memo, **both** rather than one, because a payee's *"consulting, March"* and a payer's *"reimbursed by work"* are different claims and neither may overwrite the other. Advisory only, signed and therefore covered by `offer_commit`, bounded in **characters rather than bytes** — a byte bound silently shortens every language that does not fit one character per byte — and never written to the chain, since a memo in `tx_extra` publishes to everyone what the protocol keeps between two people. Names are **petnames**: §15.9's lesson applies unchanged, in that a signature over a display name proves only that a keyholder chose that string, so names are self-asserted in the contact card, exchanged in §16.3's post-receipt coda, and stored and renameable locally by the receiver. No global registry, because a registry is a directory. **Nobody can be addressed by name** — reaching a person requires a prior exchange, which is also how VeilidChat works, by invitation rather than lookup. The divergence: §18.1 has required NFC-normalized text since 0.14, the second implementation enforced it, and **the reference decoder did not** — invisible because no object carried a string until now. Two encodings of "café" are two canonical objects and two hashes, which is §18.3's transcript-divergence bug arriving through a display field nobody thought was load-bearing. Fixed, and pinned by vectors so the suite can catch it next time.
 - **0.60** — **Second audit pass; the checks grew and each new one caught something.** §18.12's first version verified that references *resolve* — it could not see a claim that had quietly stopped being true. Three checks added, three findings: O21's live text still said "104 vectors" against a set of 136 (changelog entries stay exempt, being history); `bond_proof` occupied fields 140–144 while §18.4.2 still read "140+ Unallocated", reintroducing the exact collision hazard the registry exists to prevent; and **§18.9.1's normative table listed ten vector kinds while the schema accepted sixteen** — every escrow and bond case was executable, published, and undiscoverable from the document. That last one names the pattern: **an artifact and its description drift toward the artifact**, because the artifact is what gets run, and only a mechanical comparison notices. Verified still true rather than assumed: §2.5's "no adversarial review whatsoever" (the user has deliberately deferred it), and suite 2's key agreement genuinely unimplemented — a suite named in the type system is not a suite that exists.
@@ -1674,13 +1675,62 @@ This was a real defect: §7.5's memo shipped at 0.61 accepting `Some("")`, with 
 
 ### What this does not solve
 
-- **Forward secrecy.** The messages specified here are not forward-secret. §15.3.2 already warns that bitchat's offline envelopes give up forward secrecy, acceptable for undelivered chat and not for a payment authorization; carrying chat inside DUCAT turns that warning around. VeilidChat migrated 1:1 conversation crypto from Diffie-Hellman to HPKE for this reason, and DUCAT should adopt HPKE before messaging ships to users rather than after.
+- **Forward secrecy** is specified in §16.11, which is where the encryption lives. §16.10 covers ordering and framing only.
 - **Retention.** §7.4's dossier argument applies with more force to conversation content than to transcripts. A message log is the most sensitive thing the app will hold, and §2.2's endpoint-compromise scope now includes it.
 - **Groups.** 1:1 only. Splitting a bill does not need a group primitive — §15.2's `amount_authority: open` already covers it, with each person tapping the presenter separately, which is how a table splits a bill anyway.
 - **Store-and-forward delivery.** Both participants being online is assumed here. Deferred delivery is §8.4's research track and shares its unsolved parts.
 
 ---
 
+
+## 16.11 Message encryption, and what "forward secrecy" cost
+
+### HPKE alone was the wrong half of the property
+
+The obvious move was HPKE, because that is what VeilidChat migrated to. HPKE **base mode** encrypts with an ephemeral *sender* key against a **static receiver** key. That is sender-side forward secrecy: it protects against compromise of the sender, and not at all against compromise of the receiver. Seize the receiver's phone, recover one long-term X25519 key, and every message ever sent to them decrypts.
+
+For a protocol whose stated threat model is §2.2's endpoint compromise, that is the wrong half. **Adopting HPKE and stopping there would have let this document claim forward secrecy while providing the one direction that matters least.**
+
+### Rotating receiver keys
+
+Forward secrecy requires the *receiver's* key to be gone. So the receiver publishes short-lived keys to its rendezvous (§16.4) and deletes each after use:
+
+```
+PREKEY_BUNDLE { signed_prekey, one_time[ (id, key) … ], expiry }   signed by the persona
+        │
+        ▼
+SEALED_MESSAGE { prekey_id, enc, ciphertext }
+```
+
+- **One-time prekeys** — used once, deleted on successful decryption. After that the ciphertext is undecryptable **by anyone, including its recipient**. This is the property.
+- **A signed prekey** — the fallback when the one-time supply runs out, rotated on a schedule. Messages sealed to it are forward-secret only from the next rotation.
+
+This is X3DH's structure, named rather than reinvented; the exhaustion fallback is Signal's, and so is its known weakness. A sender MUST prefer a one-time key, and an implementation MUST be able to tell the two cases apart — falling back is a real weakening and silently treating both as success hides it.
+
+Four rules, each carrying a failure it prevents:
+
+| Rule | What it stops |
+|---|---|
+| A key is consumed **only on successful decryption** | Otherwise anyone who can reach the rendezvous exhausts a recipient's one-time keys with garbage, forcing them onto the weaker fallback — a denial of service that lands the victim in exactly the state an attacker wants. |
+| Duplicate prekey ids are `MALFORMED` | "Delete after use" becomes ambiguous, and that deletion is the only thing the property rests on. |
+| Id `0` is reserved for the signed prekey | A one-time key claiming it would be treated as the non-consumed fallback. |
+| Ciphertexts are bounded before any key is consulted | A peer must not be able to make a recipient allocate arbitrarily to reach a decryption failure. |
+
+### Suite, and why this one
+
+RFC 9180 base mode, **DHKEM(X25519, HKDF-SHA256) / HKDF-SHA256 / ChaCha20Poly1305** — the RFC's A.2 configuration. Chosen partly because it matches suite 1's curve, and partly because A.2 has **published test vectors**.
+
+That matters more here than anywhere else in the document. Both existing conformance efforts — the vector set and the second implementation (§18.11) — share an author with the reference, which is precisely why **O21 stays open**. RFC 9180's vectors do not. `core/tests/hpke.rs` reproduces the RFC's encapsulated key and ciphertext byte for byte, making this **the first externally-validated component in the project**.
+
+The `info` parameter carries §18.3's domain separation (`"DUCAT-v1" ‖ 0x00 ‖ "MESSAGE" ‖ 0x00 ‖ suite`), so a ciphertext sealed for one purpose cannot open under another even with identical keys. `aad` binds a ciphertext to its conversation.
+
+### What this still does not give
+
+**No post-compromise security.** There is no ratchet. An attacker holding current prekey state reads everything sealed to those keys until they rotate; recovery is not automatic the way a Double Ratchet makes it. A ratchet is deliberately not attempted here because it changes the ordering model — §16.10's per-sender sequences would have to become ratchet state — and doing it badly is worse than not doing it. It is the next thing to do, not a thing that has been done.
+
+**Metadata is unprotected by this section.** Who is talking to whom, and when, is a routing property that §16.6's privacy accounting covers, not an encryption one.
+
+---
 # Part IV — Bonded Fast Settlement
 **L4/L5 detail: making the tap actually settle in seconds**
 
@@ -2098,7 +2148,9 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 147–151 | `CONTACT_OFFER` as an out-of-band invitation (§16.9) | **Assigned** |
 | 152–156 | `CONTACT_ACCEPT` (§16.9) | **Assigned** |
 | 157–160 | `MESSAGE` (§16.10) | **Assigned** |
-| 161+ | Unallocated | — |
+| 161–163 | `PREKEY_BUNDLE` (§16.11) | **Assigned** |
+| 164–166 | `SEALED_MESSAGE` (§16.11) | **Assigned** |
+| 167+ | Unallocated | — |
 
 The `96+ Unallocated` row above was stale from 0.14 onward: 96–103 had been in use since `TERMS` and `MANDATE` shipped, and a second implementer allocating from 96 would have collided head-on. Registries decay silently unless something checks them, which is the argument for the type-code rule below.
 
