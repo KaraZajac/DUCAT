@@ -1235,9 +1235,9 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None };
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
         v.push(json!({
@@ -1282,6 +1282,7 @@ fn contact_cases() -> Vec<J> {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1_700_000_000,
         kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
+        payto: None,
     };
     money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
     money("payment_sent",
@@ -1295,6 +1296,18 @@ fn contact_cases() -> Vec<J> {
         "An amount on a text message is a number nothing will honour, which is worse than no number.",
         &Message { kind: MessageKind::Text, amount_pxmr: Some(1), ..base_pay.clone() },
         Some((RejectCode::Malformed, "text must not carry an amount")));
+    money("request_with_payto",
+        "A request names where to pay, so the payer needs nothing from a contact record that may be stale — and so the address is not stored and reused, which would link every payment to that person on a public ledger.",
+        &Message { payto: Some("5ApJU8bfJ2sb4eGHNSCcSjGH4SxMghLahdFoh3NKpkPYhJE3AC56oxFEFcX4Nj7DTD873X3pnwnWSfp1YUCsg6veAAvkwm9".into()), ..base_pay.clone() }, None);
+    money("notice_with_payto",
+        "Only a request names a destination. A notice doing so would be describing a payment it claims to have already made.",
+        &Message { kind: MessageKind::PaymentSent, payto: Some("5ApJU8bf".into()), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "only a request names where to pay")));
+    money("payto_too_long",
+        "An address field long enough to hold a payload is a covert channel with a signature on it.",
+        &Message { payto: Some("5".repeat(MAX_ADDRESS_CHARS + 1)), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "text over bound")));
+
     money("request_with_txid",
         "Only a notice carries a transaction. A request pointing at one is claiming a payment it is simultaneously asking for.",
         &Message { txid: Some(vec![0x77; 32]), ..base_pay.clone() },

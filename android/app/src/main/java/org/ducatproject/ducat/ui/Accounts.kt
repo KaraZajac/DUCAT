@@ -9,13 +9,14 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import org.ducatproject.ducat.Rates
+import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.formatXmr
@@ -39,9 +40,7 @@ fun AccountsScreen() {
     // end.
     val version by org.ducatproject.ducat.ContactStore.changes.collectAsState()
     val balances = remember(version) { Wallet.balances(context) }
-    val fiat = remember(version, balances.spendablePxmr) {
-        Rates.view(context, balances.spendablePxmr, stagenet = WalletStore(context).stagenet())
-    }
+    var preferFiat by remember(version) { mutableStateOf(Amounts.preferFiat(context)) }
     val clipboard = LocalClipboardManager.current
     val wallet = remember { WalletStore(context) }
     val address = wallet.address()
@@ -62,7 +61,7 @@ fun AccountsScreen() {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
-                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Top up", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.weight(1f))
                     if (wallet.stagenet()) {
@@ -140,35 +139,32 @@ fun AccountsScreen() {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else {
-                    BalanceRow("Spendable", "${formatXmr(b.spendablePxmr)} XMR")
-                    fiat?.let { f ->
-                        Row(Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
-                            Spacer(Modifier.weight(1f))
+                    val spend = Amounts.show(context, b.spendablePxmr, wallet.stagenet())
+                    BalanceRow("Spendable", spend.primary, spend.secondary)
+                    if (Amounts.canConvert(context)) {
+                        Spacer(Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                buildString {
-                                    append(f.text)
-                                    if (f.stale) append(" · old price")
-                                },
+                                "Show in ${Amounts.currency(context)}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (f.notional) MaterialTheme.ducat.changePending
-                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Spacer(Modifier.weight(1f))
+                            Switch(
+                                checked = preferFiat,
+                                onCheckedChange = {
+                                    Amounts.setPreferFiat(context, it); preferFiat = it
+                                },
                             )
                         }
-                        if (f.notional) {
+                        if (preferFiat && wallet.stagenet()) {
                             Text(
                                 "Stagenet coins are test coins. That figure is what this " +
                                     "much real Monero would be worth — these are worth nothing.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.ducat.changePending,
                             )
-                            Spacer(Modifier.height(6.dp))
                         }
-                    }
-                    if (b.lockedPxmr > 0) {
-                        BalanceRow(
-                            "Locked",
-                            "${formatXmr(b.lockedPxmr)} XMR · ~${b.blocksToUnlock * 2} min",
-                        )
+                        Spacer(Modifier.height(6.dp))
                     }
                     BalanceRow("Notes", "${b.spendableOutputs}")
                     BalanceRow("Bond", "none")
@@ -221,15 +217,26 @@ fun AccountsScreen() {
 }
 
 @Composable
-private fun BalanceRow(label: String, value: String) {
+private fun BalanceRow(label: String, value: String, secondary: String? = null) {
     Row(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
         Text(label, style = MaterialTheme.typography.bodyMedium)
         Spacer(Modifier.weight(1f))
-        Text(
-            value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            // The other unit, always. A converted figure alone is a figure
+            // nobody can check.
+            secondary?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                )
+            }
+        }
     }
 }
 

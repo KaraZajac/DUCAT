@@ -324,6 +324,9 @@ pub fn seal_message(
     kind: u8,
     amount_pxmr: Option<u64>,
     txid: Option<Vec<u8>>,
+    // Only a request may name one (§16.13). Where to pay travels with the ask
+    // so the payer needs nothing from a record that may be stale.
+    payto: Option<String>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -349,6 +352,7 @@ pub fn seal_message(
         },
         amount_pxmr,
         txid,
+        payto,
     };
     let next_link = msg.link().to_vec();
     let (chosen, forward_secret) = bundle.select();
@@ -458,6 +462,9 @@ pub struct OpenedMessage {
     pub kind: u8,
     pub amount_pxmr: Option<u64>,
     pub txid: Option<Vec<u8>>,
+    /// Where a request asks to be paid. Shown on the confirm screen, never
+    /// acted on without it.
+    pub payto: Option<String>,
 }
 
 /// Open an inbound sealed message and check it follows the thread.
@@ -523,6 +530,7 @@ pub fn open_message(
         kind: msg.kind as u8,
         amount_pxmr: msg.amount_pxmr,
         txid: msg.txid.clone(),
+        payto: msg.payto.clone(),
     })
 }
 

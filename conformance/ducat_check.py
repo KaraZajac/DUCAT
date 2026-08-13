@@ -939,7 +939,8 @@ MAX_RECORD_KEY_CHARS = 128
 # than reused: an old card decoding as a new one under different meanings is the
 # divergence the registry exists to prevent.
 MSG_SEQ, MSG_PREV, MSG_BODY, MSG_TS = 157, 158, 159, 160
-MSG_KIND, MSG_AMOUNT, MSG_TXID = 178, 179, 180
+MSG_KIND, MSG_AMOUNT, MSG_TXID, MSG_PAYTO = 178, 179, 180, 181
+MAX_ADDRESS_CHARS = 128
 CARD_PERSONA, CARD_INBOX, CARD_WRITER, CARD_NAME, CARD_EXPIRY = 167, 168, 169, 170, 171
 DET_PERSONA, DET_OUTBOX, DET_BUNDLE, DET_NAME = 172, 173, 174, 175
 HEAD_NEXT = 176
@@ -1071,6 +1072,7 @@ def parse_message(buf):
     out["kind"] = kind
     out["amount"] = b.pop(MSG_AMOUNT, (None, None))[1]
     out["txid"] = b.pop(MSG_TXID, (None, None))[1]
+    out["payto"] = _take_text(b, MSG_PAYTO, MAX_ADDRESS_CHARS, "destination", False)
     _finish(b)
 
     # A payment with no amount is a screen with a blank where the number goes;
@@ -1081,6 +1083,10 @@ def parse_message(buf):
         raise Reject("Malformed", "a payment message must carry an amount")
     if out["txid"] is not None and kind != 2:
         raise Reject("Malformed", "only a payment notice carries a transaction")
+    # §16.13: a request says where to pay. A notice doing so would be describing
+    # a payment it claims to have already made.
+    if out["payto"] is not None and kind != 1:
+        raise Reject("Malformed", "only a request names where to pay")
     return out
 
 
@@ -1212,6 +1218,8 @@ def run_message_payment(cases, r):
                 fields.append((MSG_AMOUNT, ("uint", m["amount"])))
             if m["txid"] is not None:
                 fields.append((MSG_TXID, ("bytes", m["txid"])))
+            if m["payto"] is not None:
+                fields.append((MSG_PAYTO, ("text", m["payto"])))
             return encode(("map", fields))
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

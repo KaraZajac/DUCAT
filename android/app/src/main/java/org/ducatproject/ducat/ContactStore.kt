@@ -430,6 +430,8 @@ data class StoredMessage(
     /** 0 text, 1 request, 2 notice (§16.13). */
     val kind: Int = 0,
     val amountPxmr: Long = 0,
+    /** Where a request asks to be paid, if it named one. */
+    val payto: String? = null,
     /** False means it went out under the signed prekey — no forward secrecy
      *  until that key rotates (§16.11). Shown, not hidden. */
     val forwardSecret: Boolean = true,
@@ -439,6 +441,7 @@ data class StoredMessage(
         put("out", outgoing); put("seq", seq); put("body", body)
         put("ts", timestamp); put("fs", forwardSecret); put("delivered", delivered)
         put("kind", kind); put("amt", amountPxmr)
+        put("payto", payto ?: JSONObject.NULL)
     }
 
     companion object {
@@ -451,6 +454,7 @@ data class StoredMessage(
             delivered = o.optBoolean("delivered", true),
             kind = o.optInt("kind", 0),
             amountPxmr = o.optLong("amt", 0L),
+            payto = o.optStringOrNull("payto"),
         )
     }
 }
@@ -715,6 +719,18 @@ class RateStore(context: Context) {
             "ARS", "CLP", "CZK", "HUF", "ILS", "AED", "SAR", "UAH", "VND",
         )
     }
+
+    /**
+     * Whether amounts lead with the user's currency instead of XMR.
+     *
+     * A preference rather than a per-screen choice: the unit someone reads a
+     * balance in has to be the unit they confirm a payment in, or the check
+     * they think they are doing is not the one they are doing.
+     */
+    fun preferFiat(): Boolean = prefs.getBoolean("rate_prefer_fiat", false)
+
+    fun setPreferFiat(v: Boolean) = prefs.edit().putBoolean("rate_prefer_fiat", v).apply()
+        .also { ContactStore.bump() }
 
     /** Off means off: no request is made at all, not a hidden one. */
     fun enabled(): Boolean = prefs.getBoolean("rate_enabled", true)

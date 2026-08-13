@@ -160,7 +160,8 @@ fn msg(seq: u64, prev: [u8; 32], body: &str) -> Message {
         seq,
         prev,
         body: body.into(),
-        timestamp: 1000 + seq, kind: MessageKind::Text, amount_pxmr: None, txid: None
+        timestamp: 1000 + seq, kind: MessageKind::Text, amount_pxmr: None, txid: None,
+        payto: None,
     }
 }
 
@@ -217,7 +218,7 @@ fn pay(kind: MessageKind, amount: Option<u64>, txid: Option<Vec<u8>>) -> Message
     Message {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1000,
-        kind, amount_pxmr: amount, txid,
+        kind, amount_pxmr: amount, txid, payto: None,
     }
 }
 
@@ -281,4 +282,41 @@ fn changing_an_amount_breaks_the_chain() {
     let m0 = pay(MessageKind::PaymentRequest, Some(1_000), None);
     let tampered = pay(MessageKind::PaymentRequest, Some(9_999_999), None);
     assert_ne!(m0.link(), tampered.link());
+}
+
+/// A request names where to pay; nothing else may.
+#[test]
+fn only_a_request_names_a_destination() {
+    let mut req = pay(MessageKind::PaymentRequest, Some(1_000), None);
+    req.payto = Some("5ApJU8bfJ2sb4eGHNSCcSjGH4SxMghLahdFoh3NKpkPYhJ".into());
+    assert_eq!(Message::from_value(req.to_value()).unwrap(), req);
+
+    for k in [MessageKind::Text, MessageKind::PaymentSent] {
+        let mut bad = pay(k, if k == MessageKind::Text { None } else { Some(1) }, None);
+        bad.payto = Some("5ApJU8bf".into());
+        assert!(
+            Message::from_value(bad.to_value()).is_err(),
+            "{k:?} must not carry a destination"
+        );
+    }
+}
+
+/// An address field long enough to hold a payload is a covert channel with a
+/// signature on it.
+#[test]
+fn a_destination_is_bounded() {
+    let mut req = pay(MessageKind::PaymentRequest, Some(1), None);
+    req.payto = Some("5".repeat(MAX_ADDRESS_CHARS + 1));
+    assert!(Message::from_value(req.to_value()).is_err());
+}
+
+/// Changing where a request points must break the thread, or a request is only
+/// as trustworthy as the last person to touch the record it sits in.
+#[test]
+fn changing_the_destination_breaks_the_chain() {
+    let mut a = pay(MessageKind::PaymentRequest, Some(1_000), None);
+    a.payto = Some("5ApJU8bf".into());
+    let mut b = a.clone();
+    b.payto = Some("5Attacker".into());
+    assert_ne!(a.link(), b.link());
 }

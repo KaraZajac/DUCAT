@@ -245,6 +245,10 @@ pub fn still_in_ring(seq: u64, next_seq: u64, subkey_count: u32) -> bool {
 // §16.10 — messages
 // ---------------------------------------------------------------------------
 
+/// The longest a Monero address may be. Integrated addresses are 106
+/// characters; the bound leaves room without letting the field carry a payload.
+pub const MAX_ADDRESS_CHARS: usize = 128;
+
 /// A message is 1:1 and bounded.
 ///
 /// Larger than a memo because this is prose rather than a label, and still
@@ -307,6 +311,18 @@ pub struct Message {
     /// The transaction, for `PaymentSent`. Advisory: §17.5 verifies by scanning
     /// for the output, and a txid in a message is a pointer, not evidence.
     pub txid: Option<Vec<u8>>,
+    /// Where to pay, for `PaymentRequest`.
+    ///
+    /// Carried in the request rather than kept on the contact, for two reasons.
+    /// A stored address is reused, and a reused address is a public ledger entry
+    /// linking every payment anyone ever made to that person. And a request that
+    /// names its own destination is self-contained: the payer needs nothing from
+    /// a record that may be stale.
+    ///
+    /// **This does not make the address trustworthy.** Nothing in DUCAT binds a
+    /// Monero address to a persona, so a compromised contact can ask you to pay
+    /// a stranger. §15.5's confirm screen must show it.
+    pub payto: Option<String>,
 }
 
 impl Message {
@@ -327,6 +343,9 @@ impl Message {
         }
         if let Some(t) = &self.txid {
             m.insert(f::MSG_TXID, Value::Bytes(t.clone()));
+        }
+        if let Some(p) = &self.payto {
+            m.insert(f::MSG_PAYTO, Value::Text(p.clone()));
         }
         Value::Map(m)
     }
@@ -364,6 +383,7 @@ impl Message {
             },
             amount_pxmr: r.opt_uint(f::MSG_AMOUNT)?,
             txid: r.opt_bytes(f::MSG_TXID, Some(32))?,
+            payto: r.opt_text(f::MSG_PAYTO, MAX_ADDRESS_CHARS)?,
         };
         r.finish()?;
         // A payment with no amount is a payment screen with a blank on it, and
@@ -388,6 +408,12 @@ impl Message {
             return Err(Reject::with_detail(
                 RejectCode::Malformed,
                 "only a payment notice carries a transaction",
+            ));
+        }
+        if out.payto.is_some() && out.kind != MessageKind::PaymentRequest {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "only a request names where to pay",
             ));
         }
         Ok(out)

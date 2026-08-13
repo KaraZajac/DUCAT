@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.LOCK_BLOCKS
 import org.ducatproject.ducat.Wallet
-import org.ducatproject.ducat.formatXmr
+import org.ducatproject.ducat.Amounts
 
 /**
  * What has actually happened, from the chain.
@@ -59,7 +59,19 @@ fun ActivityScreen() {
         items(entries) { e ->
             val locked = tip > 0 && e.height + LOCK_BLOCKS > tip
             ListItem(
-                headlineContent = { Text("+${formatXmr(e.amountPxmr)} XMR") },
+                headlineContent = {
+                    val a = Amounts.show(context, e.amountPxmr)
+                    Column {
+                        Text("+${a.primary}")
+                        a.secondary?.let {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline,
+                            )
+                        }
+                    }
+                },
                 supportingContent = {
                     Text(
                         buildString {

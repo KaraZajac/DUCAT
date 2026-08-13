@@ -28,10 +28,11 @@ import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Mailbox
+import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.threadAad
 import org.ducatproject.ducat.StoredMessage
-import org.ducatproject.ducat.formatXmr
+import org.ducatproject.ducat.Amounts
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -85,6 +86,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
 
     var settingsOpen by remember { mutableStateOf(false) }
     var askOpen by remember { mutableStateOf(false) }
+    var payRequest by remember { mutableStateOf<StoredMessage?>(null) }
     var confirmDelete by remember { mutableStateOf<StoredMessage?>(null) }
 
     // Applied on open and whenever the thread changes, because nothing else
@@ -199,13 +201,22 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     textAlign = TextAlign.Center,
                 )
             }
-            items(messages) { m -> Bubble(m) { confirmDelete = m } }
+            items(messages) { m ->
+                Bubble(m, onLongPress = { confirmDelete = m }, onPay = { payRequest = it })
+            }
         }
     }
 
     // Nothing to fetch: their prekeys arrived with the handshake and live in
     // the contact record. §16.12's whole point is that the first message needs
     // no round trip to someone who may not be there.
+
+    payRequest?.let { r ->
+        SendReceiveSheet(
+            prefillAddress = r.payto,
+            prefillAmountPxmr = r.amountPxmr,
+        ) { payRequest = null }
+    }
 
     if (askOpen) {
         AskForMoneyDialog(
@@ -217,7 +228,14 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                 scope.launch {
                     val r = withContext(Dispatchers.IO) {
                         runCatching {
-                            Mailbox.send(context, c, note, mine, kind = 1, amountPxmr = pxmr)
+                            Mailbox.send(
+                                context, c, note, mine,
+                                kind = 1,
+                                amountPxmr = pxmr,
+                                // Our address travels with the ask, so they need
+                                // nothing from a record that may be stale (§16.13).
+                                payto = WalletStore(context).address(),
+                            )
                         }
                     }
                     sending = false
@@ -381,7 +399,8 @@ private fun AskForMoneyDialog(onDismiss: () -> Unit, onSend: (Long, String) -> U
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun Bubble(m: StoredMessage, onLongPress: () -> Unit) {
+private fun Bubble(m: StoredMessage, onLongPress: () -> Unit, onPay: (StoredMessage) -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val align = if (m.outgoing) Alignment.End else Alignment.Start
     // Yours in the accent, theirs in the neutral surface. Colour is doing the
     // work here rather than alignment alone, because alignment is unreadable on
@@ -413,11 +432,16 @@ private fun Bubble(m: StoredMessage, onLongPress: () -> Unit) {
                         style = MaterialTheme.typography.labelSmall,
                         color = fg.copy(alpha = 0.8f),
                     )
+                    val a = Amounts.show(context, m.amountPxmr)
                     Text(
-                        "${formatXmr(m.amountPxmr)} XMR",
+                        a.primary,
                         style = MaterialTheme.typography.titleMedium,
                         color = fg,
                     )
+                    a.secondary?.let {
+                        Text(it, style = MaterialTheme.typography.labelSmall,
+                             color = fg.copy(alpha = 0.75f))
+                    }
                     if (m.body.isNotBlank()) {
                         Spacer(Modifier.height(2.dp))
                         Text(m.body, color = fg, style = MaterialTheme.typography.bodySmall)
@@ -426,12 +450,24 @@ private fun Bubble(m: StoredMessage, onLongPress: () -> Unit) {
                     // that offered a one-tap "pay" would be exactly the shortcut
                     // §15.5's confirm screen exists to prevent.
                     if (m.kind == 1 && !m.outgoing) {
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            "You decide whether to pay this.",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = fg.copy(alpha = 0.7f),
-                        )
+                        Spacer(Modifier.height(8.dp))
+                        if (m.payto != null) {
+                            // Opens the send screen filled in. It does **not**
+                            // pay: §16.13 forbids a one-tap spend from an
+                            // arriving message, because the confirm screen is
+                            // the only thing between a message and money
+                            // leaving.
+                            FilledTonalButton(
+                                onClick = { onPay(m) },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                            ) { Text("Review payment", style = MaterialTheme.typography.labelMedium) }
+                        } else {
+                            Text(
+                                "No address in this request — ask them where to send it.",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = fg.copy(alpha = 0.7f),
+                            )
+                        }
                     }
                 }
             }

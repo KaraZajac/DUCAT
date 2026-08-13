@@ -152,6 +152,7 @@ pub mod f {
     pub const MSG_KIND: u64 = 178;
     pub const MSG_AMOUNT: u64 = 179;
     pub const MSG_TXID: u64 = 180;
+    pub const MSG_PAYTO: u64 = 181;
 
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;

@@ -24,6 +24,7 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.NodeStore
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
+import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.formatXmr
 
 /**
@@ -40,16 +41,26 @@ import org.ducatproject.ducat.formatXmr
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SendReceiveSheet(onDismiss: () -> Unit) {
+fun SendReceiveSheet(
+    prefillAddress: String? = null,
+    prefillAmountPxmr: Long = 0,
+    onDismiss: () -> Unit,
+) {
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
     val version by ContactStore.changes.collectAsState()
     val wallet = remember { WalletStore(context) }
     val b = remember(version) { Wallet.balances(context) }
-    var tab by remember { mutableIntStateOf(0) }
+    // Straight to Send when this was opened from a request: the user already
+    // said what they wanted to do.
+    var tab by remember { mutableIntStateOf(if (prefillAddress != null) 1 else 0) }
     var scanning by remember { mutableStateOf(false) }
-    var dest by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
+    var dest by remember { mutableStateOf(prefillAddress.orEmpty()) }
+    var amount by remember {
+        mutableStateOf(
+            if (prefillAmountPxmr > 0) formatXmr(prefillAmountPxmr) else ""
+        )
+    }
     var busy by remember { mutableStateOf(false) }
     var confirming by remember { mutableStateOf(false) }
     var sent by remember { mutableStateOf<uniffi.ducat_mobile.SendResult?>(null) }
@@ -80,7 +91,19 @@ fun SendReceiveSheet(onDismiss: () -> Unit) {
         // nothing may shorten the path to here.
         AlertDialog(
             onDismissRequest = { confirming = false },
-            title = { Text("Send ${formatXmr(pxmr)} XMR?") },
+            title = {
+                // The confirm always shows both. This is the moment someone
+                // commits, and the unit they were reading a second ago must not
+                // be the only one on the screen.
+                val a = Amounts.show(context, pxmr)
+                Column {
+                    Text("Send ${a.primary}?")
+                    a.secondary?.let {
+                        Text(it, style = MaterialTheme.typography.labelMedium,
+                             color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            },
             text = {
                 Column {
                     Text("To", style = MaterialTheme.typography.labelMedium)
@@ -171,14 +194,18 @@ fun SendReceiveSheet(onDismiss: () -> Unit) {
             } else {
                 Text("Send", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
+                val avail = Amounts.show(context, b.spendablePxmr)
                 Text(
-                    "Spendable now: ${formatXmr(b.spendablePxmr)} XMR across " +
-                        "${b.spendableOutputs} note(s)",
+                    "Spendable now: ${avail.primary} across ${b.spendableOutputs} note(s)",
                     style = MaterialTheme.typography.bodyMedium,
                 )
+                avail.secondary?.let {
+                    Text(it, style = MaterialTheme.typography.labelSmall,
+                         color = MaterialTheme.colorScheme.outline)
+                }
                 if (b.lockedPxmr > 0) {
                     Text(
-                        "${formatXmr(b.lockedPxmr)} XMR still locked — §17.2 keeps " +
+                        "${Amounts.show(context, b.lockedPxmr).primary} still locked — §17.2 keeps " +
                             "these apart because one is money you can hand over and " +
                             "the other is not.",
                         style = MaterialTheme.typography.bodySmall,
@@ -219,7 +246,7 @@ fun SendReceiveSheet(onDismiss: () -> Unit) {
                             "Uses ${p.notes.size} note(s). The fee is added on top and " +
                                 "is only known once the transaction is built."
                         } else {
-                            "Not enough unlocked — ${formatXmr(p.totalInPxmr)} XMR available."
+                            "Not enough unlocked — ${Amounts.show(context, p.totalInPxmr).primary} available."
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = if (p.enough) MaterialTheme.colorScheme.onSurfaceVariant
@@ -254,7 +281,7 @@ fun SendReceiveSheet(onDismiss: () -> Unit) {
                                  style = MaterialTheme.typography.bodySmall)
                             Spacer(Modifier.height(6.dp))
                             Text(
-                                "fee ${formatXmr(r.feePxmr.toLong())} XMR · " +
+                                "fee ${Amounts.show(context, r.feePxmr.toLong()).primary} · " +
                                     "accepted by ${r.acceptedBy} node(s)",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,

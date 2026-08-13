@@ -938,7 +938,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_reconcile_float(`maxExposurePxmr`: Long,`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1338,7 +1338,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_reconcile_float() != 35020.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 25985.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 27364.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
@@ -2093,7 +2093,12 @@ data class OpenedMessage (
      */
     var `kind`: kotlin.UByte, 
     var `amountPxmr`: kotlin.ULong?, 
-    var `txid`: kotlin.ByteArray?
+    var `txid`: kotlin.ByteArray?, 
+    /**
+     * Where a request asks to be paid. Shown on the confirm screen, never
+     * acted on without it.
+     */
+    var `payto`: kotlin.String?
 ) {
     
     companion object
@@ -2114,6 +2119,7 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterUByte.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
         )
     }
 
@@ -2126,7 +2132,8 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterUInt.allocationSize(value.`prekeyId`) +
             FfiConverterUByte.allocationSize(value.`kind`) +
             FfiConverterOptionalULong.allocationSize(value.`amountPxmr`) +
-            FfiConverterOptionalByteArray.allocationSize(value.`txid`)
+            FfiConverterOptionalByteArray.allocationSize(value.`txid`) +
+            FfiConverterOptionalString.allocationSize(value.`payto`)
     )
 
     override fun write(value: OpenedMessage, buf: ByteBuffer) {
@@ -2139,6 +2146,7 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterUByte.write(value.`kind`, buf)
             FfiConverterOptionalULong.write(value.`amountPxmr`, buf)
             FfiConverterOptionalByteArray.write(value.`txid`, buf)
+            FfiConverterOptionalString.write(value.`payto`, buf)
     }
 }
 
@@ -4246,11 +4254,11 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
         /**
          * Seal one message in a thread.
          */
-    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?): SealedOut {
+    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?): SealedOut {
             return FfiConverterTypeSealedOut.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
-        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),_status)
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),_status)
 }
     )
     }
