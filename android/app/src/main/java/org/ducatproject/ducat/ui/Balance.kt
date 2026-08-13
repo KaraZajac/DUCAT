@@ -1,6 +1,7 @@
 package org.ducatproject.ducat.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -30,7 +31,7 @@ import org.ducatproject.ducat.Money
  */
 @Composable
 fun BalanceCard(
-    spendable: Money,
+    spendablePxmr: Long,
     capacity: Capacity,
     float: DucatFloat,
     locked: Money?,
@@ -44,11 +45,31 @@ fun BalanceCard(
             // Spendable *now* — not the total. The total is the number that
             // gets someone declined at a counter.
             Text("Ready to spend", style = MaterialTheme.typography.labelLarge)
+            // Through the shared formatter, so the currency switch reaches the
+            // one number people actually look at. It bypassed it before, which
+            // is how the headline figure ended up unitless.
+            val ctx = androidx.compose.ui.platform.LocalContext.current
+            val shown = org.ducatproject.ducat.Amounts.show(ctx, spendablePxmr)
             Text(
-                spendable.toString(),
+                shown.primary,
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
+                // Tapping the amount flips the unit. The balance is where
+                // someone asks "how much is that really", so it is where the
+                // answer should be one tap away.
+                modifier = Modifier.clickable(enabled = shown.secondary != null) {
+                    org.ducatproject.ducat.Amounts.setPreferFiat(
+                        ctx, !org.ducatproject.ducat.Amounts.preferFiat(ctx),
+                    )
+                },
             )
+            shown.secondary?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
 
             Spacer(Modifier.height(4.dp))
 
@@ -83,7 +104,7 @@ fun BalanceCard(
             // §17.2 requires warning *before* the count reaches zero, not at the
             // counter: "a client that funds a float and immediately offers to
             // transact will fail at the curb with a full balance on screen."
-            if (capacity.approxPayments <= 2) {
+            if (float.unlockedOutputs == 0 || capacity.approxPayments <= 2) {
                 Spacer(Modifier.height(16.dp))
                 Surface(
                     color = MaterialTheme.colorScheme.errorContainer,
@@ -91,14 +112,14 @@ fun BalanceCard(
                 ) {
                     Column(Modifier.padding(12.dp)) {
                         Text(
-                            if (capacity.approxPayments == 0)
+                            if (float.unlockedOutputs == 0)
                                 "You can't pay right now"
                             else
                                 "Running low on notes",
                             fontWeight = FontWeight.SemiBold,
                         )
                         Text(
-                            if (capacity.approxPayments == 0)
+                            if (float.unlockedOutputs == 0)
                                 "Your money is here, but it's all tied up as change. " +
                                     "Break a note to spend again."
                             else
@@ -122,17 +143,19 @@ fun BalanceCard(
  * test — so the copy says "about".
  */
 internal fun notesPhrase(outputs: Int, approxPayments: Int): String {
-    // Notes and payments are different quantities and the first version conflated
-    // them: with two notes the capacity is one, and it printed "1 note left" —
-    // understating what the user has on the one screen §17.2 cares most about.
     val notes = if (outputs == 1) "1 note" else "$outputs notes"
+    // `approxPayments` answers "how many spends in a row without waiting for
+    // change" — it is §17.2's planning figure, and floor(1/1.5) is 0. Using it
+    // to answer "can I pay at all" told someone holding a perfectly spendable
+    // note that they could not spend it.
     return when {
-        outputs == 0 -> "No notes left — everything is out as change"
-        approxPayments == 0 -> "$notes, but not enough to cover a payment yet"
+        outputs == 0 -> "nothing unlocked yet"
+        approxPayments == 0 -> "$notes — enough for one payment, then a wait for change"
         approxPayments == 1 -> "$notes, so about one more payment"
         else -> "$notes, so about $approxPayments more payments"
     }
 }
+
 
 /** Monero stagenet and mainnet both target two-minute blocks. */
 internal fun minutesFor(blocks: Int): String = when {

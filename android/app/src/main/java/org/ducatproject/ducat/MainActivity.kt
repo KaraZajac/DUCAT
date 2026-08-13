@@ -32,7 +32,7 @@ import androidx.activity.compose.BackHandler
 import kotlinx.coroutines.launch
 import org.ducatproject.ducat.ui.AccountsScreen
 import org.ducatproject.ducat.ui.ActivityScreen
-import org.ducatproject.ducat.ui.SendReceiveSheet
+import org.ducatproject.ducat.ui.PaySheet
 import org.ducatproject.ducat.ui.ChatListScreen
 import org.ducatproject.ducat.ui.ChatScreen
 import org.ducatproject.ducat.ui.DrawerContent
@@ -178,7 +178,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             Overlay.None -> {}
         }
 
-        if (payOpen) SendReceiveSheet { payOpen = false }
+        // The whole send/request flow: who first, then how much, with contacts
+        // listed above an address field because a payment to a contact carries
+        // a note and a thread and an address payment carries neither.
+        if (payOpen) PaySheet { payOpen = false }
 
         Scaffold(
             topBar = {
@@ -275,9 +278,7 @@ private fun HomeScreen(onTopUp: () -> Unit) {
         approxPaymentsSupported(b.spendableOutputs.toUInt()).toInt()
     }
     BalanceCard(
-        // XMR, not a currency conversion. There is no rate source wired, and a
-        // dollar figure with no rate behind it is a number someone would act on.
-        spendable = Money(b.spendablePxmr / 1_000_000L, symbol = "", exponent = 6),
+        spendablePxmr = b.spendablePxmr,
         capacity = Capacity(approxPayments = approx),
         float = float,
         locked = Money(b.lockedPxmr / 1_000_000L, symbol = "", exponent = 6),

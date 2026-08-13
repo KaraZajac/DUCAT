@@ -212,7 +212,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     // no round trip to someone who may not be there.
 
     payRequest?.let { r ->
-        SendReceiveSheet(
+        PaySheet(
             prefillAddress = r.payto,
             prefillAmountPxmr = r.amountPxmr,
         ) { payRequest = null }
