@@ -817,6 +817,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -877,6 +879,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_monero_pick_node(`candidates`: RustBuffer.ByValue,`wantNettype`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_probe(`url`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_rate(`currency`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_scan(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1096,6 +1100,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_probe(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_rate(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_scan(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_scan_view_only(
@@ -1240,6 +1246,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_probe() != 57591.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_rate() != 39660.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_scan() != 7265.toShort()) {
@@ -2262,6 +2271,53 @@ public object FfiConverterTypePrekeyMaterial: FfiConverterRustBuffer<PrekeyMater
             FfiConverterByteArray.write(value.`signedSecret`, buf)
             FfiConverterSequenceByteArray.write(value.`oneTimeSecrets`, buf)
             FfiConverterSequenceUInt.write(value.`oneTimeIds`, buf)
+    }
+}
+
+
+
+/**
+ * A quote, for display only.
+ */
+data class Rate (
+    var `currency`: kotlin.String, 
+    /**
+     * Units of `currency` per XMR. A float because this never touches a spend
+     * path — §18.2 keeps money in integer piconero, and this is a caption.
+     */
+    var `perXmr`: kotlin.Double, 
+    var `source`: kotlin.String, 
+    var `fetchedAt`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeRate: FfiConverterRustBuffer<Rate> {
+    override fun read(buf: ByteBuffer): Rate {
+        return Rate(
+            FfiConverterString.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: Rate) = (
+            FfiConverterString.allocationSize(value.`currency`) +
+            FfiConverterDouble.allocationSize(value.`perXmr`) +
+            FfiConverterString.allocationSize(value.`source`) +
+            FfiConverterULong.allocationSize(value.`fetchedAt`)
+    )
+
+    override fun write(value: Rate, buf: ByteBuffer) {
+            FfiConverterString.write(value.`currency`, buf)
+            FfiConverterDouble.write(value.`perXmr`, buf)
+            FfiConverterString.write(value.`source`, buf)
+            FfiConverterULong.write(value.`fetchedAt`, buf)
     }
 }
 
@@ -3670,6 +3726,20 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_probe(
         FfiConverterString.lower(`url`),FfiConverterUInt.lower(`timeoutMs`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Fetch a quote. Two sources, because one going down should not blank the
+         * screen; both are public and need no account.
+         */
+    @Throws(MoneroException::class) fun `moneroRate`(`currency`: kotlin.String, `timeoutMs`: kotlin.UInt): Rate {
+            return FfiConverterTypeRate.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_rate(
+        FfiConverterString.lower(`currency`),FfiConverterUInt.lower(`timeoutMs`),_status)
 }
     )
     }

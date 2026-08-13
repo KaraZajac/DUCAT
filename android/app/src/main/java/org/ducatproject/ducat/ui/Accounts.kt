@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import org.ducatproject.ducat.Rates
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.formatXmr
@@ -38,6 +39,9 @@ fun AccountsScreen() {
     // end.
     val version by org.ducatproject.ducat.ContactStore.changes.collectAsState()
     val balances = remember(version) { Wallet.balances(context) }
+    val fiat = remember(version, balances.spendablePxmr) {
+        Rates.view(context, balances.spendablePxmr, stagenet = WalletStore(context).stagenet())
+    }
     val clipboard = LocalClipboardManager.current
     val wallet = remember { WalletStore(context) }
     val address = wallet.address()
@@ -125,6 +129,29 @@ fun AccountsScreen() {
                     )
                 } else {
                     BalanceRow("Spendable", "${formatXmr(b.spendablePxmr)} XMR")
+                    fiat?.let { f ->
+                        Row(Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
+                            Spacer(Modifier.weight(1f))
+                            Text(
+                                buildString {
+                                    append(f.text)
+                                    if (f.stale) append(" · old price")
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (f.notional) MaterialTheme.ducat.changePending
+                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        if (f.notional) {
+                            Text(
+                                "Stagenet coins are test coins. That figure is what this " +
+                                    "much real Monero would be worth — these are worth nothing.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.ducat.changePending,
+                            )
+                            Spacer(Modifier.height(6.dp))
+                        }
+                    }
                     if (b.lockedPxmr > 0) {
                         BalanceRow(
                             "Locked",

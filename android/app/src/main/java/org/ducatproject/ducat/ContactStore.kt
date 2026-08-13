@@ -615,6 +615,45 @@ class WalletStore(context: Context) {
         prefs.getString("wallet_height", null)?.toULongOrNull() ?: 0uL
 }
 
+/**
+ * The exchange rate, cached.
+ *
+ * Cached hard on purpose. A price lookup tells whoever answers that this device
+ * cares about Monero's price, at a time, from an IP — a smaller disclosure than
+ * the wallet already makes to a public node, but one the user did not ask for.
+ * Half an hour is a long time for a price and a short time for a pattern.
+ */
+class RateStore(context: Context) {
+    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+
+    /** Off means off: no request is made at all, not a hidden one. */
+    fun enabled(): Boolean = prefs.getBoolean("rate_enabled", true)
+    fun setEnabled(v: Boolean) = prefs.edit().putBoolean("rate_enabled", v).apply()
+
+    fun currency(): String = prefs.getString("rate_currency", "USD") ?: "USD"
+    fun setCurrency(v: String) =
+        prefs.edit().putString("rate_currency", v).remove("rate_value").apply()
+
+    fun cached(): Pair<Double, Long>? {
+        val v = prefs.getFloat("rate_value", 0f).toDouble()
+        val at = prefs.getLong("rate_at", 0L)
+        return if (v > 0 && at > 0) v to at else null
+    }
+
+    fun store(v: Double, at: Long, source: String) = prefs.edit()
+        .putFloat("rate_value", v.toFloat())
+        .putLong("rate_at", at)
+        .putString("rate_source", source)
+        .apply()
+
+    fun source(): String = prefs.getString("rate_source", "") ?: ""
+
+    fun isStale(maxAgeSecs: Long = 1800): Boolean {
+        val at = cached()?.second ?: return true
+        return System.currentTimeMillis() / 1000 - at > maxAgeSecs
+    }
+}
+
 /** Which Monero node to use, and the last one that worked. */
 class NodeStore(context: Context) {
     private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)

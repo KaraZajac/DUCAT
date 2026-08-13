@@ -444,3 +444,89 @@ fn hex_to_bytes(s: &str) -> Option<Vec<u8>> {
         .map(|i| u8::from_str_radix(&s[i..i + 2], 16).ok())
         .collect()
 }
+
+// ---------------------------------------------------------------------------
+// What it is worth, and the two ways that question misleads
+// ---------------------------------------------------------------------------
+//
+// **Asking leaks.** A price lookup tells whoever answers that this device cares
+// about Monero's price, at a time, from an IP. That is a smaller disclosure than
+// the wallet itself makes to a public node, but it is a disclosure the user did
+// not ask for, so it is cached hard and can be turned off entirely.
+//
+// **A stagenet balance is worth nothing.** Converting test coins to a currency
+// figure would put a number on the screen that a person could act on, and there
+// is no world in which that number is true. The rate is still shown, because it
+// is real, but the caller is told which network it is pricing so it can say so.
+
+/// A quote, for display only.
+#[derive(uniffi::Record, Clone)]
+pub struct Rate {
+    pub currency: String,
+    /// Units of `currency` per XMR. A float because this never touches a spend
+    /// path — §18.2 keeps money in integer piconero, and this is a caption.
+    pub per_xmr: f64,
+    pub source: String,
+    pub fetched_at: u64,
+}
+
+/// Fetch a quote. Two sources, because one going down should not blank the
+/// screen; both are public and need no account.
+#[uniffi::export]
+pub fn monero_rate(currency: String, timeout_ms: u32) -> Result<Rate, MoneroError> {
+    let cur = currency.to_lowercase();
+    let agent = ureq::AgentBuilder::new()
+        .timeout(Duration::from_millis(timeout_ms as u64))
+        .build();
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+
+    let cg = format!(
+        "https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies={cur}"
+    );
+    if let Ok(r) = agent.get(&cg).call() {
+        if let Ok(txt) = r.into_string() {
+            if let Ok(v) = serde_json::from_str::<serde_json::Value>(&txt) {
+                if let Some(p) = v["monero"][&cur].as_f64() {
+                    return Ok(Rate {
+                        currency: cur.to_uppercase(),
+                        per_xmr: p,
+                        source: "CoinGecko".into(),
+                        fetched_at: now,
+                    });
+                }
+            }
+        }
+    }
+
+    // Kraken quotes a handful of pairs directly. Only used when the first
+    // source fails, so the common case is one request rather than two.
+    if matches!(cur.as_str(), "usd" | "eur" | "gbp") {
+        let pair = format!("XMR{}", cur.to_uppercase());
+        let url = format!("https://api.kraken.com/0/public/Ticker?pair={pair}");
+        if let Ok(r) = agent.get(&url).call() {
+            if let Ok(txt) = r.into_string() {
+                if let Ok(v) = serde_json::from_str::<serde_json::Value>(&txt) {
+                    if let Some(obj) = v["result"].as_object() {
+                        if let Some(first) = obj.values().next() {
+                            if let Some(last) = first["c"][0].as_str() {
+                                if let Ok(p) = last.parse::<f64>() {
+                                    return Ok(Rate {
+                                        currency: cur.to_uppercase(),
+                                        per_xmr: p,
+                                        source: "Kraken".into(),
+                                        fetched_at: now,
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Err(MoneroError::Failed("no price source answered".into()))
+}

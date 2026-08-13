@@ -125,3 +125,46 @@ fun formatXmr(pxmr: Long): String {
     val micro = frac / 1_000_000L
     return if (whole == 0L && micro == 0L && pxmr > 0) "<0.000001" else "%d.%06d".format(whole, micro)
 }
+
+
+/**
+ * A balance as a currency figure, and whether it means anything.
+ *
+ * **A stagenet balance is worth nothing.** Converting test coins to a currency
+ * amount would put a number on the screen that someone could act on, and there
+ * is no reading under which it is true. So the conversion is computed and the
+ * caller is told it is notional; the screen must say so rather than showing a
+ * figure that looks like money.
+ */
+data class FiatView(
+    val text: String,
+    val notional: Boolean,
+    val stale: Boolean,
+)
+
+object Rates {
+    /** Refresh if the cache is stale and the user has not turned it off. */
+    fun refresh(context: Context) {
+        val store = RateStore(context)
+        if (!store.enabled() || !store.isStale()) return
+        try {
+            val r = uniffi.ducat_mobile.moneroRate(store.currency(), 12_000u)
+            store.store(r.perXmr, r.fetchedAt.toLong(), r.source)
+        } catch (e: Exception) {
+            Log.w(TAG, "rate: ${e.message}")
+        }
+    }
+
+    fun view(context: Context, pxmr: Long, stagenet: Boolean): FiatView? {
+        val store = RateStore(context)
+        if (!store.enabled()) return null
+        val (rate, _) = store.cached() ?: return null
+        val xmr = pxmr.toDouble() / 1_000_000_000_000.0
+        val amount = xmr * rate
+        return FiatView(
+            text = "%s %.2f".format(store.currency(), amount),
+            notional = stagenet,
+            stale = store.isStale(),
+        )
+    }
+}

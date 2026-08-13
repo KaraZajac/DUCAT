@@ -47,6 +47,10 @@ class Poller(private val context: Context) {
                     }
                 }.onFailure { Log.w(TAG, "scan: ${it.message}") }
 
+                // Cheap: it only leaves the device when the cache has expired.
+                runCatching { Rates.refresh(context) }
+                    .onFailure { Log.w(TAG, "rate: ${it.message}") }
+
                 delay(10_000)
             }
         }

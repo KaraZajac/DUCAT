@@ -18,6 +18,7 @@ import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.NameStore
 import org.ducatproject.ducat.PersonaStore
+import org.ducatproject.ducat.RateStore
 import org.ducatproject.ducat.WalletStore
 
 /**
@@ -134,6 +135,52 @@ fun SectionScreen(
 
         Section.Modes -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Not built yet.", style = MaterialTheme.typography.bodyLarge)
+        }
+    }
+}
+
+/**
+ * Whether to look up a price at all, and in what currency.
+ *
+ * Off means no request is made, not a quieter one. Asking tells whoever answers
+ * that this device cares about Monero's price — smaller than what the wallet
+ * already tells a public node, but not nothing, and not something to do on a
+ * user's behalf without a way to decline.
+ */
+@Composable
+private fun RateSettings() {
+    val context = LocalContext.current
+    val store = remember { RateStore(context) }
+    var on by remember { mutableStateOf(store.enabled()) }
+    var cur by remember { mutableStateOf(store.currency()) }
+
+    Column {
+        Text("Prices", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Switch(checked = on, onCheckedChange = { on = it; store.setEnabled(it) })
+            Spacer(Modifier.width(12.dp))
+            Text("Show what a balance is worth")
+        }
+        if (on) {
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("USD", "EUR", "GBP").forEach { c ->
+                    FilterChip(
+                        selected = cur == c,
+                        onClick = { cur = c; store.setCurrency(c) },
+                        label = { Text(c) },
+                    )
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Looked up at most twice an hour, from CoinGecko or Kraken. Turning " +
+                    "this off stops the request entirely." +
+                    (if (store.source().isNotEmpty()) " Last from ${store.source()}." else ""),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
