@@ -39,48 +39,50 @@ fun BalanceCard(
     /** The scan behind the number above. Null only where there is no wallet. */
     sync: org.ducatproject.ducat.Balances? = null,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        shape = RoundedCornerShape(20.dp),
-    ) {
-        Column(Modifier.padding(20.dp)) {
-            // Spendable *now* — not the total. The total is the number that
-            // gets someone declined at a counter.
-            Text("Ready to spend", style = MaterialTheme.typography.labelLarge)
-            // Through the shared formatter, so the currency switch reaches the
-            // one number people actually look at. It bypassed it before, which
-            // is how the headline figure ended up unitless.
-            val ctx = androidx.compose.ui.platform.LocalContext.current
-            val shown = org.ducatproject.ducat.Amounts.show(ctx, spendablePxmr)
-            Text(
-                shown.primary,
-                fontSize = 40.sp,
-                fontWeight = FontWeight.Bold,
-                // Tapping the amount flips the unit. The balance is where
-                // someone asks "how much is that really", so it is where the
-                // answer should be one tap away.
-                modifier = Modifier.clickable(enabled = shown.secondary != null) {
-                    org.ducatproject.ducat.Amounts.setPreferFiat(
-                        ctx, !org.ducatproject.ducat.Amounts.preferFiat(ctx),
-                    )
-                },
-            )
-            shown.secondary?.let {
-                Text(
-                    it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+    // The number lives on the page, not in a card. Venmo and PayPal both do
+    // this and it is why their home screens read as calm: a card is a box you
+    // evaluate, a figure on the page is a fact you own. The card below holds
+    // the qualifications, which are details and deserve a box.
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val shown = org.ducatproject.ducat.Amounts.show(ctx, spendablePxmr)
+    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+        Spacer(Modifier.height(20.dp))
+        Text(
+            "Ready to spend",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(2.dp))
+        Text(
+            shown.primary,
+            style = MaterialTheme.typography.displayLarge,
+            // Tapping the amount flips the unit. The balance is where
+            // someone asks "how much is that really", so it is where the
+            // answer should be one tap away.
+            modifier = Modifier.clickable(enabled = shown.secondary != null) {
+                org.ducatproject.ducat.Amounts.setPreferFiat(
+                    ctx, !org.ducatproject.ducat.Amounts.preferFiat(ctx),
                 )
-            }
+            },
+        )
+        shown.secondary?.let {
+            Text(
+                it,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        // Directly under the figure it qualifies. A caveat placed further
+        // down is a caveat someone reads after deciding.
+        sync?.let {
+            Spacer(Modifier.height(12.dp))
+            SyncStatus(it)
+        }
+        Spacer(Modifier.height(20.dp))
+    }
 
-            // Directly under the figure it qualifies. A caveat placed further
-            // down is a caveat someone reads after deciding.
-            sync?.let {
-                Spacer(Modifier.height(10.dp))
-                SyncStatus(it)
-            }
-
-            Spacer(Modifier.height(4.dp))
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+        Column(Modifier.padding(20.dp)) {
 
             // §17.2 forbids an exact promise, so the wording carries the
             // approximation rather than hiding it behind a precise-looking digit.

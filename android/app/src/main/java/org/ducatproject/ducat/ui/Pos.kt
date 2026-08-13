@@ -278,7 +278,7 @@ private fun PresentScreen(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("${formatXmr(totalPxmr)} XMR", fontSize = 32.sp, fontWeight = FontWeight.Bold)
+        Text("${formatXmr(totalPxmr)} XMR", style = MaterialTheme.typography.displayMedium)
         Amounts.show(context, totalPxmr).secondary?.let {
             Text(it, style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)

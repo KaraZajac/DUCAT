@@ -11,6 +11,26 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+/**
+ * One radius family, applied everywhere.
+ *
+ * Mixed corner radii are one of those things nobody names and everybody sees.
+ * Inputs and chips sit at the small end, cards at the large end, and dialogs
+ * larger still — the same progression PayPal and Venmo use, where the bigger
+ * the surface, the softer its corner.
+ */
+val DucatShapes = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(20.dp),
+    extraLarge = RoundedCornerShape(28.dp),
+)
 
 /** What the user chose, if anything. */
 enum class ThemeMode { System, Latte, Mocha }
@@ -28,6 +48,16 @@ private val LocalDucatColors = staticCompositionLocalOf { LatteMeaning }
 val MaterialTheme.ducat: DucatColors
     @Composable get() = LocalDucatColors.current
 
+/**
+ * The tones between background and card.
+ *
+ * These were never set, and that omission was most of why the app looked
+ * "almost right": Material 3 components — every Card, the navigation bar, menus
+ * — take their fill from `surfaceContainer*`, and an unset role falls back to
+ * the baseline Material palette. So cards rendered in Google's grey-violet
+ * while everything around them was Catppuccin, one tone off everywhere, on
+ * every screen, too subtle to name and impossible not to feel.
+ */
 private fun latteScheme() = lightColorScheme(
     primary = Latte.mauve,
     onPrimary = Latte.base,
@@ -48,7 +78,14 @@ private fun latteScheme() = lightColorScheme(
     onSurface = Latte.text,
     surfaceVariant = Latte.surface0,
     onSurfaceVariant = Latte.subtext0,
+    surfaceContainerLowest = Latte.base,
+    surfaceContainerLow = Latte.mantle,
+    surfaceContainer = Latte.mantle,
+    surfaceContainerHigh = Latte.crust,
+    surfaceContainerHighest = Latte.surface0,
+    surfaceTint = Color.Transparent,
     outline = Latte.overlay0,
+    outlineVariant = Latte.surface1,
     error = Latte.red,
     onError = Latte.base,
     errorContainer = Latte.crust,
@@ -72,7 +109,14 @@ private fun mochaScheme() = darkColorScheme(
     onSurface = Mocha.text,
     surfaceVariant = Mocha.surface0,
     onSurfaceVariant = Mocha.subtext0,
+    surfaceContainerLowest = Mocha.crust,
+    surfaceContainerLow = Mocha.mantle,
+    surfaceContainer = Mocha.mantle,
+    surfaceContainerHigh = Mocha.surface0,
+    surfaceContainerHighest = Mocha.surface1,
+    surfaceTint = Color.Transparent,
     outline = Mocha.overlay0,
+    outlineVariant = Mocha.surface1,
     error = Mocha.red,
     onError = Mocha.crust,
     errorContainer = Mocha.surface0,
@@ -87,7 +131,11 @@ fun DucatTheme(mode: ThemeMode = ThemeMode.System, content: @Composable () -> Un
         ThemeMode.Mocha -> true
     }
     CompositionLocalProvider(LocalDucatColors provides if (dark) MochaMeaning else LatteMeaning) {
-        MaterialTheme(colorScheme = if (dark) mochaScheme() else latteScheme()) {
+        MaterialTheme(
+            colorScheme = if (dark) mochaScheme() else latteScheme(),
+            typography = DucatTypography,
+            shapes = DucatShapes,
+        ) {
             // The Surface is not decoration. Without it only screens that bring
             // their own Scaffold get a background, and the rest show the
             // Activity's window colour through — which is how onboarding

@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -207,7 +208,14 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(if (tab == Tab.Home) "" else tab.label) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                    ),
+                    title = {
+                        if (tab != Tab.Home) {
+                            Text(tab.label, style = MaterialTheme.typography.titleLarge)
+                        }
+                    },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawer.open() } }) {
                             Icon(Icons.Filled.Menu, contentDescription = "Menu")
@@ -217,6 +225,19 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                         IconButton(onClick = { qrOpen = true }) {
                             Icon(Icons.Filled.QrCode2, contentDescription = "Codes")
                         }
+                        // Your own face, where Venmo puts it, and it goes where
+                        // a face should: the profile. Re-read on store changes
+                        // so a newly set picture appears without a restart.
+                        val pv by ContactStore.changes.collectAsState()
+                        val me = remember(pv) { MyProfile(context) }
+                        Box(
+                            Modifier.padding(end = 8.dp)
+                                .clickable { overlay = Overlay.Drawer(Section.Profile) },
+                        ) {
+                            org.ducatproject.ducat.ui.Avatar(
+                                me.name() ?: "?", me.avatar(), size = 32,
+                            )
+                        }
                     },
                 )
             },
@@ -225,7 +246,13 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 // above was a real bug on a real screen: the button covered the
                 // card beneath it, and on a payment screen the thing being
                 // covered is a number someone is about to act on.
-                NavigationBar {
+                // Blends with the background rather than sitting on a tonal
+                // band — the same trick every app the user recognises uses to
+                // make the bar feel like part of the screen instead of a tray.
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    tonalElevation = 0.dp,
+                ) {
                     NavItem(Tab.Home, Icons.Filled.Home, tab) { tab = it }
                     // The coin, which we already draw for the launcher. Nothing
                     // in the core icon set means "your money" without borrowing

@@ -78,8 +78,7 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
             val amount = Amounts.show(context, e.amountPxmr)
             Text(
                 "${if (sent) "−" else "+"}${amount.primary}",
-                fontSize = 34.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.displayMedium,
             )
             amount.secondary?.let {
                 Text(it, style = MaterialTheme.typography.bodyMedium,

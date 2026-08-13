@@ -103,6 +103,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                         store.thread(c.personaHex).lastOrNull()
                     }
                     ListItem(
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                         headlineContent = { Text(c.displayName()) },
                         supportingContent = {
                             Text(
@@ -121,7 +122,6 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                         },
                         modifier = Modifier.clickable { onOpenChat(c) },
                     )
-                    HorizontalDivider()
                 }
             }
         }
@@ -188,6 +188,7 @@ private fun RestoreChatSheet(
             )
             hidden.forEach { c ->
                 ListItem(
+                    colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(c.displayName()) },
                     leadingContent = { Avatar(c.displayName(), c.avatar) },
                     modifier = Modifier.clickable { onPick(c) },

@@ -380,7 +380,7 @@ private fun AmountStep(
                     maxLocked = false
                 },
                 placeholder = { Text("0") },
-                textStyle = MaterialTheme.typography.headlineLarge,
+                textStyle = MaterialTheme.typography.displayMedium,
                 singleLine = true,
                 isError = overMax,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),

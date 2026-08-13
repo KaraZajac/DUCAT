@@ -91,7 +91,7 @@ fun ActivityScreen() {
     }
 
     LazyColumn(Modifier.fillMaxSize()) {
-        items(events) { e -> EventRow(e) { open = e }; HorizontalDivider() }
+        items(events) { e -> EventRow(e) { open = e } }
     }
 }
 
@@ -104,6 +104,12 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
 
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
+        // On the page itself. ListItem's default fill is a tonal band, and a
+        // list of bands reads as a table; rows on the background with space
+        // between them read as a feed, which is the register every payments
+        // app the user knows writes in. The ruling lines went for the same
+        // reason — the avatars already separate the rows.
+        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
         leadingContent = {
             Icon(
                 when {
