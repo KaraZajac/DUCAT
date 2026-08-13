@@ -199,16 +199,33 @@ pub fn parse_contact_details(bytes: Vec<u8>) -> Result<PeerDetails, ContactError
 
 // --- the outbox ring (§16.12) ---------------------------------------------
 
+/// Encode a head, republishing our current prekeys with it.
+///
+/// The bundle rides along because the head is read on every poll, so a
+/// refreshed supply reaches every reader for no extra round trip. Without it a
+/// pair that exhausts its one-time keys stays on the signed prekey forever —
+/// forward secrecy quietly gone, and no path back.
 #[uniffi::export]
-pub fn build_log_head(next_seq: u64) -> Vec<u8> {
-    LogHead { version: 1, suite: 1, next_seq }.to_value().encode()
+pub fn build_log_head(next_seq: u64, prekey_bundle: Option<Vec<u8>>) -> Vec<u8> {
+    LogHead { version: 1, suite: 1, next_seq, prekey_bundle }
+        .to_value()
+        .encode()
+}
+
+/// A head, decoded.
+#[derive(uniffi::Record, Clone)]
+pub struct HeadInfo {
+    pub next_seq: u64,
+    /// Present when the publisher included refreshed keys. A reader that sees
+    /// one should replace its cached copy: keeping a stale bundle means sealing
+    /// to keys that were consumed long ago.
+    pub prekey_bundle: Option<Vec<u8>>,
 }
 
 #[uniffi::export]
-pub fn parse_log_head(bytes: Vec<u8>) -> Result<u64, ContactError> {
-    Ok(LogHead::from_value(decode(&bytes).map_err(refuse)?)
-        .map_err(refuse)?
-        .next_seq)
+pub fn parse_log_head(bytes: Vec<u8>) -> Result<HeadInfo, ContactError> {
+    let h = LogHead::from_value(decode(&bytes).map_err(refuse)?).map_err(refuse)?;
+    Ok(HeadInfo { next_seq: h.next_seq, prekey_bundle: h.prekey_bundle })
 }
 
 /// Which subkey a sequence number occupies. Subkey 0 is the head, so an

@@ -81,7 +81,7 @@ async fn make_log(rc: &RoutingContext) -> Result<RecordKey, Box<dyn std::error::
     let desc = rc
         .create_dht_record(CRYPTO_KIND_VLD0, DHTSchema::dflt(LOG_SUBKEYS as u16)?, None)
         .await?;
-    let head = LogHead { version: 1, suite: 1, next_seq: 0 };
+    let head = LogHead { version: 1, suite: 1, next_seq: 0, prekey_bundle: None };
     rc.set_dht_value(desc.key().clone(), 0, head.to_value().encode(), None)
         .await?;
     Ok(desc.key().clone())
@@ -100,7 +100,7 @@ async fn append(
 ) -> Result<(), Box<dyn std::error::Error>> {
     rc.set_dht_value(log.clone(), subkey_for(seq, LOG_SUBKEYS), body.to_vec(), None)
         .await?;
-    let head = LogHead { version: 1, suite: 1, next_seq: seq + 1 };
+    let head = LogHead { version: 1, suite: 1, next_seq: seq + 1, prekey_bundle: None };
     rc.set_dht_value(log.clone(), 0, head.to_value().encode(), None)
         .await?;
     Ok(())

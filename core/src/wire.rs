@@ -141,6 +141,7 @@ pub mod f {
 
     // LOG_HEAD (§16.12)
     pub const HEAD_NEXT: u64 = 176;
+    pub const HEAD_BUNDLE: u64 = 177;
 
     // MESSAGE (§16.10)
     pub const MSG_SEQ: u64 = 157;

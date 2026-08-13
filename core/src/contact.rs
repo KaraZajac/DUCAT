@@ -181,6 +181,15 @@ pub struct LogHead {
     /// The sequence number the *next* message will carry. Also the count of
     /// messages ever written, which is what makes a gap detectable.
     pub next_seq: u64,
+    /// The publisher's **current** prekey bundle (§16.11).
+    ///
+    /// Carried here because the head is read on every poll anyway, so a
+    /// refreshed bundle reaches every reader for no extra round trip — and
+    /// because there is otherwise nowhere to put one. The handshake inbox is a
+    /// one-time artifact and may be deleted, so a supply exhausted after it was
+    /// read could never be replenished: the pair would stay on the signed
+    /// prekey permanently, with forward secrecy quietly gone for good.
+    pub prekey_bundle: Option<Vec<u8>>,
 }
 
 impl LogHead {
@@ -190,6 +199,9 @@ impl LogHead {
         m.insert(f::VERSION, Value::Uint(self.version));
         m.insert(f::SUITE, Value::Uint(self.suite as u64));
         m.insert(f::HEAD_NEXT, Value::Uint(self.next_seq));
+        if let Some(b) = &self.prekey_bundle {
+            m.insert(f::HEAD_BUNDLE, Value::Bytes(b.clone()));
+        }
         Value::Map(m)
     }
 
@@ -205,6 +217,7 @@ impl LogHead {
             version: r.uint(f::VERSION)?,
             suite: r.uint(f::SUITE)? as u8,
             next_seq: r.uint(f::HEAD_NEXT)?,
+            prekey_bundle: r.opt_bytes(f::HEAD_BUNDLE, None)?,
         };
         r.finish()?;
         Ok(out)

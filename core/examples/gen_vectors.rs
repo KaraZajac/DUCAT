@@ -1212,7 +1212,7 @@ fn contact_cases() -> Vec<J> {
         ("head_zero", "A log nobody has written to yet: the next message will be sequence 0.", 0u64),
         ("head_mid", "next_seq doubles as the count of messages ever written, which is what makes a gap detectable.", 42u64),
     ] {
-        let h = LogHead { version: 1, suite: 1, next_seq: seq };
+        let h = LogHead { version: 1, suite: 1, next_seq: seq, prekey_bundle: None };
         let hex_body = hex(&h.to_value().encode());
         v.push(json!({ "name": name, "why": why, "head_hex": hex_body,
                        "expect": { "ok": true, "reencodes_to_hex": hex_body } }));

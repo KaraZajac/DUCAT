@@ -828,7 +828,7 @@ internal interface UniffiLib : Library {
     ): Int
     fun uniffi_ducat_mobile_fn_func_build_contact_details(`personaSecret`: RustBuffer.ByValue,`outboxKey`: RustBuffer.ByValue,`prekeyBundle`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_build_log_head(`nextSeq`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_build_log_head(`nextSeq`: Long,`prekeyBundle`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_bundle_one_time_count(`bundleBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -893,7 +893,7 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_parse_contact_details(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_parse_log_head(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-    ): Long
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_persona_public_hex(`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_plan_float(`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -1149,7 +1149,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_build_contact_details() != 46604.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_build_log_head() != 23126.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_build_log_head() != 42400.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_bundle_one_time_count() != 35922.toShort()) {
@@ -1245,7 +1245,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_parse_contact_details() != 50912.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_parse_log_head() != 60224.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_parse_log_head() != 56522.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_persona_public_hex() != 1339.toShort()) {
@@ -1616,6 +1616,46 @@ public object FfiConverterTypeFloatPlan: FfiConverterRustBuffer<FloatPlan> {
     override fun write(value: FloatPlan, buf: ByteBuffer) {
             FfiConverterUInt.write(value.`outputs`, buf)
             FfiConverterULong.write(value.`totalPxmr`, buf)
+    }
+}
+
+
+
+/**
+ * A head, decoded.
+ */
+data class HeadInfo (
+    var `nextSeq`: kotlin.ULong, 
+    /**
+     * Present when the publisher included refreshed keys. A reader that sees
+     * one should replace its cached copy: keeping a stale bundle means sealing
+     * to keys that were consumed long ago.
+     */
+    var `prekeyBundle`: kotlin.ByteArray?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeHeadInfo: FfiConverterRustBuffer<HeadInfo> {
+    override fun read(buf: ByteBuffer): HeadInfo {
+        return HeadInfo(
+            FfiConverterULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: HeadInfo) = (
+            FfiConverterULong.allocationSize(value.`nextSeq`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`prekeyBundle`)
+    )
+
+    override fun write(value: HeadInfo, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`nextSeq`, buf)
+            FfiConverterOptionalByteArray.write(value.`prekeyBundle`, buf)
     }
 }
 
@@ -2850,11 +2890,19 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
     )
     }
     
- fun `buildLogHead`(`nextSeq`: kotlin.ULong): kotlin.ByteArray {
+
+        /**
+         * Encode a head, republishing our current prekeys with it.
+         *
+         * The bundle rides along because the head is read on every poll, so a
+         * refreshed supply reaches every reader for no extra round trip. Without it a
+         * pair that exhausts its one-time keys stays on the signed prekey forever —
+         * forward secrecy quietly gone, and no path back.
+         */ fun `buildLogHead`(`nextSeq`: kotlin.ULong, `prekeyBundle`: kotlin.ByteArray?): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_build_log_head(
-        FfiConverterULong.lower(`nextSeq`),_status)
+        FfiConverterULong.lower(`nextSeq`),FfiConverterOptionalByteArray.lower(`prekeyBundle`),_status)
 }
     )
     }
@@ -3319,8 +3367,8 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
     }
     
 
-    @Throws(ContactException::class) fun `parseLogHead`(`bytes`: kotlin.ByteArray): kotlin.ULong {
-            return FfiConverterULong.lift(
+    @Throws(ContactException::class) fun `parseLogHead`(`bytes`: kotlin.ByteArray): HeadInfo {
+            return FfiConverterTypeHeadInfo.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_parse_log_head(
         FfiConverterByteArray.lower(`bytes`),_status)

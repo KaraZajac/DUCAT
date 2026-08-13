@@ -111,7 +111,7 @@ fn details_must_name_an_outbox() {
 
 #[test]
 fn heads_round_trip() {
-    let h = LogHead { version: 1, suite: 1, next_seq: 42 };
+    let h = LogHead { version: 1, suite: 1, next_seq: 42, prekey_bundle: None };
     assert_eq!(LogHead::from_value(h.to_value()).unwrap(), h);
 }
 

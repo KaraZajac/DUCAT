@@ -68,7 +68,7 @@ object Mailbox {
     /** A fresh append-only log with its head initialised. */
     private fun createLog(): DhtRecord {
         val rec = nodeDhtCreate(LOG_SUBKEYS)
-        nodeDhtSet(rec.key, 0u, buildLogHead(0uL))
+        nodeDhtSet(rec.key, 0u, buildLogHead(0uL, null))
         return rec
     }
 
@@ -184,7 +184,13 @@ object Mailbox {
         }
         nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
         nodeDhtSet(c.myOutbox, logSubkey(c.outSeq.toULong(), LOG_SUBKEYS), sealed.bytes)
-        nodeDhtSet(c.myOutbox, 0u, buildLogHead((c.outSeq + 1).toULong()))
+        // Republish our keys with every head write. Cheap — the head is read on
+        // every poll anyway — and it is the only route back from an exhausted
+        // supply, since the handshake inbox is a one-time artifact.
+        nodeDhtSet(
+            c.myOutbox, 0u,
+            buildLogHead((c.outSeq + 1).toULong(), topUpIfLow(store)),
+        )
 
         store.append(
             c.personaHex,
@@ -208,6 +214,25 @@ object Mailbox {
         return store.all().first { it.personaHex == c.personaHex }
     }
 
+    /**
+     * Our current bundle, regenerated first if the one-time supply has run low.
+     *
+     * Six is a threshold rather than zero: hitting zero means the *next* sender
+     * is already on the signed prekey, and this only refreshes when we happen
+     * to write a head. Leaving headroom is what keeps forward secrecy the
+     * normal case rather than the lucky one.
+     */
+    private fun topUpIfLow(store: ContactStore): ByteArray? {
+        if (store.oneTimeRemaining() > 6) return store.prekeyBundle()
+        val m = generatePrekeys(ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL)
+        store.savePrekeys(
+            m.bundle, m.signedSecret,
+            m.oneTimeIds.mapIndexed { i, id -> id.toInt() to m.oneTimeSecrets[i] }.toMap(),
+        )
+        Log.i(TAG, "topped up one-time keys")
+        return m.bundle
+    }
+
     /** Read everything new from every contact's outbox. Returns how many landed. */
     fun poll(context: Context): Int {
         val store = ContactStore(context)
@@ -227,7 +252,12 @@ object Mailbox {
     private fun pollOne(store: ContactStore, c: Contact, minePersonaHex: String): Int {
         nodeDhtOpen(c.theirOutbox, null, null)
         val headRaw = nodeDhtGet(c.theirOutbox, 0u, true) ?: return 0
-        val next = parseLogHead(headRaw)
+        val head = parseLogHead(headRaw)
+        val next = head.nextSeq
+        // Take their refreshed keys if they published any. A stale cached bundle
+        // means sealing to keys they consumed long ago, which fails on their
+        // side and looks like the network.
+        head.prekeyBundle?.let { store.setTheirBundle(c.personaHex, it) }
         var seq = c.inSeq.toULong()
         var prev = c.inPrevLink
         var count = 0

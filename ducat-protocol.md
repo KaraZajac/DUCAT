@@ -1736,6 +1736,7 @@ Four rules, each carrying a failure it prevents:
 | Duplicate prekey ids are `MALFORMED` | "Delete after use" becomes ambiguous, and that deletion is the only thing the property rests on. |
 | Id `0` is reserved for the signed prekey | A one-time key claiming it would be treated as the non-consumed fallback. |
 | Ciphertexts are bounded before any key is consulted | A peer must not be able to make a recipient allocate arbitrarily to reach a decryption failure. |
+| A publisher MUST be able to **replenish**, and readers MUST take the refresh | The handshake inbox is a one-time artifact and may be deleted, so a supply exhausted after it was read has nowhere to be topped up from — the pair stays on the signed prekey permanently, forward secrecy quietly gone with no path back. §16.12's log head carries the publisher's current bundle for this reason: it is read on every poll, so a refresh costs no extra round trip. Replenish on a **threshold rather than at zero**, since reaching zero means the next sender is already on the fallback. |
 | A sender MUST **withdraw a used key from its cached copy** of the recipient's bundle | `select` is not stateful and must not be — it is a pure read of a published list. A sender that never prunes therefore seals every message to the same key: the first is accepted, the receiver burns it, and every message after that returns an unknown prekey. It presents as the recipient breaking after exactly one message. Observed between two devices, and it is the row below on the other side of the wire — fixing one does not fix the other. |
 | Consuming a key MUST also **withdraw it from the published bundle** | Deleting the secret alone leaves the bundle advertising a key that can no longer decrypt anything. Senders take the first one-time entry, so the first key ever consumed is offered forever, and every later message is refused — identically after a re-fetch, since the stale bundle is what gets re-served. Observed between two real devices: the first message worked and every one after it failed. Half a deletion fails closed on everything that follows, which is worse than no deletion at all. |
 
@@ -2215,8 +2216,8 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 164–166 | `SEALED_MESSAGE` (§16.11) | **Assigned** |
 | 167–171 | `CONTACT_OFFER` — the record-based card (§16.12) | **Assigned** |
 | 172–175 | `CONTACT_ACCEPT` — inbox details (§16.12) | **Assigned** |
-| 176 | `LOG_HEAD` (§16.12) | **Assigned** |
-| 177+ | Unallocated | — |
+| 176–177 | `LOG_HEAD` (§16.12) | **Assigned** |
+| 178+ | Unallocated | — |
 
 The `96+ Unallocated` row above was stale from 0.14 onward: 96–103 had been in use since `TERMS` and `MANDATE` shipped, and a second implementer allocating from 96 would have collided head-on. Registries decay silently unless something checks them, which is the argument for the type-code rule below.
 
