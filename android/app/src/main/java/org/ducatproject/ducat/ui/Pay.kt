@@ -264,6 +264,19 @@ private fun AmountStep(
         runCatching { amountFocus.requestFocus() }
     }
 
+    // A finished payment has nothing left to do here, and staying put is worse
+    // than idle: the send consumed the note it was spending, so Max drops to
+    // zero and the form reads as an error the moment it succeeds. Long enough
+    // to read the confirmation, then back to wherever this was opened from —
+    // the conversation, or Home. `onDone` existed and was never called, which
+    // is why it never left.
+    LaunchedEffect(done) {
+        if (done != null) {
+            kotlinx.coroutines.delay(1600)
+            onDone()
+        }
+    }
+
     // The ceiling, priced. Not the balance: offering the balance as the maximum
     // is how a wallet lets someone type a number it will then refuse, after
     // they have already decided.

@@ -456,6 +456,29 @@ pub async fn watch(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
                     }
                     let mark = if one_time { "" } else { " \x1b[33m(no forward secrecy)\x1b[0m" };
                     println!("  \x1b[36m←\x1b[0m [{}] {}{}", m.seq, m.body, mark);
+                    // A payment message is mostly *not* its text. Printing only
+                    // the body threw away the amount, the destination and the
+                    // transaction — which is to say it threw away every field
+                    // §16.13 added, and made a request unactionable from here.
+                    if m.kind != MessageKind::Text {
+                        println!(
+                            "        \x1b[35m{}\x1b[0m{}",
+                            match m.kind {
+                                MessageKind::PaymentRequest => "asks for payment",
+                                MessageKind::PaymentSent => "says they sent",
+                                MessageKind::Text => unreachable!(),
+                            },
+                            m.amount_pxmr
+                                .map(|a| format!(" {a} pXMR ({:.6} XMR)", a as f64 / 1e12))
+                                .unwrap_or_default(),
+                        );
+                        if let Some(p) = &m.payto {
+                            println!("        pay to: {p}");
+                        }
+                        if let Some(t) = &m.txid {
+                            println!("        txid:   {}", hex::encode(t));
+                        }
+                    }
                     prev = Some(m);
                     seq += 1;
                 }
