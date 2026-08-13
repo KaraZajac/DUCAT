@@ -115,12 +115,18 @@ fun QrHub(
                             selected = scanning,
                             onClick = { scanning = true },
                             shape = SegmentedButtonDefaults.itemShape(0, 2),
+                            // No checkmark — the fill already says which is active,
+                            // and the icon shoves the label sideways when it appears.
+                            icon = {},
                             modifier = Modifier.weight(1f),
                         ) { Text("Scan code", maxLines = 1, softWrap = false) }
                         SegmentedButton(
                             selected = !scanning,
                             onClick = { scanning = false },
                             shape = SegmentedButtonDefaults.itemShape(1, 2),
+                            // No checkmark — the fill already says which is active,
+                            // and the icon shoves the label sideways when it appears.
+                            icon = {},
                             modifier = Modifier.weight(1f),
                         ) { Text("My code", maxLines = 1, softWrap = false) }
                     }

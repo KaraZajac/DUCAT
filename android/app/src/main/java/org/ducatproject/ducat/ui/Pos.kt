@@ -290,12 +290,18 @@ private fun PresentScreen(
                 selected = mode == Present.Ducat,
                 onClick = { mode = Present.Ducat },
                 shape = SegmentedButtonDefaults.itemShape(0, 2),
+                // No checkmark — the fill already says which is active,
+                // and the icon shoves the label sideways when it appears.
+                icon = {},
                 modifier = Modifier.weight(1f),
             ) { Text("DUCAT", maxLines = 1, softWrap = false) }
             SegmentedButton(
                 selected = mode == Present.Monero,
                 onClick = { mode = Present.Monero },
                 shape = SegmentedButtonDefaults.itemShape(1, 2),
+                // No checkmark — the fill already says which is active,
+                // and the icon shoves the label sideways when it appears.
+                icon = {},
                 modifier = Modifier.weight(1f),
             ) { Text("Monero", maxLines = 1, softWrap = false) }
         }
