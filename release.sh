@@ -11,7 +11,13 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 DRAFT=$(grep -m1 -oP '^\*\*Draft \K[0-9.]+' ducat-protocol.md)
-TAG="${1:-v${DRAFT}-$(git rev-parse --short HEAD)}"
+# Build number between draft and hash, so names sort the way time does.
+# The hash alone made the releases page a shuffle: GitHub orders it by tag
+# name, a hash is random, so v0.72-cf... sat above the newer v0.72-cd... and
+# the page showed an old build on top. The count is monotonic; the hash stays
+# because it is the thing you can actually look up.
+BUILD=$(git rev-list --count HEAD)
+TAG="${1:-v${DRAFT}.${BUILD}-$(git rev-parse --short HEAD)}"
 OUT=android/app/build/outputs/apk/debug
 
 echo "building ${TAG}…"
@@ -47,7 +53,9 @@ NOTES=$(mktemp)
 
 git tag -f "$TAG" >/dev/null
 git push -f origin "$TAG" >/dev/null 2>&1
-gh release create "$TAG" "${APKS[@]}" --title "DUCAT $TAG" --notes-file "$NOTES"
+# --latest pinned explicitly rather than left to inference, so the badge and
+# the stable download URL always mean the build made most recently.
+gh release create "$TAG" "${APKS[@]}" --title "DUCAT $TAG" --notes-file "$NOTES" --latest
 rm -f "$NOTES"
 
 # The stable link is the one worth handing over. A release page keeps its
