@@ -1633,13 +1633,15 @@ A **public, reusable** artifact is a different object and already exists: `TapSt
 
 ### Carrying it
 
-A signed card measured **1007 bytes** in the harness, dominated by the Veilid route blob. What that means per channel:
+A signed card measured **1241 bytes** issued by a phone on a real network — 1070 of which is the Veilid route blob, so the card is a route with an identity attached rather than the other way round. As a `ducat:` URI that is **1710 characters**. (The harness figure was 1007 bytes; a real route is larger than a locally-built one, which is the sort of gap that only appears on a device.)
 
 | Channel | Verdict |
 |---|---|
 | NFC | Comfortable. Well inside what §15.3's exchange already moves. |
-| QR | Fits, densely — roughly a version-27 symbol at L. Scannable from a phone screen, marginal from a printed card at small sizes. |
-| `ducat:` URI (§18.7) through a messaging app | No size constraint. This is the channel the format should be optimised for, and it is the one the user actually reaches for. |
+| QR | Fits, at about a **version-31** symbol at level L against a maximum of 40. Scannable from a phone screen; marginal from print, and with little headroom left if the route blob grows. |
+| `ducat:` URI (§18.7) through a messaging app | No size constraint. This is the channel the format should be optimised for, and it is the one people actually reach for. |
+
+**The route blob is the thing to watch.** It is 86% of the card and the only part that can grow, so QR carriage is one route-format change away from not fitting.
 
 A **donation QR on a website is not this object**. That is `TapStatic` (§15.9): reusable, public, no relationship established, and carrying §15.9's admitted limit that a swapped tag verifies perfectly.
 
