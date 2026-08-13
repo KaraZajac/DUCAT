@@ -19,9 +19,8 @@
 
 mod escrow_role;
 mod attack;
-mod contact;
 mod dht;
-mod peer;
+mod mailbox;
 mod edges;
 mod flow;
 mod inverted;
@@ -53,6 +52,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         });
         return escrow_role::drive(&tap_path, &ms).await;
     }
+    if args.iter().any(|a| a == "--card-issue") {
+        return mailbox::issue().await;
+    }
+    if let Some(i) = args.iter().position(|a| a == "--card-claim") {
+        return mailbox::claim(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
+    }
+    if args.iter().any(|a| a == "--card-collect") {
+        return mailbox::collect().await;
+    }
     if args.iter().any(|a| a == "--inbox-create") {
         return dht::inbox_create().await;
     }
@@ -76,22 +84,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             std::process::exit(2);
         }
         return dht::read(&key).await;
-    }
-    if let Some(i) = args.iter().position(|a| a == "--peer") {
-        let uri = args.get(i + 1).cloned().unwrap_or_default();
-        if uri.is_empty() {
-            eprintln!("usage: ducat-harness --peer '<ducat:card/… from the phone>'");
-            std::process::exit(2);
-        }
-        return peer::run(&uri).await;
-    }
-    if args.iter().any(|a| a == "--contact-share") {
-        return contact::share(&std::env::var("DUCAT_CARD")
-            .unwrap_or_else(|_| "/tmp/ducat-card.blob".into())).await;
-    }
-    if args.iter().any(|a| a == "--contact-claim") {
-        return contact::claim(&std::env::var("DUCAT_CARD")
-            .unwrap_or_else(|_| "/tmp/ducat-card.blob".into())).await;
     }
     if args.iter().any(|a| a == "--edges") {
         return edges::run().await;

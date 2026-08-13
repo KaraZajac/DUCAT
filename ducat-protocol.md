@@ -1639,15 +1639,15 @@ A **public, reusable** artifact is a different object and already exists: `TapSt
 
 ### Carrying it
 
-A signed card measured **1241 bytes** issued by a phone on a real network — 1070 of which is the Veilid route blob, so the card is a route with an identity attached rather than the other way round. As a `ducat:` URI that is **1710 characters**. (The harness figure was 1007 bytes; a real route is larger than a locally-built one, which is the sort of gap that only appears on a device.)
+A signed card is **402 characters** as a `ducat:` URI. The record-based form (§16.12) replaced a 1070-byte route blob with a ~100-character record key, taking the URI from 1710 characters to 402 — **under a quarter**, and no longer dominated by a field that could grow.
 
 | Channel | Verdict |
 |---|---|
-| NFC | Comfortable. Well inside what §15.3's exchange already moves. |
-| QR | Fits, at about a **version-31** symbol at level L against a maximum of 40. Scannable from a phone screen; marginal from print, and with little headroom left if the route blob grows. |
-| `ducat:` URI (§18.7) through a messaging app | No size constraint. This is the channel the format should be optimised for, and it is the one people actually reach for. |
+| NFC | Comfortable, and now trivially so. |
+| QR | About a **version-13** symbol at level L, down from version 31. Scans from a phone screen at a glance and survives print at ordinary sizes, which the previous form did not. |
+| `ducat:` URI (§18.7) through a messaging app | Short enough to paste without wrapping mangling it — a practical property the long form did not have. |
 
-**The route blob is the thing to watch.** It is 86% of the card and the only part that can grow, so QR carriage is one route-format change away from not fitting.
+Nothing in the card grows with use now: a record key is fixed-width, so the size is stable rather than merely acceptable today.
 
 ### A card outlives its route, and that is a problem
 
