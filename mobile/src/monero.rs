@@ -533,7 +533,7 @@ impl monero_daemon_rpc::HttpTransport for UreqTransport {
         &self,
         route: &str,
         body: Vec<u8>,
-        _response_size_limit: Option<usize>,
+        response_size_limit: Option<usize>,
     ) -> impl Send + std::future::Future<Output = Result<Vec<u8>, monero_daemon_rpc::prelude::InterfaceError>>
     {
         let url = format!("{}/{}", self.url, route.trim_start_matches('/'));
@@ -548,10 +548,25 @@ impl monero_daemon_rpc::HttpTransport for UreqTransport {
                 .set("Content-Type", "application/octet-stream")
                 .send_bytes(&body)
                 .map_err(|e| err(short_error(&e.to_string())))?;
+
+            // **Bounded.** `read_to_end` on a stranger's socket is an
+            // out-of-memory bug with a network trigger: the node chooses how
+            // much to send and the phone has to hold all of it. The caller's
+            // limit is honoured, and a default applies where it gives none —
+            // ignoring the argument was silently opting out of the protection
+            // the trait was offering.
+            const FALLBACK_LIMIT: usize = 32 * 1024 * 1024;
+            let limit = response_size_limit.unwrap_or(FALLBACK_LIMIT);
             let mut out = Vec::new();
+            // One byte over, so hitting the cap is distinguishable from a
+            // response that happens to be exactly that size.
             resp.into_reader()
+                .take(limit as u64 + 1)
                 .read_to_end(&mut out)
                 .map_err(|e| err(e.to_string()))?;
+            if out.len() > limit {
+                return Err(err(format!("response exceeded {limit} bytes")));
+            }
             Ok(out)
         }
     }

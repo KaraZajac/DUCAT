@@ -303,6 +303,18 @@ private fun WalletSync(nodeHeight: Long) {
                 color = MaterialTheme.ducat.changePending,
             )
 
+            // A stall after progress showed a frozen bar and nothing else: the
+            // failure branch only ran when nothing had been read at all, so the
+            // one case with a visible symptom had no explanation attached.
+            b.error?.let { e ->
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Last window failed: $e",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+
             // The escape hatch belongs here too: this is the screen someone
             // watching a stuck scan is already looking at.
             if (b.scannedTo in 1..(b.tip - 100_000)) {

@@ -2,6 +2,7 @@ package org.ducatproject.ducat
 
 import android.content.Context
 import android.util.Log
+import kotlin.math.roundToInt
 import org.json.JSONArray
 import org.json.JSONObject
 import uniffi.ducat_mobile.OwnedOutput
@@ -37,20 +38,33 @@ data class Balances(
     val tip: Long,
     /** Measured blocks per second, or 0 when nothing has been timed yet. */
     val scanRate: Double = 0.0,
+    /** Where this wallet's scan began — its restore height, or a skip-ahead. */
+    val scanFrom: Long = 0,
+    /** Why the last window failed, if it did. Shown even while progress exists. */
+    val error: String? = null,
 ) {
     val syncing: Boolean get() = tip > 0 && scannedTo < tip
 
     val blocksLeft: Long get() = (tip - scannedTo).coerceAtLeast(0)
 
     /**
-     * Fraction of the way there.
+     * Fraction of the way there, **over the range this wallet needs**.
+     *
+     * Measured from where the scan began, not from the genesis block. A wallet
+     * created a day ago has 720 blocks to read out of 2.18 million; against the
+     * whole chain that is 99.97% before it starts and 100% when it finishes, so
+     * the bar would sit still through the entire job it exists to show. The
+     * earlier version did exactly that while its comment claimed otherwise.
      *
      * `kotlin.Float` spelled out: this project has its own `Float`, which is
      * §17.2's spendable balance, and the bare name resolves to that.
      */
     val progress: kotlin.Float
-        get() = if (tip <= 0 || scannedTo <= 0) 0f
-                else (scannedTo.toFloat() / tip).coerceIn(0f, 1f)
+        get() {
+            val span = tip - scanFrom
+            if (tip <= 0 || span <= 0) return 0f
+            return ((scannedTo - scanFrom).toFloat() / span).coerceIn(0f, 1f)
+        }
 
     /**
      * Seconds left, or null when there is nothing honest to say.
@@ -64,11 +78,14 @@ data class Balances(
 }
 
 /** "about 3 minutes", "about 2 hours" — never a false precision. */
-fun humanDuration(secs: Long): String = when {
-    secs < 90 -> "under a minute"
-    secs < 5400 -> "about ${(secs / 60.0).toInt()} minutes"
-    secs < 172_800 -> "about ${(secs / 3600.0).toInt()} hours"
-    else -> "about ${(secs / 86_400.0).toInt()} days"
+fun humanDuration(secs: Long): String {
+    fun plural(n: Int, unit: String) = "about $n $unit" + if (n == 1) "" else "s"
+    return when {
+        secs < 90 -> "under a minute"
+        secs < 5400 -> plural((secs / 60.0).roundToInt().coerceAtLeast(1), "minute")
+        secs < 172_800 -> plural((secs / 3600.0).roundToInt().coerceAtLeast(1), "hour")
+        else -> plural((secs / 86_400.0).roundToInt().coerceAtLeast(1), "day")
+    }
 }
 
 /** A received output, as the Activity screen shows it. */
@@ -183,6 +200,8 @@ object Wallet {
             scannedTo = store.scannedTo(),
             tip = tip,
             scanRate = store.scanRate(),
+            scanFrom = store.restoreHeight().toLong(),
+            error = store.lastScanError(),
         )
     }
 

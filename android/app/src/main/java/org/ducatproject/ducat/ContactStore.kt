@@ -674,6 +674,14 @@ class WalletStore(context: Context) {
             .putString("wallet_height", height.toString())
             .putLong("wallet_scanned_to", height)
             .remove("wallet_outputs")
+            // The measured rate and its timestamp belong to the range being
+            // abandoned. Keeping them means the next window is timed against a
+            // clock reading from before the skip — possibly hours — which
+            // collapses the rate and shows an estimate of days for a scan about
+            // to finish in a minute.
+            .remove("wallet_rate")
+            .remove("wallet_scan_at")
+            .remove("wallet_scan_error")
             .apply()
         // Same change signal the contact store uses, so every screen watching it
         // re-reads rather than showing the balance it had a moment ago.
