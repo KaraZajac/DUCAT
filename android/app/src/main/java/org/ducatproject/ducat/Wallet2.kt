@@ -35,8 +35,40 @@ data class Balances(
     val blocksToUnlock: Long,
     val scannedTo: Long,
     val tip: Long,
+    /** Measured blocks per second, or 0 when nothing has been timed yet. */
+    val scanRate: Double = 0.0,
 ) {
     val syncing: Boolean get() = tip > 0 && scannedTo < tip
+
+    val blocksLeft: Long get() = (tip - scannedTo).coerceAtLeast(0)
+
+    /**
+     * Fraction of the way there.
+     *
+     * `kotlin.Float` spelled out: this project has its own `Float`, which is
+     * §17.2's spendable balance, and the bare name resolves to that.
+     */
+    val progress: kotlin.Float
+        get() = if (tip <= 0 || scannedTo <= 0) 0f
+                else (scannedTo.toFloat() / tip).coerceIn(0f, 1f)
+
+    /**
+     * Seconds left, or null when there is nothing honest to say.
+     *
+     * Null rather than zero when the rate is unknown: a screen showing "0
+     * minutes remaining" for a scan that has not started is worse than one
+     * showing nothing.
+     */
+    val secondsLeft: Long?
+        get() = if (scanRate > 0.01 && blocksLeft > 0) (blocksLeft / scanRate).toLong() else null
+}
+
+/** "about 3 minutes", "about 2 hours" — never a false precision. */
+fun humanDuration(secs: Long): String = when {
+    secs < 90 -> "under a minute"
+    secs < 5400 -> "about ${(secs / 60.0).toInt()} minutes"
+    secs < 172_800 -> "about ${(secs / 3600.0).toInt()} hours"
+    else -> "about ${(secs / 86_400.0).toInt()} days"
 }
 
 /** A received output, as the Activity screen shows it. */
@@ -121,6 +153,7 @@ object Wallet {
             blocksToUnlock = soonest,
             scannedTo = store.scannedTo(),
             tip = tip,
+            scanRate = store.scanRate(),
         )
     }
 

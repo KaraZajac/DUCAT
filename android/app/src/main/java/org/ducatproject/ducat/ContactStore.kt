@@ -562,7 +562,32 @@ class WalletStore(context: Context) {
      * that adds the same output twice reports a balance it does not have, and
      * the mistake compounds every scan.
      */
+    /**
+     * Blocks per second, measured rather than assumed.
+     *
+     * Scanning speed depends on the node, the link and how full the blocks are,
+     * so a constant would be wrong on most devices most of the time. An
+     * estimate built from a guess is worse than no estimate: people plan around
+     * the number they are shown.
+     */
+    fun scanRate(): Double = prefs.getFloat("wallet_rate", 0f).toDouble()
+
     fun recordScan(scannedTo: Long, tip: Long, found: List<OwnedOutput>) {
+        val now = System.currentTimeMillis()
+        val lastAt = prefs.getLong("wallet_scan_at", 0L)
+        val lastTo = prefs.getLong("wallet_scanned_to", 0L)
+        if (lastAt > 0 && scannedTo > lastTo) {
+            val secs = (now - lastAt) / 1000.0
+            if (secs > 0.5) {
+                val observed = (scannedTo - lastTo) / secs
+                // Smoothed: one slow window on a bad connection should nudge the
+                // estimate, not replace it and make the remaining time jump.
+                val prev = prefs.getFloat("wallet_rate", 0f).toDouble()
+                val blended = if (prev > 0) prev * 0.7 + observed * 0.3 else observed
+                prefs.edit().putFloat("wallet_rate", blended.toFloat()).apply()
+            }
+        }
+        prefs.edit().putLong("wallet_scan_at", now).apply()
         val byKi = entries().associateBy { it.keyImage }.toMutableMap()
         for (o in found) {
             val ki = o.keyImageHex

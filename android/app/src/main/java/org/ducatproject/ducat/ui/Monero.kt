@@ -13,7 +13,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.NodeStore
+import org.ducatproject.ducat.Wallet
+import org.ducatproject.ducat.WalletStore
+import org.ducatproject.ducat.humanDuration
 import uniffi.ducat_mobile.MoneroNodeStatus
 import uniffi.ducat_mobile.NodeTrust
 import uniffi.ducat_mobile.moneroDefaultNodes
@@ -106,6 +110,9 @@ fun MoneroPanel() {
                 )
             }
 
+            HorizontalDivider(Modifier.padding(vertical = 14.dp))
+            WalletSync(status?.height?.toLong() ?: 0L)
+
             Spacer(Modifier.height(14.dp))
             if (!editing) {
                 TextButton(onClick = { editing = true }) {
@@ -185,5 +192,98 @@ private fun Line(k: String, v: String) {
              color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.weight(1f))
         Text(v, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+
+/**
+ * How far through the chain this wallet has read.
+ *
+ * Separate from the node's own sync, and the distinction matters: a node can be
+ * fully caught up while the wallet has read none of it. Showing only the node's
+ * state — which is what this panel did — tells someone everything is fine while
+ * their balance is still zero.
+ */
+@Composable
+private fun WalletSync(nodeHeight: Long) {
+    val context = LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val b = remember(version, nodeHeight) { Wallet.balances(context) }
+    var rescanOpen by remember { mutableStateOf(false) }
+
+    Text("Wallet", style = MaterialTheme.typography.titleSmall)
+    Spacer(Modifier.height(6.dp))
+
+    when {
+        b.tip == 0L -> Text(
+            "Not started — waiting for a node.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        !b.syncing -> Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("✓", color = MaterialTheme.ducat.settled)
+            Spacer(Modifier.width(8.dp))
+            Text("Caught up at block ${b.tip}", style = MaterialTheme.typography.bodySmall)
+        }
+
+        else -> Column {
+            LinearProgressIndicator(
+                progress = { b.progress },
+                modifier = Modifier.fillMaxWidth().height(6.dp),
+            )
+            Spacer(Modifier.height(8.dp))
+            Row {
+                Text(
+                    "block ${b.scannedTo} of ${b.tip}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    "${(b.progress * 100).toInt()}%",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                buildString {
+                    append("${b.blocksLeft} blocks to go")
+                    // Only when it has been measured. A made-up estimate is
+                    // worse than none, because people plan around it.
+                    b.secondsLeft?.let { append(" · ${humanDuration(it)}") }
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                "Your balance is only what has been read so far.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.ducat.changePending,
+            )
+
+            // The escape hatch belongs here too: this is the screen someone
+            // watching a stuck scan is already looking at.
+            if (b.scannedTo in 1..(b.tip - 100_000)) {
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "This wallet is scanning from the beginning of the chain, which " +
+                        "takes far longer than it needs to if it was made recently.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                Spacer(Modifier.height(6.dp))
+                OutlinedButton(onClick = { rescanOpen = true }) { Text("Skip ahead") }
+            }
+        }
+    }
+
+    if (rescanOpen) {
+        SkipAheadDialog(
+            tip = b.tip,
+            onPick = { WalletStore(context).rescanFrom(it); rescanOpen = false },
+            onDismiss = { rescanOpen = false },
+        )
     }
 }

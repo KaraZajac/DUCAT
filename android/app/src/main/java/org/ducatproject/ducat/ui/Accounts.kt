@@ -49,7 +49,7 @@ fun AccountsScreen() {
     var rescanOpen by remember { mutableStateOf(false) }
 
     if (rescanOpen) {
-        RescanDialog(
+        SkipAheadDialog(
             tip = balances.tip,
             onPick = {
                 WalletStore(context).rescanFrom(it)
@@ -242,7 +242,7 @@ private fun BalanceRow(label: String, value: String) {
  * silently misses a payment is worse than one that takes a few minutes longer.
  */
 @Composable
-private fun RescanDialog(tip: Long, onPick: (Long) -> Unit, onDismiss: () -> Unit) {
+internal fun SkipAheadDialog(tip: Long, onPick: (Long) -> Unit, onDismiss: () -> Unit) {
     val suggestions = listOf(
         720L to "about a day ago",
         5_040L to "about a week ago",
