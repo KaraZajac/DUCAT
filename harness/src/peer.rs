@@ -186,6 +186,13 @@ pub async fn run(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
         }
+        // Retry once against a freshly fetched bundle. Their prekeys rotate —
+        // the app regenerates when its one-time supply runs out, and a route
+        // change comes with new keys — so a cached bundle goes stale silently
+        // and the only symptom is `that key is gone` on a message the sender
+        // thought was fine.
+        let mut attempt = 0;
+        loop {
         let b = their_bundle.as_mut().unwrap();
         let msg = Message {
             version: 1, suite: 1, seq: out_seq, prev: out_prev,
@@ -203,20 +210,36 @@ pub async fn run(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
         let sealed = SealedMessage {
             version: 1, suite: 1, prekey_id: chosen.id, enc: ek, ciphertext: ct,
         };
-        b.one_time.retain(|k| k.id != chosen.id);
-
         match call(&api, &rc, &their_blob, frame(MSG_TEXT, &sealed.to_value().encode())).await {
             Ok(r) => {
                 let t = String::from_utf8_lossy(&r).to_string();
                 if t.starts_with("ok") {
+                    // Only now is the key actually spent, and only now does the
+                    // sequence advance. Consuming either before the receiver
+                    // confirms means a failed send silently skips a prekey and
+                    // leaves a gap the next message is refused for.
+                    b.one_time.retain(|k| k.id != chosen.id);
                     println!("  \x1b[35m→\x1b[0m [{out_seq}] {body}");
                     out_seq += 1;
                     out_prev = link;
-                } else {
-                    println!("  \x1b[31mrefused:\x1b[0m {t}");
+                    break;
                 }
+                if t.contains("that key is gone") && attempt == 0 {
+                    attempt += 1;
+                    println!("  \x1b[2mtheir keys rotated — refetching\x1b[0m");
+                    match call(&api, &rc, &their_blob, frame(MSG_PREKEYS, b"")).await {
+                        Ok(raw) => match decode(&raw).ok().and_then(|v| PreKeyBundle::from_value(v).ok()) {
+                            Some(nb) => { their_bundle = Some(nb); continue }
+                            None => { println!("  \x1b[31mrefetch gave no bundle\x1b[0m"); break }
+                        },
+                        Err(e) => { println!("  \x1b[31mrefetch failed:\x1b[0m {e}"); break }
+                    }
+                }
+                println!("  \x1b[31mrefused:\x1b[0m {t}");
+                break;
             }
-            Err(e) => println!("  \x1b[31msend failed:\x1b[0m {e}"),
+            Err(e) => { println!("  \x1b[31msend failed:\x1b[0m {e}"); break }
+        }
         }
     }
 

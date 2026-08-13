@@ -34,7 +34,10 @@ private const val MSG_PREKEYS: Byte = 0x42
  */
 class Responder(private val context: Context) {
 
+    private lateinit var scope: CoroutineScope
+
     fun start(scope: CoroutineScope) {
+        this.scope = scope
         scope.launch(Dispatchers.IO) {
             while (isActive) {
                 val call = runCatching { nodePollCall() }.getOrNull()
@@ -88,16 +91,51 @@ class Responder(private val context: Context) {
         val card = cards.cardBytes() ?: return refusal("no card outstanding")
         val scanned = checkInboundClaim(card, body, cards.claimed())
         cards.markClaimed()
-        ContactStore(context).add(
+        val store = ContactStore(context)
+        val hex = scanned.persona.joinToString("") { "%02x".format(it) }
+        // Preserve a conversation if this persona is already known. A re-claim
+        // is the same person handing over a fresh route, and replacing the
+        // record wholesale threw away the thread and reset both counters.
+        val existing = store.all().firstOrNull { it.personaHex == hex }
+        store.add(
             Contact(
-                personaHex = scanned.persona.joinToString("") { "%02x".format(it) },
-                petname = null,
+                personaHex = hex,
+                petname = existing?.petname,
                 assertedName = scanned.assertedName,
                 rendezvous = scanned.rendezvous,
                 claimSecret = ByteArray(0),
+                theirBundle = null, // their keys may have rotated with the route
+                outSeq = existing?.outSeq ?: 0,
+                outPrevLink = existing?.outPrevLink,
+                inSeq = existing?.inSeq ?: 0,
+                inPrevLink = existing?.inPrevLink,
             )
         )
+        // The reverse path has never been exercised at this point: they reached
+        // us, we have not reached them, and the first thing that finds out is a
+        // message the user typed. Prove it now, in the background, so a broken
+        // route surfaces when the contact appears rather than later.
+        probeBack(hex, scanned.rendezvous)
         return "ok".toByteArray()
+    }
+
+    /**
+     * Reach back to a new contact to confirm the channel works both ways.
+     *
+     * Fetching their prekeys is enough — it is a real round trip over their
+     * route, it caches the keys the first message will need, and it says
+     * nothing to anyone watching that adding a contact did not already say.
+     */
+    private fun probeBack(personaHex: String, rendezvous: ByteArray) {
+        scope.launch(Dispatchers.IO) {
+            val ok = runCatching {
+                val bundle = uniffi.ducat_mobile.nodeAppCall(
+                    rendezvous, byteArrayOf(MSG_PREKEYS), 20_000u
+                )
+                ContactStore(context).setTheirBundle(personaHex, bundle)
+            }.isSuccess
+            Log.i(TAG, "reverse path to $personaHex: ${if (ok) "ok" else "FAILED"}")
+        }
     }
 
     private fun handleText(body: ByteArray): ByteArray {
