@@ -306,6 +306,36 @@ pub fn persona_public_hex(persona_secret: Vec<u8>) -> Result<String, ContactErro
         .collect())
 }
 
+/// Remove a consumed one-time prekey from a published bundle.
+///
+/// Burning a secret without pruning the bundle leaves the bundle advertising a
+/// key that can no longer decrypt anything. Senders pick the first one-time
+/// entry, so the *first* consumed id is offered forever and every message after
+/// the first is refused — permanently, and identically after a re-fetch, since
+/// the stale bundle is what gets re-served.
+///
+/// §16.11 says a one-time key is used once and deleted. Deleting half of it —
+/// the secret but not the advertisement — is worse than not deleting at all,
+/// because it fails closed on every subsequent message.
+#[uniffi::export]
+pub fn prune_prekey(bundle_bytes: Vec<u8>, id: u32) -> Result<Vec<u8>, ContactError> {
+    let mut b =
+        PreKeyBundle::from_value(decode(&bundle_bytes).map_err(refuse)?).map_err(refuse)?;
+    b.one_time.retain(|k| k.id != id);
+    Ok(b.to_value().encode())
+}
+
+/// How many one-time keys a bundle still advertises.
+#[uniffi::export]
+pub fn bundle_one_time_count(bundle_bytes: Vec<u8>) -> Result<u32, ContactError> {
+    Ok(
+        PreKeyBundle::from_value(decode(&bundle_bytes).map_err(refuse)?)
+            .map_err(refuse)?
+            .one_time
+            .len() as u32,
+    )
+}
+
 /// Which prekey a sealed message names, without opening it.
 ///
 /// The receiver must look up a secret *before* it can decrypt, and looking one

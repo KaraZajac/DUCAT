@@ -278,7 +278,12 @@ fn handle(p: &mut Peer, msg: &[u8]) -> Vec<u8> {
         return b"!frame".to_vec();
     };
     match kind {
-        MSG_PREKEYS => p.bundle.to_value().encode(),
+        MSG_PREKEYS => {
+            // The phone probes back here when it adds us, so this line is the
+            // first proof the reverse path works.
+            println!("  \x1b[32m✓\x1b[0m they reached us — prekeys served");
+            p.bundle.to_value().encode()
+        }
         MSG_TEXT => {
             let Ok(sealed) = decode(body).map_err(|_| ()).and_then(|v| {
                 SealedMessage::from_value(v).map_err(|_| ())

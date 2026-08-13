@@ -777,6 +777,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -800,6 +804,8 @@ internal interface UniffiLib : Library {
     ): Int
     fun uniffi_ducat_mobile_fn_func_build_claim(`personaSecret`: RustBuffer.ByValue,`rendezvous`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`claimSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_bundle_one_time_count(`bundleBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Int
     fun uniffi_ducat_mobile_fn_func_capacity_bucket(`capacityPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
     fun uniffi_ducat_mobile_fn_func_capacity_leak_bits(uniffi_out_err: UniffiRustCallStatus, 
@@ -845,6 +851,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_plan_float(`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_protocol_version(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_prune_prekey(`bundleBytes`: RustBuffer.ByValue,`id`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_read_contact_card(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -978,6 +986,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_build_claim(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_bundle_one_time_count(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_bucket(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_leak_bits(
@@ -1024,6 +1034,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_protocol_version(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_prune_prekey(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_read_contact_card(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_read_contact_card_bytes(
@@ -1063,6 +1075,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_build_claim() != 23088.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_bundle_one_time_count() != 35922.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_capacity_bucket() != 17889.toShort()) {
@@ -1132,6 +1147,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_protocol_version() != 58081.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_prune_prekey() != 19780.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_read_contact_card() != 10077.toShort()) {
@@ -2603,6 +2621,19 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
     
 
         /**
+         * How many one-time keys a bundle still advertises.
+         */
+    @Throws(ContactException::class) fun `bundleOneTimeCount`(`bundleBytes`: kotlin.ByteArray): kotlin.UInt {
+            return FfiConverterUInt.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_bundle_one_time_count(
+        FfiConverterByteArray.lower(`bundleBytes`),_status)
+}
+    )
+    }
+    
+
+        /**
          * The largest ladder value not exceeding `capacity_pxmr`.
          *
          * Rounds **down**, always: rounding to nearest would let a bond claim capacity
@@ -2930,6 +2961,29 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_protocol_version(
         _status)
+}
+    )
+    }
+    
+
+        /**
+         * Remove a consumed one-time prekey from a published bundle.
+         *
+         * Burning a secret without pruning the bundle leaves the bundle advertising a
+         * key that can no longer decrypt anything. Senders pick the first one-time
+         * entry, so the *first* consumed id is offered forever and every message after
+         * the first is refused — permanently, and identically after a re-fetch, since
+         * the stale bundle is what gets re-served.
+         *
+         * §16.11 says a one-time key is used once and deleted. Deleting half of it —
+         * the secret but not the advertisement — is worse than not deleting at all,
+         * because it fails closed on every subsequent message.
+         */
+    @Throws(ContactException::class) fun `prunePrekey`(`bundleBytes`: kotlin.ByteArray, `id`: kotlin.UInt): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_prune_prekey(
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterUInt.lower(`id`),_status)
 }
     )
     }

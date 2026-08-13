@@ -1730,6 +1730,7 @@ Four rules, each carrying a failure it prevents:
 | Duplicate prekey ids are `MALFORMED` | "Delete after use" becomes ambiguous, and that deletion is the only thing the property rests on. |
 | Id `0` is reserved for the signed prekey | A one-time key claiming it would be treated as the non-consumed fallback. |
 | Ciphertexts are bounded before any key is consulted | A peer must not be able to make a recipient allocate arbitrarily to reach a decryption failure. |
+| Consuming a key MUST also **withdraw it from the published bundle** | Deleting the secret alone leaves the bundle advertising a key that can no longer decrypt anything. Senders take the first one-time entry, so the first key ever consumed is offered forever, and every later message is refused — identically after a re-fetch, since the stale bundle is what gets re-served. Observed between two real devices: the first message worked and every one after it failed. Half a deletion fails closed on everything that follows, which is worse than no deletion at all. |
 
 ### Suite, and why this one
 

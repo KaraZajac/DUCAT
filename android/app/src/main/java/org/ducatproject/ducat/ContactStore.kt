@@ -196,12 +196,31 @@ class ContactStore(context: Context) {
         val raw = prefs.getString("prekeys", null) ?: return
         val o = JSONObject(raw)
         o.getJSONObject("one_time").remove(id.toString())
+        // **And prune the published bundle.** Deleting the secret alone leaves
+        // the bundle advertising a key that can no longer decrypt anything, and
+        // senders take the first one-time entry — so the first key consumed is
+        // offered forever and every later message is refused, identically after
+        // a re-fetch, because the stale bundle is what gets re-served.
+        runCatching {
+            uniffi.ducat_mobile.prunePrekey(unb64(o.getString("bundle")), id.toUInt())
+        }.onSuccess { o.put("bundle", b64(it)) }
         prefs.edit().putString("prekeys", o.toString()).apply()
     } }
 
+    /**
+     * How many usable one-time keys are left.
+     *
+     * Counted from the **bundle**, not the secret map, because the bundle is
+     * what senders see: a supply that looks healthy locally but advertises
+     * nothing usable is the failure this whole method exists to prevent.
+     */
     fun oneTimeRemaining(): Int {
         val raw = prefs.getString("prekeys", null) ?: return 0
-        return JSONObject(raw).getJSONObject("one_time").length()
+        val o = JSONObject(raw)
+        val advertised = runCatching {
+            uniffi.ducat_mobile.bundleOneTimeCount(unb64(o.getString("bundle"))).toInt()
+        }.getOrDefault(0)
+        return minOf(advertised, o.getJSONObject("one_time").length())
     }
 }
 

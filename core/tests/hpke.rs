@@ -234,3 +234,46 @@ fn an_oversized_ciphertext_is_refused_before_any_key_is_touched() {
     };
     assert!(SealedMessage::from_value(m.to_value()).is_err());
 }
+
+
+/// Deleting a one-time secret without pruning the published bundle is worse
+/// than not deleting at all.
+///
+/// The bundle keeps advertising the key, senders take the first one-time entry,
+/// and so the *first* key consumed is offered forever — every later message is
+/// refused, and identically after a re-fetch, because the stale bundle is what
+/// gets re-served. It looks like a network fault and is a bookkeeping one.
+///
+/// Shipped in the Android app and found only by two devices talking: the first
+/// message worked and every one after it failed with "that key is gone".
+#[test]
+fn a_consumed_prekey_must_not_stay_advertised() {
+    let (signed_sk, signed_pk) = kp(20);
+    let (ot1_sk, ot1_pk) = kp(21);
+    let (_, ot2_pk) = kp(22);
+
+    let mut bundle = PreKeyBundle {
+        version: 1, suite: 1, signed_prekey: signed_pk,
+        one_time: vec![PreKey { id: 1, public: ot1_pk }, PreKey { id: 2, public: ot2_pk }],
+        expiry: 9_999_999,
+    };
+
+    let mut rng = FixedRng(vec![9u8; 32], 0);
+    let (chosen, _) = bundle.select();
+    assert_eq!(chosen.id, 1, "senders take the first entry");
+    let (enc, ct) = seal(&mut rng, &chosen.public, &message_info(1), b"", b"hi").unwrap();
+
+    let mut store = PreKeyStore::new(signed_sk);
+    store.insert_one_time(1, ot1_sk);
+    let sealed = SealedMessage { version: 1, suite: 1, prekey_id: 1, enc, ciphertext: ct };
+    let (_, consumed) = store.open_and_consume(&sealed, &message_info(1), b"").unwrap();
+    assert!(consumed);
+
+    // The half-delete: secret gone, advertisement intact.
+    assert_eq!(store.remaining(), 0);
+    assert_eq!(bundle.select().0.id, 1, "still offering the burned key");
+
+    // Pruning is what makes the next sender pick a key that works.
+    bundle.one_time.retain(|k| k.id != 1);
+    assert_eq!(bundle.select().0.id, 2);
+}
