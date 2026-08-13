@@ -59,6 +59,16 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
 
+    // Re-read whenever anything writes to the store. The responder runs in a
+    // different coroutine and cannot reach this screen's state directly; without
+    // this, an inbound message was decrypted and stored and then stayed
+    // invisible until the user sent something of their own.
+    val version by ContactStore.changes.collectAsState()
+    LaunchedEffect(version) {
+        messages = store.thread(c.personaHex)
+        store.all().firstOrNull { it.personaHex == c.personaHex }?.let { c = it }
+    }
+
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size)
     }

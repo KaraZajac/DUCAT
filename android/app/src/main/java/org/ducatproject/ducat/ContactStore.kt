@@ -2,6 +2,8 @@ package org.ducatproject.ducat
 
 import android.content.Context
 import android.util.Base64
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -38,6 +40,26 @@ class ContactStore(context: Context) {
          * `ContactStore` per operation; a per-instance lock would guard nothing.
          */
         private val lock = Any()
+
+        /**
+         * Bumped by every mutation, so screens can notice one.
+         *
+         * Without this the chat screen only re-read the store inside its own
+         * send handler, so an inbound message was written, decrypted, chained
+         * and stored — and then sat there invisible until the user happened to
+         * send something. It looked exactly like messages not being delivered,
+         * and it was the opposite: everything worked except the redraw.
+         *
+         * A counter rather than the data itself, because the store is
+         * file-backed and the interesting question is only "has anything
+         * changed"; the screens re-read what they need.
+         */
+        private val _changes = MutableStateFlow(0L)
+        val changes: StateFlow<Long> = _changes
+
+        internal fun bump() {
+            _changes.value = _changes.value + 1
+        }
     }
 
     fun all(): List<Contact> {
@@ -96,6 +118,7 @@ class ContactStore(context: Context) {
      */
     fun deleteThread(personaHex: String) { synchronized(lock) {
         prefs.edit().remove("thread_$personaHex").apply()
+        bump()
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
         save(
             all().filterNot { it.personaHex == personaHex } +
@@ -121,6 +144,7 @@ class ContactStore(context: Context) {
         val arr = JSONArray()
         list.forEach { arr.put(it.toJson()) }
         prefs.edit().putString("contacts", arr.toString()).apply()
+        bump()
     } }
 
     // --- threads ----------------------------------------------------------
@@ -135,6 +159,7 @@ class ContactStore(context: Context) {
         val arr = JSONArray()
         (thread(personaHex) + m).forEach { arr.put(it.toJson()) }
         prefs.edit().putString("thread_$personaHex", arr.toString()).apply()
+        bump()
     } }
 
     // --- prekeys ----------------------------------------------------------

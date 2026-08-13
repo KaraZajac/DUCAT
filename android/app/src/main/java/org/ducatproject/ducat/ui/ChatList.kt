@@ -32,6 +32,10 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val store = remember { ContactStore(context) }
     var all by remember { mutableStateOf(store.all()) }
+    // Same reason as the chat screen: a message arriving must move this list,
+    // and nothing else tells it one did.
+    val version by ContactStore.changes.collectAsState()
+    LaunchedEffect(version) { all = store.all() }
     var sheet by remember { mutableStateOf<Sheet?>(null) }
     var confirm by remember { mutableStateOf<Contact?>(null) }
 
