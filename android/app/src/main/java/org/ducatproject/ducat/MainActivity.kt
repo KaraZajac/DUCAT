@@ -257,39 +257,46 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     tonalElevation = 0.dp,
                 ) {
                     NavItem(Tab.Home, Icons.Filled.Home, tab) { tab = it }
-                    // The coin, which we already draw for the launcher. Nothing
-                    // in the core icon set means "your money" without borrowing
-                    // a shopping metaphor this app is not about.
-                    NavigationBarItem(
-                        selected = tab == Tab.Accounts,
-                        onClick = { tab = Tab.Accounts },
-                        icon = {
-                            Icon(
-                                painterResource(R.drawable.ic_ducat_coin),
-                                contentDescription = Tab.Accounts.label,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        },
-                        label = { Text(Tab.Accounts.label) },
-                    )
+                    // A wallet, now that the coin is the centre button. Two
+                    // copies of the app's own mark in one bar and neither reads
+                    // as the mark.
+                    NavItem(Tab.Accounts, Icons.Filled.AccountBalanceWallet, tab) { tab = it }
 
-                    // The one verb that dominates, raised without leaving the
-                    // bar. It is `presenter_role` (§15.2), not a mode we
-                    // invented: Request means I present and you tap me, Send
-                    // means I read your tap.
-                    // NOT fillMaxHeight: NavigationBar does not constrain its
-                    // children's height, so filling it expanded the bar to the
-                    // whole screen and left the content with none.
-                    Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        FloatingActionButton(
+                    // The one verb that dominates, wearing the app's own mark —
+                    // Venmo's centre button, which is the app icon with the verb
+                    // under it. The circle overhangs the bar's top edge by a
+                    // little; that is the detail that makes it read as *the*
+                    // button rather than a fifth tab. A modest overhang, not the
+                    // free-floating FAB this once was — that one covered the
+                    // number someone was about to act on.
+                    Column(
+                        Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Surface(
                             onClick = { payOpen = true },
                             shape = CircleShape,
-                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            color = MaterialTheme.colorScheme.tertiary,
                             contentColor = MaterialTheme.colorScheme.onTertiary,
-                            modifier = Modifier.size(52.dp),
+                            shadowElevation = 6.dp,
+                            modifier = Modifier.size(58.dp).offset(y = (-12).dp),
                         ) {
-                            Icon(Icons.Filled.SwapVert, contentDescription = "Send or request")
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    painterResource(R.drawable.ic_ducat_mono),
+                                    contentDescription = "Send or receive",
+                                    modifier = Modifier.size(40.dp),
+                                )
+                            }
                         }
+                        Text(
+                            "Send/Receive",
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            softWrap = false,
+                            modifier = Modifier.offset(y = (-8).dp),
+                        )
                     }
 
                     NavItem(Tab.Activity, Icons.Filled.Receipt, tab) { tab = it }
