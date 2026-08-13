@@ -14,13 +14,17 @@ import android.content.Context
  * One at a time. A device that is simultaneously a till and a taxi meter has
  * two ideas about what an arriving payment means.
  */
+enum class Mode { None, Pos, BarTab, Taxi, Donate }
+
 class ModeStore(context: Context) {
     private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
 
-    fun posEnabled(): Boolean = prefs.getBoolean("mode_pos", false)
+    fun current(): Mode =
+        runCatching { Mode.valueOf(prefs.getString("mode_current", null) ?: "None") }
+            .getOrDefault(Mode.None)
 
-    fun setPos(v: Boolean) {
-        prefs.edit().putBoolean("mode_pos", v).apply()
+    fun set(m: Mode) {
+        prefs.edit().putString("mode_current", m.name).apply()
         ContactStore.bump()
     }
 }

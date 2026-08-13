@@ -401,12 +401,20 @@ private fun SelectionContainerText(text: String) {
 fun ModesScreen() {
     val context = LocalContext.current
     val modes = remember { org.ducatproject.ducat.ModeStore(context) }
-    var pos by remember { mutableStateOf(modes.posEnabled()) }
+    var current by remember { mutableStateOf(modes.current()) }
+
+    // One at a time, enforced here: switching one on switches the rest off. A
+    // device that is simultaneously a till and a taxi meter has two ideas
+    // about what an arriving payment means.
+    fun pick(m: org.ducatproject.ducat.Mode, on: Boolean) {
+        current = if (on) m else org.ducatproject.ducat.Mode.None
+        modes.set(current)
+    }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
         Text(
             "A mode changes what this device leads with. Switch one on and the " +
-                "Home tab becomes that job until you switch it off.",
+                "Home tab becomes that job until you switch it off. One at a time.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -415,29 +423,42 @@ fun ModesScreen() {
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
                 ModeRow(
-                    title = "Point of sale",
-                    detail = "Ring up items, show one code, send an itemised bill " +
-                        "and a receipt in a conversation.",
-                    checked = pos,
-                    onChange = { pos = it; modes.setPos(it) },
-                )
+                    "Point of sale",
+                    "Ring up a sale, show one code — the bill and the receipt " +
+                        "travel the conversation it opens.",
+                    current == org.ducatproject.ducat.Mode.Pos,
+                ) { pick(org.ducatproject.ducat.Mode.Pos, it) }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                ModeRow("Bar tab", "Keep a running tab per person, settle at close.", null) {}
+                ModeRow(
+                    "Bar tab",
+                    "A running tab per customer — scan once, add all night, one " +
+                        "bill at close. They can pay after they leave.",
+                    current == org.ducatproject.ducat.Mode.BarTab,
+                ) { pick(org.ducatproject.ducat.Mode.BarTab, it) }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                ModeRow("Taxi", "A metered fare, settled at the kerb.", null) {}
+                ModeRow(
+                    "Taxi",
+                    "The rate goes in writing when the meter starts; the bill " +
+                        "shows the minutes.",
+                    current == org.ducatproject.ducat.Mode.Taxi,
+                ) { pick(org.ducatproject.ducat.Mode.Taxi, it) }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                ModeRow("Donate", "A standing code anyone can give to.", null) {}
+                ModeRow(
+                    "Donate",
+                    "A standing code any Monero wallet can give to. No app needed " +
+                        "on their side.",
+                    current == org.ducatproject.ducat.Mode.Donate,
+                ) { pick(org.ducatproject.ducat.Mode.Donate, it) }
             }
         }
     }
 }
 
-/** One mode. `checked = null` means not built yet, and the row says so. */
 @Composable
 private fun ModeRow(
     title: String,
     detail: String,
-    checked: Boolean?,
+    checked: Boolean,
     onChange: (Boolean) -> Unit,
 ) {
     Row(
@@ -445,17 +466,7 @@ private fun ModeRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, style = MaterialTheme.typography.titleMedium)
-                if (checked == null) {
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        "not built yet",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.outline,
-                    )
-                }
-            }
+            Text(title, style = MaterialTheme.typography.titleMedium)
             Text(
                 detail,
                 style = MaterialTheme.typography.bodySmall,
@@ -463,10 +474,6 @@ private fun ModeRow(
             )
         }
         Spacer(Modifier.width(12.dp))
-        Switch(
-            checked = checked == true,
-            onCheckedChange = onChange,
-            enabled = checked != null,
-        )
+        Switch(checked = checked, onCheckedChange = onChange)
     }
 }

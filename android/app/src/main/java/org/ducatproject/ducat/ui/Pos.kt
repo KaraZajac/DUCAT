@@ -82,7 +82,7 @@ fun PosScreen() {
             Spacer(Modifier.height(16.dp))
         }
 
-        AddLine { d, a -> basket = basket + BillItem(d, a) }
+        PosAddLine { d, a -> basket = basket + BillItem(d, a) }
 
         if (basket.isNotEmpty()) {
             Spacer(Modifier.height(12.dp))
@@ -176,7 +176,7 @@ private fun AmountBoth(pxmr: Long) {
  * both units show on every row after that.
  */
 @Composable
-private fun AddLine(onAdd: (String, Long) -> Unit) {
+internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
     val context = LocalContext.current
     var desc by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }

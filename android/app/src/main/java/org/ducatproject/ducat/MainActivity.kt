@@ -328,11 +328,13 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     // every customer is making them do it forty times a shift.
                     Tab.Home -> {
                         val mv by ContactStore.changes.collectAsState()
-                        val posMode = remember(mv) { ModeStore(context).posEnabled() }
-                        if (posMode) {
-                            org.ducatproject.ducat.ui.PosScreen()
-                        } else {
-                            Column(Modifier.verticalScroll(rememberScrollState())) {
+                        val mode = remember(mv) { ModeStore(context).current() }
+                        when (mode) {
+                            Mode.Pos -> org.ducatproject.ducat.ui.PosScreen()
+                            Mode.BarTab -> org.ducatproject.ducat.ui.BarTabScreen()
+                            Mode.Taxi -> org.ducatproject.ducat.ui.TaxiScreen()
+                            Mode.Donate -> org.ducatproject.ducat.ui.DonateScreen()
+                            Mode.None -> Column(Modifier.verticalScroll(rememberScrollState())) {
                                 HomeScreen(onTopUp = { tab = Tab.Accounts })
                             }
                         }

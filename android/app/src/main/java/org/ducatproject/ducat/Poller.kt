@@ -72,6 +72,12 @@ class Poller(private val context: Context) {
                     }
                 }.onFailure { DucatLog.w(TAG, "scan: ${it.message}") }
 
+                // Settled tabs and fares: payment seen on chain, receipt into
+                // the thread. Here rather than on a screen, because the payment
+                // lands when it lands and the vendor is busy (§15.11).
+                runCatching { TabStore.reconcile(context) }
+                    .onFailure { DucatLog.w(TAG, "tabs: ${it.message}") }
+
                 // Cheap: it only leaves the device when the cache has expired.
                 runCatching { Rates.refresh(context) }
                     .onFailure { DucatLog.w(TAG, "rate: ${it.message}") }
