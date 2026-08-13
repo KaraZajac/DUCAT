@@ -79,6 +79,13 @@ class MainActivity : ComponentActivity() {
                             // a user was shown during setup vanished the moment
                             // setup finished — and BackupSettings was handed
                             // null for the very key it exists to back up.
+                            // The profile choices are settings, not keys, and
+                            // are kept where the rest of the app reads them.
+                            next.displayName?.let {
+                                NameStore(this@MainActivity).put(it)
+                            }
+                            ContactStore(this@MainActivity)
+                                .setPublishAddress(next.publishPayto)
                             next.wallet?.let { w ->
                                 WalletStore(this@MainActivity).save(
                                     address = w.address,

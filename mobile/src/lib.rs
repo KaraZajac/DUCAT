@@ -391,6 +391,13 @@ pub struct BackupInput {
     /// Hex, from [`create_wallet`].
     pub spend_key_hex: String,
     pub restore_height: u64,
+    /// The name handed out on cards (§7.5). A restored persona without it
+    /// hands out cards nobody recognises.
+    pub display_name: Option<String>,
+    /// Whether contacts may pay without asking (§16.12). A privacy setting, so
+    /// it travels rather than silently reverting to a default the user did not
+    /// pick — in either direction.
+    pub publish_payto: bool,
 }
 
 /// Roughly four centuries of two-minute blocks. Anything beyond this is not a
@@ -463,6 +470,11 @@ pub fn export_backup(
         mandates: vec![],
         verification: ducat_core::verify::VerificationPolicy::default(),
         escrow_shares: vec![],
+        // Carried through from the caller: these are the user's own settings,
+        // and a backup that quietly drops them restores a persona that has
+        // forgotten its name and its mind about being paid.
+        display_name: input.display_name.clone(),
+        publish_payto: input.publish_payto,
         created: 0,
     };
 
@@ -595,6 +607,8 @@ pub struct RestoredBackup {
     pub spend_key_hex: String,
     pub restore_height: u64,
     pub persona_secret: Vec<u8>,
+    pub display_name: Option<String>,
+    pub publish_payto: bool,
     /// Escrow shares carried in the bundle (§4.3.3). Zero is the normal case.
     pub escrow_count: u32,
 }
@@ -609,6 +623,8 @@ pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup
     let b = ducat_core::backup::import(&blob, passphrase.as_bytes())
         .map_err(|e| BackupError::Failed(format!("{:?}", e.code)))?;
     Ok(RestoredBackup {
+        display_name: b.display_name.clone(),
+        publish_payto: b.publish_payto,
         spend_key_hex: b.monero_seed,
         restore_height: b.monero_restore_height,
         persona_secret: b.persona_secret,

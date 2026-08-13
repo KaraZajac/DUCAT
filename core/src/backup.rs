@@ -71,6 +71,8 @@ mod k {
     pub const CVM_CUMULATIVE_AT: u64 = 12;
     pub const CVM_CUMULATIVE_WINDOW_S: u64 = 13;
     pub const ESCROW_SHARES: u64 = 14;
+    pub const DISPLAY_NAME: u64 = 15;
+    pub const PUBLISH_PAYTO: u64 = 16;
     pub const ESCROW_ID: u64 = 0;
     pub const ESCROW_KEY_FILE: u64 = 1;
     pub const ESCROW_RESTORE_HEIGHT: u64 = 2;
@@ -174,6 +176,21 @@ pub struct Backup {
     /// multisig restores as a half-formed multisig, which is the stranded state
     /// §8.2 already warns about.
     pub escrow_shares: Vec<EscrowShare>,
+    /// The name this persona hands out on cards (§7.5).
+    ///
+    /// Not a credential and included anyway, for the same reason as the
+    /// verification thresholds above: a restored persona that has forgotten its
+    /// own name hands out cards nobody recognises, and the user has no way to
+    /// know that is what happened.
+    pub display_name: Option<String>,
+    /// Whether this persona publishes an address so contacts can pay without
+    /// asking (§16.12).
+    ///
+    /// A **privacy** setting, so restoring it wrong is worse than losing it.
+    /// Defaulting to on would silently publish an address for someone who had
+    /// deliberately kept it private; the decode therefore treats absence as
+    /// off, which is the safe direction and the original default.
+    pub publish_payto: bool,
     pub created: u64,
 }
 
@@ -181,6 +198,14 @@ impl Backup {
     fn to_value(&self) -> Value {
         let mut m = BTreeMap::new();
         m.insert(k::VERSION, Value::Uint(BACKUP_VERSION));
+        if let Some(n) = &self.display_name {
+            m.insert(k::DISPLAY_NAME, Value::Text(n.clone()));
+        }
+        // Only encoded when true: absent means off, which is the safe default
+        // for a privacy setting and keeps one meaning to one encoding.
+        if self.publish_payto {
+            m.insert(k::PUBLISH_PAYTO, Value::Uint(1));
+        }
         m.insert(k::PERSONA_SUITE, Value::Uint(self.persona_suite as u64));
         m.insert(k::PERSONA_SECRET, Value::Bytes(self.persona_secret.clone()));
         m.insert(k::MONERO_SEED, Value::Text(self.monero_seed.clone()));
@@ -291,6 +316,11 @@ impl Backup {
                 .ok_or_else(|| Reject::new(RejectCode::Malformed))?
                 .to_string(),
             monero_restore_height: get(k::MONERO_RESTORE_HEIGHT)?.as_uint().unwrap_or(0),
+            // Optional, and both default to the safe direction: a bundle from
+            // before these existed restores with no name and no publishing,
+            // rather than inventing either.
+            display_name: m.get(&k::DISPLAY_NAME).and_then(|v| v.as_text()).map(|s| s.to_string()),
+            publish_payto: m.get(&k::PUBLISH_PAYTO).and_then(|v| v.as_uint()).unwrap_or(0) == 1,
             rendezvous: arr(k::RENDEZVOUS)?,
             attestation_records: arr(k::ATTESTATION_RECORDS)?,
             mandates: arr(k::MANDATES)?,

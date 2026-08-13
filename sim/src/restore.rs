@@ -69,6 +69,8 @@ pub fn restore_main() {
         // No escrow open in this scenario. §4.3.3: shares are per-escrow and
         // short-lived, so an empty list is the normal case, not a gap.
         escrow_shares: vec![],
+        display_name: None,
+        publish_payto: false,
         created: 0,
     };
     let passphrase = b"the correct passphrase";

@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import java.io.File
+import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.NameStore
 import uniffi.ducat_mobile.BackupInput
 import uniffi.ducat_mobile.addressForSpendKey
 import uniffi.ducat_mobile.createPersonaSecret
@@ -73,7 +75,16 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                     onClick = {
                         message = try {
                             val bytes = exportBackup(
-                                BackupInput(spendKeyHex!!, restoreHeight),
+                                BackupInput(
+                                    spendKeyHex!!,
+                                    restoreHeight,
+                                    // The user's own settings travel with their
+                                    // keys: a restore that keeps the money and
+                                    // loses the name and the privacy choice is
+                                    // a restore that quietly changed both.
+                                    NameStore(context).get(),
+                                    ContactStore(context).publishAddress(),
+                                ),
                                 passphrase,
                                 personaSecret!!,
                             )
@@ -119,6 +130,12 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
         message = try {
             val bytes = context.contentResolver.openInputStream(uri)!!.use { it.readBytes() }
             val r = importBackup(bytes, passphrase)
+            // Settings come back too. A restore that keeps the money and drops
+            // the name and the privacy choice has quietly changed both, and the
+            // user has no way to notice — publishing especially, where the
+            // wrong direction is a silent disclosure.
+            r.displayName?.let { NameStore(context).put(it) }
+            ContactStore(context).setPublishAddress(r.publishPayto)
             // The address is the check that matters. A bundle that decrypts has
             // proved the passphrase, not that it holds the wallet you meant.
             restored = addressForSpendKey(r.spendKeyHex, stagenet = true)

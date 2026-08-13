@@ -802,3 +802,102 @@ fn describe_send_error(raw: &str) -> String {
         format!("could not build the transaction: {raw}")
     }
 }
+
+// ---------------------------------------------------------------------------
+// What a payment will cost (§17)
+// ---------------------------------------------------------------------------
+
+/// A fee estimate, with everything needed to show why it is that number.
+#[derive(uniffi::Record, Clone)]
+pub struct FeeEstimate {
+    pub fee_pxmr: u64,
+    /// Piconero per byte, straight from the daemon.
+    pub per_byte: u64,
+    /// The transaction size this assumed.
+    pub estimated_bytes: u64,
+    /// Roughly how long until the first confirmation, at this priority.
+    pub minutes_to_confirm: u32,
+    /// The four tiers the daemon offered, cheapest first, as whole fees for
+    /// this transaction shape — so a caller can show the trade rather than a
+    /// number nobody can compare against anything.
+    pub tier_fees_pxmr: Vec<u64>,
+}
+
+/// Estimate the fee for a transaction of this shape.
+///
+/// **An estimate, and labelled one everywhere it is shown.** The exact fee is
+/// only known once decoys are chosen and the transaction is built, which costs
+/// network round trips and cannot happen on every keystroke. It is close: the
+/// weight model below is the actual structure of a CLSAG/Bulletproof+
+/// transaction, not a guess at an average.
+#[uniffi::export]
+pub fn monero_fee_estimate(
+    node_url: String,
+    inputs: u32,
+    outputs: u32,
+    priority: u32,
+) -> Result<FeeEstimate, MoneroError> {
+    let agent = ureq::AgentBuilder::new()
+        .timeout(Duration::from_secs(15))
+        .build();
+    let resp = agent
+        .post(&format!("{}/json_rpc", node_url.trim_end_matches('/')))
+        .set("Content-Type", "application/json")
+        .send_string(r#"{"jsonrpc":"2.0","id":"0","method":"get_fee_estimate"}"#)
+        .map_err(|e| MoneroError::Failed(short_error(&e.to_string())))?;
+    let v: serde_json::Value = resp
+        .into_string()
+        .map_err(|e| MoneroError::Failed(e.to_string()))
+        .and_then(|b| serde_json::from_str(&b).map_err(|e| MoneroError::Failed(e.to_string())))?;
+    let r = &v["result"];
+
+    let tiers: Vec<u64> = r["fees"]
+        .as_array()
+        .map(|a| a.iter().filter_map(|x| x.as_u64()).collect())
+        .filter(|v: &Vec<u64>| !v.is_empty())
+        .unwrap_or_else(|| vec![r["fee"].as_u64().unwrap_or(20_000)]);
+    let mask = r["quantization_mask"].as_u64().unwrap_or(10_000).max(1);
+
+    let bytes = estimated_weight(inputs.max(1), outputs.max(2));
+    let pick = |per_byte: u64| quantize(per_byte.saturating_mul(bytes), mask);
+
+    let idx = (priority as usize).min(tiers.len() - 1);
+    Ok(FeeEstimate {
+        fee_pxmr: pick(tiers[idx]),
+        per_byte: tiers[idx],
+        estimated_bytes: bytes,
+        // Monero targets two-minute blocks. The cheapest tier can sit through a
+        // few before it is included; the dearest is normally the next block.
+        minutes_to_confirm: match idx {
+            0 => 20,
+            1 => 6,
+            2 => 4,
+            _ => 2,
+        },
+        tier_fees_pxmr: tiers.iter().map(|t| pick(*t)).collect(),
+    })
+}
+
+/// Monero rounds a fee up to a multiple of the quantisation mask, so an
+/// estimate that does not is always slightly under — and "slightly under" on a
+/// fee is a transaction that does not relay.
+fn quantize(fee: u64, mask: u64) -> u64 {
+    fee.div_ceil(mask).saturating_mul(mask)
+}
+
+/// Size of a ring-size-16 CLSAG transaction with Bulletproofs+.
+///
+/// Built from the parts rather than fitted to an average:
+///
+/// - **~650 bytes per input** — a CLSAG signature is `32·ring + 64` = 576 bytes,
+///   plus the key image and the ring's key offsets.
+/// - **~72 bytes per output** — one-time key, encrypted amount, ECDH tag.
+/// - **~576 bytes of range proof** for up to two outputs, growing by a step each
+///   time the output count crosses a power of two, because Bulletproofs+ are
+///   logarithmic in the padded count.
+/// - **~100 bytes** of prefix, version, unlock time and extra.
+fn estimated_weight(inputs: u32, outputs: u32) -> u64 {
+    let padded = outputs.next_power_of_two().max(2);
+    let range_proof = 576 + 32 * (padded.trailing_zeros() as u64).saturating_sub(1) * 2;
+    100 + (inputs as u64) * 650 + (outputs as u64) * 72 + range_proof
+}

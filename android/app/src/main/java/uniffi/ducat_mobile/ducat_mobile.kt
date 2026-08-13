@@ -821,6 +821,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -877,6 +879,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_log_subkey(`seq`: Long,`subkeyCount`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
     fun uniffi_ducat_mobile_fn_func_monero_default_nodes(`ownUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_fee_estimate(`nodeUrl`: RustBuffer.ByValue,`inputs`: Int,`outputs`: Int,`priority`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_pick_node(`candidates`: RustBuffer.ByValue,`wantNettype`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1100,6 +1104,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_default_nodes(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_fee_estimate(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_pick_node(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_probe(
@@ -1246,6 +1252,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_default_nodes() != 12244.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_fee_estimate() != 30573.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_pick_node() != 51910.toShort()) {
@@ -1598,7 +1607,18 @@ data class BackupInput (
      * Hex, from [`create_wallet`].
      */
     var `spendKeyHex`: kotlin.String, 
-    var `restoreHeight`: kotlin.ULong
+    var `restoreHeight`: kotlin.ULong, 
+    /**
+     * The name handed out on cards (§7.5). A restored persona without it
+     * hands out cards nobody recognises.
+     */
+    var `displayName`: kotlin.String?, 
+    /**
+     * Whether contacts may pay without asking (§16.12). A privacy setting, so
+     * it travels rather than silently reverting to a default the user did not
+     * pick — in either direction.
+     */
+    var `publishPayto`: kotlin.Boolean
 ) {
     
     companion object
@@ -1612,17 +1632,23 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
         return BackupInput(
             FfiConverterString.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterBoolean.read(buf),
         )
     }
 
     override fun allocationSize(value: BackupInput) = (
             FfiConverterString.allocationSize(value.`spendKeyHex`) +
-            FfiConverterULong.allocationSize(value.`restoreHeight`)
+            FfiConverterULong.allocationSize(value.`restoreHeight`) +
+            FfiConverterOptionalString.allocationSize(value.`displayName`) +
+            FfiConverterBoolean.allocationSize(value.`publishPayto`)
     )
 
     override fun write(value: BackupInput, buf: ByteBuffer) {
             FfiConverterString.write(value.`spendKeyHex`, buf)
             FfiConverterULong.write(value.`restoreHeight`, buf)
+            FfiConverterOptionalString.write(value.`displayName`, buf)
+            FfiConverterBoolean.write(value.`publishPayto`, buf)
     }
 }
 
@@ -1670,6 +1696,67 @@ public object FfiConverterTypeDhtRecord: FfiConverterRustBuffer<DhtRecord> {
             FfiConverterByteArray.write(value.`ownerPublic`, buf)
             FfiConverterByteArray.write(value.`ownerSecret`, buf)
             FfiConverterUInt.write(value.`subkeyCount`, buf)
+    }
+}
+
+
+
+/**
+ * A fee estimate, with everything needed to show why it is that number.
+ */
+data class FeeEstimate (
+    var `feePxmr`: kotlin.ULong, 
+    /**
+     * Piconero per byte, straight from the daemon.
+     */
+    var `perByte`: kotlin.ULong, 
+    /**
+     * The transaction size this assumed.
+     */
+    var `estimatedBytes`: kotlin.ULong, 
+    /**
+     * Roughly how long until the first confirmation, at this priority.
+     */
+    var `minutesToConfirm`: kotlin.UInt, 
+    /**
+     * The four tiers the daemon offered, cheapest first, as whole fees for
+     * this transaction shape — so a caller can show the trade rather than a
+     * number nobody can compare against anything.
+     */
+    var `tierFeesPxmr`: List<kotlin.ULong>
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFeeEstimate: FfiConverterRustBuffer<FeeEstimate> {
+    override fun read(buf: ByteBuffer): FeeEstimate {
+        return FeeEstimate(
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterSequenceULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FeeEstimate) = (
+            FfiConverterULong.allocationSize(value.`feePxmr`) +
+            FfiConverterULong.allocationSize(value.`perByte`) +
+            FfiConverterULong.allocationSize(value.`estimatedBytes`) +
+            FfiConverterUInt.allocationSize(value.`minutesToConfirm`) +
+            FfiConverterSequenceULong.allocationSize(value.`tierFeesPxmr`)
+    )
+
+    override fun write(value: FeeEstimate, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`feePxmr`, buf)
+            FfiConverterULong.write(value.`perByte`, buf)
+            FfiConverterULong.write(value.`estimatedBytes`, buf)
+            FfiConverterUInt.write(value.`minutesToConfirm`, buf)
+            FfiConverterSequenceULong.write(value.`tierFeesPxmr`, buf)
     }
 }
 
@@ -2412,6 +2499,8 @@ data class RestoredBackup (
     var `spendKeyHex`: kotlin.String, 
     var `restoreHeight`: kotlin.ULong, 
     var `personaSecret`: kotlin.ByteArray, 
+    var `displayName`: kotlin.String?, 
+    var `publishPayto`: kotlin.Boolean, 
     /**
      * Escrow shares carried in the bundle (§4.3.3). Zero is the normal case.
      */
@@ -2430,6 +2519,8 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterString.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterBoolean.read(buf),
             FfiConverterUInt.read(buf),
         )
     }
@@ -2438,6 +2529,8 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterString.allocationSize(value.`spendKeyHex`) +
             FfiConverterULong.allocationSize(value.`restoreHeight`) +
             FfiConverterByteArray.allocationSize(value.`personaSecret`) +
+            FfiConverterOptionalString.allocationSize(value.`displayName`) +
+            FfiConverterBoolean.allocationSize(value.`publishPayto`) +
             FfiConverterUInt.allocationSize(value.`escrowCount`)
     )
 
@@ -2445,6 +2538,8 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterString.write(value.`spendKeyHex`, buf)
             FfiConverterULong.write(value.`restoreHeight`, buf)
             FfiConverterByteArray.write(value.`personaSecret`, buf)
+            FfiConverterOptionalString.write(value.`displayName`, buf)
+            FfiConverterBoolean.write(value.`publishPayto`, buf)
             FfiConverterUInt.write(value.`escrowCount`, buf)
     }
 }
@@ -3355,6 +3450,34 @@ public object FfiConverterSequenceUInt: FfiConverterRustBuffer<List<kotlin.UInt>
 /**
  * @suppress
  */
+public object FfiConverterSequenceULong: FfiConverterRustBuffer<List<kotlin.ULong>> {
+    override fun read(buf: ByteBuffer): List<kotlin.ULong> {
+        val len = buf.getInt()
+        return List<kotlin.ULong>(len) {
+            FfiConverterULong.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.ULong>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterULong.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.ULong>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterULong.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceBoolean: FfiConverterRustBuffer<List<kotlin.Boolean>> {
     override fun read(buf: ByteBuffer): List<kotlin.Boolean> {
         val len = buf.getInt()
@@ -3793,6 +3916,25 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_default_nodes(
         FfiConverterOptionalString.lower(`ownUrl`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Estimate the fee for a transaction of this shape.
+         *
+         * **An estimate, and labelled one everywhere it is shown.** The exact fee is
+         * only known once decoys are chosen and the transaction is built, which costs
+         * network round trips and cannot happen on every keystroke. It is close: the
+         * weight model below is the actual structure of a CLSAG/Bulletproof+
+         * transaction, not a guess at an average.
+         */
+    @Throws(MoneroException::class) fun `moneroFeeEstimate`(`nodeUrl`: kotlin.String, `inputs`: kotlin.UInt, `outputs`: kotlin.UInt, `priority`: kotlin.UInt): FeeEstimate {
+            return FfiConverterTypeFeeEstimate.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_fee_estimate(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterUInt.lower(`inputs`),FfiConverterUInt.lower(`outputs`),FfiConverterUInt.lower(`priority`),_status)
 }
     )
     }

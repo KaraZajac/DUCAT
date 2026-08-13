@@ -2,6 +2,8 @@ package org.ducatproject.ducat.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -213,6 +215,7 @@ private fun AmountStep(
     var fiatEntry by remember { mutableStateOf(Amounts.preferFiat(context)) }
     val rate = remember(version) { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
+    var priority by remember { mutableIntStateOf(1) }
 
     var typed by remember {
         mutableStateOf(if (prefillAmountPxmr > 0) formatXmr(prefillAmountPxmr) else "")
@@ -224,16 +227,19 @@ private fun AmountStep(
     var confirming by remember { mutableStateOf(false) }
     val amountFocus = remember { FocusRequester() }
 
-    // Straight to the amount with the pad up. The destination is already
-    // decided by the time this screen exists, so the only open question is how
-    // much — asking for a tap first is asking for a tap that says nothing.
     LaunchedEffect(Unit) {
         kotlinx.coroutines.delay(150)
         runCatching { amountFocus.requestFocus() }
     }
 
-    // What was typed, as piconero. Entering in a currency converts at the rate
-    // shown; entering in XMR does not convert at all.
+    // The ceiling, priced. Not the balance: offering the balance as the maximum
+    // is how a wallet lets someone type a number it will then refuse, after
+    // they have already decided.
+    var maxPxmr by remember { mutableStateOf(0L) }
+    LaunchedEffect(version, priority) {
+        maxPxmr = withContext(Dispatchers.IO) { Wallet.maxSendable(context, priority) }
+    }
+
     val pxmr = remember(typed, fiatEntry, rate) {
         val v = typed.trim().toBigDecimalOrNull() ?: return@remember null
         val xmr = if (fiatEntry && rate != null && rate > 0) {
@@ -242,7 +248,26 @@ private fun AmountStep(
         xmr.multiply(BigDecimal(1_000_000_000_000L)).toLong().takeIf { it > 0 }
     }
 
-    Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
+    var quote by remember { mutableStateOf<Quote?>(null) }
+    LaunchedEffect(pxmr, priority, version) {
+        val amt = pxmr
+        quote = if (amt == null) null
+        else withContext(Dispatchers.IO) { Wallet.quote(context, amt, priority) }
+    }
+
+    val overMax = pxmr != null && maxPxmr > 0 && pxmr > maxPxmr
+
+    Column(
+        Modifier
+            .fillMaxWidth()
+            // The sheet has to give the keyboard room and let the rest scroll,
+            // or the buttons end up under it and the screen is unusable at the
+            // exact moment someone is typing an amount.
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 24.dp),
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Back") }
             Spacer(Modifier.width(4.dp))
@@ -254,14 +279,14 @@ private fun AmountStep(
                          style = MaterialTheme.typography.titleMedium)
                 }
                 is PayTarget.ToAddress -> Text(
-                    target.address.take(12) + "…" + target.address.takeLast(6),
+                    target.address.take(10) + "…" + target.address.takeLast(6),
                     fontFamily = FontFamily.Monospace,
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = typed,
@@ -269,18 +294,14 @@ private fun AmountStep(
                 placeholder = { Text("0") },
                 textStyle = MaterialTheme.typography.headlineMedium,
                 singleLine = true,
-                // A number pad, not a full keyboard. The amount is the first
-                // thing anyone types here and it is always digits.
+                isError = overMax,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f).focusRequester(amountFocus),
             )
             Spacer(Modifier.width(10.dp))
             if (rate != null) {
-                // Switching the unit keeps the number and re-reads it, rather
-                // than converting what was typed: someone who meant "20" meant
-                // twenty of whatever they just chose.
                 AssistChip(
-                    onClick = { fiatEntry = !fiatEntry },
+                    onClick = { fiatEntry = !fiatEntry; typed = "" },
                     label = { Text(if (fiatEntry) cur else "XMR") },
                     trailingIcon = { Icon(Icons.Filled.SwapVert, null, Modifier.size(16.dp)) },
                 )
@@ -288,21 +309,86 @@ private fun AmountStep(
                 Text("XMR", style = MaterialTheme.typography.labelLarge)
             }
         }
+
+        // The other unit, live, so nobody converts in their head to check.
         pxmr?.let {
             Text(
                 if (fiatEntry) "${formatXmr(it)} XMR"
-                else Amounts.show(context, it).let { s -> s.secondary ?: "" },
+                else Amounts.show(context, it).secondary.orEmpty(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
-        Spacer(Modifier.height(12.dp))
-        Text(
-            "Spendable: ${Amounts.show(context, b.spendablePxmr).primary}",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Spacer(Modifier.height(10.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "You can send up to ${inUnit(context, maxPxmr, fiatEntry, rate, cur)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (overMax) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.weight(1f))
+            TextButton(
+                onClick = {
+                    typed = if (fiatEntry && rate != null) {
+                        "%.2f".format(maxPxmr / 1e12 * rate)
+                    } else formatXmr(maxPxmr)
+                },
+                enabled = maxPxmr > 0,
+            ) { Text("Max") }
+        }
+        if (overMax) {
+            Text(
+                "That is more than you can send once the fee is counted.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+
+        // The breakdown, once there is something to break down.
+        quote?.let { q ->
+            Spacer(Modifier.height(14.dp))
+            Card(colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                Column(Modifier.padding(14.dp)) {
+                    CostRow("Amount", Amounts.show(context, q.amountPxmr).primary)
+                    CostRow(
+                        "Network fee (estimated)",
+                        Amounts.show(context, q.feePxmr).primary,
+                    )
+                    HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                    CostRow("Total", Amounts.show(context, q.totalPxmr).primary, bold = true)
+                    CostRow("Left after", Amounts.show(context, q.remainingPxmr).primary)
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "Uses ${q.notes} note(s) · usually confirmed in about " +
+                            "${q.minutesToConfirm} minutes",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        "The fee is an estimate until the transaction is built; the " +
+                            "exact one is shown after sending.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(10.dp))
+            Text("Speed", style = MaterialTheme.typography.labelLarge)
+            Spacer(Modifier.height(4.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf("Slow", "Normal", "Fast", "Fastest").forEachIndexed { i, label ->
+                    FilterChip(
+                        selected = priority == i,
+                        onClick = { priority = i },
+                        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                    )
+                }
+            }
+        }
 
         if (target is PayTarget.ToContact) {
             Spacer(Modifier.height(12.dp))
@@ -339,6 +425,8 @@ private fun AmountStep(
                                 .onFailure { error = it.message ?: "could not send" }
                         }
                     },
+                    // Asking for more than you hold is perfectly reasonable, so
+                    // a request is never blocked by the balance.
                     enabled = !busy && pxmr != null,
                     modifier = Modifier.weight(1f),
                 ) { Text("Request") }
@@ -347,8 +435,8 @@ private fun AmountStep(
                 target.contact.theirAddress != null || prefillAmountPxmr > 0
             Button(
                 onClick = { confirming = true },
-                enabled = !busy && pxmr != null && payable &&
-                    b.spendablePxmr >= (pxmr ?: 0),
+                enabled = !busy && pxmr != null && payable && !overMax &&
+                    quote?.affordable == true,
                 modifier = Modifier.weight(1f),
             ) {
                 if (busy) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
@@ -385,6 +473,7 @@ private fun AmountStep(
         }
         ConfirmSend(
             pxmr = pxmr,
+            quote = quote,
             destination = dest,
             contactName = (target as? PayTarget.ToContact)?.contact?.displayName(),
             onCancel = { confirming = false },
@@ -396,14 +485,7 @@ private fun AmountStep(
                         runCatching {
                             val node = NodeStore(context).lastGood()
                                 ?: throw IllegalStateException("no node — check Status")
-                            // A contact payment still needs an address, and one
-                            // only exists if they asked. §16.13 keeps addresses
-                            // out of the contact record on purpose.
-                            // Their published address if they chose to publish
-                            // one, otherwise the one from a request. Neither
-                            // exists until they have offered it (§16.12).
                             val to = dest
-                                ?: (target as? PayTarget.ToContact)?.contact?.theirAddress
                                 ?: throw IllegalStateException(
                                     "They have not shared an address. Ask them to send " +
                                         "a request, or to turn on \"let contacts pay me " +
@@ -413,10 +495,40 @@ private fun AmountStep(
                         }
                     }
                     busy = false
-                    r.onSuccess { done = "Sent · ${it.txidHex.take(16)}…" }
-                        .onFailure { error = it.message ?: "could not send" }
+                    r.onSuccess {
+                        done = "Sent · fee ${formatXmr(it.feePxmr.toLong())} XMR · " +
+                            "${it.txidHex.take(16)}…"
+                    }.onFailure { error = it.message ?: "could not send" }
                 }
             },
+        )
+    }
+}
+
+/** An amount in whichever unit the entry field is currently using. */
+private fun inUnit(
+    context: android.content.Context,
+    pxmr: Long,
+    fiat: Boolean,
+    rate: Double?,
+    cur: String,
+): String = if (fiat && rate != null) {
+    "%s %,.2f".format(cur, pxmr / 1e12 * rate)
+} else "${formatXmr(pxmr)} XMR"
+
+@Composable
+private fun CostRow(label: String, value: String, bold: Boolean = false) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+        Text(
+            label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.weight(1f))
+        Text(
+            value,
+            style = if (bold) MaterialTheme.typography.titleSmall
+                    else MaterialTheme.typography.bodySmall,
         )
     }
 }
@@ -425,6 +537,7 @@ private fun AmountStep(
 @Composable
 private fun ConfirmSend(
     pxmr: Long,
+    quote: Quote?,
     destination: String?,
     contactName: String?,
     onCancel: () -> Unit,
@@ -450,6 +563,14 @@ private fun ConfirmSend(
                     Spacer(Modifier.height(6.dp))
                     Text(it, fontFamily = FontFamily.Monospace,
                          style = MaterialTheme.typography.bodySmall)
+                }
+                quote?.let { q ->
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        "Plus about ${Amounts.show(context, q.feePxmr).primary} in fees — " +
+                            "${Amounts.show(context, q.totalPxmr).primary} in total.",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
                 Spacer(Modifier.height(10.dp))
                 Text(

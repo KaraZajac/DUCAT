@@ -35,7 +35,7 @@ import uniffi.ducat_mobile.exportBackup
  * it. A user with money in the float has both. The one moment when doing it
  * costs nothing is the moment before there is anything to protect.
  */
-enum class Step { Persona, Wallet, Limits, Backup, Done }
+enum class Step { Persona, Profile, Wallet, Limits, Backup, Done }
 
 /**
  * No node has been asked yet, so the backup records genesis.
@@ -57,6 +57,10 @@ data class Onboarding(
     val step: Step = Step.Persona,
     val persona: ByteArray? = null,
     val wallet: NewWallet? = null,
+    /** The name handed out on cards (§7.5). Optional, and it can change later. */
+    val displayName: String? = null,
+    /** Whether contacts may pay without asking (§16.12). Off unless chosen. */
+    val publishPayto: Boolean = false,
     val backupConfirmed: Boolean = false,
 )
 
@@ -103,6 +107,20 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                 },
             )
 
+            Step.Profile -> ProfileStep(
+                initialName = state.displayName.orEmpty(),
+                initialPublish = state.publishPayto,
+                onNext = { name, publish ->
+                    onState(
+                        state.copy(
+                            step = Step.Wallet,
+                            displayName = name.ifBlank { null },
+                            publishPayto = publish,
+                        )
+                    )
+                },
+            )
+
             Step.Limits -> StepCard(
                 title = "Set your spending limits",
                 body = "Small payments go straight through. Larger ones ask for your " +
@@ -134,8 +152,8 @@ private fun Progress(step: Step) {
     // The step you are *on*, not the number completed. "0 of 4" on the first
     // screen reads as though nothing has started and something has gone wrong.
     val n = when (step) {
-        Step.Persona -> 1; Step.Wallet -> 2; Step.Limits -> 3
-        Step.Backup -> 4; Step.Done -> 4
+        Step.Persona -> 1; Step.Profile -> 2; Step.Wallet -> 3; Step.Limits -> 4
+        Step.Backup -> 5; Step.Done -> 5
     }
     Column {
         Text("Set up DUCAT", style = MaterialTheme.typography.headlineSmall)
@@ -146,7 +164,7 @@ private fun Progress(step: Step) {
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            if (step == Step.Done) "Done" else "Step $n of 4",
+            if (step == Step.Done) "Done" else "Step $n of 5",
             style = MaterialTheme.typography.bodySmall,
         )
     }
@@ -255,7 +273,12 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                         }
                         error = try {
                             val bytes = exportBackup(
-                                BackupInput(w.spendKeyHex, w.restoreHeight),
+                                BackupInput(
+                                    w.spendKeyHex,
+                                    w.restoreHeight,
+                                    state.displayName,
+                                    state.publishPayto,
+                                ),
                                 passphrase,
                                 persona,
                             )
@@ -305,4 +328,90 @@ private fun shareBackup(context: Context, file: File) {
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
     context.startActivity(Intent.createChooser(send, "Save your DUCAT backup"))
+}
+
+
+/**
+ * A name, and one decision about being paid.
+ *
+ * Both belong here rather than buried in settings later. The name is what every
+ * card hands out, so a persona created without one introduces itself as a key
+ * fragment. And the address question is asked once, before there is anything at
+ * stake, rather than at the moment somebody is trying to pay — which is the
+ * worst possible time to be reading about linkability.
+ *
+ * Both are optional and both can change afterwards. Neither is a credential;
+ * they travel in the backup because losing them changes how a restored persona
+ * behaves, which is not something a restore should do silently.
+ */
+@Composable
+private fun ProfileStep(
+    initialName: String,
+    initialPublish: Boolean,
+    onNext: (String, Boolean) -> Unit,
+) {
+    var name by remember { mutableStateOf(initialName) }
+    var publish by remember { mutableStateOf(initialPublish) }
+
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(20.dp)) {
+            Text("What should people call you?", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "This goes on the cards you hand out. Whoever adds you can rename " +
+                    "you on their side, and that name is the one they see — so this " +
+                    "is a suggestion, not an identity.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(14.dp))
+            OutlinedTextField(
+                value = name,
+                onValueChange = { if (it.length <= 32) name = it },
+                label = { Text("Name (optional)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Spacer(Modifier.height(22.dp))
+            Text("Can contacts pay you directly?", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Switch(checked = publish, onCheckedChange = { publish = it })
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    if (publish) "Yes — easier to be paid"
+                    else "No — they ask, you approve",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                if (publish) {
+                    "Your address goes to each contact and gets reused. Anyone " +
+                        "reading the chain can tell the same person was paid each " +
+                        "time — including people who only ever paid you once."
+                } else {
+                    "Each payment uses a fresh address, so nothing on the chain ties " +
+                        "your payments together. Someone paying you waits for you to " +
+                        "send a request first."
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = if (publish) MaterialTheme.ducat.changePending
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "You can change both later.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline,
+            )
+
+            Spacer(Modifier.height(18.dp))
+            Button(
+                onClick = { onNext(name.trim(), publish) },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Continue") }
+        }
+    }
 }

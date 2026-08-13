@@ -115,6 +115,27 @@ enum class SyncBlocker {
     Failing,
 }
 
+/**
+ * What a payment costs, before anything is signed.
+ *
+ * Everything here is an estimate and is labelled one. The exact fee is known
+ * only once decoys are chosen and the transaction is built, which is network
+ * work that cannot happen on every keystroke — but the weight model is the real
+ * structure of a CLSAG transaction, so it is close rather than a guess.
+ */
+data class Quote(
+    val amountPxmr: Long,
+    val feePxmr: Long,
+    val notes: Int,
+    val estimatedBytes: Long,
+    val minutesToConfirm: Int,
+    /** Everything this payment removes from the balance. */
+    val totalPxmr: Long,
+    /** What is left afterwards, unlocked. */
+    val remainingPxmr: Long,
+    val affordable: Boolean,
+)
+
 /** What a send would use and cost, before anything is signed. */
 data class SendPlan(
     val notes: List<WalletEntry>,
@@ -245,6 +266,72 @@ object Wallet {
             total += n.amountPxmr
         }
         return SendPlan(picked, amountPxmr, total)
+    }
+
+    /**
+     * The fee for a shape of transaction, cached for a minute.
+     *
+     * Cached because the rate is a network call and the amount field changes on
+     * every keystroke; a minute is far shorter than fees move and far longer
+     * than someone types a number.
+     */
+    private var feeCache: Triple<String, Long, Long>? = null  // key, fee, at
+
+    fun feeFor(context: Context, inputs: Int, priority: Int = 1): Long {
+        val node = NodeStore(context).lastGood() ?: return 0
+        val key = "$node|$inputs|$priority"
+        val now = System.currentTimeMillis()
+        feeCache?.let { (k, fee, at) -> if (k == key && now - at < 60_000) return fee }
+        return try {
+            val e = uniffi.ducat_mobile.moneroFeeEstimate(
+                node, inputs.coerceAtLeast(1).toUInt(), 2u, priority.toUInt(),
+            )
+            feeCache = Triple(key, e.feePxmr.toLong(), now)
+            e.feePxmr.toLong()
+        } catch (e: Exception) {
+            DucatLog.w(TAG, "fee estimate: ${e.message}")
+            0
+        }
+    }
+
+    fun minutesToConfirm(priority: Int): Int = when (priority) {
+        0 -> 20; 1 -> 6; 2 -> 4; else -> 2
+    }
+
+    /**
+     * The most that can actually be sent, fee included.
+     *
+     * Not the balance. Offering the balance as the maximum is how a wallet
+     * lets someone type a number it will then refuse, and the refusal arrives
+     * after they have decided.
+     */
+    fun maxSendable(context: Context, priority: Int = 1): Long {
+        val b = balances(context)
+        if (b.spendableOutputs == 0) return 0
+        val fee = feeFor(context, b.spendableOutputs, priority)
+        return (b.spendablePxmr - fee).coerceAtLeast(0)
+    }
+
+    /** Cost of sending this amount, with what is left afterwards. */
+    fun quote(context: Context, amountPxmr: Long, priority: Int = 1): Quote {
+        val b = balances(context)
+        val plan = plan(context, amountPxmr)
+        // Fee scales with input count, and the input count comes from the
+        // amount — so a quote for an unaffordable amount still prices the notes
+        // it would have needed rather than pretending one would do.
+        val inputs = if (plan.notes.isEmpty()) b.spendableOutputs else plan.notes.size
+        val fee = feeFor(context, inputs, priority)
+        val total = amountPxmr + fee
+        return Quote(
+            amountPxmr = amountPxmr,
+            feePxmr = fee,
+            notes = inputs,
+            estimatedBytes = 0,
+            minutesToConfirm = minutesToConfirm(priority),
+            totalPxmr = total,
+            remainingPxmr = (b.spendablePxmr - total).coerceAtLeast(0),
+            affordable = total <= b.spendablePxmr,
+        )
     }
 
     /** Build, sign and broadcast. Blocking; call it off the main thread. */

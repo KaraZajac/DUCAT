@@ -22,6 +22,8 @@ fn sample() -> Backup {
             key_file: vec![0x9F; 2286], // the measured size of a real 2-of-3 .keys
             restore_height: 2_183_000,
         }],
+        display_name: None,
+        publish_payto: false,
         created: 1_800_000_000,
     }
 }
@@ -235,4 +237,36 @@ fn a_bundle_with_no_open_escrows_is_still_valid() {
     let back = import(&blob, b"passphrase here").unwrap();
     assert!(back.escrow_shares.is_empty());
     assert_eq!(back.persona_secret, b.persona_secret);
+}
+
+/// A restored persona that has forgotten its own name hands out cards nobody
+/// recognises, and the user has no way to tell that is what happened.
+#[test]
+fn a_bundle_carries_the_profile_name() {
+    let mut b = sample();
+    b.display_name = Some("kara".into());
+    let blob = export(&b, b"correct horse battery", [7u8; 16], [9u8; 24]).unwrap();
+    let back = import(&blob, b"correct horse battery").unwrap();
+    assert_eq!(back.display_name.as_deref(), Some("kara"));
+}
+
+/// Publishing an address is a **privacy** setting, so restoring it wrong is
+/// worse than losing it. Absence must mean off — the safe direction and the
+/// original default — never on.
+#[test]
+fn publishing_defaults_to_off_and_survives_when_on() {
+    let mut b = sample();
+    assert!(!b.publish_payto, "off is the default");
+    let off = import(
+        &export(&b, b"correct horse battery", [7u8; 16], [9u8; 24]).unwrap(),
+        b"correct horse battery",
+    ).unwrap();
+    assert!(!off.publish_payto, "a bundle with it off must not restore it on");
+
+    b.publish_payto = true;
+    let on = import(
+        &export(&b, b"correct horse battery", [7u8; 16], [9u8; 24]).unwrap(),
+        b"correct horse battery",
+    ).unwrap();
+    assert!(on.publish_payto, "a deliberate choice must survive");
 }

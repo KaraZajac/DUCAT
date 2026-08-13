@@ -760,6 +760,8 @@ fn backup_cases() -> Vec<J> {
             key_file: vec![0x9F; 64],
             restore_height: 2_183_000,
         }],
+        display_name: None,
+        publish_payto: false,
         created: 1_800_000_000,
     };
     let pass = b"a fixed passphrase";
