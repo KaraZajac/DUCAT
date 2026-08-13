@@ -245,62 +245,63 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 )
             },
             bottomBar = {
-                // PayPal seats its centre action *inside* the bar. Floating it
-                // above was a real bug on a real screen: the button covered the
-                // card beneath it, and on a payment screen the thing being
-                // covered is a number someone is about to act on.
-                // Blends with the background rather than sitting on a tonal
-                // band — the same trick every app the user recognises uses to
-                // make the bar feel like part of the screen instead of a tray.
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    tonalElevation = 0.dp,
-                ) {
-                    NavItem(Tab.Home, Icons.Filled.Home, tab) { tab = it }
-                    // A wallet, now that the coin is the centre button. Two
-                    // copies of the app's own mark in one bar and neither reads
-                    // as the mark.
-                    NavItem(Tab.Accounts, Icons.Filled.AccountBalanceWallet, tab) { tab = it }
-
-                    // The one verb that dominates, wearing the app's own mark —
-                    // Venmo's centre button, which is the app icon with the verb
-                    // under it. The circle overhangs the bar's top edge by a
-                    // little; that is the detail that makes it read as *the*
-                    // button rather than a fifth tab. A modest overhang, not the
-                    // free-floating FAB this once was — that one covered the
-                    // number someone was about to act on.
-                    Column(
-                        Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Surface(
-                            onClick = { payOpen = true },
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.tertiary,
-                            contentColor = MaterialTheme.colorScheme.onTertiary,
-                            shadowElevation = 6.dp,
-                            modifier = Modifier.size(58.dp).offset(y = (-12).dp),
+                // Venmo's bar: the app's own mascot on the centre circle, a
+                // size up from the tabs, overhanging the bar's top edge. The
+                // overhang cannot live *inside* NavigationBar — it clips its
+                // children, which cut the circle flat — so the bar sits in a
+                // wrapper with a transparent strip for the circle to rise into.
+                // The strip is part of the bottomBar, so the Scaffold keeps
+                // content clear of it: an overhang, not the free-floating FAB
+                // this once was, which covered the number someone was about to
+                // act on.
+                Box(Modifier.fillMaxWidth()) {
+                    Column {
+                        Spacer(Modifier.height(18.dp))
+                        NavigationBar(
+                            containerColor = MaterialTheme.colorScheme.background,
+                            tonalElevation = 0.dp,
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    painterResource(R.drawable.ic_ducat_mono),
-                                    contentDescription = "Send or receive",
-                                    modifier = Modifier.size(40.dp),
+                            NavItem(Tab.Home, Icons.Filled.Home, tab) { tab = it }
+                            // A wallet, since the mark owns the centre. Two
+                            // copies of it in one bar and neither reads as the
+                            // mark.
+                            NavItem(Tab.Accounts, Icons.Filled.AccountBalanceWallet, tab) { tab = it }
+                            // The centre slot: only the label lives in the bar;
+                            // the circle floats in the wrapper above.
+                            Column(
+                                Modifier.weight(1f).fillMaxHeight(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Bottom,
+                            ) {
+                                Text(
+                                    "Send/Receive",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    modifier = Modifier.padding(bottom = 14.dp),
                                 )
                             }
+                            NavItem(Tab.Activity, Icons.Filled.Receipt, tab) { tab = it }
+                            NavItem(Tab.Chat, Icons.Filled.ChatBubbleOutline, tab) { tab = it }
                         }
-                        Text(
-                            "Send/Receive",
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1,
-                            softWrap = false,
-                            modifier = Modifier.offset(y = (-8).dp),
-                        )
                     }
-
-                    NavItem(Tab.Activity, Icons.Filled.Receipt, tab) { tab = it }
-                    NavItem(Tab.Chat, Icons.Filled.ChatBubbleOutline, tab) { tab = it }
+                    Surface(
+                        onClick = { payOpen = true },
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        shadowElevation = 6.dp,
+                        modifier = Modifier.size(62.dp).align(Alignment.TopCenter),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            // An Image, not an Icon: Icon tints to one colour,
+                            // and the cat is not the cat as a silhouette.
+                            androidx.compose.foundation.Image(
+                                painterResource(R.mipmap.ic_launcher),
+                                contentDescription = "Send or receive",
+                                modifier = Modifier.size(48.dp),
+                            )
+                        }
+                    }
                 }
             },
         ) { padding ->
