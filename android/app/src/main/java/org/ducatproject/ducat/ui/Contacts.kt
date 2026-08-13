@@ -45,83 +45,6 @@ import uniffi.ducat_mobile.readContactCard
  * *do* know. Both are in the app because both are real, and the UI has to make
  * which one you are in obvious rather than blurring them together.
  */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ContactsScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
-    val context = LocalContext.current
-    val store = remember { ContactStore(context) }
-    var contacts by remember { mutableStateOf(store.all()) }
-    var sheet by remember { mutableStateOf<Sheet?>(null) }
-
-    Column(Modifier.fillMaxSize()) {
-        Row(
-            Modifier.fillMaxWidth().padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Button(
-                onClick = { sheet = Sheet.Share },
-                modifier = Modifier.weight(1f),
-                enabled = personaSecret != null,
-            ) {
-                Icon(Icons.Filled.Share, null, Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("My card")
-            }
-            OutlinedButton(
-                onClick = { sheet = Sheet.Add },
-                modifier = Modifier.weight(1f),
-            ) {
-                Icon(Icons.Filled.PersonAdd, null, Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Add")
-            }
-        }
-
-        if (contacts.isEmpty()) {
-            Column(
-                Modifier.fillMaxWidth().padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Icon(
-                    Icons.Filled.People,
-                    null,
-                    Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.outline,
-                )
-                Spacer(Modifier.height(12.dp))
-                Text("No contacts yet", style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "Hand someone your card in person, or send it to them over " +
-                        "any app you already trust. Nobody can be found by name — " +
-                        "reaching a person takes a card they gave you.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        } else {
-            LazyColumn(Modifier.fillMaxSize()) {
-                items(contacts, key = { it.personaHex }) { c ->
-                    ContactRow(c) { onOpenChat(c) }
-                    HorizontalDivider()
-                }
-            }
-        }
-    }
-
-    when (sheet) {
-        Sheet.Share -> ShareCardSheet(personaSecret) { sheet = null }
-        Sheet.Add -> AddContactSheet(
-            onDismiss = { sheet = null },
-            onAdded = { contacts = store.all(); sheet = null },
-            store = store,
-        )
-        null -> {}
-    }
-}
-
-private enum class Sheet { Share, Add }
-
 @Composable
 private fun ContactRow(c: Contact, onClick: () -> Unit) {
     ListItem(
@@ -167,7 +90,7 @@ private fun ContactRow(c: Contact, onClick: () -> Unit) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
+internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
@@ -284,7 +207,7 @@ private fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: ContactStore) {
+internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: ContactStore) {
     val clipboard = LocalClipboardManager.current
     var text by remember { mutableStateOf("") }
     var scanned by remember { mutableStateOf<uniffi.ducat_mobile.ScannedCard?>(null) }

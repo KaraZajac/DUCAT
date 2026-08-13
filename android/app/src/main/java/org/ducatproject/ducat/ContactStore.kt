@@ -58,6 +58,39 @@ class ContactStore(context: Context) {
             c.copy(inSeq = seq, inPrevLink = prevLink))
     }
 
+    /** Show or hide a conversation without touching the contact. */
+    fun setChatVisible(personaHex: String, visible: Boolean) {
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
+        save(all().filterNot { it.personaHex == personaHex } + c.copy(chatVisible = visible))
+    }
+
+    /**
+     * Delete a conversation's messages.
+     *
+     * Genuinely deleted, not flagged. §16.11 spends real effort making a
+     * delivered message unrecoverable; a "delete" that leaves the plaintext in
+     * the store would undo that at the last step, which is the step the user
+     * can see.
+     *
+     * The chain counters reset with it: a thread with no history has no link
+     * for the next message to follow, and leaving them would refuse everything
+     * the other side sends afterwards.
+     */
+    fun deleteThread(personaHex: String) {
+        prefs.edit().remove("thread_$personaHex").apply()
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
+        save(
+            all().filterNot { it.personaHex == personaHex } +
+                c.copy(outSeq = 0, outPrevLink = null, inSeq = 0, inPrevLink = null)
+        )
+    }
+
+    /** Forget a person entirely: the contact and everything they said. */
+    fun forget(personaHex: String) {
+        prefs.edit().remove("thread_$personaHex").apply()
+        save(all().filterNot { it.personaHex == personaHex })
+    }
+
     /** Record their published keys without touching any counter. */
     fun setTheirBundle(personaHex: String, bundle: ByteArray) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
@@ -142,6 +175,14 @@ data class Contact(
     val outPrevLink: ByteArray? = null,
     val inSeq: Long = 0,
     val inPrevLink: ByteArray? = null,
+    /**
+     * Whether this contact appears in the chat list.
+     *
+     * A contact and a conversation are different things: removing a chat should
+     * not throw away the person, and removing the person should not be the only
+     * way to tidy the list. Hidden here, deleted in Contacts.
+     */
+    val chatVisible: Boolean = true,
 ) {
     /** §7.5: the petname wins. A self-asserted name is a fallback, never a name. */
     fun displayName(): String = petname ?: assertedName ?: "${personaHex.take(8)}…"
@@ -157,6 +198,7 @@ data class Contact(
         put("out_prev", outPrevLink?.let { b64(it) } ?: JSONObject.NULL)
         put("in_seq", inSeq)
         put("in_prev", inPrevLink?.let { b64(it) } ?: JSONObject.NULL)
+        put("chat_visible", chatVisible)
     }
 
     companion object {
@@ -171,6 +213,7 @@ data class Contact(
             outPrevLink = o.optStringOrNull("out_prev")?.let { unb64(it) },
             inSeq = o.optLong("in_seq"),
             inPrevLink = o.optStringOrNull("in_prev")?.let { unb64(it) },
+            chatVisible = o.optBoolean("chat_visible", true),
         )
     }
 }
@@ -270,3 +313,35 @@ class PersonaStore(context: Context) {
  */
 fun threadAad(minePersonaHex: String, theirsPersonaHex: String): ByteArray =
     listOf(minePersonaHex, theirsPersonaHex).sorted().joinToString(":").toByteArray()
+
+
+/**
+ * The Monero wallet created during onboarding.
+ *
+ * It was previously held only in onboarding's Compose state, so the address a
+ * user was shown during setup vanished the moment setup finished — and
+ * `BackupSettings` was being handed `null` for the key it exists to back up.
+ * A wallet you cannot see the address of is a wallet nobody can pay into.
+ *
+ * The spend key lives here for §4.3's export. That is the same first-pass
+ * compromise as the rest of this file, and the loudest instance of it: this is
+ * the key that controls the money.
+ */
+class WalletStore(context: Context) {
+    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+
+    fun save(address: String, spendKeyHex: String, restoreHeight: ULong, stagenet: Boolean) {
+        prefs.edit()
+            .putString("wallet_address", address)
+            .putString("wallet_spend", spendKeyHex)
+            .putString("wallet_height", restoreHeight.toString())
+            .putBoolean("wallet_stagenet", stagenet)
+            .apply()
+    }
+
+    fun address(): String? = prefs.getString("wallet_address", null)
+    fun spendKeyHex(): String? = prefs.getString("wallet_spend", null)
+    fun stagenet(): Boolean = prefs.getBoolean("wallet_stagenet", true)
+    fun restoreHeight(): ULong =
+        prefs.getString("wallet_height", null)?.toULongOrNull() ?: 0uL
+}

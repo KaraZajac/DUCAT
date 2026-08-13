@@ -27,8 +27,14 @@ import org.ducatproject.ducat.ui.ThemeMode
 import org.ducatproject.ducat.ui.ThemePreference
 import org.ducatproject.ducat.ui.ducat
 import org.ducatproject.ducat.ui.BridgeSelfTest
+import androidx.activity.compose.BackHandler
+import kotlinx.coroutines.launch
+import org.ducatproject.ducat.ui.AccountsScreen
+import org.ducatproject.ducat.ui.ChatListScreen
 import org.ducatproject.ducat.ui.ChatScreen
-import org.ducatproject.ducat.ui.ContactsScreen
+import org.ducatproject.ducat.ui.DrawerContent
+import org.ducatproject.ducat.ui.Section
+import org.ducatproject.ducat.ui.SectionScreen
 import uniffi.ducat_mobile.approxPaymentsSupported
 import uniffi.ducat_mobile.protocolVersion
 
@@ -62,6 +68,19 @@ class MainActivity : ComponentActivity() {
                     OnboardingFlow(setup) { next ->
                         setup = next
                         if (next.step == Step.Done && next.backupConfirmed) {
+                            // Persist the wallet setup created. It used to live
+                            // only in onboarding's Compose state, so the address
+                            // a user was shown during setup vanished the moment
+                            // setup finished — and BackupSettings was handed
+                            // null for the very key it exists to back up.
+                            next.wallet?.let { w ->
+                                WalletStore(this@MainActivity).save(
+                                    address = w.address,
+                                    spendKeyHex = w.spendKeyHex,
+                                    restoreHeight = w.restoreHeight,
+                                    stagenet = true,
+                                )
+                            }
                             prefs.onboarded = true
                             onboarded = true
                         }
@@ -80,134 +99,153 @@ class MainActivity : ComponentActivity() {
 /** A screen that takes over from the tabbed shell. */
 private sealed interface Overlay {
     data object None : Overlay
-    data object Contacts : Overlay
     data class Chat(val contact: Contact) : Overlay
+    data class Drawer(val section: Section) : Overlay
 }
 
-enum class Tab(val label: String) { Home("Home"), Accounts("Accounts"), Activity("Activity"), Menu("Menu") }
+enum class Tab(val label: String) {
+    Home("Home"), Accounts("Accounts"), Activity("Activity"), Chat("Chat")
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     var tab by remember { mutableStateOf(Tab.Home) }
-    // Contacts and a conversation are full-screen rather than a fifth tab. The
-    // nav bar is the money surface; people are a place you go *into*, and
-    // burying chat behind a bar slot would make the bar the wrong shape for the
-    // one verb (§15.2's present/read) it exists to keep prominent.
     var overlay by remember { mutableStateOf<Overlay>(Overlay.None) }
+    val drawer = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val persona = remember { PersonaStore(context).secret() }
 
-    when (val o = overlay) {
-        is Overlay.Chat -> {
-            ChatScreen(o.contact) { overlay = Overlay.Contacts }
-            return
+    // Android's back gesture is a system behaviour, not a widget: without a
+    // handler it goes straight to the activity and closes the app. Every screen
+    // that is *entered* has to say how to leave it, or the way out of a
+    // conversation is quitting.
+    BackHandler(enabled = drawer.isOpen) { scope.launch { drawer.close() } }
+    BackHandler(enabled = overlay !is Overlay.None && drawer.isClosed) {
+        overlay = when (overlay) {
+            // A chat opened from Contacts returns to Contacts, not to the tabs.
+            is Overlay.Chat -> Overlay.None
+            else -> Overlay.None
         }
-        Overlay.Contacts -> {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text("People") },
-                        navigationIcon = {
-                            IconButton(onClick = { overlay = Overlay.None }) {
-                                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-                            }
-                        },
-                    )
-                },
-            ) { padding ->
-                Box(Modifier.padding(padding)) {
-                    ContactsScreen(persona) { overlay = Overlay.Chat(it) }
-                }
-            }
-            return
-        }
-        Overlay.None -> {}
+    }
+    BackHandler(enabled = overlay is Overlay.None && drawer.isClosed && tab != Tab.Home) {
+        tab = Tab.Home
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(if (tab == Tab.Home) "" else tab.label) },
-                navigationIcon = {
-                    IconButton(onClick = { tab = Tab.Menu }) {
-                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { overlay = Overlay.Contacts }) {
-                        Icon(Icons.Filled.People, contentDescription = "People")
-                    }
-                },
-            )
-        },
-        bottomBar = {
-            // PayPal seats its centre action *inside* the bar. Floating it above
-            // was a real bug on a real screen: the button covered the card
-            // beneath it, and on a payment screen the thing being covered is a
-            // number someone is about to act on.
-            NavigationBar {
-                NavItem(Tab.Home, Icons.Filled.Home, tab) { tab = it }
-                // The coin, which we already draw for the launcher. Nothing in
-                // the core icon set means "your money" without borrowing a
-                // shopping metaphor this app is not about.
-                NavigationBarItem(
-                    selected = tab == Tab.Accounts,
-                    onClick = { tab = Tab.Accounts },
-                    icon = {
-                        Icon(
-                            painterResource(R.drawable.ic_ducat_coin),
-                            contentDescription = Tab.Accounts.label,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    },
-                    label = { Text(Tab.Accounts.label) },
-                )
-
-                // The one verb that dominates, raised without leaving the bar.
-                // It is `presenter_role` (§15.2), not a mode we invented:
-                // Request means I present and you tap me, Send means I read
-                // your tap.
-                // NOT fillMaxHeight: NavigationBar does not constrain its
-                // children's height, so filling it expanded the bar to the whole
-                // screen and left the content with none. Shipped once, visible
-                // immediately on a device and invisible from here.
-                Box(
-                    Modifier.weight(1f),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    FloatingActionButton(
-                        onClick = { /* tap flow */ },
-                        shape = CircleShape,
-                        modifier = Modifier.size(52.dp),
-                    ) {
-                        Icon(Icons.Filled.SwapVert, contentDescription = "Send or request")
-                    }
-                }
-
-                NavItem(Tab.Activity, Icons.Filled.Receipt, tab) { tab = it }
-                NavItem(Tab.Menu, Icons.Filled.Settings, tab) { tab = it }
+    ModalNavigationDrawer(
+        drawerState = drawer,
+        drawerContent = {
+            DrawerContent { section ->
+                scope.launch { drawer.close() }
+                overlay = Overlay.Drawer(section)
             }
         },
-    ) { padding ->
-        Column(
-            Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            when (tab) {
-                Tab.Home -> HomeScreen()
-                Tab.Accounts -> Placeholder(
-                    "Accounts",
-                    "Float, reserve and bond — §17.2 forbids showing them as one number."
+    ) {
+        when (val o = overlay) {
+            is Overlay.Chat -> {
+                ChatScreen(o.contact) { overlay = Overlay.None }
+                return@ModalNavigationDrawer
+            }
+            is Overlay.Drawer -> {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text(o.section.label) },
+                            navigationIcon = {
+                                IconButton(onClick = { overlay = Overlay.None }) {
+                                    Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                                }
+                            },
+                        )
+                    },
+                ) { padding ->
+                    Box(Modifier.padding(padding)) {
+                        SectionScreen(o.section, themeMode, onThemeChange) {
+                            overlay = Overlay.Chat(it)
+                        }
+                    }
+                }
+                return@ModalNavigationDrawer
+            }
+            Overlay.None -> {}
+        }
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(if (tab == Tab.Home) "" else tab.label) },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawer.open() } }) {
+                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                        }
+                    },
                 )
-                Tab.Activity -> Placeholder(
-                    "Activity",
-                    "Mostly nameless by design: a name exists only where §16.3's " +
-                        "post-receipt coda established a contact."
-                )
-                Tab.Menu -> MenuScreen(themeMode, onThemeChange)
+            },
+            bottomBar = {
+                // PayPal seats its centre action *inside* the bar. Floating it
+                // above was a real bug on a real screen: the button covered the
+                // card beneath it, and on a payment screen the thing being
+                // covered is a number someone is about to act on.
+                NavigationBar {
+                    NavItem(Tab.Home, Icons.Filled.Home, tab) { tab = it }
+                    // The coin, which we already draw for the launcher. Nothing
+                    // in the core icon set means "your money" without borrowing
+                    // a shopping metaphor this app is not about.
+                    NavigationBarItem(
+                        selected = tab == Tab.Accounts,
+                        onClick = { tab = Tab.Accounts },
+                        icon = {
+                            Icon(
+                                painterResource(R.drawable.ic_ducat_coin),
+                                contentDescription = Tab.Accounts.label,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
+                        label = { Text(Tab.Accounts.label) },
+                    )
+
+                    // The one verb that dominates, raised without leaving the
+                    // bar. It is `presenter_role` (§15.2), not a mode we
+                    // invented: Request means I present and you tap me, Send
+                    // means I read your tap.
+                    // NOT fillMaxHeight: NavigationBar does not constrain its
+                    // children's height, so filling it expanded the bar to the
+                    // whole screen and left the content with none.
+                    Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        FloatingActionButton(
+                            onClick = { /* tap flow */ },
+                            shape = CircleShape,
+                            modifier = Modifier.size(52.dp),
+                        ) {
+                            Icon(Icons.Filled.SwapVert, contentDescription = "Send or request")
+                        }
+                    }
+
+                    NavItem(Tab.Activity, Icons.Filled.Receipt, tab) { tab = it }
+                    NavItem(Tab.Chat, Icons.Filled.ChatBubbleOutline, tab) { tab = it }
+                }
+            },
+        ) { padding ->
+            Box(Modifier.padding(padding).fillMaxSize()) {
+                when (tab) {
+                    // Only the scrolling screens get a scroll wrapper. Chat owns
+                    // a LazyColumn, and nesting one inside a vertical scroll
+                    // gives it unbounded height — it renders every row at once
+                    // and the list stops being lazy.
+                    Tab.Home -> Column(Modifier.verticalScroll(rememberScrollState())) {
+                        HomeScreen()
+                    }
+                    Tab.Accounts -> AccountsScreen()
+                    Tab.Activity -> Column(Modifier.verticalScroll(rememberScrollState())) {
+                        Placeholder(
+                            "Activity",
+                            "Mostly nameless by design: a name exists only where a " +
+                                "contact was established (§16.3, §16.9).",
+                        )
+                    }
+                    Tab.Chat -> ChatListScreen(persona) { overlay = Overlay.Chat(it) }
+                }
             }
         }
     }
@@ -236,9 +274,6 @@ private fun HomeScreen() {
         locked = Money(1200),
         onTopUp = {},
     )
-    // On the home screen for this build only. It answers the one question this
-    // APK exists to answer, and it should be deleted the moment it has.
-    BridgeSelfTest()
 }
 
 /** One bar slot, so the centre action can sit among them rather than over them. */
@@ -255,44 +290,6 @@ private fun RowScope.NavItem(
         icon = { Icon(icon, contentDescription = target.label) },
         label = { Text(target.label) },
     )
-}
-
-@Composable
-private fun MenuScreen(mode: ThemeMode, onChange: (ThemeMode) -> Unit) {
-    val context = LocalContext.current
-    Column(Modifier.fillMaxWidth().padding(20.dp)) {
-        // The transport, first: nothing else here matters if a route cannot be
-        // built, and this is the screen a person troubleshoots from.
-        NetworkPanel(storageDir = context.filesDir.absolutePath + "/veilid")
-        BackupSettings(spendKeyHex = null, restoreHeight = 0uL, personaSecret = null)
-        Spacer(Modifier.height(16.dp))
-        Text("Appearance", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(8.dp))
-        ThemeMode.entries.forEach { m ->
-            Row(
-                Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                RadioButton(selected = mode == m, onClick = { onChange(m) })
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    when (m) {
-                        ThemeMode.System -> "Follow system"
-                        ThemeMode.Latte -> "Latte (light)"
-                        ThemeMode.Mocha -> "Mocha (dark)"
-                    }
-                )
-            }
-        }
-        Spacer(Modifier.height(24.dp))
-        Text(
-            "Personas, backup, custody, verification thresholds, markets, relays, records.",
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Spacer(Modifier.height(8.dp))
-        // Proof the native core is loaded and answering.
-        Text("speaking ${protocolVersion()}", style = MaterialTheme.typography.bodySmall)
-    }
 }
 
 @Composable
