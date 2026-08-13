@@ -425,7 +425,17 @@ pub fn node_dht_create_shared(
     })
 }
 
-/// Open someone else's record, optionally as a writer.
+/// Open a record, optionally as a writer.
+///
+/// **A record must be open before `set` or `get` will work, and creating one
+/// leaves it open only for the life of this process.** After a restart the app
+/// must re-open every record it intends to use — its own outbox included.
+/// Forgetting this produces a failure that looks like the network (a set that
+/// goes nowhere) and is bookkeeping, which is the same shape of bug that cost a
+/// night on the `app_call` build.
+///
+/// Opening an already-open record is harmless, so callers should re-open rather
+/// than track whether they have.
 #[uniffi::export]
 pub fn node_dht_open(
     key: String,
@@ -453,6 +463,8 @@ pub fn node_dht_open(
     })
 }
 
+/// Write one subkey. The record must be open (see [`node_dht_open`]), and this
+/// node must be the owner or a named writer for that subkey.
 #[uniffi::export]
 pub fn node_dht_set(key: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeError> {
     let (api, rt) = handles()?;
