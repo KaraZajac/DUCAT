@@ -13,6 +13,11 @@ use std::sync::{Mutex, OnceLock};
 
 use veilid_core::*;
 
+struct Handles {
+    api: VeilidAPI,
+    rt: tokio::runtime::Handle,
+}
+
 struct Node {
     api: VeilidAPI,
     runtime: tokio::runtime::Runtime,
@@ -37,6 +42,21 @@ static INBOX: OnceLock<Mutex<VecDeque<(u64, Vec<u8>)>>> = OnceLock::new();
 
 fn inbox() -> &'static Mutex<VecDeque<(u64, Vec<u8>)>> {
     INBOX.get_or_init(|| Mutex::new(VecDeque::new()))
+}
+
+/// Take a clone of what a call needs, and **release the lock before doing any
+/// network work**.
+///
+/// Every function here used to hold the global node mutex across its
+/// `block_on`. Building a private route takes seconds, and `node_status` is
+/// polled from a Compose recomposition — so a status poll during a route build
+/// blocked the main thread until the route finished, which Android reports as
+/// the app not responding. It reads to a user as a crash while building a card,
+/// and there is nothing in the log to say a lock was the reason.
+fn handles() -> Result<(VeilidAPI, tokio::runtime::Handle), NodeError> {
+    let guard = slot().lock().unwrap();
+    let node = guard.as_ref().ok_or(NodeError::NotRunning)?;
+    Ok((node.api.clone(), node.runtime.handle().clone()))
 }
 
 /// What the UI can show and a person can troubleshoot from.
@@ -123,11 +143,11 @@ pub fn node_start(storage_dir: String) -> Result<(), NodeError> {
 /// A snapshot. Cheap, and safe to call from a recomposition.
 #[uniffi::export]
 pub fn node_status() -> NodeStatus {
-    let guard = slot().lock().unwrap();
-    let Some(node) = guard.as_ref() else {
+    let Ok((api, rt)) = handles() else {
         return NodeStatus::default();
     };
-    match node.runtime.block_on(node.api.get_state()) {
+    let node = Handles { api, rt };
+    match node.rt.block_on(node.api.get_state()) {
         Ok(s) => NodeStatus {
             running: true,
             attached: !matches!(s.attachment.state, AttachmentState::Detached),
@@ -234,14 +254,26 @@ pub fn android_ready() -> bool {
 /// free.
 #[uniffi::export]
 pub fn node_route_blob() -> Result<Vec<u8>, NodeError> {
-    let guard = slot().lock().unwrap();
-    let node = guard.as_ref().ok_or(NodeError::NotRunning)?;
-    node.runtime.block_on(async {
-        node.api
-            .new_custom_private_route(PrivateSpec::default())
-            .await
-            .map(|r| r.blob)
-            .map_err(|e| NodeError::Failed(format!("route: {e}")))
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        // Allocation genuinely fails sometimes — veilid returns `TryAgain:
+        // allocated route failed to test`, which is a transient result of the
+        // hops it picked rather than a permanent condition. Retrying is what
+        // the error name asks for, and one failure should not be a dead end in
+        // front of a user who just pressed a button.
+        let mut last = String::new();
+        for attempt in 1..=4 {
+            match api.new_custom_private_route(PrivateSpec::default()).await {
+                Ok(r) => return Ok(r.blob),
+                Err(e) => {
+                    last = format!("{e}");
+                    if attempt < 4 {
+                        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+                    }
+                }
+            }
+        }
+        Err(NodeError::Failed(format!("route: {last} (4 attempts)")))
     })
 }
 
@@ -256,15 +288,12 @@ pub fn node_app_call(
     message: Vec<u8>,
     timeout_ms: u32,
 ) -> Result<Vec<u8>, NodeError> {
-    let guard = slot().lock().unwrap();
-    let node = guard.as_ref().ok_or(NodeError::NotRunning)?;
-    node.runtime.block_on(async {
-        let route = node
-            .api
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let route = api
             .import_remote_private_route(route_blob)
             .map_err(|e| NodeError::Failed(format!("import route: {e}")))?;
-        let rc = node
-            .api
+        let rc = api
             .routing_context()
             .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
         let fut = rc.app_call(Target::RouteId(route), message);
@@ -297,11 +326,9 @@ pub fn node_poll_call() -> Option<InboundCall> {
 /// error rather than an overwrite.
 #[uniffi::export]
 pub fn node_reply(id: u64, message: Vec<u8>) -> Result<(), NodeError> {
-    let guard = slot().lock().unwrap();
-    let node = guard.as_ref().ok_or(NodeError::NotRunning)?;
-    node.runtime.block_on(async {
-        node.api
-            .app_call_reply(OperationId::new(id), message)
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        api.app_call_reply(OperationId::new(id), message)
             .await
             .map_err(|e| NodeError::Failed(format!("reply: {e}")))
     })

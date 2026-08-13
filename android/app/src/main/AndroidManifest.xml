@@ -31,7 +31,11 @@
              passphrase-protected export the user performs. Letting the OS sweep
              wallet keys into cloud backup would defeat the whole design. -->
 
+        <!-- adjustResize so the message list shrinks for the keyboard instead of
+             being covered by it; Compose's imePadding needs the window to
+             actually resize. -->
         <activity
+            android:windowSoftInputMode="adjustResize"
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask">

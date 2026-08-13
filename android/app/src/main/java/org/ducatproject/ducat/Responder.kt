@@ -130,7 +130,7 @@ class Responder(private val context: Context) {
                     timestamp = opened.timestamp.toLong(),
                 ),
             )
-            store.update(c.copy(inSeq = c.inSeq + 1, inPrevLink = opened.link))
+            store.advanceInbound(c.personaHex, c.inSeq + 1, opened.link)
             // The deletion §16.11 is made of. After this the message we just
             // read cannot be read again by anyone, ourselves included.
             if (opened.consumedOneTime) store.burnOneTime(opened.prekeyId.toInt())

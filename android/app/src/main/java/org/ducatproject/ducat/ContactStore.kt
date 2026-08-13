@@ -35,6 +35,35 @@ class ContactStore(context: Context) {
 
     fun update(c: Contact) = add(c)
 
+    /**
+     * Advance only the *sending* counters, re-reading first.
+     *
+     * The chat screen and the responder both used to write the whole record.
+     * The screen's copy of a contact is captured when it opens, so sending a
+     * message wrote back a stale `inSeq` and silently undid every message
+     * received since — after which the next inbound message was refused as out
+     * of order, and the sender was told nothing useful. Read-modify-write on a
+     * shared record needs the read to happen at write time, not at screen open.
+     */
+    fun advanceOutbound(personaHex: String, seq: Long, prevLink: ByteArray) {
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
+        save(all().filterNot { it.personaHex == personaHex } +
+            c.copy(outSeq = seq, outPrevLink = prevLink))
+    }
+
+    /** The same, for the receiving counters. */
+    fun advanceInbound(personaHex: String, seq: Long, prevLink: ByteArray) {
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
+        save(all().filterNot { it.personaHex == personaHex } +
+            c.copy(inSeq = seq, inPrevLink = prevLink))
+    }
+
+    /** Record their published keys without touching any counter. */
+    fun setTheirBundle(personaHex: String, bundle: ByteArray) {
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
+        save(all().filterNot { it.personaHex == personaHex } + c.copy(theirBundle = bundle))
+    }
+
     fun remove(personaHex: String) = save(all().filterNot { it.personaHex == personaHex })
 
     private fun save(list: List<Contact>) {

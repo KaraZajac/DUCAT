@@ -2,6 +2,7 @@ package org.ducatproject.ducat.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -59,10 +60,19 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     val listState = rememberLazyListState()
 
     LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
+        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size)
+    }
+    // The keyboard opening does not change the message count, so the scroll
+    // above never fired for it and a sent message ended up behind the keyboard
+    // until the user dismissed it. Watching the IME inset is what actually
+    // tracks "the visible area just shrank".
+    val imeBottom = WindowInsets.ime.getBottom(LocalDensity.current)
+    LaunchedEffect(imeBottom) {
+        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size)
     }
 
     Scaffold(
+        modifier = Modifier.imePadding(),
         topBar = {
             TopAppBar(
                 title = { Text(c.displayName()) },
@@ -162,9 +172,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             withContext(Dispatchers.IO) {
                 runCatching {
                     val reply = nodeAppCall(c.rendezvous, byteArrayOf(MSG_PREKEYS), 20_000u)
-                    val updated = c.copy(theirBundle = reply)
-                    store.update(updated)
-                    updated
+                    store.setTheirBundle(c.personaHex, reply)
+                    store.all().first { it.personaHex == c.personaHex }
                 }
             }.onSuccess { c = it }
                 .onFailure { error = "Could not reach them: ${it.message}" }
@@ -197,9 +206,11 @@ private fun sendOne(store: ContactStore, c: Contact, body: String, minePersonaHe
             forwardSecret = sealed.forwardSecret,
         ),
     )
-    val updated = c.copy(outSeq = c.outSeq + 1, outPrevLink = sealed.nextLink)
-    store.update(updated)
-    return updated
+    store.advanceOutbound(c.personaHex, c.outSeq + 1, sealed.nextLink)
+    // Re-read rather than returning a locally-mutated copy: the responder may
+    // have advanced the inbound counters while this send was in flight, and the
+    // screen must not carry a view of the contact that predates them.
+    return store.all().first { it.personaHex == c.personaHex }
 }
 
 @Composable
