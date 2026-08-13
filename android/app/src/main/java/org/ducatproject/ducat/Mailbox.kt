@@ -57,7 +57,10 @@ object Mailbox {
         val card = createContactCard(
             persona, inbox.key, writer.public, displayName, writer.secret, validSecs,
         )
-        store.saveIssuedCard(inbox.key, writer.public, writer.secret, outbox.key)
+        store.saveIssuedCard(
+            inbox.key, writer.public, writer.secret,
+            outbox.key, outbox.ownerPublic, outbox.ownerSecret,
+        )
         Log.i(TAG, "issued card: inbox=${inbox.key.take(24)}… outbox=${outbox.key.take(24)}…")
         return card
     }
@@ -108,6 +111,8 @@ object Mailbox {
             petname = petname,
             assertedName = theirs.assertedName,
             myOutbox = outbox.key,
+            myOutboxOwnerPublic = outbox.ownerPublic,
+            myOutboxOwnerSecret = outbox.ownerSecret,
             theirOutbox = theirs.outboxKey,
             theirBundle = theirs.prekeyBundle,
         )
@@ -138,6 +143,8 @@ object Mailbox {
                     petname = null,
                     assertedName = theirs.assertedName,
                     myOutbox = issued.outboxKey,
+                    myOutboxOwnerPublic = issued.outboxOwnerPublic,
+                    myOutboxOwnerSecret = issued.outboxOwnerSecret,
                     theirOutbox = theirs.outboxKey,
                     theirBundle = theirs.prekeyBundle,
                 )
@@ -166,7 +173,16 @@ object Mailbox {
             bundle, c.outSeq.toULong(), c.outPrevLink ?: ByteArray(32), body,
             threadAad(minePersonaHex, c.personaHex),
         )
-        nodeDhtOpen(c.myOutbox, null, null)
+        // Re-opened **as the owner**. Creating a record leaves it writable only
+        // for that process; a plain re-open is read-only and the write comes
+        // back "value is not writable", which sounds like the network refusing
+        // and is us having discarded the key.
+        if (c.myOutboxOwnerSecret.isEmpty()) {
+            throw IllegalStateException(
+                "This conversation predates the current format. Ask them for a new card."
+            )
+        }
+        nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
         nodeDhtSet(c.myOutbox, logSubkey(c.outSeq.toULong(), LOG_SUBKEYS), sealed.bytes)
         nodeDhtSet(c.myOutbox, 0u, buildLogHead((c.outSeq + 1).toULong()))
 

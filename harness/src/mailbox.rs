@@ -359,3 +359,99 @@ pub async fn collect() -> Result<(), Box<dyn std::error::Error>> {
     api.shutdown().await;
     Ok(())
 }
+
+
+/// Poll a contact's outbox, as the claimant, until interrupted.
+///
+/// The claimant half of `--card-collect`: same reads, but the outbox and
+/// persona come from the card's inbox rather than a state file, so this works
+/// against a card issued by anything — including a phone.
+pub async fn watch(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
+    use std::str::FromStr;
+    println!("\n\x1b[1mDUCAT — watching their outbox\x1b[0m\n");
+
+    let (env, _) = card_from_uri(uri).map_err(|e| format!("{e:?}"))?;
+    let peek = ContactCard::from_value(
+        decode(&peek_body(&env).map_err(|e| format!("{e:?}"))?).map_err(|e| format!("{e:?}"))?,
+    )
+    .map_err(|e| format!("{e:?}"))?;
+    let their_pk = PublicKey::from_bytes(Suite::Ed25519X25519, &peek.persona)
+        .map_err(|e| format!("bad persona: {e:?}"))?;
+    let (_, body) = open_env(&env, &their_pk).map_err(|e| format!("signature: {e:?}"))?;
+    let card = ContactCard::from_value(decode(body.bytes()).map_err(|e| format!("{e:?}"))?)
+        .map_err(|e| format!("{e:?}"))?;
+
+    let (api, _c) = crate::veilid::start("watch").await?;
+    let rc = api.routing_context()?;
+    let inbox = RecordKey::from_str(&card.inbox_key)?;
+    rc.open_dht_record(inbox.clone(), None).await?;
+    let theirs = match rc.get_dht_value(inbox.clone(), 0, true).await? {
+        Some(v) => ContactDetails::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?,
+        None => return Err("their details are not published".into()),
+    };
+    let log = RecordKey::from_str(&theirs.outbox_key)?;
+    rc.open_dht_record(log.clone(), None).await?;
+    println!("  watching {}\n", theirs.outbox_key);
+
+    // The claimant's keys, matching what `--card-claim` published.
+    let persona = SecretKey::ed25519_from_bytes(&[0x72; 32]);
+    let (mut store, _) = prekeys(0x80);
+    let aad = thread_aad(
+        &hex::encode(persona.public().to_bytes()),
+        &hex::encode(&theirs.persona),
+    );
+
+    let mut seq = 0u64;
+    let mut prev: Option<Message> = None;
+    let deadline = Instant::now() + std::time::Duration::from_secs(240);
+    while Instant::now() < deadline {
+        let next = match rc.get_dht_value(log.clone(), 0, true).await? {
+            Some(v) => LogHead::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?)
+                .map_err(|e| format!("{e:?}"))?
+                .next_seq,
+            None => 0,
+        };
+        while seq < next {
+            if !still_in_ring(seq, next, LOG_SUBKEYS) {
+                println!("  \x1b[33m[{seq}] gone — the ring wrapped past it\x1b[0m");
+                seq += 1;
+                prev = None;
+                continue;
+            }
+            let raw = match rc
+                .get_dht_value(log.clone(), subkey_for(seq, LOG_SUBKEYS), true)
+                .await?
+            {
+                Some(v) => v.data().to_vec(),
+                None => break,
+            };
+            let sealed = SealedMessage::from_value(decode(&raw).map_err(|e| format!("{e:?}"))?)
+                .map_err(|e| format!("{e:?}"))?;
+            match store.open_and_consume(&sealed, &hpke::message_info(1), &aad) {
+                Ok((plain, one_time)) => {
+                    let m = Message::from_value(decode(&plain).map_err(|e| format!("{e:?}"))?)
+                        .map_err(|e| format!("{e:?}"))?;
+                    if let Err(e) = check_message(&m, seq, prev.as_ref()) {
+                        println!("  \x1b[31m[{seq}] chain: {:?}\x1b[0m", e.code);
+                        break;
+                    }
+                    let mark = if one_time { "" } else { " \x1b[33m(no forward secrecy)\x1b[0m" };
+                    println!("  \x1b[36m←\x1b[0m [{}] {}{}", m.seq, m.body, mark);
+                    prev = Some(m);
+                    seq += 1;
+                }
+                Err(e) => {
+                    println!("  \x1b[31m[{seq}] {:?}\x1b[0m", e.code);
+                    break;
+                }
+            }
+        }
+        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+    }
+
+    rc.close_dht_record(inbox).await?;
+    rc.close_dht_record(log).await?;
+    api.shutdown().await;
+    Ok(())
+}

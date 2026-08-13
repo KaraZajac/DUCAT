@@ -176,12 +176,16 @@ class ContactStore(context: Context) {
         writerPublic: ByteArray,
         writerSecret: ByteArray,
         outboxKey: String,
+        outboxOwnerPublic: ByteArray,
+        outboxOwnerSecret: ByteArray,
     ) = synchronized(lock) {
         prefs.edit()
             .putString("issued_inbox", inboxKey)
             .putString("issued_wpub", b64(writerPublic))
             .putString("issued_wsec", b64(writerSecret))
             .putString("issued_outbox", outboxKey)
+            .putString("issued_outbox_pub", b64(outboxOwnerPublic))
+            .putString("issued_outbox_sec", b64(outboxOwnerSecret))
             .putBoolean("issued_answered", false)
             .apply()
         bump()
@@ -194,6 +198,8 @@ class ContactStore(context: Context) {
             writerPublic = unb64(prefs.getString("issued_wpub", "") ?: ""),
             writerSecret = unb64(prefs.getString("issued_wsec", "") ?: ""),
             outboxKey = prefs.getString("issued_outbox", "") ?: "",
+            outboxOwnerPublic = unb64(prefs.getString("issued_outbox_pub", "") ?: ""),
+            outboxOwnerSecret = unb64(prefs.getString("issued_outbox_sec", "") ?: ""),
         )
     }
 
@@ -306,6 +312,16 @@ data class Contact(
     val assertedName: String?,
     /** Our append-only log for this contact (§16.12). Only we write it. */
     val myOutbox: String,
+    /**
+     * The keypair that owns [myOutbox].
+     *
+     * Creating a record leaves it writable only for that process. Re-opening it
+     * without the owner keypair gives a read-only handle, and the write then
+     * fails with "value is not writable" — which reads as a permissions problem
+     * with the network and is us having thrown the key away.
+     */
+    val myOutboxOwnerPublic: ByteArray = ByteArray(0),
+    val myOutboxOwnerSecret: ByteArray = ByteArray(0),
     /** Theirs. Permanent, and readable whether or not they are online. */
     val theirOutbox: String,
     /** Their published prekeys, read out of the inbox at handshake time. */
@@ -332,6 +348,8 @@ data class Contact(
         put("petname", petname ?: JSONObject.NULL)
         put("asserted", assertedName ?: JSONObject.NULL)
         put("my_outbox", myOutbox)
+        put("my_outbox_pub", b64(myOutboxOwnerPublic))
+        put("my_outbox_sec", b64(myOutboxOwnerSecret))
         put("their_outbox", theirOutbox)
         put("their_bundle", theirBundle?.let { b64(it) } ?: JSONObject.NULL)
         put("out_seq", outSeq)
@@ -347,6 +365,8 @@ data class Contact(
             petname = o.optStringOrNull("petname"),
             assertedName = o.optStringOrNull("asserted"),
             myOutbox = o.optString("my_outbox", ""),
+            myOutboxOwnerPublic = unb64(o.optString("my_outbox_pub", "")),
+            myOutboxOwnerSecret = unb64(o.optString("my_outbox_sec", "")),
             theirOutbox = o.optString("their_outbox", ""),
             theirBundle = o.optStringOrNull("their_bundle")?.let { unb64(it) },
             outSeq = o.optLong("out_seq"),
@@ -398,6 +418,8 @@ data class IssuedCardState(
     val writerPublic: ByteArray,
     val writerSecret: ByteArray,
     val outboxKey: String,
+    val outboxOwnerPublic: ByteArray,
+    val outboxOwnerSecret: ByteArray,
 )
 
 class CardStore(context: Context) {

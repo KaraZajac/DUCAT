@@ -58,6 +58,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(i) = args.iter().position(|a| a == "--card-claim") {
         return mailbox::claim(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
     }
+    if let Some(i) = args.iter().position(|a| a == "--card-watch") {
+        return mailbox::watch(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
+    }
     if args.iter().any(|a| a == "--card-collect") {
         return mailbox::collect().await;
     }
