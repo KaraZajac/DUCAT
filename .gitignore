@@ -6,3 +6,16 @@ android/build/
 android/app/build/
 android/app/src/main/jniLibs/
 research/monero-rs/testwallet.key
+
+# Monero key material never belongs in the repository. These were committed
+# once and had to be removed from every commit with git-filter-repo; the
+# patterns are here so it cannot happen a second time by accident.
+*.keys
+*.key
+share-*.bin
+view.hex
+**/personas/
+**/w_fund/
+**/wallets/
+**/clitest/
+research/monero-rs/*/group/

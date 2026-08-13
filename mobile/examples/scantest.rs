@@ -12,12 +12,23 @@ const FUNDING_HEIGHT: u64 = 2_183_921;
 const FUNDING_PXMR: u64 = 800_000_000;
 
 fn main() {
+    // The keys this checked against are no longer in the repository: they were
+    // real Monero secrets, and a public repository is not where those live. The
+    // check still runs for anyone holding them locally, and skips cleanly for
+    // everyone else rather than failing in a way that reads like a broken
+    // scanner.
     let dir = std::path::Path::new("research/monero-rs/frostlass-spike/group");
-    let addr = std::fs::read_to_string(dir.join("address.txt"))
-        .expect("run from the repo root")
-        .trim()
-        .to_string();
-    let view = std::fs::read_to_string(dir.join("view.hex")).unwrap().trim().to_string();
+    let (addr, view) = match (
+        std::fs::read_to_string(dir.join("address.txt")),
+        std::fs::read_to_string(dir.join("view.hex")),
+    ) {
+        (Ok(a), Ok(v)) => (a.trim().to_string(), v.trim().to_string()),
+        _ => {
+            println!("skipped — no local key material for the known-funded group.");
+            println!("Fund examples/testwallet.rs instead; it verifies the same path.");
+            return;
+        }
+    };
 
     let st = ducat_mobile::monero::monero_probe(NODE.into(), 15_000);
     println!("node    height={} synced={} net={}", st.height, st.synced, st.nettype);
