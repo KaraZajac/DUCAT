@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.*
+import org.ducatproject.ducat.DucatLog
 import java.math.BigDecimal
 
 /**
@@ -552,7 +553,32 @@ private fun AmountStep(
                                         "a request, or to turn on \"let contacts pay me " +
                                         "directly\"."
                                 )
-                            Wallet.send(context, node, to, pxmr)
+                            val contact = (target as? PayTarget.ToContact)?.contact
+                            val res = Wallet.send(
+                                context, node, to, pxmr,
+                                contactHex = contact?.personaHex,
+                                note = note.ifBlank { null },
+                            )
+                            // Tell them, in the thread. §16.13's notice is
+                            // advisory — they verify by finding the output — but
+                            // without it a payment lands with no explanation and
+                            // neither side has a record of what it was for.
+                            contact?.let { c ->
+                                runCatching {
+                                    Mailbox.send(
+                                        context, c,
+                                        note.ifBlank { "Payment" },
+                                        PersonaStore(context).personaHex(),
+                                        kind = 2, amountPxmr = pxmr,
+                                    )
+                                }.onFailure {
+                                    DucatLog.w(
+                                        "Pay",
+                                        "sent, but could not tell them: ${it.message}",
+                                    )
+                                }
+                            }
+                            res
                         }
                     }
                     busy = false

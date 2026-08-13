@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.RequestQuote
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Send
@@ -354,11 +355,26 @@ private fun Bubble(m: StoredMessage, onLongPress: () -> Unit, onPay: (StoredMess
                 Text(m.body, color = fg)
             } else {
                 Column {
-                    Text(
-                        if (m.kind == 1) "Asked for" else "Sent",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = fg.copy(alpha = 0.8f),
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            if (m.kind == 1) Icons.Filled.RequestQuote
+                            else Icons.Filled.ArrowUpward,
+                            null,
+                            Modifier.size(14.dp),
+                            tint = fg.copy(alpha = 0.8f),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            when {
+                                m.kind == 1 && m.outgoing -> "You asked for"
+                                m.kind == 1 -> "Asked you for"
+                                m.outgoing -> "You sent"
+                                else -> "Sent you"
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = fg.copy(alpha = 0.8f),
+                        )
+                    }
                     val a = Amounts.show(context, m.amountPxmr)
                     Text(
                         a.primary,

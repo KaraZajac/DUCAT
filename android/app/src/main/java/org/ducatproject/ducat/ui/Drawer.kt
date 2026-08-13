@@ -326,6 +326,16 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
     val store = remember { ContactStore(context) }
     var contacts by remember { mutableStateOf(store.all()) }
     var confirm by remember { mutableStateOf<Contact?>(null) }
+    var profileOf by remember { mutableStateOf<Contact?>(null) }
+
+    profileOf?.let { p ->
+        ContactProfile(
+            contact = p,
+            onBack = { profileOf = null; contacts = store.all() },
+            onOpenChat = { profileOf = null; onOpenChat(it) },
+        )
+        return
+    }
 
     if (contacts.isEmpty()) {
         Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
@@ -349,6 +359,7 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
                         style = MaterialTheme.typography.bodySmall,
                     )
                 },
+                modifier = Modifier.clickable { profileOf = c },
                 trailingContent = {
                     Row {
                         IconButton(onClick = { onOpenChat(c) }) {

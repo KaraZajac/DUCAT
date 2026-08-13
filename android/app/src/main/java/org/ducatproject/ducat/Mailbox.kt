@@ -186,6 +186,8 @@ object Mailbox {
         val store = ContactStore(context)
         val bundle = c.theirBundle
             ?: throw IllegalStateException("No keys for this contact yet.")
+        DucatLog.i(TAG, "sending ${if (kind == 0) "message" else "payment note"} " +
+            "seq ${c.outSeq} to ${c.displayName()}")
         val sealed = sealMessage(
             bundle, c.outSeq.toULong(), c.outPrevLink ?: ByteArray(32), body,
             threadAad(minePersonaHex, c.personaHex),
@@ -230,6 +232,8 @@ object Mailbox {
             runCatching { prunePrekey(bundle, sealed.prekeyId) }
                 .onSuccess { store.setTheirBundle(c.personaHex, it) }
         }
+        DucatLog.i(TAG, "delivered seq ${c.outSeq} to ${c.displayName()}" +
+            if (sealed.forwardSecret) "" else " (no forward secrecy — their one-time keys ran out)")
         return store.all().first { it.personaHex == c.personaHex }
     }
 
@@ -313,6 +317,7 @@ object Mailbox {
             val opened = openMessage(
                 raw, secret, isOneTime, seq, prev, threadAad(minePersonaHex, c.personaHex),
             )
+            DucatLog.i(TAG, "received seq ${opened.seq} from ${c.displayName()}")
             store.append(
                 c.personaHex,
                 StoredMessage(

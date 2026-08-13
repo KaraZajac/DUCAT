@@ -577,6 +577,52 @@ class WalletStore(context: Context) {
 
     fun address(): String? = prefs.getString("wallet_address", null)
 
+    // --- what happened, not just what arrived --------------------------------
+
+    /**
+     * Record a payment we made.
+     *
+     * Received outputs come from the chain. A payment we *sent* never appears
+     * there as anything this wallet can recognise, because the outputs it
+     * creates belong to somebody else — so without recording it here, sending
+     * money leaves no trace and the balance simply drops.
+     */
+    fun recordSent(
+        txidHex: String,
+        amountPxmr: Long,
+        feePxmr: Long,
+        toAddress: String,
+        contactHex: String?,
+        note: String?,
+    ) {
+        val arr = JSONArray(prefs.getString("wallet_sends", "[]"))
+        arr.put(JSONObject().apply {
+            put("txid", txidHex); put("amt", amountPxmr); put("fee", feePxmr)
+            put("to", toAddress); put("contact", contactHex ?: JSONObject.NULL)
+            put("note", note ?: JSONObject.NULL)
+            put("ts", System.currentTimeMillis() / 1000)
+        })
+        prefs.edit().putString("wallet_sends", arr.toString()).apply()
+        ContactStore.bump()
+    }
+
+    fun sends(): List<SentPayment> {
+        val arr = JSONArray(prefs.getString("wallet_sends", "[]"))
+        return (0 until arr.length()).map {
+            val o = arr.getJSONObject(it)
+            SentPayment(
+                txidHex = o.getString("txid"),
+                amountPxmr = o.getLong("amt"),
+                feePxmr = o.optLong("fee", 0),
+                toAddress = o.optString("to", ""),
+                contactHex = if (o.isNull("contact")) null else o.optString("contact"),
+                note = if (o.isNull("note")) null else o.optString("note"),
+                timestamp = o.optLong("ts", 0),
+            )
+        }
+    }
+
+
     // --- scan state -------------------------------------------------------
 
     fun scannedTo(): Long = prefs.getLong("wallet_scanned_to", 0L)
@@ -821,3 +867,15 @@ class NodeStore(context: Context) {
 
     fun lastGood(): String? = prefs.getString("monero_last_good", null)
 }
+
+
+/** A payment this wallet made. */
+data class SentPayment(
+    val txidHex: String,
+    val amountPxmr: Long,
+    val feePxmr: Long,
+    val toAddress: String,
+    val contactHex: String?,
+    val note: String?,
+    val timestamp: Long,
+)

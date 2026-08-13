@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.*
@@ -17,6 +18,8 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.LOCK_BLOCKS
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.Amounts
+import org.ducatproject.ducat.WalletStore
+import org.ducatproject.ducat.formatXmr
 
 /**
  * What has actually happened, from the chain.
@@ -29,10 +32,39 @@ import org.ducatproject.ducat.Amounts
 fun ActivityScreen() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    val entries = remember(version) { Wallet.entries(context) }
+    // Both directions. A list that only shows what arrived explains a rising
+    // balance and leaves a falling one a mystery.
+    val rows = remember(version) {
+        val received = Wallet.entries(context).map { e ->
+            Row(
+                incoming = true,
+                amountPxmr = e.amountPxmr,
+                height = e.height,
+                timestamp = 0,
+                spent = e.spent,
+                subtitle = null,
+            )
+        }
+        val sent = WalletStore(context).sends().map { p ->
+            Row(
+                incoming = false,
+                amountPxmr = p.amountPxmr,
+                height = 0,
+                timestamp = p.timestamp,
+                spent = false,
+                subtitle = buildString {
+                    p.note?.takeIf { it.isNotBlank() }?.let { append(it).append(" · ") }
+                    append("fee ${formatXmr(p.feePxmr)} XMR")
+                },
+            )
+        }
+        // Received rows carry a height and sent rows a clock; sorting by
+        // whichever they have keeps them interleaved roughly in order.
+        (received + sent).sortedByDescending { maxOf(it.height, it.timestamp) }
+    }
     val tip = remember(version) { Wallet.balances(context).tip }
 
-    if (entries.isEmpty()) {
+    if (rows.isEmpty()) {
         Column(
             Modifier.fillMaxSize().padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -56,13 +88,13 @@ fun ActivityScreen() {
     }
 
     LazyColumn(Modifier.fillMaxSize()) {
-        items(entries) { e ->
-            val locked = tip > 0 && e.height + LOCK_BLOCKS > tip
+        items(rows) { e ->
+            val locked = e.incoming && tip > 0 && e.height > 0 && e.height + LOCK_BLOCKS > tip
             ListItem(
                 headlineContent = {
                     val a = Amounts.show(context, e.amountPxmr)
                     Column {
-                        Text("+${a.primary}")
+                        Text("${if (e.incoming) "+" else "−"}${a.primary}")
                         a.secondary?.let {
                             Text(
                                 it,
@@ -74,7 +106,7 @@ fun ActivityScreen() {
                 },
                 supportingContent = {
                     Text(
-                        buildString {
+                        e.subtitle ?: buildString {
                             append("block ${e.height}")
                             if (e.spent) append(" · spent")
                             else if (locked) append(" · unlocks in ${e.height + LOCK_BLOCKS - tip} blocks")
@@ -84,9 +116,14 @@ fun ActivityScreen() {
                 },
                 leadingContent = {
                     Icon(
-                        if (locked) Icons.Filled.Lock else Icons.Filled.ArrowDownward,
+                        when {
+                            !e.incoming -> Icons.Filled.ArrowUpward
+                            locked -> Icons.Filled.Lock
+                            else -> Icons.Filled.ArrowDownward
+                        },
                         null,
                         tint = when {
+                            !e.incoming -> MaterialTheme.colorScheme.onSurfaceVariant
                             e.spent -> MaterialTheme.colorScheme.outline
                             locked -> MaterialTheme.ducat.changePending
                             else -> MaterialTheme.ducat.settled
@@ -98,3 +135,14 @@ fun ActivityScreen() {
         }
     }
 }
+
+
+/** One line in the list, from either direction. */
+private data class Row(
+    val incoming: Boolean,
+    val amountPxmr: Long,
+    val height: Long,
+    val timestamp: Long,
+    val spent: Boolean,
+    val subtitle: String?,
+)

@@ -170,8 +170,17 @@ object Wallet {
             val r = moneroScan(nodeUrl, spend, from.toULong(), WINDOW)
             store.recordScan(r.scannedTo.toLong(), r.tip.toLong(), r.outputs)
             store.recordScanError(null)
-            if (r.outputs.isNotEmpty()) {
-                DucatLog.i(TAG, "found ${r.outputs.size} output(s) up to ${r.scannedTo}")
+            for (o in r.outputs) {
+                DucatLog.i(
+                    TAG,
+                    "received ${formatXmr(o.amountPxmr.toLong())} XMR at block ${o.height}",
+                )
+            }
+            if (r.blocksFailed > 0u) {
+                DucatLog.w(
+                    TAG,
+                    "scanned to ${r.scannedTo} — ${r.blocksFailed} block(s) unreadable",
+                )
             }
             r.scannedTo.toLong() > from
         } catch (e: Throwable) {
@@ -353,6 +362,8 @@ object Wallet {
         nodeUrl: String,
         toAddress: String,
         amountPxmr: Long,
+        contactHex: String? = null,
+        note: String? = null,
     ): uniffi.ducat_mobile.SendResult {
         val store = WalletStore(context)
         val spend = store.spendKeyHex()
@@ -363,8 +374,30 @@ object Wallet {
                 "not enough unlocked — ${formatXmr(plan.totalInPxmr)} XMR available"
             )
         }
-        val r = uniffi.ducat_mobile.moneroSend(
-            nodeUrl, spend, plan.notes.map { it.blob }, toAddress, amountPxmr.toULong(),
+        DucatLog.i(
+            TAG,
+            "sending ${formatXmr(amountPxmr)} XMR using ${plan.notes.size} note(s) " +
+                "to ${toAddress.take(12)}…",
+        )
+        val r = try {
+            uniffi.ducat_mobile.moneroSend(
+                nodeUrl, spend, plan.notes.map { it.blob }, toAddress, amountPxmr.toULong(),
+            )
+        } catch (e: Throwable) {
+            DucatLog.e(TAG, "send failed: ${e.message ?: e}")
+            throw e
+        }
+        DucatLog.i(
+            TAG,
+            "sent ${r.txidHex.take(16)}… fee ${formatXmr(r.feePxmr.toLong())} XMR, " +
+                "accepted by ${r.acceptedBy} node(s)",
+        )
+        // Recorded here, not on the next scan: the outputs a payment creates
+        // belong to the recipient, so nothing the wallet scans will ever show
+        // that this happened. Without it the balance drops for no visible
+        // reason.
+        store.recordSent(
+            r.txidHex, amountPxmr, r.feePxmr.toLong(), toAddress, contactHex, note,
         )
         // Mark the inputs spent immediately rather than waiting for a rescan.
         // The daemon will confirm it, but until then a second send must not be
