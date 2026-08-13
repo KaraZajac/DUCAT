@@ -929,6 +929,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "message.chain")
             } else if obj.contains_key("details_hex") {
                 ("contact", "contact.details")
+            } else if obj.contains_key("payment_hex") {
+                ("contact", "message.payment")
             } else if obj.contains_key("head_hex") {
                 ("contact", "log.head")
             } else if obj.contains_key("subkey_count") {
@@ -1233,9 +1235,9 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000 };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060 };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120 };
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
         v.push(json!({
@@ -1265,6 +1267,39 @@ fn contact_cases() -> Vec<J> {
         "Re-delivering a message already accepted is a stale sequence number, not a fresh one.",
         &[&m0, &m1, &m1],
         Some((2, RejectCode::StateViolation, "sequence replay")));
+
+    // §16.13 — money in a conversation.
+    let mut money = |name: &str, why: &str, m: &Message, bad: Option<(RejectCode, &str)>| {
+        let hex_body = hex(&m.to_value().encode());
+        v.push(match bad {
+            None => json!({ "name": name, "why": why, "payment_hex": hex_body,
+                            "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+            Some((code, hint)) => json!({ "name": name, "why": why, "payment_hex": hex_body,
+                            "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+        });
+    };
+    let base_pay = Message {
+        version: 1, suite: 1, seq: 0, prev: [0u8; 32],
+        body: "for the coffee".into(), timestamp: 1_700_000_000,
+        kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
+    };
+    money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
+    money("payment_sent",
+        "A notice that money was sent, with a transaction to look for. Advisory: §17.5 verifies by finding the output, never by believing the note.",
+        &Message { kind: MessageKind::PaymentSent, txid: Some(vec![0x77; 32]), ..base_pay.clone() }, None);
+    money("payment_without_amount",
+        "A payment screen with a blank where the number goes. Refused rather than rendered.",
+        &Message { amount_pxmr: None, ..base_pay.clone() },
+        Some((RejectCode::Malformed, "payment needs an amount")));
+    money("text_with_amount",
+        "An amount on a text message is a number nothing will honour, which is worse than no number.",
+        &Message { kind: MessageKind::Text, amount_pxmr: Some(1), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "text must not carry an amount")));
+    money("request_with_txid",
+        "Only a notice carries a transaction. A request pointing at one is claiming a payment it is simultaneously asking for.",
+        &Message { txid: Some(vec![0x77; 32]), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "only a notice carries a txid")));
+
 
     v
 }

@@ -427,6 +427,9 @@ data class StoredMessage(
     val seq: Long,
     val body: String,
     val timestamp: Long,
+    /** 0 text, 1 request, 2 notice (§16.13). */
+    val kind: Int = 0,
+    val amountPxmr: Long = 0,
     /** False means it went out under the signed prekey — no forward secrecy
      *  until that key rotates (§16.11). Shown, not hidden. */
     val forwardSecret: Boolean = true,
@@ -435,6 +438,7 @@ data class StoredMessage(
     fun toJson(): JSONObject = JSONObject().apply {
         put("out", outgoing); put("seq", seq); put("body", body)
         put("ts", timestamp); put("fs", forwardSecret); put("delivered", delivered)
+        put("kind", kind); put("amt", amountPxmr)
     }
 
     companion object {
@@ -445,6 +449,8 @@ data class StoredMessage(
             timestamp = o.getLong("ts"),
             forwardSecret = o.optBoolean("fs", true),
             delivered = o.optBoolean("delivered", true),
+            kind = o.optInt("kind", 0),
+            amountPxmr = o.optLong("amt", 0L),
         )
     }
 }

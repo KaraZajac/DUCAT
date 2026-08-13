@@ -163,8 +163,15 @@ mod spend {
         println!("\n\x1b[1mFROSTLASS — signing a real CLSAG with 3 of 5\x1b[0m\n");
         println!("  group    {}…", &addr[..28]);
 
+        // Decoy selection is many round trips, so a node that answers get_info
+        // quickly can still time out under it. Overridable to try another.
+        let forced = std::env::var("NODE").ok();
+        let relays: Vec<&str> = match forced.as_deref() {
+            Some(u) => vec![u],
+            None => RELAYS.to_vec(),
+        };
         let mut rpc = None;
-        for r in RELAYS {
+        for r in relays {
             if let Ok(c) = SimpleRequestTransport::new(r.to_string()).await {
                 if c.latest_block_number().await.is_ok() {
                     println!("  node     {r}");
@@ -181,8 +188,17 @@ mod spend {
         // client that cannot find its own money without external bookkeeping
         // has not really scanned.
         let mut scanner = Scanner::new(vp.clone());
-        let mut found = None;
-        let start = tip.saturating_sub(40);
+        let mut found: Option<(monero_wallet::WalletOutput, usize)> = None;
+        // Widened from 40: the group's change output is however far back the
+        // last spend left it, and a window sized for "we just funded this" finds
+        // nothing months later. Scanning is one request per block, so this is
+        // slow rather than free — but a spike that cannot find its own money is
+        // not a spike that proves anything.
+        let window: usize = std::env::var("SCAN_BACK")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(400);
+        let start = tip.saturating_sub(window);
         for h in start..=tip {
             let block = match rpc.block_by_number(h).await {
                 Ok(b) => b,
@@ -193,13 +209,20 @@ mod spend {
                 Err(_) => continue,
             };
             let outs = scanner.scan(sb).unwrap().not_additionally_locked();
-            if let Some(o) = outs.into_iter().next() {
-                println!("  found    {} pXMR at height {}", o.commitment().amount, h);
-                found = Some((o, h));
-                break;
+            for o in outs {
+                // Keep the **most recent**, not the largest. A threshold group's
+                // key images need the group secret, which is split, so this scan
+                // cannot tell spent from unspent — and the largest output here is
+                // the original funding, which an earlier spend already consumed.
+                // The newest output is the change from that spend, which is the
+                // one still there. A heuristic, and stated as one.
+                if found.as_ref().map(|(_, ph)| h >= *ph).unwrap_or(true) {
+                    found = Some((o, h));
+                }
             }
         }
         let (output, height) = found.expect("no unlocked output for the group — still locked?");
+        println!("  using    {} pXMR from height {}", output.commitment().amount, height);
 
         // Build.
         let decoyed = OutputWithDecoys::new(&mut OsRng, &rpc, 16, height, output.clone())

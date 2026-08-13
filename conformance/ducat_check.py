@@ -939,6 +939,7 @@ MAX_RECORD_KEY_CHARS = 128
 # than reused: an old card decoding as a new one under different meanings is the
 # divergence the registry exists to prevent.
 MSG_SEQ, MSG_PREV, MSG_BODY, MSG_TS = 157, 158, 159, 160
+MSG_KIND, MSG_AMOUNT, MSG_TXID = 178, 179, 180
 CARD_PERSONA, CARD_INBOX, CARD_WRITER, CARD_NAME, CARD_EXPIRY = 167, 168, 169, 170, 171
 DET_PERSONA, DET_OUTBOX, DET_BUNDLE, DET_NAME = 172, 173, 174, 175
 HEAD_NEXT = 176
@@ -1053,7 +1054,33 @@ def parse_message(buf):
     }
     if len(out["prev"]) != 32:
         raise Reject("Malformed", "previous link is not 32 bytes")
+
+    # §16.13. Text is the default and is encoded by *omitting* the kind — the
+    # explicit zero is refused, because one meaning with two encodings is what
+    # §18.1 exists to prevent.
+    if MSG_KIND in b:
+        k, kind = b.pop(MSG_KIND)
+        if k != "uint":
+            raise Reject("Malformed", "kind is not an integer")
+        if kind == 0:
+            raise Reject("Malformed", "text is encoded by omitting the kind")
+        if kind not in (1, 2):
+            raise Reject("Malformed", "unknown message kind")
+    else:
+        kind = 0
+    out["kind"] = kind
+    out["amount"] = b.pop(MSG_AMOUNT, (None, None))[1]
+    out["txid"] = b.pop(MSG_TXID, (None, None))[1]
     _finish(b)
+
+    # A payment with no amount is a screen with a blank where the number goes;
+    # an amount on text is a number nothing will honour. Neither is ignorable.
+    if kind == 0 and out["amount"] is not None:
+        raise Reject("Malformed", "text must not carry an amount")
+    if kind in (1, 2) and out["amount"] is None:
+        raise Reject("Malformed", "a payment message must carry an amount")
+    if out["txid"] is not None and kind != 2:
+        raise Reject("Malformed", "only a payment notice carries a transaction")
     return out
 
 
@@ -1169,6 +1196,31 @@ def run_log_ring(cases, r):
         expect_reject(r, "contact", c, go)
 
 
+def run_message_payment(cases, r):
+    for c in cases:
+        def go(c=c):
+            m = parse_message(unhex(c["payment_hex"]))
+            fields = [(0, ("uint", OBJECT_TYPE_CODES["MESSAGE"])),
+                      (1, ("uint", m["version"])), (2, ("uint", m["suite"])),
+                      (MSG_SEQ, ("uint", m["seq"])),
+                      (MSG_PREV, ("bytes", m["prev"])),
+                      (MSG_BODY, ("text", m["body"])),
+                      (MSG_TS, ("uint", m["timestamp"]))]
+            if m["kind"] != 0:
+                fields.append((MSG_KIND, ("uint", m["kind"])))
+            if m["amount"] is not None:
+                fields.append((MSG_AMOUNT, ("uint", m["amount"])))
+            if m["txid"] is not None:
+                fields.append((MSG_TXID, ("bytes", m["txid"])))
+            return encode(("map", fields))
+        out = expect_reject(r, "contact", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, vector says "
+                  f"{c['expect']['reencodes_to_hex']}")
+
+
 def run_message_chain(cases, r):
     for c in cases:
         def go(c=c):
@@ -1193,6 +1245,7 @@ BY_KIND = {
     "contact.details": run_contact_details,
     "log.head": run_log_head,
     "log.ring": run_log_ring,
+    "message.payment": run_message_payment,
     "message.chain": run_message_chain,
     "escrow.ceremony": run_escrow_ceremony,
     "escrow.ready": run_escrow_ready,

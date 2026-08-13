@@ -267,7 +267,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
             seq: seq as u64,
             prev,
             body: (*text).into(),
-            timestamp: crate::payee::now(),
+            timestamp: crate::payee::now(), kind: MessageKind::Text, amount_pxmr: None, txid: None
         };
         prev = m.link();
         let (chosen, fs) = {

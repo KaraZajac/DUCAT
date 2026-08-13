@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.RequestQuote
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -30,6 +31,7 @@ import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.threadAad
 import org.ducatproject.ducat.StoredMessage
+import org.ducatproject.ducat.formatXmr
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -82,6 +84,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     }
 
     var settingsOpen by remember { mutableStateOf(false) }
+    var askOpen by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf<StoredMessage?>(null) }
 
     // Applied on open and whenever the thread changes, because nothing else
@@ -123,6 +126,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         Modifier.padding(12.dp).fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        IconButton(onClick = { askOpen = true }, enabled = c.theirBundle != null) {
+                            Icon(
+                                Icons.Filled.RequestQuote,
+                                "Ask for money",
+                                tint = MaterialTheme.colorScheme.tertiary,
+                            )
+                        }
                         OutlinedTextField(
                             value = draft,
                             onValueChange = { if (it.length <= 2000) draft = it },
@@ -196,6 +206,27 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     // Nothing to fetch: their prekeys arrived with the handshake and live in
     // the contact record. §16.12's whole point is that the first message needs
     // no round trip to someone who may not be there.
+
+    if (askOpen) {
+        AskForMoneyDialog(
+            onDismiss = { askOpen = false },
+            onSend = { pxmr, note ->
+                askOpen = false
+                sending = true
+                error = null
+                scope.launch {
+                    val r = withContext(Dispatchers.IO) {
+                        runCatching {
+                            Mailbox.send(context, c, note, mine, kind = 1, amountPxmr = pxmr)
+                        }
+                    }
+                    sending = false
+                    r.onSuccess { c = it; messages = store.thread(c.personaHex) }
+                        .onFailure { error = it.message ?: "could not send" }
+                }
+            },
+        )
+    }
 
     if (settingsOpen) {
         ChatSettingsDialog(
@@ -295,6 +326,59 @@ private fun sendOne(
     minePersonaHex: String,
 ): Contact = Mailbox.send(context, c, body, minePersonaHex)
 
+/**
+ * Asking for money.
+ *
+ * The amount is entered in XMR and carried in piconero, because a rounded
+ * amount in a message someone acts on is a rounding error somebody pays for.
+ */
+@Composable
+private fun AskForMoneyDialog(onDismiss: () -> Unit, onSend: (Long, String) -> Unit) {
+    var amount by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
+    val pxmr = remember(amount) {
+        amount.trim().toBigDecimalOrNull()
+            ?.multiply(java.math.BigDecimal(1_000_000_000_000L))
+            ?.toLong()
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Ask for money") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount (XMR)") },
+                    singleLine = true,
+                    isError = amount.isNotBlank() && pxmr == null,
+                )
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = note,
+                    onValueChange = { if (it.length <= 128) note = it },
+                    label = { Text("What for") },
+                    singleLine = true,
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "This is a message, not a charge. They still have to choose to " +
+                        "pay it, and nothing here can take anything.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { pxmr?.let { onSend(it, note.ifBlank { "Payment request" }) } },
+                enabled = pxmr != null && pxmr > 0,
+            ) { Text("Ask") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Bubble(m: StoredMessage, onLongPress: () -> Unit) {
@@ -320,7 +404,37 @@ private fun Bubble(m: StoredMessage, onLongPress: () -> Unit) {
                 .combinedClickable(onClick = {}, onLongClick = onLongPress)
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
-            Text(m.body, color = fg)
+            if (m.kind == 0) {
+                Text(m.body, color = fg)
+            } else {
+                Column {
+                    Text(
+                        if (m.kind == 1) "Asked for" else "Sent",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = fg.copy(alpha = 0.8f),
+                    )
+                    Text(
+                        "${formatXmr(m.amountPxmr)} XMR",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = fg,
+                    )
+                    if (m.body.isNotBlank()) {
+                        Spacer(Modifier.height(2.dp))
+                        Text(m.body, color = fg, style = MaterialTheme.typography.bodySmall)
+                    }
+                    // §16.13: a request carries no authority. An incoming one
+                    // that offered a one-tap "pay" would be exactly the shortcut
+                    // §15.5's confirm screen exists to prevent.
+                    if (m.kind == 1 && !m.outgoing) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "You decide whether to pay this.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = fg.copy(alpha = 0.7f),
+                        )
+                    }
+                }
+            }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (!m.forwardSecret) {

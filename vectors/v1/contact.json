@@ -257,6 +257,59 @@
       ],
       "name": "chain_replayed_message",
       "why": "Re-delivering a message already accepted is a stale sequence number, not a fresh one."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20118b31b00000004e3b29200"
+      },
+      "kind": "message.payment",
+      "name": "payment_request",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20118b31b00000004e3b29200",
+      "why": "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20218b31b00000004e3b2920018b458207777777777777777777777777777777777777777777777777777777777777777"
+      },
+      "kind": "message.payment",
+      "name": "payment_sent",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20218b31b00000004e3b2920018b458207777777777777777777777777777777777777777777777777777777777777777",
+      "why": "A notice that money was sent, with a transaction to look for. Advisory: §17.5 verifies by finding the output, never by believing the note."
+    },
+    {
+      "expect": {
+        "hint": "payment needs an amount",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "payment_without_amount",
+      "payment_hex": "a8001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b201",
+      "why": "A payment screen with a blank where the number goes. Refused rather than rendered."
+    },
+    {
+      "expect": {
+        "hint": "text must not carry an amount",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "text_with_amount",
+      "payment_hex": "a8001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b301",
+      "why": "An amount on a text message is a number nothing will honour, which is worse than no number."
+    },
+    {
+      "expect": {
+        "hint": "only a notice carries a txid",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "request_with_txid",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20118b31b00000004e3b2920018b458207777777777777777777777777777777777777777777777777777777777777777",
+      "why": "Only a notice carries a transaction. A request pointing at one is claiming a payment it is simultaneously asking for."
     }
   ],
   "category": "contact"

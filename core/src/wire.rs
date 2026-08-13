@@ -148,6 +148,10 @@ pub mod f {
     pub const MSG_PREV: u64 = 158;
     pub const MSG_BODY: u64 = 159;
     pub const MSG_TS: u64 = 160;
+    // Money in a conversation (§16.13)
+    pub const MSG_KIND: u64 = 178;
+    pub const MSG_AMOUNT: u64 = 179;
+    pub const MSG_TXID: u64 = 180;
 
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;
@@ -444,6 +448,13 @@ impl Reader {
         match self.m.remove(&k).ok_or_else(|| Self::missing(k))? {
             Value::Array(v) => Ok(v),
             _ => Err(Self::wrong(k)),
+        }
+    }
+
+    pub(crate) fn opt_uint(&mut self, k: u64) -> Result<Option<u64>, Reject> {
+        match self.m.remove(&k) {
+            None => Ok(None),
+            Some(v) => v.as_uint().map(Some).ok_or_else(|| Self::wrong(k)),
         }
     }
 

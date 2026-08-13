@@ -7,6 +7,7 @@
 
 use ducat_core::cbor::decode;
 use ducat_core::contact::{
+    MessageKind,
     card_from_uri, card_to_uri, check_message, subkey_for as ring_subkey, still_in_ring,
     thread_aad as pair_aad, ContactCard, ContactDetails, LogHead, Message,
     MAX_DISPLAY_NAME_CHARS, MAX_MESSAGE_CHARS, MAX_RECORD_KEY_CHARS,
@@ -318,6 +319,11 @@ pub fn seal_message(
     prev_link: Vec<u8>,
     body: String,
     thread_aad: Vec<u8>,
+    // 0 text, 1 request, 2 notice (§16.13). A request carries no authority —
+    // the payer still decides at §15.5's confirm screen.
+    kind: u8,
+    amount_pxmr: Option<u64>,
+    txid: Option<Vec<u8>>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -334,7 +340,16 @@ pub fn seal_message(
     let prev: [u8; 32] = prev_link
         .try_into()
         .map_err(|_| ContactError::Refused("previous link is not 32 bytes".into()))?;
-    let msg = Message { version: 1, suite: 1, seq, prev, body, timestamp: now() };
+    let msg = Message {
+        version: 1, suite: 1, seq, prev, body, timestamp: now(),
+        kind: match kind {
+            1 => MessageKind::PaymentRequest,
+            2 => MessageKind::PaymentSent,
+            _ => MessageKind::Text,
+        },
+        amount_pxmr,
+        txid,
+    };
     let next_link = msg.link().to_vec();
     let (chosen, forward_secret) = bundle.select();
     let mut rng = SystemRng;
@@ -439,6 +454,10 @@ pub struct OpenedMessage {
     /// keeping it is keeping the ability to decrypt this message forever.
     pub consumed_one_time: bool,
     pub prekey_id: u32,
+    /// 0 text, 1 request, 2 notice (§16.13).
+    pub kind: u8,
+    pub amount_pxmr: Option<u64>,
+    pub txid: Option<Vec<u8>>,
 }
 
 /// Open an inbound sealed message and check it follows the thread.
@@ -501,6 +520,9 @@ pub fn open_message(
         link: msg.link().to_vec(),
         consumed_one_time: consumed,
         prekey_id: sealed.prekey_id,
+        kind: msg.kind as u8,
+        amount_pxmr: msg.amount_pxmr,
+        txid: msg.txid.clone(),
     })
 }
 

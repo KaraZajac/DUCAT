@@ -189,7 +189,8 @@
             "contact.card",
             "contact.details",
             "log.head",
-            "log.ring"
+            "log.ring",
+            "message.payment"
           ]
         },
         "name": {

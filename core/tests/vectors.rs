@@ -442,6 +442,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "object.roundtrip", "escrow.ceremony", "escrow.ready", "escrow.release",
         "bond.check", "slash.check",
         "contact.card", "contact.details", "log.head", "log.ring", "message.chain",
+        "message.payment",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -579,6 +580,21 @@ fn contact_vectors_pass() {
                 if oldest > 0 {
                     assert!(!still_in_ring(oldest - 1, seq + 1, count),
                             "{name}: the ring should have passed {}", oldest - 1);
+                }
+            }
+            "message.payment" => {
+                let got = decode(&unhex(c["payment_hex"].as_str().unwrap()))
+                    .map_err(|e| e.into())
+                    .and_then(Message::from_value);
+                assert_eq!(got.is_ok(), want_ok, "{name}: {got:?}");
+                match got {
+                    Ok(m) => assert_eq!(
+                        hexs(&m.to_value().encode()),
+                        c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"
+                    ),
+                    Err(e) => assert_eq!(
+                        format!("{:?}", e.code).to_uppercase(), want_code(), "{name}"
+                    ),
                 }
             }
             "message.chain" => {

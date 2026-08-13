@@ -165,13 +165,21 @@ object Mailbox {
      * move and then found an unwritten slot would have been told a message
      * exists that does not; this order only ever makes one briefly late.
      */
-    fun send(context: Context, c: Contact, body: String, minePersonaHex: String): Contact {
+    fun send(
+        context: Context,
+        c: Contact,
+        body: String,
+        minePersonaHex: String,
+        kind: Int = 0,
+        amountPxmr: Long? = null,
+    ): Contact {
         val store = ContactStore(context)
         val bundle = c.theirBundle
             ?: throw IllegalStateException("No keys for this contact yet.")
         val sealed = sealMessage(
             bundle, c.outSeq.toULong(), c.outPrevLink ?: ByteArray(32), body,
             threadAad(minePersonaHex, c.personaHex),
+            kind.toUByte(), amountPxmr?.toULong(), null,
         )
         // Re-opened **as the owner**. Creating a record leaves it writable only
         // for that process; a plain re-open is read-only and the write comes
@@ -198,6 +206,7 @@ object Mailbox {
                 outgoing = true, seq = c.outSeq, body = body,
                 timestamp = System.currentTimeMillis() / 1000,
                 forwardSecret = sealed.forwardSecret,
+                kind = kind, amountPxmr = amountPxmr ?: 0L,
             ),
         )
         store.advanceOutbound(c.personaHex, c.outSeq + 1, sealed.nextLink)
@@ -299,6 +308,8 @@ object Mailbox {
                 StoredMessage(
                     outgoing = false, seq = opened.seq.toLong(),
                     body = opened.body, timestamp = opened.timestamp.toLong(),
+                    kind = opened.kind.toInt(),
+                    amountPxmr = opened.amountPxmr?.toLong() ?: 0L,
                 ),
             )
             if (opened.consumedOneTime) store.burnOneTime(opened.prekeyId.toInt())

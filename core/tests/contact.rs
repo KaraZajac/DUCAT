@@ -160,7 +160,7 @@ fn msg(seq: u64, prev: [u8; 32], body: &str) -> Message {
         seq,
         prev,
         body: body.into(),
-        timestamp: 1000 + seq,
+        timestamp: 1000 + seq, kind: MessageKind::Text, amount_pxmr: None, txid: None
     }
 }
 
@@ -209,4 +209,76 @@ fn an_empty_body_is_refused_rather_than_being_a_second_spelling_of_none() {
 fn messages_round_trip() {
     let m = msg(3, [4u8; 32], "here's the 20 back");
     assert_eq!(Message::from_value(m.to_value()).unwrap(), m);
+}
+
+// --- money in a conversation (§16.13) -------------------------------------
+
+fn pay(kind: MessageKind, amount: Option<u64>, txid: Option<Vec<u8>>) -> Message {
+    Message {
+        version: 1, suite: 1, seq: 0, prev: [0u8; 32],
+        body: "for the coffee".into(), timestamp: 1000,
+        kind, amount_pxmr: amount, txid,
+    }
+}
+
+#[test]
+fn payment_messages_round_trip() {
+    let req = pay(MessageKind::PaymentRequest, Some(21_000_000_000), None);
+    assert_eq!(Message::from_value(req.to_value()).unwrap(), req);
+    let sent = pay(MessageKind::PaymentSent, Some(21_000_000_000), Some(vec![7u8; 32]));
+    assert_eq!(Message::from_value(sent.to_value()).unwrap(), sent);
+}
+
+/// Text is the default, so encoding it explicitly would give one meaning two
+/// encodings — the thing §18.1 refuses everywhere else.
+#[test]
+fn text_is_encoded_by_omission() {
+    let t = pay(MessageKind::Text, None, None);
+    let enc = t.to_value().encode();
+    assert!(!enc.windows(1).any(|_| false)); // shape check below is the real one
+    let mut v = t.to_value();
+    if let ducat_core::cbor::Value::Map(m) = &mut v {
+        assert!(!m.contains_key(&178), "text must not encode a kind");
+        m.insert(178, ducat_core::cbor::Value::Uint(0));
+    }
+    assert!(Message::from_value(v).is_err(), "an explicit text kind must be refused");
+    let _ = enc;
+}
+
+/// A payment screen with a blank where the amount goes.
+#[test]
+fn a_payment_without_an_amount_is_refused() {
+    for k in [MessageKind::PaymentRequest, MessageKind::PaymentSent] {
+        assert!(Message::from_value(pay(k, None, None).to_value()).is_err());
+    }
+}
+
+/// An amount nothing will honour is worse than no amount at all.
+#[test]
+fn text_must_not_carry_an_amount() {
+    assert!(Message::from_value(pay(MessageKind::Text, Some(1), None).to_value()).is_err());
+}
+
+#[test]
+fn only_a_notice_carries_a_transaction() {
+    let bad = pay(MessageKind::PaymentRequest, Some(1), Some(vec![7u8; 32]));
+    assert!(Message::from_value(bad.to_value()).is_err());
+}
+
+#[test]
+fn an_unknown_kind_is_refused_rather_than_shown_as_text() {
+    let mut v = pay(MessageKind::Text, None, None).to_value();
+    if let ducat_core::cbor::Value::Map(m) = &mut v {
+        m.insert(178, ducat_core::cbor::Value::Uint(99));
+    }
+    assert!(Message::from_value(v).is_err());
+}
+
+/// The chain covers the amount, because a request is only as trustworthy as
+/// the thread it arrived in.
+#[test]
+fn changing_an_amount_breaks_the_chain() {
+    let m0 = pay(MessageKind::PaymentRequest, Some(1_000), None);
+    let tampered = pay(MessageKind::PaymentRequest, Some(9_999_999), None);
+    assert_ne!(m0.link(), tampered.link());
 }

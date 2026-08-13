@@ -252,6 +252,37 @@ pub fn still_in_ring(seq: u64, next_seq: u64, subkey_count: u32) -> bool {
 /// nobody designed, with the storage and retention consequences of one.
 pub const MAX_MESSAGE_CHARS: usize = 2000;
 
+/// What a message is (§16.13).
+///
+/// Money in a conversation is not a separate channel: a request rides the same
+/// sealed, chained, offline-tolerant log as the text around it, which is what
+/// §16.12 was for. §15's tap cannot express this at all — it assumes both
+/// parties are present, and the whole point of asking someone for money is that
+/// they might be asleep.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MessageKind {
+    /// Ordinary text.
+    Text = 0,
+    /// "Please send me this much." Carries no authority whatsoever — it is a
+    /// message, and the payer still decides at §15.5's confirm screen. A request
+    /// that could move money would be a request that malware sends for you.
+    PaymentRequest = 1,
+    /// "I sent you this much", with a transaction to look for. Advisory: the
+    /// recipient verifies by finding the output, never by believing the note.
+    PaymentSent = 2,
+}
+
+impl MessageKind {
+    fn from_code(v: u64) -> Option<Self> {
+        Some(match v {
+            0 => MessageKind::Text,
+            1 => MessageKind::PaymentRequest,
+            2 => MessageKind::PaymentSent,
+            _ => return None,
+        })
+    }
+}
+
 /// One message on a persistent contact (§16.10).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Message {
@@ -267,6 +298,15 @@ pub struct Message {
     pub prev: [u8; 32],
     pub body: String,
     pub timestamp: u64,
+    /// Text unless this is about money (§16.13).
+    pub kind: MessageKind,
+    /// Required for a payment kind, refused for text. Piconero, so a request is
+    /// exact — a rounded amount in a message someone acts on is a rounding
+    /// error somebody pays for.
+    pub amount_pxmr: Option<u64>,
+    /// The transaction, for `PaymentSent`. Advisory: §17.5 verifies by scanning
+    /// for the output, and a txid in a message is a pointer, not evidence.
+    pub txid: Option<Vec<u8>>,
 }
 
 impl Message {
@@ -279,6 +319,15 @@ impl Message {
         m.insert(f::MSG_PREV, Value::Bytes(self.prev.to_vec()));
         m.insert(f::MSG_BODY, Value::Text(self.body.clone()));
         m.insert(f::MSG_TS, Value::Uint(self.timestamp));
+        if self.kind != MessageKind::Text {
+            m.insert(f::MSG_KIND, Value::Uint(self.kind as u64));
+        }
+        if let Some(a) = self.amount_pxmr {
+            m.insert(f::MSG_AMOUNT, Value::Uint(a));
+        }
+        if let Some(t) = &self.txid {
+            m.insert(f::MSG_TXID, Value::Bytes(t.clone()));
+        }
         Value::Map(m)
     }
 
@@ -299,8 +348,48 @@ impl Message {
                 .opt_text(f::MSG_BODY, MAX_MESSAGE_CHARS)?
                 .ok_or_else(|| Reject::with_detail(RejectCode::Malformed, "message has no body"))?,
             timestamp: r.uint(f::MSG_TS)?,
+            // Absent means text. Encoding the default would give one meaning two
+            // encodings, which §18.1 refuses.
+            kind: match r.opt_uint(f::MSG_KIND)? {
+                None => MessageKind::Text,
+                Some(0) => {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        "text is the default and must be encoded by omitting the kind",
+                    ))
+                }
+                Some(v) => MessageKind::from_code(v).ok_or_else(|| {
+                    Reject::with_detail(RejectCode::Malformed, "unknown message kind")
+                })?,
+            },
+            amount_pxmr: r.opt_uint(f::MSG_AMOUNT)?,
+            txid: r.opt_bytes(f::MSG_TXID, Some(32))?,
         };
         r.finish()?;
+        // A payment with no amount is a payment screen with a blank on it, and
+        // an amount on a text message is a number nothing will honour. Both are
+        // refused rather than ignored.
+        match (out.kind, out.amount_pxmr) {
+            (MessageKind::Text, Some(_)) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a text message must not carry an amount",
+                ))
+            }
+            (MessageKind::PaymentRequest, None) | (MessageKind::PaymentSent, None) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a payment message must carry an amount",
+                ))
+            }
+            _ => {}
+        }
+        if out.txid.is_some() && out.kind != MessageKind::PaymentSent {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "only a payment notice carries a transaction",
+            ));
+        }
         Ok(out)
     }
 
