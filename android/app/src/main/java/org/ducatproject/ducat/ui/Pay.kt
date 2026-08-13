@@ -256,6 +256,22 @@ private fun AmountStep(
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var done by remember { mutableStateOf<String?>(null) }
+    /**
+     * Asking for money, or sending it.
+     *
+     * One screen was doing both, and the send half owns most of it: a maximum,
+     * a fee estimate, a "left after", a speed. None of that is true of a
+     * request — you are asking someone else to spend, so your balance and your
+     * fee are not part of the question. Typing an amount therefore priced a
+     * transaction the user had not asked for, and the way to ask was a second
+     * button beside the one everything on screen had been describing.
+     *
+     * The toggle makes the mode the first decision rather than the last, and
+     * everything that only applies to a spend disappears when it does not.
+     */
+    var asking by remember { mutableStateOf(false) }
+    // Asking needs a thread to ask in. A bare address has no way back.
+    val canAsk = target is PayTarget.ToContact
     var confirming by remember { mutableStateOf(false) }
     val amountFocus = remember { FocusRequester() }
 
@@ -400,6 +416,16 @@ private fun AmountStep(
         }
 
         Spacer(Modifier.height(12.dp))
+        if (asking) {
+            Text(
+                "What you are asking ${
+                    (target as? PayTarget.ToContact)?.contact?.displayName() ?: "them"
+                } for. Your balance and the network fee are theirs to worry " +
+                    "about, not yours — this is a message, not a transaction.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "Up to ${inUnit(context, maxPxmr, fiatEntry, rate, cur)} after fees",
@@ -464,6 +490,7 @@ private fun AmountStep(
                 }
             }
         }
+        } // end of the send-only breakdown
 
         if (target is PayTarget.ToContact) {
             Spacer(Modifier.height(12.dp))
@@ -477,11 +504,29 @@ private fun AmountStep(
         }
 
         Spacer(Modifier.height(16.dp))
+        // The mode, where PayPal puts it: a pill above the action, so the two
+        // verbs are one visible choice rather than two competing buttons.
+        if (canAsk) {
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                SegmentedButton(
+                    selected = !asking,
+                    onClick = { asking = false },
+                    shape = SegmentedButtonDefaults.itemShape(0, 2),
+                ) { Text("Send") }
+                SegmentedButton(
+                    selected = asking,
+                    onClick = { asking = true },
+                    shape = SegmentedButtonDefaults.itemShape(1, 2),
+                ) { Text("Request") }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (target is PayTarget.ToContact) {
-                OutlinedButton(
+            if (asking && target is PayTarget.ToContact) {
+                Button(
                     onClick = {
-                        val amt = pxmr ?: return@OutlinedButton
+                        val amt = pxmr ?: return@Button
                         busy = true; error = null
                         scope.launch {
                             val r = withContext(Dispatchers.IO) {
@@ -503,29 +548,33 @@ private fun AmountStep(
                     // Asking for more than you hold is perfectly reasonable, so
                     // a request is never blocked by the balance.
                     enabled = !busy && pxmr != null,
-                    modifier = Modifier.weight(1f),
-                ) { Text("Request") }
-            }
-            val payable = target !is PayTarget.ToContact ||
-                target.contact.theirAddress != null || prefillAmountPxmr > 0
-            Button(
-                onClick = { confirming = true },
-                enabled = !busy && pxmr != null && payable && !overMax &&
-                    quote?.affordable == true,
-                modifier = Modifier.weight(1f),
-            ) {
-                if (busy) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                else Text("Send")
+                    modifier = Modifier.weight(1f).height(52.dp),
+                ) {
+                    if (busy) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                    else Text("Request")
+                }
+            } else {
+                val payable = target !is PayTarget.ToContact ||
+                    target.contact.theirAddress != null || prefillAmountPxmr > 0
+                Button(
+                    onClick = { confirming = true },
+                    enabled = !busy && pxmr != null && payable && !overMax &&
+                        quote?.affordable == true,
+                    modifier = Modifier.weight(1f).height(52.dp),
+                ) {
+                    if (busy) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                    else Text("Send")
+                }
             }
         }
 
-        if (target is PayTarget.ToContact && target.contact.theirAddress == null &&
+        if (!asking && target is PayTarget.ToContact && target.contact.theirAddress == null &&
             prefillAmountPxmr == 0L
         ) {
             Spacer(Modifier.height(8.dp))
             Text(
                 "${target.contact.displayName()} has not shared an address, so you can " +
-                    "ask but not send yet. A request carries one back.",
+                    "ask but not send yet. Switch to Request — it carries one back.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

@@ -51,8 +51,33 @@ impl ducat_core::hpke::rand_core::TryCryptoRng for HarnessRng {}
 const LOG_SUBKEYS: u32 = 8;
 const ONE_TIME_KEYS: u32 = 4;
 
+/// Where the harness keeps who it has met.
+///
+/// **Not `/tmp`.** It was, and the consequence was not hypothetical: a cleared
+/// `/tmp` took the issuer's record of a real contact with it, and a payment
+/// request the other side had already sent became unreadable from this machine
+/// — the message was still in the DHT, still sealed to keys this harness can
+/// still derive, and there was no longer anything here saying *whose log to
+/// look in*. Ephemeral storage for the one file that has to outlive a reboot.
+///
+/// `$XDG_STATE_HOME`, then `~/.local/state`, then `/tmp` as a last resort so a
+/// machine with no home directory still runs.
 fn state_path(who: &str) -> String {
-    std::env::var("DUCAT_STATE").unwrap_or_else(|_| format!("/tmp/ducat-{who}.json"))
+    if let Ok(p) = std::env::var("DUCAT_STATE") {
+        return p;
+    }
+    let base = std::env::var("XDG_STATE_HOME")
+        .ok()
+        .filter(|v| !v.is_empty())
+        .or_else(|| std::env::var("HOME").ok().map(|h| format!("{h}/.local/state")));
+    match base {
+        Some(b) => {
+            let dir = format!("{b}/ducat");
+            let _ = std::fs::create_dir_all(&dir);
+            format!("{dir}/{who}.json")
+        }
+        None => format!("/tmp/ducat-{who}.json"),
+    }
 }
 
 /// Derived rather than stored: the harness needs the same prekeys back in a
@@ -307,7 +332,15 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
         println!("  \x1b[35m→\x1b[0m [{seq}] {text}");
     }
 
-    std::fs::write(state_path("claimant"), format!("{}\n", outbox))?;
+    // Their log *and* their persona. Only the outbox was kept, and the persona
+    // is half of the thread AAD — so reading their messages in a later process
+    // meant re-deriving it from the card, and a card is a one-shot thing handed
+    // over in person. Keeping one line instead of two made every future read
+    // depend on still having the URI.
+    std::fs::write(
+        state_path("claimant"),
+        format!("{}\n{}\n{}\n", outbox, hex::encode(&theirs.persona), inbox),
+    )?;
     rc.close_dht_record(inbox).await?;
     rc.close_dht_record(outbox).await?;
     println!("\n  \x1b[32mclaimed and sent, with the issuer offline throughout\x1b[0m");
@@ -315,12 +348,27 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub async fn collect() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn collect(card: &str) -> Result<(), Box<dyn std::error::Error>> {
     use std::str::FromStr;
     println!("\n\x1b[1mDUCAT — collect (claimant now offline)\x1b[0m\n");
-    let st = std::fs::read_to_string(state_path("issuer"))?;
-    let mut lines = st.lines();
-    let inbox = RecordKey::from_str(lines.next().ok_or("no inbox in state")?)?;
+    // The state file is a convenience, not the source of truth: the inbox key
+    // is inside the card we handed out, and reading a claimant's reply needs
+    // nothing else. Depending on the file alone meant a card issued from a
+    // machine whose /tmp had since been cleared could never be collected on —
+    // even though the record was still there and still readable.
+    let inbox = if card.is_empty() {
+        let st = std::fs::read_to_string(state_path("issuer"))
+            .map_err(|_| "no issuer state here — pass the card URI you handed out")?;
+        RecordKey::from_str(st.lines().next().ok_or("no inbox in state")?)?
+    } else {
+        let (env, _) = card_from_uri(card).map_err(|e| format!("{e:?}"))?;
+        let c = ContactCard::from_value(
+            decode(&peek_body(&env).map_err(|e| format!("{e:?}"))?)
+                .map_err(|e| format!("{e:?}"))?,
+        )
+        .map_err(|e| format!("{e:?}"))?;
+        RecordKey::from_str(&c.inbox_key)?
+    };
 
     let (api, _c) = crate::veilid::start("collect").await?;
     let rc = api.routing_context()?;
@@ -390,6 +438,22 @@ pub async fn watch(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
     use std::str::FromStr;
     println!("\n\x1b[1mDUCAT — watching their outbox\x1b[0m\n");
 
+    // No card given: pick up where `--card-claim` left off. A card is handed
+    // over once, in person; needing it again to read a thread that already
+    // exists is the wrong dependency.
+    if uri.is_empty() {
+        let st = std::fs::read_to_string(state_path("claimant"))
+            .map_err(|_| "no claimed contact on this machine — pass a card URI")?;
+        let mut it = st.lines();
+        let outbox = it.next().unwrap_or_default().to_string();
+        let persona_hex = it.next().unwrap_or_default().to_string();
+        if outbox.is_empty() || persona_hex.is_empty() {
+            return Err("this contact was claimed before the persona was kept; pass a card URI".into());
+        }
+        let persona = hex::decode(&persona_hex).map_err(|e| format!("persona: {e}"))?;
+        return watch_log(&outbox, &persona).await;
+    }
+
     let (env, _) = card_from_uri(uri).map_err(|e| format!("{e:?}"))?;
     let peek = ContactCard::from_value(
         decode(&peek_body(&env).map_err(|e| format!("{e:?}"))?).map_err(|e| format!("{e:?}"))?,
@@ -410,16 +474,28 @@ pub async fn watch(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
             .map_err(|e| format!("{e:?}"))?,
         None => return Err("their details are not published".into()),
     };
-    let log = RecordKey::from_str(&theirs.outbox_key)?;
+    let outbox_key = theirs.outbox_key.clone();
+    let their_persona = theirs.persona.clone();
+    rc.close_dht_record(inbox).await?;
+    api.shutdown().await;
+    watch_log(&outbox_key, &their_persona).await
+}
+
+/// Poll one contact's log, given only their outbox and persona.
+async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    use std::str::FromStr;
+    let (api, _c) = crate::veilid::start("watch").await?;
+    let rc = api.routing_context()?;
+    let log = RecordKey::from_str(outbox_key)?;
     rc.open_dht_record(log.clone(), None).await?;
-    println!("  watching {}\n", theirs.outbox_key);
+    println!("  watching {}\n", outbox_key);
 
     // The claimant's keys, matching what `--card-claim` published.
     let persona = SecretKey::ed25519_from_bytes(&[0x72; 32]);
     let (mut store, _) = prekeys(0x80);
     let aad = thread_aad(
         &hex::encode(persona.public().to_bytes()),
-        &hex::encode(&theirs.persona),
+        &hex::encode(their_persona),
     );
 
     let mut seq = 0u64;
@@ -504,7 +580,6 @@ pub async fn watch(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
         tokio::time::sleep(std::time::Duration::from_secs(5)).await;
     }
 
-    rc.close_dht_record(inbox).await?;
     rc.close_dht_record(log).await?;
     api.shutdown().await;
     Ok(())
