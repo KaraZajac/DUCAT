@@ -321,8 +321,21 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     // a LazyColumn, and nesting one inside a vertical scroll
                     // gives it unbounded height — it renders every row at once
                     // and the list stops being lazy.
-                    Tab.Home -> Column(Modifier.verticalScroll(rememberScrollState())) {
-                        HomeScreen(onTopUp = { tab = Tab.Accounts })
+                    //
+                    // In POS mode the Home tab *is* the till. A mode is a
+                    // stance, not a feature: the person behind a counter rings
+                    // up sale after sale, and making them navigate to it before
+                    // every customer is making them do it forty times a shift.
+                    Tab.Home -> {
+                        val mv by ContactStore.changes.collectAsState()
+                        val posMode = remember(mv) { ModeStore(context).posEnabled() }
+                        if (posMode) {
+                            org.ducatproject.ducat.ui.PosScreen()
+                        } else {
+                            Column(Modifier.verticalScroll(rememberScrollState())) {
+                                HomeScreen(onTopUp = { tab = Tab.Accounts })
+                            }
+                        }
                     }
                     Tab.Accounts -> AccountsScreen()
                     Tab.Activity -> ActivityScreen()

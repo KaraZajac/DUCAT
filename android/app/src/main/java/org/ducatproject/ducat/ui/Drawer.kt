@@ -37,8 +37,7 @@ enum class Section(val label: String) {
     Contacts("Contacts"),
     Logs("Logs"),
     Settings("Settings"),
-    Pos("Point of sale"),
-    Modes("Other modes"),
+    Modes("Operating modes"),
 }
 
 @Composable
@@ -66,10 +65,7 @@ fun DrawerContent(onPick: (Section) -> Unit) {
                 // Modes is listed and disabled rather than hidden: §8.8's
                 // provider roles are real and unbuilt, and a menu that quietly
                 // omits them tells a user less than one that says "not yet".
-                onClick = { if (s != Section.Modes) onPick(s) },
-                badge = if (s == Section.Modes) {
-                    { Text("later", style = MaterialTheme.typography.labelSmall) }
-                } else null,
+                onClick = { onPick(s) },
                 modifier = Modifier.padding(horizontal = 12.dp),
             )
         }
@@ -82,7 +78,6 @@ private fun iconFor(s: Section) = when (s) {
     Section.Contacts -> Icons.Filled.People
     Section.Logs -> Icons.Filled.Description
     Section.Settings -> Icons.Filled.Settings
-    Section.Pos -> Icons.Filled.PointOfSale
     Section.Modes -> Icons.Filled.Tune
 }
 
@@ -142,13 +137,7 @@ fun SectionScreen(
             )
         }
 
-        Section.Pos -> PosScreen()
-        Section.Modes -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(
-                "Bar tab, taxi and donation modes are not built yet.",
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        }
+        Section.Modes -> ModesScreen()
     }
 }
 
@@ -396,5 +385,88 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
 private fun SelectionContainerText(text: String) {
     androidx.compose.foundation.text.selection.SelectionContainer {
         Text(text, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+
+/**
+ * What this device is for (§15).
+ *
+ * A toggle, not a navigation item: a mode is a standing state, and the proof it
+ * is on should be the app itself — switch the till on and Home *is* the till
+ * until it is switched off. The ones not built yet say so and cannot be turned
+ * on, which beats a menu of five entries where four disappoint.
+ */
+@Composable
+fun ModesScreen() {
+    val context = LocalContext.current
+    val modes = remember { org.ducatproject.ducat.ModeStore(context) }
+    var pos by remember { mutableStateOf(modes.posEnabled()) }
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
+        Text(
+            "A mode changes what this device leads with. Switch one on and the " +
+                "Home tab becomes that job until you switch it off.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(16.dp))
+
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                ModeRow(
+                    title = "Point of sale",
+                    detail = "Ring up items, show one code, send an itemised bill " +
+                        "and a receipt in a conversation.",
+                    checked = pos,
+                    onChange = { pos = it; modes.setPos(it) },
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                ModeRow("Bar tab", "Keep a running tab per person, settle at close.", null) {}
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                ModeRow("Taxi", "A metered fare, settled at the kerb.", null) {}
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                ModeRow("Donate", "A standing code anyone can give to.", null) {}
+            }
+        }
+    }
+}
+
+/** One mode. `checked = null` means not built yet, and the row says so. */
+@Composable
+private fun ModeRow(
+    title: String,
+    detail: String,
+    checked: Boolean?,
+    onChange: (Boolean) -> Unit,
+) {
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                if (checked == null) {
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "not built yet",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
+            }
+            Text(
+                detail,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.width(12.dp))
+        Switch(
+            checked = checked == true,
+            onCheckedChange = onChange,
+            enabled = checked != null,
+        )
     }
 }
