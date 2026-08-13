@@ -233,6 +233,27 @@ private fun WalletSync(nodeHeight: Long) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            SyncBlocker.Failing -> Column {
+                Text(
+                    "Scanning failed",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    Wallet.lastError(context) ?: "unknown",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontFamily = FontFamily.Monospace,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "The node above answered, so this is the wallet's own read of " +
+                        "the chain rather than the connection.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             else -> Text(
                 "Not started — looking for a node.",
                 style = MaterialTheme.typography.bodySmall,

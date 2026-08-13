@@ -572,6 +572,20 @@ class WalletStore(context: Context) {
      */
     fun scanRate(): Double = prefs.getFloat("wallet_rate", 0f).toDouble()
 
+    /**
+     * Why the last scan attempt failed, if it did.
+     *
+     * Kept because the alternative is a screen that says "not started" while
+     * the reason sits in logcat, which a person holding a phone cannot read.
+     * A wallet that will not sync has to be able to say what stopped it.
+     */
+    fun lastScanError(): String? = prefs.getString("wallet_scan_error", null)
+
+    fun recordScanError(msg: String?) = prefs.edit()
+        .putString("wallet_scan_error", msg)
+        .apply()
+        .also { ContactStore.bump() }
+
     fun recordScan(scannedTo: Long, tip: Long, found: List<OwnedOutput>) {
         val now = System.currentTimeMillis()
         val lastAt = prefs.getLong("wallet_scan_at", 0L)

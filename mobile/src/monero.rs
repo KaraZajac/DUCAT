@@ -25,6 +25,7 @@
 //! the UI says which one is in use rather than claiming a property it cannot
 //! check.
 
+use std::io::Read;
 use std::str::FromStr;
 use std::time::{Duration, Instant};
 
@@ -241,6 +242,15 @@ pub struct ScanResult {
     /// rather than implying it is finished.
     pub tip: u64,
     pub outputs: Vec<OwnedOutput>,
+    /// Blocks actually fetched and examined.
+    ///
+    /// Reported because the loop skips a block it cannot read and carries on,
+    /// which makes "scanned a window, found nothing" indistinguishable from
+    /// "read nothing at all". Without this a completely broken transport looks
+    /// exactly like an empty wallet — which is what it did look like.
+    pub blocks_read: u32,
+    /// Blocks that could not be fetched or expanded.
+    pub blocks_failed: u32,
 }
 
 /// Scan a bounded window for outputs belonging to this wallet.
@@ -257,8 +267,7 @@ pub fn monero_scan(
     max_blocks: u32,
 ) -> Result<ScanResult, MoneroError> {
     use curve25519_dalek::constants::ED25519_BASEPOINT_TABLE;
-    use monero_simple_request_rpc::prelude::*;
-    use monero_simple_request_rpc::SimpleRequestTransport;
+    use monero_daemon_rpc::prelude::*;
     use monero_wallet::ed25519::{Point, Scalar};
     use monero_wallet::{Scanner, ViewPair};
     use zeroize::Zeroizing;
@@ -281,7 +290,7 @@ pub fn monero_scan(
         .map_err(|e| MoneroError::Failed(format!("runtime: {e}")))?;
 
     rt.block_on(async {
-        let rpc = SimpleRequestTransport::new(node_url.clone())
+        let rpc = monero_daemon_rpc::MoneroDaemon::new(UreqTransport::new(node_url.clone()))
             .await
             .map_err(|e| MoneroError::Failed(format!("connect: {e:?}")))?;
         let tip = rpc
@@ -293,23 +302,33 @@ pub fn monero_scan(
             .map_err(|e| MoneroError::Failed(format!("view pair: {e:?}")))?;
         let mut scanner = Scanner::new(vp);
         let mut outputs = Vec::new();
+        let (mut read, mut failed) = (0u32, 0u32);
 
         // Bounded, and the bound is not politeness: each block is a round trip
         // to someone else's node, so an unbounded loop on a phone is a scan
         // that never returns and a screen that never updates.
         let last = tip.min(from_height + max_blocks as u64);
         let mut h = from_height;
+        let mut first_error: Option<String> = None;
         while h <= last {
             let block = match rpc.block_by_number(h as usize).await {
                 Ok(b) => b,
                 // A gap is skipped rather than fatal: one flaky block should not
-                // discard the window's progress.
-                Err(_) => { h += 1; continue }
+                // discard the window's progress. Counted, though — see
+                // `blocks_failed`.
+                Err(e) => {
+                    if first_error.is_none() { first_error = Some(format!("{e:?}")); }
+                    failed += 1; h += 1; continue
+                }
             };
             let sb = match rpc.expand_to_scannable_block(block).await {
                 Ok(b) => b,
-                Err(_) => { h += 1; continue }
+                Err(e) => {
+                    if first_error.is_none() { first_error = Some(format!("{e:?}")); }
+                    failed += 1; h += 1; continue
+                }
             };
+            read += 1;
             if let Ok(found) = scanner.scan(sb) {
                 for o in found.not_additionally_locked() {
                     // KI = (spend + key_offset) * Hp(output key). Derivable only
@@ -330,7 +349,15 @@ pub fn monero_scan(
             h += 1;
         }
 
-        Ok(ScanResult { scanned_to: last, tip, outputs })
+        // Every block in the window failing is a broken connection, not an
+        // empty wallet, and must not be reported as progress.
+        if read == 0 && failed > 0 {
+            return Err(MoneroError::Failed(format!(
+                "could not read any of {failed} blocks: {}",
+                first_error.unwrap_or_else(|| "unknown".into())
+            )));
+        }
+        Ok(ScanResult { scanned_to: last, tip, outputs, blocks_read: read, blocks_failed: failed })
     })
 }
 
@@ -348,8 +375,7 @@ pub fn monero_scan_view_only(
     from_height: u64,
     max_blocks: u32,
 ) -> Result<ScanResult, MoneroError> {
-    use monero_simple_request_rpc::prelude::*;
-    use monero_simple_request_rpc::SimpleRequestTransport;
+    use monero_daemon_rpc::prelude::*;
     use monero_wallet::address::{MoneroAddress, Network};
     use monero_wallet::ed25519::Scalar;
     use monero_wallet::{Scanner, ViewPair};
@@ -370,7 +396,7 @@ pub fn monero_scan_view_only(
         .map_err(|e| MoneroError::Failed(format!("runtime: {e}")))?;
 
     rt.block_on(async {
-        let rpc = SimpleRequestTransport::new(node_url)
+        let rpc = monero_daemon_rpc::MoneroDaemon::new(UreqTransport::new(node_url))
             .await
             .map_err(|e| MoneroError::Failed(format!("connect: {e:?}")))?;
         let tip = rpc
@@ -385,9 +411,11 @@ pub fn monero_scan_view_only(
 
         let last = tip.min(from_height + max_blocks as u64);
         let mut h = from_height;
+        let (mut read, mut failed) = (0u32, 0u32);
         while h <= last {
-            let Ok(block) = rpc.block_by_number(h as usize).await else { h += 1; continue };
-            let Ok(sb) = rpc.expand_to_scannable_block(block).await else { h += 1; continue };
+            let Ok(block) = rpc.block_by_number(h as usize).await else { failed += 1; h += 1; continue };
+            let Ok(sb) = rpc.expand_to_scannable_block(block).await else { failed += 1; h += 1; continue };
+            read += 1;
             if let Ok(found) = scanner.scan(sb) {
                 for o in found.not_additionally_locked() {
                     outputs.push(OwnedOutput {
@@ -403,7 +431,10 @@ pub fn monero_scan_view_only(
             }
             h += 1;
         }
-        Ok(ScanResult { scanned_to: last, tip, outputs })
+        if read == 0 && failed > 0 {
+            return Err(MoneroError::Failed(format!("could not read any of {failed} blocks")));
+        }
+        Ok(ScanResult { scanned_to: last, tip, outputs, blocks_read: read, blocks_failed: failed })
     })
 }
 
@@ -466,6 +497,65 @@ fn hex_to_bytes(s: &str) -> Option<Vec<u8>> {
 // figure would put a number on the screen that a person could act on, and there
 // is no world in which that number is true. The rate is still shown, because it
 // is real, but the caller is told which network it is pricing so it can say so.
+
+/// The daemon connection, over the same HTTP client as everything else here.
+///
+/// `monero-simple-request-rpc` exists and works on a desktop. It pulls in hyper
+/// and its own async machinery, and on the phone the scan failed while the
+/// plain-`ureq` probe beside it succeeded — two HTTP stacks in one binary, only
+/// one of them proven on the device.
+///
+/// `HttpTransport` is a single method, so the fix is to have one stack rather
+/// than diagnose the second. The blocking call inside an async fn is
+/// deliberate: the runtime driving it exists only for this chain and has
+/// nothing else to run.
+#[derive(Clone)]
+struct UreqTransport {
+    url: String,
+    agent: ureq::Agent,
+}
+
+impl UreqTransport {
+    fn new(url: String) -> Self {
+        UreqTransport {
+            url: url.trim_end_matches('/').to_string(),
+            agent: ureq::AgentBuilder::new()
+                // Generous: a scan asks for blocks one at a time and a slow node
+                // is better waited on than abandoned mid-window.
+                .timeout(Duration::from_secs(30))
+                .build(),
+        }
+    }
+}
+
+impl monero_daemon_rpc::HttpTransport for UreqTransport {
+    fn post(
+        &self,
+        route: &str,
+        body: Vec<u8>,
+        _response_size_limit: Option<usize>,
+    ) -> impl Send + std::future::Future<Output = Result<Vec<u8>, monero_daemon_rpc::prelude::InterfaceError>>
+    {
+        let url = format!("{}/{}", self.url, route.trim_start_matches('/'));
+        let agent = self.agent.clone();
+        async move {
+            // `InterfaceError` is the transport-failed variant; `InvalidInterface`
+            // would tell the caller to stop using this node, which a timeout does
+            // not justify.
+            let err = monero_daemon_rpc::prelude::InterfaceError::InterfaceError;
+            let resp = agent
+                .post(&url)
+                .set("Content-Type", "application/octet-stream")
+                .send_bytes(&body)
+                .map_err(|e| err(short_error(&e.to_string())))?;
+            let mut out = Vec::new();
+            resp.into_reader()
+                .read_to_end(&mut out)
+                .map_err(|e| err(e.to_string()))?;
+            Ok(out)
+        }
+    }
+}
 
 /// A quote, for display only.
 #[derive(uniffi::Record, Clone)]
@@ -568,8 +658,7 @@ pub fn monero_send(
     to_address: String,
     amount_pxmr: u64,
 ) -> Result<SendResult, MoneroError> {
-    use monero_simple_request_rpc::prelude::*;
-    use monero_simple_request_rpc::SimpleRequestTransport;
+    use monero_daemon_rpc::prelude::*;
     use monero_wallet::address::MoneroAddress;
     use monero_wallet::ed25519::Scalar;
     use monero_wallet::send::{Change, SignableTransaction};
@@ -611,7 +700,7 @@ pub fn monero_send(
         .map_err(|e| MoneroError::Failed(format!("runtime: {e}")))?;
 
     rt.block_on(async {
-        let rpc = SimpleRequestTransport::new(node_url.clone())
+        let rpc = monero_daemon_rpc::MoneroDaemon::new(UreqTransport::new(node_url.clone()))
             .await
             .map_err(|e| MoneroError::Failed(format!("connect: {e:?}")))?;
         let tip = rpc
@@ -668,7 +757,8 @@ pub fn monero_send(
             "http://node.monerodevs.org:38089",
             "http://stagenet.xmr-tw.org:38081",
         ] {
-            let Ok(t) = SimpleRequestTransport::new(r.to_string()).await else { continue };
+            let Ok(t) = monero_daemon_rpc::MoneroDaemon::new(UreqTransport::new(r.to_string())).await
+            else { continue };
             if t.publish_transaction(&signed).await.is_ok() {
                 accepted += 1;
             }

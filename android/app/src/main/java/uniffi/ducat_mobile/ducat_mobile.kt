@@ -2451,7 +2451,20 @@ data class ScanResult (
      * rather than implying it is finished.
      */
     var `tip`: kotlin.ULong, 
-    var `outputs`: List<OwnedOutput>
+    var `outputs`: List<OwnedOutput>, 
+    /**
+     * Blocks actually fetched and examined.
+     *
+     * Reported because the loop skips a block it cannot read and carries on,
+     * which makes "scanned a window, found nothing" indistinguishable from
+     * "read nothing at all". Without this a completely broken transport looks
+     * exactly like an empty wallet — which is what it did look like.
+     */
+    var `blocksRead`: kotlin.UInt, 
+    /**
+     * Blocks that could not be fetched or expanded.
+     */
+    var `blocksFailed`: kotlin.UInt
 ) {
     
     companion object
@@ -2466,19 +2479,25 @@ public object FfiConverterTypeScanResult: FfiConverterRustBuffer<ScanResult> {
             FfiConverterULong.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterSequenceTypeOwnedOutput.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
         )
     }
 
     override fun allocationSize(value: ScanResult) = (
             FfiConverterULong.allocationSize(value.`scannedTo`) +
             FfiConverterULong.allocationSize(value.`tip`) +
-            FfiConverterSequenceTypeOwnedOutput.allocationSize(value.`outputs`)
+            FfiConverterSequenceTypeOwnedOutput.allocationSize(value.`outputs`) +
+            FfiConverterUInt.allocationSize(value.`blocksRead`) +
+            FfiConverterUInt.allocationSize(value.`blocksFailed`)
     )
 
     override fun write(value: ScanResult, buf: ByteBuffer) {
             FfiConverterULong.write(value.`scannedTo`, buf)
             FfiConverterULong.write(value.`tip`, buf)
             FfiConverterSequenceTypeOwnedOutput.write(value.`outputs`, buf)
+            FfiConverterUInt.write(value.`blocksRead`, buf)
+            FfiConverterUInt.write(value.`blocksFailed`, buf)
     }
 }
 

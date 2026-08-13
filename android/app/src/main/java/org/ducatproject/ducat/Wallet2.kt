@@ -95,6 +95,8 @@ enum class SyncBlocker {
     NoWallet,
     /** No node has answered yet. Usually resolves on its own. */
     NoNode,
+    /** A node answered and the scan itself failed. The reason is kept. */
+    Failing,
 }
 
 /** What a send would use and cost, before anything is signed. */
@@ -130,12 +132,17 @@ object Wallet {
         return try {
             val r = moneroScan(nodeUrl, spend, from.toULong(), WINDOW)
             store.recordScan(r.scannedTo.toLong(), r.tip.toLong(), r.outputs)
+            store.recordScanError(null)
             if (r.outputs.isNotEmpty()) {
                 Log.i(TAG, "found ${r.outputs.size} output(s) up to ${r.scannedTo}")
             }
             r.scannedTo.toLong() > from
-        } catch (e: Exception) {
-            Log.w(TAG, "scan: ${e.message}")
+        } catch (e: Throwable) {
+            // Throwable, not Exception: a panic crossing the FFI boundary
+            // arrives as an Error, and catching only Exception let the real
+            // cause disappear while the screen said "not started".
+            Log.w(TAG, "scan failed: ${e}")
+            store.recordScanError(e.message ?: e.toString())
             false
         }
     }
@@ -183,10 +190,13 @@ object Wallet {
         val store = WalletStore(context)
         return when {
             store.spendKeyHex() == null -> SyncBlocker.NoWallet
+            store.lastScanError() != null -> SyncBlocker.Failing
             store.tip() == 0L -> SyncBlocker.NoNode
             else -> SyncBlocker.None
         }
     }
+
+    fun lastError(context: Context): String? = WalletStore(context).lastScanError()
 
     fun entries(context: Context): List<WalletEntry> =
         WalletStore(context).entries().sortedByDescending { it.height }
