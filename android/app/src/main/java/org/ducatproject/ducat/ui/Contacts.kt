@@ -26,15 +26,12 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.ducatproject.ducat.CardStore
 import org.ducatproject.ducat.Contact
+import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.NameStore
 import org.ducatproject.ducat.PersonaStore
-import uniffi.ducat_mobile.buildClaim
-import uniffi.ducat_mobile.nodeAppCall
 import uniffi.ducat_mobile.createContactCard
-import uniffi.ducat_mobile.nodeRouteBlob
 import uniffi.ducat_mobile.readContactCard
 
 /**
@@ -128,12 +125,10 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                         scope.launch {
                             val r = withContext(Dispatchers.IO) {
                                 runCatching {
-                                    // A fresh route per card: reusing one links
-                                    // every holder to every other (§16.6).
-                                    val route = nodeRouteBlob()
-                                    createContactCard(
-                                        personaSecret!!,
-                                        route,
+                                    // Records, not a route: the card names an
+                                    // inbox that outlives this process (§16.12).
+                                    Mailbox.issueCard(
+                                        context,
                                         name.ifBlank { null },
                                         60uL * 60uL * 24uL,
                                     )
@@ -142,7 +137,6 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                             busy = false
                             r.onSuccess {
                                 NameStore(context).put(name)
-                                CardStore(context).remember(it)
                                 uri = it.uri
                             }.onFailure { error = it.message ?: "could not make a card" }
                         }
@@ -153,7 +147,7 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                     if (busy) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                         Spacer(Modifier.width(10.dp))
-                        Text("Building a private route…")
+                        Text("Publishing your inbox…")
                     } else {
                         Text("Create card")
                     }
@@ -161,8 +155,9 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                 if (busy) {
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "This takes a few seconds — a private route has to be built " +
-                            "through the network before anyone can reach you.",
+                        "This takes a few seconds — two records have to be published " +
+                            "before anyone can reach you. They keep working after you " +
+                            "close the app.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -304,43 +299,17 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                         error = null
                         scope.launch {
                             val r = withContext(Dispatchers.IO) {
+                                // §16.3's rule holds for cards too: a contact is
+                                // mutual or it is not one. Claiming publishes
+                                // *our* details in the reply subkey, which is
+                                // also what tells the issuer their card is spent.
                                 runCatching {
-                                    // §16.3's rule holds for cards too: a contact
-                                    // is mutual or it is not a contact. Claiming
-                                    // hands *our* persona and route back, and is
-                                    // what tells the issuer their card is spent.
-                                    val ourRoute = nodeRouteBlob()
-                                    val claim = buildClaim(
-                                        PersonaStore(context).secret(),
-                                        ourRoute,
-                                        NameStore(context).get(),
-                                        s.claimSecret,
-                                    )
-                                    val reply = nodeAppCall(
-                                        s.rendezvous,
-                                        byteArrayOf(0x40) + claim,
-                                        30_000u,
-                                    )
-                                    if (!reply.decodeToString().startsWith("ok")) {
-                                        throw IllegalStateException(
-                                            replyReason(reply.decodeToString())
-                                        )
-                                    }
+                                    Mailbox.claimCard(context, s, petname.ifBlank { null })
                                 }
                             }
                             adding = false
-                            r.onSuccess {
-                                store.add(
-                                    Contact(
-                                        personaHex = s.persona.toHex(),
-                                        petname = petname.ifBlank { null },
-                                        assertedName = s.assertedName,
-                                        rendezvous = s.rendezvous,
-                                        claimSecret = s.claimSecret,
-                                    )
-                                )
-                                onAdded()
-                            }.onFailure { error = it.message ?: "could not reach them" }
+                            r.onSuccess { onAdded() }
+                                .onFailure { error = it.message ?: "could not read their inbox" }
                         }
                     },
                     enabled = petname.isNotBlank() && !adding,
@@ -349,7 +318,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                     if (adding) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                         Spacer(Modifier.width(10.dp))
-                        Text("Reaching them…")
+                        Text("Reading their inbox…")
                     } else {
                         Text("Add contact")
                     }

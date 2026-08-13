@@ -245,8 +245,13 @@ pub fn android_ready() -> bool {
 }
 
 
-/// A private route this node can be reached on, as the blob that goes in a
-/// contact card (§16.9).
+/// A private route this node can be reached on.
+///
+/// **Not for messaging.** Contact cards carry a DHT record key now (§16.12),
+/// because a route dies with the process that made it and a card must not.
+/// What remains correct for is the **tap** (§15.3), where both parties are
+/// standing together and a live round trip is the right shape — a payment is a
+/// conversation with a person in front of you, not a letter.
 ///
 /// Each call builds a *new* route. That is the expensive, correct default: a
 /// route reused across cards links every holder of those cards to one another,
@@ -278,6 +283,10 @@ pub fn node_route_blob() -> Result<Vec<u8>, NodeError> {
 }
 
 /// One request/response exchange with a peer reached by its route blob.
+///
+/// For the tap (§15.3). Messaging goes through records — see the note on
+/// [`node_route_blob`] for why using this as a mailbox was the mistake §16.12
+/// documents.
 ///
 /// Blocking, with a caller-supplied timeout. Kotlin must call this off the main
 /// thread; a route round trip is tens to hundreds of milliseconds on a good day

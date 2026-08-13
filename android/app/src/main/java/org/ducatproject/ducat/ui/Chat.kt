@@ -22,17 +22,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.threadAad
 import org.ducatproject.ducat.StoredMessage
-import uniffi.ducat_mobile.nodeAppCall
-import uniffi.ducat_mobile.sealMessage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-private const val MSG_TEXT: Byte = 0x41
-private const val MSG_PREKEYS: Byte = 0x42
 
 /**
  * One conversation.
@@ -122,7 +118,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 error = null
                                 scope.launch {
                                     val result = withContext(Dispatchers.IO) {
-                                        runCatching { sendOne(store, c, body, mine) }
+                                        runCatching { sendOne(context, c, body, mine) }
                                     }
                                     sending = false
                                     result.onSuccess { updated ->
@@ -145,8 +141,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     }
                     if (c.theirBundle == null) {
                         Text(
-                            "Fetching their keys — they need to be online once before " +
-                                "the first message can be encrypted.",
+                            "No keys for this contact — the handshake did not complete. " +
+                                "Ask them for a new card.",
                             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -176,52 +172,18 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         }
     }
 
-    // Fetch their prekey bundle the first time the screen opens.
-    LaunchedEffect(c.personaHex) {
-        if (c.theirBundle == null) {
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    val reply = nodeAppCall(c.rendezvous, byteArrayOf(MSG_PREKEYS), 20_000u)
-                    store.setTheirBundle(c.personaHex, reply)
-                    store.all().first { it.personaHex == c.personaHex }
-                }
-            }.onSuccess { c = it }
-                .onFailure { error = "Could not reach them: ${it.message}" }
-        }
-    }
+    // Nothing to fetch: their prekeys arrived with the handshake and live in
+    // the contact record. §16.12's whole point is that the first message needs
+    // no round trip to someone who may not be there.
 }
 
-/** Seal, chain, send, record. Fails as a unit — nothing is stored unsent. */
-private fun sendOne(store: ContactStore, c: Contact, body: String, minePersonaHex: String): Contact {
-    val bundle = c.theirBundle ?: throw IllegalStateException("no keys for this contact yet")
-    val sealed = sealMessage(
-        bundle,
-        c.outSeq.toULong(),
-        c.outPrevLink ?: ByteArray(32),
-        body,
-        // Binds the ciphertext to this pair, so it cannot be replayed into
-        // another conversation (§16.11). Symmetric — see threadAad.
-        threadAad(minePersonaHex, c.personaHex),
-    )
-    val framed = byteArrayOf(MSG_TEXT) + sealed.bytes
-    nodeAppCall(c.rendezvous, framed, 30_000u)
-
-    store.append(
-        c.personaHex,
-        StoredMessage(
-            outgoing = true,
-            seq = c.outSeq,
-            body = body,
-            timestamp = System.currentTimeMillis() / 1000,
-            forwardSecret = sealed.forwardSecret,
-        ),
-    )
-    store.advanceOutbound(c.personaHex, c.outSeq + 1, sealed.nextLink)
-    // Re-read rather than returning a locally-mutated copy: the responder may
-    // have advanced the inbound counters while this send was in flight, and the
-    // screen must not carry a view of the contact that predates them.
-    return store.all().first { it.personaHex == c.personaHex }
-}
+/** Seal, chain, append. Fails as a unit — nothing is stored unsent. */
+private fun sendOne(
+    context: android.content.Context,
+    c: Contact,
+    body: String,
+    minePersonaHex: String,
+): Contact = Mailbox.send(context, c, body, minePersonaHex)
 
 @Composable
 private fun Bubble(m: StoredMessage) {

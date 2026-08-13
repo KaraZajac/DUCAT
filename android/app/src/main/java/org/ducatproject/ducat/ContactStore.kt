@@ -65,7 +65,13 @@ class ContactStore(context: Context) {
     fun all(): List<Contact> {
         val raw = prefs.getString("contacts", null) ?: return emptyList()
         val arr = JSONArray(raw)
-        return (0 until arr.length()).map { Contact.from(arr.getJSONObject(it)) }
+        return (0 until arr.length())
+            .map { Contact.from(arr.getJSONObject(it)) }
+            // Contacts saved before §16.12 have no outbox and can never send or
+            // receive again. Dropping them beats listing people whose messages
+            // will silently fail — a broken contact is worse than an absent one,
+            // because it looks like it should work.
+            .filter { it.myOutbox.isNotEmpty() && it.theirOutbox.isNotEmpty() }
     }
 
     fun add(c: Contact) { synchronized(lock) {
@@ -163,6 +169,40 @@ class ContactStore(context: Context) {
     } }
 
     // --- prekeys ----------------------------------------------------------
+
+    /** The records behind the card we last handed out. */
+    fun saveIssuedCard(
+        inboxKey: String,
+        writerPublic: ByteArray,
+        writerSecret: ByteArray,
+        outboxKey: String,
+    ) = synchronized(lock) {
+        prefs.edit()
+            .putString("issued_inbox", inboxKey)
+            .putString("issued_wpub", b64(writerPublic))
+            .putString("issued_wsec", b64(writerSecret))
+            .putString("issued_outbox", outboxKey)
+            .putBoolean("issued_answered", false)
+            .apply()
+        bump()
+    }
+
+    fun issuedCard(): IssuedCardState? {
+        val inbox = prefs.getString("issued_inbox", null) ?: return null
+        return IssuedCardState(
+            inboxKey = inbox,
+            writerPublic = unb64(prefs.getString("issued_wpub", "") ?: ""),
+            writerSecret = unb64(prefs.getString("issued_wsec", "") ?: ""),
+            outboxKey = prefs.getString("issued_outbox", "") ?: "",
+        )
+    }
+
+    fun issuedCardAnswered(): Boolean = prefs.getBoolean("issued_answered", false)
+
+    fun markIssuedCardAnswered() = synchronized(lock) {
+        prefs.edit().putBoolean("issued_answered", true).apply()
+        bump()
+    }
 
     /** Our own published bundle and its secrets. */
     fun savePrekeys(bundle: ByteArray, signedSecret: ByteArray, oneTime: Map<Int, ByteArray>) { synchronized(lock) {
@@ -264,9 +304,11 @@ data class Contact(
     val personaHex: String,
     val petname: String?,
     val assertedName: String?,
-    val rendezvous: ByteArray,
-    val claimSecret: ByteArray,
-    /** Their published prekeys, once fetched. */
+    /** Our append-only log for this contact (§16.12). Only we write it. */
+    val myOutbox: String,
+    /** Theirs. Permanent, and readable whether or not they are online. */
+    val theirOutbox: String,
+    /** Their published prekeys, read out of the inbox at handshake time. */
     val theirBundle: ByteArray? = null,
     /** Our next outgoing sequence number, and the link it must carry (§16.10). */
     val outSeq: Long = 0,
@@ -289,8 +331,8 @@ data class Contact(
         put("persona", personaHex)
         put("petname", petname ?: JSONObject.NULL)
         put("asserted", assertedName ?: JSONObject.NULL)
-        put("rendezvous", b64(rendezvous))
-        put("claim_secret", b64(claimSecret))
+        put("my_outbox", myOutbox)
+        put("their_outbox", theirOutbox)
         put("their_bundle", theirBundle?.let { b64(it) } ?: JSONObject.NULL)
         put("out_seq", outSeq)
         put("out_prev", outPrevLink?.let { b64(it) } ?: JSONObject.NULL)
@@ -304,8 +346,8 @@ data class Contact(
             personaHex = o.getString("persona"),
             petname = o.optStringOrNull("petname"),
             assertedName = o.optStringOrNull("asserted"),
-            rendezvous = unb64(o.getString("rendezvous")),
-            claimSecret = unb64(o.getString("claim_secret")),
+            myOutbox = o.optString("my_outbox", ""),
+            theirOutbox = o.optString("their_outbox", ""),
             theirBundle = o.optStringOrNull("their_bundle")?.let { unb64(it) },
             outSeq = o.optLong("out_seq"),
             outPrevLink = o.optStringOrNull("out_prev")?.let { unb64(it) },
@@ -350,21 +392,18 @@ class NameStore(context: Context) {
     fun put(v: String) = prefs.edit().putString("my_name", v).apply()
 }
 
+/** The inbox and outbox behind a card we have handed out. */
+data class IssuedCardState(
+    val inboxKey: String,
+    val writerPublic: ByteArray,
+    val writerSecret: ByteArray,
+    val outboxKey: String,
+)
+
 class CardStore(context: Context) {
     private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
 
-    /** Kept so a second claim on the same card can be refused (§16.9). */
-    fun remember(card: uniffi.ducat_mobile.IssuedCard) {
-        prefs.edit()
-            .putString("my_card", b64(card.bytes))
-            .putString("my_card_commit", b64(card.claimCommit))
-            .putBoolean("my_card_claimed", false)
-            .apply()
-    }
-
     fun cardBytes(): ByteArray? = prefs.getString("my_card", null)?.let { unb64(it) }
-    fun claimed(): Boolean = prefs.getBoolean("my_card_claimed", false)
-    fun markClaimed() = prefs.edit().putBoolean("my_card_claimed", true).apply()
 }
 
 private fun JSONObject.optStringOrNull(k: String): String? =

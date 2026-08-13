@@ -7,8 +7,9 @@
 
 use ducat_core::cbor::decode;
 use ducat_core::contact::{
-    check_claim, check_message, ContactClaim, ContactInvite, Message, MAX_DISPLAY_NAME_CHARS,
-    MAX_MESSAGE_CHARS,
+    card_from_uri, card_to_uri, check_message, subkey_for as ring_subkey, still_in_ring,
+    thread_aad as pair_aad, ContactCard, ContactDetails, LogHead, Message,
+    MAX_DISPLAY_NAME_CHARS, MAX_MESSAGE_CHARS, MAX_RECORD_KEY_CHARS,
 };
 use ducat_core::hpke::{self, PreKey, PreKeyBundle, PreKeyStore, SealedMessage};
 use ducat_core::sig::{ObjectType, PublicKey, SecretKey, SignedBytes, Suite};
@@ -31,32 +32,53 @@ fn now() -> u64 {
         .unwrap_or(0)
 }
 
+/// The writer a contact inbox admits.
+///
+/// Any valid Ed25519 pair works: VLD0 signs with Ed25519, so Veilid will accept
+/// one we generated as an SMPL member. Generated here rather than in Kotlin so
+/// the secret is produced by the same CSPRNG as every other key in this bridge.
+#[derive(uniffi::Record, Clone)]
+pub struct WriterKeys {
+    pub public: Vec<u8>,
+    pub secret: Vec<u8>,
+}
+
+#[uniffi::export]
+pub fn generate_writer_keys() -> WriterKeys {
+    // The seed is kept rather than recovered: a VLD0 secret key *is* the
+    // 32-byte Ed25519 seed, so this is the form Veilid will accept back as a
+    // writer, and deriving the public key from it keeps the two in step.
+    let seed = random32();
+    let sk = SecretKey::ed25519_from_bytes(&seed);
+    WriterKeys {
+        public: sk.public().to_bytes().to_vec(),
+        secret: seed.to_vec(),
+    }
+}
+
 /// A card ready to hand over, in every form the UI needs at once.
 #[derive(uniffi::Record, Clone)]
 pub struct IssuedCard {
     /// The signed envelope. What NFC transfers verbatim.
     pub bytes: Vec<u8>,
-    /// The same bytes as a `ducat:` URI (§18.7) — what a QR encodes and what
-    /// pastes into a message to a friend.
+    /// The same bytes as a `ducat:` URI (§18.7), with the writer secret beside
+    /// them — what a QR encodes and what pastes into a message to a friend.
     pub uri: String,
-    /// Held by the issuer to recognise the claim. Never leaves the device.
-    pub claim_secret: Vec<u8>,
-    /// Stored so a second claim can be refused (§16.9). Single use is a property
-    /// of a store that outlives the call, not of a function.
-    pub claim_commit: Vec<u8>,
     pub expiry: u64,
 }
 
-/// Mint a contact card for this persona.
+/// Mint a contact card naming an inbox that already exists.
 ///
-/// `valid_secs` is the caller's, because how long a card should live depends on
-/// how it is being handed over: seconds across a table, hours if it is going
-/// into a message someone reads tomorrow.
+/// The record is created by the caller (`node_dht_create_shared`) because that
+/// needs the node, and this module deliberately holds no node state. What
+/// happens here is only signing and encoding.
 #[uniffi::export]
 pub fn create_contact_card(
     persona_secret: Vec<u8>,
-    rendezvous: Vec<u8>,
+    inbox_key: String,
+    writer_public: Vec<u8>,
     display_name: Option<String>,
+    writer_secret: Vec<u8>,
     valid_secs: u64,
 ) -> Result<IssuedCard, ContactError> {
     if let Some(n) = &display_name {
@@ -68,28 +90,31 @@ pub fn create_contact_card(
             )));
         }
     }
+    if inbox_key.is_empty() || inbox_key.chars().count() > MAX_RECORD_KEY_CHARS {
+        return Err(ContactError::Refused("inbox key is not a record key".into()));
+    }
     let sk = persona_key(&persona_secret)?;
-    let secret = random32();
     let expiry = now() + valid_secs;
-    let invite = ContactInvite {
+    let card = ContactCard {
         version: 1,
         suite: 1,
         persona: sk.public().to_bytes().to_vec(),
-        rendezvous,
+        inbox_key,
+        writer_public,
         display_name,
-        claim_commit: hpke_commit(&secret),
         expiry,
     };
     let bytes = seal_env(
-        &SignedBytes::from_received(invite.to_value().encode()).map_err(refuse)?,
+        &SignedBytes::from_received(card.to_value().encode()).map_err(refuse)?,
         ObjectType::ContactOffer,
         &sk,
     );
+    let wsec: [u8; 32] = writer_secret
+        .try_into()
+        .map_err(|_| ContactError::Refused("writer secret is not 32 bytes".into()))?;
     Ok(IssuedCard {
-        uri: ducat_core::contact::card_to_uri(&bytes, &secret),
+        uri: card_to_uri(&bytes, &wsec),
         bytes,
-        claim_secret: secret.to_vec(),
-        claim_commit: invite.claim_commit.to_vec(),
         expiry,
     })
 }
@@ -98,95 +123,113 @@ pub fn create_contact_card(
 #[derive(uniffi::Record, Clone)]
 pub struct ScannedCard {
     pub persona: Vec<u8>,
-    pub rendezvous: Vec<u8>,
+    pub inbox_key: String,
+    pub writer_public: Vec<u8>,
+    /// The capability. Whoever holds this can write the inbox's reply subkey,
+    /// and **Veilid enforces that** — it is not a check this code performs.
+    pub writer_secret: Vec<u8>,
     /// Self-asserted. §16.9 requires this be shown as unverified, and the
-    /// petname the user assigns is the name that is actually displayed later.
+    /// petname the user assigns is the name actually displayed later.
     pub asserted_name: Option<String>,
-    pub claim_secret: Vec<u8>,
     pub expiry: u64,
     pub expired: bool,
 }
 
 /// Read a card that arrived by NFC, QR or a pasted `ducat:` URI.
 ///
-/// The signature check proves the persona key made this card. It does **not**
-/// prove the person who sent it holds that key — §16.9 is explicit that the
-/// carrying channel supplies that, and the UI must not imply otherwise.
+/// The signature proves the persona key made this card. It does **not** prove
+/// the person who sent it holds that key — §16.9 is explicit that the carrying
+/// channel supplies that, and the UI must not imply otherwise.
 #[uniffi::export]
 pub fn read_contact_card(input: String) -> Result<ScannedCard, ContactError> {
-    let (env, secret) = ducat_core::contact::card_from_uri(&input).map_err(refuse)?;
-    let invite = verify_card(&env)?;
+    let (env, secret) = card_from_uri(&input).map_err(refuse)?;
+    let card = verify_card(&env)?;
     Ok(ScannedCard {
-        persona: invite.persona.clone(),
-        rendezvous: invite.rendezvous.clone(),
-        asserted_name: invite.display_name.clone(),
-        claim_secret: secret.to_vec(),
-        expiry: invite.expiry,
-        expired: now() > invite.expiry,
+        persona: card.persona.clone(),
+        inbox_key: card.inbox_key.clone(),
+        writer_public: card.writer_public.clone(),
+        writer_secret: secret.to_vec(),
+        asserted_name: card.display_name.clone(),
+        expiry: card.expiry,
+        expired: now() > card.expiry,
     })
 }
 
-/// Read a card that arrived as raw bytes (NFC), where there is no URI to carry
-/// the claim secret, so it is supplied alongside.
+/// Encode what goes into an inbox subkey: who I am, where to leave things, and
+/// the keys to seal with.
 #[uniffi::export]
-pub fn read_contact_card_bytes(
-    envelope: Vec<u8>,
-    claim_secret: Vec<u8>,
-) -> Result<ScannedCard, ContactError> {
-    let invite = verify_card(&envelope)?;
-    Ok(ScannedCard {
-        persona: invite.persona.clone(),
-        rendezvous: invite.rendezvous.clone(),
-        asserted_name: invite.display_name.clone(),
-        claim_secret,
-        expiry: invite.expiry,
-        expired: now() > invite.expiry,
-    })
-}
-
-/// Build the claim to send back over the card's rendezvous.
-#[uniffi::export]
-pub fn build_claim(
+pub fn build_contact_details(
     persona_secret: Vec<u8>,
-    rendezvous: Vec<u8>,
+    outbox_key: String,
+    prekey_bundle: Vec<u8>,
     display_name: Option<String>,
-    claim_secret: Vec<u8>,
 ) -> Result<Vec<u8>, ContactError> {
     let sk = persona_key(&persona_secret)?;
-    let secret: [u8; 32] = claim_secret
-        .try_into()
-        .map_err(|_| ContactError::Refused("claim secret is not 32 bytes".into()))?;
-    Ok(ContactClaim {
+    Ok(ContactDetails {
         version: 1,
         suite: 1,
         persona: sk.public().to_bytes().to_vec(),
-        rendezvous,
+        outbox_key,
+        prekey_bundle,
         display_name,
-        claim_secret: secret,
-        timestamp: now(),
     }
     .to_value()
     .encode())
 }
 
-/// Decide whether an inbound claim on one of our cards may be honoured.
+/// The other side of that, for a subkey we just read.
+#[derive(uniffi::Record, Clone)]
+pub struct PeerDetails {
+    pub persona: Vec<u8>,
+    pub outbox_key: String,
+    pub prekey_bundle: Vec<u8>,
+    pub asserted_name: Option<String>,
+}
+
 #[uniffi::export]
-pub fn check_inbound_claim(
-    card_bytes: Vec<u8>,
-    claim_bytes: Vec<u8>,
-    already_claimed: bool,
-) -> Result<ScannedCard, ContactError> {
-    let invite = verify_card(&card_bytes)?;
-    let claim = ContactClaim::from_value(decode(&claim_bytes).map_err(refuse)?).map_err(refuse)?;
-    check_claim(&invite, &claim, now(), already_claimed).map_err(refuse)?;
-    Ok(ScannedCard {
-        persona: claim.persona,
-        rendezvous: claim.rendezvous,
-        asserted_name: claim.display_name,
-        claim_secret: Vec::new(),
-        expiry: invite.expiry,
-        expired: false,
+pub fn parse_contact_details(bytes: Vec<u8>) -> Result<PeerDetails, ContactError> {
+    let d = ContactDetails::from_value(decode(&bytes).map_err(refuse)?).map_err(refuse)?;
+    Ok(PeerDetails {
+        persona: d.persona,
+        outbox_key: d.outbox_key,
+        prekey_bundle: d.prekey_bundle,
+        asserted_name: d.display_name,
     })
+}
+
+// --- the outbox ring (§16.12) ---------------------------------------------
+
+#[uniffi::export]
+pub fn build_log_head(next_seq: u64) -> Vec<u8> {
+    LogHead { version: 1, suite: 1, next_seq }.to_value().encode()
+}
+
+#[uniffi::export]
+pub fn parse_log_head(bytes: Vec<u8>) -> Result<u64, ContactError> {
+    Ok(LogHead::from_value(decode(&bytes).map_err(refuse)?)
+        .map_err(refuse)?
+        .next_seq)
+}
+
+/// Which subkey a sequence number occupies. Subkey 0 is the head, so an
+/// off-by-one here overwrites it and loses the whole log rather than one entry.
+#[uniffi::export]
+pub fn log_subkey(seq: u64, subkey_count: u32) -> u32 {
+    ring_subkey(seq, subkey_count)
+}
+
+/// Whether a reader can still fetch `seq`, or the ring has passed it by. A
+/// reader that was away too long has genuinely lost messages and must be able
+/// to tell, rather than render a thread with a hole in it.
+#[uniffi::export]
+pub fn log_still_readable(seq: u64, next_seq: u64, subkey_count: u32) -> bool {
+    still_in_ring(seq, next_seq, subkey_count)
+}
+
+/// The AAD binding a ciphertext to one conversation, symmetric by construction.
+#[uniffi::export]
+pub fn thread_aad(mine_hex: String, theirs_hex: String) -> Vec<u8> {
+    pair_aad(&mine_hex, &theirs_hex)
 }
 
 // --- §16.11 ---------------------------------------------------------------
@@ -482,25 +525,25 @@ fn persona_key(secret: &[u8]) -> Result<SecretKey, ContactError> {
     Ok(SecretKey::ed25519_from_bytes(&b))
 }
 
-fn verify_card(envelope: &[u8]) -> Result<ContactInvite, ContactError> {
+fn verify_card(envelope: &[u8]) -> Result<ContactCard, ContactError> {
     // The persona is inside the object the signature covers, so the key is read
     // from the payload and then checked against it. A card that verifies under
     // a key other than the one it names is a card claiming someone else's
     // identity, which is the whole point of checking.
-    let peek = decode_invite_unverified(envelope)?;
+    let peek = decode_card_unverified(envelope)?;
     let pk = PublicKey::from_bytes(Suite::Ed25519X25519, &peek.persona).map_err(refuse)?;
     let (ty, body) = open_env(envelope, &pk).map_err(refuse)?;
     if ty != ObjectType::ContactOffer {
         return Err(ContactError::Refused("not a contact card".into()));
     }
-    ContactInvite::from_value(decode(body.bytes()).map_err(refuse)?).map_err(refuse)
+    ContactCard::from_value(decode(body.bytes()).map_err(refuse)?).map_err(refuse)
 }
 
 /// Read the payload without checking the signature, only to learn which key to
 /// check it with. Never returned to a caller.
-fn decode_invite_unverified(envelope: &[u8]) -> Result<ContactInvite, ContactError> {
+fn decode_card_unverified(envelope: &[u8]) -> Result<ContactCard, ContactError> {
     let body = ducat_core::wire::peek_body(envelope).map_err(refuse)?;
-    ContactInvite::from_value(decode(&body).map_err(refuse)?).map_err(refuse)
+    ContactCard::from_value(decode(&body).map_err(refuse)?).map_err(refuse)
 }
 
 /// The OS CSPRNG, presented through the trait version `hpke` expects.
@@ -537,6 +580,3 @@ fn random32() -> [u8; 32] {
     b
 }
 
-fn hpke_commit(secret: &[u8; 32]) -> [u8; 32] {
-    ducat_core::contact::claim_commitment(secret)
-}

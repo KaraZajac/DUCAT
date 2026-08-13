@@ -31,7 +31,7 @@ class DucatApplication : Application() {
             // messages while Ducat sits in the background must still be
             // answered — a peer that only replies when someone is looking at it
             // is not reachable in any sense a person would recognise.
-            Responder(this@DucatApplication).start(scope)
+            Poller(this@DucatApplication).start(scope)
             // Hold the process up once the node is actually running, so the
             // notification never appears in front of a node that failed to
             // start.
