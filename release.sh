@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#
+# Cut a release with the APKs attached.
+#
+#   ./release.sh                 # tag from the spec draft + short commit
+#   ./release.sh v0.66-test3     # or name it yourself
+#
+# Manual on purpose. A release per commit makes the list a build log, and the
+# point of a release is that someone should install *this* one.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+DRAFT=$(grep -m1 -oP '^\*\*Draft \K[0-9.]+' ducat-protocol.md)
+TAG="${1:-v${DRAFT}-$(git rev-parse --short HEAD)}"
+OUT=android/app/build/outputs/apk/debug
+
+echo "building ${TAG}…"
+bash mobile/build-android.sh >/dev/null
+(cd android && ./gradlew :app:assembleDebug -q >/dev/null)
+
+# Every ABI, because "which phone is this for" should not be a question the
+# person installing has to answer wrong once to learn.
+APKS=()
+for a in arm64-v8a armeabi-v7a x86_64; do
+  f="$OUT/app-$a-debug.apk"
+  [ -f "$f" ] && APKS+=("$f#DUCAT ${TAG} ($a)")
+done
+[ ${#APKS[@]} -gt 0 ] || { echo "no APKs built"; exit 1; }
+
+NOTES=$(mktemp)
+{
+  echo "Draft ${DRAFT} · $(git rev-parse --short HEAD)"
+  echo
+  echo "**Debug-signed, stagenet only.** Not for real money."
+  echo
+  echo "Install \`arm64-v8a\` unless you know your phone is older."
+  echo
+  echo "### Since the last release"
+  echo
+  LAST=$(git tag --sort=-creatordate | head -1)
+  if [ -n "$LAST" ]; then
+    git log --pretty='- %s' "${LAST}..HEAD" | head -25
+  else
+    git log --pretty='- %s' -12
+  fi
+} > "$NOTES"
+
+git tag -f "$TAG" >/dev/null
+git push -f origin "$TAG" >/dev/null 2>&1
+gh release create "$TAG" "${APKS[@]}" --title "DUCAT $TAG" --notes-file "$NOTES"
+rm -f "$NOTES"
+echo
+echo "installable from a phone browser at the URL above"
