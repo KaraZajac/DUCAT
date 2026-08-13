@@ -1,7 +1,6 @@
 package org.ducatproject.ducat
 
 import android.content.Context
-import android.util.Log
 import uniffi.ducat_mobile.*
 
 private const val TAG = "DucatMailbox"
@@ -61,7 +60,7 @@ object Mailbox {
             inbox.key, writer.public, writer.secret,
             outbox.key, outbox.ownerPublic, outbox.ownerSecret,
         )
-        Log.i(TAG, "issued card: inbox=${inbox.key.take(24)}… outbox=${outbox.key.take(24)}…")
+        DucatLog.i(TAG, "issued card: inbox=${inbox.key.take(24)}… outbox=${outbox.key.take(24)}…")
         return card
     }
 
@@ -117,7 +116,7 @@ object Mailbox {
             theirBundle = theirs.prekeyBundle,
         )
         store.add(c)
-        Log.i(TAG, "claimed: their outbox=${theirs.outboxKey.take(24)}…")
+        DucatLog.i(TAG, "claimed: their outbox=${theirs.outboxKey.take(24)}…")
         return c
     }
 
@@ -150,10 +149,10 @@ object Mailbox {
                 )
             )
             store.markIssuedCardAnswered()
-            Log.i(TAG, "card answered by ${theirs.assertedName}")
+            DucatLog.i(TAG, "card answered by ${theirs.assertedName}")
             1
         } catch (e: Exception) {
-            Log.w(TAG, "collectClaims: ${e.message}")
+            DucatLog.w(TAG, "collectClaims: ${e.message}")
             0
         }
     }
@@ -238,7 +237,7 @@ object Mailbox {
             m.bundle, m.signedSecret,
             m.oneTimeIds.mapIndexed { i, id -> id.toInt() to m.oneTimeSecrets[i] }.toMap(),
         )
-        Log.i(TAG, "topped up one-time keys")
+        DucatLog.i(TAG, "topped up one-time keys")
         return m.bundle
     }
 
@@ -251,7 +250,7 @@ object Mailbox {
             got += try {
                 pollOne(store, c, mine)
             } catch (e: Exception) {
-                Log.w(TAG, "poll ${c.displayName()}: ${e.message}")
+                DucatLog.w(TAG, "poll ${c.displayName()}: ${e.message}")
                 0
             }
         }
@@ -275,7 +274,7 @@ object Mailbox {
             if (!logStillReadable(seq, next, LOG_SUBKEYS)) {
                 // The ring passed us. Saying so beats rendering a thread with a
                 // hole in it (§16.10's conversation that did not happen).
-                Log.w(TAG, "lost message $seq from ${c.displayName()} — ring wrapped")
+                DucatLog.w(TAG, "lost message $seq from ${c.displayName()} — ring wrapped")
                 store.append(
                     c.personaHex,
                     StoredMessage(
@@ -296,7 +295,7 @@ object Mailbox {
                 // Stop rather than skip: the chain links each message to the
                 // one before, so stepping over an unreadable message makes
                 // every later one fail to verify too.
-                Log.w(TAG, "prekey $id is gone; cannot read $seq")
+                DucatLog.w(TAG, "prekey $id is gone; cannot read $seq")
                 break
             }
 

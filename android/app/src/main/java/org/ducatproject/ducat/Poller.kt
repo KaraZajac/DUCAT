@@ -1,7 +1,6 @@
 package org.ducatproject.ducat
 
 import android.content.Context
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -34,10 +33,10 @@ class Poller(private val context: Context) {
             8_000u,
         )
         store.rememberLastGood(s.url)
-        Log.i(TAG, "picked node ${s.url} at height ${s.height}")
+        DucatLog.i(TAG, "picked node ${s.url} at height ${s.height}")
         s.url
     } catch (e: Exception) {
-        Log.w(TAG, "no node: ${e.message}")
+        DucatLog.w(TAG, "no node: ${e.message}")
         null
     }
 
@@ -49,8 +48,8 @@ class Poller(private val context: Context) {
                     // that only becomes a contact once somebody looks.
                     Mailbox.collectClaims(context)
                     val n = Mailbox.poll(context)
-                    if (n > 0) Log.i(TAG, "collected $n message(s)")
-                }.onFailure { Log.w(TAG, "poll: ${it.message}") }
+                    if (n > 0) DucatLog.i(TAG, "collected $n message(s)")
+                }.onFailure { DucatLog.w(TAG, "poll: ${it.message}") }
 
                 // The chain, in windows. Kept on the same loop as messages
                 // because both are "what happened while we were not looking",
@@ -66,11 +65,11 @@ class Poller(private val context: Context) {
                         val moved = Wallet.scanStep(context, node)
                         if (moved) Wallet.refreshSpent(context, node)
                     }
-                }.onFailure { Log.w(TAG, "scan: ${it.message}") }
+                }.onFailure { DucatLog.w(TAG, "scan: ${it.message}") }
 
                 // Cheap: it only leaves the device when the cache has expired.
                 runCatching { Rates.refresh(context) }
-                    .onFailure { Log.w(TAG, "rate: ${it.message}") }
+                    .onFailure { DucatLog.w(TAG, "rate: ${it.message}") }
 
                 delay(10_000)
             }

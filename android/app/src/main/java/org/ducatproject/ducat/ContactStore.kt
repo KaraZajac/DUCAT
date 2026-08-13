@@ -700,11 +700,44 @@ class WalletStore(context: Context) {
 class RateStore(context: Context) {
     private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
 
+    companion object {
+        /**
+         * Currencies the price sources quote directly.
+         *
+         * Listed rather than passed through, because an unrecognised code comes
+         * back from CoinGecko as an absent field rather than an error — which
+         * would show as "no price" with nothing saying why.
+         */
+        val SUPPORTED = listOf(
+            "USD", "EUR", "GBP", "CAD", "AUD", "NZD", "CHF", "JPY", "CNY",
+            "INR", "BRL", "MXN", "ZAR", "SEK", "NOK", "DKK", "PLN", "TRY",
+            "RUB", "KRW", "SGD", "HKD", "TWD", "THB", "IDR", "PHP", "NGN",
+            "ARS", "CLP", "CZK", "HUF", "ILS", "AED", "SAR", "UAH", "VND",
+        )
+    }
+
     /** Off means off: no request is made at all, not a hidden one. */
     fun enabled(): Boolean = prefs.getBoolean("rate_enabled", true)
     fun setEnabled(v: Boolean) = prefs.edit().putBoolean("rate_enabled", v).apply()
 
-    fun currency(): String = prefs.getString("rate_currency", "USD") ?: "USD"
+    /**
+     * The currency to price in, defaulting to the phone's own.
+     *
+     * Taken from the device locale rather than assumed to be dollars. Someone
+     * in Berlin does not want to convert from USD in their head to know whether
+     * a payment was the right size, and defaulting to the currency they already
+     * think in is free.
+     */
+    fun currency(): String = prefs.getString("rate_currency", null) ?: deviceCurrency()
+
+    /** What this phone is set to, or USD when it names something unsupported. */
+    fun deviceCurrency(): String = runCatching {
+        val code = java.util.Currency
+            .getInstance(java.util.Locale.getDefault())
+            .currencyCode
+            .uppercase()
+        if (code in SUPPORTED) code else "USD"
+    }.getOrDefault("USD")
     fun setCurrency(v: String) =
         prefs.edit().putString("rate_currency", v).remove("rate_value").apply()
 

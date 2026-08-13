@@ -1,7 +1,6 @@
 package org.ducatproject.ducat
 
 import android.content.Context
-import android.util.Log
 import kotlin.math.roundToInt
 import org.json.JSONArray
 import org.json.JSONObject
@@ -141,7 +140,7 @@ object Wallet {
         if (spend == null) {
             // Distinct from "no node", and the difference is everything: this
             // wallet cannot ever scan, and no amount of waiting fixes it.
-            Log.w(TAG, "no spend key stored — this wallet predates wallet persistence")
+            DucatLog.w(TAG, "no spend key stored — this wallet predates wallet persistence")
             return false
         }
         val from = store.scannedTo().takeIf { it > 0 } ?: store.restoreHeight().toLong()
@@ -151,14 +150,14 @@ object Wallet {
             store.recordScan(r.scannedTo.toLong(), r.tip.toLong(), r.outputs)
             store.recordScanError(null)
             if (r.outputs.isNotEmpty()) {
-                Log.i(TAG, "found ${r.outputs.size} output(s) up to ${r.scannedTo}")
+                DucatLog.i(TAG, "found ${r.outputs.size} output(s) up to ${r.scannedTo}")
             }
             r.scannedTo.toLong() > from
         } catch (e: Throwable) {
             // Throwable, not Exception: a panic crossing the FFI boundary
             // arrives as an Error, and catching only Exception let the real
             // cause disappear while the screen said "not started".
-            Log.w(TAG, "scan failed: ${e}")
+            DucatLog.w(TAG, "scan failed: ${e}")
             store.recordScanError(e.message ?: e.toString())
             false
         }
@@ -179,7 +178,7 @@ object Wallet {
             val spent = moneroSpent(nodeUrl, entries.map { it.keyImage })
             store.recordSpent(entries.map { it.keyImage }.zip(spent).toMap())
         } catch (e: Exception) {
-            Log.w(TAG, "spent check: ${e.message}")
+            DucatLog.w(TAG, "spent check: ${e.message}")
         }
     }
 
@@ -310,7 +309,7 @@ object Rates {
             val r = uniffi.ducat_mobile.moneroRate(store.currency(), 12_000u)
             store.store(r.perXmr, r.fetchedAt.toLong(), r.source)
         } catch (e: Exception) {
-            Log.w(TAG, "rate: ${e.message}")
+            DucatLog.w(TAG, "rate: ${e.message}")
         }
     }
 

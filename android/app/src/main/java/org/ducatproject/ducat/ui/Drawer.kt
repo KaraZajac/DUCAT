@@ -6,6 +6,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,6 +35,7 @@ enum class Section(val label: String) {
     Status("Status"),
     Profile("Profile"),
     Contacts("Contacts"),
+    Logs("Logs"),
     Settings("Settings"),
     Modes("Operating modes"),
 }
@@ -75,6 +79,7 @@ private fun iconFor(s: Section) = when (s) {
     Section.Status -> Icons.Filled.Lan
     Section.Profile -> Icons.Filled.Person
     Section.Contacts -> Icons.Filled.People
+    Section.Logs -> Icons.Filled.Description
     Section.Settings -> Icons.Filled.Settings
     Section.Modes -> Icons.Filled.Tune
 }
@@ -102,6 +107,8 @@ fun SectionScreen(
         Section.Profile -> ProfileSection()
 
         Section.Contacts -> ContactsAdminSection(onOpenChat)
+
+        Section.Logs -> LogsScreen()
 
         Section.Settings -> Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)
@@ -164,18 +171,49 @@ private fun RateSettings() {
         }
         if (on) {
             Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("USD", "EUR", "GBP").forEach { c ->
-                    FilterChip(
-                        selected = cur == c,
-                        onClick = { cur = c; store.setCurrency(c) },
-                        label = { Text(c) },
-                    )
-                }
+            var picking by remember { mutableStateOf(false) }
+            OutlinedButton(onClick = { picking = true }) {
+                Text(cur)
+                Spacer(Modifier.width(6.dp))
+                Icon(Icons.Filled.ArrowDropDown, null, Modifier.size(18.dp))
+            }
+            if (picking) {
+                AlertDialog(
+                    onDismissRequest = { picking = false },
+                    title = { Text("Currency") },
+                    text = {
+                        LazyColumn(Modifier.heightIn(max = 360.dp)) {
+                            items(RateStore.SUPPORTED) { c ->
+                                Row(
+                                    Modifier.fillMaxWidth()
+                                        .clickable { cur = c; store.setCurrency(c); picking = false }
+                                        .padding(vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    RadioButton(
+                                        selected = cur == c,
+                                        onClick = { cur = c; store.setCurrency(c); picking = false },
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(c)
+                                    if (c == store.deviceCurrency()) {
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            "this phone",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = { TextButton(onClick = { picking = false }) { Text("Done") } },
+                )
             }
             Spacer(Modifier.height(8.dp))
             Text(
-                "Looked up at most twice an hour, from CoinGecko or Kraken. Turning " +
+                "Checked at most twice an hour, from CoinGecko or Kraken. Turning " +
                     "this off stops the request entirely." +
                     (if (store.source().isNotEmpty()) " Last from ${store.source()}." else ""),
                 style = MaterialTheme.typography.bodySmall,
