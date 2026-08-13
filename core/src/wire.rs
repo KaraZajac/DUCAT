@@ -529,6 +529,23 @@ pub fn seal(body: &SignedBytes, object_type: ObjectType, key: &SecretKey) -> Vec
     Value::Map(m).encode()
 }
 
+/// Read an envelope's body **without checking its signature**.
+///
+/// Exists for exactly one case: an object that carries the public key its own
+/// signature must be checked against, such as §16.9's contact card. The caller
+/// reads the key out of this, then calls [`open`] and uses only that result.
+///
+/// Anything this returns is attacker-controlled. It is not a shortcut for
+/// skipping verification, and nothing derived from it may be shown to a user or
+/// stored before [`open`] succeeds.
+pub fn peek_body(envelope: &[u8]) -> Result<Vec<u8>, Reject> {
+    let mut env = Reader::new(decode(envelope)?)?;
+    let body = env.bytes(ENV_BODY, None)?;
+    let _ = env.bytes(ENV_SIG, Some(64))?;
+    env.finish()?;
+    Ok(body)
+}
+
 /// Unwrap and verify, returning the body's canonical bytes.
 ///
 /// The object type is read from the body itself and used to select the

@@ -27,6 +27,11 @@ class DucatApplication : Application() {
         VeilidInit.ensure(this)
         scope.launch {
             runCatching { nodeStart("${filesDir.absolutePath}/veilid") }
+            // Answering starts with the app, not with a screen. A contact who
+            // messages while Ducat sits in the background must still be
+            // answered — a peer that only replies when someone is looking at it
+            // is not reachable in any sense a person would recognise.
+            Responder(this@DucatApplication).start(scope)
             // Failure is surfaced by the status panel rather than thrown here.
             // Nothing else can act on it, and crashing at launch over a
             // transport is a wallet that will not open in a tunnel.

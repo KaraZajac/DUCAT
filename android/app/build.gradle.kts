@@ -63,6 +63,10 @@ dependencies {
     // less apt glyph to save download size would be optimising the wrong thing.
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    // QR encoding only. §16.9's card is ~1 KB, which is a dense but valid
+    // symbol; the alternative was hand-rolling Reed-Solomon, which is not a
+    // thing to hand-roll for a code someone scans to add a friend.
+    implementation("com.google.zxing:core:3.5.3")
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("junit:junit:4.13.2")
 }

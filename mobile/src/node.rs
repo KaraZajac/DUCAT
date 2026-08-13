@@ -8,6 +8,7 @@
 //! Everything the UI sees is a snapshot it polls. Nothing here blocks a caller
 //! on the network, because the caller is the main thread.
 
+use std::collections::VecDeque;
 use std::sync::{Mutex, OnceLock};
 
 use veilid_core::*;
@@ -21,6 +22,21 @@ static NODE: OnceLock<Mutex<Option<Node>>> = OnceLock::new();
 
 fn slot() -> &'static Mutex<Option<Node>> {
     NODE.get_or_init(|| Mutex::new(None))
+}
+
+/// Inbound `app_call`s waiting for the UI to answer them.
+///
+/// Bounded, and the bound is not decoration: a peer that can reach our route
+/// can queue as fast as it likes, and an unbounded queue behind a UI that polls
+/// on a timer is a memory exhaustion bug with a network trigger. Overflow drops
+/// the *oldest*, because a caller who has already waited past the deadline is
+/// not going to be helped by an answer.
+const MAX_PENDING: usize = 64;
+
+static INBOX: OnceLock<Mutex<VecDeque<(u64, Vec<u8>)>>> = OnceLock::new();
+
+fn inbox() -> &'static Mutex<VecDeque<(u64, Vec<u8>)>> {
+    INBOX.get_or_init(|| Mutex::new(VecDeque::new()))
 }
 
 /// What the UI can show and a person can troubleshoot from.
@@ -46,6 +62,10 @@ pub struct NodeStatus {
 pub enum NodeError {
     #[error("{0}")]
     Failed(String),
+    /// Distinct from `Failed` because the UI's response differs: this one means
+    /// "wait for the node", not "something went wrong".
+    #[error("the Veilid node is not running")]
+    NotRunning,
 }
 
 /// Start the node, storing its state under `storage_dir`.
@@ -75,10 +95,19 @@ pub fn node_start(storage_dir: String) -> Result<(), NodeError> {
             cfg[store]["directory"] = serde_json::json!(format!("{storage_dir}/{store}"));
         }
 
-        // Updates are dropped for now. Nothing in the app consumes them yet, and
-        // a callback that pretends to handle AppCall while no protocol runs
-        // would be a place for a half-implemented tap to hide.
-        let cb: UpdateCallback = std::sync::Arc::new(|_| {});
+        // `AppCall` is now consumed: it is how a contact's message reaches us
+        // (§16.11). Everything else is still dropped, and deliberately — a
+        // callback that pretended to handle updates no protocol reads would be
+        // a place for a half-implemented flow to hide.
+        let cb: UpdateCallback = std::sync::Arc::new(|update| {
+            if let VeilidUpdate::AppCall(call) = update {
+                let mut q = inbox().lock().unwrap();
+                if q.len() >= MAX_PENDING {
+                    q.pop_front();
+                }
+                q.push_back((call.id().as_u64(), call.message().to_vec()));
+            }
+        });
         let api = api_startup_json(cb, cfg.to_string())
             .await
             .map_err(|e| format!("startup: {e}"))?;
@@ -193,4 +222,87 @@ pub fn android_ready() -> bool {
     {
         true
     }
+}
+
+
+/// A private route this node can be reached on, as the blob that goes in a
+/// contact card (§16.9).
+///
+/// Each call builds a *new* route. That is the expensive, correct default: a
+/// route reused across cards links every holder of those cards to one another,
+/// which is the linkability §16.6 accounts for and does not want handed out for
+/// free.
+#[uniffi::export]
+pub fn node_route_blob() -> Result<Vec<u8>, NodeError> {
+    let guard = slot().lock().unwrap();
+    let node = guard.as_ref().ok_or(NodeError::NotRunning)?;
+    node.runtime.block_on(async {
+        node.api
+            .new_custom_private_route(PrivateSpec::default())
+            .await
+            .map(|r| r.blob)
+            .map_err(|e| NodeError::Failed(format!("route: {e}")))
+    })
+}
+
+/// One request/response exchange with a peer reached by its route blob.
+///
+/// Blocking, with a caller-supplied timeout. Kotlin must call this off the main
+/// thread; a route round trip is tens to hundreds of milliseconds on a good day
+/// and §8.7.2 measured far worse.
+#[uniffi::export]
+pub fn node_app_call(
+    route_blob: Vec<u8>,
+    message: Vec<u8>,
+    timeout_ms: u32,
+) -> Result<Vec<u8>, NodeError> {
+    let guard = slot().lock().unwrap();
+    let node = guard.as_ref().ok_or(NodeError::NotRunning)?;
+    node.runtime.block_on(async {
+        let route = node
+            .api
+            .import_remote_private_route(route_blob)
+            .map_err(|e| NodeError::Failed(format!("import route: {e}")))?;
+        let rc = node
+            .api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let fut = rc.app_call(Target::RouteId(route), message);
+        match tokio::time::timeout(std::time::Duration::from_millis(timeout_ms as u64), fut).await {
+            Ok(Ok(reply)) => Ok(reply),
+            Ok(Err(e)) => Err(NodeError::Failed(format!("app_call: {e}"))),
+            Err(_) => Err(NodeError::Failed("timed out".into())),
+        }
+    })
+}
+
+/// An inbound call the UI has not answered yet.
+#[derive(uniffi::Record, Clone)]
+pub struct InboundCall {
+    pub id: u64,
+    pub message: Vec<u8>,
+}
+
+/// Take the next inbound call, if any. Non-blocking, safe on any thread.
+#[uniffi::export]
+pub fn node_poll_call() -> Option<InboundCall> {
+    inbox()
+        .lock()
+        .unwrap()
+        .pop_front()
+        .map(|(id, message)| InboundCall { id, message })
+}
+
+/// Answer one. Veilid allows a single reply per call, so a second attempt is an
+/// error rather than an overwrite.
+#[uniffi::export]
+pub fn node_reply(id: u64, message: Vec<u8>) -> Result<(), NodeError> {
+    let guard = slot().lock().unwrap();
+    let node = guard.as_ref().ok_or(NodeError::NotRunning)?;
+    node.runtime.block_on(async {
+        node.api
+            .app_call_reply(OperationId::new(id), message)
+            .await
+            .map_err(|e| NodeError::Failed(format!("reply: {e}")))
+    })
 }

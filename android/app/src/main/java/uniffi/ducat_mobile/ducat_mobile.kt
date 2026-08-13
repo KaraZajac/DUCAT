@@ -747,6 +747,34 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -768,11 +796,17 @@ internal interface UniffiLib : Library {
     ): Byte
     fun uniffi_ducat_mobile_fn_func_approx_payments_supported(`unlockedOutputs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_build_claim(`personaSecret`: RustBuffer.ByValue,`rendezvous`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`claimSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_capacity_bucket(`capacityPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
     fun uniffi_ducat_mobile_fn_func_capacity_leak_bits(uniffi_out_err: UniffiRustCallStatus, 
     ): Double
+    fun uniffi_ducat_mobile_fn_func_check_inbound_claim(`cardBytes`: RustBuffer.ByValue,`claimBytes`: RustBuffer.ByValue,`alreadyClaimed`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_check_verification(`policy`: RustBuffer.ByValue,`deviceUnlocked`: Byte,`appSecretAgeS`: RustBuffer.ByValue,`amountMinor`: Long,`spentInWindowMinor`: Long,`rateIsFresh`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_create_contact_card(`personaSecret`: RustBuffer.ByValue,`rendezvous`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`validSecs`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_create_persona_secret(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -782,7 +816,17 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_export_backup(`input`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_generate_prekeys(`count`: Int,`validSecs`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_import_backup(`blob`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_app_call(`routeBlob`: RustBuffer.ByValue,`message`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_poll_call(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_reply(`id`: Long,`message`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    fun uniffi_ducat_mobile_fn_func_node_route_blob(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_start(`storageDir`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
@@ -792,12 +836,24 @@ internal interface UniffiLib : Library {
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_test_route(uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_open_message(`sealedBytes`: RustBuffer.ByValue,`prekeySecret`: RustBuffer.ByValue,`isOneTime`: Byte,`expectedSeq`: Long,`prevLink`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_plan_float(`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_protocol_version(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_read_contact_card(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_read_contact_card_bytes(`envelope`: RustBuffer.ByValue,`claimSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_reconcile_float(`maxExposurePxmr`: Long,`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Int
+    fun uniffi_ducat_mobile_fn_func_verify_thread(`messages`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
     fun ffi_ducat_mobile_rustbuffer_alloc(`size`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun ffi_ducat_mobile_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -916,11 +972,17 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_approx_payments_supported(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_build_claim(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_bucket(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_leak_bits(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_check_inbound_claim(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_check_verification(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_create_contact_card(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_create_persona_secret(
     ): Short
@@ -930,7 +992,17 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_export_backup(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_generate_prekeys(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_import_backup(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_app_call(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_poll_call(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_reply(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_route_blob(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_start(
     ): Short
@@ -940,11 +1012,23 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_test_route(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_open_message(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_plan_float(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_protocol_version(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_read_contact_card(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_read_contact_card_bytes(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_reconcile_float(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_seal_message(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_sealed_prekey_id(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_verify_thread(
     ): Short
     fun ffi_ducat_mobile_uniffi_contract_version(
     ): Int
@@ -972,13 +1056,22 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_approx_payments_supported() != 28086.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_build_claim() != 23088.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_capacity_bucket() != 17889.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_capacity_leak_bits() != 25938.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_check_inbound_claim() != 13541.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_check_verification() != 369.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_create_contact_card() != 28383.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_create_persona_secret() != 62676.toShort()) {
@@ -993,7 +1086,22 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_export_backup() != 50604.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_generate_prekeys() != 34322.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_import_backup() != 12814.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_app_call() != 65190.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_poll_call() != 3546.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_reply() != 61516.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_route_blob() != 62210.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_start() != 34295.toShort()) {
@@ -1008,13 +1116,31 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_test_route() != 9881.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_open_message() != 55240.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_plan_float() != 49046.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_protocol_version() != 58081.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_read_contact_card() != 10077.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_read_contact_card_bytes() != 38068.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_reconcile_float() != 35020.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 9225.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_verify_thread() != 14473.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -1314,6 +1440,102 @@ public object FfiConverterTypeFloatPlan: FfiConverterRustBuffer<FloatPlan> {
 
 
 /**
+ * An inbound call the UI has not answered yet.
+ */
+data class InboundCall (
+    var `id`: kotlin.ULong, 
+    var `message`: kotlin.ByteArray
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeInboundCall: FfiConverterRustBuffer<InboundCall> {
+    override fun read(buf: ByteBuffer): InboundCall {
+        return InboundCall(
+            FfiConverterULong.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: InboundCall) = (
+            FfiConverterULong.allocationSize(value.`id`) +
+            FfiConverterByteArray.allocationSize(value.`message`)
+    )
+
+    override fun write(value: InboundCall, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`id`, buf)
+            FfiConverterByteArray.write(value.`message`, buf)
+    }
+}
+
+
+
+/**
+ * A card ready to hand over, in every form the UI needs at once.
+ */
+data class IssuedCard (
+    /**
+     * The signed envelope. What NFC transfers verbatim.
+     */
+    var `bytes`: kotlin.ByteArray, 
+    /**
+     * The same bytes as a `ducat:` URI (§18.7) — what a QR encodes and what
+     * pastes into a message to a friend.
+     */
+    var `uri`: kotlin.String, 
+    /**
+     * Held by the issuer to recognise the claim. Never leaves the device.
+     */
+    var `claimSecret`: kotlin.ByteArray, 
+    /**
+     * Stored so a second claim can be refused (§16.9). Single use is a property
+     * of a store that outlives the call, not of a function.
+     */
+    var `claimCommit`: kotlin.ByteArray, 
+    var `expiry`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeIssuedCard: FfiConverterRustBuffer<IssuedCard> {
+    override fun read(buf: ByteBuffer): IssuedCard {
+        return IssuedCard(
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: IssuedCard) = (
+            FfiConverterByteArray.allocationSize(value.`bytes`) +
+            FfiConverterString.allocationSize(value.`uri`) +
+            FfiConverterByteArray.allocationSize(value.`claimSecret`) +
+            FfiConverterByteArray.allocationSize(value.`claimCommit`) +
+            FfiConverterULong.allocationSize(value.`expiry`)
+    )
+
+    override fun write(value: IssuedCard, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`bytes`, buf)
+            FfiConverterString.write(value.`uri`, buf)
+            FfiConverterByteArray.write(value.`claimSecret`, buf)
+            FfiConverterByteArray.write(value.`claimCommit`, buf)
+            FfiConverterULong.write(value.`expiry`, buf)
+    }
+}
+
+
+
+/**
  * A newly created wallet, as onboarding needs to show it.
  *
  * The **seed is returned once** and is never stored by this crate. §4.3 makes
@@ -1446,6 +1668,115 @@ public object FfiConverterTypeNodeStatus: FfiConverterRustBuffer<NodeStatus> {
 
 
 /**
+ * A message that arrived, after decryption and chain checking.
+ */
+data class OpenedMessage (
+    var `seq`: kotlin.ULong, 
+    var `body`: kotlin.String, 
+    var `timestamp`: kotlin.ULong, 
+    var `link`: kotlin.ByteArray, 
+    /**
+     * True if a one-time key was consumed. The caller MUST delete that secret;
+     * keeping it is keeping the ability to decrypt this message forever.
+     */
+    var `consumedOneTime`: kotlin.Boolean, 
+    var `prekeyId`: kotlin.UInt
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessage> {
+    override fun read(buf: ByteBuffer): OpenedMessage {
+        return OpenedMessage(
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: OpenedMessage) = (
+            FfiConverterULong.allocationSize(value.`seq`) +
+            FfiConverterString.allocationSize(value.`body`) +
+            FfiConverterULong.allocationSize(value.`timestamp`) +
+            FfiConverterByteArray.allocationSize(value.`link`) +
+            FfiConverterBoolean.allocationSize(value.`consumedOneTime`) +
+            FfiConverterUInt.allocationSize(value.`prekeyId`)
+    )
+
+    override fun write(value: OpenedMessage, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`seq`, buf)
+            FfiConverterString.write(value.`body`, buf)
+            FfiConverterULong.write(value.`timestamp`, buf)
+            FfiConverterByteArray.write(value.`link`, buf)
+            FfiConverterBoolean.write(value.`consumedOneTime`, buf)
+            FfiConverterUInt.write(value.`prekeyId`, buf)
+    }
+}
+
+
+
+/**
+ * A freshly generated set of prekeys: what to publish, and what to keep.
+ */
+data class PrekeyMaterial (
+    /**
+     * Published to the rendezvous so people can write to us.
+     */
+    var `bundle`: kotlin.ByteArray, 
+    /**
+     * The signed prekey's secret. Rotated on a schedule, never consumed.
+     */
+    var `signedSecret`: kotlin.ByteArray, 
+    /**
+     * One-time secrets, in the same order as the ids below. **Deleting these
+     * after use is the entire forward-secrecy property** — a backup that keeps
+     * them keeps every message they ever opened.
+     */
+    var `oneTimeSecrets`: List<kotlin.ByteArray>, 
+    var `oneTimeIds`: List<kotlin.UInt>
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePrekeyMaterial: FfiConverterRustBuffer<PrekeyMaterial> {
+    override fun read(buf: ByteBuffer): PrekeyMaterial {
+        return PrekeyMaterial(
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterSequenceByteArray.read(buf),
+            FfiConverterSequenceUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PrekeyMaterial) = (
+            FfiConverterByteArray.allocationSize(value.`bundle`) +
+            FfiConverterByteArray.allocationSize(value.`signedSecret`) +
+            FfiConverterSequenceByteArray.allocationSize(value.`oneTimeSecrets`) +
+            FfiConverterSequenceUInt.allocationSize(value.`oneTimeIds`)
+    )
+
+    override fun write(value: PrekeyMaterial, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`bundle`, buf)
+            FfiConverterByteArray.write(value.`signedSecret`, buf)
+            FfiConverterSequenceByteArray.write(value.`oneTimeSecrets`, buf)
+            FfiConverterSequenceUInt.write(value.`oneTimeIds`, buf)
+    }
+}
+
+
+
+/**
  * Whether a stated risk cap can support a stated usage pattern.
  *
  * The two are set in different places by different reasoning — a security
@@ -1533,6 +1864,117 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterULong.write(value.`restoreHeight`, buf)
             FfiConverterByteArray.write(value.`personaSecret`, buf)
             FfiConverterUInt.write(value.`escrowCount`, buf)
+    }
+}
+
+
+
+/**
+ * What the UI shows before someone decides to add a contact.
+ */
+data class ScannedCard (
+    var `persona`: kotlin.ByteArray, 
+    var `rendezvous`: kotlin.ByteArray, 
+    /**
+     * Self-asserted. §16.9 requires this be shown as unverified, and the
+     * petname the user assigns is the name that is actually displayed later.
+     */
+    var `assertedName`: kotlin.String?, 
+    var `claimSecret`: kotlin.ByteArray, 
+    var `expiry`: kotlin.ULong, 
+    var `expired`: kotlin.Boolean
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeScannedCard: FfiConverterRustBuffer<ScannedCard> {
+    override fun read(buf: ByteBuffer): ScannedCard {
+        return ScannedCard(
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ScannedCard) = (
+            FfiConverterByteArray.allocationSize(value.`persona`) +
+            FfiConverterByteArray.allocationSize(value.`rendezvous`) +
+            FfiConverterOptionalString.allocationSize(value.`assertedName`) +
+            FfiConverterByteArray.allocationSize(value.`claimSecret`) +
+            FfiConverterULong.allocationSize(value.`expiry`) +
+            FfiConverterBoolean.allocationSize(value.`expired`)
+    )
+
+    override fun write(value: ScannedCard, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`persona`, buf)
+            FfiConverterByteArray.write(value.`rendezvous`, buf)
+            FfiConverterOptionalString.write(value.`assertedName`, buf)
+            FfiConverterByteArray.write(value.`claimSecret`, buf)
+            FfiConverterULong.write(value.`expiry`, buf)
+            FfiConverterBoolean.write(value.`expired`, buf)
+    }
+}
+
+
+
+/**
+ * A message sealed to a contact, plus which key it used.
+ */
+data class SealedOut (
+    var `bytes`: kotlin.ByteArray, 
+    var `prekeyId`: kotlin.UInt, 
+    /**
+     * False means the one-time supply was exhausted and this message is only
+     * forward-secret until the signed prekey rotates. §16.11 requires the
+     * caller be able to see this rather than treating both as success.
+     */
+    var `forwardSecret`: kotlin.Boolean, 
+    /**
+     * The link the *next* message in this thread must carry (§16.10).
+     *
+     * Returned here because it is computed over the **plaintext** message, and
+     * after sealing the caller no longer holds that. A caller that derived a
+     * link from the ciphertext instead would produce a chain that verifies
+     * against nothing.
+     */
+    var `nextLink`: kotlin.ByteArray
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSealedOut: FfiConverterRustBuffer<SealedOut> {
+    override fun read(buf: ByteBuffer): SealedOut {
+        return SealedOut(
+            FfiConverterByteArray.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SealedOut) = (
+            FfiConverterByteArray.allocationSize(value.`bytes`) +
+            FfiConverterUInt.allocationSize(value.`prekeyId`) +
+            FfiConverterBoolean.allocationSize(value.`forwardSecret`) +
+            FfiConverterByteArray.allocationSize(value.`nextLink`)
+    )
+
+    override fun write(value: SealedOut, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`bytes`, buf)
+            FfiConverterUInt.write(value.`prekeyId`, buf)
+            FfiConverterBoolean.write(value.`forwardSecret`, buf)
+            FfiConverterByteArray.write(value.`nextLink`, buf)
     }
 }
 
@@ -1730,6 +2172,65 @@ public object FfiConverterTypeBackupError : FfiConverterRustBuffer<BackupExcepti
 
 
 
+sealed class ContactException: kotlin.Exception() {
+    
+    class Refused(
+        
+        val v1: kotlin.String
+        ) : ContactException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<ContactException> {
+        override fun lift(error_buf: RustBuffer.ByValue): ContactException = FfiConverterTypeContactError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeContactError : FfiConverterRustBuffer<ContactException> {
+    override fun read(buf: ByteBuffer): ContactException {
+        
+
+        return when(buf.getInt()) {
+            1 -> ContactException.Refused(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: ContactException): ULong {
+        return when(value) {
+            is ContactException.Refused -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+        }
+    }
+
+    override fun write(value: ContactException, buf: ByteBuffer) {
+        when(value) {
+            is ContactException.Refused -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+
+
 sealed class NodeException: kotlin.Exception() {
     
     class Failed(
@@ -1738,6 +2239,16 @@ sealed class NodeException: kotlin.Exception() {
         ) : NodeException() {
         override val message
             get() = "v1=${ v1 }"
+    }
+    
+    /**
+     * Distinct from `Failed` because the UI's response differs: this one means
+     * "wait for the node", not "something went wrong".
+     */
+    class NotRunning(
+        ) : NodeException() {
+        override val message
+            get() = ""
     }
     
 
@@ -1759,6 +2270,7 @@ public object FfiConverterTypeNodeError : FfiConverterRustBuffer<NodeException> 
             1 -> NodeException.Failed(
                 FfiConverterString.read(buf),
                 )
+            2 -> NodeException.NotRunning()
             else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
         }
     }
@@ -1770,6 +2282,10 @@ public object FfiConverterTypeNodeError : FfiConverterRustBuffer<NodeException> 
                 4UL
                 + FfiConverterString.allocationSize(value.v1)
             )
+            is NodeException.NotRunning -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
         }
     }
 
@@ -1778,6 +2294,10 @@ public object FfiConverterTypeNodeError : FfiConverterRustBuffer<NodeException> 
             is NodeException.Failed -> {
                 buf.putInt(1)
                 FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+            is NodeException.NotRunning -> {
+                buf.putInt(2)
                 Unit
             }
         }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
@@ -1893,6 +2413,126 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
         }
     }
 }
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalByteArray: FfiConverterRustBuffer<kotlin.ByteArray?> {
+    override fun read(buf: ByteBuffer): kotlin.ByteArray? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterByteArray.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.ByteArray?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterByteArray.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.ByteArray?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterByteArray.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeInboundCall: FfiConverterRustBuffer<InboundCall?> {
+    override fun read(buf: ByteBuffer): InboundCall? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeInboundCall.read(buf)
+    }
+
+    override fun allocationSize(value: InboundCall?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeInboundCall.allocationSize(value)
+        }
+    }
+
+    override fun write(value: InboundCall?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeInboundCall.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceUInt: FfiConverterRustBuffer<List<kotlin.UInt>> {
+    override fun read(buf: ByteBuffer): List<kotlin.UInt> {
+        val len = buf.getInt()
+        return List<kotlin.UInt>(len) {
+            FfiConverterUInt.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.UInt>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterUInt.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.UInt>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterUInt.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.ByteArray>> {
+    override fun read(buf: ByteBuffer): List<kotlin.ByteArray> {
+        val len = buf.getInt()
+        return List<kotlin.ByteArray>(len) {
+            FfiConverterByteArray.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.ByteArray>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterByteArray.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.ByteArray>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterByteArray.write(it, buf)
+        }
+    }
+}
         /**
          * The address a restored key controls, so a user can confirm they restored what
          * they meant to before trusting it with anything.
@@ -1941,6 +2581,19 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
     
 
         /**
+         * Build the claim to send back over the card's rendezvous.
+         */
+    @Throws(ContactException::class) fun `buildClaim`(`personaSecret`: kotlin.ByteArray, `rendezvous`: kotlin.ByteArray, `displayName`: kotlin.String?, `claimSecret`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_build_claim(
+        FfiConverterByteArray.lower(`personaSecret`),FfiConverterByteArray.lower(`rendezvous`),FfiConverterOptionalString.lower(`displayName`),FfiConverterByteArray.lower(`claimSecret`),_status)
+}
+    )
+    }
+    
+
+        /**
          * The largest ladder value not exceeding `capacity_pxmr`.
          *
          * Rounds **down**, always: rounding to nearest would let a bond claim capacity
@@ -1970,6 +2623,19 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
     
 
         /**
+         * Decide whether an inbound claim on one of our cards may be honoured.
+         */
+    @Throws(ContactException::class) fun `checkInboundClaim`(`cardBytes`: kotlin.ByteArray, `claimBytes`: kotlin.ByteArray, `alreadyClaimed`: kotlin.Boolean): ScannedCard {
+            return FfiConverterTypeScannedCard.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_check_inbound_claim(
+        FfiConverterByteArray.lower(`cardBytes`),FfiConverterByteArray.lower(`claimBytes`),FfiConverterBoolean.lower(`alreadyClaimed`),_status)
+}
+    )
+    }
+    
+
+        /**
          * Decide whether this payment may be signed (§15.5.1).
          *
          * `rate_is_fresh` reflects §17.7's cached rate, and a stale one **escalates**
@@ -1982,6 +2648,23 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_check_verification(
         FfiConverterTypeVerificationPolicy.lower(`policy`),FfiConverterBoolean.lower(`deviceUnlocked`),FfiConverterOptionalULong.lower(`appSecretAgeS`),FfiConverterULong.lower(`amountMinor`),FfiConverterULong.lower(`spentInWindowMinor`),FfiConverterBoolean.lower(`rateIsFresh`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Mint a contact card for this persona.
+         *
+         * `valid_secs` is the caller's, because how long a card should live depends on
+         * how it is being handed over: seconds across a table, hours if it is going
+         * into a message someone reads tomorrow.
+         */
+    @Throws(ContactException::class) fun `createContactCard`(`personaSecret`: kotlin.ByteArray, `rendezvous`: kotlin.ByteArray, `displayName`: kotlin.String?, `validSecs`: kotlin.ULong): IssuedCard {
+            return FfiConverterTypeIssuedCard.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_create_contact_card(
+        FfiConverterByteArray.lower(`personaSecret`),FfiConverterByteArray.lower(`rendezvous`),FfiConverterOptionalString.lower(`displayName`),FfiConverterULong.lower(`validSecs`),_status)
 }
     )
     }
@@ -2044,6 +2727,15 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
     )
     }
     
+ fun `generatePrekeys`(`count`: kotlin.UInt, `validSecs`: kotlin.ULong): PrekeyMaterial {
+            return FfiConverterTypePrekeyMaterial.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_generate_prekeys(
+        FfiConverterUInt.lower(`count`),FfiConverterULong.lower(`validSecs`),_status)
+}
+    )
+    }
+    
 
         /**
          * Open a bundle.
@@ -2057,6 +2749,67 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
     uniffiRustCallWithError(BackupException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_import_backup(
         FfiConverterByteArray.lower(`blob`),FfiConverterString.lower(`passphrase`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * One request/response exchange with a peer reached by its route blob.
+         *
+         * Blocking, with a caller-supplied timeout. Kotlin must call this off the main
+         * thread; a route round trip is tens to hundreds of milliseconds on a good day
+         * and §8.7.2 measured far worse.
+         */
+    @Throws(NodeException::class) fun `nodeAppCall`(`routeBlob`: kotlin.ByteArray, `message`: kotlin.ByteArray, `timeoutMs`: kotlin.UInt): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_app_call(
+        FfiConverterByteArray.lower(`routeBlob`),FfiConverterByteArray.lower(`message`),FfiConverterUInt.lower(`timeoutMs`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Take the next inbound call, if any. Non-blocking, safe on any thread.
+         */ fun `nodePollCall`(): InboundCall? {
+            return FfiConverterOptionalTypeInboundCall.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_poll_call(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * Answer one. Veilid allows a single reply per call, so a second attempt is an
+         * error rather than an overwrite.
+         */
+    @Throws(NodeException::class) fun `nodeReply`(`id`: kotlin.ULong, `message`: kotlin.ByteArray)
+        = 
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_reply(
+        FfiConverterULong.lower(`id`),FfiConverterByteArray.lower(`message`),_status)
+}
+    
+    
+
+        /**
+         * A private route this node can be reached on, as the blob that goes in a
+         * contact card (§16.9).
+         *
+         * Each call builds a *new* route. That is the expensive, correct default: a
+         * route reused across cards links every holder of those cards to one another,
+         * which is the linkability §16.6 accounts for and does not want handed out for
+         * free.
+         */
+    @Throws(NodeException::class) fun `nodeRouteBlob`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_route_blob(
+        _status)
 }
     )
     }
@@ -2116,6 +2869,22 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
     
 
         /**
+         * Open an inbound sealed message and check it follows the thread.
+         *
+         * The caller supplies only the secret for the prekey the message names, so a
+         * compromised call cannot walk the whole key store.
+         */
+    @Throws(ContactException::class) fun `openMessage`(`sealedBytes`: kotlin.ByteArray, `prekeySecret`: kotlin.ByteArray, `isOneTime`: kotlin.Boolean, `expectedSeq`: kotlin.ULong, `prevLink`: kotlin.ByteArray?, `threadAad`: kotlin.ByteArray): OpenedMessage {
+            return FfiConverterTypeOpenedMessage.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_open_message(
+        FfiConverterByteArray.lower(`sealedBytes`),FfiConverterByteArray.lower(`prekeySecret`),FfiConverterBoolean.lower(`isOneTime`),FfiConverterULong.lower(`expectedSeq`),FfiConverterOptionalByteArray.lower(`prevLink`),FfiConverterByteArray.lower(`threadAad`),_status)
+}
+    )
+    }
+    
+
+        /**
          * Size a float for `payments` consecutive spends of about `typical_pxmr`.
          *
          * Returns the plan and, unavoidably, the **minimum exposure**: §17.2 makes
@@ -2143,11 +2912,85 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
     )
     }
     
+
+        /**
+         * Read a card that arrived by NFC, QR or a pasted `ducat:` URI.
+         *
+         * The signature check proves the persona key made this card. It does **not**
+         * prove the person who sent it holds that key — §16.9 is explicit that the
+         * carrying channel supplies that, and the UI must not imply otherwise.
+         */
+    @Throws(ContactException::class) fun `readContactCard`(`input`: kotlin.String): ScannedCard {
+            return FfiConverterTypeScannedCard.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_read_contact_card(
+        FfiConverterString.lower(`input`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Read a card that arrived as raw bytes (NFC), where there is no URI to carry
+         * the claim secret, so it is supplied alongside.
+         */
+    @Throws(ContactException::class) fun `readContactCardBytes`(`envelope`: kotlin.ByteArray, `claimSecret`: kotlin.ByteArray): ScannedCard {
+            return FfiConverterTypeScannedCard.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_read_contact_card_bytes(
+        FfiConverterByteArray.lower(`envelope`),FfiConverterByteArray.lower(`claimSecret`),_status)
+}
+    )
+    }
+    
  fun `reconcileFloat`(`maxExposurePxmr`: kotlin.ULong, `payments`: kotlin.UInt, `typicalPxmr`: kotlin.ULong): Reconciliation {
             return FfiConverterTypeReconciliation.lift(
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_reconcile_float(
         FfiConverterULong.lower(`maxExposurePxmr`),FfiConverterUInt.lower(`payments`),FfiConverterULong.lower(`typicalPxmr`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Seal one message in a thread.
+         */
+    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray): SealedOut {
+            return FfiConverterTypeSealedOut.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Which prekey a sealed message names, without opening it.
+         *
+         * The receiver must look up a secret *before* it can decrypt, and looking one
+         * up requires knowing which. Reading this costs nothing and reveals nothing
+         * the sender did not already put in the clear.
+         */
+    @Throws(ContactException::class) fun `sealedPrekeyId`(`sealedBytes`: kotlin.ByteArray): kotlin.UInt {
+            return FfiConverterUInt.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_sealed_prekey_id(
+        FfiConverterByteArray.lower(`sealedBytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Local-only: check a thread we already hold is internally consistent.
+         */
+    @Throws(ContactException::class) fun `verifyThread`(`messages`: List<kotlin.ByteArray>): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_verify_thread(
+        FfiConverterSequenceByteArray.lower(`messages`),_status)
 }
     )
     }

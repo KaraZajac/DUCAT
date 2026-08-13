@@ -27,6 +27,8 @@ import org.ducatproject.ducat.ui.ThemeMode
 import org.ducatproject.ducat.ui.ThemePreference
 import org.ducatproject.ducat.ui.ducat
 import org.ducatproject.ducat.ui.BridgeSelfTest
+import org.ducatproject.ducat.ui.ChatScreen
+import org.ducatproject.ducat.ui.ContactsScreen
 import uniffi.ducat_mobile.approxPaymentsSupported
 import uniffi.ducat_mobile.protocolVersion
 
@@ -75,12 +77,53 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/** A screen that takes over from the tabbed shell. */
+private sealed interface Overlay {
+    data object None : Overlay
+    data object Contacts : Overlay
+    data class Chat(val contact: Contact) : Overlay
+}
+
 enum class Tab(val label: String) { Home("Home"), Accounts("Accounts"), Activity("Activity"), Menu("Menu") }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     var tab by remember { mutableStateOf(Tab.Home) }
+    // Contacts and a conversation are full-screen rather than a fifth tab. The
+    // nav bar is the money surface; people are a place you go *into*, and
+    // burying chat behind a bar slot would make the bar the wrong shape for the
+    // one verb (§15.2's present/read) it exists to keep prominent.
+    var overlay by remember { mutableStateOf<Overlay>(Overlay.None) }
+    val context = LocalContext.current
+    val persona = remember { PersonaStore(context).secret() }
+
+    when (val o = overlay) {
+        is Overlay.Chat -> {
+            ChatScreen(o.contact) { overlay = Overlay.Contacts }
+            return
+        }
+        Overlay.Contacts -> {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text("People") },
+                        navigationIcon = {
+                            IconButton(onClick = { overlay = Overlay.None }) {
+                                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                            }
+                        },
+                    )
+                },
+            ) { padding ->
+                Box(Modifier.padding(padding)) {
+                    ContactsScreen(persona) { overlay = Overlay.Chat(it) }
+                }
+            }
+            return
+        }
+        Overlay.None -> {}
+    }
 
     Scaffold(
         topBar = {
@@ -89,6 +132,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 navigationIcon = {
                     IconButton(onClick = { tab = Tab.Menu }) {
                         Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { overlay = Overlay.Contacts }) {
+                        Icon(Icons.Filled.People, contentDescription = "People")
                     }
                 },
             )

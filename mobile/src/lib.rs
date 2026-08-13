@@ -12,6 +12,7 @@
 
 use ducat_core::{bond, float, verify};
 
+pub mod contacts;
 pub mod node;
 
 uniffi::setup_scaffolding!();
