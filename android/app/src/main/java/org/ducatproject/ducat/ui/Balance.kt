@@ -36,6 +36,8 @@ fun BalanceCard(
     float: DucatFloat,
     locked: Money?,
     onTopUp: () -> Unit,
+    /** The scan behind the number above. Null only where there is no wallet. */
+    sync: org.ducatproject.ducat.Balances? = null,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -69,6 +71,13 @@ fun BalanceCard(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+
+            // Directly under the figure it qualifies. A caveat placed further
+            // down is a caveat someone reads after deciding.
+            sync?.let {
+                Spacer(Modifier.height(10.dp))
+                SyncStatus(it)
             }
 
             Spacer(Modifier.height(4.dp))

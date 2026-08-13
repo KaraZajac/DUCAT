@@ -290,6 +290,7 @@ private fun HomeScreen(onTopUp: () -> Unit) {
         float = float,
         locked = Money(b.lockedPxmr / 1_000_000L, symbol = "", exponent = 6),
         onTopUp = onTopUp,
+        sync = b,
     )
 }
 

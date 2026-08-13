@@ -194,22 +194,12 @@ fun AccountsScreen() {
                             }
                         }
                     }
-                    if (b.syncing) {
-                        Spacer(Modifier.height(10.dp))
-                        val done = (b.scannedTo - 0).coerceAtLeast(0)
-                        Text(
-                            "Reading the chain — block $done of ${b.tip}. " +
-                                "A balance shown before this finishes is only what " +
-                                "has been seen so far.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.ducat.changePending,
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        LinearProgressIndicator(
-                            progress = { if (b.tip > 0) (b.scannedTo.toFloat() / b.tip) else 0f },
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
+                    // Shared with Home rather than reimplemented. The copy that
+                    // used to live here measured progress as scannedTo/tip —
+                    // the bug already fixed in `Balances.progress` — so this
+                    // screen sat at 100% for a scan that had just begun.
+                    Spacer(Modifier.height(12.dp))
+                    SyncStatus(b)
                 }
             }
         }

@@ -643,6 +643,13 @@ class WalletStore(context: Context) {
         prefs.edit()
             .remove("wallet_outputs")
             .putLong("wallet_scanned_to", restoreHeight().toLong())
+            // Same reason `rescanFrom` clears these, and missing it here made
+            // the same mistake: the first window after a wipe gets timed
+            // against the clock reading from before it, so 173 blocks that
+            // take two minutes were quoted at thirty-four.
+            .remove("wallet_rate")
+            .remove("wallet_scan_at")
+            .remove("wallet_scan_error")
             .putInt("wallet_output_schema", OUTPUT_SCHEMA)
             .apply()
         ContactStore.bump()
