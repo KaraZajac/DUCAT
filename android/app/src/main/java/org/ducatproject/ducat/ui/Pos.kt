@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.BillItem
@@ -459,13 +460,33 @@ private fun PresentScreen(
         }
 
         Spacer(Modifier.height(20.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (stage != Sale.Paid) {
-                OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f).height(48.dp)) {
-                    Text("Back")
+        val scope = rememberCoroutineScope()
+        // Leaving a billed sale must withdraw the bill, not just the screen.
+        // The settled record would otherwise sit in the store forever, and a
+        // later unrelated payment of the same amount would match it — a
+        // receipt fired into a dead sale's thread.
+        fun abandon() {
+            saleTabId?.let { id ->
+                scope.launch(Dispatchers.IO) {
+                    runCatching {
+                        TabStore(context).get(id)
+                            ?.takeIf { it.state == "settled" }
+                            ?.let { TabStore(context).cancel(it) }
+                    }
                 }
             }
-            Button(onClick = onDone, modifier = Modifier.weight(1f).height(48.dp)) {
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (stage != Sale.Paid) {
+                OutlinedButton(
+                    onClick = { abandon(); onBack() },
+                    modifier = Modifier.weight(1f).height(48.dp),
+                ) { Text("Back") }
+            }
+            Button(
+                onClick = { if (stage != Sale.Paid) abandon(); onDone() },
+                modifier = Modifier.weight(1f).height(48.dp),
+            ) {
                 Text(if (stage == Sale.Paid) "New sale" else "Cancel sale")
             }
         }

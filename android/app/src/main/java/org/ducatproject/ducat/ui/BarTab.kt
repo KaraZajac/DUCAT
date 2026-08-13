@@ -47,7 +47,10 @@ fun BarTabScreen() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val store = remember { TabStore(context) }
-    val tabs = remember(version) { store.all().filter { it.origin == "bar" } }
+    // Every origin, not just the bar's own: a taxi fare or a till sale that
+    // was billed and then abandoned needs the same two exits (cancel, settled
+    // outside), and this list is the only place that manages settlements.
+    val tabs = remember(version) { store.all() }
     var openId by remember { mutableStateOf<String?>(null) }
     var opening by remember { mutableStateOf(false) }
 
@@ -68,9 +71,9 @@ fun BarTabScreen() {
         return
     }
 
-    val open = tabs.filter { it.state == "open" }
+    val open = tabs.filter { it.state == "open" && it.origin == "bar" }
     val awaiting = tabs.filter { it.state == "settled" }
-    val paid = tabs.filter { it.state == "paid" }
+    val paid = tabs.filter { it.state == "paid" || it.state == "paid_oob" }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
@@ -166,14 +169,23 @@ private fun TabRow(t: RunningTab, onClick: () -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(name, style = MaterialTheme.typography.titleMedium)
             Text(
-                when (t.state) {
-                    "open" -> "${t.lines.size} item(s)"
-                    "settled" -> "billed, unpaid"
-                    else -> "paid ✓"
+                buildString {
+                    if (t.origin != "bar") append("${t.origin} · ")
+                    append(
+                        when (t.state) {
+                            "open" -> "${t.lines.size} item(s)"
+                            "settled" -> "billed, unpaid"
+                            "paid_oob" -> "paid outside DUCAT ✓"
+                            "cancelled" -> "cancelled"
+                            else -> "paid ✓"
+                        }
+                    )
                 },
                 style = MaterialTheme.typography.labelSmall,
-                color = if (t.state == "paid") MaterialTheme.ducat.settled
-                else MaterialTheme.colorScheme.onSurfaceVariant,
+                color = when (t.state) {
+                    "paid", "paid_oob" -> MaterialTheme.ducat.settled
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                },
             )
         }
         Column(horizontalAlignment = Alignment.End) {
@@ -412,10 +424,48 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                     modifier = Modifier.padding(horizontal = 16.dp),
                 ) { Text("Discard tab", color = MaterialTheme.colorScheme.error) }
             }
-            "settled" -> Text(
-                "Billed. The receipt goes to them by itself when the payment lands.",
+            "settled" -> Column(Modifier.padding(horizontal = 16.dp)) {
+                Text(
+                    "Billed. The receipt goes to them by itself when the payment " +
+                        "lands. If it was settled some other way, say so here:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
+                Spacer(Modifier.height(12.dp))
+                // Cash across the bar is a settlement, not an exception — the
+                // fallback rails existing is half the design. They still get a
+                // receipt in the thread; it just points at no transaction.
+                Button(
+                    onClick = {
+                        scope.launch(Dispatchers.IO) { runCatching { store.markPaidOutside(tab) } }
+                        onBack()
+                    },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                ) { Text("Paid outside DUCAT (cash, card)") }
+                Spacer(Modifier.height(8.dp))
+                // Withdrawing the bill tells them in the thread — their app
+                // still shows a Review button pointing at money nobody is
+                // watching for, and a cancellation they never hear about is a
+                // payment into the void.
+                OutlinedButton(
+                    onClick = {
+                        scope.launch(Dispatchers.IO) { runCatching { store.cancel(tab) } }
+                        onBack()
+                    },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                ) { Text("Cancel the bill", color = MaterialTheme.colorScheme.error) }
+            }
+            "cancelled" -> Text(
+                "Cancelled — they were told in the conversation.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+            "paid_oob" -> Text(
+                "Paid outside DUCAT ✓ — receipt sent, no transaction attached.",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.ducat.settled,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
             else -> Text(

@@ -27,7 +27,7 @@ data class RunningTab(
     val openedAt: Long,
     val lines: List<BillItem>,
     val taxPxmr: Long?,
-    /** open → settled (billed, unpaid) → paid. */
+    /** open → settled (billed, unpaid) → paid | paid_oob | cancelled. */
     val state: String,
     val settledTotal: Long = 0,
     val settledAt: Long = 0,
@@ -134,6 +134,55 @@ class TabStore(private val context: Context) {
         update(settled)
         DucatLog.i(TAG, "settled ${tab.origin} tab with ${contact.displayName()}: ${formatXmr(total)} XMR")
         return settled
+    }
+
+    /**
+     * The bill was settled outside DUCAT — cash across the bar, a card.
+     *
+     * Still gets a receipt, because the customer's record should not depend on
+     * which rail the money took: a `RECEIPT` without a transaction is legal on
+     * the wire (the txid is optional) and simply says what the payee is
+     * acknowledging. Best-effort — an offline node must not stop the bartender
+     * from closing out the night, so the tab is marked first and the receipt
+     * failure is logged rather than blocking.
+     */
+    fun markPaidOutside(tab: RunningTab) {
+        update(tab.copy(state = "paid_oob"))
+        val contact = ContactStore(context).all()
+            .firstOrNull { it.personaHex == tab.personaHex } ?: return
+        runCatching {
+            Mailbox.send(
+                context, contact, "Receipt — settled outside DUCAT. Thank you",
+                PersonaStore(context).personaHex(),
+                kind = 3, amountPxmr = tab.settledTotal,
+                items = tab.lines, taxPxmr = tab.taxPxmr,
+            )
+        }.onFailure { DucatLog.w(TAG, "oob receipt: ${it.message}") }
+        DucatLog.i(TAG, "${tab.origin} tab settled outside DUCAT (${formatXmr(tab.settledTotal)} XMR)")
+    }
+
+    /**
+     * Withdraw the bill.
+     *
+     * The counterparty's client still holds an actionable request — a
+     * "Review payment" button pointing at money the payee no longer expects —
+     * so cancelling MUST say so in the thread (§15.11), or they can pay a
+     * bill nobody is watching for. The message is the cancellation; the state
+     * change just stops reconciliation matching it.
+     */
+    fun cancel(tab: RunningTab) {
+        update(tab.copy(state = "cancelled"))
+        val contact = ContactStore(context).all()
+            .firstOrNull { it.personaHex == tab.personaHex } ?: return
+        runCatching {
+            Mailbox.send(
+                context, contact,
+                "That bill for ${formatXmr(tab.settledTotal)} XMR is cancelled — " +
+                    "nothing to pay.",
+                PersonaStore(context).personaHex(),
+            )
+        }.onFailure { DucatLog.w(TAG, "cancel notice: ${it.message}") }
+        DucatLog.i(TAG, "${tab.origin} tab cancelled (${formatXmr(tab.settledTotal)} XMR)")
     }
 
     companion object {
