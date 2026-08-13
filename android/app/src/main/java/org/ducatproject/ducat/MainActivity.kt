@@ -220,6 +220,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                         FloatingActionButton(
                             onClick = { /* tap flow */ },
                             shape = CircleShape,
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            contentColor = MaterialTheme.colorScheme.onTertiary,
                             modifier = Modifier.size(52.dp),
                         ) {
                             Icon(Icons.Filled.SwapVert, contentDescription = "Send or request")

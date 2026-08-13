@@ -1,6 +1,9 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,6 +12,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -77,6 +81,18 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size)
     }
 
+    var settingsOpen by remember { mutableStateOf(false) }
+    var confirmDelete by remember { mutableStateOf<StoredMessage?>(null) }
+
+    // Applied on open and whenever the thread changes, because nothing else
+    // runs while a conversation sits idle.
+    LaunchedEffect(version) {
+        val secs = store.disappearAfter(c.personaHex)
+        if (secs > 0 && store.expireOld(c.personaHex, secs) > 0) {
+            messages = store.thread(c.personaHex)
+        }
+    }
+
     Scaffold(
         modifier = Modifier.imePadding(),
         topBar = {
@@ -84,6 +100,11 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                 title = { Text(c.displayName()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Back") }
+                },
+                actions = {
+                    IconButton(onClick = { settingsOpen = true }) {
+                        Icon(Icons.Filled.MoreVert, "Conversation settings")
+                    }
                 },
             )
         },
@@ -168,13 +189,102 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     textAlign = TextAlign.Center,
                 )
             }
-            items(messages) { m -> Bubble(m) }
+            items(messages) { m -> Bubble(m) { confirmDelete = m } }
         }
     }
 
     // Nothing to fetch: their prekeys arrived with the handshake and live in
     // the contact record. §16.12's whole point is that the first message needs
     // no round trip to someone who may not be there.
+
+    if (settingsOpen) {
+        ChatSettingsDialog(
+            current = store.disappearAfter(c.personaHex),
+            onPick = { store.setDisappearAfter(c.personaHex, it); settingsOpen = false },
+            onClearAll = {
+                store.deleteThread(c.personaHex)
+                messages = emptyList()
+                settingsOpen = false
+            },
+            onDismiss = { settingsOpen = false },
+        )
+    }
+
+    confirmDelete?.let { m ->
+        AlertDialog(
+            onDismissRequest = { confirmDelete = null },
+            title = { Text("Delete this message?") },
+            text = {
+                Text(
+                    "Removed from this phone only. The other side keeps their " +
+                        "copy — nothing here can reach it."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    store.deleteMessage(c.personaHex, m.seq, m.outgoing)
+                    messages = store.thread(c.personaHex)
+                    confirmDelete = null
+                }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = null }) { Text("Cancel") } },
+        )
+    }
+}
+
+/**
+ * Disappearing messages, stated honestly.
+ *
+ * This is a **local** retention rule. It cannot reach the other device, and a
+ * screen implying otherwise would be worse than not offering it — the whole
+ * point of §16.11 is not overstating what a guarantee covers.
+ */
+@Composable
+private fun ChatSettingsDialog(
+    current: Long,
+    onPick: (Long) -> Unit,
+    onClearAll: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val options = listOf(
+        0L to "Keep everything",
+        3600L to "1 hour",
+        86_400L to "1 day",
+        604_800L to "1 week",
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Conversation") },
+        text = {
+            Column {
+                Text("Delete messages on this phone after", style = MaterialTheme.typography.labelLarge)
+                Spacer(Modifier.height(8.dp))
+                options.forEach { (secs, label) ->
+                    Row(
+                        Modifier.fillMaxWidth().clickable { onPick(secs) }.padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = current == secs, onClick = { onPick(secs) })
+                        Spacer(Modifier.width(8.dp))
+                        Text(label)
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "Only your copy. The other side keeps theirs, and nothing here " +
+                        "can reach it.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onClearAll) {
+                Text("Clear this chat", color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Done") } },
+    )
 }
 
 /** Seal, chain, append. Fails as a unit — nothing is stored unsent. */
@@ -185,19 +295,29 @@ private fun sendOne(
     minePersonaHex: String,
 ): Contact = Mailbox.send(context, c, body, minePersonaHex)
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun Bubble(m: StoredMessage) {
+private fun Bubble(m: StoredMessage, onLongPress: () -> Unit) {
     val align = if (m.outgoing) Alignment.End else Alignment.Start
-    val bg = if (m.outgoing) MaterialTheme.colorScheme.primaryContainer
+    // Yours in the accent, theirs in the neutral surface. Colour is doing the
+    // work here rather than alignment alone, because alignment is unreadable on
+    // a narrow screen once messages wrap to full width.
+    val bg = if (m.outgoing) MaterialTheme.colorScheme.primary
     else MaterialTheme.colorScheme.surfaceVariant
-    val fg = if (m.outgoing) MaterialTheme.colorScheme.onPrimaryContainer
+    val fg = if (m.outgoing) MaterialTheme.colorScheme.onPrimary
     else MaterialTheme.colorScheme.onSurfaceVariant
+    val corner = if (m.outgoing) {
+        RoundedCornerShape(16.dp, 16.dp, 4.dp, 16.dp)
+    } else {
+        RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp)
+    }
 
     Column(Modifier.fillMaxWidth(), horizontalAlignment = align) {
         Box(
             Modifier
                 .widthIn(max = 280.dp)
-                .background(bg, RoundedCornerShape(16.dp))
+                .background(bg, corner)
+                .combinedClickable(onClick = {}, onLongClick = onLongPress)
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             Text(m.body, color = fg)

@@ -33,6 +33,13 @@ private fun latteScheme() = lightColorScheme(
     onPrimary = Latte.base,
     primaryContainer = Latte.lavender,
     onPrimaryContainer = Latte.crust,
+    // Yellow for the send/request action. It is the only control on the bar
+    // that does something irreversible, so it gets the one colour nothing else
+    // uses — mauve is the app's chrome and would let the button blend into it.
+    tertiary = Latte.yellow,
+    onTertiary = Latte.crust,
+    tertiaryContainer = Latte.yellow,
+    onTertiaryContainer = Latte.crust,
     secondary = Latte.sapphire,
     onSecondary = Latte.base,
     background = Latte.base,
@@ -53,6 +60,10 @@ private fun mochaScheme() = darkColorScheme(
     onPrimary = Mocha.crust,
     primaryContainer = Mocha.surface1,
     onPrimaryContainer = Mocha.lavender,
+    tertiary = Mocha.yellow,
+    onTertiary = Mocha.crust,
+    tertiaryContainer = Mocha.yellow,
+    onTertiaryContainer = Mocha.crust,
     secondary = Mocha.sapphire,
     onSecondary = Mocha.crust,
     background = Mocha.base,

@@ -104,6 +104,49 @@ class ContactStore(context: Context) {
             c.copy(inSeq = seq, inPrevLink = prevLink))
     } }
 
+    /**
+     * Drop messages older than the contact's disappearing window.
+     *
+     * **One-sided, and the UI must say so.** This deletes our copy; it cannot
+     * reach theirs, and a design that implied otherwise would be worse than
+     * having no feature. What it does give is real: §16.11 already makes a
+     * delivered message unrecoverable once its prekey is consumed, so removing
+     * the plaintext is the last copy on this device.
+     */
+    fun expireOld(personaHex: String, afterSecs: Long): Int {
+        if (afterSecs <= 0) return 0
+        val cutoff = System.currentTimeMillis() / 1000 - afterSecs
+        val kept = thread(personaHex).filter { it.timestamp >= cutoff }
+        val all = thread(personaHex)
+        if (kept.size == all.size) return 0
+        writeThread(personaHex, kept)
+        return all.size - kept.size
+    }
+
+    /** Delete one message from this device. */
+    fun deleteMessage(personaHex: String, seq: Long, outgoing: Boolean) {
+        writeThread(
+            personaHex,
+            thread(personaHex).filterNot { it.seq == seq && it.outgoing == outgoing },
+        )
+    }
+
+    private fun writeThread(personaHex: String, msgs: List<StoredMessage>) = synchronized(lock) {
+        val arr = JSONArray()
+        msgs.forEach { arr.put(it.toJson()) }
+        prefs.edit().putString("thread_$personaHex", arr.toString()).apply()
+        bump()
+    }
+
+    /** How long messages in this conversation survive locally, in seconds. */
+    fun disappearAfter(personaHex: String): Long =
+        prefs.getLong("disappear_$personaHex", 0L)
+
+    fun setDisappearAfter(personaHex: String, secs: Long) = synchronized(lock) {
+        prefs.edit().putLong("disappear_$personaHex", secs).apply()
+        bump()
+    }
+
     /** Show or hide a conversation without touching the contact. */
     fun setChatVisible(personaHex: String, visible: Boolean) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
