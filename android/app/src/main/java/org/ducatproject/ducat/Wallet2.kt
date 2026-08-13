@@ -308,7 +308,20 @@ object Wallet {
     fun maxSendable(context: Context, priority: Int = 1): Long {
         val b = balances(context)
         if (b.spendableOutputs == 0) return 0
-        val fee = feeFor(context, b.spendableOutputs, priority)
+
+        // Converged rather than assumed. The fee depends on how many notes the
+        // payment consumes, and the notes consumed depend on the amount — so
+        // pricing the worst case understates the maximum, sometimes badly for
+        // someone holding many small notes. Start from every note, see how many
+        // that amount actually needs, and price again.
+        var fee = feeFor(context, b.spendableOutputs, priority)
+        repeat(2) {
+            val candidate = (b.spendablePxmr - fee).coerceAtLeast(0)
+            val needed = plan(context, candidate).notes.size.coerceAtLeast(1)
+            val next = feeFor(context, needed, priority)
+            if (next == fee) return@repeat
+            fee = next
+        }
         return (b.spendablePxmr - fee).coerceAtLeast(0)
     }
 

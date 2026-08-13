@@ -22,6 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -73,23 +75,37 @@ fun PaySheet(
         return
     }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        when (val t = target) {
-            null -> ChooseTarget(
-                onPick = { target = it },
-                onScan = { scanning = true },
-            )
-            else -> AmountStep(
-                target = t,
-                prefillAmountPxmr = prefillAmountPxmr,
-                // With a target chosen for us there is no earlier step to go
-                // back to, so back leaves rather than doing nothing.
-                onBack = {
-                    if (prefillAddress == null && prefillContact == null) target = null
-                    else onDismiss()
-                },
-                onDone = onDismiss,
-            )
+    // A whole screen, not a sheet. A bottom sheet has to share the window with
+    // the keyboard, and on a payment screen the thing it covers is the amount
+    // and the button under it. `decorFitsSystemWindows = false` is what lets
+    // imePadding do its job inside a dialog.
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            decorFitsSystemWindows = false,
+        ),
+    ) {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            when (val t = target) {
+                null -> ChooseTarget(
+                    onPick = { target = it },
+                    onScan = { scanning = true },
+                    onClose = onDismiss,
+                )
+                else -> AmountStep(
+                    target = t,
+                    prefillAmountPxmr = prefillAmountPxmr,
+                    // With a target chosen for us there is no earlier step to
+                    // return to, so back leaves rather than doing nothing.
+                    onBack = {
+                        if (prefillAddress == null && prefillContact == null) target = null
+                        else onDismiss()
+                    },
+                    onDone = onDismiss,
+                )
+            }
         }
     }
 }
@@ -122,14 +138,29 @@ private fun readScan(context: android.content.Context, raw: String): PayTarget? 
 }
 
 @Composable
-private fun ChooseTarget(onPick: (PayTarget) -> Unit, onScan: () -> Unit) {
+private fun ChooseTarget(
+    onPick: (PayTarget) -> Unit,
+    onScan: () -> Unit,
+    onClose: () -> Unit,
+) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val contacts = remember(version) { ContactStore(context).all() }
     var address by remember { mutableStateOf("") }
 
-    Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
-        Text("Send or request", style = MaterialTheme.typography.titleLarge)
+    Column(
+        Modifier
+            .fillMaxSize()
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 24.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 12.dp)) {
+            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, "Close") }
+            Spacer(Modifier.width(4.dp))
+            Text("Send or request", style = MaterialTheme.typography.titleLarge)
+        }
         Spacer(Modifier.height(12.dp))
 
         OutlinedButton(onClick = onScan, modifier = Modifier.fillMaxWidth()) {
@@ -236,8 +267,18 @@ private fun AmountStep(
     // is how a wallet lets someone type a number it will then refuse, after
     // they have already decided.
     var maxPxmr by remember { mutableStateOf(0L) }
+    // Sticky: once someone has asked for the maximum, changing the speed
+    // changes the fee, and the amount has to follow or the screen is showing a
+    // number that is no longer the maximum it just promised.
+    var maxLocked by remember { mutableStateOf(false) }
     LaunchedEffect(version, priority) {
         maxPxmr = withContext(Dispatchers.IO) { Wallet.maxSendable(context, priority) }
+    }
+    LaunchedEffect(maxPxmr, maxLocked, fiatEntry) {
+        if (maxLocked && maxPxmr > 0) {
+            typed = if (fiatEntry && rate != null) "%.2f".format(maxPxmr / 1e12 * rate)
+                    else formatXmr(maxPxmr)
+        }
     }
 
     val pxmr = remember(typed, fiatEntry, rate) {
@@ -259,40 +300,57 @@ private fun AmountStep(
 
     Column(
         Modifier
-            .fillMaxWidth()
-            // The sheet has to give the keyboard room and let the rest scroll,
-            // or the buttons end up under it and the screen is unusable at the
-            // exact moment someone is typing an amount.
+            .fillMaxSize()
+            // The keyboard gets its own room and the rest scrolls, so the
+            // buttons never end up underneath it — which is the one moment the
+            // screen exists for.
             .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
             .padding(bottom = 24.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(top = 12.dp),
+        ) {
             IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Back") }
             Spacer(Modifier.width(4.dp))
             when (target) {
                 is PayTarget.ToContact -> {
                     Avatar(target.contact.displayName())
                     Spacer(Modifier.width(10.dp))
-                    Text(target.contact.displayName(),
-                         style = MaterialTheme.typography.titleMedium)
+                    Column {
+                        Text(target.contact.displayName(),
+                             style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "in DUCAT",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                    }
                 }
-                is PayTarget.ToAddress -> Text(
-                    target.address.take(10) + "…" + target.address.takeLast(6),
-                    fontFamily = FontFamily.Monospace,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                is PayTarget.ToAddress -> Column {
+                    Text("Monero address", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        target.address.take(10) + "…" + target.address.takeLast(6),
+                        fontFamily = FontFamily.Monospace,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(28.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = typed,
-                onValueChange = { typed = it.filter { c -> c.isDigit() || c == '.' } },
+                onValueChange = {
+                    typed = it.filter { c -> c.isDigit() || c == '.' }
+                    maxLocked = false
+                },
                 placeholder = { Text("0") },
-                textStyle = MaterialTheme.typography.headlineMedium,
+                textStyle = MaterialTheme.typography.headlineLarge,
                 singleLine = true,
                 isError = overMax,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -301,7 +359,14 @@ private fun AmountStep(
             Spacer(Modifier.width(10.dp))
             if (rate != null) {
                 AssistChip(
-                    onClick = { fiatEntry = !fiatEntry; typed = "" },
+                    onClick = {
+                    // Keep a locked maximum across the switch — it is the same
+                    // amount in a different unit, not a new intention.
+                    val wasMax = maxLocked
+                    fiatEntry = !fiatEntry
+                    typed = ""
+                    maxLocked = wasMax
+                },
                     label = { Text(if (fiatEntry) cur else "XMR") },
                     trailingIcon = { Icon(Icons.Filled.SwapVert, null, Modifier.size(16.dp)) },
                 )
@@ -320,23 +385,19 @@ private fun AmountStep(
             )
         }
 
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "You can send up to ${inUnit(context, maxPxmr, fiatEntry, rate, cur)}",
+                "Up to ${inUnit(context, maxPxmr, fiatEntry, rate, cur)} after fees",
                 style = MaterialTheme.typography.bodySmall,
                 color = if (overMax) MaterialTheme.colorScheme.error
                         else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.weight(1f))
             TextButton(
-                onClick = {
-                    typed = if (fiatEntry && rate != null) {
-                        "%.2f".format(maxPxmr / 1e12 * rate)
-                    } else formatXmr(maxPxmr)
-                },
+                onClick = { maxLocked = true },
                 enabled = maxPxmr > 0,
-            ) { Text("Max") }
+            ) { Text(if (maxLocked) "Max ✓" else "Max") }
         }
         if (overMax) {
             Text(
