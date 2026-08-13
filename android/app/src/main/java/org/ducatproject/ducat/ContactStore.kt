@@ -547,3 +547,25 @@ class WalletStore(context: Context) {
     fun restoreHeight(): ULong =
         prefs.getString("wallet_height", null)?.toULongOrNull() ?: 0uL
 }
+
+/** Which Monero node to use, and the last one that worked. */
+class NodeStore(context: Context) {
+    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+
+    fun ownUrl(): String? = prefs.getString("monero_own_node", null)?.ifBlank { null }
+
+    fun setOwnUrl(v: String?) =
+        prefs.edit().putString("monero_own_node", v?.trim() ?: "").apply()
+
+    /**
+     * The last node that answered, synced, on the right network.
+     *
+     * Kept so a restart does not re-probe the whole list before showing
+     * anything — not as a preference. A node that was good an hour ago is still
+     * checked before it is used.
+     */
+    fun rememberLastGood(url: String) =
+        prefs.edit().putString("monero_last_good", url).apply()
+
+    fun lastGood(): String? = prefs.getString("monero_last_good", null)
+}

@@ -13,6 +13,7 @@
 use ducat_core::{bond, float, verify};
 
 pub mod contacts;
+pub mod monero;
 pub mod node;
 
 uniffi::setup_scaffolding!();

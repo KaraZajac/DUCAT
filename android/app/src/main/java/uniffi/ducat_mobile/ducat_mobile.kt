@@ -805,6 +805,12 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -860,6 +866,12 @@ internal interface UniffiLib : Library {
     ): Byte
     fun uniffi_ducat_mobile_fn_func_log_subkey(`seq`: Long,`subkeyCount`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_monero_default_nodes(`ownUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_pick_node(`candidates`: RustBuffer.ByValue,`wantNettype`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_probe(`url`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_app_call(`routeBlob`: RustBuffer.ByValue,`message`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_close(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1066,6 +1078,12 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_log_subkey(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_default_nodes(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_pick_node(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_probe(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_app_call(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_close(
@@ -1195,6 +1213,15 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_log_subkey() != 6279.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_default_nodes() != 12244.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_pick_node() != 51910.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_probe() != 57591.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_app_call() != 36150.toShort()) {
@@ -1743,6 +1770,72 @@ public object FfiConverterTypeIssuedCard: FfiConverterRustBuffer<IssuedCard> {
 
 
 /**
+ * What a probe found. Named apart from Veilid's `NodeStatus`: two things
+ * called the same in one bridge is a footgun for every caller downstream.
+ */
+data class MoneroNodeStatus (
+    var `url`: kotlin.String, 
+    var `reachable`: kotlin.Boolean, 
+    var `height`: kotlin.ULong, 
+    /**
+     * The daemon's own view of whether it has caught up. A node still syncing
+     * will happily answer and report a height that is behind, which would show
+     * a wallet a balance that is merely old.
+     */
+    var `synced`: kotlin.Boolean, 
+    /**
+     * `stagenet`, `mainnet` or `testnet`, straight from the daemon. Checked
+     * rather than assumed: pointing a stagenet wallet at mainnet is the kind
+     * of mistake that is only funny until it involves real money.
+     */
+    var `nettype`: kotlin.String, 
+    var `rttMs`: kotlin.ULong, 
+    var `error`: kotlin.String?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeMoneroNodeStatus: FfiConverterRustBuffer<MoneroNodeStatus> {
+    override fun read(buf: ByteBuffer): MoneroNodeStatus {
+        return MoneroNodeStatus(
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: MoneroNodeStatus) = (
+            FfiConverterString.allocationSize(value.`url`) +
+            FfiConverterBoolean.allocationSize(value.`reachable`) +
+            FfiConverterULong.allocationSize(value.`height`) +
+            FfiConverterBoolean.allocationSize(value.`synced`) +
+            FfiConverterString.allocationSize(value.`nettype`) +
+            FfiConverterULong.allocationSize(value.`rttMs`) +
+            FfiConverterOptionalString.allocationSize(value.`error`)
+    )
+
+    override fun write(value: MoneroNodeStatus, buf: ByteBuffer) {
+            FfiConverterString.write(value.`url`, buf)
+            FfiConverterBoolean.write(value.`reachable`, buf)
+            FfiConverterULong.write(value.`height`, buf)
+            FfiConverterBoolean.write(value.`synced`, buf)
+            FfiConverterString.write(value.`nettype`, buf)
+            FfiConverterULong.write(value.`rttMs`, buf)
+            FfiConverterOptionalString.write(value.`error`, buf)
+    }
+}
+
+
+
+/**
  * A newly created wallet, as onboarding needs to show it.
  *
  * The **seed is returned once** and is never stored by this crate. §4.3 makes
@@ -1801,6 +1894,45 @@ public object FfiConverterTypeNewWallet: FfiConverterRustBuffer<NewWallet> {
             FfiConverterString.write(value.`address`, buf)
             FfiConverterString.write(value.`spendKeyHex`, buf)
             FfiConverterULong.write(value.`restoreHeight`, buf)
+    }
+}
+
+
+
+/**
+ * A node worth trying, and what using it costs.
+ */
+data class NodeCandidate (
+    var `url`: kotlin.String, 
+    var `trust`: NodeTrust, 
+    var `label`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeNodeCandidate: FfiConverterRustBuffer<NodeCandidate> {
+    override fun read(buf: ByteBuffer): NodeCandidate {
+        return NodeCandidate(
+            FfiConverterString.read(buf),
+            FfiConverterTypeNodeTrust.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: NodeCandidate) = (
+            FfiConverterString.allocationSize(value.`url`) +
+            FfiConverterTypeNodeTrust.allocationSize(value.`trust`) +
+            FfiConverterString.allocationSize(value.`label`)
+    )
+
+    override fun write(value: NodeCandidate, buf: ByteBuffer) {
+            FfiConverterString.write(value.`url`, buf)
+            FfiConverterTypeNodeTrust.write(value.`trust`, buf)
+            FfiConverterString.write(value.`label`, buf)
     }
 }
 
@@ -2528,6 +2660,65 @@ public object FfiConverterTypeContactError : FfiConverterRustBuffer<ContactExcep
 
 
 
+sealed class MoneroException: kotlin.Exception() {
+    
+    class Failed(
+        
+        val v1: kotlin.String
+        ) : MoneroException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<MoneroException> {
+        override fun lift(error_buf: RustBuffer.ByValue): MoneroException = FfiConverterTypeMoneroError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeMoneroError : FfiConverterRustBuffer<MoneroException> {
+    override fun read(buf: ByteBuffer): MoneroException {
+        
+
+        return when(buf.getInt()) {
+            1 -> MoneroException.Failed(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: MoneroException): ULong {
+        return when(value) {
+            is MoneroException.Failed -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+        }
+    }
+
+    override fun write(value: MoneroException, buf: ByteBuffer) {
+        when(value) {
+            is MoneroException.Failed -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+
+
 sealed class NodeException: kotlin.Exception() {
     
     class Failed(
@@ -2601,6 +2792,51 @@ public object FfiConverterTypeNodeError : FfiConverterRustBuffer<NodeException> 
     }
 
 }
+
+
+
+/**
+ * How much the node we are using can learn about us.
+ */
+
+enum class NodeTrust {
+    
+    /**
+     * Ours. It learns nothing we did not already know.
+     */
+    OWN,
+    /**
+     * Reached through Tor. A stranger's node, but not one that also sees where
+     * the request came from.
+     */
+    ONION,
+    /**
+     * A stranger's node on the open network. It sees our address and our
+     * transactions together.
+     */
+    PUBLIC_CLEARNET;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeNodeTrust: FfiConverterRustBuffer<NodeTrust> {
+    override fun read(buf: ByteBuffer) = try {
+        NodeTrust.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: NodeTrust) = 4UL
+
+    override fun write(value: NodeTrust, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
 
 
 
@@ -2827,6 +3063,34 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterByteArray.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeNodeCandidate: FfiConverterRustBuffer<List<NodeCandidate>> {
+    override fun read(buf: ByteBuffer): List<NodeCandidate> {
+        val len = buf.getInt()
+        return List<NodeCandidate>(len) {
+            FfiConverterTypeNodeCandidate.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<NodeCandidate>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeNodeCandidate.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<NodeCandidate>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeNodeCandidate.write(it, buf)
         }
     }
 }
@@ -3118,6 +3382,53 @@ public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<kotlin.
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_log_subkey(
         FfiConverterULong.lower(`seq`),FfiConverterUInt.lower(`subkeyCount`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The list, in the order it should be tried.
+         *
+         * Own first, then onion, then clearnet — the order in which they give away
+         * less. A user pointing at their own node should never be silently demoted to
+         * a public one, so a configured node is returned alone rather than at the head
+         * of a fallback list.
+         */ fun `moneroDefaultNodes`(`ownUrl`: kotlin.String?): List<NodeCandidate> {
+            return FfiConverterSequenceTypeNodeCandidate.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_default_nodes(
+        FfiConverterOptionalString.lower(`ownUrl`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Try candidates in order and keep the first that is usable on this network.
+         *
+         * "Usable" means reachable **and** synced **and** on the network we asked for.
+         * A node that answers is not the same as a node worth trusting a balance to,
+         * and taking the first that merely responds is how a wallet ends up reading a
+         * chain that stopped hours ago.
+         */
+    @Throws(MoneroException::class) fun `moneroPickNode`(`candidates`: List<NodeCandidate>, `wantNettype`: kotlin.String, `timeoutMs`: kotlin.UInt): MoneroNodeStatus {
+            return FfiConverterTypeMoneroNodeStatus.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_pick_node(
+        FfiConverterSequenceTypeNodeCandidate.lower(`candidates`),FfiConverterString.lower(`wantNettype`),FfiConverterUInt.lower(`timeoutMs`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Ask a daemon where it is. Blocking; call it off the main thread.
+         */ fun `moneroProbe`(`url`: kotlin.String, `timeoutMs`: kotlin.UInt): MoneroNodeStatus {
+            return FfiConverterTypeMoneroNodeStatus.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_probe(
+        FfiConverterString.lower(`url`),FfiConverterUInt.lower(`timeoutMs`),_status)
 }
     )
     }

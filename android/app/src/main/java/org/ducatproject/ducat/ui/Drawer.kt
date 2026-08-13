@@ -92,6 +92,8 @@ fun SectionScreen(
         ) {
             NetworkPanel(storageDir = context.filesDir.absolutePath + "/veilid")
             Spacer(Modifier.height(16.dp))
+            MoneroPanel()
+            Spacer(Modifier.height(16.dp))
             Text("speaking ${uniffi.ducat_mobile.protocolVersion()}",
                  style = MaterialTheme.typography.bodySmall)
         }
