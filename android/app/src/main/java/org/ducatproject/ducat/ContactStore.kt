@@ -625,6 +625,30 @@ class WalletStore(context: Context) {
 
     // --- scan state -------------------------------------------------------
 
+    /**
+     * Bumped when stored outputs become untrustworthy and must be re-read.
+     *
+     * Version 1: key images were derived as x·P instead of x·H_p(P). Every one
+     * was wrong, so the daemon reported genuinely spent outputs as unspent and
+     * the wallet counted them again. Fixing the derivation does not fix the
+     * entries already written under it — they are keyed by a value that will
+     * never match anything again — so they have to go and be rescanned.
+     */
+    private val OUTPUT_SCHEMA = 1
+
+    /** Returns true if it wiped anything. */
+    fun migrateOutputsIfNeeded(): Boolean {
+        if (prefs.getInt("wallet_output_schema", 0) >= OUTPUT_SCHEMA) return false
+        val had = prefs.getString("wallet_outputs", null) != null
+        prefs.edit()
+            .remove("wallet_outputs")
+            .putLong("wallet_scanned_to", restoreHeight().toLong())
+            .putInt("wallet_output_schema", OUTPUT_SCHEMA)
+            .apply()
+        ContactStore.bump()
+        return had
+    }
+
     fun scannedTo(): Long = prefs.getLong("wallet_scanned_to", 0L)
     fun tip(): Long = prefs.getLong("wallet_tip", 0L)
 

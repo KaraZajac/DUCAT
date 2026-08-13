@@ -892,7 +892,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_scan_view_only(`nodeUrl`: RustBuffer.ByValue,`address`: RustBuffer.ByValue,`viewKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_monero_send(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`inputBlobs`: RustBuffer.ByValue,`toAddress`: RustBuffer.ByValue,`amountPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_monero_send(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`inputBlobs`: RustBuffer.ByValue,`toAddress`: RustBuffer.ByValue,`amountPxmr`: Long,`priority`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_spent(`nodeUrl`: RustBuffer.ByValue,`keyImagesHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1272,7 +1272,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_monero_scan_view_only() != 11816.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_monero_send() != 29256.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_send() != 9105.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_spent() != 3803.toShort()) {
@@ -4028,11 +4028,11 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
          * person at a time, and a wallet that silently consolidates has decided
          * something about the user's privacy on their behalf.
          */
-    @Throws(MoneroException::class) fun `moneroSend`(`nodeUrl`: kotlin.String, `spendKeyHex`: kotlin.String, `inputBlobs`: List<kotlin.ByteArray>, `toAddress`: kotlin.String, `amountPxmr`: kotlin.ULong): SendResult {
+    @Throws(MoneroException::class) fun `moneroSend`(`nodeUrl`: kotlin.String, `spendKeyHex`: kotlin.String, `inputBlobs`: List<kotlin.ByteArray>, `toAddress`: kotlin.String, `amountPxmr`: kotlin.ULong, `priority`: kotlin.UInt): SendResult {
             return FfiConverterTypeSendResult.lift(
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_send(
-        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterSequenceByteArray.lower(`inputBlobs`),FfiConverterString.lower(`toAddress`),FfiConverterULong.lower(`amountPxmr`),_status)
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterSequenceByteArray.lower(`inputBlobs`),FfiConverterString.lower(`toAddress`),FfiConverterULong.lower(`amountPxmr`),FfiConverterUInt.lower(`priority`),_status)
 }
     )
     }

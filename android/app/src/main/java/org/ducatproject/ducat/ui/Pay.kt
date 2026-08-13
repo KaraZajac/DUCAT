@@ -558,6 +558,7 @@ private fun AmountStep(
                                 context, node, to, pxmr,
                                 contactHex = contact?.personaHex,
                                 note = note.ifBlank { null },
+                                priority = priority,
                             )
                             // Tell them, in the thread. §16.13's notice is
                             // advisory — they verify by finding the output — but

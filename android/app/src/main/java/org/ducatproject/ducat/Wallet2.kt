@@ -157,6 +157,15 @@ object Wallet {
      */
     fun scanStep(context: Context, nodeUrl: String): Boolean {
         val store = WalletStore(context)
+        // Before anything else: outputs written under the broken key-image
+        // derivation cannot be reconciled, only re-read.
+        if (store.migrateOutputsIfNeeded()) {
+            DucatLog.w(
+                TAG,
+                "cleared stored outputs — key images were wrong, rescanning from " +
+                    "${store.restoreHeight()}",
+            )
+        }
         val spend = store.spendKeyHex()
         if (spend == null) {
             // Distinct from "no node", and the difference is everything: this
@@ -364,6 +373,8 @@ object Wallet {
         amountPxmr: Long,
         contactHex: String? = null,
         note: String? = null,
+        // The speed the user picked, which was previously shown and ignored.
+        priority: Int = 1,
     ): uniffi.ducat_mobile.SendResult {
         val store = WalletStore(context)
         val spend = store.spendKeyHex()
@@ -381,7 +392,8 @@ object Wallet {
         )
         val r = try {
             uniffi.ducat_mobile.moneroSend(
-                nodeUrl, spend, plan.notes.map { it.blob }, toAddress, amountPxmr.toULong(),
+                nodeUrl, spend, plan.notes.map { it.blob }, toAddress,
+                amountPxmr.toULong(), priority.toUInt(),
             )
         } catch (e: Throwable) {
             DucatLog.e(TAG, "send failed: ${e.message ?: e}")

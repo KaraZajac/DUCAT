@@ -38,7 +38,7 @@ fn main() {
             println!("nothing to spend — fund {address} first");
             return;
         }
-        match ducat_mobile::monero::monero_send(NODE.into(), spend, blobs, to, pxmr) {
+        match ducat_mobile::monero::monero_send(NODE.into(), spend, blobs, to, pxmr, 1) {
             Ok(r) => println!(
                 "\n  txid {}\n  fee {} pXMR\n  accepted by {} node(s)",
                 r.txid_hex, r.fee_pxmr, r.accepted_by

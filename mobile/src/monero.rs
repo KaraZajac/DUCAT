@@ -331,11 +331,18 @@ pub fn monero_scan(
             read += 1;
             if let Ok(found) = scanner.scan(sb) {
                 for o in found.not_additionally_locked() {
-                    // KI = (spend + key_offset) * Hp(output key). Derivable only
-                    // with the spend secret, which is what separates knowing a
-                    // payment arrived from knowing it is still there.
+                    // KI = (spend + key_offset) · H_p(output key).
+                    //
+                    // `Point::key_image()` is **not** the hash: it validates a
+                    // point and hands it straight back. Using it produced x·P
+                    // instead of x·H_p(P), so every key image was wrong, the
+                    // daemon answered "not spent" for outputs that were, and the
+                    // wallet counted spent money twice. This is the derivation
+                    // monero-wallet's own signing path uses.
                     let x: curve25519_dalek::Scalar = spend.into() + o.key_offset().into();
-                    let ki = o.key().key_image().map(|gen| gen * x);
+                    let hp: curve25519_dalek::EdwardsPoint =
+                        Point::biased_hash(o.key().compress().to_bytes()).into();
+                    let ki = Some(x * hp);
                     outputs.push(OwnedOutput {
                         amount_pxmr: o.commitment().amount,
                         height: h,
@@ -672,6 +679,10 @@ pub fn monero_send(
     input_blobs: Vec<Vec<u8>>,
     to_address: String,
     amount_pxmr: u64,
+    // 0 slow, 1 normal, 2 fast, 3 fastest — the same tiers the estimate uses.
+    // This was hardcoded to the cheapest, so the speed a user picked changed
+    // the number they were shown and nothing about the transaction.
+    priority: u32,
 ) -> Result<SendResult, MoneroError> {
     use monero_daemon_rpc::prelude::*;
     use monero_wallet::address::MoneroAddress;
@@ -735,7 +746,15 @@ pub fn monero_send(
         }
 
         let fee_rate = rpc
-            .fee_rate(FeePriority::Unimportant, u64::MAX)
+            .fee_rate(
+                match priority {
+                    0 => FeePriority::Unimportant,
+                    1 => FeePriority::Normal,
+                    2 => FeePriority::Elevated,
+                    _ => FeePriority::Priority,
+                },
+                u64::MAX,
+            )
             .await
             .map_err(|e| MoneroError::Failed(format!("fee rate: {e:?}")))?;
 
