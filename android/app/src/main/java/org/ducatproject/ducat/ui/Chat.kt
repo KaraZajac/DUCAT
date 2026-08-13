@@ -218,32 +218,12 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         ) { payRequest = null }
     }
 
+    // The same sheet the send/request button opens, with the contact already
+    // chosen. A second, smaller money form in chat meant one place had a
+    // currency switch and a number pad and the other did not, which is how the
+    // unit someone is thinking in stops matching the unit they are typing in.
     if (askOpen) {
-        AskForMoneyDialog(
-            onDismiss = { askOpen = false },
-            onSend = { pxmr, note ->
-                askOpen = false
-                sending = true
-                error = null
-                scope.launch {
-                    val r = withContext(Dispatchers.IO) {
-                        runCatching {
-                            Mailbox.send(
-                                context, c, note, mine,
-                                kind = 1,
-                                amountPxmr = pxmr,
-                                // Our address travels with the ask, so they need
-                                // nothing from a record that may be stale (§16.13).
-                                payto = WalletStore(context).address(),
-                            )
-                        }
-                    }
-                    sending = false
-                    r.onSuccess { c = it; messages = store.thread(c.personaHex) }
-                        .onFailure { error = it.message ?: "could not send" }
-                }
-            },
-        )
+        PaySheet(prefillContact = c) { askOpen = false }
     }
 
     if (settingsOpen) {
@@ -343,59 +323,6 @@ private fun sendOne(
     body: String,
     minePersonaHex: String,
 ): Contact = Mailbox.send(context, c, body, minePersonaHex)
-
-/**
- * Asking for money.
- *
- * The amount is entered in XMR and carried in piconero, because a rounded
- * amount in a message someone acts on is a rounding error somebody pays for.
- */
-@Composable
-private fun AskForMoneyDialog(onDismiss: () -> Unit, onSend: (Long, String) -> Unit) {
-    var amount by remember { mutableStateOf("") }
-    var note by remember { mutableStateOf("") }
-    val pxmr = remember(amount) {
-        amount.trim().toBigDecimalOrNull()
-            ?.multiply(java.math.BigDecimal(1_000_000_000_000L))
-            ?.toLong()
-    }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Ask for money") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = amount,
-                    onValueChange = { amount = it },
-                    label = { Text("Amount (XMR)") },
-                    singleLine = true,
-                    isError = amount.isNotBlank() && pxmr == null,
-                )
-                Spacer(Modifier.height(10.dp))
-                OutlinedTextField(
-                    value = note,
-                    onValueChange = { if (it.length <= 128) note = it },
-                    label = { Text("What for") },
-                    singleLine = true,
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    "This is a message, not a charge. They still have to choose to " +
-                        "pay it, and nothing here can take anything.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { pxmr?.let { onSend(it, note.ifBlank { "Payment request" }) } },
-                enabled = pxmr != null && pxmr > 0,
-            ) { Text("Ask") }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
-    )
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

@@ -138,9 +138,9 @@ pub async fn issue() -> Result<(), Box<dyn std::error::Error>> {
         outbox_key: outbox.to_string(),
         prekey_bundle: bundle.to_value().encode(),
         display_name: Some("kara".into()),
-        // The harness declines to publish an address: §16.12 makes that the
-        // default, and a test fixture that opts in tests the wrong shape.
-        payto: None,
+        // Off unless asked, which is §16.12's rule: publishing is the
+        // contact's own choice about their own linkability.
+        payto: std::env::var("DUCAT_PAYTO").ok().filter(|v| !v.is_empty()),
     };
     rc.set_dht_value(inbox.key().clone(), 0, details.to_value().encode(), None)
         .await?;
@@ -246,7 +246,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
         outbox_key: outbox.to_string(),
         prekey_bundle: bundle.to_value().encode(),
         display_name: Some("desktop".into()),
-        payto: None,
+        payto: std::env::var("DUCAT_PAYTO").ok().filter(|v| !v.is_empty()),
     };
     rc.set_dht_value(inbox.clone(), 1, mine.to_value().encode(), None).await?;
     println!("  wrote    subkey 1 — the handshake is complete");
@@ -261,7 +261,17 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
         &hex::encode(&theirs.persona),
     );
     let mut prev = [0u8; 32];
-    for (seq, text) in ["hello from a process that is about to exit", "and a second one"]
+    let script: Vec<String> = std::env::var("DUCAT_SAY")
+        .ok()
+        .filter(|v| !v.is_empty())
+        .map(|v| v.split('|').map(|s| s.to_string()).collect())
+        .unwrap_or_else(|| {
+            vec![
+                "hello from a process that is about to exit".into(),
+                "and a second one".into(),
+            ]
+        });
+    for (seq, text) in script
         .iter()
         .enumerate()
     {
@@ -270,7 +280,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
             suite: 1,
             seq: seq as u64,
             prev,
-            body: (*text).into(),
+            body: text.clone(),
             timestamp: crate::payee::now(),
             kind: MessageKind::Text,
             amount_pxmr: None,

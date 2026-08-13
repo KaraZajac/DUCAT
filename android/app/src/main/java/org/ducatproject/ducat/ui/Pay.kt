@@ -11,6 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
@@ -78,7 +80,12 @@ fun PaySheet(
             else -> AmountStep(
                 target = t,
                 prefillAmountPxmr = prefillAmountPxmr,
-                onBack = { if (prefillAddress == null && prefillContact == null) target = null },
+                // With a target chosen for us there is no earlier step to go
+                // back to, so back leaves rather than doing nothing.
+                onBack = {
+                    if (prefillAddress == null && prefillContact == null) target = null
+                    else onDismiss()
+                },
                 onDone = onDismiss,
             )
         }
@@ -215,6 +222,15 @@ private fun AmountStep(
     var error by remember { mutableStateOf<String?>(null) }
     var done by remember { mutableStateOf<String?>(null) }
     var confirming by remember { mutableStateOf(false) }
+    val amountFocus = remember { FocusRequester() }
+
+    // Straight to the amount with the pad up. The destination is already
+    // decided by the time this screen exists, so the only open question is how
+    // much — asking for a tap first is asking for a tap that says nothing.
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(150)
+        runCatching { amountFocus.requestFocus() }
+    }
 
     // What was typed, as piconero. Entering in a currency converts at the rate
     // shown; entering in XMR does not convert at all.
@@ -253,8 +269,10 @@ private fun AmountStep(
                 placeholder = { Text("0") },
                 textStyle = MaterialTheme.typography.headlineMedium,
                 singleLine = true,
+                // A number pad, not a full keyboard. The amount is the first
+                // thing anyone types here and it is always digits.
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).focusRequester(amountFocus),
             )
             Spacer(Modifier.width(10.dp))
             if (rate != null) {
