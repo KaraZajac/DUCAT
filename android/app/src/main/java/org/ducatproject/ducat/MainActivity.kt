@@ -267,11 +267,15 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             // mark.
                             NavItem(Tab.Accounts, Icons.Filled.AccountBalanceWallet, tab) { tab = it }
                             // The centre slot: only the label lives in the bar;
-                            // the circle floats in the wrapper above.
-                            Column(
-                                Modifier.weight(1f).fillMaxHeight(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Bottom,
+                            // the circle floats in the wrapper above. A fixed
+                            // height, never fillMaxHeight — NavigationBar does
+                            // not constrain its children, so filling it expands
+                            // the bar to the whole screen. That lesson was in a
+                            // comment here once, which got deleted with the code
+                            // it annotated and promptly needed relearning.
+                            Box(
+                                Modifier.weight(1f).height(80.dp),
+                                contentAlignment = Alignment.BottomCenter,
                             ) {
                                 Text(
                                     "Send/Receive",
@@ -295,8 +299,14 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                         Box(contentAlignment = Alignment.Center) {
                             // An Image, not an Icon: Icon tints to one colour,
                             // and the cat is not the cat as a silhouette.
+                            //
+                            // Its own PNG, **not** R.mipmap.ic_launcher: on any
+                            // modern device that name resolves to the adaptive
+                            // <adaptive-icon> XML, which painterResource cannot
+                            // load — it throws at first composition, which is
+                            // the app crashing on open.
                             androidx.compose.foundation.Image(
-                                painterResource(R.mipmap.ic_launcher),
+                                painterResource(R.drawable.ducat_cat),
                                 contentDescription = "Send or receive",
                                 modifier = Modifier.size(48.dp),
                             )
