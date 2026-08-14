@@ -46,7 +46,11 @@ private val CLOSED_STATES = setOf("paid", "paid_oob", "cancelled")
  * outlives the visit.
  */
 @Composable
-fun BarTabScreen() {
+fun BarTabScreen(
+    /** "all" (legacy), "open" (running + billed + start), or "closed". The
+     *  bar shell splits the night's two halves across two tabs. */
+    section: String = "all",
+) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val store = remember { TabStore(context) }
@@ -81,6 +85,7 @@ fun BarTabScreen() {
     val done = tabs.filter { it.state in CLOSED_STATES }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        if (section != "closed") {
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
             Spacer(Modifier.height(16.dp))
             Text(
@@ -103,7 +108,8 @@ fun BarTabScreen() {
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(52.dp),
         ) { Text("Start a tab") }
 
-        if (open.isNotEmpty()) {
+        }
+        if (section != "closed" && open.isNotEmpty()) {
             SectionLabel("Running")
             Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Column {
@@ -112,7 +118,7 @@ fun BarTabScreen() {
             }
         }
 
-        if (awaiting.isNotEmpty()) {
+        if (section != "closed" && awaiting.isNotEmpty()) {
             SectionLabel("Billed — waiting for payment")
             Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Column {
@@ -128,7 +134,7 @@ fun BarTabScreen() {
             )
         }
 
-        if (done.isNotEmpty()) {
+        if (section != "open" && done.isNotEmpty()) {
             Row(
                 Modifier.fillMaxWidth().padding(end = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -146,7 +152,15 @@ fun BarTabScreen() {
             }
         }
 
-        if (tabs.isEmpty()) {
+        if (section == "closed" && done.isEmpty()) {
+            Text(
+                "Nothing settled yet tonight.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(24.dp),
+            )
+        }
+        if (section != "closed" && tabs.isEmpty()) {
             Text(
                 "No tabs yet. Start one when the first order lands.",
                 style = MaterialTheme.typography.bodySmall,

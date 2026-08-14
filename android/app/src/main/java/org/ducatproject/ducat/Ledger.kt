@@ -100,6 +100,16 @@ object Ledger {
         val provisional: Boolean = false,
         /** Ordering only: where this belongs in the running balance. */
         val sortHeight: Long = 0,
+        /** The bill this payment answered, line by line — taken from the
+         *  receipt that names this transaction (§16.13), which is the one
+         *  place the itemisation and the txid meet. */
+        val items: List<BillItem> = emptyList(),
+        val taxPxmr: Long? = null,
+        /** A receipt naming this transaction exists in some thread. */
+        val receipted: Boolean = false,
+        /** The other side's persona, when a thread supplied one — what makes
+         *  "open the conversation" possible from a bank-statement row. */
+        val contactHex: String? = null,
     ) {
         /** Change we paid to ourselves in this transaction, if any. */
         val changePxmr: Long get() = if (direction == Direction.Sent) ours.sumOf { it.amountPxmr } else 0
@@ -123,15 +133,26 @@ object Ledger {
         // is the only way a received payment gets a name: Monero itself does
         // not carry a sender, so an unnamed receipt is honest, not a gap.
         val announced = HashMap<String, Pair<String, String?>>()
+        val announcedHex = HashMap<String, String>()
+        // And the paperwork: any receipt naming a transaction ties the chain
+        // event to its bill — the itemisation, the tax, the thread. This is
+        // what turns a row of piconero into "6 min × 0.0005, tip, receipted".
+        val papered = HashMap<String, Triple<List<BillItem>, Long?, String>>()
         for (c in everyone) {
             for (m in contacts.thread(c.personaHex)) {
-                val id = m.txidHex ?: continue
-                if (m.outgoing || m.kind != 2) continue
-                announced[id.lowercase()] = c.displayName() to m.body.takeIf { it.isNotBlank() }
+                val id = m.txidHex?.lowercase() ?: continue
+                if (!m.outgoing && m.kind == 2) {
+                    announced[id] = c.displayName() to m.body.takeIf { it.isNotBlank() }
+                    announcedHex[id] = c.personaHex
+                }
+                if (m.kind == 3) {
+                    papered[id] = Triple(m.items, m.taxPxmr, c.personaHex)
+                }
             }
         }
 
-        return assemble(
+        val sendsByTx = store.sends().associateBy { it.txidHex.lowercase() }
+        val built = assemble(
             entries = store.entries(),
             tip = store.tip(),
             chainOf = { txs.get(it) },
@@ -139,6 +160,64 @@ object Ledger {
             nameOf = { h -> everyone.firstOrNull { it.personaHex == h }?.displayName() },
             announced = announced,
         )
+        return built.map { e ->
+            val paper = papered[e.txid.lowercase()]
+            val hex = when (e.direction) {
+                Direction.Sent ->
+                    sendsByTx[e.txid.lowercase()]?.contactHex ?: paper?.third
+                else -> announcedHex[e.txid.lowercase()] ?: paper?.third
+            }
+            if (paper == null && hex == null) e
+            else e.copy(
+                items = paper?.first ?: e.items,
+                taxPxmr = paper?.second,
+                receipted = paper != null,
+                contactHex = hex,
+            )
+        }
+    }
+
+    /** A request nobody has answered yet — the "uncleared" half of a bank
+     *  statement. Heuristic on purpose: a request is open until a payment at
+     *  or above it follows in the same thread, which is the same matching the
+     *  settlement engine discloses (§15.11). */
+    data class OpenRequest(
+        val theyAsked: Boolean,
+        val counterparty: String,
+        val contactHex: String,
+        val amountPxmr: Long,
+        val items: List<BillItem>,
+        val timestamp: Long,
+    )
+
+    fun openRequests(context: Context): List<OpenRequest> {
+        val contacts = ContactStore(context)
+        val out = ArrayList<OpenRequest>()
+        for (c in contacts.all()) {
+            val thread = contacts.thread(c.personaHex)
+            for (m in thread) {
+                if (m.kind != 1) continue
+                val answered = thread.any { p ->
+                    p.kind == 2 && p.outgoing != m.outgoing &&
+                        p.timestamp >= m.timestamp && p.amountPxmr >= m.amountPxmr
+                } || thread.any { p ->
+                    // A receipt at or above it also closes it (paid outside).
+                    p.kind == 3 && p.timestamp >= m.timestamp &&
+                        p.amountPxmr >= m.amountPxmr
+                }
+                if (!answered) {
+                    out += OpenRequest(
+                        theyAsked = !m.outgoing,
+                        counterparty = c.displayName(),
+                        contactHex = c.personaHex,
+                        amountPxmr = m.amountPxmr,
+                        items = m.items,
+                        timestamp = m.timestamp,
+                    )
+                }
+            }
+        }
+        return out.sortedByDescending { it.timestamp }
     }
 
     /**

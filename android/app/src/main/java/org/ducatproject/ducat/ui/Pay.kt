@@ -556,7 +556,10 @@ private fun AmountStep(
             OutlinedTextField(
                 value = note,
                 onValueChange = { if (it.length <= 128) note = it },
-                label = { Text("What for") },
+                // The memo. It rides the sealed notice, never the chain — a
+                // public memo field would be a note stapled to a banknote —
+                // and Activity shows it on the transaction like a bank line.
+                label = { Text("Memo — what's this for?") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )

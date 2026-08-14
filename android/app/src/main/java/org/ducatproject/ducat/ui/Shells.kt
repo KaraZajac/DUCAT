@@ -1,0 +1,232 @@
+package org.ducatproject.ducat.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.LocalBar
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PointOfSale
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
+import org.ducatproject.ducat.Amounts
+import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.Mode
+import org.ducatproject.ducat.RunningTab
+import org.ducatproject.ducat.TabStore
+import org.ducatproject.ducat.formatXmr
+
+/**
+ * A mode is a different app (§15.11), not a feature of this one.
+ *
+ * The person holding a till thinks in sales; the person driving thinks in
+ * fares and a meter. Handing them the wallet's five tabs with one swapped
+ * screen made the job share a bar with Chat and Activity it never uses. A
+ * shell owns the whole scaffold — its own name in the top bar, its own bottom
+ * tabs, nothing else — and the only way out is the hamburger and *Personal*,
+ * which is the point: switching a job off should feel like putting down the
+ * till, not toggling a setting.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
+    when (mode) {
+        Mode.Pos -> Shell(
+            title = "Point of Sale",
+            openDrawer = openDrawer,
+            tabs = listOf(
+                ShellTab("Register", Icons.Filled.PointOfSale) { PosScreen() },
+                ShellTab("Sales", Icons.Filled.Receipt) {
+                    SettledList(origin = "pos", noun = "sale")
+                },
+            ),
+        )
+        Mode.BarTab -> Shell(
+            title = "Bar Tab",
+            openDrawer = openDrawer,
+            tabs = listOf(
+                ShellTab("Tabs", Icons.Filled.LocalBar) { BarTabScreen(section = "open") },
+                ShellTab("Closed", Icons.Filled.Receipt) { BarTabScreen(section = "closed") },
+            ),
+        )
+        Mode.Taxi -> Shell(
+            title = "Taxi",
+            openDrawer = openDrawer,
+            tabs = listOf(
+                ShellTab("Fares", Icons.Filled.Search) { DriveScreen() },
+                ShellTab("Meter", Icons.Filled.Speed) { TaxiScreen() },
+                ShellTab("Rides", Icons.Filled.DirectionsCar) {
+                    SettledList(origin = "taxi", noun = "ride")
+                },
+            ),
+        )
+        Mode.Donate -> Shell(
+            title = "Donations",
+            openDrawer = openDrawer,
+            tabs = listOf(
+                ShellTab("Code", Icons.Filled.RadioButtonUnchecked) { DonateScreen() },
+            ),
+        )
+        Mode.None -> {} // personal mode renders the full app, not a shell
+    }
+}
+
+private data class ShellTab(
+    val label: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val content: @Composable () -> Unit,
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun Shell(title: String, openDrawer: () -> Unit, tabs: List<ShellTab>) {
+    var current by remember { mutableStateOf(0) }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
+                title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+                navigationIcon = {
+                    IconButton(onClick = openDrawer) {
+                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                    }
+                },
+            )
+        },
+        bottomBar = {
+            // One tab is no tab: the donate shell is a single standing screen
+            // and a bar under it would be a bar with one button.
+            if (tabs.size > 1) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    tonalElevation = 0.dp,
+                ) {
+                    tabs.forEachIndexed { i, t ->
+                        NavigationBarItem(
+                            selected = current == i,
+                            onClick = { current = i },
+                            icon = { Icon(t.icon, contentDescription = t.label) },
+                            label = { Text(t.label) },
+                        )
+                    }
+                }
+            }
+        },
+    ) { padding ->
+        Box(Modifier.padding(padding).fillMaxSize()) {
+            tabs[current].content()
+        }
+    }
+}
+
+/**
+ * The day's ledger for one job: what settled, what's still owed, and the sum
+ * that matters at closing time. Shared by the till's Sales tab and the taxi's
+ * Rides tab, because both are the same question about a different `origin`.
+ */
+@Composable
+private fun SettledList(origin: String, noun: String) {
+    val context = LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val store = remember { TabStore(context) }
+    val mine = remember(version) { store.all().filter { it.origin == origin } }
+    val waiting = mine.filter { it.state == "settled" }
+    val done = mine.filter { it.state == "paid" || it.state == "paid_oob" }
+    val today = remember { java.util.Calendar.getInstance().apply {
+        set(java.util.Calendar.HOUR_OF_DAY, 0); set(java.util.Calendar.MINUTE, 0)
+        set(java.util.Calendar.SECOND, 0)
+    }.timeInMillis }
+    val earnedToday = done.filter { it.settledAt >= today }.sumOf { it.totalPxmr }
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+            Spacer(Modifier.height(16.dp))
+            Text(
+                "Today",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            val shown = Amounts.show(context, earnedToday)
+            Text(shown.primary, style = MaterialTheme.typography.displayLarge)
+            shown.secondary?.let {
+                Text(it, style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+
+        if (waiting.isNotEmpty()) {
+            SettledSection("Billed — waiting", waiting)
+        }
+        if (done.isNotEmpty()) {
+            SettledSection("Settled", done)
+        }
+        if (mine.isEmpty()) {
+            Text(
+                "No ${noun}s yet today.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(24.dp),
+            )
+        }
+        Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun SettledSection(label: String, tabs: List<RunningTab>) {
+    val context = LocalContext.current
+    Text(
+        label,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 24.dp, top = 20.dp, bottom = 8.dp),
+    )
+    Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+        Column {
+            tabs.sortedByDescending { it.settledAt }.forEach { t ->
+                val who = remember(t.personaHex) {
+                    ContactStore(context).all()
+                        .firstOrNull { it.personaHex == t.personaHex }?.displayName()
+                        ?: "${t.personaHex.take(8)}…"
+                }
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(who, style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            when (t.state) {
+                                "settled" -> if (t.seenTx != null) "payment seen — settling"
+                                    else "billed, unpaid"
+                                "paid_oob" -> "paid outside DUCAT ✓"
+                                else -> "paid ✓"
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (t.state == "settled")
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            else MaterialTheme.ducat.settled,
+                        )
+                    }
+                    Text(
+                        "${formatXmr(t.totalPxmr)} XMR",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontFamily = FontFamily.Monospace,
+                    )
+                }
+            }
+        }
+    }
+}

@@ -430,67 +430,73 @@ fun ModesScreen() {
     val modes = remember { org.ducatproject.ducat.ModeStore(context) }
     var current by remember { mutableStateOf(modes.current()) }
 
-    // One at a time, enforced here: switching one on switches the rest off. A
-    // device that is simultaneously a till and a taxi meter has two ideas
-    // about what an arriving payment means.
-    fun pick(m: org.ducatproject.ducat.Mode, on: Boolean) {
-        current = if (on) m else org.ducatproject.ducat.Mode.None
-        modes.set(current)
-        org.ducatproject.ducat.DucatLog.i("Mode", "switched to $current")
+    // A picker, not toggles: a mode is what this device *is* right now, and a
+    // thing can only be one thing. Choosing one hands the whole app to that
+    // job; Personal is the wallet-and-chat app this list starts from.
+    fun pick(m: org.ducatproject.ducat.Mode) {
+        current = m
+        modes.set(m)
+        org.ducatproject.ducat.DucatLog.i("Mode", "switched to $m")
     }
+
+    val options = listOf(
+        Triple(
+            org.ducatproject.ducat.Mode.None, "Personal",
+            "Your wallet, chats and activity. The default.",
+        ),
+        Triple(
+            org.ducatproject.ducat.Mode.Pos, "Point of sale",
+            "A register: ring up items or type a total, show one code — " +
+                "bill and receipt travel the conversation it opens.",
+        ),
+        Triple(
+            org.ducatproject.ducat.Mode.BarTab, "Bar tab",
+            "A tab book: scan once, add all night, one bill at close. " +
+                "They can pay after they leave.",
+        ),
+        Triple(
+            org.ducatproject.ducat.Mode.Taxi, "Taxi",
+            "Fares and a meter: watch a stand for hails, rate in writing " +
+                "when the meter starts, the bill shows the minutes.",
+        ),
+        Triple(
+            org.ducatproject.ducat.Mode.Donate, "Donations",
+            "A standing code any Monero wallet can give to. No app needed " +
+                "on their side.",
+        ),
+    )
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
         Text(
-            "A mode changes what this device leads with. Switch one on and the " +
-                "Home tab becomes that job until you switch it off. One at a time.",
+            "Pick what this device is right now. A mode takes over the whole " +
+                "app until you come back here and pick Personal.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(16.dp))
 
         Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
-                ModeRow(
-                    "Point of sale",
-                    "Ring up a sale, show one code — the bill and the receipt " +
-                        "travel the conversation it opens.",
-                    current == org.ducatproject.ducat.Mode.Pos,
-                ) { pick(org.ducatproject.ducat.Mode.Pos, it) }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                ModeRow(
-                    "Bar tab",
-                    "A running tab per customer — scan once, add all night, one " +
-                        "bill at close. They can pay after they leave.",
-                    current == org.ducatproject.ducat.Mode.BarTab,
-                ) { pick(org.ducatproject.ducat.Mode.BarTab, it) }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                ModeRow(
-                    "Taxi",
-                    "The rate goes in writing when the meter starts; the bill " +
-                        "shows the minutes.",
-                    current == org.ducatproject.ducat.Mode.Taxi,
-                ) { pick(org.ducatproject.ducat.Mode.Taxi, it) }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                ModeRow(
-                    "Donate",
-                    "A standing code any Monero wallet can give to. No app needed " +
-                        "on their side.",
-                    current == org.ducatproject.ducat.Mode.Donate,
-                ) { pick(org.ducatproject.ducat.Mode.Donate, it) }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                ModeRow(
-                    "Hail a ride",
-                    "Post where you're going on a stand drivers watch. The one " +
-                        "who takes it lands in your chat.",
-                    current == org.ducatproject.ducat.Mode.Hail,
-                ) { pick(org.ducatproject.ducat.Mode.Hail, it) }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                ModeRow(
-                    "Drive",
-                    "Watch a stand, take hails. Quote and meet in the chat; " +
-                        "bill at the end like any ride.",
-                    current == org.ducatproject.ducat.Mode.Drive,
-                ) { pick(org.ducatproject.ducat.Mode.Drive, it) }
+            Column(Modifier.padding(vertical = 4.dp)) {
+                options.forEachIndexed { i, (mode, title, detail) ->
+                    if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    Row(
+                        Modifier.fillMaxWidth()
+                            .clickable { pick(mode) }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = current == mode, onClick = { pick(mode) })
+                        Spacer(Modifier.width(8.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(title, style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                detail,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
             }
         }
     }

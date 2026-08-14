@@ -1,6 +1,10 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -33,17 +37,19 @@ private const val TAG = "Hail"
 private const val HAIL_TTL_SECS = 15L * 60
 
 /**
- * The rider's half of §15.12: post a notice, wait for the claim.
+ * The rider's half of §15.12, as a card on the personal Home screen.
  *
- * What goes on the board is deliberately nothing: a claim-once card, a coarse
- * destination, an offer, an expiry. The driver who claims the card lands in
- * an ordinary conversation, and everything after that — precise pickup,
- * quote, the ride, the bill, the payment — is machinery this app already had.
- * An unbonded hail is a mutual promise, like flagging a cab; the screen says
- * so rather than implying a dispatcher stands behind it.
+ * Hailing is a moment, not a job — the modes list is for people running a
+ * till or a meter all day, and a rider is neither. So the hail lives where a
+ * rider already is: under their balance, folded until wanted. What goes on
+ * the board is deliberately nothing: a claim-once card, a coarse destination,
+ * an offer, an expiry; the driver who claims it lands in an ordinary
+ * conversation, and an unbonded hail is a mutual promise, like flagging a
+ * cab — the card says so rather than implying a dispatcher stands behind it.
  */
 @Composable
-fun HailScreen() {
+fun HailCard() {
+    var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var cell by remember { mutableStateOf("") }
     var dest by remember { mutableStateOf("") }
@@ -81,20 +87,35 @@ fun HailScreen() {
         }
     }
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
-        Text("Hail a ride", style = MaterialTheme.typography.headlineSmall)
-        Spacer(Modifier.height(4.dp))
-        Text(
-            "Your hail goes on a public board drivers nearby watch. It carries " +
-                "your destination and offer — never your exact location. The " +
-                "driver who takes it lands in your chat, where the rest happens.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(16.dp))
+    Spacer(Modifier.height(12.dp))
+    Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+    Column(Modifier.fillMaxWidth().padding(16.dp)) {
+        Row(
+            Modifier.fillMaxWidth().clickable { if (posted == null) expanded = !expanded },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("🚕", style = MaterialTheme.typography.headlineSmall)
+            Spacer(Modifier.width(10.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Hail a ride", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    if (posted != null) "Hail standing — waiting for a driver"
+                    else "Post where you're going to a stand drivers watch.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (posted == null) {
+                Icon(
+                    if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    null, tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
 
         val p = posted
-        if (p == null) {
+        if (p == null && expanded) {
+            Spacer(Modifier.height(12.dp))
             OutlinedTextField(
                 value = cell, onValueChange = { cell = it.take(64) },
                 label = { Text("Stand") },
@@ -148,6 +169,7 @@ fun HailScreen() {
                             PostedHail(theCell, sub, card.inboxKey)
                         }.onSuccess {
                             posted = it
+                            expanded = false
                             status = "Posted. Waiting for a driver…"
                             DucatLog.i(TAG, "hail posted at ${it.cell} subkey ${it.subkey}")
                         }.onFailure {
@@ -171,30 +193,24 @@ fun HailScreen() {
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
             )
-        } else {
-            Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp)) {
-                    Text("Hail standing at ${p.cell}",
-                        style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(4.dp))
-                    Text(status ?: "Waiting for a driver…",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.height(12.dp))
-                    LinearProgressIndicator(Modifier.fillMaxWidth())
-                    Spacer(Modifier.height(12.dp))
-                    OutlinedButton(
-                        onClick = {
-                            val gone = p
-                            posted = null; status = null
-                            kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
-                                runCatching { standPost(gone.cell, gone.subkey, ByteArray(0)) }
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) { Text("Take it down") }
-                }
-            }
+        } else if (p != null) {
+            Spacer(Modifier.height(10.dp))
+            Text("Standing at ${p.cell}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(8.dp))
+            LinearProgressIndicator(Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
+            OutlinedButton(
+                onClick = {
+                    val gone = p
+                    posted = null; status = null
+                    kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
+                        runCatching { standPost(gone.cell, gone.subkey, ByteArray(0)) }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Take it down") }
         }
 
         status?.let {
@@ -209,6 +225,7 @@ fun HailScreen() {
             Text(it, color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall)
         }
+    }
     }
 }
 

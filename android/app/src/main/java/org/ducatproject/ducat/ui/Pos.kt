@@ -47,6 +47,13 @@ fun PosScreen() {
     var basket by remember { mutableStateOf(listOf<BillItem>()) }
     var taxPxmr by remember { mutableStateOf(0L) }
     var charging by remember { mutableStateOf(false) }
+    // Two registers, one till: itemised for the shop that rings up lines,
+    // quick for the coffee cart that only ever needs a number. Both end in
+    // the same card, the same bill, the same receipt — quick just bills one
+    // line named "Sale", because a §16.13 bill must still add up.
+    var quick by remember { mutableStateOf(false) }
+    var quickAmount by remember { mutableStateOf("") }
+    var quickFiat by remember { mutableStateOf(Amounts.preferFiat(context)) }
 
     val total = basket.sumOf { it.amountPxmr } + taxPxmr
 
@@ -79,7 +86,70 @@ fun PosScreen() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                SegmentedButton(
+                    selected = !quick, onClick = { quick = false },
+                    shape = SegmentedButtonDefaults.itemShape(0, 2),
+                    icon = {},
+                ) { Text("Items") }
+                SegmentedButton(
+                    selected = quick, onClick = { quick = true },
+                    shape = SegmentedButtonDefaults.itemShape(1, 2),
+                    icon = {},
+                ) { Text("Quick amount") }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        if (quick) {
+            val rate = remember { RateStore(context).cached()?.first }
+            val cur = remember { Amounts.currency(context) }
+            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(
+                        value = quickAmount,
+                        onValueChange = { quickAmount = it },
+                        label = { Text(if (quickFiat) "Total ($cur)" else "Total (XMR)") },
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
+                        ),
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.headlineSmall,
+                    )
+                    if (rate != null) {
+                        Spacer(Modifier.width(8.dp))
+                        TextButton(onClick = { quickFiat = !quickFiat }) {
+                            Text(if (quickFiat) cur else "XMR")
+                        }
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                val pxmr = quickAmount.trim().toDoubleOrNull()?.let { v ->
+                    if (quickFiat && rate != null) ((v / rate) * 1e12).toLong()
+                    else if (!quickFiat) (v * 1e12).toLong()
+                    else null
+                }?.takeIf { it > 0 }
+                Button(
+                    onClick = {
+                        basket = listOf(BillItem("Sale", pxmr!!))
+                        taxPxmr = 0L
+                        quickAmount = ""
+                        charging = true
+                    },
+                    enabled = pxmr != null,
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                ) {
+                    Text(
+                        pxmr?.let { "Request ${Amounts.show(context, it).primary}" }
+                            ?: "Request payment",
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+                Spacer(Modifier.height(24.dp))
+            }
+            return@Column
         }
 
         PosAddLine { d, a -> basket = basket + BillItem(d, a) }

@@ -14,7 +14,11 @@ import android.content.Context
  * One at a time. A device that is simultaneously a till and a taxi meter has
  * two ideas about what an arriving payment means.
  */
-enum class Mode { None, Pos, BarTab, Taxi, Donate, Hail, Drive }
+// None is Personal — the default, the wallet-and-chat app. Hail is gone from
+// this list on purpose: hailing is a rider's moment, not a job, and it lives
+// as a card on the personal Home screen. Drive folded into Taxi, because a
+// taxi finds fares and runs a meter with the same hands.
+enum class Mode { None, Pos, BarTab, Taxi, Donate }
 
 class ModeStore(context: Context) {
     private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)

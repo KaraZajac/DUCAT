@@ -42,6 +42,7 @@ fun ActivityScreen() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val events = remember(version) { Ledger.build(context) }
+    val pending = remember(version) { Ledger.openRequests(context) }
     val tip = remember(version) { Wallet.balances(context).tip }
     var open by remember { mutableStateOf<Ledger.Event?>(null) }
 
@@ -91,6 +92,61 @@ fun ActivityScreen() {
     }
 
     LazyColumn(Modifier.fillMaxSize()) {
+        // The uncleared half of the statement: money asked for and not yet
+        // moved, in either direction. A bank shows pending card holds for the
+        // same reason — the balance alone under-describes the situation.
+        if (pending.isNotEmpty()) {
+            item {
+                Text(
+                    "Awaiting",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 4.dp),
+                )
+            }
+            items(pending) { r ->
+                val shown = Amounts.show(context, r.amountPxmr)
+                ListItem(
+                    modifier = Modifier.clickable {
+                        org.ducatproject.ducat.MainActivity.openChat.value = r.contactHex
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                    ),
+                    leadingContent = {
+                        Icon(
+                            Icons.Filled.Schedule, null,
+                            tint = MaterialTheme.colorScheme.outline,
+                        )
+                    },
+                    headlineContent = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                if (r.theyAsked) "${r.counterparty} asks for"
+                                else "You asked ${r.counterparty} for",
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            Spacer(Modifier.weight(1f))
+                            Text(shown.primary, fontWeight = FontWeight.SemiBold)
+                        }
+                    },
+                    supportingContent = {
+                        Text(
+                            (if (r.items.isNotEmpty())
+                                "${r.items.size} item(s) · " else "") + whenText(r.timestamp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                    },
+                )
+            }
+            item {
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    modifier = Modifier.padding(vertical = 4.dp),
+                )
+            }
+        }
         items(events) { e -> EventRow(e) { open = e } }
     }
 }
@@ -172,12 +228,33 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
                     }
                 }
                 Spacer(Modifier.height(2.dp))
-                Text(
-                    if (e.provisional) "Reading the transaction…" else who(e),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (e.provisional) MaterialTheme.ducat.changePending
-                    else MaterialTheme.colorScheme.onSurface,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        if (e.provisional) "Reading the transaction…" else who(e),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (e.provisional) MaterialTheme.ducat.changePending
+                        else MaterialTheme.colorScheme.onSurface,
+                    )
+                    if (e.receipted) {
+                        Spacer(Modifier.width(6.dp))
+                        // The paperwork chip: this payment has a receipt in a
+                        // thread, which is what separates a DUCAT payment from
+                        // a bare transfer.
+                        Text(
+                            "🧾 receipt",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.ducat.settled,
+                        )
+                    }
+                }
+                e.note?.let {
+                    Text(
+                        "“$it”",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                    )
+                }
                 Text(
                     when {
                         e.pending -> "Sending — not yet in a block"

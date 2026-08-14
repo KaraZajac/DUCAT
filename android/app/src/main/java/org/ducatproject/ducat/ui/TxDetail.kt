@@ -128,6 +128,55 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
                 note = if (e.pending) "Unchanged until the spend is seen on chain." else null,
             )
 
+            // The half a bank statement never has: what the money was *for*,
+            // from the receipt that names this transaction (§16.13). A bare
+            // transfer shows nothing here — which is itself the argument for
+            // paying through DUCAT.
+            if (e.items.isNotEmpty() || e.receipted || e.contactHex != null) {
+                Section("Paperwork")
+                if (e.items.isNotEmpty()) {
+                    Card(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(horizontal = 14.dp, vertical = 8.dp)) {
+                            e.items.forEach { i ->
+                                Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+                                    Text(
+                                        i.description,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    Text(
+                                        formatXmr(i.amountPxmr),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontFamily = FontFamily.Monospace,
+                                    )
+                                }
+                            }
+                            e.taxPxmr?.let {
+                                Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+                                    Text("tax", style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.weight(1f))
+                                    Text(formatXmr(it),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontFamily = FontFamily.Monospace)
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(6.dp))
+                }
+                if (e.receipted) {
+                    Field(
+                        "Receipt", "🧾 in the conversation",
+                        note = "Issued by the payee, naming this transaction.",
+                    )
+                }
+                e.contactHex?.let { hex ->
+                    TextButton(onClick = {
+                        org.ducatproject.ducat.MainActivity.openChat.value = hex
+                    }) { Text("Open the conversation") }
+                }
+            }
+
             Section("On the chain")
             if (e.txid.isNotEmpty()) {
                 Field("Transaction", e.txid, mono = true, copyable = true)

@@ -195,6 +195,17 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         tab = Tab.Home
     }
 
+    // The mode owns the whole scaffold (§15.11): a till is a different app
+    // from a wallet, and the drawer is the one shared door between them.
+    val modeV by ContactStore.changes.collectAsState()
+    val appMode = remember(modeV) { ModeStore(context).current() }
+    // Picking a mode should land you *in* it, not leave the picker on top.
+    LaunchedEffect(appMode) {
+        (overlay as? Overlay.Drawer)?.let {
+            if (it.section == Section.Modes) overlay = Overlay.None
+        }
+    }
+
     ModalNavigationDrawer(
         drawerState = drawer,
         drawerContent = {
@@ -234,6 +245,14 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 return@ModalNavigationDrawer
             }
             Overlay.None -> {}
+        }
+
+        // A job takes the whole screen. Overlays (chat, drawer sections) have
+        // already returned above, so a notification can still drop the till
+        // into the conversation it names and back lands in the shell.
+        if (appMode != Mode.None) {
+            org.ducatproject.ducat.ui.ModeShell(appMode) { scope.launch { drawer.open() } }
+            return@ModalNavigationDrawer
         }
 
         // The whole send/request flow: who first, then how much, with contacts
@@ -385,23 +404,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     // stance, not a feature: the person behind a counter rings
                     // up sale after sale, and making them navigate to it before
                     // every customer is making them do it forty times a shift.
-                    Tab.Home -> {
-                        val mv by ContactStore.changes.collectAsState()
-                        val mode = remember(mv) { ModeStore(context).current() }
-                        when (mode) {
-                            Mode.Pos -> org.ducatproject.ducat.ui.PosScreen()
-                            Mode.BarTab -> org.ducatproject.ducat.ui.BarTabScreen()
-                            Mode.Taxi -> org.ducatproject.ducat.ui.TaxiScreen()
-                            Mode.Donate -> org.ducatproject.ducat.ui.DonateScreen()
-                            Mode.Hail -> org.ducatproject.ducat.ui.HailScreen()
-                            Mode.Drive -> org.ducatproject.ducat.ui.DriveScreen()
-                            Mode.None -> Column(Modifier.verticalScroll(rememberScrollState())) {
-                                HomeScreen(
-                                    onTopUp = { tab = Tab.Accounts },
-                                    onSeeActivity = { tab = Tab.Activity },
-                                )
-                            }
-                        }
+                    Tab.Home -> Column(Modifier.verticalScroll(rememberScrollState())) {
+                        HomeScreen(
+                            onTopUp = { tab = Tab.Accounts },
+                            onSeeActivity = { tab = Tab.Activity },
+                        )
                     }
                     Tab.Accounts -> AccountsScreen()
                     Tab.Activity -> ActivityScreen()
@@ -438,6 +445,10 @@ private fun HomeScreen(onTopUp: () -> Unit, onSeeActivity: () -> Unit) {
         onTopUp = onTopUp,
         sync = b,
     )
+
+    // The one job that belongs on the personal screen: hailing is a rider's
+    // moment, not an operating mode, and it lives under the balance.
+    org.ducatproject.ducat.ui.HailCard()
 
     // The nudge that keeps §4.3 true: the bundle carries the relationships
     // now, so every contact made after the last export is one a restore will
