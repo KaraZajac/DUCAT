@@ -86,6 +86,25 @@ fn state_path(who: &str) -> String {
     }
 }
 
+/// One-time ids the peer has already consumed, so the published bundle can
+/// stop advertising them (§16.11). A missing file is an empty ledger.
+fn used_one_time_ids() -> std::collections::HashSet<u32> {
+    std::fs::read_to_string(state_path("claimant-used"))
+        .unwrap_or_default()
+        .split(',')
+        .filter_map(|v| v.trim().parse().ok())
+        .collect()
+}
+
+fn record_used_one_time_id(id: u32) {
+    let mut used = used_one_time_ids();
+    if used.insert(id) {
+        let mut v: Vec<String> = used.iter().map(|i| i.to_string()).collect();
+        v.sort();
+        let _ = std::fs::write(state_path("claimant-used"), v.join(","));
+    }
+}
+
 /// Derived rather than stored: the harness needs the same prekeys back in a
 /// later process, and a seed is one field instead of a key ring. A real client
 /// stores the secrets and deletes each on use (§16.11).
@@ -149,7 +168,15 @@ async fn append(
     // makes is also a prekey refresh. Writing None here was why the app's
     // cached copy of this harness's bundle could only ever shrink — it burned
     // a key per message and nothing ever restocked the shelf.
-    let (_, bundle) = prekeys(0x80);
+    //
+    // And pruned of consumed ids, per §16.11's table: republishing the full
+    // list re-advertised keys the peer had already spent, their client took
+    // the refresh as the spec commands, sealed the next message to a key this
+    // side had consumed, and the read refused it as a replay. Observed live,
+    // one message after the first bill.
+    let (_, mut bundle) = prekeys(0x80);
+    let used = used_one_time_ids();
+    bundle.one_time.retain(|k| !used.contains(&k.id));
     let head = LogHead {
         version: 1,
         suite: 1,
@@ -406,6 +433,42 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+/// Bill the thread: one itemised PAYMENT_REQUEST (§16.13, §15.11).
+///
+/// `items` is "desc=pxmr,desc=pxmr"; the amount is their sum, because the sum
+/// rule is checked by every conformant reader and a bill that does not add up
+/// is refused. `payto` rides in the request itself (§16.13's self-contained
+/// destination).
+pub async fn bill(items_arg: &str, payto: &str) -> Result<(), Box<dyn std::error::Error>> {
+    send_money_message(items_arg, Some(payto.to_string()), MessageKind::PaymentRequest).await
+}
+
+/// Receipt for what actually arrived (§16.13): same shape as a bill, kind 3,
+/// tip as a visible line so the sum rule holds over the amount received.
+pub async fn receipt(items_arg: &str) -> Result<(), Box<dyn std::error::Error>> {
+    send_money_message(items_arg, None, MessageKind::Receipt).await
+}
+
+async fn send_money_message(
+    items_arg: &str,
+    payto: Option<String>,
+    kind: MessageKind,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let items: Vec<(String, u64)> = items_arg
+        .split(',')
+        .filter(|s| !s.is_empty())
+        .map(|kv| {
+            let (d, a) = kv.split_once('=').ok_or("items are desc=pxmr,desc=pxmr")?;
+            Ok::<_, Box<dyn std::error::Error>>((d.to_string(), a.parse::<u64>()?))
+        })
+        .collect::<Result<_, _>>()?;
+    if items.is_empty() {
+        return Err("a bill needs at least one line".into());
+    }
+    let total: u64 = items.iter().map(|(_, a)| a).sum();
+    bill_or_say(Some((items, total, payto, kind)), "").await
+}
+
 /// Say something in a thread that already exists.
 ///
 /// The card is single use by design — it is the handshake, not the channel —
@@ -414,11 +477,18 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
 /// (§16.12's refresh), which is exactly what that field is for: no round trip
 /// to a peer who may not be there.
 pub async fn say(text: &str) -> Result<(), Box<dyn std::error::Error>> {
-    use std::str::FromStr;
-    println!("\n\x1b[1mDUCAT — say\x1b[0m\n");
     if text.is_empty() {
         return Err("nothing to say — pass the message after --say".into());
     }
+    bill_or_say(None, text).await
+}
+
+async fn bill_or_say(
+    billing: Option<(Vec<(String, u64)>, u64, Option<String>, MessageKind)>,
+    text: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    use std::str::FromStr;
+    println!("\n\x1b[1mDUCAT — {}\x1b[0m\n", if billing.is_some() { "bill" } else { "say" });
     let st = std::fs::read_to_string(state_path("claimant"))
         .map_err(|_| "no claimed contact on this machine")?;
     let mut it = st.lines();
@@ -492,15 +562,33 @@ pub async fn say(text: &str) -> Result<(), Box<dyn std::error::Error>> {
         )
     };
 
-    let m = Message {
-        version: 1, suite: 1, seq, prev,
-        body: text.to_string(),
-        timestamp: std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)?
-            .as_secs(),
-        kind: MessageKind::Text,
-        amount_pxmr: None, txid: None, payto: None,
-        items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
+    let m = match &billing {
+        None => Message {
+            version: 1, suite: 1, seq, prev,
+            body: text.to_string(),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)?
+                .as_secs(),
+            kind: MessageKind::Text,
+            amount_pxmr: None, txid: None, payto: None,
+            items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
+        },
+        Some((items, total, payto, kind)) => Message {
+            version: 1, suite: 1, seq, prev,
+            body: if *kind == MessageKind::Receipt { "Receipt — thank you".to_string() }
+                  else { "Your fare".to_string() },
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)?
+                .as_secs(),
+            kind: *kind,
+            amount_pxmr: Some(*total),
+            txid: None,
+            payto: payto.clone(),
+            items: items.iter().map(|(d, a)| LineItem {
+                description: d.clone(), amount_pxmr: *a,
+            }).collect(),
+            tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
+        },
     };
     let (chosen, fs) = their_bundle.select();
     if !fs {
@@ -512,7 +600,13 @@ pub async fn say(text: &str) -> Result<(), Box<dyn std::error::Error>> {
         .map_err(|e| format!("seal: {e:?}"))?;
     let sealed = SealedMessage { version: 1, suite: 1, prekey_id: chosen.id, enc, ciphertext: ct };
     append(&rc, &mine, seq, &sealed.to_value().encode()).await?;
-    println!("  \x1b[35m→\x1b[0m [{seq}] {text}");
+    match &billing {
+        None => println!("  \x1b[35m→\x1b[0m [{seq}] {text}"),
+        Some((items, total, _, kind)) => {
+            for (d, a) in items { println!("  \x1b[35m→\x1b[0m   {d}  {a} pXMR"); }
+            println!("  \x1b[35m→\x1b[0m [{seq}] {kind:?} total {total} pXMR");
+        }
+    }
 
     // Move the stored chain link forward, or the *next* say is the stranded
     // one. Read-modify-write of the whole file: the first four lines are
@@ -767,6 +861,9 @@ async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn
                 .map_err(|e| format!("{e:?}"))?;
             match store.open_and_consume(&sealed, &hpke::message_info(1), &aad) {
                 Ok((plain, one_time)) => {
+                    if one_time {
+                        record_used_one_time_id(sealed.prekey_id);
+                    }
                     let m = Message::from_value(decode(&plain).map_err(|e| format!("{e:?}"))?)
                         .map_err(|e| format!("{e:?}"))?;
                     if let Err(e) = check_message(&m, seq, prev.as_ref()) {

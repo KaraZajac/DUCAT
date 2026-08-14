@@ -68,6 +68,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(i) = args.iter().position(|a| a == "--say") {
         return mailbox::say(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
     }
+    if let Some(i) = args.iter().position(|a| a == "--bill") {
+        return mailbox::bill(
+            args.get(i + 1).map(|s| s.as_str()).unwrap_or(""),
+            args.get(i + 2).map(|s| s.as_str()).unwrap_or(""),
+        ).await;
+    }
+    if let Some(i) = args.iter().position(|a| a == "--receipt") {
+        return mailbox::receipt(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
+    }
     if let Some(i) = args.iter().position(|a| a == "--card-collect") {
         return mailbox::collect(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
     }
