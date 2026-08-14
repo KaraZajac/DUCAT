@@ -853,6 +853,14 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -906,10 +914,18 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_generate_writer_keys(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_geohashcenter(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_geohashencode(`latE7`: Long,`lonE7`: Long,`precision`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_geohashneighbors(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_hail_decode(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_hail_encode(`info`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_haversinem(`lat1E7`: Long,`lon1E7`: Long,`lat2E7`: Long,`lon2E7`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
     fun uniffi_ducat_mobile_fn_func_import_backup(`blob`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_log_still_readable(`seq`: Long,`nextSeq`: Long,`subkeyCount`: Int,uniffi_out_err: UniffiRustCallStatus, 
@@ -1160,9 +1176,17 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_generate_writer_keys(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_geohashcenter(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_geohashencode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_geohashneighbors(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_hail_decode(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_hail_encode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_haversinem(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_import_backup(
     ): Short
@@ -1338,10 +1362,22 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_generate_writer_keys() != 64976.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_geohashcenter() != 56272.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_geohashencode() != 53067.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_geohashneighbors() != 18841.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_hail_decode() != 8878.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_hail_encode() != 59791.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_haversinem() != 44993.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_import_backup() != 12814.toShort()) {
@@ -1607,6 +1643,29 @@ public object FfiConverterULong: FfiConverter<ULong, Long> {
 
     override fun write(value: ULong, buf: ByteBuffer) {
         buf.putLong(value.toLong())
+    }
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterLong: FfiConverter<Long, Long> {
+    override fun lift(value: Long): Long {
+        return value
+    }
+
+    override fun read(buf: ByteBuffer): Long {
+        return buf.getLong()
+    }
+
+    override fun lower(value: Long): Long {
+        return value
+    }
+
+    override fun allocationSize(value: Long) = 8UL
+
+    override fun write(value: Long, buf: ByteBuffer) {
+        buf.putLong(value)
     }
 }
 
@@ -2151,7 +2210,9 @@ data class HailInfo (
     var `card`: kotlin.String, 
     var `dest`: kotlin.String, 
     var `farePxmr`: kotlin.ULong?, 
-    var `expiry`: kotlin.ULong
+    var `expiry`: kotlin.ULong, 
+    var `originCell`: kotlin.String?, 
+    var `destCell`: kotlin.String?
 ) {
     
     companion object
@@ -2167,6 +2228,8 @@ public object FfiConverterTypeHailInfo: FfiConverterRustBuffer<HailInfo> {
             FfiConverterString.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
         )
     }
 
@@ -2174,7 +2237,9 @@ public object FfiConverterTypeHailInfo: FfiConverterRustBuffer<HailInfo> {
             FfiConverterString.allocationSize(value.`card`) +
             FfiConverterString.allocationSize(value.`dest`) +
             FfiConverterOptionalULong.allocationSize(value.`farePxmr`) +
-            FfiConverterULong.allocationSize(value.`expiry`)
+            FfiConverterULong.allocationSize(value.`expiry`) +
+            FfiConverterOptionalString.allocationSize(value.`originCell`) +
+            FfiConverterOptionalString.allocationSize(value.`destCell`)
     )
 
     override fun write(value: HailInfo, buf: ByteBuffer) {
@@ -2182,6 +2247,8 @@ public object FfiConverterTypeHailInfo: FfiConverterRustBuffer<HailInfo> {
             FfiConverterString.write(value.`dest`, buf)
             FfiConverterOptionalULong.write(value.`farePxmr`, buf)
             FfiConverterULong.write(value.`expiry`, buf)
+            FfiConverterOptionalString.write(value.`originCell`, buf)
+            FfiConverterOptionalString.write(value.`destCell`, buf)
     }
 }
 
@@ -4330,6 +4397,34 @@ public object FfiConverterSequenceULong: FfiConverterRustBuffer<List<kotlin.ULon
 /**
  * @suppress
  */
+public object FfiConverterSequenceLong: FfiConverterRustBuffer<List<kotlin.Long>> {
+    override fun read(buf: ByteBuffer): List<kotlin.Long> {
+        val len = buf.getInt()
+        return List<kotlin.Long>(len) {
+            FfiConverterLong.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.Long>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterLong.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.Long>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterLong.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceBoolean: FfiConverterRustBuffer<List<kotlin.Boolean>> {
     override fun read(buf: ByteBuffer): List<kotlin.Boolean> {
         val len = buf.getInt()
@@ -4878,6 +4973,40 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
     }
     
 
+    @Throws(ContactException::class) fun `geohashCenter`(`cell`: kotlin.String): List<kotlin.Long> {
+            return FfiConverterSequenceLong.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_geohashcenter(
+        FfiConverterString.lower(`cell`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * §15.12's geocells, straight from core so the phone and the vectors agree
+         * on every boundary.
+         */
+    @Throws(ContactException::class) fun `geohashEncode`(`latE7`: kotlin.Long, `lonE7`: kotlin.Long, `precision`: kotlin.UInt): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_geohashencode(
+        FfiConverterLong.lower(`latE7`),FfiConverterLong.lower(`lonE7`),FfiConverterUInt.lower(`precision`),_status)
+}
+    )
+    }
+    
+
+    @Throws(ContactException::class) fun `geohashNeighbors`(`cell`: kotlin.String): List<kotlin.String> {
+            return FfiConverterSequenceString.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_geohashneighbors(
+        FfiConverterString.lower(`cell`),_status)
+}
+    )
+    }
+    
+
     @Throws(ContactException::class) fun `hailDecode`(`bytes`: kotlin.ByteArray): HailInfo {
             return FfiConverterTypeHailInfo.lift(
     uniffiRustCallWithError(ContactException) { _status ->
@@ -4893,6 +5022,15 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_hail_encode(
         FfiConverterTypeHailInfo.lower(`info`),_status)
+}
+    )
+    }
+    
+ fun `haversineM`(`lat1E7`: kotlin.Long, `lon1E7`: kotlin.Long, `lat2E7`: kotlin.Long, `lon2E7`: kotlin.Long): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_haversinem(
+        FfiConverterLong.lower(`lat1E7`),FfiConverterLong.lower(`lon1E7`),FfiConverterLong.lower(`lat2E7`),FfiConverterLong.lower(`lon2E7`),_status)
 }
     )
     }

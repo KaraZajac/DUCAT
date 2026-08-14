@@ -1287,42 +1287,6 @@ private class VoiceRecorder(private val context: android.content.Context) {
     }
 }
 
-/**
- * One location fix, sent as a link anyone's map can open.
- *
- * Explicitly one-shot: a single fix the user chose to send, never a stream —
- * continuous location is a different feature with a different threat model,
- * and this deliberately is not it.
- */
-private fun grabLocation(
-    context: android.content.Context,
-    done: (String?) -> Unit,
-) {
-    val lm = context.getSystemService(android.location.LocationManager::class.java)
-        ?: return done(null)
-    val send = { loc: android.location.Location? ->
-        done(loc?.let {
-            "📍 Where I am: https://www.openstreetmap.org/?mlat=%.5f&mlon=%.5f#map=17/%.5f/%.5f"
-                .format(it.latitude, it.longitude, it.latitude, it.longitude)
-        })
-    }
-    try {
-        val provider = when {
-            lm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ->
-                android.location.LocationManager.GPS_PROVIDER
-            lm.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER) ->
-                android.location.LocationManager.NETWORK_PROVIDER
-            else -> return done(null)
-        }
-        if (android.os.Build.VERSION.SDK_INT >= 30) {
-            lm.getCurrentLocation(provider, null, context.mainExecutor) { send(it) }
-        } else {
-            send(lm.getLastKnownLocation(provider))
-        }
-    } catch (e: SecurityException) {
-        done(null)
-    }
-}
 
 /**
  * A contact, shared as the readable claim it is (§16.2).

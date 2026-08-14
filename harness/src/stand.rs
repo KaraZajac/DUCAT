@@ -161,6 +161,22 @@ pub async fn hail_watch(cell: &str) -> Result<(), Box<dyn std::error::Error>> {
     use ducat_core::cbor::decode;
     use ducat_core::contact::HailNotice;
 
+    // A geocell means the 3×3 (§15.12): the named cell and its 8 neighbours,
+    // because a rider fifty metres over a border is otherwise invisible.
+    let cells: Vec<String> = if let Some(gh) = cell.strip_prefix("geo:") {
+        let mut v = vec![cell.to_string()];
+        v.extend(ducat_core::geo::geohash_neighbors(gh)
+            .map_err(|e| format!("{e:?}"))?
+            .into_iter()
+            .map(|n| format!("geo:{n}")));
+        v
+    } else {
+        vec![cell.to_string()]
+    };
+    if cells.len() > 1 {
+        println!("\n\x1b[1mDUCAT — driving the 3×3 around {cell:?}\x1b[0m\n");
+        return hail_watch_cells(&cells).await;
+    }
     println!("\n\x1b[1mDUCAT — driving at {cell:?}\x1b[0m\n");
     let (pk, sk) = cell_keypair(cell);
     let enc = SharedSecret::new(CRYPTO_KIND_VLD0, cell_encryption(cell));
@@ -242,4 +258,64 @@ pub async fn peek_seals() -> Result<(), Box<dyn std::error::Error>> {
     rc.close_dht_record(log).await?;
     api.shutdown().await;
     Ok(())
+}
+
+/// The 3×3 watch: nine boards, ensured pinned, polled round-robin.
+async fn hail_watch_cells(cells: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    use ducat_core::cbor::decode;
+    use ducat_core::contact::HailNotice;
+
+    let (api, _c) = crate::veilid::start("drive").await?;
+    let rc = api.routing_context()?;
+    let mut keys = Vec::new();
+    for cell in cells {
+        let name = cell.strip_prefix("geo:").map(|g| format!("geo:{g}")).unwrap_or_else(|| cell.clone());
+        let (pk, sk) = cell_keypair(&name);
+        let enc = SharedSecret::new(CRYPTO_KIND_VLD0, cell_encryption(&name));
+        let key = api
+            .get_dht_record_key(schema(), PublicKey::new(CRYPTO_KIND_VLD0, pk.clone()), Some(enc))
+            .await?;
+        if rc.open_dht_record(key.clone(), None).await.is_err() {
+            let kp = KeyPair::new(CRYPTO_KIND_VLD0, BareKeyPair::new(pk, sk));
+            if let Ok(desc) = rc.create_dht_record(CRYPTO_KIND_VLD0, schema(), Some(kp)).await {
+                let _ = rc.close_dht_record(desc.key().clone()).await;
+            }
+            rc.open_dht_record(key.clone(), None).await?;
+        }
+        println!("  board {} = {}", cell, key);
+        keys.push((cell.clone(), key));
+    }
+
+    let now = || std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
+
+    loop {
+        for (cell, key) in &keys {
+            for subkey in 0..8u32 {
+                let Ok(Some(v)) = rc.get_dht_value(key.clone(), subkey, true).await else { continue };
+                if v.data().is_empty() { continue }
+                let Ok(val) = decode(v.data()) else { continue };
+                let Ok(n) = HailNotice::from_value(val) else { continue };
+                if n.expiry <= now() { continue }
+                println!(
+                    "  [{cell} slot {subkey}] to {:?} ({}), {}, stands {}s",
+                    n.dest,
+                    n.dest_cell.as_deref().unwrap_or("no cell"),
+                    n.fare_pxmr.map(|f| format!("offers {f} pXMR"))
+                        .unwrap_or_else(|| "quote me".into()),
+                    n.expiry - now(),
+                );
+                println!("\n  taking it — claiming the card…");
+                for (_, k) in &keys { let _ = rc.close_dht_record(k.clone()).await; }
+                api.shutdown().await;
+                crate::mailbox::claim(&n.card).await?;
+                println!("\n  \x1b[32mhail taken\x1b[0m — talk with --say");
+                return Ok(());
+            }
+        }
+        print!(".");
+        use std::io::Write as _;
+        std::io::stdout().flush().ok();
+        tokio::time::sleep(std::time::Duration::from_secs(4)).await;
+    }
 }

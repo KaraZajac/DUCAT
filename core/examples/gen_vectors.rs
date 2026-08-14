@@ -1585,6 +1585,8 @@ fn contact_cases() -> Vec<J> {
             dest: "airport, terminal B".into(),
             fare_pxmr: Some(5_000_000_000),
             expiry: 1_800_000_000,
+            origin_cell: None,
+            dest_cell: None,
         };
         ncase("hail_valid",
             "A rider on a public board: a claim-once card, sixty-four bytes of destination, an offer, an expiry. The card is the only field with teeth — claiming it is what §16.9 verifies.",
@@ -1612,6 +1614,25 @@ fn contact_cases() -> Vec<J> {
             "A version this reader does not speak, refused rather than guessed at.",
             &HailNotice { version: 2, ..base.clone() },
             Some((RejectCode::Malformed, "unknown version")));
+        // §15.12's geocells: coarse place on the board, capped by construction.
+        ncase("hail_with_geocells",
+            "An Uber-shaped hail: origin and destination as geocells no finer than ~1.2 km, so a driver reads the job — distance to the fare, length of the ride — before claiming. The cells are the only location the board ever carries.",
+            &HailNotice {
+                origin_cell: Some("dqcjq8".into()),
+                dest_cell: Some("dqcjnb".into()),
+                ..base.clone()
+            }, None);
+        ncase("hail_origin_only",
+            "Either cell may travel alone; a rider may name where they are and keep where they are going for the thread.",
+            &HailNotice { origin_cell: Some("u4pruy".into()), ..base.clone() }, None);
+        ncase("hail_cell_too_precise",
+            "Precision 7 is ~150 m — a location, not an area. The cap is what makes 'no precise location on the board' true by construction rather than by good manners.",
+            &HailNotice { origin_cell: Some("dqcjq8h".into()), ..base.clone() },
+            Some((RejectCode::Malformed, "cell too precise")));
+        ncase("hail_cell_bad_alphabet",
+            "'a' is not in the geohash alphabet; a cell that cannot name a place is bait for whatever parses it.",
+            &HailNotice { dest_cell: Some("dqcja".into()), ..base.clone() },
+            Some((RejectCode::Malformed, "not a geohash")));
     }
 
     v

@@ -948,6 +948,8 @@ HEAD_BUNDLE = 177
 HEAD_READ, HEAD_RING = 201, 202
 # HAIL_NOTICE (§16.17) — the one object on a public surface.
 HN_VERSION, HN_CARD, HN_DEST, HN_FARE, HN_EXPIRY = 203, 204, 205, 206, 207
+HN_ORIGIN_CELL, HN_DEST_CELL = 208, 209
+GEOHASH_ALPHABET = set("0123456789bcdefghjkmnpqrstuvwxyz")
 MAX_ATTACHMENT_BYTES = 1_048_576 - 64
 MAX_MIME_CHARS, MAX_FILENAME_CHARS = 64, 96
 ITEM_DESC, ITEM_AMOUNT = 185, 186
@@ -1161,6 +1163,17 @@ def parse_hail_notice(buf):
     if out["fare"] == 0:
         raise Reject("Malformed", "a zero fare offer is a missing one")
     out["expiry"] = _take(b, HN_EXPIRY, "uint", "expiry")
+    out["origin_cell"] = b.pop(HN_ORIGIN_CELL, (None, None))[1]
+    out["dest_cell"] = b.pop(HN_DEST_CELL, (None, None))[1]
+    for cell in (out["origin_cell"], out["dest_cell"]):
+        if cell is None:
+            continue
+        # §16.17: a board cell is a geohash no finer than precision 6 —
+        # ~1.2 km is the floor, by construction.
+        if not (1 <= len(cell) <= 6):
+            raise Reject("Malformed", "a board cell is 1..=6 characters")
+        if not set(cell.lower()) <= GEOHASH_ALPHABET:
+            raise Reject("Malformed", "not a geohash")
     _finish(b)
     return out
 
@@ -1177,6 +1190,10 @@ def run_hail_notice(cases, r):
             if n["fare"] is not None:
                 fields.append((HN_FARE, ("uint", n["fare"])))
             fields.append((HN_EXPIRY, ("uint", n["expiry"])))
+            if n["origin_cell"] is not None:
+                fields.append((HN_ORIGIN_CELL, ("text", n["origin_cell"])))
+            if n["dest_cell"] is not None:
+                fields.append((HN_DEST_CELL, ("text", n["dest_cell"])))
             return _reencode_map(fields)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

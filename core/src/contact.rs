@@ -1192,6 +1192,14 @@ pub struct HailNotice {
     pub fare_pxmr: Option<u64>,
     /// Unix seconds. A reader MUST drop an expired notice unrendered.
     pub expiry: u64,
+    /// Where the pickup roughly is — a geocell no finer than precision 6
+    /// (~1.2 km), refused above. What lets a driver judge the distance to
+    /// the fare before claiming, priced in privacy the §15.12 board already
+    /// spends: the notice is pinned to a cell anyway.
+    pub origin_cell: Option<String>,
+    /// Where the ride roughly goes, same cap. The Uber-shaped triage field:
+    /// a driver reads the job, not just the presence of one.
+    pub dest_cell: Option<String>,
 }
 
 impl HailNotice {
@@ -1204,6 +1212,12 @@ impl HailNotice {
             m.insert(f::HN_FARE, Value::Uint(fare));
         }
         m.insert(f::HN_EXPIRY, Value::Uint(self.expiry));
+        if let Some(c) = &self.origin_cell {
+            m.insert(f::HN_ORIGIN_CELL, Value::Text(c.clone()));
+        }
+        if let Some(c) = &self.dest_cell {
+            m.insert(f::HN_DEST_CELL, Value::Text(c.clone()));
+        }
         Value::Map(m)
     }
 
@@ -1236,8 +1250,18 @@ impl HailNotice {
             ));
         }
         let expiry = r.uint(f::HN_EXPIRY)?;
+        let origin_cell = r.opt_text(f::HN_ORIGIN_CELL, 6)?;
+        let dest_cell = r.opt_text(f::HN_DEST_CELL, 6)?;
+        for cell in [&origin_cell, &dest_cell].into_iter().flatten() {
+            if !crate::geo::valid_board_cell(cell) {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a board cell is a geohash no finer than precision 6",
+                ));
+            }
+        }
         r.finish()?;
-        Ok(HailNotice { version, card, dest, fare_pxmr, expiry })
+        Ok(HailNotice { version, card, dest, fare_pxmr, expiry, origin_cell, dest_cell })
     }
 }
 
@@ -1252,6 +1276,8 @@ mod hail_tests {
             dest: "terminal B".into(),
             fare_pxmr: Some(5_000_000_000),
             expiry: 1_800_000_000,
+            origin_cell: Some("dqcjq8".into()),
+            dest_cell: Some("dqcjnb".into()),
         }
     }
 

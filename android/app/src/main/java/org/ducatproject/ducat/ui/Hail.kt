@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.foundation.horizontalScroll
+import org.ducatproject.ducat.Amounts
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -54,10 +57,34 @@ fun HailCard() {
     var cell by remember { mutableStateOf("") }
     var dest by remember { mutableStateOf("") }
     var fareXmr by remember { mutableStateOf("") }
+    // Geocells (§15.12): where I am, coarsened to ~1.2 km by construction.
+    var myFix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
+    var originCell by remember { mutableStateOf<String?>(null) }
+    var destPlace by remember { mutableStateOf<org.ducatproject.ducat.PlaceStore.Place?>(null) }
+    var savePlaceOpen by remember { mutableStateOf(false) }
+    val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { }
     var posted by remember { mutableStateOf<PostedHail?>(null) }
     var status by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    fun locate() {
+        if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            return
+        }
+        grabFix(context) { fix ->
+            myFix = fix
+            originCell = fix?.let { (la, lo) ->
+                runCatching { uniffi.ducat_mobile.geohashEncode(la, lo, 6u) }.getOrNull()
+            }
+            originCell?.let { cell = "geo:$it" }
+            if (fix == null) error = "could not get a location fix"
+        }
+    }
 
     // The wait: the card's inbox answers when a driver claims (§16.9's
     // machinery unchanged). Polling, not a watch — a hail lives minutes.
@@ -116,25 +143,89 @@ fun HailCard() {
         val p = posted
         if (p == null && expanded) {
             Spacer(Modifier.height(12.dp))
-            OutlinedTextField(
-                value = cell, onValueChange = { cell = it.take(64) },
-                label = { Text("Stand") },
-                placeholder = { Text("stand:city-neighborhood") },
-                modifier = Modifier.fillMaxWidth(), singleLine = true,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = cell, onValueChange = { cell = it.take(64) },
+                    label = { Text("Stand") },
+                    placeholder = { Text("📍 or type a stand name") },
+                    modifier = Modifier.weight(1f), singleLine = true,
+                )
+                Spacer(Modifier.width(8.dp))
+                FilledTonalIconButton(onClick = { locate() }) {
+                    Icon(Icons.Filled.MyLocation, "Use my location")
+                }
+            }
             Text(
-                "A stand is a name both sides know — agree on it the way you " +
-                    "agree on a corner.",
+                originCell?.let { "Your area: geo:$it (~1.2 km — never finer, by design)" }
+                    ?: "📍 uses your area, ~1.2 km coarse. Or type a name both " +
+                        "sides know, like a corner.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
             )
             Spacer(Modifier.height(10.dp))
-            OutlinedTextField(
-                value = dest, onValueChange = { dest = it.take(64) },
-                label = { Text("Where to") },
-                placeholder = { Text("airport, terminal B") },
-                modifier = Modifier.fillMaxWidth(), singleLine = true,
-            )
+            // Destination: a saved place carries coordinates (so a fare can be
+            // estimated); free text stays for "quote me". No geocoder, on
+            // purpose — an address search would hand every destination you
+            // ever type to whoever runs the server.
+            val places = remember(savePlaceOpen) {
+                org.ducatproject.ducat.PlaceStore(context).all()
+            }
+            if (places.isNotEmpty()) {
+                Row(
+                    Modifier.fillMaxWidth().horizontalScroll(
+                        androidx.compose.foundation.rememberScrollState()
+                    ),
+                ) {
+                    places.forEach { pl ->
+                        FilterChip(
+                            selected = destPlace?.name == pl.name,
+                            onClick = {
+                                destPlace = if (destPlace?.name == pl.name) null else pl
+                                if (destPlace != null) dest = pl.name
+                            },
+                            label = { Text(pl.name) },
+                            modifier = Modifier.padding(end = 6.dp),
+                        )
+                    }
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = dest,
+                    onValueChange = { dest = it.take(64); destPlace = null },
+                    label = { Text("Where to") },
+                    placeholder = { Text("airport, terminal B") },
+                    modifier = Modifier.weight(1f), singleLine = true,
+                )
+                Spacer(Modifier.width(8.dp))
+                TextButton(onClick = { savePlaceOpen = true }) { Text("Save here") }
+            }
+            // The estimate: base + per-km + per-min over great-circle × 1.3,
+            // fiat-first like every cab rate card, snapshotted to piconero at
+            // post (§15.11's meter rule). It seeds an offer, nothing more.
+            val estimate = remember(myFix, destPlace) {
+                val fix = myFix ?: return@remember null
+                val d = destPlace ?: return@remember null
+                val meters = uniffi.ducat_mobile.haversineM(
+                    fix.first, fix.second, d.latE7, d.lonE7,
+                ).toLong()
+                org.ducatproject.ducat.Fare.estimate(context, meters)?.let { it to meters }
+            }
+            estimate?.let { (est, meters) ->
+                val (fiat, pxmr) = est
+                val cur = remember { Amounts.currency(context) }
+                LaunchedEffect(pxmr) {
+                    if (fareXmr.isBlank()) fareXmr = formatXmr(pxmr)
+                }
+                Text(
+                    "≈ %.1f km by road · est. %s %.2f–%.2f".format(
+                        meters / 1000.0 * org.ducatproject.ducat.Fare.CIRCUITY,
+                        cur, fiat * 0.8, fiat * 1.2,
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Spacer(Modifier.height(10.dp))
             OutlinedTextField(
                 value = fareXmr, onValueChange = { fareXmr = it },
@@ -155,6 +246,11 @@ fun HailCard() {
                                 context, MyProfile(context).name(),
                                 (HAIL_TTL_SECS * 2).toULong(), purpose = "hail",
                             )
+                            val destCell = destPlace?.let { d ->
+                                runCatching {
+                                    uniffi.ducat_mobile.geohashEncode(d.latE7, d.lonE7, 6u)
+                                }.getOrNull()
+                            }
                             val bytes = hailEncode(
                                 HailInfo(
                                     card = card.uri,
@@ -162,6 +258,8 @@ fun HailCard() {
                                     farePxmr = fare,
                                     expiry = (System.currentTimeMillis() / 1000 +
                                         HAIL_TTL_SECS).toULong(),
+                                    originCell = originCell,
+                                    destCell = destCell,
                                 )
                             )
                             val sub = (0..7).random().toUInt()
@@ -227,9 +325,52 @@ fun HailCard() {
         }
     }
     }
+    if (savePlaceOpen) SavePlaceDialog { savePlaceOpen = false }
 }
 
 private data class PostedHail(val cell: String, val subkey: UInt, val inboxKey: String)
+
+/** Name where you stand; it becomes a destination chip with coordinates. */
+@Composable
+private fun SavePlaceDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    var name by remember { mutableStateOf("") }
+    var fix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
+    LaunchedEffect(Unit) { grabFix(context) { fix = it } }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Save this place") },
+        text = {
+            Column {
+                Text(
+                    if (fix != null) "Location fixed. Name it:"
+                    else "Getting a fix…",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = name, onValueChange = { name = it.take(24) },
+                    label = { Text("Name (home, work, airport…)") },
+                    singleLine = true,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    fix?.let { (la, lo) ->
+                        org.ducatproject.ducat.PlaceStore(context)
+                            .add(org.ducatproject.ducat.PlaceStore.Place(name.trim(), la, lo))
+                    }
+                    onDismiss()
+                },
+                enabled = fix != null && name.isNotBlank(),
+            ) { Text("Save") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
+}
 
 /**
  * The driver's half: watch a stand, take a hail.
@@ -242,29 +383,67 @@ private data class PostedHail(val cell: String, val subkey: UInt, val inboxKey: 
 fun DriveScreen() {
     val context = LocalContext.current
     var cell by remember { mutableStateOf("") }
-    var watching by remember { mutableStateOf<String?>(null) }
+    // The watch set: one named stand, or a geocell and its 8 neighbours —
+    // §15.12's 3×3, because a rider fifty metres over a border is otherwise
+    // invisible.
+    var watching by remember { mutableStateOf<List<String>?>(null) }
+    var myFix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
     var notices by remember { mutableStateOf<List<SeenHail>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { }
+    fun driveHere() {
+        if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            return
+        }
+        grabFix(context) { fix ->
+            if (fix == null) { error = "could not get a location fix"; return@grabFix }
+            myFix = fix
+            runCatching {
+                val home = uniffi.ducat_mobile.geohashEncode(fix.first, fix.second, 6u)
+                val cells = listOf(home) +
+                    uniffi.ducat_mobile.geohashNeighbors(home)
+                cell = "geo:$home"
+                watching = cells.map { "geo:$it" }
+            }.onFailure { error = it.message }
+        }
+    }
 
     LaunchedEffect(watching) {
-        val c = watching ?: return@LaunchedEffect
+        val cells = watching ?: return@LaunchedEffect
+        // Round-robin three boards per tick: nine sequential force-refreshed
+        // reads every cycle is a phone doing nothing else.
+        var at = 0
+        val found = HashMap<String, List<SeenHail>>()
         while (true) {
-            val fresh = withContext(Dispatchers.IO) {
-                runCatching {
-                    val now = System.currentTimeMillis() / 1000
-                    standRead(c).mapNotNull { n ->
-                        runCatching { hailDecode(n.data) }.getOrNull()?.let { h ->
-                            if (h.expiry.toLong() > now) {
-                                SeenHail(n.subkey, h.card, h.dest,
-                                    h.farePxmr?.toLong(), h.expiry.toLong())
-                            } else null
+            val batch = cells.drop(at).take(3).ifEmpty { cells.take(3) }
+            at = (at + 3) % cells.size
+            val now = System.currentTimeMillis() / 1000
+            for (c in batch) {
+                val got = withContext(Dispatchers.IO) {
+                    runCatching {
+                        standRead(c).mapNotNull { n ->
+                            runCatching { hailDecode(n.data) }.getOrNull()?.let { h ->
+                                if (h.expiry.toLong() > now) {
+                                    SeenHail(
+                                        c, n.subkey, h.card, h.dest,
+                                        h.farePxmr?.toLong(), h.expiry.toLong(),
+                                        h.originCell, h.destCell,
+                                    )
+                                } else null
+                            }
                         }
-                    }
-                }.getOrNull()
+                    }.getOrNull()
+                }
+                if (got != null) found[c] = got
             }
-            if (fresh != null) notices = fresh
-            delay(6_000)
+            notices = found.values.flatten().sortedByDescending { it.expiry }
+            delay(4_000)
         }
     }
 
@@ -280,22 +459,43 @@ fun DriveScreen() {
         )
         Spacer(Modifier.height(16.dp))
 
+        if (watching == null) {
+            Button(
+                onClick = { driveHere() },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+            ) {
+                Icon(Icons.Filled.MyLocation, null, Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Drive here — watch my area")
+            }
+            Spacer(Modifier.height(8.dp))
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = cell, onValueChange = { cell = it.take(64) },
                 label = { Text("Stand") },
-                placeholder = { Text("stand:city-neighborhood") },
+                placeholder = { Text("stand name, or 📍 above") },
                 modifier = Modifier.weight(1f), singleLine = true,
                 enabled = watching == null,
             )
             Spacer(Modifier.width(8.dp))
             if (watching == null) {
-                Button(onClick = { watching = cell.trim() },
+                Button(onClick = { watching = listOf(cell.trim()) },
                     enabled = cell.isNotBlank()) { Text("Watch") }
             } else {
                 OutlinedButton(onClick = {
                     watching = null; notices = emptyList()
                 }) { Text("Stop") }
+            }
+        }
+        watching?.let { w ->
+            if (w.size > 1) {
+                Text(
+                    "Watching your cell and its 8 neighbours — " +
+                        w.first().removePrefix("geo:") + " +8",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                )
             }
         }
 
@@ -319,6 +519,36 @@ fun DriveScreen() {
                             fontFamily = FontFamily.Monospace,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        // The triage line (§16.17): how far to the fare, how
+                        // long the job — from the cells, all the board knows.
+                        val fix = myFix
+                        val triage = remember(n) {
+                            runCatching {
+                                val parts = ArrayList<String>()
+                                val o = n.originCell?.let {
+                                    uniffi.ducat_mobile.geohashCenter(it)
+                                }
+                                if (o != null && fix != null) {
+                                    val m = uniffi.ducat_mobile.haversineM(
+                                        fix.first, fix.second, o[0], o[1])
+                                    parts += "pickup ~%.1f km".format(m.toLong() / 1000.0)
+                                }
+                                val d = n.destCell?.let {
+                                    uniffi.ducat_mobile.geohashCenter(it)
+                                }
+                                if (o != null && d != null) {
+                                    val m = uniffi.ducat_mobile.haversineM(
+                                        o[0], o[1], d[0], d[1])
+                                    parts += "trip ~%.1f km".format(
+                                        m.toLong() / 1000.0 * org.ducatproject.ducat.Fare.CIRCUITY)
+                                }
+                                parts.joinToString(" · ")
+                            }.getOrDefault("")
+                        }
+                        if (triage.isNotEmpty()) {
+                            Text(triage, style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                         val mins = (n.expiry - System.currentTimeMillis() / 1000) / 60
                         Text("stands for another ${mins} min",
                             style = MaterialTheme.typography.labelSmall,
@@ -327,7 +557,7 @@ fun DriveScreen() {
                         Button(
                             onClick = {
                                 busy = true; error = null
-                                val theCell = watching!!
+                                val theCell = n.cell
                                 kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
                                     runCatching {
                                         val scanned = readContactCard(n.card)
@@ -367,9 +597,13 @@ fun DriveScreen() {
 }
 
 private data class SeenHail(
+    /** Which board it was pinned to — where the clear goes after a claim. */
+    val cell: String,
     val subkey: UInt,
     val card: String,
     val dest: String,
     val farePxmr: Long?,
     val expiry: Long,
+    val originCell: String?,
+    val destCell: String?,
 )

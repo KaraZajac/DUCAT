@@ -834,6 +834,48 @@
       "name": "hail_wrong_version",
       "notice_hex": "a518cb0218cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218ce1b000000012a05f20018cf1a6b49d200",
       "why": "A version this reader does not speak, refused rather than guessed at."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a718cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218ce1b000000012a05f20018cf1a6b49d20018d0666471636a713818d1666471636a6e62"
+      },
+      "kind": "hail.notice",
+      "name": "hail_with_geocells",
+      "notice_hex": "a718cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218ce1b000000012a05f20018cf1a6b49d20018d0666471636a713818d1666471636a6e62",
+      "why": "An Uber-shaped hail: origin and destination as geocells no finer than ~1.2 km, so a driver reads the job — distance to the fare, length of the ride — before claiming. The cells are the only location the board ever carries."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a618cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218ce1b000000012a05f20018cf1a6b49d20018d066753470727579"
+      },
+      "kind": "hail.notice",
+      "name": "hail_origin_only",
+      "notice_hex": "a618cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218ce1b000000012a05f20018cf1a6b49d20018d066753470727579",
+      "why": "Either cell may travel alone; a rider may name where they are and keep where they are going for the thread."
+    },
+    {
+      "expect": {
+        "hint": "cell too precise",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "hail.notice",
+      "name": "hail_cell_too_precise",
+      "notice_hex": "a618cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218ce1b000000012a05f20018cf1a6b49d20018d0676471636a713868",
+      "why": "Precision 7 is ~150 m — a location, not an area. The cap is what makes 'no precise location on the board' true by construction rather than by good manners."
+    },
+    {
+      "expect": {
+        "hint": "not a geohash",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "hail.notice",
+      "name": "hail_cell_bad_alphabet",
+      "notice_hex": "a618cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218ce1b000000012a05f20018cf1a6b49d20018d1656471636a61",
+      "why": "'a' is not in the geohash alphabet; a cell that cannot name a place is bait for whatever parses it."
     }
   ],
   "category": "contact"

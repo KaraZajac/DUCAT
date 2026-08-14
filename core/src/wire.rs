@@ -186,6 +186,10 @@ pub mod f {
     pub const HN_DEST: u64 = 205;
     pub const HN_FARE: u64 = 206;
     pub const HN_EXPIRY: u64 = 207;
+    // Geocells on a hail (§16.17): both capped at precision 6 by rule, so a
+    // public board never carries better than ~1.2 km.
+    pub const HN_ORIGIN_CELL: u64 = 208;
+    pub const HN_DEST_CELL: u64 = 209;
 
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;

@@ -865,6 +865,8 @@ pub struct HailInfo {
     pub dest: String,
     pub fare_pxmr: Option<u64>,
     pub expiry: u64,
+    pub origin_cell: Option<String>,
+    pub dest_cell: Option<String>,
 }
 
 #[uniffi::export]
@@ -875,6 +877,8 @@ pub fn hail_encode(info: HailInfo) -> Result<Vec<u8>, ContactError> {
         dest: info.dest,
         fare_pxmr: info.fare_pxmr,
         expiry: info.expiry,
+        origin_cell: info.origin_cell,
+        dest_cell: info.dest_cell,
     };
     // Encode-then-decode: what goes onto a public board is only ever bytes
     // this implementation would itself accept.
@@ -895,5 +899,30 @@ pub fn hail_decode(bytes: Vec<u8>) -> Result<HailInfo, ContactError> {
         dest: n.dest,
         fare_pxmr: n.fare_pxmr,
         expiry: n.expiry,
+        origin_cell: n.origin_cell,
+        dest_cell: n.dest_cell,
     })
+}
+
+/// §15.12's geocells, straight from core so the phone and the vectors agree
+/// on every boundary.
+#[uniffi::export]
+pub fn geohashEncode(lat_e7: i64, lon_e7: i64, precision: u32) -> Result<String, ContactError> {
+    ducat_core::geo::geohash_encode(lat_e7, lon_e7, precision).map_err(refuse)
+}
+
+#[uniffi::export]
+pub fn geohashNeighbors(cell: String) -> Result<Vec<String>, ContactError> {
+    ducat_core::geo::geohash_neighbors(&cell).map_err(refuse)
+}
+
+#[uniffi::export]
+pub fn geohashCenter(cell: String) -> Result<Vec<i64>, ContactError> {
+    let (lat, lon) = ducat_core::geo::geohash_center(&cell).map_err(refuse)?;
+    Ok(vec![lat, lon])
+}
+
+#[uniffi::export]
+pub fn haversineM(lat1_e7: i64, lon1_e7: i64, lat2_e7: i64, lon2_e7: i64) -> u64 {
+    ducat_core::geo::haversine_m(lat1_e7, lon1_e7, lat2_e7, lon2_e7)
 }
