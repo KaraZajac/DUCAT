@@ -233,9 +233,11 @@ private fun Field(
         onValueChange = onChange,
         label = { Text(label) },
         isError = problem != null,
-        supportingText = {
-            problem?.let { Text(it) } ?: hint?.let { Text(it) }
-        },
+        // Examples live inside the box as placeholders and leave when typing
+        // starts; a permanent caption under every field read as clutter.
+        // Below the box is reserved for actual problems.
+        placeholder = { hint?.let { Text(it) } },
+        supportingText = problem?.let { { Text(it) } },
         singleLine = true,
         modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
     )
