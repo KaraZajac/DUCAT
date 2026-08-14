@@ -89,3 +89,69 @@ fun RouteMap(
         },
     )
 }
+
+/**
+ * The driver's watch: demand as pins. One marker per standing hail at its
+ * pickup cell's centre (~1.2 km coarse — the board's honesty carries to the
+ * map), the driver's own position beside them. Tap a pin to read the job.
+ */
+@Composable
+fun DriverMap(
+    me: Pair<Long, Long>?,
+    fares: List<Pair<Pair<Long, Long>, String>>,
+    onFareTap: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    AndroidView(
+        modifier = modifier.clipToBounds(),
+        factory = { ctx ->
+            val cfg = org.osmdroid.config.Configuration.getInstance()
+            cfg.load(ctx, ctx.getSharedPreferences("osmdroid", 0))
+            cfg.userAgentValue = "DUCAT/0.8 (github.com/KaraZajac/DUCAT)"
+            cfg.osmdroidBasePath = java.io.File(ctx.cacheDir, "osm")
+            cfg.osmdroidTileCache = java.io.File(ctx.cacheDir, "osm/tiles")
+            MapView(ctx).apply {
+                setTileSource(TileSourceFactory.MAPNIK)
+                setMultiTouchControls(true)
+                clipToOutline = true
+                isVerticalMapRepetitionEnabled = false
+                isHorizontalMapRepetitionEnabled = false
+                minZoomLevel = 3.0
+                controller.setZoom(13.0)
+            }
+        },
+        update = { map ->
+            map.overlays.clear()
+            val pts = ArrayList<GeoPoint>()
+            me?.let {
+                val g = GeoPoint(it.first / 1e7, it.second / 1e7)
+                pts += g
+                map.overlays.add(Marker(map).apply {
+                    position = g; title = "You"
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                })
+            }
+            fares.forEachIndexed { i, (at, label) ->
+                val g = GeoPoint(at.first / 1e7, at.second / 1e7)
+                pts += g
+                map.overlays.add(Marker(map).apply {
+                    position = g; title = label
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    setOnMarkerClickListener { _, _ -> onFareTap(i); true }
+                })
+            }
+            map.post {
+                when {
+                    pts.size >= 2 -> map.zoomToBoundingBox(
+                        BoundingBox.fromGeoPoints(pts).increaseByScale(1.5f), false,
+                    )
+                    pts.size == 1 -> {
+                        map.controller.setZoom(13.0)
+                        map.controller.setCenter(pts[0])
+                    }
+                }
+                map.invalidate()
+            }
+        },
+    )
+}

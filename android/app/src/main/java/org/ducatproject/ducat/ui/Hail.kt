@@ -431,6 +431,56 @@ fun DriveScreen() {
         }
     }
 
+    val takeHailShared: (SeenHail) -> Unit = { taken ->
+                selected = null
+                busy = true; error = null
+                kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
+                    runCatching {
+                        val scanned = readContactCard(taken.card)
+                        Mailbox.claimCard(context, scanned, null)
+                    }.onSuccess { rider ->
+                        runCatching { standPost(taken.cell, taken.subkey, ByteArray(0)) }
+                        runCatching {
+                            val me = org.ducatproject.ducat.MyProfile(context)
+                            val fix = myFix
+                            val o = taken.originCell?.let {
+                                uniffi.ducat_mobile.geohashCenter(it)
+                            }
+                            val etaMin = if (fix != null && o != null) {
+                                org.ducatproject.ducat.Geo.route(
+                                    fix.first, fix.second, o[0], o[1],
+                                )?.let { (it.seconds / 60).coerceAtLeast(1) }
+                                    ?: (uniffi.ducat_mobile.haversineM(
+                                        fix.first, fix.second, o[0], o[1],
+                                    ).toLong() * 2 / 1000).coerceAtLeast(1)
+                            } else null
+                            val car = listOfNotNull(me.carColor(), me.carModel())
+                                .joinToString(" ").ifBlank { null }
+                            val msg = buildString {
+                                append("🚕 On my way")
+                                etaMin?.let { append(" — ETA ~$it min") }
+                                append(".")
+                                car?.let { append(" Look for a $it") }
+                                me.plate()?.let { append(", plate $it") }
+                                if (car != null || me.plate() != null) append(".")
+                            }
+                            Mailbox.send(
+                                context, rider, msg,
+                                org.ducatproject.ducat.PersonaStore(context).personaHex(),
+                            )
+                        }
+                        DucatLog.i(TAG, "took a hail to ${taken.dest}")
+                        withContext(Dispatchers.Main) {
+                            MainActivity.openChat.value = rider.personaHex
+                        }
+                    }.onFailure {
+                        DucatLog.w(TAG, "claim: ${it.message}")
+                        error = "Someone beat you to that one."
+                    }
+                    busy = false
+                }
+    }
+
     LaunchedEffect(watching) {
         val cells = watching ?: return@LaunchedEffect
         // Round-robin three boards per tick: nine sequential force-refreshed
@@ -462,6 +512,86 @@ fun DriveScreen() {
             notices = found.values.flatten().sortedByDescending { it.expiry }
             delay(4_000)
         }
+    }
+
+    if (watching != null) {
+        // On duty: the map is the screen. Demand as pins, me among them,
+        // the cards along the bottom for the same jobs in words.
+        Column(Modifier.fillMaxSize()) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("On duty", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        if ((watching?.size ?: 0) > 1) "watching your area and 8 around it"
+                        else "watching ${watching?.firstOrNull() ?: ""}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
+                OutlinedButton(onClick = { watching = null; notices = emptyList() }) {
+                    Text("Stop")
+                }
+            }
+            androidx.compose.foundation.layout.Box(Modifier.weight(1f).fillMaxWidth()) {
+                DriverMap(
+                    me = myFix,
+                    fares = notices.mapNotNull { n ->
+                        n.originCell?.let {
+                            runCatching { uniffi.ducat_mobile.geohashCenter(it) }.getOrNull()
+                        }?.let { c -> (c[0] to c[1]) to n.dest }
+                    },
+                    onFareTap = { i -> notices.getOrNull(i)?.let { selected = it } },
+                    modifier = Modifier.fillMaxSize(),
+                )
+                if (notices.isEmpty()) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
+                        shape = MaterialTheme.shapes.medium,
+                        modifier = Modifier.align(Alignment.TopCenter).padding(12.dp),
+                    ) {
+                        Text(
+                            "No hails standing — they'll pin here.",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        )
+                    }
+                }
+                androidx.compose.foundation.lazy.LazyRow(
+                    Modifier.align(Alignment.BottomStart).padding(8.dp),
+                ) {
+                    items(notices.size) { i ->
+                        val n = notices[i]
+                        Card(
+                            onClick = { selected = n },
+                            modifier = Modifier.padding(end = 8.dp).width(220.dp),
+                        ) {
+                            Column(Modifier.padding(10.dp)) {
+                                Text(n.dest, style = MaterialTheme.typography.titleSmall,
+                                    maxLines = 1)
+                                Text(
+                                    n.farePxmr?.let {
+                                        val sh = Amounts.show(context, it)
+                                        sh.secondary ?: sh.primary
+                                    } ?: "quote me",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.ducat.settled,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        selected?.let { n ->
+            FareDetail(
+                n = n, myFix = myFix, busy = busy,
+                onTake = takeHailShared, onClose = { selected = null },
+            )
+        }
+        return
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
@@ -663,55 +793,7 @@ fun DriveScreen() {
             n = n,
             myFix = myFix,
             busy = busy,
-            onTake = { taken ->
-                selected = null
-                busy = true; error = null
-                kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
-                    runCatching {
-                        val scanned = readContactCard(taken.card)
-                        Mailbox.claimCard(context, scanned, null)
-                    }.onSuccess { rider ->
-                        runCatching { standPost(taken.cell, taken.subkey, ByteArray(0)) }
-                        runCatching {
-                            val me = org.ducatproject.ducat.MyProfile(context)
-                            val fix = myFix
-                            val o = taken.originCell?.let {
-                                uniffi.ducat_mobile.geohashCenter(it)
-                            }
-                            val etaMin = if (fix != null && o != null) {
-                                org.ducatproject.ducat.Geo.route(
-                                    fix.first, fix.second, o[0], o[1],
-                                )?.let { (it.seconds / 60).coerceAtLeast(1) }
-                                    ?: (uniffi.ducat_mobile.haversineM(
-                                        fix.first, fix.second, o[0], o[1],
-                                    ).toLong() * 2 / 1000).coerceAtLeast(1)
-                            } else null
-                            val car = listOfNotNull(me.carColor(), me.carModel())
-                                .joinToString(" ").ifBlank { null }
-                            val msg = buildString {
-                                append("🚕 On my way")
-                                etaMin?.let { append(" — ETA ~$it min") }
-                                append(".")
-                                car?.let { append(" Look for a $it") }
-                                me.plate()?.let { append(", plate $it") }
-                                if (car != null || me.plate() != null) append(".")
-                            }
-                            Mailbox.send(
-                                context, rider, msg,
-                                org.ducatproject.ducat.PersonaStore(context).personaHex(),
-                            )
-                        }
-                        DucatLog.i(TAG, "took a hail to ${taken.dest}")
-                        withContext(Dispatchers.Main) {
-                            MainActivity.openChat.value = rider.personaHex
-                        }
-                    }.onFailure {
-                        DucatLog.w(TAG, "claim: ${it.message}")
-                        error = "Someone beat you to that one."
-                    }
-                    busy = false
-                }
-            },
+            onTake = takeHailShared,
             onClose = { selected = null },
         )
     }
