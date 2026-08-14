@@ -46,7 +46,14 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     var sheet by remember { mutableStateOf<Sheet?>(null) }
     var confirm by remember { mutableStateOf<Contact?>(null) }
 
-    val shown = all.filter { it.chatVisible }
+    // Most recent conversation first — the list's order *is* its meaning, and
+    // "who did I talk to last" is the question it answers. Threads that have
+    // never spoken sink to the bottom together.
+    val shown = remember(all) {
+        all.filter { it.chatVisible }.sortedByDescending { c ->
+            store.thread(c.personaHex).lastOrNull()?.timestamp ?: 0L
+        }
+    }
     val hidden = all.filterNot { it.chatVisible }
 
     Column(Modifier.fillMaxSize()) {
