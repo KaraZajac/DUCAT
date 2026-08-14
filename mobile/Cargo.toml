@@ -25,6 +25,8 @@ uniffi = { version = "0.28", features = ["cli"] }
 ureq = { version = "2", default-features = false, features = ["tls"] }
 monero-simple-request-rpc = "0.1.0"
 monero-daemon-rpc = "0.2.0"
+sha2 = "0.10"
+ed25519-dalek = "2"
 
 [[bin]]
 name = "uniffi-bindgen"

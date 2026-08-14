@@ -190,7 +190,8 @@
             "contact.details",
             "log.head",
             "log.ring",
-            "message.payment"
+            "message.payment",
+            "hail.notice"
           ]
         },
         "name": {
@@ -1280,6 +1281,69 @@
               },
               "expect": {
                 "$ref": "#/$defs/outcome"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "hail.notice"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "expect",
+              "notice_hex"
+            ],
+            "properties": {
+              "notice_hex": {
+                "$ref": "#/$defs/hex"
+              },
+              "expect": {
+                "type": "object",
+                "required": [
+                  "ok"
+                ],
+                "properties": {
+                  "ok": {
+                    "type": "boolean"
+                  },
+                  "reencodes_to_hex": {
+                    "$ref": "#/$defs/hex"
+                  },
+                  "reject": {
+                    "type": "string"
+                  },
+                  "hint": {
+                    "type": "string"
+                  }
+                },
+                "if": {
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "reencodes_to_hex"
+                  ]
+                },
+                "else": {
+                  "required": [
+                    "reject"
+                  ]
+                }
               }
             }
           }

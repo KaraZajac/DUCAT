@@ -393,6 +393,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             Mode.BarTab -> org.ducatproject.ducat.ui.BarTabScreen()
                             Mode.Taxi -> org.ducatproject.ducat.ui.TaxiScreen()
                             Mode.Donate -> org.ducatproject.ducat.ui.DonateScreen()
+                            Mode.Hail -> org.ducatproject.ducat.ui.HailScreen()
+                            Mode.Drive -> org.ducatproject.ducat.ui.DriveScreen()
                             Mode.None -> Column(Modifier.verticalScroll(rememberScrollState())) {
                                 HomeScreen(
                                     onTopUp = { tab = Tab.Accounts },

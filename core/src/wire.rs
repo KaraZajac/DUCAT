@@ -179,6 +179,13 @@ pub mod f {
     // Read watermark and ring size on a log head (§16.16, §16.12).
     pub const HEAD_READ: u64 = 201;
     pub const HEAD_RING: u64 = 202;
+    // HAIL_NOTICE (§16.17) — the one object that lives on a public board.
+    // (HN_, because §5.2.1's market hail already owns the bare HAIL_ names.)
+    pub const HN_VERSION: u64 = 203;
+    pub const HN_CARD: u64 = 204;
+    pub const HN_DEST: u64 = 205;
+    pub const HN_FARE: u64 = 206;
+    pub const HN_EXPIRY: u64 = 207;
 
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;

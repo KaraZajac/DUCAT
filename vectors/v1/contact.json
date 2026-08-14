@@ -759,6 +759,81 @@
       "name": "attachment_partial",
       "payment_hex": "ad001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f93b718a01a6553f10018c2785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118c35820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18c45818bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18c51a00030d4018c76a696d6167652f6a70656718c8676361742e6a7067",
       "why": "All or nothing: every subset of {record, key, nonce, length, hash, mime} is a trap — fetchable but not decryptable, or decryptable but not verifiable."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a518cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218ce1b000000012a05f20018cf1a6b49d200"
+      },
+      "kind": "hail.notice",
+      "name": "hail_valid",
+      "notice_hex": "a518cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218ce1b000000012a05f20018cf1a6b49d200",
+      "why": "A rider on a public board: a claim-once card, sixty-four bytes of destination, an offer, an expiry. The card is the only field with teeth — claiming it is what §16.9 verifies."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a418cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218cf1a6b49d200"
+      },
+      "kind": "hail.notice",
+      "name": "hail_quote_me",
+      "notice_hex": "a418cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218cf1a6b49d200",
+      "why": "An absent fare is a real posture: name your price. Distinct from zero, which is refused below."
+    },
+    {
+      "expect": {
+        "hint": "zero fare",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "hail.notice",
+      "name": "hail_fare_zero",
+      "notice_hex": "a518cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218ce0018cf1a6b49d200",
+      "why": "A zero fare offer is a missing one wearing a number — two encodings of one meaning (§18.1)."
+    },
+    {
+      "expect": {
+        "hint": "card must be a ducat: URI",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "hail.notice",
+      "name": "hail_card_wrong_scheme",
+      "notice_hex": "a518cb0118cc781868747470733a2f2f6578616d706c652e636f6d2f7269646518cd73616972706f72742c207465726d696e616c204218ce1b000000012a05f20018cf1a6b49d200",
+      "why": "The board is hostile input; a notice whose card is not a ducat: URI is bait for whatever parses the link."
+    },
+    {
+      "expect": {
+        "hint": "empty destination",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "hail.notice",
+      "name": "hail_dest_empty",
+      "notice_hex": "a518cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd6018ce1b000000012a05f20018cf1a6b49d200",
+      "why": "An empty destination says nothing and renders as something."
+    },
+    {
+      "expect": {
+        "hint": "text too long",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "hail.notice",
+      "name": "hail_dest_too_long",
+      "notice_hex": "a518cb0118cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd7841787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787818ce1b000000012a05f20018cf1a6b49d200",
+      "why": "Sixty-four bytes of human words is the cap by construction: the place a notice can say is the cell it is pinned to. More is a channel, and the channel is the thread."
+    },
+    {
+      "expect": {
+        "hint": "unknown version",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "hail.notice",
+      "name": "hail_wrong_version",
+      "notice_hex": "a518cb0218cc783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918cd73616972706f72742c207465726d696e616c204218ce1b000000012a05f20018cf1a6b49d200",
+      "why": "A version this reader does not speak, refused rather than guessed at."
     }
   ],
   "category": "contact"

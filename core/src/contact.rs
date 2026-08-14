@@ -1168,6 +1168,122 @@ pub fn attachment_open(
         .map_err(|_| Reject::with_detail(RejectCode::BadSig, "attachment did not authenticate"))
 }
 
+/// Longest `card` URI a notice may carry (§16.17). A real card is ~500 bytes;
+/// the cap is generous headroom, not an invitation — a board subkey is 32 KiB
+/// and a notice that fills it is an attack, not a hail.
+pub const MAX_HAIL_CARD_CHARS: usize = 1024;
+/// Longest `dest` (§16.17): 64 bytes of human words, no coordinates by
+/// construction — the place a notice can say is the cell it is pinned to.
+pub const MAX_HAIL_DEST_CHARS: usize = 64;
+
+/// A hail notice (§16.17): the one DUCAT object on a public surface.
+///
+/// Short because the surface is hostile. The card is the only field with
+/// teeth — claiming it is what §16.9 verifies; everything else is an
+/// untrusted claim a reader renders at its own judgment.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HailNotice {
+    pub version: u64,
+    /// A `ducat:` card URI, purpose `hail`, claim-once.
+    pub card: String,
+    /// Coarse destination or area — human words, never coordinates.
+    pub dest: String,
+    /// The rider's offer. Absent means "quote me". Zero is `MALFORMED`.
+    pub fare_pxmr: Option<u64>,
+    /// Unix seconds. A reader MUST drop an expired notice unrendered.
+    pub expiry: u64,
+}
+
+impl HailNotice {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::HN_VERSION, Value::Uint(self.version));
+        m.insert(f::HN_CARD, Value::Text(self.card.clone()));
+        m.insert(f::HN_DEST, Value::Text(self.dest.clone()));
+        if let Some(fare) = self.fare_pxmr {
+            m.insert(f::HN_FARE, Value::Uint(fare));
+        }
+        m.insert(f::HN_EXPIRY, Value::Uint(self.expiry));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let version = r.uint(f::HN_VERSION)?;
+        if version != 1 {
+            return Err(Reject::with_detail(RejectCode::Malformed, "unknown hail notice version"));
+        }
+        let card = r.opt_text(f::HN_CARD, MAX_HAIL_CARD_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a hail notice needs a card")
+        })?;
+        if !card.starts_with("ducat:") {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a hail card must be a ducat: URI",
+            ));
+        }
+        let dest = r.opt_text(f::HN_DEST, MAX_HAIL_DEST_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a hail notice needs a destination")
+        })?;
+        if dest.is_empty() {
+            return Err(Reject::with_detail(RejectCode::Malformed, "an empty destination says nothing"));
+        }
+        let fare_pxmr = r.opt_uint(f::HN_FARE)?;
+        if fare_pxmr == Some(0) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a zero fare offer is a missing one",
+            ));
+        }
+        let expiry = r.uint(f::HN_EXPIRY)?;
+        r.finish()?;
+        Ok(HailNotice { version, card, dest, fare_pxmr, expiry })
+    }
+}
+
+#[cfg(test)]
+mod hail_tests {
+    use super::*;
+
+    fn ok_notice() -> HailNotice {
+        HailNotice {
+            version: 1,
+            card: "ducat:abc123".into(),
+            dest: "terminal B".into(),
+            fare_pxmr: Some(5_000_000_000),
+            expiry: 1_800_000_000,
+        }
+    }
+
+    #[test]
+    fn hail_round_trips() {
+        let n = ok_notice();
+        let v = crate::cbor::decode(&n.to_value().encode()).unwrap();
+        assert_eq!(HailNotice::from_value(v).unwrap(), n);
+    }
+
+    #[test]
+    fn hail_rejects_the_malformed_cases() {
+        // Wrong scheme, empty dest, zero fare, wrong version — each refused.
+        let mut bad = ok_notice();
+        bad.card = "https://not-a-card".into();
+        assert!(HailNotice::from_value(bad.to_value()).is_err());
+        let mut bad = ok_notice();
+        bad.dest = "".into();
+        assert!(HailNotice::from_value(bad.to_value()).is_err());
+        let mut bad = ok_notice();
+        bad.fare_pxmr = Some(0);
+        assert!(HailNotice::from_value(bad.to_value()).is_err());
+        let mut bad = ok_notice();
+        bad.version = 2;
+        assert!(HailNotice::from_value(bad.to_value()).is_err());
+        // "Quote me" — fare absent — is fine.
+        let mut ok = ok_notice();
+        ok.fare_pxmr = None;
+        assert!(HailNotice::from_value(ok.to_value()).is_ok());
+    }
+}
+
 #[cfg(test)]
 mod attachment_tests {
     use super::*;

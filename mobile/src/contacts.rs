@@ -839,3 +839,43 @@ fn random32() -> [u8; 32] {
     b
 }
 
+
+/// A hail notice (§16.17), for the app's rider and driver screens.
+#[derive(uniffi::Record)]
+pub struct HailInfo {
+    pub card: String,
+    pub dest: String,
+    pub fare_pxmr: Option<u64>,
+    pub expiry: u64,
+}
+
+#[uniffi::export]
+pub fn hail_encode(info: HailInfo) -> Result<Vec<u8>, ContactError> {
+    let n = ducat_core::contact::HailNotice {
+        version: 1,
+        card: info.card,
+        dest: info.dest,
+        fare_pxmr: info.fare_pxmr,
+        expiry: info.expiry,
+    };
+    // Encode-then-decode: what goes onto a public board is only ever bytes
+    // this implementation would itself accept.
+    let bytes = n.to_value().encode();
+    ducat_core::contact::HailNotice::from_value(
+        decode(&bytes).map_err(refuse)?,
+    ).map_err(refuse)?;
+    Ok(bytes)
+}
+
+#[uniffi::export]
+pub fn hail_decode(bytes: Vec<u8>) -> Result<HailInfo, ContactError> {
+    let n = ducat_core::contact::HailNotice::from_value(
+        decode(&bytes).map_err(refuse)?,
+    ).map_err(refuse)?;
+    Ok(HailInfo {
+        card: n.card,
+        dest: n.dest,
+        fare_pxmr: n.fare_pxmr,
+        expiry: n.expiry,
+    })
+}

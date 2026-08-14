@@ -843,6 +843,16 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -895,6 +905,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_generate_prekeys(`count`: Int,`validSecs`: Long,`startId`: Int,`reuseSignedSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_generate_writer_keys(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_hail_decode(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_hail_encode(`info`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_import_backup(`blob`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -986,6 +1000,12 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_stand_post(`cell`: RustBuffer.ByValue,`subkey`: Int,`data`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    fun uniffi_ducat_mobile_fn_func_stand_read(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_stand_record_key(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_thread_aad(`mineHex`: RustBuffer.ByValue,`theirsHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_verify_thread(`messages`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1140,6 +1160,10 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_generate_writer_keys(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_hail_decode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_hail_encode(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_import_backup(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_log_still_readable(
@@ -1230,6 +1254,12 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_sealed_prekey_id(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_stand_post(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_stand_read(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_stand_record_key(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_thread_aad(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_verify_thread(
@@ -1306,6 +1336,12 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_generate_writer_keys() != 64976.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_hail_decode() != 8878.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_hail_encode() != 59791.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_import_backup() != 12814.toShort()) {
@@ -1441,6 +1477,15 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_stand_post() != 31206.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_stand_read() != 1731.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_stand_record_key() != 60724.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_thread_aad() != 26627.toShort()) {
@@ -2094,6 +2139,49 @@ public object FfiConverterTypeFloatPlan: FfiConverterRustBuffer<FloatPlan> {
     override fun write(value: FloatPlan, buf: ByteBuffer) {
             FfiConverterUInt.write(value.`outputs`, buf)
             FfiConverterULong.write(value.`totalPxmr`, buf)
+    }
+}
+
+
+
+/**
+ * A hail notice (§16.17), for the app's rider and driver screens.
+ */
+data class HailInfo (
+    var `card`: kotlin.String, 
+    var `dest`: kotlin.String, 
+    var `farePxmr`: kotlin.ULong?, 
+    var `expiry`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeHailInfo: FfiConverterRustBuffer<HailInfo> {
+    override fun read(buf: ByteBuffer): HailInfo {
+        return HailInfo(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: HailInfo) = (
+            FfiConverterString.allocationSize(value.`card`) +
+            FfiConverterString.allocationSize(value.`dest`) +
+            FfiConverterOptionalULong.allocationSize(value.`farePxmr`) +
+            FfiConverterULong.allocationSize(value.`expiry`)
+    )
+
+    override fun write(value: HailInfo, buf: ByteBuffer) {
+            FfiConverterString.write(value.`card`, buf)
+            FfiConverterString.write(value.`dest`, buf)
+            FfiConverterOptionalULong.write(value.`farePxmr`, buf)
+            FfiConverterULong.write(value.`expiry`, buf)
     }
 }
 
@@ -3348,6 +3436,41 @@ public object FfiConverterTypeSendResult: FfiConverterRustBuffer<SendResult> {
 
 
 /**
+ * One pinned notice, as raw bytes the caller decodes (§16.17).
+ */
+data class StandNotice (
+    var `subkey`: kotlin.UInt, 
+    var `data`: kotlin.ByteArray
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeStandNotice: FfiConverterRustBuffer<StandNotice> {
+    override fun read(buf: ByteBuffer): StandNotice {
+        return StandNotice(
+            FfiConverterUInt.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: StandNotice) = (
+            FfiConverterUInt.allocationSize(value.`subkey`) +
+            FfiConverterByteArray.allocationSize(value.`data`)
+    )
+
+    override fun write(value: StandNotice, buf: ByteBuffer) {
+            FfiConverterUInt.write(value.`subkey`, buf)
+            FfiConverterByteArray.write(value.`data`, buf)
+    }
+}
+
+
+
+/**
  * A transaction as the chain records it.
  *
  * The point of `key_images` is not display: it is how a wallet works out that
@@ -4452,6 +4575,34 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
         }
     }
 }
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<StandNotice>> {
+    override fun read(buf: ByteBuffer): List<StandNotice> {
+        val len = buf.getInt()
+        return List<StandNotice>(len) {
+            FfiConverterTypeStandNotice.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<StandNotice>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeStandNotice.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<StandNotice>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeStandNotice.write(it, buf)
+        }
+    }
+}
         /**
          * The address a restored key controls, so a user can confirm they restored what
          * they meant to before trusting it with anything.
@@ -4722,6 +4873,26 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_generate_writer_keys(
         _status)
+}
+    )
+    }
+    
+
+    @Throws(ContactException::class) fun `hailDecode`(`bytes`: kotlin.ByteArray): HailInfo {
+            return FfiConverterTypeHailInfo.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_hail_decode(
+        FfiConverterByteArray.lower(`bytes`),_status)
+}
+    )
+    }
+    
+
+    @Throws(ContactException::class) fun `hailEncode`(`info`: HailInfo): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_hail_encode(
+        FfiConverterTypeHailInfo.lower(`info`),_status)
 }
     )
     }
@@ -5422,6 +5593,47 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_sealed_prekey_id(
         FfiConverterByteArray.lower(`sealedBytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Post a notice onto the board at `subkey`. Creates the board if this is the
+         * first pin; opens under the conventional key so what is written decrypts
+         * for anyone who can derive the cell.
+         */
+    @Throws(NodeException::class) fun `standPost`(`cell`: kotlin.String, `subkey`: kotlin.UInt, `data`: kotlin.ByteArray)
+        = 
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_stand_post(
+        FfiConverterString.lower(`cell`),FfiConverterUInt.lower(`subkey`),FfiConverterByteArray.lower(`data`),_status)
+}
+    
+    
+
+        /**
+         * Everything currently pinned to the board: (subkey, bytes) pairs, freshly
+         * fetched. Empty values are cleared slots and are skipped.
+         */
+    @Throws(NodeException::class) fun `standRead`(`cell`: kotlin.String): List<StandNotice> {
+            return FfiConverterSequenceTypeStandNotice.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_stand_read(
+        FfiConverterString.lower(`cell`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The board's record key, computed locally. Costs no network round trip.
+         */
+    @Throws(NodeException::class) fun `standRecordKey`(`cell`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_stand_record_key(
+        FfiConverterString.lower(`cell`),_status)
 }
     )
     }

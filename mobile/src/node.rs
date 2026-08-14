@@ -610,3 +610,138 @@ fn parse_key(s: &str) -> Result<RecordKey, NodeError> {
     use std::str::FromStr;
     RecordKey::from_str(s).map_err(|e| NodeError::Failed(format!("bad record key: {e}")))
 }
+
+// ---------------------------------------------------------------------------
+// Stands (§15.12): rendezvous by convention.
+// ---------------------------------------------------------------------------
+
+/// Derive the stand's owner keypair and encryption key from the cell name.
+///
+/// Both halves are the convention, pinned by §15.12: the opaque record key
+/// derives from the owner public key, and the *values* are encrypted under a
+/// key that rides the record-key handle — so a public board derives that too,
+/// or readers compute the right record and cannot open its values.
+fn stand_material(cell: &str) -> (BareKeyPair, BareSharedSecret) {
+    use sha2::{Digest, Sha256};
+    let seed: [u8; 32] = Sha256::new()
+        .chain_update(b"DUCAT-STAND-v0")
+        .chain_update([0u8])
+        .chain_update(cell.as_bytes())
+        .finalize()
+        .into();
+    let sk = ed25519_dalek::SigningKey::from_bytes(&seed);
+    let pk = sk.verifying_key();
+    let enc: [u8; 32] = Sha256::new()
+        .chain_update(b"DUCAT-STAND-v0-ENC")
+        .chain_update([0u8])
+        .chain_update(cell.as_bytes())
+        .finalize()
+        .into();
+    (
+        BareKeyPair::new(BarePublicKey::new(pk.as_bytes()), BareSecretKey::new(&seed)),
+        BareSharedSecret::new(&enc),
+    )
+}
+
+fn stand_schema() -> DHTSchema {
+    DHTSchema::dflt(8).expect("static schema")
+}
+
+/// The board's record key, computed locally. Costs no network round trip.
+#[uniffi::export]
+pub fn stand_record_key(cell: String) -> Result<String, NodeError> {
+    let (api, rt) = handles()?;
+    let (kp, enc) = stand_material(&cell);
+    rt.block_on(async {
+        let key = api
+            .get_dht_record_key(
+                stand_schema(),
+                PublicKey::new(CRYPTO_KIND_VLD0, kp.key()),
+                Some(SharedSecret::new(CRYPTO_KIND_VLD0, enc)),
+            )
+            .await
+            .map_err(|e| NodeError::Failed(format!("record key: {e}")))?;
+        Ok(key.to_string())
+    })
+}
+
+/// Post a notice onto the board at `subkey`. Creates the board if this is the
+/// first pin; opens under the conventional key so what is written decrypts
+/// for anyone who can derive the cell.
+#[uniffi::export]
+pub fn stand_post(cell: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeError> {
+    let (api, rt) = handles()?;
+    let (kp, enc) = stand_material(&cell);
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let owner = KeyPair::new(CRYPTO_KIND_VLD0, kp.clone());
+        let key = api
+            .get_dht_record_key(
+                stand_schema(),
+                PublicKey::new(CRYPTO_KIND_VLD0, kp.key()),
+                Some(SharedSecret::new(CRYPTO_KIND_VLD0, enc)),
+            )
+            .await
+            .map_err(|e| NodeError::Failed(format!("record key: {e}")))?;
+        // The create-time random encryption key is deliberately unused
+        // (§15.12): descriptor published, handle discarded, reopened under
+        // the conventional key.
+        if let Ok(desc) = rc
+            .create_dht_record(CRYPTO_KIND_VLD0, stand_schema(), Some(owner.clone()))
+            .await
+        {
+            let _ = rc.close_dht_record(desc.key().clone()).await;
+        }
+        rc.open_dht_record(key.clone(), Some(owner))
+            .await
+            .map_err(|e| NodeError::Failed(format!("open: {e}")))?;
+        rc.set_dht_value(key.clone(), subkey, data, None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("post: {e}")))?;
+        let _ = rc.close_dht_record(key).await;
+        Ok(())
+    })
+}
+
+/// Everything currently pinned to the board: (subkey, bytes) pairs, freshly
+/// fetched. Empty values are cleared slots and are skipped.
+#[uniffi::export]
+pub fn stand_read(cell: String) -> Result<Vec<StandNotice>, NodeError> {
+    let (api, rt) = handles()?;
+    let (kp, enc) = stand_material(&cell);
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let key = api
+            .get_dht_record_key(
+                stand_schema(),
+                PublicKey::new(CRYPTO_KIND_VLD0, kp.key()),
+                Some(SharedSecret::new(CRYPTO_KIND_VLD0, enc)),
+            )
+            .await
+            .map_err(|e| NodeError::Failed(format!("record key: {e}")))?;
+        rc.open_dht_record(key.clone(), None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("open: {e}")))?;
+        let mut out = Vec::new();
+        for subkey in 0..8u32 {
+            if let Ok(Some(v)) = rc.get_dht_value(key.clone(), subkey, true).await {
+                if !v.data().is_empty() {
+                    out.push(StandNotice { subkey, data: v.data().to_vec() });
+                }
+            }
+        }
+        let _ = rc.close_dht_record(key).await;
+        Ok(out)
+    })
+}
+
+/// One pinned notice, as raw bytes the caller decodes (§16.17).
+#[derive(uniffi::Record)]
+pub struct StandNotice {
+    pub subkey: u32,
+    pub data: Vec<u8>,
+}

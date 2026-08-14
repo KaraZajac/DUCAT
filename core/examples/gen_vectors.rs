@@ -937,6 +937,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "message.payment")
             } else if obj.contains_key("head_hex") {
                 ("contact", "log.head")
+            } else if obj.contains_key("notice_hex") {
+                ("contact", "hail.notice")
             } else if obj.contains_key("subkey_count") {
                 ("contact", "log.ring")
             } else {
@@ -1564,6 +1566,52 @@ fn contact_cases() -> Vec<J> {
             "why": "All or nothing: every subset of {record, key, nonce, length, hash, mime} is a trap — fetchable but not decryptable, or decryptable but not verifiable.",
             "payment_hex": hex_body,
             "expect": { "ok": false, "reject": "MALFORMED", "hint": "attachment fields travel together" } }));
+    }
+
+    // §16.17: the hail notice, the one object that lives on a public board.
+    {
+        let mut ncase = |name: &str, why: &str, n: &HailNotice, bad: Option<(RejectCode, &str)>| {
+            let hex_body = hex(&n.to_value().encode());
+            v.push(match bad {
+                None => json!({ "name": name, "why": why, "notice_hex": hex_body,
+                                "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+                Some((code, hint)) => json!({ "name": name, "why": why, "notice_hex": hex_body,
+                                "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+            });
+        };
+        let base = HailNotice {
+            version: 1,
+            card: "ducat:2m1CQVCAiPjIfW5EX7ja1i8dRAsCLZ3nSCEgKHZBHZY".into(),
+            dest: "airport, terminal B".into(),
+            fare_pxmr: Some(5_000_000_000),
+            expiry: 1_800_000_000,
+        };
+        ncase("hail_valid",
+            "A rider on a public board: a claim-once card, sixty-four bytes of destination, an offer, an expiry. The card is the only field with teeth — claiming it is what §16.9 verifies.",
+            &base, None);
+        ncase("hail_quote_me",
+            "An absent fare is a real posture: name your price. Distinct from zero, which is refused below.",
+            &HailNotice { fare_pxmr: None, ..base.clone() }, None);
+        ncase("hail_fare_zero",
+            "A zero fare offer is a missing one wearing a number — two encodings of one meaning (§18.1).",
+            &HailNotice { fare_pxmr: Some(0), ..base.clone() },
+            Some((RejectCode::Malformed, "zero fare")));
+        ncase("hail_card_wrong_scheme",
+            "The board is hostile input; a notice whose card is not a ducat: URI is bait for whatever parses the link.",
+            &HailNotice { card: "https://example.com/ride".into(), ..base.clone() },
+            Some((RejectCode::Malformed, "card must be a ducat: URI")));
+        ncase("hail_dest_empty",
+            "An empty destination says nothing and renders as something.",
+            &HailNotice { dest: String::new(), ..base.clone() },
+            Some((RejectCode::Malformed, "empty destination")));
+        ncase("hail_dest_too_long",
+            "Sixty-four bytes of human words is the cap by construction: the place a notice can say is the cell it is pinned to. More is a channel, and the channel is the thread.",
+            &HailNotice { dest: "x".repeat(65), ..base.clone() },
+            Some((RejectCode::Malformed, "text too long")));
+        ncase("hail_wrong_version",
+            "A version this reader does not speak, refused rather than guessed at.",
+            &HailNotice { version: 2, ..base.clone() },
+            Some((RejectCode::Malformed, "unknown version")));
     }
 
     v

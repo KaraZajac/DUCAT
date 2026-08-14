@@ -946,6 +946,8 @@ MSG_ATT_RECORD, MSG_ATT_KEY, MSG_ATT_NONCE = 194, 195, 196
 MSG_ATT_LEN, MSG_ATT_HASH, MSG_ATT_MIME, MSG_ATT_NAME = 197, 198, 199, 200
 HEAD_BUNDLE = 177
 HEAD_READ, HEAD_RING = 201, 202
+# HAIL_NOTICE (§16.17) — the one object on a public surface.
+HN_VERSION, HN_CARD, HN_DEST, HN_FARE, HN_EXPIRY = 203, 204, 205, 206, 207
 MAX_ATTACHMENT_BYTES = 1_048_576 - 64
 MAX_MIME_CHARS, MAX_FILENAME_CHARS = 64, 96
 ITEM_DESC, ITEM_AMOUNT = 185, 186
@@ -1136,6 +1138,52 @@ def parse_head(buf):
     out["ring"] = ring
     _finish(b)
     return out
+
+
+def parse_hail_notice(buf):
+    # §16.17: hostile-surface rules, each refused rather than repaired. The
+    # card is the only field with teeth; everything else is an untrusted claim.
+    b = _body(buf)
+    out = {
+        "version": _take(b, HN_VERSION, "uint", "version"),
+        "card": _take(b, HN_CARD, "text", "card"),
+        "dest": _take(b, HN_DEST, "text", "destination"),
+        "fare": b.pop(HN_FARE, (None, None))[1],
+    }
+    if out["version"] != 1:
+        raise Reject("Malformed", "unknown hail notice version")
+    if not out["card"].startswith("ducat:"):
+        raise Reject("Malformed", "a hail card must be a ducat: URI")
+    if len(out["card"]) > 1024:
+        raise Reject("Malformed", "card too long")
+    if not (1 <= len(out["dest"].encode()) <= 64):
+        raise Reject("Malformed", "destination is 1..=64 bytes")
+    if out["fare"] == 0:
+        raise Reject("Malformed", "a zero fare offer is a missing one")
+    out["expiry"] = _take(b, HN_EXPIRY, "uint", "expiry")
+    _finish(b)
+    return out
+
+
+def run_hail_notice(cases, r):
+    for c in cases:
+        def go(c=c):
+            n = parse_hail_notice(unhex(c["notice_hex"]))
+            fields = [
+                (HN_VERSION, ("uint", n["version"])),
+                (HN_CARD, ("text", n["card"])),
+                (HN_DEST, ("text", n["dest"])),
+            ]
+            if n["fare"] is not None:
+                fields.append((HN_FARE, ("uint", n["fare"])))
+            fields.append((HN_EXPIRY, ("uint", n["expiry"])))
+            return _reencode_map(fields)
+        out = expect_reject(r, "contact", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, vector says "
+                  f"{c['expect']['reencodes_to_hex']}")
 
 
 def parse_message(buf):
@@ -1478,6 +1526,7 @@ BY_KIND = {
     "contact.details": run_contact_details,
     "log.head": run_log_head,
     "log.ring": run_log_ring,
+    "hail.notice": run_hail_notice,
     "message.payment": run_message_payment,
     "message.chain": run_message_chain,
     "escrow.ceremony": run_escrow_ceremony,

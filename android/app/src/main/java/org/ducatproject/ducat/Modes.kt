@@ -14,7 +14,7 @@ import android.content.Context
  * One at a time. A device that is simultaneously a till and a taxi meter has
  * two ideas about what an arriving payment means.
  */
-enum class Mode { None, Pos, BarTab, Taxi, Donate }
+enum class Mode { None, Pos, BarTab, Taxi, Donate, Hail, Drive }
 
 class ModeStore(context: Context) {
     private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)

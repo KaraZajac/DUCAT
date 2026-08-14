@@ -70,9 +70,11 @@ fn cell_encryption(cell: &str) -> BareSharedSecret {
 }
 
 fn schema() -> DHTSchema {
-    // Subkey 0 is the only one used; the spare is room for the design to grow
-    // a head/notice split without moving to new records.
-    DHTSchema::dflt(2).expect("static schema")
+    // Eight notice slots, exactly as §15.12 pins it. The schema is part of
+    // the record-key derivation, so this is not a tunable: a board created
+    // with a different slot count is a *different record*, and two parties
+    // disagreeing on it would each stare at their own empty board.
+    DHTSchema::dflt(8).expect("static schema")
 }
 
 pub async fn post(cell: &str, text: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -148,4 +150,61 @@ pub async fn read(cell: &str) -> Result<(), Box<dyn std::error::Error>> {
     rc.close_dht_record(key).await?;
     api.shutdown().await;
     Ok(())
+}
+
+/// The driver's side of a §15.12 hail, from the desk: watch a stand, print
+/// what appears, and claim the first live notice — which drops the two of us
+/// into an ordinary thread where `--say` and the rest already work.
+pub async fn hail_watch(cell: &str) -> Result<(), Box<dyn std::error::Error>> {
+    use ducat_core::cbor::decode;
+    use ducat_core::contact::HailNotice;
+
+    println!("\n\x1b[1mDUCAT — driving at {cell:?}\x1b[0m\n");
+    let (pk, _) = cell_keypair(cell);
+    let enc = SharedSecret::new(CRYPTO_KIND_VLD0, cell_encryption(cell));
+    let (api, _c) = crate::veilid::start("drive").await?;
+    let rc = api.routing_context()?;
+    let key = api
+        .get_dht_record_key(schema(), PublicKey::new(CRYPTO_KIND_VLD0, pk), Some(enc))
+        .await?;
+    println!("  board    {key}");
+    rc.open_dht_record(key.clone(), None).await?;
+
+    let now = || std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
+
+    loop {
+        for subkey in 0..8u32 {
+            let Ok(Some(v)) = rc.get_dht_value(key.clone(), subkey, true).await else {
+                continue;
+            };
+            if v.data().is_empty() {
+                continue;
+            }
+            let Ok(val) = decode(v.data()) else { continue };
+            let Ok(n) = HailNotice::from_value(val) else {
+                println!("  [{subkey}] undecodable notice — ignored");
+                continue;
+            };
+            if n.expiry <= now() {
+                continue;
+            }
+            println!("  [{subkey}] to {:?}, {}, stands {}s",
+                n.dest,
+                n.fare_pxmr.map(|f| format!("offers {} pXMR", f))
+                    .unwrap_or_else(|| "quote me".into()),
+                n.expiry - now());
+            println!("\n  taking it — claiming the card…");
+            rc.close_dht_record(key.clone()).await?;
+            api.shutdown().await;
+            // The claim is the existing card machinery, unchanged.
+            crate::mailbox::claim(&n.card).await?;
+            println!("\n  \x1b[32mhail taken\x1b[0m — talk with --say");
+            return Ok(());
+        }
+        print!(".");
+        use std::io::Write as _;
+        std::io::stdout().flush().ok();
+        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+    }
 }

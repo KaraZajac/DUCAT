@@ -477,6 +477,20 @@ fun ModesScreen() {
                         "on their side.",
                     current == org.ducatproject.ducat.Mode.Donate,
                 ) { pick(org.ducatproject.ducat.Mode.Donate, it) }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                ModeRow(
+                    "Hail a ride",
+                    "Post where you're going on a stand drivers watch. The one " +
+                        "who takes it lands in your chat.",
+                    current == org.ducatproject.ducat.Mode.Hail,
+                ) { pick(org.ducatproject.ducat.Mode.Hail, it) }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                ModeRow(
+                    "Drive",
+                    "Watch a stand, take hails. Quote and meet in the chat; " +
+                        "bill at the end like any ride.",
+                    current == org.ducatproject.ducat.Mode.Drive,
+                ) { pick(org.ducatproject.ducat.Mode.Drive, it) }
             }
         }
     }
