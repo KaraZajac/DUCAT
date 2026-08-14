@@ -189,9 +189,14 @@ object Wallet {
 
         return try {
             val r = moneroScan(nodeUrl, spend, from.toULong(), WINDOW)
+            // The window overlaps the tip on purpose (a reorg can rewrite it),
+            // so the same output comes back every pass until the chain moves
+            // on. The store dedupes by key image; the log must too, or one
+            // coffee is announced four times.
+            val known = store.entries().map { it.keyImage }.toSet()
             store.recordScan(r.scannedTo.toLong(), r.tip.toLong(), r.outputs)
             store.recordScanError(null)
-            for (o in r.outputs) {
+            for (o in r.outputs.filter { it.keyImageHex !in known }) {
                 DucatLog.i(
                     TAG,
                     "received ${formatXmr(o.amountPxmr.toLong())} XMR at block ${o.height}",

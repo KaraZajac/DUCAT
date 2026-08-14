@@ -27,6 +27,16 @@ class ContactStore(context: Context) {
 
     companion object {
         /**
+         * How long a burned one-time secret stays readable (§16.11).
+         *
+         * Long enough to cover DHT head propagation — observed lagging a
+         * republish by close to a minute — with a wide margin; short enough
+         * that the forward-secrecy delete is a promise about tonight, not
+         * someday.
+         */
+        const val BURN_GRACE_MS = 30L * 60 * 1000
+
+        /**
          * One lock for the whole store, across every instance.
          *
          * Scoping the counters to their own helpers shrank the lost-update
@@ -99,7 +109,7 @@ class ContactStore(context: Context) {
     } }
 
     /** The same, for the receiving counters. */
-    fun advanceInbound(personaHex: String, seq: Long, prevLink: ByteArray) { synchronized(lock) {
+    fun advanceInbound(personaHex: String, seq: Long, prevLink: ByteArray?) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
         save(all().filterNot { it.personaHex == personaHex } +
             c.copy(inSeq = seq, inPrevLink = prevLink))
@@ -564,9 +574,36 @@ class ContactStore(context: Context) {
 
     fun oneTimeSecret(id: Int): ByteArray? {
         val raw = prefs.getString("prekeys", null) ?: return null
-        val ot = JSONObject(raw).getJSONObject("one_time")
-        return if (ot.has(id.toString())) unb64(ot.getString(id.toString())) else null
+        val o = JSONObject(raw)
+        val ot = o.getJSONObject("one_time")
+        if (ot.has(id.toString())) return unb64(ot.getString(id.toString()))
+        // Still in the burn pen: a sender working from a head that had not yet
+        // propagated. Within the grace window the message is readable; the
+        // sweep is what makes the delete real.
+        val pen = o.optJSONObject("one_time_burned") ?: return null
+        return pen.optJSONObject(id.toString())?.let { unb64(it.getString("sk")) }
     }
+
+    /**
+     * Complete the deletes: drop burned one-time secrets past the grace window.
+     *
+     * This is where §16.11's forward secrecy actually lands. Until this runs,
+     * a message sealed to a burned key is still readable on this device —
+     * deliberately, for [BURN_GRACE_MS], because head propagation lags — and
+     * after it, readable by no one.
+     */
+    fun sweepBurnedPrekeys() { synchronized(lock) {
+        val raw = prefs.getString("prekeys", null) ?: return
+        val o = JSONObject(raw)
+        val pen = o.optJSONObject("one_time_burned") ?: return
+        val cutoff = System.currentTimeMillis() - BURN_GRACE_MS
+        val stale = pen.keys().asSequence().toList()
+            .filter { (pen.getJSONObject(it).optLong("at")) < cutoff }
+        if (stale.isEmpty()) return
+        stale.forEach { pen.remove(it) }
+        o.put("one_time_burned", pen)
+        prefs.edit().putString("prekeys", o.toString()).apply()
+    } }
 
     /**
      * Delete a used one-time secret. This is the operation §16.11's forward
@@ -576,7 +613,21 @@ class ContactStore(context: Context) {
     fun burnOneTime(id: Int) { synchronized(lock) {
         val raw = prefs.getString("prekeys", null) ?: return
         val o = JSONObject(raw)
+        // The secret moves to a holding pen instead of vanishing. The bundle
+        // travels in our log head, which is an eventually-consistent DHT
+        // record — a sender's fetch can trail our burn by minutes, so sealing
+        // to a just-burned key is a race, not misbehaviour (§16.11). Deleting
+        // immediately turns that race into a permanently unreadable message;
+        // the pen keeps it readable through the propagation window, and the
+        // sweep below completes the delete that forward secrecy consists of.
+        val secret = o.getJSONObject("one_time").opt(id.toString())
         o.getJSONObject("one_time").remove(id.toString())
+        if (secret != null) {
+            val pen = o.optJSONObject("one_time_burned") ?: JSONObject()
+            pen.put(id.toString(), JSONObject()
+                .put("sk", secret).put("at", System.currentTimeMillis()))
+            o.put("one_time_burned", pen)
+        }
         // **And prune the published bundle.** Deleting the secret alone leaves
         // the bundle advertising a key that can no longer decrypt anything, and
         // senders take the first one-time entry — so the first key consumed is

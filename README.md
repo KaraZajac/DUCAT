@@ -70,7 +70,7 @@ because codes get scanned across dark bars.
 ## The repository
 
 ```
-ducat-protocol.md   the spec — draft 0.80, changelog first
+ducat-protocol.md   the spec — draft 0.81, changelog first
 core/               reference implementation (Rust)
 vectors/            207 conformance vectors + schema — the published artifact
 conformance/        three checkers: schema, second implementation, spec audit

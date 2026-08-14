@@ -219,6 +219,11 @@ object Mailbox {
                         .onFailure { DucatLog.w(TAG, "could not pre-issue: ${it.message}") }
                 }
             } catch (e: Exception) {
+                if (isOffline(e)) {
+                    // One line, not one per card: offline fails them all alike.
+                    DucatLog.i(TAG, "offline — claims wait for the network")
+                    break
+                }
                 DucatLog.w(TAG, "collectClaims(${issued.inboxKey.take(16)}…): ${e.message}")
             }
         }
@@ -431,18 +436,30 @@ object Mailbox {
     /** Read everything new from every contact's outbox. Returns how many landed. */
     fun poll(context: Context): Int {
         val store = ContactStore(context)
+        // Each poll is also the clock for the forward-secrecy delete: burned
+        // one-time secrets past their grace window leave for good here.
+        store.sweepBurnedPrekeys()
         val mine = PersonaStore(context).personaHex()
         var got = 0
         for (c in store.all()) {
             got += try {
                 pollOne(context, store, c, mine)
             } catch (e: Exception) {
+                if (isOffline(e)) {
+                    // Offline fails every contact identically; one line says it.
+                    DucatLog.i(TAG, "offline — messages wait for the network")
+                    break
+                }
                 DucatLog.w(TAG, "poll ${c.displayName()}: ${e.message}")
                 0
             }
         }
         return got
     }
+
+    /** Veilid's TryAgain surfacing through the bridge as message text. */
+    private fun isOffline(e: Exception) =
+        e.message?.contains("TryAgain", ignoreCase = true) == true
 
     private fun pollOne(context: Context, store: ContactStore, c: Contact, minePersonaHex: String): Int {
         nodeDhtOpen(c.theirOutbox, null, null)
@@ -476,6 +493,9 @@ object Mailbox {
                 )
                 seq += 1uL
                 prev = null
+                // Advance the stored cursor too, or the loop exiting here
+                // re-appends the same loss placeholder on every poll.
+                store.advanceInbound(c.personaHex, seq.toLong(), null)
                 continue
             }
             val raw = nodeDhtGet(c.theirOutbox, logSubkey(seq, ring), true) ?: break
@@ -483,11 +503,29 @@ object Mailbox {
             val isOneTime = id != 0
             val secret = if (isOneTime) store.oneTimeSecret(id) else store.signedPrekeySecret()
             if (secret == null) {
-                // Stop rather than skip: the chain links each message to the
-                // one before, so stepping over an unreadable message makes
-                // every later one fail to verify too.
-                DucatLog.w(TAG, "prekey $id is gone; cannot read $seq")
-                break
+                // The grace pen (§16.11) already covered the propagation race,
+                // so a secret that is *still* missing is gone for good and this
+                // message is permanently unreadable — by anyone, us included.
+                // Blocking would freeze the thread forever on a message that
+                // can never open; record the loss like a ring wrap and let the
+                // chain restart from the next message.
+                DucatLog.w(
+                    TAG,
+                    "prekey $id is gone; message $seq from ${c.displayName()} is lost",
+                )
+                store.append(
+                    c.personaHex,
+                    StoredMessage(
+                        outgoing = false, seq = seq.toLong(),
+                        body = "[a message could not be opened — it was sealed " +
+                            "to a key this device no longer holds]",
+                        timestamp = System.currentTimeMillis() / 1000,
+                    ),
+                )
+                seq += 1uL
+                prev = null
+                store.advanceInbound(c.personaHex, seq.toLong(), null)
+                continue
             }
 
             val opened = openMessage(
