@@ -723,9 +723,24 @@ pub fn stand_read(cell: String) -> Result<Vec<StandNotice>, NodeError> {
             )
             .await
             .map_err(|e| NodeError::Failed(format!("record key: {e}")))?;
-        rc.open_dht_record(key.clone(), None)
-            .await
-            .map_err(|e| NodeError::Failed(format!("open: {e}")))?;
+        // First one to the corner pins the board: a reader arriving before
+        // any writer would otherwise get KeyNotFound, and the convention
+        // means the reader holds the keypair to fix that itself.
+        if rc.open_dht_record(key.clone(), None).await.is_err() {
+            if let Ok(desc) = rc
+                .create_dht_record(
+                    CRYPTO_KIND_VLD0,
+                    stand_schema(),
+                    Some(KeyPair::new(CRYPTO_KIND_VLD0, kp.clone())),
+                )
+                .await
+            {
+                let _ = rc.close_dht_record(desc.key().clone()).await;
+            }
+            rc.open_dht_record(key.clone(), None)
+                .await
+                .map_err(|e| NodeError::Failed(format!("open: {e}")))?;
+        }
         let mut out = Vec::new();
         for subkey in 0..8u32 {
             if let Ok(Some(v)) = rc.get_dht_value(key.clone(), subkey, true).await {

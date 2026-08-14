@@ -160,15 +160,24 @@ pub async fn hail_watch(cell: &str) -> Result<(), Box<dyn std::error::Error>> {
     use ducat_core::contact::HailNotice;
 
     println!("\n\x1b[1mDUCAT — driving at {cell:?}\x1b[0m\n");
-    let (pk, _) = cell_keypair(cell);
+    let (pk, sk) = cell_keypair(cell);
     let enc = SharedSecret::new(CRYPTO_KIND_VLD0, cell_encryption(cell));
     let (api, _c) = crate::veilid::start("drive").await?;
     let rc = api.routing_context()?;
     let key = api
-        .get_dht_record_key(schema(), PublicKey::new(CRYPTO_KIND_VLD0, pk), Some(enc))
+        .get_dht_record_key(schema(), PublicKey::new(CRYPTO_KIND_VLD0, pk.clone()), Some(enc))
         .await?;
     println!("  board    {key}");
-    rc.open_dht_record(key.clone(), None).await?;
+    // First to the corner pins the board (learned live: a driver arriving
+    // before any rider got KeyNotFound and went home).
+    if rc.open_dht_record(key.clone(), None).await.is_err() {
+        let kp = KeyPair::new(CRYPTO_KIND_VLD0, BareKeyPair::new(pk, sk));
+        if let Ok(desc) = rc.create_dht_record(CRYPTO_KIND_VLD0, schema(), Some(kp)).await {
+            let _ = rc.close_dht_record(desc.key().clone()).await;
+        }
+        rc.open_dht_record(key.clone(), None).await?;
+        println!("  (board was unpinned — pinned it)");
+    }
 
     let now = || std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
