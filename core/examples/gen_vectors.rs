@@ -1200,6 +1200,9 @@ fn contact_cases() -> Vec<J> {
         display_name: Some("sam".into()),
         payto: None,
         avatar: None, email: None, phone: None, signal: None, pronouns: None,
+        car_model: None,
+        car_color: None,
+        plate: None,
     };
     let mut detail = |name: &str, why: &str, d: &ContactDetails, bad: Option<(RejectCode, &str)>| {
         let hex_body = hex(&d.to_value().encode());
@@ -1219,6 +1222,9 @@ fn contact_cases() -> Vec<J> {
         phone: Some("14155550123".into()),
         signal: Some("sam_oc.42".into()),
         pronouns: Some(Pronouns::TheyThem),
+        car_model: None,
+        car_color: None,
+        plate: None,
         ..det.clone()
     };
     detail("details_with_profile",
@@ -1257,7 +1263,10 @@ fn contact_cases() -> Vec<J> {
         Some((RejectCode::Malformed, "signal is name.digits")));
     detail("details_without_pronouns",
         "A closed set, because this is drawn next to a name on a stranger's screen and free text there is a place to put a message. Absence is not a failure state — a person with none set renders like anyone else.",
-        &ContactDetails { pronouns: None, ..profiled.clone() },
+        &ContactDetails { pronouns: None,
+        car_model: None,
+        car_color: None,
+        plate: None, ..profiled.clone() },
         None);
     detail("details_valid", "What each side writes into the contact inbox: who they are, where to leave things, and the keys to seal with.", &det, None);
     detail("details_no_name", "The name is optional here for the same reason it is on the card.",
@@ -1269,6 +1278,23 @@ fn contact_cases() -> Vec<J> {
         "Absent is how a contact declines to publish one. An empty string would be a second spelling of that.",
         &ContactDetails { payto: Some(String::new()), ..det.clone() },
         Some((RejectCode::Malformed, "empty text field")));
+
+    detail("details_with_car",
+        "A driver's identity at the curb (§15.12): model, colour, plate — claims like the rest of the profile, and the rider's check is the bumper.",
+        &ContactDetails {
+            car_model: Some("Toyota Corolla".into()),
+            car_color: Some("blue".into()),
+            plate: Some("KAR-4242".into()),
+            ..det.clone()
+        }, None);
+    detail("details_plate_control_chars",
+        "A plate renders beside a name on a stranger's screen; control characters in it are a message, not a plate.",
+        &ContactDetails { plate: Some("AB\u{7}123".into()), ..det.clone() },
+        Some((RejectCode::Malformed, "plate is short plain text")));
+    detail("details_car_model_too_long",
+        "Twenty-four characters names any car; more is advertising space.",
+        &ContactDetails { car_model: Some("x".repeat(25)), ..det.clone() },
+        Some((RejectCode::Malformed, "text too long")));
 
     detail("details_outbox_empty",
         "An empty outbox key would leave the other side with a contact it can never write to, reported as success.",

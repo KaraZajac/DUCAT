@@ -162,6 +162,12 @@ pub struct ContactDetails {
     pub phone: Option<String>,
     pub signal: Option<String>,
     pub pronouns: Option<Pronouns>,
+    /// The car, for a rider scanning a curb full of strangers (§15.12). Each
+    /// is a claim like the rest of the profile — the plate on the screen must
+    /// match the plate on the bumper, and that check is the rider's.
+    pub car_model: Option<String>,
+    pub car_color: Option<String>,
+    pub plate: Option<String>,
 }
 
 /// How to refer to someone.
@@ -219,6 +225,12 @@ pub const MAX_AVATAR_BYTES: usize = 12 * 1024;
 pub const MAX_EMAIL_CHARS: usize = 254;
 pub const MAX_PHONE_DIGITS: usize = 15;
 pub const MAX_SIGNAL_CHARS: usize = 48;
+/// "Toyota Corolla" fits; a paragraph does not. These render beside a name on
+/// a stranger's screen, which is exactly where a free-form field becomes a
+/// message board.
+pub const MAX_CAR_MODEL_CHARS: usize = 24;
+pub const MAX_CAR_COLOR_CHARS: usize = 16;
+pub const MAX_PLATE_CHARS: usize = 12;
 
 /// `local@domain.tld`, deliberately strict.
 ///
@@ -327,6 +339,15 @@ impl ContactDetails {
         if let Some(p) = self.pronouns {
             m.insert(f::DET_PRONOUNS, Value::Uint(p as u64));
         }
+        if let Some(v) = &self.car_model {
+            m.insert(f::DET_CAR_MODEL, Value::Text(v.clone()));
+        }
+        if let Some(v) = &self.car_color {
+            m.insert(f::DET_CAR_COLOR, Value::Text(v.clone()));
+        }
+        if let Some(v) = &self.plate {
+            m.insert(f::DET_PLATE, Value::Text(v.clone()));
+        }
         Value::Map(m)
     }
 
@@ -358,8 +379,29 @@ impl ContactDetails {
                     Reject::with_detail(RejectCode::Malformed, "unknown pronouns code")
                 })?),
             },
+            car_model: r.opt_text(f::DET_CAR_MODEL, MAX_CAR_MODEL_CHARS)?,
+            car_color: r.opt_text(f::DET_CAR_COLOR, MAX_CAR_COLOR_CHARS)?,
+            plate: r.opt_text(f::DET_PLATE, MAX_PLATE_CHARS)?,
         };
         r.finish()?;
+        for (v, what) in [
+            (&out.car_model, "car model"),
+            (&out.car_color, "car colour"),
+            (&out.plate, "plate"),
+        ] {
+            if let Some(t) = v {
+                if t.is_empty() || t.chars().any(|c| c.is_control()) {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        match what {
+                            "car model" => "a car model is short plain text",
+                            "car colour" => "a car colour is short plain text",
+                            _ => "a plate is short plain text",
+                        },
+                    ));
+                }
+            }
+        }
         if let Some(a) = &out.avatar {
             if a.is_empty() {
                 return Err(Reject::with_detail(

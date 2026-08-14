@@ -34,6 +34,15 @@ class MyProfile(context: Context) {
     fun signal(): String? = prefs.getString("my_signal", null)
     fun setSignal(v: String?) = put("my_signal", v?.trim()?.ifBlank { null })
 
+    // The car (§15.12): what a rider looks for at the curb. Claims, like the
+    // rest of this file — the rider's check is the bumper.
+    fun carModel(): String? = prefs.getString("my_car_model", null)
+    fun setCarModel(v: String?) = put("my_car_model", v?.trim()?.ifBlank { null })
+    fun carColor(): String? = prefs.getString("my_car_color", null)
+    fun setCarColor(v: String?) = put("my_car_color", v?.trim()?.ifBlank { null })
+    fun plate(): String? = prefs.getString("my_plate", null)
+    fun setPlate(v: String?) = put("my_plate", v?.trim()?.ifBlank { null })
+
     /** 1..6, matching `pronounOptions()`. Null means not set, which is not a
      *  failure state — someone with none renders like anyone else. */
     fun pronouns(): Int? = prefs.getInt("my_pronouns", 0).takeIf { it in 1..6 }
@@ -69,13 +78,16 @@ class MyProfile(context: Context) {
 
     /** What actually goes on the record, after the share switch. */
     fun toWire(): Profile =
-        if (!shareProfile()) Profile(null, null, null, null, null)
+        if (!shareProfile()) Profile(null, null, null, null, null, null, null, null)
         else Profile(
             avatar = avatar(),
             email = email(),
             phone = phone(),
             signal = signal(),
             pronouns = pronouns()?.toUInt(),
+            carModel = carModel(),
+            carColor = carColor(),
+            plate = plate(),
         )
 
     private fun put(key: String, v: String?) {

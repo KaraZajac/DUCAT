@@ -76,9 +76,16 @@ object Fare {
 
     /** (fiat estimate, pxmr estimate), or null with no exchange rate cached. */
     fun estimate(context: Context, straightMeters: Long): Pair<Double, Long>? {
-        val rate = RateStore(context).cached()?.first ?: return null
         val km = straightMeters / 1000.0 * CIRCUITY
-        val mins = km / AVG_KMH * 60.0
+        return estimateExact(context, (km * 1000).toLong(), (km / AVG_KMH * 3600).toLong())
+    }
+
+    /** The same, from a real route's distance and duration (OSRM) — no
+     *  circuity guess needed when the road itself has answered. */
+    fun estimateExact(context: Context, routeMeters: Long, routeSeconds: Long): Pair<Double, Long>? {
+        val rate = RateStore(context).cached()?.first ?: return null
+        val km = routeMeters / 1000.0
+        val mins = routeSeconds / 60.0
         val fiat = base(context) + perKm(context) * km + perMin(context) * mins
         val pxmr = ((fiat / rate) * 1e12).toLong()
         return fiat to pxmr

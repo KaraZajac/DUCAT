@@ -176,6 +176,9 @@ object Mailbox {
             phone = theirs.profile.phone,
             signal = theirs.profile.signal,
             pronouns = theirs.profile.pronouns?.toInt(),
+            carModel = theirs.profile.carModel,
+            carColor = theirs.profile.carColor,
+            plate = theirs.profile.plate,
             myRing = NEW_RING.toInt(),
         )
         store.add(c)
@@ -219,6 +222,9 @@ object Mailbox {
                         phone = theirs.profile.phone,
                         signal = theirs.profile.signal,
                         pronouns = theirs.profile.pronouns?.toInt(),
+                        carModel = theirs.profile.carModel,
+                        carColor = theirs.profile.carColor,
+                        plate = theirs.profile.plate,
                         myRing = NEW_RING.toInt(),
                     )
                 )

@@ -823,6 +823,10 @@ data class Contact(
     val pronouns: Int? = null,
     /** Our log's ring size (§16.12). Eight for logs made before rings grew. */
     val myRing: Int = 8,
+    // Their car, from the profile (§15.12): what a rider looks for at the curb.
+    val carModel: String? = null,
+    val carColor: String? = null,
+    val plate: String? = null,
     /** How far into our log they say they have read (§16.16). Their claim. */
     val theirReadUpTo: Long? = null,
     /** Our next outgoing sequence number, and the link it must carry (§16.10). */
@@ -858,6 +862,9 @@ data class Contact(
         put("signal", signal ?: JSONObject.NULL)
         put("pronouns", pronouns ?: JSONObject.NULL)
         put("my_ring", myRing)
+        put("car_model", carModel ?: JSONObject.NULL)
+        put("car_color", carColor ?: JSONObject.NULL)
+        put("plate", plate ?: JSONObject.NULL)
         put("their_read", theirReadUpTo ?: JSONObject.NULL)
         put("out_seq", outSeq)
         put("out_prev", outPrevLink?.let { b64(it) } ?: JSONObject.NULL)
@@ -877,6 +884,9 @@ data class Contact(
             signal = o.optStringOrNull("signal"),
             pronouns = if (o.isNull("pronouns")) null else o.optInt("pronouns").takeIf { it in 1..6 },
             myRing = o.optInt("my_ring", 8),
+            carModel = o.optStringOrNull("car_model"),
+            carColor = o.optStringOrNull("car_color"),
+            plate = o.optStringOrNull("plate"),
             theirReadUpTo = if (o.isNull("their_read")) null else o.optLong("their_read"),
             myOutbox = o.optString("my_outbox", ""),
             myOutboxOwnerPublic = unb64(o.optString("my_outbox_pub", "")),

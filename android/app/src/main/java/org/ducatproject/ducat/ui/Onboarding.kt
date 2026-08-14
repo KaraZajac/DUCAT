@@ -73,7 +73,7 @@ data class Onboarding(
     val publishPayto: Boolean = true,
     /** §16.9's optional profile, gathered at setup and editable afterwards. */
     val profile: uniffi.ducat_mobile.Profile =
-        uniffi.ducat_mobile.Profile(null, null, null, null, null),
+        uniffi.ducat_mobile.Profile(null, null, null, null, null, null, null, null),
     val backupConfirmed: Boolean = false,
 )
 

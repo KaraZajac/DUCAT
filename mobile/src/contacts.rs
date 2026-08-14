@@ -173,6 +173,10 @@ pub struct Profile {
     pub signal: Option<String>,
     /// 1 she/her, 2 she/they, 3 he/him, 4 he/they, 5 they/them, 6 any.
     pub pronouns: Option<u32>,
+    /// The car (§15.12): what a rider looks for at the curb.
+    pub car_model: Option<String>,
+    pub car_color: Option<String>,
+    pub plate: Option<String>,
 }
 
 impl Profile {
@@ -250,6 +254,9 @@ pub fn build_contact_details(
         phone: profile.phone,
         signal: profile.signal,
         pronouns,
+        car_model: profile.car_model,
+        car_color: profile.car_color,
+        plate: profile.plate,
     }
     .to_value()
     .encode();
@@ -284,6 +291,9 @@ pub fn parse_contact_details(bytes: Vec<u8>) -> Result<PeerDetails, ContactError
             phone: d.phone,
             signal: d.signal,
             pronouns: Profile::code_of(d.pronouns),
+            car_model: d.car_model,
+            car_color: d.car_color,
+            plate: d.plate,
         },
     })
 }

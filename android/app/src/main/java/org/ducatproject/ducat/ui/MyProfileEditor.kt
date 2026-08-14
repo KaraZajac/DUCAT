@@ -47,6 +47,9 @@ fun MyProfileEditor() {
     var email by remember { mutableStateOf(p.email() ?: "") }
     var phone by remember { mutableStateOf(p.phone() ?: "") }
     var signal by remember { mutableStateOf(p.signal() ?: "") }
+    var carModel by remember { mutableStateOf(p.carModel() ?: "") }
+    var carColor by remember { mutableStateOf(p.carColor() ?: "") }
+    var plate by remember { mutableStateOf(p.plate() ?: "") }
     var pronouns by remember { mutableStateOf(p.pronouns()) }
     var avatar by remember { mutableStateOf(p.avatar()) }
     var share by remember { mutableStateOf(p.shareProfile()) }
@@ -158,6 +161,23 @@ fun MyProfileEditor() {
         Field("Signal", signal, MyProfile.signalProblem(signal),
             hint = "name.12") { signal = it; saved = false }
 
+        Spacer(Modifier.height(10.dp))
+        Text(
+            "Driving? Riders see this when you take their hail — it is how a " +
+                "stranger finds the right car at the curb.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Field("Car model", carModel, null, hint = "Toyota Corolla") {
+            carModel = it.take(24); saved = false
+        }
+        Field("Car colour", carColor, null, hint = "blue") {
+            carColor = it.take(16); saved = false
+        }
+        Field("License plate", plate, null, hint = "KAR-4242") {
+            plate = it.take(12).uppercase(); saved = false
+        }
+
         Spacer(Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Switch(checked = share, onCheckedChange = { share = it; p.setShareProfile(it) })
@@ -185,6 +205,7 @@ fun MyProfileEditor() {
         Button(
             onClick = {
                 p.setName(name); p.setEmail(email); p.setPhone(phone); p.setSignal(signal)
+                p.setCarModel(carModel); p.setCarColor(carColor); p.setPlate(plate)
                 saved = true
             },
             enabled = problems.isEmpty(),

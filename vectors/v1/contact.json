@@ -224,6 +224,38 @@
       "why": "Absent is how a contact declines to publish one. An empty string would be a second spelling of that."
     },
     {
+      "details_hex": "aa000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d18d26e546f796f746120436f726f6c6c6118d364626c756518d4684b41522d34323432",
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d18d26e546f796f746120436f726f6c6c6118d364626c756518d4684b41522d34323432"
+      },
+      "kind": "contact.details",
+      "name": "details_with_car",
+      "why": "A driver's identity at the curb (§15.12): model, colour, plate — claims like the rest of the profile, and the rider's check is the bumper."
+    },
+    {
+      "details_hex": "a8000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d18d466414207313233",
+      "expect": {
+        "hint": "plate is short plain text",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "contact.details",
+      "name": "details_plate_control_chars",
+      "why": "A plate renders beside a name on a stranger's screen; control characters in it are a message, not a plate."
+    },
+    {
+      "details_hex": "a8000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d18d2781978787878787878787878787878787878787878787878787878",
+      "expect": {
+        "hint": "text too long",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "contact.details",
+      "name": "details_car_model_too_long",
+      "why": "Twenty-four characters names any car; more is advertising space."
+    },
+    {
       "details_hex": "a7000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad6018ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d",
       "expect": {
         "hint": "empty text field",

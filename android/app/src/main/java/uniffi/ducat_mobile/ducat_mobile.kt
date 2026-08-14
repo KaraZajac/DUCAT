@@ -3057,7 +3057,13 @@ data class Profile (
     /**
      * 1 she/her, 2 she/they, 3 he/him, 4 he/they, 5 they/them, 6 any.
      */
-    var `pronouns`: kotlin.UInt?
+    var `pronouns`: kotlin.UInt?, 
+    /**
+     * The car (§15.12): what a rider looks for at the curb.
+     */
+    var `carModel`: kotlin.String?, 
+    var `carColor`: kotlin.String?, 
+    var `plate`: kotlin.String?
 ) {
     
     companion object
@@ -3074,6 +3080,9 @@ public object FfiConverterTypeProfile: FfiConverterRustBuffer<Profile> {
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalUInt.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
         )
     }
 
@@ -3082,7 +3091,10 @@ public object FfiConverterTypeProfile: FfiConverterRustBuffer<Profile> {
             FfiConverterOptionalString.allocationSize(value.`email`) +
             FfiConverterOptionalString.allocationSize(value.`phone`) +
             FfiConverterOptionalString.allocationSize(value.`signal`) +
-            FfiConverterOptionalUInt.allocationSize(value.`pronouns`)
+            FfiConverterOptionalUInt.allocationSize(value.`pronouns`) +
+            FfiConverterOptionalString.allocationSize(value.`carModel`) +
+            FfiConverterOptionalString.allocationSize(value.`carColor`) +
+            FfiConverterOptionalString.allocationSize(value.`plate`)
     )
 
     override fun write(value: Profile, buf: ByteBuffer) {
@@ -3091,6 +3103,9 @@ public object FfiConverterTypeProfile: FfiConverterRustBuffer<Profile> {
             FfiConverterOptionalString.write(value.`phone`, buf)
             FfiConverterOptionalString.write(value.`signal`, buf)
             FfiConverterOptionalUInt.write(value.`pronouns`, buf)
+            FfiConverterOptionalString.write(value.`carModel`, buf)
+            FfiConverterOptionalString.write(value.`carColor`, buf)
+            FfiConverterOptionalString.write(value.`plate`, buf)
     }
 }
 

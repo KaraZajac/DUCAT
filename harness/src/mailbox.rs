@@ -228,6 +228,9 @@ pub async fn issue() -> Result<(), Box<dyn std::error::Error>> {
         // contact's own choice about their own linkability.
         payto: std::env::var("DUCAT_PAYTO").ok().filter(|v| !v.is_empty()),
         avatar: None, email: None, phone: None, signal: None, pronouns: None,
+        car_model: None,
+        car_color: None,
+        plate: None,
     };
     rc.set_dht_value(inbox.key().clone(), 0, details.to_value().encode(), None)
         .await?;
@@ -335,6 +338,9 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
         display_name: Some("desktop".into()),
         payto: std::env::var("DUCAT_PAYTO").ok().filter(|v| !v.is_empty()),
         avatar: None, email: None, phone: None, signal: None, pronouns: None,
+        car_model: None,
+        car_color: None,
+        plate: None,
     };
     rc.set_dht_value(inbox.clone(), 1, mine.to_value().encode(), None).await?;
     println!("  wrote    subkey 1 — the handshake is complete");

@@ -959,6 +959,8 @@ CARD_PERSONA, CARD_INBOX, CARD_WRITER, CARD_NAME, CARD_EXPIRY = 167, 168, 169, 1
 DET_PERSONA, DET_OUTBOX, DET_BUNDLE, DET_NAME = 172, 173, 174, 175
 DET_PAYTO = 182
 DET_AVATAR, DET_EMAIL, DET_PHONE, DET_SIGNAL, DET_PRONOUNS = 187, 188, 189, 190, 191
+DET_CAR_MODEL, DET_CAR_COLOR, DET_PLATE = 210, 211, 212
+MAX_CAR_MODEL_CHARS, MAX_CAR_COLOR_CHARS, MAX_PLATE_CHARS = 24, 16, 12
 MAX_AVATAR_BYTES = 12 * 1024
 MAX_EMAIL_CHARS, MAX_PHONE_DIGITS, MAX_SIGNAL_CHARS = 254, 15, 48
 
@@ -1097,6 +1099,12 @@ def parse_details(buf):
         "phone": _take_text(b, DET_PHONE, MAX_PHONE_DIGITS, "phone", False),
         "signal": _take_text(b, DET_SIGNAL, MAX_SIGNAL_CHARS, "signal", False),
         "pronouns": b.pop(DET_PRONOUNS, (None, None))[1],
+        # The car (§15.12): what lets a rider find the right stranger's
+        # vehicle. Short plain text, no control characters — these render
+        # beside a name.
+        "car_model": _take_text(b, DET_CAR_MODEL, MAX_CAR_MODEL_CHARS, "car model", False),
+        "car_color": _take_text(b, DET_CAR_COLOR, MAX_CAR_COLOR_CHARS, "car colour", False),
+        "plate": _take_text(b, DET_PLATE, MAX_PLATE_CHARS, "plate", False),
     }
     _finish(b)
     if out["avatar"] is not None:
@@ -1115,6 +1123,10 @@ def parse_details(buf):
         raise Reject("Malformed", "a Signal username is name.digits")
     if out["pronouns"] is not None and out["pronouns"] not in (1, 2, 3, 4, 5, 6):
         raise Reject("Malformed", "unknown pronouns code")
+    for k in ("car_model", "car_color", "plate"):
+        v = out[k]
+        if v is not None and (not v or any(ord(c) < 0x20 or ord(c) == 0x7f for c in v)):
+            raise Reject("Malformed", f"a {k.replace('_', ' ')} is short plain text")
     return out
 
 
@@ -1418,6 +1430,10 @@ def run_contact_details(cases, r):
                     m.append((field, ("text", d[key])))
             if d["pronouns"] is not None:
                 m.append((DET_PRONOUNS, ("uint", d["pronouns"])))
+            for key, field in (("car_model", DET_CAR_MODEL),
+                               ("car_color", DET_CAR_COLOR), ("plate", DET_PLATE)):
+                if d[key] is not None:
+                    m.append((field, ("text", d[key])))
             return _reencode_map(m)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

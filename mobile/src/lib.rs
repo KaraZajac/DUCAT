@@ -725,6 +725,11 @@ pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup
             phone: b.phone.clone(),
             signal: b.signal.clone(),
             pronouns: b.pronouns.map(|p| p as u32),
+            // The car does not ride the typed backup fields (it is profile
+            // presentation, restored via app_state like the rest of MyProfile).
+            car_model: None,
+            car_color: None,
+            plate: None,
         },
         contacts: b.contacts.iter().map(contact_from_core).collect(),
         prekey_signed_secret: b.prekey_signed_secret.clone(),

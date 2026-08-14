@@ -190,6 +190,11 @@ pub mod f {
     // public board never carries better than ~1.2 km.
     pub const HN_ORIGIN_CELL: u64 = 208;
     pub const HN_DEST_CELL: u64 = 209;
+    // Driver identity on the profile (§16.9): what lets a stranger find the
+    // right car at the curb. Claims like everything else in a profile.
+    pub const DET_CAR_MODEL: u64 = 210;
+    pub const DET_CAR_COLOR: u64 = 211;
+    pub const DET_PLATE: u64 = 212;
 
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;

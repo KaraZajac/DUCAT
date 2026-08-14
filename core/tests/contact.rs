@@ -91,6 +91,9 @@ fn details() -> ContactDetails {
         display_name: Some("sam".into()),
         payto: None,
         avatar: None, email: None, phone: None, signal: None, pronouns: None,
+        car_model: None,
+        car_color: None,
+        plate: None,
     }
 }
 

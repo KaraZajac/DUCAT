@@ -53,6 +53,9 @@ android {
 dependencies {
     // UniFFI's generated bindings need JNA on Android.
     implementation("net.java.dev.jna:jna:5.15.0@aar")
+    // OpenStreetMap tiles for the hail map. Tiles come from OSM's servers —
+    // stated in the UI, because a map view is a location leak by definition.
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
