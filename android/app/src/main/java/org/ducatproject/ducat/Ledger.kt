@@ -110,6 +110,9 @@ object Ledger {
         /** The other side's persona, when a thread supplied one — what makes
          *  "open the conversation" possible from a bank-statement row. */
         val contactHex: String? = null,
+        /** Who issued the receipt ("you", or their name), and when. */
+        val receiptBy: String? = null,
+        val receiptAt: Long = 0,
     ) {
         /** Change we paid to ourselves in this transaction, if any. */
         val changePxmr: Long get() = if (direction == Direction.Sent) ours.sumOf { it.amountPxmr } else 0
@@ -137,27 +140,26 @@ object Ledger {
         // And the paperwork: any receipt naming a transaction ties the chain
         // event to its bill — the itemisation, the tax, the thread. This is
         // what turns a row of piconero into "6 min × 0.0005, tip, receipted".
-        val papered = HashMap<String, Triple<List<BillItem>, Long?, String>>()
+        // Receipts come from their own store, not the threads: a conversation
+        // is the user's to delete, and a taxi's thread especially will be —
+        // the receipt lives on in Activity the way a paper one outlives the
+        // ride.
+        contacts.migrateReceipts()
+        val receipts = contacts.receipts()
+        val papered = HashMap<String, ContactStore.ReceiptRecord>()
         // Receipts that name no transaction still name an exact amount —
         // §17.5's nomination read in reverse. Held loose and matched to the
-        // chain event of the same amount in the same thread's direction, each
-        // spent once, oldest first.
-        class Loose(
-            val items: List<BillItem>, val tax: Long?, val hex: String,
-            val amount: Long, val forSent: Boolean, var spent: Boolean = false,
-        )
+        // chain event of the same amount in the same direction, each spent
+        // once.
+        class Loose(val r: ContactStore.ReceiptRecord, var spent: Boolean = false)
         val loose = ArrayList<Loose>()
+        for (r in receipts) {
+            val rid = r.txidHex?.lowercase()
+            if (rid != null) papered[rid] = r
+            else if (r.amountPxmr > 0) loose += Loose(r)
+        }
         for (c in everyone) {
             for (m in contacts.thread(c.personaHex)) {
-                if (m.kind == 3) {
-                    val rid = m.txidHex?.lowercase()
-                    if (rid != null) {
-                        papered[rid] = Triple(m.items, m.taxPxmr, c.personaHex)
-                    } else if (m.amountPxmr > 0) {
-                        loose += Loose(m.items, m.taxPxmr, c.personaHex,
-                            m.amountPxmr, forSent = !m.outgoing)
-                    }
-                }
                 val id = m.txidHex?.lowercase() ?: continue
                 if (!m.outgoing && m.kind == 2) {
                     announced[id] = c.displayName() to m.body.takeIf { it.isNotBlank() }
@@ -183,26 +185,30 @@ object Ledger {
                 // would staple paperwork to the wrong money.
                 val threadHex = sendsByTx[e.txid.lowercase()]?.contactHex
                 val l = loose.firstOrNull {
-                    !it.spent && it.amount == e.amountPxmr &&
-                        it.forSent == (e.direction == Direction.Sent) &&
-                        (threadHex == null || it.hex == threadHex)
+                    !it.spent && it.r.amountPxmr == e.amountPxmr &&
+                        // A receipt someone sent us covers a payment we made;
+                        // one we issued covers a payment we received.
+                        it.r.mine == (e.direction == Direction.Received) &&
+                        (threadHex == null || it.r.contactHex == threadHex)
                 }
                 if (l != null) {
                     l.spent = true
-                    paper = Triple(l.items, l.tax, l.hex)
+                    paper = l.r
                 }
             }
             val hex = when (e.direction) {
                 Direction.Sent ->
-                    sendsByTx[e.txid.lowercase()]?.contactHex ?: paper?.third
-                else -> announcedHex[e.txid.lowercase()] ?: paper?.third
+                    sendsByTx[e.txid.lowercase()]?.contactHex ?: paper?.contactHex
+                else -> announcedHex[e.txid.lowercase()] ?: paper?.contactHex
             }
             if (paper == null && hex == null) e
             else e.copy(
-                items = paper?.first ?: e.items,
-                taxPxmr = paper?.second,
+                items = paper?.items ?: e.items,
+                taxPxmr = paper?.taxPxmr,
                 receipted = paper != null,
                 contactHex = hex,
+                receiptBy = paper?.let { if (it.mine) "you" else it.counterparty },
+                receiptAt = paper?.timestamp ?: 0L,
             )
         }
     }

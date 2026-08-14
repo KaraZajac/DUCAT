@@ -289,7 +289,88 @@ class ContactStore(context: Context) {
         val arr = JSONArray()
         (thread(personaHex) + m).forEach { arr.put(it.toJson()) }
         prefs.edit().putString("thread_$personaHex", arr.toString()).apply()
+        // A receipt is a record, not a message that happens to mention money.
+        // Conversations get deleted — a taxi's thread especially — and the
+        // receipt must outlive the small talk around it, the way a paper one
+        // outlives the ride. Captured here, the one funnel every message
+        // passes through, into a store nothing but the user clears.
+        if (m.kind == 3) saveReceiptLocked(personaHex, m)
         bump()
+    } }
+
+    /** A receipt, kept apart from the conversation it arrived in. */
+    data class ReceiptRecord(
+        val txidHex: String?,
+        val amountPxmr: Long,
+        val items: List<BillItem>,
+        val taxPxmr: Long?,
+        /** The counterparty's persona, and their name as it read at the time —
+         *  kept as text because the contact itself may be deleted later. */
+        val contactHex: String,
+        val counterparty: String,
+        /** True when this device issued it (we were the payee). */
+        val mine: Boolean,
+        val timestamp: Long,
+    )
+
+    private fun saveReceiptLocked(personaHex: String, m: StoredMessage) {
+        val name = all().firstOrNull { it.personaHex == personaHex }?.displayName()
+            ?: "${personaHex.take(8)}…"
+        val arr = prefs.getString("receipts_v1", null)
+            ?.let { runCatching { JSONArray(it) }.getOrNull() } ?: JSONArray()
+        arr.put(JSONObject().apply {
+            put("txid", m.txidHex ?: JSONObject.NULL)
+            put("amt", m.amountPxmr)
+            put("items", JSONArray().also { a ->
+                m.items.forEach { a.put(JSONObject().put("d", it.description).put("a", it.amountPxmr)) }
+            })
+            put("tax", m.taxPxmr ?: JSONObject.NULL)
+            put("hex", personaHex)
+            put("who", name)
+            put("mine", m.outgoing)
+            put("ts", m.timestamp)
+        })
+        prefs.edit().putString("receipts_v1", arr.toString()).apply()
+    }
+
+    fun receipts(): List<ReceiptRecord> {
+        val raw = prefs.getString("receipts_v1", null) ?: return emptyList()
+        val arr = runCatching { JSONArray(raw) }.getOrElse { return emptyList() }
+        return (0 until arr.length()).mapNotNull { i ->
+            runCatching {
+                val o = arr.getJSONObject(i)
+                ReceiptRecord(
+                    txidHex = if (o.isNull("txid")) null else o.optString("txid"),
+                    amountPxmr = o.getLong("amt"),
+                    items = (o.optJSONArray("items") ?: JSONArray()).let { a ->
+                        (0 until a.length()).map {
+                            val it2 = a.getJSONObject(it)
+                            BillItem(it2.getString("d"), it2.getLong("a"))
+                        }
+                    },
+                    taxPxmr = if (o.isNull("tax")) null else o.getLong("tax"),
+                    contactHex = o.getString("hex"),
+                    counterparty = o.optString("who"),
+                    mine = o.optBoolean("mine"),
+                    timestamp = o.optLong("ts"),
+                )
+            }.getOrNull()
+        }
+    }
+
+    /**
+     * One-time import of receipts already sitting in threads, from before the
+     * store existed. The damage this repairs is silent: a deleted taxi thread
+     * would have taken its receipts with it.
+     */
+    fun migrateReceipts() { synchronized(lock) {
+        if (prefs.getBoolean("receipts_migrated_v1", false)) return
+        for (c in all()) {
+            for (m in thread(c.personaHex)) {
+                if (m.kind == 3) saveReceiptLocked(c.personaHex, m)
+            }
+        }
+        prefs.edit().putBoolean("receipts_migrated_v1", true).apply()
     } }
 
     // --- backup (§4.3) ----------------------------------------------------
