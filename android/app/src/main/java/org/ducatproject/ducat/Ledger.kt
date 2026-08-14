@@ -138,15 +138,30 @@ object Ledger {
         // event to its bill — the itemisation, the tax, the thread. This is
         // what turns a row of piconero into "6 min × 0.0005, tip, receipted".
         val papered = HashMap<String, Triple<List<BillItem>, Long?, String>>()
+        // Receipts that name no transaction still name an exact amount —
+        // §17.5's nomination read in reverse. Held loose and matched to the
+        // chain event of the same amount in the same thread's direction, each
+        // spent once, oldest first.
+        class Loose(
+            val items: List<BillItem>, val tax: Long?, val hex: String,
+            val amount: Long, val forSent: Boolean, var spent: Boolean = false,
+        )
+        val loose = ArrayList<Loose>()
         for (c in everyone) {
             for (m in contacts.thread(c.personaHex)) {
+                if (m.kind == 3) {
+                    val rid = m.txidHex?.lowercase()
+                    if (rid != null) {
+                        papered[rid] = Triple(m.items, m.taxPxmr, c.personaHex)
+                    } else if (m.amountPxmr > 0) {
+                        loose += Loose(m.items, m.taxPxmr, c.personaHex,
+                            m.amountPxmr, forSent = !m.outgoing)
+                    }
+                }
                 val id = m.txidHex?.lowercase() ?: continue
                 if (!m.outgoing && m.kind == 2) {
                     announced[id] = c.displayName() to m.body.takeIf { it.isNotBlank() }
                     announcedHex[id] = c.personaHex
-                }
-                if (m.kind == 3) {
-                    papered[id] = Triple(m.items, m.taxPxmr, c.personaHex)
                 }
             }
         }
@@ -161,7 +176,22 @@ object Ledger {
             announced = announced,
         )
         return built.map { e ->
-            val paper = papered[e.txid.lowercase()]
+            var paper = papered[e.txid.lowercase()]
+            if (paper == null) {
+                // Amount-and-direction fallback. Exact match only: a receipt
+                // is a statement about a specific sum, and "close enough"
+                // would staple paperwork to the wrong money.
+                val threadHex = sendsByTx[e.txid.lowercase()]?.contactHex
+                val l = loose.firstOrNull {
+                    !it.spent && it.amount == e.amountPxmr &&
+                        it.forSent == (e.direction == Direction.Sent) &&
+                        (threadHex == null || it.hex == threadHex)
+                }
+                if (l != null) {
+                    l.spent = true
+                    paper = Triple(l.items, l.tax, l.hex)
+                }
+            }
             val hex = when (e.direction) {
                 Direction.Sent ->
                     sendsByTx[e.txid.lowercase()]?.contactHex ?: paper?.third

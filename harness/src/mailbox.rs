@@ -442,19 +442,23 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
 /// is refused. `payto` rides in the request itself (§16.13's self-contained
 /// destination).
 pub async fn bill(items_arg: &str, payto: &str) -> Result<(), Box<dyn std::error::Error>> {
-    send_money_message(items_arg, Some(payto.to_string()), MessageKind::PaymentRequest).await
+    send_money_message(items_arg, Some(payto.to_string()), MessageKind::PaymentRequest, None).await
 }
 
 /// Receipt for what actually arrived (§16.13): same shape as a bill, kind 3,
 /// tip as a visible line so the sum rule holds over the amount received.
-pub async fn receipt(items_arg: &str) -> Result<(), Box<dyn std::error::Error>> {
-    send_money_message(items_arg, None, MessageKind::Receipt).await
+/// `txid_hex` names the transaction it acknowledges — the field that lets the
+/// payer's Activity screen staple this paperwork to the chain event.
+pub async fn receipt(items_arg: &str, txid_hex: &str) -> Result<(), Box<dyn std::error::Error>> {
+    send_money_message(items_arg, None, MessageKind::Receipt,
+        if txid_hex.is_empty() { None } else { Some(hex::decode(txid_hex)?) }).await
 }
 
 async fn send_money_message(
     items_arg: &str,
     payto: Option<String>,
     kind: MessageKind,
+    txid: Option<Vec<u8>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let items: Vec<(String, u64)> = items_arg
         .split(',')
@@ -468,7 +472,7 @@ async fn send_money_message(
         return Err("a bill needs at least one line".into());
     }
     let total: u64 = items.iter().map(|(_, a)| a).sum();
-    bill_or_say(Some((items, total, payto, kind)), "").await
+    bill_or_say(Some((items, total, payto, kind, txid)), "").await
 }
 
 /// Say something in a thread that already exists.
@@ -486,7 +490,7 @@ pub async fn say(text: &str) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn bill_or_say(
-    billing: Option<(Vec<(String, u64)>, u64, Option<String>, MessageKind)>,
+    billing: Option<(Vec<(String, u64)>, u64, Option<String>, MessageKind, Option<Vec<u8>>)>,
     text: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     use std::str::FromStr;
@@ -575,7 +579,7 @@ async fn bill_or_say(
             amount_pxmr: None, txid: None, payto: None,
             items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
         },
-        Some((items, total, payto, kind)) => Message {
+        Some((items, total, payto, kind, txid)) => Message {
             version: 1, suite: 1, seq, prev,
             body: if *kind == MessageKind::Receipt { "Receipt — thank you".to_string() }
                   else { "Your fare".to_string() },
@@ -584,7 +588,7 @@ async fn bill_or_say(
                 .as_secs(),
             kind: *kind,
             amount_pxmr: Some(*total),
-            txid: None,
+            txid: txid.clone(),
             payto: payto.clone(),
             items: items.iter().map(|(d, a)| LineItem {
                 description: d.clone(), amount_pxmr: *a,
@@ -616,7 +620,7 @@ async fn bill_or_say(
     append(&rc, &mine, seq, &sealed.to_value().encode()).await?;
     match &billing {
         None => println!("  \x1b[35m→\x1b[0m [{seq}] {text}"),
-        Some((items, total, _, kind)) => {
+        Some((items, total, _, kind, _)) => {
             for (d, a) in items { println!("  \x1b[35m→\x1b[0m   {d}  {a} pXMR"); }
             println!("  \x1b[35m→\x1b[0m [{seq}] {kind:?} total {total} pXMR");
         }
