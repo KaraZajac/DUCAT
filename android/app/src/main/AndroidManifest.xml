@@ -5,6 +5,8 @@
          an iPhone cannot present over NFC at all (O19), and plenty of Android
          hardware lacks HCE, so QR is the floor that always works. -->
     <uses-permission android:name="android.permission.NFC" />
+    <!-- Android 13+: notifying about a message or a payment needs asking. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.nfc.hce" android:required="false" />
 
     <!-- BLE, for the §18.7 service. Not required: a device without it falls to QR. -->

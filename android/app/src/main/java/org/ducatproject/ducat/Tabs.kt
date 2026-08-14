@@ -251,6 +251,13 @@ class TabStore(private val context: Context) {
                     )
                 }.onSuccess {
                     store.update(tab.copy(state = "paid", paidKi = hit.keyImage))
+                    Notify.post(
+                        context,
+                        "${contact.displayName()} paid",
+                        "${formatXmr(hit.amountPxmr)} XMR" +
+                            (if (tip > 0) " (tip ${formatXmr(tip)})" else "") +
+                            " — receipt sent",
+                    )
                     DucatLog.i(
                         TAG,
                         "${tab.origin} paid ${formatXmr(hit.amountPxmr)} XMR" +

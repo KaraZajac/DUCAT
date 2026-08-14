@@ -330,7 +330,7 @@ object Mailbox {
         var got = 0
         for (c in store.all()) {
             got += try {
-                pollOne(store, c, mine)
+                pollOne(context, store, c, mine)
             } catch (e: Exception) {
                 DucatLog.w(TAG, "poll ${c.displayName()}: ${e.message}")
                 0
@@ -339,7 +339,7 @@ object Mailbox {
         return got
     }
 
-    private fun pollOne(store: ContactStore, c: Contact, minePersonaHex: String): Int {
+    private fun pollOne(context: Context, store: ContactStore, c: Contact, minePersonaHex: String): Int {
         nodeDhtOpen(c.theirOutbox, null, null)
         val headRaw = nodeDhtGet(c.theirOutbox, 0u, true) ?: return 0
         val head = parseLogHead(headRaw)
@@ -385,19 +385,21 @@ object Mailbox {
                 raw, secret, isOneTime, seq, prev, threadAad(minePersonaHex, c.personaHex),
             )
             DucatLog.i(TAG, "received seq ${opened.seq} from ${c.displayName()}")
-            store.append(
-                c.personaHex,
-                StoredMessage(
-                    outgoing = false, seq = opened.seq.toLong(),
-                    body = opened.body, timestamp = opened.timestamp.toLong(),
-                    kind = opened.kind.toInt(),
-                    amountPxmr = opened.amountPxmr?.toLong() ?: 0L,
-                    payto = opened.payto,
-                    txidHex = opened.txid?.toHexString(),
-                    items = opened.items.map { BillItem(it.description, it.amountPxmr.toLong()) },
-                    taxPxmr = opened.taxPxmr?.toLong(),
-                ),
+            val arrived = StoredMessage(
+                outgoing = false, seq = opened.seq.toLong(),
+                body = opened.body, timestamp = opened.timestamp.toLong(),
+                kind = opened.kind.toInt(),
+                amountPxmr = opened.amountPxmr?.toLong() ?: 0L,
+                payto = opened.payto,
+                txidHex = opened.txid?.toHexString(),
+                items = opened.items.map { BillItem(it.description, it.amountPxmr.toLong()) },
+                taxPxmr = opened.taxPxmr?.toLong(),
             )
+            // The one funnel every arrival passes through, so the notification
+            // cannot be forgotten by a new screen: if it was stored, it was
+            // announced.
+            Notify.message(context, c.displayName(), arrived)
+            store.append(c.personaHex, arrived)
             // A request carries a fresher address than anything stored (§16.12).
             opened.payto?.let { store.setTheirAddress(c.personaHex, it) }
             if (opened.consumedOneTime) store.burnOneTime(opened.prekeyId.toInt())

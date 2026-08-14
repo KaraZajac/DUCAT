@@ -135,6 +135,19 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     val context = LocalContext.current
     val persona = remember { PersonaStore(context).secret() }
 
+    // Android 13+ gates notifications behind a runtime ask. Once, up front:
+    // this app's whole point includes "your phone tells you when money moves",
+    // and a silent decline leaves it looking broken rather than muted.
+    val askNotify = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { }
+    LaunchedEffect(Unit) {
+        if (android.os.Build.VERSION.SDK_INT >= 33 &&
+            context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) askNotify.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    }
+
     // Android's back gesture is a system behaviour, not a widget: without a
     // handler it goes straight to the activity and closes the app. Every screen
     // that is *entered* has to say how to leave it, or the way out of a

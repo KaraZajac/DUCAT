@@ -62,8 +62,25 @@ class Poller(private val context: Context) {
                     // depends on a screen having run is not a background job.
                     val node = NodeStore(context).lastGood() ?: pickNode(context)
                     if (node != null) {
+                        val before = WalletStore(context).entries().map { it.keyImage }.toSet()
                         val moved = Wallet.scanStep(context, node)
-                        if (moved) Wallet.refreshSpent(context, node)
+                        if (moved) {
+                            Wallet.refreshSpent(context, node)
+                            // Money that arrived while nobody was looking. Only
+                            // during steady state — a wallet mid-catch-up would
+                            // fire one notification per historical receipt.
+                            val b = Wallet.balances(context)
+                            if (!b.syncing) {
+                                WalletStore(context).entries()
+                                    .filter { it.keyImage.isNotEmpty() && it.keyImage !in before }
+                                    .forEach {
+                                        Notify.post(
+                                            context, "Money arrived",
+                                            "${formatXmr(it.amountPxmr)} XMR — unlocks after ten blocks",
+                                        )
+                                    }
+                            }
+                        }
                         // Turn outputs back into transactions: which ones we
                         // sent, and when each block was mined. A few per pass,
                         // because each is a round trip and this loop also has
