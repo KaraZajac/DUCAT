@@ -585,6 +585,9 @@ object Mailbox {
             val opened = openMessage(
                 raw, secret, isOneTime, seq, prev, threadAad(minePersonaHex, c.personaHex),
             )
+            // If this seq had been waiting out the patience window, it made
+            // it after all — the tracker must not keep growing.
+            stuckSince.remove("${c.personaHex}:$seq")
             DucatLog.i(TAG, "received seq ${opened.seq} from ${c.displayName()}")
             val arrived = StoredMessage(
                 outgoing = false, seq = opened.seq.toLong(),

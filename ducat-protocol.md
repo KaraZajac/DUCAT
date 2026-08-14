@@ -1485,7 +1485,7 @@ Use static tags only where the worst case of a swapped tag is "money went to the
 
 ## 15.11 Operating modes
 
-A device at a counter is a till all day. A phone on a bar is a tab book all night. These are **stances**, not features: each one fixes the answers to §15.2's two questions — `presenter_role` (who presents) and `amount_authority` (whose number is it) — and an implementation SHOULD let the user set the stance once rather than re-derive it per customer.
+A device at a counter is a till all day. A phone on a bar is a tab book all night. These are **stances**, not features: each one fixes the answers to §15.2's two questions — `presenter_role` (who presents) and `amount_authority` (whose number is it) — and an implementation SHOULD let the user set the stance once rather than re-derive it per customer — and SHOULD let the stance own the whole client while set: a till that still carries the wallet's tabs is a till asking its operator to navigate.
 
 The claim that matters most here is negative: **no mode below requires a new wire object.** Each is a discipline over machinery this protocol already has, and an implementation that invents per-mode message types has misread the section.
 

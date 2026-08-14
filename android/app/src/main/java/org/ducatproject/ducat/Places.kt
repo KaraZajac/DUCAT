@@ -1,51 +1,6 @@
 package org.ducatproject.ducat
 
 import android.content.Context
-import org.json.JSONArray
-import org.json.JSONObject
-
-/**
- * Saved places, because a destination needs coordinates and this app calls no
- * geocoder: an address search would hand every destination the user ever
- * types to whichever server answers it. A place is saved by standing in it
- * once (or pasting a geocell), named by its owner, kept locally.
- */
-class PlaceStore(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
-
-    data class Place(val name: String, val latE7: Long, val lonE7: Long)
-
-    fun all(): List<Place> {
-        val raw = prefs.getString("places_v1", null) ?: return emptyList()
-        val arr = runCatching { JSONArray(raw) }.getOrElse { return emptyList() }
-        return (0 until arr.length()).mapNotNull { i ->
-            runCatching {
-                val o = arr.getJSONObject(i)
-                Place(o.getString("n"), o.getLong("la"), o.getLong("lo"))
-            }.getOrNull()
-        }
-    }
-
-    fun add(p: Place) {
-        val list = all().filterNot { it.name == p.name } + p
-        val arr = JSONArray()
-        list.forEach {
-            arr.put(JSONObject().put("n", it.name).put("la", it.latE7).put("lo", it.lonE7))
-        }
-        prefs.edit().putString("places_v1", arr.toString()).apply()
-        ContactStore.bump()
-    }
-
-    fun remove(name: String) {
-        val arr = JSONArray()
-        all().filterNot { it.name == name }.forEach {
-            arr.put(JSONObject().put("n", it.name).put("la", it.latE7).put("lo", it.lonE7))
-        }
-        prefs.edit().putString("places_v1", arr.toString()).apply()
-        ContactStore.bump()
-    }
-}
-
 /**
  * The fare estimate (§15.12): every taxi on Earth prices the same way.
  *

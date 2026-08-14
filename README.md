@@ -51,14 +51,37 @@ message is refused; receipts issued by the payee, pointing at the transaction
 they acknowledge; pictures (sealed chunks in their own DHT records); reactions;
 opt-in read receipts that ride the log head for free.
 
-**Operating modes** — the device takes a stance, and the Home tab becomes the
-job: a **point of sale** (ring up, one code, bill on scan, receipt on payment,
+**Operating modes are whole apps.** Pick one in the drawer and the entire
+scaffold hands over — its own tabs, nothing of the wallet's: a **point of
+sale** (itemised or type-a-total register, one code, receipt on payment,
 mempool sighting shown as *seen, never settled*), a **bar tab** (every drink
 pinged to the customer, one bill at close, tip on top, pay from the bus home),
-a **taxi meter** (rate disclosed in-thread when the meter starts, the bill shows
-the minutes), and a **donation box** (a standing address any Monero wallet can
-give to, its linkability cost stated on screen). None of these needed a new
-wire object — the section's proudest sentence.
+a **taxi** (fares, meter, and today's take — see below), and a **donation
+box** (a standing address any Monero wallet can give to, its linkability cost
+stated on screen). Almost none of this needed a new wire object — the spec's
+proudest sentence.
+
+**Ride-hailing with no dispatcher (§15.12).** A rider's phone turns a GPS fix
+into a geocell — a public bulletin board *whose address is the place itself* —
+and posts a hail: a claim-once card, a destination, an offer priced from the
+real driving route. Drivers watch their cell and its neighbours (the net drawn
+on a live map, its size their call), read the job — pickup distance, trip
+length, what a rideshare would have paid them — and claim it; the DHT referees
+the race, no matchmaker exists. Acceptance arrives with a face on it: name,
+car, colour, plate, ETA. Fares run ~15% under a rideshare's rider price while
+the driver keeps 100% minus a cent of network fee, which is what deleting the
+platform's ~30% take makes arithmetically possible. Demonstrated end to end on
+the live network: hail → claim → quote → ride → payment with tip → receipt.
+One stated trade: address search, routing and map tiles query OpenStreetMap's
+servers — the single place DUCAT sends location off-device; the boards
+themselves never carry better than ~1.2 km.
+
+**Receipts are records, not messages.** Every receipt lives in its own store,
+survives thread and contact deletion, rides the backup, and dresses the
+Activity tab like a bank statement: counterparty, memo, itemisation, and a
+pending section for requests not yet answered. The memo travels in the sealed
+notice — never on the chain, because a public memo is a note stapled to a
+banknote.
 
 **And the app behaves like an app**: notifications that hide amounts from the
 lock screen and deep-link into the thread they announce, unread badges, an
@@ -114,7 +137,9 @@ its mistakes, and says so in the changelog. Settlement is
 Demonstrated end to end on stagenet, over live private routes: `direct`, `fast/1`
 and escrow settlement; card exchange and claim in both directions (as URIs —
 never yet over NFC); ten attacks refused; the abandonment paths that leave a
-single-sided receipt; the bar-tab flow phone-to-desktop, bill to receipt.
+single-sided receipt; the bar-tab flow phone-to-desktop, bill to receipt; and
+two complete dispatched rides phone↔desktop — geocell hail to on-chain
+settlement with tip and receipt, the second without a single lost message.
 
 Not proven, and stated here rather than buried: **no external adversarial
 review** (§2.5 is the project's own argument for why that matters), no

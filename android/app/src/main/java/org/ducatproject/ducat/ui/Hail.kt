@@ -55,40 +55,15 @@ private const val HAIL_TTL_SECS = 15L * 60
  */
 @Composable
 fun HailCard() {
-    var expanded by remember { mutableStateOf(false) }
     var sheetOpen by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var cell by remember { mutableStateOf("") }
     var dest by remember { mutableStateOf("") }
     var fareXmr by remember { mutableStateOf("") }
-    // Geocells (§15.12): where I am, coarsened to ~1.2 km by construction.
-    var myFix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
-    var originCell by remember { mutableStateOf<String?>(null) }
-    var destPlace by remember { mutableStateOf<org.ducatproject.ducat.PlaceStore.Place?>(null) }
-    var savePlaceOpen by remember { mutableStateOf(false) }
-    val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-    ) { }
     var posted by remember { mutableStateOf<PostedHail?>(null) }
     var status by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
-    fun locate() {
-        if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) !=
-            android.content.pm.PackageManager.PERMISSION_GRANTED
-        ) {
-            locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
-            return
-        }
-        grabFix(context) { fix ->
-            myFix = fix
-            originCell = fix?.let { (la, lo) ->
-                runCatching { uniffi.ducat_mobile.geohashEncode(la, lo, 6u) }.getOrNull()
-            }
-            originCell?.let { cell = "geo:$it" }
-            if (fix == null) error = "could not get a location fix"
-        }
-    }
 
     // The wait: the card's inbox answers when a driver claims (§16.9's
     // machinery unchanged). Polling, not a watch — a hail lives minutes.
@@ -147,158 +122,7 @@ fun HailCard() {
         }
 
         val p = posted
-        @Suppress("ConstantConditionIf")
-        if (false && p == null && expanded) { // the form moved to HailSheet
-            Spacer(Modifier.height(12.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(
-                    value = cell, onValueChange = { cell = it.take(64) },
-                    label = { Text("Stand") },
-                    placeholder = { Text("📍 or type a stand name") },
-                    modifier = Modifier.weight(1f), singleLine = true,
-                )
-                Spacer(Modifier.width(8.dp))
-                FilledTonalIconButton(onClick = { locate() }) {
-                    Icon(Icons.Filled.MyLocation, "Use my location")
-                }
-            }
-            Text(
-                originCell?.let { "Your area: geo:$it (~1.2 km — never finer, by design)" }
-                    ?: "📍 uses your area, ~1.2 km coarse. Or type a name both " +
-                        "sides know, like a corner.",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
-            )
-            Spacer(Modifier.height(10.dp))
-            // Destination: a saved place carries coordinates (so a fare can be
-            // estimated); free text stays for "quote me". No geocoder, on
-            // purpose — an address search would hand every destination you
-            // ever type to whoever runs the server.
-            val places = remember(savePlaceOpen) {
-                org.ducatproject.ducat.PlaceStore(context).all()
-            }
-            if (places.isNotEmpty()) {
-                Row(
-                    Modifier.fillMaxWidth().horizontalScroll(
-                        androidx.compose.foundation.rememberScrollState()
-                    ),
-                ) {
-                    places.forEach { pl ->
-                        FilterChip(
-                            selected = destPlace?.name == pl.name,
-                            onClick = {
-                                destPlace = if (destPlace?.name == pl.name) null else pl
-                                if (destPlace != null) dest = pl.name
-                            },
-                            label = { Text(pl.name) },
-                            modifier = Modifier.padding(end = 6.dp),
-                        )
-                    }
-                }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(
-                    value = dest,
-                    onValueChange = { dest = it.take(64); destPlace = null },
-                    label = { Text("Where to") },
-                    placeholder = { Text("airport, terminal B") },
-                    modifier = Modifier.weight(1f), singleLine = true,
-                )
-                Spacer(Modifier.width(8.dp))
-                TextButton(onClick = { savePlaceOpen = true }) { Text("Save here") }
-            }
-            // The estimate: base + per-km + per-min over great-circle × 1.3,
-            // fiat-first like every cab rate card, snapshotted to piconero at
-            // post (§15.11's meter rule). It seeds an offer, nothing more.
-            val estimate = remember(myFix, destPlace) {
-                val fix = myFix ?: return@remember null
-                val d = destPlace ?: return@remember null
-                val meters = uniffi.ducat_mobile.haversineM(
-                    fix.first, fix.second, d.latE7, d.lonE7,
-                ).toLong()
-                org.ducatproject.ducat.Fare.estimate(context, meters)?.let { it to meters }
-            }
-            estimate?.let { (est, meters) ->
-                val (fiat, pxmr) = est
-                val cur = remember { Amounts.currency(context) }
-                LaunchedEffect(pxmr) {
-                    if (fareXmr.isBlank()) fareXmr = formatXmr(pxmr)
-                }
-                Text(
-                    "≈ %.1f km by road · est. %s %.2f–%.2f".format(
-                        meters / 1000.0 * org.ducatproject.ducat.Fare.CIRCUITY,
-                        cur, fiat * 0.8, fiat * 1.2,
-                    ),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Spacer(Modifier.height(10.dp))
-            OutlinedTextField(
-                value = fareXmr, onValueChange = { fareXmr = it },
-                label = { Text("Offer (XMR) — empty asks the driver to quote") },
-                modifier = Modifier.fillMaxWidth(), singleLine = true,
-            )
-            Spacer(Modifier.height(16.dp))
-            Button(
-                onClick = {
-                    busy = true; error = null
-                    val theCell = cell.trim()
-                    val theDest = dest.trim()
-                    val fare = fareXmr.trim().toDoubleOrNull()
-                        ?.let { (it * 1e12).toLong().toULong() }
-                    kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
-                        runCatching {
-                            val card = Mailbox.issueCard(
-                                context, MyProfile(context).name(),
-                                (HAIL_TTL_SECS * 2).toULong(), purpose = "hail",
-                            )
-                            val destCell = destPlace?.let { d ->
-                                runCatching {
-                                    uniffi.ducat_mobile.geohashEncode(d.latE7, d.lonE7, 6u)
-                                }.getOrNull()
-                            }
-                            val bytes = hailEncode(
-                                HailInfo(
-                                    card = card.uri,
-                                    dest = theDest,
-                                    farePxmr = fare,
-                                    expiry = (System.currentTimeMillis() / 1000 +
-                                        HAIL_TTL_SECS).toULong(),
-                                    originCell = originCell,
-                                    destCell = destCell,
-                                )
-                            )
-                            val sub = (0..7).random().toUInt()
-                            standPost(theCell, sub, bytes)
-                            PostedHail(theCell, sub, card.inboxKey)
-                        }.onSuccess {
-                            posted = it
-                            expanded = false
-                            status = "Posted. Waiting for a driver…"
-                            DucatLog.i(TAG, "hail posted at ${it.cell} subkey ${it.subkey}")
-                        }.onFailure {
-                            error = it.message ?: "could not post the hail"
-                            DucatLog.w(TAG, "post: ${it.message}")
-                        }
-                        busy = false
-                    }
-                },
-                enabled = !busy && cell.isNotBlank() && dest.isNotBlank(),
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-            ) {
-                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                else Text("Post the hail")
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                "A hail is a mutual promise, like flagging a cab — nobody is " +
-                    "made to show up. Payment happens at the end, from your " +
-                    "confirm screen, never automatically.",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
-            )
-        } else if (p != null) {
+        if (p != null) {
             Spacer(Modifier.height(10.dp))
             Text("Standing at ${p.cell}",
                 style = MaterialTheme.typography.bodyMedium,
@@ -332,7 +156,6 @@ fun HailCard() {
         }
     }
     }
-    if (savePlaceOpen) SavePlaceDialog { savePlaceOpen = false }
     if (sheetOpen) {
         HailSheet(
             onPosted = { cell, sub, inbox ->
@@ -346,47 +169,6 @@ fun HailCard() {
 
 private data class PostedHail(val cell: String, val subkey: UInt, val inboxKey: String)
 
-/** Name where you stand; it becomes a destination chip with coordinates. */
-@Composable
-private fun SavePlaceDialog(onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    var name by remember { mutableStateOf("") }
-    var fix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
-    LaunchedEffect(Unit) { grabFix(context) { fix = it } }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Save this place") },
-        text = {
-            Column {
-                Text(
-                    if (fix != null) "Location fixed. Name it:"
-                    else "Getting a fix…",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = name, onValueChange = { name = it.take(24) },
-                    label = { Text("Name (home, work, airport…)") },
-                    singleLine = true,
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    fix?.let { (la, lo) ->
-                        org.ducatproject.ducat.PlaceStore(context)
-                            .add(org.ducatproject.ducat.PlaceStore.Place(name.trim(), la, lo))
-                    }
-                    onDismiss()
-                },
-                enabled = fix != null && name.isNotBlank(),
-            ) { Text("Save") }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
-    )
-}
 
 /**
  * The driver's half: watch a stand, take a hail.
@@ -1042,8 +824,10 @@ fun HailSheet(
     // Addresses first; the route (and the map that draws it) only once both
     // ends exist. The map is a preview of a decision, not a picker.
     LaunchedEffect(from, to) {
-        val f = from ?: return@LaunchedEffect
-        val t = to ?: return@LaunchedEffect
+        // Editing an endpoint retracts the route: a stale route under a
+        // cleared field left a Hail button pointing at !!-nothing.
+        val f = from ?: run { route = null; return@LaunchedEffect }
+        val t = to ?: run { route = null; return@LaunchedEffect }
         routing = true
         route = null
         val r = withContext(Dispatchers.IO) {
@@ -1199,7 +983,7 @@ fun HailSheet(
                                     busy = false
                                 }
                             },
-                            enabled = !busy,
+                            enabled = !busy && from != null && to != null,
                             modifier = Modifier.fillMaxWidth().height(52.dp),
                         ) {
                             if (busy) CircularProgressIndicator(

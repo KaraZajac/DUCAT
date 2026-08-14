@@ -47,8 +47,10 @@ object Geo {
         val q = URLEncoder.encode(query, "UTF-8")
         val bias = near?.let { (la, lo) ->
             val lat = la / 1e7; val lon = lo / 1e7
+            // Locale.US, non-negotiably: a comma-decimal locale would format
+            // 48.85 as "48,85" and the URL's own commas stop meaning anything.
             "&viewbox=%.4f,%.4f,%.4f,%.4f&bounded=0".format(
-                lon - 0.45, lat + 0.45, lon + 0.45, lat - 0.45,
+                java.util.Locale.US, lon - 0.45, lat + 0.45, lon + 0.45, lat - 0.45,
             )
         } ?: ""
         val body = get(
@@ -86,7 +88,7 @@ object Geo {
     fun routeVia(waypoints: List<Pair<Long, Long>>): Route? {
         if (waypoints.size < 2) return null
         val coords = waypoints.joinToString(";") { (la, lo) ->
-            "%f,%f".format(lo / 1e7, la / 1e7)
+            "%f,%f".format(java.util.Locale.US, lo / 1e7, la / 1e7)
         }
         val body = get(
             "https://router.project-osrm.org/route/v1/driving/$coords" +
