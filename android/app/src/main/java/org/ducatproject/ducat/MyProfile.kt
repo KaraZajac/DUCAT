@@ -76,8 +76,13 @@ class MyProfile(context: Context) {
         prefs.edit().putBoolean("share_profile", v).apply(); ContactStore.bump()
     }
 
-    /** What actually goes on the record, after the share switch. */
-    fun toWire(): Profile =
+    /** What actually goes on the record, after the share switch.
+     *
+     *  The car rides only when [driving] — it exists for the one moment a
+     *  rider scans a curb for a stranger's vehicle (§15.12), and a plate is
+     *  a real-world identifier that has no business on every card handed
+     *  across a bar. */
+    fun toWire(driving: Boolean = false): Profile =
         if (!shareProfile()) Profile(null, null, null, null, null, null, null, null)
         else Profile(
             avatar = avatar(),
@@ -85,9 +90,9 @@ class MyProfile(context: Context) {
             phone = phone(),
             signal = signal(),
             pronouns = pronouns()?.toUInt(),
-            carModel = carModel(),
-            carColor = carColor(),
-            plate = plate(),
+            carModel = if (driving) carModel() else null,
+            carColor = if (driving) carColor() else null,
+            plate = if (driving) plate() else null,
         )
 
     private fun put(key: String, v: String?) {

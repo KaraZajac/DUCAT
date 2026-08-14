@@ -1581,6 +1581,8 @@ Arriving at the destination MAY prompt the driver's client to send the bill — 
 
 No protocol makes a car arrive. The platforms solve no-shows with reputation and a card on file — trust plus recourse, not cryptography — and an **unbonded hail is a mutual promise, like flagging a cab**: stated in the UI, not hidden. The deposit shifts the deadhead risk; receipts and the thread are the reputation substrate a regular relationship accretes; and the durable answer for strangers is a **driver bond** posted through Part IV's escrow machinery, which is future work this section deliberately does not specify. What this section refuses: any design where dispute resolution reintroduces an operator.
 
+**Driver identity is scoped to the claim.** The car fields (§16.9, 210–212) SHOULD travel only in the `CONTACT_ACCEPT` written when claiming a hail — the one moment a rider needs to find a stranger's vehicle. A plate is a real-world identifier; publishing it on every card handed across a bar would spend deanonymization for nothing.
+
 **Route safety inherited (O17):** the hail imports no route blobs from strangers — the board is read-only DHT, the claim is a card, and the thread is §16.12's mailbox model throughout, which is precisely the containment O17 prescribes while Veilid #395 stands.
 
 **Stewardship (§18.7):** a hail's records are the shortest-lived in the protocol. A rider's client SHOULD overwrite its notice's subkey with an empty value once claimed or expired, and MUST delete local record state when the hail is spent; a board is never rewritten merely to keep it warm.

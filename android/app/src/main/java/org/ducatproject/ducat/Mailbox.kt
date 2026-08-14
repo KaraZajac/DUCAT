@@ -129,7 +129,14 @@ object Mailbox {
      * Accept someone's card: read their details, publish ours in the reply
      * subkey, and keep both.
      */
-    fun claimCard(context: Context, scanned: ScannedCard, petname: String?): Contact {
+    fun claimCard(
+        context: Context,
+        scanned: ScannedCard,
+        petname: String?,
+        /** True only when accepting a hail: the one claim where the car —
+         *  model, colour, plate — belongs in the details we publish. */
+        asDriver: Boolean = false,
+    ): Contact {
         val store = ContactStore(context)
         val persona = PersonaStore(context).secret()
 
@@ -163,7 +170,7 @@ object Mailbox {
             buildContactDetails(
                 persona, outbox.key, prekeys.bundle, petname,
                 if (store.publishAddress()) WalletStore(context).address() else null,
-                MyProfile(context).toWire(),
+                MyProfile(context).toWire(driving = asDriver),
             ),
         )
 

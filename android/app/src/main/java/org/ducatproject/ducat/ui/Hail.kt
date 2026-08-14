@@ -259,7 +259,7 @@ fun DriveScreen() {
                 kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
                     runCatching {
                         val scanned = readContactCard(taken.card)
-                        Mailbox.claimCard(context, scanned, null)
+                        Mailbox.claimCard(context, scanned, null, asDriver = true)
                     }.onSuccess { rider ->
                         runCatching { standPost(taken.cell, taken.subkey, ByteArray(0)) }
                         runCatching {
@@ -570,7 +570,7 @@ fun DriveScreen() {
                                 kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
                                     runCatching {
                                         val scanned = readContactCard(n.card)
-                                        Mailbox.claimCard(context, scanned, null)
+                                        Mailbox.claimCard(context, scanned, null, asDriver = true)
                                     }.onSuccess { rider ->
                                         // The notice is spent; clear its slot
                                         // so the next driver is not baited by
