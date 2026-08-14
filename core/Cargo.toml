@@ -2,6 +2,7 @@
 name = "ducat-core"
 version = "0.1.0"
 edition = "2021"
+license = "BSD-3-Clause"
 description = "DUCAT protocol core: deterministic codec, domain-separated signing, contract state machine"
 
 [dependencies]

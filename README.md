@@ -112,12 +112,19 @@ its mistakes, and says so in the changelog. Settlement is
 ## What is proven, and what is not
 
 Demonstrated end to end on stagenet, over live private routes: `direct`, `fast/1`
-and escrow settlement; both tap directions; ten attacks refused; the abandonment
-paths that leave a single-sided receipt; the bar-tab flow phone-to-desktop,
-bill to receipt.
+and escrow settlement; card exchange and claim in both directions (as URIs —
+never yet over NFC); ten attacks refused; the abandonment paths that leave a
+single-sided receipt; the bar-tab flow phone-to-desktop, bill to receipt.
 
 Not proven, and stated here rather than buried: **no external adversarial
 review** (§2.5 is the project's own argument for why that matters), no
 implementer who has never read `core/` (O21), NFC compile-verified but never
 field-tested between two phones, and no measurement of the tap on a handset.
 The latency figures in §8.7.2 are a desktop with an attached node.
+
+## License
+
+[BSD-3-Clause](LICENSE) — the same license as Monero. Note that §18.7's
+obligations (no carriage fees, full participation) are conformance
+requirements of the *protocol*, not terms of the license: build anything you
+like from this code, but a client that monetizes carriage is not DUCAT.
