@@ -841,6 +841,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -934,6 +936,8 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_create_shared(`writerPublic`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_dht_delete(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
     fun uniffi_ducat_mobile_fn_func_node_dht_get(`key`: RustBuffer.ByValue,`subkey`: Int,`forceRefresh`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_open(`key`: RustBuffer.ByValue,`writerPublic`: RustBuffer.ByValue,`writerSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1176,6 +1180,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_create_shared(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_dht_delete(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_get(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_open(
@@ -1360,6 +1366,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_create_shared() != 28332.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_delete() != 49534.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_get() != 61174.toShort()) {
@@ -5043,6 +5052,24 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
 }
     )
     }
+    
+
+        /**
+         * Forget a record this device is done with (§18.7's stewardship).
+         *
+         * Local, and honestly so: the network's copies expire by their own TTL and
+         * nothing a client says can hasten that. What this does is stop *us* being a
+         * long-lived origin for a record whose purpose is spent — an answered
+         * handshake inbox, a fetched attachment — and free the local storage. A good
+         * tenant cleans its own unit; the building handles the rest.
+         */
+    @Throws(NodeException::class) fun `nodeDhtDelete`(`key`: kotlin.String)
+        = 
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_delete(
+        FfiConverterString.lower(`key`),_status)
+}
+    
     
 
     @Throws(NodeException::class) fun `nodeDhtGet`(`key`: kotlin.String, `subkey`: kotlin.UInt, `forceRefresh`: kotlin.Boolean): kotlin.ByteArray? {

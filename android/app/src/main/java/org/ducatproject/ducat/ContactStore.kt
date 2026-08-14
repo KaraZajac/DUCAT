@@ -480,6 +480,35 @@ class ContactStore(context: Context) {
         issuedCards().firstOrNull { it.inboxKey == inboxKey }?.answeredBy
 
     /**
+     * Sweep the registry (§18.7's stewardship): answered cards a while after
+     * their claim was collected, unanswered ones past their day. Returns the
+     * inbox keys of what was dropped so the caller can forget the records too
+     * — the network reclaims its copies by TTL either way; this is about not
+     * being a long-lived origin for spent purposes, and not growing a registry
+     * forever.
+     */
+    fun pruneCards(): List<String> = synchronized(lock) {
+        val arr = prefs.getString("issued_cards", null)?.let { JSONArray(it) } ?: return emptyList()
+        val now = System.currentTimeMillis()
+        val keep = JSONArray()
+        val dropped = mutableListOf<String>()
+        for (i in 0 until arr.length()) {
+            val o = arr.getJSONObject(i)
+            val made = o.optLong("made", now)
+            val answered = !o.isNull("answered_by")
+            val stale =
+                (answered && now - made > 60 * 60 * 1000L) ||
+                    (!answered && now - made > 24 * 60 * 60 * 1000L)
+            if (stale) dropped += o.getString("inbox") else keep.put(o)
+        }
+        if (dropped.isNotEmpty()) {
+            prefs.edit().putString("issued_cards", keep.toString()).apply()
+            bump()
+        }
+        dropped
+    }
+
+    /**
      * The URI of the card currently on offer, so it can be shown without being
      * regenerated.
      *

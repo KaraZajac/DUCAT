@@ -117,6 +117,16 @@ class Poller(private val context: Context) {
                     NodeStore(context).lastGood()?.let { TabStore.poolSight(context, it) }
                 }.onFailure { DucatLog.w(TAG, "pool: ${it.message}") }
 
+                // Stewardship (§18.7): a good tenant cleans its own unit.
+                // Cards whose purpose is spent leave the registry, and this
+                // device stops holding their records; the network's copies
+                // expire by TTL on their own.
+                runCatching {
+                    ContactStore(context).pruneCards().forEach {
+                        runCatching { uniffi.ducat_mobile.nodeDhtDelete(it) }
+                    }
+                }.onFailure { DucatLog.w(TAG, "prune: ${it.message}") }
+
                 // One attachment per pass: pictures arrive shortly after
                 // their messages without ever starving the payment paths.
                 runCatching { Mailbox.fetchOneAttachment(context) }

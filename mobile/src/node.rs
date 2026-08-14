@@ -552,6 +552,27 @@ pub fn node_wait_change(timeout_ms: u32) -> bool {
     fired
 }
 
+/// Forget a record this device is done with (§18.7's stewardship).
+///
+/// Local, and honestly so: the network's copies expire by their own TTL and
+/// nothing a client says can hasten that. What this does is stop *us* being a
+/// long-lived origin for a record whose purpose is spent — an answered
+/// handshake inbox, a fetched attachment — and free the local storage. A good
+/// tenant cleans its own unit; the building handles the rest.
+#[uniffi::export]
+pub fn node_dht_delete(key: String) -> Result<(), NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let rk = parse_key(&key)?;
+        rc.delete_dht_record(rk)
+            .await
+            .map_err(|e| NodeError::Failed(format!("delete: {e}")))
+    })
+}
+
 #[uniffi::export]
 pub fn node_dht_get(
     key: String,

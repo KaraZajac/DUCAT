@@ -365,6 +365,9 @@ object Mailbox {
                     }
                     val plain = attachmentOpen(key, nonce, ct)
                     out.writeBytes(plain)
+                    // Stewardship (§18.7): the bytes are ours now; stop being
+                    // an origin for the record that carried them.
+                    runCatching { nodeDhtDelete(rec) }
                     DucatLog.i(TAG, "fetched attachment ${hash.take(12)}… (${plain.size} bytes)")
                     ContactStore.bump()
                     true
