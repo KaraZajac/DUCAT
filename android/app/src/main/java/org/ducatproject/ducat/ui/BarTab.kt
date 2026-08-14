@@ -31,6 +31,9 @@ import org.ducatproject.ducat.formatXmr
 
 private const val TAG = "BarTab"
 
+/** States with nothing left to reconcile — safe to drop from the tab book. */
+private val CLOSED_STATES = setOf("paid", "paid_oob", "cancelled")
+
 /**
  * The tab book (§15.11): one running account per customer, settled as one bill.
  *
@@ -73,7 +76,9 @@ fun BarTabScreen() {
 
     val open = tabs.filter { it.state == "open" && it.origin == "bar" }
     val awaiting = tabs.filter { it.state == "settled" }
-    val paid = tabs.filter { it.state == "paid" || it.state == "paid_oob" }
+    // Everything finished, cancelled included — a cancelled tab that appears
+    // nowhere is not gone, it is just unmanageable.
+    val done = tabs.filter { it.state in CLOSED_STATES }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
@@ -123,10 +128,21 @@ fun BarTabScreen() {
             )
         }
 
-        if (paid.isNotEmpty()) {
-            SectionLabel("Settled tonight")
+        if (done.isNotEmpty()) {
+            Row(
+                Modifier.fillMaxWidth().padding(end = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SectionLabel("Settled")
+                Spacer(Modifier.weight(1f))
+                // Local bookkeeping only: the receipts already live in the
+                // threads, which is where the record of the night belongs.
+                TextButton(onClick = { done.forEach { store.delete(it.id) } }) {
+                    Text("Clear", style = MaterialTheme.typography.labelMedium)
+                }
+            }
             Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                Column { paid.forEach { t -> TabRow(t) { openId = t.id } } }
+                Column { done.forEach { t -> TabRow(t) { openId = t.id } } }
             }
         }
 
@@ -479,6 +495,17 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 color = MaterialTheme.ducat.settled,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
+        }
+
+        if (tab.state in CLOSED_STATES) {
+            // Only closed tabs: an open tab has "Discard", a billed one must
+            // exit through cancel or paid-outside so the customer is told —
+            // deleting it here would leave their app pointing at a bill nobody
+            // is watching for.
+            TextButton(
+                onClick = { store.delete(tab.id); onBack() },
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) { Text("Remove from tab book", color = MaterialTheme.colorScheme.error) }
         }
 
         error?.let {

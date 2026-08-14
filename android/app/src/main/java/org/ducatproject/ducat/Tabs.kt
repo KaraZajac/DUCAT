@@ -113,6 +113,18 @@ class TabStore(private val context: Context) {
     fun delete(id: String) = save(all().filterNot { it.id == id })
 
     /**
+     * Key images ever matched to a bill, kept apart from the tabs themselves:
+     * deleting a paid tab must not release its output back into the matching
+     * pool, or a still-billed tab for the same amount could later "find" a
+     * payment that already bought someone else's evening.
+     */
+    fun claimedKis(): Set<String> =
+        prefs.getStringSet("claimed_kis_v1", emptySet()) ?: emptySet()
+
+    fun addClaimedKi(ki: String) =
+        prefs.edit().putStringSet("claimed_kis_v1", claimedKis() + ki).apply()
+
+    /**
      * Bill the tab: one itemised request into the thread, then wait for chain.
      *
      * The wallet's current key images are snapshotted here so reconciliation
@@ -248,7 +260,8 @@ class TabStore(private val context: Context) {
             val settled = store.all().filter { it.state == "settled" }.sortedBy { it.settledAt }
             if (settled.isEmpty()) return
             val entries = WalletStore(context).entries()
-            val claimed = store.all().mapNotNull { it.paidKi }.toMutableSet()
+            val claimed = (store.all().mapNotNull { it.paidKi } + store.claimedKis())
+                .toMutableSet()
 
             for (tab in settled) {
                 // Amounts this payer *said* they sent for this bill, from
@@ -293,6 +306,7 @@ class TabStore(private val context: Context) {
                     )
                 }.onSuccess {
                     store.update(tab.copy(state = "paid", paidKi = hit.keyImage))
+                    store.addClaimedKi(hit.keyImage)
                     Notify.post(
                         context,
                         "${contact.displayName()} paid",
