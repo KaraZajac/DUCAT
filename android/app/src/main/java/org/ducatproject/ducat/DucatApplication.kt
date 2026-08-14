@@ -24,6 +24,9 @@ class DucatApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // First, so everything after it — including a crash in the next
+        // line — is on the record.
+        DucatLog.init(this)
         VeilidInit.ensure(this)
         scope.launch {
             runCatching { nodeStart("${filesDir.absolutePath}/veilid") }

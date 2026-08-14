@@ -40,7 +40,13 @@ fun LogsScreen() {
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
     val version by DucatLog.changes.collectAsState()
-    val entries = remember(version) { DucatLog.snapshot().asReversed() }
+    // A filter, because a day's field test buries the one red line under four
+    // hundred quiet ones, and scrolling for it is how it gets missed.
+    var filter by remember { mutableStateOf<DucatLog.Level?>(null) }
+    val all = remember(version) { DucatLog.snapshot().asReversed() }
+    val entries = remember(all, filter) {
+        filter?.let { f -> all.filter { it.level == f } } ?: all
+    }
     val listState = rememberLazyListState()
     var copied by remember { mutableStateOf(false) }
 
@@ -53,10 +59,15 @@ fun LogsScreen() {
             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val warns = all.count { it.level == DucatLog.Level.Warn }
+            val errors = all.count { it.level == DucatLog.Level.Error }
             Text(
-                "${entries.size} line(s)",
+                "${all.size} line(s)" +
+                    (if (warns > 0) " · $warns warn" else "") +
+                    (if (errors > 0) " · $errors error" else ""),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (errors > 0) MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.weight(1f))
             IconButton(onClick = {
@@ -82,6 +93,21 @@ fun LogsScreen() {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.ducat.settled,
             )
+        }
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            @Composable
+            fun chip(label: String, level: DucatLog.Level?) = FilterChip(
+                selected = filter == level,
+                onClick = { filter = if (filter == level) null else level },
+                label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+            )
+            chip("All", null)
+            chip("Info", DucatLog.Level.Info)
+            chip("Warn", DucatLog.Level.Warn)
+            chip("Error", DucatLog.Level.Error)
         }
         HorizontalDivider()
 

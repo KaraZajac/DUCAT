@@ -24,6 +24,7 @@ import uniffi.ducat_mobile.createPersonaSecret
 import uniffi.ducat_mobile.exportBackup
 import uniffi.ducat_mobile.importBackup
 import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.DucatLog
 
 /**
  * Backup, after onboarding.
@@ -159,11 +160,14 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
             ContactStore(context).restoreFromBackup(r)
             // The address is the check that matters. A bundle that decrypts has
             // proved the passphrase, not that it holds the wallet you meant.
+            DucatLog.i("Backup", "imported: ${r.contacts.size} contact(s), " +
+                "${r.prekeyOneTime.size} prekey(s), escrow ${r.escrowCount}")
             restored = addressForSpendKey(r.spendKeyHex, stagenet = true)
             "Opened — ${r.escrowCount} escrow share(s), restore height ${r.restoreHeight}"
         } catch (t: Throwable) {
             // A wrong passphrase and a tampered file are the same error, on
             // purpose: telling them apart would say whether a guess was close.
+            DucatLog.w("Backup", "import failed: ${t.javaClass.simpleName}")
             "Could not open it — wrong passphrase, or the file has been altered"
         }
     }

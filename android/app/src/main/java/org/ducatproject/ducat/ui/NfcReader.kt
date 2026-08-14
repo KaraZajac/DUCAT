@@ -33,7 +33,11 @@ fun NfcTapReader(onUri: (String) -> Unit) {
     DisposableEffect(Unit) {
         val activity = context as? Activity ?: return@DisposableEffect onDispose {}
         val adapter = NfcAdapter.getDefaultAdapter(activity)
-            ?: return@DisposableEffect onDispose {}
+            ?: run {
+                DucatLog.i("Tap", "no NFC hardware — QR only")
+                return@DisposableEffect onDispose {}
+            }
+        DucatLog.i("Tap", "reader mode on")
 
         val main = Handler(Looper.getMainLooper())
         adapter.enableReaderMode(
@@ -54,6 +58,9 @@ fun NfcTapReader(onUri: (String) -> Unit) {
             NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B,
             null,
         )
-        onDispose { runCatching { adapter.disableReaderMode(activity) } }
+        onDispose {
+            DucatLog.i("Tap", "reader mode off")
+            runCatching { adapter.disableReaderMode(activity) }
+        }
     }
 }

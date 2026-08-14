@@ -24,7 +24,70 @@ import java.util.Locale
  * a chat window — see [redact].
  */
 object DucatLog {
-    private const val CAP = 400
+    private const val CAP = 600
+    /** The on-disk tail: enough for a day of testing, small enough to share. */
+    private const val FILE_CAP_BYTES = 512 * 1024
+
+    @Volatile
+    private var file: java.io.File? = null
+
+    /**
+     * Start persisting, install the crash hook, stamp the build.
+     *
+     * **Crash capture is the point.** The log that matters most in a field
+     * test is the one written in the last second before the process dies, and
+     * an in-memory ring loses exactly that one. The handler writes the stack
+     * through to disk (the append is synchronous) before handing the crash to
+     * the system, so the next launch opens with the evidence on screen.
+     */
+    fun init(context: android.content.Context) {
+        val f = java.io.File(context.filesDir, "ducat.log")
+        file = f
+        // Reload the tail, so a restart — crash or otherwise — keeps history.
+        runCatching {
+            if (f.length() > FILE_CAP_BYTES) {
+                val tail = f.readBytes().let { it.copyOfRange(it.size - FILE_CAP_BYTES / 2, it.size) }
+                f.writeBytes(tail)
+            }
+            f.readLines().takeLast(CAP).forEach { line ->
+                parseLine(line)?.let {
+                    if (lines.size >= CAP) lines.removeFirst()
+                    lines.addLast(it)
+                }
+            }
+        }
+        val prior = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { t, e ->
+            runCatching {
+                add(
+                    Level.Error, "Crash",
+                    "${e.javaClass.simpleName}: ${e.message} on ${t.name}\n" +
+                        e.stackTrace.take(20).joinToString("\n") { "  at $it" },
+                )
+            }
+            prior?.uncaughtException(t, e)
+        }
+        val pkg = runCatching {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        }.getOrNull() ?: "?"
+        add(
+            Level.Info, "App",
+            "started — v$pkg, ${android.os.Build.MODEL}, Android ${android.os.Build.VERSION.RELEASE}",
+        )
+    }
+
+    private val lineFormat = Regex("^(\\d+)\\|(I|W|E)\\|([^|]*)\\|(.*)$")
+
+    private fun parseLine(l: String): Entry? {
+        val m = lineFormat.find(l) ?: return null
+        val (at, lv, tag, msg) = m.destructured
+        return Entry(
+            at.toLongOrNull() ?: return null,
+            when (lv) { "W" -> Level.Warn; "E" -> Level.Error; else -> Level.Info },
+            tag,
+            msg.replace("\\u000A", "\n"),
+        )
+    }
 
     enum class Level { Info, Warn, Error }
 
@@ -50,7 +113,17 @@ object DucatLog {
             Level.Error -> Log.e(tag, clean)
         }
         if (lines.size >= CAP) lines.removeFirst()
-        lines.addLast(Entry(System.currentTimeMillis(), level, tag, clean))
+        val entry = Entry(System.currentTimeMillis(), level, tag, clean)
+        lines.addLast(entry)
+        // Write-through, synchronously: the entry a crash is about to produce
+        // must be on disk before the process is gone. One short line per event
+        // keeps this cheap enough not to matter.
+        runCatching {
+            file?.appendText(
+                "${entry.at}|${entry.level.name.first()}|${entry.tag}|" +
+                    entry.message.replace("\n", "\\u000A") + "\n"
+            )
+        }
         _changes.value = _changes.value + 1
     }
 
@@ -60,6 +133,7 @@ object DucatLog {
     @Synchronized
     fun clear() {
         lines.clear()
+        runCatching { file?.writeText("") }
         _changes.value = _changes.value + 1
     }
 

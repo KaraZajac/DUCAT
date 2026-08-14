@@ -409,6 +409,7 @@ fun ModesScreen() {
     fun pick(m: org.ducatproject.ducat.Mode, on: Boolean) {
         current = if (on) m else org.ducatproject.ducat.Mode.None
         modes.set(current)
+        org.ducatproject.ducat.DucatLog.i("Mode", "switched to $current")
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
