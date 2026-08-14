@@ -33,13 +33,38 @@ object Mailbox {
     /** How long an unreadable sequence gets before it is declared lost —
      *  covering slow ring-slot propagation, which force-refresh does not. */
     private const val STUCK_PATIENCE_MS = 10L * 60 * 1000
-    private val stuckSince = java.util.concurrent.ConcurrentHashMap<String, Long>()
-    /** Hash of the raw bytes last *processed* per (contact, slot). What lets
-     *  the reader tell a stale tenant (bytes it already opened — wait, the
-     *  real write is still propagating) from a genuinely new message sealed
-     *  to a dead key (skip now; ten silent minutes teach nobody anything).
-     *  Doomed messages used to serve their patience sentences serially. */
-    private val slotSeen = java.util.concurrent.ConcurrentHashMap<String, Int>()
+
+    /** Persisted, not in-memory: the patience clock reset on every app
+     *  restart, and a phone that restarts every few minutes (this one does)
+     *  made a dead letter immortal — sixteen observed minutes on a ten-minute
+     *  window, with live receipts queued behind it forever. */
+    private fun waitPrefs(context: Context) =
+        context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+
+    private fun stuckSince(context: Context, key: String): Long {
+        val p = waitPrefs(context)
+        val existing = p.getLong("stuck_$key", 0L)
+        if (existing > 0L) return existing
+        val now = System.currentTimeMillis()
+        p.edit().putLong("stuck_$key", now).apply()
+        return now
+    }
+
+    private fun clearStuck(context: Context, key: String) {
+        waitPrefs(context).edit().remove("stuck_$key").apply()
+    }
+
+    /** Hash of the raw bytes last *processed* per (contact, slot) — persisted
+     *  for the same reason: the stale-tenant/dead-letter distinction is only
+     *  as durable as its memory. */
+    private fun slotSeen(context: Context, key: String): Int? =
+        waitPrefs(context).let {
+            if (it.contains("slotseen_$key")) it.getInt("slotseen_$key", 0) else null
+        }
+
+    private fun recordSlotSeen(context: Context, key: String, hash: Int) {
+        waitPrefs(context).edit().putInt("slotseen_$key", hash).apply()
+    }
 
     /**
      * Mint a card: an inbox for the handshake, an outbox for what we will say.
@@ -562,7 +587,7 @@ object Mailbox {
             if (secret == null) {
                 val slotKey = "${c.personaHex}:${logSubkey(seq, ring)}"
                 val rawHash = raw.contentHashCode()
-                val lastProcessed = slotSeen[slotKey]
+                val lastProcessed = slotSeen(context, slotKey)
                 if (lastProcessed == rawHash) {
                     // The slot's previous tenant — bytes this reader already
                     // opened as an earlier sequence. The real write is still
@@ -602,7 +627,7 @@ object Mailbox {
                 // patience window — the conservative wait that cannot call a
                 // late arrival lost.
                 val key = "${c.personaHex}:$seq"
-                val since = stuckSince.getOrPut(key) { System.currentTimeMillis() }
+                val since = stuckSince(context, key)
                 if (System.currentTimeMillis() - since < STUCK_PATIENCE_MS) {
                     DucatLog.i(
                         TAG,
@@ -611,7 +636,7 @@ object Mailbox {
                     )
                     break
                 }
-                stuckSince.remove(key)
+                clearStuck(context, key)
                 DucatLog.w(
                     TAG,
                     "prekey $id is gone; message $seq from ${c.displayName()} is lost",
@@ -636,8 +661,8 @@ object Mailbox {
             )
             // If this seq had been waiting out the patience window, it made
             // it after all — the tracker must not keep growing.
-            stuckSince.remove("${c.personaHex}:$seq")
-            slotSeen["${c.personaHex}:${logSubkey(seq, ring)}"] = raw.contentHashCode()
+            clearStuck(context, "${c.personaHex}:$seq")
+            recordSlotSeen(context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode())
             DucatLog.i(TAG, "received seq ${opened.seq} from ${c.displayName()}")
             val arrived = StoredMessage(
                 outgoing = false, seq = opened.seq.toLong(),
