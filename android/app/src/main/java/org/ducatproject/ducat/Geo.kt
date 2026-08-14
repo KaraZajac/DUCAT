@@ -29,6 +29,9 @@ object Geo {
         val seconds: Long,
         /** Decoded route geometry, (latE7, lonE7) pairs, for the map. */
         val points: List<Pair<Long, Long>>,
+        /** Per-leg (meters, seconds) when routed through waypoints — the
+         *  driver's "to the pickup" and "the ride itself", separately. */
+        val legs: List<Pair<Long, Long>> = emptyList(),
     )
 
     /**
@@ -75,10 +78,16 @@ object Geo {
     }
 
     /** Driving route between two points. Blocking; call from IO. */
-    fun route(fromLatE7: Long, fromLonE7: Long, toLatE7: Long, toLonE7: Long): Route? {
-        val coords = "%f,%f;%f,%f".format(
-            fromLonE7 / 1e7, fromLatE7 / 1e7, toLonE7 / 1e7, toLatE7 / 1e7,
-        )
+    fun route(fromLatE7: Long, fromLonE7: Long, toLatE7: Long, toLonE7: Long): Route? =
+        routeVia(listOf(fromLatE7 to fromLonE7, toLatE7 to toLonE7))
+
+    /** A route through every waypoint in order — the driver's whole job is
+     *  me → pickup → destination, and the legs come back separately. */
+    fun routeVia(waypoints: List<Pair<Long, Long>>): Route? {
+        if (waypoints.size < 2) return null
+        val coords = waypoints.joinToString(";") { (la, lo) ->
+            "%f,%f".format(lo / 1e7, la / 1e7)
+        }
         val body = get(
             "https://router.project-osrm.org/route/v1/driving/$coords" +
                 "?overview=full&geometries=geojson"
@@ -86,12 +95,17 @@ object Geo {
         return runCatching {
             val r = JSONObject(body).getJSONArray("routes").getJSONObject(0)
             val line = r.getJSONObject("geometry").getJSONArray("coordinates")
+            val legsArr = r.getJSONArray("legs")
             Route(
                 meters = r.getDouble("distance").toLong(),
                 seconds = r.getDouble("duration").toLong(),
                 points = (0 until line.length()).map { i ->
                     val pt = line.getJSONArray(i)
                     (pt.getDouble(1) * 1e7).toLong() to (pt.getDouble(0) * 1e7).toLong()
+                },
+                legs = (0 until legsArr.length()).map { i ->
+                    val l = legsArr.getJSONObject(i)
+                    l.getDouble("distance").toLong() to l.getDouble("duration").toLong()
                 },
             )
         }.getOrNull()

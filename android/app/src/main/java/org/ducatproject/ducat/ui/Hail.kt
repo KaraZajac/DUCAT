@@ -405,6 +405,7 @@ fun DriveScreen() {
     var watching by remember { mutableStateOf<List<String>?>(null) }
     var myFix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
     var notices by remember { mutableStateOf<List<SeenHail>>(emptyList()) }
+    var selected by remember { mutableStateOf<SeenHail?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
@@ -529,10 +530,12 @@ fun DriveScreen() {
                     Column(Modifier.padding(16.dp)) {
                         Text(n.dest, style = MaterialTheme.typography.titleMedium)
                         Text(
-                            n.farePxmr?.let { "offers ${formatXmr(it)} XMR" }
-                                ?: "asks you to quote",
+                            n.farePxmr?.let {
+                                val shown = Amounts.show(context, it)
+                                "offers ${shown.primary}" +
+                                    (shown.secondary?.let { s -> " · $s" } ?: "")
+                            } ?: "asks you to quote",
                             style = MaterialTheme.typography.bodyMedium,
-                            fontFamily = FontFamily.Monospace,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         // The triage line (§16.17): how far to the fare, how
@@ -570,6 +573,12 @@ fun DriveScreen() {
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline)
                         Spacer(Modifier.height(10.dp))
+                        Row {
+                        OutlinedButton(
+                            onClick = { selected = n },
+                            modifier = Modifier.weight(1f).height(44.dp),
+                        ) { Text("View job") }
+                        Spacer(Modifier.width(8.dp))
                         Button(
                             onClick = {
                                 busy = true; error = null
@@ -634,8 +643,9 @@ fun DriveScreen() {
                                 }
                             },
                             enabled = !busy,
-                            modifier = Modifier.fillMaxWidth().height(44.dp),
-                        ) { Text("Take this ride") }
+                            modifier = Modifier.weight(1f).height(44.dp),
+                        ) { Text("Take it") }
+                        }
                     }
                 }
             }
@@ -645,6 +655,188 @@ fun DriveScreen() {
             Spacer(Modifier.height(10.dp))
             Text(it, color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall)
+        }
+    }
+
+    selected?.let { n ->
+        FareDetail(
+            n = n,
+            myFix = myFix,
+            busy = busy,
+            onTake = { taken ->
+                selected = null
+                busy = true; error = null
+                kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
+                    runCatching {
+                        val scanned = readContactCard(taken.card)
+                        Mailbox.claimCard(context, scanned, null)
+                    }.onSuccess { rider ->
+                        runCatching { standPost(taken.cell, taken.subkey, ByteArray(0)) }
+                        runCatching {
+                            val me = org.ducatproject.ducat.MyProfile(context)
+                            val fix = myFix
+                            val o = taken.originCell?.let {
+                                uniffi.ducat_mobile.geohashCenter(it)
+                            }
+                            val etaMin = if (fix != null && o != null) {
+                                org.ducatproject.ducat.Geo.route(
+                                    fix.first, fix.second, o[0], o[1],
+                                )?.let { (it.seconds / 60).coerceAtLeast(1) }
+                                    ?: (uniffi.ducat_mobile.haversineM(
+                                        fix.first, fix.second, o[0], o[1],
+                                    ).toLong() * 2 / 1000).coerceAtLeast(1)
+                            } else null
+                            val car = listOfNotNull(me.carColor(), me.carModel())
+                                .joinToString(" ").ifBlank { null }
+                            val msg = buildString {
+                                append("🚕 On my way")
+                                etaMin?.let { append(" — ETA ~$it min") }
+                                append(".")
+                                car?.let { append(" Look for a $it") }
+                                me.plate()?.let { append(", plate $it") }
+                                if (car != null || me.plate() != null) append(".")
+                            }
+                            Mailbox.send(
+                                context, rider, msg,
+                                org.ducatproject.ducat.PersonaStore(context).personaHex(),
+                            )
+                        }
+                        DucatLog.i(TAG, "took a hail to ${taken.dest}")
+                        withContext(Dispatchers.Main) {
+                            MainActivity.openChat.value = rider.personaHex
+                        }
+                    }.onFailure {
+                        DucatLog.w(TAG, "claim: ${it.message}")
+                        error = "Someone beat you to that one."
+                    }
+                    busy = false
+                }
+            },
+            onClose = { selected = null },
+        )
+    }
+}
+
+/**
+ * The job, before the yes: the whole trip on one map — me to the pickup, the
+ * ride itself — with what it pays against what a platform would have paid.
+ * The Uber driver's accept screen, minus the countdown pressure: a hail
+ * stands until it expires, and a decision under a shrinking timer is not a
+ * decision.
+ */
+@Composable
+private fun FareDetail(
+    n: SeenHail,
+    myFix: Pair<Long, Long>?,
+    busy: Boolean,
+    onTake: (SeenHail) -> Unit,
+    onClose: () -> Unit,
+) {
+    val context = LocalContext.current
+    var route by remember { mutableStateOf<org.ducatproject.ducat.Geo.Route?>(null) }
+    val origin = remember(n) {
+        n.originCell?.let {
+            runCatching { uniffi.ducat_mobile.geohashCenter(it) }.getOrNull()
+        }
+    }
+    val dest = remember(n) {
+        n.destCell?.let {
+            runCatching { uniffi.ducat_mobile.geohashCenter(it) }.getOrNull()
+        }
+    }
+    LaunchedEffect(n) {
+        val o = origin ?: return@LaunchedEffect
+        val pts = ArrayList<Pair<Long, Long>>()
+        myFix?.let { pts += it }
+        pts += (o[0] to o[1])
+        dest?.let { pts += (it[0] to it[1]) }
+        if (pts.size >= 2) {
+            route = withContext(Dispatchers.IO) {
+                org.ducatproject.ducat.Geo.routeVia(pts)
+            }
+        }
+    }
+
+    androidx.compose.ui.window.Dialog(
+        onDismissRequest = onClose,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Column(Modifier.fillMaxSize().verticalScroll(
+                androidx.compose.foundation.rememberScrollState())) {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconButton(onClick = onClose) { Icon(Icons.Filled.Close, "Close") }
+                    Text("The job", style = MaterialTheme.typography.titleLarge)
+                }
+                RouteMap(
+                    from = myFix ?: origin?.let { it[0] to it[1] },
+                    to = dest?.let { it[0] to it[1] } ?: origin?.let { it[0] to it[1] },
+                    route = route?.points ?: emptyList(),
+                    modifier = Modifier.fillMaxWidth().height(300.dp)
+                        .padding(horizontal = 16.dp)
+                        .clip(MaterialTheme.shapes.large),
+                )
+                Column(Modifier.padding(16.dp)) {
+                    Text(n.dest, style = MaterialTheme.typography.titleMedium)
+                    route?.let { r ->
+                        val toPickup = r.legs.getOrNull(0)
+                        val trip = if (r.legs.size >= 2) r.legs[1] else r.legs.getOrNull(0)
+                        toPickup?.let {
+                            if (myFix != null) Text(
+                                "to the pickup: %.1f km · ~%d min".format(
+                                    it.first / 1000.0, (it.second / 60).coerceAtLeast(1)),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        trip?.let {
+                            Text(
+                                "the ride: %.1f km · ~%d min".format(
+                                    it.first / 1000.0, (it.second / 60).coerceAtLeast(1)),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        n.farePxmr?.let { fare ->
+                            val shown = Amounts.show(context, fare)
+                            Text(
+                                "offer: ${shown.primary}" +
+                                    (shown.secondary?.let { s -> " · $s" } ?: ""),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            trip?.let { t ->
+                                val (_, uberDriver, _) = org.ducatproject.ducat.Fare
+                                    .competitors(t.first, t.second)
+                                val cur = Amounts.currency(context)
+                                Text(
+                                    ("you keep all of it — a rideshare would pay " +
+                                        "~$cur %.0f for this trip").format(uberDriver),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.ducat.settled,
+                                )
+                            }
+                        } ?: Text("rider asks you to quote",
+                            style = MaterialTheme.typography.titleMedium)
+                    } ?: Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Routing the job…", style = MaterialTheme.typography.bodySmall)
+                    }
+                    Spacer(Modifier.height(14.dp))
+                    Button(
+                        onClick = { onTake(n) },
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                    ) { Text("Take this ride 🚕") }
+                    Spacer(Modifier.height(6.dp))
+                    OutlinedButton(
+                        onClick = onClose,
+                        modifier = Modifier.fillMaxWidth().height(44.dp),
+                    ) { Text("Pass") }
+                }
+            }
         }
     }
 }

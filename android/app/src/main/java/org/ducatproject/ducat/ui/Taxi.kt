@@ -85,8 +85,17 @@ private fun NewRideScreen(rides: RideStore) {
     val prefs = remember {
         context.getSharedPreferences("ducat_contacts", android.content.Context.MODE_PRIVATE)
     }
-    var base by remember { mutableStateOf(prefs.getString("taxi_base_text", "") ?: "") }
-    var perMin by remember { mutableStateOf(prefs.getString("taxi_permin_text", "") ?: "") }
+    // Empty fields inherit the fare card's positioned defaults (§15.12's
+    // pricing: inside the platform margin) rather than making every driver
+    // invent a rate at the curb.
+    var base by remember { mutableStateOf(
+        prefs.getString("taxi_base_text", null)
+            ?: "%.2f".format(org.ducatproject.ducat.Fare.base(context))
+    ) }
+    var perMin by remember { mutableStateOf(
+        prefs.getString("taxi_permin_text", null)
+            ?: "%.2f".format(org.ducatproject.ducat.Fare.perMin(context))
+    ) }
     var fiat by remember { mutableStateOf(Amounts.preferFiat(context)) }
     val rate = remember { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
