@@ -146,7 +146,11 @@ private fun ChooseTarget(
 ) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    val contacts = remember(version) { ContactStore(context).all() }
+    // Alphabetical: a picker is looked *up*, not scrolled through in arrival
+    // order — recency belongs to the chat list, names belong here.
+    val contacts = remember(version) {
+        ContactStore(context).all().sortedBy { it.displayName().lowercase() }
+    }
     var address by remember { mutableStateOf("") }
 
     Column(

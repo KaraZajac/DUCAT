@@ -458,7 +458,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
 
                     if (contactPick) {
                         ContactPickDialog(
-                            contacts = store.all().filter { it.personaHex != c.personaHex },
+                            contacts = store.all().filter { it.personaHex != c.personaHex }
+                                .sortedBy { it.displayName().lowercase() },
                             // The introduction, done the only way consent
                             // allows: a fresh card of *mine*, dropped into the
                             // thread as a ducat: link, for them to hand to

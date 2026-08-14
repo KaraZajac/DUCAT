@@ -274,6 +274,7 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
 
     val regulars = remember {
         ContactStore(context).all().filter { it.theirBundle != null }
+            .sortedBy { it.displayName().lowercase() }
     }
 
     Column(
