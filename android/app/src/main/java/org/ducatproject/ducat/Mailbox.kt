@@ -363,6 +363,9 @@ object Mailbox {
         // and every later one comes back as an unknown prekey. Exactly the bug
         // that hit the published bundle earlier, on the other side of the wire.
         if (sealed.prekeyId != 0u) {
+            if (sealed.forwardSecret) {
+                store.recordUsedTheirId(c.personaHex, sealed.prekeyId.toInt())
+            }
             runCatching { prunePrekey(bundle, sealed.prekeyId) }
                 .onSuccess { store.setTheirBundle(c.personaHex, it) }
         }

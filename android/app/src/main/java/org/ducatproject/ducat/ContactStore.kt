@@ -265,7 +265,26 @@ class ContactStore(context: Context) {
     /** Record their published keys without touching any counter. */
     fun setTheirBundle(personaHex: String, bundle: ByteArray) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
-        save(all().filterNot { it.personaHex == personaHex } + c.copy(theirBundle = bundle))
+        // A refreshed head replaces the cache — but re-pruned of every id this
+        // side ever sealed to. In a two-party thread, their burned set is
+        // exactly our spent set, so however stale the fetched head, a spent
+        // key cannot be picked twice (the desk relearned this with a coffee
+        // receipt that died on the same dead key twice).
+        var b = bundle
+        usedTheirIds(personaHex).forEach { id ->
+            runCatching { uniffi.ducat_mobile.prunePrekey(b, id.toUInt()) }
+                .onSuccess { b = it }
+        }
+        save(all().filterNot { it.personaHex == personaHex } + c.copy(theirBundle = b))
+    } }
+
+    fun usedTheirIds(personaHex: String): Set<Int> =
+        prefs.getString("usedtheirs_$personaHex", null)
+            ?.split(',')?.mapNotNull { it.toIntOrNull() }?.toSet() ?: emptySet()
+
+    fun recordUsedTheirId(personaHex: String, id: Int) { synchronized(lock) {
+        val all = usedTheirIds(personaHex) + id
+        prefs.edit().putString("usedtheirs_$personaHex", all.joinToString(",")).apply()
     } }
 
     fun remove(personaHex: String) = save(all().filterNot { it.personaHex == personaHex })
