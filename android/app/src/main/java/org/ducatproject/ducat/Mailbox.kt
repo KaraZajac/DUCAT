@@ -50,7 +50,7 @@ object Mailbox {
 
         val writer = generateWriterKeys()
         val inbox = nodeDhtCreateShared(writer.public)
-        val outbox = createLog()
+        val outbox = createLog(context)
 
         // Fresh one-time ids from the device-wide counter, and the signed
         // prekey *reused*: rotating it as a side effect of making a card was
@@ -98,9 +98,14 @@ object Mailbox {
     }
 
     /** A fresh append-only log with its head initialised. */
-    private fun createLog(): DhtRecord {
+    private fun createLog(context: Context): DhtRecord {
         val rec = nodeDhtCreate(LOG_SUBKEYS)
-        nodeDhtSet(rec.key, 0u, buildLogHead(0uL, null, null, NEW_RING))
+        // The bundle rides the head from birth, not from the first message.
+        // A head without keys strands a counterparty who claimed the card and
+        // wants to speak first — observed live: a hail's driver claimed,
+        // tried to quote, and found "they have not written since claiming".
+        val bundle = topUpIfLow(ContactStore(context))
+        nodeDhtSet(rec.key, 0u, buildLogHead(0uL, bundle, null, NEW_RING))
         return rec
     }
 
@@ -126,7 +131,7 @@ object Mailbox {
             ?: throw IllegalStateException("Their details are not published yet — ask them to open DUCAT.")
         val theirs = parseContactDetails(raw)
 
-        val outbox = createLog()
+        val outbox = createLog(context)
         val prekeys = generatePrekeys(
             ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL,
             store.nextPrekeyStart(ONE_TIME_KEYS.toInt()).toUInt(),
