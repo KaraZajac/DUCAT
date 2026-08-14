@@ -34,6 +34,12 @@ object Mailbox {
      *  covering slow ring-slot propagation, which force-refresh does not. */
     private const val STUCK_PATIENCE_MS = 10L * 60 * 1000
     private val stuckSince = java.util.concurrent.ConcurrentHashMap<String, Long>()
+    /** Hash of the raw bytes last *processed* per (contact, slot). What lets
+     *  the reader tell a stale tenant (bytes it already opened — wait, the
+     *  real write is still propagating) from a genuinely new message sealed
+     *  to a dead key (skip now; ten silent minutes teach nobody anything).
+     *  Doomed messages used to serve their patience sentences serially. */
+    private val slotSeen = java.util.concurrent.ConcurrentHashMap<String, Int>()
 
     /**
      * Mint a card: an inbox for the handshake, an outbox for what we will say.
@@ -547,14 +553,47 @@ object Mailbox {
             val isOneTime = id != 0
             val secret = if (isOneTime) store.oneTimeSecret(id) else store.signedPrekeySecret()
             if (secret == null) {
-                // Not lost yet. A ring slot's write propagates slowly, so this
-                // read may be the slot's *previous tenant* — an old message,
-                // sealed to an old key — while the real one is still in
-                // flight. Declaring loss on first sight converted exactly that
-                // into a permanent hole (observed: a receipt marked lost while
-                // its bytes were minutes from arriving). Wait the slot out;
-                // only a message still unreadable after the patience window is
-                // genuinely gone.
+                val slotKey = "${c.personaHex}:${logSubkey(seq, ring)}"
+                val rawHash = raw.contentHashCode()
+                val lastProcessed = slotSeen[slotKey]
+                if (lastProcessed == rawHash) {
+                    // The slot's previous tenant — bytes this reader already
+                    // opened as an earlier sequence. The real write is still
+                    // propagating; wait as long as it takes, no clock.
+                    DucatLog.i(
+                        TAG,
+                        "slot for message $seq from ${c.displayName()} still " +
+                            "holds its previous tenant — waiting",
+                    )
+                    break
+                }
+                if (lastProcessed != null) {
+                    // Bytes never seen before, sealed to a key this device
+                    // does not hold: genuinely unreadable, and certainly not
+                    // a propagation mirage. Ten silent minutes here taught
+                    // nobody anything — doomed messages used to serve their
+                    // sentences serially, each holding up the next.
+                    DucatLog.w(
+                        TAG,
+                        "prekey $id is gone; message $seq from ${c.displayName()} is lost",
+                    )
+                    store.append(
+                        c.personaHex,
+                        StoredMessage(
+                            outgoing = false, seq = seq.toLong(),
+                            body = "[a message could not be opened — it was sealed " +
+                                "to a key this device no longer holds]",
+                            timestamp = System.currentTimeMillis() / 1000,
+                        ),
+                    )
+                    seq += 1uL
+                    prev = null
+                    store.advanceInbound(c.personaHex, seq.toLong(), null)
+                    continue
+                }
+                // No memory of this slot (fresh start): fall back to the
+                // patience window — the conservative wait that cannot call a
+                // late arrival lost.
                 val key = "${c.personaHex}:$seq"
                 val since = stuckSince.getOrPut(key) { System.currentTimeMillis() }
                 if (System.currentTimeMillis() - since < STUCK_PATIENCE_MS) {
@@ -591,6 +630,7 @@ object Mailbox {
             // If this seq had been waiting out the patience window, it made
             // it after all — the tracker must not keep growing.
             stuckSince.remove("${c.personaHex}:$seq")
+            slotSeen["${c.personaHex}:${logSubkey(seq, ring)}"] = raw.contentHashCode()
             DucatLog.i(TAG, "received seq ${opened.seq} from ${c.displayName()}")
             val arrived = StoredMessage(
                 outgoing = false, seq = opened.seq.toLong(),
