@@ -411,6 +411,7 @@ fun DriveScreen() {
     val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { }
+    var locating by remember { mutableStateOf(false) }
     fun driveHere() {
         if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) !=
             android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -418,7 +419,9 @@ fun DriveScreen() {
             locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
             return
         }
+        locating = true
         grabFix(context) { fix ->
+            locating = false
             if (fix == null) { error = "could not get a location fix"; return@grabFix }
             myFix = fix
             runCatching {
@@ -609,11 +612,18 @@ fun DriveScreen() {
         if (watching == null) {
             Button(
                 onClick = { driveHere() },
+                enabled = !locating,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
             ) {
-                Icon(Icons.Filled.MyLocation, null, Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Drive here — watch my area")
+                if (locating) {
+                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Getting your location…")
+                } else {
+                    Icon(Icons.Filled.MyLocation, null, Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Drive here — watch my area")
+                }
             }
             Spacer(Modifier.height(8.dp))
         }

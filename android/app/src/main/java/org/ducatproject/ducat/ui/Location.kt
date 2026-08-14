@@ -30,6 +30,19 @@ fun grabFix(
             (it.latitude * 1e7).toLong() to (it.longitude * 1e7).toLong()
         })
     }
+    // A recent fix answers *now*. Everything this feeds is ~1.2 km coarse
+    // (§15.12 cells) or a route preview, and a ten-minute-old position beats
+    // thirty silent seconds of GPS cold-start every time a person is
+    // standing indoors wondering if the button worked.
+    val recent = listOf(
+        android.location.LocationManager.GPS_PROVIDER,
+        android.location.LocationManager.NETWORK_PROVIDER,
+    ).mapNotNull { p ->
+        runCatching { lm.getLastKnownLocation(p) }.getOrNull()
+    }.maxByOrNull { it.time }
+    if (recent != null && System.currentTimeMillis() - recent.time < 10 * 60 * 1000) {
+        return send(recent)
+    }
     try {
         val provider = when {
             lm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ->
