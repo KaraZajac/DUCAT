@@ -793,16 +793,27 @@ fun HailSheet(
                         val est = org.ducatproject.ducat.Fare
                             .estimateExact(context, r.meters, r.seconds)
                         val cur = remember { Amounts.currency(context) }
+                        // One number, both units. The route is known; a range
+                        // was the estimate hedging against a distance we had
+                        // already measured.
                         Text(
                             "%.1f km · ~%d min%s".format(
                                 r.meters / 1000.0, r.seconds / 60,
-                                est?.let {
-                                    " · est. $cur %.2f–%.2f"
-                                        .format(it.first * 0.85, it.first * 1.15)
-                                } ?: "",
+                                est?.let { " · $cur %.2f".format(it.first) } ?: "",
                             ),
                             style = MaterialTheme.typography.titleMedium,
                         )
+                        est?.let { (fiat, _) ->
+                            val (uber, uberDriver, taxi) =
+                                org.ducatproject.ducat.Fare.competitors(r.meters, r.seconds)
+                            Text(
+                                ("rideshare ~$cur %.0f · taxi ~$cur %.0f — your driver " +
+                                    "keeps all of it (a rideshare pays theirs ~$cur %.0f)")
+                                    .format(uber, taxi, uberDriver),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.ducat.settled,
+                            )
+                        }
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = fareXmr,
