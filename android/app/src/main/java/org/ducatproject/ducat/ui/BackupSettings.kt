@@ -86,6 +86,11 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                                     NameStore(context).get(),
                                     ContactStore(context).publishAddress(),
                                     MyProfile(context).toWire(),
+                                    ContactStore(context).backupContacts(),
+                                    ContactStore(context).backupPrekeys().first,
+                                    ContactStore(context).backupPrekeys().second,
+                                    ContactStore(context).backupPrekeys().third.toULong(),
+                                    ContactStore(context).backupAppState(),
                                 ),
                                 passphrase,
                                 personaSecret!!,
@@ -148,6 +153,10 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                 p.setSignal(r.profile.signal)
                 p.setPronouns(r.profile.pronouns?.toInt())
             }
+            // The relationships. Threads and tabs from the opaque blob, then
+            // the typed contacts as the authoritative overlay — so a bundle
+            // from another client still restores everyone.
+            ContactStore(context).restoreFromBackup(r)
             // The address is the check that matters. A bundle that decrypts has
             // proved the passphrase, not that it holds the wallet you meant.
             restored = addressForSpendKey(r.spendKeyHex, stagenet = true)

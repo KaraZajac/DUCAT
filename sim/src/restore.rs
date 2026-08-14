@@ -72,6 +72,7 @@ pub fn restore_main() {
         display_name: None,
         publish_payto: false,
         avatar: None, email: None, phone: None, signal: None, pronouns: None,
+        contacts: Vec::new(), prekey_signed_secret: None, prekey_one_time: Vec::new(), prekey_next_id: 0, app_state: None,
         created: 0,
     };
     let passphrase = b"the correct passphrase";

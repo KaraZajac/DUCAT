@@ -292,6 +292,8 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                                     state.displayName,
                                     state.publishPayto,
                                     state.profile,
+                                    // First run: no relationships yet.
+                                    emptyList(), null, emptyList(), 0uL, null,
                                 ),
                                 passphrase,
                                 persona,

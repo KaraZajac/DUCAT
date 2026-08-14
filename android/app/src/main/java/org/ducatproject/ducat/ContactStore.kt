@@ -226,6 +226,141 @@ class ContactStore(context: Context) {
         bump()
     } }
 
+    // --- backup (§4.3) ----------------------------------------------------
+
+    /**
+     * Everything a backup needs to restore the relationships.
+     *
+     * Typed contacts and prekeys, because another client must be able to take
+     * them; the opaque blob carries same-client continuity — threads, tabs,
+     * conversation settings, their profiles — with no interop promise. The
+     * wallet keys are deliberately absent: the backup already carries them in
+     * their own typed fields, and a second copy is a second thing to audit.
+     */
+    fun backupContacts(): List<uniffi.ducat_mobile.ContactBackup> = all().map { c ->
+        uniffi.ducat_mobile.ContactBackup(
+            persona = hexToBytes(c.personaHex) ?: ByteArray(0),
+            myOutboxKey = c.myOutbox,
+            myOutboxOwnerPublic = c.myOutboxOwnerPublic,
+            myOutboxOwnerSecret = c.myOutboxOwnerSecret,
+            theirOutboxKey = c.theirOutbox,
+            theirBundle = c.theirBundle,
+            theirPayto = c.theirAddress,
+            petname = c.petname,
+            assertedName = c.assertedName,
+            inSeq = c.inSeq.toULong(),
+            outSeq = c.outSeq.toULong(),
+            inPrev = c.inPrevLink,
+            outPrev = c.outPrevLink,
+        )
+    }
+
+    fun backupPrekeys(): Triple<ByteArray?, List<uniffi.ducat_mobile.PrekeyEntry>, Long> {
+        val raw = prefs.getString("prekeys", null)
+            ?: return Triple(null, emptyList(), prefs.getInt("prekey_next_id", 1).toLong())
+        val o = JSONObject(raw)
+        val ot = o.optJSONObject("one_time") ?: JSONObject()
+        val entries = ot.keys().asSequence().map { id ->
+            uniffi.ducat_mobile.PrekeyEntry(id.toULong(), unb64(ot.getString(id)))
+        }.toList()
+        return Triple(
+            if (o.has("signed")) unb64(o.getString("signed")) else null,
+            entries,
+            prefs.getInt("prekey_next_id", 1).toLong(),
+        )
+    }
+
+    /** The keys that are presentation rather than protocol. */
+    private val appStateKeys = listOf("tabs_v1", "publish_address")
+
+    fun backupAppState(): ByteArray {
+        val o = JSONObject()
+        // Threads and per-thread settings, by prefix; the fixed keys after.
+        val threads = JSONObject()
+        prefs.all.keys.filter {
+            it.startsWith("thread_") || it.startsWith("disappear_")
+        }.forEach { k -> prefs.getString(k, null)?.let { threads.put(k, it) }
+            ?: threads.put(k, prefs.getLong(k, 0L)) }
+        o.put("kv", threads)
+        appStateKeys.forEach { k ->
+            prefs.all[k]?.let { v -> o.put(k, v) }
+        }
+        // Their profiles ride inside the contacts JSON already; carry it whole
+        // so avatars and pronouns survive on the same client.
+        prefs.getString("contacts", null)?.let { o.put("contacts_raw", it) }
+        return o.toString().toByteArray(Charsets.UTF_8)
+    }
+
+    /**
+     * Restore, opaque first and typed second: the typed fields are the
+     * authoritative overlay, so a bundle from a different client — no opaque
+     * blob, or one this client cannot read — still restores every relationship.
+     */
+    fun restoreFromBackup(r: uniffi.ducat_mobile.RestoredBackup) = synchronized(lock) {
+        r.appState?.let { blob ->
+            runCatching {
+                val o = JSONObject(String(blob, Charsets.UTF_8))
+                val e = prefs.edit()
+                o.optJSONObject("kv")?.let { kv ->
+                    kv.keys().forEach { k ->
+                        val v = kv.get(k)
+                        if (v is String) e.putString(k, v) else if (v is Long) e.putLong(k, v)
+                        else if (v is Int) e.putLong(k, v.toLong())
+                    }
+                }
+                o.optString("contacts_raw").takeIf { it.isNotEmpty() }
+                    ?.let { e.putString("contacts", it) }
+                appStateKeys.forEach { k ->
+                    if (o.has(k)) when (val v = o.get(k)) {
+                        is Boolean -> e.putBoolean(k, v)
+                        is String -> e.putString(k, v)
+                    }
+                }
+                e.apply()
+            }.onFailure { DucatLog.w("Backup", "app state: ${it.message}") }
+        }
+
+        // Typed contacts overlay whatever the blob brought.
+        for (c in r.contacts) {
+            val personaHex = c.persona.toHexString()
+            val existing = all().firstOrNull { it.personaHex == personaHex }
+            add(
+                (existing ?: Contact(
+                    personaHex = personaHex,
+                    petname = null, assertedName = null,
+                    myOutbox = "", theirOutbox = "",
+                )).copy(
+                    petname = c.petname ?: existing?.petname,
+                    assertedName = c.assertedName ?: existing?.assertedName,
+                    myOutbox = c.myOutboxKey,
+                    myOutboxOwnerPublic = c.myOutboxOwnerPublic,
+                    myOutboxOwnerSecret = c.myOutboxOwnerSecret,
+                    theirOutbox = c.theirOutboxKey,
+                    theirBundle = c.theirBundle,
+                    theirAddress = c.theirPayto,
+                    inSeq = c.inSeq.toLong(),
+                    outSeq = c.outSeq.toLong(),
+                    inPrevLink = c.inPrev,
+                    outPrevLink = c.outPrev,
+                )
+            )
+        }
+
+        // Prekeys merge in — never replace; the store's one rule.
+        val ot = r.prekeyOneTime.associate { it.id.toInt() to it.secret }
+        if (r.prekeySignedSecret != null || ot.isNotEmpty()) {
+            val bundle = prefs.getString("prekeys", null)
+                ?.let { runCatching { unb64(JSONObject(it).getString("bundle")) }.getOrNull() }
+                ?: ByteArray(0)
+            savePrekeys(bundle, r.prekeySignedSecret ?: ByteArray(0), ot)
+        }
+        val next = prefs.getInt("prekey_next_id", 1)
+        if (r.prekeyNextId.toInt() > next) {
+            prefs.edit().putInt("prekey_next_id", r.prekeyNextId.toInt()).apply()
+        }
+        bump()
+    }
+
     // --- prekeys ----------------------------------------------------------
 
     /**
@@ -319,8 +454,10 @@ class ContactStore(context: Context) {
      */
     fun savePrekeys(bundle: ByteArray, signedSecret: ByteArray, oneTime: Map<Int, ByteArray>) { synchronized(lock) {
         val o = prefs.getString("prekeys", null)?.let { JSONObject(it) } ?: JSONObject()
-        o.put("bundle", b64(bundle))
-        if (!o.has("signed")) o.put("signed", b64(signedSecret))
+        // Empty material never overwrites real material: restore passes what
+        // it has, and "nothing" must mean "keep", not "erase".
+        if (bundle.isNotEmpty()) o.put("bundle", b64(bundle))
+        if (!o.has("signed") && signedSecret.size == 32) o.put("signed", b64(signedSecret))
         val ot = o.optJSONObject("one_time") ?: JSONObject()
         oneTime.forEach { (id, sk) -> ot.put(id.toString(), b64(sk)) }
         o.put("one_time", ot)

@@ -1659,7 +1659,21 @@ data class BackupInput (
      * §16.9's profile. Optional throughout, and carried so a restore does not
      * quietly drop what someone chose to publish about themselves.
      */
-    var `profile`: Profile
+    var `profile`: Profile, 
+    /**
+     * §16.12's relationships, typed so another client can restore them.
+     */
+    var `contacts`: List<ContactBackup>, 
+    /**
+     * §16.11's store. The forward-secrecy trade is stated on the core field.
+     */
+    var `prekeySignedSecret`: kotlin.ByteArray?, 
+    var `prekeyOneTime`: List<PrekeyEntry>, 
+    var `prekeyNextId`: kotlin.ULong, 
+    /**
+     * Same-client continuity (threads, tabs); opaque, no interop promise.
+     */
+    var `appState`: kotlin.ByteArray?
 ) {
     
     companion object
@@ -1676,6 +1690,11 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterOptionalString.read(buf),
             FfiConverterBoolean.read(buf),
             FfiConverterTypeProfile.read(buf),
+            FfiConverterSequenceTypeContactBackup.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterSequenceTypePrekeyEntry.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
         )
     }
 
@@ -1684,7 +1703,12 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterULong.allocationSize(value.`restoreHeight`) +
             FfiConverterOptionalString.allocationSize(value.`displayName`) +
             FfiConverterBoolean.allocationSize(value.`publishPayto`) +
-            FfiConverterTypeProfile.allocationSize(value.`profile`)
+            FfiConverterTypeProfile.allocationSize(value.`profile`) +
+            FfiConverterSequenceTypeContactBackup.allocationSize(value.`contacts`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`prekeySignedSecret`) +
+            FfiConverterSequenceTypePrekeyEntry.allocationSize(value.`prekeyOneTime`) +
+            FfiConverterULong.allocationSize(value.`prekeyNextId`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`appState`)
     )
 
     override fun write(value: BackupInput, buf: ByteBuffer) {
@@ -1693,6 +1717,11 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterOptionalString.write(value.`displayName`, buf)
             FfiConverterBoolean.write(value.`publishPayto`, buf)
             FfiConverterTypeProfile.write(value.`profile`, buf)
+            FfiConverterSequenceTypeContactBackup.write(value.`contacts`, buf)
+            FfiConverterOptionalByteArray.write(value.`prekeySignedSecret`, buf)
+            FfiConverterSequenceTypePrekeyEntry.write(value.`prekeyOneTime`, buf)
+            FfiConverterULong.write(value.`prekeyNextId`, buf)
+            FfiConverterOptionalByteArray.write(value.`appState`, buf)
     }
 }
 
@@ -1728,6 +1757,85 @@ public object FfiConverterTypeBillLine: FfiConverterRustBuffer<BillLine> {
     override fun write(value: BillLine, buf: ByteBuffer) {
             FfiConverterString.write(value.`description`, buf)
             FfiConverterULong.write(value.`amountPxmr`, buf)
+    }
+}
+
+
+
+/**
+ * One relationship, across the bridge.
+ */
+data class ContactBackup (
+    var `persona`: kotlin.ByteArray, 
+    var `myOutboxKey`: kotlin.String, 
+    var `myOutboxOwnerPublic`: kotlin.ByteArray, 
+    var `myOutboxOwnerSecret`: kotlin.ByteArray, 
+    var `theirOutboxKey`: kotlin.String, 
+    var `theirBundle`: kotlin.ByteArray?, 
+    var `theirPayto`: kotlin.String?, 
+    var `petname`: kotlin.String?, 
+    var `assertedName`: kotlin.String?, 
+    var `inSeq`: kotlin.ULong, 
+    var `outSeq`: kotlin.ULong, 
+    var `inPrev`: kotlin.ByteArray?, 
+    var `outPrev`: kotlin.ByteArray?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeContactBackup: FfiConverterRustBuffer<ContactBackup> {
+    override fun read(buf: ByteBuffer): ContactBackup {
+        return ContactBackup(
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ContactBackup) = (
+            FfiConverterByteArray.allocationSize(value.`persona`) +
+            FfiConverterString.allocationSize(value.`myOutboxKey`) +
+            FfiConverterByteArray.allocationSize(value.`myOutboxOwnerPublic`) +
+            FfiConverterByteArray.allocationSize(value.`myOutboxOwnerSecret`) +
+            FfiConverterString.allocationSize(value.`theirOutboxKey`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`theirBundle`) +
+            FfiConverterOptionalString.allocationSize(value.`theirPayto`) +
+            FfiConverterOptionalString.allocationSize(value.`petname`) +
+            FfiConverterOptionalString.allocationSize(value.`assertedName`) +
+            FfiConverterULong.allocationSize(value.`inSeq`) +
+            FfiConverterULong.allocationSize(value.`outSeq`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`inPrev`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`outPrev`)
+    )
+
+    override fun write(value: ContactBackup, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`persona`, buf)
+            FfiConverterString.write(value.`myOutboxKey`, buf)
+            FfiConverterByteArray.write(value.`myOutboxOwnerPublic`, buf)
+            FfiConverterByteArray.write(value.`myOutboxOwnerSecret`, buf)
+            FfiConverterString.write(value.`theirOutboxKey`, buf)
+            FfiConverterOptionalByteArray.write(value.`theirBundle`, buf)
+            FfiConverterOptionalString.write(value.`theirPayto`, buf)
+            FfiConverterOptionalString.write(value.`petname`, buf)
+            FfiConverterOptionalString.write(value.`assertedName`, buf)
+            FfiConverterULong.write(value.`inSeq`, buf)
+            FfiConverterULong.write(value.`outSeq`, buf)
+            FfiConverterOptionalByteArray.write(value.`inPrev`, buf)
+            FfiConverterOptionalByteArray.write(value.`outPrev`, buf)
     }
 }
 
@@ -2519,6 +2627,38 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
 
 
 
+data class PrekeyEntry (
+    var `id`: kotlin.ULong, 
+    var `secret`: kotlin.ByteArray
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePrekeyEntry: FfiConverterRustBuffer<PrekeyEntry> {
+    override fun read(buf: ByteBuffer): PrekeyEntry {
+        return PrekeyEntry(
+            FfiConverterULong.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PrekeyEntry) = (
+            FfiConverterULong.allocationSize(value.`id`) +
+            FfiConverterByteArray.allocationSize(value.`secret`)
+    )
+
+    override fun write(value: PrekeyEntry, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`id`, buf)
+            FfiConverterByteArray.write(value.`secret`, buf)
+    }
+}
+
+
+
 /**
  * A freshly generated set of prekeys: what to publish, and what to keep.
  */
@@ -2740,6 +2880,11 @@ data class RestoredBackup (
      * who knew them.
      */
     var `profile`: Profile, 
+    var `contacts`: List<ContactBackup>, 
+    var `prekeySignedSecret`: kotlin.ByteArray?, 
+    var `prekeyOneTime`: List<PrekeyEntry>, 
+    var `prekeyNextId`: kotlin.ULong, 
+    var `appState`: kotlin.ByteArray?, 
     /**
      * Escrow shares carried in the bundle (§4.3.3). Zero is the normal case.
      */
@@ -2761,6 +2906,11 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterOptionalString.read(buf),
             FfiConverterBoolean.read(buf),
             FfiConverterTypeProfile.read(buf),
+            FfiConverterSequenceTypeContactBackup.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterSequenceTypePrekeyEntry.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
             FfiConverterUInt.read(buf),
         )
     }
@@ -2772,6 +2922,11 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterOptionalString.allocationSize(value.`displayName`) +
             FfiConverterBoolean.allocationSize(value.`publishPayto`) +
             FfiConverterTypeProfile.allocationSize(value.`profile`) +
+            FfiConverterSequenceTypeContactBackup.allocationSize(value.`contacts`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`prekeySignedSecret`) +
+            FfiConverterSequenceTypePrekeyEntry.allocationSize(value.`prekeyOneTime`) +
+            FfiConverterULong.allocationSize(value.`prekeyNextId`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`appState`) +
             FfiConverterUInt.allocationSize(value.`escrowCount`)
     )
 
@@ -2782,6 +2937,11 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterOptionalString.write(value.`displayName`, buf)
             FfiConverterBoolean.write(value.`publishPayto`, buf)
             FfiConverterTypeProfile.write(value.`profile`, buf)
+            FfiConverterSequenceTypeContactBackup.write(value.`contacts`, buf)
+            FfiConverterOptionalByteArray.write(value.`prekeySignedSecret`, buf)
+            FfiConverterSequenceTypePrekeyEntry.write(value.`prekeyOneTime`, buf)
+            FfiConverterULong.write(value.`prekeyNextId`, buf)
+            FfiConverterOptionalByteArray.write(value.`appState`, buf)
             FfiConverterUInt.write(value.`escrowCount`, buf)
     }
 }
@@ -3957,6 +4117,34 @@ public object FfiConverterSequenceTypeBillLine: FfiConverterRustBuffer<List<Bill
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypeContactBackup: FfiConverterRustBuffer<List<ContactBackup>> {
+    override fun read(buf: ByteBuffer): List<ContactBackup> {
+        val len = buf.getInt()
+        return List<ContactBackup>(len) {
+            FfiConverterTypeContactBackup.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<ContactBackup>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeContactBackup.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<ContactBackup>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeContactBackup.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypeNodeCandidate: FfiConverterRustBuffer<List<NodeCandidate>> {
     override fun read(buf: ByteBuffer): List<NodeCandidate> {
         val len = buf.getInt()
@@ -4003,6 +4191,34 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypeOwnedOutput.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<PrekeyEntry>> {
+    override fun read(buf: ByteBuffer): List<PrekeyEntry> {
+        val len = buf.getInt()
+        return List<PrekeyEntry>(len) {
+            FfiConverterTypePrekeyEntry.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<PrekeyEntry>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypePrekeyEntry.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<PrekeyEntry>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypePrekeyEntry.write(it, buf)
         }
     }
 }

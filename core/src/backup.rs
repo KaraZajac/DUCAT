@@ -80,7 +80,28 @@ mod k {
     pub const PHONE: u64 = 19;
     pub const SIGNAL: u64 = 20;
     pub const PRONOUNS: u64 = 21;
+    // §16.12's relationships. A wallet restores money; these restore the
+    // people, without whom the money has nobody to go to.
+    pub const CONTACTS: u64 = 22;
+    pub const PREKEY_SIGNED: u64 = 23;
+    pub const PREKEY_ONE_TIME: u64 = 24;
+    pub const PREKEY_NEXT_ID: u64 = 25;
+    pub const APP_STATE: u64 = 26;
     pub const ESCROW_ID: u64 = 0;
+    // Sub-keys of one CONTACTS entry.
+    pub const C_PERSONA: u64 = 0;
+    pub const C_MY_OUTBOX: u64 = 1;
+    pub const C_MY_OWNER_PUB: u64 = 2;
+    pub const C_MY_OWNER_SEC: u64 = 3;
+    pub const C_THEIR_OUTBOX: u64 = 4;
+    pub const C_THEIR_BUNDLE: u64 = 5;
+    pub const C_THEIR_PAYTO: u64 = 6;
+    pub const C_PETNAME: u64 = 7;
+    pub const C_ASSERTED: u64 = 8;
+    pub const C_IN_SEQ: u64 = 9;
+    pub const C_OUT_SEQ: u64 = 10;
+    pub const C_IN_PREV: u64 = 11;
+    pub const C_OUT_PREV: u64 = 12;
     pub const ESCROW_KEY_FILE: u64 = 1;
     pub const ESCROW_RESTORE_HEIGHT: u64 = 2;
 }
@@ -211,7 +232,113 @@ pub struct Backup {
     pub phone: Option<String>,
     pub signal: Option<String>,
     pub pronouns: Option<u64>,
+    /**
+     * The relationships (§16.12), typed so a *different* client can restore
+     * them: each entry carries the persona, both outbox keys, our outbox's
+     * owner keypair — without which the log is readable and unwritable, the
+     * exact stranding measured in the field — their cached prekey bundle, and
+     * the chain counters, without which the next message in either direction
+     * is refused as out of order.
+     */
+    pub contacts: Vec<BackupContact>,
+    /**
+     * Our prekey store (§16.11), and the trade is stated rather than implied:
+     * **a backup holding one-time secrets can rewind forward secrecy to the
+     * moment it was made.** Delete-on-use is the entire property, and a copy
+     * that predates the use undoes the delete for anyone holding the file.
+     * They are included anyway, because the alternative strands every message
+     * sealed to them in flight — an availability failure certain to happen at
+     * exactly the moment of device loss — and because §4.3 already names the
+     * bundle a complete spending credential, so the marginal exposure rides a
+     * file that must already be guarded absolutely.
+     */
+    pub prekey_signed_secret: Option<Vec<u8>>,
+    pub prekey_one_time: Vec<(u64, Vec<u8>)>,
+    pub prekey_next_id: u64,
+    /**
+     * Same-client continuity — threads, tabs, presentation — as one opaque
+     * blob. Deliberately untyped: its contents are implementation-defined and
+     * carry no interop promise, which is what keeps the typed fields above an
+     * honest list of what another client needs.
+     */
+    pub app_state: Option<Vec<u8>>,
     pub created: u64,
+}
+
+/// One relationship, as another implementation would need it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BackupContact {
+    pub persona: Vec<u8>,
+    pub my_outbox_key: String,
+    pub my_outbox_owner_public: Vec<u8>,
+    pub my_outbox_owner_secret: Vec<u8>,
+    pub their_outbox_key: String,
+    pub their_bundle: Option<Vec<u8>>,
+    pub their_payto: Option<String>,
+    pub petname: Option<String>,
+    pub asserted_name: Option<String>,
+    pub in_seq: u64,
+    pub out_seq: u64,
+    pub in_prev: Option<Vec<u8>>,
+    pub out_prev: Option<Vec<u8>>,
+}
+
+impl BackupContact {
+    fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(k::C_PERSONA, Value::Bytes(self.persona.clone()));
+        m.insert(k::C_MY_OUTBOX, Value::Text(self.my_outbox_key.clone()));
+        m.insert(k::C_MY_OWNER_PUB, Value::Bytes(self.my_outbox_owner_public.clone()));
+        m.insert(k::C_MY_OWNER_SEC, Value::Bytes(self.my_outbox_owner_secret.clone()));
+        m.insert(k::C_THEIR_OUTBOX, Value::Text(self.their_outbox_key.clone()));
+        if let Some(b) = &self.their_bundle {
+            m.insert(k::C_THEIR_BUNDLE, Value::Bytes(b.clone()));
+        }
+        if let Some(p) = &self.their_payto {
+            m.insert(k::C_THEIR_PAYTO, Value::Text(p.clone()));
+        }
+        if let Some(p) = &self.petname {
+            m.insert(k::C_PETNAME, Value::Text(p.clone()));
+        }
+        if let Some(a) = &self.asserted_name {
+            m.insert(k::C_ASSERTED, Value::Text(a.clone()));
+        }
+        m.insert(k::C_IN_SEQ, Value::Uint(self.in_seq));
+        m.insert(k::C_OUT_SEQ, Value::Uint(self.out_seq));
+        if let Some(p) = &self.in_prev {
+            m.insert(k::C_IN_PREV, Value::Bytes(p.clone()));
+        }
+        if let Some(p) = &self.out_prev {
+            m.insert(k::C_OUT_PREV, Value::Bytes(p.clone()));
+        }
+        Value::Map(m)
+    }
+
+    fn from_value(v: &Value) -> Result<Self, Reject> {
+        let m = match v {
+            Value::Map(m) => m,
+            _ => return Err(Reject::new(RejectCode::Malformed)),
+        };
+        let text = |key: u64| m.get(&key).and_then(|v| v.as_text()).map(|s| s.to_string());
+        let bytes = |key: u64| m.get(&key).and_then(|v| v.as_bytes()).map(|b| b.to_vec());
+        Ok(BackupContact {
+            persona: bytes(k::C_PERSONA).ok_or_else(|| Reject::new(RejectCode::Malformed))?,
+            my_outbox_key: text(k::C_MY_OUTBOX)
+                .ok_or_else(|| Reject::new(RejectCode::Malformed))?,
+            my_outbox_owner_public: bytes(k::C_MY_OWNER_PUB).unwrap_or_default(),
+            my_outbox_owner_secret: bytes(k::C_MY_OWNER_SEC).unwrap_or_default(),
+            their_outbox_key: text(k::C_THEIR_OUTBOX)
+                .ok_or_else(|| Reject::new(RejectCode::Malformed))?,
+            their_bundle: bytes(k::C_THEIR_BUNDLE),
+            their_payto: text(k::C_THEIR_PAYTO),
+            petname: text(k::C_PETNAME),
+            asserted_name: text(k::C_ASSERTED),
+            in_seq: m.get(&k::C_IN_SEQ).and_then(|v| v.as_uint()).unwrap_or(0),
+            out_seq: m.get(&k::C_OUT_SEQ).and_then(|v| v.as_uint()).unwrap_or(0),
+            in_prev: bytes(k::C_IN_PREV),
+            out_prev: bytes(k::C_OUT_PREV),
+        })
+    }
 }
 
 impl Backup {
@@ -240,6 +367,28 @@ impl Backup {
         }
         if let Some(p) = self.pronouns {
             m.insert(k::PRONOUNS, Value::Uint(p));
+        }
+        if !self.contacts.is_empty() {
+            m.insert(
+                k::CONTACTS,
+                Value::Array(self.contacts.iter().map(|c| c.to_value()).collect()),
+            );
+        }
+        if let Some(sk) = &self.prekey_signed_secret {
+            m.insert(k::PREKEY_SIGNED, Value::Bytes(sk.clone()));
+        }
+        if !self.prekey_one_time.is_empty() {
+            let mut ot = BTreeMap::new();
+            for (id, sk) in &self.prekey_one_time {
+                ot.insert(*id, Value::Bytes(sk.clone()));
+            }
+            m.insert(k::PREKEY_ONE_TIME, Value::Map(ot));
+        }
+        if self.prekey_next_id > 0 {
+            m.insert(k::PREKEY_NEXT_ID, Value::Uint(self.prekey_next_id));
+        }
+        if let Some(b) = &self.app_state {
+            m.insert(k::APP_STATE, Value::Bytes(b.clone()));
         }
         m.insert(k::PERSONA_SUITE, Value::Uint(self.persona_suite as u64));
         m.insert(k::PERSONA_SECRET, Value::Bytes(self.persona_secret.clone()));
@@ -361,6 +510,26 @@ impl Backup {
             phone: m.get(&k::PHONE).and_then(|v| v.as_text()).map(|s| s.to_string()),
             signal: m.get(&k::SIGNAL).and_then(|v| v.as_text()).map(|s| s.to_string()),
             pronouns: m.get(&k::PRONOUNS).and_then(|v| v.as_uint()),
+            contacts: match m.get(&k::CONTACTS) {
+                Some(Value::Array(a)) => a
+                    .iter()
+                    .map(BackupContact::from_value)
+                    .collect::<Result<Vec<_>, _>>()?,
+                _ => Vec::new(),
+            },
+            prekey_signed_secret: m
+                .get(&k::PREKEY_SIGNED)
+                .and_then(|v| v.as_bytes())
+                .map(|b| b.to_vec()),
+            prekey_one_time: match m.get(&k::PREKEY_ONE_TIME) {
+                Some(Value::Map(ot)) => ot
+                    .iter()
+                    .filter_map(|(id, v)| v.as_bytes().map(|b| (*id, b.to_vec())))
+                    .collect(),
+                _ => Vec::new(),
+            },
+            prekey_next_id: m.get(&k::PREKEY_NEXT_ID).and_then(|v| v.as_uint()).unwrap_or(0),
+            app_state: m.get(&k::APP_STATE).and_then(|v| v.as_bytes()).map(|b| b.to_vec()),
             rendezvous: arr(k::RENDEZVOUS)?,
             attestation_records: arr(k::ATTESTATION_RECORDS)?,
             mandates: arr(k::MANDATES)?,

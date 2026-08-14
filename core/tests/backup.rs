@@ -25,6 +25,7 @@ fn sample() -> Backup {
         display_name: None,
         publish_payto: false,
         avatar: None, email: None, phone: None, signal: None, pronouns: None,
+        contacts: Vec::new(), prekey_signed_secret: None, prekey_one_time: Vec::new(), prekey_next_id: 0, app_state: None,
         created: 1_800_000_000,
     }
 }
@@ -314,4 +315,52 @@ fn an_older_bundle_restores_with_an_empty_profile() {
     assert!(back.signal.is_none());
     assert!(back.pronouns.is_none());
     assert!(!back.publish_payto, "publishing must never default to on");
+}
+
+/// The relationships survive: every field another client would need.
+#[test]
+fn contacts_and_prekeys_survive_the_round_trip() {
+    let mut b = sample();
+    b.contacts = vec![BackupContact {
+        persona: vec![0xAB; 32],
+        my_outbox_key: "VLD0:mine".into(),
+        my_outbox_owner_public: vec![1; 32],
+        my_outbox_owner_secret: vec![2; 32],
+        their_outbox_key: "VLD0:theirs".into(),
+        their_bundle: Some(vec![3; 64]),
+        their_payto: Some("52bCDbFD".into()),
+        petname: Some("sam".into()),
+        asserted_name: Some("sam!".into()),
+        in_seq: 7,
+        out_seq: 9,
+        in_prev: Some(vec![4; 32]),
+        out_prev: Some(vec![5; 32]),
+    }];
+    b.prekey_signed_secret = Some(vec![6; 32]);
+    b.prekey_one_time = vec![(41, vec![7; 32]), (42, vec![8; 32])];
+    b.prekey_next_id = 43;
+    b.app_state = Some(b"{\"threads\":{}}".to_vec());
+
+    let blob = export(&b, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase").expect("import");
+
+    assert_eq!(back.contacts, b.contacts);
+    assert_eq!(back.prekey_signed_secret, b.prekey_signed_secret);
+    assert_eq!(back.prekey_one_time, b.prekey_one_time);
+    assert_eq!(back.prekey_next_id, 43);
+    assert_eq!(back.app_state, b.app_state);
+    // A chain counter off by one refuses the next message in that direction,
+    // so these are not metadata: they are whether the thread still works.
+    assert_eq!(back.contacts[0].in_seq, 7);
+    assert_eq!(back.contacts[0].out_seq, 9);
+}
+
+/// A bundle from before relationships restores with none, never with junk.
+#[test]
+fn an_older_bundle_restores_with_no_contacts() {
+    let blob = export(&sample(), b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase").expect("import");
+    assert!(back.contacts.is_empty());
+    assert!(back.prekey_one_time.is_empty());
+    assert!(back.app_state.is_none());
 }
