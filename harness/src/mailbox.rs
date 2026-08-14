@@ -101,6 +101,28 @@ fn used_one_time_ids() -> std::collections::HashSet<u32> {
         .collect()
 }
 
+/// Ids of *their* one-time keys this desk has already sealed to. The peer
+/// burns a key when they read the message sealed to it — and since this desk
+/// is the only writer in the thread, their burned set is exactly this set.
+/// Skipping it makes a stale head harmless: however old the fetched bundle,
+/// the ids we personally spent never get picked twice.
+fn used_their_ids() -> std::collections::HashSet<u32> {
+    std::fs::read_to_string(state_path("claimant-theirs"))
+        .unwrap_or_default()
+        .split(',')
+        .filter_map(|v| v.trim().parse().ok())
+        .collect()
+}
+
+fn record_used_their_id(id: u32) {
+    let mut used = used_their_ids();
+    if used.insert(id) {
+        let mut v: Vec<String> = used.iter().map(|i| i.to_string()).collect();
+        v.sort();
+        let _ = std::fs::write(state_path("claimant-theirs"), v.join(","));
+    }
+}
+
 fn record_used_one_time_id(id: u32) {
     let mut used = used_one_time_ids();
     if used.insert(id) {
@@ -626,9 +648,16 @@ async fn bill_or_say(
         b.one_time.clear();
         b
     } else {
-        their_bundle
+        // Never an id we already spent, however stale the head we fetched.
+        let used = used_their_ids();
+        let mut b = their_bundle.clone();
+        b.one_time.retain(|k| !used.contains(&k.id));
+        b
     };
     let (chosen, fs) = their_bundle.select();
+    if fs {
+        record_used_their_id(chosen.id);
+    }
     if !fs {
         println!("  \x1b[33m!\x1b[0m one-time keys exhausted — no forward secrecy");
     }
