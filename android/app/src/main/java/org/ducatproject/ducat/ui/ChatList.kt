@@ -54,8 +54,6 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
             store.thread(c.personaHex).lastOrNull()?.timestamp ?: 0L
         }
     }
-    val hidden = all.filterNot { it.chatVisible }
-
     Column(Modifier.fillMaxSize()) {
         Row(
             Modifier.fillMaxWidth().padding(16.dp),
@@ -70,21 +68,10 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                 Spacer(Modifier.width(8.dp))
                 Text("My card")
             }
-            OutlinedButton(onClick = { sheet = Sheet.Add }, modifier = Modifier.weight(1f)) {
-                Icon(Icons.Filled.PersonAdd, null, Modifier.size(18.dp))
+            OutlinedButton(onClick = { sheet = Sheet.New }, modifier = Modifier.weight(1f)) {
+                Icon(Icons.Filled.ChatBubbleOutline, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Add")
-            }
-        }
-
-        if (hidden.isNotEmpty()) {
-            TextButton(
-                onClick = { sheet = Sheet.Restore },
-                modifier = Modifier.padding(horizontal = 16.dp),
-            ) {
-                Icon(Icons.Filled.Restore, null, Modifier.size(16.dp))
-                Spacer(Modifier.width(6.dp))
-                Text("${hidden.size} hidden — start a chat again")
+                Text("New chat")
             }
         }
 
@@ -175,7 +162,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                 Text(
                     "Every message with ${c.displayName()} is deleted from this " +
                         "phone and cannot be recovered. ${c.displayName()} stays in " +
-                        "your contacts, and you can start again any time."
+                        "your contacts — New chat starts a fresh one any time."
                 )
             },
             confirmButton = {
@@ -197,38 +184,70 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
             onAdded = { all = store.all(); sheet = null },
             store = store,
         )
-        Sheet.Restore -> RestoreChatSheet(
-            hidden = hidden,
+        Sheet.New -> NewChatSheet(
+            contacts = all.sortedBy { it.displayName().lowercase() },
             onDismiss = { sheet = null },
+            onAdd = { sheet = Sheet.Add },
             onPick = {
                 store.setChatVisible(it.personaHex, true)
                 all = store.all()
                 sheet = null
+                onOpenChat(it)
             },
         )
         null -> {}
     }
 }
 
-internal enum class Sheet { Share, Add, Restore }
+internal enum class Sheet { Share, Add, New }
 
+/**
+ * A conversation starts from a person, and every contact qualifies — including
+ * ones whose chat was deleted (the relationship outlives its messages) and
+ * ones that arrived through a sale rather than a hello.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun RestoreChatSheet(
-    hidden: List<Contact>,
+private fun NewChatSheet(
+    contacts: List<Contact>,
     onDismiss: () -> Unit,
+    onAdd: () -> Unit,
     onPick: (Contact) -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(bottom = 24.dp)) {
             Text(
-                "Start a chat again",
+                "New chat",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(20.dp),
             )
-            hidden.forEach { c ->
+            ListItem(
+                colors = ListItemDefaults.colors(
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                ),
+                headlineContent = { Text("Add a contact") },
+                supportingContent = { Text("Scan or paste a card someone gave you") },
+                leadingContent = {
+                    Icon(
+                        Icons.Filled.PersonAdd, null,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                },
+                modifier = Modifier.clickable(onClick = onAdd),
+            )
+            if (contacts.isEmpty()) {
+                Text(
+                    "No contacts yet.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                )
+            }
+            contacts.forEach { c ->
                 ListItem(
-                    colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(
+                        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                    ),
                     headlineContent = { Text(c.displayName()) },
                     leadingContent = { Avatar(c.displayName(), c.avatar) },
                     modifier = Modifier.clickable { onPick(c) },
