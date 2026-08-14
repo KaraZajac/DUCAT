@@ -25,6 +25,13 @@ struct Node {
 
 static NODE: OnceLock<Mutex<Option<Node>>> = OnceLock::new();
 
+/// One bit and a doorbell: "something you watch has changed".
+static CHANGE: OnceLock<(Mutex<bool>, std::sync::Condvar)> = OnceLock::new();
+
+fn change_signal() -> &'static (Mutex<bool>, std::sync::Condvar) {
+    CHANGE.get_or_init(|| (Mutex::new(false), std::sync::Condvar::new()))
+}
+
 fn slot() -> &'static Mutex<Option<Node>> {
     NODE.get_or_init(|| Mutex::new(None))
 }
@@ -120,12 +127,25 @@ pub fn node_start(storage_dir: String) -> Result<(), NodeError> {
         // callback that pretended to handle updates no protocol reads would be
         // a place for a half-implemented flow to hide.
         let cb: UpdateCallback = std::sync::Arc::new(|update| {
-            if let VeilidUpdate::AppCall(call) = update {
-                let mut q = inbox().lock().unwrap();
-                if q.len() >= MAX_PENDING {
-                    q.pop_front();
+            match update {
+                VeilidUpdate::AppCall(call) => {
+                    let mut q = inbox().lock().unwrap();
+                    if q.len() >= MAX_PENDING {
+                        q.pop_front();
+                    }
+                    q.push_back((call.id().as_u64(), call.message().to_vec()));
                 }
-                q.push_back((call.id().as_u64(), call.message().to_vec()));
+                // A watched record moved (§16.12). The event carries which
+                // record and what value, and we deliberately keep none of it:
+                // the poller's read path is the one place values enter the
+                // app, and an event that merely *wakes* it cannot introduce a
+                // second, subtly different way for a message to arrive.
+                VeilidUpdate::ValueChange(..) => {
+                    let (flag, cond) = change_signal();
+                    *flag.lock().unwrap() = true;
+                    cond.notify_all();
+                }
+                _ => {}
             }
         });
         let api = api_startup_json(cb, cfg.to_string())
@@ -491,6 +511,47 @@ pub fn node_dht_set(key: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeE
 /// Read a subkey. `force_refresh` goes to the network rather than the local
 /// copy, which is what a poll for new messages needs and what a re-read of your
 /// own writes does not.
+/// Ask the network to tell us when a record changes (§16.12).
+///
+/// The record must already be open in this process. Watches are best-effort
+/// and expire — the network promises a wake-up, not delivery — which is why
+/// the poller keeps its sweep: the watch buys latency, the sweep keeps the
+/// correctness it always had.
+#[uniffi::export]
+pub fn node_dht_watch(key: String) -> Result<bool, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let rk = parse_key(&key)?;
+        rc.watch_dht_values(rk, None, None, None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("watch: {e}")))
+    })
+}
+
+/// Block until any watched record changes, or the timeout passes.
+///
+/// Returns true on a change. The flag is level- rather than edge-triggered on
+/// purpose: a change that lands between the poller's sweep and its next wait
+/// is caught by the flag still being up, not lost in the gap.
+#[uniffi::export]
+pub fn node_wait_change(timeout_ms: u32) -> bool {
+    let (flag, cond) = change_signal();
+    let guard = flag.lock().unwrap();
+    let (mut guard, _timeout) = cond
+        .wait_timeout_while(
+            guard,
+            std::time::Duration::from_millis(timeout_ms as u64),
+            |changed| !*changed,
+        )
+        .unwrap();
+    let fired = *guard;
+    *guard = false;
+    fired
+}
+
 #[uniffi::export]
 pub fn node_dht_get(
     key: String,

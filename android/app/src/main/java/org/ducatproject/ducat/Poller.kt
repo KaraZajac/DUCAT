@@ -6,21 +6,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val TAG = "DucatPoller"
 
 /**
- * Collects what has arrived, on a timer.
+ * Collects what has arrived — woken by the network, swept on a timer.
  *
- * This replaces the responder that answered `app_call`s. Nothing pushes to us
- * any more, and that is the point: a message written while this phone was off
- * is waiting in a record rather than lost with a route. The cost is latency
- * bounded by the poll interval instead of arrival being instant.
- *
- * Veilid can watch a record and report changes, which would cut the interval
- * out. That is worth doing and is deliberately not done first: a poll is
- * correct whether or not a watch survives backgrounding, and correctness is
- * what this rewrite is buying.
+ * This replaces the responder that answered `app_call`s: a message written
+ * while this phone was off waits in a record rather than dying with a route.
+ * The original build polled on a fixed interval and said watches were "worth
+ * doing and deliberately not done first: a poll is correct whether or not a
+ * watch survives backgrounding". That condition is now honoured rather than
+ * retired — **the sweep stays**, identical, every interval, and watches only
+ * decide how early the next pass starts. A watch that dies, expires, or was never
+ * placed costs latency, never a message.
  */
 class Poller(private val context: Context) {
 
@@ -105,7 +105,28 @@ class Poller(private val context: Context) {
                 runCatching { Rates.refresh(context) }
                     .onFailure { DucatLog.w(TAG, "rate: ${it.message}") }
 
-                delay(10_000)
+                // Re-arm watches on what can ring: every contact's log head
+                // (their next message moves it) and every unanswered card's
+                // inbox (a claim writes it). Re-armed each pass because
+                // watches expire and the network only promises best effort —
+                // the sweep below is still the guarantee.
+                runCatching {
+                    val store = ContactStore(context)
+                    store.all().forEach {
+                        runCatching { uniffi.ducat_mobile.nodeDhtWatch(it.theirOutbox) }
+                    }
+                    store.issuedCards().filter { it.answeredBy == null }.forEach {
+                        runCatching { uniffi.ducat_mobile.nodeDhtWatch(it.inboxKey) }
+                    }
+                }.onFailure { DucatLog.w(TAG, "watch: ${it.message}") }
+
+                // Sleep until the network rings or the interval passes —
+                // instant messages when watches hold, the old cadence when
+                // they do not.
+                val rang = withContext(Dispatchers.IO) {
+                    runCatching { uniffi.ducat_mobile.nodeWaitChange(10_000u) }.getOrDefault(false)
+                }
+                if (rang) DucatLog.i(TAG, "a watched record changed — polling now")
             }
         }
     }

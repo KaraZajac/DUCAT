@@ -833,6 +833,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -928,6 +932,8 @@ internal interface UniffiLib : Library {
     ): Int
     fun uniffi_ducat_mobile_fn_func_node_dht_set(`key`: RustBuffer.ByValue,`subkey`: Int,`data`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
+    fun uniffi_ducat_mobile_fn_func_node_dht_watch(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
     fun uniffi_ducat_mobile_fn_func_node_poll_call(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_reply(`id`: Long,`message`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -942,6 +948,8 @@ internal interface UniffiLib : Library {
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_test_route(uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_node_wait_change(`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
     fun uniffi_ducat_mobile_fn_func_open_message(`sealedBytes`: RustBuffer.ByValue,`prekeySecret`: RustBuffer.ByValue,`isOneTime`: Byte,`expectedSeq`: Long,`prevLink`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_parse_contact_details(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1162,6 +1170,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_set(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_dht_watch(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_poll_call(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_reply(
@@ -1175,6 +1185,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_node_stop(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_test_route(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_wait_change(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_open_message(
     ): Short
@@ -1332,13 +1344,16 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_create_shared() != 28332.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_get() != 19453.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_get() != 61174.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_open() != 42085.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_set() != 46746.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_watch() != 21226.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_poll_call() != 3546.toShort()) {
@@ -1360,6 +1375,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_test_route() != 9881.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_wait_change() != 30887.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_open_message() != 55240.toShort()) {
@@ -4869,11 +4887,6 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
     }
     
 
-        /**
-         * Read a subkey. `force_refresh` goes to the network rather than the local
-         * copy, which is what a poll for new messages needs and what a re-read of your
-         * own writes does not.
-         */
     @Throws(NodeException::class) fun `nodeDhtGet`(`key`: kotlin.String, `subkey`: kotlin.UInt, `forceRefresh`: kotlin.Boolean): kotlin.ByteArray? {
             return FfiConverterOptionalByteArray.lift(
     uniffiRustCallWithError(NodeException) { _status ->
@@ -4918,6 +4931,27 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
         FfiConverterString.lower(`key`),FfiConverterUInt.lower(`subkey`),FfiConverterByteArray.lower(`data`),_status)
 }
     
+    
+
+        /**
+         * Read a subkey. `force_refresh` goes to the network rather than the local
+         * copy, which is what a poll for new messages needs and what a re-read of your
+         * own writes does not.
+         * Ask the network to tell us when a record changes (§16.12).
+         *
+         * The record must already be open in this process. Watches are best-effort
+         * and expire — the network promises a wake-up, not delivery — which is why
+         * the poller keeps its sweep: the watch buys latency, the sweep keeps the
+         * correctness it always had.
+         */
+    @Throws(NodeException::class) fun `nodeDhtWatch`(`key`: kotlin.String): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_watch(
+        FfiConverterString.lower(`key`),_status)
+}
+    )
+    }
     
 
         /**
@@ -5017,6 +5051,22 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
     uniffiRustCallWithError(NodeException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_test_route(
         _status)
+}
+    )
+    }
+    
+
+        /**
+         * Block until any watched record changes, or the timeout passes.
+         *
+         * Returns true on a change. The flag is level- rather than edge-triggered on
+         * purpose: a change that lands between the poller's sweep and its next wait
+         * is caught by the flag still being up, not lost in the gap.
+         */ fun `nodeWaitChange`(`timeoutMs`: kotlin.UInt): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_wait_change(
+        FfiConverterUInt.lower(`timeoutMs`),_status)
 }
     )
     }
