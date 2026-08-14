@@ -12,6 +12,10 @@ data class IssuedHandle(val uri: String, val inboxKey: String)
  *  to stop being readable rather than accumulate, and a ring that wraps in
  *  ordinary use is a ring whose wrap gets exercised. */
 const val LOG_SUBKEYS: UInt = 8u
+
+/** New logs get a bigger ring: reactions and receipts multiply message count,
+ *  and eight slots of history was sized for text alone (§16.12). */
+const val NEW_RING: UInt = 32u
 private const val ONE_TIME_KEYS: UInt = 32u
 
 /**
@@ -96,7 +100,7 @@ object Mailbox {
     /** A fresh append-only log with its head initialised. */
     private fun createLog(): DhtRecord {
         val rec = nodeDhtCreate(LOG_SUBKEYS)
-        nodeDhtSet(rec.key, 0u, buildLogHead(0uL, null))
+        nodeDhtSet(rec.key, 0u, buildLogHead(0uL, null, null, NEW_RING))
         return rec
     }
 
@@ -157,6 +161,7 @@ object Mailbox {
             phone = theirs.profile.phone,
             signal = theirs.profile.signal,
             pronouns = theirs.profile.pronouns?.toInt(),
+            myRing = NEW_RING.toInt(),
         )
         store.add(c)
         DucatLog.i(TAG, "claimed: their outbox=${theirs.outboxKey.take(24)}…")
@@ -199,6 +204,7 @@ object Mailbox {
                         phone = theirs.profile.phone,
                         signal = theirs.profile.signal,
                         pronouns = theirs.profile.pronouns?.toInt(),
+                        myRing = NEW_RING.toInt(),
                     )
                 )
                 store.markCardAnswered(issued.inboxKey, personaHex)
@@ -241,6 +247,11 @@ object Mailbox {
          *  disagreeing with the total it sits beside. */
         items: List<BillItem> = emptyList(),
         taxPxmr: Long? = null,
+        /** §16.14: the message this reaction is about. */
+        reSeq: Long? = null,
+        reOwn: Boolean = false,
+        /** §16.15: a sealed blob parked in its own record. */
+        attachment: uniffi.ducat_mobile.AttachmentRef? = null,
     ): Contact {
         val store = ContactStore(context)
         val bundle = c.theirBundle
@@ -254,6 +265,7 @@ object Mailbox {
             txidHex?.let { hexToBytes(it) }, payto,
             items.map { uniffi.ducat_mobile.BillLine(it.description, it.amountPxmr.toULong()) },
             taxPxmr?.toULong(),
+            reSeq?.toULong(), reOwn, attachment,
         )
         // Re-opened **as the owner**. Creating a record leaves it writable only
         // for that process; a plain re-open is read-only and the write comes
@@ -265,13 +277,21 @@ object Mailbox {
             )
         }
         nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
-        nodeDhtSet(c.myOutbox, logSubkey(c.outSeq.toULong(), LOG_SUBKEYS), sealed.bytes)
+        nodeDhtSet(c.myOutbox, logSubkey(c.outSeq.toULong(), c.myRing.toUInt()), sealed.bytes)
         // Republish our keys with every head write. Cheap — the head is read on
         // every poll anyway — and it is the only route back from an exhausted
         // supply, since the handshake inbox is a one-time artifact.
         nodeDhtSet(
             c.myOutbox, 0u,
-            buildLogHead((c.outSeq + 1).toULong(), topUpIfLow(store)),
+            buildLogHead(
+                (c.outSeq + 1).toULong(),
+                topUpIfLow(store),
+                // §16.16: the watermark rides every head write for free, and
+                // only when the user opted in. c.inSeq is "I have accepted
+                // your messages below this", which is exactly the claim.
+                if (store.readReceipts()) c.inSeq.toULong() else null,
+                c.myRing.toUInt().takeIf { it != 8u },
+            ),
         )
 
         store.append(
@@ -282,6 +302,11 @@ object Mailbox {
                 forwardSecret = sealed.forwardSecret,
                 kind = kind, amountPxmr = amountPxmr ?: 0L, payto = payto,
                 txidHex = txidHex, items = items, taxPxmr = taxPxmr,
+                reSeq = reSeq, reOwn = reOwn,
+                attRecord = attachment?.recordKey, attKey = attachment?.key,
+                attNonce = attachment?.nonce, attLen = attachment?.len?.toLong() ?: 0L,
+                attHash = attachment?.ctHash?.toHexString(),
+                attMime = attachment?.mime, attName = attachment?.name,
             ),
         )
         store.advanceOutbound(c.personaHex, c.outSeq + 1, sealed.nextLink)
@@ -298,6 +323,83 @@ object Mailbox {
         DucatLog.i(TAG, "delivered seq ${c.outSeq} to ${c.displayName()}" +
             if (sealed.forwardSecret) "" else " (no forward secrecy — their one-time keys ran out)")
         return store.all().first { it.personaHex == c.personaHex }
+    }
+
+    /** Where a fetched attachment lives, named by its ciphertext hash. */
+    fun attachmentFile(context: Context, ctHashHex: String): java.io.File =
+        java.io.File(java.io.File(context.filesDir, "att").apply { mkdirs() }, ctHashHex)
+
+    /**
+     * Fetch one missing attachment, if any (§16.15).
+     *
+     * Bounded to one per call because each chunk is a DHT round trip and this
+     * runs on the poll loop. Hash first, decrypt second: bytes from the
+     * network never reach the AEAD without matching the hash the sealed
+     * message promised — and the file is cached under that hash, so a
+     * re-delivered message finds its picture already on disk.
+     */
+    fun fetchOneAttachment(context: Context): Boolean {
+        val store = ContactStore(context)
+        for (c in store.all()) {
+            for (m in store.thread(c.personaHex)) {
+                val hash = m.attHash ?: continue
+                val rec = m.attRecord ?: continue
+                val key = m.attKey ?: continue
+                val nonce = m.attNonce ?: continue
+                val out = attachmentFile(context, hash)
+                if (out.exists()) continue
+                return runCatching {
+                    nodeDhtOpen(rec, null, null)
+                    val ctLen = m.attLen + 16 // AEAD tag
+                    val chunks = ((ctLen + 32_767) / 32_768).toInt()
+                    val buf = java.io.ByteArrayOutputStream()
+                    for (i in 0 until chunks) {
+                        val part = nodeDhtGet(rec, i.toUInt(), true)
+                            ?: throw IllegalStateException("chunk $i missing")
+                        buf.write(part)
+                    }
+                    val ct = buf.toByteArray()
+                    val digest = java.security.MessageDigest.getInstance("SHA-256").digest(ct)
+                    if (digest.toHexString() != hash) {
+                        throw IllegalStateException("ciphertext hash mismatch")
+                    }
+                    val plain = attachmentOpen(key, nonce, ct)
+                    out.writeBytes(plain)
+                    DucatLog.i(TAG, "fetched attachment ${hash.take(12)}… (${plain.size} bytes)")
+                    ContactStore.bump()
+                    true
+                }.getOrElse {
+                    DucatLog.w(TAG, "attachment ${hash.take(12)}…: ${it.message}")
+                    false
+                }
+            }
+        }
+        return false
+    }
+
+    /**
+     * Publish the read watermark without sending anything (§16.16).
+     *
+     * A head write with the sequence unchanged: no slot, no prekey, no chain
+     * entry — the cheapest possible "I have seen it", and only when the user
+     * turned receipts on.
+     */
+    fun markRead(context: Context, c: Contact) {
+        val store = ContactStore(context)
+        if (!store.readReceipts()) return
+        if (c.myOutboxOwnerSecret.isEmpty()) return
+        runCatching {
+            nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
+            nodeDhtSet(
+                c.myOutbox, 0u,
+                buildLogHead(
+                    c.outSeq.toULong(),
+                    store.prekeyBundle(),
+                    c.inSeq.toULong(),
+                    c.myRing.toUInt().takeIf { it != 8u },
+                ),
+            )
+        }.onFailure { DucatLog.w(TAG, "markRead: ${it.message}") }
     }
 
     /**
@@ -348,12 +450,16 @@ object Mailbox {
         // means sealing to keys they consumed long ago, which fails on their
         // side and looks like the network.
         head.prekeyBundle?.let { store.setTheirBundle(c.personaHex, it) }
+        // §16.12: their ring is whatever their head says it is.
+        val ring = head.ring ?: LOG_SUBKEYS
+        // §16.16: their claim about how far they have read our log.
+        head.readUpTo?.let { store.setTheirReadUpTo(c.personaHex, it.toLong()) }
         var seq = c.inSeq.toULong()
         var prev = c.inPrevLink
         var count = 0
 
         while (seq < next) {
-            if (!logStillReadable(seq, next, LOG_SUBKEYS)) {
+            if (!logStillReadable(seq, next, ring)) {
                 // The ring passed us. Saying so beats rendering a thread with a
                 // hole in it (§16.10's conversation that did not happen).
                 DucatLog.w(TAG, "lost message $seq from ${c.displayName()} — ring wrapped")
@@ -369,7 +475,7 @@ object Mailbox {
                 prev = null
                 continue
             }
-            val raw = nodeDhtGet(c.theirOutbox, logSubkey(seq, LOG_SUBKEYS), true) ?: break
+            val raw = nodeDhtGet(c.theirOutbox, logSubkey(seq, ring), true) ?: break
             val id = sealedPrekeyId(raw).toInt()
             val isOneTime = id != 0
             val secret = if (isOneTime) store.oneTimeSecret(id) else store.signedPrekeySecret()
@@ -394,6 +500,15 @@ object Mailbox {
                 txidHex = opened.txid?.toHexString(),
                 items = opened.items.map { BillItem(it.description, it.amountPxmr.toLong()) },
                 taxPxmr = opened.taxPxmr?.toLong(),
+                reSeq = opened.reSeq?.toLong(),
+                reOwn = opened.reOwn,
+                attRecord = opened.attachment?.recordKey,
+                attKey = opened.attachment?.key,
+                attNonce = opened.attachment?.nonce,
+                attLen = opened.attachment?.len?.toLong() ?: 0L,
+                attHash = opened.attachment?.ctHash?.toHexString(),
+                attMime = opened.attachment?.mime,
+                attName = opened.attachment?.name,
             )
             // The one funnel every arrival passes through, so the notification
             // cannot be forgotten by a new screen: if it was stored, it was

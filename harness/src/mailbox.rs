@@ -126,7 +126,7 @@ async fn make_log(
     let desc = rc
         .create_dht_record(CRYPTO_KIND_VLD0, DHTSchema::dflt(LOG_SUBKEYS as u16)?, Some(kp.clone()))
         .await?;
-    let head = LogHead { version: 1, suite: 1, next_seq: 0, prekey_bundle: None };
+    let head = LogHead { version: 1, suite: 1, next_seq: 0, prekey_bundle: None, read_up_to: None, ring: None };
     rc.set_dht_value(desc.key().clone(), 0, head.to_value().encode(), None)
         .await?;
     Ok((desc.key().clone(), kp))
@@ -155,6 +155,8 @@ async fn append(
         suite: 1,
         next_seq: seq + 1,
         prekey_bundle: Some(bundle.to_value().encode()),
+        read_up_to: None,
+        ring: None,
     };
     rc.set_dht_value(log.clone(), 0, head.to_value().encode(), None)
         .await?;
@@ -342,6 +344,9 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
             kind: MessageKind::Text,
             items: Vec::new(),
             tax_pxmr: None,
+            re_seq: None,
+            re_own: false,
+            attachment: None,
             amount_pxmr: None,
             txid: None,
             payto: None,
@@ -490,7 +495,7 @@ pub async fn say(text: &str) -> Result<(), Box<dyn std::error::Error>> {
             .as_secs(),
         kind: MessageKind::Text,
         amount_pxmr: None, txid: None, payto: None,
-        items: Vec::new(), tax_pxmr: None,
+        items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
     };
     let (chosen, fs) = their_bundle.select();
     if !fs {
@@ -554,6 +559,8 @@ pub async fn refresh_keys() -> Result<(), Box<dyn std::error::Error>> {
         suite: 1,
         next_seq: next,
         prekey_bundle: Some(bundle.to_value().encode()),
+        read_up_to: None,
+        ring: None,
     };
     rc.set_dht_value(mine.clone(), 0, head.to_value().encode(), None).await?;
     println!(
@@ -616,11 +623,11 @@ pub async fn collect(card: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     let mut prev: Option<Message> = None;
     for seq in 0..head.next_seq {
-        if !still_in_ring(seq, head.next_seq, LOG_SUBKEYS) {
+        if !still_in_ring(seq, head.next_seq, head.ring.unwrap_or(LOG_SUBKEYS)) {
             println!("  \x1b[33m[{seq}] gone — the ring wrapped past it\x1b[0m");
             continue;
         }
-        let raw = match rc.get_dht_value(log.clone(), subkey_for(seq, LOG_SUBKEYS), true).await? {
+        let raw = match rc.get_dht_value(log.clone(), subkey_for(seq, head.ring.unwrap_or(LOG_SUBKEYS)), true).await? {
             Some(v) => v.data().to_vec(),
             None => { println!("  \x1b[31m[{seq}] slot empty\x1b[0m"); continue }
         };
@@ -718,21 +725,24 @@ async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn
     let mut prev: Option<Message> = None;
     let deadline = Instant::now() + std::time::Duration::from_secs(240);
     while Instant::now() < deadline {
-        let next = match rc.get_dht_value(log.clone(), 0, true).await? {
-            Some(v) => LogHead::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?)
-                .map_err(|e| format!("{e:?}"))?
-                .next_seq,
-            None => 0,
+        let (next, ring) = match rc.get_dht_value(log.clone(), 0, true).await? {
+            Some(v) => {
+                let h = LogHead::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?)
+                    .map_err(|e| format!("{e:?}"))?;
+                // §16.12: the ring comes from the head, never from a constant.
+                (h.next_seq, h.ring.unwrap_or(LOG_SUBKEYS))
+            }
+            None => (0, LOG_SUBKEYS),
         };
         while seq < next {
-            if !still_in_ring(seq, next, LOG_SUBKEYS) {
+            if !still_in_ring(seq, next, ring) {
                 println!("  \x1b[33m[{seq}] gone — the ring wrapped past it\x1b[0m");
                 seq += 1;
                 prev = None;
                 continue;
             }
             let raw = match rc
-                .get_dht_value(log.clone(), subkey_for(seq, LOG_SUBKEYS), true)
+                .get_dht_value(log.clone(), subkey_for(seq, ring), true)
                 .await?
             {
                 Some(v) => v.data().to_vec(),
@@ -761,6 +771,7 @@ async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn
                                 MessageKind::PaymentRequest => "asks for payment",
                                 MessageKind::PaymentSent => "says they sent",
                                 MessageKind::Receipt => "receipt for",
+                                MessageKind::Reaction => "reacted",
                                 MessageKind::Text => unreachable!(),
                             },
                             m.amount_pxmr

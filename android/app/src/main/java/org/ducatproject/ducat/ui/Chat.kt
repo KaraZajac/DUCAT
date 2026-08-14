@@ -42,6 +42,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import org.ducatproject.ducat.formatXmr
+import org.ducatproject.ducat.DucatLog
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 
 /**
  * One conversation.
@@ -63,10 +67,28 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     var c by remember { mutableStateOf(contact) }
     val mine = remember { PersonaStore(context).personaHex() }
     var messages by remember { mutableStateOf(store.thread(contact.personaHex)) }
+    // Reactions decorate their targets rather than being bubbles (§16.14):
+    // the message is the unit of rendering, the reaction is a remark upon one.
+    // Latest per (sender, target) wins, which is how changing your mind works.
+    val reactions = remember(messages) {
+        messages.filter { it.kind == 4 && it.reSeq != null }
+            .associateBy { r -> Triple(r.outgoing == r.reOwn, r.reSeq!!, r.outgoing) }
+    }
     var draft by remember { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
+
+    // §16.16: viewing the thread is what "read" means, so the watermark is
+    // published from exactly here — never from the poller, which reads
+    // everything and knows nothing about eyes.
+    LaunchedEffect(c.inSeq) {
+        if (store.readReceipts()) {
+            kotlinx.coroutines.withContext(Dispatchers.IO) {
+                runCatching { Mailbox.markRead(context, c) }
+            }
+        }
+    }
 
     // Re-read whenever anything writes to the store. The responder runs in a
     // different coroutine and cannot reach this screen's state directly; without
@@ -137,6 +159,37 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         Modifier.padding(12.dp).fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        // A picture (§16.15): resized, sealed under a fresh
+                        // key, parked in its own record, referenced from the
+                        // message. The record on the network is noise to
+                        // everyone but this thread.
+                        val pickImage = androidx.activity.compose.rememberLauncherForActivityResult(
+                            androidx.activity.result.contract.ActivityResultContracts.GetContent()
+                        ) { uri ->
+                            if (uri != null) {
+                                sending = true
+                                scope.launch(Dispatchers.IO) {
+                                    runCatching { sendPicture(context, c, mine, uri) }
+                                        .onSuccess {
+                                            messages = store.thread(c.personaHex)
+                                        }
+                                        .onFailure {
+                                            error = it.message ?: "could not send the picture"
+                                            DucatLog.w("Chat", "picture: ${it.message}")
+                                        }
+                                    sending = false
+                                }
+                            }
+                        }
+                        IconButton(
+                            onClick = { pickImage.launch("image/*") },
+                            enabled = c.theirBundle != null && !sending,
+                        ) {
+                            Icon(
+                                Icons.Filled.Image, "Send a picture",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                         IconButton(onClick = { askOpen = true }, enabled = c.theirBundle != null) {
                             // The cat, because it is the app's money button
                             // everywhere now — the same mark as the bar's
@@ -215,8 +268,30 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     textAlign = TextAlign.Center,
                 )
             }
-            items(messages) { m ->
-                Bubble(m, onLongPress = { confirmDelete = m }, onPay = { payRequest = it })
+            items(messages.filter { it.kind != 4 }) { m ->
+                Column {
+                    Bubble(m, c.theirReadUpTo, onLongPress = { confirmDelete = m }, onPay = { payRequest = it })
+                    val mine2 = reactions[Triple(m.outgoing, m.seq, true)]?.body
+                    val theirs2 = reactions[Triple(m.outgoing, m.seq, false)]?.body
+                    if (mine2 != null || theirs2 != null) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                            horizontalArrangement =
+                                if (m.outgoing) Arrangement.End else Arrangement.Start,
+                        ) {
+                            Surface(
+                                shape = MaterialTheme.shapes.small,
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                            ) {
+                                Text(
+                                    listOfNotNull(theirs2, mine2).joinToString(" "),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -261,12 +336,47 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     confirmDelete?.let { m ->
         AlertDialog(
             onDismissRequest = { confirmDelete = null },
-            title = { Text("Delete this message?") },
+            title = { Text("Message") },
             text = {
-                Text(
-                    "Removed from this phone only. The other side keeps their " +
-                        "copy — nothing here can reach it."
-                )
+                Column {
+                    if (m.kind != 4 && c.theirBundle != null) {
+                        // React: one tap, one emoji, sent through the same
+                        // sealed chain as everything else (§16.14).
+                        Row(horizontalArrangement = Arrangement.SpaceEvenly,
+                            modifier = Modifier.fillMaxWidth()) {
+                            listOf("👍", "❤️", "😂", "😮", "😢", "🔥").forEach { emo ->
+                                Text(
+                                    emo,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    modifier = Modifier
+                                        .clickable {
+                                            confirmDelete = null
+                                            scope.launch(Dispatchers.IO) {
+                                                runCatching {
+                                                    Mailbox.send(
+                                                        context, c, emo, mine,
+                                                        kind = 4,
+                                                        reSeq = m.seq,
+                                                        reOwn = m.outgoing,
+                                                    )
+                                                }.onSuccess {
+                                                    messages = store.thread(c.personaHex)
+                                                }.onFailure {
+                                                    DucatLog.w("Chat", "react: ${it.message}")
+                                                }
+                                            }
+                                        }
+                                        .padding(4.dp),
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(12.dp))
+                    }
+                    Text(
+                        "Delete removes it from this phone only. The other side " +
+                            "keeps their copy — nothing here can reach it."
+                    )
+                }
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -345,7 +455,7 @@ private fun sendOne(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun Bubble(m: StoredMessage, onLongPress: () -> Unit, onPay: (StoredMessage) -> Unit) {
+private fun Bubble(m: StoredMessage, theirReadUpTo: Long? = null, onLongPress: () -> Unit, onPay: (StoredMessage) -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val align = if (m.outgoing) Alignment.End else Alignment.Start
     // Yours in the accent, theirs in the neutral surface. Colour is doing the
@@ -370,7 +480,42 @@ private fun Bubble(m: StoredMessage, onLongPress: () -> Unit, onPay: (StoredMess
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             if (m.kind == 0) {
-                Text(m.body, color = fg)
+                val ctx = LocalContext.current
+                val att = m.attHash
+                if (att != null) {
+                    val file = remember(att) { Mailbox.attachmentFile(ctx, att) }
+                    val bmp = remember(att, file.exists()) {
+                        if (file.exists()) runCatching {
+                            // Bounded decode: the protocol capped the bytes,
+                            // but the pixels are still the decoder's problem.
+                            val o = android.graphics.BitmapFactory.Options()
+                                .apply { inSampleSize = 1 }
+                            android.graphics.BitmapFactory
+                                .decodeFile(file.absolutePath, o)
+                        }.getOrNull() else null
+                    }
+                    if (bmp != null) {
+                        androidx.compose.foundation.Image(
+                            bmp.asImageBitmap(), "Picture",
+                            modifier = Modifier
+                                .widthIn(max = 240.dp)
+                                .clip(MaterialTheme.shapes.medium),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                        )
+                    } else {
+                        Text(
+                            "📷 downloading…",
+                            color = fg.copy(alpha = 0.8f),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    if (m.body.isNotBlank() && m.body != "📷") {
+                        Spacer(Modifier.height(4.dp))
+                        Text(m.body, color = fg)
+                    }
+                } else {
+                    Text(m.body, color = fg)
+                }
             } else {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -457,6 +602,20 @@ private fun Bubble(m: StoredMessage, onLongPress: () -> Unit, onPay: (StoredMess
                 )
                 Spacer(Modifier.width(4.dp))
             }
+            if (m.outgoing) {
+                // §16.16: their watermark, when they publish one. Their claim,
+                // shown as one — a tick, not a certainty. No watermark, no
+                // ticks: absence of the feature is not "unread".
+                theirReadUpTo?.let { read ->
+                    Text(
+                        if (read > m.seq) "✓✓" else "✓",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (read > m.seq) MaterialTheme.ducat.settled
+                        else MaterialTheme.colorScheme.outline,
+                    )
+                    Spacer(Modifier.width(4.dp))
+                }
+            }
             Text(
                 SimpleDateFormat("HH:mm", Locale.getDefault())
                     .format(Date(m.timestamp * 1000)),
@@ -535,4 +694,66 @@ private fun Bill(m: StoredMessage, fg: androidx.compose.ui.graphics.Color) {
             )
         }
     }
+}
+
+/**
+ * Resize, seal, park, reference (§16.15).
+ *
+ * Re-encoded rather than passed through, same as avatars: the picker hands
+ * back an arbitrary file, and what goes out must be something this device's
+ * own image stack produced. Quality steps down until the ciphertext fits one
+ * record — 32 chunks of 32 KiB is Veilid's cap, and a picture that misses it
+ * is refused on arrival, so better to lose detail here.
+ */
+private fun sendPicture(
+    context: android.content.Context,
+    c: Contact,
+    mine: String,
+    uri: android.net.Uri,
+) {
+    val src = context.contentResolver.openInputStream(uri).use {
+        android.graphics.BitmapFactory.decodeStream(it)
+    } ?: throw IllegalArgumentException("not an image")
+    val maxDim = 1280
+    val scale = minOf(1f, maxDim.toFloat() / maxOf(src.width, src.height))
+    val scaled = if (scale < 1f) android.graphics.Bitmap.createScaledBitmap(
+        src, (src.width * scale).toInt(), (src.height * scale).toInt(), true,
+    ) else src
+
+    var plain: ByteArray? = null
+    for (q in intArrayOf(85, 70, 55, 40)) {
+        val out = java.io.ByteArrayOutputStream()
+        scaled.compress(android.graphics.Bitmap.CompressFormat.JPEG, q, out)
+        val b = out.toByteArray()
+        if (b.size <= 900_000) { plain = b; break }
+    }
+    val bytes = plain ?: throw IllegalArgumentException("could not shrink that picture enough")
+
+    val rng = java.security.SecureRandom()
+    val key = ByteArray(32).also(rng::nextBytes)
+    val nonce = ByteArray(24).also(rng::nextBytes)
+    val ct = uniffi.ducat_mobile.attachmentSeal(key, nonce, bytes)
+    val hash = java.security.MessageDigest.getInstance("SHA-256").digest(ct)
+
+    // One record, ciphertext chunked across its subkeys.
+    val chunks = (ct.size + 32_767) / 32_768
+    val rec = uniffi.ducat_mobile.nodeDhtCreate(chunks.toUInt())
+    for (i in 0 until chunks) {
+        val end = minOf((i + 1) * 32_768, ct.size)
+        uniffi.ducat_mobile.nodeDhtSet(rec.key, i.toUInt(), ct.copyOfRange(i * 32_768, end))
+    }
+
+    val ref = uniffi.ducat_mobile.AttachmentRef(
+        recordKey = rec.key,
+        key = key, nonce = nonce,
+        len = bytes.size.toULong(),
+        ctHash = hash,
+        mime = "image/jpeg",
+        name = null,
+    )
+    Mailbox.send(context, c, "📷", mine, attachment = ref)
+    // The sender's own copy, cached under the same name the fetch loop uses,
+    // so their bubble never says "downloading" about their own picture.
+    Mailbox.attachmentFile(context, hash.joinToString("") { "%02x".format(it) })
+        .writeBytes(bytes)
 }

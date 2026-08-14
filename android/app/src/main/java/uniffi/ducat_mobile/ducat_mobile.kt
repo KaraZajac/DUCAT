@@ -837,6 +837,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -858,9 +862,13 @@ internal interface UniffiLib : Library {
     ): Byte
     fun uniffi_ducat_mobile_fn_func_approx_payments_supported(`unlockedOutputs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_attachment_open(`key`: RustBuffer.ByValue,`nonce`: RustBuffer.ByValue,`ciphertext`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_attachment_seal(`key`: RustBuffer.ByValue,`nonce`: RustBuffer.ByValue,`plaintext`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_build_contact_details(`personaSecret`: RustBuffer.ByValue,`outboxKey`: RustBuffer.ByValue,`prekeyBundle`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`profile`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_build_log_head(`nextSeq`: Long,`prekeyBundle`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_build_log_head(`nextSeq`: Long,`prekeyBundle`: RustBuffer.ByValue,`readUpTo`: RustBuffer.ByValue,`ring`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_bundle_one_time_count(`bundleBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -970,7 +978,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_reconcile_float(`maxExposurePxmr`: Long,`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1095,6 +1103,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_android_ready(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_approx_payments_supported(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_attachment_open(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_attachment_seal(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_build_contact_details(
     ): Short
@@ -1242,10 +1254,16 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_approx_payments_supported() != 28086.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_attachment_open() != 24778.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_attachment_seal() != 27745.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_build_contact_details() != 30064.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_build_log_head() != 42400.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_build_log_head() != 471.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_bundle_one_time_count() != 35922.toShort()) {
@@ -1410,7 +1428,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_reconcile_float() != 35020.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 6125.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 379.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
@@ -1657,6 +1675,61 @@ public object FfiConverterByteArray: FfiConverterRustBuffer<ByteArray> {
     override fun write(value: ByteArray, buf: ByteBuffer) {
         buf.putInt(value.size)
         buf.put(value)
+    }
+}
+
+
+
+/**
+ * An attachment reference, across the bridge (§16.15).
+ */
+data class AttachmentRef (
+    var `recordKey`: kotlin.String, 
+    var `key`: kotlin.ByteArray, 
+    var `nonce`: kotlin.ByteArray, 
+    var `len`: kotlin.ULong, 
+    var `ctHash`: kotlin.ByteArray, 
+    var `mime`: kotlin.String, 
+    var `name`: kotlin.String?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAttachmentRef: FfiConverterRustBuffer<AttachmentRef> {
+    override fun read(buf: ByteBuffer): AttachmentRef {
+        return AttachmentRef(
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AttachmentRef) = (
+            FfiConverterString.allocationSize(value.`recordKey`) +
+            FfiConverterByteArray.allocationSize(value.`key`) +
+            FfiConverterByteArray.allocationSize(value.`nonce`) +
+            FfiConverterULong.allocationSize(value.`len`) +
+            FfiConverterByteArray.allocationSize(value.`ctHash`) +
+            FfiConverterString.allocationSize(value.`mime`) +
+            FfiConverterOptionalString.allocationSize(value.`name`)
+    )
+
+    override fun write(value: AttachmentRef, buf: ByteBuffer) {
+            FfiConverterString.write(value.`recordKey`, buf)
+            FfiConverterByteArray.write(value.`key`, buf)
+            FfiConverterByteArray.write(value.`nonce`, buf)
+            FfiConverterULong.write(value.`len`, buf)
+            FfiConverterByteArray.write(value.`ctHash`, buf)
+            FfiConverterString.write(value.`mime`, buf)
+            FfiConverterOptionalString.write(value.`name`, buf)
     }
 }
 
@@ -2023,6 +2096,14 @@ public object FfiConverterTypeFloatPlan: FfiConverterRustBuffer<FloatPlan> {
 data class HeadInfo (
     var `nextSeq`: kotlin.ULong, 
     /**
+     * The peer's read watermark into *our* log, if they publish one (§16.16).
+     */
+    var `readUpTo`: kotlin.ULong?, 
+    /**
+     * The ring size this log uses; readers MUST honour it (§16.12).
+     */
+    var `ring`: kotlin.UInt?, 
+    /**
      * Present when the publisher included refreshed keys. A reader that sees
      * one should replace its cached copy: keeping a stale bundle means sealing
      * to keys that were consumed long ago.
@@ -2040,17 +2121,23 @@ public object FfiConverterTypeHeadInfo: FfiConverterRustBuffer<HeadInfo> {
     override fun read(buf: ByteBuffer): HeadInfo {
         return HeadInfo(
             FfiConverterULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalUInt.read(buf),
             FfiConverterOptionalByteArray.read(buf),
         )
     }
 
     override fun allocationSize(value: HeadInfo) = (
             FfiConverterULong.allocationSize(value.`nextSeq`) +
+            FfiConverterOptionalULong.allocationSize(value.`readUpTo`) +
+            FfiConverterOptionalUInt.allocationSize(value.`ring`) +
             FfiConverterOptionalByteArray.allocationSize(value.`prekeyBundle`)
     )
 
     override fun write(value: HeadInfo, buf: ByteBuffer) {
             FfiConverterULong.write(value.`nextSeq`, buf)
+            FfiConverterOptionalULong.write(value.`readUpTo`, buf)
+            FfiConverterOptionalUInt.write(value.`ring`, buf)
             FfiConverterOptionalByteArray.write(value.`prekeyBundle`, buf)
     }
 }
@@ -2406,7 +2493,10 @@ data class OpenedMessage (
      * this does not have to re-derive the total to know it is honest.
      */
     var `items`: List<BillLine>, 
-    var `taxPxmr`: kotlin.ULong?
+    var `taxPxmr`: kotlin.ULong?, 
+    var `reSeq`: kotlin.ULong?, 
+    var `reOwn`: kotlin.Boolean, 
+    var `attachment`: AttachmentRef?
 ) {
     
     companion object
@@ -2430,6 +2520,9 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalString.read(buf),
             FfiConverterSequenceTypeBillLine.read(buf),
             FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterOptionalTypeAttachmentRef.read(buf),
         )
     }
 
@@ -2445,7 +2538,10 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalByteArray.allocationSize(value.`txid`) +
             FfiConverterOptionalString.allocationSize(value.`payto`) +
             FfiConverterSequenceTypeBillLine.allocationSize(value.`items`) +
-            FfiConverterOptionalULong.allocationSize(value.`taxPxmr`)
+            FfiConverterOptionalULong.allocationSize(value.`taxPxmr`) +
+            FfiConverterOptionalULong.allocationSize(value.`reSeq`) +
+            FfiConverterBoolean.allocationSize(value.`reOwn`) +
+            FfiConverterOptionalTypeAttachmentRef.allocationSize(value.`attachment`)
     )
 
     override fun write(value: OpenedMessage, buf: ByteBuffer) {
@@ -2461,6 +2557,9 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalString.write(value.`payto`, buf)
             FfiConverterSequenceTypeBillLine.write(value.`items`, buf)
             FfiConverterOptionalULong.write(value.`taxPxmr`, buf)
+            FfiConverterOptionalULong.write(value.`reSeq`, buf)
+            FfiConverterBoolean.write(value.`reOwn`, buf)
+            FfiConverterOptionalTypeAttachmentRef.write(value.`attachment`, buf)
     }
 }
 
@@ -3979,6 +4078,38 @@ public object FfiConverterOptionalByteArray: FfiConverterRustBuffer<kotlin.ByteA
 /**
  * @suppress
  */
+public object FfiConverterOptionalTypeAttachmentRef: FfiConverterRustBuffer<AttachmentRef?> {
+    override fun read(buf: ByteBuffer): AttachmentRef? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeAttachmentRef.read(buf)
+    }
+
+    override fun allocationSize(value: AttachmentRef?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeAttachmentRef.allocationSize(value)
+        }
+    }
+
+    override fun write(value: AttachmentRef?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeAttachmentRef.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalTypeInboundCall: FfiConverterRustBuffer<InboundCall?> {
     override fun read(buf: ByteBuffer): InboundCall? {
         if (buf.get().toInt() == 0) {
@@ -4360,6 +4491,33 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
     
 
         /**
+         * Open fetched attachment bytes. Verify the hash before calling (§16.15).
+         */
+    @Throws(ContactException::class) fun `attachmentOpen`(`key`: kotlin.ByteArray, `nonce`: kotlin.ByteArray, `ciphertext`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_attachment_open(
+        FfiConverterByteArray.lower(`key`),FfiConverterByteArray.lower(`nonce`),FfiConverterByteArray.lower(`ciphertext`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Seal attachment bytes; returns the ciphertext to park in a record.
+         * The key and nonce are the caller's to generate fresh — never reuse either.
+         */
+    @Throws(ContactException::class) fun `attachmentSeal`(`key`: kotlin.ByteArray, `nonce`: kotlin.ByteArray, `plaintext`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_attachment_seal(
+        FfiConverterByteArray.lower(`key`),FfiConverterByteArray.lower(`nonce`),FfiConverterByteArray.lower(`plaintext`),_status)
+}
+    )
+    }
+    
+
+        /**
          * the keys to seal with.
          */
     @Throws(ContactException::class) fun `buildContactDetails`(`personaSecret`: kotlin.ByteArray, `outboxKey`: kotlin.String, `prekeyBundle`: kotlin.ByteArray, `displayName`: kotlin.String?, `payto`: kotlin.String?, `profile`: Profile): kotlin.ByteArray {
@@ -4379,11 +4537,11 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
          * refreshed supply reaches every reader for no extra round trip. Without it a
          * pair that exhausts its one-time keys stays on the signed prekey forever —
          * forward secrecy quietly gone, and no path back.
-         */ fun `buildLogHead`(`nextSeq`: kotlin.ULong, `prekeyBundle`: kotlin.ByteArray?): kotlin.ByteArray {
+         */ fun `buildLogHead`(`nextSeq`: kotlin.ULong, `prekeyBundle`: kotlin.ByteArray?, `readUpTo`: kotlin.ULong?, `ring`: kotlin.UInt?): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_build_log_head(
-        FfiConverterULong.lower(`nextSeq`),FfiConverterOptionalByteArray.lower(`prekeyBundle`),_status)
+        FfiConverterULong.lower(`nextSeq`),FfiConverterOptionalByteArray.lower(`prekeyBundle`),FfiConverterOptionalULong.lower(`readUpTo`),FfiConverterOptionalUInt.lower(`ring`),_status)
 }
     )
     }
@@ -5215,11 +5373,11 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
         /**
          * Seal one message in a thread.
          */
-    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?): SealedOut {
+    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?): SealedOut {
             return FfiConverterTypeSealedOut.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
-        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),_status)
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),_status)
 }
     )
     }

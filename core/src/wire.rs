@@ -165,6 +165,20 @@ pub mod f {
     pub const DET_PHONE: u64 = 189;
     pub const DET_SIGNAL: u64 = 190;
     pub const DET_PRONOUNS: u64 = 191;
+    // Reactions (§16.14).
+    pub const MSG_RE_SEQ: u64 = 192;
+    pub const MSG_RE_OWN: u64 = 193;
+    // Attachments (§16.15).
+    pub const MSG_ATT_RECORD: u64 = 194;
+    pub const MSG_ATT_KEY: u64 = 195;
+    pub const MSG_ATT_NONCE: u64 = 196;
+    pub const MSG_ATT_LEN: u64 = 197;
+    pub const MSG_ATT_HASH: u64 = 198;
+    pub const MSG_ATT_MIME: u64 = 199;
+    pub const MSG_ATT_NAME: u64 = 200;
+    // Read watermark and ring size on a log head (§16.16, §16.12).
+    pub const HEAD_READ: u64 = 201;
+    pub const HEAD_RING: u64 = 202;
 
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;

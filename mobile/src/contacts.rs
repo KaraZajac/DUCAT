@@ -297,8 +297,16 @@ pub fn parse_contact_details(bytes: Vec<u8>) -> Result<PeerDetails, ContactError
 /// pair that exhausts its one-time keys stays on the signed prekey forever —
 /// forward secrecy quietly gone, and no path back.
 #[uniffi::export]
-pub fn build_log_head(next_seq: u64, prekey_bundle: Option<Vec<u8>>) -> Vec<u8> {
-    LogHead { version: 1, suite: 1, next_seq, prekey_bundle }
+pub fn build_log_head(
+    next_seq: u64,
+    prekey_bundle: Option<Vec<u8>>,
+    // §16.16's watermark: how far into the peer's log this user has read.
+    // None means receipts are off, which is the default.
+    read_up_to: Option<u64>,
+    // §16.12: the ring size, when this log uses other than the default eight.
+    ring: Option<u32>,
+) -> Vec<u8> {
+    LogHead { version: 1, suite: 1, next_seq, prekey_bundle, read_up_to, ring }
         .to_value()
         .encode()
 }
@@ -307,6 +315,10 @@ pub fn build_log_head(next_seq: u64, prekey_bundle: Option<Vec<u8>>) -> Vec<u8> 
 #[derive(uniffi::Record, Clone)]
 pub struct HeadInfo {
     pub next_seq: u64,
+    /// The peer's read watermark into *our* log, if they publish one (§16.16).
+    pub read_up_to: Option<u64>,
+    /// The ring size this log uses; readers MUST honour it (§16.12).
+    pub ring: Option<u32>,
     /// Present when the publisher included refreshed keys. A reader that sees
     /// one should replace its cached copy: keeping a stale bundle means sealing
     /// to keys that were consumed long ago.
@@ -316,7 +328,7 @@ pub struct HeadInfo {
 #[uniffi::export]
 pub fn parse_log_head(bytes: Vec<u8>) -> Result<HeadInfo, ContactError> {
     let h = LogHead::from_value(decode(&bytes).map_err(refuse)?).map_err(refuse)?;
-    Ok(HeadInfo { next_seq: h.next_seq, prekey_bundle: h.prekey_bundle })
+    Ok(HeadInfo { next_seq: h.next_seq, read_up_to: h.read_up_to, ring: h.ring, prekey_bundle: h.prekey_bundle })
 }
 
 /// Which subkey a sequence number occupies. Subkey 0 is the head, so an
@@ -422,6 +434,35 @@ pub struct SealedOut {
     pub next_link: Vec<u8>,
 }
 
+/// An attachment reference, across the bridge (§16.15).
+#[derive(uniffi::Record, Clone)]
+pub struct AttachmentRef {
+    pub record_key: String,
+    pub key: Vec<u8>,
+    pub nonce: Vec<u8>,
+    pub len: u64,
+    pub ct_hash: Vec<u8>,
+    pub mime: String,
+    pub name: Option<String>,
+}
+
+/// Seal attachment bytes; returns the ciphertext to park in a record.
+/// The key and nonce are the caller's to generate fresh — never reuse either.
+#[uniffi::export]
+pub fn attachment_seal(key: Vec<u8>, nonce: Vec<u8>, plaintext: Vec<u8>) -> Result<Vec<u8>, ContactError> {
+    let k: [u8; 32] = key.try_into().map_err(|_| ContactError::Refused("key is 32 bytes".into()))?;
+    let n: [u8; 24] = nonce.try_into().map_err(|_| ContactError::Refused("nonce is 24 bytes".into()))?;
+    Ok(ducat_core::contact::attachment_seal(&k, &n, &plaintext))
+}
+
+/// Open fetched attachment bytes. Verify the hash before calling (§16.15).
+#[uniffi::export]
+pub fn attachment_open(key: Vec<u8>, nonce: Vec<u8>, ciphertext: Vec<u8>) -> Result<Vec<u8>, ContactError> {
+    let k: [u8; 32] = key.try_into().map_err(|_| ContactError::Refused("key is 32 bytes".into()))?;
+    let n: [u8; 24] = nonce.try_into().map_err(|_| ContactError::Refused("nonce is 24 bytes".into()))?;
+    ducat_core::contact::attachment_open(&k, &n, &ciphertext).map_err(refuse)
+}
+
 /// One line on a bill, across the bridge (§16.13).
 #[derive(uniffi::Record, Clone)]
 pub struct BillLine {
@@ -449,6 +490,12 @@ pub fn seal_message(
     // add up to `amount_pxmr`, and core refuses the message if they do not.
     items: Vec<BillLine>,
     tax_pxmr: Option<u64>,
+    // §16.14: the message a reaction is about, in the recipient's log unless
+    // `re_own`.
+    re_seq: Option<u64>,
+    re_own: bool,
+    // §16.15: a sealed blob parked in its own record.
+    attachment: Option<AttachmentRef>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -471,6 +518,7 @@ pub fn seal_message(
             1 => MessageKind::PaymentRequest,
             2 => MessageKind::PaymentSent,
             3 => MessageKind::Receipt,
+            4 => MessageKind::Reaction,
             _ => MessageKind::Text,
         },
         amount_pxmr,
@@ -481,6 +529,17 @@ pub fn seal_message(
             .map(|i| LineItem { description: i.description, amount_pxmr: i.amount_pxmr })
             .collect(),
         tax_pxmr,
+        re_seq,
+        re_own,
+        attachment: attachment.map(|a| ducat_core::contact::Attachment {
+            record_key: a.record_key,
+            key: a.key.try_into().unwrap_or([0u8; 32]),
+            nonce: a.nonce.try_into().unwrap_or([0u8; 24]),
+            len: a.len,
+            ct_hash: a.ct_hash.try_into().unwrap_or([0u8; 32]),
+            mime: a.mime,
+            name: a.name,
+        }),
     };
     let next_link = msg.link().to_vec();
     let (chosen, forward_secret) = bundle.select();
@@ -598,6 +657,9 @@ pub struct OpenedMessage {
     /// this does not have to re-derive the total to know it is honest.
     pub items: Vec<BillLine>,
     pub tax_pxmr: Option<u64>,
+    pub re_seq: Option<u64>,
+    pub re_own: bool,
+    pub attachment: Option<AttachmentRef>,
 }
 
 /// Open an inbound sealed message and check it follows the thread.
@@ -670,6 +732,17 @@ pub fn open_message(
             .map(|i| BillLine { description: i.description.clone(), amount_pxmr: i.amount_pxmr })
             .collect(),
         tax_pxmr: msg.tax_pxmr,
+        re_seq: msg.re_seq,
+        re_own: msg.re_own,
+        attachment: msg.attachment.as_ref().map(|a| AttachmentRef {
+            record_key: a.record_key.clone(),
+            key: a.key.to_vec(),
+            nonce: a.nonce.to_vec(),
+            len: a.len,
+            ct_hash: a.ct_hash.to_vec(),
+            mime: a.mime.clone(),
+            name: a.name.clone(),
+        }),
     })
 }
 

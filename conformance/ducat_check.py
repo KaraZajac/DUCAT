@@ -941,6 +941,13 @@ MAX_RECORD_KEY_CHARS = 128
 MSG_SEQ, MSG_PREV, MSG_BODY, MSG_TS = 157, 158, 159, 160
 MSG_KIND, MSG_AMOUNT, MSG_TXID, MSG_PAYTO = 178, 179, 180, 181
 MSG_ITEMS, MSG_TAX = 183, 184
+MSG_RE_SEQ, MSG_RE_OWN = 192, 193
+MSG_ATT_RECORD, MSG_ATT_KEY, MSG_ATT_NONCE = 194, 195, 196
+MSG_ATT_LEN, MSG_ATT_HASH, MSG_ATT_MIME, MSG_ATT_NAME = 197, 198, 199, 200
+HEAD_BUNDLE = 177
+HEAD_READ, HEAD_RING = 201, 202
+MAX_ATTACHMENT_BYTES = 1_048_576 - 64
+MAX_MIME_CHARS, MAX_FILENAME_CHARS = 64, 96
 ITEM_DESC, ITEM_AMOUNT = 185, 186
 MAX_ITEM_CHARS, MAX_ITEMS = 64, 64
 MAX_ADDRESS_CHARS = 128
@@ -1114,7 +1121,19 @@ def parse_head(buf):
         "version": _take(b, 1, "uint", "version"),
         "suite": _take(b, 2, "uint", "suite"),
         "next_seq": _take(b, HEAD_NEXT, "uint", "next sequence"),
+        "bundle": b.pop(HEAD_BUNDLE, (None, None))[1],
+        "read": b.pop(HEAD_READ, (None, None))[1],
     }
+    # §16.12: the ring size, when other than the default eight — which MUST be
+    # encoded by omission, and must leave room for a head plus one slot.
+    ring = b.pop(HEAD_RING, (None, None))[1]
+    if ring is not None:
+        if ring == 8:
+            raise Reject("Malformed",
+                         "eight is the default ring and is encoded by omitting the field")
+        if not (2 <= ring <= 1024):
+            raise Reject("Malformed", "a ring is 2..=1024 subkeys")
+    out["ring"] = ring
     _finish(b)
     return out
 
@@ -1142,7 +1161,7 @@ def parse_message(buf):
             raise Reject("Malformed", "kind is not an integer")
         if kind == 0:
             raise Reject("Malformed", "text is encoded by omitting the kind")
-        if kind not in (1, 2, 3):
+        if kind not in (1, 2, 3, 4):
             raise Reject("Malformed", "unknown message kind")
     else:
         kind = 0
@@ -1172,12 +1191,51 @@ def parse_message(buf):
             _finish(eb)
             out["items"].append({"description": desc, "amount": amt})
     out["tax"] = b.pop(MSG_TAX, (None, None))[1]
+
+    # §16.14 — reactions.
+    out["re_seq"] = b.pop(MSG_RE_SEQ, (None, None))[1]
+    if MSG_RE_OWN in b:
+        k2, v2 = b.pop(MSG_RE_OWN)
+        if k2 != "uint" or v2 != 1:
+            raise Reject("Malformed", "re_own is a presence flag and may only be 1")
+        out["re_own"] = True
+    else:
+        out["re_own"] = False
+
+    # §16.15 — attachments: all fields or none.
+    att = {
+        "record": _take_text(b, MSG_ATT_RECORD, MAX_RECORD_KEY_CHARS, "record", False),
+        "key": b.pop(MSG_ATT_KEY, (None, None))[1],
+        "nonce": b.pop(MSG_ATT_NONCE, (None, None))[1],
+        "len": b.pop(MSG_ATT_LEN, (None, None))[1],
+        "hash": b.pop(MSG_ATT_HASH, (None, None))[1],
+        "mime": _take_text(b, MSG_ATT_MIME, MAX_MIME_CHARS, "mime", False),
+        "name": _take_text(b, MSG_ATT_NAME, MAX_FILENAME_CHARS, "filename", False),
+    }
+    core = [att["record"], att["key"], att["nonce"], att["len"], att["hash"], att["mime"]]
+    if all(x is None for x in core):
+        if att["name"] is not None:
+            raise Reject("Malformed", "a filename without an attachment names nothing")
+        out["attachment"] = None
+    elif all(x is not None for x in core):
+        if att["key"] is not None and len(att["key"]) != 32:
+            raise Reject("Malformed", "attachment key is 32 bytes")
+        if len(att["nonce"]) != 24:
+            raise Reject("Malformed", "attachment nonce is 24 bytes")
+        if len(att["hash"]) != 32:
+            raise Reject("Malformed", "attachment hash is 32 bytes")
+        if not (1 <= att["len"] <= MAX_ATTACHMENT_BYTES):
+            raise Reject("Malformed", "attachment length out of bounds")
+        out["attachment"] = att
+    else:
+        raise Reject("Malformed",
+                     "an attachment carries record, key, nonce, length, hash and mime together")
     _finish(b)
 
     # A payment with no amount is a screen with a blank where the number goes;
     # an amount on text is a number nothing will honour. Neither is ignorable.
-    if kind == 0 and out["amount"] is not None:
-        raise Reject("Malformed", "text must not carry an amount")
+    if kind in (0, 4) and out["amount"] is not None:
+        raise Reject("Malformed", "this kind must not carry an amount")
     if kind in (1, 2, 3) and out["amount"] is None:
         raise Reject("Malformed", "a payment message must carry an amount")
     # A notice points at the transaction it made; a receipt (§16.13) at the one
@@ -1189,6 +1247,17 @@ def parse_message(buf):
     if out["payto"] is not None and kind != 1:
         raise Reject("Malformed", "only a request names where to pay")
 
+    if kind == 4:
+        if out["re_seq"] is None:
+            raise Reject("Malformed", "a reaction names the message it is about")
+        if len(out["body"]) > 16:
+            raise Reject("Malformed", "a reaction's body is the emoji, not a message")
+        if out["amount"] is not None or out["attachment"] is not None:
+            raise Reject("Malformed", "a reaction carries no money and no attachment")
+    elif out["re_seq"] is not None or out["re_own"]:
+        raise Reject("Malformed", "only a reaction targets another message")
+    if out["attachment"] is not None and kind != 0:
+        raise Reject("Malformed", "only a text message carries an attachment")
     if kind == 0 and (out["items"] or out["tax"] is not None):
         raise Reject("Malformed", "a text message has no bill to itemise")
     # Tax only alongside items, so an itemisation is always arithmetic the
@@ -1297,11 +1366,18 @@ def run_log_head(cases, r):
     for c in cases:
         def go(c=c):
             h = parse_head(unhex(c["head_hex"]))
-            return _reencode_map([
+            fields = [
                 (0, ("uint", OBJECT_TYPE_CODES["LOG_HEAD"])),
                 (1, ("uint", h["version"])), (2, ("uint", h["suite"])),
                 (HEAD_NEXT, ("uint", h["next_seq"])),
-            ])
+            ]
+            if h["bundle"] is not None:
+                fields.append((HEAD_BUNDLE, ("bytes", h["bundle"])))
+            if h["read"] is not None:
+                fields.append((HEAD_READ, ("uint", h["read"])))
+            if h["ring"] is not None:
+                fields.append((HEAD_RING, ("uint", h["ring"])))
+            return _reencode_map(fields)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
             r.passed -= 1
@@ -1355,6 +1431,20 @@ def run_message_payment(cases, r):
                 ])))
             if m["tax"] is not None:
                 fields.append((MSG_TAX, ("uint", m["tax"])))
+            if m["re_seq"] is not None:
+                fields.append((MSG_RE_SEQ, ("uint", m["re_seq"])))
+            if m["re_own"]:
+                fields.append((MSG_RE_OWN, ("uint", 1)))
+            a = m["attachment"]
+            if a is not None:
+                fields.append((MSG_ATT_RECORD, ("text", a["record"])))
+                fields.append((MSG_ATT_KEY, ("bytes", a["key"])))
+                fields.append((MSG_ATT_NONCE, ("bytes", a["nonce"])))
+                fields.append((MSG_ATT_LEN, ("uint", a["len"])))
+                fields.append((MSG_ATT_HASH, ("bytes", a["hash"])))
+                fields.append((MSG_ATT_MIME, ("text", a["mime"])))
+                if a["name"] is not None:
+                    fields.append((MSG_ATT_NAME, ("text", a["name"])))
             return encode(("map", fields))
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

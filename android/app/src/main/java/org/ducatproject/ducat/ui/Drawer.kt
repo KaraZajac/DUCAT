@@ -110,6 +110,33 @@ fun SectionScreen(
         Section.Settings -> Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)
         ) {
+            // §16.16, and the default is the privacy stance: when a message
+            // was read is behavioural data, and it leaves this device by
+            // choice, not by installing a chat app.
+            val cs = remember { ContactStore(context) }
+            var receipts by remember { mutableStateOf(cs.readReceipts()) }
+            Text("Privacy", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Switch(checked = receipts, onCheckedChange = {
+                    receipts = it; cs.setReadReceipts(it)
+                })
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Text("Send read receipts")
+                    Text(
+                        if (receipts)
+                            "Contacts see when you have read their messages. " +
+                                "Yours show regardless, if they send them."
+                        else
+                            "Off — when you read is your business. You still see " +
+                                "theirs if they send them.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Spacer(Modifier.height(24.dp))
             Text("Appearance", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             ThemeMode.entries.forEach { m ->

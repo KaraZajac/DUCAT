@@ -1277,10 +1277,38 @@ fn contact_cases() -> Vec<J> {
         ("head_zero", "A log nobody has written to yet: the next message will be sequence 0.", 0u64),
         ("head_mid", "next_seq doubles as the count of messages ever written, which is what makes a gap detectable.", 42u64),
     ] {
-        let h = LogHead { version: 1, suite: 1, next_seq: seq, prekey_bundle: None };
+        let h = LogHead { version: 1, suite: 1, next_seq: seq, prekey_bundle: None, read_up_to: None, ring: None };
         let hex_body = hex(&h.to_value().encode());
         v.push(json!({ "name": name, "why": why, "head_hex": hex_body,
                        "expect": { "ok": true, "reencodes_to_hex": hex_body } }));
+    }
+
+    // §16.16's watermark and §16.12's variable ring.
+    {
+        let mut hcase = |name: &str, why: &str, h: &LogHead, bad: Option<(RejectCode, &str)>| {
+            let hex_body = hex(&h.to_value().encode());
+            v.push(match bad {
+                None => json!({ "name": name, "why": why, "head_hex": hex_body,
+                                "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+                Some((code, hint)) => json!({ "name": name, "why": why, "head_hex": hex_body,
+                                "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+            });
+        };
+        let base = LogHead { version: 1, suite: 1, next_seq: 9, prekey_bundle: None, read_up_to: None, ring: None };
+        hcase("head_with_read_watermark",
+            "A read receipt as a head field rather than a message: the head is rewritten constantly anyway, so the watermark costs no ring slot, no prekey and no chain entry. Absent means receipts are off, which is the default — when a message was read is behavioural data and leaves the device only by opt-in.",
+            &LogHead { read_up_to: Some(7), ..base.clone() }, None);
+        hcase("head_with_ring",
+            "The ring size travels on the head so it can change: eight was sized for text, and reactions and receipts multiply message count. Readers take the ring from the head, never from a constant — the failure of a mismatch is reading the wrong slot and refusing a valid thread.",
+            &LogHead { ring: Some(32), ..base.clone() }, None);
+        hcase("head_ring_default_must_be_omitted",
+            "Eight is the default and is encoded by omission — one meaning, one encoding (§18.1).",
+            &LogHead { ring: Some(8), ..base.clone() },
+            Some((RejectCode::Malformed, "default ring is omitted")));
+        hcase("head_ring_too_small",
+            "A ring needs a head and at least one slot.",
+            &LogHead { ring: Some(1), ..base.clone() },
+            Some((RejectCode::Malformed, "ring out of range")));
     }
 
     // The ring. Subkey 0 is the head, so an off-by-one here overwrites it with a
@@ -1298,9 +1326,9 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None };
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
         v.push(json!({
@@ -1345,7 +1373,7 @@ fn contact_cases() -> Vec<J> {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1_700_000_000,
         kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
-        payto: None, items: Vec::new(), tax_pxmr: None,
+        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
     };
     money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
     money("payment_sent",
@@ -1458,18 +1486,85 @@ fn contact_cases() -> Vec<J> {
         }, None);
     money("receipt_without_amount",
         "A receipt for an unstated amount settles nothing.",
-        &Message { kind: MessageKind::Receipt, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, ..base_pay.clone() },
+        &Message { kind: MessageKind::Receipt, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None, ..base_pay.clone() },
         Some((RejectCode::Malformed, "payment needs an amount")));
     money("receipt_with_payto",
         "Only a request names where to pay. A receipt doing so is asking again for money it says it already has.",
         &Message { kind: MessageKind::Receipt, payto: Some("5ApJU8bf".into()), ..base_pay.clone() },
         Some((RejectCode::Malformed, "only a request names where to pay")));
 
+    // §16.14 — reactions.
+    let react = Message {
+        kind: MessageKind::Reaction, body: "🔥".into(),
+        amount_pxmr: None, re_seq: Some(4),
+        ..base_pay.clone()
+    };
+    money("reaction_valid",
+        "An emoji about a message, named by sequence in the recipient's log. A message like any other — sealed, chained, sequenced — because a side-channel for reactions would be a second delivery path with its own bugs.",
+        &react, None);
+    money("reaction_to_own_message",
+        "Reacting to one's own earlier message: the target sequence is in the sender's log, flagged by presence (§18.1 — one meaning, one encoding).",
+        &Message { re_own: true, ..react.clone() }, None);
+    money("reaction_without_target",
+        "An emoji about nothing is a text message wearing the wrong kind.",
+        &Message { re_seq: None, ..react.clone() },
+        Some((RejectCode::Malformed, "a reaction names its target")));
+    money("reaction_body_too_long",
+        "The body is the emoji. Sixteen characters holds any emoji sequence; a paragraph is a message and should be one.",
+        &Message { body: "x".repeat(17), ..react.clone() },
+        Some((RejectCode::Malformed, "reaction body too long")));
+    money("reaction_with_amount",
+        "A reaction carries no money: an amount on an emoji is a payment nothing will match.",
+        &Message { amount_pxmr: Some(1), ..react.clone() },
+        Some((RejectCode::Malformed, "reaction carries no money")));
+    money("target_on_a_text",
+        "Only a reaction targets another message.",
+        &Message { kind: MessageKind::Text, amount_pxmr: None, re_seq: Some(1), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "only a reaction targets")));
+
+    // §16.15 — attachments.
+    let att = Attachment {
+        record_key: KEY.into(),
+        key: [0xAA; 32], nonce: [0xBB; 24], len: 200_000,
+        ct_hash: [0xCC; 32], mime: "image/jpeg".into(), name: Some("cat.jpg".into()),
+    };
+    let with_att = Message {
+        kind: MessageKind::Text, amount_pxmr: None,
+        body: "📷".into(), attachment: Some(att.clone()),
+        ..base_pay.clone()
+    };
+    money("attachment_valid",
+        "A picture by reference: the bytes live in their own record as XChaCha-sealed chunks, and the key travels here, inside the sealed message — so the record on the network is noise to everyone but the thread.",
+        &with_att, None);
+    money("attachment_too_large",
+        "One record is the unit: 32 chunks of 32 KiB is Veilid's measured 1 MiB cap, and a larger file is a different design, not a larger number.",
+        &Message { attachment: Some(Attachment { len: 2_000_000, ..att.clone() }), ..with_att.clone() },
+        Some((RejectCode::Malformed, "attachment over bound")));
+    money("attachment_on_a_request",
+        "Attachments ride ordinary messages. A bill with a file in it is two features fused at their least-tested corner.",
+        &Message { kind: MessageKind::PaymentRequest, amount_pxmr: Some(1), ..with_att.clone() },
+        Some((RejectCode::Malformed, "only text carries an attachment")));
+
+
     money("request_with_txid",
         "A notice points at the transaction it made and a receipt at the one it acknowledges. A request pointing at either is claiming the payment it is simultaneously asking for.",
         &Message { txid: Some(vec![0x77; 32]), ..base_pay.clone() },
         Some((RejectCode::Malformed, "only a notice or receipt carries a txid")));
 
+
+    // Handcrafted: the struct cannot express a half-attachment, which is the
+    // point — so the case is built by deleting the hash from the encoding.
+    {
+        let mut v2 = with_att.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = v2 {
+            m.remove(&ducat_core::wire::f::MSG_ATT_HASH);
+        }
+        let hex_body = hex(&v2.encode());
+        v.push(json!({ "name": "attachment_partial",
+            "why": "All or nothing: every subset of {record, key, nonce, length, hash, mime} is a trap — fetchable but not decryptable, or decryptable but not verifiable.",
+            "payment_hex": hex_body,
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "attachment fields travel together" } }));
+    }
 
     v
 }

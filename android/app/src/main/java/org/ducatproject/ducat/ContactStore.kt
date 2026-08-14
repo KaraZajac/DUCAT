@@ -193,6 +193,22 @@ class ContactStore(context: Context) {
     /** Whether we publish our own address so contacts can pay without asking. */
     fun publishAddress(): Boolean = prefs.getBoolean("publish_address", false)
 
+    /**
+     * Whether this device publishes read watermarks (§16.16). **Off by
+     * default**: when a message was read is behavioural data, and it leaves
+     * the device by choice, not by installing a chat app.
+     */
+    fun readReceipts(): Boolean = prefs.getBoolean("read_receipts", false)
+    fun setReadReceipts(v: Boolean) {
+        prefs.edit().putBoolean("read_receipts", v).apply(); bump()
+    }
+
+    fun setTheirReadUpTo(personaHex: String, v: Long) { synchronized(lock) {
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
+        if (c.theirReadUpTo == v) return
+        save(all().filterNot { it.personaHex == personaHex } + c.copy(theirReadUpTo = v))
+    } }
+
     fun setPublishAddress(v: Boolean) = prefs.edit().putBoolean("publish_address", v).apply()
         .also { ContactStore.bump() }
 
@@ -601,6 +617,10 @@ data class Contact(
     val phone: String? = null,
     val signal: String? = null,
     val pronouns: Int? = null,
+    /** Our log's ring size (§16.12). Eight for logs made before rings grew. */
+    val myRing: Int = 8,
+    /** How far into our log they say they have read (§16.16). Their claim. */
+    val theirReadUpTo: Long? = null,
     /** Our next outgoing sequence number, and the link it must carry (§16.10). */
     val outSeq: Long = 0,
     val outPrevLink: ByteArray? = null,
@@ -633,6 +653,8 @@ data class Contact(
         put("phone", phone ?: JSONObject.NULL)
         put("signal", signal ?: JSONObject.NULL)
         put("pronouns", pronouns ?: JSONObject.NULL)
+        put("my_ring", myRing)
+        put("their_read", theirReadUpTo ?: JSONObject.NULL)
         put("out_seq", outSeq)
         put("out_prev", outPrevLink?.let { b64(it) } ?: JSONObject.NULL)
         put("in_seq", inSeq)
@@ -650,6 +672,8 @@ data class Contact(
             phone = o.optStringOrNull("phone"),
             signal = o.optStringOrNull("signal"),
             pronouns = if (o.isNull("pronouns")) null else o.optInt("pronouns").takeIf { it in 1..6 },
+            myRing = o.optInt("my_ring", 8),
+            theirReadUpTo = if (o.isNull("their_read")) null else o.optLong("their_read"),
             myOutbox = o.optString("my_outbox", ""),
             myOutboxOwnerPublic = unb64(o.optString("my_outbox_pub", "")),
             myOutboxOwnerSecret = unb64(o.optString("my_outbox_sec", "")),
@@ -678,6 +702,17 @@ data class StoredMessage(
     val amountPxmr: Long = 0,
     /** Where a request asks to be paid, if it named one. */
     val payto: String? = null,
+    /** For a reaction (§16.14): which message, and in whose log. */
+    val reSeq: Long? = null,
+    val reOwn: Boolean = false,
+    /** An attachment by reference (§16.15); bytes cached by ciphertext hash. */
+    val attRecord: String? = null,
+    val attKey: ByteArray? = null,
+    val attNonce: ByteArray? = null,
+    val attLen: Long = 0,
+    val attHash: String? = null,
+    val attMime: String? = null,
+    val attName: String? = null,
     /**
      * The transaction a payment notice points at (§16.13).
      *
@@ -707,6 +742,14 @@ data class StoredMessage(
         put("kind", kind); put("amt", amountPxmr)
         put("payto", payto ?: JSONObject.NULL)
         put("txid", txidHex ?: JSONObject.NULL)
+        reSeq?.let { put("re_seq", it) }
+        if (reOwn) put("re_own", true)
+        attRecord?.let {
+            put("att_rec", it); put("att_key", Base64.encodeToString(attKey, Base64.NO_WRAP))
+            put("att_nonce", Base64.encodeToString(attNonce, Base64.NO_WRAP))
+            put("att_len", attLen); put("att_hash", attHash)
+            put("att_mime", attMime); put("att_name", attName ?: JSONObject.NULL)
+        }
         if (items.isNotEmpty()) {
             put("items", JSONArray().also { a ->
                 items.forEach { i ->
@@ -729,6 +772,15 @@ data class StoredMessage(
             amountPxmr = o.optLong("amt", 0L),
             payto = o.optStringOrNull("payto"),
             txidHex = o.optStringOrNull("txid"),
+            reSeq = if (o.has("re_seq")) o.getLong("re_seq") else null,
+            reOwn = o.optBoolean("re_own", false),
+            attRecord = o.optStringOrNull("att_rec"),
+            attKey = o.optStringOrNull("att_key")?.let { Base64.decode(it, Base64.NO_WRAP) },
+            attNonce = o.optStringOrNull("att_nonce")?.let { Base64.decode(it, Base64.NO_WRAP) },
+            attLen = o.optLong("att_len", 0L),
+            attHash = o.optStringOrNull("att_hash"),
+            attMime = o.optStringOrNull("att_mime"),
+            attName = o.optStringOrNull("att_name"),
             items = o.optJSONArray("items")?.let { a ->
                 (0 until a.length()).map {
                     val i = a.getJSONObject(it)

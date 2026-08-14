@@ -113,7 +113,7 @@ fn details_must_name_an_outbox() {
 
 #[test]
 fn heads_round_trip() {
-    let h = LogHead { version: 1, suite: 1, next_seq: 42, prekey_bundle: None };
+    let h = LogHead { version: 1, suite: 1, next_seq: 42, prekey_bundle: None, read_up_to: None, ring: None };
     assert_eq!(LogHead::from_value(h.to_value()).unwrap(), h);
 }
 
@@ -163,7 +163,7 @@ fn msg(seq: u64, prev: [u8; 32], body: &str) -> Message {
         prev,
         body: body.into(),
         timestamp: 1000 + seq, kind: MessageKind::Text, amount_pxmr: None, txid: None,
-        payto: None, items: Vec::new(), tax_pxmr: None,
+        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
     }
 }
 
@@ -220,7 +220,7 @@ fn pay(kind: MessageKind, amount: Option<u64>, txid: Option<Vec<u8>>) -> Message
     Message {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1000,
-        kind, amount_pxmr: amount, txid, payto: None, items: Vec::new(), tax_pxmr: None,
+        kind, amount_pxmr: amount, txid, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
     }
 }
 

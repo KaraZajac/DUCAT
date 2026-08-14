@@ -101,6 +101,11 @@ class Poller(private val context: Context) {
                     NodeStore(context).lastGood()?.let { TabStore.poolSight(context, it) }
                 }.onFailure { DucatLog.w(TAG, "pool: ${it.message}") }
 
+                // One attachment per pass: pictures arrive shortly after
+                // their messages without ever starving the payment paths.
+                runCatching { Mailbox.fetchOneAttachment(context) }
+                    .onFailure { DucatLog.w(TAG, "attachment: ${it.message}") }
+
                 // Cheap: it only leaves the device when the cache has expired.
                 runCatching { Rates.refresh(context) }
                     .onFailure { DucatLog.w(TAG, "rate: ${it.message}") }

@@ -257,6 +257,48 @@
     {
       "expect": {
         "ok": true,
+        "reencodes_to_hex": "a500181a0101020118b00918c907"
+      },
+      "head_hex": "a500181a0101020118b00918c907",
+      "kind": "log.head",
+      "name": "head_with_read_watermark",
+      "why": "A read receipt as a head field rather than a message: the head is rewritten constantly anyway, so the watermark costs no ring slot, no prekey and no chain entry. Absent means receipts are off, which is the default — when a message was read is behavioural data and leaves the device only by opt-in."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a500181a0101020118b00918ca1820"
+      },
+      "head_hex": "a500181a0101020118b00918ca1820",
+      "kind": "log.head",
+      "name": "head_with_ring",
+      "why": "The ring size travels on the head so it can change: eight was sized for text, and reactions and receipts multiply message count. Readers take the ring from the head, never from a constant — the failure of a mismatch is reading the wrong slot and refusing a valid thread."
+    },
+    {
+      "expect": {
+        "hint": "default ring is omitted",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "head_hex": "a500181a0101020118b00918ca08",
+      "kind": "log.head",
+      "name": "head_ring_default_must_be_omitted",
+      "why": "Eight is the default and is encoded by omission — one meaning, one encoding (§18.1)."
+    },
+    {
+      "expect": {
+        "hint": "ring out of range",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "head_hex": "a500181a0101020118b00918ca01",
+      "kind": "log.head",
+      "name": "head_ring_too_small",
+      "why": "A ring needs a head and at least one slot."
+    },
+    {
+      "expect": {
+        "ok": true,
         "oldest_readable": 0,
         "subkey": 1
       },
@@ -602,6 +644,102 @@
     },
     {
       "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f94a518a01a6553f10018b20418c004"
+      },
+      "kind": "message.payment",
+      "name": "reaction_valid",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f94a518a01a6553f10018b20418c004",
+      "why": "An emoji about a message, named by sequence in the recipient's log. A message like any other — sealed, chained, sequenced — because a side-channel for reactions would be a second delivery path with its own bugs."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f94a518a01a6553f10018b20418c00418c101"
+      },
+      "kind": "message.payment",
+      "name": "reaction_to_own_message",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f94a518a01a6553f10018b20418c00418c101",
+      "why": "Reacting to one's own earlier message: the target sequence is in the sender's log, flagged by presence (§18.1 — one meaning, one encoding)."
+    },
+    {
+      "expect": {
+        "hint": "a reaction names its target",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "reaction_without_target",
+      "payment_hex": "a8001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f94a518a01a6553f10018b204",
+      "why": "An emoji about nothing is a text message wearing the wrong kind."
+    },
+    {
+      "expect": {
+        "hint": "reaction body too long",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "reaction_body_too_long",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f71787878787878787878787878787878787818a01a6553f10018b20418c004",
+      "why": "The body is the emoji. Sixteen characters holds any emoji sequence; a paragraph is a message and should be one."
+    },
+    {
+      "expect": {
+        "hint": "reaction carries no money",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "reaction_with_amount",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f94a518a01a6553f10018b20418b30118c004",
+      "why": "A reaction carries no money: an amount on an emoji is a payment nothing will match."
+    },
+    {
+      "expect": {
+        "hint": "only a reaction targets",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "target_on_a_text",
+      "payment_hex": "a8001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018c001",
+      "why": "Only a reaction targets another message."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "ae001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f93b718a01a6553f10018c2785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118c35820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18c45818bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18c51a00030d4018c65820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18c76a696d6167652f6a70656718c8676361742e6a7067"
+      },
+      "kind": "message.payment",
+      "name": "attachment_valid",
+      "payment_hex": "ae001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f93b718a01a6553f10018c2785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118c35820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18c45818bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18c51a00030d4018c65820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18c76a696d6167652f6a70656718c8676361742e6a7067",
+      "why": "A picture by reference: the bytes live in their own record as XChaCha-sealed chunks, and the key travels here, inside the sealed message — so the record on the network is noise to everyone but the thread."
+    },
+    {
+      "expect": {
+        "hint": "attachment over bound",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "attachment_too_large",
+      "payment_hex": "ae001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f93b718a01a6553f10018c2785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118c35820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18c45818bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18c51a001e848018c65820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18c76a696d6167652f6a70656718c8676361742e6a7067",
+      "why": "One record is the unit: 32 chunks of 32 KiB is Veilid's measured 1 MiB cap, and a larger file is a different design, not a larger number."
+    },
+    {
+      "expect": {
+        "hint": "only text carries an attachment",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "attachment_on_a_request",
+      "payment_hex": "b0001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f93b718a01a6553f10018b20118b30118c2785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118c35820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18c45818bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18c51a00030d4018c65820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18c76a696d6167652f6a70656718c8676361742e6a7067",
+      "why": "Attachments ride ordinary messages. A bill with a file in it is two features fused at their least-tested corner."
+    },
+    {
+      "expect": {
         "hint": "only a notice or receipt carries a txid",
         "ok": false,
         "reject": "MALFORMED"
@@ -610,6 +748,17 @@
       "name": "request_with_txid",
       "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20118b31b00000004e3b2920018b458207777777777777777777777777777777777777777777777777777777777777777",
       "why": "A notice points at the transaction it made and a receipt at the one it acknowledges. A request pointing at either is claiming the payment it is simultaneously asking for."
+    },
+    {
+      "expect": {
+        "hint": "attachment fields travel together",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "attachment_partial",
+      "payment_hex": "ad001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f93b718a01a6553f10018c2785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118c35820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18c45818bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18c51a00030d4018c76a696d6167652f6a70656718c8676361742e6a7067",
+      "why": "All or nothing: every subset of {record, key, nonce, length, hash, mime} is a trap — fetchable but not decryptable, or decryptable but not verifiable."
     }
   ],
   "category": "contact"

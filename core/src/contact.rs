@@ -422,6 +422,24 @@ pub struct LogHead {
     /// read could never be replenished: the pair would stay on the signed
     /// prekey permanently, with forward secrecy quietly gone for good.
     pub prekey_bundle: Option<Vec<u8>>,
+    /// How far into the *peer's* log this publisher has displayed (§16.16):
+    /// "I have shown your messages below this sequence to my user."
+    ///
+    /// On the head rather than in a message, deliberately: the head is
+    /// rewritten constantly anyway, so a read watermark costs no ring slot,
+    /// no prekey, and no chain entry — a receipt as a message would spend all
+    /// three per glance. Absent means the publisher does not send read
+    /// receipts, and §16.16 makes that the default: when a message is read is
+    /// behavioural data, and it leaves the device only by explicit opt-in.
+    pub read_up_to: Option<u64>,
+    /// The ring's subkey count, head included (§16.12).
+    ///
+    /// Carried so it can *change*: the original eight was sized for text, and
+    /// reactions and receipts multiply message count. Readers MUST take the
+    /// ring from the head rather than assuming a constant — the failure of a
+    /// mismatch is reading the wrong slot and refusing a valid thread. Absent
+    /// means eight, the size every log had before this field existed.
+    pub ring: Option<u32>,
 }
 
 impl LogHead {
@@ -433,6 +451,12 @@ impl LogHead {
         m.insert(f::HEAD_NEXT, Value::Uint(self.next_seq));
         if let Some(b) = &self.prekey_bundle {
             m.insert(f::HEAD_BUNDLE, Value::Bytes(b.clone()));
+        }
+        if let Some(r) = self.read_up_to {
+            m.insert(f::HEAD_READ, Value::Uint(r));
+        }
+        if let Some(r) = self.ring {
+            m.insert(f::HEAD_RING, Value::Uint(r as u64));
         }
         Value::Map(m)
     }
@@ -450,6 +474,25 @@ impl LogHead {
             suite: r.uint(f::SUITE)? as u8,
             next_seq: r.uint(f::HEAD_NEXT)?,
             prekey_bundle: r.opt_bytes(f::HEAD_BUNDLE, None)?,
+            read_up_to: r.opt_uint(f::HEAD_READ)?,
+            ring: match r.opt_uint(f::HEAD_RING)? {
+                None => None,
+                // Eight is the default and MUST be encoded by omission (§18.1),
+                // and a ring needs a head plus at least one slot.
+                Some(8) => {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        "eight is the default ring and is encoded by omitting the field",
+                    ))
+                }
+                Some(v) if !(2..=1024).contains(&v) => {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        "a ring is 2..=1024 subkeys",
+                    ))
+                }
+                Some(v) => Some(v as u32),
+            },
         };
         r.finish()?;
         Ok(out)
@@ -506,6 +549,12 @@ pub enum MessageKind {
     /// "I sent you this much", with a transaction to look for. Advisory: the
     /// recipient verifies by finding the output, never by believing the note.
     PaymentSent = 2,
+    /// An emoji on an existing message (§16.14): "this, about that one".
+    ///
+    /// A message like any other — sealed, chained, sequenced — because a
+    /// side-channel for reactions would be a second delivery path with its own
+    /// bugs. The body carries the emoji; the target is named by sequence.
+    Reaction = 4,
     /// "Here is what you paid me for" — issued by the party who *received* the
     /// money.
     ///
@@ -528,6 +577,7 @@ impl MessageKind {
             1 => MessageKind::PaymentRequest,
             2 => MessageKind::PaymentSent,
             3 => MessageKind::Receipt,
+            4 => MessageKind::Reaction,
             _ => return None,
         })
     }
@@ -623,7 +673,46 @@ pub struct Message {
     pub items: Vec<LineItem>,
     /// Tax, if any, on top of the items. Only meaningful alongside them.
     pub tax_pxmr: Option<u64>,
+    /// For a `Reaction`: the sequence of the message reacted to (§16.14).
+    /// Refers to the **recipient's** outbox unless [`Self::re_own`].
+    pub re_seq: Option<u64>,
+    /// Present when the reaction targets the *sender's own* earlier message.
+    pub re_own: bool,
+    /// A file or picture, by reference (§16.15).
+    ///
+    /// The bytes live in their own DHT record — up to 32 chunks of 32 KiB,
+    /// Veilid's measured per-subkey and per-record caps — encrypted under a
+    /// key that travels *here*, inside the sealed message, so the record on
+    /// the network is noise to everyone but the thread. The message stays
+    /// small; the ring stays a ring.
+    pub attachment: Option<Attachment>,
 }
+
+/// A sealed blob parked in a DHT record (§16.15).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Attachment {
+    /// The record holding the ciphertext chunks, subkey 0 upward.
+    pub record_key: String,
+    /// XChaCha20-Poly1305 key, one per attachment, never reused.
+    pub key: [u8; 32],
+    pub nonce: [u8; 24],
+    /// Plaintext length, so a fetcher can size and bound before decrypting.
+    pub len: u64,
+    /// SHA-256 of the ciphertext: fetch, hash, *then* decrypt — bytes from
+    /// the network never reach the AEAD without matching the hash the sealed
+    /// message promised.
+    pub ct_hash: [u8; 32],
+    /// What the bytes are, so the receiver knows what decoder they feed.
+    pub mime: String,
+    /// A filename, when the sender had one worth keeping.
+    pub name: Option<String>,
+}
+
+/// An attachment may not out-size its record: 32 chunks of 32 KiB is Veilid's
+/// 1 MiB record cap, and the AEAD tag rides inside it.
+pub const MAX_ATTACHMENT_BYTES: u64 = 1_048_576 - 64;
+pub const MAX_MIME_CHARS: usize = 64;
+pub const MAX_FILENAME_CHARS: usize = 96;
 
 impl Message {
     pub fn to_value(&self) -> Value {
@@ -655,6 +744,23 @@ impl Message {
         }
         if let Some(t) = self.tax_pxmr {
             m.insert(f::MSG_TAX, Value::Uint(t));
+        }
+        if let Some(r) = self.re_seq {
+            m.insert(f::MSG_RE_SEQ, Value::Uint(r));
+        }
+        if self.re_own {
+            m.insert(f::MSG_RE_OWN, Value::Uint(1));
+        }
+        if let Some(a) = &self.attachment {
+            m.insert(f::MSG_ATT_RECORD, Value::Text(a.record_key.clone()));
+            m.insert(f::MSG_ATT_KEY, Value::Bytes(a.key.to_vec()));
+            m.insert(f::MSG_ATT_NONCE, Value::Bytes(a.nonce.to_vec()));
+            m.insert(f::MSG_ATT_LEN, Value::Uint(a.len));
+            m.insert(f::MSG_ATT_HASH, Value::Bytes(a.ct_hash.to_vec()));
+            m.insert(f::MSG_ATT_MIME, Value::Text(a.mime.clone()));
+            if let Some(n) = &a.name {
+                m.insert(f::MSG_ATT_NAME, Value::Text(n.clone()));
+            }
         }
         Value::Map(m)
     }
@@ -715,6 +821,64 @@ impl Message {
                     .collect::<Result<Vec<_>, _>>()?,
             },
             tax_pxmr: r.opt_uint(f::MSG_TAX)?,
+            re_seq: r.opt_uint(f::MSG_RE_SEQ)?,
+            re_own: match r.opt_uint(f::MSG_RE_OWN)? {
+                None => false,
+                // One meaning, one encoding: presence is the flag (§18.1).
+                Some(1) => true,
+                Some(_) => {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        "re_own is a presence flag and may only be 1",
+                    ))
+                }
+            },
+            attachment: {
+                let record_key = r.opt_text(f::MSG_ATT_RECORD, MAX_RECORD_KEY_CHARS)?;
+                let key = r.opt_bytes(f::MSG_ATT_KEY, Some(32))?;
+                let nonce = r.opt_bytes(f::MSG_ATT_NONCE, Some(24))?;
+                let len = r.opt_uint(f::MSG_ATT_LEN)?;
+                let ct_hash = r.opt_bytes(f::MSG_ATT_HASH, Some(32))?;
+                let mime = r.opt_text(f::MSG_ATT_MIME, MAX_MIME_CHARS)?;
+                let name = r.opt_text(f::MSG_ATT_NAME, MAX_FILENAME_CHARS)?;
+                match (record_key, key, nonce, len, ct_hash, mime) {
+                    (None, None, None, None, None, None) => {
+                        if name.is_some() {
+                            return Err(Reject::with_detail(
+                                RejectCode::Malformed,
+                                "a filename without an attachment names nothing",
+                            ));
+                        }
+                        None
+                    }
+                    (Some(record_key), Some(key), Some(nonce), Some(len), Some(ct_hash), Some(mime)) => {
+                        // All or nothing: a partial attachment is a reference
+                        // that can be fetched but not decrypted, or decrypted
+                        // but not verified — every subset is a trap.
+                        if len == 0 || len > MAX_ATTACHMENT_BYTES {
+                            return Err(Reject::with_detail(
+                                RejectCode::Malformed,
+                                format!("an attachment is 1..={MAX_ATTACHMENT_BYTES} bytes"),
+                            ));
+                        }
+                        Some(Attachment {
+                            record_key,
+                            key: key.try_into().unwrap(),
+                            nonce: nonce.try_into().unwrap(),
+                            len,
+                            ct_hash: ct_hash.try_into().unwrap(),
+                            mime,
+                            name,
+                        })
+                    }
+                    _ => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "an attachment carries record, key, nonce, length, hash and mime together",
+                        ))
+                    }
+                }
+            },
         };
         r.finish()?;
         // A payment with no amount is a payment screen with a blank on it, and
@@ -770,6 +934,40 @@ impl Message {
             return Err(Reject::with_detail(
                 RejectCode::Malformed,
                 "tax needs items to be tax on",
+            ));
+        }
+        // §16.14: a reaction is an emoji about a message, and nothing else.
+        if out.kind == MessageKind::Reaction {
+            if out.re_seq.is_none() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a reaction names the message it is about",
+                ));
+            }
+            if out.body.chars().count() > 16 {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a reaction's body is the emoji, not a message",
+                ));
+            }
+            if out.amount_pxmr.is_some() || out.attachment.is_some() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a reaction carries no money and no attachment",
+                ));
+            }
+        } else if out.re_seq.is_some() || out.re_own {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "only a reaction targets another message",
+            ));
+        }
+        // §16.15: attachments ride ordinary messages. A bill or a receipt with
+        // a file in it is two features fused at their least-tested corner.
+        if out.attachment.is_some() && out.kind != MessageKind::Text {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "only a text message carries an attachment",
             ));
         }
         if !out.items.is_empty() {
@@ -934,4 +1132,57 @@ pub fn thread_aad(one: &str, other: &str) -> Vec<u8> {
     let mut pair = [one, other];
     pair.sort_unstable();
     pair.join(":").into_bytes()
+}
+
+// ---------------------------------------------------------------------------
+// §16.15 — attachment sealing
+// ---------------------------------------------------------------------------
+
+/// Seal attachment bytes under a one-use key.
+///
+/// Symmetric, not HPKE: the key travels inside the already-sealed message, so
+/// the thread's forward secrecy covers it, and the record on the network is
+/// noise to everyone who was not a party. XChaCha because the nonce is random
+/// and 24 bytes makes random safe; the same construction §4.3's backup uses.
+pub fn attachment_seal(key: &[u8; 32], nonce: &[u8; 24], plaintext: &[u8]) -> Vec<u8> {
+    use chacha20poly1305::aead::{Aead, KeyInit};
+    use chacha20poly1305::{XChaCha20Poly1305, XNonce};
+    let cipher = XChaCha20Poly1305::new(key.into());
+    cipher
+        .encrypt(XNonce::from_slice(nonce), plaintext)
+        .expect("XChaCha encrypt is infallible for in-memory buffers")
+}
+
+/// Open sealed attachment bytes. The caller MUST have verified the ciphertext
+/// hash first (§16.15): bytes from the network never reach the AEAD unchecked.
+pub fn attachment_open(
+    key: &[u8; 32],
+    nonce: &[u8; 24],
+    ciphertext: &[u8],
+) -> Result<Vec<u8>, Reject> {
+    use chacha20poly1305::aead::{Aead, KeyInit};
+    use chacha20poly1305::{XChaCha20Poly1305, XNonce};
+    let cipher = XChaCha20Poly1305::new(key.into());
+    cipher
+        .decrypt(XNonce::from_slice(nonce), ciphertext)
+        .map_err(|_| Reject::with_detail(RejectCode::BadSig, "attachment did not authenticate"))
+}
+
+#[cfg(test)]
+mod attachment_tests {
+    use super::*;
+
+    #[test]
+    fn attachment_round_trips_and_tamper_fails() {
+        let key = [7u8; 32];
+        let nonce = [9u8; 24];
+        let pt = b"a small picture's worth of bytes".to_vec();
+        let ct = attachment_seal(&key, &nonce, &pt);
+        assert_eq!(attachment_open(&key, &nonce, &ct).unwrap(), pt);
+        let mut bad = ct.clone();
+        bad[0] ^= 1;
+        assert!(attachment_open(&key, &nonce, &bad).is_err());
+        let wrong = [8u8; 32];
+        assert!(attachment_open(&wrong, &nonce, &ct).is_err());
+    }
 }

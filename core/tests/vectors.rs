@@ -558,12 +558,25 @@ fn contact_vectors_pass() {
                 }
             }
             "log.head" => {
-                let h = LogHead::from_value(
-                    decode(&unhex(c["head_hex"].as_str().unwrap())).unwrap()).unwrap();
-                assert_eq!(
-                    hexs(&h.to_value().encode()),
-                    c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"
-                );
+                let got = LogHead::from_value(
+                    decode(&unhex(c["head_hex"].as_str().unwrap())).unwrap());
+                let ok = c["expect"]["ok"].as_bool().unwrap_or(true);
+                match got {
+                    Ok(h) => {
+                        assert!(ok, "{name}: decoded a head the vector refuses");
+                        assert_eq!(
+                            hexs(&h.to_value().encode()),
+                            c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                    Err(e) => {
+                        assert!(!ok, "{name}: refused a head the vector accepts: {e:?}");
+                        assert_eq!(
+                            format!("{:?}", e.code).to_uppercase(),
+                            c["expect"]["reject"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                }
             }
             "log.ring" => {
                 let seq = c["seq"].as_u64().unwrap();
