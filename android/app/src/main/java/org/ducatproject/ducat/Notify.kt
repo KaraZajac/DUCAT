@@ -38,7 +38,7 @@ object Notify {
         return mgr
     }
 
-    fun post(context: Context, title: String, body: String) {
+    fun post(context: Context, title: String, body: String, openChat: String? = null) {
         // Android 13+ gates posting behind a runtime permission; posting
         // without it throws on some builds and is silently dropped on others.
         // Either way the caller cannot fix it here, so check and skip.
@@ -49,11 +49,15 @@ object Notify {
 
         val mgr = manager(context) ?: return
         val open = PendingIntent.getActivity(
-            context, 0,
+            context, ++reqCode,
             Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                openChat?.let { putExtra("open_chat", it) }
             },
-            PendingIntent.FLAG_IMMUTABLE,
+            // The extra varies per notification; without UPDATE_CURRENT every
+            // notification reuses the first one's intent and every tap lands
+            // in the same thread.
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         val fact = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_ducat_mono)
@@ -73,8 +77,11 @@ object Notify {
         mgr.notify(nextId++, full)
     }
 
+    /** Distinct request codes so two threads' taps do not share one intent. */
+    private var reqCode = 100
+
     /** An inbound thread message, worded by what it is (§16.13's kinds). */
-    fun message(context: Context, from: String, m: StoredMessage) {
+    fun message(context: Context, from: String, personaHex: String, m: StoredMessage) {
         val what = when (m.kind) {
             1 -> "$from asks for ${xmr(m.amountPxmr)}" +
                 (m.body.takeIf { it.isNotBlank() && it != "Payment request" }
@@ -83,7 +90,7 @@ object Notify {
             3 -> "Receipt from $from — ${xmr(m.amountPxmr)}"
             else -> m.body
         }
-        post(context, from, what)
+        post(context, from, what, openChat = personaHex)
     }
 
     private fun xmr(pxmr: Long) = "${formatXmr(pxmr)} XMR"

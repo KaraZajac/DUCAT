@@ -57,11 +57,31 @@ import uniffi.ducat_mobile.protocolVersion
  * every round trip. A screen written against one and reused for the other hangs.
  */
 class MainActivity : ComponentActivity() {
+    companion object {
+        /**
+         * The thread a notification asked for. A flow rather than intent
+         * plumbing through compose: the activity may already be alive
+         * (singleTop), so onNewIntent has to reach a screen that mounted
+         * long ago, and this is the only channel both paths share.
+         */
+        val openChat = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+    }
+
+    private fun readIntent(i: android.content.Intent?) {
+        i?.getStringExtra("open_chat")?.let { openChat.value = it }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        readIntent(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // Before super, so the splash is installed for this start rather than
         // the next one.
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        readIntent(intent)
         val prefs = ThemePreference(this)
         setContent {
             // Follows the system unless the user has said otherwise (Menu).
@@ -146,6 +166,17 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
             android.content.pm.PackageManager.PERMISSION_GRANTED
         ) askNotify.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    // A notification names a thread; landing on Home instead is a small
+    // betrayal every time. Consumed here so both cold start and warm resume
+    // arrive in the same place.
+    val wanted by MainActivity.openChat.collectAsState()
+    LaunchedEffect(wanted) {
+        val hex = wanted ?: return@LaunchedEffect
+        MainActivity.openChat.value = null
+        ContactStore(context).all().firstOrNull { it.personaHex == hex }
+            ?.let { overlay = Overlay.Chat(it) }
     }
 
     // Android's back gesture is a system behaviour, not a widget: without a
@@ -299,7 +330,22 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                                 )
                             }
                             NavItem(Tab.Activity, Icons.Filled.Receipt, tab) { tab = it }
-                            NavItem(Tab.Chat, Icons.Filled.ChatBubble, tab) { tab = it }
+                            // The one number a messenger owes its bottom bar:
+                            // how many conversations are waiting.
+                            val unv by ContactStore.changes.collectAsState()
+                            val unread = remember(unv) { ContactStore(context).unreadThreads() }
+                            NavigationBarItem(
+                                selected = tab == Tab.Chat,
+                                onClick = { tab = Tab.Chat },
+                                icon = {
+                                    BadgedBox(badge = {
+                                        if (unread > 0) Badge { Text("$unread") }
+                                    }) {
+                                        Icon(Icons.Filled.ChatBubble, contentDescription = Tab.Chat.label)
+                                    }
+                                },
+                                label = { Text(Tab.Chat.label) },
+                            )
                         }
                     }
                     Surface(
@@ -348,7 +394,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             Mode.Taxi -> org.ducatproject.ducat.ui.TaxiScreen()
                             Mode.Donate -> org.ducatproject.ducat.ui.DonateScreen()
                             Mode.None -> Column(Modifier.verticalScroll(rememberScrollState())) {
-                                HomeScreen(onTopUp = { tab = Tab.Accounts })
+                                HomeScreen(
+                                    onTopUp = { tab = Tab.Accounts },
+                                    onSeeActivity = { tab = Tab.Activity },
+                                )
                             }
                         }
                     }
@@ -362,7 +411,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
 }
 
 @Composable
-private fun HomeScreen(onTopUp: () -> Unit) {
+private fun HomeScreen(onTopUp: () -> Unit, onSeeActivity: () -> Unit) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val b = remember(version) { Wallet.balances(context) }
@@ -387,6 +436,59 @@ private fun HomeScreen(onTopUp: () -> Unit) {
         onTopUp = onTopUp,
         sync = b,
     )
+
+    // The last few movements, right under the number they explain — the shape
+    // every payments app the user knows leads with. Three rows, then the tab.
+    val recent = remember(version) { Ledger.build(context).take(3) }
+    if (recent.isNotEmpty()) {
+        Spacer(Modifier.height(16.dp))
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                "Recent",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.weight(1f))
+            TextButton(onClick = onSeeActivity) { Text("See all") }
+        }
+        recent.forEach { e ->
+            val sent = e.direction == Ledger.Direction.Sent
+            val shown = Amounts.show(context, e.amountPxmr)
+            Row(
+                Modifier.fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    if (sent) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
+                    null,
+                    Modifier.size(18.dp),
+                    tint = if (sent) MaterialTheme.ducat.changePending
+                    else MaterialTheme.ducat.settled,
+                )
+                Spacer(Modifier.width(10.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        e.counterparty ?: if (sent) "Sent" else "Received",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        org.ducatproject.ducat.ui.shortWhen(e.timestamp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
+                Text(
+                    "${if (sent) "−" else "+"}${shown.primary}",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+    }
 }
 
 /** One bar slot, so the centre action can sit among them rather than over them. */

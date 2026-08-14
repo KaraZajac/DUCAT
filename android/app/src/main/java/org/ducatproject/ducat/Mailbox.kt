@@ -513,7 +513,7 @@ object Mailbox {
             // The one funnel every arrival passes through, so the notification
             // cannot be forgotten by a new screen: if it was stored, it was
             // announced.
-            Notify.message(context, c.displayName(), arrived)
+            Notify.message(context, c.displayName(), c.personaHex, arrived)
             store.append(c.personaHex, arrived)
             // A request carries a fresher address than anything stored (§16.12).
             opened.payto?.let { store.setTheirAddress(c.personaHex, it) }

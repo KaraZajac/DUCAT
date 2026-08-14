@@ -203,6 +203,22 @@ class ContactStore(context: Context) {
         prefs.edit().putBoolean("read_receipts", v).apply(); bump()
     }
 
+    /**
+     * The last inbound sequence this user has *seen* — locally, for the
+     * unread dot and the tab badge. Not §16.16's watermark: this never leaves
+     * the device, so it needs no opt-in.
+     */
+    fun chatSeen(personaHex: String): Long = prefs.getLong("seen_$personaHex", 0L)
+
+    fun setChatSeen(personaHex: String, v: Long) {
+        if (v <= chatSeen(personaHex)) return
+        prefs.edit().putLong("seen_$personaHex", v).apply()
+        bump()
+    }
+
+    /** Conversations holding messages this user has not looked at. */
+    fun unreadThreads(): Int = all().count { it.chatVisible && it.inSeq > chatSeen(it.personaHex) }
+
     fun setTheirReadUpTo(personaHex: String, v: Long) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
         if (c.theirReadUpTo == v) return

@@ -98,6 +98,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     LaunchedEffect(version) {
         messages = store.thread(c.personaHex)
         store.all().firstOrNull { it.personaHex == c.personaHex }?.let { c = it }
+        // Looking at the thread is what "seen" means; the dot and the badge
+        // clear the moment the eyes arrive, not when a reply goes out.
+        store.setChatSeen(c.personaHex, c.inSeq)
     }
 
     LaunchedEffect(messages.size) {

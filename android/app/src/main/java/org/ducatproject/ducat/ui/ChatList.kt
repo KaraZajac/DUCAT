@@ -19,6 +19,11 @@ import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.draw.clip
+import org.ducatproject.ducat.StoredMessage
+import org.ducatproject.ducat.formatXmr
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 
 /**
  * The chat tab: conversations, not people.
@@ -28,7 +33,7 @@ import androidx.compose.ui.draw.clip
  * person is a heavier action that belongs in Contacts, behind a confirmation
  * that says what it destroys.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -102,25 +107,53 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     val last = remember(c.personaHex, all) {
                         store.thread(c.personaHex).lastOrNull()
                     }
+                    val unread = c.inSeq > store.chatSeen(c.personaHex)
                     ListItem(
                         colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
-                        headlineContent = { Text(c.displayName()) },
+                        headlineContent = {
+                            Text(
+                                c.displayName(),
+                                fontWeight = if (unread) FontWeight.Bold else FontWeight.Normal,
+                            )
+                        },
                         supportingContent = {
                             Text(
-                                last?.let { (if (it.outgoing) "You: " else "") + it.body }
+                                last?.let { (if (it.outgoing) "You: " else "") + previewOf(it) }
                                     ?: "No messages yet",
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 style = MaterialTheme.typography.bodySmall,
+                                fontWeight = if (unread) FontWeight.SemiBold else FontWeight.Normal,
                             )
                         },
                         leadingContent = { Avatar(c.displayName(), c.avatar) },
                         trailingContent = {
-                            IconButton(onClick = { confirm = c }) {
-                                Icon(Icons.Filled.DeleteOutline, "Delete conversation")
+                            Column(horizontalAlignment = Alignment.End) {
+                                last?.let {
+                                    Text(
+                                        shortWhen(it.timestamp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (unread) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.outline,
+                                    )
+                                }
+                                if (unread) {
+                                    Spacer(Modifier.height(4.dp))
+                                    Box(
+                                        Modifier.size(9.dp).background(
+                                            MaterialTheme.colorScheme.primary, CircleShape,
+                                        )
+                                    )
+                                }
                             }
                         },
-                        modifier = Modifier.clickable { onOpenChat(c) },
+                        // Delete moved to long-press: a trash can on every row
+                        // is one mis-tap from losing a thread, and the dialog
+                        // it opened was the only thing between.
+                        modifier = Modifier.combinedClickable(
+                            onClick = { onOpenChat(c) },
+                            onLongClick = { confirm = c },
+                        ),
                     )
                 }
             }
@@ -234,5 +267,31 @@ internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
                 fontWeight = FontWeight.Bold,
             )
         }
+    }
+}
+
+
+/** What one message looks like from a list away (§16.13's kinds included). */
+internal fun previewOf(m: StoredMessage): String = when {
+    m.kind == 1 -> "💸 Requested ${formatXmr(m.amountPxmr)} XMR"
+    m.kind == 2 -> "💸 Sent ${formatXmr(m.amountPxmr)} XMR"
+    m.kind == 3 -> "🧾 Receipt — ${formatXmr(m.amountPxmr)} XMR"
+    m.kind == 4 -> "Reacted ${m.body}"
+    m.attHash != null -> "📷 Photo"
+    else -> m.body
+}
+
+/** Now, minutes, hours, weekday, then a date — the resolution a list needs. */
+internal fun shortWhen(epochSecs: Long): String {
+    val now = System.currentTimeMillis() / 1000
+    val d = now - epochSecs
+    return when {
+        d < 60 -> "now"
+        d < 3600 -> "${d / 60}m"
+        d < 86_400 -> "${d / 3600}h"
+        d < 7 * 86_400 -> java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault())
+            .format(java.util.Date(epochSecs * 1000))
+        else -> java.text.SimpleDateFormat("d MMM", java.util.Locale.getDefault())
+            .format(java.util.Date(epochSecs * 1000))
     }
 }
