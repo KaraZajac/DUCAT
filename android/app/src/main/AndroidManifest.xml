@@ -20,6 +20,16 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
+    <!-- Voice memos: hold the mic icon in a chat. Asked for on first use. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+
+    <!-- One deliberate "where I am" message. Never a stream, never in the
+         background — the permission is requested when the tray button is
+         tapped and the fix is taken once. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <!-- The node has to keep running when the app is not on screen: killing the
          process destroys every private route, and a peer nobody can reach is
          not a peer. -->

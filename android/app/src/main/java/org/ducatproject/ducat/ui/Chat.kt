@@ -48,6 +48,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.InsertDriveFile
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.Color
 
 /**
  * One conversation.
@@ -180,61 +190,247 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         }
                     }
 
+                    // One door for every attachment-ish action: the + opens a
+                    // tray panel, picking collapses it, and the next feature
+                    // costs a tray slot instead of composer width. Signal's
+                    // grammar on purpose: camera and mic live inside the field
+                    // while it is empty, typing swaps the + for send.
+                    var trayOpen by remember { mutableStateOf(false) }
+                    var contactPick by remember { mutableStateOf(false) }
+                    var recording by remember { mutableStateOf(false) }
+                    var recSecs by remember { mutableStateOf(0) }
+                    val recorder = remember { VoiceRecorder(context) }
+                    LaunchedEffect(recording) {
+                        recSecs = 0
+                        while (recording) { kotlinx.coroutines.delay(1000); recSecs++ }
+                    }
+
+                    val afterSend: (Result<*>, String) -> Unit = { r, what ->
+                        r.onSuccess { messages = store.thread(c.personaHex) }
+                            .onFailure {
+                                error = it.message ?: "could not send the $what"
+                                DucatLog.w("Chat", "$what: ${it.message}")
+                            }
+                        sending = false
+                    }
+                    // A picture (§16.15): resized, sealed under a fresh key,
+                    // parked in its own record, referenced from the message.
+                    // The record on the network is noise to everyone but this
+                    // thread.
+                    val pickImage = androidx.activity.compose.rememberLauncherForActivityResult(
+                        androidx.activity.result.contract.ActivityResultContracts.GetContent()
+                    ) { uri ->
+                        if (uri != null) {
+                            sending = true
+                            scope.launch(Dispatchers.IO) {
+                                afterSend(runCatching { sendPicture(context, c, mine, uri) }, "picture")
+                            }
+                        }
+                    }
+                    val pickFile = androidx.activity.compose.rememberLauncherForActivityResult(
+                        androidx.activity.result.contract.ActivityResultContracts.GetContent()
+                    ) { uri ->
+                        if (uri != null) {
+                            sending = true
+                            scope.launch(Dispatchers.IO) {
+                                afterSend(runCatching { sendFile(context, c, mine, uri) }, "file")
+                            }
+                        }
+                    }
+                    // The camera hands its full frame to the same resize-seal
+                    // path a gallery pick takes; the staging file lives in
+                    // cache and is overwritten by the next shot.
+                    var cameraUri by remember {
+                        mutableStateOf<android.net.Uri?>(null)
+                    }
+                    val takePhoto = androidx.activity.compose.rememberLauncherForActivityResult(
+                        androidx.activity.result.contract.ActivityResultContracts.TakePicture()
+                    ) { ok ->
+                        val uri = cameraUri
+                        if (ok && uri != null) {
+                            sending = true
+                            scope.launch(Dispatchers.IO) {
+                                afterSend(runCatching { sendPicture(context, c, mine, uri) }, "picture")
+                            }
+                        }
+                    }
+                    val launchCamera = {
+                        val dir = java.io.File(context.cacheDir, "camera").apply { mkdirs() }
+                        val uri = androidx.core.content.FileProvider.getUriForFile(
+                            context, context.packageName + ".backups",
+                            java.io.File(dir, "shot.jpg"),
+                        )
+                        cameraUri = uri
+                        takePhoto.launch(uri)
+                    }
+                    // Declaring CAMERA in the manifest (the QR scanner needs
+                    // it) means even the delegate-to-camera-app intent requires
+                    // the grant — an Android quirk, not a choice.
+                    val camPerm = androidx.activity.compose.rememberLauncherForActivityResult(
+                        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+                    ) { granted -> if (granted) launchCamera() }
+                    val micPerm = androidx.activity.compose.rememberLauncherForActivityResult(
+                        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+                    ) { }
+                    val granted = { p: String ->
+                        context.checkSelfPermission(p) ==
+                            android.content.pm.PackageManager.PERMISSION_GRANTED
+                    }
+                    val sendLocation = {
+                        trayOpen = false
+                        grabLocation(context) { place ->
+                            if (place == null) {
+                                error = "could not get a location fix"
+                            } else {
+                                scope.launch(Dispatchers.IO) {
+                                    afterSend(
+                                        runCatching { Mailbox.send(context, c, place, mine) },
+                                        "location",
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
+                        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+                    ) { ok -> if (ok) sendLocation() }
+
                     Row(
                         Modifier.padding(12.dp).fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        // One door for every attachment-ish action: + opens
-                        // the tray, picking collapses it, and the next feature
-                        // costs a tray slot instead of composer width.
-                        var trayOpen by remember { mutableStateOf(false) }
-                        // A picture (§16.15): resized, sealed under a fresh
-                        // key, parked in its own record, referenced from the
-                        // message. The record on the network is noise to
-                        // everyone but this thread.
-                        val pickImage = androidx.activity.compose.rememberLauncherForActivityResult(
-                            androidx.activity.result.contract.ActivityResultContracts.GetContent()
-                        ) { uri ->
-                            if (uri != null) {
-                                sending = true
-                                scope.launch(Dispatchers.IO) {
-                                    runCatching { sendPicture(context, c, mine, uri) }
-                                        .onSuccess {
-                                            messages = store.thread(c.personaHex)
-                                        }
-                                        .onFailure {
-                                            error = it.message ?: "could not send the picture"
-                                            DucatLog.w("Chat", "picture: ${it.message}")
-                                        }
-                                    sending = false
+                        OutlinedTextField(
+                            value = draft,
+                            onValueChange = { if (it.length <= 2000) draft = it },
+                            placeholder = {
+                                Text(
+                                    if (recording) "Recording… ${recSecs}s" else "Message",
+                                    color = if (recording) MaterialTheme.colorScheme.error
+                                    else Color.Unspecified,
+                                )
+                            },
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                imeAction = androidx.compose.ui.text.input.ImeAction.Send,
+                            ),
+                            keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                                onSend = { doSend() },
+                            ),
+                            trailingIcon = {
+                                if (draft.isBlank()) Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            if (granted(android.Manifest.permission.CAMERA)) {
+                                                launchCamera()
+                                            } else {
+                                                camPerm.launch(android.Manifest.permission.CAMERA)
+                                            }
+                                        },
+                                        enabled = c.theirBundle != null && !sending,
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.PhotoCamera, "Take a picture",
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                    // Hold to record, release to send — the
+                                    // Signal gesture. Too short to be speech is
+                                    // discarded rather than sent, so a stray
+                                    // brush of the icon costs nothing.
+                                    Box(
+                                        Modifier
+                                            .size(44.dp)
+                                            .pointerInput(c.theirBundle != null) {
+                                                if (c.theirBundle == null) return@pointerInput
+                                                detectTapGestures(onPress = {
+                                                    if (!granted(android.Manifest.permission.RECORD_AUDIO)) {
+                                                        micPerm.launch(
+                                                            android.Manifest.permission.RECORD_AUDIO
+                                                        )
+                                                        return@detectTapGestures
+                                                    }
+                                                    if (!recorder.start()) return@detectTapGestures
+                                                    recording = true
+                                                    tryAwaitRelease()
+                                                    recording = false
+                                                    val memo = recorder.stop()
+                                                    if (memo != null) {
+                                                        sending = true
+                                                        scope.launch(Dispatchers.IO) {
+                                                            afterSend(
+                                                                runCatching {
+                                                                    sendVoice(context, c, mine, memo)
+                                                                },
+                                                                "voice memo",
+                                                            )
+                                                        }
+                                                    }
+                                                })
+                                            },
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.Mic, "Hold to record a voice memo",
+                                            tint = if (recording) MaterialTheme.colorScheme.error
+                                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                } else {
+                                    IconButton(onClick = { trayOpen = !trayOpen }) {
+                                        Icon(
+                                            Icons.Filled.Add, "Attach",
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            maxLines = 4,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        if (draft.isBlank()) {
+                            FilledIconButton(
+                                onClick = { trayOpen = !trayOpen },
+                                enabled = c.theirBundle != null,
+                            ) {
+                                Icon(
+                                    if (trayOpen) Icons.Filled.Close else Icons.Filled.Add,
+                                    if (trayOpen) "Close" else "Attach",
+                                )
+                            }
+                        } else {
+                            FilledIconButton(
+                                onClick = doSend,
+                                enabled = !sending && c.theirBundle != null,
+                            ) {
+                                if (sending) {
+                                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                                } else {
+                                    Icon(Icons.Filled.Send, "Send")
                                 }
                             }
                         }
-                        IconButton(
-                            onClick = { trayOpen = !trayOpen },
-                            enabled = c.theirBundle != null,
+                    }
+
+                    androidx.compose.animation.AnimatedVisibility(visible = trayOpen) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            Icon(
-                                if (trayOpen) Icons.Filled.Close else Icons.Filled.Add,
-                                if (trayOpen) "Close" else "Attach",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        androidx.compose.animation.AnimatedVisibility(visible = trayOpen) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(
-                                    onClick = { trayOpen = false; pickImage.launch("image/*") },
-                                    enabled = !sending,
+                            TrayItem(Icons.Filled.Image, "Gallery", enabled = !sending) {
+                                trayOpen = false; pickImage.launch("image/*")
+                            }
+                            TrayItem(Icons.Filled.InsertDriveFile, "File", enabled = !sending) {
+                                trayOpen = false; pickFile.launch("*/*")
+                            }
+                            // The cat: the app's money button everywhere, drawn
+                            // as an Image because tinting it makes it a blob.
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                FilledTonalIconButton(
+                                    onClick = { trayOpen = false; askOpen = true },
+                                    modifier = Modifier.size(52.dp),
                                 ) {
-                                    Icon(
-                                        Icons.Filled.Image, "Send a picture",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                                IconButton(onClick = { trayOpen = false; askOpen = true }) {
-                                    // The cat: the app's money button everywhere,
-                                    // drawn as an Image because tinting it makes
-                                    // it a blob.
                                     androidx.compose.foundation.Image(
                                         androidx.compose.ui.res.painterResource(
                                             org.ducatproject.ducat.R.drawable.ducat_cat
@@ -243,32 +439,39 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                         modifier = Modifier.size(30.dp),
                                     )
                                 }
+                                Text("Money", style = MaterialTheme.typography.labelSmall)
+                            }
+                            TrayItem(Icons.Filled.Person, "Contact", enabled = !sending) {
+                                trayOpen = false; contactPick = true
+                            }
+                            TrayItem(Icons.Filled.LocationOn, "Location", enabled = !sending) {
+                                if (granted(android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                                    sendLocation()
+                                } else {
+                                    locPerm.launch(
+                                        android.Manifest.permission.ACCESS_FINE_LOCATION
+                                    )
+                                }
                             }
                         }
-                        OutlinedTextField(
-                            value = draft,
-                            onValueChange = { if (it.length <= 2000) draft = it },
-                            placeholder = { Text("Message") },
-                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                                imeAction = androidx.compose.ui.text.input.ImeAction.Send,
-                            ),
-                            keyboardActions = androidx.compose.foundation.text.KeyboardActions(
-                                onSend = { doSend() },
-                            ),
-                            modifier = Modifier.weight(1f),
-                            maxLines = 4,
+                    }
+
+                    if (contactPick) {
+                        ContactPickDialog(
+                            contacts = store.all().filter { it.personaHex != c.personaHex },
+                            onPick = { chosen ->
+                                contactPick = false
+                                scope.launch(Dispatchers.IO) {
+                                    afterSend(
+                                        runCatching {
+                                            Mailbox.send(context, c, contactCard(chosen), mine)
+                                        },
+                                        "contact",
+                                    )
+                                }
+                            },
+                            onDismiss = { contactPick = false },
                         )
-                        Spacer(Modifier.width(8.dp))
-                        FilledIconButton(
-                            onClick = doSend,
-                            enabled = !sending && draft.isNotBlank() && c.theirBundle != null,
-                        ) {
-                            if (sending) {
-                                CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                            } else {
-                                Icon(Icons.Filled.Send, "Send")
-                            }
-                        }
                     }
                     if (c.theirBundle == null) {
                         Text(
@@ -515,37 +718,52 @@ private fun Bubble(m: StoredMessage, theirReadUpTo: Long? = null, onLongPress: (
                 val att = m.attHash
                 if (att != null) {
                     val file = remember(att) { Mailbox.attachmentFile(ctx, att) }
-                    val bmp = remember(att, file.exists()) {
-                        if (file.exists()) runCatching {
-                            // Bounded decode: the protocol capped the bytes,
-                            // but the pixels are still the decoder's problem.
-                            val o = android.graphics.BitmapFactory.Options()
-                                .apply { inSampleSize = 1 }
-                            android.graphics.BitmapFactory
-                                .decodeFile(file.absolutePath, o)
-                        }.getOrNull() else null
-                    }
-                    if (bmp != null) {
-                        androidx.compose.foundation.Image(
-                            bmp.asImageBitmap(), "Picture",
-                            modifier = Modifier
-                                .widthIn(max = 240.dp)
-                                .clip(MaterialTheme.shapes.medium),
-                            contentScale = androidx.compose.ui.layout.ContentScale.Fit,
-                        )
-                    } else {
-                        Text(
-                            "📷 downloading…",
+                    val mime = m.attMime ?: "application/octet-stream"
+                    when {
+                        !file.exists() -> Text(
+                            when {
+                                mime.startsWith("image/") -> "📷 downloading…"
+                                mime.startsWith("audio/") -> "🎤 downloading…"
+                                else -> "📎 downloading…"
+                            },
                             color = fg.copy(alpha = 0.8f),
                             style = MaterialTheme.typography.bodySmall,
                         )
+                        mime.startsWith("image/") -> {
+                            val bmp = remember(att) {
+                                runCatching {
+                                    // Bounded decode: the protocol capped the
+                                    // bytes, but the pixels are still the
+                                    // decoder's problem.
+                                    val o = android.graphics.BitmapFactory.Options()
+                                        .apply { inSampleSize = 1 }
+                                    android.graphics.BitmapFactory
+                                        .decodeFile(file.absolutePath, o)
+                                }.getOrNull()
+                            }
+                            if (bmp != null) {
+                                androidx.compose.foundation.Image(
+                                    bmp.asImageBitmap(), "Picture",
+                                    modifier = Modifier
+                                        .widthIn(max = 240.dp)
+                                        .clip(MaterialTheme.shapes.medium),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                                )
+                            } else {
+                                Text("📷 (could not decode)", color = fg.copy(alpha = 0.8f))
+                            }
+                        }
+                        mime.startsWith("audio/") -> AudioBubble(file, fg)
+                        else -> FileBubble(file, m.attName ?: "file", m.attLen, mime, fg)
                     }
-                    if (m.body.isNotBlank() && m.body != "📷") {
+                    if (m.body.isNotBlank() && m.body !in setOf("📷", "🎤") &&
+                        m.body != "📎 ${m.attName}"
+                    ) {
                         Spacer(Modifier.height(4.dp))
                         Text(m.body, color = fg)
                     }
                 } else {
-                    Text(m.body, color = fg)
+                    LinkableText(m.body, fg)
                 }
             } else {
                 Column {
@@ -658,6 +876,109 @@ private fun Bubble(m: StoredMessage, theirReadUpTo: Long? = null, onLongPress: (
 }
 
 /**
+ * Body text, with any link in it made tappable.
+ *
+ * A location message is a link (a map anyone can open beats a coordinate
+ * format only this app understands), so the text bubble has to honour links
+ * or the feature reads as broken.
+ */
+@Composable
+private fun LinkableText(body: String, fg: androidx.compose.ui.graphics.Color) {
+    val context = LocalContext.current
+    val url = remember(body) {
+        Regex("https://\\S+").find(body)?.value
+    }
+    if (url == null) {
+        Text(body, color = fg)
+    } else {
+        Text(
+            body,
+            color = fg,
+            textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+            modifier = Modifier.clickable {
+                runCatching {
+                    context.startActivity(
+                        android.content.Intent(
+                            android.content.Intent.ACTION_VIEW,
+                            android.net.Uri.parse(url),
+                        )
+                    )
+                }
+            },
+        )
+    }
+}
+
+/** A voice memo: play and stop, nothing more. The bytes are already local. */
+@Composable
+private fun AudioBubble(file: java.io.File, fg: androidx.compose.ui.graphics.Color) {
+    var playing by remember { mutableStateOf(false) }
+    val player = remember { android.media.MediaPlayer() }
+    DisposableEffect(Unit) { onDispose { runCatching { player.release() } } }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = {
+            if (playing) {
+                runCatching { player.stop() }
+                playing = false
+            } else {
+                runCatching {
+                    player.reset()
+                    player.setDataSource(file.absolutePath)
+                    player.setOnCompletionListener { playing = false }
+                    player.prepare()
+                    player.start()
+                }.onSuccess { playing = true }
+            }
+        }) {
+            Icon(
+                if (playing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
+                if (playing) "Stop" else "Play voice memo",
+                tint = fg,
+            )
+        }
+        Text("Voice memo", color = fg, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+/** Any other file: name and size, tap to open with whatever handles its type. */
+@Composable
+private fun FileBubble(
+    file: java.io.File,
+    name: String,
+    len: Long,
+    mime: String,
+    fg: androidx.compose.ui.graphics.Color,
+) {
+    val context = LocalContext.current
+    Row(
+        Modifier.clickable {
+            runCatching {
+                val uri = androidx.core.content.FileProvider.getUriForFile(
+                    context, context.packageName + ".backups", file,
+                )
+                context.startActivity(
+                    android.content.Intent(android.content.Intent.ACTION_VIEW)
+                        .setDataAndType(uri, mime)
+                        .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                )
+            }.onFailure { DucatLog.w("Chat", "open file: ${it.message}") }
+        },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Filled.InsertDriveFile, null, Modifier.size(28.dp), tint = fg)
+        Spacer(Modifier.width(8.dp))
+        Column {
+            Text(name, color = fg, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                if (len >= 1024) "${len / 1024} KB" else "$len B",
+                color = fg.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
+    }
+}
+
+/**
  * The breakdown, as a bill reads on paper.
  *
  * Monospace and right-aligned amounts, because a column of numbers that does
@@ -759,7 +1080,27 @@ private fun sendPicture(
         if (b.size <= 900_000) { plain = b; break }
     }
     val bytes = plain ?: throw IllegalArgumentException("could not shrink that picture enough")
+    sendAttachmentBytes(context, c, mine, bytes, "image/jpeg", null, "📷")
+}
 
+/**
+ * Seal, park, reference, send — the §16.15 tail every attachment shares.
+ *
+ * A picture, a voice memo and a file differ only in how their bytes came to
+ * exist; from here down they are identical: sealed under a fresh key, chunked
+ * into a record of their own, referenced from a sealed message, and cached
+ * locally under the ciphertext hash so the sender's bubble never says
+ * "downloading" about its own bytes.
+ */
+private fun sendAttachmentBytes(
+    context: android.content.Context,
+    c: Contact,
+    mine: String,
+    bytes: ByteArray,
+    mime: String,
+    name: String?,
+    body: String,
+) {
     val rng = java.security.SecureRandom()
     val key = ByteArray(32).also(rng::nextBytes)
     val nonce = ByteArray(24).also(rng::nextBytes)
@@ -779,12 +1120,215 @@ private fun sendPicture(
         key = key, nonce = nonce,
         len = bytes.size.toULong(),
         ctHash = hash,
-        mime = "image/jpeg",
-        name = null,
+        mime = mime,
+        name = name,
     )
-    Mailbox.send(context, c, "📷", mine, attachment = ref)
-    // The sender's own copy, cached under the same name the fetch loop uses,
-    // so their bubble never says "downloading" about their own picture.
+    Mailbox.send(context, c, body, mine, attachment = ref)
     Mailbox.attachmentFile(context, hash.joinToString("") { "%02x".format(it) })
         .writeBytes(bytes)
+}
+
+/** The record cap: 32 subkeys of 32 KiB, minus the AEAD tag's 16 bytes. */
+private const val MAX_FILE_BYTES = 32 * 32_768 - 16
+
+/** A voice memo: the recorder's m4a, sent as an ordinary attachment. */
+private fun sendVoice(
+    context: android.content.Context,
+    c: Contact,
+    mine: String,
+    memo: java.io.File,
+) {
+    try {
+        val bytes = memo.readBytes()
+        if (bytes.isEmpty()) throw IllegalArgumentException("nothing was recorded")
+        if (bytes.size > MAX_FILE_BYTES) {
+            throw IllegalArgumentException("that memo is too long — a few minutes is the most")
+        }
+        sendAttachmentBytes(context, c, mine, bytes, "audio/mp4", "Voice memo.m4a", "🎤")
+    } finally {
+        memo.delete()
+    }
+}
+
+/** Any file the picker hands over, if it fits one record. */
+private fun sendFile(
+    context: android.content.Context,
+    c: Contact,
+    mine: String,
+    uri: android.net.Uri,
+) {
+    val resolver = context.contentResolver
+    val name = resolver.query(uri, null, null, null, null)?.use { cur ->
+        val i = cur.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+        if (i >= 0 && cur.moveToFirst()) cur.getString(i) else null
+    } ?: "file"
+    val bytes = resolver.openInputStream(uri)?.use { it.readBytes() }
+        ?: throw IllegalArgumentException("could not read that file")
+    if (bytes.size > MAX_FILE_BYTES) {
+        throw IllegalArgumentException(
+            "that file is ${bytes.size / 1024} KB — attachments go up to 1 MB"
+        )
+    }
+    val mime = resolver.getType(uri) ?: "application/octet-stream"
+    sendAttachmentBytes(context, c, mine, bytes, mime, name, "📎 $name")
+}
+
+/**
+ * Hold-to-record (§16.15's bytes, Signal's gesture).
+ *
+ * AAC in MP4 at 32 kbps: universally decodable, and a minute of speech lands
+ * near 250 KB — comfortably one record. A press too short to be speech is
+ * discarded rather than sent, so brushing the icon costs nothing.
+ */
+private class VoiceRecorder(private val context: android.content.Context) {
+    private var rec: android.media.MediaRecorder? = null
+    private var file: java.io.File? = null
+    private var startedAt = 0L
+
+    fun start(): Boolean = runCatching {
+        val f = java.io.File(context.cacheDir, "voice-memo.m4a")
+        @Suppress("DEPRECATION")
+        val r = android.media.MediaRecorder()
+        r.setAudioSource(android.media.MediaRecorder.AudioSource.MIC)
+        r.setOutputFormat(android.media.MediaRecorder.OutputFormat.MPEG_4)
+        r.setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AAC)
+        r.setAudioEncodingBitRate(32_000)
+        r.setAudioSamplingRate(44_100)
+        r.setOutputFile(f.absolutePath)
+        r.prepare()
+        r.start()
+        rec = r
+        file = f
+        startedAt = System.currentTimeMillis()
+    }.onFailure {
+        DucatLog.w("Chat", "recorder: ${it.message}")
+        rec?.release(); rec = null
+    }.isSuccess
+
+    /** Null when the take was too short or the recorder failed. */
+    fun stop(): java.io.File? {
+        val r = rec ?: return null
+        rec = null
+        val clean = runCatching { r.stop() }.isSuccess
+        r.release()
+        val f = file
+        file = null
+        val longEnough = System.currentTimeMillis() - startedAt >= 700
+        return if (clean && longEnough && f != null && f.length() > 0) {
+            f
+        } else {
+            f?.delete()
+            null
+        }
+    }
+}
+
+/**
+ * One location fix, sent as a link anyone's map can open.
+ *
+ * Explicitly one-shot: a single fix the user chose to send, never a stream —
+ * continuous location is a different feature with a different threat model,
+ * and this deliberately is not it.
+ */
+private fun grabLocation(
+    context: android.content.Context,
+    done: (String?) -> Unit,
+) {
+    val lm = context.getSystemService(android.location.LocationManager::class.java)
+        ?: return done(null)
+    val send = { loc: android.location.Location? ->
+        done(loc?.let {
+            "📍 Where I am: https://www.openstreetmap.org/?mlat=%.5f&mlon=%.5f#map=17/%.5f/%.5f"
+                .format(it.latitude, it.longitude, it.latitude, it.longitude)
+        })
+    }
+    try {
+        val provider = when {
+            lm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ->
+                android.location.LocationManager.GPS_PROVIDER
+            lm.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER) ->
+                android.location.LocationManager.NETWORK_PROVIDER
+            else -> return done(null)
+        }
+        if (android.os.Build.VERSION.SDK_INT >= 30) {
+            lm.getCurrentLocation(provider, null, context.mainExecutor) { send(it) }
+        } else {
+            send(lm.getLastKnownLocation(provider))
+        }
+    } catch (e: SecurityException) {
+        done(null)
+    }
+}
+
+/**
+ * A contact, shared as the readable claim it is (§16.2).
+ *
+ * What travels is the profile the contact *asserted* — name, persona, and any
+ * reachability they chose to publish — not a connection ticket: a card is
+ * claim-once and minting one for a third party is not this device's to do.
+ * The persona key is the durable part; everything else is introduction.
+ */
+private fun contactCard(c: Contact): String = buildString {
+    append("👤 ${c.displayName()}\n")
+    c.email?.let { append("✉ $it\n") }
+    c.phone?.let { append("☎ $it\n") }
+    c.signal?.let { append("Signal: $it\n") }
+    append("DUCAT persona: ${c.personaHex}")
+}
+
+@Composable
+private fun TrayItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        FilledTonalIconButton(
+            onClick = onClick,
+            enabled = enabled,
+            modifier = Modifier.size(52.dp),
+        ) { Icon(icon, label) }
+        Text(label, style = MaterialTheme.typography.labelSmall)
+    }
+}
+
+@Composable
+private fun ContactPickDialog(
+    contacts: List<Contact>,
+    onPick: (Contact) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Share a contact") },
+        text = {
+            if (contacts.isEmpty()) {
+                Text("Nobody else to share yet.")
+            } else {
+                Column {
+                    Text(
+                        "Sends their name and whatever they chose to publish. " +
+                            "Not a connection code — those are theirs to give.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    contacts.forEach { c ->
+                        Row(
+                            Modifier.fillMaxWidth().clickable { onPick(c) }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Avatar(c.displayName(), c.avatar)
+                            Spacer(Modifier.width(12.dp))
+                            Text(c.displayName(), style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
 }

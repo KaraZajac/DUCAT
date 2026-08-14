@@ -7,4 +7,10 @@
 -->
 <paths>
     <files-path name="backups" path="backups/" />
+    <!-- The camera app writes its full frame here before the resize-and-seal
+         path picks it up; overwritten by the next shot, never kept. -->
+    <cache-path name="camera" path="camera/" />
+    <!-- Received attachments, cached by ciphertext hash, so "open with"
+         can hand one to a viewer per-grant. -->
+    <files-path name="att" path="att/" />
 </paths>
