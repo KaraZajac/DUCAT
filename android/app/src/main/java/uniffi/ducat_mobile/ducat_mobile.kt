@@ -861,6 +861,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -913,6 +915,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_generate_prekeys(`count`: Int,`validSecs`: Long,`startId`: Int,`reuseSignedSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_generate_writer_keys(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_geohashbounds(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_geohashcenter(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1176,6 +1180,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_generate_writer_keys(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_geohashbounds(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_geohashcenter(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_geohashencode(
@@ -1360,6 +1366,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_generate_writer_keys() != 64976.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_geohashbounds() != 36152.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_geohashcenter() != 56272.toShort()) {
@@ -4983,6 +4992,16 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_generate_writer_keys(
         _status)
+}
+    )
+    }
+    
+
+    @Throws(ContactException::class) fun `geohashBounds`(`cell`: kotlin.String): List<kotlin.Long> {
+            return FfiConverterSequenceLong.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_geohashbounds(
+        FfiConverterString.lower(`cell`),_status)
 }
     )
     }

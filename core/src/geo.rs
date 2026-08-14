@@ -123,6 +123,12 @@ fn bounds(cell: &str) -> Result<(i64, i64, i64, i64), Reject> {
     Ok((lat_lo, lat_hi, lon_lo, lon_hi))
 }
 
+/// The cell's bounds, e7: (lat_lo, lat_hi, lon_lo, lon_hi). What lets a map
+/// draw the area a name covers — a driver's net, visible instead of guessed.
+pub fn geohash_bounds(cell: &str) -> Result<(i64, i64, i64, i64), Reject> {
+    bounds(cell)
+}
+
 /// The cell's centre, e7. What "distance to this cell" means.
 pub fn geohash_center(cell: &str) -> Result<(i64, i64), Reject> {
     let (lat_lo, lat_hi, lon_lo, lon_hi) = bounds(cell)?;

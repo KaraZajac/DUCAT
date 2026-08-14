@@ -406,6 +406,13 @@ fun DriveScreen() {
     var myFix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
     var notices by remember { mutableStateOf<List<SeenHail>>(emptyList()) }
     var selected by remember { mutableStateOf<SeenHail?>(null) }
+    var coverage by remember { mutableStateOf<LongArray?>(null) }
+    // The net's size is the driver's call: one cell where hails are thick,
+    // 5×5 where a fare is worth chasing across a rural county.
+    val rangePrefs = remember {
+        context.getSharedPreferences("ducat_contacts", android.content.Context.MODE_PRIVATE)
+    }
+    var range by remember { mutableStateOf(rangePrefs.getInt("drive_range", 3)) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
@@ -426,8 +433,24 @@ fun DriveScreen() {
             myFix = fix
             runCatching {
                 val home = uniffi.ducat_mobile.geohashEncode(fix.first, fix.second, 6u)
-                val cells = listOf(home) +
-                    uniffi.ducat_mobile.geohashNeighbors(home)
+                val ring1 = uniffi.ducat_mobile.geohashNeighbors(home)
+                val cells = when (range) {
+                    1 -> listOf(home)
+                    5 -> (listOf(home) + ring1 +
+                        ring1.flatMap { uniffi.ducat_mobile.geohashNeighbors(it) })
+                        .distinct()
+                    else -> listOf(home) + ring1
+                }
+                // The outer box of a contiguous block of cells is the net,
+                // drawn on the map so coverage is seen instead of guessed.
+                var latLo = Long.MAX_VALUE; var latHi = Long.MIN_VALUE
+                var lonLo = Long.MAX_VALUE; var lonHi = Long.MIN_VALUE
+                cells.forEach { c ->
+                    val b = uniffi.ducat_mobile.geohashBounds(c)
+                    latLo = minOf(latLo, b[0]); latHi = maxOf(latHi, b[1])
+                    lonLo = minOf(lonLo, b[2]); lonHi = maxOf(lonHi, b[3])
+                }
+                coverage = longArrayOf(latLo, latHi, lonLo, lonHi)
                 cell = "geo:$home"
                 watching = cells.map { "geo:$it" }
             }.onFailure { error = it.message }
@@ -527,9 +550,13 @@ fun DriveScreen() {
             ) {
                 Column(Modifier.weight(1f)) {
                     Text("On duty", style = MaterialTheme.typography.titleMedium)
+                    val n = watching?.size ?: 0
                     Text(
-                        if ((watching?.size ?: 0) > 1) "watching your area and 8 around it"
-                        else "watching ${watching?.firstOrNull() ?: ""}",
+                        when {
+                            n >= 25 -> "wide net — ~6 km across"
+                            n >= 9 -> "watching ~3.5 km across"
+                            else -> "just your area, ~1.2 km"
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                     )
@@ -540,6 +567,7 @@ fun DriveScreen() {
             }
             androidx.compose.foundation.layout.Box(Modifier.weight(1f).fillMaxWidth()) {
                 DriverMap(
+                    coverage = coverage,
                     me = myFix,
                     fares = notices.mapNotNull { n ->
                         n.originCell?.let {
@@ -610,6 +638,26 @@ fun DriveScreen() {
         Spacer(Modifier.height(16.dp))
 
         if (watching == null) {
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                listOf(1 to "Just here", 3 to "Nearby", 5 to "Wide").forEachIndexed { i, (v, label) ->
+                    SegmentedButton(
+                        selected = range == v,
+                        onClick = { range = v; rangePrefs.edit().putInt("drive_range", v).apply() },
+                        shape = SegmentedButtonDefaults.itemShape(i, 3),
+                        icon = {},
+                    ) { Text(label) }
+                }
+            }
+            Text(
+                when (range) {
+                    1 -> "~1.2 km — dense city blocks"
+                    5 -> "~6 km across — rural or slow nights"
+                    else -> "~3.5 km across — the usual"
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline,
+            )
+            Spacer(Modifier.height(8.dp))
             Button(
                 onClick = { driveHere() },
                 enabled = !locating,

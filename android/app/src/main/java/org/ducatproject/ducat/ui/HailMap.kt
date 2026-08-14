@@ -100,6 +100,9 @@ fun DriverMap(
     me: Pair<Long, Long>?,
     fares: List<Pair<Pair<Long, Long>, String>>,
     onFareTap: (Int) -> Unit,
+    /** The watched area's outer bounds (latLo, latHi, lonLo, lonHi, e7) —
+     *  the driver's net, drawn instead of guessed. */
+    coverage: LongArray? = null,
     modifier: Modifier = Modifier,
 ) {
     AndroidView(
@@ -123,6 +126,23 @@ fun DriverMap(
         update = { map ->
             map.overlays.clear()
             val pts = ArrayList<GeoPoint>()
+            coverage?.let { c ->
+                val (latLo, latHi, lonLo, lonHi) = listOf(c[0], c[1], c[2], c[3])
+                val box = listOf(
+                    GeoPoint(latLo / 1e7, lonLo / 1e7),
+                    GeoPoint(latLo / 1e7, lonHi / 1e7),
+                    GeoPoint(latHi / 1e7, lonHi / 1e7),
+                    GeoPoint(latHi / 1e7, lonLo / 1e7),
+                )
+                map.overlays.add(org.osmdroid.views.overlay.Polygon(map).apply {
+                    points = box + box.first()
+                    outlinePaint.strokeWidth = 4f
+                    outlinePaint.color = android.graphics.Color.argb(200, 150, 120, 255)
+                    fillPaint.color = android.graphics.Color.argb(24, 150, 120, 255)
+                })
+                // The frame includes the whole net, not just where things are.
+                pts += box
+            }
             me?.let {
                 val g = GeoPoint(it.first / 1e7, it.second / 1e7)
                 pts += g

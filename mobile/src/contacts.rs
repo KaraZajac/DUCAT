@@ -933,6 +933,12 @@ pub fn geohashCenter(cell: String) -> Result<Vec<i64>, ContactError> {
 }
 
 #[uniffi::export]
+pub fn geohashBounds(cell: String) -> Result<Vec<i64>, ContactError> {
+    let (a, b, c, d) = ducat_core::geo::geohash_bounds(&cell).map_err(refuse)?;
+    Ok(vec![a, b, c, d])
+}
+
+#[uniffi::export]
 pub fn haversineM(lat1_e7: i64, lon1_e7: i64, lat2_e7: i64, lon2_e7: i64) -> u64 {
     ducat_core::geo::haversine_m(lat1_e7, lon1_e7, lat2_e7, lon2_e7)
 }
