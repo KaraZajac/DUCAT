@@ -158,6 +158,26 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
+                    val doSend = doSend@{
+                        val body = draft.trim()
+                        if (body.isEmpty() || sending || c.theirBundle == null) return@doSend
+                        sending = true
+                        error = null
+                        scope.launch {
+                            val result = withContext(Dispatchers.IO) {
+                                runCatching { sendOne(context, c, body, mine) }
+                            }
+                            sending = false
+                            result.onSuccess { updated ->
+                                c = updated
+                                draft = ""
+                                messages = store.thread(c.personaHex)
+                            }.onFailure {
+                                error = it.message ?: "could not send"
+                            }
+                        }
+                    }
+
                     Row(
                         Modifier.padding(12.dp).fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -209,30 +229,18 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             value = draft,
                             onValueChange = { if (it.length <= 2000) draft = it },
                             placeholder = { Text("Message") },
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                imeAction = androidx.compose.ui.text.input.ImeAction.Send,
+                            ),
+                            keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                                onSend = { doSend() },
+                            ),
                             modifier = Modifier.weight(1f),
                             maxLines = 4,
                         )
                         Spacer(Modifier.width(8.dp))
                         FilledIconButton(
-                            onClick = {
-                                val body = draft.trim()
-                                if (body.isEmpty()) return@FilledIconButton
-                                sending = true
-                                error = null
-                                scope.launch {
-                                    val result = withContext(Dispatchers.IO) {
-                                        runCatching { sendOne(context, c, body, mine) }
-                                    }
-                                    sending = false
-                                    result.onSuccess { updated ->
-                                        c = updated
-                                        draft = ""
-                                        messages = store.thread(c.personaHex)
-                                    }.onFailure {
-                                        error = it.message ?: "could not send"
-                                    }
-                                }
-                            },
+                            onClick = doSend,
                             enabled = !sending && draft.isNotBlank() && c.theirBundle != null,
                         ) {
                             if (sending) {

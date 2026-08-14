@@ -30,6 +30,9 @@ import com.google.zxing.MultiFormatReader
 import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import java.util.concurrent.Executors
+import androidx.compose.material.icons.filled.FlashlightOff
+import androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.Icons
 
 /**
  * A QR scanner built on CameraX and the zxing decoder already in the app.
@@ -153,6 +156,11 @@ fun QrScannerContent(
 
 @Composable
 private fun CameraPreview(onResult: (String) -> Unit, onFailure: (String) -> Unit) {
+    // The torch, because codes get scanned where this app gets used: across a
+    // bar. A scanner that cannot light the dark is a scanner that works in
+    // demos.
+    var camera by remember { mutableStateOf<androidx.camera.core.Camera?>(null) }
+    var torch by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     // One frame is enough. Without this the callback fires repeatedly while the
@@ -163,6 +171,7 @@ private fun CameraPreview(onResult: (String) -> Unit, onFailure: (String) -> Uni
 
     DisposableEffect(Unit) { onDispose { executor.shutdown() } }
 
+    Box(Modifier.fillMaxSize()) {
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { ctx ->
@@ -191,7 +200,7 @@ private fun CameraPreview(onResult: (String) -> Unit, onFailure: (String) -> Uni
                 // last camera problem presented.
                 runCatching {
                     provider.unbindAll()
-                    provider.bindToLifecycle(
+                    camera = provider.bindToLifecycle(
                         lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis,
                     )
                 }.onFailure { e ->
@@ -203,6 +212,24 @@ private fun CameraPreview(onResult: (String) -> Unit, onFailure: (String) -> Uni
             view
         },
     )
+    }
+    // Over the preview, bottom corner — reachable with the thumb that is
+    // already holding the phone up.
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomEnd) {
+        FilledTonalIconButton(
+            onClick = {
+                torch = !torch
+                camera?.cameraControl?.enableTorch(torch)
+            },
+            enabled = camera?.cameraInfo?.hasFlashUnit() == true,
+            modifier = Modifier.padding(20.dp),
+        ) {
+            Icon(
+                if (torch) Icons.Filled.FlashlightOff else Icons.Filled.FlashlightOn,
+                if (torch) "Torch off" else "Torch on",
+            )
+        }
+    }
 }
 
 private val reader = MultiFormatReader().apply {

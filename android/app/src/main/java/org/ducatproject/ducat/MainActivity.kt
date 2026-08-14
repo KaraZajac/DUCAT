@@ -437,6 +437,34 @@ private fun HomeScreen(onTopUp: () -> Unit, onSeeActivity: () -> Unit) {
         sync = b,
     )
 
+    // The nudge that keeps §4.3 true: the bundle carries the relationships
+    // now, so every contact made after the last export is one a restore will
+    // not bring back — and nobody re-exports unprompted.
+    val stale = remember(version) { ContactStore(context).backupStale() }
+    if (stale) {
+        Spacer(Modifier.height(12.dp))
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            Row(
+                Modifier.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("Back up", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        "You have contacts your last backup does not. A restore " +
+                            "would bring back the money and not the people.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+
     // The last few movements, right under the number they explain — the shape
     // every payments app the user knows leads with. Three rows, then the tab.
     val recent = remember(version) { Ledger.build(context).take(3) }

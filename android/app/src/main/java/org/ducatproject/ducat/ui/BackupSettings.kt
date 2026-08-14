@@ -100,6 +100,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                             val f = File(dir, "ducat-backup.ducatbak")
                             f.writeBytes(bytes)
                             share(context, f)
+                            ContactStore(context).markBackupExported()
                             "Exported ${bytes.size} bytes"
                         } catch (t: Throwable) {
                             t.message ?: "export failed"

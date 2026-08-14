@@ -216,6 +216,24 @@ class ContactStore(context: Context) {
         bump()
     }
 
+    /**
+     * When a backup was last exported, and whether the things it protects
+     * have changed since (§4.3). Contacts and prekeys are the churn that
+     * matters: money keys never change, but every new relationship is one a
+     * stale bundle will not restore.
+     */
+    fun markBackupExported() {
+        prefs.edit().putLong("backup_at", System.currentTimeMillis())
+            .putInt("backup_contacts", all().size).apply()
+        bump()
+    }
+
+    fun backupStale(): Boolean {
+        val at = prefs.getLong("backup_at", 0L)
+        if (at == 0L) return all().isNotEmpty()
+        return all().size > prefs.getInt("backup_contacts", 0)
+    }
+
     /** Conversations holding messages this user has not looked at. */
     fun unreadThreads(): Int = all().count { it.chatVisible && it.inSeq > chatSeen(it.personaHex) }
 
