@@ -46,6 +46,8 @@ import org.ducatproject.ducat.DucatLog
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
 
 /**
  * One conversation.
@@ -182,6 +184,10 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         Modifier.padding(12.dp).fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        // One door for every attachment-ish action: + opens
+                        // the tray, picking collapses it, and the next feature
+                        // costs a tray slot instead of composer width.
+                        var trayOpen by remember { mutableStateOf(false) }
                         // A picture (§16.15): resized, sealed under a fresh
                         // key, parked in its own record, referenced from the
                         // message. The record on the network is noise to
@@ -205,25 +211,39 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             }
                         }
                         IconButton(
-                            onClick = { pickImage.launch("image/*") },
-                            enabled = c.theirBundle != null && !sending,
+                            onClick = { trayOpen = !trayOpen },
+                            enabled = c.theirBundle != null,
                         ) {
                             Icon(
-                                Icons.Filled.Image, "Send a picture",
+                                if (trayOpen) Icons.Filled.Close else Icons.Filled.Add,
+                                if (trayOpen) "Close" else "Attach",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        IconButton(onClick = { askOpen = true }, enabled = c.theirBundle != null) {
-                            // The cat, because it is the app's money button
-                            // everywhere now — the same mark as the bar's
-                            // centre. An Image: tinting it makes it a blob.
-                            androidx.compose.foundation.Image(
-                                androidx.compose.ui.res.painterResource(
-                                    org.ducatproject.ducat.R.drawable.ducat_cat
-                                ),
-                                contentDescription = "Send or ask for money",
-                                modifier = Modifier.size(30.dp),
-                            )
+                        androidx.compose.animation.AnimatedVisibility(visible = trayOpen) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(
+                                    onClick = { trayOpen = false; pickImage.launch("image/*") },
+                                    enabled = !sending,
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Image, "Send a picture",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                IconButton(onClick = { trayOpen = false; askOpen = true }) {
+                                    // The cat: the app's money button everywhere,
+                                    // drawn as an Image because tinting it makes
+                                    // it a blob.
+                                    androidx.compose.foundation.Image(
+                                        androidx.compose.ui.res.painterResource(
+                                            org.ducatproject.ducat.R.drawable.ducat_cat
+                                        ),
+                                        contentDescription = "Send or ask for money",
+                                        modifier = Modifier.size(30.dp),
+                                    )
+                                }
+                            }
                         }
                         OutlinedTextField(
                             value = draft,
