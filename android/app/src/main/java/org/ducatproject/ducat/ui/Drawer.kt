@@ -333,12 +333,28 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
     var profileOf by remember { mutableStateOf<Contact?>(null) }
 
     profileOf?.let { p ->
-        ContactProfile(
-            contact = p,
-            onBack = { profileOf = null; contacts = store.all() },
-            onOpenChat = { profileOf = null; onOpenChat(it) },
-        )
-        return
+        // A full-screen overlay, not a nested screen: nesting put a second
+        // top bar under the section's own and left the system back button
+        // wired to neither — it exited to Home past both arrows. A dialog
+        // carries exactly one header, covers the bar beneath instead of
+        // stacking, and hands its dismissal to the back button for free.
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { profileOf = null; contacts = store.all() },
+            properties = androidx.compose.ui.window.DialogProperties(
+                usePlatformDefaultWidth = false,
+            ),
+        ) {
+            Surface(
+                Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background,
+            ) {
+                ContactProfile(
+                    contact = p,
+                    onBack = { profileOf = null; contacts = store.all() },
+                    onOpenChat = { profileOf = null; onOpenChat(it) },
+                )
+            }
+        }
     }
 
     if (contacts.isEmpty()) {
