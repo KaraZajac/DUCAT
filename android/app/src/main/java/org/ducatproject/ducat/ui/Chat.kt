@@ -807,7 +807,24 @@ private fun Bubble(m: StoredMessage, theirReadUpTo: Long? = null, onLongPress: (
                         Text(m.body, color = fg)
                     }
                 } else {
-                    LinkableText(m.body, fg)
+                    // A card in a chat is usually an in-person introduction:
+                    // the third party is standing right there, and their scan
+                    // of this screen is the same scan as any other code. The
+                    // link stays tappable for when they are not.
+                    val cardUri = remember(m.body) {
+                        Regex("ducat:\\S+").find(m.body)?.value
+                    }
+                    if (cardUri != null) {
+                        Column {
+                            Box(Modifier.clip(MaterialTheme.shapes.medium)) {
+                                QrBlock(cardUri)
+                            }
+                            Spacer(Modifier.height(6.dp))
+                            LinkableText(m.body, fg)
+                        }
+                    } else {
+                        LinkableText(m.body, fg)
+                    }
                 }
             } else {
                 Column {
