@@ -697,14 +697,18 @@ fun HailSheet(
             from = f?.let { org.ducatproject.ducat.Geo.Hit("My location", it.first, it.second) }
         }
     }
+    var locating by remember { mutableStateOf(false) }
     fun useMyLocation() {
         if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
             android.content.pm.PackageManager.PERMISSION_GRANTED
-        ) grabFix(context) { f ->
-            from = f?.let { org.ducatproject.ducat.Geo.Hit("My location", it.first, it.second) }
-            if (f == null) error = "could not get a location fix"
-        }
-        else locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        ) {
+            locating = true
+            grabFix(context) { f ->
+                locating = false
+                from = f?.let { org.ducatproject.ducat.Geo.Hit("My location", it.first, it.second) }
+                if (f == null) error = "could not get a location fix"
+            }
+        } else locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
     }
     LaunchedEffect(Unit) { useMyLocation() }
 
@@ -752,6 +756,8 @@ fun HailSheet(
                         label = "Pickup",
                         chosen = from,
                         onChosen = { from = it },
+                        near = from?.let { it.latE7 to it.lonE7 },
+                        hint = if (locating) "Locating…" else null,
                         trailing = {
                             FilledTonalIconButton(onClick = { useMyLocation() }) {
                                 Icon(Icons.Filled.MyLocation, "Use my location")
@@ -763,6 +769,10 @@ fun HailSheet(
                         label = "Where to?",
                         chosen = to,
                         onChosen = { to = it },
+                        // Bias toward the pickup: a business name means the
+                        // one near you, not the one in another hemisphere.
+                        near = from?.let { it.latE7 to it.lonE7 },
+                        hint = "address or business name",
                     )
 
                     if (routing) {
@@ -887,6 +897,8 @@ private fun AddressField(
     label: String,
     chosen: org.ducatproject.ducat.Geo.Hit?,
     onChosen: (org.ducatproject.ducat.Geo.Hit?) -> Unit,
+    near: Pair<Long, Long>? = null,
+    hint: String? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
     val scope = androidx.compose.runtime.rememberCoroutineScope()
@@ -900,7 +912,7 @@ private fun AddressField(
         searching = true
         scope.launch {
             hits = withContext(Dispatchers.IO) {
-                org.ducatproject.ducat.Geo.search(query.trim())
+                org.ducatproject.ducat.Geo.search(query.trim(), near)
             }
             searching = false
         }
@@ -911,6 +923,7 @@ private fun AddressField(
             value = query,
             onValueChange = { query = it; if (chosen != null) onChosen(null) },
             label = { Text(label) },
+            placeholder = { hint?.let { Text(it) } },
             modifier = Modifier.weight(1f), singleLine = true,
             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                 imeAction = androidx.compose.ui.text.input.ImeAction.Search,

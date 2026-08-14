@@ -31,17 +31,42 @@ object Geo {
         val points: List<Pair<Long, Long>>,
     )
 
-    /** Address → candidates. Blocking; call from IO. */
-    fun search(query: String): List<Hit> {
+    /**
+     * Address or business → candidates. Blocking; call from IO.
+     *
+     * `near` biases results toward the user: "Starbucks" means nothing
+     * globally and everything locally, so a viewbox (~50 km) around the fix
+     * is sent, unbounded — prefer nearby, never refuse the airport across
+     * town. Labels lead with the POI's name when it has one, because a
+     * business is looked up by what the sign says, not by its street number.
+     */
+    fun search(query: String, near: Pair<Long, Long>? = null): List<Hit> {
         val q = URLEncoder.encode(query, "UTF-8")
-        val body = get("https://nominatim.openstreetmap.org/search?q=$q&format=jsonv2&limit=5")
-            ?: return emptyList()
+        val bias = near?.let { (la, lo) ->
+            val lat = la / 1e7; val lon = lo / 1e7
+            "&viewbox=%.4f,%.4f,%.4f,%.4f&bounded=0".format(
+                lon - 0.45, lat + 0.45, lon + 0.45, lat - 0.45,
+            )
+        } ?: ""
+        val body = get(
+            "https://nominatim.openstreetmap.org/search?q=$q&format=jsonv2&limit=6$bias"
+        ) ?: return emptyList()
         return runCatching {
             val arr = JSONArray(body)
             (0 until arr.length()).map { i ->
                 val o = arr.getJSONObject(i)
+                val name = o.optString("name")
+                val display = o.optString("display_name")
+                // "Name — street, town" beats a nine-part administrative
+                // genealogy. Three parts of context is what a person scans.
+                val context = display.split(", ")
+                    .filterNot { it == name }.take(3).joinToString(", ")
                 Hit(
-                    label = o.optString("display_name").take(80),
+                    label = when {
+                        name.isNotBlank() && context.isNotBlank() -> "$name — $context"
+                        name.isNotBlank() -> name
+                        else -> display
+                    }.take(90),
                     latE7 = (o.getString("lat").toDouble() * 1e7).toLong(),
                     lonE7 = (o.getString("lon").toDouble() * 1e7).toLong(),
                 )

@@ -39,7 +39,16 @@ fun grabFix(
             else -> return done(null)
         }
         if (android.os.Build.VERSION.SDK_INT >= 30) {
-            lm.getCurrentLocation(provider, null, context.mainExecutor) { send(it) }
+            lm.getCurrentLocation(provider, null, context.mainExecutor) { loc ->
+                // A fresh fix indoors can take a while or fail outright; the
+                // last known position is minutes old at worst and beats an
+                // empty pickup field every time.
+                send(loc
+                    ?: lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER)
+                    ?: runCatching {
+                        lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER)
+                    }.getOrNull())
+            }
         } else {
             send(lm.getLastKnownLocation(provider))
         }
