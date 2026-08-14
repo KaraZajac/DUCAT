@@ -262,7 +262,7 @@ private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
 }
 
 /** Where the sale stands, so the screen can say it in one word. */
-private enum class Sale { Waiting, Billed, Paid }
+private enum class Sale { Waiting, Billed, Seen, Paid }
 
 /**
  * The bill on screen, one code under it, and the rest happens by itself.
@@ -294,11 +294,13 @@ private fun PresentScreen(
     // paid the moment it returns, and the receipt logic lives in exactly one
     // place (TabStore.reconcile) for every vendor mode.
     val stage = when {
-        saleTabId != null -> when (remember(version, saleTabId) {
-            TabStore(context).get(saleTabId!!)?.state
-        }) {
-            "paid" -> Sale.Paid
-            else -> Sale.Billed
+        saleTabId != null -> remember(version, saleTabId) {
+            val t = TabStore(context).get(saleTabId!!)
+            when {
+                t?.state == "paid" -> Sale.Paid
+                t?.seenTx != null -> Sale.Seen
+                else -> Sale.Billed
+            }
         }
         else -> Sale.Waiting
     }
@@ -432,6 +434,23 @@ private fun PresentScreen(
                 }
                 else -> {}
             }
+            Sale.Seen -> {
+                Text(
+                    "Payment seen ✓",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.ducat.changePending,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Their payment is in the network — settling, about two " +
+                        "minutes. The receipt sends itself when it lands.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+                Spacer(Modifier.height(10.dp))
+                CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+            }
             Sale.Billed -> {
                 Text("Bill sent to ${customer?.displayName() ?: "the customer"}",
                     style = MaterialTheme.typography.titleMedium)
@@ -483,17 +502,31 @@ private fun PresentScreen(
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (stage != Sale.Paid) {
+            if (stage == Sale.Waiting || stage == Sale.Billed) {
                 OutlinedButton(
                     onClick = { abandon(); onBack() },
                     modifier = Modifier.weight(1f).height(48.dp),
                 ) { Text("Back") }
             }
             Button(
-                onClick = { if (stage != Sale.Paid) abandon(); onDone() },
+                onClick = {
+                    // Once a payment is sighted, the money is in flight and
+                    // cancelling the bill would orphan it — the way out is
+                    // letting it settle.
+                    if (stage == Sale.Waiting || stage == Sale.Billed) abandon()
+                    onDone()
+                },
                 modifier = Modifier.weight(1f).height(48.dp),
             ) {
-                Text(if (stage == Sale.Paid) "New sale" else "Cancel sale")
+                Text(
+                    when (stage) {
+                        Sale.Paid -> "New sale"
+                        Sale.Seen -> "New sale (this one settles by itself)"
+                        else -> "Cancel sale"
+                    },
+                    maxLines = 1, softWrap = false,
+                    style = MaterialTheme.typography.labelMedium,
+                )
             }
         }
         Spacer(Modifier.height(24.dp))

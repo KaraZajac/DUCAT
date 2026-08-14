@@ -36,6 +36,9 @@ data class RunningTab(
     val knownKis: List<String> = emptyList(),
     /** The output that settled it, so no other tab can claim the same one. */
     val paidKi: String? = null,
+    /** A matching transaction sighted in the mempool — §17.5's *seen*, not
+     *  settled. UX state only: the receipt waits for the chain. */
+    val seenTx: String? = null,
 ) {
     val totalPxmr: Long get() =
         if (state == "open") lines.sumOf { it.amountPxmr } + (taxPxmr ?: 0L) else settledTotal
@@ -50,6 +53,7 @@ data class RunningTab(
         })
         put("known", JSONArray(knownKis))
         put("paid_ki", paidKi ?: JSONObject.NULL)
+        put("seen_tx", seenTx ?: JSONObject.NULL)
     }
 
     companion object {
@@ -72,6 +76,7 @@ data class RunningTab(
                 (0 until a.length()).map { a.getString(it) }
             } ?: emptyList(),
             paidKi = if (o.isNull("paid_ki")) null else o.optString("paid_ki"),
+            seenTx = if (o.isNull("seen_tx")) null else o.optString("seen_tx"),
         )
     }
 }
@@ -200,6 +205,43 @@ class TabStore(private val context: Context) {
          * so — and oldest-first is the disclosed tie-break rather than a
          * hidden guess.
          */
+        /**
+         * Look for settled bills in the mempool (§17.5's *seen*).
+         *
+         * Pure UX: the customer's payment left their phone seconds ago, and a
+         * till that stares blankly for two minutes reads as broken even while
+         * being exactly right. The sighting flips the screen to "settling";
+         * the receipt and the paid state still wait for the chain, because an
+         * unconfirmed transaction is a claim, not a settlement — accepting
+         * one on sight is §8.6's bonded mode, which this is not.
+         */
+        fun poolSight(context: Context, node: String) {
+            val store = TabStore(context)
+            val waiting = store.all().filter { it.state == "settled" && it.seenTx == null }
+            if (waiting.isEmpty()) return
+            val spend = WalletStore(context).spendKeyHex() ?: return
+            val hits = runCatching {
+                uniffi.ducat_mobile.moneroScanPool(node, spend, 40u)
+            }.getOrElse { return }
+            if (hits.isEmpty()) return
+            val contacts = ContactStore(context)
+            for (tab in waiting.sortedBy { it.settledAt }) {
+                val said = contacts.thread(tab.personaHex)
+                    .filter { !it.outgoing && it.kind == 2 && it.amountPxmr >= tab.settledTotal }
+                    .map { it.amountPxmr }.toSet()
+                val hit = hits.firstOrNull {
+                    it.amountPxmr.toLong() == tab.settledTotal ||
+                        it.amountPxmr.toLong() in said
+                } ?: continue
+                store.update(tab.copy(seenTx = hit.txHashHex))
+                Notify.post(
+                    context, "Payment on its way",
+                    "${formatXmr(hit.amountPxmr.toLong())} XMR seen — settling now",
+                )
+                DucatLog.i(TAG, "pool sighting for ${tab.origin} tab: ${hit.txHashHex.take(16)}…")
+            }
+        }
+
         fun reconcile(context: Context) {
             val store = TabStore(context)
             val contacts = ContactStore(context)

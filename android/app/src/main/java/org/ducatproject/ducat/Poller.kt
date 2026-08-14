@@ -94,6 +94,12 @@ class Poller(private val context: Context) {
                 // lands when it lands and the vendor is busy (§15.11).
                 runCatching { TabStore.reconcile(context) }
                     .onFailure { DucatLog.w(TAG, "tabs: ${it.message}") }
+                // The mempool, only while a bill is out and unsighted — the
+                // scan costs a round trip per pool transaction, and a till
+                // with nothing billed has nothing to look for.
+                runCatching {
+                    NodeStore(context).lastGood()?.let { TabStore.poolSight(context, it) }
+                }.onFailure { DucatLog.w(TAG, "pool: ${it.message}") }
 
                 // Cheap: it only leaves the device when the cache has expired.
                 runCatching { Rates.refresh(context) }

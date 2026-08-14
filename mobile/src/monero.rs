@@ -620,6 +620,142 @@ pub fn monero_block_time(node_url: String, height: u64) -> Result<u64, MoneroErr
     })
 }
 
+/// A payment sighted in the mempool: real bytes, zero confirmations.
+#[derive(uniffi::Record, Clone)]
+pub struct PoolHit {
+    pub tx_hash_hex: String,
+    pub amount_pxmr: u64,
+}
+
+/// Scan the mempool for outputs to this wallet (§17.5's *seen*, not settled).
+///
+/// The library keeps `scan_transaction` private, so each pool transaction is
+/// wrapped in a **synthetic block** — a minimal miner transaction, one hash,
+/// a dummy RingCT index — and fed to the ordinary scanner, the construction
+/// §O14 recorded as viable. The dummy index poisons nothing because nothing
+/// from here is ever spent: a pool hit exists to answer "has the customer's
+/// payment left their phone", and the real output arrives through the block
+/// scanner with a real index when it is mined.
+///
+/// Bounded: the pool is listed first (hashes only), and at most `max`
+/// transactions are fetched and scanned per call.
+#[uniffi::export]
+pub fn monero_scan_pool(
+    node_url: String,
+    spend_key_hex: String,
+    max: u32,
+) -> Result<Vec<PoolHit>, MoneroError> {
+    use curve25519_dalek::constants::ED25519_BASEPOINT_TABLE;
+    use monero_daemon_rpc::prelude::*;
+    use monero_wallet::block::{Block, BlockHeader};
+    use monero_wallet::ed25519::{Point, Scalar};
+    use monero_wallet::interface::ScannableBlock;
+    use monero_wallet::transaction::{Input, NotPruned, Pruned, Timelock, Transaction, TransactionPrefix};
+    use monero_wallet::{Scanner, ViewPair};
+    use zeroize::Zeroizing;
+
+    let raw = hex_to_bytes(&spend_key_hex)
+        .ok_or_else(|| MoneroError::Failed("spend key is not hex".into()))?;
+    let spend = Scalar::read(&mut raw.as_slice())
+        .map_err(|_| MoneroError::Failed("spend key is not a valid scalar".into()))?;
+    let mut sb = Vec::new();
+    spend.write(&mut sb).map_err(|e| MoneroError::Failed(format!("scalar: {e}")))?;
+    let view = Zeroizing::new(Scalar::hash(&sb));
+    let spend_pub = Point::from(&spend.into() * ED25519_BASEPOINT_TABLE);
+
+    // The pool listing, hashes only. `get_transaction_pool` carries whole
+    // blobs in an escaping scheme not worth trusting; the ids are enough, and
+    // the transactions come back clean through the ordinary fetch.
+    let agent = ureq::AgentBuilder::new()
+        .timeout(Duration::from_secs(10))
+        .build();
+    let body = agent
+        .post(&format!("{}/get_transaction_pool", node_url.trim_end_matches('/')))
+        .call()
+        .map_err(|e| MoneroError::Failed(short_error(&e.to_string())))?
+        .into_string()
+        .map_err(|e| MoneroError::Failed(format!("pool read: {e}")))?;
+    let mut hashes: Vec<[u8; 32]> = Vec::new();
+    // Pulled by key rather than by full deserialize: the entries also carry
+    // `tx_blob` fields full of escaped binary that serde_json will choke on
+    // long before it reaches the ids.
+    for part in body.split("\"id_hash\": \"").skip(1) {
+        if let Some(h) = part.get(..64).and_then(hex_to_bytes) {
+            if h.len() == 32 {
+                let mut a = [0u8; 32];
+                a.copy_from_slice(&h);
+                hashes.push(a);
+            }
+        }
+        if hashes.len() >= max as usize {
+            break;
+        }
+    }
+    if hashes.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .map_err(|e| MoneroError::Failed(format!("runtime: {e}")))?;
+
+    rt.block_on(async {
+        let rpc = monero_daemon_rpc::MoneroDaemon::new(UreqTransport::new(node_url.clone()))
+            .await
+            .map_err(|e| MoneroError::Failed(format!("connect: {e:?}")))?;
+
+        let vp = ViewPair::new(spend_pub, view)
+            .map_err(|e| MoneroError::Failed(format!("view pair: {e:?}")))?;
+        let mut scanner = Scanner::new(vp);
+        let mut hits = Vec::new();
+
+        for hash in hashes {
+            // One at a time, tolerantly: a transaction can leave the pool
+            // between the listing and the fetch, and that is churn, not error.
+            let Ok(tx) = rpc.transaction(hash).await else { continue };
+            let tx: Transaction<NotPruned> = tx;
+
+            let miner = Transaction::<NotPruned>::V2 {
+                prefix: TransactionPrefix {
+                    additional_timelock: Timelock::None,
+                    inputs: vec![Input::Gen(1)],
+                    outputs: vec![],
+                    extra: vec![],
+                },
+                proofs: None,
+            };
+            let Some(block) = Block::new(
+                BlockHeader {
+                    hardfork_version: 16,
+                    hardfork_signal: 16,
+                    timestamp: 0,
+                    previous: [0u8; 32],
+                    nonce: 0,
+                },
+                miner,
+                vec![hash],
+            ) else {
+                continue;
+            };
+            let synthetic = ScannableBlock {
+                block,
+                transactions: vec![Transaction::<Pruned>::from(tx)],
+                output_index_for_first_ringct_output: Some(0),
+            };
+            if let Ok(found) = scanner.scan(synthetic) {
+                for o in found.not_additionally_locked() {
+                    hits.push(PoolHit {
+                        tx_hash_hex: hex_of(&hash),
+                        amount_pxmr: o.commitment().amount,
+                    });
+                }
+            }
+        }
+        Ok(hits)
+    })
+}
+
 /// Ask the daemon which of these key images are already spent.
 ///
 /// Separate from scanning because it is one request for the whole set rather

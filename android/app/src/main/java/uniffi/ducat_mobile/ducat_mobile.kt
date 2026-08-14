@@ -831,6 +831,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -901,6 +903,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_monero_rate(`currency`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_scan(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_scan_pool(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`max`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_scan_view_only(`nodeUrl`: RustBuffer.ByValue,`address`: RustBuffer.ByValue,`viewKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1134,6 +1138,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_scan(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_scan_pool(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_scan_view_only(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_send(
@@ -1297,6 +1303,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_scan() != 7265.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_scan_pool() != 4933.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_scan_view_only() != 11816.toShort()) {
@@ -2622,6 +2631,41 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
             FfiConverterOptionalString.write(value.`assertedName`, buf)
             FfiConverterOptionalString.write(value.`payto`, buf)
             FfiConverterTypeProfile.write(value.`profile`, buf)
+    }
+}
+
+
+
+/**
+ * A payment sighted in the mempool: real bytes, zero confirmations.
+ */
+data class PoolHit (
+    var `txHashHex`: kotlin.String, 
+    var `amountPxmr`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePoolHit: FfiConverterRustBuffer<PoolHit> {
+    override fun read(buf: ByteBuffer): PoolHit {
+        return PoolHit(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PoolHit) = (
+            FfiConverterString.allocationSize(value.`txHashHex`) +
+            FfiConverterULong.allocationSize(value.`amountPxmr`)
+    )
+
+    override fun write(value: PoolHit, buf: ByteBuffer) {
+            FfiConverterString.write(value.`txHashHex`, buf)
+            FfiConverterULong.write(value.`amountPxmr`, buf)
     }
 }
 
@@ -4201,6 +4245,34 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypePoolHit: FfiConverterRustBuffer<List<PoolHit>> {
+    override fun read(buf: ByteBuffer): List<PoolHit> {
+        val len = buf.getInt()
+        return List<PoolHit>(len) {
+            FfiConverterTypePoolHit.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<PoolHit>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypePoolHit.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<PoolHit>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypePoolHit.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<PrekeyEntry>> {
     override fun read(buf: ByteBuffer): List<PrekeyEntry> {
         val len = buf.getInt()
@@ -4637,6 +4709,30 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_scan(
         FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterULong.lower(`fromHeight`),FfiConverterUInt.lower(`maxBlocks`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Scan the mempool for outputs to this wallet (§17.5's *seen*, not settled).
+         *
+         * The library keeps `scan_transaction` private, so each pool transaction is
+         * wrapped in a **synthetic block** — a minimal miner transaction, one hash,
+         * a dummy RingCT index — and fed to the ordinary scanner, the construction
+         * §O14 recorded as viable. The dummy index poisons nothing because nothing
+         * from here is ever spent: a pool hit exists to answer "has the customer's
+         * payment left their phone", and the real output arrives through the block
+         * scanner with a real index when it is mined.
+         *
+         * Bounded: the pool is listed first (hashes only), and at most `max`
+         * transactions are fetched and scanned per call.
+         */
+    @Throws(MoneroException::class) fun `moneroScanPool`(`nodeUrl`: kotlin.String, `spendKeyHex`: kotlin.String, `max`: kotlin.UInt): List<PoolHit> {
+            return FfiConverterSequenceTypePoolHit.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_scan_pool(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterUInt.lower(`max`),_status)
 }
     )
     }

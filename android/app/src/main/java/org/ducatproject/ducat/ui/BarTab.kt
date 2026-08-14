@@ -174,7 +174,7 @@ private fun TabRow(t: RunningTab, onClick: () -> Unit) {
                     append(
                         when (t.state) {
                             "open" -> "${t.lines.size} item(s)"
-                            "settled" -> "billed, unpaid"
+                            "settled" -> if (t.seenTx != null) "payment seen — settling" else "billed, unpaid"
                             "paid_oob" -> "paid outside DUCAT ✓"
                             "cancelled" -> "cancelled"
                             else -> "paid ✓"
