@@ -135,17 +135,19 @@ pub async fn read(cell: &str) -> Result<(), Box<dyn std::error::Error>> {
     println!("  record   {key}  ← computed locally from the cell name");
 
     rc.open_dht_record(key.clone(), None).await?;
-    match rc.get_dht_value(key.clone(), 0, true).await? {
-        Some(v) => {
-            println!("  found    {:?}", String::from_utf8_lossy(v.data()));
-            println!("\n  \x1b[32mtwo processes met at a name\x1b[0m");
+    let mut found = 0;
+    for subkey in 0..8u32 {
+        if let Ok(Some(v)) = rc.get_dht_value(key.clone(), subkey, true).await {
+            if v.data().is_empty() { continue }
+            found += 1;
+            println!("  [{subkey}] {} B: {:?}", v.data().len(),
+                String::from_utf8_lossy(&v.data()[..v.data().len().min(60)]));
         }
-        None => {
-            println!("  \x1b[31mboard is empty\x1b[0m");
-            rc.close_dht_record(key).await?;
-            api.shutdown().await;
-            return Err("nothing posted at this cell".into());
-        }
+    }
+    if found == 0 {
+        println!("  \x1b[31mboard is empty\x1b[0m");
+    } else {
+        println!("\n  \x1b[32m{found} notice(s) on the board\x1b[0m");
     }
     rc.close_dht_record(key).await?;
     api.shutdown().await;

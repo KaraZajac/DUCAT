@@ -383,7 +383,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
     std::fs::write(
         state_path("claimant"),
         format!(
-            "{}\n{}\n{}\n{}\n",
+            "{}\n{}\n{}\n{}\n{}\n",
             theirs.outbox_key,          // the log we read
             hex::encode(&theirs.persona),
             outbox,                     // the log we write
@@ -392,6 +392,11 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
                 hex::encode(outbox_kp.value().key().bytes()),
                 hex::encode(outbox_kp.value().secret().bytes()),
             ),
+            // The chain link of the last message sent above. Without this
+            // line, `say` cannot prove its next message follows the ones the
+            // claim already wrote — observed live: the first hail's thread
+            // was stranded one command after it opened.
+            hex::encode(prev),
         ),
     )?;
     rc.close_dht_record(inbox).await?;
@@ -508,6 +513,16 @@ pub async fn say(text: &str) -> Result<(), Box<dyn std::error::Error>> {
     let sealed = SealedMessage { version: 1, suite: 1, prekey_id: chosen.id, enc, ciphertext: ct };
     append(&rc, &mine, seq, &sealed.to_value().encode()).await?;
     println!("  \x1b[35m→\x1b[0m [{seq}] {text}");
+
+    // Move the stored chain link forward, or the *next* say is the stranded
+    // one. Read-modify-write of the whole file: the first four lines are
+    // identity and do not change.
+    let st = std::fs::read_to_string(state_path("claimant"))?;
+    let kept: Vec<&str> = st.lines().take(4).collect();
+    std::fs::write(
+        state_path("claimant"),
+        format!("{}\n{}\n", kept.join("\n"), hex::encode(m.link())),
+    )?;
 
     rc.close_dht_record(theirs).await?;
     rc.close_dht_record(mine).await?;
