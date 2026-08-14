@@ -2,6 +2,7 @@ package org.ducatproject.ducat.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.viewinterop.AndroidView
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
@@ -23,13 +24,19 @@ fun RouteMap(
     modifier: Modifier = Modifier,
 ) {
     AndroidView(
-        modifier = modifier,
+        modifier = modifier.clipToBounds(),
         factory = { ctx ->
-            org.osmdroid.config.Configuration.getInstance().userAgentValue =
-                "DUCAT/0.8 (github.com/KaraZajac/DUCAT)"
+            // The full init, not just a UA: without load(), osmdroid has no
+            // cache path and quietly renders the grey grid of nothing.
+            val cfg = org.osmdroid.config.Configuration.getInstance()
+            cfg.load(ctx, ctx.getSharedPreferences("osmdroid", 0))
+            cfg.userAgentValue = "DUCAT/0.8 (github.com/KaraZajac/DUCAT)"
+            cfg.osmdroidBasePath = java.io.File(ctx.cacheDir, "osm")
+            cfg.osmdroidTileCache = java.io.File(ctx.cacheDir, "osm/tiles")
             MapView(ctx).apply {
                 setTileSource(TileSourceFactory.MAPNIK)
                 setMultiTouchControls(true)
+                clipToOutline = true
                 controller.setZoom(14.0)
             }
         },

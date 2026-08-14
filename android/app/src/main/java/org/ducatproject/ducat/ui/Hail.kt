@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.horizontalScroll
 import org.ducatproject.ducat.Amounts
 import androidx.compose.foundation.rememberScrollState
@@ -681,39 +682,48 @@ fun HailSheet(
 ) {
     val context = LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-    var from by remember { mutableStateOf<Pair<Long, Long>?>(null) }
-    var fromLabel by remember { mutableStateOf("") }
-    var toQuery by remember { mutableStateOf("") }
-    var toHits by remember { mutableStateOf<List<org.ducatproject.ducat.Geo.Hit>>(emptyList()) }
+    var from by remember { mutableStateOf<org.ducatproject.ducat.Geo.Hit?>(null) }
     var to by remember { mutableStateOf<org.ducatproject.ducat.Geo.Hit?>(null) }
     var route by remember { mutableStateOf<org.ducatproject.ducat.Geo.Route?>(null) }
+    var routing by remember { mutableStateOf(false) }
     var fareXmr by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
-    var searching by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
     val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-    ) { ok -> if (ok) grabFix(context) { from = it; fromLabel = "My location" } }
-
+    ) { ok ->
+        if (ok) grabFix(context) { f ->
+            from = f?.let { org.ducatproject.ducat.Geo.Hit("My location", it.first, it.second) }
+        }
+    }
     fun useMyLocation() {
         if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
             android.content.pm.PackageManager.PERMISSION_GRANTED
-        ) grabFix(context) { from = it; fromLabel = if (it != null) "My location" else "" }
+        ) grabFix(context) { f ->
+            from = f?.let { org.ducatproject.ducat.Geo.Hit("My location", it.first, it.second) }
+            if (f == null) error = "could not get a location fix"
+        }
         else locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
     }
     LaunchedEffect(Unit) { useMyLocation() }
 
-    // Route + fare the moment both ends exist.
+    // Addresses first; the route (and the map that draws it) only once both
+    // ends exist. The map is a preview of a decision, not a picker.
     LaunchedEffect(from, to) {
         val f = from ?: return@LaunchedEffect
         val t = to ?: return@LaunchedEffect
+        routing = true
         route = null
         val r = withContext(Dispatchers.IO) {
-            org.ducatproject.ducat.Geo.route(f.first, f.second, t.latE7, t.lonE7)
+            org.ducatproject.ducat.Geo.route(f.latE7, f.lonE7, t.latE7, t.lonE7)
         }
+        routing = false
         route = r
-        if (r != null) {
+        if (r == null) {
+            error = "no route found between those points"
+        } else {
+            error = null
             org.ducatproject.ducat.Fare.estimateExact(context, r.meters, r.seconds)
                 ?.let { (_, pxmr) -> fareXmr = formatXmr(pxmr) }
         }
@@ -724,7 +734,11 @@ fun HailSheet(
         properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(Modifier.fillMaxSize()) {
+            Column(
+                Modifier.fillMaxSize()
+                    .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                    .imePadding(),
+            ) {
                 Row(
                     Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -734,137 +748,118 @@ fun HailSheet(
                 }
 
                 Column(Modifier.padding(horizontal = 16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(
-                            value = fromLabel,
-                            onValueChange = { fromLabel = it },
-                            label = { Text("Pickup") },
-                            placeholder = { Text("tap 📍") },
-                            modifier = Modifier.weight(1f), singleLine = true,
-                            readOnly = true,
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        FilledTonalIconButton(onClick = { useMyLocation() }) {
-                            Icon(Icons.Filled.MyLocation, "Use my location")
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = toQuery,
-                        onValueChange = { toQuery = it; to = null },
-                        label = { Text("Where to?") },
-                        placeholder = { Text("address or place") },
-                        modifier = Modifier.fillMaxWidth(), singleLine = true,
-                        trailingIcon = {
-                            IconButton(
-                                onClick = {
-                                    searching = true
-                                    scope.launch {
-                                        toHits = withContext(Dispatchers.IO) {
-                                            org.ducatproject.ducat.Geo.search(toQuery.trim())
-                                        }
-                                        searching = false
-                                        if (toHits.isEmpty()) error = "no matches — try adding a city"
-                                    }
-                                },
-                                enabled = toQuery.isNotBlank() && !searching,
-                            ) {
-                                if (searching) CircularProgressIndicator(
-                                    Modifier.size(18.dp), strokeWidth = 2.dp,
-                                ) else Icon(Icons.Filled.Search, "Search")
+                    AddressField(
+                        label = "Pickup",
+                        chosen = from,
+                        onChosen = { from = it },
+                        trailing = {
+                            FilledTonalIconButton(onClick = { useMyLocation() }) {
+                                Icon(Icons.Filled.MyLocation, "Use my location")
                             }
                         },
                     )
-                    toHits.takeIf { to == null }?.forEach { h ->
-                        Text(
-                            h.label,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.fillMaxWidth()
-                                .clickable {
-                                    to = h; toHits = emptyList(); toQuery = h.label.take(40)
-                                    error = null
-                                }
-                                .padding(vertical = 8.dp, horizontal = 4.dp),
-                        )
+                    Spacer(Modifier.height(8.dp))
+                    AddressField(
+                        label = "Where to?",
+                        chosen = to,
+                        onChosen = { to = it },
+                    )
+
+                    if (routing) {
+                        Spacer(Modifier.height(16.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Finding the route…",
+                                style = MaterialTheme.typography.bodySmall)
+                        }
                     }
-                }
 
-                Spacer(Modifier.height(8.dp))
-                RouteMap(
-                    from = from,
-                    to = to?.let { it.latE7 to it.lonE7 },
-                    route = route?.points ?: emptyList(),
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                )
-
-                Column(Modifier.padding(16.dp)) {
                     route?.let { r ->
-                        val est = org.ducatproject.ducat.Fare.estimateExact(context, r.meters, r.seconds)
+                        Spacer(Modifier.height(12.dp))
+                        RouteMap(
+                            from = from?.let { it.latE7 to it.lonE7 },
+                            to = to?.let { it.latE7 to it.lonE7 },
+                            route = r.points,
+                            modifier = Modifier.fillMaxWidth().height(260.dp)
+                                .clip(MaterialTheme.shapes.large),
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        val est = org.ducatproject.ducat.Fare
+                            .estimateExact(context, r.meters, r.seconds)
                         val cur = remember { Amounts.currency(context) }
                         Text(
                             "%.1f km · ~%d min%s".format(
                                 r.meters / 1000.0, r.seconds / 60,
-                                est?.let { " · est. $cur %.2f–%.2f".format(it.first * 0.85, it.first * 1.15) } ?: "",
+                                est?.let {
+                                    " · est. $cur %.2f–%.2f"
+                                        .format(it.first * 0.85, it.first * 1.15)
+                                } ?: "",
                             ),
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Spacer(Modifier.height(8.dp))
-                    }
-                    OutlinedTextField(
-                        value = fareXmr,
-                        onValueChange = { fareXmr = it },
-                        label = { Text("Your offer (XMR)") },
-                        modifier = Modifier.fillMaxWidth(), singleLine = true,
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    Button(
-                        onClick = {
-                            busy = true; error = null
-                            val f = from!!
-                            val t = to!!
-                            val fare = fareXmr.trim().toDoubleOrNull()
-                                ?.let { (it * 1e12).toLong().toULong() }
-                            scope.launch(Dispatchers.IO) {
-                                runCatching {
-                                    val oCell = uniffi.ducat_mobile.geohashEncode(f.first, f.second, 6u)
-                                    val dCell = uniffi.ducat_mobile.geohashEncode(t.latE7, t.lonE7, 6u)
-                                    val card = Mailbox.issueCard(
-                                        context, MyProfile(context).name(),
-                                        (HAIL_TTL_SECS * 2).toULong(), purpose = "hail",
-                                    )
-                                    val bytes = uniffi.ducat_mobile.hailEncode(
-                                        uniffi.ducat_mobile.HailInfo(
-                                            card = card.uri,
-                                            dest = toQuery.take(64),
-                                            farePxmr = fare,
-                                            expiry = (System.currentTimeMillis() / 1000 +
-                                                HAIL_TTL_SECS).toULong(),
-                                            originCell = oCell,
-                                            destCell = dCell,
+                        OutlinedTextField(
+                            value = fareXmr,
+                            onValueChange = { fareXmr = it },
+                            label = { Text("Your offer (XMR)") },
+                            modifier = Modifier.fillMaxWidth(), singleLine = true,
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        Button(
+                            onClick = {
+                                busy = true; error = null
+                                val f = from!!
+                                val t = to!!
+                                val destText = t.label.take(64)
+                                val fare = fareXmr.trim().toDoubleOrNull()
+                                    ?.let { (it * 1e12).toLong().toULong() }
+                                scope.launch(Dispatchers.IO) {
+                                    runCatching {
+                                        val oCell = uniffi.ducat_mobile.geohashEncode(
+                                            f.latE7, f.lonE7, 6u)
+                                        val dCell = uniffi.ducat_mobile.geohashEncode(
+                                            t.latE7, t.lonE7, 6u)
+                                        val card = Mailbox.issueCard(
+                                            context, MyProfile(context).name(),
+                                            (HAIL_TTL_SECS * 2).toULong(), purpose = "hail",
                                         )
-                                    )
-                                    val cell = "geo:$oCell"
-                                    val sub = (0..7).random().toUInt()
-                                    uniffi.ducat_mobile.standPost(cell, sub, bytes)
-                                    Triple(cell, sub, card.inboxKey)
-                                }.onSuccess { (cell, sub, inbox) ->
-                                    withContext(Dispatchers.Main) {
-                                        onPosted(cell, sub, inbox)
-                                        onClose()
+                                        val bytes = uniffi.ducat_mobile.hailEncode(
+                                            uniffi.ducat_mobile.HailInfo(
+                                                card = card.uri,
+                                                dest = destText,
+                                                farePxmr = fare,
+                                                expiry = (System.currentTimeMillis() / 1000 +
+                                                    HAIL_TTL_SECS).toULong(),
+                                                originCell = oCell,
+                                                destCell = dCell,
+                                            )
+                                        )
+                                        val cell = "geo:$oCell"
+                                        val sub = (0..7).random().toUInt()
+                                        uniffi.ducat_mobile.standPost(cell, sub, bytes)
+                                        Triple(cell, sub, card.inboxKey)
+                                    }.onSuccess { (cell, sub, inbox) ->
+                                        withContext(Dispatchers.Main) {
+                                            onPosted(cell, sub, inbox)
+                                            onClose()
+                                        }
+                                        DucatLog.i(TAG, "hail posted at $cell subkey $sub")
+                                    }.onFailure {
+                                        error = it.message ?: "could not post the hail"
                                     }
-                                    DucatLog.i(TAG, "hail posted at $cell subkey $sub")
-                                }.onFailure {
-                                    error = it.message ?: "could not post the hail"
+                                    busy = false
                                 }
-                                busy = false
-                            }
-                        },
-                        enabled = !busy && from != null && to != null,
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                    ) {
-                        if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                        else Text("Hail 🚕")
+                            },
+                            enabled = !busy,
+                            modifier = Modifier.fillMaxWidth().height(52.dp),
+                        ) {
+                            if (busy) CircularProgressIndicator(
+                                Modifier.size(18.dp), strokeWidth = 2.dp)
+                            else Text("Hail 🚕")
+                        }
                     }
+
                     error?.let {
                         Spacer(Modifier.height(6.dp))
                         Text(it, color = MaterialTheme.colorScheme.error,
@@ -876,10 +871,69 @@ fun HailSheet(
                             "only ~1 km areas.",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
-                        modifier = Modifier.padding(top = 6.dp),
+                        modifier = Modifier.padding(vertical = 8.dp),
                     )
+                    Spacer(Modifier.height(16.dp))
                 }
             }
         }
+    }
+}
+
+/** An address box: type, search, pick a candidate. Chosen state shows the
+ *  picked label and clears on edit. */
+@Composable
+private fun AddressField(
+    label: String,
+    chosen: org.ducatproject.ducat.Geo.Hit?,
+    onChosen: (org.ducatproject.ducat.Geo.Hit?) -> Unit,
+    trailing: (@Composable () -> Unit)? = null,
+) {
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var query by remember { mutableStateOf("") }
+    var hits by remember { mutableStateOf<List<org.ducatproject.ducat.Geo.Hit>>(emptyList()) }
+    var searching by remember { mutableStateOf(false) }
+    LaunchedEffect(chosen) { if (chosen != null) { query = chosen.label.take(48); hits = emptyList() } }
+
+    fun search() {
+        if (query.isBlank()) return
+        searching = true
+        scope.launch {
+            hits = withContext(Dispatchers.IO) {
+                org.ducatproject.ducat.Geo.search(query.trim())
+            }
+            searching = false
+        }
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it; if (chosen != null) onChosen(null) },
+            label = { Text(label) },
+            modifier = Modifier.weight(1f), singleLine = true,
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                imeAction = androidx.compose.ui.text.input.ImeAction.Search,
+            ),
+            keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                onSearch = { search() },
+            ),
+            trailingIcon = {
+                IconButton(onClick = { search() }, enabled = query.isNotBlank() && !searching) {
+                    if (searching) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    else Icon(Icons.Filled.Search, "Search")
+                }
+            },
+        )
+        trailing?.let { Spacer(Modifier.width(8.dp)); it() }
+    }
+    hits.forEach { h ->
+        Text(
+            h.label,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.fillMaxWidth()
+                .clickable { onChosen(h); hits = emptyList() }
+                .padding(vertical = 8.dp, horizontal = 4.dp),
+        )
     }
 }
