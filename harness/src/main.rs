@@ -72,6 +72,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         return mailbox::bill(
             args.get(i + 1).map(|s| s.as_str()).unwrap_or(""),
             args.get(i + 2).map(|s| s.as_str()).unwrap_or(""),
+            args.get(i + 3).map(|s| s.as_str()).unwrap_or(""),
         ).await;
     }
     if let Some(i) = args.iter().position(|a| a == "--receipt") {

@@ -46,9 +46,12 @@ impl ducat_core::hpke::rand_core::TryRng for HarnessRng {
 }
 impl ducat_core::hpke::rand_core::TryCryptoRng for HarnessRng {}
 
-/// Enough subkeys for a head and seven messages. Small on purpose: a ring that
-/// wraps during a test is a ring whose wrap is tested.
-const LOG_SUBKEYS: u32 = 8;
+/// A head plus 31 slots, matching the app's ring. Eight was "small on
+/// purpose: a wrap that happens is a wrap that is tested" — and it earned its
+/// keep three times (the slot-8 landmine, the stale-tenant reads, the
+/// patience window all came from wraps). Tuition paid; now the desk stops
+/// wrapping during a coffee.
+const LOG_SUBKEYS: u32 = 32;
 // Sixteen, up from four. The app burns one per inbound message and refreshes
 // its cached copy of our bundle only from our log head — which this harness,
 // being mostly offline, rarely rewrites. Four keys was six messages of real
@@ -147,7 +150,10 @@ async fn make_log(
     let desc = rc
         .create_dht_record(CRYPTO_KIND_VLD0, DHTSchema::dflt(LOG_SUBKEYS as u16)?, Some(kp.clone()))
         .await?;
-    let head = LogHead { version: 1, suite: 1, next_seq: 0, prekey_bundle: None, read_up_to: None, ring: None };
+    let head = LogHead {
+        version: 1, suite: 1, next_seq: 0, prekey_bundle: None, read_up_to: None,
+        ring: if LOG_SUBKEYS == 8 { None } else { Some(LOG_SUBKEYS) },
+    };
     rc.set_dht_value(desc.key().clone(), 0, head.to_value().encode(), None)
         .await?;
     Ok((desc.key().clone(), kp))
@@ -163,8 +169,12 @@ async fn append(
     log: &RecordKey,
     seq: u64,
     body: &[u8],
+    // The ring of the record actually being written — never a constant. A
+    // constant is how the app put slot 8 in an 8-subkey record; the desk
+    // does not get to relearn that one.
+    ring: u32,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    rc.set_dht_value(log.clone(), subkey_for(seq, LOG_SUBKEYS), body.to_vec(), None)
+    rc.set_dht_value(log.clone(), subkey_for(seq, ring), body.to_vec(), None)
         .await?;
     // §16.12: the head carries our current bundle, so every poll a reader
     // makes is also a prekey refresh. Writing None here was why the app's
@@ -185,7 +195,8 @@ async fn append(
         next_seq: seq + 1,
         prekey_bundle: Some(bundle.to_value().encode()),
         read_up_to: None,
-        ring: None,
+        // Eight is encoded by omission (§18.1); anything else travels.
+        ring: if ring == 8 { None } else { Some(ring) },
     };
     rc.set_dht_value(log.clone(), 0, head.to_value().encode(), None)
         .await?;
@@ -400,7 +411,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
                                    &m.to_value().encode())
             .map_err(|e| format!("seal: {e:?}"))?;
         let sealed = SealedMessage { version: 1, suite: 1, prekey_id: chosen.id, enc, ciphertext: ct };
-        append(&rc, &outbox, seq as u64, &sealed.to_value().encode()).await?;
+        append(&rc, &outbox, seq as u64, &sealed.to_value().encode(), LOG_SUBKEYS).await?;
         println!("  \x1b[35m→\x1b[0m [{seq}] {text}");
     }
 
@@ -447,8 +458,9 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
 /// rule is checked by every conformant reader and a bill that does not add up
 /// is refused. `payto` rides in the request itself (§16.13's self-contained
 /// destination).
-pub async fn bill(items_arg: &str, payto: &str) -> Result<(), Box<dyn std::error::Error>> {
-    send_money_message(items_arg, Some(payto.to_string()), MessageKind::PaymentRequest, None).await
+pub async fn bill(items_arg: &str, payto: &str, body: &str) -> Result<(), Box<dyn std::error::Error>> {
+    send_money_message(items_arg, Some(payto.to_string()), MessageKind::PaymentRequest, None,
+        if body.is_empty() { "Your bill" } else { body }).await
 }
 
 /// Receipt for what actually arrived (§16.13): same shape as a bill, kind 3,
@@ -457,7 +469,8 @@ pub async fn bill(items_arg: &str, payto: &str) -> Result<(), Box<dyn std::error
 /// payer's Activity screen staple this paperwork to the chain event.
 pub async fn receipt(items_arg: &str, txid_hex: &str) -> Result<(), Box<dyn std::error::Error>> {
     send_money_message(items_arg, None, MessageKind::Receipt,
-        if txid_hex.is_empty() { None } else { Some(hex::decode(txid_hex)?) }).await
+        if txid_hex.is_empty() { None } else { Some(hex::decode(txid_hex)?) },
+        "Receipt — thank you").await
 }
 
 async fn send_money_message(
@@ -465,6 +478,7 @@ async fn send_money_message(
     payto: Option<String>,
     kind: MessageKind,
     txid: Option<Vec<u8>>,
+    body: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let items: Vec<(String, u64)> = items_arg
         .split(',')
@@ -478,7 +492,7 @@ async fn send_money_message(
         return Err("a bill needs at least one line".into());
     }
     let total: u64 = items.iter().map(|(_, a)| a).sum();
-    bill_or_say(Some((items, total, payto, kind, txid)), "").await
+    bill_or_say(Some((items, total, payto, kind, txid)), body).await
 }
 
 /// Say something in a thread that already exists.
@@ -551,6 +565,7 @@ async fn bill_or_say(
         None => return Err("our own log has no head".into()),
     };
     let seq = head.next_seq;
+    let my_ring = head.ring.unwrap_or(8);
 
     let persona = SecretKey::ed25519_from_bytes(&[0x72; 32]);
     let aad = thread_aad(
@@ -587,8 +602,7 @@ async fn bill_or_say(
         },
         Some((items, total, payto, kind, txid)) => Message {
             version: 1, suite: 1, seq, prev,
-            body: if *kind == MessageKind::Receipt { "Receipt — thank you".to_string() }
-                  else { "Your fare".to_string() },
+            body: text.to_string(),
             timestamp: std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)?
                 .as_secs(),
@@ -623,7 +637,7 @@ async fn bill_or_say(
                                &m.to_value().encode())
         .map_err(|e| format!("seal: {e:?}"))?;
     let sealed = SealedMessage { version: 1, suite: 1, prekey_id: chosen.id, enc, ciphertext: ct };
-    append(&rc, &mine, seq, &sealed.to_value().encode()).await?;
+    append(&rc, &mine, seq, &sealed.to_value().encode(), my_ring).await?;
     match &billing {
         None => println!("  \x1b[35m→\x1b[0m [{seq}] {text}"),
         Some((items, total, _, kind, _)) => {
