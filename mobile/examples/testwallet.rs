@@ -42,10 +42,16 @@ fn main() {
             .and_then(|v| v.parse().ok())
             .unwrap_or(restore);
         let mut blobs = Vec::new();
+        let mut seen = std::collections::HashSet::new();
         while from < st.height {
             let r = ducat_mobile::monero::monero_scan(NODE.into(), spend.clone(), from, 2_000)
                 .expect("scan");
             for o in &r.outputs {
+                // Windows overlap at their seams, so the same output can come
+                // back twice — and a duplicated blob goes in as two inputs,
+                // which the builder rightly refuses as a self-double-spend.
+                // (`InvalidInputs`, learned the direct way.)
+                if !seen.insert(o.key_image_hex.clone()) { continue }
                 println!("  found {} pXMR at {}", o.amount_pxmr, o.height);
                 blobs.push((o.blob.clone(), o.key_image_hex.clone(), o.amount_pxmr));
             }
