@@ -124,3 +124,19 @@ in. Stands and introductions compose: the board bootstraps strangers in
 anonymous density (airports, downtowns); introductions carry the trust
 network everywhere else. Uber needed one global machine because it had no way
 to let a bartender vouch. We do.
+
+## Postscript: the second ride (2026-08-14, afternoon)
+
+The first ride worked and left scars — eight bugs, three receipt
+attempts, placeholder holes in the thread. Every fix shipped the same
+day, the rider deleted the thread, and the loop ran again from nothing:
+hail posted at the stand, claimed in under a minute, quote sealed to a
+one-time key from the *newborn* head (the step that failed cold last
+time), acceptance, bill correct on the first send, payment with a 50%
+tip confirmed on chain at block 2185465, and a receipt — one-time key,
+full forward secrecy — rendering clean twelve minutes after the hail.
+
+Zero placeholders. Zero fallbacks. No operator anywhere in the chain.
+The second ride is the evidence that the first ride's lessons were
+real: same code path, same strangers, nothing left to apologise for in
+the thread.
