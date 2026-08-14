@@ -195,6 +195,64 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         tab = Tab.Home
     }
 
+    // A bill interrupts. When a fresh PAYMENT_REQUEST lands — taxi fare, till
+    // total, a friend's ask — it takes the screen the way an incoming call
+    // does, whatever mode the device is in. Once per bill: dismissing leaves
+    // the bubble in the chat as the paper trail, and nothing re-nags.
+    var billPrompt by remember {
+        mutableStateOf<Pair<Contact, StoredMessage>?>(null)
+    }
+    var billPay by remember { mutableStateOf<Pair<Contact, Long>?>(null) }
+    val billPrefs = remember {
+        context.getSharedPreferences("ducat_contacts", android.content.Context.MODE_PRIVATE)
+    }
+    val billV by ContactStore.changes.collectAsState()
+    LaunchedEffect(billV) {
+        if (billPrompt != null) return@LaunchedEffect
+        val store = ContactStore(context)
+        val now = System.currentTimeMillis() / 1000
+        for (c in store.all()) {
+            val m = store.thread(c.personaHex)
+                .lastOrNull { !it.outgoing && it.kind == 1 } ?: continue
+            val seen = billPrefs.getLong("billseen_${c.personaHex}", -1L)
+            // Fresh only: reinstalls and restores must not replay history as
+            // a stack of surprise take-overs.
+            if (m.seq > seen && now - m.timestamp < 300) {
+                billPrompt = c to m
+                break
+            }
+        }
+    }
+    billPrompt?.let { (c, m) ->
+        val markSeen = {
+            billPrefs.edit().putLong("billseen_${c.personaHex}", m.seq).apply()
+            billPrompt = null
+        }
+        org.ducatproject.ducat.ui.BillScreen(
+            m = m,
+            contact = c,
+            onPay = { markSeen(); billPay = c to m.amountPxmr },
+            onDecline = {
+                markSeen()
+                val mine = PersonaStore(context).personaHex()
+                kotlinx.coroutines.MainScope().launch(kotlinx.coroutines.Dispatchers.IO) {
+                    runCatching {
+                        Mailbox.send(
+                            context, c,
+                            "Declining that bill for " +
+                                "${formatXmr(m.amountPxmr)} XMR — not this time.",
+                            mine,
+                        )
+                    }
+                }
+            },
+            onClose = markSeen,
+        )
+    }
+    billPay?.let { (c, amt) ->
+        PaySheet(prefillContact = c, prefillAmountPxmr = amt) { billPay = null }
+    }
+
     // The mode owns the whole scaffold (§15.11): a till is a different app
     // from a wallet, and the drawer is the one shared door between them.
     val modeV by ContactStore.changes.collectAsState()
