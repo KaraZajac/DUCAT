@@ -143,12 +143,7 @@ fun HailCard() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            if (posted == null) {
-                Icon(
-                    if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                    null, tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+
         }
 
         val p = posted
