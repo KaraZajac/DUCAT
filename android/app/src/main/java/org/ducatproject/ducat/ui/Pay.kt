@@ -266,6 +266,9 @@ private fun AmountStep(
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var done by remember { mutableStateOf<String?>(null) }
+    // The ceremony: a completed *send* takes the screen (Ceremony.kt). A
+    // request keeps the quiet text — asking is not a crescendo.
+    var paidPxmr by remember { mutableStateOf<Long?>(null) }
     /**
      * Asking for money, or sending it.
      *
@@ -653,6 +656,13 @@ private fun AmountStep(
             Spacer(Modifier.height(12.dp))
             Text(it, color = MaterialTheme.ducat.settled)
         }
+        paidPxmr?.let { amt ->
+            PaidSplash(
+                amountPxmr = amt,
+                toName = (target as? PayTarget.ToContact)?.contact?.displayName(),
+                onDone = { paidPxmr = null; onDone() },
+            )
+        }
         error?.let {
             Spacer(Modifier.height(12.dp))
             Text(it, color = MaterialTheme.colorScheme.error,
@@ -720,10 +730,8 @@ private fun AmountStep(
                         }
                     }
                     busy = false
-                    r.onSuccess {
-                        done = "Sent · fee ${formatXmr(it.feePxmr.toLong())} XMR · " +
-                            "${it.txidHex.take(16)}…"
-                    }.onFailure { error = it.message ?: "could not send" }
+                    r.onSuccess { paidPxmr = pxmr }
+                        .onFailure { error = it.message ?: "could not send" }
                 }
             },
         )

@@ -130,6 +130,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     var settingsOpen by remember { mutableStateOf(false) }
     var askOpen by remember { mutableStateOf(false) }
     var payRequest by remember { mutableStateOf<StoredMessage?>(null) }
+    var billView by remember { mutableStateOf<StoredMessage?>(null) }
     var confirmDelete by remember { mutableStateOf<StoredMessage?>(null) }
 
     // Applied on open and whenever the thread changes, because nothing else
@@ -534,7 +535,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             }
             items(messages.filter { it.kind != 4 }) { m ->
                 Column {
-                    Bubble(m, c.theirReadUpTo, onLongPress = { confirmDelete = m }, onPay = { payRequest = it })
+                    Bubble(m, c.theirReadUpTo, onLongPress = { confirmDelete = m }, onPay = { billView = it })
                     val mine2 = reactions[Triple(m.outgoing, m.seq, true)]?.body
                     val theirs2 = reactions[Triple(m.outgoing, m.seq, false)]?.body
                     if (mine2 != null || theirs2 != null) {
@@ -563,6 +564,31 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     // Nothing to fetch: their prekeys arrived with the handshake and live in
     // the contact record. §16.12's whole point is that the first message needs
     // no round trip to someone who may not be there.
+
+    billView?.let { b ->
+        // The bill gets the whole screen (Ceremony.kt): a decision, not a
+        // bubble. Accept leads to the same confirm screen as ever — §15.5
+        // survives every coat of paint.
+        BillScreen(
+            m = b,
+            contact = c,
+            onPay = { billView = null; payRequest = b },
+            onDecline = {
+                billView = null
+                scope.launch(Dispatchers.IO) {
+                    runCatching {
+                        Mailbox.send(
+                            context, c,
+                            "Declining that bill for ${formatXmr(b.amountPxmr)} XMR — " +
+                                "not this time.",
+                            mine,
+                        )
+                    }
+                }
+            },
+            onClose = { billView = null },
+        )
+    }
 
     payRequest?.let { r ->
         // The contact rides along, not just the address. Paying a request as a

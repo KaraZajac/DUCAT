@@ -56,6 +56,7 @@ private const val HAIL_TTL_SECS = 15L * 60
 @Composable
 fun HailCard() {
     var sheetOpen by remember { mutableStateOf(false) }
+    var driverFound by remember { mutableStateOf<org.ducatproject.ducat.Contact?>(null) }
     val context = LocalContext.current
     var cell by remember { mutableStateOf("") }
     var dest by remember { mutableStateOf("") }
@@ -94,7 +95,10 @@ fun HailCard() {
                 status = "$who took your hail" +
                     (ride?.let { " — look for a $it" } ?: "") + ". ETA in the chat."
                 posted = null
-                MainActivity.openChat.value = claimant
+                // The ceremony (Ceremony.kt): the stranger's face, car and
+                // plate get the whole screen, and the chat is one tap away
+                // rather than an abrupt teleport into it.
+                driverFound = d
                 break
             }
         }
@@ -155,6 +159,16 @@ fun HailCard() {
                 style = MaterialTheme.typography.bodySmall)
         }
     }
+    }
+    driverFound?.let { d ->
+        DriverFound(
+            contact = d,
+            onOpenChat = {
+                driverFound = null
+                MainActivity.openChat.value = d.personaHex
+            },
+            onDismiss = { driverFound = null },
+        )
     }
     if (sheetOpen) {
         HailSheet(
