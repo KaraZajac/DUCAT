@@ -754,11 +754,29 @@ fn verify_chain(msg: &Message, expected_seq: u64, prev: Option<[u8; 32]>) -> Res
             msg.seq
         )));
     }
-    let want = prev.unwrap_or([0u8; 32]);
-    if msg.prev != want {
-        return Err(ContactError::Refused(
-            "this message does not follow the one before it".into(),
-        ));
+    match prev {
+        Some(want) => {
+            if msg.prev != want {
+                return Err(ContactError::Refused(
+                    "this message does not follow the one before it".into(),
+                ));
+            }
+        }
+        // No link mid-thread means a recorded gap — a lost or unreadable
+        // message the reader stepped past. §16.11: the chain restarts at the
+        // next message, prev unverifiable across the gap. Treating "unknown"
+        // as "must be the thread start" froze a thread every two minutes for
+        // fifteen hours after one honest hole; continuity across a gap is
+        // unverifiable *by definition*, and refusing everything after it
+        // converts one lost message into a dead thread.
+        None if expected_seq > 0 => {}
+        None => {
+            if msg.prev != [0u8; 32] {
+                return Err(ContactError::Refused(
+                    "a first message must not claim a predecessor".into(),
+                ));
+            }
+        }
     }
     Ok(())
 }
