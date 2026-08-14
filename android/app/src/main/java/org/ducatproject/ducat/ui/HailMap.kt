@@ -37,6 +37,11 @@ fun RouteMap(
                 setTileSource(TileSourceFactory.MAPNIK)
                 setMultiTouchControls(true)
                 clipToOutline = true
+                // One Earth is enough: repetition is what a failed zoom shows
+                // three of, vertically.
+                isVerticalMapRepetitionEnabled = false
+                isHorizontalMapRepetitionEnabled = false
+                minZoomLevel = 3.0
                 controller.setZoom(14.0)
             }
         },
@@ -65,13 +70,22 @@ fun RouteMap(
                     outlinePaint.strokeWidth = 8f
                 })
             }
-            when {
-                pts.size >= 2 -> map.zoomToBoundingBox(
-                    BoundingBox.fromGeoPoints(pts).increaseByScale(1.4f), false,
-                )
-                pts.size == 1 -> map.controller.setCenter(pts[0])
+            // Deferred: zoomToBoundingBox on a view that has not been laid
+            // out yet has zero pixels to fit the box into, and osmdroid's
+            // answer to that is the whole world — observed as a 37 km ride
+            // rendered as three planets. post{} runs after measurement.
+            map.post {
+                when {
+                    pts.size >= 2 -> map.zoomToBoundingBox(
+                        BoundingBox.fromGeoPoints(pts).increaseByScale(1.4f), false,
+                    )
+                    pts.size == 1 -> {
+                        map.controller.setZoom(14.0)
+                        map.controller.setCenter(pts[0])
+                    }
+                }
+                map.invalidate()
             }
-            map.invalidate()
         },
     )
 }
