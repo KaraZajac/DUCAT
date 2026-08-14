@@ -68,6 +68,8 @@ const ONE_TIME_KEYS: u32 = 16;
 ///
 /// `$XDG_STATE_HOME`, then `~/.local/state`, then `/tmp` as a last resort so a
 /// machine with no home directory still runs.
+pub fn state_path_pub(who: &str) -> String { state_path(who) }
+
 fn state_path(who: &str) -> String {
     if let Ok(p) = std::env::var("DUCAT_STATE") {
         return p;
@@ -589,6 +591,18 @@ async fn bill_or_say(
             }).collect(),
             tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
         },
+    };
+    // DUCAT_SIGNED_ONLY: seal to the signed prekey even with one-time keys
+    // advertised. The escape hatch for exactly what the field showed: replicas
+    // served this node heads up to half an hour stale, so every one-time id it
+    // picked was long burned on the phone. The signed key never burns; the
+    // recipient renders the open lock, which is the honest trade (§16.11).
+    let their_bundle = if std::env::var("DUCAT_SIGNED_ONLY").is_ok() {
+        let mut b = their_bundle.clone();
+        b.one_time.clear();
+        b
+    } else {
+        their_bundle
     };
     let (chosen, fs) = their_bundle.select();
     if !fs {

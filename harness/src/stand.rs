@@ -219,3 +219,27 @@ pub async fn hail_watch(cell: &str) -> Result<(), Box<dyn std::error::Error>> {
         tokio::time::sleep(std::time::Duration::from_secs(5)).await;
     }
 }
+
+/// Which prekey id each of our sent messages was sealed to — the envelope is
+/// plaintext CBOR, so our own outbox answers without any secrets.
+pub async fn peek_seals() -> Result<(), Box<dyn std::error::Error>> {
+    use ducat_core::cbor::decode;
+    use ducat_core::hpke::SealedMessage;
+    use std::str::FromStr;
+    let st = std::fs::read_to_string(crate::mailbox::state_path_pub("claimant"))?;
+    let my_log = st.lines().nth(2).ok_or("no outbox in state")?.to_string();
+    let (api, _c) = crate::veilid::start("peek").await?;
+    let rc = api.routing_context()?;
+    let log = RecordKey::from_str(&my_log)?;
+    rc.open_dht_record(log.clone(), None).await?;
+    for subkey in 1..8u32 {
+        if let Ok(Some(v)) = rc.get_dht_value(log.clone(), subkey, true).await {
+            if let Ok(sealed) = SealedMessage::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?) {
+                println!("  slot {subkey}: sealed to prekey id {}", sealed.prekey_id);
+            }
+        }
+    }
+    rc.close_dht_record(log).await?;
+    api.shutdown().await;
+    Ok(())
+}

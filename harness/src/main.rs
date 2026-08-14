@@ -102,6 +102,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(i) = args.iter().position(|a| a == "--stand-read") {
         return stand::read(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
     }
+    if args.iter().any(|a| a == "--peek-seals") {
+        return stand::peek_seals().await;
+    }
     if let Some(i) = args.iter().position(|a| a == "--hail-watch") {
         return stand::hail_watch(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
     }
