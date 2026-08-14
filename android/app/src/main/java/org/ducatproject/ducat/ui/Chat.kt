@@ -459,6 +459,35 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     if (contactPick) {
                         ContactPickDialog(
                             contacts = store.all().filter { it.personaHex != c.personaHex },
+                            // The introduction, done the only way consent
+                            // allows: a fresh card of *mine*, dropped into the
+                            // thread as a ducat: link, for them to hand to
+                            // whoever should reach me. Their claim arrives
+                            // through the same registry as any other card.
+                            onIntroduceMe = {
+                                contactPick = false
+                                sending = true
+                                scope.launch(Dispatchers.IO) {
+                                    afterSend(
+                                        runCatching {
+                                            val card = Mailbox.issueCard(
+                                                context,
+                                                org.ducatproject.ducat.MyProfile(context).name(),
+                                                60uL * 60uL * 24uL * 7uL,
+                                                purpose = "intro",
+                                            )
+                                            Mailbox.send(
+                                                context, c,
+                                                "🎟 A card for me — pass it to whoever " +
+                                                    "should reach me. One claim, one week:\n" +
+                                                    card.uri,
+                                                mine,
+                                            )
+                                        },
+                                        "card",
+                                    )
+                                }
+                            },
                             onPick = { chosen ->
                                 contactPick = false
                                 scope.launch(Dispatchers.IO) {
@@ -613,11 +642,26 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    store.deleteMessage(c.personaHex, m.seq, m.outgoing)
-                    messages = store.thread(c.personaHex)
-                    confirmDelete = null
-                }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+                Row {
+                    if (m.body.isNotBlank()) {
+                        // Copy is how a card, an address, or a link gets passed
+                        // along — forwarding by hand until forwarding exists.
+                        TextButton(onClick = {
+                            val cm = context.getSystemService(
+                                android.content.ClipboardManager::class.java
+                            )
+                            cm?.setPrimaryClip(
+                                android.content.ClipData.newPlainText("message", m.body)
+                            )
+                            confirmDelete = null
+                        }) { Text("Copy") }
+                    }
+                    TextButton(onClick = {
+                        store.deleteMessage(c.personaHex, m.seq, m.outgoing)
+                        messages = store.thread(c.personaHex)
+                        confirmDelete = null
+                    }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+                }
             },
             dismissButton = { TextButton(onClick = { confirmDelete = null }) { Text("Cancel") } },
         )
@@ -880,13 +924,15 @@ private fun Bubble(m: StoredMessage, theirReadUpTo: Long? = null, onLongPress: (
  *
  * A location message is a link (a map anyone can open beats a coordinate
  * format only this app understands), so the text bubble has to honour links
- * or the feature reads as broken.
+ * or the feature reads as broken. `ducat:` rides the same path: a card passed
+ * along in a chat is claimed by tapping it, exactly as it would be from a
+ * browser — the VIEW intent lands back in this app's claim flow.
  */
 @Composable
 private fun LinkableText(body: String, fg: androidx.compose.ui.graphics.Color) {
     val context = LocalContext.current
     val url = remember(body) {
-        Regex("https://\\S+").find(body)?.value
+        Regex("(https://|ducat:)\\S+").find(body)?.value
     }
     if (url == null) {
         Text(body, color = fg)
@@ -1293,27 +1339,58 @@ private fun TrayItem(
     }
 }
 
+/**
+ * Two different things a person means by "share a contact", kept honest.
+ *
+ * **A card for me** is the introduction: a fresh claim-once card minted here,
+ * dropped into the thread for the other side to pass along. It is the only
+ * connectable thing this device is entitled to mint — nobody can be made
+ * reachable except by their own device issuing a card.
+ *
+ * **Someone's profile** is exactly what it says: the name and reachability
+ * that contact chose to publish, as text. Useful for "here's the bartender's
+ * Signal", and deliberately not a connection code, because those are theirs
+ * to give.
+ */
 @Composable
 private fun ContactPickDialog(
     contacts: List<Contact>,
+    onIntroduceMe: () -> Unit,
     onPick: (Contact) -> Unit,
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Share a contact") },
+        title = { Text("Share") },
         text = {
-            if (contacts.isEmpty()) {
-                Text("Nobody else to share yet.")
-            } else {
-                Column {
+            Column {
+                Row(
+                    Modifier.fillMaxWidth().clickable(onClick = onIntroduceMe)
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("🎟", style = MaterialTheme.typography.headlineSmall)
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text("A card for me", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "A one-claim link they can pass to someone who " +
+                                "should reach you.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                if (contacts.isNotEmpty()) {
+                    Spacer(Modifier.height(10.dp))
                     Text(
-                        "Sends their name and whatever they chose to publish. " +
-                            "Not a connection code — those are theirs to give.",
+                        "Or someone's profile — their name and whatever they " +
+                            "chose to publish. Not a connection code: those are " +
+                            "theirs to give.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(4.dp))
                     contacts.forEach { c ->
                         Row(
                             Modifier.fillMaxWidth().clickable { onPick(c) }
