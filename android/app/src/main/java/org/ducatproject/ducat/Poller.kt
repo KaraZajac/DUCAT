@@ -71,13 +71,29 @@ class Poller(private val context: Context) {
                             // fire one notification per historical receipt.
                             val b = Wallet.balances(context)
                             if (!b.syncing) {
+                                // Change is not income — the Ledger's oldest
+                                // lesson, relearned here: the remainder of your
+                                // own send comes back as a new output, and
+                                // announcing it as "money arrived" told someone
+                                // who had just paid that they had been paid.
+                                // Every output knows its transaction, and a
+                                // transaction in our send records is ours.
+                                val ourSends = WalletStore(context).sends()
+                                    .map { it.txidHex.lowercase() }.toSet()
                                 WalletStore(context).entries()
                                     .filter { it.keyImage.isNotEmpty() && it.keyImage !in before }
                                     .forEach {
-                                        Notify.post(
-                                            context, "Money arrived",
-                                            "${formatXmr(it.amountPxmr)} XMR — unlocks after ten blocks",
-                                        )
+                                        if (it.txHashHex.lowercase() in ourSends) {
+                                            DucatLog.i(
+                                                TAG,
+                                                "change back: ${formatXmr(it.amountPxmr)} XMR",
+                                            )
+                                        } else {
+                                            Notify.post(
+                                                context, "Money arrived",
+                                                "${formatXmr(it.amountPxmr)} XMR — unlocks after ten blocks",
+                                            )
+                                        }
                                     }
                             }
                         }
