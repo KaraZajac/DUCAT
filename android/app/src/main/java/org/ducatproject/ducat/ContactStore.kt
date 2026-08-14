@@ -418,7 +418,10 @@ class ContactStore(context: Context) {
     }
 
     /** The keys that are presentation rather than protocol. */
-    private val appStateKeys = listOf("tabs_v1", "publish_address")
+    // receipts_v1 rides along deliberately: a receipt is the record that
+    // must survive everything else — thread deletions, contact deletions,
+    // and now device loss too.
+    private val appStateKeys = listOf("tabs_v1", "publish_address", "receipts_v1", "claimed_kis_v1")
 
     fun backupAppState(): ByteArray {
         val o = JSONObject()
