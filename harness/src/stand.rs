@@ -1,0 +1,151 @@
+//! Rendezvous by convention: two strangers, one place name, no exchange.
+//!
+//! Everything in DUCAT so far connects people who *met* — a card crossed a
+//! table, a QR crossed a screen. Dispatch (§15.11's taxi grown into a hail)
+//! needs the one thing that model refuses: a rider and a driver who have
+//! never met converging on the same DHT record with nothing in common but
+//! *where they are*.
+//!
+//! Veilid makes this possible without a directory, and the mechanism is worth
+//! stating precisely because it looks like magic until it doesn't:
+//! `get_dht_record_key(schema, owner_key, _)` computes a record key **locally**
+//! from an owner public key. So a keypair derived deterministically from a
+//! public string — `seed = SHA-256("DUCAT-STAND-v0" ‖ cell)` — gives everyone
+//! who knows the string the same record key, and the DHT becomes a map from
+//! *names* to *bulletin boards*. A geocell string is such a name. So is
+//! "the taxi rank at the airport".
+//!
+//! The cost is stated with the trick: the seed is public, therefore the
+//! *secret* is public, therefore **anyone can write or vandalise the board**.
+//! This is a bulletin board in the honest sense — pinned in a public square,
+//! erasable by anyone with hands. What keeps it useful is what keeps a real
+//! one useful: notices are small (a card URI and a coarse area), stale ones
+//! expire, everything of value moves immediately into a claimed card's sealed
+//! thread, and a wiped board is re-pinned by the next person who needs it.
+//! What it must never carry: precise locations, identities, anything worth
+//! scraping. The board is a place to say "someone here wants a ride", and
+//! nothing else.
+//!
+//!   ducat-harness --stand-post <cell> <text>    derive, create/open, write
+//!   ducat-harness --stand-read <cell>           derive, compute key, read
+//!
+//! The proof is that `--stand-read` is handed *only the cell string* — the
+//! record key it reads from is computed, not communicated.
+
+use sha2::{Digest, Sha256};
+use veilid_core::*;
+
+/// The convention. Version pinned in the string so a future scheme change
+/// lands on different records rather than fighting over these.
+fn cell_keypair(cell: &str) -> (BarePublicKey, BareSecretKey) {
+    let seed: [u8; 32] = Sha256::new()
+        .chain_update(b"DUCAT-STAND-v0")
+        .chain_update([0u8])
+        .chain_update(cell.as_bytes())
+        .finalize()
+        .into();
+    let sk = ed25519_dalek::SigningKey::from_bytes(&seed);
+    let pk = sk.verifying_key();
+    (
+        BarePublicKey::new(pk.as_bytes()),
+        BareSecretKey::new(&seed),
+    )
+}
+
+/// The other half of the convention, learned from the source: veilid 0.5
+/// encrypts every record's values, and the key rides in the RecordKey
+/// *handle*, never on the network. `create` always draws a random one — so a
+/// public board derives its encryption key from the cell name too, both
+/// sides construct the same full key locally, and the create-time key is
+/// simply never used. (The values are then "encrypted" under a public
+/// secret, which is to say: public, which is the point of a board.)
+fn cell_encryption(cell: &str) -> BareSharedSecret {
+    let k: [u8; 32] = Sha256::new()
+        .chain_update(b"DUCAT-STAND-v0-ENC")
+        .chain_update([0u8])
+        .chain_update(cell.as_bytes())
+        .finalize()
+        .into();
+    BareSharedSecret::new(&k)
+}
+
+fn schema() -> DHTSchema {
+    // Subkey 0 is the only one used; the spare is room for the design to grow
+    // a head/notice split without moving to new records.
+    DHTSchema::dflt(2).expect("static schema")
+}
+
+pub async fn post(cell: &str, text: &str) -> Result<(), Box<dyn std::error::Error>> {
+    println!("\n\x1b[1mDUCAT — stand post (rendezvous by convention)\x1b[0m\n");
+    let (pk, sk) = cell_keypair(cell);
+    println!("  cell     {cell:?}");
+    println!("  owner    {pk} (derived from the cell name, not generated)");
+
+    let (api, _c) = crate::veilid::start("stand-p").await?;
+    let rc = api.routing_context()?;
+    let kp = KeyPair::new(CRYPTO_KIND_VLD0, BareKeyPair::new(pk, sk));
+    let enc = SharedSecret::new(CRYPTO_KIND_VLD0, cell_encryption(cell));
+
+    // The conventional key: opaque part from the owner key, encryption part
+    // from the cell name. Both computed locally; nothing exchanged.
+    let key = api
+        .get_dht_record_key(schema(), kp.key(), Some(enc))
+        .await?;
+
+    // Create publishes the descriptor (schema + owner). Its handle carries a
+    // random encryption key we deliberately never use: close, and reopen
+    // under the conventional key, so what we write decrypts for anyone who
+    // can derive it. If the board already exists, create fails and the open
+    // is all that was needed anyway.
+    if let Ok(desc) = rc
+        .create_dht_record(CRYPTO_KIND_VLD0, schema(), Some(kp.clone()))
+        .await
+    {
+        rc.close_dht_record(desc.key().clone()).await?;
+    }
+    rc.open_dht_record(key.clone(), Some(kp)).await?;
+    println!("  record   {key}");
+
+    rc.set_dht_value(key.clone(), 0, text.as_bytes().to_vec(), None)
+        .await?;
+    println!("  posted   {} B", text.len());
+    println!(
+        "\n  now, from anyone who knows only the cell name:\n    \
+         cargo run -q -p ducat-harness -- --stand-read {cell:?}\n"
+    );
+    rc.close_dht_record(key).await?;
+    api.shutdown().await;
+    Ok(())
+}
+
+pub async fn read(cell: &str) -> Result<(), Box<dyn std::error::Error>> {
+    println!("\n\x1b[1mDUCAT — stand read (key computed, not communicated)\x1b[0m\n");
+    let (pk, _) = cell_keypair(cell);
+    println!("  cell     {cell:?}");
+
+    let (api, _c) = crate::veilid::start("stand-r").await?;
+    let rc = api.routing_context()?;
+
+    let enc = SharedSecret::new(CRYPTO_KIND_VLD0, cell_encryption(cell));
+    let key = api
+        .get_dht_record_key(schema(), PublicKey::new(CRYPTO_KIND_VLD0, pk), Some(enc))
+        .await?;
+    println!("  record   {key}  ← computed locally from the cell name");
+
+    rc.open_dht_record(key.clone(), None).await?;
+    match rc.get_dht_value(key.clone(), 0, true).await? {
+        Some(v) => {
+            println!("  found    {:?}", String::from_utf8_lossy(v.data()));
+            println!("\n  \x1b[32mtwo processes met at a name\x1b[0m");
+        }
+        None => {
+            println!("  \x1b[31mboard is empty\x1b[0m");
+            rc.close_dht_record(key).await?;
+            api.shutdown().await;
+            return Err("nothing posted at this cell".into());
+        }
+    }
+    rc.close_dht_record(key).await?;
+    api.shutdown().await;
+    Ok(())
+}

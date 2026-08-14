@@ -1225,8 +1225,10 @@ name = "ducat-harness"
 version = "0.1.0"
 dependencies = [
  "ducat-core",
+ "ed25519-dalek 2.2.0",
  "hex",
  "serde_json",
+ "sha2 0.10.9",
  "tokio",
  "tracing-subscriber",
  "veilid-core",

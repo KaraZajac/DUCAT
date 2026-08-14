@@ -20,6 +20,7 @@
 mod escrow_role;
 mod attack;
 mod dht;
+mod stand;
 mod mailbox;
 mod edges;
 mod flow;
@@ -82,6 +83,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     if let Some(i) = args.iter().position(|a| a == "--inbox-collect") {
         return dht::inbox_collect(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
+    }
+    if let Some(i) = args.iter().position(|a| a == "--stand-post") {
+        return stand::post(
+            args.get(i + 1).map(|s| s.as_str()).unwrap_or(""),
+            args.get(i + 2).map(|s| s.as_str()).unwrap_or("a notice"),
+        ).await;
+    }
+    if let Some(i) = args.iter().position(|a| a == "--stand-read") {
+        return stand::read(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
     }
     if args.iter().any(|a| a == "--dht-write") {
         return dht::write().await;
