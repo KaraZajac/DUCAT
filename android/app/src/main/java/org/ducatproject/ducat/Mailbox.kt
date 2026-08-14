@@ -30,6 +30,11 @@ private const val ONE_TIME_KEYS: UInt = 32u
  */
 object Mailbox {
 
+    /** How long an unreadable sequence gets before it is declared lost —
+     *  covering slow ring-slot propagation, which force-refresh does not. */
+    private const val STUCK_PATIENCE_MS = 10L * 60 * 1000
+    private val stuckSince = java.util.concurrent.ConcurrentHashMap<String, Long>()
+
     /**
      * Mint a card: an inbox for the handshake, an outbox for what we will say.
      *
@@ -99,7 +104,12 @@ object Mailbox {
 
     /** A fresh append-only log with its head initialised. */
     private fun createLog(context: Context): DhtRecord {
-        val rec = nodeDhtCreate(LOG_SUBKEYS)
+        // The record must be as big as the ring its head advertises. It was
+        // minted with 8 subkeys while the head claimed 32 — and sequences 0–6
+        // map identically under both, so every thread worked flawlessly until
+        // its eighth message computed slot 8 in an 8-subkey record and the
+        // send died. Found by the first conversation to reach it.
+        val rec = nodeDhtCreate(NEW_RING)
         // The bundle rides the head from birth, not from the first message.
         // A head without keys strands a counterparty who claimed the card and
         // wants to speak first — observed live: a hail's driver claimed,
@@ -287,7 +297,27 @@ object Mailbox {
             )
         }
         nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
-        nodeDhtSet(c.myOutbox, logSubkey(c.outSeq.toULong(), c.myRing.toUInt()), sealed.bytes)
+        // Threads minted before the 8-subkey/32-ring mismatch was fixed hold
+        // records smaller than the ring their head claims. Slots 0–6 map
+        // identically under ring 8 and ring 32, so clamping the ring back to
+        // the record's real size heals the thread with no history rewritten —
+        // the head republishes the honest ring below and readers follow it.
+        var ring = c.myRing.toUInt()
+        try {
+            nodeDhtSet(c.myOutbox, logSubkey(c.outSeq.toULong(), ring), sealed.bytes)
+        } catch (e: Exception) {
+            if (e.message?.contains("out of range") == true && ring > LOG_SUBKEYS) {
+                DucatLog.w(
+                    TAG,
+                    "legacy log smaller than its ring — clamping ${c.displayName()} to $LOG_SUBKEYS",
+                )
+                ring = LOG_SUBKEYS
+                store.setMyRing(c.personaHex, LOG_SUBKEYS.toInt())
+                nodeDhtSet(c.myOutbox, logSubkey(c.outSeq.toULong(), ring), sealed.bytes)
+            } else {
+                throw e
+            }
+        }
         // Republish our keys with every head write. Cheap — the head is read on
         // every poll anyway — and it is the only route back from an exhausted
         // supply, since the handshake inbox is a one-time artifact.
@@ -300,7 +330,7 @@ object Mailbox {
                 // only when the user opted in. c.inSeq is "I have accepted
                 // your messages below this", which is exactly the claim.
                 if (store.readReceipts()) c.inSeq.toULong() else null,
-                c.myRing.toUInt().takeIf { it != 8u },
+                ring.takeIf { it != 8u },
             ),
         )
 
@@ -508,12 +538,25 @@ object Mailbox {
             val isOneTime = id != 0
             val secret = if (isOneTime) store.oneTimeSecret(id) else store.signedPrekeySecret()
             if (secret == null) {
-                // The grace pen (§16.11) already covered the propagation race,
-                // so a secret that is *still* missing is gone for good and this
-                // message is permanently unreadable — by anyone, us included.
-                // Blocking would freeze the thread forever on a message that
-                // can never open; record the loss like a ring wrap and let the
-                // chain restart from the next message.
+                // Not lost yet. A ring slot's write propagates slowly, so this
+                // read may be the slot's *previous tenant* — an old message,
+                // sealed to an old key — while the real one is still in
+                // flight. Declaring loss on first sight converted exactly that
+                // into a permanent hole (observed: a receipt marked lost while
+                // its bytes were minutes from arriving). Wait the slot out;
+                // only a message still unreadable after the patience window is
+                // genuinely gone.
+                val key = "${c.personaHex}:$seq"
+                val since = stuckSince.getOrPut(key) { System.currentTimeMillis() }
+                if (System.currentTimeMillis() - since < STUCK_PATIENCE_MS) {
+                    DucatLog.i(
+                        TAG,
+                        "message $seq from ${c.displayName()} not readable yet " +
+                            "(prekey $id) — waiting for the slot to settle",
+                    )
+                    break
+                }
+                stuckSince.remove(key)
                 DucatLog.w(
                     TAG,
                     "prekey $id is gone; message $seq from ${c.displayName()} is lost",

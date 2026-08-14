@@ -109,6 +109,12 @@ class ContactStore(context: Context) {
     } }
 
     /** The same, for the receiving counters. */
+    /** Clamp a thread's ring to its record's real size (legacy-log healing). */
+    fun setMyRing(personaHex: String, ring: Int) { synchronized(lock) {
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
+        save(all().filterNot { it.personaHex == personaHex } + c.copy(myRing = ring))
+    } }
+
     fun advanceInbound(personaHex: String, seq: Long, prevLink: ByteArray?) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
         save(all().filterNot { it.personaHex == personaHex } +
