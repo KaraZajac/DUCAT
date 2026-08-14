@@ -107,6 +107,11 @@ private fun NewRideScreen(rides: RideStore) {
     val perMinPxmr = toPxmr(perMin)
     val ready = basePxmr != null && perMinPxmr != null && perMinPxmr > 0
 
+    DisposableEffect(cardUri) {
+        org.ducatproject.ducat.nfc.Tap.offered = cardUri
+        onDispose { org.ducatproject.ducat.nfc.Tap.offered = null }
+    }
+
     LaunchedEffect(Unit) {
         val r = withContext(Dispatchers.IO) {
             runCatching {
@@ -203,8 +208,8 @@ private fun NewRideScreen(rides: RideStore) {
                 QrBlock(cardUri!!)
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "The rider scans this. The rate lands in the conversation and " +
-                        "the meter starts by itself.",
+                    "The rider scans or taps. The rate lands in the conversation " +
+                        "and the meter starts by itself.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,

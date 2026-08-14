@@ -84,6 +84,9 @@ fun QrScannerContent(
     onDismiss: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
+    // Tap or scan, one door: a card arriving over NFC takes the same path a
+    // QR takes, so every screen that can scan can also be tapped against.
+    NfcTapReader(onResult)
     var granted by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==

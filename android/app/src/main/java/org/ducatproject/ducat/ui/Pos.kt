@@ -303,6 +303,12 @@ private fun PresentScreen(
         else -> Sale.Waiting
     }
 
+    // While the code is up, a tap offers the same sale card.
+    DisposableEffect(cardUri) {
+        org.ducatproject.ducat.nfc.Tap.offered = cardUri
+        onDispose { org.ducatproject.ducat.nfc.Tap.offered = null }
+    }
+
     // A card per sale, marked as one: a "sale" card never auto-reissues, and
     // this flow waits for *its* claimant — a profile-code scan mid-sale must
     // not be billed as the customer.
@@ -418,7 +424,7 @@ private fun PresentScreen(
                             tint = MaterialTheme.colorScheme.outline)
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            "Tap to pay is not built yet",
+                            "Or tap phones — same bill either way",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline,
                         )

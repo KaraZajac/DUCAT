@@ -184,6 +184,12 @@ fun QrHub(
 @Composable
 private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Unit) {
     val context = LocalContext.current
+    // While this screen shows the code, a tap serves the same card. The QR
+    // and the antenna are one offer in two physics.
+    DisposableEffect(uri) {
+        org.ducatproject.ducat.nfc.Tap.offered = uri
+        onDispose { org.ducatproject.ducat.nfc.Tap.offered = null }
+    }
     val name = remember { MyProfile(context).name() }
     val pic = remember { MyProfile(context).avatar() }
 
@@ -231,6 +237,12 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
                     }
                 }
                 Spacer(Modifier.height(20.dp))
+                Text(
+                    "Tap phones, or scan — same card either way.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(6.dp))
                 Text(
                     // Worth saying because it is surprising, and because someone
                     // who does not know it will hand the same code to two people

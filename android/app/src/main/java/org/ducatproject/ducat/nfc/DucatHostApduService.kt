@@ -2,30 +2,65 @@ package org.ducatproject.ducat.nfc
 
 import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
+import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.DucatLog
 
 /**
- * Presenting over NFC (§15.3).
+ * The offering half of the tap (§15.3).
  *
- * Registered against the AID §18.7 pins — `F0 44 55 43 41 54`, `0xF0` + "DUCAT",
- * in ISO/IEC 7816-5's registration-free proprietary range. Declared in
- * `res/xml/apduservice.xml` and never edited: the value cannot be discovered at
- * runtime, so changing it is a simultaneous update of every client that exists.
+ * Android routes any `SELECT` of §18.7's AID — `F0 44 55 43 41 54`, `0xF0` +
+ * "DUCAT" — to this service while the screen is on, whatever the app is
+ * showing. What it serves is [Tap.offered] — whichever card the visible screen
+ * armed — falling back to the standing profile card, so a tap works from the
+ * home screen as readily as from the code screen.
  *
- * Not implemented yet. The APDU exchange carries a `TapPresent`, and a tap that
- * half-works is worse than one that does not exist — so this refuses cleanly
- * until the bridge to `core` is in place rather than guessing at bytes the
- * protocol already specifies.
+ * The payload is bytes of a URI and nothing else. No decisions happen here: a
+ * tap hands over the same card a QR shows, and the claim, the contact, the
+ * money all happen where they already happen. A card is also **claim-once**
+ * (§16.9), so serving it to a second reader is harmless — the DHT refuses the
+ * second claim, not this service.
  */
 class DucatHostApduService : HostApduService() {
 
+    private var payload: ByteArray? = null
+
     override fun processCommandApdu(commandApdu: ByteArray?, extras: Bundle?): ByteArray {
-        // 0x6A82 — file or application not found. The honest answer while there
-        // is nothing behind the AID.
-        return byteArrayOf(0x6A.toByte(), 0x82.toByte())
+        val apdu = commandApdu ?: return Tap.SW_UNKNOWN_INS
+
+        if (Tap.isSelect(apdu)) {
+            // Snapshotted at SELECT and held for the session: the reader walks
+            // offsets into one consistent value, not into whatever the screen
+            // swaps to mid-tap.
+            val uri = Tap.offered ?: ContactStore(this).currentCardUri()
+            if (uri == null) {
+                DucatLog.i(TAG, "tap arrived with nothing to offer")
+                return Tap.SW_NOTHING_OFFERED
+            }
+            val bytes = uri.toByteArray(Charsets.UTF_8)
+            payload = bytes
+            DucatLog.i(TAG, "tap: offering ${bytes.size} bytes")
+            return byteArrayOf(
+                (bytes.size shr 8).toByte(), (bytes.size and 0xFF).toByte(),
+            ) + Tap.SW_OK
+        }
+
+        if (Tap.isRead(apdu)) {
+            val bytes = payload ?: return Tap.SW_NOTHING_OFFERED
+            val off = Tap.readOffset(apdu)
+            if (off >= bytes.size) return Tap.SW_BAD_OFFSET
+            val end = minOf(off + Tap.CHUNK, bytes.size)
+            return bytes.copyOfRange(off, end) + Tap.SW_OK
+        }
+
+        return Tap.SW_UNKNOWN_INS
     }
 
     override fun onDeactivated(reason: Int) {
-        // A tap ends when the field drops. §15.3's budget is the user's wait, so
-        // any session state belongs here rather than in a timeout.
+        // The field dropped; the session's snapshot goes with it.
+        payload = null
+    }
+
+    private companion object {
+        const val TAG = "Tap"
     }
 }

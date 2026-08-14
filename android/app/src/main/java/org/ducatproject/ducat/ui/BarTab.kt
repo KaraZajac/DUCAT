@@ -218,6 +218,11 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
 
     BackHandler(onBack = onBack)
 
+    DisposableEffect(cardUri) {
+        org.ducatproject.ducat.nfc.Tap.offered = cardUri
+        onDispose { org.ducatproject.ducat.nfc.Tap.offered = null }
+    }
+
     LaunchedEffect(Unit) {
         val r = withContext(Dispatchers.IO) {
             runCatching {
@@ -266,7 +271,7 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
                 QrBlock(cardUri!!)
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "They scan, the tab opens by itself.",
+                    "They scan or tap — the tab opens by itself.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
