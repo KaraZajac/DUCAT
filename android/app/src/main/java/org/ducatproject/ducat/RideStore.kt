@@ -24,6 +24,8 @@ class RideStore(context: Context) {
         val cardUri: String,
         /** Epoch seconds; past this the notice is dead either way. */
         val expiry: Long,
+        /** The encoded notice itself, so migration reposts the same bytes. */
+        val notice: ByteArray = ByteArray(0),
     )
 
     fun save(r: PostedRide) {
@@ -33,6 +35,8 @@ class RideStore(context: Context) {
             .putString("inbox", r.inboxKey)
             .putString("card", r.cardUri)
             .putLong("expiry", r.expiry)
+            .putString("notice", android.util.Base64.encodeToString(
+                r.notice, android.util.Base64.NO_WRAP))
             .apply()
     }
 
@@ -43,6 +47,9 @@ class RideStore(context: Context) {
             inboxKey = prefs.getString("inbox", null) ?: return null,
             cardUri = prefs.getString("card", null) ?: return null,
             expiry = prefs.getLong("expiry", 0L),
+            notice = prefs.getString("notice", null)
+                ?.let { android.util.Base64.decode(it, android.util.Base64.NO_WRAP) }
+                ?: ByteArray(0),
         )
     }
 

@@ -75,6 +75,39 @@ private fun clearOwnSlot(board: String, subkey: UInt, myCardUri: String) {
 }
 
 /**
+ * Try to rehome a posted notice on a lower shard (§15.12's migration rule).
+ *
+ * Post-low-first, verify, then clear the old slot: the moment of two copies
+ * is safe because both carry the same claim-once card — the DHT referees a
+ * race over either copy identically. Returns the new tenancy, or null when
+ * nothing lower is free or the landing could not be confirmed.
+ */
+private fun migrateDown(p: PostedHail): PostedHail? {
+    val base = p.cell.substringBeforeLast('-')
+    val myShard = p.cell.substringAfterLast('-').toUIntOrNull() ?: return null
+    val now = System.currentTimeMillis() / 1000
+    return runCatching {
+        for (shard in 0u until myShard) {
+            val name = uniffi.ducat_mobile.standShardName(base, shard)
+            val taken = standRead(name).mapNotNull { n ->
+                runCatching { hailDecode(n.data) }.getOrNull()
+                    ?.takeIf { it.expiry.toLong() > now }
+                    ?.let { n.subkey }
+            }.toSet()
+            val free = (0u..7u).firstOrNull { it !in taken } ?: continue
+            standPost(name, free, p.notice)
+            val landed = standRead(name).firstOrNull { it.subkey == free }
+                ?.let { runCatching { hailDecode(it.data) }.getOrNull() }
+            if (landed?.card == p.card) {
+                clearOwnSlot(p.cell, p.subkey, p.card)
+                return@runCatching p.copy(cell = name, subkey = free)
+            }
+        }
+        null
+    }.getOrNull()
+}
+
+/**
  * The rider's half of §15.12, as a card on the personal Home screen.
  *
  * Hailing is a moment, not a job — the modes list is for people running a
@@ -105,9 +138,33 @@ fun HailCard() {
     // The wait: the card's inbox answers when a driver claims (§16.9's
     // machinery unchanged). Polling, not a watch — a hail lives minutes.
     LaunchedEffect(posted) {
-        val p = posted ?: return@LaunchedEffect
+        var p = posted ?: return@LaunchedEffect
+        var tick = 0
         while (true) {
             delay(3_000)
+            tick += 1
+            // §15.12: a notice SHOULD move down when a lower slot frees —
+            // the sweep's stopping rule leans on the ladder staying compact,
+            // and an overflow shard is a worse address the moment a better
+            // one opens. Every tenth tick, not every poll: two board reads.
+            if (tick % 10 == 0 && p.cell.contains('-') && p.notice.isNotEmpty()) {
+                val moved = withContext(Dispatchers.IO) { migrateDown(p) }
+                if (moved != null) {
+                    RideStore(context).save(
+                        RideStore.PostedRide(
+                            board = moved.cell, subkey = moved.subkey,
+                            inboxKey = moved.inboxKey, cardUri = moved.card,
+                            expiry = moved.expiry, notice = moved.notice,
+                        )
+                    )
+                    DucatLog.i(TAG, "hail moved down to ${moved.cell} slot ${moved.subkey}")
+                    // Reassigning `posted` restarts this effect with the new
+                    // tenancy — and everything else reading it (the take-down
+                    // button above all) must see the slot we actually hold.
+                    posted = moved
+                    break
+                }
+            }
             if (System.currentTimeMillis() / 1000 > p.expiry) {
                 // Dead either way: retire the notice and say so. The clear
                 // rides hailScope so leaving Home cannot cancel it.
@@ -250,10 +307,12 @@ private data class PostedHail(
     val card: String,
     /** Epoch seconds; past this the poll gives up and clears. */
     val expiry: Long,
+    /** The encoded notice, verbatim — what a migration reposts. */
+    val notice: ByteArray = ByteArray(0),
 )
 
 private fun RideStore.PostedRide.asPosted() =
-    PostedHail(board, subkey, inboxKey, cardUri, expiry)
+    PostedHail(board, subkey, inboxKey, cardUri, expiry, notice)
 
 
 /**
@@ -428,6 +487,9 @@ fun DriveScreen() {
             val cutoff = System.currentTimeMillis() / 1000
             notices = found.values.flatten()
                 .filter { it.expiry > cutoff }
+                // A migrating notice can stand in two slots for a moment;
+                // the card is the identity, so one pin, not two.
+                .distinctBy { it.card }
                 .sortedByDescending { it.expiry }
             delay(4_000)
         }
@@ -1147,6 +1209,7 @@ fun HailSheet(
                                                 board = board, subkey = sub,
                                                 inboxKey = card.inboxKey,
                                                 cardUri = card.uri, expiry = expiry,
+                                                notice = bytes,
                                             )
                                         )
                                         DucatLog.i(TAG, "hail posted at $board subkey $sub")

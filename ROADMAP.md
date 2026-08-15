@@ -5,7 +5,9 @@ money. Ordered by what blocks 1.0, not by effort.
 
 ## Protocol correctness — must fix before 1.0
 
-- **Per-contact prekey partitioning (§16.11).** One global bundle is
+- ~~**Per-contact prekey partitioning (§16.11).**~~ **Done, 0.86** — each
+  thread's head offers a disjoint batch; ids stay globally unique; burns
+  prune the owning thread's offer. One global bundle was
   published to every contact's head and senders take the first one-time
   entry — so two contacts holding the same cached bundle seal to the same
   key, the first message burns it, and the second arrives permanently
@@ -13,11 +15,10 @@ money. Ordered by what blocks 1.0, not by effort.
   or gate the burn-pen sweep on observed bundle propagation rather than a
   fixed 30 minutes. Found in the 0.85 review (finding M6); the only
   unfixed protocol-level defect on the list.
-- **Rider notice migration down the ladder (§15.12).** Spec says a rider's
-  client SHOULD move its notice to a lower shard when a slot frees; the app
-  does not yet. Without it, two consecutive drained shards beneath a live
-  one strand that hail until expiry. The claim-poll loop already wakes
-  every 3 s — it can check for a lower home at the same time.
+- ~~**Rider notice migration down the ladder (§15.12).**~~ **Done, 0.86** —
+  every tenth claim-poll tick, a notice on an overflow shard looks for a
+  lower free slot: post-low-first, verify landing by card, then clear the
+  old slot; drivers dedupe by card during the brief double-listing.
 - **Density-adaptive cell precision (§15.12).** "6 where busy, 5 where
   empty" is a convention with no mechanism. A rule clients can compute
   alone (e.g. ladder height ≥ N sustained → post and watch at precision
