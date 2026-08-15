@@ -67,18 +67,52 @@ private inline fun <T> runCatchingCancellable(block: () -> T): Result<T> =
  * already-empty slot needs nothing, and anything undecodable or belonging to
  * someone else is not ours to erase.
  */
-/** Retire every slot a hail occupies — the 6-cell home and any 5-cell copy. */
-private fun clearAllSlots(p: PostedHail) {
-    clearOwnSlot(p.cell, p.subkey, p.card)
-    p.cell2?.let { clearOwnSlot(it, p.subkey2, p.card) }
+/**
+ * Retire every slot a hail occupies — the 6-cell home and any 5-cell copy.
+ *
+ * Recorded as tombstones *before* the attempt: a take-down that runs while
+ * the phone is offline fails silently, and the board kept advertising a
+ * withdrawn hail for the next driver to claim (observed live — the desk
+ * claimed a ghost). The poller retries what this pass cannot finish.
+ */
+private fun clearAllSlots(context: android.content.Context, p: PostedHail) {
+    val rides = RideStore(context)
+    rides.addTombstone(RideStore.Tombstone(p.cell, p.subkey, p.card, p.expiry))
+    p.cell2?.let { rides.addTombstone(RideStore.Tombstone(it, p.subkey2, p.card, p.expiry)) }
+    sweepHailTombstones(context)
 }
 
-private fun clearOwnSlot(board: String, subkey: UInt, myCardUri: String) {
-    runCatching {
-        val held = standRead(board).firstOrNull { it.subkey == subkey } ?: return
-        val notice = runCatching { hailDecode(held.data) }.getOrNull() ?: return
-        if (notice.card == myCardUri) standPost(board, subkey, ByteArray(0))
+/**
+ * Try every recorded clear; drop the ones that verifiably took, and the ones
+ * whose notice has expired — sweeps filter expired notices and writers treat
+ * their slots as free, so past expiry the board heals itself.
+ */
+fun sweepHailTombstones(context: android.content.Context) {
+    val rides = RideStore(context)
+    val now = System.currentTimeMillis() / 1000
+    rides.tombstones().forEach { t ->
+        if (now > t.expiry || clearOwnSlot(t.board, t.subkey, t.card)) {
+            rides.removeTombstone(t)
+        }
     }
+}
+
+/** True when the slot verifiably no longer holds our notice. */
+private fun clearOwnSlot(board: String, subkey: UInt, myCardUri: String): Boolean {
+    return runCatching {
+        val held = standRead(board).firstOrNull { it.subkey == subkey }
+            ?: return@runCatching true
+        val notice = runCatching { hailDecode(held.data) }.getOrNull()
+            ?: return@runCatching true
+        if (notice.card != myCardUri) return@runCatching true
+        standPost(board, subkey, ByteArray(0))
+        // The write can be silently refused (§16.12's read-before-write is
+        // primed by the reads above, but the network still referees) — only
+        // an empty or foreign read-back counts as cleared.
+        standRead(board).firstOrNull { it.subkey == subkey }
+            ?.let { runCatching { hailDecode(it.data) }.getOrNull()?.card != myCardUri }
+            ?: true
+    }.getOrDefault(false)
 }
 
 /**
@@ -188,7 +222,7 @@ fun HailCard() {
                 // Dead either way: retire the notice and say so. The clear
                 // rides hailScope so leaving Home cannot cancel it.
                 hailScope.launch {
-                    clearAllSlots(p)
+                    clearAllSlots(context, p)
                     rides.clear()
                 }
                 DucatLog.i(TAG, "hail expired unclaimed")
@@ -206,7 +240,7 @@ fun HailCard() {
             if (claimant != null) {
                 // Stewardship (§15.12): the notice is spent; clear the slot.
                 hailScope.launch {
-                    clearAllSlots(p)
+                    clearAllSlots(context, p)
                     rides.clear()
                 }
                 val d = ContactStore(context).all().firstOrNull { it.personaHex == claimant }
@@ -291,7 +325,7 @@ fun HailCard() {
                     val gone = p
                     posted = null; status = null
                     hailScope.launch {
-                        clearAllSlots(gone)
+                        clearAllSlots(context, gone)
                         rides.clear()
                     }
                 },

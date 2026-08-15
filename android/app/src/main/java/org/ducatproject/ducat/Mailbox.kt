@@ -576,6 +576,10 @@ object Mailbox {
         // Each poll is also the clock for the forward-secrecy delete: burned
         // one-time secrets past their grace window leave for good here.
         store.sweepBurnedPrekeys()
+        // Withdrawn hails whose board clears could not land yet (offline
+        // take-downs); each poll is a retry until the slot is verifiably
+        // not ours or the notice has expired out of everyone's sweeps.
+        runCatching { org.ducatproject.ducat.ui.sweepHailTombstones(context) }
         val mine = PersonaStore(context).personaHex()
         var got = 0
         for (c in store.all()) {

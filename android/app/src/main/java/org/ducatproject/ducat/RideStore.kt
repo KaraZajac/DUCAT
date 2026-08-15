@@ -61,5 +61,48 @@ class RideStore(context: Context) {
         )
     }
 
-    fun clear() = prefs.edit().clear().apply()
+    fun clear() = prefs.edit()
+        .remove("board").remove("subkey").remove("inbox")
+        .remove("card").remove("expiry").remove("notice")
+        .remove("board2").remove("subkey2")
+        .apply()
+
+    // --- tombstones -------------------------------------------------------
+    //
+    // A take-down that runs while the phone is offline fails silently, and
+    // the board keeps advertising a withdrawn hail for the next driver to
+    // claim (observed live, 2026-08-15: the desk claimed a ghost). A clear
+    // is therefore recorded before it is attempted, retried by the poller,
+    // and dropped only when the slot is verifiably not ours — or the notice
+    // has expired, after which the board self-heals: sweeps filter expired
+    // notices and writers treat their slots as free.
+
+    data class Tombstone(val board: String, val subkey: UInt, val card: String, val expiry: Long)
+
+    fun addTombstone(t: Tombstone) {
+        val arr = org.json.JSONArray(prefs.getString("tombstones", "[]"))
+        arr.put(org.json.JSONObject()
+            .put("b", t.board).put("s", t.subkey.toInt())
+            .put("c", t.card).put("e", t.expiry))
+        prefs.edit().putString("tombstones", arr.toString()).apply()
+    }
+
+    fun tombstones(): List<Tombstone> {
+        val arr = org.json.JSONArray(prefs.getString("tombstones", "[]"))
+        return (0 until arr.length()).map {
+            val o = arr.getJSONObject(it)
+            Tombstone(o.getString("b"), o.getInt("s").toUInt(), o.getString("c"), o.getLong("e"))
+        }
+    }
+
+    fun removeTombstone(t: Tombstone) {
+        val keep = tombstones().filterNot { it == t }
+        val arr = org.json.JSONArray()
+        keep.forEach {
+            arr.put(org.json.JSONObject()
+                .put("b", it.board).put("s", it.subkey.toInt())
+                .put("c", it.card).put("e", it.expiry))
+        }
+        prefs.edit().putString("tombstones", arr.toString()).apply()
+    }
 }
