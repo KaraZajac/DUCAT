@@ -73,6 +73,13 @@ money. Ordered by what blocks 1.0, not by effort.
   are field-test numbers. Measure, then tier: hot when the screen is on
   and a hail is standing, slow otherwise.
 
+## Small bugs spotted, not yet fixed
+
+- **"Break a note" card shows on a zero-balance wallet** (seen on the
+  emulated phone's first run): the not-spendable warning fires when
+  spendable == 0 even though total == 0 too — an empty wallet is not
+  "all tied up as change". Guard on total > 0.
+
 ## Validation — before the number says 1.0
 
 - **NFC tap, live.** §15's core gesture has never been tested on
