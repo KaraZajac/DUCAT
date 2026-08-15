@@ -43,6 +43,16 @@ until [ "$(adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | t
 done
 echo "booted."
 
+# With the TAP up, Android still prefers its emulated WiFi/cellular — both
+# SLIRP. One policy-routing rule sends every guest packet out eth0/TAP
+# instead, while WiFi stays up so ConnectivityService and DNS stay happy
+# (SLIRP's DNS address 10.0.2.3 is also our dnsmasq, by design).
+if ip link show tap-ducat >/dev/null 2>&1; then
+  adb -s emulator-5554 root >/dev/null 2>&1 && sleep 2
+  adb -s emulator-5554 shell "ip rule add from all lookup eth0 pref 15500" 2>/dev/null || true
+  echo "guest routed via TAP"
+fi
+
 if [ "$1" = "install" ]; then
   (cd android && ./gradlew :app:assembleDebug -q)
   adb install -r android/app/build/outputs/apk/debug/app-x86_64-debug.apk
