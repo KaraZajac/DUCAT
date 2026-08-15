@@ -1,21 +1,23 @@
 package org.ducatproject.desk
 
-import uniffi.ducat_mobile.createPersonaSecret
 import uniffi.ducat_mobile.nodeStart
 import uniffi.ducat_mobile.nodeStatus
 import uniffi.ducat_mobile.nodeStop
-import uniffi.ducat_mobile.personaPublicHex
+import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.PersonaStore
 
 /**
- * The stack, stood up with no window: JVM → JNA → Rust bridge → Veilid.
- * What CI (and a headless desk) can run; the window is only paint.
+ * The stack, stood up with no window: JVM → JNA → Rust bridge → Veilid —
+ * and now the shared stores over file-backed preferences. What CI (and a
+ * headless desk) can run; the window is only paint.
  */
 fun main() {
     val dir = kotlin.io.path.createTempDirectory("ducat-desk-smoke").toFile()
+    val context = DeskContext(dir)
     println("smoke: starting node in ${dir.absolutePath}")
     nodeStart("${dir.absolutePath}/veilid")
-    val persona = personaPublicHex(createPersonaSecret())
-    println("smoke: persona $persona")
+    println("smoke: persona ${PersonaStore(context).personaHex()}")
+    println("smoke: contacts ${ContactStore(context).all().size}")
     val deadline = System.currentTimeMillis() + 60_000
     while (System.currentTimeMillis() < deadline) {
         val s = nodeStatus()

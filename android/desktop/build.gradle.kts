@@ -10,6 +10,27 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// The phone's protocol brain, compiled verbatim: these files touch Android
+// only through the shims in src/main/kotlin/android/. Grown one file at a
+// time, deliberately — anything ui/ or screen-shaped stays on the phone.
+val sharedLogic = listOf(
+    "org/ducatproject/ducat/Mailbox.kt",
+    "org/ducatproject/ducat/ContactStore.kt",
+    "org/ducatproject/ducat/MyProfile.kt",
+    "org/ducatproject/ducat/DucatLog.kt",
+    "org/ducatproject/ducat/RideStore.kt",
+    "org/ducatproject/ducat/Wallet2.kt",
+    // Desk-side glue that lives inside the shared package (see DeskGlue.kt).
+    "org/ducatproject/ducat/DeskGlue.kt",
+    "org/ducatproject/ducat/ui/DeskHailOps.kt",
+)
+
+kotlin.sourceSets["main"].kotlin.apply {
+    srcDir(rootProject.file("app/src/main/java"))
+    include("org/ducatproject/desk/**", "uniffi/**", "android/**")
+    sharedLogic.forEach { include(it) }
+}
+
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
@@ -17,6 +38,8 @@ dependencies {
     implementation("net.java.dev.jna:jna:5.14.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     implementation("org.json:json:20240303")
+    // QR for the on-screen card — the same pure-Java encoder the phone ships.
+    implementation("com.google.zxing:core:3.5.3")
 }
 
 // Headless proof the stack stands: JVM, JNA, the Rust bridge, Veilid — no
