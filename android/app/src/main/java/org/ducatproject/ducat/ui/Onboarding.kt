@@ -16,6 +16,9 @@ import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uniffi.ducat_mobile.BackupInput
 import uniffi.ducat_mobile.NewWallet
 import uniffi.ducat_mobile.createPersonaSecret
@@ -164,20 +167,30 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
 private fun Progress(step: Step) {
     // The step you are *on*, not the number completed. "0 of 4" on the first
     // screen reads as though nothing has started and something has gone wrong.
+    //
+    // The reachable flow is four steps — Persona → Wallet → Limits → Backup —
+    // then Done. `Step.Profile` exists but is skipped (Persona goes straight to
+    // Wallet), so it is not counted; numbering the shown steps contiguously is
+    // what keeps "Step 2 of 4" from ever jumping to "Step 3".
+    val total = 4
     val n = when (step) {
-        Step.Persona -> 1; Step.Profile -> 2; Step.Wallet -> 3; Step.Limits -> 4
-        Step.Backup -> 5; Step.Done -> 5
+        Step.Persona -> 1
+        Step.Wallet -> 2
+        Step.Profile -> 2 // unreachable in the current flow; kept in range
+        Step.Limits -> 3
+        Step.Backup -> 4
+        Step.Done -> total
     }
     Column {
         Text("Set up DUCAT", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(8.dp))
         LinearProgressIndicator(
-            progress = { n / 4f },
+            progress = { n.toFloat() / total },
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            if (step == Step.Done) "Done" else "Step $n of 5",
+            if (step == Step.Done) "Done" else "Step $n of $total",
             style = MaterialTheme.typography.bodySmall,
         )
     }
@@ -207,9 +220,11 @@ private fun StepCard(title: String, body: String, action: String, onAction: () -
 @Composable
 private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var passphrase by remember { mutableStateOf("") }
     var written by remember { mutableStateOf<File?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
     val longEnough = passphrase.length >= 8
 
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
@@ -284,31 +299,41 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                             error = "Setup is incomplete"
                             return@Button
                         }
-                        error = try {
-                            val bytes = exportBackup(
-                                BackupInput(
-                                    w.spendKeyHex,
-                                    w.restoreHeight,
-                                    state.displayName,
-                                    state.publishPayto,
-                                    state.profile,
-                                    // First run: no relationships yet.
-                                    emptyList(), null, emptyList(), 0uL, null,
-                                ),
-                                passphrase,
-                                persona,
-                            )
-                            val dir = File(context.filesDir, "backups").apply { mkdirs() }
-                            val f = File(dir, "ducat-backup.ducatbak")
-                            f.writeBytes(bytes)
-                            written = f
-                            null
-                        } catch (t: Throwable) {
-                            t.message ?: t::class.simpleName
+                        busy = true; error = null
+                        scope.launch {
+                            // Encrypt and write off the main thread so the setup
+                            // screen does not freeze while the file is built.
+                            val result = withContext(Dispatchers.IO) {
+                                runCatching {
+                                    val bytes = exportBackup(
+                                        BackupInput(
+                                            w.spendKeyHex,
+                                            w.restoreHeight,
+                                            state.displayName,
+                                            state.publishPayto,
+                                            state.profile,
+                                            // First run: no relationships yet.
+                                            emptyList(), null, emptyList(), 0uL, null,
+                                        ),
+                                        passphrase,
+                                        persona,
+                                    )
+                                    val dir = File(context.filesDir, "backups").apply { mkdirs() }
+                                    val f = File(dir, "ducat-backup.ducatbak")
+                                    f.writeBytes(bytes)
+                                    f
+                                }
+                            }
+                            result.onSuccess { written = it }
+                                .onFailure { error = it.message ?: it::class.simpleName }
+                            busy = false
                         }
                     },
-                    enabled = longEnough,
-                ) { Text("Create backup") }
+                    enabled = longEnough && !busy,
+                ) {
+                    if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    else Text("Create backup")
+                }
             } else {
                 Text(
                     "Backup created — ${written!!.length()} bytes.",

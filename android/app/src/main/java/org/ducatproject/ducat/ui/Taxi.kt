@@ -241,6 +241,7 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
     var now by remember { mutableStateOf(System.currentTimeMillis()) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    var confirmCancel by remember { mutableStateOf(false) }
     val contact = remember(personaHex) {
         ContactStore(context).all().firstOrNull { it.personaHex == personaHex }
     }
@@ -329,12 +330,35 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
         )
 
         Spacer(Modifier.height(10.dp))
-        TextButton(onClick = { rides.clear() }) {
+        TextButton(onClick = { confirmCancel = true }) {
             Text("Cancel ride — no bill", color = MaterialTheme.colorScheme.error)
         }
         error?.let {
             Text(it, color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall)
         }
+    }
+
+    // A running meter thrown away is unrecoverable — the elapsed minutes are
+    // gone with it — so it asks first, like forgetting a contact does.
+    if (confirmCancel) {
+        AlertDialog(
+            onDismissRequest = { confirmCancel = false },
+            title = { Text("Cancel this ride?") },
+            text = {
+                Text(
+                    "The meter stops and no bill is sent. The minutes counted so " +
+                        "far are discarded and cannot be recovered."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { confirmCancel = false; rides.clear() }) {
+                    Text("Cancel ride", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmCancel = false }) { Text("Keep going") }
+            },
+        )
     }
 }

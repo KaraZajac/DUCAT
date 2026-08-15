@@ -65,7 +65,7 @@ fun NetworkPanel(storageDir: String) {
 
             // "Not initialised" and "no peers" look identical in a status line
             // and have nothing to do with each other.
-            Line("android bridge", if (androidReady()) "ready" else "NOT SET UP", androidReady())
+            Line("android bridge", if (androidReady()) "ready" else "not set up", androidReady())
             Line("node", if (status.running) "running" else "stopped", status.running)
             Line("attached", status.state, status.attached)
             // The distinction that matters, spelled out rather than merged.
@@ -113,9 +113,11 @@ fun NetworkPanel(storageDir: String) {
                     Spacer(Modifier.width(8.dp))
                     // The only proof a route can be built is building one.
                     Button(
-                        enabled = status.publicInternetReady,
+                        // Disabled while a probe is in flight (routeResult "…")
+                        // so a second tap cannot restart it mid-test.
+                        enabled = status.publicInternetReady && routeResult != "…",
                         onClick = { routeResult = "…" },
-                    ) { Text("Test a route") }
+                    ) { Text(if (routeResult == "…") "Testing…" else "Test a route") }
                 }
             }
         }

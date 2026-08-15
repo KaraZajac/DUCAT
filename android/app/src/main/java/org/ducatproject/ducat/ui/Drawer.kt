@@ -1,14 +1,12 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -46,11 +44,16 @@ fun DrawerContent(onPick: (Section) -> Unit) {
     val name = remember { NameStore(context).get() }
 
     ModalDrawerSheet {
-        Column(Modifier.padding(20.dp)) {
+        // The header is a way into the profile, not just a label: a missing
+        // name is a nudge, and a nudge you cannot act on is a dead end. Tapping
+        // "DUCAT" — named or not — opens the profile that the subtitle is about.
+        Column(
+            Modifier.clickable { onPick(Section.Profile) }.fillMaxWidth().padding(20.dp)
+        ) {
             Text("DUCAT", style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.height(4.dp))
             Text(
-                name ?: "no profile name set",
+                name ?: "Set a profile name",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

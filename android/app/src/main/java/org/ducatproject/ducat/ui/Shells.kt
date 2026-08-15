@@ -206,7 +206,12 @@ private fun SettledSection(label: String, tabs: List<RunningTab>) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(Modifier.weight(1f)) {
-                        Text(who, style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            who,
+                            style = MaterialTheme.typography.bodyLarge,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        )
                         Text(
                             when (t.state) {
                                 "settled" -> if (t.seenTx != null) "payment seen — settling"
@@ -220,11 +225,24 @@ private fun SettledSection(label: String, tabs: List<RunningTab>) {
                             else MaterialTheme.ducat.settled,
                         )
                     }
-                    Text(
-                        "${formatXmr(t.totalPxmr)} XMR",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontFamily = FontFamily.Monospace,
-                    )
+                    // Honour the fiat toggle the "Today" total above already
+                    // respects, so a vendor who reads in dollars sees each line
+                    // in dollars too, not raw XMR.
+                    val line = Amounts.show(context, t.totalPxmr)
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            line.primary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = FontFamily.Monospace,
+                        )
+                        line.secondary?.let {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
             }
         }

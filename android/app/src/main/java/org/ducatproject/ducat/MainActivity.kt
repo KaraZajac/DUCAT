@@ -604,6 +604,8 @@ private fun HomeScreen(
                     Text(
                         e.counterparty ?: if (sent) "Sent" else "Received",
                         style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     )
                     Text(
                         org.ducatproject.ducat.ui.shortWhen(e.timestamp),

@@ -173,8 +173,12 @@ fun AccountsScreen() {
                     // day and a half it takes to arrive.
                     if (b.scannedTo in 1..(b.tip - 100_000)) {
                         Spacer(Modifier.height(12.dp))
+                        // A slow first scan is routine, not a fault — a wallet
+                        // made before a node was reachable, catching up. It
+                        // carries its own "Skip ahead", so it reads as a neutral
+                        // heads-up, not the red of something broken.
                         Card(colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer)) {
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                             Column(Modifier.padding(12.dp)) {
                                 Text(
                                     "Scanning from the beginning of the chain",

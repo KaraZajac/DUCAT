@@ -387,6 +387,7 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    var confirmDiscard by remember { mutableStateOf(false) }
     val contact = remember(tab.personaHex) {
         ContactStore(context).all().firstOrNull { it.personaHex == tab.personaHex }
     }
@@ -494,9 +495,32 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
                 )
                 TextButton(
-                    onClick = { store.delete(tab.id); onBack() },
+                    onClick = { confirmDiscard = true },
                     modifier = Modifier.padding(horizontal = 16.dp),
                 ) { Text("Discard tab", color = MaterialTheme.colorScheme.error) }
+
+                // An open tab discarded takes its line items with it and cannot
+                // be recovered, so it asks first — the same courtesy Forget gets.
+                if (confirmDiscard) {
+                    AlertDialog(
+                        onDismissRequest = { confirmDiscard = false },
+                        title = { Text("Discard this tab?") },
+                        text = {
+                            Text(
+                                "The tab and everything rung up on it are deleted from " +
+                                    "this phone. No bill is sent, and this cannot be undone."
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                confirmDiscard = false; store.delete(tab.id); onBack()
+                            }) { Text("Discard", color = MaterialTheme.colorScheme.error) }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { confirmDiscard = false }) { Text("Keep tab") }
+                        },
+                    )
+                }
             }
             "settled" -> Column(Modifier.padding(horizontal = 16.dp)) {
                 Text(

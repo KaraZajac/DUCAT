@@ -16,6 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.NameStore
 import uniffi.ducat_mobile.BackupInput
@@ -41,10 +44,16 @@ import org.ducatproject.ducat.DucatLog
 @Composable
 fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: ByteArray?) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var passphrase by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
     var restored by remember { mutableStateOf<String?>(null) }
     var pendingImport by remember { mutableStateOf<Uri?>(null) }
+    // Export encrypts and writes a file; import decrypts one. Both are heavy
+    // enough to jank the frame if run on the main thread, and both used to,
+    // with no sign the tap had landed. One flag disables both and shows a
+    // spinner so a slow encrypt reads as working, not frozen.
+    var busy by remember { mutableStateOf(false) }
 
     val picker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -73,44 +82,57 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
             Spacer(Modifier.height(12.dp))
             Row {
                 Button(
-                    enabled = passphrase.length >= 8 && spendKeyHex != null && personaSecret != null,
+                    enabled = !busy && passphrase.length >= 8 &&
+                        spendKeyHex != null && personaSecret != null,
                     onClick = {
-                        message = try {
-                            val bytes = exportBackup(
-                                BackupInput(
-                                    spendKeyHex!!,
-                                    restoreHeight,
-                                    // The user's own settings travel with their
-                                    // keys: a restore that keeps the money and
-                                    // loses the name and the privacy choice is
-                                    // a restore that quietly changed both.
-                                    NameStore(context).get(),
-                                    ContactStore(context).publishAddress(),
-                                    MyProfile(context).toWire(),
-                                    ContactStore(context).backupContacts(),
-                                    ContactStore(context).backupPrekeys().first,
-                                    ContactStore(context).backupPrekeys().second,
-                                    ContactStore(context).backupPrekeys().third.toULong(),
-                                    ContactStore(context).backupAppState(),
-                                ),
-                                passphrase,
-                                personaSecret!!,
-                            )
-                            val dir = File(context.filesDir, "backups").apply { mkdirs() }
-                            val f = File(dir, "ducat-backup.ducatbak")
-                            f.writeBytes(bytes)
-                            share(context, f)
-                            ContactStore(context).markBackupExported()
-                            "Exported ${bytes.size} bytes"
-                        } catch (t: Throwable) {
-                            t.message ?: "export failed"
+                        busy = true; message = null
+                        scope.launch {
+                            val result = withContext(Dispatchers.IO) {
+                                runCatching {
+                                    val bytes = exportBackup(
+                                        BackupInput(
+                                            spendKeyHex!!,
+                                            restoreHeight,
+                                            // The user's own settings travel with
+                                            // their keys: a restore that keeps the
+                                            // money and loses the name and the
+                                            // privacy choice quietly changed both.
+                                            NameStore(context).get(),
+                                            ContactStore(context).publishAddress(),
+                                            MyProfile(context).toWire(),
+                                            ContactStore(context).backupContacts(),
+                                            ContactStore(context).backupPrekeys().first,
+                                            ContactStore(context).backupPrekeys().second,
+                                            ContactStore(context).backupPrekeys().third.toULong(),
+                                            ContactStore(context).backupAppState(),
+                                        ),
+                                        passphrase,
+                                        personaSecret!!,
+                                    )
+                                    val dir = File(context.filesDir, "backups").apply { mkdirs() }
+                                    val f = File(dir, "ducat-backup.ducatbak")
+                                    f.writeBytes(bytes)
+                                    ContactStore(context).markBackupExported()
+                                    f to bytes.size
+                                }
+                            }
+                            // The share sheet is an activity; it has to start on
+                            // the main thread, so it waits for the IO to finish.
+                            result.onSuccess { (f, size) ->
+                                share(context, f)
+                                message = "Exported $size bytes"
+                            }.onFailure { message = it.message ?: "export failed" }
+                            busy = false
                         }
                     },
-                ) { Text("Export") }
+                ) {
+                    if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    else Text("Export")
+                }
 
                 Spacer(Modifier.width(8.dp))
                 OutlinedButton(
-                    enabled = passphrase.length >= 8,
+                    enabled = !busy && passphrase.length >= 8,
                     onClick = { picker.launch(arrayOf("*/*")) },
                 ) { Text("Import") }
             }
@@ -136,9 +158,14 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
     LaunchedEffect(pendingImport) {
         val uri = pendingImport ?: return@LaunchedEffect
         pendingImport = null
+        busy = true
         message = try {
-            val bytes = context.contentResolver.openInputStream(uri)!!.use { it.readBytes() }
-            val r = importBackup(bytes, passphrase)
+            // Read and decrypt off the main thread — a large bundle would
+            // otherwise freeze the frame while it works.
+            val r = withContext(Dispatchers.IO) {
+                val bytes = context.contentResolver.openInputStream(uri)!!.use { it.readBytes() }
+                importBackup(bytes, passphrase)
+            }
             // Settings come back too. A restore that keeps the money and drops
             // the name and the privacy choice has quietly changed both, and the
             // user has no way to notice — publishing especially, where the
@@ -171,6 +198,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
             DucatLog.w("Backup", "import failed: ${t.javaClass.simpleName}")
             "Could not open it — wrong passphrase, or the file has been altered"
         }
+        busy = false
     }
 }
 

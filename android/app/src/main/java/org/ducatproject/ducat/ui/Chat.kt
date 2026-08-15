@@ -761,6 +761,31 @@ private fun ChatSettingsDialog(
         86_400L to "1 day",
         604_800L to "1 week",
     )
+    var confirmClear by remember { mutableStateOf(false) }
+
+    // Clearing a thread is unrecoverable and one tap from a settings sheet is
+    // too close to it, so the tap opens a confirm rather than doing the delete.
+    if (confirmClear) {
+        AlertDialog(
+            onDismissRequest = { confirmClear = false },
+            title = { Text("Clear this chat?") },
+            text = {
+                Text(
+                    "Every message in this conversation is deleted from this phone " +
+                        "and cannot be recovered. The other side keeps their copy."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { confirmClear = false; onClearAll() }) {
+                    Text("Clear", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmClear = false }) { Text("Cancel") }
+            },
+        )
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Conversation") },
@@ -788,7 +813,7 @@ private fun ChatSettingsDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onClearAll) {
+            TextButton(onClick = { confirmClear = true }) {
                 Text("Clear this chat", color = MaterialTheme.colorScheme.error)
             }
         },

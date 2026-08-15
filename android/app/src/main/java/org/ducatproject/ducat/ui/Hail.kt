@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.horizontalScroll
 import org.ducatproject.ducat.Amounts
+import org.ducatproject.ducat.RateStore
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -1050,6 +1051,28 @@ fun DriveScreen() {
 }
 
 /**
+ * Parse an offer/fare field to picoXMR, converting from the local currency when
+ * the field is denominated in it. Null if the text does not parse, or if a rate
+ * is needed but not cached. Mirrors Taxi/Pos so every money entry in the app
+ * behaves identically.
+ */
+internal fun offerToPxmr(text: String, fiat: Boolean, rate: Double?): Long? {
+    val v = moneyText(text).toBigDecimalOrNull() ?: return null
+    val xmr = if (fiat) {
+        if (rate == null || rate <= 0) return null
+        v.divide(java.math.BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
+    } else v
+    return runCatching { xmr.movePointRight(12).toLong() }.getOrNull()?.takeIf { it >= 0 }
+}
+
+/** Render picoXMR into a field string in the chosen unit (the inverse used to
+ *  seed and to convert a field when the unit toggle is flipped). */
+internal fun pxmrToField(pxmr: Long, fiat: Boolean, rate: Double?): String =
+    if (fiat && rate != null && rate > 0)
+        "%.2f".format(java.util.Locale.US, pxmr / 1e12 * rate)
+    else formatXmr(pxmr)
+
+/**
  * The job, before the yes: the whole trip on one map — me to the pickup, the
  * ride itself — with what it pays against what a platform would have paid.
  * The Uber driver's accept screen, minus the countdown pressure: a hail
@@ -1066,10 +1089,19 @@ private fun FareDetail(
 ) {
     val context = LocalContext.current
     var route by remember { mutableStateOf<org.ducatproject.ducat.Geo.Route?>(null) }
+    // The fare field can be typed in the local currency, like every other money
+    // entry (Pay/POS/Taxi). It starts in whatever unit the wallet prefers, but
+    // only if a rate is cached — without one, fiat entry has nothing to convert.
+    val rate = remember { RateStore(context).cached()?.first }
+    val cur = remember { Amounts.currency(context) }
+    val initFiat = remember { Amounts.preferFiat(context) && rate != null }
+    var fiat by remember { mutableStateOf(initFiat) }
     // The fare the Take will put on the wire (kind 6): the rider's offer to
     // start with, editable because a counter-offer is a fare too. A "quote
     // me" hail seeds from the routed estimate once one exists.
-    var fareXmr by remember(n) { mutableStateOf(n.farePxmr?.let(::formatXmr) ?: "") }
+    var fareXmr by remember(n) {
+        mutableStateOf(n.farePxmr?.let { pxmrToField(it, initFiat, rate) } ?: "")
+    }
     var fareError by remember(n) { mutableStateOf<String?>(null) }
     val origin = remember(n) {
         n.originCell?.let {
@@ -1097,7 +1129,7 @@ private fun FareDetail(
                     else r.legs.firstOrNull()
                     trip?.let { (mtr, secs) ->
                         org.ducatproject.ducat.Fare.estimateExact(context, mtr, secs)
-                            ?.let { (_, pxmr) -> fareXmr = formatXmr(pxmr) }
+                            ?.let { (_, pxmr) -> fareXmr = pxmrToField(pxmr, fiat, rate) }
                     }
                 }
             }
@@ -1175,7 +1207,7 @@ private fun FareDetail(
                     OutlinedTextField(
                         value = fareXmr,
                         onValueChange = { fareXmr = it; fareError = null },
-                        label = { Text("Your fare (XMR)") },
+                        label = { Text("Your fare (${if (fiat) cur else "XMR"})") },
                         supportingText = {
                             Text(
                                 if (n.farePxmr != null) "their offer — change it to counter"
@@ -1184,6 +1216,16 @@ private fun FareDetail(
                         },
                         modifier = Modifier.fillMaxWidth(), singleLine = true,
                     )
+                    if (rate != null) {
+                        TextButton(onClick = {
+                            // Convert what is typed so flipping the unit keeps
+                            // the same money, not the same digits.
+                            val pxmr = offerToPxmr(fareXmr, fiat, rate)
+                            fiat = !fiat
+                            fareXmr = pxmr?.let { pxmrToField(it, fiat, rate) } ?: ""
+                            fareError = null
+                        }) { Text("Price in ${if (fiat) "XMR" else cur} instead") }
+                    }
                     Spacer(Modifier.height(10.dp))
                     Button(
                         onClick = onClick@{
@@ -1191,12 +1233,12 @@ private fun FareDetail(
                             // keyboard, a minus, or garbage must fail loudly —
                             // an offer for a fare nobody typed is a silent
                             // repricing.
-                            val v = fareXmr.trim().replace(',', '.').toDoubleOrNull()
-                            if (v == null || v <= 0.0) {
+                            val pxmr = offerToPxmr(fareXmr, fiat, rate)
+                            if (pxmr == null || pxmr <= 0) {
                                 fareError = "The fare must be a number above zero."
                                 return@onClick
                             }
-                            onTake(n, (v * 1e12).toLong())
+                            onTake(n, pxmr)
                         },
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(52.dp),
@@ -1273,6 +1315,11 @@ fun HailSheet(
     var to by remember { mutableStateOf<org.ducatproject.ducat.Geo.Hit?>(null) }
     var route by remember { mutableStateOf<org.ducatproject.ducat.Geo.Route?>(null) }
     var routing by remember { mutableStateOf(false) }
+    // The offer can be typed in the local currency, like the rest of the app.
+    // Only defaults to fiat when a rate is cached to convert it.
+    val rate = remember { RateStore(context).cached()?.first }
+    val cur = remember { Amounts.currency(context) }
+    var fiat by remember { mutableStateOf(Amounts.preferFiat(context) && rate != null) }
     var fareXmr by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -1318,7 +1365,7 @@ fun HailSheet(
         } else {
             error = null
             org.ducatproject.ducat.Fare.estimateExact(context, r.meters, r.seconds)
-                ?.let { (_, pxmr) -> fareXmr = formatXmr(pxmr) }
+                ?.let { (_, pxmr) -> fareXmr = pxmrToField(pxmr, fiat, rate) }
         }
     }
 
@@ -1412,9 +1459,18 @@ fun HailSheet(
                         OutlinedTextField(
                             value = fareXmr,
                             onValueChange = { fareXmr = it },
-                            label = { Text("Your offer (XMR)") },
+                            label = { Text("Your offer (${if (fiat) cur else "XMR"})") },
                             modifier = Modifier.fillMaxWidth(), singleLine = true,
                         )
+                        if (rate != null) {
+                            TextButton(onClick = {
+                                // Convert what is typed so the unit flip keeps
+                                // the same money, not the same digits.
+                                val pxmr = offerToPxmr(fareXmr, fiat, rate)
+                                fiat = !fiat
+                                fareXmr = pxmr?.let { pxmrToField(it, fiat, rate) } ?: ""
+                            }) { Text("Price in ${if (fiat) "XMR" else cur} instead") }
+                        }
                         Spacer(Modifier.height(10.dp))
                         Button(
                             onClick = onClick@{
@@ -1422,16 +1478,15 @@ fun HailSheet(
                                 // a minus or garbage must refuse loudly here —
                                 // posting "quote me" instead of the typed
                                 // offer is a silent repricing.
-                                val fareText = fareXmr.trim().replace(',', '.')
                                 var fare: ULong? = null
-                                if (fareText.isNotEmpty()) {
-                                    val v = fareText.toDoubleOrNull()
-                                    if (v == null || v <= 0.0) {
+                                if (fareXmr.trim().isNotEmpty()) {
+                                    val pxmr = offerToPxmr(fareXmr, fiat, rate)
+                                    if (pxmr == null || pxmr <= 0) {
                                         error = "The offer must be a number above zero — " +
                                             "or leave it blank to ask for a quote."
                                         return@onClick
                                     }
-                                    fare = (v * 1e12).toLong().toULong()
+                                    fare = pxmr.toULong()
                                 }
                                 busy = true; error = null
                                 val f = from!!
