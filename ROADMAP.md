@@ -31,9 +31,15 @@ money. Ordered by what blocks 1.0, not by effort.
 
 ## Trust — the stranger problem, named since 0.82
 
-- **Driver bonds through Part IV escrow.** The durable answer to no-shows
-  between strangers. Deliberately unspecified so far; 1.0 should at least
-  pin the ceremony shape even if the app ships without it.
+- ~~**Driver bonds through Part IV escrow.**~~ **Spec'd + proven, 0.88** —
+  §17.9 pins the ceremony (DKG then FROST over the sealed thread, kinds
+  8/9/10); escrowtest.rs builds a real 2-of-2 on stagenet, funds it, and
+  releases by FROST co-signature (both signers derive one tx). Message
+  plumbing is in core/bridge/harness (240 vectors). **Left:** wire the
+  actual PedPoP driver onto the kinds (blocked on a version-matched
+  interactive-DKG crate — crates.io dkg-pedpop conflicts; likely pin the
+  serai monorepo), the arbiter-set role, and a "post a bond / return the
+  deposit" UI.
 - **Opt-in live location after commitment.** Rider and driver may share
   positions *after* mutual acceptance, never before, off by default,
   clearly bounded to the ride. Presence streaming is a different threat
