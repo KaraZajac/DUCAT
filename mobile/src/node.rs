@@ -697,6 +697,11 @@ pub fn stand_post(cell: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeEr
         rc.open_dht_record(key.clone(), Some(owner))
             .await
             .map_err(|e| NodeError::Failed(format!("open: {e}")))?;
+        // Prime the local value_seq with the slot's current tenant first: a
+        // write from a store that never saw the slot goes out at seq 0 and
+        // the network silently keeps whatever is already there (§16.12's
+        // read-before-write, learned the hard way on the mailbox ring).
+        let _ = rc.get_dht_value(key.clone(), subkey, true).await;
         rc.set_dht_value(key.clone(), subkey, data, None)
             .await
             .map_err(|e| NodeError::Failed(format!("post: {e}")))?;

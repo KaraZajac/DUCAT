@@ -941,6 +941,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "hail.notice")
             } else if obj.contains_key("subkey_count") {
                 ("contact", "log.ring")
+            } else if obj.contains_key("shard") {
+                ("contact", "stand.shard")
             } else {
                 ("contact", "contact.card")
             }
@@ -1351,6 +1353,37 @@ fn contact_cases() -> Vec<J> {
             "name": name, "why": why,
             "seq": seq, "subkey_count": count,
             "expect": { "ok": true, "subkey": subkey, "oldest_readable": reachable_from }
+        }));
+    }
+
+    // §15.12's overflow ladder: the shard names both sides construct
+    // independently. A writer and a reader disagreeing on a name are standing
+    // at different corners, so the format is a vector, not a convention.
+    for (name, why, base, shard, expect) in [
+        ("shard_zero_is_bare",
+         "Shard 0 is the bare stand name — deployed boards from 0.83 stay valid, and a quiet cell costs exactly one read.",
+         "geo:u4pruy", 0u32, Some("geo:u4pruy")),
+        ("shard_one",
+         "The first overflow board: decimal suffix, no padding — a padded and an unpadded spelling would be two different record keys for one name.",
+         "geo:u4pruy", 1, Some("geo:u4pruy-1")),
+        ("shard_top",
+         "The tallest the ladder goes: 16 shards of 8 slots bounds a cell at 128 concurrent notices and a sweep at 16 reads.",
+         "geo:u4pruy", 15, Some("geo:u4pruy-15")),
+        ("shard_past_cap",
+         "Past the cap, density has outgrown the cell; the answer is a finer geohash, not a taller ladder.",
+         "geo:u4pruy", 16, None),
+        ("shard_of_nothing",
+         "A stand needs a name; a shard of the empty string is a board nobody meant to make.",
+         "", 0, None),
+    ] {
+        v.push(json!({
+            "name": name, "why": why,
+            "base": base, "shard": shard,
+            "expect": match expect {
+                Some(n) => json!({ "ok": true, "board": n }),
+                None => json!({ "ok": false, "reject": "MALFORMED",
+                                "hint": "ladder cap or empty base" }),
+            }
         }));
     }
 

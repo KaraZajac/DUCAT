@@ -926,6 +926,18 @@ pub fn geohashNeighbors(cell: String) -> Result<Vec<String>, ContactError> {
     ducat_core::geo::geohash_neighbors(&cell).map_err(refuse)
 }
 
+/// §15.12's overflow ladder: the board name for one shard of a stand.
+#[uniffi::export]
+pub fn standShardName(base: String, shard: u32) -> Result<String, ContactError> {
+    ducat_core::geo::stand_shard_name(&base, shard).map_err(refuse)
+}
+
+/// How tall a ladder may grow — readers sweep until an empty shard or this.
+#[uniffi::export]
+pub fn maxStandShards() -> u32 {
+    ducat_core::geo::MAX_STAND_SHARDS
+}
+
 #[uniffi::export]
 pub fn geohashCenter(cell: String) -> Result<Vec<i64>, ContactError> {
     let (lat, lon) = ducat_core::geo::geohash_center(&cell).map_err(refuse)?;

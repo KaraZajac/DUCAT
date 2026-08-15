@@ -190,6 +190,7 @@
             "contact.details",
             "log.head",
             "log.ring",
+            "stand.shard",
             "message.payment",
             "hail.notice"
           ]

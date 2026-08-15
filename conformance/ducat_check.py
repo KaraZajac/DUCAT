@@ -1467,6 +1467,29 @@ def run_log_head(cases, r):
                   f"{c['expect']['reencodes_to_hex']}")
 
 
+MAX_STAND_SHARDS = 16
+
+def stand_shard_name(base, shard):
+    # §15.12's overflow ladder, independently implemented: shard 0 is the bare
+    # name, overflow shards are "-<n>" decimal with no padding.
+    if not base:
+        raise Reject("Malformed", "a stand needs a name")
+    if shard >= MAX_STAND_SHARDS:
+        raise Reject("Malformed", "the ladder is capped at 16 shards")
+    return base if shard == 0 else f"{base}-{shard}"
+
+
+def run_stand_shard(cases, r):
+    for c in cases:
+        def go(c=c):
+            got = stand_shard_name(c["base"], c["shard"])
+            if got != c["expect"]["board"]:
+                raise Reject("StateViolation",
+                             f"board {got!r}, vector says {c['expect']['board']!r}")
+            return None
+        expect_reject(r, "contact", c, go)
+
+
 def run_log_ring(cases, r):
     for c in cases:
         def go(c=c):
@@ -1559,6 +1582,7 @@ BY_KIND = {
     "contact.details": run_contact_details,
     "log.head": run_log_head,
     "log.ring": run_log_ring,
+    "stand.shard": run_stand_shard,
     "hail.notice": run_hail_notice,
     "message.payment": run_message_payment,
     "message.chain": run_message_chain,

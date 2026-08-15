@@ -377,6 +377,63 @@
       "why": "Wrapping is modular, not a one-off."
     },
     {
+      "base": "geo:u4pruy",
+      "expect": {
+        "board": "geo:u4pruy",
+        "ok": true
+      },
+      "kind": "stand.shard",
+      "name": "shard_zero_is_bare",
+      "shard": 0,
+      "why": "Shard 0 is the bare stand name — deployed boards from 0.83 stay valid, and a quiet cell costs exactly one read."
+    },
+    {
+      "base": "geo:u4pruy",
+      "expect": {
+        "board": "geo:u4pruy-1",
+        "ok": true
+      },
+      "kind": "stand.shard",
+      "name": "shard_one",
+      "shard": 1,
+      "why": "The first overflow board: decimal suffix, no padding — a padded and an unpadded spelling would be two different record keys for one name."
+    },
+    {
+      "base": "geo:u4pruy",
+      "expect": {
+        "board": "geo:u4pruy-15",
+        "ok": true
+      },
+      "kind": "stand.shard",
+      "name": "shard_top",
+      "shard": 15,
+      "why": "The tallest the ladder goes: 16 shards of 8 slots bounds a cell at 128 concurrent notices and a sweep at 16 reads."
+    },
+    {
+      "base": "geo:u4pruy",
+      "expect": {
+        "hint": "ladder cap or empty base",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "stand.shard",
+      "name": "shard_past_cap",
+      "shard": 16,
+      "why": "Past the cap, density has outgrown the cell; the answer is a finer geohash, not a taller ladder."
+    },
+    {
+      "base": "",
+      "expect": {
+        "hint": "ladder cap or empty base",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "stand.shard",
+      "name": "shard_of_nothing",
+      "shard": 0,
+      "why": "A stand needs a name; a shard of the empty string is a board nobody meant to make."
+    },
+    {
       "expect": {
         "ok": true
       },

@@ -441,7 +441,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "transcript.replay", "transcript.substitution", "backup.import",
         "object.roundtrip", "escrow.ceremony", "escrow.ready", "escrow.release",
         "bond.check", "slash.check",
-        "contact.card", "contact.details", "log.head", "log.ring", "message.chain",
+        "contact.card", "contact.details", "log.head", "log.ring", "stand.shard", "message.chain",
         "message.payment", "hail.notice",
     ];
     let dir = std::path::Path::new("../vectors/v1");
@@ -592,6 +592,23 @@ fn contact_vectors_pass() {
                     }
                     Err(e) => {
                         assert!(!ok, "{name}: refused a notice the vector accepts: {e:?}");
+                        assert_eq!(
+                            format!("{:?}", e.code).to_uppercase(),
+                            c["expect"]["reject"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                }
+            }
+            "stand.shard" => {
+                let base = c["base"].as_str().unwrap();
+                let shard = c["shard"].as_u64().unwrap() as u32;
+                match ducat_core::geo::stand_shard_name(base, shard) {
+                    Ok(got) => {
+                        assert!(c["expect"]["ok"].as_bool().unwrap(), "{name}: should reject");
+                        assert_eq!(got, c["expect"]["board"].as_str().unwrap(), "{name}: wrong board name");
+                    }
+                    Err(e) => {
+                        assert!(!c["expect"]["ok"].as_bool().unwrap(), "{name}: should accept: {:?}", e.code);
                         assert_eq!(
                             format!("{:?}", e.code).to_uppercase(),
                             c["expect"]["reject"].as_str().unwrap(), "{name}"

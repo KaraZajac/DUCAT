@@ -863,6 +863,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -935,6 +939,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_log_still_readable(`seq`: Long,`nextSeq`: Long,`subkeyCount`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Byte
     fun uniffi_ducat_mobile_fn_func_log_subkey(`seq`: Long,`subkeyCount`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): Int
+    fun uniffi_ducat_mobile_fn_func_maxstandshards(uniffi_out_err: UniffiRustCallStatus, 
     ): Int
     fun uniffi_ducat_mobile_fn_func_monero_block_time(`nodeUrl`: RustBuffer.ByValue,`height`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
@@ -1020,6 +1026,8 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_standshardname(`base`: RustBuffer.ByValue,`shard`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_stand_post(`cell`: RustBuffer.ByValue,`subkey`: Int,`data`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     fun uniffi_ducat_mobile_fn_func_stand_read(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1200,6 +1208,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_log_subkey(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_maxstandshards(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_block_time(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_default_nodes(
@@ -1283,6 +1293,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_seal_message(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_sealed_prekey_id(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_standshardname(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_stand_post(
     ): Short
@@ -1396,6 +1408,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_log_subkey() != 6279.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_maxstandshards() != 25679.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_block_time() != 31246.toShort()) {
@@ -1522,6 +1537,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_standshardname() != 25766.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_stand_post() != 31206.toShort()) {
@@ -5115,6 +5133,18 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
     
 
         /**
+         * How tall a ladder may grow — readers sweep until an empty shard or this.
+         */ fun `maxStandShards`(): kotlin.UInt {
+            return FfiConverterUInt.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_maxstandshards(
+        _status)
+}
+    )
+    }
+    
+
+        /**
          * When a block was mined, in seconds.
          *
          * For filling in times on outputs found before the scanner recorded them. One
@@ -5765,6 +5795,19 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_sealed_prekey_id(
         FfiConverterByteArray.lower(`sealedBytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * §15.12's overflow ladder: the board name for one shard of a stand.
+         */
+    @Throws(ContactException::class) fun `standShardName`(`base`: kotlin.String, `shard`: kotlin.UInt): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_standshardname(
+        FfiConverterString.lower(`base`),FfiConverterUInt.lower(`shard`),_status)
 }
     )
     }

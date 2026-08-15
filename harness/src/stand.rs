@@ -77,79 +77,116 @@ fn schema() -> DHTSchema {
     DHTSchema::dflt(8).expect("static schema")
 }
 
-pub async fn post(cell: &str, text: &str) -> Result<(), Box<dyn std::error::Error>> {
-    println!("\n\x1b[1mDUCAT — stand post (rendezvous by convention)\x1b[0m\n");
-    let (pk, sk) = cell_keypair(cell);
-    println!("  cell     {cell:?}");
-    println!("  owner    {pk} (derived from the cell name, not generated)");
+/// Open a board by name, pinning it first if nobody has (the convention
+/// means any reader holds the keypair to fix KeyNotFound itself).
+async fn open_board(
+    api: &VeilidAPI,
+    rc: &RoutingContext,
+    name: &str,
+) -> Result<RecordKey, Box<dyn std::error::Error>> {
+    let (pk, sk) = cell_keypair(name);
+    let enc = SharedSecret::new(CRYPTO_KIND_VLD0, cell_encryption(name));
+    let key = api
+        .get_dht_record_key(schema(), PublicKey::new(CRYPTO_KIND_VLD0, pk.clone()), Some(enc))
+        .await?;
+    if rc.open_dht_record(key.clone(), None).await.is_err() {
+        let kp = KeyPair::new(CRYPTO_KIND_VLD0, BareKeyPair::new(pk, sk));
+        if let Ok(desc) = rc.create_dht_record(CRYPTO_KIND_VLD0, schema(), Some(kp)).await {
+            let _ = rc.close_dht_record(desc.key().clone()).await;
+        }
+        rc.open_dht_record(key.clone(), None).await?;
+    }
+    Ok(key)
+}
 
+/// Is this slot free to write? Empty, or holding debris — anything that is
+/// not a live hail notice. Reading it first is also what primes the local
+/// value_seq, without which the overwrite is silently refused (§16.12's
+/// read-before-write, learned the hard way on the mailbox ring).
+fn slot_is_free(data: &[u8], now: u64) -> bool {
+    use ducat_core::cbor::decode;
+    use ducat_core::contact::HailNotice;
+    if data.is_empty() {
+        return true;
+    }
+    match decode(data).ok().and_then(|v| HailNotice::from_value(v).ok()) {
+        Some(n) => n.expiry <= now,
+        None => true,
+    }
+}
+
+pub async fn post(cell: &str, text: &str) -> Result<(), Box<dyn std::error::Error>> {
+    use ducat_core::geo::{stand_shard_name, MAX_STAND_SHARDS};
+    println!("\n\x1b[1mDUCAT — stand post (rendezvous by convention)\x1b[0m\n");
     let (api, _c) = crate::veilid::start("stand-p").await?;
     let rc = api.routing_context()?;
-    let kp = KeyPair::new(CRYPTO_KIND_VLD0, BareKeyPair::new(pk, sk));
-    let enc = SharedSecret::new(CRYPTO_KIND_VLD0, cell_encryption(cell));
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_secs();
 
-    // The conventional key: opaque part from the owner key, encryption part
-    // from the cell name. Both computed locally; nothing exchanged.
-    let key = api
-        .get_dht_record_key(schema(), kp.key(), Some(enc))
-        .await?;
-
-    // Create publishes the descriptor (schema + owner). Its handle carries a
-    // random encryption key we deliberately never use: close, and reopen
-    // under the conventional key, so what we write decrypts for anyone who
-    // can derive it. If the board already exists, create fails and the open
-    // is all that was needed anyway.
-    if let Ok(desc) = rc
-        .create_dht_record(CRYPTO_KIND_VLD0, schema(), Some(kp.clone()))
-        .await
-    {
-        rc.close_dht_record(desc.key().clone()).await?;
+    // §15.12's overflow ladder: the lowest shard with a free slot takes the
+    // notice. Backfilling low keeps the ladder compact, which is what lets a
+    // reader stop sweeping at the first empty shard.
+    for shard in 0..MAX_STAND_SHARDS {
+        let name = stand_shard_name(cell, shard).map_err(|e| format!("{e:?}"))?;
+        let key = open_board(&api, &rc, &name).await?;
+        for subkey in 0..8u32 {
+            let occupant = rc.get_dht_value(key.clone(), subkey, true).await?;
+            if slot_is_free(occupant.as_ref().map(|v| v.data()).unwrap_or(&[]), now) {
+                // The board is written with the derived owner key, so reopen
+                // as owner for the set.
+                let (pk, sk) = cell_keypair(&name);
+                let kp = KeyPair::new(CRYPTO_KIND_VLD0, BareKeyPair::new(pk, sk));
+                rc.close_dht_record(key.clone()).await?;
+                rc.open_dht_record(key.clone(), Some(kp)).await?;
+                rc.set_dht_value(key.clone(), subkey, text.as_bytes().to_vec(), None)
+                    .await?;
+                println!("  posted   {} B at {name:?} slot {subkey}", text.len());
+                rc.close_dht_record(key).await?;
+                api.shutdown().await;
+                return Ok(());
+            }
+        }
+        println!("  {name:?} is full — climbing the ladder");
+        rc.close_dht_record(key).await?;
     }
-    rc.open_dht_record(key.clone(), Some(kp)).await?;
-    println!("  record   {key}");
-
-    rc.set_dht_value(key.clone(), 0, text.as_bytes().to_vec(), None)
-        .await?;
-    println!("  posted   {} B", text.len());
-    println!(
-        "\n  now, from anyone who knows only the cell name:\n    \
-         cargo run -q -p ducat-harness -- --stand-read {cell:?}\n"
-    );
-    rc.close_dht_record(key).await?;
     api.shutdown().await;
-    Ok(())
+    Err("every shard is full — this cell has outgrown itself; use a finer geohash".into())
 }
 
 pub async fn read(cell: &str) -> Result<(), Box<dyn std::error::Error>> {
+    use ducat_core::geo::{stand_shard_name, MAX_STAND_SHARDS};
     println!("\n\x1b[1mDUCAT — stand read (key computed, not communicated)\x1b[0m\n");
-    let (pk, _) = cell_keypair(cell);
-    println!("  cell     {cell:?}");
-
     let (api, _c) = crate::veilid::start("stand-r").await?;
     let rc = api.routing_context()?;
 
-    let enc = SharedSecret::new(CRYPTO_KIND_VLD0, cell_encryption(cell));
-    let key = api
-        .get_dht_record_key(schema(), PublicKey::new(CRYPTO_KIND_VLD0, pk), Some(enc))
-        .await?;
-    println!("  record   {key}  ← computed locally from the cell name");
-
-    rc.open_dht_record(key.clone(), None).await?;
     let mut found = 0;
-    for subkey in 0..8u32 {
-        if let Ok(Some(v)) = rc.get_dht_value(key.clone(), subkey, true).await {
-            if v.data().is_empty() { continue }
-            found += 1;
-            println!("  [{subkey}] {} B: {:?}", v.data().len(),
-                String::from_utf8_lossy(&v.data()[..v.data().len().min(60)]));
+    for shard in 0..MAX_STAND_SHARDS {
+        let name = stand_shard_name(cell, shard).map_err(|e| format!("{e:?}"))?;
+        let key = open_board(&api, &rc, &name).await?;
+        if shard == 0 {
+            println!("  record   {key}  ← computed locally from the cell name");
         }
+        let mut here = 0;
+        for subkey in 0..8u32 {
+            if let Ok(Some(v)) = rc.get_dht_value(key.clone(), subkey, true).await {
+                if v.data().is_empty() { continue }
+                here += 1;
+                println!("  [{name:?} {subkey}] {} B: {:?}", v.data().len(),
+                    String::from_utf8_lossy(&v.data()[..v.data().len().min(60)]));
+            }
+        }
+        rc.close_dht_record(key).await?;
+        found += here;
+        // An empty shard ends the sweep: writers backfill low, so nothing
+        // lives above a hole for long. A quiet cell costs one read.
+        if here == 0 { break }
     }
     if found == 0 {
         println!("  \x1b[31mboard is empty\x1b[0m");
     } else {
-        println!("\n  \x1b[32m{found} notice(s) on the board\x1b[0m");
+        println!("\n  \x1b[32m{found} notice(s) on the ladder\x1b[0m");
     }
-    rc.close_dht_record(key).await?;
     api.shutdown().await;
     Ok(())
 }
@@ -264,53 +301,59 @@ pub async fn peek_seals() -> Result<(), Box<dyn std::error::Error>> {
 async fn hail_watch_cells(cells: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     use ducat_core::cbor::decode;
     use ducat_core::contact::HailNotice;
+    use ducat_core::geo::{stand_shard_name, MAX_STAND_SHARDS};
 
     let (api, _c) = crate::veilid::start("drive").await?;
     let rc = api.routing_context()?;
-    let mut keys = Vec::new();
-    for cell in cells {
-        let name = cell.strip_prefix("geo:").map(|g| format!("geo:{g}")).unwrap_or_else(|| cell.clone());
-        let (pk, sk) = cell_keypair(&name);
-        let enc = SharedSecret::new(CRYPTO_KIND_VLD0, cell_encryption(&name));
-        let key = api
-            .get_dht_record_key(schema(), PublicKey::new(CRYPTO_KIND_VLD0, pk.clone()), Some(enc))
-            .await?;
-        if rc.open_dht_record(key.clone(), None).await.is_err() {
-            let kp = KeyPair::new(CRYPTO_KIND_VLD0, BareKeyPair::new(pk, sk));
-            if let Ok(desc) = rc.create_dht_record(CRYPTO_KIND_VLD0, schema(), Some(kp)).await {
-                let _ = rc.close_dht_record(desc.key().clone()).await;
-            }
-            rc.open_dht_record(key.clone(), None).await?;
-        }
-        println!("  board {} = {}", cell, key);
-        keys.push((cell.clone(), key));
-    }
+    // Boards open lazily as the ladder is climbed: 9 cells × 16 shards eagerly
+    // would be 144 records for what is almost always 9.
+    let mut opened: std::collections::HashMap<String, RecordKey> = Default::default();
 
     let now = || std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
 
     loop {
-        for (cell, key) in &keys {
-            for subkey in 0..8u32 {
-                let Ok(Some(v)) = rc.get_dht_value(key.clone(), subkey, true).await else { continue };
-                if v.data().is_empty() { continue }
-                let Ok(val) = decode(v.data()) else { continue };
-                let Ok(n) = HailNotice::from_value(val) else { continue };
-                if n.expiry <= now() { continue }
-                println!(
-                    "  [{cell} slot {subkey}] to {:?} ({}), {}, stands {}s",
-                    n.dest,
-                    n.dest_cell.as_deref().unwrap_or("no cell"),
-                    n.fare_pxmr.map(|f| format!("offers {f} pXMR"))
-                        .unwrap_or_else(|| "quote me".into()),
-                    n.expiry - now(),
-                );
-                println!("\n  taking it — claiming the card…");
-                for (_, k) in &keys { let _ = rc.close_dht_record(k.clone()).await; }
-                api.shutdown().await;
-                crate::mailbox::claim(&n.card).await?;
-                println!("\n  \x1b[32mhail taken\x1b[0m — talk with --say");
-                return Ok(());
+        for cell in cells {
+            // §15.12's overflow ladder: sweep from shard 0, stop at the first
+            // shard holding nothing live. Writers backfill low, so a quiet
+            // cell costs one read and a busy one costs its actual height.
+            'ladder: for shard in 0..MAX_STAND_SHARDS {
+                let name = stand_shard_name(cell, shard).map_err(|e| format!("{e:?}"))?;
+                let key = match opened.get(&name) {
+                    Some(k) => k.clone(),
+                    None => {
+                        let k = open_board(&api, &rc, &name).await?;
+                        if shard == 0 {
+                            println!("  board {} = {}", name, k);
+                        }
+                        opened.insert(name.clone(), k.clone());
+                        k
+                    }
+                };
+                let mut live_here = 0u32;
+                for subkey in 0..8u32 {
+                    let Ok(Some(v)) = rc.get_dht_value(key.clone(), subkey, true).await else { continue };
+                    if v.data().is_empty() { continue }
+                    let Ok(val) = decode(v.data()) else { continue };
+                    let Ok(n) = HailNotice::from_value(val) else { continue };
+                    if n.expiry <= now() { continue }
+                    live_here += 1;
+                    println!(
+                        "  [{name} slot {subkey}] to {:?} ({}), {}, stands {}s",
+                        n.dest,
+                        n.dest_cell.as_deref().unwrap_or("no cell"),
+                        n.fare_pxmr.map(|f| format!("offers {f} pXMR"))
+                            .unwrap_or_else(|| "quote me".into()),
+                        n.expiry - now(),
+                    );
+                    println!("\n  taking it — claiming the card…");
+                    for k in opened.values() { let _ = rc.close_dht_record(k.clone()).await; }
+                    api.shutdown().await;
+                    crate::mailbox::claim(&n.card).await?;
+                    println!("\n  \x1b[32mhail taken\x1b[0m — talk with --say");
+                    return Ok(());
+                }
+                if live_here == 0 { break 'ladder }
             }
         }
         print!(".");

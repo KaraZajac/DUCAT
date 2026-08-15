@@ -191,6 +191,28 @@ pub fn haversine_m(lat1_e7: i64, lon1_e7: i64, lat2_e7: i64, lon2_e7: i64) -> u6
     (2.0 * R * a.sqrt().asin()) as u64
 }
 
+/// The most overflow shards a stand's ladder may grow (§15.12). Shard 0 is
+/// the bare name; 16 shards × 8 slots bounds a cell at 128 concurrent
+/// notices and a full sweep at 16 reads. Past that, density has outgrown the
+/// cell and the answer is a finer geohash, not a taller ladder.
+pub const MAX_STAND_SHARDS: u32 = 16;
+
+/// The board name for one shard of a stand's overflow ladder (§15.12).
+///
+/// Shard 0 is the bare stand name — deployed boards stay valid — and shards
+/// 1.. are `<name>-<n>`, decimal, no leading zeros. The format is pinned
+/// here because both sides construct it independently: a writer and a
+/// reader disagreeing on a name are standing at different corners.
+pub fn stand_shard_name(base: &str, shard: u32) -> Result<String, Reject> {
+    if base.is_empty() {
+        return Err(bad("a stand needs a name"));
+    }
+    if shard >= MAX_STAND_SHARDS {
+        return Err(bad("the ladder is capped at 16 shards"));
+    }
+    Ok(if shard == 0 { base.to_string() } else { format!("{base}-{shard}") })
+}
+
 /// A board cell is a valid geohash no finer than precision 6 (§16.17).
 pub fn valid_board_cell(cell: &str) -> bool {
     !cell.is_empty()
@@ -246,6 +268,17 @@ mod tests {
         assert!(geohash_neighbors("ezs4a").is_err()); // 'a' is not in the alphabet
         assert!(!valid_board_cell("u4pruyd")); // 7 chars: too precise for a board
         assert!(valid_board_cell("u4pruy"));
+    }
+
+    /// The ladder names, pinned: shard 0 is the bare name, overflow shards
+    /// suffix it, and the cap is a hard edge.
+    #[test]
+    fn ladder_names() {
+        assert_eq!(stand_shard_name("geo:u4pruy", 0).unwrap(), "geo:u4pruy");
+        assert_eq!(stand_shard_name("geo:u4pruy", 1).unwrap(), "geo:u4pruy-1");
+        assert_eq!(stand_shard_name("geo:u4pruy", 15).unwrap(), "geo:u4pruy-15");
+        assert!(stand_shard_name("geo:u4pruy", 16).is_err());
+        assert!(stand_shard_name("", 0).is_err());
     }
 
     #[test]

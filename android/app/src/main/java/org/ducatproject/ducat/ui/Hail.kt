@@ -128,7 +128,7 @@ fun HailCard() {
         val p = posted
         if (p != null) {
             Spacer(Modifier.height(10.dp))
-            Text("Standing at ${p.cell}",
+            Text("Standing at ${p.cell.removePrefix("geo:").substringBefore("-")}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(8.dp))
@@ -314,19 +314,29 @@ fun DriveScreen() {
             at = (at + 3) % cells.size
             val now = System.currentTimeMillis() / 1000
             for (c in batch) {
+                // §15.12's overflow ladder: sweep shards from 0, stop at the
+                // first with nothing live. Writers backfill low, so a quiet
+                // cell costs one read and a busy one its actual height.
                 val got = withContext(Dispatchers.IO) {
                     runCatching {
-                        standRead(c).mapNotNull { n ->
-                            runCatching { hailDecode(n.data) }.getOrNull()?.let { h ->
-                                if (h.expiry.toLong() > now) {
-                                    SeenHail(
-                                        c, n.subkey, h.card, h.dest,
-                                        h.farePxmr?.toLong(), h.expiry.toLong(),
-                                        h.originCell, h.destCell,
-                                    )
-                                } else null
+                        val all = mutableListOf<SeenHail>()
+                        for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
+                            val name = uniffi.ducat_mobile.standShardName(c, shard)
+                            val live = standRead(name).mapNotNull { n ->
+                                runCatching { hailDecode(n.data) }.getOrNull()?.let { h ->
+                                    if (h.expiry.toLong() > now) {
+                                        SeenHail(
+                                            name, n.subkey, h.card, h.dest,
+                                            h.farePxmr?.toLong(), h.expiry.toLong(),
+                                            h.originCell, h.destCell,
+                                        )
+                                    } else null
+                                }
                             }
+                            if (live.isEmpty()) break
+                            all += live
                         }
+                        all
                     }.getOrNull()
                 }
                 if (got != null) found[c] = got
@@ -981,9 +991,29 @@ fun HailSheet(
                                                 destCell = dCell,
                                             )
                                         )
-                                        val cell = "geo:$oCell"
-                                        val sub = (0..7).random().toUInt()
-                                        uniffi.ducat_mobile.standPost(cell, sub, bytes)
+                                        // §15.12's overflow ladder: the lowest
+                                        // shard with a free slot takes the
+                                        // notice — reading first also primes
+                                        // the slot for the overwrite.
+                                        val base = "geo:$oCell"
+                                        val nowS = System.currentTimeMillis() / 1000
+                                        var placed: Pair<String, UInt>? = null
+                                        for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
+                                            val name = uniffi.ducat_mobile.standShardName(base, shard)
+                                            val taken = standRead(name).mapNotNull { n ->
+                                                runCatching { hailDecode(n.data) }.getOrNull()
+                                                    ?.takeIf { it.expiry.toLong() > nowS }
+                                                    ?.let { n.subkey }
+                                            }.toSet()
+                                            val free = (0u..7u).firstOrNull { it !in taken }
+                                            if (free != null) {
+                                                uniffi.ducat_mobile.standPost(name, free, bytes)
+                                                placed = name to free
+                                                break
+                                            }
+                                        }
+                                        val (cell, sub) = placed
+                                            ?: error("every stand shard is full here — try again shortly")
                                         Triple(cell, sub, card.inboxKey)
                                     }.onSuccess { (cell, sub, inbox) ->
                                         withContext(Dispatchers.Main) {
