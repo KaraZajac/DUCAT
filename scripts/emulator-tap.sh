@@ -13,11 +13,11 @@
 # (scripts/emulator.sh picks that up automatically when the device exists.)
 set -e
 
-TAP=tap-ducat
 # Android's emulator guest does not DHCP: eth0 is baked to 10.0.2.15 with
 # gateway 10.0.2.2 and DNS 10.0.2.3. The host speaks that dialect instead of
-# teaching the guest a new one.
-NET=10.0.2
+# teaching the guest a new one. The second phone gets its own TAP on 10.0.3
+# and its guest is re-addressed over adb root (see scripts/emulator.sh) —
+# two guests both claiming 10.0.2.15 on one host would be a routing seance.
 OWNER=${SUDO_USER:-kara}
 
 if [ "$(id -u)" != 0 ]; then
@@ -26,8 +26,10 @@ if [ "$(id -u)" != 0 ]; then
 fi
 
 if [ "$1" = "down" ]; then
-  pkill -f "dnsmasq.*$TAP" 2>/dev/null || true
-  ip link del $TAP 2>/dev/null || true
+  for TAP in tap-ducat tap-ducat2; do
+    pkill -f "dnsmasq.*$TAP" 2>/dev/null || true
+    ip link del $TAP 2>/dev/null || true
+  done
   firewall-cmd --remove-masquerade --quiet 2>/dev/null || true
   echo "torn down."
   exit 0
@@ -35,23 +37,23 @@ fi
 
 command -v dnsmasq >/dev/null || { echo "need dnsmasq: dnf install dnsmasq" >&2; exit 1; }
 
-# The device, owned by the user so the emulator needs no root.
-ip tuntap add dev $TAP mode tap user "$OWNER" 2>/dev/null || true
-ip addr flush dev $TAP
-ip addr add $NET.2/24 dev $TAP
-ip addr add $NET.3/24 dev $TAP
-ip link set $TAP up
-
-# Forwarding plus NAT out whatever the default route uses.
 sysctl -qw net.ipv4.ip_forward=1
-firewall-cmd --zone=trusted --change-interface=$TAP --quiet
 firewall-cmd --add-masquerade --quiet
 
-# DNS for the guest at the address it already believes in. No DHCP — the
-# guest is static by construction.
-pkill -f "dnsmasq.*$TAP" 2>/dev/null || true
-dnsmasq --interface=$TAP --bind-interfaces --except-interface=lo \
-  --listen-address=$NET.3 --no-dhcp-interface=$TAP --pid-file=/run/dnsmasq-$TAP.pid
+raise() {
+  local TAP=$1 NET=$2
+  ip tuntap add dev $TAP mode tap user "$OWNER" 2>/dev/null || true
+  ip addr flush dev $TAP
+  ip addr add $NET.2/24 dev $TAP
+  ip addr add $NET.3/24 dev $TAP
+  ip link set $TAP up
+  firewall-cmd --zone=trusted --change-interface=$TAP --quiet
+  pkill -f "dnsmasq.*$TAP" 2>/dev/null || true
+  dnsmasq --interface=$TAP --bind-interfaces --except-interface=lo \
+    --listen-address=$NET.3 --no-dhcp-interface=$TAP --pid-file=/run/dnsmasq-$TAP.pid
+  echo "ready: $TAP as $NET.2 (gw) / $NET.3 (dns)"
+}
 
-echo "ready: $TAP up as $NET.2 (gw) and $NET.3 (dns), NAT on."
-echo "launch: scripts/emulator.sh (it detects $TAP), or add: -net-tap $TAP"
+raise tap-ducat 10.0.2
+raise tap-ducat2 10.0.3
+echo "launch: scripts/emulator.sh [1|2]"
