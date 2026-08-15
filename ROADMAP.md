@@ -31,15 +31,18 @@ money. Ordered by what blocks 1.0, not by effort.
 
 ## Trust — the stranger problem, named since 0.82
 
-- ~~**Driver bonds through Part IV escrow.**~~ **Spec'd + proven, 0.88** —
-  §17.9 pins the ceremony (DKG then FROST over the sealed thread, kinds
-  8/9/10); escrowtest.rs builds a real 2-of-2 on stagenet, funds it, and
-  releases by FROST co-signature (both signers derive one tx). Message
-  plumbing is in core/bridge/harness (240 vectors). **Left:** wire the
-  actual PedPoP driver onto the kinds (blocked on a version-matched
-  interactive-DKG crate — crates.io dkg-pedpop conflicts; likely pin the
-  serai monorepo), the arbiter-set role, and a "post a bond / return the
-  deposit" UI.
+- ~~**Driver bonds through Part IV escrow.**~~ **Built + proven, 0.88** —
+  §17.9 ceremony (DKG then FROST over the sealed thread, kinds 8/9/10).
+  Trustless DKG→fund→FROST-release proven on stagenet with no dealer
+  (escrowtest.rs; release txid da200c13). Version blocker solved by
+  vendoring dkg-pedpop against multiexp 0.5 (mobile/vendor). The ceremony
+  engine ships in the app (mobile/src/ceremony.rs — machines held by
+  ceremony_id, stepped by wire bytes; unit-tested), and the app glue
+  (Ceremony.kt) drives it from the poll loop: startBond → DkgRound →
+  engine → escrow address. Builds, installs, no regression. **Left:**
+  (1) full two-phone live run — gated on the second emulator TAP;
+  (2) FROST-release glue (kind 9) mirroring the DKG glue; (3) the
+  arbiter-set role; (4) a "post a bond / return deposit" UI.
 - **Opt-in live location after commitment.** Rider and driver may share
   positions *after* mutual acceptance, never before, off by default,
   clearly bounded to the ride. Presence streaming is a different threat
