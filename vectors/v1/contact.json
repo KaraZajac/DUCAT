@@ -840,6 +840,80 @@
     },
     {
       "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6d626520746865726520696e203618a01a6553f10018b20618b31afa56ea0018d5190168"
+      },
+      "kind": "message.payment",
+      "name": "ride_offer",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6d626520746865726520696e203618a01a6553f10018b20618b31afa56ea0018d5190168",
+      "why": "A driver's terms for a claimed hail: the fare, and how far away they are. The claim was the application; nothing is owed until the accept."
+    },
+    {
+      "expect": {
+        "hint": "a ride message must carry the fare",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "ride_offer_without_fare",
+      "payment_hex": "a8001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b206",
+      "why": "An offer without a fare offers nothing; the rider would be accepting a blank."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6d73656520796f7520746865726518a01a6553f10018b20718b31afa56ea0018c000"
+      },
+      "kind": "message.payment",
+      "name": "ride_accept",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6d73656520796f7520746865726518a01a6553f10018b20718b31afa56ea0018c000",
+      "why": "The rider's yes: names the offer it answers and echoes its fare, binding the acceptance to a price neither side can later dispute into a different number."
+    },
+    {
+      "expect": {
+        "hint": "a retract or accept names its target",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "ride_accept_without_target",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20718b31afa56ea00",
+      "why": "An accept that names no offer accepts nothing in particular; with two offers in a thread, which one it answers must never be inferred."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f781963616e63656c6c656420e280942077726f6e67207461626c6518a01a6553f10018b20518c00318c101"
+      },
+      "kind": "message.payment",
+      "name": "retract_a_bill",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f781963616e63656c6c656420e280942077726f6e67207461626c6518a01a6553f10018b20518c00318c101",
+      "why": "The sender withdraws their own earlier bill: re_own names their side of the thread, and the button on the other phone goes dead instead of paying into a sale nobody is watching."
+    },
+    {
+      "expect": {
+        "hint": "a retract carries no amount",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "retract_with_amount",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20518b31b00000004e3b2920018c003",
+      "why": "A retract withdraws a message; it does not transact. An amount on one is a number nothing should honour."
+    },
+    {
+      "expect": {
+        "hint": "only a ride offer carries an eta",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "eta_on_a_text",
+      "payment_hex": "a8001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018d519012c",
+      "why": "An eta is a ride offer's courtesy figure; on anything else it is a field with no meaning to act on."
+    },
+    {
+      "expect": {
         "hint": "attachment fields travel together",
         "ok": false,
         "reject": "MALFORMED"

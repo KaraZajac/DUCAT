@@ -1387,9 +1387,9 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None };
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
         v.push(json!({
@@ -1434,7 +1434,7 @@ fn contact_cases() -> Vec<J> {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1_700_000_000,
         kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
-        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
+        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None,
     };
     money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
     money("payment_sent",
@@ -1547,7 +1547,7 @@ fn contact_cases() -> Vec<J> {
         }, None);
     money("receipt_without_amount",
         "A receipt for an unstated amount settles nothing.",
-        &Message { kind: MessageKind::Receipt, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None, ..base_pay.clone() },
+        &Message { kind: MessageKind::Receipt, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None, ..base_pay.clone() },
         Some((RejectCode::Malformed, "payment needs an amount")));
     money("receipt_with_payto",
         "Only a request names where to pay. A receipt doing so is asking again for money it says it already has.",
@@ -1611,6 +1611,36 @@ fn contact_cases() -> Vec<J> {
         "A notice points at the transaction it made and a receipt at the one it acknowledges. A request pointing at either is claiming the payment it is simultaneously asking for.",
         &Message { txid: Some(vec![0x77; 32]), ..base_pay.clone() },
         Some((RejectCode::Malformed, "only a notice or receipt carries a txid")));
+
+    // §15.12's ceremony: the claim opens a channel, these three close a deal.
+    money("ride_offer",
+        "A driver's terms for a claimed hail: the fare, and how far away they are. The claim was the application; nothing is owed until the accept.",
+        &Message { kind: MessageKind::RideOffer, body: "be there in 6".into(),
+                   amount_pxmr: Some(4_200_000_000), eta_secs: Some(360), ..base_pay.clone() }, None);
+    money("ride_offer_without_fare",
+        "An offer without a fare offers nothing; the rider would be accepting a blank.",
+        &Message { kind: MessageKind::RideOffer, amount_pxmr: None, ..base_pay.clone() },
+        Some((RejectCode::Malformed, "a ride message must carry the fare")));
+    money("ride_accept",
+        "The rider's yes: names the offer it answers and echoes its fare, binding the acceptance to a price neither side can later dispute into a different number.",
+        &Message { kind: MessageKind::RideAccept, body: "see you there".into(),
+                   amount_pxmr: Some(4_200_000_000), re_seq: Some(0), ..base_pay.clone() }, None);
+    money("ride_accept_without_target",
+        "An accept that names no offer accepts nothing in particular; with two offers in a thread, which one it answers must never be inferred.",
+        &Message { kind: MessageKind::RideAccept, amount_pxmr: Some(4_200_000_000), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "a retract or accept names its target")));
+    money("retract_a_bill",
+        "The sender withdraws their own earlier bill: re_own names their side of the thread, and the button on the other phone goes dead instead of paying into a sale nobody is watching.",
+        &Message { kind: MessageKind::Retract, body: "cancelled — wrong table".into(),
+                   amount_pxmr: None, re_seq: Some(3), re_own: true, ..base_pay.clone() }, None);
+    money("retract_with_amount",
+        "A retract withdraws a message; it does not transact. An amount on one is a number nothing should honour.",
+        &Message { kind: MessageKind::Retract, re_seq: Some(3), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "a retract carries no amount")));
+    money("eta_on_a_text",
+        "An eta is a ride offer's courtesy figure; on anything else it is a field with no meaning to act on.",
+        &Message { kind: MessageKind::Text, amount_pxmr: None, eta_secs: Some(300), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "only a ride offer carries an eta")));
 
 
     // Handcrafted: the struct cannot express a half-attachment, which is the

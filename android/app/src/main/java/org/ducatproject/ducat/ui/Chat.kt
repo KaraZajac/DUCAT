@@ -39,8 +39,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import org.ducatproject.ducat.formatXmr
 import org.ducatproject.ducat.DucatLog
@@ -539,6 +541,24 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                 )
             }
             items(messages.filter { it.kind != 4 }) { m ->
+                if (m.kind == 5) {
+                    // A retraction is a remark about the thread, not a message
+                    // in it: one quiet centred line, no bubble and no buttons —
+                    // the bill or offer it names greys out where it stands.
+                    Text(
+                        buildString {
+                            append(if (m.outgoing) "You " else "${c.displayName()} ")
+                            append(if (m.reOwn) "withdrew a message" else "declined")
+                            if (m.body.isNotBlank()) append(" — “${m.body}”")
+                        },
+                        Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                    return@items
+                }
                 Column {
                     Bubble(
                         m, c.theirReadUpTo,
@@ -551,6 +571,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             it.kind == 2 && it.outgoing &&
                                 it.amountPxmr == m.amountPxmr &&
                                 it.timestamp >= m.timestamp
+                        },
+                        // The sender's own retract (kind 5, reOwn) withdraws
+                        // the bill: same log, same seq, so the match is exact
+                        // where the paid-check above can only go by amount.
+                        cancelled = m.kind == 1 && messages.any {
+                            it.kind == 5 && it.reOwn && it.reSeq == m.seq &&
+                                it.outgoing == m.outgoing
                         },
                         onLongPress = { confirmDelete = m },
                         onPay = { billView = it },
@@ -783,6 +810,7 @@ private fun Bubble(
     m: StoredMessage,
     theirReadUpTo: Long? = null,
     paid: Boolean = false,
+    cancelled: Boolean = false,
     onLongPress: () -> Unit,
     onPay: (StoredMessage) -> Unit,
 ) {
@@ -885,6 +913,7 @@ private fun Bubble(
                             when (m.kind) {
                                 1 -> Icons.Filled.RequestQuote
                                 3 -> Icons.Filled.Receipt
+                                6, 7 -> Icons.Filled.DirectionsCar
                                 else -> Icons.Filled.ArrowUpward
                             },
                             null,
@@ -901,6 +930,10 @@ private fun Bubble(
                                 // round from a notice.
                                 m.kind == 3 && m.outgoing -> "Receipt you issued"
                                 m.kind == 3 -> "Receipt"
+                                m.kind == 6 && m.outgoing -> "You offered to drive"
+                                m.kind == 6 -> "Offers to drive you"
+                                m.kind == 7 && m.outgoing -> "You accepted the ride"
+                                m.kind == 7 -> "Ride accepted"
                                 m.outgoing -> "You sent"
                                 else -> "Sent you"
                             },
@@ -917,6 +950,13 @@ private fun Bubble(
                     a.secondary?.let {
                         Text(it, style = MaterialTheme.typography.labelSmall,
                              color = fg.copy(alpha = 0.75f))
+                    }
+                    if (m.kind == 6) m.etaSecs?.let { secs ->
+                        Text(
+                            "about ${(secs / 60).coerceAtLeast(1)} min away",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = fg.copy(alpha = 0.8f),
+                        )
                     }
                     if (m.body.isNotBlank()) {
                         Spacer(Modifier.height(2.dp))
@@ -936,6 +976,15 @@ private fun Bubble(
                             // the same bill twice.
                             Text(
                                 "Paid ✓",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = fg.copy(alpha = 0.8f),
+                            )
+                        } else if (cancelled) {
+                            // Withdrawn by its sender: a live button here
+                            // would offer to pay money nobody is watching
+                            // for (§15.11).
+                            Text(
+                                "Cancelled",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = fg.copy(alpha = 0.8f),
                             )

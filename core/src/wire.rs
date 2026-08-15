@@ -192,6 +192,8 @@ pub mod f {
     pub const HN_DEST_CELL: u64 = 209;
     // Driver identity on the profile (§16.9): what lets a stranger find the
     // right car at the curb. Claims like everything else in a profile.
+    /// §15.12's ride offer: how far away the driver is, seconds.
+    pub const MSG_ETA: u64 = 213;
     pub const DET_CAR_MODEL: u64 = 210;
     pub const DET_CAR_COLOR: u64 = 211;
     pub const DET_PLATE: u64 = 212;

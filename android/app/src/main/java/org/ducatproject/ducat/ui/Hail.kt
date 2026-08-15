@@ -33,6 +33,7 @@ import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MainActivity
 import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.RideStore
+import org.ducatproject.ducat.StoredMessage
 import org.ducatproject.ducat.formatXmr
 import uniffi.ducat_mobile.HailInfo
 import uniffi.ducat_mobile.hailDecode
@@ -66,6 +67,12 @@ private inline fun <T> runCatchingCancellable(block: () -> T): Result<T> =
  * already-empty slot needs nothing, and anything undecodable or belonging to
  * someone else is not ours to erase.
  */
+/** Retire every slot a hail occupies — the 6-cell home and any 5-cell copy. */
+private fun clearAllSlots(p: PostedHail) {
+    clearOwnSlot(p.cell, p.subkey, p.card)
+    p.cell2?.let { clearOwnSlot(it, p.subkey2, p.card) }
+}
+
 private fun clearOwnSlot(board: String, subkey: UInt, myCardUri: String) {
     runCatching {
         val held = standRead(board).firstOrNull { it.subkey == subkey } ?: return
@@ -122,6 +129,18 @@ private fun migrateDown(p: PostedHail): PostedHail? {
 fun HailCard() {
     var sheetOpen by remember { mutableStateOf(false) }
     var driverFound by remember { mutableStateOf<org.ducatproject.ducat.Contact?>(null) }
+    // Between the claim and the yes: the driver who took the hail, while
+    // their kind-6 offer is still in flight; then the offer itself, on the
+    // decision screen; and the offer set aside when the rider backs out of
+    // that screen without deciding — parked, not dropped, so a stray back
+    // press cannot silently discard a fare.
+    var awaitingOffer by remember { mutableStateOf<org.ducatproject.ducat.Contact?>(null) }
+    var rideOffer by remember {
+        mutableStateOf<Pair<org.ducatproject.ducat.Contact, StoredMessage>?>(null)
+    }
+    var parkedOffer by remember {
+        mutableStateOf<Pair<org.ducatproject.ducat.Contact, StoredMessage>?>(null)
+    }
     val context = LocalContext.current
     var cell by remember { mutableStateOf("") }
     var dest by remember { mutableStateOf("") }
@@ -169,7 +188,7 @@ fun HailCard() {
                 // Dead either way: retire the notice and say so. The clear
                 // rides hailScope so leaving Home cannot cancel it.
                 hailScope.launch {
-                    clearOwnSlot(p.cell, p.subkey, p.card)
+                    clearAllSlots(p)
                     rides.clear()
                 }
                 DucatLog.i(TAG, "hail expired unclaimed")
@@ -187,27 +206,53 @@ fun HailCard() {
             if (claimant != null) {
                 // Stewardship (§15.12): the notice is spent; clear the slot.
                 hailScope.launch {
-                    clearOwnSlot(p.cell, p.subkey, p.card)
+                    clearAllSlots(p)
                     rides.clear()
                 }
                 val d = ContactStore(context).all().firstOrNull { it.personaHex == claimant }
-                val who = d?.displayName() ?: "a driver"
-                // The stranger's car (§16.9 fields 210–212): what the rider
-                // scans the curb for. Claims — the check is the bumper.
-                val car = listOfNotNull(d?.carColor, d?.carModel).joinToString(" ")
-                    .ifBlank { null }
-                val ride = listOfNotNull(car, d?.plate?.let { "plate $it" })
-                    .joinToString(", ").ifBlank { null }
-                DucatLog.i(TAG, "hail claimed by $who")
-                status = "$who took your hail" +
-                    (ride?.let { " — look for a $it" } ?: "") + ". ETA in the chat."
+                DucatLog.i(TAG, "hail claimed by ${d?.displayName() ?: "a driver"}")
                 posted = null
-                // The ceremony (Ceremony.kt): the stranger's face, car and
-                // plate get the whole screen, and the chat is one tap away
-                // rather than an abrupt teleport into it.
-                driverFound = d
+                if (d != null) {
+                    // The claim is only half the ceremony: the driver's
+                    // kind-6 offer names the fare, and the offer screen —
+                    // not the chat — is where the rider says yes. Keep
+                    // watching the new thread for it.
+                    awaitingOffer = d
+                } else {
+                    // The claim landed but the contact did not materialise;
+                    // the chat path still works, so say what is known
+                    // rather than nothing.
+                    status = "A driver took your hail — check your chats."
+                }
                 break
             }
+        }
+    }
+
+    // The wait for the fare: the offer arrives in the new thread as a kind-6.
+    // Polling again rather than watching, and nudging the poller each tick —
+    // the background fetch runs on its own clock, and this wait is seconds,
+    // not minutes. The Cancel below is the escape hatch, so an offer that
+    // never comes cannot strand the rider in silence.
+    LaunchedEffect(awaitingOffer) {
+        val d = awaitingOffer ?: return@LaunchedEffect
+        while (true) {
+            delay(3_000)
+            val offer = withContext(Dispatchers.IO) {
+                runCatchingCancellable {
+                    Mailbox.poll(context)
+                    ContactStore(context).thread(d.personaHex)
+                        .firstOrNull { !it.outgoing && it.kind == 6 }
+                }.getOrNull()
+            } ?: continue
+            // Re-read the contact: the profile (car, plate) may have landed
+            // after the claim did, and the offer screen shows it.
+            val fresh = ContactStore(context).all()
+                .firstOrNull { it.personaHex == d.personaHex } ?: d
+            rideOffer = fresh to offer
+            awaitingOffer = null
+            status = null
+            break
         }
     }
 
@@ -246,7 +291,7 @@ fun HailCard() {
                     val gone = p
                     posted = null; status = null
                     hailScope.launch {
-                        clearOwnSlot(gone.cell, gone.subkey, gone.card)
+                        clearAllSlots(gone)
                         rides.clear()
                     }
                 },
@@ -254,6 +299,37 @@ fun HailCard() {
             ) { Text("Take it down") }
         }
 
+        awaitingOffer?.let { d ->
+            Spacer(Modifier.height(10.dp))
+            Text(
+                "${d.displayName()} took your hail — waiting for their offer…",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            LinearProgressIndicator(Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
+            OutlinedButton(
+                // Sends nothing on purpose: the slot is already cleared and
+                // the thread stands — the driver can still say hello there.
+                // This only stops the wait.
+                onClick = { awaitingOffer = null; status = null },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Cancel") }
+        }
+        parkedOffer?.let { (d, o) ->
+            Spacer(Modifier.height(10.dp))
+            Text(
+                "${d.displayName()} offers " +
+                    Amounts.show(context, o.amountPxmr).primary,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = { rideOffer = parkedOffer; parkedOffer = null },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("View the offer") }
+        }
         status?.let {
             if (posted == null) {
                 Spacer(Modifier.height(12.dp))
@@ -285,6 +361,48 @@ fun HailCard() {
             onDismiss = { driverFound = null },
         )
     }
+    rideOffer?.let { (d, offer) ->
+        RideOfferScreen(
+            m = offer,
+            contact = d,
+            onAccept = {
+                rideOffer = null
+                // The accept echoes the offer's fare and names its seq —
+                // that echo is what lets the driver's client hold the two
+                // to the same number. Best-effort on hailScope: leaving
+                // Home must not lose the yes mid-send.
+                hailScope.launch {
+                    runCatchingCancellable {
+                        Mailbox.send(
+                            context, d, "See you soon",
+                            org.ducatproject.ducat.PersonaStore(context).personaHex(),
+                            kind = 7, amountPxmr = offer.amountPxmr,
+                            reSeq = offer.seq,
+                        )
+                    }.onFailure { DucatLog.w(TAG, "ride accept: ${it.message}") }
+                }
+                driverFound = d
+            },
+            onDecline = {
+                rideOffer = null
+                hailScope.launch {
+                    runCatchingCancellable {
+                        Mailbox.send(
+                            context, d, "No thanks",
+                            org.ducatproject.ducat.PersonaStore(context).personaHex(),
+                            kind = 5, reSeq = offer.seq, reOwn = false,
+                        )
+                    }.onFailure { DucatLog.w(TAG, "ride decline: ${it.message}") }
+                }
+                status = "You declined — post again?"
+                expired = true
+            },
+            // Backed out without deciding: park it. Re-polling would only
+            // re-find the same offer and reopen the screen in the user's
+            // face, so the reopen becomes a button instead.
+            onClose = { parkedOffer = rideOffer; rideOffer = null },
+        )
+    }
     if (sheetOpen) {
         HailSheet(
             onPosted = {
@@ -309,10 +427,52 @@ private data class PostedHail(
     val expiry: Long,
     /** The encoded notice, verbatim — what a migration reposts. */
     val notice: ByteArray = ByteArray(0),
+    /** The 5-cell copy, when the corner was deserted (§15.12). */
+    val cell2: String? = null,
+    val subkey2: UInt = 0u,
 )
 
 private fun RideStore.PostedRide.asPosted() =
-    PostedHail(board, subkey, inboxKey, cardUri, expiry, notice)
+    PostedHail(board, subkey, inboxKey, cardUri, expiry, notice, board2, subkey2)
+
+/**
+ * The driver's offer in flight: persona, our seq, the fare.
+ *
+ * Just enough to rebuild the waiting banner after process death — the thread
+ * itself holds the offer, and the rider's answer names our seq, so nothing
+ * else needs remembering. Lives in the same prefs file as the rider's posted
+ * hail, under its own key prefix; one offer at a time, like one hail.
+ */
+private data class DriveOffer(
+    val personaHex: String,
+    val seq: Long,
+    val farePxmr: Long,
+)
+
+private fun ridePrefs(context: android.content.Context) =
+    context.getSharedPreferences("ducat_rides", android.content.Context.MODE_PRIVATE)
+
+private fun saveDriveOffer(context: android.content.Context, o: DriveOffer) {
+    ridePrefs(context).edit()
+        .putString("driveoffer_persona", o.personaHex)
+        .putLong("driveoffer_seq", o.seq)
+        .putLong("driveoffer_fare", o.farePxmr)
+        .apply()
+}
+
+private fun loadDriveOffer(context: android.content.Context): DriveOffer? {
+    val p = ridePrefs(context)
+    val persona = p.getString("driveoffer_persona", null) ?: return null
+    return DriveOffer(persona, p.getLong("driveoffer_seq", 0), p.getLong("driveoffer_fare", 0))
+}
+
+private fun clearDriveOffer(context: android.content.Context) {
+    ridePrefs(context).edit()
+        .remove("driveoffer_persona")
+        .remove("driveoffer_seq")
+        .remove("driveoffer_fare")
+        .apply()
+}
 
 
 /**
@@ -342,6 +502,13 @@ fun DriveScreen() {
     var range by remember { mutableStateOf(rangePrefs.getInt("drive_range", 3)) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    // The offer we sent and the rider has not answered. Seeded from prefs so
+    // process death mid-wait comes back to the same banner, not to amnesia.
+    var pendingOffer by remember { mutableStateOf(loadDriveOffer(context)) }
+    var confirmedRide by remember {
+        mutableStateOf<Pair<org.ducatproject.ducat.Contact, Long>?>(null)
+    }
+    var riderDeclined by remember { mutableStateOf(false) }
     val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { }
@@ -361,18 +528,26 @@ fun DriveScreen() {
             runCatching {
                 val home = uniffi.ducat_mobile.geohashEncode(fix.first, fix.second, 6u)
                 val ring1 = uniffi.ducat_mobile.geohashNeighbors(home)
-                val cells = when (range) {
+                // §15.12's density rule: sparse riders drop a copy on their
+                // 5-cell, so a driver watches that precision's neighbourhood
+                // too — nine more boards, one quiet read each.
+                val wide = uniffi.ducat_mobile.geohashEncode(fix.first, fix.second, 5u)
+                val wideCells = listOf(wide) + uniffi.ducat_mobile.geohashNeighbors(wide)
+                val fine = when (range) {
                     1 -> listOf(home)
                     5 -> (listOf(home) + ring1 +
                         ring1.flatMap { uniffi.ducat_mobile.geohashNeighbors(it) })
                         .distinct()
                     else -> listOf(home) + ring1
                 }
+                val cells = (fine + wideCells).distinct()
                 // The outer box of a contiguous block of cells is the net,
                 // drawn on the map so coverage is seen instead of guessed.
+                // The box shows the *chosen* range; the 5-cell watch is
+                // background reach, not a promise about where you'll drive.
                 var latLo = Long.MAX_VALUE; var latHi = Long.MIN_VALUE
                 var lonLo = Long.MAX_VALUE; var lonHi = Long.MIN_VALUE
-                cells.forEach { c ->
+                fine.forEach { c ->
                     val b = uniffi.ducat_mobile.geohashBounds(c)
                     latLo = minOf(latLo, b[0]); latHi = maxOf(latHi, b[1])
                     lonLo = minOf(lonLo, b[2]); lonHi = maxOf(lonHi, b[3])
@@ -384,7 +559,7 @@ fun DriveScreen() {
         }
     }
 
-    val takeHailShared: (SeenHail) -> Unit = { taken ->
+    val takeHailShared: (SeenHail, Long) -> Unit = { taken, farePxmr ->
                 selected = null
                 busy = true; error = null
                 hailScope.launch {
@@ -395,38 +570,55 @@ fun DriveScreen() {
                         // The notice is spent — clear the slot, but only if it
                         // still holds the notice we claimed.
                         clearOwnSlot(taken.cell, taken.subkey, taken.card)
-                        runCatchingCancellable {
+                        // The offer is protocol now (kind 6): the fare and the
+                        // ETA ride typed fields the rider's accept must echo,
+                        // and the body stays what a person reads — the car to
+                        // scan the curb for. ETA only from a real route; the
+                        // old haversine guess was a body-text hedge, not a
+                        // number worth a protocol claim.
+                        val sent = runCatchingCancellable {
                             val me = org.ducatproject.ducat.MyProfile(context)
                             val fix = myFix
                             val o = taken.originCell?.let {
                                 uniffi.ducat_mobile.geohashCenter(it)
                             }
-                            val etaMin = if (fix != null && o != null) {
+                            val etaSecs = if (fix != null && o != null) {
                                 org.ducatproject.ducat.Geo.route(
                                     fix.first, fix.second, o[0], o[1],
-                                )?.let { (it.seconds / 60).coerceAtLeast(1) }
-                                    ?: (uniffi.ducat_mobile.haversineM(
-                                        fix.first, fix.second, o[0], o[1],
-                                    ).toLong() * 2 / 1000).coerceAtLeast(1)
+                                )?.seconds?.coerceIn(1, 86_400)
                             } else null
                             val car = listOfNotNull(me.carColor(), me.carModel())
                                 .joinToString(" ").ifBlank { null }
                             val msg = buildString {
                                 append("🚕 On my way")
-                                etaMin?.let { append(" — ETA ~$it min") }
-                                append(".")
-                                car?.let { append(" Look for a $it") }
+                                car?.let { append(" — look for a $it") }
                                 me.plate()?.let { append(", plate $it") }
-                                if (car != null || me.plate() != null) append(".")
+                                append(".")
                             }
+                            val offerSeq = rider.outSeq
                             Mailbox.send(
                                 context, rider, msg,
                                 org.ducatproject.ducat.PersonaStore(context).personaHex(),
+                                kind = 6, amountPxmr = farePxmr, etaSecs = etaSecs,
                             )
-                        }
+                            DriveOffer(rider.personaHex, offerSeq, farePxmr)
+                        }.onFailure {
+                            DucatLog.w(TAG, "ride offer: ${it.message}")
+                        }.getOrNull()
                         DucatLog.i(TAG, "took a hail to ${taken.dest}")
-                        withContext(Dispatchers.Main) {
-                            MainActivity.openChat.value = rider.personaHex
+                        if (sent != null) {
+                            // The claim survived any process death; the offer
+                            // must too, or a relaunched app forgets it is
+                            // mid-ceremony.
+                            saveDriveOffer(context, sent)
+                            withContext(Dispatchers.Main) { pendingOffer = sent }
+                        } else {
+                            // Claimed but the offer never left: the chat is
+                            // the fallback ceremony, as it was before offers
+                            // existed.
+                            withContext(Dispatchers.Main) {
+                                MainActivity.openChat.value = rider.personaHex
+                            }
                         }
                     }.onFailure {
                         DucatLog.w(TAG, "claim: ${it.message}")
@@ -436,6 +628,60 @@ fun DriveScreen() {
                     }
                     withContext(Dispatchers.Main) { busy = false }
                 }
+    }
+
+    // The wait for the rider's word: their kind-7 accept or kind-5 decline
+    // names our offer's seq, so the match is exact rather than "any reply".
+    // The poller gets a nudge each tick — its own clock is minutes, and a
+    // driver already rolling wants seconds.
+    LaunchedEffect(pendingOffer) {
+        val po = pendingOffer ?: return@LaunchedEffect
+        while (true) {
+            delay(3_000)
+            val answer = withContext(Dispatchers.IO) {
+                runCatchingCancellable {
+                    Mailbox.poll(context)
+                    ContactStore(context).thread(po.personaHex).firstOrNull {
+                        !it.outgoing && it.reSeq == po.seq &&
+                            (it.kind == 7 || (it.kind == 5 && !it.reOwn))
+                    }
+                }.getOrNull()
+            } ?: continue
+            clearDriveOffer(context)
+            pendingOffer = null
+            if (answer.kind == 7) {
+                confirmedRide = ContactStore(context).all()
+                    .firstOrNull { it.personaHex == po.personaHex }
+                    ?.let { it to po.farePxmr }
+                DucatLog.i(TAG, "ride confirmed for ${formatXmr(po.farePxmr)} XMR")
+            } else {
+                riderDeclined = true
+                DucatLog.i(TAG, "rider declined the offer")
+            }
+            break
+        }
+    }
+
+    confirmedRide?.let { (rider, fare) ->
+        RideConfirmed(
+            contact = rider,
+            farePxmr = fare,
+            onOpenChat = {
+                confirmedRide = null
+                MainActivity.openChat.value = rider.personaHex
+            },
+            onDismiss = { confirmedRide = null },
+        )
+    }
+    if (riderDeclined) {
+        AlertDialog(
+            onDismissRequest = { riderDeclined = false },
+            title = { Text("Rider declined") },
+            text = { Text("They passed on your offer. Their hail is gone from the board.") },
+            confirmButton = {
+                TextButton(onClick = { riderDeclined = false }) { Text("OK") }
+            },
+        )
     }
 
     LaunchedEffect(watching) {
@@ -520,6 +766,10 @@ fun DriveScreen() {
                     Text("Stop")
                 }
             }
+            pendingOffer?.let {
+                OfferWaitCard(it, Modifier.fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp))
+            }
             androidx.compose.foundation.layout.Box(Modifier.weight(1f).fillMaxWidth()) {
                 DriverMap(
                     coverage = coverage,
@@ -590,6 +840,10 @@ fun DriveScreen() {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        pendingOffer?.let {
+            Spacer(Modifier.height(12.dp))
+            OfferWaitCard(it, Modifier.fillMaxWidth())
+        }
         Spacer(Modifier.height(16.dp))
 
         if (watching == null) {
@@ -728,68 +982,12 @@ fun DriveScreen() {
                         Spacer(Modifier.width(8.dp))
                         Button(
                             onClick = {
-                                busy = true; error = null
-                                val theCell = n.cell
-                                hailScope.launch {
-                                    runCatchingCancellable {
-                                        val scanned = readContactCard(n.card)
-                                        Mailbox.claimCard(context, scanned, null, asDriver = true)
-                                    }.onSuccess { rider ->
-                                        // The notice is spent; clear its slot
-                                        // so the next driver is not baited by
-                                        // a card that cannot answer (§15.12) —
-                                        // but only if it still holds the
-                                        // notice we claimed.
-                                        clearOwnSlot(theCell, n.subkey, n.card)
-                                        // The Uber moment: acceptance arrives
-                                        // with a face on it — ETA from a real
-                                        // route when one answers, and the car
-                                        // the rider will scan the curb for.
-                                        runCatchingCancellable {
-                                            val me = org.ducatproject.ducat.MyProfile(context)
-                                            val fix = myFix
-                                            val o = n.originCell?.let {
-                                                uniffi.ducat_mobile.geohashCenter(it)
-                                            }
-                                            val etaMin = if (fix != null && o != null) {
-                                                org.ducatproject.ducat.Geo.route(
-                                                    fix.first, fix.second, o[0], o[1],
-                                                )?.let { (it.seconds / 60).coerceAtLeast(1) }
-                                                    ?: (uniffi.ducat_mobile.haversineM(
-                                                        fix.first, fix.second, o[0], o[1],
-                                                    ).toLong() * 2 / 1000).coerceAtLeast(1)
-                                            } else null
-                                            val car = listOfNotNull(
-                                                me.carColor(), me.carModel(),
-                                            ).joinToString(" ").ifBlank { null }
-                                            val msg = buildString {
-                                                append("🚕 On my way")
-                                                etaMin?.let { append(" — ETA ~$it min") }
-                                                append(".")
-                                                car?.let { append(" Look for a $it") }
-                                                me.plate()?.let { append(", plate $it") }
-                                                if (car != null || me.plate() != null) append(".")
-                                            }
-                                            Mailbox.send(
-                                                context, rider, msg,
-                                                org.ducatproject.ducat.PersonaStore(context)
-                                                    .personaHex(),
-                                            )
-                                        }.onFailure {
-                                            DucatLog.w(TAG, "intro message: ${it.message}")
-                                        }
-                                        DucatLog.i(TAG, "took a hail to ${n.dest}")
-                                        withContext(Dispatchers.Main) {
-                                            MainActivity.openChat.value = rider.personaHex
-                                        }
-                                    }.onFailure {
-                                        DucatLog.w(TAG, "claim: ${it.message}")
-                                        withContext(Dispatchers.Main) {
-                                            error = "Someone beat you to that one."
-                                        }
-                                    }
-                                    withContext(Dispatchers.Main) { busy = false }
-                                }
+                                // A named fare can be taken as offered in one
+                                // tap; "quote me" needs a number typed, which
+                                // is the detail screen's job.
+                                val fare = n.farePxmr
+                                if (fare != null) takeHailShared(n, fare)
+                                else selected = n
                             },
                             enabled = !busy,
                             modifier = Modifier.weight(1f).height(44.dp),
@@ -830,11 +1028,16 @@ private fun FareDetail(
     n: SeenHail,
     myFix: Pair<Long, Long>?,
     busy: Boolean,
-    onTake: (SeenHail) -> Unit,
+    onTake: (SeenHail, Long) -> Unit,
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
     var route by remember { mutableStateOf<org.ducatproject.ducat.Geo.Route?>(null) }
+    // The fare the Take will put on the wire (kind 6): the rider's offer to
+    // start with, editable because a counter-offer is a fare too. A "quote
+    // me" hail seeds from the routed estimate once one exists.
+    var fareXmr by remember(n) { mutableStateOf(n.farePxmr?.let(::formatXmr) ?: "") }
+    var fareError by remember(n) { mutableStateOf<String?>(null) }
     val origin = remember(n) {
         n.originCell?.let {
             runCatching { uniffi.ducat_mobile.geohashCenter(it) }.getOrNull()
@@ -854,6 +1057,16 @@ private fun FareDetail(
         if (pts.size >= 2) {
             route = withContext(Dispatchers.IO) {
                 org.ducatproject.ducat.Geo.routeVia(pts)
+            }
+            if (n.farePxmr == null && fareXmr.isBlank()) {
+                route?.let { r ->
+                    val trip = if (myFix != null && r.legs.size >= 2) r.legs[1]
+                    else r.legs.firstOrNull()
+                    trip?.let { (mtr, secs) ->
+                        org.ducatproject.ducat.Fare.estimateExact(context, mtr, secs)
+                            ?.let { (_, pxmr) -> fareXmr = formatXmr(pxmr) }
+                    }
+                }
             }
         }
     }
@@ -926,11 +1139,40 @@ private fun FareDetail(
                         Text("Routing the job…", style = MaterialTheme.typography.bodySmall)
                     }
                     Spacer(Modifier.height(14.dp))
+                    OutlinedTextField(
+                        value = fareXmr,
+                        onValueChange = { fareXmr = it; fareError = null },
+                        label = { Text("Your fare (XMR)") },
+                        supportingText = {
+                            Text(
+                                if (n.farePxmr != null) "their offer — change it to counter"
+                                else "they asked you to quote",
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(), singleLine = true,
+                    )
+                    Spacer(Modifier.height(10.dp))
                     Button(
-                        onClick = { onTake(n) },
+                        onClick = onClick@{
+                            // Same refusal as the rider's sheet: a comma
+                            // keyboard, a minus, or garbage must fail loudly —
+                            // an offer for a fare nobody typed is a silent
+                            // repricing.
+                            val v = fareXmr.trim().replace(',', '.').toDoubleOrNull()
+                            if (v == null || v <= 0.0) {
+                                fareError = "The fare must be a number above zero."
+                                return@onClick
+                            }
+                            onTake(n, (v * 1e12).toLong())
+                        },
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(52.dp),
                     ) { Text("Take this ride 🚕") }
+                    fareError?.let {
+                        Spacer(Modifier.height(4.dp))
+                        Text(it, color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall)
+                    }
                     Spacer(Modifier.height(6.dp))
                     OutlinedButton(
                         onClick = onClose,
@@ -938,6 +1180,31 @@ private fun FareDetail(
                     ) { Text("Pass") }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Claimed but unanswered: the compact card that keeps the wait visible
+ * without taking the map away — a driver can keep cruising while the rider
+ * decides, and a full-screen wait would say otherwise.
+ */
+@Composable
+private fun OfferWaitCard(po: DriveOffer, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val name = remember(po.personaHex) {
+        ContactStore(context).all()
+            .firstOrNull { it.personaHex == po.personaHex }?.displayName()
+    }
+    Card(modifier) {
+        Column(Modifier.padding(12.dp)) {
+            Text(
+                "Offered ${Amounts.show(context, po.farePxmr).primary} — " +
+                    "waiting for ${name ?: "the rider"}",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(Modifier.height(6.dp))
+            LinearProgressIndicator(Modifier.fillMaxWidth())
         }
     }
 }
@@ -1200,6 +1467,41 @@ fun HailSheet(
                                         }
                                         val (board, sub) = placed
                                             ?: error("every stand shard is full here — try again shortly")
+                                        // §15.12's density rule: a deserted
+                                        // corner earns a second copy on the
+                                        // containing 5-cell, where a driver
+                                        // kilometres away is actually looking.
+                                        // Same card — claim-once referees the
+                                        // two copies like migration's.
+                                        var second: Pair<String, UInt>? = null
+                                        if (board == base && oCell.length == 6) {
+                                            val alone = runCatching {
+                                                standRead(base).none { n ->
+                                                    runCatching { hailDecode(n.data) }.getOrNull()
+                                                        ?.let {
+                                                            it.card != card.uri &&
+                                                                it.expiry.toLong() >
+                                                                System.currentTimeMillis() / 1000
+                                                        } == true
+                                                }
+                                            }.getOrDefault(false)
+                                            if (alone) {
+                                                val wide = "geo:${oCell.take(5)}"
+                                                second = runCatching {
+                                                    val busy = standRead(wide).mapNotNull { n ->
+                                                        runCatching { hailDecode(n.data) }.getOrNull()
+                                                            ?.takeIf {
+                                                                it.expiry.toLong() >
+                                                                    System.currentTimeMillis() / 1000
+                                                            }?.let { n.subkey }
+                                                    }.toSet()
+                                                    (0u..7u).firstOrNull { it !in busy }?.let { s2 ->
+                                                        uniffi.ducat_mobile.standPost(wide, s2, bytes)
+                                                        wide to s2
+                                                    }
+                                                }.getOrNull()
+                                            }
+                                        }
                                         // Persist before announcing: the Home
                                         // card rehydrates from this record, so
                                         // the hail survives even if this sheet
@@ -1210,9 +1512,12 @@ fun HailSheet(
                                                 inboxKey = card.inboxKey,
                                                 cardUri = card.uri, expiry = expiry,
                                                 notice = bytes,
+                                                board2 = second?.first,
+                                                subkey2 = second?.second ?: 0u,
                                             )
                                         )
-                                        DucatLog.i(TAG, "hail posted at $board subkey $sub")
+                                        DucatLog.i(TAG, "hail posted at $board subkey $sub" +
+                                            (second?.let { " (+5-cell copy at ${it.first})" } ?: ""))
                                     }.onSuccess {
                                         withContext(Dispatchers.Main) {
                                             onPosted()

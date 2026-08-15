@@ -341,6 +341,44 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
     }
 }
 
+/**
+ * Withdraw a bill with the wire's word for it, when the bill can be named.
+ *
+ * A kind-5 Retract pointing at the original request lets the customer's
+ * client grey out its own Review button instead of trusting them to read a
+ * sentence. The request's seq is recovered from the thread — the last
+ * outgoing bill for the same total — and when it cannot be, the plain-text
+ * cancellation goes out exactly as before (§15.11: telling them imperfectly
+ * still beats not telling them). A Retract carries no amount; core refuses
+ * one that does.
+ */
+internal fun cancelTabWithRetract(
+    context: android.content.Context,
+    store: TabStore,
+    tab: RunningTab,
+) {
+    val contacts = ContactStore(context)
+    val contact = contacts.all().firstOrNull { it.personaHex == tab.personaHex }
+    val billSeq = contacts.thread(tab.personaHex)
+        .lastOrNull { it.outgoing && it.kind == 1 && it.amountPxmr == tab.settledTotal }
+        ?.seq
+    if (contact == null || billSeq == null) {
+        store.cancel(tab)
+        return
+    }
+    store.update(tab.copy(state = "cancelled"))
+    runCatching {
+        Mailbox.send(
+            context, contact,
+            "That bill for ${formatXmr(tab.settledTotal)} XMR is cancelled — " +
+                "nothing to pay.",
+            org.ducatproject.ducat.PersonaStore(context).personaHex(),
+            kind = 5, reSeq = billSeq, reOwn = true,
+        )
+    }.onFailure { DucatLog.w(TAG, "cancel retract: ${it.message}") }
+    DucatLog.i(TAG, "${tab.origin} tab cancelled (${formatXmr(tab.settledTotal)} XMR)")
+}
+
 /** One tab: its lines, and the one button that bills it. */
 @Composable
 private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
@@ -486,7 +524,9 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 // payment into the void.
                 OutlinedButton(
                     onClick = {
-                        scope.launch(Dispatchers.IO) { runCatching { store.cancel(tab) } }
+                        scope.launch(Dispatchers.IO) {
+                            runCatching { cancelTabWithRetract(context, store, tab) }
+                        }
                         onBack()
                     },
                     modifier = Modifier.fillMaxWidth().height(48.dp),

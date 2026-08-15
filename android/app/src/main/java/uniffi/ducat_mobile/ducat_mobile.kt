@@ -1022,7 +1022,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_reconcile_float(`maxExposurePxmr`: Long,`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1533,7 +1533,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_reconcile_float() != 35020.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 379.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 13918.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
@@ -2687,7 +2687,11 @@ data class OpenedMessage (
     var `taxPxmr`: kotlin.ULong?, 
     var `reSeq`: kotlin.ULong?, 
     var `reOwn`: kotlin.Boolean, 
-    var `attachment`: AttachmentRef?
+    var `attachment`: AttachmentRef?, 
+    /**
+     * §15.12: a ride offer's distance-in-time, seconds.
+     */
+    var `etaSecs`: kotlin.ULong?
 ) {
     
     companion object
@@ -2714,6 +2718,7 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.read(buf),
             FfiConverterBoolean.read(buf),
             FfiConverterOptionalTypeAttachmentRef.read(buf),
+            FfiConverterOptionalULong.read(buf),
         )
     }
 
@@ -2732,7 +2737,8 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.allocationSize(value.`taxPxmr`) +
             FfiConverterOptionalULong.allocationSize(value.`reSeq`) +
             FfiConverterBoolean.allocationSize(value.`reOwn`) +
-            FfiConverterOptionalTypeAttachmentRef.allocationSize(value.`attachment`)
+            FfiConverterOptionalTypeAttachmentRef.allocationSize(value.`attachment`) +
+            FfiConverterOptionalULong.allocationSize(value.`etaSecs`)
     )
 
     override fun write(value: OpenedMessage, buf: ByteBuffer) {
@@ -2751,6 +2757,7 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.write(value.`reSeq`, buf)
             FfiConverterBoolean.write(value.`reOwn`, buf)
             FfiConverterOptionalTypeAttachmentRef.write(value.`attachment`, buf)
+            FfiConverterOptionalULong.write(value.`etaSecs`, buf)
     }
 }
 
@@ -5773,11 +5780,11 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
         /**
          * Seal one message in a thread.
          */
-    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?): SealedOut {
+    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?): SealedOut {
             return FfiConverterTypeSealedOut.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
-        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),_status)
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),_status)
 }
     )
     }

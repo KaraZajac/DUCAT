@@ -322,6 +322,8 @@ object Mailbox {
         /** The bill was settled outside DUCAT: this receipt deliberately names
          *  no transaction, and the record it leaves must say so (§15.11). */
         oob: Boolean = false,
+        /** §15.12: a ride offer's distance-in-time; refused on other kinds. */
+        etaSecs: Long? = null,
     ): Contact {
         val store = ContactStore(context)
         val bundle = c.theirBundle
@@ -359,6 +361,7 @@ object Mailbox {
             items.map { uniffi.ducat_mobile.BillLine(it.description, it.amountPxmr.toULong()) },
             taxPxmr?.toULong(),
             reSeq?.toULong(), reOwn, attachment,
+            etaSecs?.toULong(),
         )
         // Everything local lands before anything remote. The failure orders
         // are not symmetric: a published slot and head with the counter lost
@@ -380,6 +383,7 @@ object Mailbox {
                 attHash = attachment?.ctHash?.toHexString(),
                 attMime = attachment?.mime, attName = attachment?.name,
                 oob = oob,
+                etaSecs = etaSecs,
             ),
             c.outSeq + 1, sealed.nextLink, sealed.bytes,
         )
@@ -712,6 +716,7 @@ object Mailbox {
                 taxPxmr = opened.taxPxmr?.toLong(),
                 reSeq = opened.reSeq?.toLong(),
                 reOwn = opened.reOwn,
+                etaSecs = opened.etaSecs?.toLong(),
                 attRecord = opened.attachment?.recordKey,
                 attKey = opened.attachment?.key,
                 attNonce = opened.attachment?.nonce,

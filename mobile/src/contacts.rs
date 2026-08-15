@@ -506,6 +506,8 @@ pub fn seal_message(
     re_own: bool,
     // §16.15: a sealed blob parked in its own record.
     attachment: Option<AttachmentRef>,
+    // §15.12: a ride offer's courtesy figure; refused on any other kind.
+    eta_secs: Option<u64>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -529,6 +531,9 @@ pub fn seal_message(
             2 => MessageKind::PaymentSent,
             3 => MessageKind::Receipt,
             4 => MessageKind::Reaction,
+            5 => MessageKind::Retract,
+            6 => MessageKind::RideOffer,
+            7 => MessageKind::RideAccept,
             _ => MessageKind::Text,
         },
         amount_pxmr,
@@ -541,6 +546,7 @@ pub fn seal_message(
         tax_pxmr,
         re_seq,
         re_own,
+        eta_secs,
         attachment: attachment.map(|a| ducat_core::contact::Attachment {
             record_key: a.record_key,
             key: a.key.try_into().unwrap_or([0u8; 32]),
@@ -670,6 +676,8 @@ pub struct OpenedMessage {
     pub re_seq: Option<u64>,
     pub re_own: bool,
     pub attachment: Option<AttachmentRef>,
+    /// §15.12: a ride offer's distance-in-time, seconds.
+    pub eta_secs: Option<u64>,
 }
 
 /// Open an inbound sealed message and check it follows the thread.
@@ -744,6 +752,7 @@ pub fn open_message(
         tax_pxmr: msg.tax_pxmr,
         re_seq: msg.re_seq,
         re_own: msg.re_own,
+        eta_secs: msg.eta_secs,
         attachment: msg.attachment.as_ref().map(|a| AttachmentRef {
             record_key: a.record_key.clone(),
             key: a.key.to_vec(),

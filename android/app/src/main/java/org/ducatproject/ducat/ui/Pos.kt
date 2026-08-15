@@ -566,9 +566,12 @@ private fun PresentScreen(
             saleTabId?.let { id ->
                 scope.launch(Dispatchers.IO) {
                     runCatching {
-                        TabStore(context).get(id)
+                        val store = TabStore(context)
+                        store.get(id)
                             ?.takeIf { it.state == "settled" }
-                            ?.let { TabStore(context).cancel(it) }
+                            // The retract path: the customer's Review button
+                            // greys out by itself when the bill can be named.
+                            ?.let { cancelTabWithRetract(context, store, it) }
                     }
                 }
             }

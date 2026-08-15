@@ -610,6 +610,20 @@ pub enum MessageKind {
     /// the output; a receipt is the vendor's account of what it was *for*, and
     /// the chain records amounts and never reasons.
     Receipt = 3,
+    /// "The message at `re_seq` is withdrawn." One mechanism for two moments:
+    /// with `re_own` the sender cancels their own earlier message (a bill
+    /// nobody should pay now), without it they decline the counterparty's (an
+    /// offer refused). Advisory like everything here — a retracted bill's
+    /// button goes dead in the UI; no money moves or un-moves.
+    Retract = 5,
+    /// A driver's terms for a claimed hail (§15.12): the fare, and optionally
+    /// how far away they are. The claim opened the channel; this message is
+    /// the application. Nothing is owed until the accept.
+    RideOffer = 6,
+    /// The rider's yes, naming the offer it answers and echoing its fare —
+    /// binding the acceptance to a price, so "accepted" can never mean a
+    /// number neither party said.
+    RideAccept = 7,
 }
 
 impl MessageKind {
@@ -620,6 +634,9 @@ impl MessageKind {
             2 => MessageKind::PaymentSent,
             3 => MessageKind::Receipt,
             4 => MessageKind::Reaction,
+            5 => MessageKind::Retract,
+            6 => MessageKind::RideOffer,
+            7 => MessageKind::RideAccept,
             _ => return None,
         })
     }
@@ -720,6 +737,9 @@ pub struct Message {
     pub re_seq: Option<u64>,
     /// Present when the reaction targets the *sender's own* earlier message.
     pub re_own: bool,
+    /// For a `RideOffer`: how far away the driver is, in seconds (§15.12).
+    /// A courtesy figure the rider weighs, not a promise anything enforces.
+    pub eta_secs: Option<u64>,
     /// A file or picture, by reference (§16.15).
     ///
     /// The bytes live in their own DHT record — up to 32 chunks of 32 KiB,
@@ -793,6 +813,9 @@ impl Message {
         if self.re_own {
             m.insert(f::MSG_RE_OWN, Value::Uint(1));
         }
+        if let Some(e) = self.eta_secs {
+            m.insert(f::MSG_ETA, Value::Uint(e));
+        }
         if let Some(a) = &self.attachment {
             m.insert(f::MSG_ATT_RECORD, Value::Text(a.record_key.clone()));
             m.insert(f::MSG_ATT_KEY, Value::Bytes(a.key.to_vec()));
@@ -864,6 +887,7 @@ impl Message {
             },
             tax_pxmr: r.opt_uint(f::MSG_TAX)?,
             re_seq: r.opt_uint(f::MSG_RE_SEQ)?,
+            eta_secs: r.opt_uint(f::MSG_ETA)?,
             re_own: match r.opt_uint(f::MSG_RE_OWN)? {
                 None => false,
                 // One meaning, one encoding: presence is the flag (§18.1).
@@ -927,7 +951,7 @@ impl Message {
         // an amount on a text message is a number nothing will honour. Both are
         // refused rather than ignored.
         match (out.kind, out.amount_pxmr) {
-            (MessageKind::Text, Some(_)) => {
+            (MessageKind::Text, Some(_)) | (MessageKind::Retract, Some(_)) => {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "a text message must not carry an amount",
@@ -939,6 +963,14 @@ impl Message {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "a payment message must carry an amount",
+                ))
+            }
+            // An offer without a fare offers nothing; an accept without the
+            // fare it echoes binds the rider to a number neither party said.
+            (MessageKind::RideOffer, None) | (MessageKind::RideAccept, None) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a ride message must carry the fare",
                 ))
             }
             _ => {}
@@ -961,10 +993,16 @@ impl Message {
                 "only a request names where to pay",
             ));
         }
-        if out.kind == MessageKind::Text && (!out.items.is_empty() || out.tax_pxmr.is_some()) {
+        if matches!(
+            out.kind,
+            MessageKind::Text | MessageKind::Retract | MessageKind::RideOffer | MessageKind::RideAccept
+        ) && (!out.items.is_empty() || out.tax_pxmr.is_some())
+        {
+            // The ride's bill comes later, through §15.11's meter; a retract
+            // withdraws a bill rather than being one.
             return Err(Reject::with_detail(
                 RejectCode::Malformed,
-                "a text message has no bill to itemise",
+                "this message kind has no bill to itemise",
             ));
         }
         // Tax only alongside items, so that itemisation is *always* arithmetic
@@ -998,11 +1036,41 @@ impl Message {
                     "a reaction carries no money and no attachment",
                 ));
             }
+        } else if matches!(out.kind, MessageKind::Retract | MessageKind::RideAccept) {
+            if out.re_seq.is_none() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a retract or an accept names the message it answers",
+                ));
+            }
+            // Accepting your own offer is not a ceremony, it is a soliloquy.
+            if out.kind == MessageKind::RideAccept && out.re_own {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "an accept answers the counterparty's offer",
+                ));
+            }
         } else if out.re_seq.is_some() || out.re_own {
             return Err(Reject::with_detail(
                 RejectCode::Malformed,
-                "only a reaction targets another message",
+                "only a reaction, a retract or an accept targets another message",
             ));
+        }
+        // An eta is a RideOffer's courtesy figure and nothing else's — and a
+        // day is the honest ceiling for "on my way".
+        if let Some(e) = out.eta_secs {
+            if out.kind != MessageKind::RideOffer {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "only a ride offer carries an eta",
+                ));
+            }
+            if e > 86_400 {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "an eta longer than a day is not an eta",
+                ));
+            }
         }
         // §16.15: attachments ride ordinary messages. A bill or a receipt with
         // a file in it is two features fused at their least-tested corner.

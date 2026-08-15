@@ -84,6 +84,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             args.get(i + 2).map(|s| s.as_str()).unwrap_or(""),
         ).await;
     }
+    if let Some(i) = args.iter().position(|a| a == "--ride-offer") {
+        return mailbox::ride_offer(
+            args.get(i + 1).map(|s| s.as_str()).unwrap_or(""),
+            args.get(i + 2).map(|s| s.as_str()).unwrap_or("0"),
+            args.get(i + 3).map(|s| s.as_str()).unwrap_or(""),
+        ).await;
+    }
+    if let Some(i) = args.iter().position(|a| a == "--ride-accept") {
+        return mailbox::ride_accept(
+            args.get(i + 1).map(|s| s.as_str()).unwrap_or(""),
+            args.get(i + 2).map(|s| s.as_str()).unwrap_or(""),
+        ).await;
+    }
+    if let Some(i) = args.iter().position(|a| a == "--retract") {
+        return mailbox::retract(
+            args.get(i + 1).map(|s| s.as_str()).unwrap_or(""),
+            args.get(i + 2).map(|s| s.as_str()).unwrap_or("0"),
+            args.get(i + 3).map(|s| s.as_str()).unwrap_or(""),
+        ).await;
+    }
     if let Some(i) = args.iter().position(|a| a == "--card-collect") {
         return mailbox::collect(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
     }

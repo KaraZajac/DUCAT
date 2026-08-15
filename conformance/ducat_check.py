@@ -942,6 +942,7 @@ MSG_SEQ, MSG_PREV, MSG_BODY, MSG_TS = 157, 158, 159, 160
 MSG_KIND, MSG_AMOUNT, MSG_TXID, MSG_PAYTO = 178, 179, 180, 181
 MSG_ITEMS, MSG_TAX = 183, 184
 MSG_RE_SEQ, MSG_RE_OWN = 192, 193
+MSG_ETA = 213
 MSG_ATT_RECORD, MSG_ATT_KEY, MSG_ATT_NONCE = 194, 195, 196
 MSG_ATT_LEN, MSG_ATT_HASH, MSG_ATT_MIME, MSG_ATT_NAME = 197, 198, 199, 200
 HEAD_BUNDLE = 177
@@ -1238,7 +1239,7 @@ def parse_message(buf):
             raise Reject("Malformed", "kind is not an integer")
         if kind == 0:
             raise Reject("Malformed", "text is encoded by omitting the kind")
-        if kind not in (1, 2, 3, 4):
+        if kind not in (1, 2, 3, 4, 5, 6, 7):
             raise Reject("Malformed", "unknown message kind")
     else:
         kind = 0
@@ -1271,6 +1272,7 @@ def parse_message(buf):
 
     # §16.14 — reactions.
     out["re_seq"] = b.pop(MSG_RE_SEQ, (None, None))[1]
+    out["eta"] = b.pop(MSG_ETA, (None, None))[1]
     if MSG_RE_OWN in b:
         k2, v2 = b.pop(MSG_RE_OWN)
         if k2 != "uint" or v2 != 1:
@@ -1311,10 +1313,14 @@ def parse_message(buf):
 
     # A payment with no amount is a screen with a blank where the number goes;
     # an amount on text is a number nothing will honour. Neither is ignorable.
-    if kind in (0, 4) and out["amount"] is not None:
+    if kind in (0, 4, 5) and out["amount"] is not None:
         raise Reject("Malformed", "this kind must not carry an amount")
     if kind in (1, 2, 3) and out["amount"] is None:
         raise Reject("Malformed", "a payment message must carry an amount")
+    # §15.12's ceremony: an offer without a fare offers nothing, and an accept
+    # must echo the fare so "accepted" is bound to a price both parties said.
+    if kind in (6, 7) and out["amount"] is None:
+        raise Reject("Malformed", "a ride message must carry the fare")
     # A notice points at the transaction it made; a receipt (§16.13) at the one
     # it acknowledges. A request may point at neither.
     if out["txid"] is not None and kind not in (2, 3):
@@ -1331,12 +1337,25 @@ def parse_message(buf):
             raise Reject("Malformed", "a reaction's body is the emoji, not a message")
         if out["amount"] is not None or out["attachment"] is not None:
             raise Reject("Malformed", "a reaction carries no money and no attachment")
+    elif kind in (5, 7):
+        # A retract or an accept names its target; an accept answers the
+        # *counterparty's* offer, never the sender's own.
+        if out["re_seq"] is None:
+            raise Reject("Malformed", "a retract or an accept names the message it answers")
+        if kind == 7 and out["re_own"]:
+            raise Reject("Malformed", "an accept answers the counterparty's offer")
     elif out["re_seq"] is not None or out["re_own"]:
-        raise Reject("Malformed", "only a reaction targets another message")
+        raise Reject("Malformed", "only a reaction, a retract or an accept targets another message")
     if out["attachment"] is not None and kind != 0:
         raise Reject("Malformed", "only a text message carries an attachment")
-    if kind == 0 and (out["items"] or out["tax"] is not None):
-        raise Reject("Malformed", "a text message has no bill to itemise")
+    if kind in (0, 5, 6, 7) and (out["items"] or out["tax"] is not None):
+        raise Reject("Malformed", "this message kind has no bill to itemise")
+    # An eta is a ride offer's courtesy figure, bounded by honesty: a day.
+    if out["eta"] is not None:
+        if kind != 6:
+            raise Reject("Malformed", "only a ride offer carries an eta")
+        if out["eta"] > 86_400:
+            raise Reject("Malformed", "an eta longer than a day is not an eta")
     # Tax only alongside items, so an itemisation is always arithmetic the
     # recipient can check rather than a split they have to believe.
     if out["tax"] is not None and not out["items"]:
@@ -1539,6 +1558,8 @@ def run_message_payment(cases, r):
                 fields.append((MSG_RE_SEQ, ("uint", m["re_seq"])))
             if m["re_own"]:
                 fields.append((MSG_RE_OWN, ("uint", 1)))
+            if m.get("eta") is not None:
+                fields.append((MSG_ETA, ("uint", m["eta"])))
             a = m["attachment"]
             if a is not None:
                 fields.append((MSG_ATT_RECORD, ("text", a["record"])))

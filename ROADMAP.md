@@ -19,14 +19,15 @@ money. Ordered by what blocks 1.0, not by effort.
   every tenth claim-poll tick, a notice on an overflow shard looks for a
   lower free slot: post-low-first, verify landing by card, then clear the
   old slot; drivers dedupe by card during the brief double-listing.
-- **Density-adaptive cell precision (§15.12).** "6 where busy, 5 where
-  empty" is a convention with no mechanism. A rule clients can compute
-  alone (e.g. ladder height ≥ N sustained → post and watch at precision
-  +1) so a stadium crowd converges without anyone coordinating.
-- **Typed offer/accept ceremony for rides.** Today claiming a hail *is*
-  the deal. The intended shape: claim = applying; rider sees the
-  driver's offer (or counter-fare) and accepts; cards exchange on accept.
-  Needs a small wire object and both UIs.
+- ~~**Density-adaptive cell precision (§15.12).**~~ **Done, 0.87** — a
+  deserted 6-cell earns a second copy of the notice on the containing
+  5-cell (same card; claim-once referees); drivers watch both precisions'
+  neighbourhoods; everything dedupes by card; all copies cleared together.
+- ~~**Typed offer/accept ceremony for rides.**~~ **Done, 0.87** — kinds
+  RETRACT (5), RIDE_OFFER (6, fare MUST + eta 213), RIDE_ACCEPT (7, names
+  the offer, echoes the fare). Claim = applying; full-screen offer
+  ceremony on the rider, waiting/confirmed states on the driver; harness
+  speaks all three.
 
 ## Trust — the stranger problem, named since 0.82
 
@@ -63,9 +64,9 @@ money. Ordered by what blocks 1.0, not by effort.
   loses target/amount/memo; onboarding can regenerate the wallet being
   backed up. Sweep the screens, persist in-flight sale state next to the
   tab record.
-- **Bill cancellation tracking.** A cancelled bill's "Review payment"
-  button stays live (the cancel is just text today). Needs a marker the
-  request bubble checks — pairs naturally with the offer/accept work.
+- ~~**Bill cancellation tracking.**~~ **Done, 0.87** — a vendor cancel
+  sends RETRACT(re_own) naming the bill; the request bubble renders
+  "Cancelled" instead of a live Review payment button.
 - **Poller cadence and battery.** The 3 s claim-poll and 4 s board sweep
   are field-test numbers. Measure, then tier: hot when the screen is on
   and a hail is standing, slow otherwise.

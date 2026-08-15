@@ -37,11 +37,12 @@ import org.ducatproject.ducat.formatXmr
  *
  * A bill is not a chat bubble, and a completed payment is not a status line —
  * every pay terminal on Earth knows the full-screen beat matters, because the
- * moment money moves is the moment both people look at the screen. Three
+ * moment money moves is the moment both people look at the screen. The
  * ceremonies live here: the bill (a decision), the paid splash (a relief),
- * and the driver card (a stranger becoming your ride). None of them touch the
- * wire; they are presentation over §16.13's machinery, and the confirm screen
- * they lead to remains the only thing between a message and money leaving.
+ * and the ride's three beats — the driver's offer, the rider's yes, the car
+ * at the curb. None of them touch the wire; they are presentation over
+ * §16.13's machinery, and the confirm screen they lead to remains the only
+ * thing between a message and money leaving.
  */
 
 /** A bill, full screen: the decision gets the whole display. */
@@ -207,6 +208,157 @@ fun PaidSplash(amountPxmr: Long, toName: String?, onDone: () -> Unit) {
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onTertiary,
                 )
+            }
+        }
+    }
+}
+
+/**
+ * The driver's offer (kind 6), full screen: a fare is a decision, like a bill.
+ *
+ * The fare is the protocol field, so the number shown *is* the number the
+ * accept will echo — nothing here re-derives or rounds it. Accepting sends a
+ * kind-7 that names this offer; the actual payment still happens at the end
+ * of the ride through the ordinary bill-and-confirm path, which is why the
+ * buttons say yes to a fare and never to money moving.
+ */
+@Composable
+fun RideOfferScreen(
+    m: StoredMessage,
+    contact: Contact,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit,
+    onClose: () -> Unit,
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    Dialog(
+        onDismissRequest = onClose,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Column(
+                Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Row(Modifier.fillMaxWidth().padding(8.dp)) {
+                    IconButton(onClick = onClose) { Icon(Icons.Filled.Close, "Close") }
+                }
+                Spacer(Modifier.height(12.dp))
+                Avatar(contact.displayName(), contact.avatar, size = 72)
+                Spacer(Modifier.height(10.dp))
+                Text(contact.displayName(), style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "offers to drive you for",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(8.dp))
+                val shown = Amounts.show(context, m.amountPxmr)
+                Text(shown.primary, style = MaterialTheme.typography.displayLarge)
+                shown.secondary?.let {
+                    Text(it, style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                m.etaSecs?.let { secs ->
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "about ${(secs / 60).coerceAtLeast(1)} min away",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+                val car = listOfNotNull(contact.carColor, contact.carModel)
+                    .joinToString(" ").ifBlank { null }
+                car?.let {
+                    Spacer(Modifier.height(4.dp))
+                    Text(it, style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                contact.plate?.let { plate ->
+                    Text("plate $plate", style = MaterialTheme.typography.bodyMedium,
+                        fontFamily = FontFamily.Monospace,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                if (m.body.isNotBlank()) {
+                    Spacer(Modifier.height(6.dp))
+                    Text("“${m.body}”", style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Spacer(Modifier.weight(1f))
+                Column(Modifier.fillMaxWidth().padding(24.dp)) {
+                    Button(
+                        onClick = onAccept,
+                        modifier = Modifier.fillMaxWidth().height(54.dp),
+                    ) { Text("Accept", style = MaterialTheme.typography.titleMedium) }
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = onDecline,
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                    ) { Text("Decline", color = MaterialTheme.colorScheme.error) }
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "Accepting agrees the fare — you pay at the end of the " +
+                            "ride, through the usual confirm screen.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The rider said yes: the driver's half of the confirmation moment.
+ *
+ * The fare shown is the one the accept echoed, so both screens are looking at
+ * the same number when the car pulls out.
+ */
+@Composable
+fun RideConfirmed(
+    contact: Contact,
+    farePxmr: Long,
+    onOpenChat: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Column(
+                Modifier.fillMaxSize().padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Row(Modifier.fillMaxWidth()) {
+                    IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, "Close") }
+                }
+                Spacer(Modifier.weight(0.6f))
+                Text("🚕", style = MaterialTheme.typography.displaySmall)
+                Spacer(Modifier.height(8.dp))
+                Text("Ride confirmed", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(8.dp))
+                val shown = Amounts.show(context, farePxmr)
+                Text(shown.primary, style = MaterialTheme.typography.displayMedium)
+                shown.secondary?.let {
+                    Text(it, style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Spacer(Modifier.height(20.dp))
+                Avatar(contact.displayName(), contact.avatar, size = 88)
+                Spacer(Modifier.height(10.dp))
+                Text(contact.displayName(), style = MaterialTheme.typography.headlineSmall)
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "They're expecting you — anything else goes in the chat.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.weight(1f))
+                Button(
+                    onClick = onOpenChat,
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                ) { Text("Open the chat") }
             }
         }
     }

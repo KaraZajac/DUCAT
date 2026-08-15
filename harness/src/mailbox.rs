@@ -431,6 +431,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
             tax_pxmr: None,
             re_seq: None,
             re_own: false,
+            eta_secs: None,
             attachment: None,
             amount_pxmr: None,
             txid: None,
@@ -512,6 +513,18 @@ pub async fn receipt(items_arg: &str, txid_hex: &str) -> Result<(), Box<dyn std:
         "Receipt — thank you").await
 }
 
+/// Everything a non-text message might carry; text is `None` of this.
+pub struct Outgoing {
+    pub items: Vec<(String, u64)>,
+    pub amount: Option<u64>,
+    pub payto: Option<String>,
+    pub kind: MessageKind,
+    pub txid: Option<Vec<u8>>,
+    pub re_seq: Option<u64>,
+    pub re_own: bool,
+    pub eta_secs: Option<u64>,
+}
+
 async fn send_money_message(
     items_arg: &str,
     payto: Option<String>,
@@ -531,7 +544,38 @@ async fn send_money_message(
         return Err("a bill needs at least one line".into());
     }
     let total: u64 = items.iter().map(|(_, a)| a).sum();
-    bill_or_say(Some((items, total, payto, kind, txid)), body).await
+    bill_or_say(Some(Outgoing {
+        items, amount: Some(total), payto, kind, txid,
+        re_seq: None, re_own: false, eta_secs: None,
+    }), body).await
+}
+
+/// §15.12's ceremony, from the desk: the driver's terms after a claim.
+pub async fn ride_offer(fare: &str, eta: &str, body: &str) -> Result<(), Box<dyn std::error::Error>> {
+    bill_or_say(Some(Outgoing {
+        items: Vec::new(), amount: Some(fare.parse()?), payto: None,
+        kind: MessageKind::RideOffer, txid: None,
+        re_seq: None, re_own: false, eta_secs: Some(eta.parse()?),
+    }), if body.is_empty() { "On my way" } else { body }).await
+}
+
+/// The rider's yes: names the offer, echoes its fare.
+pub async fn ride_accept(offer_seq: &str, fare: &str) -> Result<(), Box<dyn std::error::Error>> {
+    bill_or_say(Some(Outgoing {
+        items: Vec::new(), amount: Some(fare.parse()?), payto: None,
+        kind: MessageKind::RideAccept, txid: None,
+        re_seq: Some(offer_seq.parse()?), re_own: false, eta_secs: None,
+    }), "See you there").await
+}
+
+/// Withdraw a message: our own earlier one (`own`), or decline theirs.
+pub async fn retract(seq: &str, own: &str, body: &str) -> Result<(), Box<dyn std::error::Error>> {
+    bill_or_say(Some(Outgoing {
+        items: Vec::new(), amount: None, payto: None,
+        kind: MessageKind::Retract, txid: None,
+        re_seq: Some(seq.parse()?), re_own: own == "1" || own == "own",
+        eta_secs: None,
+    }), if body.is_empty() { "withdrawn" } else { body }).await
 }
 
 /// Say something in a thread that already exists.
@@ -549,7 +593,7 @@ pub async fn say(text: &str) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn bill_or_say(
-    billing: Option<(Vec<(String, u64)>, u64, Option<String>, MessageKind, Option<Vec<u8>>)>,
+    billing: Option<Outgoing>,
     text: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     use std::str::FromStr;
@@ -637,22 +681,26 @@ async fn bill_or_say(
                 .as_secs(),
             kind: MessageKind::Text,
             amount_pxmr: None, txid: None, payto: None,
-            items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
+            items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None,
         },
-        Some((items, total, payto, kind, txid)) => Message {
+        Some(o) => Message {
             version: 1, suite: 1, seq, prev,
             body: text.to_string(),
             timestamp: std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)?
                 .as_secs(),
-            kind: *kind,
-            amount_pxmr: Some(*total),
-            txid: txid.clone(),
-            payto: payto.clone(),
-            items: items.iter().map(|(d, a)| LineItem {
+            kind: o.kind,
+            amount_pxmr: o.amount,
+            txid: o.txid.clone(),
+            payto: o.payto.clone(),
+            items: o.items.iter().map(|(d, a)| LineItem {
                 description: d.clone(), amount_pxmr: *a,
             }).collect(),
-            tax_pxmr: None, re_seq: None, re_own: false, attachment: None,
+            tax_pxmr: None,
+            re_seq: o.re_seq,
+            re_own: o.re_own,
+            eta_secs: o.eta_secs,
+            attachment: None,
         },
     };
     // DUCAT_SIGNED_ONLY: seal to the signed prekey even with one-time keys
@@ -686,9 +734,13 @@ async fn bill_or_say(
     append(&rc, &mine, seq, &sealed.to_value().encode(), my_ring).await?;
     match &billing {
         None => println!("  \x1b[35m→\x1b[0m [{seq}] {text}"),
-        Some((items, total, _, kind, _)) => {
-            for (d, a) in items { println!("  \x1b[35m→\x1b[0m   {d}  {a} pXMR"); }
-            println!("  \x1b[35m→\x1b[0m [{seq}] {kind:?} total {total} pXMR");
+        Some(o) => {
+            for (d, a) in &o.items { println!("  \x1b[35m→\x1b[0m   {d}  {a} pXMR"); }
+            println!(
+                "  \x1b[35m→\x1b[0m [{seq}] {:?}{}",
+                o.kind,
+                o.amount.map(|t| format!(" total {t} pXMR")).unwrap_or_default(),
+            );
         }
     }
 
@@ -1049,6 +1101,9 @@ async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn
                                 MessageKind::PaymentSent => "says they sent",
                                 MessageKind::Receipt => "receipt for",
                                 MessageKind::Reaction => "reacted",
+                                MessageKind::Retract => "withdraws an earlier message",
+                                MessageKind::RideOffer => "offers to drive, fare",
+                                MessageKind::RideAccept => "accepts the ride at",
                                 MessageKind::Text => unreachable!(),
                             },
                             m.amount_pxmr
@@ -1057,6 +1112,13 @@ async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn
                         );
                         if let Some(p) = &m.payto {
                             println!("        pay to: {p}");
+                        }
+                        if let Some(e) = m.eta_secs {
+                            println!("        about {} min away", e.div_ceil(60));
+                        }
+                        if let Some(rs) = m.re_seq {
+                            println!("        re: {} message {rs}",
+                                if m.re_own { "their own" } else { "our" });
                         }
                         if let Some(t) = &m.txid {
                             println!("        txid:   {}", hex::encode(t));

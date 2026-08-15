@@ -26,6 +26,10 @@ class RideStore(context: Context) {
         val expiry: Long,
         /** The encoded notice itself, so migration reposts the same bytes. */
         val notice: ByteArray = ByteArray(0),
+        /** A second copy on the containing 5-cell, when the corner was
+         *  deserted (§15.12's density rule). Same card; claim-once referees. */
+        val board2: String? = null,
+        val subkey2: UInt = 0u,
     )
 
     fun save(r: PostedRide) {
@@ -37,6 +41,8 @@ class RideStore(context: Context) {
             .putLong("expiry", r.expiry)
             .putString("notice", android.util.Base64.encodeToString(
                 r.notice, android.util.Base64.NO_WRAP))
+            .putString("board2", r.board2)
+            .putInt("subkey2", r.subkey2.toInt())
             .apply()
     }
 
@@ -50,6 +56,8 @@ class RideStore(context: Context) {
             notice = prefs.getString("notice", null)
                 ?.let { android.util.Base64.decode(it, android.util.Base64.NO_WRAP) }
                 ?: ByteArray(0),
+            board2 = prefs.getString("board2", null),
+            subkey2 = prefs.getInt("subkey2", 0).toUInt(),
         )
     }
 

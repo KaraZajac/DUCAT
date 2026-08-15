@@ -1130,6 +1130,8 @@ data class StoredMessage(
     /** A receipt for a bill settled outside DUCAT (§15.11): it names no
      *  transaction because none exists, not because one has yet to be found. */
     val oob: Boolean = false,
+    /** §15.12: a ride offer's distance-in-time, seconds. */
+    val etaSecs: Long? = null,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("out", outgoing); put("seq", seq); put("body", body)
@@ -1154,6 +1156,7 @@ data class StoredMessage(
             })
         }
         taxPxmr?.let { put("tax", it) }
+        etaSecs?.let { put("eta", it) }
     }
 
     companion object {
@@ -1185,6 +1188,7 @@ data class StoredMessage(
                 }
             } ?: emptyList(),
             taxPxmr = if (o.has("tax")) o.getLong("tax") else null,
+            etaSecs = if (o.has("eta")) o.getLong("eta") else null,
         )
     }
 }
