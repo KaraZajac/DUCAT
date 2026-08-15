@@ -685,13 +685,43 @@ async fn bill_or_say(
         format!("{}\n{}\n", kept.join("\n"), hex::encode(m.link())),
     )?;
 
-    // Let the write actually leave the building. set_dht_value returns once
-    // the value is accepted locally; the network push is asynchronous, and
-    // shutting down a second later dropped at least two receipts on the floor
-    // (2026-08-14: an hour after "send", the phone's replica still held the
-    // slot's previous tenant).
-    println!("  flushing to the network…");
-    tokio::time::sleep(std::time::Duration::from_secs(25)).await;
+    // "Delivered" is a claim about the network, not about this process's
+    // memory. set_dht_value returns on local acceptance; with zero reliable
+    // peers the push sat in the offline queue and died with the process —
+    // four receipts in a row (2026-08-14). SyncSet both repairs and measures:
+    // it writes any local-newer subkeys out and reports the network's
+    // sequence numbers back, so this loop ends on confirmation, not hope.
+    print!("  flushing to the network");
+    let subkeys = veilid_core::ValueSubkeyRangeSet::full();
+    let deadline = Instant::now() + std::time::Duration::from_secs(240);
+    let mut confirmed = false;
+    while Instant::now() < deadline {
+        let report = rc
+            .inspect_dht_record(mine.clone(), Some(subkeys.clone()), veilid_core::DHTReportScope::SyncSet)
+            .await?;
+        // A seq of MAX means "no value here" on either side.
+        const UNSET: veilid_core::ValueSeqNum = veilid_core::ValueSeqNum::MAX;
+        let local = report.local_seqs();
+        let network = report.network_seqs();
+        if !local.is_empty()
+            && local.iter().zip(network.iter()).all(|(l, n)| {
+                *l == UNSET || (*n != UNSET && *n >= *l)
+            })
+        {
+            confirmed = true;
+            break;
+        }
+        print!(".");
+        use std::io::Write as _;
+        let _ = std::io::stdout().flush();
+        tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+    }
+    println!();
+    if confirmed {
+        println!("  \x1b[32mconfirmed on the network\x1b[0m");
+    } else {
+        println!("  \x1b[31mNOT confirmed after 240s — the peer may not see this yet\x1b[0m");
+    }
 
     rc.close_dht_record(theirs).await?;
     rc.close_dht_record(mine).await?;
