@@ -28,6 +28,13 @@ monero-daemon-rpc = "0.2.0"
 sha2 = "0.10"
 ed25519-dalek = "2"
 
+[dev-dependencies]
+# The escrow demo (examples/escrowtest.rs): 2-of-2 threshold keys and FROST
+# signing over the same stack monero-wallet's multisig feature uses.
+modular-frost = { version = "0.11.1", features = ["ed25519"] }
+dkg-dealer = "0.6.0"
+rand_chacha = "0.3"
+
 [[bin]]
 name = "uniffi-bindgen"
 path = "src/bin/uniffi-bindgen.rs"
