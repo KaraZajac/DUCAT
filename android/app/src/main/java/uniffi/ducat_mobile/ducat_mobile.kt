@@ -869,6 +869,16 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -906,6 +916,8 @@ internal interface UniffiLib : Library {
     ): Long
     fun uniffi_ducat_mobile_fn_func_capacity_leak_bits(uniffi_out_err: UniffiRustCallStatus, 
     ): Double
+    fun uniffi_ducat_mobile_fn_func_ceremony_abort(`ceremonyId`: RustBuffer.ByValue,`i`: Short,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
     fun uniffi_ducat_mobile_fn_func_check_verification(`policy`: RustBuffer.ByValue,`deviceUnlocked`: Byte,`appSecretAgeS`: RustBuffer.ByValue,`amountMinor`: Long,`spentInWindowMinor`: Long,`rateIsFresh`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_create_contact_card(`personaSecret`: RustBuffer.ByValue,`inboxKey`: RustBuffer.ByValue,`writerPublic`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`writerSecret`: RustBuffer.ByValue,`validSecs`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -915,6 +927,14 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_create_wallet(`tipHeight`: Long,`stagenet`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_default_verification_policy(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_dkg_commit(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`t`: Short,`n`: Short,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_dkg_finish(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`t`: Short,`n`: Short,`shares`: RustBuffer.ByValue,`stagenet`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_dkg_share(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`t`: Short,`n`: Short,`commitments`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_dkg_take_keys(`ceremonyId`: RustBuffer.ByValue,`i`: Short,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_export_backup(`input`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1176,6 +1196,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_leak_bits(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_ceremony_abort(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_check_verification(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_create_contact_card(
@@ -1185,6 +1207,14 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_create_wallet(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_default_verification_policy(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_dkg_commit(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_dkg_finish(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_dkg_share(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_dkg_take_keys(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_export_backup(
     ): Short
@@ -1362,6 +1392,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_capacity_leak_bits() != 25938.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_ceremony_abort() != 3839.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_check_verification() != 369.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1375,6 +1408,18 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_default_verification_policy() != 11081.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_dkg_commit() != 33601.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_dkg_finish() != 12656.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_dkg_share() != 1950.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_dkg_take_keys() != 37798.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_export_backup() != 50604.toShort()) {
@@ -1633,6 +1678,29 @@ public object FfiConverterUByte: FfiConverter<UByte, Byte> {
 
     override fun write(value: UByte, buf: ByteBuffer) {
         buf.put(value.toByte())
+    }
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterUShort: FfiConverter<UShort, Short> {
+    override fun lift(value: Short): UShort {
+        return value.toUShort()
+    }
+
+    override fun read(buf: ByteBuffer): UShort {
+        return lift(buf.getShort())
+    }
+
+    override fun lower(value: UShort): Short {
+        return value.toShort()
+    }
+
+    override fun allocationSize(value: UShort) = 2UL
+
+    override fun write(value: UShort, buf: ByteBuffer) {
+        buf.putShort(value.toShort())
     }
 }
 
@@ -2234,6 +2302,41 @@ public object FfiConverterTypeFloatPlan: FfiConverterRustBuffer<FloatPlan> {
     override fun write(value: FloatPlan, buf: ByteBuffer) {
             FfiConverterUInt.write(value.`outputs`, buf)
             FfiConverterULong.write(value.`totalPxmr`, buf)
+    }
+}
+
+
+
+/**
+ * A counterparty's wire message, tagged by their participant index.
+ */
+data class FromParty (
+    var `participant`: kotlin.UShort, 
+    var `bytes`: kotlin.ByteArray
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFromParty: FfiConverterRustBuffer<FromParty> {
+    override fun read(buf: ByteBuffer): FromParty {
+        return FromParty(
+            FfiConverterUShort.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FromParty) = (
+            FfiConverterUShort.allocationSize(value.`participant`) +
+            FfiConverterByteArray.allocationSize(value.`bytes`)
+    )
+
+    override fun write(value: FromParty, buf: ByteBuffer) {
+            FfiConverterUShort.write(value.`participant`, buf)
+            FfiConverterByteArray.write(value.`bytes`, buf)
     }
 }
 
@@ -3620,6 +3723,41 @@ public object FfiConverterTypeStandNotice: FfiConverterRustBuffer<StandNotice> {
 
 
 /**
+ * Ours to send, tagged by who it is addressed to.
+ */
+data class ToParty (
+    var `participant`: kotlin.UShort, 
+    var `bytes`: kotlin.ByteArray
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeToParty: FfiConverterRustBuffer<ToParty> {
+    override fun read(buf: ByteBuffer): ToParty {
+        return ToParty(
+            FfiConverterUShort.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ToParty) = (
+            FfiConverterUShort.allocationSize(value.`participant`) +
+            FfiConverterByteArray.allocationSize(value.`bytes`)
+    )
+
+    override fun write(value: ToParty, buf: ByteBuffer) {
+            FfiConverterUShort.write(value.`participant`, buf)
+            FfiConverterByteArray.write(value.`bytes`, buf)
+    }
+}
+
+
+
+/**
  * A transaction as the chain records it.
  *
  * The point of `key_images` is not display: it is how a wallet works out that
@@ -4647,6 +4785,34 @@ public object FfiConverterSequenceTypeContactBackup: FfiConverterRustBuffer<List
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypeFromParty: FfiConverterRustBuffer<List<FromParty>> {
+    override fun read(buf: ByteBuffer): List<FromParty> {
+        val len = buf.getInt()
+        return List<FromParty>(len) {
+            FfiConverterTypeFromParty.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<FromParty>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeFromParty.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<FromParty>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeFromParty.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypeNodeCandidate: FfiConverterRustBuffer<List<NodeCandidate>> {
     override fun read(buf: ByteBuffer): List<NodeCandidate> {
         val len = buf.getInt()
@@ -4777,6 +4943,34 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypeStandNotice.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToParty>> {
+    override fun read(buf: ByteBuffer): List<ToParty> {
+        val len = buf.getInt()
+        return List<ToParty>(len) {
+            FfiConverterTypeToParty.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<ToParty>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeToParty.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<ToParty>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeToParty.write(it, buf)
         }
     }
 }
@@ -4945,6 +5139,18 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
     
 
         /**
+         * Abandon a ceremony's in-memory state (the peer sent `CeremonyAbort`, or it
+         * timed out). Idempotent — an unknown id is already gone.
+         */ fun `ceremonyAbort`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort)
+        = 
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_ceremony_abort(
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),_status)
+}
+    
+    
+
+        /**
          * Decide whether this payment may be signed (§15.5.1).
          *
          * `rate_is_fresh` reflects §17.7's cached rate, and a stale one **escalates**
@@ -5011,6 +5217,66 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_default_verification_policy(
         _status)
+}
+    )
+    }
+    
+
+        /**
+         * Round 1 — commit. Returns the broadcast commitment bytes to seal to every
+         * other party as a `DkgRound{round:0}` (§17.9). The context binds this key
+         * to one escrow and MUST be the ceremony id both sides agreed on.
+         */
+    @Throws(ContactException::class) fun `dkgCommit`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `t`: kotlin.UShort, `n`: kotlin.UShort): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_dkg_commit(
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterUShort.lower(`t`),FfiConverterUShort.lower(`n`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Round 3 — finish. Given the shares addressed to us, completes the key and
+         * returns the group's public key bytes (the escrow's spend key, which no
+         * party holds in full). The `ThresholdKeys` are kept for `dkg_take_keys`.
+         */
+    @Throws(ContactException::class) fun `dkgFinish`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `t`: kotlin.UShort, `n`: kotlin.UShort, `shares`: List<FromParty>, `stagenet`: kotlin.Boolean): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_dkg_finish(
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterUShort.lower(`t`),FfiConverterUShort.lower(`n`),FfiConverterSequenceTypeFromParty.lower(`shares`),FfiConverterBoolean.lower(`stagenet`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Round 2 — share. Given every other party's commitment, returns the
+         * encrypted share addressed to each of them (`DkgRound{round:1}`). Consumes
+         * the round-1 machine and stores the round-2 one.
+         */
+    @Throws(ContactException::class) fun `dkgShare`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `t`: kotlin.UShort, `n`: kotlin.UShort, `commitments`: List<FromParty>): List<ToParty> {
+            return FfiConverterSequenceTypeToParty.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_dkg_share(
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterUShort.lower(`t`),FfiConverterUShort.lower(`n`),FfiConverterSequenceTypeFromParty.lower(`commitments`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Hand the finished `ThresholdKeys` to the caller for persistence, once. The
+         * caller stores these as the party's only escrow secret; there is no copy of
+         * the other party's share anywhere on this device.
+         */
+    @Throws(ContactException::class) fun `dkgTakeKeys`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_dkg_take_keys(
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),_status)
 }
     )
     }

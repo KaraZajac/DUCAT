@@ -27,14 +27,11 @@ monero-simple-request-rpc = "0.1.0"
 monero-daemon-rpc = "0.2.0"
 sha2 = "0.10"
 ed25519-dalek = "2"
-
-[dev-dependencies]
-# The escrow demo (examples/escrowtest.rs): 2-of-2 threshold keys and FROST
-# signing over the same stack monero-wallet's multisig feature uses.
+# The §17.9 ceremony engine (src/ceremony.rs) ships in the library: FROST
+# signing over the same stack monero-wallet's multisig feature already pulls,
+# and the vendored interactive DKG (see mobile/vendor/dkg-pedpop — crates.io's
+# release drags an incompatible multiexp; ours repoints it at 0.5).
 modular-frost = { version = "0.11.1", features = ["ed25519"] }
-# The vendored dkg-pedpop (see mobile/vendor/dkg-pedpop) is the version-
-# matched interactive DKG §17.9 needs; crates.io's release drags an
-# incompatible multiexp. This gives the escrow demo a real no-dealer keygen.
 dkg-pedpop = { path = "vendor/dkg-pedpop" }
 ciphersuite = "0.4"
 
