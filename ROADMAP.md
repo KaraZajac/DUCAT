@@ -98,11 +98,13 @@ is already cross-platform Rust; the path, cheapest first:
    names). Still wanted: a card-issue flow with a QR on the terminal,
    a persistent watch daemon (one process, all threads), and packaging
    (static binaries for the three OSes).
-2. **GUI**: Compose Multiplatform reuses the Android UI wholesale on
-   desktop (the app is already Jetpack Compose; uniffi works on desktop
-   JVM); the work is abstracting SharedPreferences/Location/camera/NFC
-   behind interfaces. Alternative: egui/Slint on the Rust directly —
-   smaller binary, zero UI reuse.
+2. **GUI — building, `:desktop` module ("DUCAT Desk").** v2 compiles the
+   phone's protocol sources verbatim against a four-class Android shim:
+   one implementation of Mailbox/ContactStore on every screen. Window:
+   contacts, chat, claimable card QR, the phone's poll loop; headless
+   `:desktop:smoke` gates the stack in CI. Next: bills/pay rendering,
+   wallet scan loop, notifications, then packageDeb/Msi/Dmg artifacts.
+   The shim retires into a real shared module once the surface is known.
 3. **iPhone** eventually: uniffi generates Swift bindings natively and
    the Rust stack compiles for iOS — the protocol layer is free; the UI
    and App Store review are the cost. Nothing now forecloses it.
