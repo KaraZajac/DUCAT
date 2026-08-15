@@ -84,6 +84,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             args.get(i + 2).map(|s| s.as_str()).unwrap_or(""),
         ).await;
     }
+    if args.iter().any(|a| a == "--contacts") {
+        return mailbox::contacts_list();
+    }
+    if let Some(i) = args.iter().position(|a| a == "--contact-save") {
+        return mailbox::contact_save(args.get(i + 1).map(|s| s.as_str()).unwrap_or(""));
+    }
+    if let Some(i) = args.iter().position(|a| a == "--geo") {
+        // The helper the field kept needing: where am I, in board names.
+        let lat: f64 = args.get(i + 1).and_then(|s| s.parse().ok()).ok_or("--geo <lat> <lon>")?;
+        let lon: f64 = args.get(i + 2).and_then(|s| s.parse().ok()).ok_or("--geo <lat> <lon>")?;
+        let (la, lo) = ((lat * 1e7) as i64, (lon * 1e7) as i64);
+        let six = ducat_core::geo::geohash_encode(la, lo, 6).map_err(|e| format!("{e:?}"))?;
+        let five = ducat_core::geo::geohash_encode(la, lo, 5).map_err(|e| format!("{e:?}"))?;
+        println!("\n  cell (6)   {six}   → board geo:{six}");
+        println!("  cell (5)   {five}    → board geo:{five}");
+        println!("  drive:     --hail-watch geo:{six}\n");
+        return Ok(());
+    }
     if let Some(i) = args.iter().position(|a| a == "--ride-offer") {
         return mailbox::ride_offer(
             args.get(i + 1).map(|s| s.as_str()).unwrap_or(""),

@@ -73,6 +73,74 @@ const ONE_TIME_KEYS: u32 = 16;
 /// machine with no home directory still runs.
 pub fn state_path_pub(who: &str) -> String { state_path(who) }
 
+/// Name the currently-claimed thread, so the next claim cannot erase it.
+///
+/// The single-slot state made every new claim an amnesia event: the desk
+/// forgot the previous conversation entirely, chain links and spent-key
+/// ledgers included. Saving moves the default slot's three files under
+/// `contacts/<name>/`; talk to them again with `DUCAT_CONTACT=<name>`.
+pub fn contact_save(name: &str) -> Result<(), Box<dyn std::error::Error>> {
+    if name.is_empty()
+        || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    {
+        return Err("a contact name is letters, digits, - or _".into());
+    }
+    let src = state_path("claimant");
+    if !std::path::Path::new(&src).exists() {
+        return Err("no claimed contact in the default slot".into());
+    }
+    let dir = std::path::Path::new(&src)
+        .parent()
+        .ok_or("no state dir")?
+        .join("contacts")
+        .join(name);
+    std::fs::create_dir_all(&dir)?;
+    for who in ["claimant", "claimant-used", "claimant-theirs"] {
+        let from = state_path(who);
+        if std::path::Path::new(&from).exists() {
+            std::fs::rename(&from, dir.join(format!("{who}.json")))?;
+        }
+    }
+    println!("  saved — talk with DUCAT_CONTACT={name}");
+    Ok(())
+}
+
+/// Every thread this desk knows: the default slot and every saved name.
+pub fn contacts_list() -> Result<(), Box<dyn std::error::Error>> {
+    println!("\n\x1b[1mDUCAT — contacts on this desk\x1b[0m\n");
+    let default = state_path("claimant");
+    let dir = std::path::Path::new(&default).parent().ok_or("no state dir")?.to_path_buf();
+    let mut any = false;
+    let mut show = |label: &str, path: &std::path::Path| {
+        if let Ok(st) = std::fs::read_to_string(path) {
+            let mut it = st.lines();
+            let outbox = it.next().unwrap_or("?");
+            let persona = it.next().unwrap_or("?");
+            println!("  {label:<16} persona {}…  outbox {}…",
+                &persona[..persona.len().min(12)],
+                &outbox[..outbox.len().min(24)]);
+            any = true;
+        }
+    };
+    show("(default)", std::path::Path::new(&default));
+    if let Ok(entries) = std::fs::read_dir(dir.join("contacts")) {
+        let mut names: Vec<_> = entries
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().is_dir())
+            .filter_map(|e| e.file_name().into_string().ok())
+            .collect();
+        names.sort();
+        for n in names {
+            show(&n, &dir.join("contacts").join(&n).join("claimant.json"));
+        }
+    }
+    if !any {
+        println!("  none yet — claim a card first");
+    }
+    println!();
+    Ok(())
+}
+
 fn state_path(who: &str) -> String {
     if let Ok(p) = std::env::var("DUCAT_STATE") {
         return p;
@@ -81,9 +149,22 @@ fn state_path(who: &str) -> String {
         .ok()
         .filter(|v| !v.is_empty())
         .or_else(|| std::env::var("HOME").ok().map(|h| format!("{h}/.local/state")));
+    // One desk, many people: DUCAT_CONTACT selects whose thread the state
+    // belongs to. The unselected path stays where it always was, so every
+    // existing thread keeps working with no flag — a single-slot state that
+    // silently overwrote the last conversation on every new claim was the
+    // harness's biggest lie about being a client.
+    let contact = std::env::var("DUCAT_CONTACT").ok().filter(|c| {
+        !c.is_empty()
+            && c != "default"
+            && c.chars().all(|ch| ch.is_ascii_alphanumeric() || ch == '-' || ch == '_')
+    });
     match base {
         Some(b) => {
-            let dir = format!("{b}/ducat");
+            let dir = match &contact {
+                Some(c) => format!("{b}/ducat/contacts/{c}"),
+                None => format!("{b}/ducat"),
+            };
             let _ = std::fs::create_dir_all(&dir);
             format!("{dir}/{who}.json")
         }
