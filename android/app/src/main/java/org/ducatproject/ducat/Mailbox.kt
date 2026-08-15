@@ -777,6 +777,14 @@ object Mailbox {
             // a duplicate thread row, and its receipt captured twice.
             Notify.message(context, c.displayName(), c.personaHex, arrived)
             store.appendAndAdvance(c.personaHex, arrived, (seq + 1uL).toLong(), opened.link)
+            // §17.9: a ceremony round drives the threshold engine, not the
+            // chat. The message is recorded above like any other so the
+            // thread stays honest; the orchestrator acts on it here.
+            if (arrived.kind == 8) {
+                runCatching {
+                    Ceremony.onDkgRound(context, c, opened.ceremonyId, opened.round?.toLong(), opened.payload)
+                }.onFailure { DucatLog.w(TAG, "ceremony round: ${it.message}") }
+            }
             // A request carries a fresher address than anything stored (§16.12).
             opened.payto?.let { store.setTheirAddress(c.personaHex, it) }
             if (opened.consumedOneTime) store.burnOneTime(opened.prekeyId.toInt())
