@@ -240,13 +240,22 @@ fn release(
         let mut outgoing = Zeroizing::new([0u8; 32]);
         OsRng.fill_bytes(outgoing.as_mut());
 
-        // Sweep: everything to the destination as change-style payout — the
-        // deposit comes back whole, minus only the network fee.
+        // Sweep needs an explicit output, not just a change target. A
+        // 1-input 1-output CLSAG tx costs well under 0.00005 XMR; reserve
+        // that, pay the rest, and any slack over the true fee is donated —
+        // fine for a test release. Change::None: nothing comes back.
+        // One payment output, change back to the same address: everything
+        // minus the true network fee arrives at `dest`, split across the
+        // payment and the change output. The reserve need only exceed the
+        // real fee; the surplus returns as change rather than being donated.
+        const FEE_RESERVE: u64 = 200_000_000;
+        assert!(total > FEE_RESERVE, "escrow too small to cover the fee");
+        let payout = total - FEE_RESERVE;
         let tx = SignableTransaction::new(
             RctType::ClsagBulletproofPlus,
             outgoing,
             decoyed,
-            vec![],
+            vec![(dest, payout)],
             Change::fingerprintable(Some(dest)),
             vec![],
             fee_rate,
