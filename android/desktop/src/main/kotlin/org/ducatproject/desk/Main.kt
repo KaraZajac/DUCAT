@@ -40,9 +40,26 @@ import uniffi.ducat_mobile.nodeStatus
  */
 
 private fun dataDir(): File {
+    // DUCAT_DESK_STATE names the identity: two desks on one machine are two
+    // directories, each a complete persona/wallet/contacts. What must never
+    // happen is two *processes* on one directory — see lockOrExplain.
+    System.getenv("DUCAT_DESK_STATE")?.takeIf { it.isNotEmpty() }?.let {
+        return File(it).apply { mkdirs() }
+    }
     val base = System.getenv("XDG_DATA_HOME")?.takeIf { it.isNotEmpty() }
         ?: "${System.getProperty("user.home")}/.local/share"
     return File(base, "ducat-desk").apply { mkdirs() }
+}
+
+/**
+ * One process per identity, enforced. Two desks on one state dir would race
+ * the Veilid store and tear the chain counters and prekey burns — the state
+ * a week of field fixes made crash-proof, corrupted by its own twin. The
+ * lock is held for the process's life; the OS releases it on any death.
+ */
+private fun lockOrExplain(dir: File): java.nio.channels.FileLock? {
+    val ch = java.io.RandomAccessFile(File(dir, "desk.lock"), "rw").channel
+    return ch.tryLock()
 }
 
 private fun qrBitmap(text: String, px: Int = 380): ImageBitmap {
@@ -54,9 +71,22 @@ private fun qrBitmap(text: String, px: Int = 380): ImageBitmap {
     return img.toComposeImageBitmap()
 }
 
-fun main() = application {
-    Window(onCloseRequest = ::exitApplication, title = "DUCAT Desk") {
-        val context = remember { DeskContext(dataDir()) }
+fun main() {
+    val dir = dataDir()
+    if (lockOrExplain(dir) == null) {
+        System.err.println(
+            "ducat-desk: ${dir.absolutePath} is already in use by another desk.\n" +
+            "Two processes on one identity would corrupt it. For a second desk,\n" +
+            "give it its own: DUCAT_DESK_STATE=~/path/to/other-desk",
+        )
+        kotlin.system.exitProcess(1)
+    }
+    runDesk(dir)
+}
+
+private fun runDesk(deskDir: File) = application {
+    Window(onCloseRequest = ::exitApplication, title = "DUCAT Desk — ${deskDir.name}") {
+        val context = remember { DeskContext(deskDir) }
         var ready by remember { mutableStateOf(false) }
         var statusLine by remember { mutableStateOf("starting…") }
         var contacts by remember { mutableStateOf<List<Contact>>(emptyList()) }
@@ -69,7 +99,7 @@ fun main() = application {
         // The node, then the poller: the same loop the phone's service runs.
         LaunchedEffect(Unit) {
             withContext(Dispatchers.IO) {
-                runCatching { nodeStart(File(dataDir(), "veilid").absolutePath) }
+                runCatching { nodeStart(File(deskDir, "veilid").absolutePath) }
                     .onFailure { error = it.message }
             }
             while (true) {

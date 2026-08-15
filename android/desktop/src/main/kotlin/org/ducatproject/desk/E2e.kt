@@ -27,11 +27,22 @@ fun main() {
     while (!nodeStatus().publicInternetReady) Thread.sleep(2_000)
     println("e2e: node ready")
 
-    // A returning desk already has its people; only a fresh one issues.
+    // A returning desk already has its people; only a fresh one issues —
+    // unless it was handed a card to claim, which makes it the guest.
+    val toClaim = System.getenv("DUCAT_DESK_CLAIM")
     if (ContactStore(context).all().isEmpty()) {
-        val card = Mailbox.issueCard(context, "desk-e2e", 60uL * 60uL)
-        // One line, greppable, complete: the whole handshake is this string.
-        println("E2E_CARD ${card.uri}")
+        if (!toClaim.isNullOrEmpty()) {
+            val scanned = uniffi.ducat_mobile.readContactCard(toClaim)
+            val c = Mailbox.claimCard(context, scanned, null)
+            println("E2E_CLAIMED ${c.displayName()} ${c.personaHex}")
+            Mailbox.send(context, c, "hello from the other desk",
+                PersonaStore(context).personaHex())
+            println("E2E_GREETED")
+        } else {
+            val card = Mailbox.issueCard(context, "desk-e2e", 60uL * 60uL)
+            // One line, greppable, complete: the whole handshake is this string.
+            println("E2E_CARD ${card.uri}")
+        }
     } else {
         println("E2E_RESUMED")
     }
@@ -61,7 +72,9 @@ fun main() {
                     "eta=${m.etaSecs ?: 0} re=${m.reSeq ?: -1} body=${m.body}")
                 // Answer text so the far side can assert the desk speaks; leave
                 // money and ceremony kinds as received facts.
-                if (m.kind == 0 && !m.body.startsWith("[")) {
+                // Never answer an answer: two desks running this same loop
+                // would otherwise volley "desk heard" at each other forever.
+                if (m.kind == 0 && !m.body.startsWith("[") && !m.body.startsWith("desk heard")) {
                     runCatching {
                         Mailbox.send(context, c, "desk heard: ${m.body}", mine)
                         println("E2E_REPLIED ${m.seq}")
