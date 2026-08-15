@@ -87,14 +87,16 @@ private fun NewRideScreen(rides: RideStore) {
     }
     // Empty fields inherit the fare card's positioned defaults (§15.12's
     // pricing: inside the platform margin) rather than making every driver
-    // invent a rate at the curb.
+    // invent a rate at the curb. Locale-pinned to the dot, because these
+    // strings are parsed by toPxmr below — a locale's decimal comma would
+    // leave the defaults unparseable.
     var base by remember { mutableStateOf(
         prefs.getString("taxi_base_text", null)
-            ?: "%.2f".format(org.ducatproject.ducat.Fare.base(context))
+            ?: "%.2f".format(java.util.Locale.US, org.ducatproject.ducat.Fare.base(context))
     ) }
     var perMin by remember { mutableStateOf(
         prefs.getString("taxi_permin_text", null)
-            ?: "%.2f".format(org.ducatproject.ducat.Fare.perMin(context))
+            ?: "%.2f".format(java.util.Locale.US, org.ducatproject.ducat.Fare.perMin(context))
     ) }
     var fiat by remember { mutableStateOf(Amounts.preferFiat(context)) }
     val rate = remember { RateStore(context).cached()?.first }
@@ -104,7 +106,7 @@ private fun NewRideScreen(rides: RideStore) {
     var error by remember { mutableStateOf<String?>(null) }
 
     fun toPxmr(text: String): Long? {
-        val v = text.toBigDecimalOrNull() ?: return null
+        val v = moneyText(text).toBigDecimalOrNull() ?: return null
         val xmr = if (fiat) {
             if (rate == null || rate <= 0) return null
             v.divide(BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
@@ -177,7 +179,7 @@ private fun NewRideScreen(rides: RideStore) {
         Row {
             OutlinedTextField(
                 value = base,
-                onValueChange = { base = it.filter { c -> c.isDigit() || c == '.' } },
+                onValueChange = { base = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
                 label = { Text("Base (${if (fiat) cur else "XMR"})") },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
@@ -185,7 +187,7 @@ private fun NewRideScreen(rides: RideStore) {
             Spacer(Modifier.width(8.dp))
             OutlinedTextField(
                 value = perMin,
-                onValueChange = { perMin = it.filter { c -> c.isDigit() || c == '.' } },
+                onValueChange = { perMin = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
                 label = { Text("Per min (${if (fiat) cur else "XMR"})") },
                 singleLine = true,
                 modifier = Modifier.weight(1f),

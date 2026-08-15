@@ -1,6 +1,7 @@
 package org.ducatproject.ducat
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Base64
 import uniffi.ducat_mobile.OwnedOutput
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -178,24 +179,36 @@ class ContactStore(context: Context) {
      * the store would undo that at the last step, which is the step the user
      * can see.
      *
-     * The chain counters reset with it: a thread with no history has no link
-     * for the next message to follow, and leaving them would refuse everything
-     * the other side sends afterwards.
+     * The chain counters and prev-links stay exactly where they are. They are
+     * cursors into a live DHT conversation, not part of the rendering:
+     * resetting them forks both directions at once — our next send reuses a
+     * sequence their reader already accepted, and their next message is
+     * refused as out of order. Deleting a thread removes what this device
+     * shows, never where the protocol stands.
      */
     fun deleteThread(personaHex: String) { synchronized(lock) {
         prefs.edit().remove("thread_$personaHex").apply()
         bump()
-        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
-        save(
-            all().filterNot { it.personaHex == personaHex } +
-                c.copy(outSeq = 0, outPrevLink = null, inSeq = 0, inPrevLink = null)
-        )
     } }
 
-    /** Forget a person entirely: the contact and everything they said. */
+    /**
+     * Forget a person entirely: the contact, everything they said, and every
+     * per-persona key the store and the mailbox filed under them. The prefixed
+     * families ("stuck_", "slotseen_") are swept by scanning all keys, because
+     * they are keyed per-slot and per-seq and nothing else remembers which
+     * ones exist — leaving them would grow the prefs file by one orphan per
+     * forgotten conversation, forever.
+     */
     fun forget(personaHex: String) { synchronized(lock) {
-        prefs.edit().remove("thread_$personaHex").apply()
-        save(all().filterNot { it.personaHex == personaHex })
+        val e = prefs.edit()
+        listOf("thread_", "disappear_", "seen_", "usedtheirs_", "billseen_", "pendingslot_")
+            .forEach { e.remove(it + personaHex) }
+        prefs.all.keys.filter {
+            it.startsWith("stuck_$personaHex:") || it.startsWith("slotseen_$personaHex:")
+        }.forEach { e.remove(it) }
+        putContacts(e, all().filterNot { it.personaHex == personaHex })
+        e.apply()
+        bump()
     } }
 
     /** Take a fresher address for a contact, from details or a request. */
@@ -290,11 +303,19 @@ class ContactStore(context: Context) {
     fun remove(personaHex: String) = save(all().filterNot { it.personaHex == personaHex })
 
     private fun save(list: List<Contact>) { synchronized(lock) {
-        val arr = JSONArray()
-        list.forEach { arr.put(it.toJson()) }
-        prefs.edit().putString("contacts", arr.toString()).apply()
+        val e = prefs.edit()
+        putContacts(e, list)
+        e.apply()
         bump()
     } }
+
+    /** The contacts array into a caller's editor, for writes that must land
+     *  in the same commit as something else. */
+    private fun putContacts(e: SharedPreferences.Editor, list: List<Contact>) {
+        val arr = JSONArray()
+        list.forEach { arr.put(it.toJson()) }
+        e.putString("contacts", arr.toString())
+    }
 
     // --- threads ----------------------------------------------------------
 
@@ -307,14 +328,88 @@ class ContactStore(context: Context) {
     fun append(personaHex: String, m: StoredMessage) { synchronized(lock) {
         val arr = JSONArray()
         (thread(personaHex) + m).forEach { arr.put(it.toJson()) }
-        prefs.edit().putString("thread_$personaHex", arr.toString()).apply()
+        val e = prefs.edit().putString("thread_$personaHex", arr.toString())
         // A receipt is a record, not a message that happens to mention money.
         // Conversations get deleted — a taxi's thread especially — and the
         // receipt must outlive the small talk around it, the way a paper one
         // outlives the ride. Captured here, the one funnel every message
         // passes through, into a store nothing but the user clears.
-        if (m.kind == 3) saveReceiptLocked(personaHex, m)
+        if (m.kind == 3) saveReceiptLocked(personaHex, m, e)
+        e.apply()
         bump()
+    } }
+
+    /**
+     * One inbound message and the cursor that accepts it, as one commit.
+     *
+     * Append and advance used to be two writes, and a process death between
+     * them re-delivered the message on the next poll: a duplicate thread row,
+     * and a receipt captured twice. The cursor is the statement that this
+     * message was taken; it cannot be separable from the message itself.
+     */
+    fun appendAndAdvance(
+        personaHex: String,
+        m: StoredMessage,
+        newInSeq: Long,
+        newPrevLink: ByteArray?,
+    ) { synchronized(lock) {
+        val e = prefs.edit()
+        val arr = JSONArray()
+        (thread(personaHex) + m).forEach { arr.put(it.toJson()) }
+        e.putString("thread_$personaHex", arr.toString())
+        if (m.kind == 3) saveReceiptLocked(personaHex, m, e)
+        all().firstOrNull { it.personaHex == personaHex }?.let { c ->
+            putContacts(e, all().filterNot { it.personaHex == personaHex } +
+                c.copy(inSeq = newInSeq, inPrevLink = newPrevLink))
+        }
+        e.apply()
+        bump()
+    } }
+
+    /**
+     * The outbound twin: the local echo, the sending counters, and the sealed
+     * slot bytes still owed to the DHT, in one commit — before any network
+     * write. The failure orders are not symmetric: a published slot and head
+     * with the counter lost to a process death would reuse this sequence with
+     * different content next time, a fork every reader keeps; a persisted
+     * counter with the slot unwritten is only a late slot, which the pending
+     * bytes fill in on a later send with the same seq and the same content.
+     */
+    fun appendAndAdvanceOutbound(
+        personaHex: String,
+        m: StoredMessage,
+        newOutSeq: Long,
+        newPrevLink: ByteArray,
+        sealedSlot: ByteArray,
+    ) { synchronized(lock) {
+        val e = prefs.edit()
+        val arr = JSONArray()
+        (thread(personaHex) + m).forEach { arr.put(it.toJson()) }
+        e.putString("thread_$personaHex", arr.toString())
+        if (m.kind == 3) saveReceiptLocked(personaHex, m, e)
+        e.putString(
+            "pendingslot_$personaHex",
+            JSONObject().put("seq", m.seq).put("b", b64(sealedSlot)).toString(),
+        )
+        all().firstOrNull { it.personaHex == personaHex }?.let { c ->
+            putContacts(e, all().filterNot { it.personaHex == personaHex } +
+                c.copy(outSeq = newOutSeq, outPrevLink = newPrevLink))
+        }
+        e.apply()
+        bump()
+    } }
+
+    /** Sealed bytes a send persisted but never delivered: seq to bytes. */
+    fun pendingSlot(personaHex: String): Pair<Long, ByteArray>? =
+        prefs.getString("pendingslot_$personaHex", null)?.let {
+            runCatching {
+                val o = JSONObject(it)
+                o.getLong("seq") to unb64(o.getString("b"))
+            }.getOrNull()
+        }
+
+    fun clearPendingSlot(personaHex: String) { synchronized(lock) {
+        prefs.edit().remove("pendingslot_$personaHex").apply()
     } }
 
     /** A receipt, kept apart from the conversation it arrived in. */
@@ -330,13 +425,31 @@ class ContactStore(context: Context) {
         /** True when this device issued it (we were the payee). */
         val mine: Boolean,
         val timestamp: Long,
+        /** Settled outside DUCAT: txid-less by construction — no chain event
+         *  exists for it, and the ledger must not go looking for one. */
+        val oob: Boolean = false,
     )
 
-    private fun saveReceiptLocked(personaHex: String, m: StoredMessage) {
+    private fun saveReceiptLocked(
+        personaHex: String,
+        m: StoredMessage,
+        into: SharedPreferences.Editor? = null,
+    ) {
         val name = all().firstOrNull { it.personaHex == personaHex }?.displayName()
             ?: "${personaHex.take(8)}…"
         val arr = prefs.getString("receipts_v1", null)
             ?.let { runCatching { JSONArray(it) }.getOrNull() } ?: JSONArray()
+        // Captured once. The same receipt can reach here twice — a poll
+        // re-reading a slot, the migration re-walking a thread — and a record
+        // store must not count a payment twice because delivery stuttered.
+        for (i in 0 until arr.length()) {
+            val o = arr.optJSONObject(i) ?: continue
+            val sameTx = m.txidHex != null && !o.isNull("txid") &&
+                o.optString("txid").equals(m.txidHex, ignoreCase = true)
+            val sameMsg = o.optString("hex") == personaHex &&
+                o.optLong("seq", -1L) == m.seq && o.optBoolean("mine") == m.outgoing
+            if (sameTx || sameMsg) return
+        }
         arr.put(JSONObject().apply {
             put("txid", m.txidHex ?: JSONObject.NULL)
             put("amt", m.amountPxmr)
@@ -348,8 +461,12 @@ class ContactStore(context: Context) {
             put("who", name)
             put("mine", m.outgoing)
             put("ts", m.timestamp)
+            put("seq", m.seq)
+            if (m.oob) put("oob", true)
         })
-        prefs.edit().putString("receipts_v1", arr.toString()).apply()
+        val e = into ?: prefs.edit()
+        e.putString("receipts_v1", arr.toString())
+        if (into == null) e.apply()
     }
 
     fun receipts(): List<ReceiptRecord> {
@@ -372,6 +489,7 @@ class ContactStore(context: Context) {
                     counterparty = o.optString("who"),
                     mine = o.optBoolean("mine"),
                     timestamp = o.optLong("ts"),
+                    oob = o.optBoolean("oob", false),
                 )
             }.getOrNull()
         }
@@ -968,11 +1086,15 @@ data class StoredMessage(
      *  until that key rotates (§16.11). Shown, not hidden. */
     val forwardSecret: Boolean = true,
     val delivered: Boolean = true,
+    /** A receipt for a bill settled outside DUCAT (§15.11): it names no
+     *  transaction because none exists, not because one has yet to be found. */
+    val oob: Boolean = false,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("out", outgoing); put("seq", seq); put("body", body)
         put("ts", timestamp); put("fs", forwardSecret); put("delivered", delivered)
         put("kind", kind); put("amt", amountPxmr)
+        if (oob) put("oob", true)
         put("payto", payto ?: JSONObject.NULL)
         put("txid", txidHex ?: JSONObject.NULL)
         reSeq?.let { put("re_seq", it) }
@@ -1001,6 +1123,7 @@ data class StoredMessage(
             timestamp = o.getLong("ts"),
             forwardSecret = o.optBoolean("fs", true),
             delivered = o.optBoolean("delivered", true),
+            oob = o.optBoolean("oob", false),
             kind = o.optInt("kind", 0),
             amountPxmr = o.optLong("amt", 0L),
             payto = o.optStringOrNull("payto"),

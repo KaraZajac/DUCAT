@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -240,14 +241,18 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     }
                     // The camera hands its full frame to the same resize-seal
                     // path a gallery pick takes; the staging file lives in
-                    // cache and is overwritten by the next shot.
-                    var cameraUri by remember {
-                        mutableStateOf<android.net.Uri?>(null)
+                    // cache and is overwritten by the next shot. Saveable (as a
+                    // string — Uri is not) because the camera app routinely
+                    // kills this process while it has the screen: a plain
+                    // remember came back null, and the shot it named was
+                    // silently dropped.
+                    var cameraUri by rememberSaveable {
+                        mutableStateOf<String?>(null)
                     }
                     val takePhoto = androidx.activity.compose.rememberLauncherForActivityResult(
                         androidx.activity.result.contract.ActivityResultContracts.TakePicture()
                     ) { ok ->
-                        val uri = cameraUri
+                        val uri = cameraUri?.let(android.net.Uri::parse)
                         if (ok && uri != null) {
                             sending = true
                             scope.launch(Dispatchers.IO) {
@@ -261,7 +266,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             context, context.packageName + ".backups",
                             java.io.File(dir, "shot.jpg"),
                         )
-                        cameraUri = uri
+                        cameraUri = uri.toString()
                         takePhoto.launch(uri)
                     }
                     // Declaring CAMERA in the manifest (the QR scanner needs
@@ -535,7 +540,21 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             }
             items(messages.filter { it.kind != 4 }) { m ->
                 Column {
-                    Bubble(m, c.theirReadUpTo, onLongPress = { confirmDelete = m }, onPay = { billView = it })
+                    Bubble(
+                        m, c.theirReadUpTo,
+                        // A later kind-2 notice for the same amount is this
+                        // request being answered — the amount is the only
+                        // thread from a payment back to the bill it settles.
+                        // An identical re-bill will also read as paid, which
+                        // errs the safe way for a button that spends.
+                        paid = m.kind == 1 && !m.outgoing && messages.any {
+                            it.kind == 2 && it.outgoing &&
+                                it.amountPxmr == m.amountPxmr &&
+                                it.timestamp >= m.timestamp
+                        },
+                        onLongPress = { confirmDelete = m },
+                        onPay = { billView = it },
+                    )
                     val mine2 = reactions[Triple(m.outgoing, m.seq, true)]?.body
                     val theirs2 = reactions[Triple(m.outgoing, m.seq, false)]?.body
                     if (mine2 != null || theirs2 != null) {
@@ -760,7 +779,13 @@ private fun sendOne(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun Bubble(m: StoredMessage, theirReadUpTo: Long? = null, onLongPress: () -> Unit, onPay: (StoredMessage) -> Unit) {
+private fun Bubble(
+    m: StoredMessage,
+    theirReadUpTo: Long? = null,
+    paid: Boolean = false,
+    onLongPress: () -> Unit,
+    onPay: (StoredMessage) -> Unit,
+) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val align = if (m.outgoing) Alignment.End else Alignment.Start
     // Yours in the accent, theirs in the neutral surface. Colour is doing the
@@ -906,7 +931,15 @@ private fun Bubble(m: StoredMessage, theirReadUpTo: Long? = null, onLongPress: (
                     // §15.5's confirm screen exists to prevent.
                     if (m.kind == 1 && !m.outgoing) {
                         Spacer(Modifier.height(8.dp))
-                        if (m.payto != null) {
+                        if (paid) {
+                            // Settled: a live button here would offer to pay
+                            // the same bill twice.
+                            Text(
+                                "Paid ✓",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = fg.copy(alpha = 0.8f),
+                            )
+                        } else if (m.payto != null) {
                             // Opens the send screen filled in. It does **not**
                             // pay: §16.13 forbids a one-tap spend from an
                             // arriving message, because the confirm screen is

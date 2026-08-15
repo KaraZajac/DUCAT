@@ -125,8 +125,8 @@ pub async fn post(cell: &str, text: &str) -> Result<(), Box<dyn std::error::Erro
         .as_secs();
 
     // §15.12's overflow ladder: the lowest shard with a free slot takes the
-    // notice. Backfilling low keeps the ladder compact, which is what lets a
-    // reader stop sweeping at the first empty shard.
+    // notice. Backfilling low keeps the ladder compact, which is what keeps
+    // a reader's sweep short.
     for shard in 0..MAX_STAND_SHARDS {
         let name = stand_shard_name(cell, shard).map_err(|e| format!("{e:?}"))?;
         let key = open_board(&api, &rc, &name).await?;
@@ -161,6 +161,7 @@ pub async fn read(cell: &str) -> Result<(), Box<dyn std::error::Error>> {
     let rc = api.routing_context()?;
 
     let mut found = 0;
+    let mut quiet = 0;
     for shard in 0..MAX_STAND_SHARDS {
         let name = stand_shard_name(cell, shard).map_err(|e| format!("{e:?}"))?;
         let key = open_board(&api, &rc, &name).await?;
@@ -178,9 +179,15 @@ pub async fn read(cell: &str) -> Result<(), Box<dyn std::error::Error>> {
         }
         rc.close_dht_record(key).await?;
         found += here;
-        // An empty shard ends the sweep: writers backfill low, so nothing
-        // lives above a hole for long. A quiet cell costs one read.
-        if here == 0 { break }
+        // Claims and expiry empty the low shards first, so one hole is not
+        // the end of the ladder: keep going past a single quiet shard, stop
+        // after two in a row. Costs a quiet cell one extra read.
+        if here == 0 {
+            quiet += 1;
+            if quiet >= 2 { break }
+        } else {
+            quiet = 0;
+        }
     }
     if found == 0 {
         println!("  \x1b[31mboard is empty\x1b[0m");
@@ -314,9 +321,11 @@ async fn hail_watch_cells(cells: &[String]) -> Result<(), Box<dyn std::error::Er
 
     loop {
         for cell in cells {
-            // §15.12's overflow ladder: sweep from shard 0, stop at the first
-            // shard holding nothing live. Writers backfill low, so a quiet
-            // cell costs one read and a busy one costs its actual height.
+            // §15.12's overflow ladder: sweep from shard 0. Claims and
+            // expiry empty the low shards first, so one quiet shard is not
+            // the end of the ladder — stop only after two in a row, which
+            // costs a quiet cell one extra read.
+            let mut quiet = 0u32;
             'ladder: for shard in 0..MAX_STAND_SHARDS {
                 let name = stand_shard_name(cell, shard).map_err(|e| format!("{e:?}"))?;
                 let key = match opened.get(&name) {
@@ -353,7 +362,12 @@ async fn hail_watch_cells(cells: &[String]) -> Result<(), Box<dyn std::error::Er
                     println!("\n  \x1b[32mhail taken\x1b[0m — talk with --say");
                     return Ok(());
                 }
-                if live_here == 0 { break 'ladder }
+                if live_here == 0 {
+                    quiet += 1;
+                    if quiet >= 2 { break 'ladder }
+                } else {
+                    quiet = 0;
+                }
             }
         }
         print!(".");

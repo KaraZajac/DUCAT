@@ -13,8 +13,10 @@ fun grabLocation(
 ) = grabFix(context) { fix ->
     done(fix?.let { (lat, lon) ->
         val la = lat / 1e7; val lo = lon / 1e7
+        // Locale.US or a comma-decimal locale mints mlat=52,52000 — a URL
+        // no map can open. Same rule as every coordinate URL in Geo.kt.
         "📍 Where I am: https://www.openstreetmap.org/?mlat=%.5f&mlon=%.5f#map=17/%.5f/%.5f"
-            .format(la, lo, la, lo)
+            .format(java.util.Locale.US, la, lo, la, lo)
     })
 }
 
@@ -56,8 +58,13 @@ fun grabFix(
                 // A fresh fix indoors can take a while or fail outright; the
                 // last known position is minutes old at worst and beats an
                 // empty pickup field every time.
+                // This callback runs after the try below has exited — an
+                // unguarded call here crashes if permission was revoked
+                // between the request and the fix arriving.
                 send(loc
-                    ?: lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER)
+                    ?: runCatching {
+                        lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER)
+                    }.getOrNull()
                     ?: runCatching {
                         lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER)
                     }.getOrNull())

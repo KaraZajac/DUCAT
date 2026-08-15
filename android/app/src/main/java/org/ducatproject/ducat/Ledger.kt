@@ -156,7 +156,11 @@ object Ledger {
         for (r in receipts) {
             val rid = r.txidHex?.lowercase()
             if (rid != null) papered[rid] = r
-            else if (r.amountPxmr > 0) loose += Loose(r)
+            // An out-of-band receipt is txid-less because the money took
+            // another rail entirely — cash across the bar. There is no chain
+            // event for it to match, so it never enters the loose pool, where
+            // it would staple itself to an unrelated payment of the same size.
+            else if (r.amountPxmr > 0 && !r.oob) loose += Loose(r)
         }
         for (c in everyone) {
             for (m in contacts.thread(c.personaHex)) {
@@ -179,28 +183,39 @@ object Ledger {
         )
         return built.map { e ->
             var paper = papered[e.txid.lowercase()]
+            // The counterparty the event can already name — our send record,
+            // or the notice that announced it. A loose receipt must agree
+            // with it, never supply a different one.
+            val knownHex = when (e.direction) {
+                Direction.Sent -> sendsByTx[e.txid.lowercase()]?.contactHex
+                else -> announcedHex[e.txid.lowercase()]
+            }
             if (paper == null) {
                 // Amount-and-direction fallback. Exact match only: a receipt
                 // is a statement about a specific sum, and "close enough"
-                // would staple paperwork to the wrong money.
-                val threadHex = sendsByTx[e.txid.lowercase()]?.contactHex
-                val l = loose.firstOrNull {
-                    !it.spent && it.r.amountPxmr == e.amountPxmr &&
-                        // A receipt someone sent us covers a payment we made;
-                        // one we issued covers a payment we received.
-                        it.r.mine == (e.direction == Direction.Received) &&
-                        (threadHex == null || it.r.contactHex == threadHex)
-                }
+                // would staple paperwork to the wrong money. Bounded in time
+                // for the same reason — a receipt and its payment happen
+                // together, and among candidates the closest one wins rather
+                // than whichever the list happened to serve first.
+                val l = loose
+                    .filter {
+                        !it.spent && it.r.amountPxmr == e.amountPxmr &&
+                            // A receipt someone sent us covers a payment we
+                            // made; one we issued covers a payment we received.
+                            it.r.mine == (e.direction == Direction.Received) &&
+                            (knownHex == null || it.r.contactHex == knownHex)
+                    }
+                    .filter {
+                        e.timestamp == 0L || it.r.timestamp == 0L ||
+                            kotlin.math.abs(it.r.timestamp - e.timestamp) <= 86_400
+                    }
+                    .minByOrNull { kotlin.math.abs(it.r.timestamp - e.timestamp) }
                 if (l != null) {
                     l.spent = true
                     paper = l.r
                 }
             }
-            val hex = when (e.direction) {
-                Direction.Sent ->
-                    sendsByTx[e.txid.lowercase()]?.contactHex ?: paper?.contactHex
-                else -> announcedHex[e.txid.lowercase()] ?: paper?.contactHex
-            }
+            val hex = knownHex ?: paper?.contactHex
             if (paper == null && hex == null) e
             else e.copy(
                 items = paper?.items ?: e.items,

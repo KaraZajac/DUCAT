@@ -39,6 +39,11 @@ data class RunningTab(
     /** A matching transaction sighted in the mempool — §17.5's *seen*, not
      *  settled. UX state only: the receipt waits for the chain. */
     val seenTx: String? = null,
+    /** The chain tip when the bill went out. The key-image snapshot only
+     *  covers outputs the scanner had already reached; an output mined at or
+     *  below this height existed before the bill, however late a catch-up
+     *  scan surfaces it, and cannot be its payment. */
+    val tipAtBill: Long = 0,
 ) {
     val totalPxmr: Long get() =
         if (state == "open") lines.sumOf { it.amountPxmr } + (taxPxmr ?: 0L) else settledTotal
@@ -54,6 +59,7 @@ data class RunningTab(
         put("known", JSONArray(knownKis))
         put("paid_ki", paidKi ?: JSONObject.NULL)
         put("seen_tx", seenTx ?: JSONObject.NULL)
+        put("tip_at_bill", tipAtBill)
     }
 
     companion object {
@@ -77,6 +83,7 @@ data class RunningTab(
             } ?: emptyList(),
             paidKi = if (o.isNull("paid_ki")) null else o.optString("paid_ki"),
             seenTx = if (o.isNull("seen_tx")) null else o.optString("seen_tx"),
+            tipAtBill = o.optLong("tip_at_bill", 0),
         )
     }
 }
@@ -147,6 +154,7 @@ class TabStore(private val context: Context) {
             settledTotal = total,
             settledAt = System.currentTimeMillis(),
             knownKis = WalletStore(context).entries().map { it.keyImage },
+            tipAtBill = WalletStore(context).tip(),
         )
         update(settled)
         DucatLog.i(TAG, "settled ${tab.origin} tab with ${contact.displayName()}: ${formatXmr(total)} XMR")
@@ -173,6 +181,9 @@ class TabStore(private val context: Context) {
                 PersonaStore(context).personaHex(),
                 kind = 3, amountPxmr = tab.settledTotal,
                 items = tab.lines, taxPxmr = tab.taxPxmr,
+                // The money took another rail; the record must say so, or the
+                // ledger goes looking for a chain event that does not exist.
+                oob = true,
             )
         }.onFailure { DucatLog.w(TAG, "oob receipt: ${it.message}") }
         DucatLog.i(TAG, "${tab.origin} tab settled outside DUCAT (${formatXmr(tab.settledTotal)} XMR)")
@@ -284,6 +295,11 @@ class TabStore(private val context: Context) {
                     it.keyImage.isNotEmpty() &&
                         it.keyImage !in tab.knownKis &&
                         it.keyImage !in claimed &&
+                        // Mined after the bill, not merely scanned after it: a
+                        // wallet catching up surfaces old outputs the key-image
+                        // snapshot never saw, and an exact-amount coincidence
+                        // from last week must not settle tonight's tab.
+                        (tab.tipAtBill == 0L || it.height > tab.tipAtBill) &&
                         (it.amountPxmr == tab.settledTotal || it.amountPxmr in said)
                 } ?: continue
                 claimed += hit.keyImage

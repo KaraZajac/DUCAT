@@ -109,7 +109,9 @@ fun PosScreen() {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
                         value = quickAmount,
-                        onValueChange = { quickAmount = it },
+                        onValueChange = {
+                            quickAmount = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
+                        },
                         label = { Text(if (quickFiat) "Total ($cur)" else "Total (XMR)") },
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                             keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
@@ -126,7 +128,7 @@ fun PosScreen() {
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                val pxmr = quickAmount.trim().toDoubleOrNull()?.let { v ->
+                val pxmr = moneyText(quickAmount).toDoubleOrNull()?.let { v ->
                     if (quickFiat && rate != null) ((v / rate) * 1e12).toLong()
                     else if (!quickFiat) (v * 1e12).toLong()
                     else null
@@ -255,7 +257,7 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
     val cur = remember { Amounts.currency(context) }
 
     val pxmr: Long? = remember(amount, fiat, rate) {
-        val v = amount.toBigDecimalOrNull() ?: return@remember null
+        val v = moneyText(amount).toBigDecimalOrNull() ?: return@remember null
         val xmr = if (fiat) {
             if (rate == null || rate <= 0) return@remember null
             v.divide(BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
@@ -277,7 +279,7 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
         Spacer(Modifier.width(8.dp))
         OutlinedTextField(
             value = amount,
-            onValueChange = { amount = it.filter { c -> c.isDigit() || c == '.' } },
+            onValueChange = { amount = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
             label = { Text(if (fiat) cur else "XMR") },
             singleLine = true,
             modifier = Modifier.weight(1f),
@@ -320,8 +322,8 @@ private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
         OutlinedTextField(
             value = text,
             onValueChange = {
-                text = it.filter { c -> c.isDigit() || c == '.' }
-                onSet(text.toDoubleOrNull()?.let { v -> (v * 1e12).toLong() } ?: 0L)
+                text = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
+                onSet(moneyText(text).toDoubleOrNull()?.let { v -> (v * 1e12).toLong() } ?: 0L)
             },
             label = { Text("XMR") },
             placeholder = { Text("0") },

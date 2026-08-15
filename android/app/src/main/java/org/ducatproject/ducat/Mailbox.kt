@@ -292,9 +292,12 @@ object Mailbox {
     /**
      * Append one message to our outbox for this contact.
      *
-     * The slot is written **before** the head. A reader that saw `next_seq`
-     * move and then found an unwritten slot would have been told a message
-     * exists that does not; this order only ever makes one briefly late.
+     * The local echo, the counters and the sealed bytes are persisted before
+     * the DHT sees anything, and the slot is written **before** the head. A
+     * reader that saw `next_seq` move and then found an unwritten slot would
+     * have been told a message exists that does not; this order only ever
+     * makes one briefly late — and a persisted counter with the slot still
+     * owed is filled in by the next send, with the same seq and same bytes.
      */
     fun send(
         context: Context,
@@ -316,10 +319,36 @@ object Mailbox {
         reOwn: Boolean = false,
         /** §16.15: a sealed blob parked in its own record. */
         attachment: uniffi.ducat_mobile.AttachmentRef? = null,
+        /** The bill was settled outside DUCAT: this receipt deliberately names
+         *  no transaction, and the record it leaves must say so (§15.11). */
+        oob: Boolean = false,
     ): Contact {
         val store = ContactStore(context)
         val bundle = c.theirBundle
             ?: throw IllegalStateException("No keys for this contact yet.")
+        // Re-opened **as the owner**. Creating a record leaves it writable only
+        // for that process; a plain re-open is read-only and the write comes
+        // back "value is not writable", which sounds like the network refusing
+        // and is us having discarded the key.
+        if (c.myOutboxOwnerSecret.isEmpty()) {
+            throw IllegalStateException(
+                "This conversation predates the current format. Ask them for a new card."
+            )
+        }
+        nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
+        var ring = c.myRing.toUInt()
+        // A previous send persisted its message and counters but died before
+        // the DHT took the slot. Those bytes go out first — the same seq and
+        // the same bytes, never a re-seal, which would put different content
+        // under a sequence number.
+        store.pendingSlot(c.personaHex)?.let { (pseq, pbytes) ->
+            if (pseq < c.outSeq) {
+                DucatLog.i(TAG, "delivering seq $pseq to ${c.displayName()} " +
+                    "left over from an interrupted send")
+                ring = writeSlotClamped(store, c, pseq.toULong(), pbytes, ring)
+            }
+            store.clearPendingSlot(c.personaHex)
+        }
         DucatLog.i(TAG, "sending ${if (kind == 0) "message" else "payment note"} " +
             "seq ${c.outSeq} to ${c.displayName()}")
         val sealed = sealMessage(
@@ -331,37 +360,45 @@ object Mailbox {
             taxPxmr?.toULong(),
             reSeq?.toULong(), reOwn, attachment,
         )
-        // Re-opened **as the owner**. Creating a record leaves it writable only
-        // for that process; a plain re-open is read-only and the write comes
-        // back "value is not writable", which sounds like the network refusing
-        // and is us having discarded the key.
-        if (c.myOutboxOwnerSecret.isEmpty()) {
-            throw IllegalStateException(
-                "This conversation predates the current format. Ask them for a new card."
-            )
-        }
-        nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
-        // Threads minted before the 8-subkey/32-ring mismatch was fixed hold
-        // records smaller than the ring their head claims. Slots 0–6 map
-        // identically under ring 8 and ring 32, so clamping the ring back to
-        // the record's real size heals the thread with no history rewritten —
-        // the head republishes the honest ring below and readers follow it.
-        var ring = c.myRing.toUInt()
-        try {
-            nodeDhtSet(c.myOutbox, logSubkey(c.outSeq.toULong(), ring), sealed.bytes)
-        } catch (e: Exception) {
-            if (e.message?.contains("out of range") == true && ring > LOG_SUBKEYS) {
-                DucatLog.w(
-                    TAG,
-                    "legacy log smaller than its ring — clamping ${c.displayName()} to $LOG_SUBKEYS",
-                )
-                ring = LOG_SUBKEYS
-                store.setMyRing(c.personaHex, LOG_SUBKEYS.toInt())
-                nodeDhtSet(c.myOutbox, logSubkey(c.outSeq.toULong(), ring), sealed.bytes)
-            } else {
-                throw e
+        // Everything local lands before anything remote. The failure orders
+        // are not symmetric: a published slot and head with the counter lost
+        // to a process death reuses this seq with different content next time
+        // — a fork every reader keeps — while a persisted counter with the
+        // slot unwritten is only a late slot, retried above on the next send,
+        // and a head one behind the counter self-heals on its next publish.
+        store.appendAndAdvanceOutbound(
+            c.personaHex,
+            StoredMessage(
+                outgoing = true, seq = c.outSeq, body = body,
+                timestamp = System.currentTimeMillis() / 1000,
+                forwardSecret = sealed.forwardSecret,
+                kind = kind, amountPxmr = amountPxmr ?: 0L, payto = payto,
+                txidHex = txidHex, items = items, taxPxmr = taxPxmr,
+                reSeq = reSeq, reOwn = reOwn,
+                attRecord = attachment?.recordKey, attKey = attachment?.key,
+                attNonce = attachment?.nonce, attLen = attachment?.len?.toLong() ?: 0L,
+                attHash = attachment?.ctHash?.toHexString(),
+                attMime = attachment?.mime, attName = attachment?.name,
+                oob = oob,
+            ),
+            c.outSeq + 1, sealed.nextLink, sealed.bytes,
+        )
+
+        // Withdraw the key we just used from our *cached copy* of their bundle
+        // — also before the network, since the sealed bytes are committed for
+        // delivery from here whether or not tonight's write lands.
+        // select() takes the first one-time entry, so without this every message
+        // seals to the same key — the first is accepted, the receiver burns it,
+        // and every later one comes back as an unknown prekey. Exactly the bug
+        // that hit the published bundle earlier, on the other side of the wire.
+        if (sealed.prekeyId != 0u) {
+            if (sealed.forwardSecret) {
+                store.recordUsedTheirId(c.personaHex, sealed.prekeyId.toInt())
             }
+            runCatching { prunePrekey(bundle, sealed.prekeyId) }
+                .onSuccess { store.setTheirBundle(c.personaHex, it) }
         }
+        ring = writeSlotClamped(store, c, c.outSeq.toULong(), sealed.bytes, ring)
         // Republish our keys with every head write. Cheap — the head is read on
         // every poll anyway — and it is the only route back from an exhausted
         // supply, since the handshake inbox is a one-time artifact.
@@ -377,39 +414,44 @@ object Mailbox {
                 ring.takeIf { it != 8u },
             ),
         )
-
-        store.append(
-            c.personaHex,
-            StoredMessage(
-                outgoing = true, seq = c.outSeq, body = body,
-                timestamp = System.currentTimeMillis() / 1000,
-                forwardSecret = sealed.forwardSecret,
-                kind = kind, amountPxmr = amountPxmr ?: 0L, payto = payto,
-                txidHex = txidHex, items = items, taxPxmr = taxPxmr,
-                reSeq = reSeq, reOwn = reOwn,
-                attRecord = attachment?.recordKey, attKey = attachment?.key,
-                attNonce = attachment?.nonce, attLen = attachment?.len?.toLong() ?: 0L,
-                attHash = attachment?.ctHash?.toHexString(),
-                attMime = attachment?.mime, attName = attachment?.name,
-            ),
-        )
-        store.advanceOutbound(c.personaHex, c.outSeq + 1, sealed.nextLink)
-
-        // Withdraw the key we just used from our *cached copy* of their bundle.
-        // select() takes the first one-time entry, so without this every message
-        // seals to the same key — the first is accepted, the receiver burns it,
-        // and every later one comes back as an unknown prekey. Exactly the bug
-        // that hit the published bundle earlier, on the other side of the wire.
-        if (sealed.prekeyId != 0u) {
-            if (sealed.forwardSecret) {
-                store.recordUsedTheirId(c.personaHex, sealed.prekeyId.toInt())
-            }
-            runCatching { prunePrekey(bundle, sealed.prekeyId) }
-                .onSuccess { store.setTheirBundle(c.personaHex, it) }
-        }
+        store.clearPendingSlot(c.personaHex)
         DucatLog.i(TAG, "delivered seq ${c.outSeq} to ${c.displayName()}" +
             if (sealed.forwardSecret) "" else " (no forward secrecy — their one-time keys ran out)")
         return store.all().first { it.personaHex == c.personaHex }
+    }
+
+    /**
+     * One slot write, healing legacy logs on the way. Threads minted before
+     * the 8-subkey/32-ring mismatch was fixed hold records smaller than the
+     * ring their head claims. Slots 0–6 map identically under ring 8 and
+     * ring 32, so clamping the ring back to the record's real size heals the
+     * thread with no history rewritten — the head republishes the honest ring
+     * and readers follow it. Returns the ring actually in effect.
+     */
+    private fun writeSlotClamped(
+        store: ContactStore,
+        c: Contact,
+        seq: ULong,
+        bytes: ByteArray,
+        ring0: UInt,
+    ): UInt {
+        var ring = ring0
+        try {
+            nodeDhtSet(c.myOutbox, logSubkey(seq, ring), bytes)
+        } catch (e: Exception) {
+            if (e.message?.contains("out of range") == true && ring > LOG_SUBKEYS) {
+                DucatLog.w(
+                    TAG,
+                    "legacy log smaller than its ring — clamping ${c.displayName()} to $LOG_SUBKEYS",
+                )
+                ring = LOG_SUBKEYS
+                store.setMyRing(c.personaHex, LOG_SUBKEYS.toInt())
+                nodeDhtSet(c.myOutbox, logSubkey(seq, ring), bytes)
+            } else {
+                throw e
+            }
+        }
+        return ring
     }
 
     /** Where a fetched attachment lives, named by its ciphertext hash. */
@@ -564,20 +606,23 @@ object Mailbox {
             if (!logStillReadable(seq, next, ring)) {
                 // The ring passed us. Saying so beats rendering a thread with a
                 // hole in it (§16.10's conversation that did not happen).
+                // Placeholder and cursor in one commit, or a process death
+                // between them re-appends the same loss on the next poll.
                 DucatLog.w(TAG, "lost message $seq from ${c.displayName()} — ring wrapped")
-                store.append(
+                store.appendAndAdvance(
                     c.personaHex,
                     StoredMessage(
                         outgoing = false, seq = seq.toLong(),
                         body = "[a message was lost — this device was away too long]",
                         timestamp = System.currentTimeMillis() / 1000,
                     ),
+                    (seq + 1uL).toLong(), null,
                 )
+                // A patience clock started for this seq before the ring caught
+                // it would otherwise sit in prefs forever.
+                clearStuck(context, "${c.personaHex}:$seq")
                 seq += 1uL
                 prev = null
-                // Advance the stored cursor too, or the loop exiting here
-                // re-appends the same loss placeholder on every poll.
-                store.advanceInbound(c.personaHex, seq.toLong(), null)
                 continue
             }
             val raw = nodeDhtGet(c.theirOutbox, logSubkey(seq, ring), true) ?: break
@@ -587,10 +632,9 @@ object Mailbox {
             if (secret == null) {
                 val slotKey = "${c.personaHex}:${logSubkey(seq, ring)}"
                 val rawHash = raw.contentHashCode()
-                val lastProcessed = slotSeen(context, slotKey)
-                if (lastProcessed == rawHash) {
+                if (slotSeen(context, slotKey) == rawHash) {
                     // The slot's previous tenant — bytes this reader already
-                    // opened as an earlier sequence. The real write is still
+                    // processed as an earlier sequence. The real write is still
                     // propagating; wait as long as it takes, no clock.
                     DucatLog.i(
                         TAG,
@@ -599,33 +643,12 @@ object Mailbox {
                     )
                     break
                 }
-                if (lastProcessed != null) {
-                    // Bytes never seen before, sealed to a key this device
-                    // does not hold: genuinely unreadable, and certainly not
-                    // a propagation mirage. Ten silent minutes here taught
-                    // nobody anything — doomed messages used to serve their
-                    // sentences serially, each holding up the next.
-                    DucatLog.w(
-                        TAG,
-                        "prekey $id is gone; message $seq from ${c.displayName()} is lost",
-                    )
-                    store.append(
-                        c.personaHex,
-                        StoredMessage(
-                            outgoing = false, seq = seq.toLong(),
-                            body = "[a message could not be opened — it was sealed " +
-                                "to a key this device no longer holds]",
-                            timestamp = System.currentTimeMillis() / 1000,
-                        ),
-                    )
-                    seq += 1uL
-                    prev = null
-                    store.advanceInbound(c.personaHex, seq.toLong(), null)
-                    continue
-                }
-                // No memory of this slot (fresh start): fall back to the
-                // patience window — the conservative wait that cannot call a
-                // late arrival lost.
+                // Bytes this reader has no memory of processing. Either this
+                // seq's real write, sealed to a key this device no longer
+                // holds, or an older tenant still propagating that never got
+                // processed here — the seen-hash cannot tell them apart, so
+                // both get the patience window. Declaring loss on sight
+                // turned every unprocessed old tenant into a false loss.
                 val key = "${c.personaHex}:$seq"
                 val since = stuckSince(context, key)
                 if (System.currentTimeMillis() - since < STUCK_PATIENCE_MS) {
@@ -641,7 +664,12 @@ object Mailbox {
                     TAG,
                     "prekey $id is gone; message $seq from ${c.displayName()} is lost",
                 )
-                store.append(
+                // The bytes being given up on become the slot's last-processed
+                // tenant: when the next sequence lands here and these bytes
+                // are still what the network serves, that is propagation lag,
+                // not another loss.
+                recordSlotSeen(context, slotKey, rawHash)
+                store.appendAndAdvance(
                     c.personaHex,
                     StoredMessage(
                         outgoing = false, seq = seq.toLong(),
@@ -649,10 +677,10 @@ object Mailbox {
                             "to a key this device no longer holds]",
                         timestamp = System.currentTimeMillis() / 1000,
                     ),
+                    (seq + 1uL).toLong(), null,
                 )
                 seq += 1uL
                 prev = null
-                store.advanceInbound(c.personaHex, seq.toLong(), null)
                 continue
             }
 
@@ -685,16 +713,17 @@ object Mailbox {
             )
             // The one funnel every arrival passes through, so the notification
             // cannot be forgotten by a new screen: if it was stored, it was
-            // announced.
+            // announced. Message and cursor land in one commit: a process
+            // death between them re-delivered the message on the next poll —
+            // a duplicate thread row, and its receipt captured twice.
             Notify.message(context, c.displayName(), c.personaHex, arrived)
-            store.append(c.personaHex, arrived)
+            store.appendAndAdvance(c.personaHex, arrived, (seq + 1uL).toLong(), opened.link)
             // A request carries a fresher address than anything stored (§16.12).
             opened.payto?.let { store.setTheirAddress(c.personaHex, it) }
             if (opened.consumedOneTime) store.burnOneTime(opened.prekeyId.toInt())
             prev = opened.link
             seq += 1uL
             count++
-            store.advanceInbound(c.personaHex, seq.toLong(), opened.link)
         }
         return count
     }

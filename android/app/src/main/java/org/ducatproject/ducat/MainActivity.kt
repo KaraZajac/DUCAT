@@ -179,6 +179,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             ?.let { overlay = Overlay.Chat(it) }
     }
 
+    // The mode owns the whole scaffold (§15.11): a till is a different app
+    // from a wallet, and the drawer is the one shared door between them.
+    val modeV by ContactStore.changes.collectAsState()
+    val appMode = remember(modeV) { ModeStore(context).current() }
+
     // Android's back gesture is a system behaviour, not a widget: without a
     // handler it goes straight to the activity and closes the app. Every screen
     // that is *entered* has to say how to leave it, or the way out of a
@@ -191,7 +196,12 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             else -> Overlay.None
         }
     }
-    BackHandler(enabled = overlay is Overlay.None && drawer.isClosed && tab != Tab.Home) {
+    // Only while the tabs are actually on screen: under a mode shell this
+    // would swallow the first back press to move a tab nobody can see.
+    BackHandler(
+        enabled = overlay is Overlay.None && drawer.isClosed && tab != Tab.Home &&
+            appMode == Mode.None,
+    ) {
         tab = Tab.Home
     }
 
@@ -207,8 +217,12 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         context.getSharedPreferences("ducat_contacts", android.content.Context.MODE_PRIVATE)
     }
     val billV by ContactStore.changes.collectAsState()
-    LaunchedEffect(billV) {
-        if (billPrompt != null) return@LaunchedEffect
+    // Keyed on the flows a bill can be behind, not just the store: one
+    // takeover at a time, so a bill arriving while another bill's prompt or
+    // payment screen is up waits unseen — and the re-key runs this again the
+    // moment the current flow closes, which is when the queued one appears.
+    LaunchedEffect(billV, billPrompt, billPay, payOpen) {
+        if (billPrompt != null || billPay != null || payOpen) return@LaunchedEffect
         val store = ContactStore(context)
         val now = System.currentTimeMillis() / 1000
         for (c in store.all()) {
@@ -235,13 +249,23 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             onDecline = {
                 markSeen()
                 val mine = PersonaStore(context).personaHex()
+                val body = "Declining that bill for " +
+                    "${formatXmr(m.amountPxmr)} XMR — not this time."
+                // Advisory, but not fire-and-forget: the other side is waiting
+                // on this bill, and a decline that never leaves reads as being
+                // ignored. One retry, then a log line so field logs show the
+                // decline never went out.
                 kotlinx.coroutines.MainScope().launch(kotlinx.coroutines.Dispatchers.IO) {
-                    runCatching {
-                        Mailbox.send(
-                            context, c,
-                            "Declining that bill for " +
-                                "${formatXmr(m.amountPxmr)} XMR — not this time.",
-                            mine,
+                    var r = runCatching { Mailbox.send(context, c, body, mine) }
+                    if (r.isFailure) {
+                        kotlinx.coroutines.delay(5_000)
+                        r = runCatching { Mailbox.send(context, c, body, mine) }
+                    }
+                    r.onFailure {
+                        DucatLog.w(
+                            "Bill",
+                            "decline for ${formatXmr(m.amountPxmr)} XMR to " +
+                                "${c.displayName()} never sent: ${it.message}",
                         )
                     }
                 }
@@ -253,10 +277,6 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         PaySheet(prefillContact = c, prefillAmountPxmr = amt) { billPay = null }
     }
 
-    // The mode owns the whole scaffold (§15.11): a till is a different app
-    // from a wallet, and the drawer is the one shared door between them.
-    val modeV by ContactStore.changes.collectAsState()
-    val appMode = remember(modeV) { ModeStore(context).current() }
     // Picking a mode should land you *in* it, not leave the picker on top.
     LaunchedEffect(appMode) {
         (overlay as? Overlay.Drawer)?.let {

@@ -328,7 +328,11 @@ private fun PublishAddressSetting() {
 private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
     val context = LocalContext.current
     val store = remember { ContactStore(context) }
-    var contacts by remember { mutableStateOf(store.all()) }
+    // Keyed on the store's version like every other list: a rename, a new
+    // claim, or a forget made anywhere else must show here without leaving
+    // and reopening the section.
+    val version by ContactStore.changes.collectAsState()
+    var contacts by remember(version) { mutableStateOf(store.all()) }
     var confirm by remember { mutableStateOf<Contact?>(null) }
     var profileOf by remember { mutableStateOf<Contact?>(null) }
 

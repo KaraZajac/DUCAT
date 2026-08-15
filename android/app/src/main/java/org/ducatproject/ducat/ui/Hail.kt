@@ -20,7 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,6 +32,7 @@ import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MainActivity
 import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.RideStore
 import org.ducatproject.ducat.formatXmr
 import uniffi.ducat_mobile.HailInfo
 import uniffi.ducat_mobile.hailDecode
@@ -41,6 +45,34 @@ private const val TAG = "Hail"
 
 /** How long a posted hail stands before the board should ignore it. */
 private const val HAIL_TTL_SECS = 15L * 60
+
+/**
+ * Work the DHT will remember even when the screen does not: posts, claims and
+ * slot clears run here, so a navigation or a dismissed sheet cannot cancel
+ * them mid-write. One scope for the file, not one per click.
+ */
+private val hailScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+/** runCatching that lets cancellation through: a swallowed
+ *  CancellationException keeps a coroutine limping on after its scope has
+ *  told it to stop. */
+private inline fun <T> runCatchingCancellable(block: () -> T): Result<T> =
+    runCatching(block).onFailure { if (it is CancellationException) throw it }
+
+/**
+ * Clear a board slot only if it still holds *our* notice. Slots get reused —
+ * a blind empty write races whoever backfilled the slot after us, and the
+ * loser is a stranger's live hail. Tenancy is proved by the card URI; an
+ * already-empty slot needs nothing, and anything undecodable or belonging to
+ * someone else is not ours to erase.
+ */
+private fun clearOwnSlot(board: String, subkey: UInt, myCardUri: String) {
+    runCatching {
+        val held = standRead(board).firstOrNull { it.subkey == subkey } ?: return
+        val notice = runCatching { hailDecode(held.data) }.getOrNull() ?: return
+        if (notice.card == myCardUri) standPost(board, subkey, ByteArray(0))
+    }
+}
 
 /**
  * The rider's half of §15.12, as a card on the personal Home screen.
@@ -61,7 +93,11 @@ fun HailCard() {
     var cell by remember { mutableStateOf("") }
     var dest by remember { mutableStateOf("") }
     var fareXmr by remember { mutableStateOf("") }
-    var posted by remember { mutableStateOf<PostedHail?>(null) }
+    val rides = remember { RideStore(context) }
+    // The posted hail is DHT state, not screen state: rehydrate from the
+    // store so a process restart resumes watching the same slot.
+    var posted by remember { mutableStateOf(rides.load()?.asPosted()) }
+    var expired by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
@@ -72,16 +108,30 @@ fun HailCard() {
         val p = posted ?: return@LaunchedEffect
         while (true) {
             delay(3_000)
+            if (System.currentTimeMillis() / 1000 > p.expiry) {
+                // Dead either way: retire the notice and say so. The clear
+                // rides hailScope so leaving Home cannot cancel it.
+                hailScope.launch {
+                    clearOwnSlot(p.cell, p.subkey, p.card)
+                    rides.clear()
+                }
+                DucatLog.i(TAG, "hail expired unclaimed")
+                status = "Nobody took your hail before it expired."
+                expired = true
+                posted = null
+                break
+            }
             val claimant = withContext(Dispatchers.IO) {
-                runCatching {
+                runCatchingCancellable {
                     Mailbox.collectClaims(context)
                     ContactStore(context).claimantOf(p.inboxKey)
                 }.getOrNull()
             }
             if (claimant != null) {
                 // Stewardship (§15.12): the notice is spent; clear the slot.
-                withContext(Dispatchers.IO) {
-                    runCatching { standPost(p.cell, p.subkey, ByteArray(0)) }
+                hailScope.launch {
+                    clearOwnSlot(p.cell, p.subkey, p.card)
+                    rides.clear()
                 }
                 val d = ContactStore(context).all().firstOrNull { it.personaHex == claimant }
                 val who = d?.displayName() ?: "a driver"
@@ -138,8 +188,9 @@ fun HailCard() {
                 onClick = {
                     val gone = p
                     posted = null; status = null
-                    kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
-                        runCatching { standPost(gone.cell, gone.subkey, ByteArray(0)) }
+                    hailScope.launch {
+                        clearOwnSlot(gone.cell, gone.subkey, gone.card)
+                        rides.clear()
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -151,6 +202,13 @@ fun HailCard() {
                 Spacer(Modifier.height(12.dp))
                 Text(it, style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.ducat.settled)
+                if (expired) {
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = { expired = false; status = null; sheetOpen = true },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Post it again") }
+                }
             }
         }
         error?.let {
@@ -172,8 +230,11 @@ fun HailCard() {
     }
     if (sheetOpen) {
         HailSheet(
-            onPosted = { cell, sub, inbox ->
-                posted = PostedHail(cell, sub, inbox)
+            onPosted = {
+                // The sheet persisted the ride before announcing it; the
+                // store is the truth even if this card was rebuilt meanwhile.
+                posted = rides.load()?.asPosted()
+                expired = false
                 status = "Posted. Waiting for a driver…"
             },
             onClose = { sheetOpen = false },
@@ -181,7 +242,18 @@ fun HailCard() {
     }
 }
 
-private data class PostedHail(val cell: String, val subkey: UInt, val inboxKey: String)
+private data class PostedHail(
+    val cell: String,
+    val subkey: UInt,
+    val inboxKey: String,
+    /** Our card's URI — tenancy proof when the slot is cleared. */
+    val card: String,
+    /** Epoch seconds; past this the poll gives up and clears. */
+    val expiry: Long,
+)
+
+private fun RideStore.PostedRide.asPosted() =
+    PostedHail(board, subkey, inboxKey, cardUri, expiry)
 
 
 /**
@@ -256,13 +328,15 @@ fun DriveScreen() {
     val takeHailShared: (SeenHail) -> Unit = { taken ->
                 selected = null
                 busy = true; error = null
-                kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
-                    runCatching {
+                hailScope.launch {
+                    runCatchingCancellable {
                         val scanned = readContactCard(taken.card)
                         Mailbox.claimCard(context, scanned, null, asDriver = true)
                     }.onSuccess { rider ->
-                        runCatching { standPost(taken.cell, taken.subkey, ByteArray(0)) }
-                        runCatching {
+                        // The notice is spent — clear the slot, but only if it
+                        // still holds the notice we claimed.
+                        clearOwnSlot(taken.cell, taken.subkey, taken.card)
+                        runCatchingCancellable {
                             val me = org.ducatproject.ducat.MyProfile(context)
                             val fix = myFix
                             val o = taken.originCell?.let {
@@ -297,9 +371,11 @@ fun DriveScreen() {
                         }
                     }.onFailure {
                         DucatLog.w(TAG, "claim: ${it.message}")
-                        error = "Someone beat you to that one."
+                        withContext(Dispatchers.Main) {
+                            error = "Someone beat you to that one."
+                        }
                     }
-                    busy = false
+                    withContext(Dispatchers.Main) { busy = false }
                 }
     }
 
@@ -314,12 +390,14 @@ fun DriveScreen() {
             at = (at + 3) % cells.size
             val now = System.currentTimeMillis() / 1000
             for (c in batch) {
-                // §15.12's overflow ladder: sweep shards from 0, stop at the
-                // first with nothing live. Writers backfill low, so a quiet
-                // cell costs one read and a busy one its actual height.
+                // §15.12's overflow ladder: sweep shards from 0. Claims and
+                // expiry empty the low shards first, so one quiet shard is
+                // not the end of the ladder — stop only after two in a row,
+                // which costs a quiet cell one extra read.
                 val got = withContext(Dispatchers.IO) {
-                    runCatching {
+                    runCatchingCancellable {
                         val all = mutableListOf<SeenHail>()
+                        var quiet = 0
                         for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
                             val name = uniffi.ducat_mobile.standShardName(c, shard)
                             val live = standRead(name).mapNotNull { n ->
@@ -333,15 +411,24 @@ fun DriveScreen() {
                                     } else null
                                 }
                             }
-                            if (live.isEmpty()) break
-                            all += live
+                            if (live.isEmpty()) {
+                                if (++quiet >= 2) break
+                            } else {
+                                quiet = 0
+                                all += live
+                            }
                         }
                         all
                     }.getOrNull()
                 }
                 if (got != null) found[c] = got
             }
-            notices = found.values.flatten().sortedByDescending { it.expiry }
+            // Cells whose reads keep failing hold their last good sweep, so
+            // filter by expiry again here or a stale notice lingers forever.
+            val cutoff = System.currentTimeMillis() / 1000
+            notices = found.values.flatten()
+                .filter { it.expiry > cutoff }
+                .sortedByDescending { it.expiry }
             delay(4_000)
         }
     }
@@ -535,7 +622,7 @@ fun DriveScreen() {
                         // The triage line (§16.17): how far to the fare, how
                         // long the job — from the cells, all the board knows.
                         val fix = myFix
-                        val triage = remember(n) {
+                        val triage = remember(n, fix) {
                             runCatching {
                                 val parts = ArrayList<String>()
                                 val o = n.originCell?.let {
@@ -562,10 +649,14 @@ fun DriveScreen() {
                             Text(triage, style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
+                        // A notice can expire between sweeps; a negative
+                        // countdown is nonsense, so say nothing instead.
                         val mins = (n.expiry - System.currentTimeMillis() / 1000) / 60
-                        Text("stands for another ${mins} min",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.outline)
+                        if (mins > 0) {
+                            Text("stands for another ${mins} min",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline)
+                        }
                         Spacer(Modifier.height(10.dp))
                         Row {
                         OutlinedButton(
@@ -577,22 +668,22 @@ fun DriveScreen() {
                             onClick = {
                                 busy = true; error = null
                                 val theCell = n.cell
-                                kotlinx.coroutines.MainScope().launch(Dispatchers.IO) {
-                                    runCatching {
+                                hailScope.launch {
+                                    runCatchingCancellable {
                                         val scanned = readContactCard(n.card)
                                         Mailbox.claimCard(context, scanned, null, asDriver = true)
                                     }.onSuccess { rider ->
                                         // The notice is spent; clear its slot
                                         // so the next driver is not baited by
-                                        // a card that cannot answer (§15.12).
-                                        runCatching {
-                                            standPost(theCell, n.subkey, ByteArray(0))
-                                        }
+                                        // a card that cannot answer (§15.12) —
+                                        // but only if it still holds the
+                                        // notice we claimed.
+                                        clearOwnSlot(theCell, n.subkey, n.card)
                                         // The Uber moment: acceptance arrives
                                         // with a face on it — ETA from a real
                                         // route when one answers, and the car
                                         // the rider will scan the curb for.
-                                        runCatching {
+                                        runCatchingCancellable {
                                             val me = org.ducatproject.ducat.MyProfile(context)
                                             val fix = myFix
                                             val o = n.originCell?.let {
@@ -631,9 +722,11 @@ fun DriveScreen() {
                                         }
                                     }.onFailure {
                                         DucatLog.w(TAG, "claim: ${it.message}")
-                                        error = "Someone beat you to that one."
+                                        withContext(Dispatchers.Main) {
+                                            error = "Someone beat you to that one."
+                                        }
                                     }
-                                    busy = false
+                                    withContext(Dispatchers.Main) { busy = false }
                                 }
                             },
                             enabled = !busy,
@@ -690,7 +783,7 @@ private fun FareDetail(
             runCatching { uniffi.ducat_mobile.geohashCenter(it) }.getOrNull()
         }
     }
-    LaunchedEffect(n) {
+    LaunchedEffect(n, myFix) {
         val o = origin ?: return@LaunchedEffect
         val pts = ArrayList<Pair<Long, Long>>()
         myFix?.let { pts += it }
@@ -810,11 +903,10 @@ private data class SeenHail(
  */
 @Composable
 fun HailSheet(
-    onPosted: (String, UInt, String) -> Unit, // cell, subkey, inboxKey
+    onPosted: () -> Unit, // the posted ride is read back from RideStore
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
     var from by remember { mutableStateOf<org.ducatproject.ducat.Geo.Hit?>(null) }
     var to by remember { mutableStateOf<org.ducatproject.ducat.Geo.Hit?>(null) }
     var route by remember { mutableStateOf<org.ducatproject.ducat.Geo.Route?>(null) }
@@ -963,15 +1055,31 @@ fun HailSheet(
                         )
                         Spacer(Modifier.height(10.dp))
                         Button(
-                            onClick = {
+                            onClick = onClick@{
+                                // A comma-decimal keyboard types "0,004", and
+                                // a minus or garbage must refuse loudly here —
+                                // posting "quote me" instead of the typed
+                                // offer is a silent repricing.
+                                val fareText = fareXmr.trim().replace(',', '.')
+                                var fare: ULong? = null
+                                if (fareText.isNotEmpty()) {
+                                    val v = fareText.toDoubleOrNull()
+                                    if (v == null || v <= 0.0) {
+                                        error = "The offer must be a number above zero — " +
+                                            "or leave it blank to ask for a quote."
+                                        return@onClick
+                                    }
+                                    fare = (v * 1e12).toLong().toULong()
+                                }
                                 busy = true; error = null
                                 val f = from!!
                                 val t = to!!
                                 val destText = t.label.take(64)
-                                val fare = fareXmr.trim().toDoubleOrNull()
-                                    ?.let { (it * 1e12).toLong().toULong() }
-                                scope.launch(Dispatchers.IO) {
-                                    runCatching {
+                                // The post outlives the sheet on purpose: a
+                                // dismissal mid-write must not orphan a live
+                                // notice on the board.
+                                hailScope.launch {
+                                    runCatchingCancellable {
                                         val oCell = uniffi.ducat_mobile.geohashEncode(
                                             f.latE7, f.lonE7, 6u)
                                         val dCell = uniffi.ducat_mobile.geohashEncode(
@@ -980,51 +1088,79 @@ fun HailSheet(
                                             context, MyProfile(context).name(),
                                             (HAIL_TTL_SECS * 2).toULong(), purpose = "hail",
                                         )
+                                        val expiry = System.currentTimeMillis() / 1000 +
+                                            HAIL_TTL_SECS
                                         val bytes = uniffi.ducat_mobile.hailEncode(
                                             uniffi.ducat_mobile.HailInfo(
                                                 card = card.uri,
                                                 dest = destText,
                                                 farePxmr = fare,
-                                                expiry = (System.currentTimeMillis() / 1000 +
-                                                    HAIL_TTL_SECS).toULong(),
+                                                expiry = expiry.toULong(),
                                                 originCell = oCell,
                                                 destCell = dCell,
                                             )
                                         )
-                                        // §15.12's overflow ladder: the lowest
-                                        // shard with a free slot takes the
-                                        // notice — reading first also primes
-                                        // the slot for the overwrite.
+                                        // §15.12's overflow ladder, with a
+                                        // read-back: two riders can race for
+                                        // the same free slot and the DHT keeps
+                                        // whoever wrote last, silently. Only a
+                                        // slot that reads back holding our
+                                        // card counts as placed; a lost one
+                                        // just continues the walk.
                                         val base = "geo:$oCell"
-                                        val nowS = System.currentTimeMillis() / 1000
                                         var placed: Pair<String, UInt>? = null
-                                        for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
+                                        ladder@ for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
                                             val name = uniffi.ducat_mobile.standShardName(base, shard)
+                                            val nowS = System.currentTimeMillis() / 1000
                                             val taken = standRead(name).mapNotNull { n ->
                                                 runCatching { hailDecode(n.data) }.getOrNull()
                                                     ?.takeIf { it.expiry.toLong() > nowS }
                                                     ?.let { n.subkey }
                                             }.toSet()
-                                            val free = (0u..7u).firstOrNull { it !in taken }
-                                            if (free != null) {
-                                                uniffi.ducat_mobile.standPost(name, free, bytes)
-                                                placed = name to free
-                                                break
+                                            for (free in 0u..7u) {
+                                                if (free in taken) continue
+                                                // A post error means the slot
+                                                // went to someone else.
+                                                if (runCatching {
+                                                        uniffi.ducat_mobile.standPost(name, free, bytes)
+                                                    }.isFailure) continue
+                                                val held = runCatching {
+                                                    standRead(name)
+                                                        .firstOrNull { it.subkey == free }
+                                                        ?.let { hailDecode(it.data) }
+                                                        ?.card == card.uri
+                                                }.getOrDefault(false)
+                                                if (held) {
+                                                    placed = name to free
+                                                    break@ladder
+                                                }
                                             }
                                         }
-                                        val (cell, sub) = placed
+                                        val (board, sub) = placed
                                             ?: error("every stand shard is full here — try again shortly")
-                                        Triple(cell, sub, card.inboxKey)
-                                    }.onSuccess { (cell, sub, inbox) ->
+                                        // Persist before announcing: the Home
+                                        // card rehydrates from this record, so
+                                        // the hail survives even if this sheet
+                                        // is already gone.
+                                        RideStore(context).save(
+                                            RideStore.PostedRide(
+                                                board = board, subkey = sub,
+                                                inboxKey = card.inboxKey,
+                                                cardUri = card.uri, expiry = expiry,
+                                            )
+                                        )
+                                        DucatLog.i(TAG, "hail posted at $board subkey $sub")
+                                    }.onSuccess {
                                         withContext(Dispatchers.Main) {
-                                            onPosted(cell, sub, inbox)
+                                            onPosted()
                                             onClose()
                                         }
-                                        DucatLog.i(TAG, "hail posted at $cell subkey $sub")
-                                    }.onFailure {
-                                        error = it.message ?: "could not post the hail"
+                                    }.onFailure { e ->
+                                        withContext(Dispatchers.Main) {
+                                            error = e.message ?: "could not post the hail"
+                                        }
                                     }
-                                    busy = false
+                                    withContext(Dispatchers.Main) { busy = false }
                                 }
                             },
                             enabled = !busy && from != null && to != null,

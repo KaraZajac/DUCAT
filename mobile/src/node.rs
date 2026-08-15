@@ -701,10 +701,28 @@ pub fn stand_post(cell: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeEr
         // write from a store that never saw the slot goes out at seq 0 and
         // the network silently keeps whatever is already there (§16.12's
         // read-before-write, learned the hard way on the mailbox ring).
-        let _ = rc.get_dht_value(key.clone(), subkey, true).await;
-        rc.set_dht_value(key.clone(), subkey, data, None)
+        // Best-effort: retry a failed prime once, then write anyway — a slot
+        // nobody has written yet has nothing to fetch.
+        if rc.get_dht_value(key.clone(), subkey, true).await.is_err() {
+            let _ = rc.get_dht_value(key.clone(), subkey, true).await;
+        }
+        rc.set_dht_value(key.clone(), subkey, data.clone(), None)
             .await
             .map_err(|e| NodeError::Failed(format!("post: {e}")))?;
+        // Last write wins on the DHT, silently: read the slot back and only
+        // claim success if it holds our bytes. A caller racing another writer
+        // treats the error as "slot lost" and walks the ladder on.
+        let echoed = rc
+            .get_dht_value(key.clone(), subkey, true)
+            .await
+            .map_err(|e| NodeError::Failed(format!("verify: {e}")))?;
+        let held = echoed.as_ref().map(|v| v.data()).unwrap_or(&[]);
+        if held != data.as_slice() {
+            let _ = rc.close_dht_record(key).await;
+            return Err(NodeError::Failed(
+                "slot taken by a concurrent writer".into(),
+            ));
+        }
         let _ = rc.close_dht_record(key).await;
         Ok(())
     })

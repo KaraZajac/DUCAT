@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -84,11 +85,23 @@ fun PaySheet(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
-            dismissOnBackPress = true,
+            // Off, because the dialog's own handling drops the whole sheet
+            // from any step; back is handled inside, where it can step.
+            dismissOnBackPress = false,
             decorFitsSystemWindows = false,
         ),
     ) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            // The system back mirrors the on-screen arrow: a step back, not a
+            // bigger Close. Only the first step — or a flow that started with
+            // its target chosen for it — leaves the sheet.
+            BackHandler {
+                if (target != null && prefillAddress == null && prefillContact == null) {
+                    target = null
+                } else {
+                    onDismiss()
+                }
+            }
             when (val t = target) {
                 null -> ChooseTarget(
                     onPick = { target = it },
@@ -320,13 +333,21 @@ private fun AmountStep(
     }
     LaunchedEffect(maxPxmr, maxLocked, fiatEntry) {
         if (maxLocked && maxPxmr > 0) {
-            typed = if (fiatEntry && rate != null) "%.2f".format(maxPxmr / 1e12 * rate)
-                    else formatXmr(maxPxmr)
+            // This text is re-parsed as the amount, so it is pinned to the
+            // dot the parser expects rather than the locale's separator, and
+            // floored to the cent — a rounded-up cent would convert back to
+            // more than the maximum just promised.
+            typed = if (fiatEntry && rate != null) {
+                "%.2f".format(
+                    java.util.Locale.US,
+                    kotlin.math.floor(maxPxmr / 1e12 * rate * 100) / 100,
+                )
+            } else formatXmr(maxPxmr)
         }
     }
 
     val tipPxmr = remember(tipTyped, fiatEntry, rate) {
-        val v = tipTyped.toBigDecimalOrNull() ?: return@remember 0L
+        val v = moneyText(tipTyped).toBigDecimalOrNull() ?: return@remember 0L
         val xmr = if (fiatEntry && rate != null && rate > 0) {
             v.divide(BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
         } else if (fiatEntry) return@remember 0L else v
@@ -334,7 +355,7 @@ private fun AmountStep(
     }
     val pxmr = remember(typed, fiatEntry, rate, tipPxmr, billed) {
         if (billed) return@remember prefillAmountPxmr + tipPxmr
-        val v = typed.trim().toBigDecimalOrNull() ?: return@remember null
+        val v = moneyText(typed).toBigDecimalOrNull() ?: return@remember null
         val xmr = if (fiatEntry && rate != null && rate > 0) {
             v.divide(BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
         } else v
@@ -416,7 +437,7 @@ private fun AmountStep(
             Spacer(Modifier.height(14.dp))
             OutlinedTextField(
                 value = tipTyped,
-                onValueChange = { tipTyped = it.filter { c -> c.isDigit() || c == '.' } },
+                onValueChange = { tipTyped = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
                 label = { Text("Add a tip (${if (fiatEntry) cur else "XMR"}) — optional") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -437,7 +458,7 @@ private fun AmountStep(
             OutlinedTextField(
                 value = typed,
                 onValueChange = {
-                    typed = it.filter { c -> c.isDigit() || c == '.' }
+                    typed = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
                     maxLocked = false
                 },
                 placeholder = { Text("0") },
@@ -619,8 +640,10 @@ private fun AmountStep(
                         }
                     },
                     // Asking for more than you hold is perfectly reasonable, so
-                    // a request is never blocked by the balance.
-                    enabled = !busy && pxmr != null,
+                    // a request is never blocked by the balance. It is blocked
+                    // by its own success: the form lingers while "Request sent"
+                    // is read, and a second tap there is a duplicate bill.
+                    enabled = !busy && done == null && pxmr != null,
                     modifier = Modifier.weight(1f).height(52.dp),
                 ) {
                     if (busy) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
@@ -631,7 +654,7 @@ private fun AmountStep(
                     target.contact.theirAddress != null || prefillAmountPxmr > 0
                 Button(
                     onClick = { confirming = true },
-                    enabled = !busy && pxmr != null && payable && !overMax &&
+                    enabled = !busy && done == null && pxmr != null && payable && !overMax &&
                         quote?.affordable == true,
                     modifier = Modifier.weight(1f).height(52.dp),
                 ) {
@@ -680,10 +703,16 @@ private fun AmountStep(
             quote = quote,
             destination = dest,
             contactName = (target as? PayTarget.ToContact)?.contact?.displayName(),
+            busy = busy,
             onCancel = { confirming = false },
-            onConfirm = {
-                confirming = false
+            onConfirm = latch@{
+                // Latched before anything else, synchronously: a second tap in
+                // the frame before this dialog leaves would build and broadcast
+                // a second transaction, and nothing downstream can take one
+                // back.
+                if (busy) return@latch
                 busy = true; error = null
+                confirming = false
                 scope.launch {
                     val r = withContext(Dispatchers.IO) {
                         runCatching {
@@ -738,6 +767,16 @@ private fun AmountStep(
     }
 }
 
+/**
+ * Typed money, made parseable.
+ *
+ * Decimal keyboards follow the device locale, and many of them offer a comma
+ * where the parser expects a dot — a filter that dropped the comma made cents
+ * untypeable. The fields accept both marks; this is the one place a comma
+ * becomes a dot, so every parse sees the same shape.
+ */
+internal fun moneyText(s: String): String = s.trim().replace(',', '.')
+
 /** An amount in whichever unit the entry field is currently using. */
 private fun inUnit(
     context: android.content.Context,
@@ -773,6 +812,7 @@ private fun ConfirmSend(
     quote: Quote?,
     destination: String?,
     contactName: String?,
+    busy: Boolean,
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
 ) {
@@ -814,7 +854,9 @@ private fun ConfirmSend(
                 )
             }
         },
-        confirmButton = { TextButton(onClick = onConfirm) { Text("Send") } },
+        // Disabled once a send is in flight — the second half of the
+        // double-tap guard, alongside the latch in onConfirm itself.
+        confirmButton = { TextButton(onClick = onConfirm, enabled = !busy) { Text("Send") } },
         dismissButton = { TextButton(onClick = onCancel) { Text("Cancel") } },
     )
 }
