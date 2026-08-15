@@ -513,6 +513,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
             re_seq: None,
             re_own: false,
             eta_secs: None,
+            payload: None, round: None, ceremony_id: None,
             attachment: None,
             amount_pxmr: None,
             txid: None,
@@ -608,6 +609,9 @@ pub struct Outgoing {
     pub re_seq: Option<u64>,
     pub re_own: bool,
     pub eta_secs: Option<u64>,
+    pub payload: Option<Vec<u8>>,
+    pub round: Option<u64>,
+    pub ceremony_id: Option<[u8; 32]>,
 }
 
 async fn send_money_message(
@@ -632,6 +636,7 @@ async fn send_money_message(
     bill_or_say(Some(Outgoing {
         items, amount: Some(total), payto, kind, txid,
         re_seq: None, re_own: false, eta_secs: None,
+        payload: None, round: None, ceremony_id: None,
     }), body).await
 }
 
@@ -641,6 +646,7 @@ pub async fn ride_offer(fare: &str, eta: &str, body: &str) -> Result<(), Box<dyn
         items: Vec::new(), amount: Some(fare.parse()?), payto: None,
         kind: MessageKind::RideOffer, txid: None,
         re_seq: None, re_own: false, eta_secs: Some(eta.parse()?),
+        payload: None, round: None, ceremony_id: None,
     }), if body.is_empty() { "On my way" } else { body }).await
 }
 
@@ -650,6 +656,7 @@ pub async fn ride_accept(offer_seq: &str, fare: &str) -> Result<(), Box<dyn std:
         items: Vec::new(), amount: Some(fare.parse()?), payto: None,
         kind: MessageKind::RideAccept, txid: None,
         re_seq: Some(offer_seq.parse()?), re_own: false, eta_secs: None,
+        payload: None, round: None, ceremony_id: None,
     }), "See you there").await
 }
 
@@ -659,8 +666,35 @@ pub async fn retract(seq: &str, own: &str, body: &str) -> Result<(), Box<dyn std
         items: Vec::new(), amount: None, payto: None,
         kind: MessageKind::Retract, txid: None,
         re_seq: Some(seq.parse()?), re_own: own == "1" || own == "own",
-        eta_secs: None,
+        eta_secs: None, payload: None, round: None, ceremony_id: None,
     }), if body.is_empty() { "withdrawn" } else { body }).await
+}
+
+/// Send one ceremony round over the sealed thread (§17.9): opaque payload,
+/// round tag, and the per-escrow context. The desk half of the bond/escrow
+/// build and release — it carries the threshold library's bytes, unparsed.
+pub async fn ceremony(
+    kind: u8,
+    round: u64,
+    ceremony_id_hex: &str,
+    payload_hex: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mk = match kind {
+        8 => MessageKind::DkgRound,
+        9 => MessageKind::FrostRound,
+        10 => MessageKind::CeremonyAbort,
+        _ => return Err("ceremony kind is 8 (dkg), 9 (frost), or 10 (abort)".into()),
+    };
+    let cid: [u8; 32] = hex::decode(ceremony_id_hex)?
+        .try_into()
+        .map_err(|_| "ceremony id is 32 bytes of hex")?;
+    let payload = if kind == 10 { None } else { Some(hex::decode(payload_hex)?) };
+    bill_or_say(Some(Outgoing {
+        items: Vec::new(), amount: None, payto: None, kind: mk, txid: None,
+        re_seq: None, re_own: false, eta_secs: None,
+        payload, round: if kind == 10 { None } else { Some(round) },
+        ceremony_id: Some(cid),
+    }), if kind == 10 { "ceremony aborted" } else { "ceremony round" }).await
 }
 
 /// Say something in a thread that already exists.
@@ -763,7 +797,7 @@ pub async fn say_many(count: u32, prefix: &str) -> Result<(), Box<dyn std::error
             kind: MessageKind::Text,
             amount_pxmr: None, txid: None, payto: None,
             items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false,
-            eta_secs: None, attachment: None,
+            eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None,
         };
         let (chosen, fs) = their_bundle.select();
         if !fs && !fell_back {
@@ -913,7 +947,7 @@ async fn bill_or_say(
                 .as_secs(),
             kind: MessageKind::Text,
             amount_pxmr: None, txid: None, payto: None,
-            items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None,
+            items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None,
         },
         Some(o) => Message {
             version: 1, suite: 1, seq, prev,
@@ -932,6 +966,9 @@ async fn bill_or_say(
             re_seq: o.re_seq,
             re_own: o.re_own,
             eta_secs: o.eta_secs,
+            payload: o.payload.clone(),
+            round: o.round,
+            ceremony_id: o.ceremony_id,
             attachment: None,
         },
     };
@@ -1336,6 +1373,9 @@ async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn
                                 MessageKind::Retract => "withdraws an earlier message",
                                 MessageKind::RideOffer => "offers to drive, fare",
                                 MessageKind::RideAccept => "accepts the ride at",
+                                MessageKind::DkgRound => "dkg round",
+                                MessageKind::FrostRound => "frost round",
+                                MessageKind::CeremonyAbort => "aborts a ceremony",
                                 MessageKind::Text => unreachable!(),
                             },
                             m.amount_pxmr
@@ -1351,6 +1391,13 @@ async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn
                         if let Some(rs) = m.re_seq {
                             println!("        re: {} message {rs}",
                                 if m.re_own { "their own" } else { "our" });
+                        }
+                        if let (Some(r), Some(c)) = (m.round, &m.ceremony_id) {
+                            println!("        round {r} of ceremony {}",
+                                &hex::encode(c)[..12]);
+                        }
+                        if let Some(p) = &m.payload {
+                            println!("        {} payload bytes", p.len());
                         }
                         if let Some(t) = &m.txid {
                             println!("        txid:   {}", hex::encode(t));

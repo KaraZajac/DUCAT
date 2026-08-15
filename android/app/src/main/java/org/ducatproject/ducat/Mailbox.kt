@@ -334,6 +334,10 @@ object Mailbox {
         oob: Boolean = false,
         /** §15.12: a ride offer's distance-in-time; refused on other kinds. */
         etaSecs: Long? = null,
+        /** §17.9 ceremony: opaque threshold bytes, round tag, escrow id. */
+        payload: ByteArray? = null,
+        round: Long? = null,
+        ceremonyId: ByteArray? = null,
     ): Contact {
         val store = ContactStore(context)
         val bundle = c.theirBundle
@@ -372,6 +376,7 @@ object Mailbox {
             taxPxmr?.toULong(),
             reSeq?.toULong(), reOwn, attachment,
             etaSecs?.toULong(),
+            payload, round?.toULong(), ceremonyId,
         )
         // Everything local lands before anything remote. The failure orders
         // are not symmetric: a published slot and head with the counter lost

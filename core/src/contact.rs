@@ -624,6 +624,21 @@ pub enum MessageKind {
     /// binding the acceptance to a price, so "accepted" can never mean a
     /// number neither party said.
     RideAccept = 7,
+    /// A round of the interactive DKG that builds a bond or escrow's threshold
+    /// key (§17.9). Carries an opaque `payload` the threshold library reads
+    /// and DUCAT does not, a `round` tag, and a `ceremony_id` binding it to
+    /// one escrow. Neither party ever holds the other's share; the message is
+    /// how the PedPoP rounds cross the §16.12 thread.
+    DkgRound = 8,
+    /// A round of FROST signing that releases a bond or escrow (§17.9): the
+    /// deposit returned, or an arbiter's RULING executed. Same three fields.
+    /// A signer MUST verify the transaction's destination before it signs —
+    /// a co-signature is §15.5's consent, to a specific place for the money.
+    FrostRound = 9,
+    /// This ceremony is abandoned; its state may be discarded. "Nothing
+    /// happens" is never safe (§9.3.4), so an aborted build says so rather
+    /// than leaving the other side waiting for a round that never comes.
+    CeremonyAbort = 10,
 }
 
 impl MessageKind {
@@ -637,6 +652,9 @@ impl MessageKind {
             5 => MessageKind::Retract,
             6 => MessageKind::RideOffer,
             7 => MessageKind::RideAccept,
+            8 => MessageKind::DkgRound,
+            9 => MessageKind::FrostRound,
+            10 => MessageKind::CeremonyAbort,
             _ => return None,
         })
     }
@@ -740,6 +758,15 @@ pub struct Message {
     /// For a `RideOffer`: how far away the driver is, in seconds (§15.12).
     /// A courtesy figure the rider weighs, not a promise anything enforces.
     pub eta_secs: Option<u64>,
+    /// §17.9 ceremony payload — serialized threshold-library bytes DUCAT
+    /// carries but does not parse. Present on `DkgRound`/`FrostRound` only.
+    pub payload: Option<Vec<u8>>,
+    /// Which round of the ceremony this is; the reader refuses one it did not
+    /// expect (§2.5: out-of-order ceremony messages are never applied).
+    pub round: Option<u64>,
+    /// The 32-byte per-escrow context binding every ceremony message to one
+    /// multisig, so a stale message cannot replay into a live ceremony.
+    pub ceremony_id: Option<[u8; 32]>,
     /// A file or picture, by reference (§16.15).
     ///
     /// The bytes live in their own DHT record — up to 32 chunks of 32 KiB,
@@ -816,6 +843,15 @@ impl Message {
         if let Some(e) = self.eta_secs {
             m.insert(f::MSG_ETA, Value::Uint(e));
         }
+        if let Some(p) = &self.payload {
+            m.insert(f::MSG_PAYLOAD, Value::Bytes(p.clone()));
+        }
+        if let Some(r) = self.round {
+            m.insert(f::MSG_ROUND, Value::Uint(r));
+        }
+        if let Some(c) = &self.ceremony_id {
+            m.insert(f::MSG_CEREMONY, Value::Bytes(c.to_vec()));
+        }
         if let Some(a) = &self.attachment {
             m.insert(f::MSG_ATT_RECORD, Value::Text(a.record_key.clone()));
             m.insert(f::MSG_ATT_KEY, Value::Bytes(a.key.to_vec()));
@@ -888,6 +924,12 @@ impl Message {
             tax_pxmr: r.opt_uint(f::MSG_TAX)?,
             re_seq: r.opt_uint(f::MSG_RE_SEQ)?,
             eta_secs: r.opt_uint(f::MSG_ETA)?,
+            payload: r.opt_bytes(f::MSG_PAYLOAD, None)?.map(|b| b.to_vec()),
+            round: r.opt_uint(f::MSG_ROUND)?,
+            ceremony_id: match r.opt_bytes(f::MSG_CEREMONY, Some(32))? {
+                Some(b) => Some(b.try_into().unwrap()),
+                None => None,
+            },
             re_own: match r.opt_uint(f::MSG_RE_OWN)? {
                 None => false,
                 // One meaning, one encoding: presence is the flag (§18.1).
@@ -951,10 +993,14 @@ impl Message {
         // an amount on a text message is a number nothing will honour. Both are
         // refused rather than ignored.
         match (out.kind, out.amount_pxmr) {
-            (MessageKind::Text, Some(_)) | (MessageKind::Retract, Some(_)) => {
+            (MessageKind::Text, Some(_))
+            | (MessageKind::Retract, Some(_))
+            | (MessageKind::DkgRound, Some(_))
+            | (MessageKind::FrostRound, Some(_))
+            | (MessageKind::CeremonyAbort, Some(_)) => {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
-                    "a text message must not carry an amount",
+                    "this message kind must not carry an amount",
                 ))
             }
             (MessageKind::PaymentRequest, None)
@@ -995,7 +1041,13 @@ impl Message {
         }
         if matches!(
             out.kind,
-            MessageKind::Text | MessageKind::Retract | MessageKind::RideOffer | MessageKind::RideAccept
+            MessageKind::Text
+                | MessageKind::Retract
+                | MessageKind::RideOffer
+                | MessageKind::RideAccept
+                | MessageKind::DkgRound
+                | MessageKind::FrostRound
+                | MessageKind::CeremonyAbort
         ) && (!out.items.is_empty() || out.tax_pxmr.is_some())
         {
             // The ride's bill comes later, through §15.11's meter; a retract
@@ -1071,6 +1123,52 @@ impl Message {
                     "an eta longer than a day is not an eta",
                 ));
             }
+        }
+        // §17.9 ceremony fields ride only on ceremony kinds. A payload or a
+        // ceremony_id anywhere else is a field with no meaning to act on, and
+        // a build/release message MUST carry both — the round bytes and the
+        // context that binds them to one escrow. Abort carries the context so
+        // the far side knows *which* ceremony died, but no payload.
+        let is_round = matches!(out.kind, MessageKind::DkgRound | MessageKind::FrostRound);
+        if is_round {
+            if out.payload.as_ref().map(|p| p.is_empty()).unwrap_or(true) {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a ceremony round carries a payload",
+                ));
+            }
+            if let Some(p) = &out.payload {
+                if p.len() as u64 > MAX_ATTACHMENT_BYTES {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        "a ceremony payload is bounded like an attachment",
+                    ));
+                }
+            }
+            if out.round.is_none() || out.ceremony_id.is_none() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a ceremony round names its round and its escrow",
+                ));
+            }
+        } else if out.kind == MessageKind::CeremonyAbort {
+            if out.ceremony_id.is_none() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "an abort names the ceremony it ends",
+                ));
+            }
+            if out.payload.is_some() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "an abort withdraws a ceremony; it carries no round payload",
+                ));
+            }
+        } else if out.payload.is_some() || out.round.is_some() || out.ceremony_id.is_some() {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "only a ceremony message carries ceremony fields",
+            ));
         }
         // §16.15: attachments ride ordinary messages. A bill or a receipt with
         // a file in it is two features fused at their least-tested corner.

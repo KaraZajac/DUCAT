@@ -194,6 +194,11 @@ pub mod f {
     // right car at the curb. Claims like everything else in a profile.
     /// §15.12's ride offer: how far away the driver is, seconds.
     pub const MSG_ETA: u64 = 213;
+    /// §17.9 ceremony: opaque threshold-library bytes, the round tag, and the
+    /// per-escrow context binding every message to one multisig.
+    pub const MSG_PAYLOAD: u64 = 214;
+    pub const MSG_ROUND: u64 = 215;
+    pub const MSG_CEREMONY: u64 = 216;
     pub const DET_CAR_MODEL: u64 = 210;
     pub const DET_CAR_COLOR: u64 = 211;
     pub const DET_PLATE: u64 = 212;

@@ -1026,7 +1026,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_reconcile_float(`maxExposurePxmr`: Long,`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1542,7 +1542,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_reconcile_float() != 35020.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 13918.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 2433.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
@@ -2700,7 +2700,13 @@ data class OpenedMessage (
     /**
      * §15.12: a ride offer's distance-in-time, seconds.
      */
-    var `etaSecs`: kotlin.ULong?
+    var `etaSecs`: kotlin.ULong?, 
+    /**
+     * §17.9 ceremony fields, opaque to DUCAT.
+     */
+    var `payload`: kotlin.ByteArray?, 
+    var `round`: kotlin.ULong?, 
+    var `ceremonyId`: kotlin.ByteArray?
 ) {
     
     companion object
@@ -2728,6 +2734,9 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterBoolean.read(buf),
             FfiConverterOptionalTypeAttachmentRef.read(buf),
             FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
         )
     }
 
@@ -2747,7 +2756,10 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.allocationSize(value.`reSeq`) +
             FfiConverterBoolean.allocationSize(value.`reOwn`) +
             FfiConverterOptionalTypeAttachmentRef.allocationSize(value.`attachment`) +
-            FfiConverterOptionalULong.allocationSize(value.`etaSecs`)
+            FfiConverterOptionalULong.allocationSize(value.`etaSecs`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`payload`) +
+            FfiConverterOptionalULong.allocationSize(value.`round`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`ceremonyId`)
     )
 
     override fun write(value: OpenedMessage, buf: ByteBuffer) {
@@ -2767,6 +2779,9 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterBoolean.write(value.`reOwn`, buf)
             FfiConverterOptionalTypeAttachmentRef.write(value.`attachment`, buf)
             FfiConverterOptionalULong.write(value.`etaSecs`, buf)
+            FfiConverterOptionalByteArray.write(value.`payload`, buf)
+            FfiConverterOptionalULong.write(value.`round`, buf)
+            FfiConverterOptionalByteArray.write(value.`ceremonyId`, buf)
     }
 }
 
@@ -5815,11 +5830,11 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
         /**
          * Seal one message in a thread.
          */
-    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?): SealedOut {
+    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?): SealedOut {
             return FfiConverterTypeSealedOut.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
-        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),_status)
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),_status)
 }
     )
     }

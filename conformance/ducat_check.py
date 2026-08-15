@@ -943,6 +943,7 @@ MSG_KIND, MSG_AMOUNT, MSG_TXID, MSG_PAYTO = 178, 179, 180, 181
 MSG_ITEMS, MSG_TAX = 183, 184
 MSG_RE_SEQ, MSG_RE_OWN = 192, 193
 MSG_ETA = 213
+MSG_PAYLOAD, MSG_ROUND, MSG_CEREMONY = 214, 215, 216
 MSG_ATT_RECORD, MSG_ATT_KEY, MSG_ATT_NONCE = 194, 195, 196
 MSG_ATT_LEN, MSG_ATT_HASH, MSG_ATT_MIME, MSG_ATT_NAME = 197, 198, 199, 200
 HEAD_BUNDLE = 177
@@ -1239,7 +1240,7 @@ def parse_message(buf):
             raise Reject("Malformed", "kind is not an integer")
         if kind == 0:
             raise Reject("Malformed", "text is encoded by omitting the kind")
-        if kind not in (1, 2, 3, 4, 5, 6, 7):
+        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10):
             raise Reject("Malformed", "unknown message kind")
     else:
         kind = 0
@@ -1273,6 +1274,9 @@ def parse_message(buf):
     # §16.14 — reactions.
     out["re_seq"] = b.pop(MSG_RE_SEQ, (None, None))[1]
     out["eta"] = b.pop(MSG_ETA, (None, None))[1]
+    out["payload"] = b.pop(MSG_PAYLOAD, (None, None))[1]
+    out["round"] = b.pop(MSG_ROUND, (None, None))[1]
+    out["ceremony"] = b.pop(MSG_CEREMONY, (None, None))[1]
     if MSG_RE_OWN in b:
         k2, v2 = b.pop(MSG_RE_OWN)
         if k2 != "uint" or v2 != 1:
@@ -1313,7 +1317,7 @@ def parse_message(buf):
 
     # A payment with no amount is a screen with a blank where the number goes;
     # an amount on text is a number nothing will honour. Neither is ignorable.
-    if kind in (0, 4, 5) and out["amount"] is not None:
+    if kind in (0, 4, 5, 8, 9, 10) and out["amount"] is not None:
         raise Reject("Malformed", "this kind must not carry an amount")
     if kind in (1, 2, 3) and out["amount"] is None:
         raise Reject("Malformed", "a payment message must carry an amount")
@@ -1348,7 +1352,7 @@ def parse_message(buf):
         raise Reject("Malformed", "only a reaction, a retract or an accept targets another message")
     if out["attachment"] is not None and kind != 0:
         raise Reject("Malformed", "only a text message carries an attachment")
-    if kind in (0, 5, 6, 7) and (out["items"] or out["tax"] is not None):
+    if kind in (0, 5, 6, 7, 8, 9, 10) and (out["items"] or out["tax"] is not None):
         raise Reject("Malformed", "this message kind has no bill to itemise")
     # An eta is a ride offer's courtesy figure, bounded by honesty: a day.
     if out["eta"] is not None:
@@ -1356,6 +1360,23 @@ def parse_message(buf):
             raise Reject("Malformed", "only a ride offer carries an eta")
         if out["eta"] > 86_400:
             raise Reject("Malformed", "an eta longer than a day is not an eta")
+    # §17.9 ceremony fields ride only on ceremony kinds.
+    if kind in (8, 9):
+        if not out["payload"]:
+            raise Reject("Malformed", "a ceremony round carries a payload")
+        if len(out["payload"]) > MAX_ATTACHMENT_BYTES:
+            raise Reject("Malformed", "a ceremony payload is bounded like an attachment")
+        if out["round"] is None or out["ceremony"] is None:
+            raise Reject("Malformed", "a ceremony round names its round and its escrow")
+        if out["ceremony"] is not None and len(out["ceremony"]) != 32:
+            raise Reject("Malformed", "a ceremony id is 32 bytes")
+    elif kind == 10:
+        if out["ceremony"] is None:
+            raise Reject("Malformed", "an abort names the ceremony it ends")
+        if out["payload"] is not None:
+            raise Reject("Malformed", "an abort withdraws a ceremony; it carries no round payload")
+    elif out["payload"] is not None or out["round"] is not None or out["ceremony"] is not None:
+        raise Reject("Malformed", "only a ceremony message carries ceremony fields")
     # Tax only alongside items, so an itemisation is always arithmetic the
     # recipient can check rather than a split they have to believe.
     if out["tax"] is not None and not out["items"]:
@@ -1560,6 +1581,12 @@ def run_message_payment(cases, r):
                 fields.append((MSG_RE_OWN, ("uint", 1)))
             if m.get("eta") is not None:
                 fields.append((MSG_ETA, ("uint", m["eta"])))
+            if m.get("payload") is not None:
+                fields.append((MSG_PAYLOAD, ("bytes", m["payload"])))
+            if m.get("round") is not None:
+                fields.append((MSG_ROUND, ("uint", m["round"])))
+            if m.get("ceremony") is not None:
+                fields.append((MSG_CEREMONY, ("bytes", m["ceremony"])))
             a = m["attachment"]
             if a is not None:
                 fields.append((MSG_ATT_RECORD, ("text", a["record"])))

@@ -1387,9 +1387,9 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None };
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
         v.push(json!({
@@ -1434,7 +1434,7 @@ fn contact_cases() -> Vec<J> {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1_700_000_000,
         kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
-        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None,
+        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None,
     };
     money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
     money("payment_sent",
@@ -1547,7 +1547,7 @@ fn contact_cases() -> Vec<J> {
         }, None);
     money("receipt_without_amount",
         "A receipt for an unstated amount settles nothing.",
-        &Message { kind: MessageKind::Receipt, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, attachment: None, ..base_pay.clone() },
+        &Message { kind: MessageKind::Receipt, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, ..base_pay.clone() },
         Some((RejectCode::Malformed, "payment needs an amount")));
     money("receipt_with_payto",
         "Only a request names where to pay. A receipt doing so is asking again for money it says it already has.",
@@ -1641,6 +1641,43 @@ fn contact_cases() -> Vec<J> {
         "An eta is a ride offer's courtesy figure; on anything else it is a field with no meaning to act on.",
         &Message { kind: MessageKind::Text, amount_pxmr: None, eta_secs: Some(300), ..base_pay.clone() },
         Some((RejectCode::Malformed, "only a ride offer carries an eta")));
+
+    // §17.9's ceremony carries opaque threshold bytes; DUCAT checks the
+    // envelope, never the payload.
+    money("dkg_round",
+        "A DKG round: the threshold library's commitment bytes, a round tag, and the per-escrow context that binds the message to one multisig. DUCAT carries the payload; it does not parse it.",
+        &Message { kind: MessageKind::DkgRound, amount_pxmr: None,
+                   payload: Some(vec![0xd1; 96]), round: Some(0), ceremony_id: Some([0x11; 32]),
+                   ..base_pay.clone() }, None);
+    money("frost_round",
+        "A FROST signing round: a preprocess or signature share, tagged and bound to its escrow. The release it builds pays a destination the signer verifies before co-signing (§15.5 into escrow).",
+        &Message { kind: MessageKind::FrostRound, amount_pxmr: None,
+                   payload: Some(vec![0xf2; 128]), round: Some(1), ceremony_id: Some([0x22; 32]),
+                   ..base_pay.clone() }, None);
+    money("ceremony_abort",
+        "An abort names the ceremony it ends and carries no round payload — 'nothing happens' is never safe, so a dead build says so (§9.3.4).",
+        &Message { kind: MessageKind::CeremonyAbort, amount_pxmr: None,
+                   ceremony_id: Some([0x33; 32]), ..base_pay.clone() }, None);
+    money("dkg_round_without_payload",
+        "A ceremony round with no bytes is an envelope around nothing; refused.",
+        &Message { kind: MessageKind::DkgRound, amount_pxmr: None,
+                   round: Some(0), ceremony_id: Some([0x11; 32]), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "a ceremony round carries a payload")));
+    money("dkg_round_without_context",
+        "A round that names no escrow could replay into any of them; refused.",
+        &Message { kind: MessageKind::DkgRound, amount_pxmr: None,
+                   payload: Some(vec![0xd1; 96]), round: Some(0), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "a ceremony round names its round and its escrow")));
+    money("payload_on_a_text",
+        "A ceremony payload on an ordinary message is a field with no meaning to act on; refused.",
+        &Message { kind: MessageKind::Text, amount_pxmr: None,
+                   payload: Some(vec![0xd1; 8]), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "only a ceremony message carries ceremony fields")));
+    money("abort_with_payload",
+        "An abort withdraws a ceremony; a round payload on it is a contradiction.",
+        &Message { kind: MessageKind::CeremonyAbort, amount_pxmr: None,
+                   payload: Some(vec![0xd1; 8]), ceremony_id: Some([0x33; 32]), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "an abort withdraws a ceremony; it carries no round payload")));
 
 
     // Handcrafted: the struct cannot express a half-attachment, which is the

@@ -508,6 +508,10 @@ pub fn seal_message(
     attachment: Option<AttachmentRef>,
     // §15.12: a ride offer's courtesy figure; refused on any other kind.
     eta_secs: Option<u64>,
+    // §17.9 ceremony: opaque threshold bytes, round tag, per-escrow context.
+    payload: Option<Vec<u8>>,
+    round: Option<u64>,
+    ceremony_id: Option<Vec<u8>>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -534,6 +538,9 @@ pub fn seal_message(
             5 => MessageKind::Retract,
             6 => MessageKind::RideOffer,
             7 => MessageKind::RideAccept,
+            8 => MessageKind::DkgRound,
+            9 => MessageKind::FrostRound,
+            10 => MessageKind::CeremonyAbort,
             _ => MessageKind::Text,
         },
         amount_pxmr,
@@ -547,6 +554,13 @@ pub fn seal_message(
         re_seq,
         re_own,
         eta_secs,
+        payload,
+        round,
+        ceremony_id: match ceremony_id {
+            Some(c) if c.len() == 32 => Some(c.try_into().unwrap()),
+            Some(_) => return Err(ContactError::Refused("ceremony id is 32 bytes".into())),
+            None => None,
+        },
         attachment: attachment.map(|a| ducat_core::contact::Attachment {
             record_key: a.record_key,
             key: a.key.try_into().unwrap_or([0u8; 32]),
@@ -684,6 +698,10 @@ pub struct OpenedMessage {
     pub attachment: Option<AttachmentRef>,
     /// §15.12: a ride offer's distance-in-time, seconds.
     pub eta_secs: Option<u64>,
+    /// §17.9 ceremony fields, opaque to DUCAT.
+    pub payload: Option<Vec<u8>>,
+    pub round: Option<u64>,
+    pub ceremony_id: Option<Vec<u8>>,
 }
 
 /// Open an inbound sealed message and check it follows the thread.
@@ -759,6 +777,9 @@ pub fn open_message(
         re_seq: msg.re_seq,
         re_own: msg.re_own,
         eta_secs: msg.eta_secs,
+        payload: msg.payload.clone(),
+        round: msg.round,
+        ceremony_id: msg.ceremony_id.map(|c| c.to_vec()),
         attachment: msg.attachment.as_ref().map(|a| AttachmentRef {
             record_key: a.record_key.clone(),
             key: a.key.to_vec(),

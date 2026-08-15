@@ -127,6 +127,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             args.get(i + 2).map(|s| s.as_str()).unwrap_or(""),
         ).await;
     }
+    if let Some(i) = args.iter().position(|a| a == "--ceremony") {
+        // --ceremony <kind 8|9|10> <round> <ceremony_id_hex> <payload_hex>
+        return mailbox::ceremony(
+            args.get(i + 1).and_then(|s| s.parse().ok()).unwrap_or(8),
+            args.get(i + 2).and_then(|s| s.parse().ok()).unwrap_or(0),
+            args.get(i + 3).map(|s| s.as_str()).unwrap_or(""),
+            args.get(i + 4).map(|s| s.as_str()).unwrap_or(""),
+        ).await;
+    }
     if let Some(i) = args.iter().position(|a| a == "--retract") {
         return mailbox::retract(
             args.get(i + 1).map(|s| s.as_str()).unwrap_or(""),

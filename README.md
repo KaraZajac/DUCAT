@@ -95,7 +95,7 @@ because codes get scanned across dark bars.
 ```
 ducat-protocol.md   the spec — draft 0.83, changelog first
 core/               reference implementation (Rust)
-vectors/            233 conformance vectors + schema — the published artifact
+vectors/            240 conformance vectors + schema — the published artifact
 conformance/        three checkers: schema, second implementation, spec audit
 harness/            end-to-end over real Veilid routes and real settlement
 sim/                offline simulator and market scenarios
