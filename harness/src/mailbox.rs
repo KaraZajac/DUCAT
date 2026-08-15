@@ -196,8 +196,25 @@ async fn append(
     // does not get to relearn that one.
     ring: u32,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    rc.set_dht_value(log.clone(), subkey_for(seq, ring), body.to_vec(), None)
-        .await?;
+    // Prime the local record store with the slot's current tenant first. A
+    // fresh process has no local copy, so its write goes out at value_seq 0 —
+    // and the network silently refuses to replace the seq-0 tenant already
+    // there. Every message since the ring first wrapped (seq 7 on) was lost
+    // to exactly this; the head survived only because it gets read before
+    // every write as a matter of course.
+    let _ = rc.get_dht_value(log.clone(), subkey_for(seq, ring), true).await;
+    if let Some(newer) = rc
+        .set_dht_value(log.clone(), subkey_for(seq, ring), body.to_vec(), None)
+        .await?
+    {
+        return Err(format!(
+            "slot {} already holds a newer value (seq {}) — write refused",
+            subkey_for(seq, ring),
+            newer.seq()
+        )
+        .into());
+    }
+    let _ = rc.get_dht_value(log.clone(), 0, true).await;
     // §16.12: the head carries our current bundle, so every poll a reader
     // makes is also a prekey refresh. Writing None here was why the app's
     // cached copy of this harness's bundle could only ever shrink — it burned
@@ -686,30 +703,20 @@ async fn bill_or_say(
     )?;
 
     // "Delivered" is a claim about the network, not about this process's
-    // memory. set_dht_value returns on local acceptance; with zero reliable
-    // peers the push sat in the offline queue and died with the process —
-    // four receipts in a row (2026-08-14). SyncSet both repairs and measures:
-    // it writes any local-newer subkeys out and reports the network's
-    // sequence numbers back, so this loop ends on confirmation, not hope.
-    print!("  flushing to the network");
-    let subkeys = veilid_core::ValueSubkeyRangeSet::full();
+    // memory — and an inspect scope only measures, it does not push. The one
+    // confirmation that cannot lie: read the slot back from the network and
+    // compare the bytes to what was sent.
+    let sent_bytes = sealed.to_value().encode();
+    let slot = subkey_for(seq, my_ring);
+    print!("  confirming slot {slot} on the network");
     let deadline = Instant::now() + std::time::Duration::from_secs(240);
     let mut confirmed = false;
     while Instant::now() < deadline {
-        let report = rc
-            .inspect_dht_record(mine.clone(), Some(subkeys.clone()), veilid_core::DHTReportScope::SyncSet)
-            .await?;
-        // A seq of MAX means "no value here" on either side.
-        const UNSET: veilid_core::ValueSeqNum = veilid_core::ValueSeqNum::MAX;
-        let local = report.local_seqs();
-        let network = report.network_seqs();
-        if !local.is_empty()
-            && local.iter().zip(network.iter()).all(|(l, n)| {
-                *l == UNSET || (*n != UNSET && *n >= *l)
-            })
-        {
-            confirmed = true;
-            break;
+        if let Ok(Some(v)) = rc.get_dht_value(mine.clone(), slot, true).await {
+            if v.data() == &sent_bytes[..] {
+                confirmed = true;
+                break;
+            }
         }
         print!(".");
         use std::io::Write as _;
@@ -718,9 +725,9 @@ async fn bill_or_say(
     }
     println!();
     if confirmed {
-        println!("  \x1b[32mconfirmed on the network\x1b[0m");
+        println!("  \x1b[32mthe network holds this message\x1b[0m");
     } else {
-        println!("  \x1b[31mNOT confirmed after 240s — the peer may not see this yet\x1b[0m");
+        println!("  \x1b[31mNOT confirmed after 240s\x1b[0m");
     }
 
     rc.close_dht_record(theirs).await?;
@@ -871,6 +878,59 @@ pub async fn collect(card: &str) -> Result<(), Box<dyn std::error::Error>> {
 /// The claimant half of `--card-collect`: same reads, but the outbox and
 /// persona come from the card's inbox rather than a state file, so this works
 /// against a card issued by anything — including a phone.
+/// Forensics: what does the network actually hold in *my* log record?
+/// Prints the head, the advertised ring, and every subkey's occupant
+/// (sealed prekey id) alongside local/network value sequence numbers.
+pub async fn peek_own() -> Result<(), Box<dyn std::error::Error>> {
+    use std::str::FromStr;
+    println!("\n\x1b[1mDUCAT — my own log, as the network sees it\x1b[0m\n");
+    let st = std::fs::read_to_string(state_path("claimant"))?;
+    let mut it = st.lines();
+    let _their_log = it.next().unwrap_or_default();
+    let _their_persona = it.next().unwrap_or_default();
+    let my_log = it.next().unwrap_or_default().to_string();
+    println!("  record {my_log}");
+
+    let (api, _c) = crate::veilid::start("peek").await?;
+    let rc = api.routing_context()?;
+    let mine = RecordKey::from_str(&my_log)?;
+    let desc = rc.open_dht_record(mine.clone(), None).await?;
+    println!("  schema reports {} subkeys", desc.schema().max_subkey());
+
+    match rc.get_dht_value(mine.clone(), 0, true).await? {
+        Some(v) => {
+            let h = LogHead::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?)
+                .map_err(|e| format!("{e:?}"))?;
+            println!("  head: next_seq={} ring={:?} (value_seq {})", h.next_seq, h.ring, v.seq());
+        }
+        None => println!("  head: none"),
+    }
+
+    let report = rc
+        .inspect_dht_record(mine.clone(), None, veilid_core::DHTReportScope::SyncGet)
+        .await?;
+    println!("  inspect(NetworkGet): {} local seqs, {} network seqs",
+        report.local_seqs().len(), report.network_seqs().len());
+    for (i, (l, n)) in report.local_seqs().iter().zip(report.network_seqs().iter()).enumerate() {
+        println!("    subkey {i}: local {l} network {n}");
+    }
+
+    for sub in 1u32..=40 {
+        match rc.get_dht_value(mine.clone(), sub, true).await {
+            Ok(Some(v)) => {
+                let pid = SealedMessage::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?)
+                    .map(|sm| sm.prekey_id.to_string())
+                    .unwrap_or_else(|_| "?".into());
+                println!("  slot {sub}: {} bytes, prekey {}, value_seq {}", v.data().len(), pid, v.seq());
+            }
+            Ok(None) => println!("  slot {sub}: empty"),
+            Err(e) => { println!("  slot {sub}: {e}"); break; }
+        }
+    }
+    api.shutdown().await;
+    Ok(())
+}
+
 pub async fn watch(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
     use std::str::FromStr;
     println!("\n\x1b[1mDUCAT — watching their outbox\x1b[0m\n");
