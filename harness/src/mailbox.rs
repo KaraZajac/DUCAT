@@ -677,6 +677,153 @@ pub async fn say(text: &str) -> Result<(), Box<dyn std::error::Error>> {
     bill_or_say(None, text).await
 }
 
+/// N messages in one session — the burst a stress test needs.
+///
+/// One node startup, one final network confirmation: per-message the loop
+/// seals, writes the slot, advances the head, and moves the stored chain
+/// link, exactly as `--say` does once. What a burst uniquely exercises:
+/// the ring wrapping past a reader that is not keeping up, and the
+/// one-time supply running dry mid-run — the signed-prekey fallback taken
+/// *live*, printed when it happens rather than hidden.
+pub async fn say_many(count: u32, prefix: &str) -> Result<(), Box<dyn std::error::Error>> {
+    use std::str::FromStr;
+    println!("\n\x1b[1mDUCAT — say ×{count}\x1b[0m\n");
+    let st = std::fs::read_to_string(state_path("claimant"))
+        .map_err(|_| "no claimed contact on this machine")?;
+    let mut it = st.lines();
+    let their_log = it.next().unwrap_or_default().to_string();
+    let their_persona = hex::decode(it.next().unwrap_or_default())?;
+    let my_log = it.next().unwrap_or_default().to_string();
+    let owner = it.next().unwrap_or_default().to_string();
+    let stored_link = it.next().unwrap_or_default().to_string();
+    if my_log.is_empty() {
+        return Err("this contact predates the outbox being kept; re-claim a card".into());
+    }
+
+    let (api, _c) = crate::veilid::start("say").await?;
+    let rc = api.routing_context()?;
+    let theirs = RecordKey::from_str(&their_log)?;
+    rc.open_dht_record(theirs.clone(), None).await?;
+    let their_head = match rc.get_dht_value(theirs.clone(), 0, true).await? {
+        Some(v) => LogHead::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?,
+        None => return Err("their log has no head".into()),
+    };
+    let raw = their_head
+        .prekey_bundle
+        .ok_or("their log head carries no prekeys")?;
+    let mut their_bundle =
+        PreKeyBundle::from_value(decode(&raw).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?;
+    let used = used_their_ids();
+    their_bundle.one_time.retain(|k| !used.contains(&k.id));
+
+    let mine = RecordKey::from_str(&my_log)?;
+    let (pk_hex, sk_hex) = owner
+        .split_once(':')
+        .ok_or("this contact predates the log key being kept; re-claim a fresh card")?;
+    let kp = KeyPair::new(
+        CRYPTO_KIND_VLD0,
+        BareKeyPair::new(
+            BarePublicKey::new(&hex::decode(pk_hex)?),
+            BareSecretKey::new(&hex::decode(sk_hex)?),
+        ),
+    );
+    rc.open_dht_record(mine.clone(), Some(kp)).await?;
+    let head = match rc.get_dht_value(mine.clone(), 0, true).await? {
+        Some(v) => LogHead::from_value(decode(v.data()).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?,
+        None => return Err("our own log has no head".into()),
+    };
+    let mut seq = head.next_seq;
+    let my_ring = head.ring.unwrap_or(8);
+
+    let persona = SecretKey::ed25519_from_bytes(&[0x72; 32]);
+    let aad = thread_aad(
+        &hex::encode(persona.public().to_bytes()),
+        &hex::encode(&their_persona),
+    );
+    let mut prev: [u8; 32] = if seq == 0 {
+        [0u8; 32]
+    } else {
+        hex::decode(&stored_link)?
+            .try_into()
+            .map_err(|_| "stored chain link is not 32 bytes")?
+    };
+
+    let mut last_bytes: Vec<u8> = Vec::new();
+    let mut fell_back = false;
+    for i in 0..count {
+        let m = Message {
+            version: 1, suite: 1, seq, prev,
+            body: format!("{prefix} {}/{count}", i + 1),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)?
+                .as_secs(),
+            kind: MessageKind::Text,
+            amount_pxmr: None, txid: None, payto: None,
+            items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false,
+            eta_secs: None, attachment: None,
+        };
+        let (chosen, fs) = their_bundle.select();
+        if !fs && !fell_back {
+            fell_back = true;
+            println!("  \x1b[33mone-time keys exhausted at {} — signed prekey from here\x1b[0m", i + 1);
+        }
+        let chosen_id = chosen.id;
+        let mut rng = HarnessRng((0xC3 ^ seq as u8).wrapping_add(i as u8));
+        let (enc, ct) = hpke::seal(&mut rng, &chosen.public, &hpke::message_info(1), &aad,
+                                   &m.to_value().encode())
+            .map_err(|e| format!("seal: {e:?}"))?;
+        let sealed = SealedMessage { version: 1, suite: 1, prekey_id: chosen_id, enc, ciphertext: ct };
+        last_bytes = sealed.to_value().encode();
+        append(&rc, &mine, seq, &last_bytes, my_ring).await?;
+        if fs {
+            record_used_their_id(chosen_id);
+            their_bundle.one_time.retain(|k| k.id != chosen_id);
+        }
+        prev = m.link();
+        seq += 1;
+        // The chain link moves with every message, or a crash mid-burst
+        // strands everything after the last save.
+        let kept = std::fs::read_to_string(state_path("claimant"))?;
+        let head4: Vec<&str> = kept.lines().take(4).collect();
+        std::fs::write(
+            state_path("claimant"),
+            format!("{}\n{}\n", head4.join("\n"), hex::encode(prev)),
+        )?;
+        println!("  \x1b[35m→\x1b[0m [{}] {prefix} {}/{count}", seq - 1, i + 1);
+    }
+
+    // One confirmation for the burst: the last slot's bytes, read back.
+    let slot = subkey_for(seq - 1, my_ring);
+    print!("  confirming slot {slot} on the network");
+    let deadline = Instant::now() + std::time::Duration::from_secs(240);
+    let mut confirmed = false;
+    while Instant::now() < deadline {
+        if let Ok(Some(v)) = rc.get_dht_value(mine.clone(), slot, true).await {
+            if v.data() == &last_bytes[..] {
+                confirmed = true;
+                break;
+            }
+        }
+        print!(".");
+        use std::io::Write as _;
+        let _ = std::io::stdout().flush();
+        tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+    }
+    println!();
+    if confirmed {
+        println!("  \x1b[32mthe network holds the burst\x1b[0m");
+    } else {
+        println!("  \x1b[31mNOT confirmed after 240s\x1b[0m");
+    }
+    rc.close_dht_record(theirs).await?;
+    rc.close_dht_record(mine).await?;
+    api.shutdown().await;
+    Ok(())
+}
+
 async fn bill_or_say(
     billing: Option<Outgoing>,
     text: &str,

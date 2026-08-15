@@ -17,16 +17,24 @@ import uniffi.ducat_mobile.nodeStop
  * without a phone in the room.
  */
 fun main() {
-    val dir = kotlin.io.path.createTempDirectory("ducat-desk-e2e").toFile()
+    // DUCAT_DESK_STATE keeps the desk's memory across runs — the shape of a
+    // process-death test is exactly "same state, new process".
+    val dir = System.getenv("DUCAT_DESK_STATE")?.let { java.io.File(it).apply { mkdirs() } }
+        ?: kotlin.io.path.createTempDirectory("ducat-desk-e2e").toFile()
     val context = DeskContext(dir)
     println("e2e: state in ${dir.absolutePath}")
     nodeStart("${dir.absolutePath}/veilid")
     while (!nodeStatus().publicInternetReady) Thread.sleep(2_000)
     println("e2e: node ready")
 
-    val card = Mailbox.issueCard(context, "desk-e2e", 60uL * 60uL)
-    // One line, greppable, complete: the whole handshake is this string.
-    println("E2E_CARD ${card.uri}")
+    // A returning desk already has its people; only a fresh one issues.
+    if (ContactStore(context).all().isEmpty()) {
+        val card = Mailbox.issueCard(context, "desk-e2e", 60uL * 60uL)
+        // One line, greppable, complete: the whole handshake is this string.
+        println("E2E_CARD ${card.uri}")
+    } else {
+        println("E2E_RESUMED")
+    }
 
     val store = ContactStore(context)
     val mine = PersonaStore(context).personaHex()

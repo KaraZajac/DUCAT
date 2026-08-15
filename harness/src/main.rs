@@ -68,6 +68,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if args.iter().any(|a| a == "--refresh-keys") {
         return mailbox::refresh_keys().await;
     }
+    if let Some(i) = args.iter().position(|a| a == "--say-n") {
+        return mailbox::say_many(
+            args.get(i + 1).and_then(|s| s.parse().ok()).unwrap_or(5),
+            args.get(i + 2).map(|s| s.as_str()).unwrap_or("burst"),
+        ).await;
+    }
     if let Some(i) = args.iter().position(|a| a == "--say") {
         return mailbox::say(args.get(i + 1).map(|s| s.as_str()).unwrap_or("")).await;
     }
@@ -82,6 +88,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         return mailbox::receipt(
             args.get(i + 1).map(|s| s.as_str()).unwrap_or(""),
             args.get(i + 2).map(|s| s.as_str()).unwrap_or(""),
+        ).await;
+    }
+    if let Some(i) = args.iter().position(|a| a == "--stand-post-hail") {
+        return stand::post_hail(
+            args.get(i + 1).map(|s| s.as_str()).unwrap_or(""),
+            args.get(i + 2).map(|s| s.as_str()).unwrap_or("somewhere"),
         ).await;
     }
     if args.iter().any(|a| a == "--contacts") {

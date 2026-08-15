@@ -27,6 +27,32 @@ fn main() {
     let (spend, address, restore) = load_or_create(st.height);
 
     let args: Vec<String> = std::env::args().collect();
+    if args.len() >= 3 && args[1] == "subaddress" {
+        // §15.10's per-contact address, from the shell — what the desk hands
+        // a specific counterparty, derivable here for round-trip tests.
+        let minor: u32 = args[2].parse().expect("minor index");
+        println!("{}", ducat_mobile::monero::monero_subaddress(spend, minor, true)
+            .expect("subaddress"));
+        return;
+    }
+    if args.len() >= 3 && args[1] == "balance-minors" {
+        // Scan watching N minors and print each output's receiving minor —
+        // the attribution §15.10 promises, checked against the real chain.
+        let minors: u32 = args[2].parse().expect("minor count");
+        let mut from = std::env::var("SCAN_FROM")
+            .ok().and_then(|v| v.parse().ok()).unwrap_or(restore);
+        while from < st.height {
+            let r = ducat_mobile::monero::monero_scan(NODE.into(), spend.clone(), from, 2_000, minors)
+                .expect("scan");
+            for o in &r.outputs {
+                println!("output {} pXMR at height {} minor {}", o.amount_pxmr, o.height, o.minor);
+            }
+            if r.scanned_to <= from { break }
+            from = r.scanned_to;
+        }
+        println!("(address {address})");
+        return;
+    }
     if args.len() >= 4 && args[1] == "send" {
         let to = args[2].clone();
         let xmr: f64 = args[3].parse().expect("amount in XMR");

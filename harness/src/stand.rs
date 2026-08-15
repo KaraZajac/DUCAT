@@ -115,7 +115,31 @@ fn slot_is_free(data: &[u8], now: u64) -> bool {
     }
 }
 
+/// Post a *real* notice — §16.17 bytes, not text. The ladder only respects
+/// hail-shaped tenants (text is debris that holds no place), so testing the
+/// overflow at all needs the genuine article.
+pub async fn post_hail(cell: &str, dest: &str) -> Result<(), Box<dyn std::error::Error>> {
+    use ducat_core::contact::HailNotice;
+    let n = HailNotice {
+        version: 1,
+        card: format!("ducat:card/ladder-test-{}", std::process::id()),
+        dest: dest.to_string(),
+        fare_pxmr: None,
+        expiry: std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_secs()
+            + 600,
+        origin_cell: None,
+        dest_cell: None,
+    };
+    post_bytes(cell, &n.to_value().encode()).await
+}
+
 pub async fn post(cell: &str, text: &str) -> Result<(), Box<dyn std::error::Error>> {
+    post_bytes(cell, text.as_bytes()).await
+}
+
+async fn post_bytes(cell: &str, body: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
     use ducat_core::geo::{stand_shard_name, MAX_STAND_SHARDS};
     println!("\n\x1b[1mDUCAT — stand post (rendezvous by convention)\x1b[0m\n");
     let (api, _c) = crate::veilid::start("stand-p").await?;
@@ -139,9 +163,9 @@ pub async fn post(cell: &str, text: &str) -> Result<(), Box<dyn std::error::Erro
                 let kp = KeyPair::new(CRYPTO_KIND_VLD0, BareKeyPair::new(pk, sk));
                 rc.close_dht_record(key.clone()).await?;
                 rc.open_dht_record(key.clone(), Some(kp)).await?;
-                rc.set_dht_value(key.clone(), subkey, text.as_bytes().to_vec(), None)
+                rc.set_dht_value(key.clone(), subkey, body.to_vec(), None)
                     .await?;
-                println!("  posted   {} B at {name:?} slot {subkey}", text.len());
+                println!("  posted   {} B at {name:?} slot {subkey}", body.len());
                 rc.close_dht_record(key).await?;
                 api.shutdown().await;
                 return Ok(());
