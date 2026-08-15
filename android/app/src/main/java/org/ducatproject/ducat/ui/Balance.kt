@@ -113,11 +113,15 @@ fun BalanceCard(
         }
     }
 
-    // §17.2 requires warning *before* the count reaches zero, not at the
-    // counter. Its own surface rather than a box inside the card above: a
-    // warning nested two boxes deep reads as part of the furniture, and this
-    // one exists to interrupt.
-    if (float.unlockedOutputs == 0 || capacity.approxPayments <= 2) {
+    // An empty wallet is not tied-up change. "Your money is here, but it's
+    // all locked" over a zero balance is a lie the first-run screen used to
+    // tell — the card fires only when money actually exists but none of it
+    // is spendable, or when the spendable supply is running thin. A wallet
+    // with nothing in it says nothing here; the Send/Receive tab is where a
+    // first deposit comes from.
+    val hasMoney = float.unlockedOutputs > 0 || float.lockedPxmr > 0
+    val allLocked = float.unlockedOutputs == 0 && float.lockedPxmr > 0
+    if (hasMoney && (allLocked || capacity.approxPayments <= 2)) {
         Spacer(Modifier.height(12.dp))
         Surface(
             color = MaterialTheme.colorScheme.errorContainer,
@@ -126,16 +130,13 @@ fun BalanceCard(
         ) {
             Column(Modifier.padding(20.dp)) {
                 Text(
-                    if (float.unlockedOutputs == 0)
-                        "You can't pay right now"
-                    else
-                        "Running low on notes",
+                    if (allLocked) "You can't pay right now" else "Running low on notes",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    if (float.unlockedOutputs == 0)
+                    if (allLocked)
                         "Your money is here, but it's all tied up as change. " +
                             "Break a note to spend again."
                     else

@@ -486,6 +486,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                         HomeScreen(
                             onTopUp = { tab = Tab.Accounts },
                             onSeeActivity = { tab = Tab.Activity },
+                            onBackup = { overlay = Overlay.Drawer(Section.Settings) },
                         )
                     }
                     Tab.Accounts -> AccountsScreen()
@@ -498,7 +499,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
 }
 
 @Composable
-private fun HomeScreen(onTopUp: () -> Unit, onSeeActivity: () -> Unit) {
+private fun HomeScreen(
+    onTopUp: () -> Unit,
+    onSeeActivity: () -> Unit,
+    onBackup: () -> Unit,
+) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val b = remember(version) { Wallet.balances(context) }
@@ -540,7 +545,7 @@ private fun HomeScreen(onTopUp: () -> Unit, onSeeActivity: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         ) {
             Row(
-                Modifier.padding(14.dp),
+                Modifier.clickable { onBackup() }.padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
@@ -552,6 +557,12 @@ private fun HomeScreen(onTopUp: () -> Unit, onSeeActivity: () -> Unit) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    Icons.Filled.ChevronRight,
+                    contentDescription = "Open backup settings",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
