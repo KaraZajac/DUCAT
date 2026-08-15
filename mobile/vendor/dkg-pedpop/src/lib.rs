@@ -29,8 +29,6 @@ pub use dkg::*;
 mod encryption;
 pub use encryption::*;
 
-#[cfg(test)]
-mod tests;
 
 /// Errors possible during key generation.
 #[derive(Clone, PartialEq, Eq, Debug, thiserror::Error)]
