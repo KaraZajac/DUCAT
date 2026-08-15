@@ -50,4 +50,10 @@ cargo run -p ducat-mobile --bin uniffi-bindgen -- generate \
   --language kotlin --out-dir /tmp/uniffi-out
 rm -rf android/app/src/main/java/uniffi/ducat_mobile
 cp -r /tmp/uniffi-out/uniffi/ducat_mobile android/app/src/main/java/uniffi/
+# The desktop client compiles the same bindings against the host library
+# (built by `cargo build --release -p ducat-mobile`, found via
+# jna.library.path in desktop/build.gradle.kts).
+rm -rf android/desktop/src/main/kotlin/uniffi/ducat_mobile
+mkdir -p android/desktop/src/main/kotlin/uniffi
+cp -r /tmp/uniffi-out/uniffi/ducat_mobile android/desktop/src/main/kotlin/uniffi/
 echo "native libraries and bindings refreshed"

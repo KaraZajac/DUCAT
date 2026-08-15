@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ducat"
 include(":app")
+include(":desktop")
