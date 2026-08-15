@@ -88,6 +88,25 @@ money. Ordered by what blocks 1.0, not by effort.
   from the document alone. Everything accidental is cleared; what remains
   is finding that person.
 
+## The desktop client (parallel track, kara 2026-08-15)
+
+An Electrum-shaped DUCAT client for Linux/Windows/Mac. The protocol stack
+is already cross-platform Rust; the path, cheapest first:
+
+1. **Harness → CLI client.** Multi-contact state landed (--contacts,
+   --contact-save, DUCAT_CONTACT selects the thread; --geo for board
+   names). Still wanted: a card-issue flow with a QR on the terminal,
+   a persistent watch daemon (one process, all threads), and packaging
+   (static binaries for the three OSes).
+2. **GUI**: Compose Multiplatform reuses the Android UI wholesale on
+   desktop (the app is already Jetpack Compose; uniffi works on desktop
+   JVM); the work is abstracting SharedPreferences/Location/camera/NFC
+   behind interfaces. Alternative: egui/Slint on the Rust directly —
+   smaller binary, zero UI reuse.
+3. **iPhone** eventually: uniffi generates Swift bindings natively and
+   the Rust stack compiles for iOS — the protocol layer is free; the UI
+   and App Store review are the cost. Nothing now forecloses it.
+
 ## Explicitly not for 1.0
 
 - Offline OSM routing (fare estimates without the one stated leak).
