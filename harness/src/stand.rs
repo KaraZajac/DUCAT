@@ -363,11 +363,28 @@ async fn hail_watch_cells(cells: &[String]) -> Result<(), Box<dyn std::error::Er
                         k
                     }
                 };
-                let mut live_here = 0u32;
+                // All eight slots at once: sequential force-refreshed reads
+                // made a 3x3 two-shard pass 144 round trips — half an hour,
+                // against notices that live fifteen minutes. Concurrency is
+                // not an optimization here; it is what makes the sweep exist.
+                let mut fetches = Vec::new();
                 for subkey in 0..8u32 {
-                    let Ok(Some(v)) = rc.get_dht_value(key.clone(), subkey, true).await else { continue };
-                    if v.data().is_empty() { continue }
-                    let Ok(val) = decode(v.data()) else { continue };
+                    let rc2 = rc.clone();
+                    let key2 = key.clone();
+                    fetches.push(tokio::spawn(async move {
+                        (subkey, rc2.get_dht_value(key2, subkey, true).await)
+                    }));
+                }
+                let mut slots = Vec::new();
+                for f in fetches {
+                    if let Ok((subkey, Ok(Some(v)))) = f.await {
+                        slots.push((subkey, v.data().to_vec()));
+                    }
+                }
+                let mut live_here = 0u32;
+                for (subkey, bytes) in slots {
+                    if bytes.is_empty() { continue }
+                    let Ok(val) = decode(&bytes) else { continue };
                     let Ok(n) = HailNotice::from_value(val) else { continue };
                     if n.expiry <= now() { continue }
                     live_here += 1;

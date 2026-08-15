@@ -996,7 +996,7 @@ internal interface UniffiLib : Library {
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_route_blob(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_node_start(`storageDir`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_node_start(`storageDir`: RustBuffer.ByValue,`udp`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_status(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1497,7 +1497,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_route_blob() != 4436.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_node_start() != 34295.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_node_start() != 15207.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_status() != 13257.toShort()) {
@@ -5610,11 +5610,11 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
          * usable: readiness takes seconds to minutes and a UI that blocks on it is a UI
          * that appears frozen. Poll [`node_status`].
          */
-    @Throws(NodeException::class) fun `nodeStart`(`storageDir`: kotlin.String)
+    @Throws(NodeException::class) fun `nodeStart`(`storageDir`: kotlin.String, `udp`: kotlin.Boolean)
         = 
     uniffiRustCallWithError(NodeException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_start(
-        FfiConverterString.lower(`storageDir`),_status)
+        FfiConverterString.lower(`storageDir`),FfiConverterBoolean.lower(`udp`),_status)
 }
     
     

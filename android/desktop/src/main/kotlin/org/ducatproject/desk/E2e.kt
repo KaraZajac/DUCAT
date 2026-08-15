@@ -23,7 +23,7 @@ fun main() {
         ?: kotlin.io.path.createTempDirectory("ducat-desk-e2e").toFile()
     val context = DeskContext(dir)
     println("e2e: state in ${dir.absolutePath}")
-    nodeStart("${dir.absolutePath}/veilid")
+    nodeStart("${dir.absolutePath}/veilid", true)
     while (!nodeStatus().publicInternetReady) Thread.sleep(2_000)
     println("e2e: node ready")
 

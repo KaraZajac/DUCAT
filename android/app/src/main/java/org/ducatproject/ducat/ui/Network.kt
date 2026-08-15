@@ -126,7 +126,7 @@ fun NetworkPanel(storageDir: String) {
     LaunchedEffect(starting) {
         if (!starting) return@LaunchedEffect
         val result = withContext(Dispatchers.IO) {
-            runCatching { nodeStart(storageDir) }.exceptionOrNull()?.message
+            runCatching { nodeStart(storageDir, udp = true) }.exceptionOrNull()?.message
         }
         status = withContext(Dispatchers.IO) { nodeStatus() }
         if (result != null) status = status.copy(error = result)

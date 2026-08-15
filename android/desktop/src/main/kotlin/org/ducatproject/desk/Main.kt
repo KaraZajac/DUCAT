@@ -99,7 +99,7 @@ private fun runDesk(deskDir: File) = application {
         // The node, then the poller: the same loop the phone's service runs.
         LaunchedEffect(Unit) {
             withContext(Dispatchers.IO) {
-                runCatching { nodeStart(File(deskDir, "veilid").absolutePath) }
+                runCatching { nodeStart(File(deskDir, "veilid").absolutePath, true) }
                     .onFailure { error = it.message }
             }
             while (true) {

@@ -101,7 +101,7 @@ pub enum NodeError {
 /// usable: readiness takes seconds to minutes and a UI that blocks on it is a UI
 /// that appears frozen. Poll [`node_status`].
 #[uniffi::export]
-pub fn node_start(storage_dir: String) -> Result<(), NodeError> {
+pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
     let mut guard = slot().lock().unwrap();
     if guard.is_some() {
         return Ok(()); // already running; starting twice would fight over the store
@@ -120,6 +120,14 @@ pub fn node_start(storage_dir: String) -> Result<(), NodeError> {
         cfg["namespace"] = serde_json::json!("ducat");
         for store in ["protected_store", "table_store", "block_store"] {
             cfg[store]["directory"] = serde_json::json!(format!("{storage_dir}/{store}"));
+        }
+        // An emulator's SLIRP user-networking silently eats sustained UDP —
+        // reads worked, every DHT set died on the way out, and the app
+        // believed its own local copy (observed 2026-08-15: an hour of
+        // "posted" hails the network never held). TCP and WSS survive SLIRP;
+        // a real phone keeps UDP.
+        if !udp {
+            cfg["network"]["protocol"]["udp"]["enabled"] = serde_json::json!(false);
         }
 
         // `AppCall` is now consumed: it is how a contact's message reaches us
@@ -706,14 +714,23 @@ pub fn stand_post(cell: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeEr
         if rc.get_dht_value(key.clone(), subkey, true).await.is_err() {
             let _ = rc.get_dht_value(key.clone(), subkey, true).await;
         }
-        rc.set_dht_value(key.clone(), subkey, data.clone(), None)
+        // The set itself reports a lost race: Some(newer) back means the
+        // network already holds a value newer than ours and kept it.
+        let refused = rc
+            .set_dht_value(key.clone(), subkey, data.clone(), None)
             .await
             .map_err(|e| NodeError::Failed(format!("post: {e}")))?;
-        // Last write wins on the DHT, silently: read the slot back and only
-        // claim success if it holds our bytes. A caller racing another writer
-        // treats the error as "slot lost" and walks the ladder on.
+        if refused.is_some() {
+            let _ = rc.close_dht_record(key).await;
+            return Err(NodeError::Failed("slot taken by a concurrent writer".into()));
+        }
+        // Verify against the *local* record store, not the network: seconds
+        // after a set, a force-refreshed read races propagation and loses —
+        // which read as "every shard is full" on a nearly-empty cell, the
+        // first bug the emulated phone ever caught. The local copy reflects
+        // exactly what the set call accepted.
         let echoed = rc
-            .get_dht_value(key.clone(), subkey, true)
+            .get_dht_value(key.clone(), subkey, false)
             .await
             .map_err(|e| NodeError::Failed(format!("verify: {e}")))?;
         let held = echoed.as_ref().map(|v| v.data()).unwrap_or(&[]);

@@ -136,10 +136,9 @@ private fun migrateDown(p: PostedHail): PostedHail? {
                     ?.let { n.subkey }
             }.toSet()
             val free = (0u..7u).firstOrNull { it !in taken } ?: continue
-            standPost(name, free, p.notice)
-            val landed = standRead(name).firstOrNull { it.subkey == free }
-                ?.let { runCatching { hailDecode(it.data) }.getOrNull() }
-            if (landed?.card == p.card) {
+            // standPost verifies its own landing; a raced slot throws and the
+            // walk simply keeps its current home this round.
+            if (runCatching { standPost(name, free, p.notice) }.isSuccess) {
                 clearOwnSlot(p.cell, p.subkey, p.card)
                 return@runCatching p.copy(cell = name, subkey = free)
             }
@@ -1482,18 +1481,15 @@ fun HailSheet(
                                             }.toSet()
                                             for (free in 0u..7u) {
                                                 if (free in taken) continue
-                                                // A post error means the slot
-                                                // went to someone else.
+                                                // standPost verifies its own
+                                                // landing (a refused or raced
+                                                // set throws); re-reading the
+                                                // network here raced its own
+                                                // propagation and read a
+                                                // nearly-empty cell as full.
                                                 if (runCatching {
                                                         uniffi.ducat_mobile.standPost(name, free, bytes)
-                                                    }.isFailure) continue
-                                                val held = runCatching {
-                                                    standRead(name)
-                                                        .firstOrNull { it.subkey == free }
-                                                        ?.let { hailDecode(it.data) }
-                                                        ?.card == card.uri
-                                                }.getOrDefault(false)
-                                                if (held) {
+                                                    }.isSuccess) {
                                                     placed = name to free
                                                     break@ladder
                                                 }

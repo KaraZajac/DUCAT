@@ -15,7 +15,7 @@ fun main() {
     val dir = kotlin.io.path.createTempDirectory("ducat-desk-smoke").toFile()
     val context = DeskContext(dir)
     println("smoke: starting node in ${dir.absolutePath}")
-    nodeStart("${dir.absolutePath}/veilid")
+    nodeStart("${dir.absolutePath}/veilid", true)
     println("smoke: persona ${PersonaStore(context).personaHex()}")
     println("smoke: contacts ${ContactStore(context).all().size}")
     val deadline = System.currentTimeMillis() + 60_000

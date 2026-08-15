@@ -29,7 +29,11 @@ class DucatApplication : Application() {
         DucatLog.init(this)
         VeilidInit.ensure(this)
         scope.launch {
-            runCatching { nodeStart("${filesDir.absolutePath}/veilid") }
+            // Tried and measured on the emulator: UDP-on reads but its set
+            // fanout dies inside QEMU user-net; UDP-off gets zero peers at
+            // all. SLIRP cannot carry a Veilid node either way, so the flag
+            // stays available for future transports and real devices keep UDP.
+            runCatching { nodeStart("${filesDir.absolutePath}/veilid", udp = true) }
             // Answering starts with the app, not with a screen. A contact who
             // messages while Ducat sits in the background must still be
             // answered — a peer that only replies when someone is looking at it
