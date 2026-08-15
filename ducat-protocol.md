@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 0.87 — Consolidated**
+**Draft 0.88 — Consolidated**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **0.88** — **The bond ceremony DUCAT owns (§17.9): interactive DKG and FROST over the sealed thread.** §8.2's audit found the seam — `dkg` 0.6.1 ships the threshold *rounds* but no way to run them between distrusting parties — and this fills it with the channel already built for two committed parties: §16.12's mailbox. Three message kinds (`DKG_ROUND` 8, `FROST_ROUND` 9, `CEREMONY_ABORT` 10) carry opaque threshold-library bytes (field 214) tagged by round (215) and bound to a per-escrow `ceremony_id` (216); DUCAT does not parse the payload, the library validates it, a malformed one aborts rather than corrupts. The 2-of-2 key builds in four sealed messages (commit, share, both ways), off any critical path, retryable — §17.1's calm onboarding made real; the release is a three-step FROST signature whose destination a signer MUST verify before co-signing, which is how §15.5's WYSIWYS survives into escrow (a co-signature is consent to a *destination*, and a `RULING` is itself that co-signature). The load-bearing crypto is proven live: `mobile/examples/escrowtest.rs` builds a real 2-of-2 wallet on stagenet and releases it by FROST, both signers exchanging only the serialized wire bytes this section seals and asserting one identical transaction. What remains unsolved is named: the arbiter set must be online to build and to rule (§17.8 governance), and O22's lost-device hole stands. No vectors — the ceremony is opaque bytes over the existing message, whose encoding is already covered.
 - **0.87** — **The offer/accept ceremony (§15.12), and the retract that bills needed too (§16.13).** Claiming a hail used to *be* the deal — commitment at the wrong moment for both parties. Three new message kinds move it to where people actually decide: the claim opens a sealed channel (applying, not winning); the driver's first word is a `RIDE_OFFER` (6) carrying the fare (MUST) and optionally `eta_secs` (213, bounded at a day, meaningful nowhere else); the rider answers with `RIDE_ACCEPT` (7), which MUST name the offer and MUST echo its fare — acceptance bound to a number both parties said, verified by the reader, so two offers in a thread cannot leave the price ambiguous. `RETRACT` (5) is the ceremony's no and turned out to be the missing half of §16.13: with `re_own` a sender withdraws their own earlier message — a vendor cancelling a bill kills the live "Review payment" button on the other phone, previously an open invitation to pay into a sale nobody was watching — and without it, declines the counterparty's. A retract carries no amount and no bill; none of the three itemise (the ride's bill still arrives through §15.11's meter, answerable to the accepted fare). All three are ordinary sealed messages — chained, sequenced, advisory, no authority and no new delivery machinery. 233 vectors, both implementations agreeing.
 - **0.86** — **A one-time prekey id is offered to at most one counterparty (§16.11).** The review that closed 0.85 left one protocol defect standing, and this drafts it away: bundles travel in per-thread log heads, but one *global* bundle published to every head let two counterparties cache the same copy and seal to the same one-time key — the first message in burned it, and the second arrived permanently unreadable, with nobody misbehaving. A one-contact field test can never surface this; the second chatty contact is the trigger. The rule joins §16.11's table: partition the *offering*, never the secrets — ids stay globally unique on the device, each thread's head advertises its own disjoint batch, and a fresh batch replaces a thread's offer wholesale (senders on stale heads still open, because the old ids' secrets survive until consumed). No wire change: the bundle format, the burn, the pen and the sweep are untouched; what changed is which keys a head is allowed to offer.
 - **0.85** — **The overflow ladder (§15.12): capacity that costs what it uses.** A stand is 8 slots, and 8 is a neighbourhood, not a Friday night. Instead of bigger boards — which every quiet cell would pay for — a stand grows by **shards**: shard 0 is the bare name (deployed boards stay valid), overflow shards are `<name>-<n>`, decimal, no padding, capped at 16 — because a padded and an unpadded spelling are two different record keys for one name, and past 128 concurrent notices density has outgrown the cell and the answer is a finer geohash. The two rules that make cost track demand: **writers backfill low** (the lowest shard with a free slot takes the notice), and **readers sweep from shard 0, stopping at the first shard holding nothing live** — so a quiet cell costs one read, a busy one its actual height, and the ladder's height is itself a live congestion signal no operator publishes. The derivation machinery is untouched: a shard is just a name. Also recorded here because the field taught it twice in one night: **a subkey write is silently refused unless the writer's store knows the slot's current value sequence** — so read-before-write on any slot that may have a tenant is a correctness rule of §16.12 and §15.12 both, "delivered" is a claim about the network to be confirmed by reading the bytes back, and inspect-scope sequence comparisons that pass vacuously on unset local state are not confirmation. 226 vectors, both implementations agreeing.
@@ -2372,6 +2373,52 @@ XMR is the settlement asset; that is not negotiable, since it is the only mechan
 - **Multisig setup remains the fragile step.** Amortized, off the critical path, and retryable — but still the least-proven machinery in the stack (main spec O1 stands).
 
 ---
+
+## 17.9 The ceremony DUCAT owns: interactive DKG and FROST over the mailbox
+
+§8.2's audit (changelog 0.50) found the seam plainly: **`dkg` 0.6.1 ships no interactive DKG**, so a deployment must bring its own ceremony between distrusting parties. The threshold library gives the rounds — PedPoP commitments and encrypted shares to build the key, FROST preprocess and signature shares to spend it — but it does not carry them anywhere. DUCAT carries them on the one channel it already has for two parties who have committed to each other: §16.12's sealed thread. Nothing new about transport, delivery, or ordering is invented; the ceremony is a sequence of ordinary sealed messages, and every property the thread already has (forward secrecy, chain-linked ordering, the patience windows, the read-before-write ring) applies to it unchanged.
+
+The load-bearing crypto is proven: `mobile/examples/escrowtest.rs` builds a real 2-of-2 wallet on stagenet and releases it by FROST, both signers exchanging only the serialized wire messages — the same bytes this section seals — and asserting they derive one identical transaction. What the example fakes is only *who runs the machines* (one process, for the demo); this section says how they run on two devices that never share a secret.
+
+### Message kinds
+
+Three kinds carry the ceremony, all on the §16.10 message (kinds 5–7 belong to §15.12's ride ceremony; the bond ceremony takes the next block):
+
+```
+DKG_ROUND     8   a DKG wire message: round tag + opaque bytes
+FROST_ROUND   9   a signing wire message: session id + round tag + opaque bytes
+CEREMONY_ABORT 10 this ceremony is abandoned; state may be discarded
+```
+
+Each carries an opaque `payload` (field 214) — the serialized PedPoP or FROST message, which DUCAT does **not** parse; the threshold library validates it, and a malformed one aborts the ceremony rather than corrupting a thread. A `round` byte (field 215) says which step it is, so a reader rejects a round it did not expect (the §2.5 discipline: out-of-order ceremony messages are refused, never applied). A `ceremony_id` (field 216) — the 32-byte thread-derived context that PedPoP requires be unique per multisig, and that binds every message to one escrow — so a stale message from an abandoned attempt cannot be replayed into a live one.
+
+### The build: three rounds, both directions
+
+For the 2-of-2 bond (rider + arbiter) or 2-of-3 (rider + two arbiter keys), the PedPoP flow is:
+
+1. **Commit.** Each party runs `generate_coefficients` and sends its `DKG_ROUND{round: commit}` carrying the commitment message. A party that sends two commitments for one `ceremony_id` is faulty and the ceremony aborts (the library says so; DUCAT enforces it by accepting one per round per sender).
+2. **Share.** Having received every commitment, each party runs `generate_secret_shares` and sends each counterparty its `DKG_ROUND{round: share}` — the *encrypted* share, readable only by its addressee. The share is encrypted by the DKG layer independently of the thread's own sealing; the double wrap is deliberate and cheap.
+3. **Confirm.** Each party runs `calculate_share`, arrives at its `ThresholdKeys`, and both independently compute the same group key — the escrow's spend key, which no device holds in full. The view key is derived from the group key by the §8.2 rule (fresh per group, since the FROST key has no private half to derive it from), so both parties, and only they, can scan the escrow. The escrow's funding address is now known to both without either learning the other's share.
+
+The whole build is four sealed messages (two each way) for 2-of-2. It happens once, at bond load or rental agreement, off any curbside critical path — exactly §17.1's "calm, retryable onboarding" — and its failure mode is a clean abort with a retry, never a stranded party.
+
+### The spend: FROST release, bound to a reason
+
+Releasing the escrow — the deposit returned, the bond withdrawn, or an arbiter's `RULING` executed — is a FROST signature over one Monero transaction whose destination is fixed by the outcome:
+
+1. **Preprocess.** Each signer runs `preprocess` and sends `FROST_ROUND{round: preprocess}`.
+2. **Sign.** Having received the other's preprocess, each runs `sign` over *the same* `SignableTransaction` and sends `FROST_ROUND{round: share}`.
+3. **Complete.** Either signer completes to the finished transaction and broadcasts it. Both derive the identical transaction hash (the example asserts this), so it does not matter who broadcasts.
+
+The transaction both parties sign is not blank: its outputs are the release destination, and a signer MUST refuse to `sign` a transaction whose destination does not match the agreed outcome — a return-to-rider on a clean ride, the driver's address on a completed one, the arbiter's `RULING` allocation on a dispute. **This is where §15.5's WYSIWYS survives into escrow**: a co-signature is consent to a specific destination, and a client that signs whatever bytes it is handed has deleted the confirm screen. The `RULING` is itself a co-signature (§9.3), which is why an expired dispute must emit a real ruling rather than nothing (§9.3.4): "do nothing" leaves funds locked behind two signatures that will never both come.
+
+### What this does not solve
+
+- **The arbiter must run the ceremony.** A 2-of-3 bond needs the arbiter set online to build the key and, on dispute, to sign the ruling. This is the arbiter-set-governance open problem (§17.8) wearing work clothes: a captured or absent arbiter set makes the bond unspendable, not merely untrustworthy.
+- **O22 stands.** A rider who loses their device mid-escrow loses their share, and a 2-of-3 buyer-favourable outcome then needs the *other two* keys — which for a bond is the arbiter set (fine) but for a two-party escrow is the counterparty (a hole with no clean answer, §4.3).
+- **The library's own caveat is inherited.** `dkg` provides the rounds and explicitly does *not* provide the completion-consensus that confirms all parties finished; DUCAT's confirm step is the thread observing both `ThresholdKeys` produce the funding address, which is weaker than a consensus protocol and stated as such.
+
+---
 *End of Part IV. One line: the rider posts collateral once, so the driver can accept an unconfirmed transaction in seconds against a bounded, provable, slashable downside — and prices are quoted in real money via a cached, privately-fetched, independently-verified rate.*
 
 ---
@@ -2560,7 +2607,8 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 203–209 | `HAIL_NOTICE` (§16.17) | **Assigned** |
 | 210–212 | car model, colour and plate on `CONTACT_ACCEPT` (§16.9, §15.12) | **Assigned** |
 | 213 | `eta_secs` on a ride offer (§15.12) | **Assigned** |
-| 214+ | Unallocated | — |
+| 214–216 | ceremony `payload`, `round`, `ceremony_id` (§17.9) | **Assigned** |
+| 217+ | Unallocated | — |
 
 The `96+ Unallocated` row above was stale from 0.14 onward: 96–103 had been in use since `TERMS` and `MANDATE` shipped, and a second implementer allocating from 96 would have collided head-on. Registries decay silently unless something checks them, which is the argument for the type-code rule below.
 
