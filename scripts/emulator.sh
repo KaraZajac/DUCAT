@@ -20,8 +20,19 @@ export ANDROID_HOME=${ANDROID_HOME:-$HOME/Android/Sdk}
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 export DISPLAY=${DISPLAY:-:0}
 
+# Real networking when the TAP exists (scripts/emulator-tap.sh, once, with
+# sudo): SLIRP cannot carry a Veilid node, so without the TAP the guest can
+# read the DHT but never write it — fine for UI work, useless for hails.
+NETFLAGS=""
+if ip link show tap-ducat >/dev/null 2>&1; then
+  NETFLAGS="-net-tap tap-ducat"
+  echo "using tap-ducat — full networking"
+else
+  echo "no tap-ducat — SLIRP only (UI testing; DHT writes will not propagate)"
+fi
+
 $ANDROID_HOME/emulator/emulator -avd ducat -no-window -no-audio \
-  -gpu host -no-snapshot -no-boot-anim -feature -Vulkan &
+  -gpu host -no-snapshot -no-boot-anim -feature -Vulkan $NETFLAGS &
 EMU=$!
 trap 'kill $EMU 2>/dev/null' EXIT
 
