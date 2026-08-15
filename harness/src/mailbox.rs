@@ -685,6 +685,14 @@ async fn bill_or_say(
         format!("{}\n{}\n", kept.join("\n"), hex::encode(m.link())),
     )?;
 
+    // Let the write actually leave the building. set_dht_value returns once
+    // the value is accepted locally; the network push is asynchronous, and
+    // shutting down a second later dropped at least two receipts on the floor
+    // (2026-08-14: an hour after "send", the phone's replica still held the
+    // slot's previous tenant).
+    println!("  flushing to the network…");
+    tokio::time::sleep(std::time::Duration::from_secs(25)).await;
+
     rc.close_dht_record(theirs).await?;
     rc.close_dht_record(mine).await?;
     api.shutdown().await;
@@ -978,8 +986,13 @@ async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn
                     seq += 1;
                 }
                 Err(e) => {
-                    println!("  \x1b[31m[{seq}] {:?}\x1b[0m", e.code);
-                    break;
+                    // The phone's policy since the placeholder fix: a message
+                    // this reader can no longer open is lost, not a roadblock.
+                    // Breaking here re-served the same corpse every pass and
+                    // starved every message behind it.
+                    println!("  \x1b[31m[{seq}] {:?} — skipping\x1b[0m", e.code);
+                    seq += 1;
+                    prev = None;
                 }
             }
         }
