@@ -1292,6 +1292,63 @@ class WalletStore(context: Context) {
 
     fun address(): String? = prefs.getString("wallet_address", null)
 
+    // --- per-contact subaddresses (§15.10) --------------------------------
+    //
+    // One counterparty, one address: a primary handed to everyone is a
+    // public ledger entry linking every payment anyone ever made to this
+    // person the moment two of them compare notes. Minors allocate once per
+    // persona and never move; the scanner watches every allocated minor, so
+    // an arriving output names its counterparty by construction instead of
+    // by believing a note.
+
+    /** The receiving address for this contact, allocated on first use. */
+    fun addressFor(personaHex: String): String? {
+        val spend = prefs.getString("wallet_spend", null) ?: return address()
+        val stagenet = prefs.getBoolean("wallet_stagenet", true)
+        val minor = minorFor(personaHex)
+        return runCatching {
+            uniffi.ducat_mobile.moneroSubaddress(spend, minor.toUInt(), stagenet)
+        }.getOrNull() ?: address()
+    }
+
+    /** This contact's minor index, allocated once. */
+    fun minorFor(personaHex: String): Int {
+        prefs.getInt("sub_minor_$personaHex", 0).takeIf { it != 0 }?.let { return it }
+        val next = prefs.getInt("sub_next", 1)
+        prefs.edit()
+            .putInt("sub_minor_$personaHex", next)
+            .putInt("sub_next", next + 1)
+            .apply()
+        return next
+    }
+
+    /** This contact's minor if one was ever allocated — no allocation here. */
+    fun minorOf(personaHex: String): Int? =
+        prefs.getInt("sub_minor_$personaHex", 0).takeIf { it != 0 }
+
+    /** The scanner's high-water mark: every minor ever allocated. */
+    fun subaddressCount(): Int = prefs.getInt("sub_next", 1) - 1
+
+    /** A card's minor becomes its claimant's the moment we learn who that is. */
+    fun adoptMinor(cardKey: String, personaHex: String) {
+        val m = prefs.getInt("sub_minor_$cardKey", 0)
+        if (m != 0 && prefs.getInt("sub_minor_$personaHex", 0) == 0) {
+            prefs.edit()
+                .putInt("sub_minor_$personaHex", m)
+                .remove("sub_minor_$cardKey")
+                .apply()
+        }
+    }
+
+    /** Who an output's receiving minor belongs to, if anyone. */
+    fun personaForMinor(minor: Int): String? {
+        if (minor == 0) return null
+        return prefs.all.keys
+            .firstOrNull {
+                it.startsWith("sub_minor_") && prefs.getInt(it, 0) == minor
+            }?.removePrefix("sub_minor_")
+    }
+
     // --- what happened, not just what arrived --------------------------------
 
     /**
@@ -1430,6 +1487,7 @@ class WalletStore(context: Context) {
                 height = o.height.toLong(),
                 spent = byKi[ki]?.spent ?: false,
                 keyImage = ki,
+                minor = o.minor.toInt(),
                 blob = o.blob,
                 txHashHex = o.txHashHex,
                 timestamp = o.timestamp.toLong(),
@@ -1469,6 +1527,7 @@ class WalletStore(context: Context) {
                 blob = Base64.decode(o.optString("blob", ""), Base64.NO_WRAP),
                 txHashHex = o.optString("tx", ""),
                 timestamp = o.optLong("ts", 0L),
+                minor = o.optInt("minor", 0),
             )
         }
     }
@@ -1481,6 +1540,7 @@ class WalletStore(context: Context) {
                 put("spent", it.spent); put("ki", it.keyImage)
                 put("blob", Base64.encodeToString(it.blob, Base64.NO_WRAP))
                 put("tx", it.txHashHex); put("ts", it.timestamp)
+                if (it.minor != 0) put("minor", it.minor)
             })
         }
         prefs.edit().putString("wallet_outputs", arr.toString()).apply()

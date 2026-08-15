@@ -146,7 +146,7 @@ class TabStore(private val context: Context) {
             if (tab.origin == "taxi") "Your fare" else "Your tab",
             PersonaStore(context).personaHex(),
             kind = 1, amountPxmr = total,
-            payto = WalletStore(context).address(),
+            payto = WalletStore(context).addressFor(tab.personaHex),
             items = tab.lines, taxPxmr = tab.taxPxmr,
         )
         val settled = tab.copy(
@@ -244,7 +244,8 @@ class TabStore(private val context: Context) {
             if (waiting.isEmpty()) return
             val spend = WalletStore(context).spendKeyHex() ?: return
             val hits = runCatching {
-                uniffi.ducat_mobile.moneroScanPool(node, spend, 40u)
+                uniffi.ducat_mobile.moneroScanPool(node, spend, 40u,
+                    WalletStore(context).subaddressCount().toUInt())
             }.getOrElse { return }
             if (hits.isEmpty()) return
             val contacts = ContactStore(context)
@@ -275,6 +276,12 @@ class TabStore(private val context: Context) {
                 .toMutableSet()
 
             for (tab in settled) {
+                // §15.10's attribution: a bill billed to this contact's
+                // subaddress can only be settled by an output that landed on
+                // it. Minor 0 stays admissible for bills that predate the
+                // per-contact address; an output on someone *else's* minor is
+                // never this tab's money, whatever the amount says.
+                val wantMinor = WalletStore(context).minorOf(tab.personaHex)
                 // Amounts this payer *said* they sent for this bill, from
                 // their PAYMENT_SENT notices in the thread after it went out.
                 // The notice is why a tip works at all: a tipped payment
@@ -300,6 +307,7 @@ class TabStore(private val context: Context) {
                         // snapshot never saw, and an exact-amount coincidence
                         // from last week must not settle tonight's tab.
                         (tab.tipAtBill == 0L || it.height > tab.tipAtBill) &&
+                        (it.minor == 0 || wantMinor == null || it.minor == wantMinor) &&
                         (it.amountPxmr == tab.settledTotal || it.amountPxmr in said)
                 } ?: continue
                 claimed += hit.keyImage

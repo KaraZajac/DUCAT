@@ -107,6 +107,9 @@ data class WalletEntry(
     val txHashHex: String = "",
     /** Block time in seconds, or 0 until it has been looked up. */
     val timestamp: Long = 0,
+    /** The subaddress minor that received it: 0 primary, else a contact's
+     *  (§15.10) — attribution by construction, not by believing a note. */
+    val minor: Int = 0,
 )
 
 /**
@@ -188,7 +191,10 @@ object Wallet {
         val from = store.scannedTo().takeIf { it > 0 } ?: store.restoreHeight().toLong()
 
         return try {
-            val r = moneroScan(nodeUrl, spend, from.toULong(), WINDOW)
+            // Watch every allocated per-contact minor: a payment to an
+            // unregistered subaddress is invisible (§15.10).
+            val r = moneroScan(nodeUrl, spend, from.toULong(), WINDOW,
+                store.subaddressCount().toUInt())
             // The window overlaps the tip on purpose (a reorg can rewrite it),
             // so the same output comes back every pass until the chain moves
             // on. The store dedupes by key image; the log must too, or one

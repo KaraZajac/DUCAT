@@ -867,6 +867,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -956,15 +958,17 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_rate(`currency`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_monero_scan(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_monero_scan(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,`subaddressMinors`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_monero_scan_pool(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`max`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_monero_scan_pool(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`max`: Int,`subaddressMinors`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_monero_scan_view_only(`nodeUrl`: RustBuffer.ByValue,`address`: RustBuffer.ByValue,`viewKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_monero_scan_view_only(`nodeUrl`: RustBuffer.ByValue,`address`: RustBuffer.ByValue,`viewKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,`subaddressMinors`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_send(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`inputBlobs`: RustBuffer.ByValue,`toAddress`: RustBuffer.ByValue,`amountPxmr`: Long,`priority`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_spent(`nodeUrl`: RustBuffer.ByValue,`keyImagesHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_subaddress(`spendKeyHex`: RustBuffer.ByValue,`minor`: Int,`stagenet`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_tx_details(`nodeUrl`: RustBuffer.ByValue,`txHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1234,6 +1238,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_spent(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_subaddress(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_tx_details(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_app_call(
@@ -1434,19 +1440,22 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_monero_rate() != 39660.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_monero_scan() != 7265.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_scan() != 512.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_monero_scan_pool() != 4933.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_scan_pool() != 9011.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_monero_scan_view_only() != 11816.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_scan_view_only() != 42386.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_send() != 9105.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_spent() != 3803.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_subaddress() != 55128.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_tx_details() != 54569.toShort()) {
@@ -2826,6 +2835,12 @@ data class OwnedOutput (
     var `amountPxmr`: kotlin.ULong, 
     var `height`: kotlin.ULong, 
     /**
+     * Which subaddress received it: 0 is the primary, anything else is a
+     * per-contact address (§15.10) — the only thing that ties an arriving
+     * output to a counterparty without believing a note.
+     */
+    var `minor`: kotlin.UInt, 
+    /**
      * Hex key image, so spentness can be checked against the daemon. Derived
      * from the spend secret, which is why scanning for a *balance* needs more
      * than the view key that scanning for *receipts* does.
@@ -2869,6 +2884,7 @@ public object FfiConverterTypeOwnedOutput: FfiConverterRustBuffer<OwnedOutput> {
         return OwnedOutput(
             FfiConverterULong.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
             FfiConverterString.read(buf),
             FfiConverterByteArray.read(buf),
             FfiConverterString.read(buf),
@@ -2879,6 +2895,7 @@ public object FfiConverterTypeOwnedOutput: FfiConverterRustBuffer<OwnedOutput> {
     override fun allocationSize(value: OwnedOutput) = (
             FfiConverterULong.allocationSize(value.`amountPxmr`) +
             FfiConverterULong.allocationSize(value.`height`) +
+            FfiConverterUInt.allocationSize(value.`minor`) +
             FfiConverterString.allocationSize(value.`keyImageHex`) +
             FfiConverterByteArray.allocationSize(value.`blob`) +
             FfiConverterString.allocationSize(value.`txHashHex`) +
@@ -2888,6 +2905,7 @@ public object FfiConverterTypeOwnedOutput: FfiConverterRustBuffer<OwnedOutput> {
     override fun write(value: OwnedOutput, buf: ByteBuffer) {
             FfiConverterULong.write(value.`amountPxmr`, buf)
             FfiConverterULong.write(value.`height`, buf)
+            FfiConverterUInt.write(value.`minor`, buf)
             FfiConverterString.write(value.`keyImageHex`, buf)
             FfiConverterByteArray.write(value.`blob`, buf)
             FfiConverterString.write(value.`txHashHex`, buf)
@@ -5269,11 +5287,11 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
          * spent. A view-only scan shows every receipt and would call money that is
          * already gone a balance.
          */
-    @Throws(MoneroException::class) fun `moneroScan`(`nodeUrl`: kotlin.String, `spendKeyHex`: kotlin.String, `fromHeight`: kotlin.ULong, `maxBlocks`: kotlin.UInt): ScanResult {
+    @Throws(MoneroException::class) fun `moneroScan`(`nodeUrl`: kotlin.String, `spendKeyHex`: kotlin.String, `fromHeight`: kotlin.ULong, `maxBlocks`: kotlin.UInt, `subaddressMinors`: kotlin.UInt): ScanResult {
             return FfiConverterTypeScanResult.lift(
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_scan(
-        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterULong.lower(`fromHeight`),FfiConverterUInt.lower(`maxBlocks`),_status)
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterULong.lower(`fromHeight`),FfiConverterUInt.lower(`maxBlocks`),FfiConverterUInt.lower(`subaddressMinors`),_status)
 }
     )
     }
@@ -5293,11 +5311,11 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
          * Bounded: the pool is listed first (hashes only), and at most `max`
          * transactions are fetched and scanned per call.
          */
-    @Throws(MoneroException::class) fun `moneroScanPool`(`nodeUrl`: kotlin.String, `spendKeyHex`: kotlin.String, `max`: kotlin.UInt): List<PoolHit> {
+    @Throws(MoneroException::class) fun `moneroScanPool`(`nodeUrl`: kotlin.String, `spendKeyHex`: kotlin.String, `max`: kotlin.UInt, `subaddressMinors`: kotlin.UInt): List<PoolHit> {
             return FfiConverterSequenceTypePoolHit.lift(
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_scan_pool(
-        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterUInt.lower(`max`),_status)
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterUInt.lower(`max`),FfiConverterUInt.lower(`subaddressMinors`),_status)
 }
     )
     }
@@ -5311,11 +5329,11 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
          * wallet is, and the distinction has to reach the screen: this total is what
          * arrived, not what is available.
          */
-    @Throws(MoneroException::class) fun `moneroScanViewOnly`(`nodeUrl`: kotlin.String, `address`: kotlin.String, `viewKeyHex`: kotlin.String, `fromHeight`: kotlin.ULong, `maxBlocks`: kotlin.UInt): ScanResult {
+    @Throws(MoneroException::class) fun `moneroScanViewOnly`(`nodeUrl`: kotlin.String, `address`: kotlin.String, `viewKeyHex`: kotlin.String, `fromHeight`: kotlin.ULong, `maxBlocks`: kotlin.UInt, `subaddressMinors`: kotlin.UInt): ScanResult {
             return FfiConverterTypeScanResult.lift(
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_scan_view_only(
-        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`address`),FfiConverterString.lower(`viewKeyHex`),FfiConverterULong.lower(`fromHeight`),FfiConverterUInt.lower(`maxBlocks`),_status)
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`address`),FfiConverterString.lower(`viewKeyHex`),FfiConverterULong.lower(`fromHeight`),FfiConverterUInt.lower(`maxBlocks`),FfiConverterUInt.lower(`subaddressMinors`),_status)
 }
     )
     }
@@ -5351,6 +5369,23 @@ public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<S
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_spent(
         FfiConverterString.lower(`nodeUrl`),FfiConverterSequenceString.lower(`keyImagesHex`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * §15.10's per-contact address: subaddress (0, minor) of this wallet.
+         *
+         * One counterparty, one address — two people comparing notes hold two
+         * strings nothing links. Minor 0 is refused because it *is* the primary:
+         * handing it out as "a subaddress" would be the reuse this exists to end.
+         */
+    @Throws(MoneroException::class) fun `moneroSubaddress`(`spendKeyHex`: kotlin.String, `minor`: kotlin.UInt, `stagenet`: kotlin.Boolean): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_subaddress(
+        FfiConverterString.lower(`spendKeyHex`),FfiConverterUInt.lower(`minor`),FfiConverterBoolean.lower(`stagenet`),_status)
 }
     )
     }

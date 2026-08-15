@@ -219,6 +219,10 @@ fn short_error(e: &str) -> String {
 pub struct OwnedOutput {
     pub amount_pxmr: u64,
     pub height: u64,
+    /// Which subaddress received it: 0 is the primary, anything else is a
+    /// per-contact address (§15.10) — the only thing that ties an arriving
+    /// output to a counterparty without believing a note.
+    pub minor: u32,
     /// Hex key image, so spentness can be checked against the daemon. Derived
     /// from the spend secret, which is why scanning for a *balance* needs more
     /// than the view key that scanning for *receipts* does.
@@ -278,6 +282,10 @@ pub fn monero_scan(
     spend_key_hex: String,
     from_height: u64,
     max_blocks: u32,
+    // How many per-contact subaddresses to watch (minors 1..=n of account 0).
+    // A payment to an unregistered subaddress is invisible, so the caller
+    // passes its high-water allocation, not a guess.
+    subaddress_minors: u32,
 ) -> Result<ScanResult, MoneroError> {
     use curve25519_dalek::constants::ED25519_BASEPOINT_TABLE;
     use monero_daemon_rpc::prelude::*;
@@ -314,6 +322,11 @@ pub fn monero_scan(
         let vp = ViewPair::new(spend_pub, view)
             .map_err(|e| MoneroError::Failed(format!("view pair: {e:?}")))?;
         let mut scanner = Scanner::new(vp);
+        for m in 1..=subaddress_minors {
+            if let Some(idx) = monero_wallet::address::SubaddressIndex::new(0, m) {
+                scanner.register_subaddress(idx);
+            }
+        }
         let mut outputs = Vec::new();
         let (mut read, mut failed) = (0u32, 0u32);
 
@@ -361,6 +374,7 @@ pub fn monero_scan(
                     outputs.push(OwnedOutput {
                         amount_pxmr: o.commitment().amount,
                         height: h,
+                        minor: o.subaddress().map(|s| s.address()).unwrap_or(0),
                         key_image_hex: ki
                             .map(|k| hex_of(k.compress().to_bytes().as_slice()))
                             .unwrap_or_default(),
@@ -385,6 +399,39 @@ pub fn monero_scan(
     })
 }
 
+/// §15.10's per-contact address: subaddress (0, minor) of this wallet.
+///
+/// One counterparty, one address — two people comparing notes hold two
+/// strings nothing links. Minor 0 is refused because it *is* the primary:
+/// handing it out as "a subaddress" would be the reuse this exists to end.
+#[uniffi::export]
+pub fn monero_subaddress(
+    spend_key_hex: String,
+    minor: u32,
+    stagenet: bool,
+) -> Result<String, MoneroError> {
+    use curve25519_dalek::constants::ED25519_BASEPOINT_TABLE;
+    use monero_wallet::address::{Network, SubaddressIndex};
+    use monero_wallet::ed25519::{Point, Scalar};
+    use monero_wallet::ViewPair;
+    use zeroize::Zeroizing;
+
+    let idx = SubaddressIndex::new(0, minor)
+        .ok_or_else(|| MoneroError::Failed("minor 0 is the primary address".into()))?;
+    let raw = hex_to_bytes(&spend_key_hex)
+        .ok_or_else(|| MoneroError::Failed("spend key is not hex".into()))?;
+    let spend = Scalar::read(&mut raw.as_slice())
+        .map_err(|_| MoneroError::Failed("spend key is not a valid scalar".into()))?;
+    let mut sb = Vec::new();
+    spend.write(&mut sb).map_err(|e| MoneroError::Failed(format!("scalar: {e}")))?;
+    let view = Zeroizing::new(Scalar::hash(&sb));
+    let spend_pub = Point::from(&spend.into() * ED25519_BASEPOINT_TABLE);
+    let vp = ViewPair::new(spend_pub, view)
+        .map_err(|e| MoneroError::Failed(format!("view pair: {e:?}")))?;
+    let network = if stagenet { Network::Stagenet } else { Network::Mainnet };
+    Ok(vp.subaddress(network, idx).to_string())
+}
+
 /// Scan with a view key alone, for an address we cannot spend from.
 ///
 /// Finds every receipt and **cannot tell whether any of it is still there**,
@@ -398,6 +445,7 @@ pub fn monero_scan_view_only(
     view_key_hex: String,
     from_height: u64,
     max_blocks: u32,
+    subaddress_minors: u32,
 ) -> Result<ScanResult, MoneroError> {
     use monero_daemon_rpc::prelude::*;
     use monero_wallet::address::{MoneroAddress, Network};
@@ -431,6 +479,11 @@ pub fn monero_scan_view_only(
         let vp = ViewPair::new(addr.spend(), view)
             .map_err(|e| MoneroError::Failed(format!("view pair: {e:?}")))?;
         let mut scanner = Scanner::new(vp);
+        for m in 1..=subaddress_minors {
+            if let Some(idx) = monero_wallet::address::SubaddressIndex::new(0, m) {
+                scanner.register_subaddress(idx);
+            }
+        }
         let mut outputs = Vec::new();
 
         let last = tip.min(from_height + max_blocks as u64);
@@ -447,6 +500,7 @@ pub fn monero_scan_view_only(
                     outputs.push(OwnedOutput {
                         amount_pxmr: o.commitment().amount,
                         height: h,
+                        minor: o.subaddress().map(|s| s.address()).unwrap_or(0),
                         // Deliberately blank: with no spend secret there is no
                         // key image, and inventing a placeholder would let a
                         // caller ask about spentness and believe the answer.
@@ -644,6 +698,7 @@ pub fn monero_scan_pool(
     node_url: String,
     spend_key_hex: String,
     max: u32,
+    subaddress_minors: u32,
 ) -> Result<Vec<PoolHit>, MoneroError> {
     use curve25519_dalek::constants::ED25519_BASEPOINT_TABLE;
     use monero_daemon_rpc::prelude::*;
@@ -708,6 +763,11 @@ pub fn monero_scan_pool(
         let vp = ViewPair::new(spend_pub, view)
             .map_err(|e| MoneroError::Failed(format!("view pair: {e:?}")))?;
         let mut scanner = Scanner::new(vp);
+        for m in 1..=subaddress_minors {
+            if let Some(idx) = monero_wallet::address::SubaddressIndex::new(0, m) {
+                scanner.register_subaddress(idx);
+            }
+        }
         let mut hits = Vec::new();
 
         for hash in hashes {

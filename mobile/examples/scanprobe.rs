@@ -7,7 +7,7 @@ fn main() {
     let key = std::fs::read_to_string("research/monero-rs/testwallet.key").unwrap();
     let spend = key.lines().next().unwrap().to_string();
     let from = st.height.saturating_sub(30);
-    match ducat_mobile::monero::monero_scan(node, spend, from, 30) {
+    match ducat_mobile::monero::monero_scan(node, spend, from, 30, 0) {
         Ok(r) => println!(
             "scan    {}..{} — read {} block(s), {} failed, {} output(s)",
             from, r.scanned_to, r.blocks_read, r.blocks_failed, r.outputs.len()

@@ -12,7 +12,7 @@ fn main() {
 
     let st = ducat_mobile::monero::monero_probe(NODE.into(), 15_000);
     let from = st.height.saturating_sub(60);
-    let r = ducat_mobile::monero::monero_scan(NODE.into(), spend, from, 60).expect("scan");
+    let r = ducat_mobile::monero::monero_scan(NODE.into(), spend, from, 60, 0).expect("scan");
     println!("tip {} — {} output(s)", st.height, r.outputs.len());
     if r.outputs.is_empty() {
         println!("nothing to check");

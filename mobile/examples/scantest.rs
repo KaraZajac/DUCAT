@@ -35,7 +35,7 @@ fn main() {
     assert!(st.synced && st.nettype == "stagenet", "need a synced stagenet node");
 
     let from = FUNDING_HEIGHT - 6;
-    let r = ducat_mobile::monero::monero_scan_view_only(NODE.into(), addr, view, from, 20)
+    let r = ducat_mobile::monero::monero_scan_view_only(NODE.into(), addr, view, from, 20, 0)
         .expect("scan");
     println!("scan    {}..{} — {} output(s)", from, r.scanned_to, r.outputs.len());
     for o in &r.outputs {

@@ -44,7 +44,7 @@ fn main() {
         let mut blobs = Vec::new();
         let mut seen = std::collections::HashSet::new();
         while from < st.height {
-            let r = ducat_mobile::monero::monero_scan(NODE.into(), spend.clone(), from, 2_000)
+            let r = ducat_mobile::monero::monero_scan(NODE.into(), spend.clone(), from, 2_000, 0)
                 .expect("scan");
             for o in &r.outputs {
                 // Windows overlap at their seams, so the same output can come
@@ -96,7 +96,7 @@ fn main() {
         let mut kis = Vec::new();
         let mut total = 0u64;
         while from < st.height {
-            let r = ducat_mobile::monero::monero_scan(NODE.into(), spend.clone(), from, 2_000)
+            let r = ducat_mobile::monero::monero_scan(NODE.into(), spend.clone(), from, 2_000, 0)
                 .expect("scan");
             for o in &r.outputs {
                 println!("  {} pXMR at {}  ki {}", o.amount_pxmr, o.height, o.key_image_hex);

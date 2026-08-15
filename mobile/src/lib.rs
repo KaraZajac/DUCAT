@@ -818,3 +818,19 @@ mod import_tests {
         assert!(wrong.is_some() && wrong == tampered, "{wrong:?} vs {tampered:?}");
     }
 }
+
+#[cfg(test)]
+mod subaddress_tests {
+    /// A subaddress is real or it is theatre: stagenet subaddresses start
+    /// with 7, mainnet with 8, and minor 0 is refused as the primary.
+    #[test]
+    fn per_contact_addresses_derive() {
+        let w = crate::create_wallet(0, true);
+        let s1 = crate::monero::monero_subaddress(w.spend_key_hex.clone(), 1, true).unwrap();
+        let s2 = crate::monero::monero_subaddress(w.spend_key_hex.clone(), 2, true).unwrap();
+        assert!(s1.starts_with('7'), "stagenet subaddress: {s1}");
+        assert_ne!(s1, s2, "two contacts, two addresses");
+        assert_ne!(s1, w.address, "a subaddress is not the primary");
+        assert!(crate::monero::monero_subaddress(w.spend_key_hex, 0, true).is_err());
+    }
+}

@@ -111,7 +111,12 @@ object Mailbox {
                 persona, outbox.key, prekeys.bundle, displayName,
                 // Only if the user has opted in. §16.12 makes this a choice,
                 // and defaulting it on would be choosing for them.
-                if (store.publishAddress()) WalletStore(context).address() else null,
+                // The claimant is not known yet, so the minor allocates to the
+                // card and is adopted by whoever answers it (§15.10) — the
+                // primary never travels in a handshake.
+                if (store.publishAddress()) {
+                    WalletStore(context).addressFor("card_${inbox.key}")
+                } else null,
                 // §16.9: the profile rides the record, never the card. A card
                 // carrying a picture is a QR code nobody can scan.
                 MyProfile(context).toWire(),
@@ -194,7 +199,11 @@ object Mailbox {
             scanned.inboxKey, 1u,
             buildContactDetails(
                 persona, outbox.key, prekeys.bundle, petname,
-                if (store.publishAddress()) WalletStore(context).address() else null,
+                // Their address, for them alone (§15.10): the counterparty is
+                // known here, so the published address is their subaddress.
+                if (store.publishAddress()) {
+                    WalletStore(context).addressFor(theirs.persona.toHexString())
+                } else null,
                 MyProfile(context).toWire(driving = asDriver),
             ),
         )
@@ -267,6 +276,7 @@ object Mailbox {
                     )
                 )
                 store.markCardAnswered(issued.inboxKey, personaHex)
+                WalletStore(context).adoptMinor("card_${issued.inboxKey}", personaHex)
                 collected++
                 DucatLog.i(TAG, "card (${issued.purpose}) answered by ${theirs.assertedName}")
                 // Only the standing profile code replaces itself — a sale's

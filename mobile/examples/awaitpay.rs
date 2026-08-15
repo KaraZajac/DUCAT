@@ -16,7 +16,7 @@ fn main() {
     for round in 0..14 {
         let st = ducat_mobile::monero::monero_probe(NODE.into(), 15_000);
         let from = st.height.saturating_sub(25);
-        match ducat_mobile::monero::monero_scan(NODE.into(), spend.clone(), from, 25) {
+        match ducat_mobile::monero::monero_scan(NODE.into(), spend.clone(), from, 25, 0) {
             Ok(r) => {
                 for o in &r.outputs {
                     if seen.contains(&o.key_image_hex) {

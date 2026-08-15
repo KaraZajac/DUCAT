@@ -630,7 +630,8 @@ private fun AmountStep(
                                         note.ifBlank { "Payment request" },
                                         PersonaStore(context).personaHex(),
                                         kind = 1, amountPxmr = amt,
-                                        payto = WalletStore(context).address(),
+                                        payto = WalletStore(context)
+                                            .addressFor(target.contact.personaHex),
                                     )
                                 }
                             }

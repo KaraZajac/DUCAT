@@ -41,10 +41,12 @@ money. Ordered by what blocks 1.0, not by effort.
 
 ## Privacy — spend it only where it buys something
 
-- **Monero subaddress per contact.** A single receive address across all
-  contacts lets any two counterparties who compare notes link their
-  payments to the same person. Subaddresses are the designed fix and the
-  wallet layer already exists.
+- ~~**Monero subaddress per contact.**~~ **Done, 0.87** — every contact
+  gets subaddress (0, minor), allocated once (cards pre-allocate; the
+  claimant adopts); every request/tab/handshake address is per-contact;
+  all three scanners watch every allocated minor; outputs record their
+  receiving minor, and tab reconcile refuses an output that landed on
+  someone else's — attribution by construction, not by believing a note.
 - **Storage encryption for the message store.** Threads, receipts, and
   contact state sit in SharedPreferences plaintext; a lost phone is a
   transcript. Android Keystore-wrapped encryption for the store files.
