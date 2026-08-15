@@ -711,9 +711,35 @@ object Mailbox {
                 continue
             }
 
-            val opened = openMessage(
-                raw, secret, isOneTime, seq, prev, threadAad(minePersonaHex, c.personaHex),
-            )
+            val opened = try {
+                openMessage(
+                    raw, secret, isOneTime, seq, prev, threadAad(minePersonaHex, c.personaHex),
+                )
+            } catch (e: uniffi.ducat_mobile.ContactException) {
+                // Decrypted but refused: the bytes are final and will never
+                // parse differently, so this is a dead letter, not weather —
+                // §16.11's must-not-block rule, one layer up. (Seen live: a
+                // sealed empty text field wedged this loop for good.)
+                if (e.message?.contains("Malformed") == true) {
+                    DucatLog.w(TAG, "message $seq from ${c.displayName()} is malformed — recorded and skipped")
+                    store.appendAndAdvance(
+                        c.personaHex,
+                        StoredMessage(
+                            outgoing = false, seq = seq.toLong(),
+                            body = "[a message could not be understood — " +
+                                "the sender's client encoded it wrongly]",
+                            timestamp = System.currentTimeMillis() / 1000,
+                        ),
+                        (seq + 1uL).toLong(), null,
+                    )
+                    clearStuck(context, "${c.personaHex}:$seq")
+                    recordSlotSeen(context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode())
+                    seq += 1uL
+                    prev = null
+                    continue
+                }
+                throw e
+            }
             // If this seq had been waiting out the patience window, it made
             // it after all — the tracker must not keep growing.
             clearStuck(context, "${c.personaHex}:$seq")

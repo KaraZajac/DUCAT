@@ -580,7 +580,11 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
 /// is refused. `payto` rides in the request itself (§16.13's self-contained
 /// destination).
 pub async fn bill(items_arg: &str, payto: &str, body: &str) -> Result<(), Box<dyn std::error::Error>> {
-    send_money_message(items_arg, Some(payto.to_string()), MessageKind::PaymentRequest, None,
+    // An empty destination is no destination. Encoding Some("") put an empty
+    // text field on the wire, which §18.1 refuses on decode — the receiver's
+    // queue wedged on a message this side should never have sealed.
+    let payto = Some(payto.to_string()).filter(|p| !p.is_empty());
+    send_money_message(items_arg, payto, MessageKind::PaymentRequest, None,
         if body.is_empty() { "Your bill" } else { body }).await
 }
 

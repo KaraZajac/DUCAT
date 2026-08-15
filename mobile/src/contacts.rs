@@ -557,6 +557,12 @@ pub fn seal_message(
             name: a.name,
         }),
     };
+    // A message this encoder produces must be one its own decoder accepts —
+    // otherwise the malformation ships sealed, and it is the *recipient's*
+    // queue that pays, wedged on bytes only the sender could have refused.
+    Message::from_value(
+        decode(&msg.to_value().encode()).map_err(refuse)?
+    ).map_err(|e| ContactError::Refused(format!("message would be refused: {e:?}")))?;
     let next_link = msg.link().to_vec();
     let (chosen, forward_secret) = bundle.select();
     let mut rng = SystemRng;

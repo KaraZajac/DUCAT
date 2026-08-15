@@ -50,6 +50,14 @@ tasks.register<JavaExec>("smoke") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// The desk driven blind over the live network; pairs with the Rust harness
+// claiming the card it prints. `./gradlew :desktop:e2e`.
+tasks.register<JavaExec>("e2e") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.E2eKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 compose.desktop {
     application {
         mainClass = "org.ducatproject.desk.MainKt"
