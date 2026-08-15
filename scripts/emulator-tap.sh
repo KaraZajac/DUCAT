@@ -14,7 +14,10 @@
 set -e
 
 TAP=tap-ducat
-NET=172.31.99
+# Android's emulator guest does not DHCP: eth0 is baked to 10.0.2.15 with
+# gateway 10.0.2.2 and DNS 10.0.2.3. The host speaks that dialect instead of
+# teaching the guest a new one.
+NET=10.0.2
 OWNER=${SUDO_USER:-kara}
 
 if [ "$(id -u)" != 0 ]; then
@@ -34,7 +37,9 @@ command -v dnsmasq >/dev/null || { echo "need dnsmasq: dnf install dnsmasq" >&2;
 
 # The device, owned by the user so the emulator needs no root.
 ip tuntap add dev $TAP mode tap user "$OWNER" 2>/dev/null || true
-ip addr replace $NET.1/24 dev $TAP
+ip addr flush dev $TAP
+ip addr add $NET.2/24 dev $TAP
+ip addr add $NET.3/24 dev $TAP
 ip link set $TAP up
 
 # Forwarding plus NAT out whatever the default route uses.
@@ -42,10 +47,11 @@ sysctl -qw net.ipv4.ip_forward=1
 firewall-cmd --zone=trusted --change-interface=$TAP --quiet
 firewall-cmd --add-masquerade --quiet
 
-# DHCP and DNS for the guest, on this interface only.
+# DNS for the guest at the address it already believes in. No DHCP — the
+# guest is static by construction.
 pkill -f "dnsmasq.*$TAP" 2>/dev/null || true
 dnsmasq --interface=$TAP --bind-interfaces --except-interface=lo \
-  --dhcp-range=$NET.10,$NET.50,12h --pid-file=/run/dnsmasq-$TAP.pid
+  --listen-address=$NET.3 --no-dhcp-interface=$TAP --pid-file=/run/dnsmasq-$TAP.pid
 
-echo "ready: $TAP up at $NET.1, DHCP serving, NAT on."
+echo "ready: $TAP up as $NET.2 (gw) and $NET.3 (dns), NAT on."
 echo "launch: scripts/emulator.sh (it detects $TAP), or add: -net-tap $TAP"
