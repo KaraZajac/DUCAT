@@ -145,7 +145,7 @@ object Mailbox {
         // A head without keys strands a counterparty who claimed the card and
         // wants to speak first — observed live: a hail's driver claimed,
         // tried to quote, and found "they have not written since claiming".
-        val bundle = topUpIfLow(ContactStore(context))
+        val bundle = topUpIfLow(ContactStore(context), rec.key)
         nodeDhtSet(rec.key, 0u, buildLogHead(0uL, bundle, null, NEW_RING))
         return rec
     }
@@ -406,7 +406,7 @@ object Mailbox {
             c.myOutbox, 0u,
             buildLogHead(
                 (c.outSeq + 1).toULong(),
-                topUpIfLow(store),
+                topUpIfLow(store, c.myOutbox),
                 // §16.16: the watermark rides every head write for free, and
                 // only when the user opted in. c.inSeq is "I have accepted
                 // your messages below this", which is exactly the claim.
@@ -526,7 +526,7 @@ object Mailbox {
                 c.myOutbox, 0u,
                 buildLogHead(
                     c.outSeq.toULong(),
-                    store.prekeyBundle(),
+                    store.threadBundle(c.myOutbox) ?: store.prekeyBundle(),
                     c.inSeq.toULong(),
                     c.myRing.toUInt().takeIf { it != 8u },
                 ),
@@ -542,18 +542,27 @@ object Mailbox {
      * to write a head. Leaving headroom is what keeps forward secrecy the
      * normal case rather than the lucky one.
      */
-    private fun topUpIfLow(store: ContactStore): ByteArray? {
-        if (store.oneTimeRemaining() > 6) return store.prekeyBundle()
+    private fun topUpIfLow(store: ContactStore, outbox: String): ByteArray? {
+        // §16.11: each thread's head offers its own disjoint batch of ids —
+        // the secrets are global, the offering is partitioned, so two
+        // contacts can never seal to the same key. A fresh batch replaces
+        // the thread's offer wholesale; unconsumed ids from the old offer
+        // keep their secrets, so a sender on a stale head still opens.
+        if (store.threadOneTimeRemaining(outbox) > 6) return store.threadBundle(outbox)
         val m = generatePrekeys(
             ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL,
             store.nextPrekeyStart(ONE_TIME_KEYS.toInt()).toUInt(),
             store.signedPrekeySecret(),
         )
         store.savePrekeys(
-            m.bundle, m.signedSecret,
+            // The global bundle field is legacy — heads now carry per-thread
+            // offers — and empty material never overwrites it (§4.3's restore
+            // rule, reused): only the secrets and the signed key land here.
+            ByteArray(0), m.signedSecret,
             m.oneTimeIds.mapIndexed { i, id -> id.toInt() to m.oneTimeSecrets[i] }.toMap(),
         )
-        DucatLog.i(TAG, "topped up one-time keys")
+        store.setThreadBundle(outbox, m.bundle)
+        DucatLog.i(TAG, "cut a fresh one-time batch for this thread")
         return m.bundle
     }
 

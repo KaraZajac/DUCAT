@@ -206,6 +206,12 @@ class ContactStore(context: Context) {
         prefs.all.keys.filter {
             it.startsWith("stuck_$personaHex:") || it.startsWith("slotseen_$personaHex:")
         }.forEach { e.remove(it) }
+        // The thread's prekey offer dies with the thread; its unconsumed ids
+        // are never reassigned (the id counter only climbs), so the secrets
+        // simply expire out of use.
+        all().firstOrNull { it.personaHex == personaHex }?.let {
+            e.remove("prekeys_ob_${it.myOutbox}")
+        }
         putContacts(e, all().filterNot { it.personaHex == personaHex })
         e.apply()
         bump()
@@ -796,6 +802,32 @@ class ContactStore(context: Context) {
     fun prekeyBundle(): ByteArray? =
         prefs.getString("prekeys", null)?.let { unb64(JSONObject(it).getString("bundle")) }
 
+    // --- per-thread prekey offers -----------------------------------------
+    //
+    // §16.11: a one-time id is offered to at most one counterparty. One
+    // global bundle in every head meant two contacts holding the same cached
+    // copy sealed to the same key — the first message in burned it and the
+    // second arrived permanently unreadable. Each thread's head now offers a
+    // disjoint batch; the secrets stay in the one global map (an id is
+    // globally unique on this device), only the *offering* is partitioned.
+
+    /** The bundle this thread's head advertises, if one has been cut for it. */
+    fun threadBundle(outbox: String): ByteArray? =
+        prefs.getString("prekeys_ob_$outbox", null)?.let { unb64(it) }
+
+    fun setThreadBundle(outbox: String, blob: ByteArray) =
+        prefs.edit().putString("prekeys_ob_$outbox", b64(blob)).apply()
+
+    /** How many of a thread's offered one-time ids still hold secrets. */
+    fun threadOneTimeRemaining(outbox: String): Int {
+        val blob = threadBundle(outbox) ?: return 0
+        val secrets = prefs.getString("prekeys", null)
+            ?.let { JSONObject(it).getJSONObject("one_time") } ?: return 0
+        return runCatching {
+            uniffi.ducat_mobile.bundleOneTimeIds(blob).count { secrets.has(it.toString()) }
+        }.getOrDefault(0)
+    }
+
     fun signedPrekeySecret(): ByteArray? =
         prefs.getString("prekeys", null)?.let { unb64(JSONObject(it).getString("signed")) }
 
@@ -863,7 +895,16 @@ class ContactStore(context: Context) {
         runCatching {
             uniffi.ducat_mobile.prunePrekey(unb64(o.getString("bundle")), id.toUInt())
         }.onSuccess { o.put("bundle", b64(it)) }
-        prefs.edit().putString("prekeys", o.toString()).apply()
+        val e = prefs.edit().putString("prekeys", o.toString())
+        // The id lives in exactly one thread's offer; prune it there too, or
+        // that head keeps advertising a key that can no longer decrypt.
+        prefs.all.keys.filter { it.startsWith("prekeys_ob_") }.forEach { k ->
+            val blob = prefs.getString(k, null) ?: return@forEach
+            runCatching {
+                uniffi.ducat_mobile.prunePrekey(unb64(blob), id.toUInt())
+            }.onSuccess { if (!it.contentEquals(unb64(blob))) e.putString(k, b64(it)) }
+        }
+        e.apply()
     } }
 
     /**
