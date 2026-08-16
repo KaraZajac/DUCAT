@@ -75,10 +75,16 @@ money. Ordered by what blocks 1.0, not by effort.
   the rest of the bond UI — co-signer consent needs a payments accessor on
   monero-wallet's SignableTransaction (0.2.0 keeps them private; until then
   the co-signer sees only the fee), plus bond amount and funding flow.
-- **Opt-in live location after commitment.** Rider and driver may share
-  positions *after* mutual acceptance, never before, off by default,
-  clearly bounded to the ride. Presence streaming is a different threat
-  model than one-shot fixes — spec it before building it.
+- **Opt-in live location after commitment.** ~~Spec it before building
+  it~~ **specified, 0.88 (2026-08-16)** — §15.12 "Live position after the
+  accept": gated on RIDE_ACCEPT, consent per ride per direction, off by
+  default and never a standing setting; a record not messages (kind 11
+  POSITION_REF, fields 218–219), one subkey overwritten in place — a now
+  with no past — sealed under a fresh stream key with the record key as
+  AAD, monotonic counter, fixed padding and cadence; bounded by client
+  stop rules (receipt / RETRACT re_own / expiry) and record TTL; receiver
+  MUST NOT retain the track. Position stays display-only. **Left:** the
+  build, once a ride to point it at exists on real hardware (field day).
 
 ## Privacy — spend it only where it buys something
 
