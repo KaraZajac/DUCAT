@@ -785,6 +785,11 @@ object Mailbox {
                     Ceremony.onDkgRound(context, c, opened.ceremonyId, opened.round?.toLong(), opened.payload)
                 }.onFailure { DucatLog.w(TAG, "ceremony round: ${it.message}") }
             }
+            if (arrived.kind == 9) {
+                runCatching {
+                    Ceremony.onFrostRound(context, c, opened.ceremonyId, opened.round?.toLong(), opened.payload)
+                }.onFailure { DucatLog.w(TAG, "frost round: ${it.message}") }
+            }
             // A request carries a fresher address than anything stored (§16.12).
             opened.payto?.let { store.setTheirAddress(c.personaHex, it) }
             if (opened.consumedOneTime) store.burnOneTime(opened.prekeyId.toInt())

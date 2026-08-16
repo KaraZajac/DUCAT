@@ -36,4 +36,9 @@
     <string name="profile_bond_finishing">Keys exchanged — finishing…</string>
     <string name="profile_bond_done">Escrow address</string>
     <string name="profile_bond_failed">Could not start: %1$s</string>
+    <string name="profile_bond_release">Return the deposit</string>
+    <string name="profile_bond_releasing">Returning — waiting for their co-signature…</string>
+    <string name="profile_bond_cosigned">Co-signed — the release is theirs to broadcast.</string>
+    <string name="profile_bond_released">Deposit returned ✓</string>
+    <string name="profile_bond_txid">Release transaction</string>
 </resources>

@@ -93,6 +93,106 @@ object Ceremony {
         return idHex
     }
 
+    /** The node the release talks to: the poller's last good one, or a fresh
+     *  pick — the same order the poller itself uses. */
+    private fun node(context: Context): String? =
+        NodeStore(context).lastGood() ?: runCatching {
+            uniffi.ducat_mobile.moneroPickNode(
+                uniffi.ducat_mobile.moneroDefaultNodes(null), "stagenet", 8000u,
+            ).url
+        }.getOrNull()
+
+    /**
+     * Release the escrow back to this device's own wallet (§17.9's FROST
+     * side): scan, build one sweep, preprocess, and send `[tx][preprocess]`
+     * as FrostRound 0. The peer co-signs sight-unseen for now — the consent
+     * view waits on a payments accessor upstream — and the completion lands
+     * back here as round 1.
+     */
+    fun releaseBond(context: Context, contact: Contact): String {
+        val mineHex = PersonaStore(context).personaHex()
+        val idHex = all(context)
+            .filter { it.optString("peer") == contact.personaHex }
+            .lastOrNull { it.optString("stage") == "done" }
+            ?.optString("id")
+            ?: throw IllegalStateException("no finished bond with this contact")
+        val o = load(context, idHex)!!
+        val id = hexToBytes(idHex)!!
+        val i = o.optInt("i")
+        val keys = hexToBytes(o.optString("keys"))
+            ?: throw IllegalStateException("this device holds no key share")
+        val dest = WalletStore(context).address()
+            ?: throw IllegalStateException("no wallet to return the deposit to")
+        val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
+
+        val prop = uniffi.ducat_mobile.frostPropose(
+            id, i.toUShort(), keys, dest, nodeUrl,
+            WalletStore(context).restoreHeight().toLong().toULong(),
+        )
+        Mailbox.send(
+            context, contact, "bond: returning the deposit",
+            mineHex, kind = 9, round = 0, ceremonyId = id, payload = prop.payload,
+        )
+        o.put("stage", "releasing")
+        o.put("payoutPxmr", prop.payoutPxmr.toLong())
+        save(context, idHex, o)
+        DucatLog.i(TAG, "bond $idHex: proposed release of ${prop.payoutPxmr} pXMR")
+        return idHex
+    }
+
+    /**
+     * A FrostRound arrived. Round 0 asks this device to co-sign the release;
+     * round 1 carries the co-signature back to the proposer, who completes
+     * and broadcasts. Out-of-stage rounds are ignored, like the DKG's.
+     */
+    fun onFrostRound(
+        context: Context,
+        contact: Contact,
+        ceremonyId: ByteArray?,
+        round: Long?,
+        payload: ByteArray?,
+    ) {
+        val id = ceremonyId ?: return
+        val idHex = id.toHexString()
+        payload ?: return
+        round ?: return
+        val mineHex = PersonaStore(context).personaHex()
+        var c = ContactStore(context).all()
+            .firstOrNull { it.personaHex == contact.personaHex } ?: contact
+        val o = load(context, idHex) ?: return
+        val i = o.optInt("i")
+        val keys = hexToBytes(o.optString("keys")) ?: return
+        val stage = o.optString("stage")
+
+        runCatching {
+            when {
+                stage == "done" && round.toInt() == 0 -> {
+                    val ans = uniffi.ducat_mobile.frostCosign(id, i.toUShort(), keys, payload)
+                    c = Mailbox.send(
+                        context, c, "bond: co-signed the release",
+                        mineHex, kind = 9, round = 1, ceremonyId = id, payload = ans.payload,
+                    )
+                    o.put("stage", "release_cosigned"); save(context, idHex, o)
+                    DucatLog.i(TAG, "bond $idHex: co-signed the release (fee ${ans.feePxmr})")
+                }
+                stage == "releasing" && round.toInt() == 1 -> {
+                    val nodeUrl = node(context)
+                        ?: throw IllegalStateException("no node reachable")
+                    val txid = uniffi.ducat_mobile.frostComplete(
+                        id, i.toUShort(), payload, nodeUrl,
+                    )
+                    o.put("stage", "released"); o.put("txid", txid)
+                    save(context, idHex, o)
+                    DucatLog.i(TAG, "bond $idHex released — txid $txid")
+                }
+                else ->
+                    DucatLog.w(TAG, "bond $idHex: frost round $round ignored at stage $stage")
+            }
+        }.onFailure {
+            DucatLog.w(TAG, "bond $idHex frost round $round failed: ${it.message}")
+        }
+    }
+
     /**
      * A DkgRound arrived. Advance the engine if it is the round this ceremony
      * was waiting for. Unknown or out-of-stage rounds are ignored (§2.5: a

@@ -888,13 +888,13 @@ fn hex_to_bytes(s: &str) -> Option<Vec<u8>> {
 /// deliberate: the runtime driving it exists only for this chain and has
 /// nothing else to run.
 #[derive(Clone)]
-struct UreqTransport {
+pub(crate) struct UreqTransport {
     url: String,
     agent: ureq::Agent,
 }
 
 impl UreqTransport {
-    fn new(url: String) -> Self {
+    pub(crate) fn new(url: String) -> Self {
         UreqTransport {
             url: url.trim_end_matches('/').to_string(),
             agent: ureq::AgentBuilder::new()

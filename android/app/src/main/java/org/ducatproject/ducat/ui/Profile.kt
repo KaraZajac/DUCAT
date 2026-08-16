@@ -274,6 +274,58 @@ private fun BondSection(
             style = MaterialTheme.typography.bodyMedium)
         "shared" -> Text(stringResource(R.string.profile_bond_finishing),
             style = MaterialTheme.typography.bodyMedium)
+        "done" -> {
+            Field(
+                stringResource(R.string.profile_bond_done),
+                ceremony?.optString("address").orEmpty(),
+                clipboard,
+            )
+            Spacer(Modifier.height(8.dp))
+            // The other half of the ceremony: spend it back out. The deposit
+            // returns to THIS device's wallet; the peer's co-signature is what
+            // makes that possible at all, which is the point of a bond.
+            Button(
+                enabled = !busy,
+                onClick = {
+                    busy = true; error = null
+                    scope.launch {
+                        val r = withContext(Dispatchers.IO) {
+                            runCatching {
+                                org.ducatproject.ducat.Ceremony.releaseBond(context, c)
+                            }
+                        }
+                        r.onFailure { error = it.message ?: "?" }
+                        busy = false
+                    }
+                },
+            ) {
+                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Text(stringResource(R.string.profile_bond_release))
+            }
+            error?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.profile_bond_failed, it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+        "releasing" -> Text(stringResource(R.string.profile_bond_releasing),
+            style = MaterialTheme.typography.bodyMedium)
+        "release_cosigned" -> Text(stringResource(R.string.profile_bond_cosigned),
+            style = MaterialTheme.typography.bodyMedium)
+        "released" -> {
+            Text(stringResource(R.string.profile_bond_released),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.ducat.settled)
+            Spacer(Modifier.height(6.dp))
+            Field(
+                stringResource(R.string.profile_bond_txid),
+                ceremony?.optString("txid").orEmpty(),
+                clipboard,
+            )
+        }
         else -> Field(
             stringResource(R.string.profile_bond_done),
             ceremony?.optString("address").orEmpty(),

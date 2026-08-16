@@ -881,6 +881,12 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -939,6 +945,12 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_dkg_take_keys(`ceremonyId`: RustBuffer.ByValue,`i`: Short,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_export_backup(`input`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_frost_complete(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`payload`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_frost_cosign(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`keys`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_frost_propose(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`keys`: RustBuffer.ByValue,`dest`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,`fromHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_generate_prekeys(`count`: Int,`validSecs`: Long,`startId`: Int,`reuseSignedSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1222,6 +1234,12 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_export_backup(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_frost_complete(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_frost_cosign(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_frost_propose(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_generate_prekeys(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_generate_writer_keys(
@@ -1429,6 +1447,15 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_export_backup() != 50604.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_frost_complete() != 22413.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_frost_cosign() != 51195.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_frost_propose() != 60353.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_generate_prekeys() != 12451.toShort()) {
@@ -2346,6 +2373,92 @@ public object FfiConverterTypeFromParty: FfiConverterRustBuffer<FromParty> {
     override fun write(value: FromParty, buf: ByteBuffer) {
             FfiConverterUShort.write(value.`participant`, buf)
             FfiConverterByteArray.write(value.`bytes`, buf)
+    }
+}
+
+
+
+/**
+ * The co-signer's answer: its wire payload plus the one figure the
+ * transaction bytes expose to it (0.2.0 keeps payments private, so the
+ * destination/amount consent view waits on an upstream accessor — until
+ * then the co-signer signs the proposer's sweep as proposed).
+ */
+data class FrostCosign (
+    var `payload`: kotlin.ByteArray, 
+    var `feePxmr`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFrostCosign: FfiConverterRustBuffer<FrostCosign> {
+    override fun read(buf: ByteBuffer): FrostCosign {
+        return FrostCosign(
+            FfiConverterByteArray.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FrostCosign) = (
+            FfiConverterByteArray.allocationSize(value.`payload`) +
+            FfiConverterULong.allocationSize(value.`feePxmr`)
+    )
+
+    override fun write(value: FrostCosign, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`payload`, buf)
+            FfiConverterULong.write(value.`feePxmr`, buf)
+    }
+}
+
+
+
+/**
+ * What the proposer sends and shows: the wire payload plus the figures the
+ * screen states before anything is signed.
+ */
+data class FrostProposal (
+    var `payload`: kotlin.ByteArray, 
+    /**
+     * Everything the escrow held.
+     */
+    var `totalPxmr`: kotlin.ULong, 
+    /**
+     * What arrives at the destination (total minus the fee reserve; the
+     * reserve's surplus over the true fee returns to the destination too,
+     * as change).
+     */
+    var `payoutPxmr`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFrostProposal: FfiConverterRustBuffer<FrostProposal> {
+    override fun read(buf: ByteBuffer): FrostProposal {
+        return FrostProposal(
+            FfiConverterByteArray.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FrostProposal) = (
+            FfiConverterByteArray.allocationSize(value.`payload`) +
+            FfiConverterULong.allocationSize(value.`totalPxmr`) +
+            FfiConverterULong.allocationSize(value.`payoutPxmr`)
+    )
+
+    override fun write(value: FrostProposal, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`payload`, buf)
+            FfiConverterULong.write(value.`totalPxmr`, buf)
+            FfiConverterULong.write(value.`payoutPxmr`, buf)
     }
 }
 
@@ -5307,6 +5420,51 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     uniffiRustCallWithError(BackupException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_export_backup(
         FfiConverterTypeBackupInput.lower(`input`),FfiConverterString.lower(`passphrase`),FfiConverterByteArray.lower(`personaSecret`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Round 2 — complete and broadcast. Consumes the parked machine, folds in
+         * the co-signer's preprocess and share, assembles the transaction, and
+         * pushes it to the network. Returns the txid.
+         */
+    @Throws(ContactException::class) fun `frostComplete`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `payload`: kotlin.ByteArray, `nodeUrl`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_complete(
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterByteArray.lower(`payload`),FfiConverterString.lower(`nodeUrl`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Round 1 — co-sign. Reads the proposed transaction and A's preprocess,
+         * preprocesses and signs in one step, and returns `[preprocess][share]`.
+         * Nothing is kept: the co-signer's part is finished.
+         */
+    @Throws(ContactException::class) fun `frostCosign`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `keys`: kotlin.ByteArray, `payload`: kotlin.ByteArray): FrostCosign {
+            return FfiConverterTypeFrostCosign.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_cosign(
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterByteArray.lower(`keys`),FfiConverterByteArray.lower(`payload`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Round 0 — propose the release. Scans the escrow, builds one sweep to
+         * `dest`, preprocesses, and returns `[tx][preprocess]` for the co-signer.
+         * The signing machine waits in its slot for `frost_complete`.
+         */
+    @Throws(ContactException::class) fun `frostPropose`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `keys`: kotlin.ByteArray, `dest`: kotlin.String, `nodeUrl`: kotlin.String, `fromHeight`: kotlin.ULong): FrostProposal {
+            return FfiConverterTypeFrostProposal.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_propose(
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterByteArray.lower(`keys`),FfiConverterString.lower(`dest`),FfiConverterString.lower(`nodeUrl`),FfiConverterULong.lower(`fromHeight`),_status)
 }
     )
     }
