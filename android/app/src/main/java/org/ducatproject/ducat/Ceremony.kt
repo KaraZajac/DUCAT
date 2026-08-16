@@ -1,39 +1,41 @@
 package org.ducatproject.ducat
 
 import android.content.Context
+import org.json.JSONArray
 import org.json.JSONObject
 
 /**
  * The bond ceremony's orchestration (§17.9): the glue between the sealed
- * thread and the threshold engine in the bridge.
+ * threads and the threshold engine in the bridge.
  *
- * The crypto lives in Rust (`ceremony.rs`, one machine per round held by
- * ceremony id); this drives it. Starting a bond runs `dkgCommit` and seals
- * the commitment as a `DkgRound` message. Every `DkgRound` that arrives on a
- * thread is handed here, which advances the engine when the round it was
- * waiting for lands: commit → share → finish, each step a sealed message the
- * counterparty answers in kind. The finished escrow — its funding address and
- * this device's key share — is stored, and no other party's share is ever
- * on this device.
+ * The crypto lives in Rust (`ceremony.rs`, machines held by ceremony id);
+ * this drives it over DUCAT's pairwise threads. A ceremony has a roster of
+ * two or three personas — two principals, optionally an arbiter — and a
+ * threshold of two. Every round-0 message carries the roster, because a
+ * pairwise thread only names two of the parties and the third has to learn
+ * who else is in the room from the invitation itself. Everyone must be
+ * mutual contacts of everyone: the shares travel the threads, and a thread
+ * that does not exist cannot carry one.
  *
- * State survives process death in prefs, because a ceremony spans poll cycles
- * and app restarts; the in-memory engine machines do not survive, so a
- * restart mid-ceremony aborts cleanly (the peer times out and both retry) —
+ * With three parties the deposit stops being strandable: any two shares can
+ * sign, so a lost phone loses nothing and a dispute has somewhere to go.
+ * The arbiter holds a share and nothing else — it cannot move money alone,
+ * and unless it is called on, it never has to do anything after the build.
+ *
+ * State survives process death in prefs, because a ceremony spans poll
+ * cycles and app restarts; the in-memory engine machines do not survive, so
+ * a restart mid-ceremony aborts cleanly (the peers time out and retry) —
  * "nothing happens" is not left as a silent default (§9.3.4).
  */
 object Ceremony {
     private const val TAG = "DucatCeremony"
 
-    // 2-of-2 for a bond: the rider and one counterparty (an arbiter, or the
-    // other side of a two-party escrow). 2-of-3 with an arbiter set is the
-    // same flow with n=3 and a second peer.
+    /** Threshold: always two signatures, whatever the roster size. */
     private const val T = 2
-    private const val N = 2
 
     private fun prefs(context: Context) =
         context.getSharedPreferences("ducat_ceremonies", Context.MODE_PRIVATE)
 
-    /** A ceremony in progress or finished, one JSON object per ceremony id. */
     private fun load(context: Context, id: String): JSONObject? =
         prefs(context).getString("c_$id", null)?.let { JSONObject(it) }
 
@@ -47,50 +49,239 @@ object Ceremony {
             .mapNotNull { k -> prefs(context).getString(k, null)?.let { JSONObject(it) } }
 
     /**
-     * The 32-byte context both sides must agree on, derived from the two
-     * personas and a nonce so a fresh bond never collides with an old one.
-     * Lower persona hex is participant 1 — a rule both compute identically
-     * without negotiating.
+     * The 32-byte context every party derives identically: the sorted
+     * personas and a nonce, so a fresh bond never collides with an old one.
      */
-    private fun ceremonyId(mineHex: String, theirsHex: String, nonce: String): ByteArray {
-        val lo = if (mineHex < theirsHex) mineHex else theirsHex
-        val hi = if (mineHex < theirsHex) theirsHex else mineHex
+    private fun ceremonyId(roster: List<String>, nonce: String): ByteArray {
         val md = java.security.MessageDigest.getInstance("SHA-256")
         md.update("DUCAT-BOND-v0".toByteArray())
-        md.update(lo.toByteArray()); md.update(hi.toByteArray()); md.update(nonce.toByteArray())
+        roster.forEach { md.update(it.toByteArray()) }
+        md.update(nonce.toByteArray())
         return md.digest()
     }
 
-    private fun myParticipant(mineHex: String, theirsHex: String): Int =
-        if (mineHex < theirsHex) 1 else 2
+    /** 1-based index of a persona in the sorted roster — the participant id. */
+    private fun indexOf(roster: List<String>, personaHex: String): Int =
+        roster.indexOf(personaHex) + 1
 
-    private fun theirParticipant(mineHex: String, theirsHex: String): Int =
-        if (mineHex < theirsHex) 2 else 1
+    // ===== Round-0 framing =====
+    //
+    // [u8 n][n × 32-byte personas, sorted][u8 arbiterIdx (0 = none)]
+    // [u8 nonceLen][nonce][commitment…]
+    //
+    // The same format for two parties and three: one parser, no special
+    // cases, and a 2-party bond is simply a roster with no arbiter.
+
+    private fun frameRound0(
+        roster: List<String>,
+        arbiterIdx: Int,
+        nonce: String,
+        commitment: ByteArray,
+    ): ByteArray {
+        val out = java.io.ByteArrayOutputStream()
+        out.write(roster.size)
+        roster.forEach { out.write(hexToBytes(it)!!) }
+        out.write(arbiterIdx)
+        val nb = nonce.toByteArray()
+        out.write(nb.size)
+        out.write(nb)
+        out.write(commitment)
+        return out.toByteArray()
+    }
+
+    private data class Invite(
+        val roster: List<String>,
+        val arbiterIdx: Int,
+        val nonce: String,
+        val commitment: ByteArray,
+    )
+
+    private fun parseRound0(payload: ByteArray): Invite? {
+        var p = 0
+        fun take(n: Int): ByteArray? {
+            if (p + n > payload.size) return null
+            return payload.copyOfRange(p, p + n).also { p += n }
+        }
+        val n = take(1)?.get(0)?.toInt() ?: return null
+        if (n < 2 || n > 3) return null
+        val roster = (0 until n).map { take(32)?.toHexString() ?: return null }
+        val arbiterIdx = take(1)?.get(0)?.toInt() ?: return null
+        val nonceLen = take(1)?.get(0)?.toInt() ?: return null
+        val nonce = String(take(nonceLen) ?: return null)
+        val commitment = payload.copyOfRange(p, payload.size)
+        if (commitment.isEmpty()) return null
+        return Invite(roster, arbiterIdx, nonce, commitment)
+    }
+
+    private fun contactFor(context: Context, personaHex: String): Contact? =
+        ContactStore(context).all().firstOrNull { it.personaHex == personaHex }
 
     /**
-     * Start a bond with a contact: commit, seal the commitment as the first
-     * DkgRound, and record the ceremony as awaiting the peer's commitment.
+     * Start a bond with a contact — and optionally an arbiter, who must be a
+     * mutual contact of both sides (the shares travel the threads; missing
+     * threads mean an impossible ceremony, discovered by whoever lacks one).
      */
-    fun startBond(context: Context, contact: Contact): String {
+    fun startBond(context: Context, contact: Contact, arbiter: Contact? = null): String {
         val mineHex = PersonaStore(context).personaHex()
-        val theirsHex = contact.personaHex
+        val roster = buildList {
+            add(mineHex); add(contact.personaHex); arbiter?.let { add(it.personaHex) }
+        }.sorted()
+        val arbiterIdx = arbiter?.let { indexOf(roster, it.personaHex) } ?: 0
         val nonce = java.util.UUID.randomUUID().toString().take(8)
-        val id = ceremonyId(mineHex, theirsHex, nonce)
+        val id = ceremonyId(roster, nonce)
         val idHex = id.toHexString()
-        val i = myParticipant(mineHex, theirsHex)
+        val i = indexOf(roster, mineHex)
+        val n = roster.size
 
-        val commit = uniffi.ducat_mobile.dkgCommit(id, i.toUShort(), T.toUShort(), N.toUShort())
-        Mailbox.send(
-            context, contact, "bond: building a shared deposit",
-            mineHex, kind = 8, round = 0, ceremonyId = id, payload = commit,
-        )
+        val commit = uniffi.ducat_mobile.dkgCommit(id, i.toUShort(), T.toUShort(), n.toUShort())
+        val frame = frameRound0(roster, arbiterIdx, nonce, commit)
+        for (peerHex in roster.filter { it != mineHex }) {
+            val peer = contactFor(context, peerHex)
+                ?: throw IllegalStateException("everyone in a bond must be your contact")
+            Mailbox.send(
+                context, peer, "bond: building a shared deposit",
+                mineHex, kind = 8, round = 0, ceremonyId = id, payload = frame,
+            )
+        }
         val o = JSONObject().apply {
-            put("id", idHex); put("nonce", nonce); put("peer", theirsHex)
+            put("id", idHex); put("nonce", nonce)
+            put("roster", JSONArray(roster)); put("arbiterIdx", arbiterIdx)
+            put("peer", contact.personaHex)
             put("i", i); put("stage", "committed")
+            put("commits", JSONObject()); put("shares", JSONObject())
         }
         save(context, idHex, o)
-        DucatLog.i(TAG, "started bond $idHex (i=$i), sent commitment")
+        DucatLog.i(TAG, "started bond $idHex (i=$i of $n), sent commitment")
         return idHex
+    }
+
+    /**
+     * A DkgRound arrived. Record it, and advance the engine when everything
+     * it was waiting for is in. Out-of-stage rounds are ignored (§2.5).
+     */
+    fun onDkgRound(
+        context: Context,
+        contact: Contact,
+        ceremonyId: ByteArray?,
+        round: Long?,
+        payload: ByteArray?,
+    ) {
+        val id = ceremonyId ?: return
+        val idHex = id.toHexString()
+        payload ?: return
+        round ?: return
+        val mineHex = PersonaStore(context).personaHex()
+
+        var o = load(context, idHex)
+
+        // A round-0 with no ceremony of ours is an invitation: learn the
+        // roster from the frame, verify the id really is that roster, join
+        // by committing to everyone, then record the sender's commitment.
+        if (o == null && round.toInt() == 0) {
+            val inv = parseRound0(payload) ?: return
+            if (mineHex !in inv.roster) return
+            if (!ceremonyId(inv.roster, inv.nonce).contentEquals(id)) {
+                DucatLog.w(TAG, "bond $idHex: roster does not hash to the ceremony id")
+                return
+            }
+            val i = indexOf(inv.roster, mineHex)
+            val n = inv.roster.size
+            val commit =
+                uniffi.ducat_mobile.dkgCommit(id, i.toUShort(), T.toUShort(), n.toUShort())
+            val frame = frameRound0(inv.roster, inv.arbiterIdx, inv.nonce, commit)
+            for (peerHex in inv.roster.filter { it != mineHex }) {
+                val peer = contactFor(context, peerHex) ?: run {
+                    DucatLog.w(TAG, "bond $idHex: ${peerHex.take(8)}… is not my contact — cannot join")
+                    return
+                }
+                Mailbox.send(
+                    context, peer, "bond: building a shared deposit",
+                    mineHex, kind = 8, round = 0, ceremonyId = id, payload = frame,
+                )
+            }
+            o = JSONObject().apply {
+                put("id", idHex); put("nonce", inv.nonce)
+                put("roster", JSONArray(inv.roster)); put("arbiterIdx", inv.arbiterIdx)
+                put("peer", contact.personaHex)
+                put("i", i); put("stage", "committed")
+                put("commits", JSONObject()); put("shares", JSONObject())
+            }
+            save(context, idHex, o)
+            DucatLog.i(TAG, "joined bond $idHex (i=$i of $n), sent commitment")
+        }
+        o ?: return
+
+        val roster = o.optJSONArray("roster")?.let { arr ->
+            (0 until arr.length()).map { arr.getString(it) }
+        } ?: return
+        val n = roster.size
+        val i = o.optInt("i")
+        val senderIdx = indexOf(roster, contact.personaHex)
+        if (senderIdx == 0) return
+
+        runCatching {
+            when {
+                o.optString("stage") == "committed" && round.toInt() == 0 -> {
+                    val inv = parseRound0(payload) ?: return
+                    val commits = o.getJSONObject("commits")
+                    commits.put(senderIdx.toString(), inv.commitment.toHexString())
+                    save(context, idHex, o)
+                    if (commits.length() < n - 1) {
+                        DucatLog.i(TAG, "bond $idHex: commitment ${commits.length()}/${n - 1}")
+                        return
+                    }
+                    // Everyone has spoken: produce a share for each of them.
+                    val from = commits.keys().asSequence().map { k ->
+                        uniffi.ducat_mobile.FromParty(
+                            k.toInt().toUShort(), hexToBytes(commits.getString(k))!!,
+                        )
+                    }.toList()
+                    val shares = uniffi.ducat_mobile.dkgShare(
+                        id, i.toUShort(), T.toUShort(), n.toUShort(), from,
+                    )
+                    for (s in shares) {
+                        val peerHex = roster[s.participant.toInt() - 1]
+                        val peer = contactFor(context, peerHex) ?: continue
+                        Mailbox.send(
+                            context, peer, "bond: your share",
+                            mineHex, kind = 8, round = 1, ceremonyId = id, payload = s.bytes,
+                        )
+                    }
+                    o.put("stage", "shared"); save(context, idHex, o)
+                    DucatLog.i(TAG, "bond $idHex: shared, sent ${shares.size} share(s)")
+                }
+                o.optString("stage") == "shared" && round.toInt() == 1 -> {
+                    val sh = o.getJSONObject("shares")
+                    sh.put(senderIdx.toString(), payload.toHexString())
+                    save(context, idHex, o)
+                    if (sh.length() < n - 1) {
+                        DucatLog.i(TAG, "bond $idHex: share ${sh.length()}/${n - 1}")
+                        return
+                    }
+                    val from = sh.keys().asSequence().map { k ->
+                        uniffi.ducat_mobile.FromParty(
+                            k.toInt().toUShort(), hexToBytes(sh.getString(k))!!,
+                        )
+                    }.toList()
+                    val addr = uniffi.ducat_mobile.dkgFinish(
+                        id, i.toUShort(), T.toUShort(), n.toUShort(), from, true,
+                    )
+                    val keys = uniffi.ducat_mobile.dkgTakeKeys(id, i.toUShort())
+                    o.put("stage", "done"); o.put("address", addr)
+                    o.put("keys", keys.toHexString())
+                    save(context, idHex, o)
+                    DucatLog.i(TAG, "bond $idHex done — escrow $addr")
+                }
+                else ->
+                    DucatLog.w(
+                        TAG,
+                        "bond $idHex: round $round ignored at stage ${o.optString("stage")}",
+                    )
+            }
+        }.onFailure {
+            DucatLog.w(TAG, "bond $idHex round $round failed: ${it.message}")
+            uniffi.ducat_mobile.ceremonyAbort(id, i.toUShort())
+        }
     }
 
     /** The node the release talks to: the poller's last good one, or a fresh
@@ -103,11 +294,10 @@ object Ceremony {
         }.getOrNull()
 
     /**
-     * Release the escrow back to this device's own wallet (§17.9's FROST
-     * side): scan, build one sweep, preprocess, and send `[tx][preprocess]`
-     * as FrostRound 0. The peer co-signs sight-unseen for now — the consent
-     * view waits on a payments accessor upstream — and the completion lands
-     * back here as round 1.
+     * Release the escrow back to this device's own wallet: scan, build one
+     * sweep, preprocess, and send `[tx][preprocess]` as FrostRound 0 to the
+     * other PRINCIPAL — never the arbiter, who only signs when the normal
+     * path is dead and someone asks it to.
      */
     fun releaseBond(context: Context, contact: Contact): String {
         val mineHex = PersonaStore(context).personaHex()
@@ -125,6 +315,11 @@ object Ceremony {
             ?: throw IllegalStateException("no wallet to return the deposit to")
         val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
 
+        val roster = o.getJSONArray("roster").let { arr ->
+            (0 until arr.length()).map { arr.getString(it) }
+        }
+        val cosignerIdx = indexOf(roster, contact.personaHex)
+
         val prop = uniffi.ducat_mobile.frostPropose(
             id, i.toUShort(), keys, dest, nodeUrl,
             WalletStore(context).restoreHeight().toLong().toULong(),
@@ -134,6 +329,7 @@ object Ceremony {
             mineHex, kind = 9, round = 0, ceremonyId = id, payload = prop.payload,
         )
         o.put("stage", "releasing")
+        o.put("cosignerIdx", cosignerIdx)
         o.put("payoutPxmr", prop.payoutPxmr.toLong())
         save(context, idHex, o)
         DucatLog.i(TAG, "bond $idHex: proposed release of ${prop.payoutPxmr} pXMR")
@@ -141,9 +337,10 @@ object Ceremony {
     }
 
     /**
-     * A FrostRound arrived. Round 0 asks this device to co-sign the release;
+     * A FrostRound arrived. Round 0 asks this device to co-sign a release;
      * round 1 carries the co-signature back to the proposer, who completes
-     * and broadcasts. Out-of-stage rounds are ignored, like the DKG's.
+     * and broadcasts. Whose signature is whose comes from the roster, not
+     * from arithmetic — with an arbiter there are three possible pairs.
      */
     fun onFrostRound(
         context: Context,
@@ -162,12 +359,19 @@ object Ceremony {
         val o = load(context, idHex) ?: return
         val i = o.optInt("i")
         val keys = hexToBytes(o.optString("keys")) ?: return
+        val roster = o.optJSONArray("roster")?.let { arr ->
+            (0 until arr.length()).map { arr.getString(it) }
+        } ?: return
+        val senderIdx = indexOf(roster, contact.personaHex)
+        if (senderIdx == 0) return
         val stage = o.optString("stage")
 
         runCatching {
             when {
                 stage == "done" && round.toInt() == 0 -> {
-                    val ans = uniffi.ducat_mobile.frostCosign(id, i.toUShort(), keys, payload)
+                    val ans = uniffi.ducat_mobile.frostCosign(
+                        id, i.toUShort(), senderIdx.toUShort(), keys, payload,
+                    )
                     c = Mailbox.send(
                         context, c, "bond: co-signed the release",
                         mineHex, kind = 9, round = 1, ceremonyId = id, payload = ans.payload,
@@ -176,10 +380,17 @@ object Ceremony {
                     DucatLog.i(TAG, "bond $idHex: co-signed the release (fee ${ans.feePxmr})")
                 }
                 stage == "releasing" && round.toInt() == 1 -> {
+                    // Only the co-signer we actually asked: in a 2-of-3 an
+                    // unsolicited "co-signature" from the third party must
+                    // not complete a transaction nobody proposed to them.
+                    if (senderIdx != o.optInt("cosignerIdx")) {
+                        DucatLog.w(TAG, "bond $idHex: round 1 from unexpected participant $senderIdx")
+                        return
+                    }
                     val nodeUrl = node(context)
                         ?: throw IllegalStateException("no node reachable")
                     val txid = uniffi.ducat_mobile.frostComplete(
-                        id, i.toUShort(), payload, nodeUrl,
+                        id, i.toUShort(), senderIdx.toUShort(), payload, nodeUrl,
                     )
                     o.put("stage", "released"); o.put("txid", txid)
                     save(context, idHex, o)
@@ -190,91 +401,6 @@ object Ceremony {
             }
         }.onFailure {
             DucatLog.w(TAG, "bond $idHex frost round $round failed: ${it.message}")
-        }
-    }
-
-    /**
-     * A DkgRound arrived. Advance the engine if it is the round this ceremony
-     * was waiting for. Unknown or out-of-stage rounds are ignored (§2.5: a
-     * ceremony message is never applied out of order).
-     */
-    fun onDkgRound(
-        context: Context,
-        contact: Contact,
-        ceremonyId: ByteArray?,
-        round: Long?,
-        payload: ByteArray?,
-    ) {
-        val id = ceremonyId ?: return
-        val idHex = id.toHexString()
-        payload ?: return
-        round ?: return
-        val mineHex = PersonaStore(context).personaHex()
-        val theirsHex = contact.personaHex
-        val i = myParticipant(mineHex, theirsHex)
-        val theirI = theirParticipant(mineHex, theirsHex)
-
-        // Every send returns the contact with its outbox sequence advanced,
-        // and the NEXT send must use that one. Reusing the argument sent two
-        // rounds as the same seq in one poll cycle — the share overwrote the
-        // commitment in the ring, and the peer only ever saw the second
-        // (found live, first two-phone run, 2026-08-16). The argument can be
-        // stale the same way when two rounds arrive in one poll, so start
-        // from the store's copy, not the caller's.
-        var c = ContactStore(context).all()
-            .firstOrNull { it.personaHex == contact.personaHex } ?: contact
-
-        // A peer's round-0 with no ceremony of ours is an invitation: commit
-        // in response so both sides converge, then treat their round-0 as the
-        // one we were waiting for.
-        var o = load(context, idHex)
-        if (o == null && round.toInt() == 0) {
-            val commit = uniffi.ducat_mobile.dkgCommit(id, i.toUShort(), T.toUShort(), N.toUShort())
-            c = Mailbox.send(
-                context, c, "bond: building a shared deposit",
-                mineHex, kind = 8, round = 0, ceremonyId = id, payload = commit,
-            )
-            o = JSONObject().apply {
-                put("id", idHex); put("peer", theirsHex); put("i", i); put("stage", "committed")
-            }
-            save(context, idHex, o)
-            DucatLog.i(TAG, "joined bond $idHex (i=$i), sent commitment")
-        }
-        o = o ?: return
-
-        val stage = o.optString("stage")
-        val from = listOf(uniffi.ducat_mobile.FromParty(theirI.toUShort(), payload))
-
-        runCatching {
-            when {
-                stage == "committed" && round.toInt() == 0 -> {
-                    val shares = uniffi.ducat_mobile.dkgShare(
-                        id, i.toUShort(), T.toUShort(), N.toUShort(), from,
-                    )
-                    val mine = shares.firstOrNull { it.participant.toInt() == theirI } ?: return
-                    c = Mailbox.send(
-                        context, c, "bond: your share",
-                        mineHex, kind = 8, round = 1, ceremonyId = id, payload = mine.bytes,
-                    )
-                    o.put("stage", "shared"); save(context, idHex, o)
-                    DucatLog.i(TAG, "bond $idHex: shared, sent our share")
-                }
-                stage == "shared" && round.toInt() == 1 -> {
-                    val addr = uniffi.ducat_mobile.dkgFinish(
-                        id, i.toUShort(), T.toUShort(), N.toUShort(), from, true,
-                    )
-                    val keys = uniffi.ducat_mobile.dkgTakeKeys(id, i.toUShort())
-                    o.put("stage", "done"); o.put("address", addr)
-                    o.put("keys", keys.toHexString())
-                    save(context, idHex, o)
-                    DucatLog.i(TAG, "bond $idHex done — escrow $addr")
-                }
-                else ->
-                    DucatLog.w(TAG, "bond $idHex: round $round ignored at stage $stage")
-            }
-        }.onFailure {
-            DucatLog.w(TAG, "bond $idHex round $round failed: ${it.message}")
-            uniffi.ducat_mobile.ceremonyAbort(id, i.toUShort())
         }
     }
 }

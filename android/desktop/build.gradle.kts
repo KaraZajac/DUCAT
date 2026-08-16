@@ -15,6 +15,7 @@ plugins {
 // time, deliberately — anything ui/ or screen-shaped stays on the phone.
 val sharedLogic = listOf(
     "org/ducatproject/ducat/Mailbox.kt",
+    "org/ducatproject/ducat/Ceremony.kt",
     "org/ducatproject/ducat/ContactStore.kt",
     "org/ducatproject/ducat/MyProfile.kt",
     "org/ducatproject/ducat/DucatLog.kt",

@@ -225,10 +225,24 @@ private fun BondSection(
     val version by ContactStore.changes.collectAsState()
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var choosingArbiter by remember { mutableStateOf(false) }
     val ceremony = remember(version, busy) {
         org.ducatproject.ducat.Ceremony.all(context)
             .filter { it.optString("peer") == c.personaHex }
             .lastOrNull()
+    }
+
+    fun post(arbiter: org.ducatproject.ducat.Contact?) {
+        busy = true; error = null; choosingArbiter = false
+        scope.launch {
+            val r = withContext(Dispatchers.IO) {
+                runCatching {
+                    org.ducatproject.ducat.Ceremony.startBond(context, c, arbiter)
+                }
+            }
+            r.onFailure { error = it.message ?: "?" }
+            busy = false
+        }
     }
 
     Text(stringResource(R.string.profile_bond_title),
@@ -239,6 +253,44 @@ private fun BondSection(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     Spacer(Modifier.height(8.dp))
+
+    if (choosingArbiter) {
+        // Everyone here must be a mutual contact of both sides — the shares
+        // travel the pairwise threads, so a missing thread is a missing wire.
+        val others = remember(version) {
+            ContactStore(context).all().filter { it.personaHex != c.personaHex }
+        }
+        AlertDialog(
+            onDismissRequest = { choosingArbiter = false },
+            title = { Text(stringResource(R.string.profile_bond_arbiter_q)) },
+            text = {
+                Column {
+                    Text(
+                        stringResource(R.string.profile_bond_arbiter_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        Modifier.fillMaxWidth().clickable { post(null) }
+                            .padding(vertical = 10.dp),
+                    ) { Text(stringResource(R.string.profile_bond_just_us)) }
+                    others.forEach { a ->
+                        Row(
+                            Modifier.fillMaxWidth().clickable { post(a) }
+                                .padding(vertical = 10.dp),
+                        ) { Text(stringResource(R.string.profile_bond_with_arbiter, a.displayName())) }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { choosingArbiter = false }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            },
+        )
+    }
+
     when (ceremony?.optString("stage").orEmpty()) {
         "" -> {
             // Sealing and sending the commitment is network work; the button
@@ -246,16 +298,9 @@ private fun BondSection(
             Button(
                 enabled = !busy,
                 onClick = {
-                    busy = true; error = null
-                    scope.launch {
-                        val r = withContext(Dispatchers.IO) {
-                            runCatching {
-                                org.ducatproject.ducat.Ceremony.startBond(context, c)
-                            }
-                        }
-                        r.onFailure { error = it.message ?: "?" }
-                        busy = false
-                    }
+                    val hasOthers = ContactStore(context).all()
+                        .any { it.personaHex != c.personaHex }
+                    if (hasOthers) choosingArbiter = true else post(null)
                 },
             ) {
                 if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -280,6 +325,23 @@ private fun BondSection(
                 ceremony?.optString("address").orEmpty(),
                 clipboard,
             )
+            // Name the third keyholder when there is one: a 2-of-3 bond
+            // behaves differently (nothing strands) and the screen should
+            // say who makes that true.
+            val arbIdx = ceremony?.optInt("arbiterIdx") ?: 0
+            if (arbIdx > 0) {
+                val arbHex = ceremony?.optJSONArray("roster")?.optString(arbIdx - 1)
+                val arbName = remember(arbHex) {
+                    ContactStore(context).all()
+                        .firstOrNull { it.personaHex == arbHex }?.displayName()
+                        ?: arbHex?.take(8)?.plus("…") ?: "?"
+                }
+                Text(
+                    stringResource(R.string.profile_bond_with_arbiter, arbName),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Spacer(Modifier.height(8.dp))
             // The other half of the ceremony: spend it back out. The deposit
             // returns to THIS device's wallet; the peer's co-signature is what

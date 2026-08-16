@@ -946,9 +946,9 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_export_backup(`input`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_frost_complete(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`payload`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_frost_complete(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`cosigner`: Short,`payload`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_frost_cosign(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`keys`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_frost_cosign(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`proposer`: Short,`keys`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_frost_propose(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`keys`: RustBuffer.ByValue,`dest`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,`fromHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1449,10 +1449,10 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_export_backup() != 50604.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_frost_complete() != 22413.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_frost_complete() != 49699.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_frost_cosign() != 51195.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_frost_cosign() != 7598.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_frost_propose() != 60353.toShort()) {
@@ -5428,28 +5428,34 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
         /**
          * Round 2 — complete and broadcast. Consumes the parked machine, folds in
          * the co-signer's preprocess and share, assembles the transaction, and
-         * pushes it to the network. Returns the txid.
+         * pushes it to the network. Returns the txid. `cosigner` names whose
+         * answer this is — with an arbiter in the roster it is a choice, not
+         * arithmetic.
          */
-    @Throws(ContactException::class) fun `frostComplete`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `payload`: kotlin.ByteArray, `nodeUrl`: kotlin.String): kotlin.String {
+    @Throws(ContactException::class) fun `frostComplete`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `cosigner`: kotlin.UShort, `payload`: kotlin.ByteArray, `nodeUrl`: kotlin.String): kotlin.String {
             return FfiConverterString.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_complete(
-        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterByteArray.lower(`payload`),FfiConverterString.lower(`nodeUrl`),_status)
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterUShort.lower(`cosigner`),FfiConverterByteArray.lower(`payload`),FfiConverterString.lower(`nodeUrl`),_status)
 }
     )
     }
     
 
         /**
-         * Round 1 — co-sign. Reads the proposed transaction and A's preprocess,
-         * preprocesses and signs in one step, and returns `[preprocess][share]`.
-         * Nothing is kept: the co-signer's part is finished.
+         * Round 1 — co-sign. Reads the proposed transaction and the proposer's
+         * preprocess, preprocesses and signs in one step, and returns
+         * `[preprocess][share]`. Nothing is kept: the co-signer's part is finished.
+         *
+         * `proposer` names who round 0 came from: in a 2-of-3 the co-signer could
+         * be either other participant, so "3 minus me" stopped being arithmetic
+         * the moment the arbiter existed.
          */
-    @Throws(ContactException::class) fun `frostCosign`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `keys`: kotlin.ByteArray, `payload`: kotlin.ByteArray): FrostCosign {
+    @Throws(ContactException::class) fun `frostCosign`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `proposer`: kotlin.UShort, `keys`: kotlin.ByteArray, `payload`: kotlin.ByteArray): FrostCosign {
             return FfiConverterTypeFrostCosign.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_cosign(
-        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterByteArray.lower(`keys`),FfiConverterByteArray.lower(`payload`),_status)
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterUShort.lower(`proposer`),FfiConverterByteArray.lower(`keys`),FfiConverterByteArray.lower(`payload`),_status)
 }
     )
     }

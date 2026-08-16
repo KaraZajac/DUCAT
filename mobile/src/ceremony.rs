@@ -445,13 +445,18 @@ pub fn frost_propose(
     Ok(FrostProposal { payload, total_pxmr: total, payout_pxmr: payout })
 }
 
-/// Round 1 — co-sign. Reads the proposed transaction and A's preprocess,
-/// preprocesses and signs in one step, and returns `[preprocess][share]`.
-/// Nothing is kept: the co-signer's part is finished.
+/// Round 1 — co-sign. Reads the proposed transaction and the proposer's
+/// preprocess, preprocesses and signs in one step, and returns
+/// `[preprocess][share]`. Nothing is kept: the co-signer's part is finished.
+///
+/// `proposer` names who round 0 came from: in a 2-of-3 the co-signer could
+/// be either other participant, so "3 minus me" stopped being arithmetic
+/// the moment the arbiter existed.
 #[uniffi::export]
 pub fn frost_cosign(
     ceremony_id: Vec<u8>,
     i: u16,
+    proposer: u16,
     keys: Vec<u8>,
     payload: Vec<u8>,
 ) -> Result<FrostCosign, ContactError> {
@@ -459,7 +464,7 @@ pub fn frost_cosign(
 
     let _id = cid(&ceremony_id)?;
     let keys = read_keys(&keys)?;
-    let their = Participant::new(3 - i)
+    let their = Participant::new(proposer)
         .ok_or_else(|| ContactError::Refused("participant is 1..".into()))?;
 
     let mut buf = payload.as_slice();
@@ -489,18 +494,21 @@ pub fn frost_cosign(
 
 /// Round 2 — complete and broadcast. Consumes the parked machine, folds in
 /// the co-signer's preprocess and share, assembles the transaction, and
-/// pushes it to the network. Returns the txid.
+/// pushes it to the network. Returns the txid. `cosigner` names whose
+/// answer this is — with an arbiter in the roster it is a choice, not
+/// arithmetic.
 #[uniffi::export]
 pub fn frost_complete(
     ceremony_id: Vec<u8>,
     i: u16,
+    cosigner: u16,
     payload: Vec<u8>,
     node_url: String,
 ) -> Result<String, ContactError> {
     use monero_daemon_rpc::prelude::*;
 
     let id = cid(&ceremony_id)?;
-    let their = Participant::new(3 - i)
+    let their = Participant::new(cosigner)
         .ok_or_else(|| ContactError::Refused("participant is 1..".into()))?;
     let sign_machine = frosts()
         .lock()

@@ -14,7 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.Balances
 import org.ducatproject.ducat.R
-import org.ducatproject.ducat.humanDuration
 
 /**
  * Whether the number above this can be trusted yet.
@@ -78,5 +77,23 @@ fun SyncStatus(b: Balances, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+/**
+ * "about 3 minutes", "about 2 hours" — never a false precision. Lives in
+ * ui/ rather than Wallet2 because it is a sentence, not protocol: the desk
+ * compiles the shared wallet file against a shim with no string resources.
+ */
+fun humanDuration(context: android.content.Context, secs: Long): String {
+    fun plural(res: Int, n: Int) = context.resources.getQuantityString(res, n, n)
+    val minutes = kotlin.math.max(1, Math.round(secs / 60.0).toInt())
+    val hours = kotlin.math.max(1, Math.round(secs / 3600.0).toInt())
+    val days = kotlin.math.max(1, Math.round(secs / 86_400.0).toInt())
+    return when {
+        secs < 90 -> context.getString(R.string.duration_under_minute)
+        secs < 5400 -> plural(R.plurals.duration_minutes, minutes)
+        secs < 172_800 -> plural(R.plurals.duration_hours, hours)
+        else -> plural(R.plurals.duration_days, days)
     }
 }

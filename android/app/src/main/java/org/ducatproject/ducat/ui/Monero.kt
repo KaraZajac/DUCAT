@@ -21,7 +21,6 @@ import org.ducatproject.ducat.R
 import org.ducatproject.ducat.SyncBlocker
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
-import org.ducatproject.ducat.humanDuration
 import uniffi.ducat_mobile.MoneroNodeStatus
 import uniffi.ducat_mobile.NodeTrust
 import uniffi.ducat_mobile.moneroDefaultNodes

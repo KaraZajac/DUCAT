@@ -76,19 +76,6 @@ data class Balances(
         get() = if (scanRate > 0.01 && blocksLeft > 0) (blocksLeft / scanRate).toLong() else null
 }
 
-/** "about 3 minutes", "about 2 hours" — never a false precision. */
-fun humanDuration(context: android.content.Context, secs: Long): String {
-    fun plural(res: Int, n: Int) = context.resources.getQuantityString(res, n, n)
-    return when {
-        secs < 90 -> context.getString(R.string.duration_under_minute)
-        secs < 5400 ->
-            plural(R.plurals.duration_minutes, (secs / 60.0).roundToInt().coerceAtLeast(1))
-        secs < 172_800 ->
-            plural(R.plurals.duration_hours, (secs / 3600.0).roundToInt().coerceAtLeast(1))
-        else ->
-            plural(R.plurals.duration_days, (secs / 86_400.0).roundToInt().coerceAtLeast(1))
-    }
-}
 
 /** A received output, as the Activity screen shows it. */
 data class WalletEntry(
