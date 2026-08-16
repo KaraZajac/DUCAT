@@ -208,13 +208,17 @@ fun SettingsScreen(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
  * The app's language. Every choice is named in its own language, so the row is
  * recognisable to someone who cannot yet read the rest of the app. Choosing one
  * recreates the activity, which is where the new language is applied.
+ *
+ * A dropdown at the button rather than a dialog: the list opens where the
+ * finger already is, scrolls in place, and a tap outside puts it away — no
+ * modal ceremony for what is one pick from a list.
  */
 @Composable
 private fun LanguageSetting() {
     val context = LocalContext.current
     val store = remember { LocaleStore(context) }
     val tag = remember { store.tag() }
-    var picking by remember { mutableStateOf(false) }
+    var open by remember { mutableStateOf(false) }
 
     val current =
         if (tag.isBlank()) stringResource(R.string.settings_language_system)
@@ -222,7 +226,7 @@ private fun LanguageSetting() {
 
     fun choose(newTag: String) {
         store.setTag(newTag)
-        picking = false
+        open = false
         // attachBaseContext runs again on recreate, applying the new locale
         // before any screen is drawn.
         context.findActivity()?.recreate()
@@ -232,48 +236,41 @@ private fun LanguageSetting() {
         Text(stringResource(R.string.settings_language_title),
             style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
-        OutlinedButton(onClick = { picking = true }) {
-            Text(current)
-            Spacer(Modifier.width(6.dp))
-            Icon(Icons.Filled.ArrowDropDown, null, Modifier.size(18.dp))
+        // The menu needs an anchor box so it opens at the button, not the column.
+        Box {
+            OutlinedButton(onClick = { open = true }) {
+                Text(current)
+                Spacer(Modifier.width(6.dp))
+                Icon(Icons.Filled.ArrowDropDown, null, Modifier.size(18.dp))
+            }
+            DropdownMenu(
+                expanded = open,
+                onDismissRequest = { open = false },
+                modifier = Modifier.heightIn(max = 420.dp),
+            ) {
+                LanguageItem(
+                    stringResource(R.string.settings_language_system),
+                    selected = tag.isBlank(),
+                ) { choose("") }
+                Languages.SUPPORTED.forEach { l ->
+                    LanguageItem(l.endonym, selected = tag == l.tag) { choose(l.tag) }
+                }
+            }
         }
-    }
-    if (picking) {
-        AlertDialog(
-            onDismissRequest = { picking = false },
-            title = { Text(stringResource(R.string.settings_language_title)) },
-            text = {
-                LazyColumn(Modifier.heightIn(max = 420.dp)) {
-                    item {
-                        LanguageRow(
-                            stringResource(R.string.settings_language_system),
-                            tag.isBlank(),
-                        ) { choose("") }
-                    }
-                    items(Languages.SUPPORTED) { l ->
-                        LanguageRow(l.endonym, tag == l.tag) { choose(l.tag) }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { picking = false }) {
-                    Text(stringResource(R.string.common_cancel))
-                }
-            },
-        )
     }
 }
 
 @Composable
-private fun LanguageRow(label: String, selected: Boolean, onClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RadioButton(selected = selected, onClick = onClick)
-        Spacer(Modifier.width(8.dp))
-        Text(label)
-    }
+private fun LanguageItem(label: String, selected: Boolean, onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(label) },
+        onClick = onClick,
+        // The current choice is marked rather than restated: a check on the row
+        // you picked reads at a glance in any script.
+        trailingIcon = if (selected) {
+            { Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }
+        } else null,
+    )
 }
 
 /** Kilometres or miles, defaulting to what the device's region uses. */
