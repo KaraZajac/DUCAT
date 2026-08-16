@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">Đã ký — việc phát đi thuộc về bên kia.</string>
     <string name="profile_bond_released">Đã hoàn tiền ký quỹ ✓</string>
     <string name="profile_bond_txid">Giao dịch hoàn trả</string>
+    <string name="profile_bond_arbiter_q">Ai giữ chìa khóa thứ ba?</string>
+    <string name="profile_bond_arbiter_note">Có trọng tài, hai trong ba khóa là đủ để chuyển khoản tiền: mất điện thoại không kẹt gì, tranh chấp có nơi phân xử. Một mình trọng tài không lấy được gì.</string>
+    <string name="profile_bond_just_us">Chỉ hai chúng tôi</string>
+    <string name="profile_bond_with_arbiter">Trọng tài: %1$s</string>
 </resources>

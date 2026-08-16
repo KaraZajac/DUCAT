@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">已共同签名 — 由对方广播。</string>
     <string name="profile_bond_released">押金已取回 ✓</string>
     <string name="profile_bond_txid">取回交易</string>
+    <string name="profile_bond_arbiter_q">第三把钥匙由谁保管？</string>
+    <string name="profile_bond_arbiter_note">有了仲裁人，三把钥匙中任意两把即可动用押金：手机丢了也不会卡住，纠纷也有去处。仲裁人单独拿不走任何东西。</string>
+    <string name="profile_bond_just_us">只有我们两个</string>
+    <string name="profile_bond_with_arbiter">仲裁人：%1$s</string>
 </resources>

@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">署名しました — 送信は相手側です。</string>
     <string name="profile_bond_released">保証金を返しました ✓</string>
     <string name="profile_bond_txid">返却トランザクション</string>
+    <string name="profile_bond_arbiter_q">3本目の鍵は誰が持ちますか？</string>
+    <string name="profile_bond_arbiter_note">立会人がいると、3本の鍵のうち2本で保証金を動かせます。電話をなくしても詰まらず、争いにも行き先があります。立会人単独では何も持ち出せません。</string>
+    <string name="profile_bond_just_us">ふたりだけ</string>
+    <string name="profile_bond_with_arbiter">立会人: %1$s</string>
 </resources>

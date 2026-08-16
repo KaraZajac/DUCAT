@@ -387,6 +387,28 @@ private fun BondSection(
                 ceremony?.optString("txid").orEmpty(),
                 clipboard,
             )
+            // A returned deposit is a finished story, not a closed door —
+            // the next bond starts from right here.
+            Spacer(Modifier.height(8.dp))
+            Button(
+                enabled = !busy,
+                onClick = {
+                    val hasOthers = ContactStore(context).all()
+                        .any { it.personaHex != c.personaHex }
+                    if (hasOthers) choosingArbiter = true else post(null)
+                },
+            ) {
+                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Text(stringResource(R.string.profile_bond_post))
+            }
+            error?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.profile_bond_failed, it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
         }
         else -> Field(
             stringResource(R.string.profile_bond_done),

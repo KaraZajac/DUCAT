@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">Подписано — отправка на их стороне.</string>
     <string name="profile_bond_released">Вклад возвращён ✓</string>
     <string name="profile_bond_txid">Транзакция возврата</string>
+    <string name="profile_bond_arbiter_q">У кого третий ключ?</string>
+    <string name="profile_bond_arbiter_note">С арбитром достаточно двух ключей из трёх: потерянный телефон ничего не блокирует, а у спора есть выход. Один арбитр забрать ничего не может.</string>
+    <string name="profile_bond_just_us">Только мы вдвоём</string>
+    <string name="profile_bond_with_arbiter">Арбитр: %1$s</string>
 </resources>

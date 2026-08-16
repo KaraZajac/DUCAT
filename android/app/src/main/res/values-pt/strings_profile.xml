@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">Contra-assinado — a transmissão fica com eles.</string>
     <string name="profile_bond_released">Depósito devolvido ✓</string>
     <string name="profile_bond_txid">Transação de devolução</string>
+    <string name="profile_bond_arbiter_q">Quem guarda a terceira chave?</string>
+    <string name="profile_bond_arbiter_note">Com um árbitro, duas das três chaves bastam para mover o depósito: um telefone perdido não prende nada e uma disputa tem para onde ir. O árbitro sozinho não pode levar nada.</string>
+    <string name="profile_bond_just_us">Só nós dois</string>
+    <string name="profile_bond_with_arbiter">Árbitro: %1$s</string>
 </resources>

@@ -3,6 +3,7 @@ package org.ducatproject.desk
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.PersonaStore
+import org.ducatproject.ducat.toHexString
 import uniffi.ducat_mobile.nodeStart
 import uniffi.ducat_mobile.nodeStatus
 import uniffi.ducat_mobile.nodeStop
@@ -27,22 +28,28 @@ fun main() {
     while (!nodeStatus().publicInternetReady) Thread.sleep(2_000)
     println("e2e: node ready")
 
-    // A returning desk already has its people; only a fresh one issues —
-    // unless it was handed a card to claim, which makes it the guest.
+    // A card in the environment is always claimed (unless its persona is
+    // already a contact) — an arbiter desk has to befriend BOTH principals,
+    // which takes one claim per run against the same state. With no card
+    // and no contacts, the desk issues one and waits, as before.
     val toClaim = System.getenv("DUCAT_DESK_CLAIM")
-    if (ContactStore(context).all().isEmpty()) {
-        if (!toClaim.isNullOrEmpty()) {
-            val scanned = uniffi.ducat_mobile.readContactCard(toClaim)
+    if (!toClaim.isNullOrEmpty()) {
+        val scanned = uniffi.ducat_mobile.readContactCard(toClaim)
+        val known = ContactStore(context).all()
+            .any { it.personaHex == scanned.persona.toHexString() }
+        if (known) {
+            println("E2E_ALREADY_KNOWN")
+        } else {
             val c = Mailbox.claimCard(context, scanned, null)
             println("E2E_CLAIMED ${c.displayName()} ${c.personaHex}")
-            Mailbox.send(context, c, "hello from the other desk",
+            Mailbox.send(context, c, "hello from the desk",
                 PersonaStore(context).personaHex())
             println("E2E_GREETED")
-        } else {
-            val card = Mailbox.issueCard(context, "desk-e2e", 60uL * 60uL)
-            // One line, greppable, complete: the whole handshake is this string.
-            println("E2E_CARD ${card.uri}")
         }
+    } else if (ContactStore(context).all().isEmpty()) {
+        val card = Mailbox.issueCard(context, "desk-e2e", 60uL * 60uL)
+        // One line, greppable, complete: the whole handshake is this string.
+        println("E2E_CARD ${card.uri}")
     } else {
         println("E2E_RESUMED")
     }

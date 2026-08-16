@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">서명 완료 — 전송은 상대방 몫이에요.</string>
     <string name="profile_bond_released">보증금 반환 완료 ✓</string>
     <string name="profile_bond_txid">반환 트랜잭션</string>
+    <string name="profile_bond_arbiter_q">세 번째 키는 누가 가질까요?</string>
+    <string name="profile_bond_arbiter_note">중재인이 있으면 세 키 중 두 개로 보증금을 움직일 수 있어요. 폰을 잃어도 묶이지 않고, 분쟁도 갈 곳이 생겨요. 중재인 혼자서는 아무것도 가져갈 수 없어요.</string>
+    <string name="profile_bond_just_us">우리 둘만</string>
+    <string name="profile_bond_with_arbiter">중재인: %1$s</string>
 </resources>

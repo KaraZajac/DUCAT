@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">İmzalandı — yayınlamak karşı tarafta.</string>
     <string name="profile_bond_released">Depozito geri alındı ✓</string>
     <string name="profile_bond_txid">Geri alma işlemi</string>
+    <string name="profile_bond_arbiter_q">Üçüncü anahtar kimde?</string>
+    <string name="profile_bond_arbiter_note">Hakemle üç anahtardan ikisi yeter: kayıp bir telefon hiçbir şeyi kilitlemez, bir anlaşmazlığın gideceği yer olur. Hakem tek başına hiçbir şey alamaz.</string>
+    <string name="profile_bond_just_us">Sadece ikimiz</string>
+    <string name="profile_bond_with_arbiter">Hakem: %1$s</string>
 </resources>

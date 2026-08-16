@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">امضا شد — پخش با طرف مقابل است.</string>
     <string name="profile_bond_released">سپرده بازگردانده شد ✓</string>
     <string name="profile_bond_txid">تراکنش بازگشت</string>
+    <string name="profile_bond_arbiter_q">کلید سوم دست کیست؟</string>
+    <string name="profile_bond_arbiter_note">با داور، دو کلید از سه کلید برای جابه‌جایی سپرده کافی است: گم‌شدن گوشی چیزی را قفل نمی‌کند و اختلاف جایی برای رفتن دارد. داور به‌تنهایی نمی‌تواند چیزی بردارد.</string>
+    <string name="profile_bond_just_us">فقط ما دو نفر</string>
+    <string name="profile_bond_with_arbiter">داور: %1$s</string>
 </resources>

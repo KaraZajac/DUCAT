@@ -219,64 +219,64 @@ object Ceremony {
         val senderIdx = indexOf(roster, contact.personaHex)
         if (senderIdx == 0) return
 
+        // Record what arrived into its bucket, whatever stage we are in — a
+        // peer that finished collecting commitments before us sends its share
+        // early, and in a three-party bond that is the common case, not the
+        // exception. Dropping an early share left one party stuck at "shared"
+        // forever with n-2 shares (found live, first 2-of-3 run 2026-08-17).
+        when (round.toInt()) {
+            0 -> parseRound0(payload)?.let {
+                o.getJSONObject("commits").put(senderIdx.toString(), it.commitment.toHexString())
+            }
+            1 -> o.getJSONObject("shares").put(senderIdx.toString(), payload.toHexString())
+        }
+        save(context, idHex, o)
+
+        // Then advance through every stage the collected material now allows,
+        // in one pass: commitments-complete → send shares; shares-complete →
+        // finish. A single poll can carry both transitions.
         runCatching {
-            when {
-                o.optString("stage") == "committed" && round.toInt() == 0 -> {
-                    val inv = parseRound0(payload) ?: return
-                    val commits = o.getJSONObject("commits")
-                    commits.put(senderIdx.toString(), inv.commitment.toHexString())
-                    save(context, idHex, o)
-                    if (commits.length() < n - 1) {
-                        DucatLog.i(TAG, "bond $idHex: commitment ${commits.length()}/${n - 1}")
-                        return
-                    }
-                    // Everyone has spoken: produce a share for each of them.
-                    val from = commits.keys().asSequence().map { k ->
-                        uniffi.ducat_mobile.FromParty(
-                            k.toInt().toUShort(), hexToBytes(commits.getString(k))!!,
-                        )
-                    }.toList()
-                    val shares = uniffi.ducat_mobile.dkgShare(
-                        id, i.toUShort(), T.toUShort(), n.toUShort(), from,
+            val commits = o.getJSONObject("commits")
+            if (o.optString("stage") == "committed" && commits.length() >= n - 1) {
+                val from = commits.keys().asSequence().map { k ->
+                    uniffi.ducat_mobile.FromParty(
+                        k.toInt().toUShort(), hexToBytes(commits.getString(k))!!,
                     )
-                    for (s in shares) {
-                        val peerHex = roster[s.participant.toInt() - 1]
-                        val peer = contactFor(context, peerHex) ?: continue
-                        Mailbox.send(
-                            context, peer, "bond: your share",
-                            mineHex, kind = 8, round = 1, ceremonyId = id, payload = s.bytes,
-                        )
-                    }
-                    o.put("stage", "shared"); save(context, idHex, o)
-                    DucatLog.i(TAG, "bond $idHex: shared, sent ${shares.size} share(s)")
+                }.toList()
+                val shares = uniffi.ducat_mobile.dkgShare(
+                    id, i.toUShort(), T.toUShort(), n.toUShort(), from,
+                )
+                for (s in shares) {
+                    val peerHex = roster[s.participant.toInt() - 1]
+                    val peer = contactFor(context, peerHex) ?: continue
+                    Mailbox.send(
+                        context, peer, "bond: your share",
+                        mineHex, kind = 8, round = 1, ceremonyId = id, payload = s.bytes,
+                    )
                 }
-                o.optString("stage") == "shared" && round.toInt() == 1 -> {
-                    val sh = o.getJSONObject("shares")
-                    sh.put(senderIdx.toString(), payload.toHexString())
-                    save(context, idHex, o)
-                    if (sh.length() < n - 1) {
-                        DucatLog.i(TAG, "bond $idHex: share ${sh.length()}/${n - 1}")
-                        return
-                    }
-                    val from = sh.keys().asSequence().map { k ->
-                        uniffi.ducat_mobile.FromParty(
-                            k.toInt().toUShort(), hexToBytes(sh.getString(k))!!,
-                        )
-                    }.toList()
-                    val addr = uniffi.ducat_mobile.dkgFinish(
-                        id, i.toUShort(), T.toUShort(), n.toUShort(), from, true,
+                o.put("stage", "shared"); save(context, idHex, o)
+                DucatLog.i(TAG, "bond $idHex: shared, sent ${shares.size} share(s)")
+            } else if (o.optString("stage") == "committed") {
+                DucatLog.i(TAG, "bond $idHex: commitment ${commits.length()}/${n - 1}")
+            }
+
+            val sh = o.getJSONObject("shares")
+            if (o.optString("stage") == "shared" && sh.length() >= n - 1) {
+                val from = sh.keys().asSequence().map { k ->
+                    uniffi.ducat_mobile.FromParty(
+                        k.toInt().toUShort(), hexToBytes(sh.getString(k))!!,
                     )
-                    val keys = uniffi.ducat_mobile.dkgTakeKeys(id, i.toUShort())
-                    o.put("stage", "done"); o.put("address", addr)
-                    o.put("keys", keys.toHexString())
-                    save(context, idHex, o)
-                    DucatLog.i(TAG, "bond $idHex done — escrow $addr")
-                }
-                else ->
-                    DucatLog.w(
-                        TAG,
-                        "bond $idHex: round $round ignored at stage ${o.optString("stage")}",
-                    )
+                }.toList()
+                val addr = uniffi.ducat_mobile.dkgFinish(
+                    id, i.toUShort(), T.toUShort(), n.toUShort(), from, true,
+                )
+                val keys = uniffi.ducat_mobile.dkgTakeKeys(id, i.toUShort())
+                o.put("stage", "done"); o.put("address", addr)
+                o.put("keys", keys.toHexString())
+                save(context, idHex, o)
+                DucatLog.i(TAG, "bond $idHex done — escrow $addr")
+            } else if (o.optString("stage") == "shared") {
+                DucatLog.i(TAG, "bond $idHex: share ${sh.length()}/${n - 1}")
             }
         }.onFailure {
             DucatLog.w(TAG, "bond $idHex round $round failed: ${it.message}")

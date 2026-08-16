@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">Підписано — трансляція на їхньому боці.</string>
     <string name="profile_bond_released">Вклад повернено ✓</string>
     <string name="profile_bond_txid">Транзакція повернення</string>
+    <string name="profile_bond_arbiter_q">У кого третій ключ?</string>
+    <string name="profile_bond_arbiter_note">З арбітром досить двох ключів із трьох: загублений телефон нічого не блокує, а суперечка має куди піти. Сам арбітр нічого забрати не може.</string>
+    <string name="profile_bond_just_us">Лише ми двоє</string>
+    <string name="profile_bond_with_arbiter">Арбітр: %1$s</string>
 </resources>

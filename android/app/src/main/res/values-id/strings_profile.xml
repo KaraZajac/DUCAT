@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">Sudah ditandatangani — penyiaran ada di pihak mereka.</string>
     <string name="profile_bond_released">Simpanan kembali ✓</string>
     <string name="profile_bond_txid">Transaksi pengembalian</string>
+    <string name="profile_bond_arbiter_q">Siapa yang memegang kunci ketiga?</string>
+    <string name="profile_bond_arbiter_note">Dengan penengah, dua dari tiga kunci cukup untuk memindahkan simpanan: ponsel hilang tidak mengunci apa pun, dan sengketa punya tempat mengadu. Penengah sendirian tidak bisa mengambil apa-apa.</string>
+    <string name="profile_bond_just_us">Hanya kami berdua</string>
+    <string name="profile_bond_with_arbiter">Penengah: %1$s</string>
 </resources>

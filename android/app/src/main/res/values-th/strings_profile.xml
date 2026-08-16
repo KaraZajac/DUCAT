@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">ลงนามแล้ว — การส่งอยู่ที่อีกฝ่าย</string>
     <string name="profile_bond_released">คืนเงินฝากแล้ว ✓</string>
     <string name="profile_bond_txid">ธุรกรรมการคืน</string>
+    <string name="profile_bond_arbiter_q">ใครถือกุญแจดอกที่สาม?</string>
+    <string name="profile_bond_arbiter_note">เมื่อมีผู้ชี้ขาด กุญแจสองในสามดอกก็ย้ายเงินฝากได้: โทรศัพท์หายก็ไม่ติดค้าง และข้อพิพาทมีทางออก ผู้ชี้ขาดเพียงลำพังเอาอะไรไปไม่ได้</string>
+    <string name="profile_bond_just_us">แค่เราสองคน</string>
+    <string name="profile_bond_with_arbiter">ผู้ชี้ขาด: %1$s</string>
 </resources>

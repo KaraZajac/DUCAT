@@ -41,4 +41,8 @@
     <string name="profile_bond_cosigned">Controfirmato — la trasmissione spetta a loro.</string>
     <string name="profile_bond_released">Deposito restituito ✓</string>
     <string name="profile_bond_txid">Transazione di restituzione</string>
+    <string name="profile_bond_arbiter_q">Chi custodisce la terza chiave?</string>
+    <string name="profile_bond_arbiter_note">Con un arbitro, due delle tre chiavi bastano a muovere il deposito: un telefono perso non blocca nulla e una disputa ha dove andare. L\'arbitro da solo non può prendere nulla.</string>
+    <string name="profile_bond_just_us">Solo noi due</string>
+    <string name="profile_bond_with_arbiter">Arbitro: %1$s</string>
 </resources>
