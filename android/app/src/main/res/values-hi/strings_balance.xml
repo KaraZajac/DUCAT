@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">खर्च के लिए तैयार</string>
+    <string name="balance_change_coming_back">%1$s छुट्टे में, %2$s में वापस</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">अभी आप भुगतान नहीं कर सकते</string>
+    <string name="balance_running_low_title">नोट कम पड़ रहे हैं</string>
+    <string name="balance_all_locked_body">पैसा यहीं है, पर सारा छुट्टों में अटका है। दोबारा खर्च करने के लिए एक नोट तुड़वाएँ।</string>
+    <string name="balance_running_low_body">अभी एक नोट तुड़वा लें, ताकि काउंटर पर अटक न जाएँ।</string>
+    <string name="balance_break_note_action">नोट तुड़वाएँ</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="one">1 नोट</item>
+        <item quantity="other">%1$d नोट</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">अभी कुछ भी अनलॉक नहीं</string>
+    <string name="balance_notes_then_wait">%1$s — एक भुगतान भर का, फिर छुट्टों का इंतज़ार</string>
+    <string name="balance_notes_one_more">%1$s, यानी करीब एक और भुगतान</string>
+    <string name="balance_notes_more">%1$s, यानी करीब %2$d और भुगतान</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">किसी भी पल</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="one">करीब %1$d मिनट</item>
+        <item quantity="other">करीब %1$d मिनट</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="one">करीब %1$d घंटा</item>
+        <item quantity="other">करीब %1$d घंटे</item>
+    </plurals>
+</resources>

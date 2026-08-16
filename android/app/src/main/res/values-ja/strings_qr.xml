@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_too_much_data">QRコードにはデータが多すぎます — 代わりにリンクを使ってください。</string>
+    <string name="qr_code">QRコード</string>
+</resources>

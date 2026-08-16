@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">การขายนี้</string>
+    <string name="pos_items">รายการ</string>
+    <string name="pos_quick_amount">จำนวนด่วน</string>
+    <string name="pos_total_in">รวม (%1$s)</string>
+    <string name="pos_request_amount">เรียกเก็บ %1$s</string>
+    <string name="pos_request_payment">เรียกเก็บเงิน</string>
+    <string name="pos_sale">การขาย</string>
+    <string name="pos_remove">ลบออก</string>
+    <string name="pos_network_fee_note">ค่าธรรมเนียมเครือข่ายเป็นของลูกค้า จ่ายให้เครือข่าย — ไม่เคยเป็นส่วนหนึ่งของบิล</string>
+    <string name="pos_charge_amount">คิดเงิน %1$s</string>
+    <string name="pos_add_first_item">เพิ่มรายการแรกเพื่อเริ่มการขาย</string>
+    <string name="pos_item">สินค้า</string>
+    <string name="pos_add_line">เพิ่มรายการ</string>
+    <string name="pos_tax">ภาษี</string>
+    <string name="pos_error_publish_code">เผยแพร่โค้ดไม่สำเร็จ</string>
+    <string name="pos_error_bill_not_sent">เขาเชื่อมต่อแล้ว แต่ส่งบิลไม่สำเร็จ: %1$s</string>
+    <string name="pos_getting_code_ready">กำลังเตรียมโค้ด…</string>
+    <string name="pos_scan_hint">ให้ลูกค้าสแกนโค้ดนี้ใน DUCAT บิลด้านบนจะถึงโทรศัพท์ของเขาทันทีที่สแกน</string>
+    <string name="pos_tap_hint">หรือแตะโทรศัพท์กัน — ได้บิลเดียวกันทั้งสองทาง</string>
+    <string name="pos_payment_seen">เห็นการชำระแล้ว ✓</string>
+    <string name="pos_payment_settling">การชำระของเขาอยู่ในเครือข่ายแล้ว — กำลังปิดยอด ราวสองนาที ใบเสร็จจะส่งตัวเองเมื่อเงินเข้า</string>
+    <string name="pos_bill_sent_to">ส่งบิลถึง %1$s แล้ว</string>
+    <string name="pos_the_customer">ลูกค้า</string>
+    <string name="pos_billed_hint">เขายืนยันบนโทรศัพท์ของเขาเอง เมื่อการชำระเข้าเชน ใบเสร็จจะส่งถึงเขาโดยอัตโนมัติ — ที่นี่ไม่มีอะไรต้องทำต่อ</string>
+    <string name="pos_paid">ชำระแล้ว ✓</string>
+    <string name="pos_receipt_sent_to">ส่งใบเสร็จถึง %1$s แล้ว</string>
+    <string name="pos_back">กลับ</string>
+    <string name="pos_new_sale">การขายใหม่</string>
+    <string name="pos_new_sale_settles">การขายใหม่ (รายการนี้จะปิดยอดเอง)</string>
+    <string name="pos_cancel_sale">ยกเลิกการขาย</string>
+</resources>

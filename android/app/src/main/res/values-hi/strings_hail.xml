@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">सवारी बुलाएँ</string>
+    <string name="hail_card_standing">पुकार खड़ी है — ड्राइवर का इंतज़ार</string>
+    <string name="hail_card_pitch">जहाँ जाना है, उसे उस स्टैंड पर लगाएँ जिस पर ड्राइवर नज़र रखते हैं।</string>
+    <string name="hail_standing_at">%1$s पर खड़ी है</string>
+    <string name="hail_take_it_down">उतार लें</string>
+    <string name="hail_awaiting_offer">%1$s ने आपकी पुकार उठाई — उनकी पेशकश का इंतज़ार…</string>
+    <string name="hail_cancel">रद्द करें</string>
+    <string name="hail_parked_offer">%1$s की पेशकश %2$s</string>
+    <string name="hail_view_the_offer">पेशकश देखें</string>
+    <string name="hail_post_it_again">फिर से लगाएँ</string>
+    <string name="hail_expired_unclaimed">समय पूरा होने तक किसी ने आपकी पुकार नहीं उठाई।</string>
+    <string name="hail_claimed_check_chats">एक ड्राइवर ने आपकी पुकार उठा ली — अपनी चैट देखें।</string>
+    <string name="hail_accept_message">जल्द मिलते हैं</string>
+    <string name="hail_decline_message">नहीं, धन्यवाद</string>
+    <string name="hail_declined_post_again">आपने मना किया — फिर से लगाएँ?</string>
+    <string name="hail_posted_waiting">लग गई। ड्राइवर का इंतज़ार…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">राइडर ने मना किया</string>
+    <string name="hail_rider_declined_body">उन्होंने आपकी पेशकश छोड़ दी। उनकी पुकार बोर्ड से हट गई है।</string>
+    <string name="hail_ok">ठीक है</string>
+    <string name="hail_on_duty">ड्यूटी पर</string>
+    <string name="hail_net_wide">चौड़ा जाल — आर-पार ~%1$s</string>
+    <string name="hail_net_nearby">~%1$s के दायरे पर नज़र</string>
+    <string name="hail_net_here">बस आपका इलाक़ा, ~%1$s</string>
+    <string name="hail_stop">रोकें</string>
+    <string name="hail_no_hails_map">कोई पुकार खड़ी नहीं — वे यहाँ पिन होंगी।</string>
+    <string name="hail_quote_me">भाव बताएँ</string>
+    <string name="hail_driving_title">ड्राइविंग</string>
+    <string name="hail_driving_pitch">स्टैंड पर नज़र रखें; कोई पुकार उठाएँ। उठाते ही राइडर से बातचीत खुलती है — भाव वहीं, मिलना वहीं, बिल आख़िर में, हर राइड की तरह।</string>
+    <string name="hail_range_just_here">बस यहीं</string>
+    <string name="hail_range_nearby">आस-पास</string>
+    <string name="hail_range_wide">दूर तक</string>
+    <string name="hail_range_desc_here">~%1$s — घने शहरी ब्लॉक</string>
+    <string name="hail_range_desc_wide">आर-पार ~%1$s — देहात या सुस्त रातें</string>
+    <string name="hail_range_desc_nearby">आर-पार ~%1$s — आम तौर पर यही</string>
+    <string name="hail_getting_location">आपकी लोकेशन ली जा रही है…</string>
+    <string name="hail_drive_here">यहीं चलाएँ — मेरे इलाक़े पर नज़र</string>
+    <string name="hail_stand_label">स्टैंड</string>
+    <string name="hail_stand_placeholder">स्टैंड का नाम, या ऊपर 📍</string>
+    <string name="hail_watch">नज़र रखें</string>
+    <string name="hail_watching_neighbours">आपके सेल और उसके 8 पड़ोसियों पर नज़र — %1$s +8</string>
+    <string name="hail_board_empty">बोर्ड पर कुछ नहीं। हर कुछ सेकंड में जाँच जारी…</string>
+    <string name="hail_offers_amount">पेशकश %1$s</string>
+    <string name="hail_offers_amount_both">पेशकश %1$s · %2$s</string>
+    <string name="hail_asks_quote">आपसे भाव पूछ रहे हैं</string>
+    <string name="hail_triage_pickup">पिकअप ~%1$s</string>
+    <string name="hail_triage_trip">सफ़र ~%1$s</string>
+    <string name="hail_stands_for_min">अभी और %1$d मिनट खड़ी रहेगी</string>
+    <string name="hail_view_job">काम देखें</string>
+    <string name="hail_take_it">उठा लें</string>
+    <string name="hail_location_fix_failed">लोकेशन नहीं मिल पाई</string>
+    <string name="hail_beaten_to_it">वह किसी और ने पहले उठा ली।</string>
+    <string name="hail_on_my_way">🚕 आ रहा हूँ।</string>
+    <string name="hail_on_my_way_car">🚕 आ रहा हूँ — %1$s देखिए।</string>
+    <string name="hail_on_my_way_plate">🚕 आ रहा हूँ, प्लेट %1$s।</string>
+    <string name="hail_on_my_way_car_plate">🚕 आ रहा हूँ — %1$s देखिए, प्लेट %2$s।</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">बंद करें</string>
+    <string name="hail_job_title">काम</string>
+    <string name="hail_to_pickup">पिकअप तक: %1$s · ~%2$d मिनट</string>
+    <string name="hail_the_ride">राइड: %1$s · ~%2$d मिनट</string>
+    <string name="hail_offer_amount">पेशकश: %1$s</string>
+    <string name="hail_offer_amount_both">पेशकश: %1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">पूरा आपका रहता है — इसी सफ़र के लिए राइडशेयर ~%1$s %2$.0f देता</string>
+    <string name="hail_rider_asks_quote">राइडर आपसे भाव पूछ रहे हैं</string>
+    <string name="hail_routing_job">रास्ता निकाला जा रहा है…</string>
+    <string name="hail_your_fare">आपका किराया (%1$s)</string>
+    <string name="hail_offer_counter_hint">उनकी पेशकश — जवाबी भाव के लिए बदलें</string>
+    <string name="hail_offer_quote_hint">उन्होंने आपसे भाव पूछा है</string>
+    <string name="hail_price_in_instead">इसके बजाय %1$s में दाम</string>
+    <string name="hail_fare_invalid">किराया शून्य से ऊपर की संख्या होनी चाहिए।</string>
+    <string name="hail_take_this_ride">यह राइड लें 🚕</string>
+    <string name="hail_pass">रहने दें</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">%1$s की पेशकश भेजी — %2$s का इंतज़ार</string>
+    <string name="hail_the_rider">राइडर</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">मेरी लोकेशन</string>
+    <string name="hail_no_route">उन दो जगहों के बीच कोई रास्ता नहीं मिला</string>
+    <string name="hail_pickup_label">पिकअप</string>
+    <string name="hail_locating">लोकेशन ली जा रही है…</string>
+    <string name="hail_use_my_location">मेरी लोकेशन लें</string>
+    <string name="hail_where_to">कहाँ जाना है?</string>
+    <string name="hail_address_hint">पता या दुकान/जगह का नाम</string>
+    <string name="hail_finding_route">रास्ता खोजा जा रहा है…</string>
+    <string name="hail_route_summary">%1$s · ~%2$d मिनट</string>
+    <string name="hail_route_summary_priced">%1$s · ~%2$d मिनट · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">राइडशेयर ~%1$s %2$.0f · टैक्सी ~%1$s %3$.0f — आपका ड्राइवर पूरा रखता है (राइडशेयर अपने ड्राइवर को ~%1$s %4$.0f देता है)</string>
+    <string name="hail_your_offer">आपकी पेशकश (%1$s)</string>
+    <string name="hail_offer_invalid">पेशकश शून्य से ऊपर की संख्या हो — या भाव पूछने के लिए खाली छोड़ दें।</string>
+    <string name="hail_shards_full">यहाँ हर स्टैंड शार्ड भरा है — थोड़ी देर में फिर कोशिश करें</string>
+    <string name="hail_post_failed">पुकार लग नहीं पाई</string>
+    <string name="hail_osm_privacy">खोज, रास्ता और नक्शा OpenStreetMap के सर्वर इस्तेमाल करते हैं — बस यही एक जगह है जहाँ DUCAT लोकेशन डिवाइस से बाहर भेजता है। ड्राइवरों को सिर्फ़ ~%1$s के इलाक़े दिखते हैं।</string>
+    <string name="hail_post_button">सवारी बुलाएँ 🚕</string>
+    <string name="hail_search">खोजें</string>
+</resources>

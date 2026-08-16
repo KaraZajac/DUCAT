@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="one">नेटिव कोर: %1$d जाँच पास</item>
+        <item quantity="other">नेटिव कोर: %1$d जाँचें पास</item>
+    </plurals>
+    <string name="bridge_checks_failed">नेटिव कोर: %2$d में से %1$d फ़ेल</string>
+    <string name="bridge_jni_note">ये JNI के पार Rust कोर को पुकारते हैं — वही एक परत जहाँ Rust के टेस्ट नहीं पहुँच सकते।</string>
+    <string name="bridge_got_expected">मिला %1$s, अपेक्षित %2$s</string>
+
+    <!-- Check names -->
+    <string name="bridge_check_protocol_version">प्रोटोकॉल संस्करण</string>
+    <string name="bridge_check_capacity_6">6 आउटपुट की क्षमता</string>
+    <string name="bridge_check_capacity_1">1 आउटपुट की क्षमता</string>
+    <string name="bridge_check_float_plan">10 भुगतानों की फ़्लोट योजना</string>
+    <string name="bridge_check_bucket_floor">4.999 XMR का बकेट फ़्लोर</string>
+    <string name="bridge_check_stale_rate">स्टेल दर बढ़ती है</string>
+</resources>

@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">채팅</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">카드 공유</string>
+    <string name="contacts_share_card_body">한 사람에게만 유효해요. 사용되는 순간 효력이 사라져서, 스크린샷이 다른 곳으로 흘러가도 들어올 수 없어요.</string>
+    <string name="contacts_name_to_show_label">표시할 이름 (선택)</string>
+    <string name="contacts_name_to_show_support">상대는 자기 쪽에서 이름을 바꿀 수 있고, 그쪽에선 그 이름이 보여요.</string>
+    <string name="contacts_error_make_card">카드를 만들지 못했어요</string>
+    <string name="contacts_publishing_inbox">수신함을 게시하는 중…</string>
+    <string name="contacts_create_card">카드 만들기</string>
+    <string name="contacts_publishing_note">몇 초 걸려요 — 누군가 닿을 수 있으려면 레코드 두 개를 먼저 게시해야 해요. 앱을 닫아도 계속 작동해요.</string>
+    <string name="contacts_copy_link">링크 복사</string>
+    <string name="contacts_send">보내기</string>
+    <string name="contacts_expires_24h">24시간 후 만료돼요.</string>
+    <string name="contacts_send_your_card">카드 보내기</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">상대의 DUCAT 카드에 카메라를 비추세요</string>
+    <string name="contacts_card_expired_ask_new">그 카드는 만료됐어요. 새 카드를 요청하세요.</string>
+    <string name="contacts_not_a_card">DUCAT 카드가 아니에요</string>
+    <string name="contacts_add_contact_title">연락처 추가</string>
+    <string name="contacts_paste_link_label">상대의 ducat: 링크 붙여넣기</string>
+    <string name="contacts_paste">붙여넣기</string>
+    <string name="contacts_scan">스캔</string>
+    <string name="contacts_card_expired_ask_them">이 카드는 만료됐어요. 새 카드를 요청하세요.</string>
+    <string name="contacts_read_card">카드 읽기</string>
+    <string name="contacts_no_name_given">(이름 없음)</string>
+    <string name="contacts_unverified_name">미검증 — 상대가 직접 입력한 이름이에요</string>
+    <string name="contacts_check_characters">누구인지가 중요하다면, 믿을 수 있는 채널로 이 문자들을 상대와 대조하세요.</string>
+    <string name="contacts_save_them_as_label">저장할 이름</string>
+    <string name="contacts_save_them_as_support">내가 부르는 이름이에요. 나만 봐요.</string>
+    <string name="contacts_error_read_inbox">상대의 수신함을 읽지 못했어요</string>
+    <string name="contacts_reading_inbox">수신함을 읽는 중…</string>
+    <string name="contacts_add_contact_button">연락처 추가</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">그 카드는 이미 사용됐어요. 새 카드를 요청하세요.</string>
+    <string name="contacts_reply_expired">그 카드는 만료됐어요. 새 카드를 요청하세요.</string>
+    <string name="contacts_reply_badsig">링크가 손상됐어요 — 다시 복사해 보세요.</string>
+    <string name="contacts_reply_own_card">그건 본인 카드예요.</string>
+    <string name="contacts_reply_refused">상대가 요청을 거부했어요.</string>
+</resources>

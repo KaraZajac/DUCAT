@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">충전</string>
+    <string name="accounts_top_up_desc">아무 지갑이나 거래소에서 이 주소로 Monero를 보내세요. 평범한 XMR 주소라서, 전송 과정 어디에도 DUCAT이 끼지 않아요.</string>
+    <string name="accounts_no_wallet">아직 지갑이 없어요 — 먼저 설정을 마쳐 주세요.</string>
+    <string name="accounts_copy">복사</string>
+    <string name="accounts_hide">숨기기</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">잔액</string>
+    <string name="accounts_balances_desc">일부러 나눠 놨어요: 지금 쓸 수 있는 돈과 갖고 있는 돈은 달라요.</string>
+    <string name="accounts_waiting_for_node">노드를 기다리는 중이에요.</string>
+    <string name="accounts_spendable">사용 가능</string>
+    <string name="accounts_show_in">%1$s로 표시</string>
+    <string name="accounts_stagenet_fiat_note">Stagenet 코인은 테스트용이에요. 저 금액은 같은 양의 진짜 Monero라면 얼마인지일 뿐 — 이 코인들은 아무 가치가 없어요.</string>
+    <string name="accounts_notes">지폐</string>
+    <string name="accounts_bond">보증금</string>
+    <string name="accounts_bond_none">없음</string>
+    <string name="accounts_scanning_from_genesis_title">체인 처음부터 스캔하는 중</string>
+    <string name="accounts_scanning_from_genesis_desc">이 지갑은 앱이 노드에 닿기 전에 만들어져서 생성 시점을 몰라요. 블록 %2$d개 중 %1$d번째면 하루 넘게 읽어야 해요. 지갑이 그보다 새것이 확실하면 건너뛰세요.</string>
+    <string name="accounts_skip_ahead">건너뛰기</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">여기까지 건너뛰기</string>
+    <string name="accounts_skip_ahead_desc">이 시점 이전에 받은 것은 찾지 못해요. 지갑이 생기기 전이 확실한 시간을 골라 주세요.</string>
+    <string name="accounts_about_a_day_ago">하루쯤 전</string>
+    <string name="accounts_about_a_week_ago">일주일쯤 전</string>
+    <string name="accounts_about_a_month_ago">한 달쯤 전</string>
+    <string name="accounts_skip_option">"%1$s  —  블록 %2$d"</string>
+    <string name="accounts_block_height_label">또는 블록 높이 입력</string>
+    <string name="accounts_use_that_height">이 높이 사용</string>
+    <string name="accounts_cancel">취소</string>
+</resources>

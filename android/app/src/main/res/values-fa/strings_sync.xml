@@ -1,0 +1,29 @@
+<resources>
+    <string name="sync_synced">همگام</string>
+    <string name="sync_not_fully">کاملاً همگام نیست</string>
+    <string name="sync_partial_note">این موجودی فقط همان است که تا حالا خوانده شده — تا پایان اسکن ممکن است کم نشان بدهد.</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">کمتر از یک دقیقه</string>
+    <plurals name="duration_minutes">
+        <item quantity="one">حدود %1$d دقیقه</item>
+        <item quantity="other">حدود %1$d دقیقه</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">حدود %1$d ساعت</item>
+        <item quantity="other">حدود %1$d ساعت</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">حدود %1$d روز</item>
+        <item quantity="other">حدود %1$d روز</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">لغو</string>
+    <string name="scanner_no_camera_title">اجازهٔ دوربین داده نشده</string>
+    <string name="scanner_no_camera_body">اسکن به آن نیاز دارد. باقی DUCAT بدونش کار می‌کند — کارت را همیشه می‌شود به‌جایش به‌صورت لینک جای‌گذاری کرد.</string>
+    <string name="scanner_allow">اجازه بده</string>
+    <string name="scanner_would_not_start">دوربین روشن نشد: %1$s</string>
+    <string name="scanner_torch_off">چراغ خاموش</string>
+    <string name="scanner_torch_on">چراغ روشن</string>
+</resources>

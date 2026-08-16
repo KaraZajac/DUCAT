@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">वापस</string>
+    <string name="profile_calls_themselves">खुद को \"%1$s\" कहते हैं</string>
+    <string name="profile_label_email">ईमेल</string>
+    <string name="profile_label_phone">फ़ोन</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">उन्होंने जो साझा किया</string>
+    <string name="profile_their_claim_note">यह उनका दावा है, कोई जाँच नहीं। DUCAT पर्सोना को कोई चीज़ ईमेल या नंबर से नहीं बाँधती — सिर्फ़ एक कुंजी से।</string>
+    <string name="profile_your_name_for_them_label">उनके लिए आपका नाम</string>
+    <string name="profile_your_name_for_them_support">सिर्फ़ आपको दिखता है। हर जगह यही नाम दिखेगा।</string>
+    <string name="profile_saved">सहेज लिया</string>
+    <string name="profile_save_name">नाम सहेजें</string>
+    <string name="profile_checked">जाँचा हुआ</string>
+    <string name="profile_checked_note">क्रिप्टोग्राफ़िक रूप से सत्यापित। उनका बाँटा हर कार्ड इसी कुंजी से साइन होता है और इसी से जाँचा जाता है।</string>
+    <string name="profile_persona">पर्सोना</string>
+    <string name="profile_told_to_you">आपको बताया गया</string>
+    <string name="profile_told_note">उनका दिया हुआ, किसी चीज़ से सत्यापित नहीं। DUCAT में कुछ भी Monero पते या नाम को पर्सोना से नहीं बाँधता, इसलिए मायने रखे तो इन्हें किसी और तरीके से जाँच लें।</string>
+    <string name="profile_their_name_label">उनका खुद के लिए नाम</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— कोई नहीं दिया —</string>
+    <string name="profile_monero_address">Monero पता</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— साझा नहीं; उन्हें अनुरोध भेजना होगा —</string>
+    <string name="profile_where_reached">वे कहाँ मिलते हैं</string>
+    <string name="profile_their_outbox">उनका आउटबॉक्स</string>
+    <string name="profile_your_outbox">उन तक आपका आउटबॉक्स</string>
+    <string name="profile_open_chat">चैट खोलें</string>
+    <string name="profile_not_built_yet">अभी बना नहीं</string>
+    <string name="profile_not_built_note">तस्वीर, सर्वनाम, ईमेल पता, और ब्लॉक करना। सब वैकल्पिक, सब सेटअप में तय, और सब उसी तरह चलते हैं जैसे नाम — उनका कहा हुआ, हमारा जाँचा हुआ कभी नहीं।</string>
+    <string name="profile_copy">कॉपी करें</string>
+</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">ปิด</string>
+    <string name="ceremony_quoted_body">“%1$s”</string>
+    <string name="ceremony_decline">ปฏิเสธ</string>
+    <string name="ceremony_open_chat">เปิดแชท</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">ขอจากคุณ</string>
+    <string name="ceremony_tax">ภาษี</string>
+    <string name="ceremony_accept_and_pay">ยอมรับและจ่าย</string>
+    <string name="ceremony_no_address">คำขอนี้ไม่มีที่อยู่ — ถามเขาว่าให้ส่งไปที่ไหน</string>
+    <string name="ceremony_accept_opens_confirm">การยอมรับจะเปิดหน้ายืนยัน — จะไม่มีเงินเคลื่อนไหวจนกว่าคุณจะอนุมัติที่นั่น</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">ชำระแล้ว ✓</string>
+    <string name="ceremony_paid_to">ชำระแล้ว · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">เสนอขับรถให้คุณในราคา</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="other">ห่างประมาณ %1$d นาที</item>
+    </plurals>
+    <string name="ceremony_plate">ทะเบียน %1$s</string>
+    <string name="ceremony_accept">ยอมรับ</string>
+    <string name="ceremony_accepting_agrees_fare">การยอมรับคือการตกลงค่าโดยสาร — คุณจ่ายเมื่อจบการเดินทาง ผ่านหน้ายืนยันตามปกติ</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">ยืนยันการเดินทางแล้ว</string>
+    <string name="ceremony_expecting_you">เขากำลังรอคุณอยู่ — เรื่องอื่น ๆ คุยกันในแชท</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">รถของคุณกำลังมา</string>
+    <string name="ceremony_eta_in_chat">เวลาที่จะถึงและเรื่องอื่น ๆ — อยู่ในแชท</string>
+</resources>

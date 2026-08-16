@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">Cadangan</string>
+    <string name="backup_body">Satu file terenkripsi berisi identitas, kunci, dan pengaturanmu. Ekspor yang baru setiap kali ada perubahan penting.</string>
+    <string name="backup_passphrase">Frasa sandi</string>
+    <string name="backup_export">Ekspor</string>
+    <string name="backup_import">Impor</string>
+    <string name="backup_exported_bytes">Terekspor %1$d byte</string>
+    <string name="backup_export_failed">ekspor gagal</string>
+    <string name="backup_restored_title">Dompet dipulihkan</string>
+    <string name="backup_restored_check">Pastikan alamat ini kamu kenali sebelum memercayainya.</string>
+    <string name="backup_opened">Terbuka — %1$d bagian escrow, tinggi pemulihan %2$d</string>
+    <string name="backup_could_not_open">Tidak bisa dibuka — frasa sandi salah, atau file-nya sudah diubah</string>
+    <string name="backup_share_title">Simpan cadangan DUCAT-mu</string>
+</resources>

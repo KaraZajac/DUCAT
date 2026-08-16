@@ -1,0 +1,33 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">अभी कुछ नहीं</string>
+    <string name="activity_empty_desc">चेन पढ़ ली जाने के बाद भुगतान यहाँ दिखते हैं। कुछ देखने के लिए ‘खाते’ से टॉप-अप करें।</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">प्रतीक्षा में</string>
+    <string name="activity_they_ask">%1$s माँग रहे हैं</string>
+    <string name="activity_you_asked">आपने %1$s से माँगे</string>
+    <plurals name="activity_items">
+        <item quantity="one">%1$d चीज़</item>
+        <item quantity="other">%1$d चीज़ें</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">ट्रांज़ैक्शन पढ़ा जा रहा है…</string>
+    <string name="activity_receipt_chip">🧾 रसीद</string>
+    <string name="activity_note_quoted">“%1$s”</string>
+    <string name="activity_sending">भेजा जा रहा है — अभी किसी ब्लॉक में नहीं</string>
+    <string name="activity_spent_unknown">खर्च हुआ, पर कहाँ — यह हम नहीं बता सकते</string>
+    <string name="activity_maybe_change">आपके अपने भुगतान के छुट्टे हो सकते हैं</string>
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="one">%1$d ब्लॉक में अनलॉक होगा</item>
+        <item quantity="other">%1$d ब्लॉक में अनलॉक होगा</item>
+    </plurals>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">%1$s को</string>
+    <string name="activity_from">%1$s से</string>
+    <string name="activity_sent_unrecorded">भेजा गया — पाने वाला दर्ज नहीं</string>
+    <string name="activity_received_unknown">मिला — भेजने वाला अज्ञात</string>
+</resources>

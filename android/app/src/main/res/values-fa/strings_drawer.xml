@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">تعیین نام پروفایل</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">زبان: %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">پرسونای تو</string>
+    <string name="drawer_persona_body">کلیدی که کارت‌هایت با آن امضا می‌شود. کسی نمی‌تواند با آن پیدایت کند — چیزی است که وقتی کارتی از تو دارند، کارت را با آن می‌سنجند.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">دریافت پول</string>
+    <string name="drawer_publish_switch">مخاطبین بتوانند مستقیم به من پول بدهند</string>
+    <string name="drawer_publish_off_note">بدون این، کسی که می‌خواهد به تو پول بدهد باید منتظر یک درخواست بماند.</string>
+    <string name="drawer_publish_on_warning">نشانی‌ات یک بار برای هر مخاطب می‌رود و بارها استفاده می‌شود. هر کسی که زنجیره را ببیند می‌فهمد هر بار به همان یک نفر پول داده شده — حتی کسانی که فقط یک بار به تو پول داده‌اند. درخواست‌ها با نشانیِ هر بار تازه، جلوی این را می‌گیرند.</string>
+    <string name="drawer_publish_scope_note">فقط مخاطبینی که بعد از روشن شدن این اضافه شوند آن را خواهند داشت.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">هنوز مخاطبی نیست. از زبانهٔ گفتگو یکی اضافه کن.</string>
+    <string name="drawer_open_chat">باز کردن گفتگو</string>
+    <string name="drawer_delete_contact">حذف مخاطب</string>
+    <string name="drawer_forget_title">%1$s فراموش شود؟</string>
+    <string name="drawer_forget_body">مخاطب و همهٔ پیام‌هایش حذف می‌شود. برگشت‌پذیر نیست و برای رسیدن دوباره به او کارت تازه‌ای لازم است.</string>
+    <string name="drawer_forget_confirm">فراموش کن</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">انتخاب کن این دستگاه الان چیست. یک حالت کل برنامه را در اختیار می‌گیرد تا وقتی برگردی اینجا و «شخصی» را انتخاب کنی.</string>
+    <string name="mode_personal">شخصی</string>
+    <string name="mode_personal_desc">کیف پول، گفتگوها و فعالیت خودت. حالت پیش‌فرض.</string>
+    <string name="mode_pos">صندوق فروش</string>
+    <string name="mode_pos_desc">یک صندوق: اقلام را ثبت کن یا جمع را تایپ کن و یک کد نشان بده — صورت‌حساب و رسید از همان گفتگویی می‌روند که باز می‌شود.</string>
+    <string name="mode_bartab">حساب دفتری</string>
+    <string name="mode_bartab_desc">یک دفتر حساب: یک بار اسکن، تمام شب اضافه کن، آخر شب یک صورت‌حساب. بعد از رفتن هم می‌توانند پرداخت کنند.</string>
+    <string name="mode_taxi">تاکسی</string>
+    <string name="mode_taxi_desc">کرایه و تاکسی‌متر: ایستگاهی را برای درخواست‌ها زیر نظر بگیر، نرخ موقع شروعِ تاکسی‌متر کتبی ثبت می‌شود، صورت‌حساب دقیقه‌ها را نشان می‌دهد.</string>
+    <string name="mode_donate">کمک‌های مالی</string>
+    <string name="mode_donate_desc">یک کد ثابت که هر کیف پول Monero می‌تواند به آن کمک کند. آن طرف به هیچ برنامه‌ای نیاز نیست.</string>
+</resources>

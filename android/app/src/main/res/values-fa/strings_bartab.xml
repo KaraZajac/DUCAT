@@ -1,0 +1,45 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">حساب‌های باز</string>
+    <string name="bartab_start_tab">باز کردن حساب</string>
+    <string name="bartab_section_running">در جریان</string>
+    <string name="bartab_section_billed">صورت‌حساب رفته — در انتظار پرداخت</string>
+    <string name="bartab_receipt_auto_hint">به محض نشستن پرداخت، رسید خودش برایشان می‌رود — حتی اگر رفته باشند.</string>
+    <string name="bartab_section_settled">تسویه‌شده</string>
+    <string name="bartab_clear">پاک کردن</string>
+    <string name="bartab_nothing_settled">امشب هنوز چیزی تسویه نشده.</string>
+    <string name="bartab_no_tabs">هنوز حسابی نیست. با اولین سفارش یکی باز کن.</string>
+    <plurals name="bartab_items">
+        <item quantity="one">%1$d قلم</item>
+        <item quantity="other">%1$d قلم</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">پرداخت دیده شد — در حال تسویه</string>
+    <string name="bartab_state_billed_unpaid">صورت‌حساب رفته، پرداخت‌نشده</string>
+    <string name="bartab_state_paid_oob">بیرون از DUCAT پرداخت شد ✓</string>
+    <string name="bartab_state_cancelled">لغو شد</string>
+    <string name="bartab_state_paid">پرداخت شد ✓</string>
+    <string name="bartab_new_customer">مشتری جدید</string>
+    <string name="bartab_scan_hint">اسکن می‌کنند یا گوشی را نزدیک می‌کنند — حساب خودش باز می‌شود.</string>
+    <string name="bartab_err_publish_code">انتشار کد ممکن نشد</string>
+    <string name="bartab_or_regular">یا یک مشتری همیشگی</string>
+    <string name="bartab_back">بازگشت</string>
+    <string name="bartab_bill_cancelled_msg">آن صورت‌حساب %1$s XMR لغو شد — چیزی برای پرداخت نیست.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · حساب الان %3$s XMR</string>
+    <string name="bartab_remove_line">حذف</string>
+    <string name="bartab_err_send_bill">ارسال صورت‌حساب ممکن نشد</string>
+    <string name="bartab_settle_bill">تسویه — صورت‌حساب %1$s</string>
+    <string name="bartab_settle_hint">یک صورت‌حساب ریز به گفتگویت با %1$s می‌رود. از هر جایی می‌توانند پرداخت کنند — با رفتن‌شان گفتگو بسته نمی‌شود.</string>
+    <string name="bartab_discard_tab">دور انداختن حساب</string>
+    <string name="bartab_discard_title">این حساب دور انداخته شود؟</string>
+    <string name="bartab_discard_body">حساب و هر چه رویش ثبت شده از این گوشی حذف می‌شود. صورت‌حسابی فرستاده نمی‌شود و این کار برگشت‌پذیر نیست.</string>
+    <string name="bartab_discard_confirm">دور بینداز</string>
+    <string name="bartab_keep_tab">نگه داشتن حساب</string>
+    <string name="bartab_billed_hint">صورت‌حساب رفت. رسید بعد از نشستن پرداخت خودش می‌رود. اگر جور دیگری تسویه شد، همین‌جا بگو:</string>
+    <string name="bartab_paid_outside_button">بیرون از DUCAT پرداخت شد (نقد، کارت)</string>
+    <string name="bartab_cancel_bill">لغو صورت‌حساب</string>
+    <string name="bartab_cancelled_note">لغو شد — در گفتگو به آن‌ها گفته شد.</string>
+    <string name="bartab_paid_oob_note">بیرون از DUCAT پرداخت شد ✓ — رسید رفت، بدون تراکنش پیوست.</string>
+    <string name="bartab_paid_note">پرداخت شد ✓ — رسید رفت.</string>
+    <string name="bartab_remove_from_book">حذف از دفتر حساب‌ها</string>
+    <string name="bartab_back_to_tabs">بازگشت به حساب‌ها</string>
+</resources>

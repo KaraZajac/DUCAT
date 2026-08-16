@@ -1,0 +1,52 @@
+<resources>
+    <!-- app_name is a name and stays "DUCAT"; translatable="false" entries are omitted here. -->
+    <string name="nfc_service_description">Thanh toán tầm gần DUCAT</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">dặm</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">Xong</string>
+    <string name="common_cancel">Hủy</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">Trang chủ</string>
+    <string name="tab_accounts">Tài khoản</string>
+    <string name="tab_activity">Hoạt động</string>
+    <string name="tab_chat">Chat</string>
+    <string name="tab_send_receive">Gửi/Nhận</string>
+
+    <string name="section_status">Trạng thái</string>
+    <string name="section_profile">Hồ sơ</string>
+    <string name="section_contacts">Danh bạ</string>
+    <string name="section_logs">Nhật ký</string>
+    <string name="section_settings">Cài đặt</string>
+    <string name="section_modes">Chế độ hoạt động</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">Ngôn ngữ</string>
+    <string name="settings_language_system">Theo hệ thống</string>
+
+    <string name="settings_appearance_title">Giao diện</string>
+    <string name="theme_follow_system">Theo hệ thống</string>
+    <string name="theme_latte">Latte (sáng)</string>
+    <string name="theme_mocha">Mocha (tối)</string>
+
+    <string name="settings_distance_title">Khoảng cách</string>
+    <string name="distance_follow_system">Theo hệ thống</string>
+    <string name="distance_kilometres">Kilômét</string>
+    <string name="distance_miles">Dặm</string>
+
+    <string name="settings_prices_title">Giá</string>
+    <string name="prices_show_worth">Hiện giá trị của số dư</string>
+    <string name="prices_currency_title">Tiền tệ</string>
+    <string name="prices_this_phone">điện thoại này</string>
+    <string name="prices_source_note">Kiểm tra nhiều nhất hai lần mỗi giờ, từ CoinGecko hoặc Kraken. Tắt đi thì yêu cầu này dừng hẳn.</string>
+    <string name="prices_last_from">Lần gần nhất từ %1$s.</string>
+
+    <string name="settings_privacy_title">Quyền riêng tư</string>
+    <string name="settings_read_receipts">Gửi xác nhận đã đọc</string>
+    <string name="settings_read_receipts_on">Liên hệ thấy được khi bạn đã đọc tin nhắn của họ. Xác nhận cho tin của bạn vẫn hiện như thường, nếu họ có gửi.</string>
+    <string name="settings_read_receipts_off">Tắt — bạn đọc lúc nào là chuyện của bạn. Bạn vẫn thấy của họ nếu họ có gửi.</string>
+</resources>

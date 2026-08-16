@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">%1$sを支援</string>
+    <string name="donate_support">支援</string>
+    <string name="donate_no_wallet">ウォレットがまだありません — 先にセットアップを完了してください。</string>
+    <string name="donate_any_wallet">どのMoneroウォレットからでもここへ寄付できます — このアプリは誰にも要りません。</string>
+    <string name="donate_since_opening">開始からの合計</string>
+    <string name="donate_reuse_warning">このコードはすべての寄付者に使い回されるため、Moneroの公開台帳上では、ここへの寄付同士が結び付けられます。また、印刷されたコードの信頼性は、最後に触れた人次第です — 掲示した先で自分のものか確認してください。</string>
+</resources>

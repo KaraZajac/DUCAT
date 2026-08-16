@@ -1,0 +1,32 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">Chưa có gì</string>
+    <string name="activity_empty_desc">Các khoản thanh toán hiện ở đây sau khi chuỗi được đọc xong. Nạp tiền từ Tài khoản để thấy gì đó.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">Đang chờ</string>
+    <string name="activity_they_ask">%1$s yêu cầu</string>
+    <string name="activity_you_asked">Bạn đã yêu cầu %1$s trả</string>
+    <plurals name="activity_items">
+        <item quantity="other">%1$d món</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">Đang đọc giao dịch…</string>
+    <string name="activity_receipt_chip">🧾 biên nhận</string>
+    <string name="activity_note_quoted">“%1$s”</string>
+    <string name="activity_sending">Đang gửi — chưa vào khối</string>
+    <string name="activity_spent_unknown">Đã chi, nhưng không nói được đi đâu</string>
+    <string name="activity_maybe_change">có thể là tiền thừa từ khoản chính bạn đã trả</string>
+    <!-- %1$s is the date, %2$s the already-pluralized "unlocks in N blocks" -->
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="other">mở khóa sau %1$d khối</item>
+    </plurals>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">Đến %1$s</string>
+    <string name="activity_from">Từ %1$s</string>
+    <string name="activity_sent_unrecorded">Đã gửi — không ghi lại người nhận</string>
+    <string name="activity_received_unknown">Đã nhận — không rõ người gửi</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">すぐ使える額</string>
+    <string name="balance_change_coming_back">お釣り%1$s、%2$sで戻ります</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">今は支払いできません</string>
+    <string name="balance_running_low_title">紙幣が残りわずかです</string>
+    <string name="balance_all_locked_body">お金はここにありますが、すべてお釣りとして拘束されています。再び使うには紙幣を崩してください。</string>
+    <string name="balance_running_low_body">レジ前で困らないよう、今のうちに紙幣を崩しておきましょう。</string>
+    <string name="balance_break_note_action">紙幣を崩す</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="other">紙幣%1$d枚</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">まだ何も解除されていません</string>
+    <string name="balance_notes_then_wait">%1$s — 支払い1回分、その後はお釣り待ちです</string>
+    <string name="balance_notes_one_more">%1$s、あと1回ほど支払えます</string>
+    <string name="balance_notes_more">%1$s、あと%2$d回ほど支払えます</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">まもなく</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="other">約%1$d分</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="other">約%1$d時間</item>
+    </plurals>
+</resources>

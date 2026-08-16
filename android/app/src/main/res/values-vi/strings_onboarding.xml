@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">Thiết lập DUCAT</string>
+    <string name="onb_progress_done">Xong</string>
+    <string name="onb_progress_step">Bước %1$d trên %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">Tạo danh tính của bạn</string>
+    <string name="onb_persona_body">Một cặp khóa trên điện thoại này. Không email, không số điện thoại, không đăng ký với ai — và cũng vì thế mà không ai khôi phục hộ bạn được.</string>
+    <string name="onb_persona_action">Tạo</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">Tạo ví của bạn</string>
+    <string name="onb_wallet_body">Khóa Monero, sinh ra tại đây và giữ tại đây. Đây chính là tiền.</string>
+    <string name="onb_wallet_action">Tạo ví</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">Đặt hạn mức chi tiêu</string>
+    <string name="onb_limits_body">Khoản nhỏ đi thẳng. Khoản lớn hơn sẽ hỏi PIN của bạn. Bạn có thể dời các ngưỡng này bất cứ lúc nào — mặc định vốn đã thận trọng.</string>
+    <string name="onb_limits_action">Giữ mặc định</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">Sẵn sàng</string>
+    <string name="onb_done_body">Nạp tiền khi bạn sẵn sàng. Trước lúc đó, không có gì gặp rủi ro và không có gì để mất.</string>
+    <string name="onb_done_action">Hoàn tất</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">Sao lưu — ngay bây giờ, đừng để sau</string>
+    <string name="onb_backup_body">Một tệp mã hóa duy nhất, bảo vệ bằng cụm mật khẩu bạn chọn. Cất nó ở nơi bạn cất những thứ quan trọng.</string>
+    <string name="onb_backup_forget_title">Nếu bạn quên cụm mật khẩu này</string>
+    <string name="onb_backup_forget_body">thì không có cách nào lấy lại. Không ai giữ bản sao và không có ai để hỏi. Cũng chính vì lẽ đó mà không ai đóng băng hay lấy được tiền của bạn.</string>
+    <string name="onb_backup_address_label">Địa chỉ của bạn</string>
+    <string name="onb_backup_passphrase_label">Cụm mật khẩu</string>
+    <string name="onb_backup_passphrase_good">Tốt</string>
+    <string name="onb_backup_passphrase_short">Ít nhất 8 ký tự</string>
+    <string name="onb_backup_error_incomplete">Thiết lập chưa hoàn tất</string>
+    <string name="onb_backup_create">Tạo bản sao lưu</string>
+    <string name="onb_backup_created">Đã tạo bản sao lưu — %1$d byte.</string>
+    <string name="onb_backup_send_elsewhere">Nó đang nằm trên chính điện thoại này, vậy chưa phải sao lưu. Gửi nó đi nơi khác: trình quản lý mật khẩu, ổ lưu trữ, một thiết bị khác.</string>
+    <string name="onb_backup_send_action">Gửi đi đâu đó</string>
+    <string name="onb_backup_done">Xong</string>
+    <string name="onb_backup_share_chooser">Lưu bản sao lưu DUCAT của bạn</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">Mọi người nên gọi bạn là gì?</string>
+    <string name="onb_profile_name_body">Tên này in trên các thẻ bạn đưa ra. Ai thêm bạn có thể đổi tên bạn ở phía họ, và tên đó mới là tên họ thấy — nên đây là một gợi ý, không phải danh tính.</string>
+    <string name="onb_profile_name_label">Tên (không bắt buộc)</string>
+    <string name="onb_profile_pay_title">Cho liên hệ trả tiền bạn trực tiếp?</string>
+    <string name="onb_profile_pay_yes">Có — nhận tiền dễ hơn</string>
+    <string name="onb_profile_pay_no">Không — họ hỏi, bạn duyệt</string>
+    <string name="onb_profile_pay_yes_detail">Địa chỉ của bạn được gửi tới từng liên hệ và dùng lại. Ai đọc chuỗi đều thấy cùng một người được trả mỗi lần — kể cả những người chỉ trả bạn đúng một lần.</string>
+    <string name="onb_profile_pay_no_detail">Mỗi khoản thanh toán dùng một địa chỉ mới, nên trên chuỗi không gì nối các khoản của bạn lại với nhau. Ai muốn trả tiền bạn phải chờ bạn gửi yêu cầu trước.</string>
+    <string name="onb_profile_change_later">Cả hai đều đổi được sau.</string>
+    <string name="onb_profile_continue">Tiếp tục</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_back">بازگشت</string>
+    <string name="main_menu">منو</string>
+    <string name="main_codes">کدها</string>
+    <string name="main_send_or_receive">ارسال یا دریافت</string>
+    <string name="main_bill_decline">آن صورت‌حساب %1$s XMR را رد می‌کنم — این بار نه.</string>
+    <string name="main_backup_title">پشتیبان بگیر</string>
+    <string name="main_backup_body">مخاطبینی داری که در آخرین پشتیبانت نیستند. بازیابی، پول را برمی‌گرداند اما آدم‌ها را نه.</string>
+    <string name="main_open_backup_settings">باز کردن تنظیمات پشتیبان</string>
+    <string name="main_recent">اخیر</string>
+    <string name="main_see_all">دیدن همه</string>
+    <string name="main_sent">ارسالی</string>
+    <string name="main_received">دریافتی</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sent as a chat message; %1$s is the map link -->
+    <string name="location_where_i_am">📍 Tôi đang ở đây: %1$s</string>
+</resources>

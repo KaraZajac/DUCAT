@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">بازگشت</string>
+    <string name="chat_conversation_settings">تنظیمات گفتگو</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">ارسال نشد</string>
+    <string name="chat_could_not_send_the">%1$s ارسال نشد</string>
+    <string name="chat_what_picture">عکس</string>
+    <string name="chat_what_file">فایل</string>
+    <string name="chat_what_location">موقعیت</string>
+    <string name="chat_what_voice_memo">پیام صوتی</string>
+    <string name="chat_what_card">کارت</string>
+    <string name="chat_what_contact">مخاطب</string>
+    <string name="chat_error_location_fix">موقعیت‌یابی ممکن نشد</string>
+    <string name="chat_recording_placeholder">در حال ضبط… %1$d ثانیه</string>
+    <string name="chat_message_placeholder">پیام</string>
+    <string name="chat_take_picture">گرفتن عکس</string>
+    <string name="chat_hold_to_record">برای ضبط پیام صوتی نگه دار</string>
+    <string name="chat_attach">پیوست</string>
+    <string name="chat_close">بستن</string>
+    <string name="chat_send">ارسال</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">گالری</string>
+    <string name="chat_file">فایل</string>
+    <string name="chat_money_desc">ارسال یا درخواست پول</string>
+    <string name="chat_money">پول</string>
+    <string name="chat_contact">مخاطب</string>
+    <string name="chat_location">موقعیت</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 کارتی برای من — بده به هر کسی که باید به من برسد. یک بار مصرف، یک هفته اعتبار:\n%1$s</string>
+    <string name="chat_decline_bill">آن صورت‌حساب %1$s XMR را رد می‌کنم — این بار نه.</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">کلیدی برای این مخاطب نیست — دست‌دادن کامل نشد. یک کارت تازه از او بخواه.</string>
+    <string name="chat_e2e_notice">پیام‌ها با کلیدهایی رمزگذاری می‌شوند که بعد از استفاده حذف می‌شوند. پیام خوانده‌شده دیگر قابل بازیابی نیست — حتی برای خودت.</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">پیامی را پس گرفتی</string>
+    <string name="chat_they_withdrew">%1$s پیامی را پس گرفت</string>
+    <string name="chat_you_declined">رد کردی</string>
+    <string name="chat_they_declined">%1$s رد کرد</string>
+    <string name="chat_retract_with_quote">%1$s — «%2$s»</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">پیام</string>
+    <string name="chat_delete_note">حذف فقط از این گوشی پاکش می‌کند. طرف مقابل نسخهٔ خودش را دارد — از اینجا دست کسی به آن نمی‌رسد.</string>
+    <string name="chat_copy">کپی</string>
+    <string name="chat_delete">حذف</string>
+    <string name="chat_cancel">لغو</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">همه‌چیز بماند</string>
+    <string name="chat_1_hour">1 ساعت</string>
+    <string name="chat_1_day">1 روز</string>
+    <string name="chat_1_week">1 هفته</string>
+    <string name="chat_clear_confirm_title">این گفتگو پاک شود؟</string>
+    <string name="chat_clear_confirm_text">همهٔ پیام‌های این گفتگو از این گوشی حذف می‌شود و برگشت‌پذیر نیست. طرف مقابل نسخهٔ خودش را نگه می‌دارد.</string>
+    <string name="chat_clear">پاک کردن</string>
+    <string name="chat_conversation_title">گفتگو</string>
+    <string name="chat_delete_after">حذف پیام‌ها از این گوشی بعد از</string>
+    <string name="chat_only_your_copy">فقط نسخهٔ خودت. طرف مقابل نسخهٔ خودش را دارد و از اینجا دست کسی به آن نمی‌رسد.</string>
+    <string name="chat_clear_this_chat">پاک کردن این گفتگو</string>
+    <string name="chat_done">تمام</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 در حال دانلود…</string>
+    <string name="chat_downloading_audio">🎤 در حال دانلود…</string>
+    <string name="chat_downloading_file">📎 در حال دانلود…</string>
+    <string name="chat_picture_desc">عکس</string>
+    <string name="chat_could_not_decode">📷 (قابل خواندن نبود)</string>
+    <string name="chat_you_asked_for">درخواست کردی</string>
+    <string name="chat_asked_you_for">از تو درخواست کرد</string>
+    <string name="chat_receipt_you_issued">رسیدی که صادر کردی</string>
+    <string name="chat_receipt">رسید</string>
+    <string name="chat_you_offered_to_drive">پیشنهاد دادی برسانی</string>
+    <string name="chat_offers_to_drive_you">پیشنهاد می‌دهد تو را برساند</string>
+    <string name="chat_you_accepted_ride">سفر را قبول کردی</string>
+    <string name="chat_ride_accepted">سفر قبول شد</string>
+    <string name="chat_you_sent">فرستادی</string>
+    <string name="chat_sent_you">برایت فرستاد</string>
+    <string name="chat_min_away">حدود %1$d دقیقه فاصله دارد</string>
+    <string name="chat_paid">پرداخت شد ✓</string>
+    <string name="chat_cancelled">لغو شد</string>
+    <string name="chat_review_payment">بررسی پرداخت</string>
+    <string name="chat_no_address">در این درخواست نشانی نیست — بپرس کجا بفرستی.</string>
+    <string name="chat_no_forward_secrecy">بدون محرمانگی پیش‌رو فرستاده شد</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">توقف</string>
+    <string name="chat_play_voice_memo">پخش پیام صوتی</string>
+    <string name="chat_voice_memo">پیام صوتی</string>
+    <string name="chat_size_kb">%1$d کیلوبایت</string>
+    <string name="chat_size_b">%1$d بایت</string>
+    <string name="chat_file_fallback">فایل</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">جمع جزء</string>
+    <string name="chat_tax">مالیات</string>
+    <string name="chat_total">جمع کل</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">عکس نیست</string>
+    <string name="chat_picture_too_big">نشد آن عکس را به‌قدر کافی کوچک کرد</string>
+    <string name="chat_nothing_recorded">چیزی ضبط نشد</string>
+    <string name="chat_memo_too_long">این پیام صوتی خیلی بلند است — چند دقیقه بیشترین حد است</string>
+    <string name="chat_could_not_read_file">آن فایل خوانده نشد</string>
+    <string name="chat_file_too_big">آن فایل %1$d کیلوبایت است — پیوست‌ها تا 1 مگابایت جا دارند</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">اشتراک‌گذاری</string>
+    <string name="chat_card_for_me">کارتی برای من</string>
+    <string name="chat_card_for_me_desc">لینکی یک‌بارمصرف که می‌توانند بدهند به کسی که باید به تو برسد.</string>
+    <string name="chat_someones_profile">یا پروفایل یک نفر — نامش و هر چه خودش خواسته منتشر شود. کد اتصال نیست: آن‌ها مال خود آدم‌هاست که بدهند.</string>
+</resources>

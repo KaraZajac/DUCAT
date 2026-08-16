@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">通信層です。支払いは匿名経路を通るため、タップがどこかへ届く前に、これが動いている必要があります。</string>
+
+    <string name="net_line_bridge">Androidブリッジ</string>
+    <string name="net_ready">準備完了</string>
+    <string name="net_not_set_up">未設定</string>
+    <string name="net_line_node">ノード</string>
+    <string name="net_running">動作中</string>
+    <string name="net_stopped">停止中</string>
+    <string name="net_line_attached">接続</string>
+    <string name="net_line_route_capable">経路構築可能</string>
+    <string name="net_yes">はい</string>
+    <string name="net_not_yet_routes">まだです — これが済むまで経路は作れません</string>
+    <string name="net_line_peers">ピア</string>
+    <string name="net_peers_value">稼働%1$s、信頼%2$s</string>
+    <string name="net_waiting">待機中 %1$d秒 — 経路を作る前に、ノードは自分がどう到達可能かを把握する必要があります</string>
+
+    <string name="net_starting">起動中…</string>
+    <string name="net_start_node">ノードを起動</string>
+    <string name="net_stop">停止</string>
+    <string name="net_testing">テスト中…</string>
+    <string name="net_test_route">経路をテスト</string>
+    <string name="net_route_ok">経路を確保しました — %1$sバイトのブロブ</string>
+    <string name="net_route_failed">経路の確立に失敗しました: %1$s</string>
+</resources>

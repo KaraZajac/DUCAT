@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notification channel -->
+    <string name="notify_channel_name">메시지 및 결제</string>
+    <string name="notify_channel_desc">메시지, 계산서, 영수증, 들어오는 돈이에요.</string>
+
+    <!-- Lock-screen public fallback: the fact, never the figure -->
+    <string name="notify_public_activity">활동</string>
+
+    <!-- Inbound message wording; %1$s sender, %2$s amount, %3$s note -->
+    <string name="notify_asks_for">%1$s님이 %2$s 요청</string>
+    <string name="notify_asks_for_note">%1$s님이 %2$s 요청 — %3$s</string>
+    <string name="notify_sent">%1$s님이 %2$s 보냄</string>
+    <string name="notify_receipt">%1$s님의 영수증 — %2$s</string>
+</resources>

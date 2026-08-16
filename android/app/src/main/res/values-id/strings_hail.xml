@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">Panggil tumpangan</string>
+    <string name="hail_card_standing">Panggilan terpasang — menunggu sopir</string>
+    <string name="hail_card_pitch">Pasang tujuanmu di pangkalan yang dipantau para sopir.</string>
+    <string name="hail_standing_at">Terpasang di %1$s</string>
+    <string name="hail_take_it_down">Turunkan</string>
+    <string name="hail_awaiting_offer">%1$s mengambil panggilanmu — menunggu tawaran mereka…</string>
+    <string name="hail_cancel">Batal</string>
+    <string name="hail_parked_offer">%1$s menawarkan %2$s</string>
+    <string name="hail_view_the_offer">Lihat tawarannya</string>
+    <string name="hail_post_it_again">Pasang lagi</string>
+    <string name="hail_expired_unclaimed">Tidak ada yang mengambil panggilanmu sebelum kedaluwarsa.</string>
+    <string name="hail_claimed_check_chats">Seorang sopir mengambil panggilanmu — cek chatmu.</string>
+    <string name="hail_accept_message">Sampai jumpa</string>
+    <string name="hail_decline_message">Tidak, terima kasih</string>
+    <string name="hail_declined_post_again">Kamu menolak — pasang lagi?</string>
+    <string name="hail_posted_waiting">Terpasang. Menunggu sopir…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">Penumpang menolak</string>
+    <string name="hail_rider_declined_body">Mereka melewatkan tawaranmu. Panggilan mereka sudah hilang dari papan.</string>
+    <string name="hail_ok">OK</string>
+    <string name="hail_on_duty">Sedang bertugas</string>
+    <string name="hail_net_wide">jaring lebar — ~%1$s melintang</string>
+    <string name="hail_net_nearby">memantau ~%1$s melintang</string>
+    <string name="hail_net_here">area kamu saja, ~%1$s</string>
+    <string name="hail_stop">Berhenti</string>
+    <string name="hail_no_hails_map">Belum ada panggilan terpasang — nanti muncul di sini.</string>
+    <string name="hail_quote_me">minta harga</string>
+    <string name="hail_driving_title">Mengemudi</string>
+    <string name="hail_driving_pitch">Pantau pangkalan; ambil panggilan. Mengambil satu membuka percakapan dengan penumpang — tawarkan harga di sana, bertemu di sana, tagih di akhir seperti perjalanan biasa.</string>
+    <string name="hail_range_just_here">Di sini saja</string>
+    <string name="hail_range_nearby">Sekitar</string>
+    <string name="hail_range_wide">Luas</string>
+    <string name="hail_range_desc_here">~%1$s — blok kota yang padat</string>
+    <string name="hail_range_desc_wide">~%1$s melintang — pedesaan atau malam sepi</string>
+    <string name="hail_range_desc_nearby">~%1$s melintang — yang umum</string>
+    <string name="hail_getting_location">Mengambil lokasimu…</string>
+    <string name="hail_drive_here">Mengemudi di sini — pantau areaku</string>
+    <string name="hail_stand_label">Pangkalan</string>
+    <string name="hail_stand_placeholder">nama pangkalan, atau 📍 di atas</string>
+    <string name="hail_watch">Pantau</string>
+    <string name="hail_watching_neighbours">Memantau sel kamu dan 8 tetangganya — %1$s +8</string>
+    <string name="hail_board_empty">Papan kosong. Mengecek tiap beberapa detik…</string>
+    <string name="hail_offers_amount">menawarkan %1$s</string>
+    <string name="hail_offers_amount_both">menawarkan %1$s · %2$s</string>
+    <string name="hail_asks_quote">memintamu memasang harga</string>
+    <string name="hail_triage_pickup">jemput ~%1$s</string>
+    <string name="hail_triage_trip">perjalanan ~%1$s</string>
+    <string name="hail_stands_for_min">terpasang %1$d menit lagi</string>
+    <string name="hail_view_job">Lihat pekerjaan</string>
+    <string name="hail_take_it">Ambil</string>
+    <string name="hail_location_fix_failed">tidak bisa mendapatkan titik lokasi</string>
+    <string name="hail_beaten_to_it">Ada yang mendahuluimu untuk yang itu.</string>
+    <string name="hail_on_my_way">🚕 Dalam perjalanan.</string>
+    <string name="hail_on_my_way_car">🚕 Dalam perjalanan — cari %1$s.</string>
+    <string name="hail_on_my_way_plate">🚕 Dalam perjalanan, pelat %1$s.</string>
+    <string name="hail_on_my_way_car_plate">🚕 Dalam perjalanan — cari %1$s, pelat %2$s.</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">Tutup</string>
+    <string name="hail_job_title">Pekerjaannya</string>
+    <string name="hail_to_pickup">ke titik jemput: %1$s · ~%2$d menit</string>
+    <string name="hail_the_ride">perjalanannya: %1$s · ~%2$d menit</string>
+    <string name="hail_offer_amount">tawaran: %1$s</string>
+    <string name="hail_offer_amount_both">tawaran: %1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">semuanya untukmu — aplikasi rideshare membayar ~%1$s %2$.0f untuk perjalanan ini</string>
+    <string name="hail_rider_asks_quote">penumpang memintamu memasang harga</string>
+    <string name="hail_routing_job">Menghitung rute pekerjaan…</string>
+    <string name="hail_your_fare">Tarifmu (%1$s)</string>
+    <string name="hail_offer_counter_hint">tawaran mereka — ubah untuk menawar balik</string>
+    <string name="hail_offer_quote_hint">mereka memintamu memasang harga</string>
+    <string name="hail_price_in_instead">Pakai harga dalam %1$s</string>
+    <string name="hail_fare_invalid">Tarif harus berupa angka di atas nol.</string>
+    <string name="hail_take_this_ride">Ambil perjalanan ini 🚕</string>
+    <string name="hail_pass">Lewati</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">Menawarkan %1$s — menunggu %2$s</string>
+    <string name="hail_the_rider">penumpangnya</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">Lokasiku</string>
+    <string name="hail_no_route">tidak ada rute di antara titik-titik itu</string>
+    <string name="hail_pickup_label">Penjemputan</string>
+    <string name="hail_locating">Mencari lokasi…</string>
+    <string name="hail_use_my_location">Pakai lokasiku</string>
+    <string name="hail_where_to">Mau ke mana?</string>
+    <string name="hail_address_hint">alamat atau nama tempat usaha</string>
+    <string name="hail_finding_route">Mencari rute…</string>
+    <string name="hail_route_summary">%1$s · ~%2$d menit</string>
+    <string name="hail_route_summary_priced">%1$s · ~%2$d menit · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">rideshare ~%1$s %2$.0f · taksi ~%1$s %3$.0f — sopirmu menyimpan semuanya (rideshare membayar sopirnya ~%1$s %4$.0f)</string>
+    <string name="hail_your_offer">Tawaranmu (%1$s)</string>
+    <string name="hail_offer_invalid">Tawaran harus berupa angka di atas nol — atau kosongkan untuk minta penawaran harga.</string>
+    <string name="hail_shards_full">semua shard pangkalan di sini penuh — coba lagi sebentar lagi</string>
+    <string name="hail_post_failed">tidak bisa memasang panggilan</string>
+    <string name="hail_osm_privacy">Pencarian, rute, dan peta memakai server OpenStreetMap — satu-satunya tempat DUCAT mengirim lokasi ke luar perangkat. Sopir hanya melihat area ~%1$s.</string>
+    <string name="hail_post_button">Panggil 🚕</string>
+    <string name="hail_search">Cari</string>
+</resources>

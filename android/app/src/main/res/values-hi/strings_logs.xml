@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Header counts -->
+    <plurals name="logs_line_count">
+        <item quantity="one">%1$d लाइन</item>
+        <item quantity="other">%1$d लाइनें</item>
+    </plurals>
+    <string name="logs_warn_count">%1$d चेतावनी</string>
+    <string name="logs_error_count">%1$d त्रुटि</string>
+
+    <!-- Toolbar actions -->
+    <string name="logs_copy_all">सब कॉपी करें</string>
+    <string name="logs_share">शेयर करें</string>
+    <string name="logs_send_logs">लॉग भेजें</string>
+    <string name="logs_clear">साफ़ करें</string>
+    <string name="logs_copied">कॉपी हो गया। कुंजियाँ और मैसेज का टेक्स्ट इनमें कभी नहीं होते।</string>
+
+    <!-- Level filter chips -->
+    <string name="logs_filter_all">सभी</string>
+    <string name="logs_filter_info">जानकारी</string>
+    <string name="logs_filter_warn">चेतावनी</string>
+    <string name="logs_filter_error">त्रुटि</string>
+
+    <string name="logs_empty">अभी कुछ लॉग नहीं। ऐप के सिंक करने, भेजने और पाने के साथ गतिविधि यहाँ दिखती है।</string>
+</resources>

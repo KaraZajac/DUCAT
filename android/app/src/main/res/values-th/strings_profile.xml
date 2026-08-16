@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">กลับ</string>
+    <string name="profile_calls_themselves">เรียกตัวเองว่า \"%1$s\"</string>
+    <string name="profile_label_email">อีเมล</string>
+    <string name="profile_label_phone">โทรศัพท์</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">สิ่งที่เขาแชร์</string>
+    <string name="profile_their_claim_note">เป็นคำกล่าวอ้างของเขา ไม่ใช่การตรวจสอบ ไม่มีอะไรผูกตัวตน DUCAT เข้ากับอีเมลหรือเบอร์โทร — ผูกกับคีย์เท่านั้น</string>
+    <string name="profile_your_name_for_them_label">ชื่อที่คุณตั้งให้เขา</string>
+    <string name="profile_your_name_for_them_support">คุณเห็นคนเดียว และเป็นชื่อที่แสดงทุกที่</string>
+    <string name="profile_saved">บันทึกแล้ว</string>
+    <string name="profile_save_name">บันทึกชื่อ</string>
+    <string name="profile_checked">ตรวจสอบแล้ว</string>
+    <string name="profile_checked_note">ยืนยันด้วยวิทยาการเข้ารหัสลับ นามบัตรทุกใบที่เขาแจกถูกเซ็นด้วยคีย์นี้และถูกตรวจกับคีย์นี้</string>
+    <string name="profile_persona">ตัวตน</string>
+    <string name="profile_told_to_you">ที่เขาบอกคุณ</string>
+    <string name="profile_told_note">ให้มาโดยเขาเองและไม่มีอะไรยืนยัน ไม่มีอะไรใน DUCAT ผูกที่อยู่ Monero หรือชื่อเข้ากับตัวตน หากเรื่องนี้สำคัญ ตรวจสอบด้วยช่องทางอื่น</string>
+    <string name="profile_their_name_label">ชื่อที่เขาเรียกตัวเอง</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— ไม่ได้ระบุ —</string>
+    <string name="profile_monero_address">ที่อยู่ Monero</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— ไม่ได้แชร์; เขาต้องส่งคำขอมาเอง —</string>
+    <string name="profile_where_reached">ช่องทางที่ติดต่อเขาได้</string>
+    <string name="profile_their_outbox">กล่องขาออกของเขา</string>
+    <string name="profile_your_outbox">กล่องขาออกของคุณถึงเขา</string>
+    <string name="profile_open_chat">เปิดแชท</string>
+    <string name="profile_not_built_yet">ยังไม่ได้สร้าง</string>
+    <string name="profile_not_built_note">รูปภาพ สรรพนาม อีเมล และการบล็อก ทั้งหมดไม่บังคับ ตั้งได้ระหว่างตั้งค่า และเดินทางแบบเดียวกับชื่อ — เขาเป็นผู้กล่าวอ้าง เราไม่เคยตรวจสอบ</string>
+    <string name="profile_copy">คัดลอก</string>
+</resources>

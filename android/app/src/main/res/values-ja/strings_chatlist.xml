@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">マイカード</string>
+    <string name="chatlist_new_chat">新しいチャット</string>
+    <string name="chatlist_no_conversations">会話はありません</string>
+    <string name="chatlist_empty_hint">カードを直接手渡すか、すでに信頼しているアプリで送ってください。名前で人を見つけることはできません — 誰かに連絡するには、その人がくれたカードが必要です。</string>
+    <string name="chatlist_preview_you">あなた: %1$s</string>
+    <string name="chatlist_no_messages_yet">まだメッセージはありません</string>
+    <string name="chatlist_delete_title">この会話を削除しますか？</string>
+    <string name="chatlist_delete_body">%1$sとのすべてのメッセージがこの端末から削除され、復元できません。%1$sは連絡先に残ります — 「新しいチャット」でいつでも再開できます。</string>
+    <string name="chatlist_delete">削除</string>
+    <string name="chatlist_cancel">キャンセル</string>
+    <string name="chatlist_add_contact">連絡先を追加</string>
+    <string name="chatlist_add_contact_hint">もらったカードをスキャンまたは貼り付け</string>
+    <string name="chatlist_no_contacts_yet">まだ連絡先はありません。</string>
+    <string name="chatlist_preview_requested">💸 %1$s XMRを請求</string>
+    <string name="chatlist_preview_sent">💸 %1$s XMRを送金</string>
+    <string name="chatlist_preview_receipt">🧾 レシート — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">%1$sでリアクション</string>
+    <string name="chatlist_preview_photo">📷 写真</string>
+    <string name="chatlist_time_now">今</string>
+    <string name="chatlist_time_minutes">%1$d分</string>
+    <string name="chatlist_time_hours">%1$d時間</string>
+</resources>

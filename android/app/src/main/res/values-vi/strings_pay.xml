@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">Một địa chỉ Monero, một mã monero:, hoặc một thẻ DUCAT</string>
+    <string name="pay_close">Đóng</string>
+    <string name="pay_send_or_request">Gửi hoặc yêu cầu</string>
+    <string name="pay_scan_a_code">Quét mã</string>
+    <string name="pay_your_contacts">Danh bạ của bạn</string>
+    <string name="pay_contact_vs_address">Trả cho một liên hệ thì kèm được lời nhắn và nằm trong chat của bạn. Trả vào địa chỉ thì không.</string>
+    <string name="pay_or_monero_address">Hoặc một địa chỉ Monero</string>
+    <string name="pay_address_placeholder">5… hoặc 7…</string>
+    <string name="pay_continue">Tiếp tục</string>
+    <string name="pay_not_monero_address">Cái đó trông không giống một địa chỉ Monero.</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">Quay lại</string>
+    <string name="pay_in_ducat">trong DUCAT</string>
+    <string name="pay_monero_address">Địa chỉ Monero</string>
+    <string name="pay_bill">Hóa đơn</string>
+    <string name="pay_add_tip">Thêm tiền boa (%1$s) — tùy chọn</string>
+    <string name="pay_total_with_tip">Tổng gồm tiền boa: %1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">Số bạn đang yêu cầu %1$s trả. Số dư và phí mạng là việc của họ, không phải của bạn — đây là một tin nhắn, chưa phải giao dịch.</string>
+    <string name="pay_them">họ</string>
+    <string name="pay_up_to_after_fees">Tối đa %1$s sau phí</string>
+    <string name="pay_max">Tối đa</string>
+    <string name="pay_max_done">Tối đa ✓</string>
+    <string name="pay_over_max">Số đó nhiều hơn mức bạn gửi được sau khi tính phí.</string>
+    <string name="pay_amount">Số tiền</string>
+    <string name="pay_network_fee_estimated">Phí mạng (ước tính)</string>
+    <string name="pay_total">Tổng</string>
+    <string name="pay_left_after">Còn lại sau đó</string>
+    <string name="pay_uses_notes">Dùng %1$d tờ tiền · thường xác nhận trong khoảng %2$d phút</string>
+    <string name="pay_fee_estimate_note">Phí chỉ là ước tính cho tới khi giao dịch được dựng; con số chính xác hiện sau khi gửi.</string>
+    <string name="pay_speed">Tốc độ</string>
+    <string name="pay_speed_slow">Chậm</string>
+    <string name="pay_speed_normal">Bình thường</string>
+    <string name="pay_speed_fast">Nhanh</string>
+    <string name="pay_speed_fastest">Nhanh nhất</string>
+    <string name="pay_memo_label">Ghi chú — khoản này để làm gì?</string>
+    <string name="pay_send">Gửi</string>
+    <string name="pay_request">Yêu cầu</string>
+    <string name="pay_no_address_hint">%1$s chưa chia sẻ địa chỉ, nên bạn hỏi được nhưng chưa gửi được. Chuyển sang Yêu cầu — nó mang về một địa chỉ.</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">Yêu cầu thanh toán</string>
+    <string name="pay_payment">Thanh toán</string>
+    <string name="pay_request_sent">Đã gửi yêu cầu</string>
+    <string name="pay_could_not_send">không gửi được</string>
+    <string name="pay_no_node">không có node — xem Trạng thái</string>
+    <string name="pay_no_address_error">Họ chưa chia sẻ địa chỉ. Hãy nhờ họ gửi một yêu cầu, hoặc bật \"cho liên hệ trả tiền tôi trực tiếp\".</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">Gửi %1$s?</string>
+    <string name="pay_to">Đến %1$s</string>
+    <string name="pay_plus_fees">Cộng khoảng %1$s phí — tổng %2$s.</string>
+    <string name="pay_irreversible_warning">Thanh toán Monero không thể đảo ngược hay hủy. Kiểm tra kỹ địa chỉ — sai rồi thì không có ai để kêu.</string>
+    <string name="pay_cancel">Hủy</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">मेरा कार्ड</string>
+    <string name="chatlist_new_chat">नई चैट</string>
+    <string name="chatlist_no_conversations">कोई बातचीत नहीं</string>
+    <string name="chatlist_empty_hint">किसी को अपना कार्ड आमने-सामने दें, या जिस ऐप पर पहले से भरोसा है उससे भेज दें। नाम से कोई नहीं मिलता — किसी तक पहुँचने के लिए उनका दिया कार्ड चाहिए।</string>
+    <string name="chatlist_preview_you">आप: %1$s</string>
+    <string name="chatlist_no_messages_yet">अभी कोई मैसेज नहीं</string>
+    <string name="chatlist_delete_title">यह बातचीत मिटा दें?</string>
+    <string name="chatlist_delete_body">%1$s के साथ हर मैसेज इस फ़ोन से मिट जाएगा और वापस नहीं आ सकता। %1$s आपके कॉन्टैक्ट में रहेंगे — ‘नई चैट’ से कभी भी नई शुरू हो जाती है।</string>
+    <string name="chatlist_delete">मिटाएँ</string>
+    <string name="chatlist_cancel">रद्द करें</string>
+    <string name="chatlist_add_contact">कॉन्टैक्ट जोड़ें</string>
+    <string name="chatlist_add_contact_hint">किसी का दिया कार्ड स्कैन करें या चिपकाएँ</string>
+    <string name="chatlist_no_contacts_yet">अभी कोई कॉन्टैक्ट नहीं।</string>
+    <string name="chatlist_preview_requested">💸 %1$s XMR माँगे</string>
+    <string name="chatlist_preview_sent">💸 %1$s XMR भेजे</string>
+    <string name="chatlist_preview_receipt">🧾 रसीद — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">रिएक्शन %1$s</string>
+    <string name="chatlist_preview_photo">📷 फ़ोटो</string>
+    <string name="chatlist_time_now">अभी</string>
+    <string name="chatlist_time_minutes">%1$d मि</string>
+    <string name="chatlist_time_hours">%1$d घं</string>
+</resources>

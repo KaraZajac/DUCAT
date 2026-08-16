@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">閉じる</string>
+    <string name="qrhub_scan_code">コードをスキャン</string>
+    <string name="qrhub_my_code">マイコード</string>
+    <string name="qrhub_scan_prompt">DUCATカードまたはMoneroアドレス</string>
+    <string name="qrhub_not_a_code">このコードはDUCATカードでもMoneroアドレスでもありません。</string>
+    <string name="qrhub_card_failed">そのカードは使えませんでした</string>
+    <string name="qrhub_card_issue_failed">カードを作成できませんでした</string>
+    <string name="qrhub_no_name_set">名前未設定</string>
+    <string name="qrhub_publishing">この端末の電源が切れていても連絡が届くよう、2件のレコードを公開しています。</string>
+    <string name="qrhub_copy_link">リンクをコピー</string>
+    <string name="qrhub_share">共有</string>
+    <string name="qrhub_share_chooser">カードを共有</string>
+    <string name="qrhub_tap_or_scan">端末同士をタップするか、スキャン — どちらでも同じカードです。</string>
+    <string name="qrhub_one_per_code">1つのコードにつき1人です。誰かがこのコードを使うと、次のコードが自動で作られます — 操作は要りません。</string>
+    <string name="qrhub_name_travels">名前と写真はカードと一緒に渡ります。それ以外に共有するものは、カードが開いた接続を通じて後から届きます。</string>
+</resources>

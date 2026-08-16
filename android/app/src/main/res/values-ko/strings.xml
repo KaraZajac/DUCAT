@@ -1,0 +1,52 @@
+<resources>
+    <!-- App metadata: app_name and other translatable="false" entries omitted — they fall back. -->
+    <string name="nfc_service_description">DUCAT 근접 결제</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">마일</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">완료</string>
+    <string name="common_cancel">취소</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">홈</string>
+    <string name="tab_accounts">계좌</string>
+    <string name="tab_activity">활동</string>
+    <string name="tab_chat">채팅</string>
+    <string name="tab_send_receive">송금</string>
+
+    <string name="section_status">상태</string>
+    <string name="section_profile">프로필</string>
+    <string name="section_contacts">연락처</string>
+    <string name="section_logs">로그</string>
+    <string name="section_settings">설정</string>
+    <string name="section_modes">운영 모드</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">언어</string>
+    <string name="settings_language_system">시스템 설정 따르기</string>
+
+    <string name="settings_appearance_title">테마</string>
+    <string name="theme_follow_system">시스템 따르기</string>
+    <string name="theme_latte">라테 (라이트)</string>
+    <string name="theme_mocha">모카 (다크)</string>
+
+    <string name="settings_distance_title">거리</string>
+    <string name="distance_follow_system">시스템 설정 따르기</string>
+    <string name="distance_kilometres">킬로미터</string>
+    <string name="distance_miles">마일</string>
+
+    <string name="settings_prices_title">시세</string>
+    <string name="prices_show_worth">잔액의 가치 표시</string>
+    <string name="prices_currency_title">통화</string>
+    <string name="prices_this_phone">이 휴대폰</string>
+    <string name="prices_source_note">CoinGecko나 Kraken에서 한 시간에 최대 두 번 확인해요. 이 기능을 끄면 요청 자체를 보내지 않아요.</string>
+    <string name="prices_last_from">마지막 출처: %1$s.</string>
+
+    <string name="settings_privacy_title">개인정보 보호</string>
+    <string name="settings_read_receipts">읽음 확인 보내기</string>
+    <string name="settings_read_receipts_on">내가 메시지를 읽으면 연락처가 알 수 있어요. 상대가 보내는 읽음 확인은 이 설정과 상관없이 표시돼요.</string>
+    <string name="settings_read_receipts_off">꺼짐 — 언제 읽었는지는 내 사정이에요. 상대가 보내면 그쪽 읽음 확인은 계속 보여요.</string>
+</resources>

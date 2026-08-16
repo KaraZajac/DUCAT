@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Header counts -->
+    <plurals name="logs_line_count">
+        <item quantity="other">%1$d行</item>
+    </plurals>
+    <string name="logs_warn_count">警告%1$d件</string>
+    <string name="logs_error_count">エラー%1$d件</string>
+
+    <!-- Toolbar actions -->
+    <string name="logs_copy_all">すべてコピー</string>
+    <string name="logs_share">共有</string>
+    <string name="logs_send_logs">ログを送る</string>
+    <string name="logs_clear">クリア</string>
+    <string name="logs_copied">コピーしました。鍵とメッセージ本文は、ここには一切含まれません。</string>
+
+    <!-- Level filter chips -->
+    <string name="logs_filter_all">すべて</string>
+    <string name="logs_filter_info">情報</string>
+    <string name="logs_filter_warn">警告</string>
+    <string name="logs_filter_error">エラー</string>
+
+    <string name="logs_empty">まだログはありません。アプリが同期・送信・受信を行うと、ここに表示されます。</string>
+</resources>

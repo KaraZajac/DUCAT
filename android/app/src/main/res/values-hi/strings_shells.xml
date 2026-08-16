@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
+    <string name="shells_title_pos">पॉइंट ऑफ़ सेल</string>
+    <string name="shells_tab_register">गल्ला</string>
+    <string name="shells_tab_sales">बिक्री</string>
+    <string name="shells_title_bar_tab">बार टैब</string>
+    <string name="shells_tab_tabs">टैब</string>
+    <string name="shells_tab_closed">बंद</string>
+    <string name="shells_title_taxi">टैक्सी</string>
+    <string name="shells_tab_fares">किराए</string>
+    <string name="shells_tab_meter">मीटर</string>
+    <string name="shells_tab_rides">राइड</string>
+    <string name="shells_title_donations">दान</string>
+    <string name="shells_tab_code">कोड</string>
+    <string name="shells_menu">मेन्यू</string>
+    <string name="shells_today">आज</string>
+    <string name="shells_billed_waiting">बिल भेजा — इंतज़ार</string>
+    <string name="shells_settled">चुकता</string>
+    <string name="shells_no_sales_yet">आज अभी कोई बिक्री नहीं।</string>
+    <string name="shells_no_rides_yet">आज अभी कोई राइड नहीं।</string>
+    <string name="shells_payment_seen_settling">भुगतान दिखा — चुकता हो रहा है</string>
+    <string name="shells_billed_unpaid">बिल भेजा, भुगतान बाकी</string>
+    <string name="shells_paid_outside">DUCAT से बाहर चुकाया ✓</string>
+    <string name="shells_paid">चुकाया ✓</string>
+</resources>

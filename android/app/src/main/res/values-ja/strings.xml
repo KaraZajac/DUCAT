@@ -1,0 +1,52 @@
+<resources>
+    <!-- App metadata. app_name stays "DUCAT" in every language: it is a name. -->
+    <string name="nfc_service_description">DUCATのタッチ決済</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">マイル</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">完了</string>
+    <string name="common_cancel">キャンセル</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">ホーム</string>
+    <string name="tab_accounts">口座</string>
+    <string name="tab_activity">履歴</string>
+    <string name="tab_chat">チャット</string>
+    <string name="tab_send_receive">送金</string>
+
+    <string name="section_status">ステータス</string>
+    <string name="section_profile">プロフィール</string>
+    <string name="section_contacts">連絡先</string>
+    <string name="section_logs">ログ</string>
+    <string name="section_settings">設定</string>
+    <string name="section_modes">動作モード</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">言語</string>
+    <string name="settings_language_system">システムに従う</string>
+
+    <string name="settings_appearance_title">外観</string>
+    <string name="theme_follow_system">システムに従う</string>
+    <string name="theme_latte">ラテ（ライト）</string>
+    <string name="theme_mocha">モカ（ダーク）</string>
+
+    <string name="settings_distance_title">距離</string>
+    <string name="distance_follow_system">システムに従う</string>
+    <string name="distance_kilometres">キロメートル</string>
+    <string name="distance_miles">マイル</string>
+
+    <string name="settings_prices_title">価格</string>
+    <string name="prices_show_worth">残高の価値を表示する</string>
+    <string name="prices_currency_title">通貨</string>
+    <string name="prices_this_phone">この端末</string>
+    <string name="prices_source_note">CoinGeckoまたはKrakenから、多くても1時間に2回確認します。オフにするとリクエスト自体を行いません。</string>
+    <string name="prices_last_from">最終取得元: %1$s。</string>
+
+    <string name="settings_privacy_title">プライバシー</string>
+    <string name="settings_read_receipts">既読通知を送る</string>
+    <string name="settings_read_receipts_on">連絡先には、あなたがメッセージを読んだことが伝わります。相手が送ってくれば、相手の既読はどちらにしても表示されます。</string>
+    <string name="settings_read_receipts_off">オフ — いつ読んだかはあなたの自由です。相手が送ってくれば、相手の既読は引き続き表示されます。</string>
+</resources>

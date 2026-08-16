@@ -1,0 +1,45 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">खुले टैब</string>
+    <string name="bartab_start_tab">टैब शुरू करें</string>
+    <string name="bartab_section_running">चालू</string>
+    <string name="bartab_section_billed">बिल भेजा — भुगतान का इंतज़ार</string>
+    <string name="bartab_receipt_auto_hint">भुगतान पहुँचते ही रसीद अपने-आप उन तक चली जाती है — उनके निकल जाने के बाद भी।</string>
+    <string name="bartab_section_settled">चुकता</string>
+    <string name="bartab_clear">साफ़ करें</string>
+    <string name="bartab_nothing_settled">आज रात अभी कुछ चुकता नहीं हुआ।</string>
+    <string name="bartab_no_tabs">अभी कोई टैब नहीं। पहला ऑर्डर आते ही एक शुरू करें।</string>
+    <plurals name="bartab_items">
+        <item quantity="one">%1$d चीज़</item>
+        <item quantity="other">%1$d चीज़ें</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">भुगतान दिखा — चुकता हो रहा है</string>
+    <string name="bartab_state_billed_unpaid">बिल भेजा, भुगतान बाकी</string>
+    <string name="bartab_state_paid_oob">DUCAT से बाहर चुकाया ✓</string>
+    <string name="bartab_state_cancelled">रद्द</string>
+    <string name="bartab_state_paid">चुकाया ✓</string>
+    <string name="bartab_new_customer">नया ग्राहक</string>
+    <string name="bartab_scan_hint">वे स्कैन करें या टैप — टैब अपने-आप खुल जाता है।</string>
+    <string name="bartab_err_publish_code">कोड जारी नहीं हो पाया</string>
+    <string name="bartab_or_regular">या कोई जाना-पहचाना ग्राहक</string>
+    <string name="bartab_back">वापस</string>
+    <string name="bartab_bill_cancelled_msg">%1$s XMR का वह बिल रद्द है — कुछ नहीं चुकाना।</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · टैब अब %3$s XMR</string>
+    <string name="bartab_remove_line">हटाएँ</string>
+    <string name="bartab_err_send_bill">बिल भेजा नहीं जा सका</string>
+    <string name="bartab_settle_bill">चुकता करें — बिल %1$s</string>
+    <string name="bartab_settle_hint">%1$s के साथ आपकी बातचीत में एक ब्योरेवार बिल। वे कहीं से भी चुका सकते हैं — उनके जाने पर थ्रेड बंद नहीं होता।</string>
+    <string name="bartab_discard_tab">टैब मिटाएँ</string>
+    <string name="bartab_discard_title">यह टैब मिटा दें?</string>
+    <string name="bartab_discard_body">टैब और उस पर चढ़ी हर चीज़ इस फ़ोन से मिट जाती है। कोई बिल नहीं भेजा जाता, और यह वापस नहीं हो सकता।</string>
+    <string name="bartab_discard_confirm">मिटाएँ</string>
+    <string name="bartab_keep_tab">टैब रखें</string>
+    <string name="bartab_billed_hint">बिल भेज दिया। भुगतान पहुँचते ही रसीद अपने-आप उन तक जाएगी। अगर हिसाब किसी और तरीके से चुकता हुआ हो, तो यहाँ बताएँ:</string>
+    <string name="bartab_paid_outside_button">DUCAT से बाहर चुकाया (नकद, कार्ड)</string>
+    <string name="bartab_cancel_bill">बिल रद्द करें</string>
+    <string name="bartab_cancelled_note">रद्द — बातचीत में उन्हें बता दिया गया।</string>
+    <string name="bartab_paid_oob_note">DUCAT से बाहर चुकाया ✓ — रसीद भेजी, कोई ट्रांज़ैक्शन जुड़ा नहीं।</string>
+    <string name="bartab_paid_note">चुकाया ✓ — रसीद भेज दी।</string>
+    <string name="bartab_remove_from_book">टैब बही से हटाएँ</string>
+    <string name="bartab_back_to_tabs">टैब पर वापस</string>
+</resources>

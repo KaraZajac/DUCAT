@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_back">वापस</string>
+    <string name="main_menu">मेन्यू</string>
+    <string name="main_codes">कोड</string>
+    <string name="main_send_or_receive">भेजें या पाएँ</string>
+    <string name="main_bill_decline">%1$s XMR का वह बिल अस्वीकार — इस बार नहीं।</string>
+    <string name="main_backup_title">बैकअप लें</string>
+    <string name="main_backup_body">आपके कुछ कॉन्टैक्ट पिछले बैकअप में नहीं हैं। रीस्टोर से पैसा लौट आएगा, लोग नहीं।</string>
+    <string name="main_open_backup_settings">बैकअप सेटिंग्स खोलें</string>
+    <string name="main_recent">हाल का</string>
+    <string name="main_see_all">सब देखें</string>
+    <string name="main_sent">भेजा</string>
+    <string name="main_received">मिला</string>
+</resources>

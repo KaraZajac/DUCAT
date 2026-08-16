@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">बंद करें</string>
+    <string name="qrhub_scan_code">कोड स्कैन करें</string>
+    <string name="qrhub_my_code">मेरा कोड</string>
+    <string name="qrhub_scan_prompt">DUCAT कार्ड या Monero पता</string>
+    <string name="qrhub_not_a_code">यह कोड न DUCAT कार्ड है, न Monero पता।</string>
+    <string name="qrhub_card_failed">वह कार्ड चला नहीं</string>
+    <string name="qrhub_card_issue_failed">कार्ड नहीं बन पाया</string>
+    <string name="qrhub_no_name_set">कोई नाम नहीं रखा</string>
+    <string name="qrhub_publishing">दो रिकॉर्ड जारी हो रहे हैं, ताकि फ़ोन बंद होने पर भी लोग आप तक पहुँच सकें।</string>
+    <string name="qrhub_copy_link">लिंक कॉपी करें</string>
+    <string name="qrhub_share">शेयर करें</string>
+    <string name="qrhub_share_chooser">अपना कार्ड शेयर करें</string>
+    <string name="qrhub_tap_or_scan">फ़ोन टैप करें, या स्कैन — कार्ड दोनों तरह एक ही।</string>
+    <string name="qrhub_one_per_code">एक कोड, एक व्यक्ति। जैसे ही कोई इसे ले लेता है, अगला अपने-आप बन जाता है — कुछ करना नहीं।</string>
+    <string name="qrhub_name_travels">आपका नाम और तस्वीर इसके साथ जाते हैं। बाकी जो आप साझा करते हैं, वह बाद में आता है — उसी कनेक्शन से जो यह खोलता है।</string>
+</resources>

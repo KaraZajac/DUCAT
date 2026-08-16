@@ -1,0 +1,28 @@
+<resources>
+    <!-- MyProfileEditor.kt -->
+    <string name="myprofile_avatar_read_error">그 사진을 읽지 못했어요.</string>
+    <string name="myprofile_your_picture">내 사진</string>
+    <string name="myprofile_add_picture">사진 추가</string>
+    <string name="myprofile_picture_note">보내기 전에 섬네일로 줄여요 — 연락처 레코드에 실려 가는데, 거긴 얼굴 하나 들어갈 자리지 사진이 들어갈 자리가 아니거든요.</string>
+    <string name="myprofile_remove">삭제</string>
+    <string name="myprofile_name_label">이름</string>
+    <string name="myprofile_name_support">건네는 카드에 표시돼요. 나를 추가한 사람은 이름을 바꿀 수 있어요.</string>
+    <string name="myprofile_pronouns">대명사</string>
+    <string name="myprofile_email">이메일</string>
+    <string name="myprofile_phone">전화번호</string>
+    <string name="myprofile_phone_hint">숫자만, 국가번호 포함</string>
+    <string name="myprofile_signal">Signal</string>
+    <string name="myprofile_signal_hint">name.12</string>
+    <string name="myprofile_driving_note">운전하시나요? 호출을 받으면 승객에게 이게 보여요 — 처음 보는 사람이 길가에서 맞는 차를 찾는 방법이에요.</string>
+    <string name="myprofile_car_model">차종</string>
+    <string name="myprofile_car_model_hint">Toyota Corolla</string>
+    <string name="myprofile_car_colour">차 색상</string>
+    <string name="myprofile_car_colour_hint">파랑</string>
+    <string name="myprofile_plate">차량 번호판</string>
+    <string name="myprofile_plate_hint">KAR-4242</string>
+    <string name="myprofile_share_switch">새 연락처와 공유</string>
+    <string name="myprofile_share_on_note">누군가 내 카드를 받으면 위 내용이 모두 전달돼요. Monero 주소는 따로 스위치가 있어요.</string>
+    <string name="myprofile_share_off_note">이름만 전달돼요. 나머지는 이 기기에 남아요.</string>
+    <string name="myprofile_saved">저장됨</string>
+    <string name="myprofile_save">저장</string>
+</resources>

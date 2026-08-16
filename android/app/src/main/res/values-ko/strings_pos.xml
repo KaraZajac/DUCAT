@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">이번 판매</string>
+    <string name="pos_items">품목</string>
+    <string name="pos_quick_amount">빠른 금액</string>
+    <string name="pos_total_in">합계 (%1$s)</string>
+    <string name="pos_request_amount">%1$s 요청</string>
+    <string name="pos_request_payment">결제 요청</string>
+    <string name="pos_sale">판매</string>
+    <string name="pos_remove">삭제</string>
+    <string name="pos_network_fee_note">네트워크 수수료는 손님이 네트워크에 내는 거예요 — 계산서에는 절대 들어가지 않아요.</string>
+    <string name="pos_charge_amount">%1$s 청구</string>
+    <string name="pos_add_first_item">첫 품목을 추가하면 판매가 시작돼요.</string>
+    <string name="pos_item">품목</string>
+    <string name="pos_add_line">줄 추가</string>
+    <string name="pos_tax">세금</string>
+    <string name="pos_error_publish_code">코드를 게시하지 못했어요</string>
+    <string name="pos_error_bill_not_sent">연결은 됐는데 계산서가 가지 않았어요: %1$s</string>
+    <string name="pos_getting_code_ready">코드를 준비하는 중…</string>
+    <string name="pos_scan_hint">손님이 DUCAT에서 이걸 스캔해요. 스캔하는 순간 위 계산서가 손님 휴대폰에 도착해요.</string>
+    <string name="pos_tap_hint">또는 폰을 맞대세요 — 어느 쪽이든 같은 계산서예요</string>
+    <string name="pos_payment_seen">결제 확인 ✓</string>
+    <string name="pos_payment_settling">결제가 네트워크에 들어갔어요 — 정산까지 2분쯤이에요. 도착하면 영수증이 저절로 가요.</string>
+    <string name="pos_bill_sent_to">%1$s에게 계산서를 보냈어요</string>
+    <string name="pos_the_customer">손님</string>
+    <string name="pos_billed_hint">손님이 자기 휴대폰에서 확인해요. 결제가 체인에 오르면 영수증이 자동으로 가요 — 여기서 할 일은 없어요.</string>
+    <string name="pos_paid">결제 완료 ✓</string>
+    <string name="pos_receipt_sent_to">%1$s에게 영수증을 보냈어요.</string>
+    <string name="pos_back">뒤로</string>
+    <string name="pos_new_sale">새 판매</string>
+    <string name="pos_new_sale_settles">새 판매 (이 건은 알아서 정산돼요)</string>
+    <string name="pos_cancel_sale">판매 취소</string>
+</resources>

@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">प्रोफ़ाइल नाम रखें</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">%1$s बोली जा रही है</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">आपका पर्सोना</string>
+    <string name="drawer_persona_body">वह कुंजी जिससे आपके कार्ड साइन होते हैं। इससे आपको कोई ढूँढ नहीं सकता — कार्ड हाथ में आने पर उसे इसी से जाँचा जाता है।</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">पैसे पाना</string>
+    <string name="drawer_publish_switch">कॉन्टैक्ट मुझे सीधे भुगतान कर सकें</string>
+    <string name="drawer_publish_off_note">इसके बिना, आपको भुगतान करने वाले को किसी अनुरोध का इंतज़ार करना होगा।</string>
+    <string name="drawer_publish_on_warning">आपका पता हर कॉन्टैक्ट के पास एक बार जाता है, और दोहराया जाता है। चेन देख सकने वाला कोई भी बता सकता है कि हर बार उसी व्यक्ति को भुगतान हुआ — वे भी जिन्होंने आपको बस एक बार भुगतान किया। अनुरोध हर बार नया पता साथ ले जाकर इससे बचते हैं।</string>
+    <string name="drawer_publish_scope_note">यह चालू होने के बाद जुड़े कॉन्टैक्ट के पास ही यह होगा।</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">अभी कोई कॉन्टैक्ट नहीं। चैट टैब से एक जोड़ें।</string>
+    <string name="drawer_open_chat">चैट खोलें</string>
+    <string name="drawer_delete_contact">कॉन्टैक्ट मिटाएँ</string>
+    <string name="drawer_forget_title">%1$s को भुला दें?</string>
+    <string name="drawer_forget_body">इससे कॉन्टैक्ट और उनका हर मैसेज मिट जाता है। ये वापस नहीं आ सकते, और उन तक दोबारा पहुँचने के लिए नया कार्ड चाहिए।</string>
+    <string name="drawer_forget_confirm">भुला दें</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">चुनें कि यह डिवाइस अभी क्या है। कोई मोड पूरे ऐप को तब तक सँभाल लेता है जब तक आप यहाँ लौटकर ‘निजी’ नहीं चुनते।</string>
+    <string name="mode_personal">निजी</string>
+    <string name="mode_personal_desc">आपका वॉलेट, चैट और गतिविधि। डिफ़ॉल्ट।</string>
+    <string name="mode_pos">पॉइंट ऑफ़ सेल</string>
+    <string name="mode_pos_desc">एक गल्ला: चीज़ें चढ़ाएँ या कुल लिखें, एक कोड दिखाएँ — बिल और रसीद उसी बातचीत से आते-जाते हैं जो यह खोलता है।</string>
+    <string name="mode_bartab">बार टैब</string>
+    <string name="mode_bartab_desc">टैब बही: एक बार स्कैन, रात भर जोड़ते जाएँ, बंद करते समय एक बिल। वे जाने के बाद भी चुका सकते हैं।</string>
+    <string name="mode_taxi">टैक्सी</string>
+    <string name="mode_taxi_desc">किराया और मीटर: स्टैंड पर पुकारों की नज़र रखें, मीटर शुरू होते ही दर लिखित में, बिल में मिनट दिखते हैं।</string>
+    <string name="mode_donate">दान</string>
+    <string name="mode_donate_desc">एक स्थायी कोड, जिस पर कोई भी Monero वॉलेट दे सकता है। उनकी तरफ़ किसी ऐप की ज़रूरत नहीं।</string>
+</resources>

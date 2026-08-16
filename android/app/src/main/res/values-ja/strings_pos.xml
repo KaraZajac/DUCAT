@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">この会計</string>
+    <string name="pos_items">商品</string>
+    <string name="pos_quick_amount">クイック金額</string>
+    <string name="pos_total_in">合計（%1$s）</string>
+    <string name="pos_request_amount">%1$sを請求</string>
+    <string name="pos_request_payment">支払いを請求</string>
+    <string name="pos_sale">会計</string>
+    <string name="pos_remove">削除</string>
+    <string name="pos_network_fee_note">ネットワーク手数料はお客がネットワークに払うものです — 請求額には決して含まれません。</string>
+    <string name="pos_charge_amount">%1$sを請求</string>
+    <string name="pos_add_first_item">最初の商品を追加して会計を始めてください。</string>
+    <string name="pos_item">商品</string>
+    <string name="pos_add_line">行を追加</string>
+    <string name="pos_tax">税</string>
+    <string name="pos_error_publish_code">コードを公開できませんでした</string>
+    <string name="pos_error_bill_not_sent">接続はされましたが、請求を送れませんでした: %1$s</string>
+    <string name="pos_getting_code_ready">コードを準備中…</string>
+    <string name="pos_scan_hint">お客がDUCATでこれをスキャンすると、その瞬間に上の請求が相手の端末に届きます。</string>
+    <string name="pos_tap_hint">または端末同士をタップ — どちらでも同じ請求です</string>
+    <string name="pos_payment_seen">支払い確認 ✓</string>
+    <string name="pos_payment_settling">支払いはネットワーク上にあります — 精算中、約2分です。着金するとレシートは自動で送られます。</string>
+    <string name="pos_bill_sent_to">%1$sに請求を送りました</string>
+    <string name="pos_the_customer">お客</string>
+    <string name="pos_billed_hint">お客は自分の端末で確認します。支払いがチェーンに着金するとレシートは自動で相手へ届きます — ここでやることはもうありません。</string>
+    <string name="pos_paid">支払い済み ✓</string>
+    <string name="pos_receipt_sent_to">%1$sにレシートを送りました。</string>
+    <string name="pos_back">戻る</string>
+    <string name="pos_new_sale">新しい会計</string>
+    <string name="pos_new_sale_settles">新しい会計（この会計は自動で精算されます）</string>
+    <string name="pos_cancel_sale">会計をキャンセル</string>
+</resources>

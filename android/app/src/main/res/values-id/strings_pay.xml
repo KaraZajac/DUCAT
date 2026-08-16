@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">Alamat Monero, kode monero:, atau kartu DUCAT</string>
+    <string name="pay_close">Tutup</string>
+    <string name="pay_send_or_request">Kirim atau minta</string>
+    <string name="pay_scan_a_code">Pindai kode</string>
+    <string name="pay_your_contacts">Kontakmu</string>
+    <string name="pay_contact_vs_address">Pembayaran ke kontak membawa catatan dan masuk ke chatmu. Ke alamat tidak.</string>
+    <string name="pay_or_monero_address">Atau alamat Monero</string>
+    <string name="pay_address_placeholder">5… atau 7…</string>
+    <string name="pay_continue">Lanjut</string>
+    <string name="pay_not_monero_address">Itu tidak tampak seperti alamat Monero.</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">Kembali</string>
+    <string name="pay_in_ducat">di DUCAT</string>
+    <string name="pay_monero_address">Alamat Monero</string>
+    <string name="pay_bill">Tagihan</string>
+    <string name="pay_add_tip">Tambah tip (%1$s) — opsional</string>
+    <string name="pay_total_with_tip">Total dengan tip: %1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">Jumlah yang kamu minta dari %1$s. Saldo dan biaya jaringan urusan mereka, bukan urusanmu — ini pesan, bukan transaksi.</string>
+    <string name="pay_them">mereka</string>
+    <string name="pay_up_to_after_fees">Hingga %1$s setelah biaya</string>
+    <string name="pay_max">Maks</string>
+    <string name="pay_max_done">Maks ✓</string>
+    <string name="pay_over_max">Itu lebih dari yang bisa kamu kirim setelah biaya dihitung.</string>
+    <string name="pay_amount">Jumlah</string>
+    <string name="pay_network_fee_estimated">Biaya jaringan (perkiraan)</string>
+    <string name="pay_total">Total</string>
+    <string name="pay_left_after">Sisa setelahnya</string>
+    <string name="pay_uses_notes">Memakai %1$d lembaran · biasanya terkonfirmasi dalam sekitar %2$d menit</string>
+    <string name="pay_fee_estimate_note">Biayanya masih perkiraan sampai transaksi dibangun; angka pastinya tampil setelah dikirim.</string>
+    <string name="pay_speed">Kecepatan</string>
+    <string name="pay_speed_slow">Lambat</string>
+    <string name="pay_speed_normal">Normal</string>
+    <string name="pay_speed_fast">Cepat</string>
+    <string name="pay_speed_fastest">Tercepat</string>
+    <string name="pay_memo_label">Catatan — untuk apa ini?</string>
+    <string name="pay_send">Kirim</string>
+    <string name="pay_request">Minta</string>
+    <string name="pay_no_address_hint">%1$s belum membagikan alamat, jadi kamu bisa meminta tapi belum bisa mengirim. Beralihlah ke Minta — permintaan membawa alamat kembali.</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">Permintaan pembayaran</string>
+    <string name="pay_payment">Pembayaran</string>
+    <string name="pay_request_sent">Permintaan terkirim</string>
+    <string name="pay_could_not_send">tidak bisa terkirim</string>
+    <string name="pay_no_node">tidak ada node — cek Status</string>
+    <string name="pay_no_address_error">Mereka belum membagikan alamat. Minta mereka mengirim permintaan, atau menyalakan \"izinkan kontak membayarku langsung\".</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">Kirim %1$s?</string>
+    <string name="pay_to">Ke %1$s</string>
+    <string name="pay_plus_fees">Ditambah sekitar %1$s biaya — total %2$s.</string>
+    <string name="pay_irreversible_warning">Pembayaran Monero tidak bisa dibatalkan atau ditarik kembali. Periksa alamatnya — tidak ada tempat mengadu kalau salah.</string>
+    <string name="pay_cancel">Batal</string>
+</resources>

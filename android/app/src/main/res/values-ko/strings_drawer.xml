@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">프로필 이름 설정</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">%1$s 사용 중</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">나의 페르소나</string>
+    <string name="drawer_persona_body">내 카드에 서명하는 키예요. 이 키로 나를 찾을 수는 없어요 — 카드를 받은 사람이 그 카드를 대조해 보는 기준이에요.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">돈 받기</string>
+    <string name="drawer_publish_switch">연락처가 나에게 바로 결제하도록 허용</string>
+    <string name="drawer_publish_off_note">이게 없으면, 나에게 돈을 보내려는 사람은 요청을 기다려야 해요.</string>
+    <string name="drawer_publish_on_warning">내 주소가 각 연락처에 한 번씩 전달되고 재사용돼요. 체인을 볼 수 있는 사람은 매번 같은 사람이 받았다는 걸 알 수 있어요 — 딱 한 번 보낸 사람까지도요. 요청은 매번 새 주소를 담아서 그 문제를 피해요.</string>
+    <string name="drawer_publish_scope_note">이걸 켠 뒤에 추가한 연락처만 주소를 받아요.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">아직 연락처가 없어요. 채팅 탭에서 추가하세요.</string>
+    <string name="drawer_open_chat">채팅 열기</string>
+    <string name="drawer_delete_contact">연락처 삭제</string>
+    <string name="drawer_forget_title">%1$s님을 잊을까요?</string>
+    <string name="drawer_forget_body">연락처와 주고받은 모든 메시지가 삭제돼요. 복구할 수 없고, 다시 연락하려면 새 카드가 필요해요.</string>
+    <string name="drawer_forget_confirm">잊기</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">이 기기가 지금 무엇인지 고르세요. 모드를 고르면 여기로 돌아와 개인을 고를 때까지 앱 전체가 그 모드가 돼요.</string>
+    <string name="mode_personal">개인</string>
+    <string name="mode_personal_desc">내 지갑, 채팅, 활동. 기본값이에요.</string>
+    <string name="mode_pos">계산대(POS)</string>
+    <string name="mode_pos_desc">계산대예요: 품목을 찍거나 합계를 입력하고 코드 하나를 보여 주세요 — 계산서와 영수증은 그때 열리는 대화로 오가요.</string>
+    <string name="mode_bartab">바 탭</string>
+    <string name="mode_bartab_desc">탭 장부예요: 처음 한 번 스캔하고 밤새 추가한 뒤, 마감에 계산서 하나. 손님은 떠난 뒤에도 결제할 수 있어요.</string>
+    <string name="mode_taxi">택시</string>
+    <string name="mode_taxi_desc">요금과 미터기예요: 승강장의 호출을 지켜보고, 미터가 시작될 때 요율을 글로 남기고, 계산서에 시간이 표시돼요.</string>
+    <string name="mode_donate">후원</string>
+    <string name="mode_donate_desc">어떤 Monero 지갑이든 보낼 수 있는 상시 코드예요. 상대 쪽엔 앱이 필요 없어요.</string>
+</resources>

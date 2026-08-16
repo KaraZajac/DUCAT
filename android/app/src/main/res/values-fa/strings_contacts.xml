@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">گفتگو</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">کارتت را به اشتراک بگذار</string>
+    <string name="contacts_share_card_body">برای یک نفر است. همین که استفاده‌اش کند از کار می‌افتد — پس اسکرین‌شاتی که سر از جای دیگری درآورد راهی به داخل نیست.</string>
+    <string name="contacts_name_to_show_label">نامی که نشان داده شود (اختیاری)</string>
+    <string name="contacts_name_to_show_support">می‌توانند در سمت خودشان نام دیگری رویت بگذارند؛ همان نام را خواهند دید.</string>
+    <string name="contacts_error_make_card">ساخت کارت ممکن نشد</string>
+    <string name="contacts_publishing_inbox">در حال انتشار صندوق ورودی‌ات…</string>
+    <string name="contacts_create_card">ساخت کارت</string>
+    <string name="contacts_publishing_note">چند ثانیه طول می‌کشد — قبل از اینکه کسی بتواند به تو برسد باید دو رکورد منتشر شود. بعد از بستن برنامه هم به کارشان ادامه می‌دهند.</string>
+    <string name="contacts_copy_link">کپی لینک</string>
+    <string name="contacts_send">ارسال</string>
+    <string name="contacts_expires_24h">تا 24 ساعت اعتبار دارد.</string>
+    <string name="contacts_send_your_card">کارتت را بفرست</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">دوربین را به سمت کارت DUCAT او بگیر</string>
+    <string name="contacts_card_expired_ask_new">آن کارت منقضی شده. یک کارت تازه بخواه.</string>
+    <string name="contacts_not_a_card">این کارت DUCAT نیست</string>
+    <string name="contacts_add_contact_title">افزودن مخاطب</string>
+    <string name="contacts_paste_link_label">لینک ducat: او را جای‌گذاری کن</string>
+    <string name="contacts_paste">جای‌گذاری</string>
+    <string name="contacts_scan">اسکن</string>
+    <string name="contacts_card_expired_ask_them">این کارت منقضی شده. از او یک کارت تازه بخواه.</string>
+    <string name="contacts_read_card">خواندن کارت</string>
+    <string name="contacts_no_name_given">(نامی داده نشده)</string>
+    <string name="contacts_unverified_name">تأییدنشده — این نامی است که خودش تایپ کرده</string>
+    <string name="contacts_check_characters">اگر مهم است این شخص کیست، این نویسه‌ها را از راهی که به آن اعتماد داری با خودش چک کن.</string>
+    <string name="contacts_save_them_as_label">ذخیره با نام</string>
+    <string name="contacts_save_them_as_support">نام تو برای او. فقط خودت می‌بینی.</string>
+    <string name="contacts_error_read_inbox">صندوق ورودی‌اش خوانده نشد</string>
+    <string name="contacts_reading_inbox">در حال خواندن صندوق ورودی‌اش…</string>
+    <string name="contacts_add_contact_button">افزودن مخاطب</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">آن کارت قبلاً استفاده شده. یک کارت تازه از او بخواه.</string>
+    <string name="contacts_reply_expired">آن کارت منقضی شده. یک کارت تازه از او بخواه.</string>
+    <string name="contacts_reply_badsig">آن لینک خراب است — دوباره کپی‌اش کن.</string>
+    <string name="contacts_reply_own_card">این کارت خودت است.</string>
+    <string name="contacts_reply_refused">درخواست را رد کرد.</string>
+</resources>

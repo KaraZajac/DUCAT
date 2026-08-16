@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">Atur nama profil</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">berbahasa %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">Personamu</string>
+    <string name="drawer_persona_body">Kunci yang menandatangani kartu-kartumu. Tidak ada yang bisa menemukanmu lewat kunci ini — ini yang dipakai orang untuk memeriksa kartu begitu mereka memilikinya.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">Menerima pembayaran</string>
+    <string name="drawer_publish_switch">Izinkan kontak membayarku langsung</string>
+    <string name="drawer_publish_off_note">Tanpa ini, orang yang mau membayarmu harus menunggu permintaan.</string>
+    <string name="drawer_publish_on_warning">Alamatmu dikirim sekali ke tiap kontak, lalu dipakai ulang. Siapa pun yang bisa melihat blockchain bisa tahu orang yang sama dibayar tiap kali — termasuk orang yang cuma pernah membayarmu sekali. Permintaan menghindari itu dengan membawa alamat baru setiap kali.</string>
+    <string name="drawer_publish_scope_note">Hanya kontak yang ditambahkan setelah ini menyala yang akan memilikinya.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">Belum ada kontak. Tambahkan dari tab Chat.</string>
+    <string name="drawer_open_chat">Buka chat</string>
+    <string name="drawer_delete_contact">Hapus kontak</string>
+    <string name="drawer_forget_title">Lupakan %1$s?</string>
+    <string name="drawer_forget_body">Ini menghapus kontak dan semua pesan dari mereka. Tidak bisa dipulihkan, dan menghubungi mereka lagi butuh kartu baru.</string>
+    <string name="drawer_forget_confirm">Lupakan</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">Pilih peran perangkat ini sekarang. Sebuah mode mengambil alih seluruh aplikasi sampai kamu kembali ke sini dan memilih Pribadi.</string>
+    <string name="mode_personal">Pribadi</string>
+    <string name="mode_personal_desc">Dompet, chat, dan aktivitasmu. Mode bawaan.</string>
+    <string name="mode_pos">Kasir</string>
+    <string name="mode_pos_desc">Mesin kasir: catat item atau ketik total, tunjukkan satu kode — tagihan dan struk berjalan lewat percakapan yang dibukanya.</string>
+    <string name="mode_bartab">Bon bar</string>
+    <string name="mode_bartab_desc">Buku bon: pindai sekali, tambah semalaman, satu tagihan saat tutup. Mereka bisa membayar setelah pergi.</string>
+    <string name="mode_taxi">Taksi</string>
+    <string name="mode_taxi_desc">Tarif dan argo: pantau pangkalan untuk panggilan, tarif tertulis saat argo jalan, tagihan menunjukkan menitnya.</string>
+    <string name="mode_donate">Donasi</string>
+    <string name="mode_donate_desc">Kode tetap yang bisa diberi oleh dompet Monero mana pun. Tanpa aplikasi di sisi mereka.</string>
+</resources>

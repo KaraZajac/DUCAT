@@ -1,0 +1,32 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">ยังไม่มีอะไร</string>
+    <string name="activity_empty_desc">การชำระเงินจะปรากฏที่นี่เมื่ออ่านเชนแล้ว เติมเงินจากหน้าบัญชีเพื่อให้มีรายการแสดง</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">รอดำเนินการ</string>
+    <string name="activity_they_ask">%1$s ขอ</string>
+    <string name="activity_you_asked">คุณขอจาก %1$s</string>
+    <plurals name="activity_items">
+        <item quantity="other">%1$d รายการ</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">กำลังอ่านธุรกรรม…</string>
+    <string name="activity_receipt_chip">🧾 ใบเสร็จ</string>
+    <string name="activity_note_quoted">“%1$s”</string>
+    <string name="activity_sending">กำลังส่ง — ยังไม่อยู่ในบล็อก</string>
+    <string name="activity_spent_unknown">ถูกใช้จ่ายไปแล้ว แต่บอกไม่ได้ว่าไปที่ใด</string>
+    <string name="activity_maybe_change">อาจเป็นเงินทอนจากการชำระของคุณเอง</string>
+    <!-- %1$s is the date, %2$s the already-pluralized "unlocks in N blocks" -->
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="other">ปลดล็อกในอีก %1$d บล็อก</item>
+    </plurals>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">ถึง %1$s</string>
+    <string name="activity_from">จาก %1$s</string>
+    <string name="activity_sent_unrecorded">ส่งแล้ว — ไม่ได้บันทึกผู้รับ</string>
+    <string name="activity_received_unknown">ได้รับแล้ว — ไม่ทราบผู้ส่ง</string>
+</resources>

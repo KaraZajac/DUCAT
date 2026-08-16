@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notification channel -->
+    <string name="notify_channel_name">ข้อความและการชำระเงิน</string>
+    <string name="notify_channel_desc">ข้อความ บิล ใบเสร็จ หรือเงินเข้า</string>
+
+    <!-- Lock-screen public fallback: the fact, never the figure -->
+    <string name="notify_public_activity">มีความเคลื่อนไหว</string>
+
+    <!-- Inbound message wording; %1$s sender, %2$s amount, %3$s note -->
+    <string name="notify_asks_for">%1$s ขอ %2$s</string>
+    <string name="notify_asks_for_note">%1$s ขอ %2$s — %3$s</string>
+    <string name="notify_sent">%1$s ส่ง %2$s</string>
+    <string name="notify_receipt">ใบเสร็จจาก %1$s — %2$s</string>
+</resources>

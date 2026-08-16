@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">یک نشانی Monero، یک کد monero:، یا یک کارت DUCAT</string>
+    <string name="pay_close">بستن</string>
+    <string name="pay_send_or_request">ارسال یا درخواست</string>
+    <string name="pay_scan_a_code">اسکن کد</string>
+    <string name="pay_your_contacts">مخاطبین تو</string>
+    <string name="pay_contact_vs_address">پرداخت به مخاطب، یادداشت دارد و در گفتگویت می‌نشیند. پرداخت به نشانی نه.</string>
+    <string name="pay_or_monero_address">یا یک نشانی Monero</string>
+    <string name="pay_address_placeholder">5… یا 7…</string>
+    <string name="pay_continue">ادامه</string>
+    <string name="pay_not_monero_address">این شبیه نشانی Monero نیست.</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">بازگشت</string>
+    <string name="pay_in_ducat">در DUCAT</string>
+    <string name="pay_monero_address">نشانی Monero</string>
+    <string name="pay_bill">صورت‌حساب</string>
+    <string name="pay_add_tip">انعام اضافه کن (%1$s) — اختیاری</string>
+    <string name="pay_total_with_tip">جمع با انعام: %1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">چیزی که از %1$s می‌خواهی. موجودی و کارمزد شبکه دغدغهٔ اوست، نه تو — این یک پیام است، نه تراکنش.</string>
+    <string name="pay_them">او</string>
+    <string name="pay_up_to_after_fees">بعد از کارمزد تا %1$s</string>
+    <string name="pay_max">حداکثر</string>
+    <string name="pay_max_done">حداکثر ✓</string>
+    <string name="pay_over_max">با احتساب کارمزد، این بیشتر از حدی است که می‌توانی بفرستی.</string>
+    <string name="pay_amount">مبلغ</string>
+    <string name="pay_network_fee_estimated">کارمزد شبکه (برآوردی)</string>
+    <string name="pay_total">جمع کل</string>
+    <string name="pay_left_after">باقی‌مانده پس از آن</string>
+    <string name="pay_uses_notes">%1$d اسکناس استفاده می‌کند · معمولاً حدود %2$d دقیقه بعد تأیید می‌شود</string>
+    <string name="pay_fee_estimate_note">تا وقتی تراکنش ساخته نشده، کارمزد برآوردی است؛ رقم دقیق بعد از ارسال نشان داده می‌شود.</string>
+    <string name="pay_speed">سرعت</string>
+    <string name="pay_speed_slow">آهسته</string>
+    <string name="pay_speed_normal">معمولی</string>
+    <string name="pay_speed_fast">سریع</string>
+    <string name="pay_speed_fastest">سریع‌ترین</string>
+    <string name="pay_memo_label">یادداشت — بابت چیست؟</string>
+    <string name="pay_send">ارسال</string>
+    <string name="pay_request">درخواست</string>
+    <string name="pay_no_address_hint">%1$s نشانی‌ای به اشتراک نگذاشته، پس فعلاً می‌توانی بخواهی اما نمی‌توانی بفرستی. برو روی «درخواست» — نشانی را با خودش برمی‌گرداند.</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">درخواست پرداخت</string>
+    <string name="pay_payment">پرداخت</string>
+    <string name="pay_request_sent">درخواست فرستاده شد</string>
+    <string name="pay_could_not_send">ارسال نشد</string>
+    <string name="pay_no_node">نودی نیست — وضعیت را ببین</string>
+    <string name="pay_no_address_error">نشانی‌ای به اشتراک نگذاشته‌اند. بگو یک درخواست بفرستند، یا «مخاطبین بتوانند مستقیم به من پول بدهند» را روشن کنند.</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">%1$s فرستاده شود؟</string>
+    <string name="pay_to">به %1$s</string>
+    <string name="pay_plus_fees">به‌علاوهٔ حدود %1$s کارمزد — جمعاً %2$s.</string>
+    <string name="pay_irreversible_warning">پرداخت‌های Monero برگشت یا لغو ندارند. نشانی را چک کن — اگر اشتباه باشد، جایی برای شکایت نیست.</string>
+    <string name="pay_cancel">لغو</string>
+</resources>

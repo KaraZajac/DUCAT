@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">फिर जाँचें</string>
+    <string name="monero_subtitle">जहाँ ट्रांज़ैक्शन प्रसारित होते हैं और चेन पढ़ी जाती है।</string>
+    <string name="monero_finding_node">नोड खोजा जा रहा है…</string>
+    <string name="monero_no_usable_node">कोई काम का नोड नहीं</string>
+    <string name="monero_line_height">हाइट</string>
+    <string name="monero_line_synced">सिंक</string>
+    <string name="monero_line_network">नेटवर्क</string>
+    <string name="monero_line_round_trip">राउंड ट्रिप</string>
+    <string name="monero_synced_yes">हाँ</string>
+    <string name="monero_synced_no">नहीं — बैलेंस बासी रहेंगे</string>
+    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_no_node">कोई नोड नहीं</string>
+    <string name="monero_change_your_node">अपना नोड बदलें</string>
+    <string name="monero_use_own_node">अपना खुद का नोड इस्तेमाल करें</string>
+    <string name="monero_your_node">आपका नोड</string>
+    <string name="monero_use_it">इस्तेमाल करें</string>
+    <string name="monero_back_to_public">वापस सार्वजनिक पर</string>
+    <string name="monero_cancel">रद्द करें</string>
+    <string name="monero_trust_own_title">आपका नोड</string>
+    <string name="monero_trust_own_body">यह आपके बारे में ऐसा कुछ नहीं जान पाता जो आप पहले से न जानते हों।</string>
+    <string name="monero_trust_onion_title">किसी और का नोड, Tor के ऊपर</string>
+    <string name="monero_trust_onion_body">उसे आपके ट्रांज़ैक्शन दिखते हैं, पर यह नहीं कि वे कहाँ से आए।</string>
+    <string name="monero_trust_public_title">किसी और का नोड</string>
+    <string name="monero_trust_public_body">उसे आपका पता और आपके ट्रांज़ैक्शन साथ-साथ दिखते हैं। Dandelion++ ट्रांज़ैक्शन का स्रोत बाकी नेटवर्क से छिपाता है — उस नोड से नहीं छिपा सकता जिसे आपने वह थमाया। इलाज एक ही है: अपना नोड चलाना।</string>
+    <string name="monero_wallet_title">वॉलेट</string>
+    <string name="monero_no_wallet_key_title">इस डिवाइस पर वॉलेट कुंजी नहीं</string>
+    <string name="monero_no_wallet_key_body">इस इंस्टॉल का सेटअप ऐप के वॉलेट सँभालने से पहले पूरा हो गया था, इसलिए स्कैन करने को कुछ नहीं है। इंतज़ार से यह ठीक नहीं होगा — बैकअप से रीस्टोर करें, या ऐप का डेटा साफ़ करके दोबारा सेटअप करें।</string>
+    <string name="monero_scanning_failed">स्कैन विफल</string>
+    <string name="monero_unknown">अज्ञात</string>
+    <string name="monero_scanning_failed_note">ऊपर वाले नोड ने जवाब दिया, इसलिए यह कनेक्शन की नहीं, वॉलेट की अपनी चेन-पढ़ाई की बात है।</string>
+    <string name="monero_not_started">शुरू नहीं हुआ — नोड की तलाश है।</string>
+    <string name="monero_caught_up">ब्लॉक %1$d तक पहुँच गए</string>
+    <string name="monero_block_of">%2$d में से ब्लॉक %1$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="one">%1$d ब्लॉक बाकी</item>
+        <item quantity="other">%1$d ब्लॉक बाकी</item>
+    </plurals>
+    <string name="monero_partial_balance">आपका बैलेंस बस उतना है जितना अब तक पढ़ा गया।</string>
+    <string name="monero_last_window_failed">पिछली विंडो विफल: %1$s</string>
+    <string name="monero_rescan_hint">यह वॉलेट चेन की शुरुआत से स्कैन कर रहा है — हाल में बने वॉलेट के लिए यह ज़रूरत से कहीं ज़्यादा लंबा है।</string>
+    <string name="monero_skip_ahead">आगे कूदें</string>
+</resources>

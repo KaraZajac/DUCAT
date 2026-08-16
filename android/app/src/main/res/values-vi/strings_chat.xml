@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">Quay lại</string>
+    <string name="chat_conversation_settings">Cài đặt cuộc trò chuyện</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">không gửi được</string>
+    <string name="chat_could_not_send_the">không gửi được %1$s</string>
+    <string name="chat_what_picture">ảnh</string>
+    <string name="chat_what_file">tệp</string>
+    <string name="chat_what_location">vị trí</string>
+    <string name="chat_what_voice_memo">ghi âm</string>
+    <string name="chat_what_card">thẻ</string>
+    <string name="chat_what_contact">liên hệ</string>
+    <string name="chat_error_location_fix">không định vị được</string>
+    <string name="chat_recording_placeholder">Đang ghi âm… %1$d giây</string>
+    <string name="chat_message_placeholder">Tin nhắn</string>
+    <string name="chat_take_picture">Chụp ảnh</string>
+    <string name="chat_hold_to_record">Giữ để ghi âm</string>
+    <string name="chat_attach">Đính kèm</string>
+    <string name="chat_close">Đóng</string>
+    <string name="chat_send">Gửi</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">Thư viện</string>
+    <string name="chat_file">Tệp</string>
+    <string name="chat_money_desc">Gửi hoặc yêu cầu tiền</string>
+    <string name="chat_money">Tiền</string>
+    <string name="chat_contact">Liên hệ</string>
+    <string name="chat_location">Vị trí</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 Một tấm thẻ để liên hệ với mình — hãy chuyển cho người cần tìm mình. Một lượt nhận, hạn một tuần:\n%1$s</string>
+    <string name="chat_decline_bill">Từ chối hóa đơn %1$s XMR đó — lần này thì không.</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">Không có khóa cho liên hệ này — bắt tay chưa hoàn tất. Hãy xin họ một thẻ mới.</string>
+    <string name="chat_e2e_notice">Tin nhắn được mã hóa bằng những khóa bị xóa sau khi dùng. Đã đọc rồi thì không thể khôi phục — kể cả bạn cũng không.</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">Bạn đã rút lại một tin nhắn</string>
+    <string name="chat_they_withdrew">%1$s đã rút lại một tin nhắn</string>
+    <string name="chat_you_declined">Bạn đã từ chối</string>
+    <string name="chat_they_declined">%1$s đã từ chối</string>
+    <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">Tin nhắn</string>
+    <string name="chat_delete_note">Xóa chỉ gỡ tin khỏi điện thoại này. Phía bên kia vẫn giữ bản của họ — không gì ở đây với tới được.</string>
+    <string name="chat_copy">Sao chép</string>
+    <string name="chat_delete">Xóa</string>
+    <string name="chat_cancel">Hủy</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">Giữ tất cả</string>
+    <string name="chat_1_hour">1 giờ</string>
+    <string name="chat_1_day">1 ngày</string>
+    <string name="chat_1_week">1 tuần</string>
+    <string name="chat_clear_confirm_title">Xóa sạch cuộc trò chuyện này?</string>
+    <string name="chat_clear_confirm_text">Mọi tin nhắn trong cuộc trò chuyện này sẽ bị xóa khỏi điện thoại và không thể khôi phục. Phía bên kia vẫn giữ bản của họ.</string>
+    <string name="chat_clear">Xóa sạch</string>
+    <string name="chat_conversation_title">Cuộc trò chuyện</string>
+    <string name="chat_delete_after">Xóa tin nhắn trên điện thoại này sau</string>
+    <string name="chat_only_your_copy">Chỉ bản của bạn. Phía bên kia vẫn giữ bản của họ, và không gì ở đây với tới được.</string>
+    <string name="chat_clear_this_chat">Xóa sạch cuộc trò chuyện này</string>
+    <string name="chat_done">Xong</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 đang tải…</string>
+    <string name="chat_downloading_audio">🎤 đang tải…</string>
+    <string name="chat_downloading_file">📎 đang tải…</string>
+    <string name="chat_picture_desc">Ảnh</string>
+    <string name="chat_could_not_decode">📷 (không giải mã được)</string>
+    <string name="chat_you_asked_for">Bạn đã yêu cầu</string>
+    <string name="chat_asked_you_for">Yêu cầu bạn trả</string>
+    <string name="chat_receipt_you_issued">Biên nhận bạn đã phát</string>
+    <string name="chat_receipt">Biên nhận</string>
+    <string name="chat_you_offered_to_drive">Bạn đề nghị chở</string>
+    <string name="chat_offers_to_drive_you">Đề nghị chở bạn</string>
+    <string name="chat_you_accepted_ride">Bạn đã nhận chuyến</string>
+    <string name="chat_ride_accepted">Chuyến đã được nhận</string>
+    <string name="chat_you_sent">Bạn đã gửi</string>
+    <string name="chat_sent_you">Đã gửi cho bạn</string>
+    <string name="chat_min_away">cách khoảng %1$d phút</string>
+    <string name="chat_paid">Đã trả ✓</string>
+    <string name="chat_cancelled">Đã hủy</string>
+    <string name="chat_review_payment">Xem lại thanh toán</string>
+    <string name="chat_no_address">Yêu cầu này không kèm địa chỉ — hãy hỏi họ gửi về đâu.</string>
+    <string name="chat_no_forward_secrecy">Gửi không có bảo mật chuyển tiếp</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">Dừng</string>
+    <string name="chat_play_voice_memo">Phát ghi âm</string>
+    <string name="chat_voice_memo">Ghi âm</string>
+    <string name="chat_size_kb">%1$d KB</string>
+    <string name="chat_size_b">%1$d B</string>
+    <string name="chat_file_fallback">tệp</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">tạm tính</string>
+    <string name="chat_tax">thuế</string>
+    <string name="chat_total">tổng</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">không phải ảnh</string>
+    <string name="chat_picture_too_big">không nén ảnh đó nhỏ đủ được</string>
+    <string name="chat_nothing_recorded">chưa ghi được gì</string>
+    <string name="chat_memo_too_long">đoạn ghi âm đó quá dài — nhiều nhất chỉ vài phút</string>
+    <string name="chat_could_not_read_file">không đọc được tệp đó</string>
+    <string name="chat_file_too_big">tệp đó %1$d KB — tệp đính kèm tối đa 1 MB</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">Chia sẻ</string>
+    <string name="chat_card_for_me">Thẻ liên hệ của tôi</string>
+    <string name="chat_card_for_me_desc">Một liên kết dùng một lần, họ có thể chuyển cho người cần liên hệ với bạn.</string>
+    <string name="chat_someones_profile">Hoặc hồ sơ của ai đó — tên và những gì người đó chọn công khai. Không phải mã kết nối: mã là của họ, họ mới được trao.</string>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">Kiểm tra lại</string>
+    <string name="monero_subtitle">Nơi giao dịch được phát đi và chuỗi được đọc.</string>
+    <string name="monero_finding_node">Đang tìm node…</string>
+    <string name="monero_no_usable_node">không có node dùng được</string>
+    <string name="monero_line_height">chiều cao</string>
+    <string name="monero_line_synced">đồng bộ</string>
+    <string name="monero_line_network">mạng</string>
+    <string name="monero_line_round_trip">khứ hồi</string>
+    <string name="monero_synced_yes">rồi</string>
+    <string name="monero_synced_no">chưa — số dư sẽ bị cũ</string>
+    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_no_node">không có node</string>
+    <string name="monero_change_your_node">Đổi node</string>
+    <string name="monero_use_own_node">Dùng node của riêng bạn</string>
+    <string name="monero_your_node">Node của bạn</string>
+    <string name="monero_use_it">Dùng nó</string>
+    <string name="monero_back_to_public">Về node công cộng</string>
+    <string name="monero_cancel">Hủy</string>
+    <string name="monero_trust_own_title">Node của bạn</string>
+    <string name="monero_trust_own_body">Nó không biết thêm gì về bạn ngoài những gì bạn vốn đã biết.</string>
+    <string name="monero_trust_onion_title">Node của người khác, qua Tor</string>
+    <string name="monero_trust_onion_body">Nó thấy giao dịch của bạn nhưng không thấy chúng đến từ đâu.</string>
+    <string name="monero_trust_public_title">Node của người khác</string>
+    <string name="monero_trust_public_body">Nó thấy địa chỉ và giao dịch của bạn cùng lúc. Dandelion++ giấu nguồn gốc của một giao dịch khỏi phần còn lại của mạng — nhưng không giấu được với node bạn trao nó. Cách chữa là tự chạy node.</string>
+    <string name="monero_wallet_title">Ví</string>
+    <string name="monero_no_wallet_key_title">Không có khóa ví trên thiết bị này</string>
+    <string name="monero_no_wallet_key_body">Bản cài này hoàn tất thiết lập trước khi ứng dụng lưu ví, nên không có gì để quét. Chờ cũng không giải quyết được — hãy khôi phục từ bản sao lưu, hoặc xóa dữ liệu ứng dụng và thiết lập lại.</string>
+    <string name="monero_scanning_failed">Quét thất bại</string>
+    <string name="monero_unknown">không rõ</string>
+    <string name="monero_scanning_failed_note">Node bên trên có trả lời, nên đây là do chính ví đọc chuỗi chứ không phải do kết nối.</string>
+    <string name="monero_not_started">Chưa bắt đầu — đang tìm node.</string>
+    <string name="monero_caught_up">Đã bắt kịp ở khối %1$d</string>
+    <string name="monero_block_of">khối %1$d trên %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="other">còn %1$d khối</item>
+    </plurals>
+    <string name="monero_partial_balance">Số dư của bạn mới chỉ là phần đã đọc xong.</string>
+    <string name="monero_last_window_failed">Cửa sổ gần nhất thất bại: %1$s</string>
+    <string name="monero_rescan_hint">Ví này đang quét từ đầu chuỗi, lâu hơn cần thiết rất nhiều nếu nó mới được tạo gần đây.</string>
+    <string name="monero_skip_ahead">Nhảy tới</string>
+</resources>

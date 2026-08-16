@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">내 카드</string>
+    <string name="chatlist_new_chat">새 채팅</string>
+    <string name="chatlist_no_conversations">대화가 없어요</string>
+    <string name="chatlist_empty_hint">카드를 직접 건네거나, 이미 믿는 앱으로 보내세요. 이름으로는 아무도 찾을 수 없어요 — 누군가에게 닿으려면 그 사람이 준 카드가 필요해요.</string>
+    <string name="chatlist_preview_you">나: %1$s</string>
+    <string name="chatlist_no_messages_yet">아직 메시지가 없어요</string>
+    <string name="chatlist_delete_title">이 대화를 삭제할까요?</string>
+    <string name="chatlist_delete_body">%1$s님과 주고받은 모든 메시지가 이 휴대폰에서 삭제되고 복구할 수 없어요. %1$s님은 연락처에 남아 있어요 — 새 채팅으로 언제든 다시 시작할 수 있어요.</string>
+    <string name="chatlist_delete">삭제</string>
+    <string name="chatlist_cancel">취소</string>
+    <string name="chatlist_add_contact">연락처 추가</string>
+    <string name="chatlist_add_contact_hint">받은 카드를 스캔하거나 붙여넣으세요</string>
+    <string name="chatlist_no_contacts_yet">아직 연락처가 없어요.</string>
+    <string name="chatlist_preview_requested">💸 %1$s XMR 요청</string>
+    <string name="chatlist_preview_sent">💸 %1$s XMR 보냄</string>
+    <string name="chatlist_preview_receipt">🧾 영수증 — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">반응: %1$s</string>
+    <string name="chatlist_preview_photo">📷 사진</string>
+    <string name="chatlist_time_now">방금</string>
+    <string name="chatlist_time_minutes">%1$d분</string>
+    <string name="chatlist_time_hours">%1$d시간</string>
+</resources>

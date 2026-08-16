@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">チャージ</string>
+    <string name="accounts_top_up_desc">任意のウォレットや取引所から、このアドレスへMoneroを送ってください。これは通常のXMRアドレスで、送金にDUCATは一切関わりません。</string>
+    <string name="accounts_no_wallet">ウォレットがまだありません — 先にセットアップを完了してください。</string>
+    <string name="accounts_copy">コピー</string>
+    <string name="accounts_hide">隠す</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">残高</string>
+    <string name="accounts_balances_desc">意図的に分けて表示しています。今すぐ使える額と、所有している額は別物です。</string>
+    <string name="accounts_waiting_for_node">ノードを待っています。</string>
+    <string name="accounts_spendable">利用可能</string>
+    <string name="accounts_show_in">%1$sで表示</string>
+    <string name="accounts_stagenet_fiat_note">stagenetのコインはテスト用コインです。この金額は同じ量の本物のMoneroの価値であり、これ自体に価値はありません。</string>
+    <string name="accounts_notes">紙幣</string>
+    <string name="accounts_bond">保証金</string>
+    <string name="accounts_bond_none">なし</string>
+    <string name="accounts_scanning_from_genesis_title">チェーンの最初からスキャンしています</string>
+    <string name="accounts_scanning_from_genesis_desc">このウォレットはアプリがノードに届かないうちに作られたため、作成時期が分かりません。ブロック%1$d / %2$dの時点では、読み終わるまで丸1日以上かかります。ウォレットがそれより新しいと分かっているなら、先へ飛ばしてください。</string>
+    <string name="accounts_skip_ahead">先へ飛ばす</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">ここまで飛ばす</string>
+    <string name="accounts_skip_ahead_desc">この時点より前に受け取ったものは見つかりません。ウォレットが存在する前だと確信できる時期を選んでください。</string>
+    <string name="accounts_about_a_day_ago">約1日前</string>
+    <string name="accounts_about_a_week_ago">約1週間前</string>
+    <string name="accounts_about_a_month_ago">約1か月前</string>
+    <string name="accounts_skip_option">"%1$s  —  ブロック %2$d"</string>
+    <string name="accounts_block_height_label">またはブロック高を指定</string>
+    <string name="accounts_use_that_height">この高さを使う</string>
+    <string name="accounts_cancel">キャンセル</string>
+</resources>

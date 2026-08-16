@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">Moneroアドレス、monero:コード、またはDUCATカード</string>
+    <string name="pay_close">閉じる</string>
+    <string name="pay_send_or_request">送る・請求する</string>
+    <string name="pay_scan_a_code">コードをスキャン</string>
+    <string name="pay_your_contacts">連絡先</string>
+    <string name="pay_contact_vs_address">連絡先への支払いはメモ付きで、チャットに残ります。アドレスへの支払いは残りません。</string>
+    <string name="pay_or_monero_address">またはMoneroアドレス</string>
+    <string name="pay_address_placeholder">5…または7…</string>
+    <string name="pay_continue">続ける</string>
+    <string name="pay_not_monero_address">Moneroアドレスには見えません。</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">戻る</string>
+    <string name="pay_in_ducat">DUCATで</string>
+    <string name="pay_monero_address">Moneroアドレス</string>
+    <string name="pay_bill">請求書</string>
+    <string name="pay_add_tip">チップを追加（%1$s） — 任意</string>
+    <string name="pay_total_with_tip">チップ込み合計: %1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">%1$sに請求する金額です。相手の残高やネットワーク手数料は相手が気にすることで、あなたには関係ありません — これはメッセージであって、トランザクションではありません。</string>
+    <string name="pay_them">相手</string>
+    <string name="pay_up_to_after_fees">手数料差引後、最大%1$s</string>
+    <string name="pay_max">最大</string>
+    <string name="pay_max_done">最大 ✓</string>
+    <string name="pay_over_max">手数料を含めると、送れる額を超えています。</string>
+    <string name="pay_amount">金額</string>
+    <string name="pay_network_fee_estimated">ネットワーク手数料（見積もり）</string>
+    <string name="pay_total">合計</string>
+    <string name="pay_left_after">送金後の残り</string>
+    <string name="pay_uses_notes">紙幣%1$d枚を使用 · 通常約%2$d分で確定</string>
+    <string name="pay_fee_estimate_note">手数料はトランザクションが作られるまで見積もりです。正確な額は送信後に表示されます。</string>
+    <string name="pay_speed">速度</string>
+    <string name="pay_speed_slow">遅い</string>
+    <string name="pay_speed_normal">普通</string>
+    <string name="pay_speed_fast">速い</string>
+    <string name="pay_speed_fastest">最速</string>
+    <string name="pay_memo_label">メモ — 何のための支払い？</string>
+    <string name="pay_send">送る</string>
+    <string name="pay_request">請求</string>
+    <string name="pay_no_address_hint">%1$sはアドレスを共有していないため、請求はできますが、まだ送金はできません。「請求」に切り替えてください — 請求はアドレスを持ち帰ります。</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">支払いリクエスト</string>
+    <string name="pay_payment">支払い</string>
+    <string name="pay_request_sent">請求を送りました</string>
+    <string name="pay_could_not_send">送信できませんでした</string>
+    <string name="pay_no_node">ノードがありません — ステータスを確認してください</string>
+    <string name="pay_no_address_error">相手はアドレスを共有していません。請求を送ってもらうか、「連絡先からの直接支払いを許可」をオンにしてもらってください。</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">%1$sを送りますか？</string>
+    <string name="pay_to">%1$sへ</string>
+    <string name="pay_plus_fees">手数料約%1$sを加えて、合計%2$s。</string>
+    <string name="pay_irreversible_warning">Moneroの支払いは取り消しも撤回もできません。アドレスを確認してください — 間違っていても訴える先はありません。</string>
+    <string name="pay_cancel">キャンセル</string>
+</resources>

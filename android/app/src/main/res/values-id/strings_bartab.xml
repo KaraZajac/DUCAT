@@ -1,0 +1,44 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">Bon terbuka</string>
+    <string name="bartab_start_tab">Buka bon</string>
+    <string name="bartab_section_running">Berjalan</string>
+    <string name="bartab_section_billed">Ditagih — menunggu pembayaran</string>
+    <string name="bartab_receipt_auto_hint">Struk terkirim sendiri ke mereka begitu pembayaran masuk — bahkan setelah mereka pergi.</string>
+    <string name="bartab_section_settled">Lunas</string>
+    <string name="bartab_clear">Bersihkan</string>
+    <string name="bartab_nothing_settled">Belum ada yang lunas malam ini.</string>
+    <string name="bartab_no_tabs">Belum ada bon. Buka satu saat pesanan pertama datang.</string>
+    <plurals name="bartab_items">
+        <item quantity="other">%1$d item</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">pembayaran terlihat — menyelesaikan</string>
+    <string name="bartab_state_billed_unpaid">ditagih, belum dibayar</string>
+    <string name="bartab_state_paid_oob">dibayar di luar DUCAT ✓</string>
+    <string name="bartab_state_cancelled">dibatalkan</string>
+    <string name="bartab_state_paid">lunas ✓</string>
+    <string name="bartab_new_customer">Pelanggan baru</string>
+    <string name="bartab_scan_hint">Mereka memindai atau menempelkan ponsel — bonnya terbuka sendiri.</string>
+    <string name="bartab_err_publish_code">tidak bisa menerbitkan kode</string>
+    <string name="bartab_or_regular">Atau pelanggan tetap</string>
+    <string name="bartab_back">Kembali</string>
+    <string name="bartab_bill_cancelled_msg">Tagihan %1$s XMR itu dibatalkan — tidak ada yang perlu dibayar.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · bon sekarang %3$s XMR</string>
+    <string name="bartab_remove_line">Hapus</string>
+    <string name="bartab_err_send_bill">tidak bisa mengirim tagihan</string>
+    <string name="bartab_settle_bill">Tutup — tagih %1$s</string>
+    <string name="bartab_settle_hint">Satu tagihan terperinci masuk ke percakapanmu dengan %1$s. Mereka bisa membayar dari mana saja — utasnya tidak tertutup saat mereka pergi.</string>
+    <string name="bartab_discard_tab">Buang bon</string>
+    <string name="bartab_discard_title">Buang bon ini?</string>
+    <string name="bartab_discard_body">Bon dan semua yang tercatat di dalamnya dihapus dari ponsel ini. Tidak ada tagihan yang dikirim, dan ini tidak bisa dibatalkan.</string>
+    <string name="bartab_discard_confirm">Buang</string>
+    <string name="bartab_keep_tab">Simpan bon</string>
+    <string name="bartab_billed_hint">Sudah ditagih. Struk terkirim sendiri ke mereka saat pembayaran masuk. Kalau diselesaikan dengan cara lain, catat di sini:</string>
+    <string name="bartab_paid_outside_button">Dibayar di luar DUCAT (tunai, kartu)</string>
+    <string name="bartab_cancel_bill">Batalkan tagihan</string>
+    <string name="bartab_cancelled_note">Dibatalkan — mereka sudah diberi tahu di percakapan.</string>
+    <string name="bartab_paid_oob_note">Dibayar di luar DUCAT ✓ — struk terkirim, tanpa transaksi terlampir.</string>
+    <string name="bartab_paid_note">Lunas ✓ — struk terkirim.</string>
+    <string name="bartab_remove_from_book">Hapus dari buku bon</string>
+    <string name="bartab_back_to_tabs">Kembali ke bon</string>
+</resources>

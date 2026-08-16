@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">ปิด</string>
+    <string name="qrhub_scan_code">สแกนโค้ด</string>
+    <string name="qrhub_my_code">โค้ดของฉัน</string>
+    <string name="qrhub_scan_prompt">นามบัตร DUCAT หรือที่อยู่ Monero</string>
+    <string name="qrhub_not_a_code">โค้ดนั้นไม่ใช่ทั้งนามบัตร DUCAT และที่อยู่ Monero</string>
+    <string name="qrhub_card_failed">นามบัตรนั้นใช้ไม่ได้</string>
+    <string name="qrhub_card_issue_failed">สร้างนามบัตรไม่สำเร็จ</string>
+    <string name="qrhub_no_name_set">ยังไม่ได้ตั้งชื่อ</string>
+    <string name="qrhub_publishing">กำลังเผยแพร่ข้อมูลสองรายการ เพื่อให้คนติดต่อคุณได้แม้โทรศัพท์เครื่องนี้จะปิดอยู่</string>
+    <string name="qrhub_copy_link">คัดลอกลิงก์</string>
+    <string name="qrhub_share">แชร์</string>
+    <string name="qrhub_share_chooser">แชร์นามบัตรของคุณ</string>
+    <string name="qrhub_tap_or_scan">แตะโทรศัพท์กัน หรือสแกน — ได้นามบัตรเดียวกันทั้งสองทาง</string>
+    <string name="qrhub_one_per_code">หนึ่งคนต่อหนึ่งโค้ด ทันทีที่มีคนรับโค้ดนี้ไป โค้ดถัดไปจะถูกสร้างขึ้นอัตโนมัติ — ไม่ต้องทำอะไรเลย</string>
+    <string name="qrhub_name_travels">ชื่อและรูปของคุณเดินทางไปกับมัน อย่างอื่นที่คุณแชร์จะตามไปทีหลัง ผ่านการเชื่อมต่อที่มันเปิดขึ้น</string>
+</resources>

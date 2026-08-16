@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">백업</string>
+    <string name="backup_body">신원, 키, 설정을 담은 암호화 파일 하나예요. 중요한 게 바뀔 때마다 새로 내보내세요.</string>
+    <string name="backup_passphrase">암호 문구</string>
+    <string name="backup_export">내보내기</string>
+    <string name="backup_import">가져오기</string>
+    <string name="backup_exported_bytes">%1$d바이트 내보냈어요</string>
+    <string name="backup_export_failed">내보내기 실패</string>
+    <string name="backup_restored_title">복원된 지갑</string>
+    <string name="backup_restored_check">이 주소가 아는 주소가 맞는지 확인한 뒤에 믿으세요.</string>
+    <string name="backup_opened">열었어요 — 에스크로 조각 %1$d개, 복원 높이 %2$d</string>
+    <string name="backup_could_not_open">열 수 없었어요 — 암호 문구가 틀렸거나 파일이 변경됐어요</string>
+    <string name="backup_share_title">DUCAT 백업 저장</string>
+</resources>

@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">चैट</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">अपना कार्ड शेयर करें</string>
+    <string name="contacts_share_card_body">एक ही व्यक्ति के लिए। इस्तेमाल होते ही काम करना बंद कर देता है — इसलिए स्क्रीनशॉट कहीं और पहुँच भी जाए, तो वह रास्ता नहीं बनता।</string>
+    <string name="contacts_name_to_show_label">दिखाने का नाम (वैकल्पिक)</string>
+    <string name="contacts_name_to_show_support">वे अपनी तरफ़ आपका नाम बदल सकते हैं; वही नाम उन्हें दिखेगा।</string>
+    <string name="contacts_error_make_card">कार्ड नहीं बन पाया</string>
+    <string name="contacts_publishing_inbox">आपका इनबॉक्स जारी हो रहा है…</string>
+    <string name="contacts_create_card">कार्ड बनाएँ</string>
+    <string name="contacts_publishing_note">इसमें कुछ सेकंड लगते हैं — कोई आप तक पहुँच सके, इससे पहले दो रिकॉर्ड जारी करने होते हैं। ऐप बंद करने के बाद भी वे काम करते रहते हैं।</string>
+    <string name="contacts_copy_link">लिंक कॉपी करें</string>
+    <string name="contacts_send">भेजें</string>
+    <string name="contacts_expires_24h">24 घंटे में समाप्त।</string>
+    <string name="contacts_send_your_card">अपना कार्ड भेजें</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">कैमरा उनके DUCAT कार्ड पर करें</string>
+    <string name="contacts_card_expired_ask_new">वह कार्ड समाप्त हो चुका है। नया माँगें।</string>
+    <string name="contacts_not_a_card">यह DUCAT कार्ड नहीं है</string>
+    <string name="contacts_add_contact_title">कॉन्टैक्ट जोड़ें</string>
+    <string name="contacts_paste_link_label">उनका ducat: लिंक चिपकाएँ</string>
+    <string name="contacts_paste">चिपकाएँ</string>
+    <string name="contacts_scan">स्कैन करें</string>
+    <string name="contacts_card_expired_ask_them">यह कार्ड समाप्त हो चुका है। उनसे नया माँगें।</string>
+    <string name="contacts_read_card">कार्ड पढ़ें</string>
+    <string name="contacts_no_name_given">(कोई नाम नहीं दिया)</string>
+    <string name="contacts_unverified_name">असत्यापित — यह नाम उन्होंने खुद लिखा है</string>
+    <string name="contacts_check_characters">अगर यह मायने रखता है कि सामने कौन है, तो ये अक्षर किसी भरोसेमंद चैनल पर उनसे मिला लें।</string>
+    <string name="contacts_save_them_as_label">इन्हें इस नाम से सहेजें</string>
+    <string name="contacts_save_them_as_support">उनके लिए आपका नाम। सिर्फ़ आपको दिखता है।</string>
+    <string name="contacts_error_read_inbox">उनका इनबॉक्स पढ़ा नहीं जा सका</string>
+    <string name="contacts_reading_inbox">उनका इनबॉक्स पढ़ा जा रहा है…</string>
+    <string name="contacts_add_contact_button">कॉन्टैक्ट जोड़ें</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">वह कार्ड पहले ही इस्तेमाल हो चुका है। उनसे नया माँगें।</string>
+    <string name="contacts_reply_expired">वह कार्ड समाप्त हो चुका है। उनसे नया माँगें।</string>
+    <string name="contacts_reply_badsig">वह लिंक टूटा हुआ है — दोबारा कॉपी करके देखें।</string>
+    <string name="contacts_reply_own_card">यह आपका ही कार्ड है।</string>
+    <string name="contacts_reply_refused">उन्होंने अनुरोध ठुकरा दिया।</string>
+</resources>

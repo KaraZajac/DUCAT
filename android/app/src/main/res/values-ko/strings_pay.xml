@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">Monero 주소, monero: 코드, 또는 DUCAT 카드</string>
+    <string name="pay_close">닫기</string>
+    <string name="pay_send_or_request">보내기 또는 요청</string>
+    <string name="pay_scan_a_code">코드 스캔</string>
+    <string name="pay_your_contacts">내 연락처</string>
+    <string name="pay_contact_vs_address">연락처로 보내는 결제는 메모가 붙고 채팅에 남아요. 주소로 보내면 그렇지 않아요.</string>
+    <string name="pay_or_monero_address">또는 Monero 주소</string>
+    <string name="pay_address_placeholder">5… 또는 7…</string>
+    <string name="pay_continue">계속</string>
+    <string name="pay_not_monero_address">Monero 주소로 보이지 않아요.</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">뒤로</string>
+    <string name="pay_in_ducat">DUCAT에서</string>
+    <string name="pay_monero_address">Monero 주소</string>
+    <string name="pay_bill">계산서</string>
+    <string name="pay_add_tip">팁 추가 (%1$s) — 선택</string>
+    <string name="pay_total_with_tip">팁 포함 합계: %1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">%1$s에게 요청하는 금액이에요. 잔액과 네트워크 수수료는 그쪽이 신경 쓸 일이지 내 일이 아니에요 — 이건 거래가 아니라 메시지예요.</string>
+    <string name="pay_them">상대</string>
+    <string name="pay_up_to_after_fees">수수료 제하고 최대 %1$s</string>
+    <string name="pay_max">최대</string>
+    <string name="pay_max_done">최대 ✓</string>
+    <string name="pay_over_max">수수료까지 치면 보낼 수 있는 금액을 넘어요.</string>
+    <string name="pay_amount">금액</string>
+    <string name="pay_network_fee_estimated">네트워크 수수료 (예상)</string>
+    <string name="pay_total">합계</string>
+    <string name="pay_left_after">결제 후 남는 금액</string>
+    <string name="pay_uses_notes">지폐 %1$d장 사용 · 보통 약 %2$d분이면 확정돼요</string>
+    <string name="pay_fee_estimate_note">수수료는 거래가 만들어지기 전까진 예상치예요; 정확한 값은 보낸 뒤에 표시돼요.</string>
+    <string name="pay_speed">속도</string>
+    <string name="pay_speed_slow">느리게</string>
+    <string name="pay_speed_normal">보통</string>
+    <string name="pay_speed_fast">빠르게</string>
+    <string name="pay_speed_fastest">가장 빠르게</string>
+    <string name="pay_memo_label">메모 — 무슨 돈이에요?</string>
+    <string name="pay_send">보내기</string>
+    <string name="pay_request">요청</string>
+    <string name="pay_no_address_hint">%1$s님이 주소를 공유하지 않아서, 요청은 돼도 아직 보낼 수는 없어요. 요청으로 바꿔 보세요 — 요청이 주소를 담아 와요.</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">결제 요청</string>
+    <string name="pay_payment">결제</string>
+    <string name="pay_request_sent">요청을 보냈어요</string>
+    <string name="pay_could_not_send">보내지 못했어요</string>
+    <string name="pay_no_node">노드 없음 — 상태를 확인하세요</string>
+    <string name="pay_no_address_error">상대가 주소를 공유하지 않았어요. 요청을 보내 달라고 하거나, \"연락처가 나에게 바로 결제하도록 허용\"을 켜 달라고 하세요.</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">%1$s 보낼까요?</string>
+    <string name="pay_to">받는 사람: %1$s</string>
+    <string name="pay_plus_fees">수수료 약 %1$s 추가 — 총 %2$s예요.</string>
+    <string name="pay_irreversible_warning">Monero 결제는 되돌리거나 취소할 수 없어요. 주소를 확인하세요 — 잘못돼도 호소할 곳이 없어요.</string>
+    <string name="pay_cancel">취소</string>
+</resources>

@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">tidak bisa menerbitkan kode</string>
+    <string name="taxi_meter_started_msg">Argo jalan — dasar %1$s XMR, %2$s XMR per menit. Tagihan di akhir menunjukkan menitnya.</string>
+    <string name="taxi_err_terms_not_sent">Mereka terhubung tapi ketentuannya tidak terkirim: %1$s</string>
+    <string name="taxi_set_fare">Atur tarif</string>
+    <string name="taxi_base_label">Dasar (%1$s)</string>
+    <string name="taxi_per_min_label">Per menit (%1$s)</string>
+    <string name="taxi_price_in_instead">Pakai harga dalam %1$s</string>
+    <string name="taxi_rate_locked_hint">Tarif yang diketik dalam %1$s dikunci ke XMR saat perjalanan dimulai — angka yang disepakati penumpang adalah angka yang ditagihkan.</string>
+    <string name="taxi_set_rate_hint">Atur tarif per menit untuk membuka kode penjemputan.</string>
+    <string name="taxi_pickup">Penjemputan</string>
+    <string name="taxi_scan_hint">Penumpang memindai atau menempelkan ponsel. Tarifnya masuk ke percakapan dan argo jalan sendiri.</string>
+    <string name="taxi_meter_terms">dasar %1$s + %2$s/mnt</string>
+    <string name="taxi_rider">penumpang</string>
+    <string name="taxi_line_base_fare">Tarif dasar</string>
+    <string name="taxi_line_metered">%1$d mnt %2$02d dtk × %3$s XMR/mnt</string>
+    <string name="taxi_err_send_fare">tidak bisa mengirim tarif</string>
+    <string name="taxi_end_ride_bill">Akhiri perjalanan — tagih %1$s</string>
+    <string name="taxi_bill_hint">Tagihan menunjukkan menit dan tarifnya. Struk terkirim sendiri ke mereka saat ongkos masuk — bahkan setelah mereka pergi.</string>
+    <string name="taxi_cancel_ride_no_bill">Batalkan perjalanan — tanpa tagihan</string>
+    <string name="taxi_cancel_title">Batalkan perjalanan ini?</string>
+    <string name="taxi_cancel_body">Argo berhenti dan tidak ada tagihan yang dikirim. Menit yang sudah terhitung dibuang dan tidak bisa dipulihkan.</string>
+    <string name="taxi_cancel_confirm">Batalkan perjalanan</string>
+    <string name="taxi_keep_going">Lanjutkan</string>
+</resources>

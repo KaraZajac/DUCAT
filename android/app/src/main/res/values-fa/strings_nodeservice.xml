@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Foreground-service channel and permanent notification -->
+    <string name="nodeservice_channel_name">در دسترس ماندن</string>
+    <string name="nodeservice_channel_desc">DUCAT را در دسترس نگه می‌دارد تا مخاطبین بتوانند پول بفرستند و پیام بدهند.</string>
+    <string name="nodeservice_notification_title">DUCAT در دسترس است</string>
+    <string name="nodeservice_notification_text">تا وقتی این روشن است، مخاطبین می‌توانند به تو برسند.</string>
+</resources>

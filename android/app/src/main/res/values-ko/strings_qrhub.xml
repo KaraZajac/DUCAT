@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">닫기</string>
+    <string name="qrhub_scan_code">코드 스캔</string>
+    <string name="qrhub_my_code">내 코드</string>
+    <string name="qrhub_scan_prompt">DUCAT 카드 또는 Monero 주소</string>
+    <string name="qrhub_not_a_code">이 코드는 DUCAT 카드도 Monero 주소도 아니에요.</string>
+    <string name="qrhub_card_failed">그 카드는 작동하지 않았어요</string>
+    <string name="qrhub_card_issue_failed">카드를 만들지 못했어요</string>
+    <string name="qrhub_no_name_set">이름 미설정</string>
+    <string name="qrhub_publishing">이 휴대폰이 꺼져 있어도 닿을 수 있게 레코드 두 개를 게시하는 중이에요.</string>
+    <string name="qrhub_copy_link">링크 복사</string>
+    <string name="qrhub_share">공유</string>
+    <string name="qrhub_share_chooser">카드 공유</string>
+    <string name="qrhub_tap_or_scan">폰을 맞대거나 스캔하세요 — 어느 쪽이든 같은 카드예요.</string>
+    <string name="qrhub_one_per_code">코드 하나에 한 사람이에요. 누군가 이걸 가져가면 다음 코드가 자동으로 만들어져요 — 할 일이 없어요.</string>
+    <string name="qrhub_name_travels">이름과 사진이 함께 가요. 그 밖에 공유하는 것들은 나중에, 카드가 여는 연결을 타고 도착해요.</string>
+</resources>

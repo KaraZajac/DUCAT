@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">वापस</string>
+    <string name="chat_conversation_settings">बातचीत की सेटिंग्स</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">भेजा नहीं जा सका</string>
+    <string name="chat_could_not_send_the">%1$s भेजने में दिक्कत हुई</string>
+    <string name="chat_what_picture">फ़ोटो</string>
+    <string name="chat_what_file">फ़ाइल</string>
+    <string name="chat_what_location">लोकेशन</string>
+    <string name="chat_what_voice_memo">वॉयस मैसेज</string>
+    <string name="chat_what_card">कार्ड</string>
+    <string name="chat_what_contact">कॉन्टैक्ट</string>
+    <string name="chat_error_location_fix">लोकेशन नहीं मिल पाई</string>
+    <string name="chat_recording_placeholder">रिकॉर्डिंग… %1$d सेकंड</string>
+    <string name="chat_message_placeholder">मैसेज</string>
+    <string name="chat_take_picture">फ़ोटो खींचें</string>
+    <string name="chat_hold_to_record">वॉयस मैसेज के लिए दबाए रखें</string>
+    <string name="chat_attach">अटैच करें</string>
+    <string name="chat_close">बंद करें</string>
+    <string name="chat_send">भेजें</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">गैलरी</string>
+    <string name="chat_file">फ़ाइल</string>
+    <string name="chat_money_desc">पैसे भेजें या माँगें</string>
+    <string name="chat_money">पैसे</string>
+    <string name="chat_contact">कॉन्टैक्ट</string>
+    <string name="chat_location">लोकेशन</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 मेरा एक कार्ड — जिसे मुझ तक पहुँचना हो, उसे दे दें। एक दावा, एक हफ़्ता:\n%1$s</string>
+    <string name="chat_decline_bill">%1$s XMR का वह बिल अस्वीकार — इस बार नहीं।</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">इस कॉन्टैक्ट की कोई कुंजी नहीं — हैंडशेक पूरा नहीं हुआ। उनसे नया कार्ड माँगें।</string>
+    <string name="chat_e2e_notice">मैसेज ऐसी कुंजियों से एन्क्रिप्ट होते हैं जो इस्तेमाल के बाद मिटा दी जाती हैं। एक बार पढ़े जाने पर वापस नहीं लाए जा सकते — आपसे भी नहीं।</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">आपने एक मैसेज वापस लिया</string>
+    <string name="chat_they_withdrew">%1$s ने एक मैसेज वापस लिया</string>
+    <string name="chat_you_declined">आपने मना किया</string>
+    <string name="chat_they_declined">%1$s ने मना किया</string>
+    <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">मैसेज</string>
+    <string name="chat_delete_note">मिटाने से यह सिर्फ़ इस फ़ोन से हटता है। दूसरी तरफ़ उनकी कॉपी रहती है — यहाँ से उस तक कुछ नहीं पहुँच सकता।</string>
+    <string name="chat_copy">कॉपी करें</string>
+    <string name="chat_delete">मिटाएँ</string>
+    <string name="chat_cancel">रद्द करें</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">सब रखें</string>
+    <string name="chat_1_hour">1 घंटा</string>
+    <string name="chat_1_day">1 दिन</string>
+    <string name="chat_1_week">1 हफ़्ता</string>
+    <string name="chat_clear_confirm_title">यह चैट साफ़ कर दें?</string>
+    <string name="chat_clear_confirm_text">इस बातचीत का हर मैसेज इस फ़ोन से मिट जाएगा और वापस नहीं आ सकता। दूसरी तरफ़ उनकी कॉपी रहेगी।</string>
+    <string name="chat_clear">साफ़ करें</string>
+    <string name="chat_conversation_title">बातचीत</string>
+    <string name="chat_delete_after">इस फ़ोन पर मैसेज इतने समय बाद मिटाएँ</string>
+    <string name="chat_only_your_copy">सिर्फ़ आपकी कॉपी। उनकी उनके पास रहती है, और यहाँ से उस तक कुछ नहीं पहुँच सकता।</string>
+    <string name="chat_clear_this_chat">यह चैट साफ़ करें</string>
+    <string name="chat_done">हो गया</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 डाउनलोड हो रही है…</string>
+    <string name="chat_downloading_audio">🎤 डाउनलोड हो रहा है…</string>
+    <string name="chat_downloading_file">📎 डाउनलोड हो रही है…</string>
+    <string name="chat_picture_desc">तस्वीर</string>
+    <string name="chat_could_not_decode">📷 (खुल नहीं पाई)</string>
+    <string name="chat_you_asked_for">आपने माँगे</string>
+    <string name="chat_asked_you_for">आपसे माँगे</string>
+    <string name="chat_receipt_you_issued">आपकी जारी की रसीद</string>
+    <string name="chat_receipt">रसीद</string>
+    <string name="chat_you_offered_to_drive">आपने राइड की पेशकश की</string>
+    <string name="chat_offers_to_drive_you">आपको राइड की पेशकश</string>
+    <string name="chat_you_accepted_ride">आपने राइड स्वीकारी</string>
+    <string name="chat_ride_accepted">राइड स्वीकार हुई</string>
+    <string name="chat_you_sent">आपने भेजे</string>
+    <string name="chat_sent_you">आपको भेजे</string>
+    <string name="chat_min_away">करीब %1$d मिनट दूर</string>
+    <string name="chat_paid">चुकाया ✓</string>
+    <string name="chat_cancelled">रद्द</string>
+    <string name="chat_review_payment">भुगतान देखें</string>
+    <string name="chat_no_address">इस अनुरोध में कोई पता नहीं — उनसे पूछें कि कहाँ भेजना है।</string>
+    <string name="chat_no_forward_secrecy">फ़ॉरवर्ड सीक्रेसी के बिना भेजा गया</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">रोकें</string>
+    <string name="chat_play_voice_memo">वॉयस मैसेज चलाएँ</string>
+    <string name="chat_voice_memo">वॉयस मैसेज</string>
+    <string name="chat_size_kb">%1$d KB</string>
+    <string name="chat_size_b">%1$d B</string>
+    <string name="chat_file_fallback">फ़ाइल</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">उप-योग</string>
+    <string name="chat_tax">टैक्स</string>
+    <string name="chat_total">कुल</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">यह तस्वीर नहीं है</string>
+    <string name="chat_picture_too_big">वह तस्वीर उतनी छोटी नहीं हो पाई जितनी चाहिए</string>
+    <string name="chat_nothing_recorded">कुछ रिकॉर्ड नहीं हुआ</string>
+    <string name="chat_memo_too_long">वह मैसेज बहुत लंबा है — ज़्यादा-से-ज़्यादा कुछ मिनट</string>
+    <string name="chat_could_not_read_file">वह फ़ाइल पढ़ी नहीं जा सकी</string>
+    <string name="chat_file_too_big">वह फ़ाइल %1$d KB की है — अटैचमेंट 1 MB तक जाते हैं</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">शेयर करें</string>
+    <string name="chat_card_for_me">मेरा एक कार्ड</string>
+    <string name="chat_card_for_me_desc">एक-दावे वाला लिंक, जिसे वे उस व्यक्ति को दे सकते हैं जिसे आप तक पहुँचना चाहिए।</string>
+    <string name="chat_someones_profile">या किसी की प्रोफ़ाइल — उनका नाम और जो उन्होंने खुद प्रकाशित करना चुना। यह कनेक्शन कोड नहीं है: वे सिर्फ़ उन्हीं के देने के लिए हैं।</string>
+</resources>

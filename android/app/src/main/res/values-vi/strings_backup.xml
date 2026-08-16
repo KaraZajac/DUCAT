@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">Sao lưu</string>
+    <string name="backup_body">Một tệp mã hóa duy nhất chứa danh tính, khóa và cài đặt của bạn. Hãy xuất bản mới mỗi khi có gì quan trọng thay đổi.</string>
+    <string name="backup_passphrase">Cụm mật khẩu</string>
+    <string name="backup_export">Xuất</string>
+    <string name="backup_import">Nhập</string>
+    <string name="backup_exported_bytes">Đã xuất %1$d byte</string>
+    <string name="backup_export_failed">xuất thất bại</string>
+    <string name="backup_restored_title">Ví đã khôi phục</string>
+    <string name="backup_restored_check">Kiểm tra xem địa chỉ này có đúng là địa chỉ bạn nhận ra không trước khi tin nó.</string>
+    <string name="backup_opened">Đã mở — %1$d phần ký quỹ, chiều cao khôi phục %2$d</string>
+    <string name="backup_could_not_open">Không mở được — sai cụm mật khẩu, hoặc tệp đã bị sửa đổi</string>
+    <string name="backup_share_title">Lưu bản sao lưu DUCAT của bạn</string>
+</resources>

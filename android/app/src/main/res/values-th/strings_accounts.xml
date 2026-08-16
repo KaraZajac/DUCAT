@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">เติมเงิน</string>
+    <string name="accounts_top_up_desc">ส่ง Monero มายังที่อยู่นี้จากกระเป๋าเงินหรือกระดานแลกเปลี่ยนใดก็ได้ นี่คือที่อยู่ XMR ปกติ — การโอนนี้ไม่มีส่วนใดเกี่ยวข้องกับ DUCAT เลย</string>
+    <string name="accounts_no_wallet">ยังไม่มีกระเป๋าเงิน — ตั้งค่าให้เสร็จก่อน</string>
+    <string name="accounts_copy">คัดลอก</string>
+    <string name="accounts_hide">ซ่อน</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">ยอดคงเหลือ</string>
+    <string name="accounts_balances_desc">แยกไว้โดยตั้งใจ: สิ่งที่คุณใช้จ่ายได้ตอนนี้ไม่ใช่ทั้งหมดที่คุณมี</string>
+    <string name="accounts_waiting_for_node">กำลังรอโหนด</string>
+    <string name="accounts_spendable">ใช้จ่ายได้</string>
+    <string name="accounts_show_in">แสดงเป็น %1$s</string>
+    <string name="accounts_stagenet_fiat_note">เหรียญ stagenet เป็นเหรียญทดสอบ ตัวเลขนั้นคือมูลค่าหาก Monero จำนวนเท่านี้เป็นของจริง — เหรียญพวกนี้ไม่มีมูลค่าใด ๆ</string>
+    <string name="accounts_notes">ธนบัตร</string>
+    <string name="accounts_bond">เงินค้ำประกัน</string>
+    <string name="accounts_bond_none">ไม่มี</string>
+    <string name="accounts_scanning_from_genesis_title">กำลังสแกนตั้งแต่ต้นเชน</string>
+    <string name="accounts_scanning_from_genesis_desc">กระเป๋านี้ถูกสร้างก่อนที่แอปจะเชื่อมต่อโหนดได้ จึงไม่รู้ว่าตัวเองถูกสร้างเมื่อไร ที่บล็อก %1$d จาก %2$d ยังต้องอ่านอีกมากกว่าหนึ่งวัน หากแน่ใจว่ากระเป๋าใหม่กว่านั้น ข้ามไปข้างหน้าได้เลย</string>
+    <string name="accounts_skip_ahead">ข้ามไปข้างหน้า</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">ข้ามไปที่</string>
+    <string name="accounts_skip_ahead_desc">สิ่งที่ได้รับก่อนจุดนี้จะไม่ถูกพบ เลือกเวลาที่คุณแน่ใจว่ามาก่อนที่กระเป๋านี้จะมีอยู่</string>
+    <string name="accounts_about_a_day_ago">ประมาณหนึ่งวันก่อน</string>
+    <string name="accounts_about_a_week_ago">ประมาณหนึ่งสัปดาห์ก่อน</string>
+    <string name="accounts_about_a_month_ago">ประมาณหนึ่งเดือนก่อน</string>
+    <string name="accounts_skip_option">"%1$s  —  บล็อก %2$d"</string>
+    <string name="accounts_block_height_label">หรือระบุความสูงบล็อก</string>
+    <string name="accounts_use_that_height">ใช้ความสูงนี้</string>
+    <string name="accounts_cancel">ยกเลิก</string>
+</resources>

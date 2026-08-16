@@ -1,0 +1,26 @@
+<resources>
+    <string name="sync_synced">同期済み</string>
+    <string name="sync_not_fully">同期が未完了</string>
+    <string name="sync_partial_note">この残高はこれまでに読み込めた分だけです — スキャンが終わるまで少なく見えることがあります。</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">1分未満</string>
+    <plurals name="duration_minutes">
+        <item quantity="other">約%1$d分</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="other">約%1$d時間</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="other">約%1$d日</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">キャンセル</string>
+    <string name="scanner_no_camera_title">カメラが許可されていません</string>
+    <string name="scanner_no_camera_body">スキャンにはカメラが必要です。DUCATの他の機能はカメラなしで動きます — カードはいつでもリンクとして貼り付けられます。</string>
+    <string name="scanner_allow">許可</string>
+    <string name="scanner_would_not_start">カメラを起動できませんでした: %1$s</string>
+    <string name="scanner_torch_off">ライトをオフ</string>
+    <string name="scanner_torch_on">ライトをオン</string>
+</resources>

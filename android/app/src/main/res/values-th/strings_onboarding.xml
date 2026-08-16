@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">ตั้งค่า DUCAT</string>
+    <string name="onb_progress_done">เสร็จแล้ว</string>
+    <string name="onb_progress_step">ขั้นที่ %1$d จาก %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">สร้างตัวตนของคุณ</string>
+    <string name="onb_persona_body">คู่คีย์บนโทรศัพท์เครื่องนี้ ไม่มีอีเมล ไม่มีเบอร์โทร ไม่มีใครให้ลงทะเบียนด้วย — ซึ่งก็เป็นเหตุผลเดียวกับที่ไม่มีใครกู้คืนให้คุณได้</string>
+    <string name="onb_persona_action">สร้าง</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">สร้างกระเป๋าเงินของคุณ</string>
+    <string name="onb_wallet_body">คีย์ Monero สร้างที่นี่และเก็บไว้ที่นี่ นี่แหละคือตัวเงิน</string>
+    <string name="onb_wallet_action">สร้างกระเป๋าเงิน</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">ตั้งวงเงินใช้จ่ายของคุณ</string>
+    <string name="onb_limits_body">การจ่ายเล็ก ๆ ผ่านได้ทันที ก้อนใหญ่กว่านั้นจะถาม PIN ของคุณ เส้นแบ่งพวกนี้เปลี่ยนได้ทุกเมื่อ — ค่าเริ่มต้นระมัดระวังอยู่แล้ว</string>
+    <string name="onb_limits_action">ใช้ค่าเริ่มต้น</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">พร้อมแล้ว</string>
+    <string name="onb_done_body">เติมเงินเมื่อคุณพร้อม ก่อนหน้านั้นไม่มีอะไรเสี่ยงและไม่มีอะไรจะเสีย</string>
+    <string name="onb_done_action">เสร็จสิ้น</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">สำรองข้อมูล — เดี๋ยวนี้ ไม่ใช่ทีหลัง</string>
+    <string name="onb_backup_body">ไฟล์เข้ารหัสไฟล์เดียว ปกป้องด้วยวลีรหัสผ่านที่คุณเลือกเอง เก็บไว้ที่เดียวกับของสำคัญของคุณ</string>
+    <string name="onb_backup_forget_title">หากคุณลืมวลีรหัสผ่านนี้</string>
+    <string name="onb_backup_forget_body">จะไม่มีทางกู้คืนได้เลย ไม่มีใครถือสำเนา และไม่มีใครให้ถาม นั่นคือเหตุผลเดียวกับที่ไม่มีใครอายัดหรือยึดเงินของคุณได้</string>
+    <string name="onb_backup_address_label">ที่อยู่ของคุณ</string>
+    <string name="onb_backup_passphrase_label">วลีรหัสผ่าน</string>
+    <string name="onb_backup_passphrase_good">ใช้ได้</string>
+    <string name="onb_backup_passphrase_short">อย่างน้อย 8 ตัวอักษร</string>
+    <string name="onb_backup_error_incomplete">การตั้งค่ายังไม่เสร็จ</string>
+    <string name="onb_backup_create">สร้างไฟล์สำรอง</string>
+    <string name="onb_backup_created">สร้างไฟล์สำรองแล้ว — %1$d ไบต์</string>
+    <string name="onb_backup_send_elsewhere">ตอนนี้มันอยู่บนโทรศัพท์เครื่องนี้ ซึ่งยังไม่นับว่าเป็นการสำรอง ส่งไปเก็บที่อื่น: ตัวจัดการรหัสผ่าน ไดรฟ์ หรืออุปกรณ์อีกเครื่อง</string>
+    <string name="onb_backup_send_action">ส่งไปเก็บที่อื่น</string>
+    <string name="onb_backup_done">เสร็จ</string>
+    <string name="onb_backup_share_chooser">บันทึกไฟล์สำรอง DUCAT ของคุณ</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">ให้คนอื่นเรียกคุณว่าอะไร?</string>
+    <string name="onb_profile_name_body">ชื่อนี้ไปอยู่บนนามบัตรที่คุณแจก คนที่เพิ่มคุณเปลี่ยนชื่อฝั่งเขาได้ และชื่อนั้นคือชื่อที่เขาเห็น — นี่จึงเป็นแค่คำแนะนำ ไม่ใช่ตัวตน</string>
+    <string name="onb_profile_name_label">ชื่อ (ไม่บังคับ)</string>
+    <string name="onb_profile_pay_title">ให้ผู้ติดต่อจ่ายเงินคุณโดยตรงได้ไหม?</string>
+    <string name="onb_profile_pay_yes">ได้ — รับเงินง่ายขึ้น</string>
+    <string name="onb_profile_pay_no">ไม่ — เขาขอ คุณอนุมัติ</string>
+    <string name="onb_profile_pay_yes_detail">ที่อยู่ของคุณถูกส่งให้ผู้ติดต่อแต่ละคนและถูกใช้ซ้ำ ใครที่อ่านเชนจะบอกได้ว่าคนคนเดียวกันได้รับเงินทุกครั้ง — รวมถึงคนที่เคยจ่ายให้คุณแค่ครั้งเดียว</string>
+    <string name="onb_profile_pay_no_detail">แต่ละการชำระใช้ที่อยู่ใหม่ จึงไม่มีอะไรบนเชนผูกการรับเงินของคุณเข้าด้วยกัน คนที่จะจ่ายให้คุณต้องรอคุณส่งคำขอก่อน</string>
+    <string name="onb_profile_change_later">ทั้งสองอย่างเปลี่ยนได้ทีหลัง</string>
+    <string name="onb_profile_continue">ดำเนินการต่อ</string>
+</resources>

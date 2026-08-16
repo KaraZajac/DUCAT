@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">ชั้นขนส่งข้อมูล การชำระเงินเดินทางบนเส้นทางนิรนาม ดังนั้นส่วนนี้ต้องทำงานก่อนที่การแตะจะไปถึงไหนได้</string>
+
+    <string name="net_line_bridge">บริดจ์แอนดรอยด์</string>
+    <string name="net_ready">พร้อม</string>
+    <string name="net_not_set_up">ยังไม่ได้ตั้งค่า</string>
+    <string name="net_line_node">โหนด</string>
+    <string name="net_running">กำลังทำงาน</string>
+    <string name="net_stopped">หยุดแล้ว</string>
+    <string name="net_line_attached">เชื่อมเข้าเครือข่าย</string>
+    <string name="net_line_route_capable">สร้างเส้นทางได้</string>
+    <string name="net_yes">ใช่</string>
+    <string name="net_not_yet_routes">ยังไม่ได้ — จะไม่มีเส้นทางจนกว่าจะถึงขั้นนี้</string>
+    <string name="net_line_peers">เพียร์</string>
+    <string name="net_peers_value">ออนไลน์ %1$s, เชื่อถือได้ %2$s</string>
+    <string name="net_waiting">รอมาแล้ว %1$d วินาที — โหนดต้องรู้ก่อนว่าตัวเองถูกเข้าถึงได้อย่างไร จึงจะสร้างเส้นทางได้</string>
+
+    <string name="net_starting">กำลังเริ่ม…</string>
+    <string name="net_start_node">เริ่มโหนด</string>
+    <string name="net_stop">หยุด</string>
+    <string name="net_testing">กำลังทดสอบ…</string>
+    <string name="net_test_route">ทดสอบเส้นทาง</string>
+    <string name="net_route_ok">จัดสรรเส้นทางแล้ว — บล็อบ %1$s ไบต์</string>
+    <string name="net_route_failed">เส้นทางล้มเหลว: %1$s</string>
+</resources>

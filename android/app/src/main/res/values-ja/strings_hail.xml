@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">タクシーを呼ぶ</string>
+    <string name="hail_card_standing">呼び出しを掲示中 — ドライバー待ち</string>
+    <string name="hail_card_pitch">ドライバーが見張っている乗り場に、行き先を掲示します。</string>
+    <string name="hail_standing_at">%1$sに掲示中</string>
+    <string name="hail_take_it_down">取り下げる</string>
+    <string name="hail_awaiting_offer">%1$sが呼び出しを受けました — オファーを待っています…</string>
+    <string name="hail_cancel">キャンセル</string>
+    <string name="hail_parked_offer">%1$sのオファー: %2$s</string>
+    <string name="hail_view_the_offer">オファーを見る</string>
+    <string name="hail_post_it_again">もう一度掲示する</string>
+    <string name="hail_expired_unclaimed">期限までに誰も呼び出しを受けませんでした。</string>
+    <string name="hail_claimed_check_chats">ドライバーが呼び出しを受けました — チャットを確認してください。</string>
+    <string name="hail_accept_message">お待ちしています</string>
+    <string name="hail_decline_message">今回は結構です</string>
+    <string name="hail_declined_post_again">断りました — もう一度掲示しますか？</string>
+    <string name="hail_posted_waiting">掲示しました。ドライバーを待っています…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">乗客が断りました</string>
+    <string name="hail_rider_declined_body">オファーは見送られました。この呼び出しは掲示板から消えています。</string>
+    <string name="hail_ok">OK</string>
+    <string name="hail_on_duty">乗務中</string>
+    <string name="hail_net_wide">広域 — 差し渡し約%1$s</string>
+    <string name="hail_net_nearby">差し渡し約%1$sを監視中</string>
+    <string name="hail_net_here">自分の周辺のみ、約%1$s</string>
+    <string name="hail_stop">停止</string>
+    <string name="hail_no_hails_map">掲示中の呼び出しはありません — 出るとここにピンが立ちます。</string>
+    <string name="hail_quote_me">見積もり希望</string>
+    <string name="hail_driving_title">乗務</string>
+    <string name="hail_driving_pitch">乗り場を見張り、呼び出しを受けます。受けると乗客との会話が開きます — 見積もりも待ち合わせもそこで。最後の請求は普通の乗車と同じです。</string>
+    <string name="hail_range_just_here">この周辺だけ</string>
+    <string name="hail_range_nearby">近隣</string>
+    <string name="hail_range_wide">広域</string>
+    <string name="hail_range_desc_here">約%1$s — 密集した市街地向け</string>
+    <string name="hail_range_desc_wide">差し渡し約%1$s — 郊外や暇な夜に</string>
+    <string name="hail_range_desc_nearby">差し渡し約%1$s — 標準</string>
+    <string name="hail_getting_location">現在地を取得中…</string>
+    <string name="hail_drive_here">ここで乗務 — 周辺を見張る</string>
+    <string name="hail_stand_label">乗り場</string>
+    <string name="hail_stand_placeholder">乗り場の名前、または上の📍</string>
+    <string name="hail_watch">見張る</string>
+    <string name="hail_watching_neighbours">自分のセルと隣接8セルを監視中 — %1$s +8</string>
+    <string name="hail_board_empty">掲示板には何もありません。数秒ごとに確認しています…</string>
+    <string name="hail_offers_amount">オファー %1$s</string>
+    <string name="hail_offers_amount_both">オファー %1$s · %2$s</string>
+    <string name="hail_asks_quote">見積もりを求めています</string>
+    <string name="hail_triage_pickup">迎車 約%1$s</string>
+    <string name="hail_triage_trip">乗車 約%1$s</string>
+    <string name="hail_stands_for_min">あと%1$d分掲示されます</string>
+    <string name="hail_view_job">仕事を見る</string>
+    <string name="hail_take_it">受ける</string>
+    <string name="hail_location_fix_failed">現在地を取得できませんでした</string>
+    <string name="hail_beaten_to_it">一足違いで他の人に取られました。</string>
+    <string name="hail_on_my_way">🚕 向かっています。</string>
+    <string name="hail_on_my_way_car">🚕 向かっています — %1$sを探してください。</string>
+    <string name="hail_on_my_way_plate">🚕 向かっています。ナンバーは%1$sです。</string>
+    <string name="hail_on_my_way_car_plate">🚕 向かっています — %1$s、ナンバー%2$sを探してください。</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">閉じる</string>
+    <string name="hail_job_title">仕事の内容</string>
+    <string name="hail_to_pickup">迎車: %1$s · 約%2$d分</string>
+    <string name="hail_the_ride">乗車: %1$s · 約%2$d分</string>
+    <string name="hail_offer_amount">オファー: %1$s</string>
+    <string name="hail_offer_amount_both">オファー: %1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">全額あなたのものです — ライドシェアならこの行程でドライバーに約%1$s %2$.0fを支払います</string>
+    <string name="hail_rider_asks_quote">乗客が見積もりを求めています</string>
+    <string name="hail_routing_job">経路を計算中…</string>
+    <string name="hail_your_fare">あなたの運賃（%1$s）</string>
+    <string name="hail_offer_counter_hint">相手のオファー — 変更すれば逆提案になります</string>
+    <string name="hail_offer_quote_hint">見積もりを求められています</string>
+    <string name="hail_price_in_instead">%1$sで価格を入力</string>
+    <string name="hail_fare_invalid">運賃はゼロより大きい数字にしてください。</string>
+    <string name="hail_take_this_ride">この仕事を受ける 🚕</string>
+    <string name="hail_pass">見送る</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">%1$sを提示 — %2$sの返事待ち</string>
+    <string name="hail_the_rider">乗客</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">現在地</string>
+    <string name="hail_no_route">2地点間の経路が見つかりません</string>
+    <string name="hail_pickup_label">乗車地点</string>
+    <string name="hail_locating">現在地を取得中…</string>
+    <string name="hail_use_my_location">現在地を使う</string>
+    <string name="hail_where_to">どちらまで？</string>
+    <string name="hail_address_hint">住所または店名</string>
+    <string name="hail_finding_route">経路を探しています…</string>
+    <string name="hail_route_summary">%1$s · 約%2$d分</string>
+    <string name="hail_route_summary_priced">%1$s · 約%2$d分 · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">ライドシェア 約%1$s %2$.0f · タクシー 約%1$s %3$.0f — ドライバーが全額受け取ります（ライドシェアがドライバーに払うのは約%1$s %4$.0f）</string>
+    <string name="hail_your_offer">あなたのオファー（%1$s）</string>
+    <string name="hail_offer_invalid">オファーはゼロより大きい数字にしてください — 空欄にすると見積もりを依頼します。</string>
+    <string name="hail_shards_full">この乗り場はどのシャードも満杯です — 少ししてからもう一度お試しください</string>
+    <string name="hail_post_failed">呼び出しを掲示できませんでした</string>
+    <string name="hail_osm_privacy">検索・経路・地図はOpenStreetMapのサーバーを使います — DUCATが位置情報を端末の外へ送る唯一の場所です。ドライバーに見えるのは約%1$s四方のエリアだけです。</string>
+    <string name="hail_post_button">呼ぶ 🚕</string>
+    <string name="hail_search">検索</string>
+</resources>

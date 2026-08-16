@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">Tutup</string>
+    <string name="ceremony_quoted_body">“%1$s”</string>
+    <string name="ceremony_decline">Tolak</string>
+    <string name="ceremony_open_chat">Buka chat</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">meminta darimu</string>
+    <string name="ceremony_tax">pajak</string>
+    <string name="ceremony_accept_and_pay">Terima &amp; bayar</string>
+    <string name="ceremony_no_address">Tidak ada alamat di permintaan ini — tanyakan ke mereka harus dikirim ke mana.</string>
+    <string name="ceremony_accept_opens_confirm">Terima membuka layar konfirmasi — tidak ada yang berpindah sebelum kamu menyetujuinya di sana.</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">Lunas ✓</string>
+    <string name="ceremony_paid_to">Lunas · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">menawarkan mengantarmu seharga</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="other">sekitar %1$d menit lagi</item>
+    </plurals>
+    <string name="ceremony_plate">pelat %1$s</string>
+    <string name="ceremony_accept">Terima</string>
+    <string name="ceremony_accepting_agrees_fare">Menerima berarti menyepakati tarif — kamu membayar di akhir perjalanan, lewat layar konfirmasi biasa.</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">Tumpangan dikonfirmasi</string>
+    <string name="ceremony_expecting_you">Mereka menunggumu — hal lain bisa lewat chat.</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">Tumpanganmu sedang datang</string>
+    <string name="ceremony_eta_in_chat">Perkiraan tiba dan hal lainnya — di chat.</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="other">Inti native: %1$d pemeriksaan lulus</item>
+    </plurals>
+    <string name="bridge_checks_failed">Inti native: %1$d dari %2$d GAGAL</string>
+    <string name="bridge_jni_note">Ini memanggil inti Rust lewat JNI — satu-satunya lapisan yang tidak terjangkau pengujian Rust.</string>
+    <string name="bridge_got_expected">dapat %1$s, seharusnya %2$s</string>
+
+    <!-- Check names -->
+    <string name="bridge_check_protocol_version">versi protokol</string>
+    <string name="bridge_check_capacity_6">kapasitas 6 output</string>
+    <string name="bridge_check_capacity_1">kapasitas 1 output</string>
+    <string name="bridge_check_float_plan">rencana uang modal untuk 10 pembayaran</string>
+    <string name="bridge_check_bucket_floor">batas bawah bucket 4.999 XMR</string>
+    <string name="bridge_check_stale_rate">laju basi meningkat</string>
+</resources>

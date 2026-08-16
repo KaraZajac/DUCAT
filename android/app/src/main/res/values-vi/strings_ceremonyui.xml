@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">Đóng</string>
+    <string name="ceremony_quoted_body">“%1$s”</string>
+    <string name="ceremony_decline">Từ chối</string>
+    <string name="ceremony_open_chat">Mở cuộc trò chuyện</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">yêu cầu bạn trả</string>
+    <string name="ceremony_tax">thuế</string>
+    <string name="ceremony_accept_and_pay">Chấp nhận &amp; trả</string>
+    <string name="ceremony_no_address">Yêu cầu này không kèm địa chỉ — hãy hỏi họ gửi về đâu.</string>
+    <string name="ceremony_accept_opens_confirm">Chấp nhận sẽ mở màn hình xác nhận — chưa có gì được chuyển cho tới khi bạn duyệt ở đó.</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">Đã trả ✓</string>
+    <string name="ceremony_paid_to">Đã trả · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">đề nghị chở bạn với giá</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="other">cách khoảng %1$d phút</item>
+    </plurals>
+    <string name="ceremony_plate">biển số %1$s</string>
+    <string name="ceremony_accept">Chấp nhận</string>
+    <string name="ceremony_accepting_agrees_fare">Chấp nhận là chốt giá cước — bạn trả khi kết thúc chuyến, qua màn hình xác nhận như thường lệ.</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">Đã chốt chuyến</string>
+    <string name="ceremony_expecting_you">Họ đang đợi bạn — có gì thêm thì nhắn trong cuộc trò chuyện.</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">Xe của bạn đang tới</string>
+    <string name="ceremony_eta_in_chat">Giờ tới nơi và mọi thứ khác — trong cuộc trò chuyện.</string>
+</resources>

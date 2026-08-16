@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">DUCAT 설정</string>
+    <string name="onb_progress_done">완료</string>
+    <string name="onb_progress_step">%2$d단계 중 %1$d단계</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">신원 만들기</string>
+    <string name="onb_persona_body">이 휴대폰에 담긴 키 한 쌍이에요. 이메일도, 전화번호도, 등록할 곳도 없어요 — 그래서 아무도 대신 복구해 줄 수 없기도 해요.</string>
+    <string name="onb_persona_action">만들기</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">지갑 만들기</string>
+    <string name="onb_wallet_body">여기서 만들어 여기에 보관하는 Monero 키예요. 이게 곧 돈이에요.</string>
+    <string name="onb_wallet_action">지갑 만들기</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">지출 한도 설정</string>
+    <string name="onb_limits_body">작은 결제는 바로 통과돼요. 큰 결제는 PIN을 물어요. 그 경계는 언제든 옮길 수 있어요 — 기본값도 이미 조심스러운 편이에요.</string>
+    <string name="onb_limits_action">기본값 유지</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">준비 완료</string>
+    <string name="onb_done_body">준비되면 돈을 넣으세요. 그전까진 위험할 것도, 잃을 것도 없어요.</string>
+    <string name="onb_done_action">마치기</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">지금 백업하세요 — 나중 말고요</string>
+    <string name="onb_backup_body">직접 고른 암호 문구로 보호되는 암호화 파일 하나예요. 중요한 걸 두는 곳에 함께 보관하세요.</string>
+    <string name="onb_backup_forget_title">이 암호 문구를 잊으면</string>
+    <string name="onb_backup_forget_body">복구할 방법이 없어요. 사본을 가진 사람도, 물어볼 곳도 없어요. 바로 그 이유로 아무도 내 돈을 동결하거나 가져갈 수 없어요.</string>
+    <string name="onb_backup_address_label">내 주소</string>
+    <string name="onb_backup_passphrase_label">암호 문구</string>
+    <string name="onb_backup_passphrase_good">좋아요</string>
+    <string name="onb_backup_passphrase_short">8자 이상이어야 해요</string>
+    <string name="onb_backup_error_incomplete">설정이 끝나지 않았어요</string>
+    <string name="onb_backup_create">백업 만들기</string>
+    <string name="onb_backup_created">백업 완료 — %1$d바이트예요.</string>
+    <string name="onb_backup_send_elsewhere">지금은 이 휴대폰에 있는데, 그건 아직 백업이 아니에요. 다른 곳으로 보내세요: 비밀번호 관리자, 드라이브, 다른 기기.</string>
+    <string name="onb_backup_send_action">다른 곳으로 보내기</string>
+    <string name="onb_backup_done">완료</string>
+    <string name="onb_backup_share_chooser">DUCAT 백업 저장</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">뭐라고 부르면 될까요?</string>
+    <string name="onb_profile_name_body">건네는 카드에 실려요. 나를 추가한 사람은 자기 쪽에서 이름을 바꿀 수 있고, 그쪽에선 그 이름이 보여요 — 그러니 이건 제안이지 신원이 아니에요.</string>
+    <string name="onb_profile_name_label">이름 (선택)</string>
+    <string name="onb_profile_pay_title">연락처가 나에게 바로 결제해도 될까요?</string>
+    <string name="onb_profile_pay_yes">예 — 받기 편해요</string>
+    <string name="onb_profile_pay_no">아니요 — 요청하면 내가 승인해요</string>
+    <string name="onb_profile_pay_yes_detail">내 주소가 각 연락처에 전달되고 재사용돼요. 체인을 읽는 사람은 매번 같은 사람이 받았다는 걸 알 수 있어요 — 딱 한 번 보낸 사람까지도요.</string>
+    <string name="onb_profile_pay_no_detail">결제마다 새 주소를 쓰기 때문에 체인 위에서 내 결제들이 서로 이어지지 않아요. 나에게 돈을 보내려는 사람은 내가 먼저 요청을 보내길 기다려요.</string>
+    <string name="onb_profile_change_later">둘 다 나중에 바꿀 수 있어요.</string>
+    <string name="onb_profile_continue">계속</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Header counts -->
+    <plurals name="logs_line_count">
+        <item quantity="other">%1$d บรรทัด</item>
+    </plurals>
+    <string name="logs_warn_count">เตือน %1$d</string>
+    <string name="logs_error_count">ผิดพลาด %1$d</string>
+
+    <!-- Toolbar actions -->
+    <string name="logs_copy_all">คัดลอกทั้งหมด</string>
+    <string name="logs_share">แชร์</string>
+    <string name="logs_send_logs">ส่งบันทึก</string>
+    <string name="logs_clear">ล้าง</string>
+    <string name="logs_copied">คัดลอกแล้ว คีย์และเนื้อหาข้อความไม่เคยอยู่ในนี้</string>
+
+    <!-- Level filter chips -->
+    <string name="logs_filter_all">ทั้งหมด</string>
+    <string name="logs_filter_info">ข้อมูล</string>
+    <string name="logs_filter_warn">เตือน</string>
+    <string name="logs_filter_error">ผิดพลาด</string>
+
+    <string name="logs_empty">ยังไม่มีบันทึก กิจกรรมจะปรากฏที่นี่เมื่อแอปซิงก์ ส่ง และรับข้อมูล</string>
+</resources>

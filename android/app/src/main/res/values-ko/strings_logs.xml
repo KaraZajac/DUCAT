@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Header counts -->
+    <plurals name="logs_line_count">
+        <item quantity="other">%1$d줄</item>
+    </plurals>
+    <string name="logs_warn_count">경고 %1$d</string>
+    <string name="logs_error_count">오류 %1$d</string>
+
+    <!-- Toolbar actions -->
+    <string name="logs_copy_all">전체 복사</string>
+    <string name="logs_share">공유</string>
+    <string name="logs_send_logs">로그 보내기</string>
+    <string name="logs_clear">비우기</string>
+    <string name="logs_copied">복사했어요. 키와 메시지 내용은 여기에 절대 담기지 않아요.</string>
+
+    <!-- Level filter chips -->
+    <string name="logs_filter_all">전체</string>
+    <string name="logs_filter_info">정보</string>
+    <string name="logs_filter_warn">경고</string>
+    <string name="logs_filter_error">오류</string>
+
+    <string name="logs_empty">아직 기록이 없어요. 앱이 동기화하고 주고받는 대로 여기에 나타나요.</string>
+</resources>

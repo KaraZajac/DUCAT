@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">Kembali</string>
+    <string name="profile_calls_themselves">menyebut dirinya \"%1$s\"</string>
+    <string name="profile_label_email">Email</string>
+    <string name="profile_label_phone">Telepon</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">Yang mereka bagikan</string>
+    <string name="profile_their_claim_note">Klaim mereka, bukan hasil pemeriksaan. Tidak ada yang mengikat persona DUCAT ke email atau nomor — hanya ke sebuah kunci.</string>
+    <string name="profile_your_name_for_them_label">Namamu untuk mereka</string>
+    <string name="profile_your_name_for_them_support">Hanya kamu yang melihatnya. Nama inilah yang tampil di mana-mana.</string>
+    <string name="profile_saved">Tersimpan</string>
+    <string name="profile_save_name">Simpan nama</string>
+    <string name="profile_checked">Diperiksa</string>
+    <string name="profile_checked_note">Diverifikasi secara kriptografis. Setiap kartu yang mereka bagikan ditandatangani kunci ini dan diperiksa terhadapnya.</string>
+    <string name="profile_persona">Persona</string>
+    <string name="profile_told_to_you">Dikatakan kepadamu</string>
+    <string name="profile_told_note">Diberikan oleh mereka dan tidak diverifikasi oleh apa pun. Tidak ada di DUCAT yang mengikat alamat Monero atau nama ke sebuah persona, jadi periksa lewat jalan lain kalau itu penting.</string>
+    <string name="profile_their_name_label">Nama mereka untuk diri sendiri</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— tidak diberikan —</string>
+    <string name="profile_monero_address">Alamat Monero</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— tidak dibagikan; mereka harus mengirim permintaan —</string>
+    <string name="profile_where_reached">Tempat mereka dihubungi</string>
+    <string name="profile_their_outbox">Kotak keluar mereka</string>
+    <string name="profile_your_outbox">Kotak keluarmu ke mereka</string>
+    <string name="profile_open_chat">Buka chat</string>
+    <string name="profile_not_built_yet">Belum dibangun</string>
+    <string name="profile_not_built_note">Foto, kata ganti, alamat email, dan pemblokiran. Semuanya opsional, semuanya diatur saat penyiapan, dan semuanya berjalan seperti sebuah nama — diklaim oleh mereka, tidak pernah kami verifikasi.</string>
+    <string name="profile_copy">Salin</string>
+</resources>

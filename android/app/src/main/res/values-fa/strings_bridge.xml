@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="one">هستهٔ بومی: %1$d بررسی قبول شد</item>
+        <item quantity="other">هستهٔ بومی: %1$d بررسی قبول شد</item>
+    </plurals>
+    <string name="bridge_checks_failed">هستهٔ بومی: %1$d از %2$d ناموفق</string>
+    <string name="bridge_jni_note">این‌ها از راه JNI هستهٔ Rust را صدا می‌زنند — تنها لایه‌ای که تست‌های Rust به آن نمی‌رسند.</string>
+    <string name="bridge_got_expected">%1$s گرفتیم، انتظار %2$s می‌رفت</string>
+
+    <!-- Check names -->
+    <string name="bridge_check_protocol_version">نسخهٔ پروتکل</string>
+    <string name="bridge_check_capacity_6">ظرفیت 6 خروجی</string>
+    <string name="bridge_check_capacity_1">ظرفیت 1 خروجی</string>
+    <string name="bridge_check_float_plan">طرح پول صندوق برای 10 پرداخت</string>
+    <string name="bridge_check_bucket_floor">کف سطل 4.999 XMR</string>
+    <string name="bridge_check_stale_rate">نرخ کهنه تشدید می‌شود</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">Sẵn sàng chi tiêu</string>
+    <string name="balance_change_coming_back">%1$s tiền thừa, quay về sau %2$s</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">Lúc này bạn chưa thể trả tiền</string>
+    <string name="balance_running_low_title">Sắp hết tờ tiền</string>
+    <string name="balance_all_locked_body">Tiền của bạn vẫn ở đây, nhưng đang kẹt hết dưới dạng tiền thừa. Tách một tờ để chi tiêu tiếp.</string>
+    <string name="balance_running_low_body">Tách một tờ ngay để khỏi lúng túng khi đứng ở quầy.</string>
+    <string name="balance_break_note_action">Tách một tờ</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="other">%1$d tờ tiền</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">chưa có gì mở khóa</string>
+    <string name="balance_notes_then_wait">%1$s — đủ cho một lần trả, rồi phải chờ tiền thừa</string>
+    <string name="balance_notes_one_more">%1$s, tức khoảng một lần trả nữa</string>
+    <string name="balance_notes_more">%1$s, tức khoảng %2$d lần trả nữa</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">chốc lát nữa thôi</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="other">khoảng %1$d phút</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="other">khoảng %1$d giờ</item>
+    </plurals>
+</resources>

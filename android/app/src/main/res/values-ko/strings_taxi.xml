@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">코드를 게시하지 못했어요</string>
+    <string name="taxi_meter_started_msg">미터 시작 — 기본요금 %1$s XMR, 분당 %2$s XMR. 마지막 계산서에 시간이 표시돼요.</string>
+    <string name="taxi_err_terms_not_sent">연결은 됐는데 조건이 가지 않았어요: %1$s</string>
+    <string name="taxi_set_fare">요금 설정</string>
+    <string name="taxi_base_label">기본요금 (%1$s)</string>
+    <string name="taxi_per_min_label">분당 (%1$s)</string>
+    <string name="taxi_price_in_instead">%1$s로 매기기</string>
+    <string name="taxi_rate_locked_hint">%1$s로 입력한 요율은 운행이 시작될 때 XMR로 고정돼요 — 승객이 동의한 숫자가 그대로 청구되는 숫자예요.</string>
+    <string name="taxi_set_rate_hint">분당 요율을 정하면 픽업 코드가 열려요.</string>
+    <string name="taxi_pickup">픽업</string>
+    <string name="taxi_scan_hint">승객이 스캔하거나 폰을 맞대요. 요율이 대화에 도착하고 미터가 저절로 시작돼요.</string>
+    <string name="taxi_meter_terms">기본 %1$s + 분당 %2$s</string>
+    <string name="taxi_rider">승객</string>
+    <string name="taxi_line_base_fare">기본요금</string>
+    <string name="taxi_line_metered">%1$d분 %2$02d초 × %3$s XMR/분</string>
+    <string name="taxi_err_send_fare">요금을 보내지 못했어요</string>
+    <string name="taxi_end_ride_bill">운행 종료 — 계산서 %1$s</string>
+    <string name="taxi_bill_hint">계산서에 시간과 요율이 표시돼요. 요금이 도착하면 영수증이 저절로 가요 — 이미 내려서 가 버린 뒤라도요.</string>
+    <string name="taxi_cancel_ride_no_bill">운행 취소 — 계산서 없음</string>
+    <string name="taxi_cancel_title">이 운행을 취소할까요?</string>
+    <string name="taxi_cancel_body">미터가 멈추고 계산서는 보내지 않아요. 지금까지 잰 시간은 버려지고 복구할 수 없어요.</string>
+    <string name="taxi_cancel_confirm">운행 취소</string>
+    <string name="taxi_keep_going">계속하기</string>
+</resources>

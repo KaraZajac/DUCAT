@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_back">Kembali</string>
+    <string name="main_menu">Menu</string>
+    <string name="main_codes">Kode</string>
+    <string name="main_send_or_receive">Kirim atau terima</string>
+    <string name="main_bill_decline">Menolak tagihan %1$s XMR itu — kali ini tidak.</string>
+    <string name="main_backup_title">Cadangkan</string>
+    <string name="main_backup_body">Kamu punya kontak yang belum ada di cadangan terakhirmu. Pemulihan akan mengembalikan uangnya, tapi tidak orang-orangnya.</string>
+    <string name="main_open_backup_settings">Buka pengaturan cadangan</string>
+    <string name="main_recent">Terbaru</string>
+    <string name="main_see_all">Lihat semua</string>
+    <string name="main_sent">Terkirim</string>
+    <string name="main_received">Diterima</string>
+</resources>

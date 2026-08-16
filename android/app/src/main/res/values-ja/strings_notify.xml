@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notification channel -->
+    <string name="notify_channel_name">メッセージと支払い</string>
+    <string name="notify_channel_desc">メッセージ、請求、レシート、または着金。</string>
+
+    <!-- Lock-screen public fallback: the fact, never the figure -->
+    <string name="notify_public_activity">アクティビティ</string>
+
+    <!-- Inbound message wording; %1$s sender, %2$s amount, %3$s note -->
+    <string name="notify_asks_for">%1$sが%2$sを請求しています</string>
+    <string name="notify_asks_for_note">%1$sが%2$sを請求しています — %3$s</string>
+    <string name="notify_sent">%1$sが%2$sを送金しました</string>
+    <string name="notify_receipt">%1$sからのレシート — %2$s</string>
+</resources>

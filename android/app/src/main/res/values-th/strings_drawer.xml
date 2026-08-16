@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">ตั้งชื่อโปรไฟล์</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">ใช้ภาษา %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">ตัวตนของคุณ</string>
+    <string name="drawer_persona_body">คีย์ที่ใช้เซ็นนามบัตรของคุณ ไม่มีใครค้นหาคุณจากมันได้ — มันคือสิ่งที่คนใช้ตรวจสอบนามบัตรเมื่อได้รับไปแล้ว</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">การรับเงิน</string>
+    <string name="drawer_publish_switch">ให้ผู้ติดต่อจ่ายเงินให้ฉันได้โดยตรง</string>
+    <string name="drawer_publish_off_note">หากไม่เปิด คนที่จะจ่ายให้คุณต้องรอคำขอจากคุณก่อน</string>
+    <string name="drawer_publish_on_warning">ที่อยู่ของคุณจะถูกส่งให้ผู้ติดต่อแต่ละคนครั้งเดียว แล้วถูกใช้ซ้ำ ใครที่มองเห็นเชนจะบอกได้ว่าคนคนเดียวกันได้รับเงินทุกครั้ง — รวมถึงคนที่เคยจ่ายให้คุณแค่ครั้งเดียว คำขอเลี่ยงเรื่องนี้ได้เพราะพกที่อยู่ใหม่ไปทุกครั้ง</string>
+    <string name="drawer_publish_scope_note">เฉพาะผู้ติดต่อที่เพิ่มหลังจากเปิดตัวเลือกนี้เท่านั้นที่จะได้รับมัน</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">ยังไม่มีผู้ติดต่อ เพิ่มได้จากแท็บแชท</string>
+    <string name="drawer_open_chat">เปิดแชท</string>
+    <string name="drawer_delete_contact">ลบผู้ติดต่อ</string>
+    <string name="drawer_forget_title">ลืม %1$s?</string>
+    <string name="drawer_forget_body">การทำเช่นนี้จะลบผู้ติดต่อและทุกข้อความจากเขา กู้คืนไม่ได้ และการติดต่อเขาอีกครั้งต้องใช้นามบัตรใบใหม่</string>
+    <string name="drawer_forget_confirm">ลืม</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">เลือกว่าตอนนี้เครื่องนี้คืออะไร โหมดจะควบคุมทั้งแอปจนกว่าคุณจะกลับมาที่นี่และเลือก ส่วนตัว</string>
+    <string name="mode_personal">ส่วนตัว</string>
+    <string name="mode_personal_desc">กระเป๋าเงิน แชท และกิจกรรมของคุณ ค่าเริ่มต้น</string>
+    <string name="mode_pos">จุดขาย</string>
+    <string name="mode_pos_desc">เครื่องคิดเงิน: ลงรายการสินค้าหรือพิมพ์ยอดรวม แสดงโค้ดเดียว — บิลและใบเสร็จเดินทางในบทสนทนาที่มันเปิดขึ้น</string>
+    <string name="mode_bartab">บิลบาร์</string>
+    <string name="mode_bartab_desc">สมุดบิล: สแกนครั้งเดียว เพิ่มรายการได้ทั้งคืน เรียกเก็บครั้งเดียวตอนปิดบิล เขาจ่ายหลังจากกลับไปแล้วก็ได้</string>
+    <string name="mode_taxi">แท็กซี่</string>
+    <string name="mode_taxi_desc">ค่าโดยสารและมิเตอร์: เฝ้าจุดจอดรอคนเรียกรถ ตกลงอัตราเป็นลายลักษณ์อักษรเมื่อมิเตอร์เริ่ม บิลแสดงจำนวนนาที</string>
+    <string name="mode_donate">รับบริจาค</string>
+    <string name="mode_donate_desc">โค้ดถาวรที่กระเป๋า Monero ใดก็บริจาคได้ ฝั่งผู้ให้ไม่ต้องมีแอป</string>
+</resources>

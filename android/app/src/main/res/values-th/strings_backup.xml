@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">สำรองข้อมูล</string>
+    <string name="backup_body">ไฟล์เข้ารหัสไฟล์เดียวที่เก็บตัวตน คีย์ และการตั้งค่าของคุณ ส่งออกไฟล์ใหม่ทุกครั้งที่มีอะไรสำคัญเปลี่ยนไป</string>
+    <string name="backup_passphrase">วลีรหัสผ่าน</string>
+    <string name="backup_export">ส่งออก</string>
+    <string name="backup_import">นำเข้า</string>
+    <string name="backup_exported_bytes">ส่งออกแล้ว %1$d ไบต์</string>
+    <string name="backup_export_failed">การส่งออกล้มเหลว</string>
+    <string name="backup_restored_title">กู้คืนกระเป๋าเงินแล้ว</string>
+    <string name="backup_restored_check">ตรวจดูว่าที่อยู่นี้เป็นที่อยู่ที่คุณจำได้ ก่อนจะเชื่อถือมัน</string>
+    <string name="backup_opened">เปิดแล้ว — ส่วนแบ่งค้ำประกัน %1$d ส่วน, ความสูงกู้คืน %2$d</string>
+    <string name="backup_could_not_open">เปิดไม่ได้ — วลีรหัสผ่านผิด หรือไฟล์ถูกแก้ไข</string>
+    <string name="backup_share_title">บันทึกไฟล์สำรอง DUCAT ของคุณ</string>
+</resources>

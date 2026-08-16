@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_too_much_data">ข้อมูลมากเกินไปสำหรับ QR โค้ด — ใช้ลิงก์แทน</string>
+    <string name="qr_code">QR โค้ด</string>
+</resources>

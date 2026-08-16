@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
+    <string name="shells_title_pos">صندوق فروش</string>
+    <string name="shells_tab_register">صندوق</string>
+    <string name="shells_tab_sales">فروش‌ها</string>
+    <string name="shells_title_bar_tab">حساب دفتری</string>
+    <string name="shells_tab_tabs">حساب‌ها</string>
+    <string name="shells_tab_closed">بسته‌شده</string>
+    <string name="shells_title_taxi">تاکسی</string>
+    <string name="shells_tab_fares">کرایه‌ها</string>
+    <string name="shells_tab_meter">تاکسی‌متر</string>
+    <string name="shells_tab_rides">سفرها</string>
+    <string name="shells_title_donations">کمک‌های مالی</string>
+    <string name="shells_tab_code">کد</string>
+    <string name="shells_menu">منو</string>
+    <string name="shells_today">امروز</string>
+    <string name="shells_billed_waiting">صورت‌حساب رفته — در انتظار</string>
+    <string name="shells_settled">تسویه‌شده</string>
+    <string name="shells_no_sales_yet">امروز هنوز فروشی نیست.</string>
+    <string name="shells_no_rides_yet">امروز هنوز سفری نیست.</string>
+    <string name="shells_payment_seen_settling">پرداخت دیده شد — در حال تسویه</string>
+    <string name="shells_billed_unpaid">صورت‌حساب رفته، پرداخت‌نشده</string>
+    <string name="shells_paid_outside">بیرون از DUCAT پرداخت شد ✓</string>
+    <string name="shells_paid">پرداخت شد ✓</string>
+</resources>

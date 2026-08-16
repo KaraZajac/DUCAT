@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">Chat</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">Bagikan kartumu</string>
+    <string name="contacts_share_card_body">Berlaku untuk satu orang. Begitu dipakai, kartunya berhenti bekerja — jadi tangkapan layar yang tersebar bukan jalan masuk.</string>
+    <string name="contacts_name_to_show_label">Nama yang ditampilkan (opsional)</string>
+    <string name="contacts_name_to_show_support">Mereka bisa mengganti namamu di sisi mereka; nama itulah yang akan mereka lihat.</string>
+    <string name="contacts_error_make_card">tidak bisa membuat kartu</string>
+    <string name="contacts_publishing_inbox">Menerbitkan kotak masukmu…</string>
+    <string name="contacts_create_card">Buat kartu</string>
+    <string name="contacts_publishing_note">Ini butuh beberapa detik — dua catatan harus diterbitkan sebelum orang bisa menghubungimu. Keduanya tetap bekerja setelah aplikasi ditutup.</string>
+    <string name="contacts_copy_link">Salin tautan</string>
+    <string name="contacts_send">Kirim</string>
+    <string name="contacts_expires_24h">Kedaluwarsa dalam 24 jam.</string>
+    <string name="contacts_send_your_card">Kirim kartumu</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">Arahkan kamera ke kartu DUCAT mereka</string>
+    <string name="contacts_card_expired_ask_new">Kartu itu sudah kedaluwarsa. Mintalah yang baru.</string>
+    <string name="contacts_not_a_card">Itu bukan kartu DUCAT</string>
+    <string name="contacts_add_contact_title">Tambah kontak</string>
+    <string name="contacts_paste_link_label">Tempel tautan ducat: milik mereka</string>
+    <string name="contacts_paste">Tempel</string>
+    <string name="contacts_scan">Pindai</string>
+    <string name="contacts_card_expired_ask_them">Kartu ini sudah kedaluwarsa. Minta yang baru ke mereka.</string>
+    <string name="contacts_read_card">Baca kartu</string>
+    <string name="contacts_no_name_given">(tanpa nama)</string>
+    <string name="contacts_unverified_name">belum terverifikasi — ini nama yang mereka ketik</string>
+    <string name="contacts_check_characters">Cocokkan karakter ini dengan mereka lewat saluran yang kamu percaya kalau identitasnya penting.</string>
+    <string name="contacts_save_them_as_label">Simpan sebagai</string>
+    <string name="contacts_save_them_as_support">Namamu untuk mereka. Hanya kamu yang melihatnya.</string>
+    <string name="contacts_error_read_inbox">tidak bisa membaca kotak masuk mereka</string>
+    <string name="contacts_reading_inbox">Membaca kotak masuk mereka…</string>
+    <string name="contacts_add_contact_button">Tambah kontak</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">Kartu itu sudah pernah dipakai. Minta yang baru ke mereka.</string>
+    <string name="contacts_reply_expired">Kartu itu sudah kedaluwarsa. Minta yang baru ke mereka.</string>
+    <string name="contacts_reply_badsig">Tautan itu rusak — coba salin lagi.</string>
+    <string name="contacts_reply_own_card">Itu kartumu sendiri.</string>
+    <string name="contacts_reply_refused">Mereka menolak permintaannya.</string>
+</resources>

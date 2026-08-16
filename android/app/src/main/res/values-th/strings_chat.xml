@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">กลับ</string>
+    <string name="chat_conversation_settings">ตั้งค่าบทสนทนา</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">ส่งไม่สำเร็จ</string>
+    <string name="chat_could_not_send_the">ส่ง %1$s ไม่สำเร็จ</string>
+    <string name="chat_what_picture">รูปภาพ</string>
+    <string name="chat_what_file">ไฟล์</string>
+    <string name="chat_what_location">ตำแหน่งที่ตั้ง</string>
+    <string name="chat_what_voice_memo">ข้อความเสียง</string>
+    <string name="chat_what_card">นามบัตร</string>
+    <string name="chat_what_contact">ผู้ติดต่อ</string>
+    <string name="chat_error_location_fix">ระบุตำแหน่งไม่สำเร็จ</string>
+    <string name="chat_recording_placeholder">กำลังอัดเสียง… %1$d วิ</string>
+    <string name="chat_message_placeholder">ข้อความ</string>
+    <string name="chat_take_picture">ถ่ายรูป</string>
+    <string name="chat_hold_to_record">กดค้างเพื่ออัดข้อความเสียง</string>
+    <string name="chat_attach">แนบไฟล์</string>
+    <string name="chat_close">ปิด</string>
+    <string name="chat_send">ส่ง</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">แกลเลอรี</string>
+    <string name="chat_file">ไฟล์</string>
+    <string name="chat_money_desc">ส่งหรือขอเงิน</string>
+    <string name="chat_money">เงิน</string>
+    <string name="chat_contact">ผู้ติดต่อ</string>
+    <string name="chat_location">ตำแหน่ง</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 นามบัตรสำหรับติดต่อฉัน — ส่งต่อให้คนที่ควรติดต่อฉันได้ ใช้ได้ครั้งเดียว ภายในหนึ่งสัปดาห์:\n%1$s</string>
+    <string name="chat_decline_bill">ขอปฏิเสธบิล %1$s XMR นั้น — คราวนี้ขอผ่าน</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">ไม่มีคีย์ของผู้ติดต่อนี้ — การเชื่อมต่อเริ่มแรกไม่เสร็จสมบูรณ์ ขอนามบัตรใบใหม่จากเขา</string>
+    <string name="chat_e2e_notice">ข้อความถูกเข้ารหัสด้วยคีย์ที่ถูกลบหลังใช้งาน เมื่ออ่านแล้วจะกู้คืนไม่ได้ — แม้แต่ตัวคุณเองก็ทำไม่ได้</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">คุณถอนข้อความ</string>
+    <string name="chat_they_withdrew">%1$s ถอนข้อความ</string>
+    <string name="chat_you_declined">คุณปฏิเสธ</string>
+    <string name="chat_they_declined">%1$s ปฏิเสธ</string>
+    <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">ข้อความ</string>
+    <string name="chat_delete_note">การลบจะลบจากโทรศัพท์เครื่องนี้เท่านั้น อีกฝ่ายยังเก็บสำเนาของเขาไว้ — ไม่มีอะไรจากตรงนี้ไปถึงมันได้</string>
+    <string name="chat_copy">คัดลอก</string>
+    <string name="chat_delete">ลบ</string>
+    <string name="chat_cancel">ยกเลิก</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">เก็บทุกอย่าง</string>
+    <string name="chat_1_hour">1 ชั่วโมง</string>
+    <string name="chat_1_day">1 วัน</string>
+    <string name="chat_1_week">1 สัปดาห์</string>
+    <string name="chat_clear_confirm_title">ล้างแชทนี้?</string>
+    <string name="chat_clear_confirm_text">ทุกข้อความในบทสนทนานี้จะถูกลบจากโทรศัพท์เครื่องนี้และกู้คืนไม่ได้ อีกฝ่ายยังเก็บสำเนาของเขาไว้</string>
+    <string name="chat_clear">ล้าง</string>
+    <string name="chat_conversation_title">บทสนทนา</string>
+    <string name="chat_delete_after">ลบข้อความบนโทรศัพท์เครื่องนี้หลังจาก</string>
+    <string name="chat_only_your_copy">เฉพาะสำเนาของคุณ อีกฝ่ายยังเก็บของเขาไว้ และไม่มีอะไรจากตรงนี้ไปถึงมันได้</string>
+    <string name="chat_clear_this_chat">ล้างแชทนี้</string>
+    <string name="chat_done">เสร็จ</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 กำลังดาวน์โหลด…</string>
+    <string name="chat_downloading_audio">🎤 กำลังดาวน์โหลด…</string>
+    <string name="chat_downloading_file">📎 กำลังดาวน์โหลด…</string>
+    <string name="chat_picture_desc">รูปภาพ</string>
+    <string name="chat_could_not_decode">📷 (ถอดรหัสไม่ได้)</string>
+    <string name="chat_you_asked_for">คุณขอ</string>
+    <string name="chat_asked_you_for">ขอจากคุณ</string>
+    <string name="chat_receipt_you_issued">ใบเสร็จที่คุณออก</string>
+    <string name="chat_receipt">ใบเสร็จ</string>
+    <string name="chat_you_offered_to_drive">คุณเสนอขับรถให้</string>
+    <string name="chat_offers_to_drive_you">เสนอขับรถให้คุณ</string>
+    <string name="chat_you_accepted_ride">คุณตอบรับการเดินทาง</string>
+    <string name="chat_ride_accepted">ตอบรับการเดินทางแล้ว</string>
+    <string name="chat_you_sent">คุณส่ง</string>
+    <string name="chat_sent_you">ส่งให้คุณ</string>
+    <string name="chat_min_away">ห่างประมาณ %1$d นาที</string>
+    <string name="chat_paid">ชำระแล้ว ✓</string>
+    <string name="chat_cancelled">ยกเลิกแล้ว</string>
+    <string name="chat_review_payment">ตรวจดูการชำระ</string>
+    <string name="chat_no_address">คำขอนี้ไม่มีที่อยู่ — ถามเขาว่าให้ส่งไปที่ไหน</string>
+    <string name="chat_no_forward_secrecy">ส่งโดยไม่มี forward secrecy</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">หยุด</string>
+    <string name="chat_play_voice_memo">เล่นข้อความเสียง</string>
+    <string name="chat_voice_memo">ข้อความเสียง</string>
+    <string name="chat_size_kb">%1$d KB</string>
+    <string name="chat_size_b">%1$d B</string>
+    <string name="chat_file_fallback">ไฟล์</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">ยอดรวมย่อย</string>
+    <string name="chat_tax">ภาษี</string>
+    <string name="chat_total">รวมทั้งหมด</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">ไม่ใช่รูปภาพ</string>
+    <string name="chat_picture_too_big">ย่อรูปนั้นให้เล็กพอไม่ได้</string>
+    <string name="chat_nothing_recorded">ไม่มีเสียงถูกอัดไว้</string>
+    <string name="chat_memo_too_long">ข้อความเสียงนั้นยาวเกินไป — ได้มากสุดไม่กี่นาที</string>
+    <string name="chat_could_not_read_file">อ่านไฟล์นั้นไม่ได้</string>
+    <string name="chat_file_too_big">ไฟล์นั้นมีขนาด %1$d KB — ไฟล์แนบได้ไม่เกิน 1 MB</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">แชร์</string>
+    <string name="chat_card_for_me">นามบัตรสำหรับติดต่อฉัน</string>
+    <string name="chat_card_for_me_desc">ลิงก์แบบใช้ได้ครั้งเดียว ที่เขาส่งต่อให้คนที่ควรติดต่อคุณได้</string>
+    <string name="chat_someones_profile">หรือโปรไฟล์ของใครบางคน — ชื่อและสิ่งที่เขาเลือกเผยแพร่ ไม่ใช่โค้ดเชื่อมต่อ: โค้ดพวกนั้นเป็นของเขาที่จะให้เอง</string>
+</resources>

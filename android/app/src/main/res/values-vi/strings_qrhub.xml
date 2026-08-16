@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">Đóng</string>
+    <string name="qrhub_scan_code">Quét mã</string>
+    <string name="qrhub_my_code">Mã của tôi</string>
+    <string name="qrhub_scan_prompt">Một thẻ DUCAT hoặc một địa chỉ Monero</string>
+    <string name="qrhub_not_a_code">Mã đó không phải thẻ DUCAT, cũng không phải địa chỉ Monero.</string>
+    <string name="qrhub_card_failed">thẻ đó không dùng được</string>
+    <string name="qrhub_card_issue_failed">không tạo được thẻ</string>
+    <string name="qrhub_no_name_set">chưa đặt tên</string>
+    <string name="qrhub_publishing">Đang công bố hai bản ghi để người khác liên hệ được bạn cả khi điện thoại này tắt.</string>
+    <string name="qrhub_copy_link">Sao chép liên kết</string>
+    <string name="qrhub_share">Chia sẻ</string>
+    <string name="qrhub_share_chooser">Chia sẻ thẻ của bạn</string>
+    <string name="qrhub_tap_or_scan">Chạm hai điện thoại, hoặc quét — thẻ vẫn vậy.</string>
+    <string name="qrhub_one_per_code">Mỗi mã một người. Ai đó nhận mã này xong, mã tiếp theo tự sinh ra — bạn không phải làm gì.</string>
+    <string name="qrhub_name_travels">Tên và ảnh của bạn đi cùng nó. Mọi thứ khác bạn chia sẻ sẽ tới sau, qua kết nối mà nó mở ra.</string>
+</resources>

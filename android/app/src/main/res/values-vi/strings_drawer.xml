@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">Đặt tên hồ sơ</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">đang nói %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">Danh tính của bạn</string>
+    <string name="drawer_persona_body">Khóa dùng để ký các thẻ của bạn. Không ai tìm được bạn qua nó — nó là thứ người ta dùng để kiểm tra một tấm thẻ khi đã có trong tay.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">Nhận tiền</string>
+    <string name="drawer_publish_switch">Cho liên hệ trả tiền tôi trực tiếp</string>
+    <string name="drawer_publish_off_note">Không bật thì ai muốn trả tiền bạn phải chờ một yêu cầu.</string>
+    <string name="drawer_publish_on_warning">Địa chỉ của bạn được gửi tới từng liên hệ một lần, rồi dùng lại. Ai nhìn được chuỗi đều thấy cùng một người được trả mỗi lần — kể cả những người chỉ trả bạn đúng một lần. Yêu cầu tránh được điều đó vì mỗi lần mang một địa chỉ mới.</string>
+    <string name="drawer_publish_scope_note">Chỉ những liên hệ thêm sau khi bật mới có nó.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">Chưa có liên hệ nào. Thêm từ thẻ Chat.</string>
+    <string name="drawer_open_chat">Mở chat</string>
+    <string name="drawer_delete_contact">Xóa liên hệ</string>
+    <string name="drawer_forget_title">Quên %1$s?</string>
+    <string name="drawer_forget_body">Việc này xóa liên hệ và mọi tin nhắn từ họ. Không thể khôi phục, và muốn liên hệ lại họ phải có thẻ mới.</string>
+    <string name="drawer_forget_confirm">Quên</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">Chọn vai trò của thiết bị này lúc này. Một chế độ sẽ chiếm toàn bộ ứng dụng cho tới khi bạn quay lại đây chọn Cá nhân.</string>
+    <string name="mode_personal">Cá nhân</string>
+    <string name="mode_personal_desc">Ví, chat và hoạt động của bạn. Chế độ mặc định.</string>
+    <string name="mode_pos">Điểm bán hàng</string>
+    <string name="mode_pos_desc">Một máy tính tiền: nhập từng món hoặc gõ tổng, đưa một mã — hóa đơn và biên nhận đi theo cuộc trò chuyện mà mã mở ra.</string>
+    <string name="mode_bartab">Tab quầy bar</string>
+    <string name="mode_bartab_desc">Một sổ tab: quét một lần, thêm cả tối, một hóa đơn lúc đóng. Khách có thể trả sau khi rời đi.</string>
+    <string name="mode_taxi">Taxi</string>
+    <string name="mode_taxi_desc">Cước và đồng hồ: canh một bến để nhận vẫy xe, chốt giá bằng chữ khi đồng hồ chạy, hóa đơn hiện số phút.</string>
+    <string name="mode_donate">Quyên góp</string>
+    <string name="mode_donate_desc">Một mã cố định mà ví Monero nào cũng gửi vào được. Phía họ không cần ứng dụng.</string>
+</resources>

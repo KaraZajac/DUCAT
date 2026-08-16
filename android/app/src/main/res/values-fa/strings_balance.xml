@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">آمادهٔ خرج</string>
+    <string name="balance_change_coming_back">%1$s بقیهٔ پول است، تا %2$s دیگر برمی‌گردد</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">فعلاً نمی‌توانی پرداخت کنی</string>
+    <string name="balance_running_low_title">اسکناس‌ها دارند ته می‌کشند</string>
+    <string name="balance_all_locked_body">پولت اینجاست، اما همه‌اش به‌صورت بقیهٔ پول گیر است. برای اینکه دوباره بتوانی خرج کنی، یک اسکناس خرد کن.</string>
+    <string name="balance_running_low_body">همین حالا یک اسکناس خرد کن تا پای صندوق غافلگیر نشوی.</string>
+    <string name="balance_break_note_action">خرد کردن اسکناس</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="one">1 اسکناس</item>
+        <item quantity="other">%1$d اسکناس</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">هنوز چیزی آزاد نشده</string>
+    <string name="balance_notes_then_wait">%1$s — برای یک پرداخت کافی است، بعدش باید منتظر بقیهٔ پول بمانی</string>
+    <string name="balance_notes_one_more">%1$s، یعنی حدوداً یک پرداخت دیگر</string>
+    <string name="balance_notes_more">%1$s، یعنی حدوداً %2$d پرداخت دیگر</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">هر لحظه</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="one">حدود %1$d دقیقه</item>
+        <item quantity="other">حدود %1$d دقیقه</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="one">حدود %1$d ساعت</item>
+        <item quantity="other">حدود %1$d ساعت</item>
+    </plurals>
+</resources>

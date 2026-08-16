@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_back">뒤로</string>
+    <string name="main_menu">메뉴</string>
+    <string name="main_codes">코드</string>
+    <string name="main_send_or_receive">보내기 또는 받기</string>
+    <string name="main_bill_decline">%1$s XMR 계산서는 거절할게요 — 이번엔 아니에요.</string>
+    <string name="main_backup_title">백업하기</string>
+    <string name="main_backup_body">마지막 백업에 없는 연락처가 있어요. 지금 복원하면 돈은 돌아와도 사람은 돌아오지 않아요.</string>
+    <string name="main_open_backup_settings">백업 설정 열기</string>
+    <string name="main_recent">최근</string>
+    <string name="main_see_all">모두 보기</string>
+    <string name="main_sent">보냄</string>
+    <string name="main_received">받음</string>
+</resources>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">DUCAT सेट करें</string>
+    <string name="onb_progress_done">हो गया</string>
+    <string name="onb_progress_step">%2$d में से चरण %1$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">अपनी पहचान बनाएँ</string>
+    <string name="onb_persona_body">इस फ़ोन पर एक की-पेयर। न ईमेल, न फ़ोन नंबर, न कहीं रजिस्टर करना — इसीलिए इसे आपके लिए कोई और बहाल भी नहीं कर सकता।</string>
+    <string name="onb_persona_action">बनाएँ</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">अपना वॉलेट बनाएँ</string>
+    <string name="onb_wallet_body">Monero कुंजियाँ — यहीं बनीं, यहीं रहेंगी। यही पैसा है।</string>
+    <string name="onb_wallet_action">वॉलेट बनाएँ</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">अपनी खर्च सीमाएँ तय करें</string>
+    <string name="onb_limits_body">छोटे भुगतान सीधे निकल जाते हैं। बड़े आपका PIN माँगते हैं। ये रेखाएँ कहाँ हों, आप कभी भी बदल सकते हैं — डिफ़ॉल्ट पहले से ही सतर्क हैं।</string>
+    <string name="onb_limits_action">डिफ़ॉल्ट रहने दें</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">तैयार</string>
+    <string name="onb_done_body">जब मन हो, पैसे जोड़ें। तब तक न कुछ दाँव पर है, न कुछ खोने को।</string>
+    <string name="onb_done_action">समाप्त</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">बैकअप लें — अभी, बाद में नहीं</string>
+    <string name="onb_backup_body">एक एन्क्रिप्टेड फ़ाइल, आपके चुने पासफ़्रेज़ से सुरक्षित। जहाँ ज़रूरी चीज़ें रखते हैं, वहीं रखें।</string>
+    <string name="onb_backup_forget_title">अगर आप यह पासफ़्रेज़ भूल गए</string>
+    <string name="onb_backup_forget_body">तो इसे वापस पाने का कोई रास्ता नहीं। किसी के पास कॉपी नहीं और पूछने को कोई नहीं। यही वजह है कि आपका पैसा न कोई रोक सकता है, न छीन सकता है।</string>
+    <string name="onb_backup_address_label">आपका पता</string>
+    <string name="onb_backup_passphrase_label">पासफ़्रेज़</string>
+    <string name="onb_backup_passphrase_good">अच्छा</string>
+    <string name="onb_backup_passphrase_short">कम-से-कम 8 अक्षर</string>
+    <string name="onb_backup_error_incomplete">सेटअप अधूरा है</string>
+    <string name="onb_backup_create">बैकअप बनाएँ</string>
+    <string name="onb_backup_created">बैकअप बन गया — %1$d बाइट।</string>
+    <string name="onb_backup_send_elsewhere">यह अभी इसी फ़ोन पर है, जो अपने-आप में बैकअप नहीं। इसे कहीं और भेजें: पासवर्ड मैनेजर, ड्राइव, कोई दूसरा डिवाइस।</string>
+    <string name="onb_backup_send_action">कहीं भेज दें</string>
+    <string name="onb_backup_done">हो गया</string>
+    <string name="onb_backup_share_chooser">अपना DUCAT बैकअप सहेजें</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">लोग आपको क्या कहकर बुलाएँ?</string>
+    <string name="onb_profile_name_body">यह आपके बाँटे कार्डों पर जाता है। जो आपको जोड़े, वह अपनी तरफ़ नाम बदल सकता है, और वही नाम उसे दिखेगा — इसलिए यह एक सुझाव है, पहचान नहीं।</string>
+    <string name="onb_profile_name_label">नाम (वैकल्पिक)</string>
+    <string name="onb_profile_pay_title">क्या कॉन्टैक्ट आपको सीधे भुगतान कर सकें?</string>
+    <string name="onb_profile_pay_yes">हाँ — पैसा पाना आसान</string>
+    <string name="onb_profile_pay_no">नहीं — वे पूछें, आप मंज़ूर करें</string>
+    <string name="onb_profile_pay_yes_detail">आपका पता हर कॉन्टैक्ट के पास जाता है और दोहराया जाता है। चेन पढ़ने वाला कोई भी बता सकता है कि हर बार उसी व्यक्ति को भुगतान हुआ — वे भी जिन्होंने आपको बस एक बार भुगतान किया।</string>
+    <string name="onb_profile_pay_no_detail">हर भुगतान नया पता इस्तेमाल करता है, इसलिए चेन पर आपके भुगतानों को आपस में कुछ नहीं जोड़ता। आपको भुगतान करने वाला पहले आपके अनुरोध का इंतज़ार करता है।</string>
+    <string name="onb_profile_change_later">दोनों बाद में बदले जा सकते हैं।</string>
+    <string name="onb_profile_continue">आगे बढ़ें</string>
+</resources>

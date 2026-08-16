@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">再確認</string>
+    <string name="monero_subtitle">トランザクションの送信とチェーンの読み込みを行う場所です。</string>
+    <string name="monero_finding_node">ノードを探しています…</string>
+    <string name="monero_no_usable_node">使えるノードがありません</string>
+    <string name="monero_line_height">高さ</string>
+    <string name="monero_line_synced">同期</string>
+    <string name="monero_line_network">ネットワーク</string>
+    <string name="monero_line_round_trip">往復時間</string>
+    <string name="monero_synced_yes">はい</string>
+    <string name="monero_synced_no">いいえ — 残高が古い可能性があります</string>
+    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_no_node">ノードなし</string>
+    <string name="monero_change_your_node">ノードを変更</string>
+    <string name="monero_use_own_node">自分のノードを使う</string>
+    <string name="monero_your_node">自分のノード</string>
+    <string name="monero_use_it">使う</string>
+    <string name="monero_back_to_public">公開ノードに戻す</string>
+    <string name="monero_cancel">キャンセル</string>
+    <string name="monero_trust_own_title">自分のノード</string>
+    <string name="monero_trust_own_body">あなたがすでに知っていること以外、あなたについて何も知りません。</string>
+    <string name="monero_trust_onion_title">他人のノード（Tor経由）</string>
+    <string name="monero_trust_onion_body">トランザクションは見えますが、それがどこから来たかは見えません。</string>
+    <string name="monero_trust_public_title">他人のノード</string>
+    <string name="monero_trust_public_body">アドレスとトランザクションをまとめて見られます。Dandelion++はトランザクションの発信元をネットワークの他の部分から隠しますが、手渡した先のノードからは隠せません。解決策は自分のノードを動かすことです。</string>
+    <string name="monero_wallet_title">ウォレット</string>
+    <string name="monero_no_wallet_key_title">この端末にウォレット鍵がありません</string>
+    <string name="monero_no_wallet_key_body">このインストールは、アプリがウォレットを保存するようになる前にセットアップを終えたため、スキャンに使うものがありません。待っても直りません — バックアップから復元するか、アプリのデータを消去してやり直してください。</string>
+    <string name="monero_scanning_failed">スキャンに失敗しました</string>
+    <string name="monero_unknown">不明</string>
+    <string name="monero_scanning_failed_note">上のノードは応答しているので、これは接続ではなく、ウォレット自身のチェーン読み込みの問題です。</string>
+    <string name="monero_not_started">未開始 — ノードを探しています。</string>
+    <string name="monero_caught_up">ブロック%1$dまで同期済み</string>
+    <string name="monero_block_of">ブロック %1$d / %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="other">残り%1$dブロック</item>
+    </plurals>
+    <string name="monero_partial_balance">表示中の残高は、これまでに読み込めた分だけです。</string>
+    <string name="monero_last_window_failed">直近の読み込みが失敗しました: %1$s</string>
+    <string name="monero_rescan_hint">このウォレットはチェーンの最初からスキャンしています。最近作られたものなら、必要以上に時間がかかっています。</string>
+    <string name="monero_skip_ahead">先へ飛ばす</string>
+</resources>

@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">لایهٔ انتقال. پرداخت از مسیری ناشناس می‌گذرد، پس قبل از آنکه لمسِ گوشی‌ها به جایی برسد این باید برپا باشد.</string>
+
+    <string name="net_line_bridge">پل اندروید</string>
+    <string name="net_ready">آماده</string>
+    <string name="net_not_set_up">راه‌اندازی نشده</string>
+    <string name="net_line_node">نود</string>
+    <string name="net_running">در حال اجرا</string>
+    <string name="net_stopped">متوقف</string>
+    <string name="net_line_attached">متصل</string>
+    <string name="net_line_route_capable">قادر به مسیرسازی</string>
+    <string name="net_yes">بله</string>
+    <string name="net_not_yet_routes">هنوز نه — تا این نشود مسیری نیست</string>
+    <string name="net_line_peers">همتاها</string>
+    <string name="net_peers_value">%1$s زنده، %2$s قابل‌اتکا</string>
+    <string name="net_waiting">%1$d ثانیه در انتظار — نود باید اول بفهمد چطور در دسترس است تا بتواند مسیری بسازد</string>
+
+    <string name="net_starting">در حال شروع…</string>
+    <string name="net_start_node">شروع نود</string>
+    <string name="net_stop">توقف</string>
+    <string name="net_testing">در حال آزمایش…</string>
+    <string name="net_test_route">آزمایش مسیر</string>
+    <string name="net_route_ok">مسیر ساخته شد — بستهٔ %1$s بایتی</string>
+    <string name="net_route_failed">مسیر ناموفق: %1$s</string>
+</resources>

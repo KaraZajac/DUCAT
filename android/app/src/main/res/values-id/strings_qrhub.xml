@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">Tutup</string>
+    <string name="qrhub_scan_code">Pindai kode</string>
+    <string name="qrhub_my_code">Kodeku</string>
+    <string name="qrhub_scan_prompt">Kartu DUCAT atau alamat Monero</string>
+    <string name="qrhub_not_a_code">Kode itu bukan kartu DUCAT maupun alamat Monero.</string>
+    <string name="qrhub_card_failed">kartu itu tidak berfungsi</string>
+    <string name="qrhub_card_issue_failed">tidak bisa membuat kartu</string>
+    <string name="qrhub_no_name_set">belum ada nama</string>
+    <string name="qrhub_publishing">Menerbitkan dua catatan supaya orang bisa menghubungimu saat ponsel ini mati.</string>
+    <string name="qrhub_copy_link">Salin tautan</string>
+    <string name="qrhub_share">Bagikan</string>
+    <string name="qrhub_share_chooser">Bagikan kartumu</string>
+    <string name="qrhub_tap_or_scan">Tempelkan ponsel, atau pindai — kartunya sama saja.</string>
+    <string name="qrhub_one_per_code">Satu orang per kode. Begitu seseorang mengambil yang ini, yang berikutnya dibuat otomatis — tidak ada yang perlu dilakukan.</string>
+    <string name="qrhub_name_travels">Nama dan fotomu ikut bersamanya. Hal lain yang kamu bagikan menyusul kemudian, lewat koneksi yang dibukanya.</string>
+</resources>

@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">Isi saldo</string>
+    <string name="accounts_top_up_desc">Kirim Monero ke alamat ini dari dompet atau exchange mana pun. Ini alamat XMR biasa — tidak ada bagian transfernya yang melibatkan DUCAT.</string>
+    <string name="accounts_no_wallet">Belum ada dompet — selesaikan penyiapan dulu.</string>
+    <string name="accounts_copy">Salin</string>
+    <string name="accounts_hide">Sembunyikan</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">Saldo</string>
+    <string name="accounts_balances_desc">Sengaja dipisah: yang bisa kamu belanjakan sekarang bukan seluruh milikmu.</string>
+    <string name="accounts_waiting_for_node">Menunggu node.</string>
+    <string name="accounts_spendable">Bisa dipakai</string>
+    <string name="accounts_show_in">Tampilkan dalam %1$s</string>
+    <string name="accounts_stagenet_fiat_note">Koin stagenet adalah koin uji. Angka itu adalah nilai Monero asli sebanyak ini — koin ini sendiri tidak bernilai apa-apa.</string>
+    <string name="accounts_notes">Lembaran</string>
+    <string name="accounts_bond">Jaminan</string>
+    <string name="accounts_bond_none">tidak ada</string>
+    <string name="accounts_scanning_from_genesis_title">Memindai dari awal blockchain</string>
+    <string name="accounts_scanning_from_genesis_desc">Dompet ini dibuat sebelum aplikasi bisa menjangkau node, jadi dompet tidak tahu kapan ia dibuat. Di blok %1$d dari %2$d, itu berarti lebih dari sehari membaca. Lompati kalau kamu yakin dompetnya lebih baru dari itu.</string>
+    <string name="accounts_skip_ahead">Lompati</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">Lompat ke</string>
+    <string name="accounts_skip_ahead_desc">Apa pun yang diterima sebelum titik ini tidak akan ditemukan. Pilih waktu yang kamu yakin lebih awal dari umur dompet ini.</string>
+    <string name="accounts_about_a_day_ago">sekitar sehari lalu</string>
+    <string name="accounts_about_a_week_ago">sekitar seminggu lalu</string>
+    <string name="accounts_about_a_month_ago">sekitar sebulan lalu</string>
+    <string name="accounts_skip_option">"%1$s  —  blok %2$d"</string>
+    <string name="accounts_block_height_label">atau tinggi blok</string>
+    <string name="accounts_use_that_height">Pakai tinggi itu</string>
+    <string name="accounts_cancel">Batal</string>
+</resources>

@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">Chat</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">Chia sẻ thẻ của bạn</string>
+    <string name="contacts_share_card_body">Chỉ dành cho một người. Ai dùng rồi thì thẻ hết hiệu lực — nên một ảnh chụp màn hình lọt đi đâu đó cũng không thành lối vào.</string>
+    <string name="contacts_name_to_show_label">Tên hiển thị (không bắt buộc)</string>
+    <string name="contacts_name_to_show_support">Họ có thể đổi tên bạn ở phía họ; tên đó mới là tên họ thấy.</string>
+    <string name="contacts_error_make_card">không tạo được thẻ</string>
+    <string name="contacts_publishing_inbox">Đang công bố hộp thư của bạn…</string>
+    <string name="contacts_create_card">Tạo thẻ</string>
+    <string name="contacts_publishing_note">Việc này mất vài giây — phải công bố hai bản ghi trước khi ai đó liên hệ được bạn. Chúng vẫn hoạt động sau khi bạn đóng ứng dụng.</string>
+    <string name="contacts_copy_link">Sao chép liên kết</string>
+    <string name="contacts_send">Gửi</string>
+    <string name="contacts_expires_24h">Hết hạn sau 24 giờ.</string>
+    <string name="contacts_send_your_card">Gửi thẻ của bạn</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">Hướng camera vào thẻ DUCAT của họ</string>
+    <string name="contacts_card_expired_ask_new">Thẻ đó đã hết hạn. Hãy xin thẻ mới.</string>
+    <string name="contacts_not_a_card">Đó không phải thẻ DUCAT</string>
+    <string name="contacts_add_contact_title">Thêm liên hệ</string>
+    <string name="contacts_paste_link_label">Dán liên kết ducat: của họ</string>
+    <string name="contacts_paste">Dán</string>
+    <string name="contacts_scan">Quét</string>
+    <string name="contacts_card_expired_ask_them">Thẻ này đã hết hạn. Hãy xin họ thẻ mới.</string>
+    <string name="contacts_read_card">Đọc thẻ</string>
+    <string name="contacts_no_name_given">(không ghi tên)</string>
+    <string name="contacts_unverified_name">chưa xác minh — đây là tên họ tự gõ</string>
+    <string name="contacts_check_characters">Nếu quan trọng đây là ai, hãy đối chiếu các ký tự này với họ qua một kênh bạn tin.</string>
+    <string name="contacts_save_them_as_label">Lưu họ là</string>
+    <string name="contacts_save_them_as_support">Tên bạn đặt cho họ. Chỉ mình bạn thấy.</string>
+    <string name="contacts_error_read_inbox">không đọc được hộp thư của họ</string>
+    <string name="contacts_reading_inbox">Đang đọc hộp thư của họ…</string>
+    <string name="contacts_add_contact_button">Thêm liên hệ</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">Thẻ đó đã được dùng rồi. Hãy xin họ thẻ mới.</string>
+    <string name="contacts_reply_expired">Thẻ đó đã hết hạn. Hãy xin họ thẻ mới.</string>
+    <string name="contacts_reply_badsig">Liên kết đó bị hỏng — thử sao chép lại.</string>
+    <string name="contacts_reply_own_card">Đó là thẻ của chính bạn.</string>
+    <string name="contacts_reply_refused">Họ đã từ chối yêu cầu.</string>
+</resources>

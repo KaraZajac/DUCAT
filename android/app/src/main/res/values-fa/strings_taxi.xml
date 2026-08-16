@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">انتشار کد ممکن نشد</string>
+    <string name="taxi_meter_started_msg">تاکسی‌متر شروع شد — پایه %1$s XMR، دقیقه‌ای %2$s XMR. صورت‌حساب پایانی دقیقه‌ها را نشان می‌دهد.</string>
+    <string name="taxi_err_terms_not_sent">وصل شدند اما شرایط نرفت: %1$s</string>
+    <string name="taxi_set_fare">تعیین کرایه</string>
+    <string name="taxi_base_label">پایه (%1$s)</string>
+    <string name="taxi_per_min_label">دقیقه‌ای (%1$s)</string>
+    <string name="taxi_price_in_instead">قیمت‌گذاری به %1$s</string>
+    <string name="taxi_rate_locked_hint">نرخی که به %1$s تایپ شود، با شروع سفر روی XMR قفل می‌شود — همان رقمی که مسافر قبول می‌کند، همان رقمی است که برایش صورت‌حساب می‌آید.</string>
+    <string name="taxi_set_rate_hint">برای باز شدن کد سوار کردن، نرخ دقیقه‌ای را تعیین کن.</string>
+    <string name="taxi_pickup">سوار کردن</string>
+    <string name="taxi_scan_hint">مسافر اسکن می‌کند یا گوشی را نزدیک می‌کند. نرخ در گفتگو می‌نشیند و تاکسی‌متر خودش شروع می‌شود.</string>
+    <string name="taxi_meter_terms">پایه %1$s + دقیقه‌ای %2$s</string>
+    <string name="taxi_rider">مسافر</string>
+    <string name="taxi_line_base_fare">کرایهٔ پایه</string>
+    <string name="taxi_line_metered">%1$d دقیقه و %2$02d ثانیه × %3$s XMR در دقیقه</string>
+    <string name="taxi_err_send_fare">ارسال کرایه ممکن نشد</string>
+    <string name="taxi_end_ride_bill">پایان سفر — صورت‌حساب %1$s</string>
+    <string name="taxi_bill_hint">صورت‌حساب دقیقه‌ها و نرخ را نشان می‌دهد. رسید بعد از نشستن کرایه خودش برایشان می‌رود — حتی وقتی رفته‌اند.</string>
+    <string name="taxi_cancel_ride_no_bill">لغو سفر — بدون صورت‌حساب</string>
+    <string name="taxi_cancel_title">این سفر لغو شود؟</string>
+    <string name="taxi_cancel_body">تاکسی‌متر می‌ایستد و صورت‌حسابی نمی‌رود. دقیقه‌های شمرده‌شده دور ریخته می‌شوند و برنمی‌گردند.</string>
+    <string name="taxi_cancel_confirm">لغو سفر</string>
+    <string name="taxi_keep_going">ادامه بده</string>
+</resources>

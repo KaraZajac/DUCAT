@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_too_much_data">Data terlalu banyak untuk kode QR — pakai tautannya saja.</string>
+    <string name="qr_code">Kode QR</string>
+</resources>

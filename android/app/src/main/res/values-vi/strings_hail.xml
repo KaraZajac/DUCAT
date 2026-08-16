@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">Vẫy xe</string>
+    <string name="hail_card_standing">Đang vẫy — chờ tài xế</string>
+    <string name="hail_card_pitch">Đăng nơi bạn muốn đến lên một bến mà tài xế đang canh.</string>
+    <string name="hail_standing_at">Đang treo tại %1$s</string>
+    <string name="hail_take_it_down">Gỡ xuống</string>
+    <string name="hail_awaiting_offer">%1$s đã nhận lượt vẫy của bạn — chờ họ báo giá…</string>
+    <string name="hail_cancel">Hủy</string>
+    <string name="hail_parked_offer">%1$s đề nghị %2$s</string>
+    <string name="hail_view_the_offer">Xem đề nghị</string>
+    <string name="hail_post_it_again">Đăng lại</string>
+    <string name="hail_expired_unclaimed">Không ai nhận lượt vẫy của bạn trước khi nó hết hạn.</string>
+    <string name="hail_claimed_check_chats">Một tài xế đã nhận lượt vẫy của bạn — xem trong chat.</string>
+    <string name="hail_accept_message">Hẹn gặp lát nữa</string>
+    <string name="hail_decline_message">Thôi, cảm ơn</string>
+    <string name="hail_declined_post_again">Bạn đã từ chối — đăng lại chứ?</string>
+    <string name="hail_posted_waiting">Đã đăng. Đang chờ tài xế…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">Khách đã từ chối</string>
+    <string name="hail_rider_declined_body">Họ không nhận đề nghị của bạn. Lượt vẫy của họ đã rời khỏi bảng.</string>
+    <string name="hail_ok">OK</string>
+    <string name="hail_on_duty">Đang trực</string>
+    <string name="hail_net_wide">lưới rộng — ngang ~%1$s</string>
+    <string name="hail_net_nearby">đang canh vùng ngang ~%1$s</string>
+    <string name="hail_net_here">chỉ khu của bạn, ~%1$s</string>
+    <string name="hail_stop">Dừng</string>
+    <string name="hail_no_hails_map">Chưa có lượt vẫy nào — chúng sẽ ghim ở đây.</string>
+    <string name="hail_quote_me">nhờ báo giá</string>
+    <string name="hail_driving_title">Chạy xe</string>
+    <string name="hail_driving_pitch">Canh một bến; nhận một lượt vẫy. Nhận là mở cuộc trò chuyện với khách — báo giá ở đó, hẹn gặp ở đó, gửi hóa đơn lúc kết thúc như mọi chuyến.</string>
+    <string name="hail_range_just_here">Ngay đây</string>
+    <string name="hail_range_nearby">Lân cận</string>
+    <string name="hail_range_wide">Rộng</string>
+    <string name="hail_range_desc_here">~%1$s — khu phố đông đúc</string>
+    <string name="hail_range_desc_wide">ngang ~%1$s — vùng quê hoặc đêm vắng</string>
+    <string name="hail_range_desc_nearby">ngang ~%1$s — mức thường dùng</string>
+    <string name="hail_getting_location">Đang lấy vị trí của bạn…</string>
+    <string name="hail_drive_here">Chạy ở đây — canh khu của tôi</string>
+    <string name="hail_stand_label">Bến</string>
+    <string name="hail_stand_placeholder">tên bến, hoặc 📍 ở trên</string>
+    <string name="hail_watch">Canh</string>
+    <string name="hail_watching_neighbours">Đang canh ô của bạn và 8 ô kề bên — %1$s +8</string>
+    <string name="hail_board_empty">Bảng đang trống. Kiểm tra vài giây một lần…</string>
+    <string name="hail_offers_amount">đề nghị %1$s</string>
+    <string name="hail_offers_amount_both">đề nghị %1$s · %2$s</string>
+    <string name="hail_asks_quote">nhờ bạn báo giá</string>
+    <string name="hail_triage_pickup">đón ~%1$s</string>
+    <string name="hail_triage_trip">chuyến ~%1$s</string>
+    <string name="hail_stands_for_min">còn treo %1$d phút nữa</string>
+    <string name="hail_view_job">Xem cuốc</string>
+    <string name="hail_take_it">Nhận</string>
+    <string name="hail_location_fix_failed">không định vị được</string>
+    <string name="hail_beaten_to_it">Có người nhanh tay hơn bạn rồi.</string>
+    <string name="hail_on_my_way">🚕 Đang trên đường tới.</string>
+    <string name="hail_on_my_way_car">🚕 Đang trên đường tới — để ý chiếc %1$s.</string>
+    <string name="hail_on_my_way_plate">🚕 Đang trên đường tới, biển số %1$s.</string>
+    <string name="hail_on_my_way_car_plate">🚕 Đang trên đường tới — để ý chiếc %1$s, biển số %2$s.</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">Đóng</string>
+    <string name="hail_job_title">Cuốc xe</string>
+    <string name="hail_to_pickup">tới điểm đón: %1$s · ~%2$d phút</string>
+    <string name="hail_the_ride">chuyến đi: %1$s · ~%2$d phút</string>
+    <string name="hail_offer_amount">đề nghị: %1$s</string>
+    <string name="hail_offer_amount_both">đề nghị: %1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">bạn giữ trọn — chạy app gọi xe thì cuốc này chỉ được trả ~%1$s %2$.0f</string>
+    <string name="hail_rider_asks_quote">khách nhờ bạn báo giá</string>
+    <string name="hail_routing_job">Đang tính lộ trình…</string>
+    <string name="hail_your_fare">Giá cước của bạn (%1$s)</string>
+    <string name="hail_offer_counter_hint">giá họ đề nghị — sửa để trả giá</string>
+    <string name="hail_offer_quote_hint">họ nhờ bạn báo giá</string>
+    <string name="hail_price_in_instead">Tính giá bằng %1$s</string>
+    <string name="hail_fare_invalid">Giá cước phải là một số lớn hơn 0.</string>
+    <string name="hail_take_this_ride">Nhận cuốc này 🚕</string>
+    <string name="hail_pass">Bỏ qua</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">Đã báo %1$s — đang chờ %2$s</string>
+    <string name="hail_the_rider">khách</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">Vị trí của tôi</string>
+    <string name="hail_no_route">không tìm thấy đường giữa hai điểm đó</string>
+    <string name="hail_pickup_label">Điểm đón</string>
+    <string name="hail_locating">Đang định vị…</string>
+    <string name="hail_use_my_location">Dùng vị trí của tôi</string>
+    <string name="hail_where_to">Đi đâu?</string>
+    <string name="hail_address_hint">địa chỉ hoặc tên địa điểm</string>
+    <string name="hail_finding_route">Đang tìm đường…</string>
+    <string name="hail_route_summary">%1$s · ~%2$d phút</string>
+    <string name="hail_route_summary_priced">%1$s · ~%2$d phút · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">app gọi xe ~%1$s %2$.0f · taxi ~%1$s %3$.0f — tài xế của bạn giữ trọn (app gọi xe chỉ trả tài xế của họ ~%1$s %4$.0f)</string>
+    <string name="hail_your_offer">Mức bạn trả (%1$s)</string>
+    <string name="hail_offer_invalid">Mức trả phải là một số lớn hơn 0 — hoặc để trống để nhờ báo giá.</string>
+    <string name="hail_shards_full">mọi phân mảnh của bến ở đây đều đầy — thử lại sau chút nữa</string>
+    <string name="hail_post_failed">không đăng được lượt vẫy</string>
+    <string name="hail_osm_privacy">Tìm kiếm, lộ trình và bản đồ dùng máy chủ của OpenStreetMap — nơi duy nhất DUCAT gửi vị trí ra khỏi thiết bị. Tài xế chỉ thấy vùng cỡ ~%1$s.</string>
+    <string name="hail_post_button">Vẫy xe 🚕</string>
+    <string name="hail_search">Tìm</string>
+</resources>

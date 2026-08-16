@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">بستن</string>
+    <string name="ceremony_quoted_body">«%1$s»</string>
+    <string name="ceremony_decline">رد کردن</string>
+    <string name="ceremony_open_chat">باز کردن گفتگو</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">از تو می‌خواهد</string>
+    <string name="ceremony_tax">مالیات</string>
+    <string name="ceremony_accept_and_pay">قبول و پرداخت</string>
+    <string name="ceremony_no_address">در این درخواست نشانی نیست — بپرس کجا بفرستی.</string>
+    <string name="ceremony_accept_opens_confirm">«قبول» صفحهٔ تأیید را باز می‌کند — تا آنجا تأیید نکنی چیزی جابه‌جا نمی‌شود.</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">پرداخت شد ✓</string>
+    <string name="ceremony_paid_to">پرداخت شد · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">پیشنهاد می‌دهد تو را برساند، در ازای</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="one">حدود %1$d دقیقه فاصله دارد</item>
+        <item quantity="other">حدود %1$d دقیقه فاصله دارد</item>
+    </plurals>
+    <string name="ceremony_plate">پلاک %1$s</string>
+    <string name="ceremony_accept">قبول</string>
+    <string name="ceremony_accepting_agrees_fare">قبول کردن یعنی توافق روی کرایه — پایان سفر، از همان صفحهٔ تأیید همیشگی پرداخت می‌کنی.</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">سفر قطعی شد</string>
+    <string name="ceremony_expecting_you">منتظرت هستند — بقیهٔ حرف‌ها در گفتگو.</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">ماشینت دارد می‌آید</string>
+    <string name="ceremony_eta_in_chat">زمان رسیدن و هر چیز دیگر — در گفتگو.</string>
+</resources>

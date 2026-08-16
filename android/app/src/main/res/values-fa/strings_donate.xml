@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">حمایت از %1$s</string>
+    <string name="donate_support">حمایت</string>
+    <string name="donate_no_wallet">هنوز کیف پولی نیست — اول راه‌اندازی را تمام کن.</string>
+    <string name="donate_any_wallet">هر کیف پول Monero می‌تواند اینجا کمک کند — کسی به این برنامه نیاز ندارد.</string>
+    <string name="donate_since_opening">از ابتدای باز شدن</string>
+    <string name="donate_reuse_warning">این یک کد را همهٔ اهداکنندگان استفاده می‌کنند، پس روی دفتر کل عمومی Monero کمک‌های آن به همدیگر قابل‌پیوندند. و یک کد چاپ‌شده فقط به اندازهٔ آخرین کسی که به آن دست زده صادق است — هر جا منتشرش می‌کنی، مطمئن شو مال خودت است.</string>
+</resources>

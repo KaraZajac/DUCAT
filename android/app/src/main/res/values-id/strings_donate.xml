@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">Dukung %1$s</string>
+    <string name="donate_support">Dukung</string>
+    <string name="donate_no_wallet">Belum ada dompet — selesaikan penyiapan dulu.</string>
+    <string name="donate_any_wallet">Dompet Monero mana pun bisa memberi di sini — tidak perlu aplikasi ini.</string>
+    <string name="donate_since_opening">Sejak dibuka</string>
+    <string name="donate_reuse_warning">Kode yang satu ini dipakai ulang oleh setiap donatur, jadi di buku besar publik Monero, donasi ke sana bisa saling dikaitkan. Dan kode yang dicetak hanya sejujur orang terakhir yang menyentuhnya — pastikan itu milikmu di tempat kamu memasangnya.</string>
+</resources>

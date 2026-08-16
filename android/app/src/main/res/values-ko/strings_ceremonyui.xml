@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">닫기</string>
+    <string name="ceremony_quoted_body">“%1$s”</string>
+    <string name="ceremony_decline">거절</string>
+    <string name="ceremony_open_chat">채팅 열기</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">님이 요청한 금액</string>
+    <string name="ceremony_tax">세금</string>
+    <string name="ceremony_accept_and_pay">수락하고 결제</string>
+    <string name="ceremony_no_address">이 요청에는 주소가 없어요 — 어디로 보낼지 물어보세요.</string>
+    <string name="ceremony_accept_opens_confirm">수락하면 확인 화면이 열려요 — 거기서 승인하기 전까지는 아무것도 움직이지 않아요.</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">결제 완료 ✓</string>
+    <string name="ceremony_paid_to">결제 완료 · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">님이 이 요금으로 태워 주겠다고 해요</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="other">약 %1$d분 거리</item>
+    </plurals>
+    <string name="ceremony_plate">번호판 %1$s</string>
+    <string name="ceremony_accept">수락</string>
+    <string name="ceremony_accepting_agrees_fare">수락하면 요금이 확정돼요 — 결제는 운행이 끝날 때, 평소의 확인 화면을 거쳐서 해요.</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">탑승 확정</string>
+    <string name="ceremony_expecting_you">기사님이 기다리고 있어요 — 다른 이야기는 채팅으로 하세요.</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">차가 오고 있어요</string>
+    <string name="ceremony_eta_in_chat">도착 시간과 그 밖의 이야기는 채팅에서요.</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">พร้อมใช้จ่าย</string>
+    <string name="balance_change_coming_back">เงินทอน %1$s จะกลับมาในอีก %2$s</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">ตอนนี้คุณจ่ายไม่ได้</string>
+    <string name="balance_running_low_title">ธนบัตรใกล้หมด</string>
+    <string name="balance_all_locked_body">เงินของคุณอยู่ที่นี่ แต่ทั้งหมดติดอยู่ในรูปเงินทอน แตกธนบัตรเพื่อให้ใช้จ่ายได้อีกครั้ง</string>
+    <string name="balance_running_low_body">แตกธนบัตรตอนนี้ จะได้ไม่ติดขัดตอนอยู่หน้าเคาน์เตอร์</string>
+    <string name="balance_break_note_action">แตกธนบัตร</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="other">ธนบัตร %1$d ใบ</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">ยังไม่มีอะไรปลดล็อก</string>
+    <string name="balance_notes_then_wait">%1$s — พอสำหรับหนึ่งการชำระ แล้วต้องรอเงินทอน</string>
+    <string name="balance_notes_one_more">%1$s จ่ายได้อีกราวหนึ่งครั้ง</string>
+    <string name="balance_notes_more">%1$s จ่ายได้อีกราว %2$d ครั้ง</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">อีกครู่เดียว</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="other">ประมาณ %1$d นาที</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="other">ประมาณ %1$d ชั่วโมง</item>
+    </plurals>
+</resources>

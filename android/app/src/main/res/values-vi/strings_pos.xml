@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">Đơn này</string>
+    <string name="pos_items">Món</string>
+    <string name="pos_quick_amount">Số tiền nhanh</string>
+    <string name="pos_total_in">Tổng (%1$s)</string>
+    <string name="pos_request_amount">Yêu cầu %1$s</string>
+    <string name="pos_request_payment">Yêu cầu thanh toán</string>
+    <string name="pos_sale">Đơn hàng</string>
+    <string name="pos_remove">Xóa</string>
+    <string name="pos_network_fee_note">Phí mạng là phần khách trả, trả cho mạng — không bao giờ nằm trong hóa đơn.</string>
+    <string name="pos_charge_amount">Thu %1$s</string>
+    <string name="pos_add_first_item">Thêm món đầu tiên để bắt đầu một đơn.</string>
+    <string name="pos_item">Món</string>
+    <string name="pos_add_line">Thêm dòng</string>
+    <string name="pos_tax">Thuế</string>
+    <string name="pos_error_publish_code">không phát hành được mã</string>
+    <string name="pos_error_bill_not_sent">Họ đã kết nối, nhưng hóa đơn không gửi được: %1$s</string>
+    <string name="pos_getting_code_ready">Đang chuẩn bị mã…</string>
+    <string name="pos_scan_hint">Khách quét mã này trong DUCAT. Hóa đơn bên trên tới điện thoại họ ngay lúc đó.</string>
+    <string name="pos_tap_hint">Hoặc chạm hai điện thoại — hóa đơn vẫn vậy</string>
+    <string name="pos_payment_seen">Đã thấy thanh toán ✓</string>
+    <string name="pos_payment_settling">Khoản thanh toán của khách đang trong mạng — đang tất toán, khoảng hai phút. Biên nhận tự gửi khi tiền về.</string>
+    <string name="pos_bill_sent_to">Đã gửi hóa đơn cho %1$s</string>
+    <string name="pos_the_customer">khách</string>
+    <string name="pos_billed_hint">Khách xác nhận trên điện thoại của họ. Khi tiền vào chuỗi, biên nhận tự động gửi cho họ — ở đây không còn gì phải làm.</string>
+    <string name="pos_paid">Đã trả ✓</string>
+    <string name="pos_receipt_sent_to">Đã gửi biên nhận cho %1$s.</string>
+    <string name="pos_back">Quay lại</string>
+    <string name="pos_new_sale">Đơn mới</string>
+    <string name="pos_new_sale_settles">Đơn mới (đơn này tự tất toán)</string>
+    <string name="pos_cancel_sale">Hủy đơn</string>
+</resources>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">차량 호출</string>
+    <string name="hail_card_standing">호출 게시 중 — 기사를 기다려요</string>
+    <string name="hail_card_pitch">목적지를 승강장에 올리면 기사들이 봐요.</string>
+    <string name="hail_standing_at">%1$s에 게시 중</string>
+    <string name="hail_take_it_down">내리기</string>
+    <string name="hail_awaiting_offer">%1$s님이 호출을 받았어요 — 제안을 기다리는 중…</string>
+    <string name="hail_cancel">취소</string>
+    <string name="hail_parked_offer">%1$s님이 %2$s 제안</string>
+    <string name="hail_view_the_offer">제안 보기</string>
+    <string name="hail_post_it_again">다시 올리기</string>
+    <string name="hail_expired_unclaimed">만료될 때까지 아무도 호출을 받지 않았어요.</string>
+    <string name="hail_claimed_check_chats">기사가 호출을 받았어요 — 채팅을 확인하세요.</string>
+    <string name="hail_accept_message">곧 봬요</string>
+    <string name="hail_decline_message">괜찮아요</string>
+    <string name="hail_declined_post_again">거절했어요 — 다시 올릴까요?</string>
+    <string name="hail_posted_waiting">올렸어요. 기사를 기다리는 중…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">승객이 거절했어요</string>
+    <string name="hail_rider_declined_body">제안을 넘겼어요. 그 호출은 게시판에서 사라졌어요.</string>
+    <string name="hail_ok">확인</string>
+    <string name="hail_on_duty">운행 중</string>
+    <string name="hail_net_wide">넓은 그물 — 약 %1$s 범위</string>
+    <string name="hail_net_nearby">약 %1$s 범위 감시 중</string>
+    <string name="hail_net_here">내 구역만, 약 %1$s</string>
+    <string name="hail_stop">정지</string>
+    <string name="hail_no_hails_map">게시된 호출이 없어요 — 생기면 여기에 핀으로 떠요.</string>
+    <string name="hail_quote_me">견적 요청</string>
+    <string name="hail_driving_title">운전</string>
+    <string name="hail_driving_pitch">승강장을 지켜보다 호출을 받으세요. 받으면 승객과 대화가 열려요 — 거기서 견적하고, 만나고, 여느 운행처럼 끝에 계산서를 보내요.</string>
+    <string name="hail_range_just_here">바로 여기</string>
+    <string name="hail_range_nearby">근처</string>
+    <string name="hail_range_wide">넓게</string>
+    <string name="hail_range_desc_here">약 %1$s — 밀집한 도심 블록</string>
+    <string name="hail_range_desc_wide">약 %1$s 범위 — 시골이나 한산한 밤</string>
+    <string name="hail_range_desc_nearby">약 %1$s 범위 — 보통은 이 정도</string>
+    <string name="hail_getting_location">위치를 확인하는 중…</string>
+    <string name="hail_drive_here">여기서 운행 — 내 구역 감시</string>
+    <string name="hail_stand_label">승강장</string>
+    <string name="hail_stand_placeholder">승강장 이름, 또는 위의 📍</string>
+    <string name="hail_watch">감시</string>
+    <string name="hail_watching_neighbours">내 셀과 이웃 8개를 감시 중 — %1$s +8</string>
+    <string name="hail_board_empty">게시판이 비어 있어요. 몇 초마다 확인 중…</string>
+    <string name="hail_offers_amount">%1$s 제안</string>
+    <string name="hail_offers_amount_both">%1$s · %2$s 제안</string>
+    <string name="hail_asks_quote">견적을 요청해요</string>
+    <string name="hail_triage_pickup">픽업 약 %1$s</string>
+    <string name="hail_triage_trip">이동 약 %1$s</string>
+    <string name="hail_stands_for_min">%1$d분 더 게시돼요</string>
+    <string name="hail_view_job">일감 보기</string>
+    <string name="hail_take_it">받기</string>
+    <string name="hail_location_fix_failed">위치를 잡지 못했어요</string>
+    <string name="hail_beaten_to_it">다른 사람이 먼저 가져갔어요.</string>
+    <string name="hail_on_my_way">🚕 가는 중이에요.</string>
+    <string name="hail_on_my_way_car">🚕 가는 중이에요 — %1$s를 찾으세요.</string>
+    <string name="hail_on_my_way_plate">🚕 가는 중이에요, 번호판 %1$s.</string>
+    <string name="hail_on_my_way_car_plate">🚕 가는 중이에요 — 번호판 %2$s, %1$s를 찾으세요.</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">닫기</string>
+    <string name="hail_job_title">일감</string>
+    <string name="hail_to_pickup">픽업까지: %1$s · 약 %2$d분</string>
+    <string name="hail_the_ride">운행: %1$s · 약 %2$d분</string>
+    <string name="hail_offer_amount">제안: %1$s</string>
+    <string name="hail_offer_amount_both">제안: %1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">전부 기사 몫이에요 — 차량공유 앱이라면 이 여정에 약 %1$s %2$.0f를 줘요</string>
+    <string name="hail_rider_asks_quote">승객이 견적을 요청해요</string>
+    <string name="hail_routing_job">경로를 계산하는 중…</string>
+    <string name="hail_your_fare">내 요금 (%1$s)</string>
+    <string name="hail_offer_counter_hint">승객의 제안 — 바꾸면 역제안이에요</string>
+    <string name="hail_offer_quote_hint">견적을 요청받았어요</string>
+    <string name="hail_price_in_instead">%1$s로 매기기</string>
+    <string name="hail_fare_invalid">요금은 0보다 큰 숫자여야 해요.</string>
+    <string name="hail_take_this_ride">이 운행 받기 🚕</string>
+    <string name="hail_pass">넘기기</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">%1$s 제안함 — %2$s 대기 중</string>
+    <string name="hail_the_rider">승객</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">내 위치</string>
+    <string name="hail_no_route">두 지점 사이 경로를 찾지 못했어요</string>
+    <string name="hail_pickup_label">픽업</string>
+    <string name="hail_locating">위치 확인 중…</string>
+    <string name="hail_use_my_location">내 위치 사용</string>
+    <string name="hail_where_to">어디로 갈까요?</string>
+    <string name="hail_address_hint">주소나 상호</string>
+    <string name="hail_finding_route">경로를 찾는 중…</string>
+    <string name="hail_route_summary">%1$s · 약 %2$d분</string>
+    <string name="hail_route_summary_priced">%1$s · 약 %2$d분 · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">차량공유 약 %1$s %2$.0f · 택시 약 %1$s %3$.0f — 기사가 전부 가져가요 (차량공유는 기사에게 약 %1$s %4$.0f를 줘요)</string>
+    <string name="hail_your_offer">내 제안 (%1$s)</string>
+    <string name="hail_offer_invalid">제안은 0보다 큰 숫자여야 해요 — 비워 두면 견적을 요청해요.</string>
+    <string name="hail_shards_full">이곳 승강장 샤드가 모두 찼어요 — 잠시 후 다시 시도하세요</string>
+    <string name="hail_post_failed">호출을 올리지 못했어요</string>
+    <string name="hail_osm_privacy">검색·경로·지도는 OpenStreetMap 서버를 써요 — DUCAT이 위치를 기기 밖으로 보내는 유일한 곳이에요. 기사에게는 약 %1$s 구역만 보여요.</string>
+    <string name="hail_post_button">호출 🚕</string>
+    <string name="hail_search">검색</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="other">Lõi native: %1$d kiểm tra đạt</item>
+    </plurals>
+    <string name="bridge_checks_failed">Lõi native: %1$d trên %2$d THẤT BẠI</string>
+    <string name="bridge_jni_note">Các kiểm tra này gọi vào lõi Rust qua JNI — tầng duy nhất mà bài kiểm thử Rust không chạm tới được.</string>
+    <string name="bridge_got_expected">nhận %1$s, kỳ vọng %2$s</string>
+
+    <!-- Check names (rendered per row; expected/got values stay in code — they
+         are compared with == against what the bridge returns) -->
+    <string name="bridge_check_protocol_version">phiên bản giao thức</string>
+    <string name="bridge_check_capacity_6">sức chứa 6 đầu ra</string>
+    <string name="bridge_check_capacity_1">sức chứa 1 đầu ra</string>
+    <string name="bridge_check_float_plan">kế hoạch tiền quỹ cho 10 lần thanh toán</string>
+    <string name="bridge_check_bucket_floor">sàn bucket 4.999 XMR</string>
+    <string name="bridge_check_stale_rate">tỷ giá cũ leo thang</string>
+</resources>

@@ -1,0 +1,26 @@
+<resources>
+    <string name="sync_synced">동기화 완료</string>
+    <string name="sync_not_fully">동기화가 덜 끝났어요</string>
+    <string name="sync_partial_note">이 잔액은 지금까지 읽은 만큼만이에요 — 스캔이 끝날 때까진 적게 보일 수 있어요.</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">1분 이내</string>
+    <plurals name="duration_minutes">
+        <item quantity="other">약 %1$d분</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="other">약 %1$d시간</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="other">약 %1$d일</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">취소</string>
+    <string name="scanner_no_camera_title">카메라 권한이 없어요</string>
+    <string name="scanner_no_camera_body">스캔에는 카메라가 필요해요. DUCAT의 다른 기능은 카메라 없이도 다 돼요 — 카드는 언제든 링크로 붙여넣을 수 있어요.</string>
+    <string name="scanner_allow">허용</string>
+    <string name="scanner_would_not_start">카메라가 켜지지 않았어요: %1$s</string>
+    <string name="scanner_torch_off">플래시 끄기</string>
+    <string name="scanner_torch_on">플래시 켜기</string>
+</resources>

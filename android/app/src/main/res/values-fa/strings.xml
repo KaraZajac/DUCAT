@@ -1,0 +1,51 @@
+<resources>
+    <string name="nfc_service_description">پرداخت‌های نزدیک‌برد DUCAT</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">کیلومتر</string>
+    <string name="unit_mi">مایل</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">تمام</string>
+    <string name="common_cancel">لغو</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">خانه</string>
+    <string name="tab_accounts">حساب‌ها</string>
+    <string name="tab_activity">فعالیت</string>
+    <string name="tab_chat">گفتگو</string>
+    <string name="tab_send_receive">ارسال/دریافت</string>
+
+    <string name="section_status">وضعیت</string>
+    <string name="section_profile">پروفایل</string>
+    <string name="section_contacts">مخاطبین</string>
+    <string name="section_logs">گزارش‌ها</string>
+    <string name="section_settings">تنظیمات</string>
+    <string name="section_modes">حالت‌های کاری</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">زبان</string>
+    <string name="settings_language_system">مطابق سیستم</string>
+
+    <string name="settings_appearance_title">ظاهر</string>
+    <string name="theme_follow_system">مطابق سیستم</string>
+    <string name="theme_latte">لاته (روشن)</string>
+    <string name="theme_mocha">موکا (تیره)</string>
+
+    <string name="settings_distance_title">مسافت</string>
+    <string name="distance_follow_system">مطابق سیستم</string>
+    <string name="distance_kilometres">کیلومتر</string>
+    <string name="distance_miles">مایل</string>
+
+    <string name="settings_prices_title">قیمت‌ها</string>
+    <string name="prices_show_worth">نشان بده موجودی چقدر می‌ارزد</string>
+    <string name="prices_currency_title">ارز</string>
+    <string name="prices_this_phone">این گوشی</string>
+    <string name="prices_source_note">حداکثر دو بار در ساعت از CoinGecko یا Kraken بررسی می‌شود. اگر خاموشش کنی، این درخواست به‌کلی متوقف می‌شود.</string>
+    <string name="prices_last_from">آخرین قیمت از %1$s.</string>
+
+    <string name="settings_privacy_title">حریم خصوصی</string>
+    <string name="settings_read_receipts">ارسال رسید خواندن</string>
+    <string name="settings_read_receipts_on">مخاطبین می‌بینند که پیام‌هایشان را کی خوانده‌ای. رسیدهای آن‌ها هم، اگر بفرستند، در هر حال نشان داده می‌شود.</string>
+    <string name="settings_read_receipts_off">خاموش — اینکه کی می‌خوانی به خودت مربوط است. رسیدهای آن‌ها را همچنان می‌بینی، اگر بفرستند.</string>
+</resources>

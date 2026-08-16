@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">پشتیبان‌گیری</string>
+    <string name="backup_body">یک فایل رمزگذاری‌شده که هویت، کلیدها و تنظیماتت را نگه می‌دارد. هر وقت چیز مهمی عوض شد، یک نسخهٔ تازه بگیر.</string>
+    <string name="backup_passphrase">عبارت عبور</string>
+    <string name="backup_export">خروجی گرفتن</string>
+    <string name="backup_import">وارد کردن</string>
+    <string name="backup_exported_bytes">%1$d بایت خروجی گرفته شد</string>
+    <string name="backup_export_failed">خروجی گرفتن ناموفق بود</string>
+    <string name="backup_restored_title">کیف پول بازیابی‌شده</string>
+    <string name="backup_restored_check">قبل از اعتماد، مطمئن شو این نشانی را می‌شناسی.</string>
+    <string name="backup_opened">باز شد — %1$d سهم امانی، ارتفاع بازیابی %2$d</string>
+    <string name="backup_could_not_open">باز نشد — عبارت عبور اشتباه است یا فایل دستکاری شده</string>
+    <string name="backup_share_title">ذخیرهٔ پشتیبان DUCAT</string>
+</resources>

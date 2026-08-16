@@ -1,0 +1,26 @@
+<resources>
+    <string name="sync_synced">ซิงก์แล้ว</string>
+    <string name="sync_not_fully">ยังซิงก์ไม่ครบ</string>
+    <string name="sync_partial_note">ยอดนี้คือเท่าที่อ่านมาแล้วเท่านั้น — อาจต่ำกว่าจริงจนกว่าการสแกนจะเสร็จ</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">ไม่ถึงหนึ่งนาที</string>
+    <plurals name="duration_minutes">
+        <item quantity="other">ประมาณ %1$d นาที</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="other">ประมาณ %1$d ชั่วโมง</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="other">ประมาณ %1$d วัน</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">ยกเลิก</string>
+    <string name="scanner_no_camera_title">ไม่ได้รับอนุญาตให้ใช้กล้อง</string>
+    <string name="scanner_no_camera_body">การสแกนต้องใช้กล้อง อย่างอื่นใน DUCAT ทำงานได้โดยไม่ต้องมี — นามบัตรวางเป็นลิงก์แทนได้เสมอ</string>
+    <string name="scanner_allow">อนุญาต</string>
+    <string name="scanner_would_not_start">กล้องไม่ยอมเริ่มทำงาน: %1$s</string>
+    <string name="scanner_torch_off">ปิดไฟฉาย</string>
+    <string name="scanner_torch_on">เปิดไฟฉาย</string>
+</resources>

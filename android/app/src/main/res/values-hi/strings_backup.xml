@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">बैकअप</string>
+    <string name="backup_body">एक एन्क्रिप्टेड फ़ाइल जिसमें आपकी पहचान, आपकी कुंजियाँ और आपकी सेटिंग्स हैं। जब भी कुछ अहम बदले, एक नई निकाल लें।</string>
+    <string name="backup_passphrase">पासफ़्रेज़</string>
+    <string name="backup_export">एक्सपोर्ट</string>
+    <string name="backup_import">इंपोर्ट</string>
+    <string name="backup_exported_bytes">%1$d बाइट एक्सपोर्ट हुए</string>
+    <string name="backup_export_failed">एक्सपोर्ट नहीं हो पाया</string>
+    <string name="backup_restored_title">रीस्टोर हुआ वॉलेट</string>
+    <string name="backup_restored_check">भरोसा करने से पहले जाँच लें कि यह पता आपका पहचाना हुआ है।</string>
+    <string name="backup_opened">खुल गया — %1$d एस्क्रो हिस्से, रीस्टोर हाइट %2$d</string>
+    <string name="backup_could_not_open">खुला नहीं — पासफ़्रेज़ गलत है, या फ़ाइल से छेड़छाड़ हुई है</string>
+    <string name="backup_share_title">अपना DUCAT बैकअप सहेजें</string>
+</resources>

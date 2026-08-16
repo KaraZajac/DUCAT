@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
+    <string name="shells_title_pos">จุดขาย</string>
+    <string name="shells_tab_register">คิดเงิน</string>
+    <string name="shells_tab_sales">ยอดขาย</string>
+    <string name="shells_title_bar_tab">บิลบาร์</string>
+    <string name="shells_tab_tabs">บิล</string>
+    <string name="shells_tab_closed">ปิดแล้ว</string>
+    <string name="shells_title_taxi">แท็กซี่</string>
+    <string name="shells_tab_fares">งาน</string>
+    <string name="shells_tab_meter">มิเตอร์</string>
+    <string name="shells_tab_rides">เที่ยวรถ</string>
+    <string name="shells_title_donations">รับบริจาค</string>
+    <string name="shells_tab_code">โค้ด</string>
+    <string name="shells_menu">เมนู</string>
+    <string name="shells_today">วันนี้</string>
+    <string name="shells_billed_waiting">เรียกเก็บแล้ว — กำลังรอ</string>
+    <string name="shells_settled">ชำระแล้ว</string>
+    <string name="shells_no_sales_yet">วันนี้ยังไม่มียอดขาย</string>
+    <string name="shells_no_rides_yet">วันนี้ยังไม่มีเที่ยวรถ</string>
+    <string name="shells_payment_seen_settling">เห็นการชำระแล้ว — กำลังปิดยอด</string>
+    <string name="shells_billed_unpaid">เรียกเก็บแล้ว ยังไม่ชำระ</string>
+    <string name="shells_paid_outside">ชำระนอก DUCAT ✓</string>
+    <string name="shells_paid">ชำระแล้ว ✓</string>
+</resources>

@@ -1,0 +1,29 @@
+<resources>
+    <string name="sync_synced">सिंक हो गया</string>
+    <string name="sync_not_fully">पूरा सिंक नहीं</string>
+    <string name="sync_partial_note">यह बैलेंस बस उतना है जितना अब तक पढ़ा गया — स्कैन पूरा होने तक कम दिख सकता है।</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">मिनट से कम</string>
+    <plurals name="duration_minutes">
+        <item quantity="one">करीब %1$d मिनट</item>
+        <item quantity="other">करीब %1$d मिनट</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">करीब %1$d घंटा</item>
+        <item quantity="other">करीब %1$d घंटे</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">करीब %1$d दिन</item>
+        <item quantity="other">करीब %1$d दिन</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">रद्द करें</string>
+    <string name="scanner_no_camera_title">कैमरे की अनुमति नहीं है</string>
+    <string name="scanner_no_camera_body">स्कैन के लिए वह चाहिए। DUCAT में बाकी सब उसके बिना चलता है — कार्ड हमेशा लिंक बनाकर चिपकाया जा सकता है।</string>
+    <string name="scanner_allow">अनुमति दें</string>
+    <string name="scanner_would_not_start">कैमरा शुरू नहीं हुआ: %1$s</string>
+    <string name="scanner_torch_off">टॉर्च बंद</string>
+    <string name="scanner_torch_on">टॉर्च चालू</string>
+</resources>

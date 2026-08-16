@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">Ủng hộ %1$s</string>
+    <string name="donate_support">Ủng hộ</string>
+    <string name="donate_no_wallet">Chưa có ví — hãy hoàn tất thiết lập trước.</string>
+    <string name="donate_any_wallet">Ví Monero nào cũng gửi được vào đây — không ai cần ứng dụng này.</string>
+    <string name="donate_since_opening">Kể từ khi mở</string>
+    <string name="donate_reuse_warning">Một mã này được mọi người ủng hộ dùng chung, nên trên sổ cái công khai của Monero, các khoản ủng hộ vào đó có thể liên kết được với nhau. Và một mã in ra chỉ trung thực bằng người cuối cùng chạm vào nó — hãy kiểm tra nó đúng là của bạn ở nơi bạn dán.</string>
+</resources>

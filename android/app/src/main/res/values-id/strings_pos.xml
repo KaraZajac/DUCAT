@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">Penjualan ini</string>
+    <string name="pos_items">Item</string>
+    <string name="pos_quick_amount">Jumlah cepat</string>
+    <string name="pos_total_in">Total (%1$s)</string>
+    <string name="pos_request_amount">Minta %1$s</string>
+    <string name="pos_request_payment">Minta pembayaran</string>
+    <string name="pos_sale">Penjualan</string>
+    <string name="pos_remove">Hapus</string>
+    <string name="pos_network_fee_note">Biaya jaringan ditanggung pelanggan, dibayarkan ke jaringan — tidak pernah masuk tagihan.</string>
+    <string name="pos_charge_amount">Tagih %1$s</string>
+    <string name="pos_add_first_item">Tambahkan item pertama untuk memulai penjualan.</string>
+    <string name="pos_item">Item</string>
+    <string name="pos_add_line">Tambah baris</string>
+    <string name="pos_tax">Pajak</string>
+    <string name="pos_error_publish_code">tidak bisa menerbitkan kode</string>
+    <string name="pos_error_bill_not_sent">Mereka terhubung, tapi tagihannya tidak terkirim: %1$s</string>
+    <string name="pos_getting_code_ready">Menyiapkan kode…</string>
+    <string name="pos_scan_hint">Mereka memindai ini di DUCAT. Tagihan di atas tiba di ponsel mereka begitu mereka memindai.</string>
+    <string name="pos_tap_hint">Atau tempelkan ponsel — tagihannya sama saja</string>
+    <string name="pos_payment_seen">Pembayaran terlihat ✓</string>
+    <string name="pos_payment_settling">Pembayaran mereka sudah di jaringan — sedang diselesaikan, sekitar dua menit. Struk terkirim sendiri saat pembayaran masuk.</string>
+    <string name="pos_bill_sent_to">Tagihan terkirim ke %1$s</string>
+    <string name="pos_the_customer">pelanggan</string>
+    <string name="pos_billed_hint">Mereka mengonfirmasi di ponsel mereka sendiri. Saat pembayaran masuk di blockchain, struk terkirim ke mereka otomatis — tidak ada lagi yang perlu dilakukan di sini.</string>
+    <string name="pos_paid">Lunas ✓</string>
+    <string name="pos_receipt_sent_to">Struk terkirim ke %1$s.</string>
+    <string name="pos_back">Kembali</string>
+    <string name="pos_new_sale">Penjualan baru</string>
+    <string name="pos_new_sale_settles">Penjualan baru (yang ini selesai sendiri)</string>
+    <string name="pos_cancel_sale">Batalkan penjualan</string>
+</resources>

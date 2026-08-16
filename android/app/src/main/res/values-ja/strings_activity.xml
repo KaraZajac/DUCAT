@@ -1,0 +1,32 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">まだ何もありません</string>
+    <string name="activity_empty_desc">チェーンの読み込みが終わると、支払いがここに表示されます。「口座」からチャージすると何か見えるようになります。</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">待機中</string>
+    <string name="activity_they_ask">%1$sからの請求</string>
+    <string name="activity_you_asked">%1$sへの請求</string>
+    <plurals name="activity_items">
+        <item quantity="other">%1$d点</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">トランザクションを読み込み中…</string>
+    <string name="activity_receipt_chip">🧾 レシート</string>
+    <string name="activity_note_quoted">「%1$s」</string>
+    <string name="activity_sending">送信中 — まだブロックに入っていません</string>
+    <string name="activity_spent_unknown">使用済みですが、送り先は特定できません</string>
+    <string name="activity_maybe_change">自分の支払いのお釣りかもしれません</string>
+    <!-- %1$s is the date, %2$s the already-pluralized "unlocks in N blocks" -->
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="other">あと%1$dブロックで解除</item>
+    </plurals>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">%1$sへ</string>
+    <string name="activity_from">%1$sから</string>
+    <string name="activity_sent_unrecorded">送信済み — 受取人は記録されていません</string>
+    <string name="activity_received_unknown">受信 — 送信者不明</string>
+</resources>

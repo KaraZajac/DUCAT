@@ -1,0 +1,44 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">進行中のツケ</string>
+    <string name="bartab_start_tab">ツケを始める</string>
+    <string name="bartab_section_running">進行中</string>
+    <string name="bartab_section_billed">請求済み — 支払い待ち</string>
+    <string name="bartab_receipt_auto_hint">支払いが着金した瞬間に、レシートは自動で相手へ届きます — 店を出た後でも。</string>
+    <string name="bartab_section_settled">精算済み</string>
+    <string name="bartab_clear">クリア</string>
+    <string name="bartab_nothing_settled">今夜はまだ精算がありません。</string>
+    <string name="bartab_no_tabs">まだツケはありません。最初の注文が入ったら始めましょう。</string>
+    <plurals name="bartab_items">
+        <item quantity="other">%1$d品</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">支払い確認 — 精算中</string>
+    <string name="bartab_state_billed_unpaid">請求済み・未払い</string>
+    <string name="bartab_state_paid_oob">DUCAT外で支払い ✓</string>
+    <string name="bartab_state_cancelled">キャンセル</string>
+    <string name="bartab_state_paid">支払い済み ✓</string>
+    <string name="bartab_new_customer">新規のお客</string>
+    <string name="bartab_scan_hint">お客がスキャンまたはタップすると、ツケが自動で開きます。</string>
+    <string name="bartab_err_publish_code">コードを公開できませんでした</string>
+    <string name="bartab_or_regular">または常連から</string>
+    <string name="bartab_back">戻る</string>
+    <string name="bartab_bill_cancelled_msg">%1$s XMRの請求はキャンセルされました — 支払いは不要です。</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · ツケ合計 %3$s XMR</string>
+    <string name="bartab_remove_line">削除</string>
+    <string name="bartab_err_send_bill">請求を送れませんでした</string>
+    <string name="bartab_settle_bill">精算 — 請求 %1$s</string>
+    <string name="bartab_settle_hint">明細付きの請求を1通、%1$sとの会話へ送ります。相手はどこからでも支払えます — 店を出てもスレッドは閉じません。</string>
+    <string name="bartab_discard_tab">ツケを破棄</string>
+    <string name="bartab_discard_title">このツケを破棄しますか？</string>
+    <string name="bartab_discard_body">ツケと、そこに付けた注文はすべてこの端末から削除されます。請求は送られず、元に戻すこともできません。</string>
+    <string name="bartab_discard_confirm">破棄</string>
+    <string name="bartab_keep_tab">ツケを残す</string>
+    <string name="bartab_billed_hint">請求済みです。支払いが着金するとレシートは自動で相手へ届きます。別の方法で精算した場合は、ここで指定してください:</string>
+    <string name="bartab_paid_outside_button">DUCAT外で支払い（現金・カード）</string>
+    <string name="bartab_cancel_bill">請求をキャンセル</string>
+    <string name="bartab_cancelled_note">キャンセルしました — 会話で相手に伝えられました。</string>
+    <string name="bartab_paid_oob_note">DUCAT外で支払い ✓ — レシート送信済み、トランザクションの添付なし。</string>
+    <string name="bartab_paid_note">支払い済み ✓ — レシート送信済み。</string>
+    <string name="bartab_remove_from_book">ツケ帳から削除</string>
+    <string name="bartab_back_to_tabs">ツケ一覧に戻る</string>
+</resources>

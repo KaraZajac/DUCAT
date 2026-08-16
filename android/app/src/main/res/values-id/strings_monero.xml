@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">Cek lagi</string>
+    <string name="monero_subtitle">Tempat transaksi disiarkan dan blockchain dibaca.</string>
+    <string name="monero_finding_node">Mencari node…</string>
+    <string name="monero_no_usable_node">tidak ada node yang bisa dipakai</string>
+    <string name="monero_line_height">tinggi</string>
+    <string name="monero_line_synced">tersinkron</string>
+    <string name="monero_line_network">jaringan</string>
+    <string name="monero_line_round_trip">bolak-balik</string>
+    <string name="monero_synced_yes">ya</string>
+    <string name="monero_synced_no">tidak — saldo bisa basi</string>
+    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_no_node">tidak ada node</string>
+    <string name="monero_change_your_node">Ganti node-mu</string>
+    <string name="monero_use_own_node">Pakai node sendiri</string>
+    <string name="monero_your_node">Node kamu</string>
+    <string name="monero_use_it">Pakai</string>
+    <string name="monero_back_to_public">Kembali ke publik</string>
+    <string name="monero_cancel">Batal</string>
+    <string name="monero_trust_own_title">Node kamu</string>
+    <string name="monero_trust_own_body">Ia tidak mempelajari apa pun tentangmu yang belum kamu ketahui sendiri.</string>
+    <string name="monero_trust_onion_title">Node orang lain, lewat Tor</string>
+    <string name="monero_trust_onion_body">Ia melihat transaksimu tapi tidak tahu dari mana asalnya.</string>
+    <string name="monero_trust_public_title">Node orang lain</string>
+    <string name="monero_trust_public_body">Ia melihat alamat dan transaksimu sekaligus. Dandelion++ menyembunyikan asal transaksi dari jaringan lainnya — tapi tidak dari node yang kamu serahi. Menjalankan node sendiri adalah solusinya.</string>
+    <string name="monero_wallet_title">Dompet</string>
+    <string name="monero_no_wallet_key_title">Tidak ada kunci dompet di perangkat ini</string>
+    <string name="monero_no_wallet_key_body">Instalasi ini menyelesaikan penyiapan sebelum aplikasi menyimpan dompet, jadi tidak ada yang bisa dipindai. Menunggu tidak akan memperbaikinya — pulihkan dari cadangan, atau hapus data aplikasi dan siapkan ulang.</string>
+    <string name="monero_scanning_failed">Pemindaian gagal</string>
+    <string name="monero_unknown">tidak diketahui</string>
+    <string name="monero_scanning_failed_note">Node di atas menjawab, jadi ini soal pembacaan blockchain oleh dompet, bukan koneksinya.</string>
+    <string name="monero_not_started">Belum mulai — mencari node.</string>
+    <string name="monero_caught_up">Sudah sampai blok %1$d</string>
+    <string name="monero_block_of">blok %1$d dari %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="other">%1$d blok lagi</item>
+    </plurals>
+    <string name="monero_partial_balance">Saldomu hanya sebatas yang sudah terbaca.</string>
+    <string name="monero_last_window_failed">Jendela terakhir gagal: %1$s</string>
+    <string name="monero_rescan_hint">Dompet ini memindai dari awal blockchain, yang jauh lebih lama dari seharusnya kalau dompet dibuat baru-baru ini.</string>
+    <string name="monero_skip_ahead">Lompati</string>
+</resources>

@@ -1,0 +1,28 @@
+<resources>
+    <!-- MyProfileEditor.kt -->
+    <string name="myprofile_avatar_read_error">वह तस्वीर पढ़ी नहीं जा सकी।</string>
+    <string name="myprofile_your_picture">आपकी तस्वीर</string>
+    <string name="myprofile_add_picture">तस्वीर जोड़ें</string>
+    <string name="myprofile_picture_note">भेजने से पहले थंबनेल बना दी जाती है — यह आपके कॉन्टैक्ट रिकॉर्ड में चलती है, जिसमें चेहरे भर की जगह है, पूरी फ़ोटो की नहीं।</string>
+    <string name="myprofile_remove">हटाएँ</string>
+    <string name="myprofile_name_label">नाम</string>
+    <string name="myprofile_name_support">आपके बाँटे कार्डों पर दिखता है। जो आपको जोड़े, वह नाम बदल सकता है।</string>
+    <string name="myprofile_pronouns">सर्वनाम</string>
+    <string name="myprofile_email">ईमेल</string>
+    <string name="myprofile_phone">फ़ोन</string>
+    <string name="myprofile_phone_hint">सिर्फ़ अंक, देश कोड समेत</string>
+    <string name="myprofile_signal">Signal</string>
+    <string name="myprofile_signal_hint">name.12</string>
+    <string name="myprofile_driving_note">गाड़ी चलाते हैं? जब आप किसी की पुकार उठाते हैं तो राइडर को यह दिखता है — इसी से कोई अजनबी सड़क किनारे सही गाड़ी पहचानता है।</string>
+    <string name="myprofile_car_model">गाड़ी का मॉडल</string>
+    <string name="myprofile_car_model_hint">Toyota Corolla</string>
+    <string name="myprofile_car_colour">गाड़ी का रंग</string>
+    <string name="myprofile_car_colour_hint">नीला</string>
+    <string name="myprofile_plate">नंबर प्लेट</string>
+    <string name="myprofile_plate_hint">KAR-4242</string>
+    <string name="myprofile_share_switch">नए कॉन्टैक्ट के साथ यह शेयर करें</string>
+    <string name="myprofile_share_on_note">जब कोई आपका कार्ड लेता है, ऊपर का सब कुछ चला जाता है। आपके Monero पते का अपना अलग स्विच है।</string>
+    <string name="myprofile_share_off_note">सिर्फ़ आपका नाम जाता है। बाकी इसी डिवाइस पर रहता है।</string>
+    <string name="myprofile_saved">सहेज लिया</string>
+    <string name="myprofile_save">सहेजें</string>
+</resources>

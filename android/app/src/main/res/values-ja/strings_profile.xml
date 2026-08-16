@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">戻る</string>
+    <string name="profile_calls_themselves">自称「%1$s」</string>
+    <string name="profile_label_email">メール</string>
+    <string name="profile_label_phone">電話番号</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">相手が共有したもの</string>
+    <string name="profile_their_claim_note">相手の自己申告であり、検証ではありません。DUCATのペルソナをメールや電話番号に結び付けるものは何もなく、結び付くのは鍵だけです。</string>
+    <string name="profile_your_name_for_them_label">あなたが付けた名前</string>
+    <string name="profile_your_name_for_them_support">見えるのはあなただけです。アプリのあらゆる場所でこの名前が表示されます。</string>
+    <string name="profile_saved">保存しました</string>
+    <string name="profile_save_name">名前を保存</string>
+    <string name="profile_checked">検証済み</string>
+    <string name="profile_checked_note">暗号学的に検証されています。相手が渡すすべてのカードはこの鍵で署名され、この鍵と照合されます。</string>
+    <string name="profile_persona">ペルソナ</string>
+    <string name="profile_told_to_you">相手からの申告</string>
+    <string name="profile_told_note">相手が入力したもので、何によっても検証されていません。DUCATにはMoneroアドレスや名前をペルソナに結び付ける仕組みはないため、重要なら別の方法で確認してください。</string>
+    <string name="profile_their_name_label">相手が名乗る名前</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— 未入力 —</string>
+    <string name="profile_monero_address">Moneroアドレス</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— 未共有。相手からの請求が必要です —</string>
+    <string name="profile_where_reached">連絡経路</string>
+    <string name="profile_their_outbox">相手の送信箱</string>
+    <string name="profile_your_outbox">相手へのあなたの送信箱</string>
+    <string name="profile_open_chat">チャットを開く</string>
+    <string name="profile_not_built_yet">未実装</string>
+    <string name="profile_not_built_note">写真、代名詞、メールアドレス、ブロック機能。すべて任意で、すべてセットアップ時に設定し、名前と同じ経路で伝わります — 本人の申告であって、こちらで検証はしません。</string>
+    <string name="profile_copy">コピー</string>
+</resources>

@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">%1$s को सहयोग दें</string>
+    <string name="donate_support">सहयोग</string>
+    <string name="donate_no_wallet">अभी वॉलेट नहीं है — पहले सेटअप पूरा करें।</string>
+    <string name="donate_any_wallet">कोई भी Monero वॉलेट यहाँ दे सकता है — किसी को इस ऐप की ज़रूरत नहीं।</string>
+    <string name="donate_since_opening">खुलने से अब तक</string>
+    <string name="donate_reuse_warning">यह एक ही कोड हर दान देने वाला दोहराता है, इसलिए Monero के सार्वजनिक बहीखाते पर इसके दान आपस में जोड़े जा सकते हैं। और छपा हुआ कोड उतना ही ईमानदार है जितना उसे आख़िरी बार छूने वाला — जहाँ भी लगाएँ, जाँच लें कि वह आपका ही है।</string>
+</resources>

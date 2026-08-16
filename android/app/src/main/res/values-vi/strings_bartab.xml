@@ -1,0 +1,44 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">Tab đang mở</string>
+    <string name="bartab_start_tab">Mở tab</string>
+    <string name="bartab_section_running">Đang chạy</string>
+    <string name="bartab_section_billed">Đã gửi hóa đơn — chờ thanh toán</string>
+    <string name="bartab_receipt_auto_hint">Biên nhận tự gửi cho khách ngay khi tiền về — kể cả khi họ đã rời đi.</string>
+    <string name="bartab_section_settled">Đã tất toán</string>
+    <string name="bartab_clear">Xóa</string>
+    <string name="bartab_nothing_settled">Tối nay chưa có gì tất toán.</string>
+    <string name="bartab_no_tabs">Chưa có tab nào. Mở một tab khi có đơn đầu tiên.</string>
+    <plurals name="bartab_items">
+        <item quantity="other">%1$d món</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">đã thấy thanh toán — đang tất toán</string>
+    <string name="bartab_state_billed_unpaid">đã gửi hóa đơn, chưa trả</string>
+    <string name="bartab_state_paid_oob">trả ngoài DUCAT ✓</string>
+    <string name="bartab_state_cancelled">đã hủy</string>
+    <string name="bartab_state_paid">đã trả ✓</string>
+    <string name="bartab_new_customer">Khách mới</string>
+    <string name="bartab_scan_hint">Khách quét hoặc chạm — tab tự mở.</string>
+    <string name="bartab_err_publish_code">không phát hành được mã</string>
+    <string name="bartab_or_regular">Hoặc khách quen</string>
+    <string name="bartab_back">Quay lại</string>
+    <string name="bartab_bill_cancelled_msg">Hóa đơn %1$s XMR đó đã hủy — không cần trả gì.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · tab hiện %3$s XMR</string>
+    <string name="bartab_remove_line">Xóa</string>
+    <string name="bartab_err_send_bill">không gửi được hóa đơn</string>
+    <string name="bartab_settle_bill">Tất toán — hóa đơn %1$s</string>
+    <string name="bartab_settle_hint">Một hóa đơn liệt kê từng món gửi vào cuộc trò chuyện với %1$s. Họ có thể trả từ bất cứ đâu — luồng trò chuyện không đóng khi họ rời đi.</string>
+    <string name="bartab_discard_tab">Bỏ tab</string>
+    <string name="bartab_discard_title">Bỏ tab này?</string>
+    <string name="bartab_discard_body">Tab và mọi thứ đã ghi trên đó sẽ bị xóa khỏi điện thoại này. Không hóa đơn nào được gửi, và việc này không hoàn tác được.</string>
+    <string name="bartab_discard_confirm">Bỏ</string>
+    <string name="bartab_keep_tab">Giữ tab</string>
+    <string name="bartab_billed_hint">Đã gửi hóa đơn. Biên nhận sẽ tự gửi cho khách khi tiền về. Nếu đã thanh toán theo cách khác, hãy ghi nhận ở đây:</string>
+    <string name="bartab_paid_outside_button">Trả ngoài DUCAT (tiền mặt, thẻ)</string>
+    <string name="bartab_cancel_bill">Hủy hóa đơn</string>
+    <string name="bartab_cancelled_note">Đã hủy — khách đã được báo trong cuộc trò chuyện.</string>
+    <string name="bartab_paid_oob_note">Trả ngoài DUCAT ✓ — đã gửi biên nhận, không kèm giao dịch.</string>
+    <string name="bartab_paid_note">Đã trả ✓ — đã gửi biên nhận.</string>
+    <string name="bartab_remove_from_book">Xóa khỏi sổ tab</string>
+    <string name="bartab_back_to_tabs">Về danh sách tab</string>
+</resources>

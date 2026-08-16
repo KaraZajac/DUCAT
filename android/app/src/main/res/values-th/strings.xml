@@ -1,0 +1,52 @@
+<resources>
+    <!-- app_name and other translatable="false" entries are omitted: they fall back to values/. -->
+    <string name="nfc_service_description">การชำระเงินระยะใกล้ของ DUCAT</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">กม.</string>
+    <string name="unit_mi">ไมล์</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">เสร็จ</string>
+    <string name="common_cancel">ยกเลิก</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">หน้าหลัก</string>
+    <string name="tab_accounts">บัญชี</string>
+    <string name="tab_activity">กิจกรรม</string>
+    <string name="tab_chat">แชท</string>
+    <string name="tab_send_receive">ส่ง/รับ</string>
+
+    <string name="section_status">สถานะ</string>
+    <string name="section_profile">โปรไฟล์</string>
+    <string name="section_contacts">ผู้ติดต่อ</string>
+    <string name="section_logs">บันทึก</string>
+    <string name="section_settings">การตั้งค่า</string>
+    <string name="section_modes">โหมดการทำงาน</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">ภาษา</string>
+    <string name="settings_language_system">ตามระบบ</string>
+
+    <string name="settings_appearance_title">ลักษณะที่ปรากฏ</string>
+    <string name="theme_follow_system">ตามระบบ</string>
+    <string name="theme_latte">ลาเต้ (สว่าง)</string>
+    <string name="theme_mocha">มอคค่า (มืด)</string>
+
+    <string name="settings_distance_title">ระยะทาง</string>
+    <string name="distance_follow_system">ตามระบบ</string>
+    <string name="distance_kilometres">กิโลเมตร</string>
+    <string name="distance_miles">ไมล์</string>
+
+    <string name="settings_prices_title">ราคา</string>
+    <string name="prices_show_worth">แสดงมูลค่าของยอดคงเหลือ</string>
+    <string name="prices_currency_title">สกุลเงิน</string>
+    <string name="prices_this_phone">โทรศัพท์เครื่องนี้</string>
+    <string name="prices_source_note">ตรวจสอบไม่เกินสองครั้งต่อชั่วโมง จาก CoinGecko หรือ Kraken การปิดตัวเลือกนี้จะหยุดคำขอทั้งหมด</string>
+    <string name="prices_last_from">ล่าสุดจาก %1$s</string>
+
+    <string name="settings_privacy_title">ความเป็นส่วนตัว</string>
+    <string name="settings_read_receipts">ส่งการแจ้งว่าอ่านแล้ว</string>
+    <string name="settings_read_receipts_on">ผู้ติดต่อจะเห็นเมื่อคุณอ่านข้อความของเขา ส่วนของเขา คุณเห็นเสมออยู่แล้วหากเขาส่งมา</string>
+    <string name="settings_read_receipts_off">ปิด — คุณอ่านเมื่อไรเป็นเรื่องของคุณ คุณยังเห็นของเขาหากเขาส่งมา</string>
+</resources>

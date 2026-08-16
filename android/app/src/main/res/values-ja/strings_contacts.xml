@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">チャット</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">カードを共有</string>
+    <string name="contacts_share_card_body">1人にだけ有効です。使われた時点で無効になるので、スクリーンショットがどこかへ流れても入り口にはなりません。</string>
+    <string name="contacts_name_to_show_label">表示する名前（任意）</string>
+    <string name="contacts_name_to_show_support">相手は自分の側であなたの名前を変えられます。相手に見えるのはその名前です。</string>
+    <string name="contacts_error_make_card">カードを作成できませんでした</string>
+    <string name="contacts_publishing_inbox">受信箱を公開しています…</string>
+    <string name="contacts_create_card">カードを作成</string>
+    <string name="contacts_publishing_note">数秒かかります — 誰かがあなたに連絡できるようになる前に、2件のレコードを公開する必要があります。アプリを閉じた後も機能し続けます。</string>
+    <string name="contacts_copy_link">リンクをコピー</string>
+    <string name="contacts_send">送信</string>
+    <string name="contacts_expires_24h">24時間で失効します。</string>
+    <string name="contacts_send_your_card">カードを送る</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">相手のDUCATカードにカメラを向けてください</string>
+    <string name="contacts_card_expired_ask_new">このカードは失効しています。新しいものをもらってください。</string>
+    <string name="contacts_not_a_card">これはDUCATカードではありません</string>
+    <string name="contacts_add_contact_title">連絡先を追加</string>
+    <string name="contacts_paste_link_label">相手のducat:リンクを貼り付け</string>
+    <string name="contacts_paste">貼り付け</string>
+    <string name="contacts_scan">スキャン</string>
+    <string name="contacts_card_expired_ask_them">このカードは失効しています。相手に新しいものを頼んでください。</string>
+    <string name="contacts_read_card">カードを読み取る</string>
+    <string name="contacts_no_name_given">（名前なし）</string>
+    <string name="contacts_unverified_name">未検証 — 相手が入力した名前です</string>
+    <string name="contacts_check_characters">相手が誰かが重要な場合は、信頼できる別の経路でこの文字列を本人と照合してください。</string>
+    <string name="contacts_save_them_as_label">保存する名前</string>
+    <string name="contacts_save_them_as_support">あなたが相手に付ける名前です。見えるのはあなただけです。</string>
+    <string name="contacts_error_read_inbox">相手の受信箱を読み取れませんでした</string>
+    <string name="contacts_reading_inbox">相手の受信箱を読み取り中…</string>
+    <string name="contacts_add_contact_button">連絡先に追加</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">このカードはすでに使われています。相手に新しいものを頼んでください。</string>
+    <string name="contacts_reply_expired">このカードは失効しています。相手に新しいものを頼んでください。</string>
+    <string name="contacts_reply_badsig">リンクが壊れています — もう一度コピーしてみてください。</string>
+    <string name="contacts_reply_own_card">それはあなた自身のカードです。</string>
+    <string name="contacts_reply_refused">相手がリクエストを拒否しました。</string>
+</resources>

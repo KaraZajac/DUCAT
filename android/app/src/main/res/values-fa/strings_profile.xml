@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">بازگشت</string>
+    <string name="profile_calls_themselves">خودش را «%1$s» می‌نامد</string>
+    <string name="profile_label_email">ایمیل</string>
+    <string name="profile_label_phone">تلفن</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">آنچه به اشتراک گذاشته</string>
+    <string name="profile_their_claim_note">ادعای خودش است، نه یک بررسی. هیچ‌چیز یک پرسونای DUCAT را به ایمیل یا شماره گره نمی‌زند — فقط به یک کلید.</string>
+    <string name="profile_your_name_for_them_label">نام تو برای او</string>
+    <string name="profile_your_name_for_them_support">فقط خودت این را می‌بینی. همین نام همه‌جا نشان داده می‌شود.</string>
+    <string name="profile_saved">ذخیره شد</string>
+    <string name="profile_save_name">ذخیرهٔ نام</string>
+    <string name="profile_checked">بررسی‌شده</string>
+    <string name="profile_checked_note">به‌صورت رمزنگارانه تأیید شده. هر کارتی که می‌دهد با این کلید امضا شده و با همان سنجیده می‌شود.</string>
+    <string name="profile_persona">پرسونا</string>
+    <string name="profile_told_to_you">به تو گفته‌شده</string>
+    <string name="profile_told_note">خودش داده و هیچ‌چیز تأییدش نکرده. در DUCAT هیچ‌چیز نشانی Monero یا نام را به پرسونا گره نمی‌زند؛ اگر مهم است، از راه دیگری بررسی کن.</string>
+    <string name="profile_their_name_label">نام خودش برای خودش</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— داده نشده —</string>
+    <string name="profile_monero_address">نشانی Monero</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— به اشتراک گذاشته نشده؛ باید خودش درخواست بفرستد —</string>
+    <string name="profile_where_reached">جایی که به او می‌رسند</string>
+    <string name="profile_their_outbox">صندوق خروجی او</string>
+    <string name="profile_your_outbox">صندوق خروجی تو به او</string>
+    <string name="profile_open_chat">باز کردن گفتگو</string>
+    <string name="profile_not_built_yet">هنوز ساخته نشده</string>
+    <string name="profile_not_built_note">عکس، ضمیرها، ایمیل، و مسدودسازی. همه اختیاری، همه هنگام راه‌اندازی، و همه از همان راهی می‌روند که نام می‌رود — ادعای خودشان، نه تأیید ما.</string>
+    <string name="profile_copy">کپی</string>
+</resources>

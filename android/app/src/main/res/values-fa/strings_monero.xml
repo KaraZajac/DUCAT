@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">بررسی دوباره</string>
+    <string name="monero_subtitle">جایی که تراکنش‌ها پخش می‌شوند و زنجیره خوانده می‌شود.</string>
+    <string name="monero_finding_node">در حال یافتن نود…</string>
+    <string name="monero_no_usable_node">نود قابل‌استفاده‌ای نیست</string>
+    <string name="monero_line_height">ارتفاع</string>
+    <string name="monero_line_synced">همگام</string>
+    <string name="monero_line_network">شبکه</string>
+    <string name="monero_line_round_trip">رفت‌وبرگشت</string>
+    <string name="monero_synced_yes">بله</string>
+    <string name="monero_synced_no">نه — موجودی‌ها کهنه خواهند بود</string>
+    <string name="monero_round_trip_ms">%1$s میلی‌ثانیه</string>
+    <string name="monero_no_node">بدون نود</string>
+    <string name="monero_change_your_node">تغییر نود</string>
+    <string name="monero_use_own_node">از نود خودت استفاده کن</string>
+    <string name="monero_your_node">نود تو</string>
+    <string name="monero_use_it">استفاده کن</string>
+    <string name="monero_back_to_public">بازگشت به عمومی</string>
+    <string name="monero_cancel">لغو</string>
+    <string name="monero_trust_own_title">نود خودت</string>
+    <string name="monero_trust_own_body">چیزی درباره‌ات یاد نمی‌گیرد که خودت از قبل نمی‌دانستی.</string>
+    <string name="monero_trust_onion_title">نود کس دیگر، از راه Tor</string>
+    <string name="monero_trust_onion_body">تراکنش‌هایت را می‌بیند اما نه اینکه از کجا آمده‌اند.</string>
+    <string name="monero_trust_public_title">نود کس دیگر</string>
+    <string name="monero_trust_public_body">نشانی و تراکنش‌هایت را با هم می‌بیند. Dandelion++ خاستگاه تراکنش را از بقیهٔ شبکه پنهان می‌کند — اما نه از نودی که خودت تحویلش دادی. راه‌حل، راه انداختن نود خودت است.</string>
+    <string name="monero_wallet_title">کیف پول</string>
+    <string name="monero_no_wallet_key_title">کلید کیف پول روی این دستگاه نیست</string>
+    <string name="monero_no_wallet_key_body">این نصب پیش از آنکه برنامه کیف پول را نگه دارد راه‌اندازی را تمام کرده، پس چیزی برای اسکن نیست. صبر کردن درستش نمی‌کند — از پشتیبان بازیابی کن، یا دادهٔ برنامه را پاک کن و از نو راه بینداز.</string>
+    <string name="monero_scanning_failed">اسکن ناموفق بود</string>
+    <string name="monero_unknown">نامشخص</string>
+    <string name="monero_scanning_failed_note">نود بالا پاسخ داد، پس این مربوط به خوانش خود کیف پول از زنجیره است، نه اتصال.</string>
+    <string name="monero_not_started">شروع نشده — در جستجوی نود.</string>
+    <string name="monero_caught_up">تا بلاک %1$d رسیده</string>
+    <string name="monero_block_of">بلاک %1$d از %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="one">%1$d بلاک مانده</item>
+        <item quantity="other">%1$d بلاک مانده</item>
+    </plurals>
+    <string name="monero_partial_balance">موجودی‌ات فقط همان است که تا حالا خوانده شده.</string>
+    <string name="monero_last_window_failed">آخرین پنجره ناموفق بود: %1$s</string>
+    <string name="monero_rescan_hint">این کیف پول از ابتدای زنجیره اسکن می‌کند؛ اگر تازه ساخته شده باشد، این خیلی بیشتر از حد لازم طول می‌کشد.</string>
+    <string name="monero_skip_ahead">پرش به جلو</string>
+</resources>

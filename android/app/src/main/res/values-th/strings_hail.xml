@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">เรียกรถ</string>
+    <string name="hail_card_standing">การเรียกรถยังค้างอยู่ — กำลังรอคนขับ</string>
+    <string name="hail_card_pitch">โพสต์จุดหมายของคุณไปยังจุดจอดที่คนขับเฝ้าดูอยู่</string>
+    <string name="hail_standing_at">ค้างอยู่ที่ %1$s</string>
+    <string name="hail_take_it_down">เอาลง</string>
+    <string name="hail_awaiting_offer">%1$s รับการเรียกของคุณแล้ว — กำลังรอข้อเสนอ…</string>
+    <string name="hail_cancel">ยกเลิก</string>
+    <string name="hail_parked_offer">%1$s เสนอ %2$s</string>
+    <string name="hail_view_the_offer">ดูข้อเสนอ</string>
+    <string name="hail_post_it_again">โพสต์อีกครั้ง</string>
+    <string name="hail_expired_unclaimed">ไม่มีใครรับการเรียกของคุณก่อนหมดเวลา</string>
+    <string name="hail_claimed_check_chats">คนขับรับการเรียกของคุณแล้ว — ดูในแชทของคุณ</string>
+    <string name="hail_accept_message">แล้วเจอกัน</string>
+    <string name="hail_decline_message">ไม่เป็นไร ขอบคุณ</string>
+    <string name="hail_declined_post_again">คุณปฏิเสธไปแล้ว — โพสต์อีกครั้งไหม?</string>
+    <string name="hail_posted_waiting">โพสต์แล้ว กำลังรอคนขับ…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">ผู้โดยสารปฏิเสธ</string>
+    <string name="hail_rider_declined_body">เขาไม่รับข้อเสนอของคุณ การเรียกของเขาหายไปจากกระดานแล้ว</string>
+    <string name="hail_ok">ตกลง</string>
+    <string name="hail_on_duty">กำลังรับงาน</string>
+    <string name="hail_net_wide">วงกว้าง — กว้างราว %1$s</string>
+    <string name="hail_net_nearby">เฝ้าดูพื้นที่กว้างราว %1$s</string>
+    <string name="hail_net_here">เฉพาะย่านของคุณ ราว %1$s</string>
+    <string name="hail_stop">หยุด</string>
+    <string name="hail_no_hails_map">ไม่มีการเรียกรถค้างอยู่ — ถ้ามีจะปักหมุดตรงนี้</string>
+    <string name="hail_quote_me">ขอราคา</string>
+    <string name="hail_driving_title">ขับรถ</string>
+    <string name="hail_driving_pitch">เฝ้าจุดจอด รับการเรียก การรับหนึ่งงานจะเปิดบทสนทนากับผู้โดยสาร — เสนอราคาที่นั่น นัดเจอที่นั่น เรียกเก็บตอนจบเหมือนการเดินทางทั่วไป</string>
+    <string name="hail_range_just_here">แค่ตรงนี้</string>
+    <string name="hail_range_nearby">ใกล้เคียง</string>
+    <string name="hail_range_wide">กว้าง</string>
+    <string name="hail_range_desc_here">ราว %1$s — ย่านเมืองหนาแน่น</string>
+    <string name="hail_range_desc_wide">กว้างราว %1$s — ชนบทหรือคืนที่เงียบ</string>
+    <string name="hail_range_desc_nearby">กว้างราว %1$s — ระยะปกติ</string>
+    <string name="hail_getting_location">กำลังหาตำแหน่งของคุณ…</string>
+    <string name="hail_drive_here">ขับแถวนี้ — เฝ้าย่านของฉัน</string>
+    <string name="hail_stand_label">จุดจอด</string>
+    <string name="hail_stand_placeholder">ชื่อจุดจอด หรือกด 📍 ด้านบน</string>
+    <string name="hail_watch">เฝ้าดู</string>
+    <string name="hail_watching_neighbours">กำลังเฝ้าเซลล์ของคุณและเพื่อนบ้านทั้ง 8 — %1$s +8</string>
+    <string name="hail_board_empty">กระดานว่างเปล่า กำลังเช็คทุกสองสามวินาที…</string>
+    <string name="hail_offers_amount">เสนอ %1$s</string>
+    <string name="hail_offers_amount_both">เสนอ %1$s · %2$s</string>
+    <string name="hail_asks_quote">ขอให้คุณเสนอราคา</string>
+    <string name="hail_triage_pickup">ไปรับราว %1$s</string>
+    <string name="hail_triage_trip">เดินทางราว %1$s</string>
+    <string name="hail_stands_for_min">ค้างอยู่อีก %1$d นาที</string>
+    <string name="hail_view_job">ดูงาน</string>
+    <string name="hail_take_it">รับงาน</string>
+    <string name="hail_location_fix_failed">ระบุตำแหน่งไม่สำเร็จ</string>
+    <string name="hail_beaten_to_it">มีคนรับงานนั้นตัดหน้าไปแล้ว</string>
+    <string name="hail_on_my_way">🚕 กำลังไป</string>
+    <string name="hail_on_my_way_car">🚕 กำลังไป — มองหารถ %1$s</string>
+    <string name="hail_on_my_way_plate">🚕 กำลังไป ทะเบียน %1$s</string>
+    <string name="hail_on_my_way_car_plate">🚕 กำลังไป — มองหารถ %1$s ทะเบียน %2$s</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">ปิด</string>
+    <string name="hail_job_title">งานนี้</string>
+    <string name="hail_to_pickup">ไปจุดรับ: %1$s · ราว %2$d นาที</string>
+    <string name="hail_the_ride">การเดินทาง: %1$s · ราว %2$d นาที</string>
+    <string name="hail_offer_amount">ข้อเสนอ: %1$s</string>
+    <string name="hail_offer_amount_both">ข้อเสนอ: %1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">คุณได้ทั้งหมด — แอปเรียกรถทั่วไปคิดราว %1$s %2$.0f สำหรับทริปนี้</string>
+    <string name="hail_rider_asks_quote">ผู้โดยสารขอให้คุณเสนอราคา</string>
+    <string name="hail_routing_job">กำลังคำนวณเส้นทางของงาน…</string>
+    <string name="hail_your_fare">ค่าโดยสารของคุณ (%1$s)</string>
+    <string name="hail_offer_counter_hint">ข้อเสนอของเขา — แก้ตัวเลขเพื่อต่อรอง</string>
+    <string name="hail_offer_quote_hint">เขาขอให้คุณเสนอราคา</string>
+    <string name="hail_price_in_instead">ตั้งราคาเป็น %1$s แทน</string>
+    <string name="hail_fare_invalid">ค่าโดยสารต้องเป็นตัวเลขที่มากกว่าศูนย์</string>
+    <string name="hail_take_this_ride">รับงานนี้ 🚕</string>
+    <string name="hail_pass">ผ่าน</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">เสนอ %1$s แล้ว — กำลังรอ %2$s</string>
+    <string name="hail_the_rider">ผู้โดยสาร</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">ตำแหน่งของฉัน</string>
+    <string name="hail_no_route">ไม่พบเส้นทางระหว่างสองจุดนั้น</string>
+    <string name="hail_pickup_label">จุดรับ</string>
+    <string name="hail_locating">กำลังหาตำแหน่ง…</string>
+    <string name="hail_use_my_location">ใช้ตำแหน่งของฉัน</string>
+    <string name="hail_where_to">ไปไหนดี?</string>
+    <string name="hail_address_hint">ที่อยู่หรือชื่อสถานที่</string>
+    <string name="hail_finding_route">กำลังหาเส้นทาง…</string>
+    <string name="hail_route_summary">%1$s · ราว %2$d นาที</string>
+    <string name="hail_route_summary_priced">%1$s · ราว %2$d นาที · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">แอปเรียกรถราว %1$s %2$.0f · แท็กซี่ราว %1$s %3$.0f — คนขับของคุณได้ทั้งหมด (แอปเรียกรถจ่ายให้คนขับราว %1$s %4$.0f)</string>
+    <string name="hail_your_offer">ข้อเสนอของคุณ (%1$s)</string>
+    <string name="hail_offer_invalid">ข้อเสนอต้องเป็นตัวเลขที่มากกว่าศูนย์ — หรือเว้นว่างไว้เพื่อขอราคา</string>
+    <string name="hail_shards_full">ทุกชาร์ดของจุดจอดแถวนี้เต็ม — ลองใหม่อีกสักครู่</string>
+    <string name="hail_post_failed">โพสต์การเรียกรถไม่สำเร็จ</string>
+    <string name="hail_osm_privacy">การค้นหา เส้นทาง และแผนที่ใช้เซิร์ฟเวอร์ของ OpenStreetMap — จุดเดียวที่ DUCAT ส่งตำแหน่งออกนอกเครื่อง คนขับเห็นเพียงพื้นที่ราว %1$s</string>
+    <string name="hail_post_button">เรียกรถ 🚕</string>
+    <string name="hail_search">ค้นหา</string>
+</resources>

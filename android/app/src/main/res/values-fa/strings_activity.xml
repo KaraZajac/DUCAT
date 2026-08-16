@@ -1,0 +1,33 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">هنوز خبری نیست</string>
+    <string name="activity_empty_desc">پرداخت‌ها بعد از خوانده شدن زنجیره اینجا ظاهر می‌شوند. برای اینکه چیزی ببینی، از حساب‌ها شارژ کن.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">در انتظار</string>
+    <string name="activity_they_ask">%1$s درخواست می‌کند</string>
+    <string name="activity_you_asked">از %1$s درخواست کردی</string>
+    <plurals name="activity_items">
+        <item quantity="one">%1$d قلم</item>
+        <item quantity="other">%1$d قلم</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">در حال خواندن تراکنش…</string>
+    <string name="activity_receipt_chip">🧾 رسید</string>
+    <string name="activity_note_quoted">«%1$s»</string>
+    <string name="activity_sending">در حال ارسال — هنوز در بلاکی نیست</string>
+    <string name="activity_spent_unknown">خرج شده، اما نمی‌توانیم بگوییم کجا</string>
+    <string name="activity_maybe_change">شاید بقیهٔ پولِ پرداخت خودت باشد</string>
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="one">پس از %1$d بلوک باز می‌شود</item>
+        <item quantity="other">پس از %1$d بلوک باز می‌شود</item>
+    </plurals>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">به %1$s</string>
+    <string name="activity_from">از %1$s</string>
+    <string name="activity_sent_unrecorded">ارسال شده — گیرنده ثبت نشده</string>
+    <string name="activity_received_unknown">دریافت شده — فرستنده نامشخص</string>
+</resources>

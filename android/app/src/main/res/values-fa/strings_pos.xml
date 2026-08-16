@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">این فروش</string>
+    <string name="pos_items">اقلام</string>
+    <string name="pos_quick_amount">مبلغ سریع</string>
+    <string name="pos_total_in">جمع (%1$s)</string>
+    <string name="pos_request_amount">درخواست %1$s</string>
+    <string name="pos_request_payment">درخواست پرداخت</string>
+    <string name="pos_sale">فروش</string>
+    <string name="pos_remove">حذف</string>
+    <string name="pos_network_fee_note">کارمزد شبکه با مشتری است و به شبکه پرداخت می‌شود — هیچ‌وقت جزو صورت‌حساب نیست.</string>
+    <string name="pos_charge_amount">دریافت %1$s</string>
+    <string name="pos_add_first_item">برای شروع فروش، اولین قلم را اضافه کن.</string>
+    <string name="pos_item">قلم</string>
+    <string name="pos_add_line">افزودن ردیف</string>
+    <string name="pos_tax">مالیات</string>
+    <string name="pos_error_publish_code">انتشار کد ممکن نشد</string>
+    <string name="pos_error_bill_not_sent">وصل شدند، اما صورت‌حساب نرفت: %1$s</string>
+    <string name="pos_getting_code_ready">در حال آماده کردن کد…</string>
+    <string name="pos_scan_hint">این را در DUCAT اسکن می‌کنند. همان لحظه صورت‌حساب بالا روی گوشی‌شان می‌رسد.</string>
+    <string name="pos_tap_hint">یا گوشی‌ها را به هم نزدیک کنید — هر دو راه، همان صورت‌حساب</string>
+    <string name="pos_payment_seen">پرداخت دیده شد ✓</string>
+    <string name="pos_payment_settling">پرداخت‌شان در شبکه است — در حال تسویه، حدود دو دقیقه. رسید بعد از نشستن، خودش می‌رود.</string>
+    <string name="pos_bill_sent_to">صورت‌حساب برای %1$s رفت</string>
+    <string name="pos_the_customer">مشتری</string>
+    <string name="pos_billed_hint">روی گوشی خودشان تأیید می‌کنند. وقتی پرداخت روی زنجیره نشست، رسید خودکار برایشان می‌رود — اینجا کاری نمانده.</string>
+    <string name="pos_paid">پرداخت شد ✓</string>
+    <string name="pos_receipt_sent_to">رسید برای %1$s رفت.</string>
+    <string name="pos_back">بازگشت</string>
+    <string name="pos_new_sale">فروش جدید</string>
+    <string name="pos_new_sale_settles">فروش جدید (این یکی خودش تسویه می‌شود)</string>
+    <string name="pos_cancel_sale">لغو فروش</string>
+</resources>

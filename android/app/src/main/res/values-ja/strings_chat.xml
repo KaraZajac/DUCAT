@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">戻る</string>
+    <string name="chat_conversation_settings">会話の設定</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">送信できませんでした</string>
+    <string name="chat_could_not_send_the">%1$sを送信できませんでした</string>
+    <string name="chat_what_picture">写真</string>
+    <string name="chat_what_file">ファイル</string>
+    <string name="chat_what_location">位置情報</string>
+    <string name="chat_what_voice_memo">ボイスメモ</string>
+    <string name="chat_what_card">カード</string>
+    <string name="chat_what_contact">連絡先</string>
+    <string name="chat_error_location_fix">現在地を取得できませんでした</string>
+    <string name="chat_recording_placeholder">録音中… %1$d秒</string>
+    <string name="chat_message_placeholder">メッセージ</string>
+    <string name="chat_take_picture">写真を撮る</string>
+    <string name="chat_hold_to_record">長押しでボイスメモを録音</string>
+    <string name="chat_attach">添付</string>
+    <string name="chat_close">閉じる</string>
+    <string name="chat_send">送信</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">ギャラリー</string>
+    <string name="chat_file">ファイル</string>
+    <string name="chat_money_desc">お金を送る・請求する</string>
+    <string name="chat_money">お金</string>
+    <string name="chat_contact">連絡先</string>
+    <string name="chat_location">位置情報</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 私へのカードです — 私に連絡すべき人へ渡してください。1回限り、有効期間は1週間です:\n%1$s</string>
+    <string name="chat_decline_bill">%1$s XMRの請求をお断りします — 今回は見送ります。</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">この連絡先の鍵がありません — ハンドシェイクが完了しませんでした。新しいカードをもらってください。</string>
+    <string name="chat_e2e_notice">メッセージは、使用後に削除される鍵で暗号化されます。一度読まれたら復元できません — あなた自身にもできません。</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">メッセージを取り消しました</string>
+    <string name="chat_they_withdrew">%1$sがメッセージを取り消しました</string>
+    <string name="chat_you_declined">断りました</string>
+    <string name="chat_they_declined">%1$sが断りました</string>
+    <string name="chat_retract_with_quote">%1$s — 「%2$s」</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">メッセージ</string>
+    <string name="chat_delete_note">削除されるのはこの端末からだけです。相手側のコピーはそのまま残り、ここから消すことはできません。</string>
+    <string name="chat_copy">コピー</string>
+    <string name="chat_delete">削除</string>
+    <string name="chat_cancel">キャンセル</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">すべて残す</string>
+    <string name="chat_1_hour">1時間</string>
+    <string name="chat_1_day">1日</string>
+    <string name="chat_1_week">1週間</string>
+    <string name="chat_clear_confirm_title">このチャットを消去しますか？</string>
+    <string name="chat_clear_confirm_text">この会話のすべてのメッセージがこの端末から削除され、復元できません。相手側のコピーは残ります。</string>
+    <string name="chat_clear">消去</string>
+    <string name="chat_conversation_title">会話</string>
+    <string name="chat_delete_after">この端末のメッセージを次の期間後に削除</string>
+    <string name="chat_only_your_copy">あなたのコピーだけです。相手側は残り、ここから消すことはできません。</string>
+    <string name="chat_clear_this_chat">このチャットを消去</string>
+    <string name="chat_done">完了</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 ダウンロード中…</string>
+    <string name="chat_downloading_audio">🎤 ダウンロード中…</string>
+    <string name="chat_downloading_file">📎 ダウンロード中…</string>
+    <string name="chat_picture_desc">写真</string>
+    <string name="chat_could_not_decode">📷（デコードできませんでした）</string>
+    <string name="chat_you_asked_for">あなたの請求</string>
+    <string name="chat_asked_you_for">あなたへの請求</string>
+    <string name="chat_receipt_you_issued">発行したレシート</string>
+    <string name="chat_receipt">レシート</string>
+    <string name="chat_you_offered_to_drive">送迎を申し出ました</string>
+    <string name="chat_offers_to_drive_you">送迎の申し出</string>
+    <string name="chat_you_accepted_ride">配車を承認しました</string>
+    <string name="chat_ride_accepted">配車が承認されました</string>
+    <string name="chat_you_sent">送金しました</string>
+    <string name="chat_sent_you">送金が届きました</string>
+    <string name="chat_min_away">約%1$d分で到着</string>
+    <string name="chat_paid">支払い済み ✓</string>
+    <string name="chat_cancelled">キャンセル</string>
+    <string name="chat_review_payment">支払いを確認</string>
+    <string name="chat_no_address">この請求にはアドレスがありません — 送り先を相手に確認してください。</string>
+    <string name="chat_no_forward_secrecy">前方秘匿性なしで送信されました</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">停止</string>
+    <string name="chat_play_voice_memo">ボイスメモを再生</string>
+    <string name="chat_voice_memo">ボイスメモ</string>
+    <string name="chat_size_kb">%1$d KB</string>
+    <string name="chat_size_b">%1$d B</string>
+    <string name="chat_file_fallback">ファイル</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">小計</string>
+    <string name="chat_tax">税</string>
+    <string name="chat_total">合計</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">画像ではありません</string>
+    <string name="chat_picture_too_big">写真を十分に縮小できませんでした</string>
+    <string name="chat_nothing_recorded">何も録音されませんでした</string>
+    <string name="chat_memo_too_long">メモが長すぎます — 上限は数分です</string>
+    <string name="chat_could_not_read_file">そのファイルを読み込めませんでした</string>
+    <string name="chat_file_too_big">このファイルは%1$d KBあります — 添付は1 MBまでです</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">共有</string>
+    <string name="chat_card_for_me">私へのカード</string>
+    <string name="chat_card_for_me_desc">あなたに連絡すべき人へ渡してもらえる、1回限りのリンクです。</string>
+    <string name="chat_someones_profile">または誰かのプロフィール — 名前と、本人が公開を選んだ情報だけです。接続コードではありません: それは本人が渡すものです。</string>
+</resources>

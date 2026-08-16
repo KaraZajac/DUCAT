@@ -1,0 +1,51 @@
+<resources>
+    <string name="nfc_service_description">DUCAT टैप भुगतान</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">किमी</string>
+    <string name="unit_mi">मील</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">हो गया</string>
+    <string name="common_cancel">रद्द करें</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">होम</string>
+    <string name="tab_accounts">खाते</string>
+    <string name="tab_activity">गतिविधि</string>
+    <string name="tab_chat">चैट</string>
+    <string name="tab_send_receive">भेजें/पाएँ</string>
+
+    <string name="section_status">स्थिति</string>
+    <string name="section_profile">प्रोफ़ाइल</string>
+    <string name="section_contacts">कॉन्टैक्ट</string>
+    <string name="section_logs">लॉग</string>
+    <string name="section_settings">सेटिंग्स</string>
+    <string name="section_modes">ऑपरेटिंग मोड</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">भाषा</string>
+    <string name="settings_language_system">सिस्टम के अनुसार</string>
+
+    <string name="settings_appearance_title">रूप-रंग</string>
+    <string name="theme_follow_system">सिस्टम के अनुसार</string>
+    <string name="theme_latte">लाते (हल्का)</string>
+    <string name="theme_mocha">मोका (गहरा)</string>
+
+    <string name="settings_distance_title">दूरी</string>
+    <string name="distance_follow_system">सिस्टम के अनुसार</string>
+    <string name="distance_kilometres">किलोमीटर</string>
+    <string name="distance_miles">मील</string>
+
+    <string name="settings_prices_title">भाव</string>
+    <string name="prices_show_worth">बैलेंस की कीमत दिखाएँ</string>
+    <string name="prices_currency_title">मुद्रा</string>
+    <string name="prices_this_phone">यह फ़ोन</string>
+    <string name="prices_source_note">घंटे में ज़्यादा-से-ज़्यादा दो बार, CoinGecko या Kraken से पूछा जाता है। इसे बंद करने पर यह अनुरोध पूरी तरह रुक जाता है।</string>
+    <string name="prices_last_from">पिछली बार %1$s से।</string>
+
+    <string name="settings_privacy_title">प्राइवेसी</string>
+    <string name="settings_read_receipts">रीड रिसीट भेजें</string>
+    <string name="settings_read_receipts_on">कॉन्टैक्ट देख पाते हैं कि आपने उनके मैसेज कब पढ़े। वे भेजें तो उनकी आपको वैसे भी दिखती हैं।</string>
+    <string name="settings_read_receipts_off">बंद — आपने कब पढ़ा, यह आपकी बात है। वे भेजें तो उनकी आपको फिर भी दिखती हैं।</string>
+</resources>

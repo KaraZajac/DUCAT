@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">परिवहन-परत। भुगतान एक गुमनाम रास्ते से चलता है, इसलिए टैप कहीं जाए, उससे पहले इसका चालू होना ज़रूरी है।</string>
+
+    <string name="net_line_bridge">एंड्रॉइड ब्रिज</string>
+    <string name="net_ready">तैयार</string>
+    <string name="net_not_set_up">सेट नहीं</string>
+    <string name="net_line_node">नोड</string>
+    <string name="net_running">चालू</string>
+    <string name="net_stopped">बंद</string>
+    <string name="net_line_attached">जुड़ा</string>
+    <string name="net_line_route_capable">रूट-सक्षम</string>
+    <string name="net_yes">हाँ</string>
+    <string name="net_not_yet_routes">अभी नहीं — इसके बिना कोई रूट नहीं</string>
+    <string name="net_line_peers">पीयर</string>
+    <string name="net_peers_value">%1$s सक्रिय, %2$s भरोसेमंद</string>
+    <string name="net_waiting">%1$d सेकंड से प्रतीक्षा — रूट बनाने से पहले नोड को समझना होता है कि उस तक कैसे पहुँचा जा सकता है</string>
+
+    <string name="net_starting">शुरू हो रहा है…</string>
+    <string name="net_start_node">नोड शुरू करें</string>
+    <string name="net_stop">रोकें</string>
+    <string name="net_testing">परख जारी…</string>
+    <string name="net_test_route">रूट परखें</string>
+    <string name="net_route_ok">रूट मिल गया — %1$s बाइट का ब्लॉब</string>
+    <string name="net_route_failed">रूट विफल: %1$s</string>
+</resources>

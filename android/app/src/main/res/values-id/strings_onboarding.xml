@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">Siapkan DUCAT</string>
+    <string name="onb_progress_done">Selesai</string>
+    <string name="onb_progress_step">Langkah %1$d dari %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">Buat identitasmu</string>
+    <string name="onb_persona_body">Sepasang kunci di ponsel ini. Tanpa email, tanpa nomor telepon, tanpa tempat mendaftar — itu juga sebabnya tidak ada yang bisa memulihkannya untukmu.</string>
+    <string name="onb_persona_action">Buat</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">Buat dompetmu</string>
+    <string name="onb_wallet_body">Kunci Monero, dibuat di sini dan disimpan di sini. Inilah uangnya.</string>
+    <string name="onb_wallet_action">Buat dompet</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">Atur batas belanjamu</string>
+    <string name="onb_limits_body">Pembayaran kecil langsung lewat. Yang lebih besar meminta PIN-mu. Garisnya bisa kamu geser kapan saja — bawaannya sudah hati-hati.</string>
+    <string name="onb_limits_action">Pakai bawaan</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">Siap</string>
+    <string name="onb_done_body">Tambahkan uang saat kamu siap. Sebelum itu, tidak ada yang dipertaruhkan dan tidak ada yang bisa hilang.</string>
+    <string name="onb_done_action">Selesai</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">Cadangkan — sekarang, jangan nanti</string>
+    <string name="onb_backup_body">Satu file terenkripsi, dilindungi frasa sandi pilihanmu. Simpan di tempat kamu menyimpan barang penting.</string>
+    <string name="onb_backup_forget_title">Kalau kamu lupa frasa sandi ini</string>
+    <string name="onb_backup_forget_body">tidak ada cara memulihkannya. Tidak ada yang menyimpan salinan dan tidak ada tempat bertanya. Itu alasan yang sama kenapa tidak ada yang bisa membekukan atau mengambil uangmu.</string>
+    <string name="onb_backup_address_label">Alamatmu</string>
+    <string name="onb_backup_passphrase_label">Frasa sandi</string>
+    <string name="onb_backup_passphrase_good">Bagus</string>
+    <string name="onb_backup_passphrase_short">Minimal 8 karakter</string>
+    <string name="onb_backup_error_incomplete">Penyiapan belum selesai</string>
+    <string name="onb_backup_create">Buat cadangan</string>
+    <string name="onb_backup_created">Cadangan dibuat — %1$d byte.</string>
+    <string name="onb_backup_send_elsewhere">File-nya ada di ponsel ini, dan itu belum bisa disebut cadangan. Kirim ke tempat lain: pengelola kata sandi, drive, perangkat lain.</string>
+    <string name="onb_backup_send_action">Kirim ke suatu tempat</string>
+    <string name="onb_backup_done">Selesai</string>
+    <string name="onb_backup_share_chooser">Simpan cadangan DUCAT-mu</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">Orang harus memanggilmu apa?</string>
+    <string name="onb_profile_name_body">Ini tercantum di kartu yang kamu bagikan. Siapa pun yang menambahkanmu bisa mengganti namamu di sisi mereka, dan nama itulah yang mereka lihat — jadi ini usulan, bukan identitas.</string>
+    <string name="onb_profile_name_label">Nama (opsional)</string>
+    <string name="onb_profile_pay_title">Bolehkah kontak membayarmu langsung?</string>
+    <string name="onb_profile_pay_yes">Ya — lebih mudah dibayar</string>
+    <string name="onb_profile_pay_no">Tidak — mereka minta, kamu setujui</string>
+    <string name="onb_profile_pay_yes_detail">Alamatmu dikirim ke tiap kontak dan dipakai ulang. Siapa pun yang membaca blockchain bisa tahu orang yang sama dibayar tiap kali — termasuk orang yang cuma pernah membayarmu sekali.</string>
+    <string name="onb_profile_pay_no_detail">Tiap pembayaran memakai alamat baru, jadi tidak ada apa pun di blockchain yang mengaitkan pembayaran-pembayaranmu. Orang yang mau membayarmu menunggu kamu mengirim permintaan dulu.</string>
+    <string name="onb_profile_change_later">Keduanya bisa diubah nanti.</string>
+    <string name="onb_profile_continue">Lanjut</string>
+</resources>

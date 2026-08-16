@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">راه‌اندازی DUCAT</string>
+    <string name="onb_progress_done">تمام</string>
+    <string name="onb_progress_step">مرحلهٔ %1$d از %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">هویتت را بساز</string>
+    <string name="onb_persona_body">یک جفت‌کلید روی همین گوشی. نه ایمیلی، نه شماره‌ای، نه جایی برای ثبت‌نام — و به همین دلیل هم هیچ‌کس نمی‌تواند برایت بازیابی‌اش کند.</string>
+    <string name="onb_persona_action">بساز</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">کیف پولت را بساز</string>
+    <string name="onb_wallet_body">کلیدهای Monero، همین‌جا ساخته و همین‌جا نگه‌داری می‌شوند. پول یعنی همین.</string>
+    <string name="onb_wallet_action">ساخت کیف پول</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">سقف خرجت را تعیین کن</string>
+    <string name="onb_limits_body">پرداخت‌های کوچک مستقیم می‌روند. بزرگ‌ترها PIN می‌خواهند. جای این خط‌ها را هر وقت بخواهی می‌توانی عوض کنی — پیش‌فرض‌ها همین حالا هم محتاطند.</string>
+    <string name="onb_limits_action">پیش‌فرض‌ها بمانند</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">آماده</string>
+    <string name="onb_done_body">هر وقت آماده بودی پول اضافه کن. تا آن موقع نه چیزی در خطر است و نه چیزی برای از دست دادن.</string>
+    <string name="onb_done_action">پایان</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">پشتیبان بگیر — همین حالا، نه بعداً</string>
+    <string name="onb_backup_body">یک فایل رمزگذاری‌شده، محافظت‌شده با عبارت عبوری که خودت انتخاب می‌کنی. بگذارش همان‌جا که چیزهای مهمت را می‌گذاری.</string>
+    <string name="onb_backup_forget_title">اگر این عبارت عبور را فراموش کنی</string>
+    <string name="onb_backup_forget_body">هیچ راهی برای بازیابی نیست. هیچ‌کس نسخه‌ای ندارد و کسی نیست که از او بپرسی. همین هم دلیل آن است که هیچ‌کس نمی‌تواند پولت را مسدود کند یا بردارد.</string>
+    <string name="onb_backup_address_label">نشانی تو</string>
+    <string name="onb_backup_passphrase_label">عبارت عبور</string>
+    <string name="onb_backup_passphrase_good">خوب</string>
+    <string name="onb_backup_passphrase_short">دست‌کم 8 نویسه</string>
+    <string name="onb_backup_error_incomplete">راه‌اندازی ناقص است</string>
+    <string name="onb_backup_create">ساخت پشتیبان</string>
+    <string name="onb_backup_created">پشتیبان ساخته شد — %1$d بایت.</string>
+    <string name="onb_backup_send_elsewhere">روی همین گوشی است، و این هنوز پشتیبان نیست. بفرستش جای دیگر: یک مدیر گذرواژه، یک فضای ابری، یک دستگاه دیگر.</string>
+    <string name="onb_backup_send_action">بفرستش یک جایی</string>
+    <string name="onb_backup_done">تمام</string>
+    <string name="onb_backup_share_chooser">ذخیرهٔ پشتیبان DUCAT</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">مردم چه صدایت کنند؟</string>
+    <string name="onb_profile_name_body">این روی کارت‌هایی می‌رود که می‌دهی. هر که اضافه‌ات کند می‌تواند در سمت خودش نامت را عوض کند و همان نام را می‌بیند — پس این یک پیشنهاد است، نه هویت.</string>
+    <string name="onb_profile_name_label">نام (اختیاری)</string>
+    <string name="onb_profile_pay_title">مخاطبین بتوانند مستقیم به تو پول بدهند؟</string>
+    <string name="onb_profile_pay_yes">بله — پول گرفتن راحت‌تر</string>
+    <string name="onb_profile_pay_no">نه — آن‌ها می‌خواهند، تو تأیید می‌کنی</string>
+    <string name="onb_profile_pay_yes_detail">نشانی‌ات به هر مخاطب می‌رود و بارها استفاده می‌شود. هر کسی زنجیره را بخواند می‌فهمد هر بار به همان یک نفر پول داده شده — حتی کسانی که فقط یک بار به تو پول داده‌اند.</string>
+    <string name="onb_profile_pay_no_detail">هر پرداخت نشانی تازه‌ای دارد، پس روی زنجیره هیچ‌چیز پرداخت‌هایت را به هم گره نمی‌زند. کسی که می‌خواهد پول بدهد، اول منتظر درخواست تو می‌ماند.</string>
+    <string name="onb_profile_change_later">هر دو را بعداً می‌توانی عوض کنی.</string>
+    <string name="onb_profile_continue">ادامه</string>
+</resources>

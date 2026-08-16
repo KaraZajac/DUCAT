@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">바로 쓸 수 있는 금액</string>
+    <string name="balance_change_coming_back">거스름돈 %1$s, %2$s 후 돌아와요</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">지금은 결제할 수 없어요</string>
+    <string name="balance_running_low_title">지폐가 얼마 안 남았어요</string>
+    <string name="balance_all_locked_body">돈은 있는데 전부 거스름돈으로 묶여 있어요. 지폐를 쪼개면 다시 쓸 수 있어요.</string>
+    <string name="balance_running_low_body">계산대에서 당황하지 않게 지금 지폐를 쪼개 두세요.</string>
+    <string name="balance_break_note_action">지폐 쪼개기</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="other">지폐 %1$d장</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">아직 잠금 해제된 게 없어요</string>
+    <string name="balance_notes_then_wait">%1$s — 결제 한 번 할 만큼이에요, 그다음엔 거스름돈을 기다려야 해요</string>
+    <string name="balance_notes_one_more">%1$s, 약 한 번 더 결제할 수 있어요</string>
+    <string name="balance_notes_more">%1$s, 약 %2$d번 더 결제할 수 있어요</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">곧</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="other">약 %1$d분</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="other">약 %1$d시간</item>
+    </plurals>
+</resources>

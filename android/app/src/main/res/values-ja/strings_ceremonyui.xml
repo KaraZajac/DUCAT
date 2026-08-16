@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">閉じる</string>
+    <string name="ceremony_quoted_body">「%1$s」</string>
+    <string name="ceremony_decline">断る</string>
+    <string name="ceremony_open_chat">チャットを開く</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">からの請求</string>
+    <string name="ceremony_tax">税</string>
+    <string name="ceremony_accept_and_pay">承認して支払う</string>
+    <string name="ceremony_no_address">この請求にはアドレスがありません — 送り先を相手に確認してください。</string>
+    <string name="ceremony_accept_opens_confirm">「承認」を押すと確認画面が開きます — そこで承認するまで、お金は動きません。</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">支払い済み ✓</string>
+    <string name="ceremony_paid_to">支払い済み · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">が次の料金で送迎を申し出ています</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="other">約%1$d分で到着</item>
+    </plurals>
+    <string name="ceremony_plate">ナンバー %1$s</string>
+    <string name="ceremony_accept">承認</string>
+    <string name="ceremony_accepting_agrees_fare">承認すると運賃が確定します — 支払いは降車時に、いつもの確認画面から行います。</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">配車が確定しました</string>
+    <string name="ceremony_expecting_you">ドライバーはあなたを待っています — 連絡はチャットでどうぞ。</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">車が向かっています</string>
+    <string name="ceremony_eta_in_chat">到着予定など、連絡はチャットで。</string>
+</resources>

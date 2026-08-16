@@ -1,0 +1,26 @@
+<resources>
+    <string name="sync_synced">Đã đồng bộ</string>
+    <string name="sync_not_fully">Chưa đồng bộ hết</string>
+    <string name="sync_partial_note">Số dư này mới chỉ là phần đã đọc xong — có thể thấp cho tới khi quét hết.</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">chưa tới một phút</string>
+    <plurals name="duration_minutes">
+        <item quantity="other">khoảng %1$d phút</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="other">khoảng %1$d giờ</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="other">khoảng %1$d ngày</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">Hủy</string>
+    <string name="scanner_no_camera_title">Camera chưa được cho phép</string>
+    <string name="scanner_no_camera_body">Quét cần tới nó. Mọi thứ khác trong DUCAT vẫn chạy mà không cần — một tấm thẻ luôn có thể dán dưới dạng liên kết.</string>
+    <string name="scanner_allow">Cho phép</string>
+    <string name="scanner_would_not_start">Camera không khởi động được: %1$s</string>
+    <string name="scanner_torch_off">Tắt đèn</string>
+    <string name="scanner_torch_on">Bật đèn</string>
+</resources>

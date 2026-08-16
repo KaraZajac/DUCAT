@@ -1,0 +1,26 @@
+<resources>
+    <string name="sync_synced">Tersinkron</string>
+    <string name="sync_not_fully">Belum sepenuhnya tersinkron</string>
+    <string name="sync_partial_note">Saldo ini hanya sebatas yang sudah terbaca — bisa tampak kecil sampai pemindaian selesai.</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">kurang dari semenit</string>
+    <plurals name="duration_minutes">
+        <item quantity="other">sekitar %1$d menit</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="other">sekitar %1$d jam</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="other">sekitar %1$d hari</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">Batal</string>
+    <string name="scanner_no_camera_title">Kamera tidak diizinkan</string>
+    <string name="scanner_no_camera_body">Memindai membutuhkannya. Semua hal lain di DUCAT bekerja tanpanya — kartu selalu bisa ditempel sebagai tautan.</string>
+    <string name="scanner_allow">Izinkan</string>
+    <string name="scanner_would_not_start">Kamera tidak mau menyala: %1$s</string>
+    <string name="scanner_torch_off">Senter mati</string>
+    <string name="scanner_torch_on">Senter nyala</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_too_much_data">Quá nhiều dữ liệu cho một mã QR — hãy dùng liên kết thay thế.</string>
+    <string name="qr_code">Mã QR</string>
+</resources>

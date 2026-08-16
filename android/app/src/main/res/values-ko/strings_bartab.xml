@@ -1,0 +1,44 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">열린 탭</string>
+    <string name="bartab_start_tab">탭 시작</string>
+    <string name="bartab_section_running">진행 중</string>
+    <string name="bartab_section_billed">계산서 발송 — 결제 대기</string>
+    <string name="bartab_receipt_auto_hint">결제가 도착하는 순간 영수증이 저절로 상대에게 가요 — 이미 떠난 뒤라도요.</string>
+    <string name="bartab_section_settled">정산 완료</string>
+    <string name="bartab_clear">비우기</string>
+    <string name="bartab_nothing_settled">오늘 밤엔 아직 정산된 게 없어요.</string>
+    <string name="bartab_no_tabs">아직 탭이 없어요. 첫 주문이 들어오면 시작하세요.</string>
+    <plurals name="bartab_items">
+        <item quantity="other">품목 %1$d개</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">결제 확인 — 정산 중</string>
+    <string name="bartab_state_billed_unpaid">계산서 발송, 미결제</string>
+    <string name="bartab_state_paid_oob">DUCAT 밖에서 결제 ✓</string>
+    <string name="bartab_state_cancelled">취소됨</string>
+    <string name="bartab_state_paid">결제 완료 ✓</string>
+    <string name="bartab_new_customer">새 손님</string>
+    <string name="bartab_scan_hint">손님이 스캔하거나 폰을 맞대면 — 탭이 저절로 열려요.</string>
+    <string name="bartab_err_publish_code">코드를 게시하지 못했어요</string>
+    <string name="bartab_or_regular">또는 단골손님</string>
+    <string name="bartab_back">뒤로</string>
+    <string name="bartab_bill_cancelled_msg">%1$s XMR 계산서는 취소됐어요 — 결제할 것 없어요.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · 현재 탭 %3$s XMR</string>
+    <string name="bartab_remove_line">삭제</string>
+    <string name="bartab_err_send_bill">계산서를 보내지 못했어요</string>
+    <string name="bartab_settle_bill">정산 — 계산서 %1$s</string>
+    <string name="bartab_settle_hint">%1$s님과의 대화로 항목별 계산서 하나가 들어가요. 어디서든 결제할 수 있고, 손님이 떠나도 대화는 닫히지 않아요.</string>
+    <string name="bartab_discard_tab">탭 버리기</string>
+    <string name="bartab_discard_title">이 탭을 버릴까요?</string>
+    <string name="bartab_discard_body">탭과 거기에 적힌 모든 항목이 이 휴대폰에서 삭제돼요. 계산서는 보내지 않고, 되돌릴 수 없어요.</string>
+    <string name="bartab_discard_confirm">버리기</string>
+    <string name="bartab_keep_tab">탭 유지</string>
+    <string name="bartab_billed_hint">계산서를 보냈어요. 결제가 도착하면 영수증이 저절로 가요. 다른 방법으로 정산했다면 여기서 알려 주세요:</string>
+    <string name="bartab_paid_outside_button">DUCAT 밖에서 결제됨 (현금, 카드)</string>
+    <string name="bartab_cancel_bill">계산서 취소</string>
+    <string name="bartab_cancelled_note">취소됨 — 대화에서 상대에게 알렸어요.</string>
+    <string name="bartab_paid_oob_note">DUCAT 밖에서 결제 ✓ — 영수증 발송, 거래 첨부 없음.</string>
+    <string name="bartab_paid_note">결제 완료 ✓ — 영수증을 보냈어요.</string>
+    <string name="bartab_remove_from_book">탭 장부에서 삭제</string>
+    <string name="bartab_back_to_tabs">탭 목록으로</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">کارت من</string>
+    <string name="chatlist_new_chat">گفتگوی جدید</string>
+    <string name="chatlist_no_conversations">گفتگویی نیست</string>
+    <string name="chatlist_empty_hint">کارتت را حضوری به کسی بده، یا از هر برنامه‌ای که همین حالا به آن اعتماد داری بفرست. هیچ‌کس با نام پیدا نمی‌شود — برای رسیدن به یک نفر، کارتی لازم است که خودش داده باشد.</string>
+    <string name="chatlist_preview_you">تو: %1$s</string>
+    <string name="chatlist_no_messages_yet">هنوز پیامی نیست</string>
+    <string name="chatlist_delete_title">این گفتگو حذف شود؟</string>
+    <string name="chatlist_delete_body">همهٔ پیام‌ها با %1$s از این گوشی حذف می‌شود و برگشت‌پذیر نیست. %1$s در مخاطبینت می‌ماند — با «گفتگوی جدید» هر وقت خواستی یکی تازه شروع کن.</string>
+    <string name="chatlist_delete">حذف</string>
+    <string name="chatlist_cancel">لغو</string>
+    <string name="chatlist_add_contact">افزودن مخاطب</string>
+    <string name="chatlist_add_contact_hint">کارتی را که کسی به تو داده اسکن یا جای‌گذاری کن</string>
+    <string name="chatlist_no_contacts_yet">هنوز مخاطبی نیست.</string>
+    <string name="chatlist_preview_requested">💸 درخواست %1$s XMR</string>
+    <string name="chatlist_preview_sent">💸 ارسال %1$s XMR</string>
+    <string name="chatlist_preview_receipt">🧾 رسید — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">با %1$s واکنش نشان داد</string>
+    <string name="chatlist_preview_photo">📷 عکس</string>
+    <string name="chatlist_time_now">همین حالا</string>
+    <string name="chatlist_time_minutes">%1$d دق</string>
+    <string name="chatlist_time_hours">%1$d س</string>
+</resources>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">뒤로</string>
+    <string name="chat_conversation_settings">대화 설정</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">보내지 못했어요</string>
+    <string name="chat_could_not_send_the">%1$s을(를) 보내지 못했어요</string>
+    <string name="chat_what_picture">사진</string>
+    <string name="chat_what_file">파일</string>
+    <string name="chat_what_location">위치</string>
+    <string name="chat_what_voice_memo">음성 메모</string>
+    <string name="chat_what_card">카드</string>
+    <string name="chat_what_contact">연락처</string>
+    <string name="chat_error_location_fix">위치를 잡지 못했어요</string>
+    <string name="chat_recording_placeholder">녹음 중… %1$d초</string>
+    <string name="chat_message_placeholder">메시지</string>
+    <string name="chat_take_picture">사진 찍기</string>
+    <string name="chat_hold_to_record">길게 눌러 음성 메모 녹음</string>
+    <string name="chat_attach">첨부</string>
+    <string name="chat_close">닫기</string>
+    <string name="chat_send">보내기</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">갤러리</string>
+    <string name="chat_file">파일</string>
+    <string name="chat_money_desc">돈 보내기 또는 요청하기</string>
+    <string name="chat_money">돈</string>
+    <string name="chat_contact">연락처</string>
+    <string name="chat_location">위치</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 저에게 닿는 카드예요 — 저와 연락해야 할 사람에게 전해 주세요. 1회 사용, 1주일 유효:\n%1$s</string>
+    <string name="chat_decline_bill">%1$s XMR 계산서는 거절할게요 — 이번엔 아니에요.</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">이 연락처의 키가 없어요 — 핸드셰이크가 끝나지 않았어요. 새 카드를 요청하세요.</string>
+    <string name="chat_e2e_notice">메시지는 사용 후 삭제되는 키로 암호화돼요. 한번 읽으면 되살릴 수 없어요 — 본인도요.</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">메시지를 회수했어요</string>
+    <string name="chat_they_withdrew">%1$s님이 메시지를 회수했어요</string>
+    <string name="chat_you_declined">거절했어요</string>
+    <string name="chat_they_declined">%1$s님이 거절했어요</string>
+    <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">메시지</string>
+    <string name="chat_delete_note">삭제는 이 휴대폰에서만 지워요. 상대는 사본을 그대로 갖고 있고, 여기서는 거기에 손댈 수 없어요.</string>
+    <string name="chat_copy">복사</string>
+    <string name="chat_delete">삭제</string>
+    <string name="chat_cancel">취소</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">모두 보관</string>
+    <string name="chat_1_hour">1시간</string>
+    <string name="chat_1_day">1일</string>
+    <string name="chat_1_week">1주일</string>
+    <string name="chat_clear_confirm_title">이 채팅을 비울까요?</string>
+    <string name="chat_clear_confirm_text">이 대화의 모든 메시지가 이 휴대폰에서 삭제되고 복구할 수 없어요. 상대는 사본을 그대로 갖고 있어요.</string>
+    <string name="chat_clear">비우기</string>
+    <string name="chat_conversation_title">대화</string>
+    <string name="chat_delete_after">이 휴대폰에서 메시지를 삭제하는 시점</string>
+    <string name="chat_only_your_copy">내 사본만이에요. 상대는 자기 것을 갖고 있고, 여기서는 거기에 손댈 수 없어요.</string>
+    <string name="chat_clear_this_chat">이 채팅 비우기</string>
+    <string name="chat_done">완료</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 다운로드 중…</string>
+    <string name="chat_downloading_audio">🎤 다운로드 중…</string>
+    <string name="chat_downloading_file">📎 다운로드 중…</string>
+    <string name="chat_picture_desc">사진</string>
+    <string name="chat_could_not_decode">📷 (열 수 없음)</string>
+    <string name="chat_you_asked_for">내가 요청한 금액</string>
+    <string name="chat_asked_you_for">나에게 요청한 금액</string>
+    <string name="chat_receipt_you_issued">내가 발행한 영수증</string>
+    <string name="chat_receipt">영수증</string>
+    <string name="chat_you_offered_to_drive">운행을 제안했어요</string>
+    <string name="chat_offers_to_drive_you">운행 제안이 왔어요</string>
+    <string name="chat_you_accepted_ride">탑승을 수락했어요</string>
+    <string name="chat_ride_accepted">탑승 수락됨</string>
+    <string name="chat_you_sent">보낸 금액</string>
+    <string name="chat_sent_you">받은 금액</string>
+    <string name="chat_min_away">약 %1$d분 거리</string>
+    <string name="chat_paid">결제 완료 ✓</string>
+    <string name="chat_cancelled">취소됨</string>
+    <string name="chat_review_payment">결제 검토</string>
+    <string name="chat_no_address">이 요청에는 주소가 없어요 — 어디로 보낼지 물어보세요.</string>
+    <string name="chat_no_forward_secrecy">순방향 비밀성 없이 전송됨</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">정지</string>
+    <string name="chat_play_voice_memo">음성 메모 재생</string>
+    <string name="chat_voice_memo">음성 메모</string>
+    <string name="chat_size_kb">%1$d KB</string>
+    <string name="chat_size_b">%1$d B</string>
+    <string name="chat_file_fallback">파일</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">소계</string>
+    <string name="chat_tax">세금</string>
+    <string name="chat_total">합계</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">이미지가 아니에요</string>
+    <string name="chat_picture_too_big">사진을 충분히 줄이지 못했어요</string>
+    <string name="chat_nothing_recorded">녹음된 게 없어요</string>
+    <string name="chat_memo_too_long">메모가 너무 길어요 — 길어야 몇 분까지예요</string>
+    <string name="chat_could_not_read_file">그 파일을 읽지 못했어요</string>
+    <string name="chat_file_too_big">그 파일은 %1$d KB예요 — 첨부는 1 MB까지예요</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">공유</string>
+    <string name="chat_card_for_me">내게 닿는 카드</string>
+    <string name="chat_card_for_me_desc">나와 연락해야 할 사람에게 전달할 수 있는 1회용 링크예요.</string>
+    <string name="chat_someones_profile">또는 누군가의 프로필 — 이름과 그 사람이 공개하기로 한 것들이에요. 연결 코드는 아니에요: 그건 본인이 직접 주는 거예요.</string>
+</resources>

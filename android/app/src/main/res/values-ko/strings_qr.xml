@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_too_much_data">QR 코드에 담기엔 데이터가 너무 많아요 — 대신 링크를 쓰세요.</string>
+    <string name="qr_code">QR 코드</string>
+</resources>

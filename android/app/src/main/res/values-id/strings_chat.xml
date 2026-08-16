@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">Kembali</string>
+    <string name="chat_conversation_settings">Pengaturan percakapan</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">tidak bisa terkirim</string>
+    <string name="chat_could_not_send_the">tidak bisa mengirim %1$s</string>
+    <string name="chat_what_picture">gambar</string>
+    <string name="chat_what_file">file</string>
+    <string name="chat_what_location">lokasi</string>
+    <string name="chat_what_voice_memo">pesan suara</string>
+    <string name="chat_what_card">kartu</string>
+    <string name="chat_what_contact">kontak</string>
+    <string name="chat_error_location_fix">tidak bisa mendapatkan titik lokasi</string>
+    <string name="chat_recording_placeholder">Merekam… %1$d dtk</string>
+    <string name="chat_message_placeholder">Pesan</string>
+    <string name="chat_take_picture">Ambil foto</string>
+    <string name="chat_hold_to_record">Tahan untuk merekam pesan suara</string>
+    <string name="chat_attach">Lampirkan</string>
+    <string name="chat_close">Tutup</string>
+    <string name="chat_send">Kirim</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">Galeri</string>
+    <string name="chat_file">File</string>
+    <string name="chat_money_desc">Kirim atau minta uang</string>
+    <string name="chat_money">Uang</string>
+    <string name="chat_contact">Kontak</string>
+    <string name="chat_location">Lokasi</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 Kartu untukku — berikan ke siapa pun yang boleh menghubungiku. Satu klaim, satu minggu:\n%1$s</string>
+    <string name="chat_decline_bill">Menolak tagihan %1$s XMR itu — kali ini tidak.</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">Tidak ada kunci untuk kontak ini — jabat tangannya tidak selesai. Minta kartu baru ke mereka.</string>
+    <string name="chat_e2e_notice">Pesan dienkripsi ke kunci yang dihapus setelah dipakai. Sekali dibaca, pesan tidak bisa dipulihkan — bahkan olehmu.</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">Kamu menarik sebuah pesan</string>
+    <string name="chat_they_withdrew">%1$s menarik sebuah pesan</string>
+    <string name="chat_you_declined">Kamu menolak</string>
+    <string name="chat_they_declined">%1$s menolak</string>
+    <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">Pesan</string>
+    <string name="chat_delete_note">Hapus hanya menghilangkannya dari ponsel ini. Pihak lain tetap menyimpan salinannya — tidak ada apa pun di sini yang bisa menjangkaunya.</string>
+    <string name="chat_copy">Salin</string>
+    <string name="chat_delete">Hapus</string>
+    <string name="chat_cancel">Batal</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">Simpan semuanya</string>
+    <string name="chat_1_hour">1 jam</string>
+    <string name="chat_1_day">1 hari</string>
+    <string name="chat_1_week">1 minggu</string>
+    <string name="chat_clear_confirm_title">Bersihkan chat ini?</string>
+    <string name="chat_clear_confirm_text">Semua pesan di percakapan ini dihapus dari ponsel ini dan tidak bisa dipulihkan. Pihak lain tetap menyimpan salinan mereka.</string>
+    <string name="chat_clear">Bersihkan</string>
+    <string name="chat_conversation_title">Percakapan</string>
+    <string name="chat_delete_after">Hapus pesan di ponsel ini setelah</string>
+    <string name="chat_only_your_copy">Hanya salinanmu. Pihak lain menyimpan milik mereka, dan tidak ada apa pun di sini yang bisa menjangkaunya.</string>
+    <string name="chat_clear_this_chat">Bersihkan chat ini</string>
+    <string name="chat_done">Selesai</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 mengunduh…</string>
+    <string name="chat_downloading_audio">🎤 mengunduh…</string>
+    <string name="chat_downloading_file">📎 mengunduh…</string>
+    <string name="chat_picture_desc">Gambar</string>
+    <string name="chat_could_not_decode">📷 (tidak bisa dibaca)</string>
+    <string name="chat_you_asked_for">Kamu meminta</string>
+    <string name="chat_asked_you_for">Meminta darimu</string>
+    <string name="chat_receipt_you_issued">Struk yang kamu terbitkan</string>
+    <string name="chat_receipt">Struk</string>
+    <string name="chat_you_offered_to_drive">Kamu menawarkan mengantar</string>
+    <string name="chat_offers_to_drive_you">Menawarkan mengantarmu</string>
+    <string name="chat_you_accepted_ride">Kamu menerima tumpangan</string>
+    <string name="chat_ride_accepted">Tumpangan diterima</string>
+    <string name="chat_you_sent">Kamu mengirim</string>
+    <string name="chat_sent_you">Mengirimimu</string>
+    <string name="chat_min_away">sekitar %1$d menit lagi</string>
+    <string name="chat_paid">Lunas ✓</string>
+    <string name="chat_cancelled">Dibatalkan</string>
+    <string name="chat_review_payment">Tinjau pembayaran</string>
+    <string name="chat_no_address">Tidak ada alamat di permintaan ini — tanyakan ke mereka harus dikirim ke mana.</string>
+    <string name="chat_no_forward_secrecy">Dikirim tanpa forward secrecy</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">Berhenti</string>
+    <string name="chat_play_voice_memo">Putar pesan suara</string>
+    <string name="chat_voice_memo">Pesan suara</string>
+    <string name="chat_size_kb">%1$d KB</string>
+    <string name="chat_size_b">%1$d B</string>
+    <string name="chat_file_fallback">file</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">subtotal</string>
+    <string name="chat_tax">pajak</string>
+    <string name="chat_total">total</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">bukan gambar</string>
+    <string name="chat_picture_too_big">tidak bisa memperkecil gambar itu secukupnya</string>
+    <string name="chat_nothing_recorded">tidak ada yang terekam</string>
+    <string name="chat_memo_too_long">pesan suara itu terlalu panjang — paling lama beberapa menit</string>
+    <string name="chat_could_not_read_file">tidak bisa membaca file itu</string>
+    <string name="chat_file_too_big">file itu %1$d KB — lampiran maksimal 1 MB</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">Bagikan</string>
+    <string name="chat_card_for_me">Kartu untukku</string>
+    <string name="chat_card_for_me_desc">Tautan sekali klaim yang bisa mereka teruskan ke orang yang boleh menghubungimu.</string>
+    <string name="chat_someones_profile">Atau profil seseorang — nama mereka dan apa pun yang mereka pilih untuk dipublikasikan. Bukan kode koneksi: itu hak mereka untuk memberikannya.</string>
+</resources>

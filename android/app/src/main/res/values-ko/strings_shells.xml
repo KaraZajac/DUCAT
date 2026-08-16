@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
+    <string name="shells_title_pos">계산대(POS)</string>
+    <string name="shells_tab_register">계산</string>
+    <string name="shells_tab_sales">판매</string>
+    <string name="shells_title_bar_tab">바 탭</string>
+    <string name="shells_tab_tabs">탭</string>
+    <string name="shells_tab_closed">마감</string>
+    <string name="shells_title_taxi">택시</string>
+    <string name="shells_tab_fares">요금</string>
+    <string name="shells_tab_meter">미터</string>
+    <string name="shells_tab_rides">운행</string>
+    <string name="shells_title_donations">후원</string>
+    <string name="shells_tab_code">코드</string>
+    <string name="shells_menu">메뉴</string>
+    <string name="shells_today">오늘</string>
+    <string name="shells_billed_waiting">계산서 발송 — 대기</string>
+    <string name="shells_settled">정산 완료</string>
+    <string name="shells_no_sales_yet">오늘은 아직 판매가 없어요.</string>
+    <string name="shells_no_rides_yet">오늘은 아직 운행이 없어요.</string>
+    <string name="shells_payment_seen_settling">결제 확인 — 정산 중</string>
+    <string name="shells_billed_unpaid">계산서 발송, 미결제</string>
+    <string name="shells_paid_outside">DUCAT 밖에서 결제 ✓</string>
+    <string name="shells_paid">결제 완료 ✓</string>
+</resources>

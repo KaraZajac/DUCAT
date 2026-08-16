@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Header counts -->
+    <plurals name="logs_line_count">
+        <item quantity="other">%1$d baris</item>
+    </plurals>
+    <string name="logs_warn_count">%1$d peringatan</string>
+    <string name="logs_error_count">%1$d error</string>
+
+    <!-- Toolbar actions -->
+    <string name="logs_copy_all">Salin semua</string>
+    <string name="logs_share">Bagikan</string>
+    <string name="logs_send_logs">Kirim log</string>
+    <string name="logs_clear">Bersihkan</string>
+    <string name="logs_copied">Tersalin. Kunci dan isi pesan tidak pernah ada di sini.</string>
+
+    <!-- Level filter chips -->
+    <string name="logs_filter_all">Semua</string>
+    <string name="logs_filter_info">Info</string>
+    <string name="logs_filter_warn">Peringatan</string>
+    <string name="logs_filter_error">Error</string>
+
+    <string name="logs_empty">Belum ada log. Aktivitas muncul di sini saat aplikasi menyinkron, mengirim, dan menerima.</string>
+</resources>

@@ -1,0 +1,44 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">บิลที่เปิดอยู่</string>
+    <string name="bartab_start_tab">เปิดบิล</string>
+    <string name="bartab_section_running">กำลังเปิดอยู่</string>
+    <string name="bartab_section_billed">เรียกเก็บแล้ว — รอการชำระ</string>
+    <string name="bartab_receipt_auto_hint">ใบเสร็จจะส่งถึงเขาเองทันทีที่เงินเข้า — แม้เขาจะกลับไปแล้วก็ตาม</string>
+    <string name="bartab_section_settled">ชำระแล้ว</string>
+    <string name="bartab_clear">ล้าง</string>
+    <string name="bartab_nothing_settled">คืนนี้ยังไม่มีบิลที่ชำระ</string>
+    <string name="bartab_no_tabs">ยังไม่มีบิล เปิดบิลเมื่อออร์เดอร์แรกมาถึง</string>
+    <plurals name="bartab_items">
+        <item quantity="other">%1$d รายการ</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">เห็นการชำระแล้ว — กำลังปิดยอด</string>
+    <string name="bartab_state_billed_unpaid">เรียกเก็บแล้ว ยังไม่ชำระ</string>
+    <string name="bartab_state_paid_oob">ชำระนอก DUCAT ✓</string>
+    <string name="bartab_state_cancelled">ยกเลิกแล้ว</string>
+    <string name="bartab_state_paid">ชำระแล้ว ✓</string>
+    <string name="bartab_new_customer">ลูกค้าใหม่</string>
+    <string name="bartab_scan_hint">ให้เขาสแกนหรือแตะ — บิลจะเปิดขึ้นเอง</string>
+    <string name="bartab_err_publish_code">เผยแพร่โค้ดไม่สำเร็จ</string>
+    <string name="bartab_or_regular">หรือลูกค้าประจำ</string>
+    <string name="bartab_back">กลับ</string>
+    <string name="bartab_bill_cancelled_msg">บิล %1$s XMR นั้นถูกยกเลิกแล้ว — ไม่ต้องชำระ</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · ยอดบิลตอนนี้ %3$s XMR</string>
+    <string name="bartab_remove_line">ลบออก</string>
+    <string name="bartab_err_send_bill">ส่งบิลเรียกเก็บไม่สำเร็จ</string>
+    <string name="bartab_settle_bill">เช็คบิล — เรียกเก็บ %1$s</string>
+    <string name="bartab_settle_hint">บิลแยกรายการหนึ่งใบส่งเข้าบทสนทนากับ %1$s เขาจ่ายจากที่ไหนก็ได้ — บทสนทนาไม่ปิดแม้เขาจะกลับไปแล้ว</string>
+    <string name="bartab_discard_tab">ทิ้งบิล</string>
+    <string name="bartab_discard_title">ทิ้งบิลนี้?</string>
+    <string name="bartab_discard_body">บิลและทุกรายการที่ลงไว้จะถูกลบจากโทรศัพท์เครื่องนี้ จะไม่มีการส่งบิลเรียกเก็บ และย้อนกลับไม่ได้</string>
+    <string name="bartab_discard_confirm">ทิ้ง</string>
+    <string name="bartab_keep_tab">เก็บบิลไว้</string>
+    <string name="bartab_billed_hint">เรียกเก็บแล้ว ใบเสร็จจะส่งถึงเขาเองเมื่อเงินเข้า หากชำระด้วยวิธีอื่นไปแล้ว แจ้งไว้ที่นี่:</string>
+    <string name="bartab_paid_outside_button">ชำระนอก DUCAT (เงินสด, บัตร)</string>
+    <string name="bartab_cancel_bill">ยกเลิกบิลเรียกเก็บ</string>
+    <string name="bartab_cancelled_note">ยกเลิกแล้ว — แจ้งให้เขาทราบในบทสนทนาแล้ว</string>
+    <string name="bartab_paid_oob_note">ชำระนอก DUCAT ✓ — ส่งใบเสร็จแล้ว ไม่มีธุรกรรมแนบ</string>
+    <string name="bartab_paid_note">ชำระแล้ว ✓ — ส่งใบเสร็จแล้ว</string>
+    <string name="bartab_remove_from_book">ลบออกจากสมุดบิล</string>
+    <string name="bartab_back_to_tabs">กลับไปหน้าบิล</string>
+</resources>

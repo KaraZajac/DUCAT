@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">ที่อยู่ Monero, โค้ด monero: หรือนามบัตร DUCAT</string>
+    <string name="pay_close">ปิด</string>
+    <string name="pay_send_or_request">ส่งหรือขอ</string>
+    <string name="pay_scan_a_code">สแกนโค้ด</string>
+    <string name="pay_your_contacts">ผู้ติดต่อของคุณ</string>
+    <string name="pay_contact_vs_address">การจ่ายให้ผู้ติดต่อแนบข้อความไปด้วยได้และไปปรากฏในแชทของคุณ การจ่ายไปยังที่อยู่เฉย ๆ ไม่มีแบบนั้น</string>
+    <string name="pay_or_monero_address">หรือที่อยู่ Monero</string>
+    <string name="pay_address_placeholder">5… หรือ 7…</string>
+    <string name="pay_continue">ดำเนินการต่อ</string>
+    <string name="pay_not_monero_address">นั่นดูไม่เหมือนที่อยู่ Monero</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">กลับ</string>
+    <string name="pay_in_ducat">ใน DUCAT</string>
+    <string name="pay_monero_address">ที่อยู่ Monero</string>
+    <string name="pay_bill">บิล</string>
+    <string name="pay_add_tip">เพิ่มทิป (%1$s) — ไม่บังคับ</string>
+    <string name="pay_total_with_tip">รวมพร้อมทิป: %1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">สิ่งที่คุณกำลังขอจาก %1$s ยอดคงเหลือและค่าธรรมเนียมเครือข่ายเป็นเรื่องของเขา ไม่ใช่ของคุณ — นี่คือข้อความ ไม่ใช่ธุรกรรม</string>
+    <string name="pay_them">เขา</string>
+    <string name="pay_up_to_after_fees">ได้สูงสุด %1$s หลังหักค่าธรรมเนียม</string>
+    <string name="pay_max">สูงสุด</string>
+    <string name="pay_max_done">สูงสุด ✓</string>
+    <string name="pay_over_max">นั่นเกินกว่าที่คุณส่งได้เมื่อรวมค่าธรรมเนียมแล้ว</string>
+    <string name="pay_amount">จำนวนเงิน</string>
+    <string name="pay_network_fee_estimated">ค่าธรรมเนียมเครือข่าย (ประมาณการ)</string>
+    <string name="pay_total">รวม</string>
+    <string name="pay_left_after">คงเหลือหลังจากนี้</string>
+    <string name="pay_uses_notes">ใช้ธนบัตร %1$d ใบ · ปกติยืนยันในราว %2$d นาที</string>
+    <string name="pay_fee_estimate_note">ค่าธรรมเนียมเป็นค่าประมาณจนกว่าธุรกรรมจะถูกสร้าง ตัวเลขจริงจะแสดงหลังส่ง</string>
+    <string name="pay_speed">ความเร็ว</string>
+    <string name="pay_speed_slow">ช้า</string>
+    <string name="pay_speed_normal">ปกติ</string>
+    <string name="pay_speed_fast">เร็ว</string>
+    <string name="pay_speed_fastest">เร็วที่สุด</string>
+    <string name="pay_memo_label">บันทึกช่วยจำ — จ่ายค่าอะไร?</string>
+    <string name="pay_send">ส่ง</string>
+    <string name="pay_request">ขอ</string>
+    <string name="pay_no_address_hint">%1$s ยังไม่ได้แชร์ที่อยู่ คุณจึงขอได้แต่ยังส่งไม่ได้ สลับไปที่ ขอ — คำขอจะพกที่อยู่กลับมาให้เอง</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">คำขอชำระเงิน</string>
+    <string name="pay_payment">การชำระเงิน</string>
+    <string name="pay_request_sent">ส่งคำขอแล้ว</string>
+    <string name="pay_could_not_send">ส่งไม่สำเร็จ</string>
+    <string name="pay_no_node">ไม่มีโหนด — ดูที่หน้าสถานะ</string>
+    <string name="pay_no_address_error">เขายังไม่ได้แชร์ที่อยู่ ขอให้เขาส่งคำขอมา หรือให้เปิด \"ให้ผู้ติดต่อจ่ายเงินให้ฉันได้โดยตรง\"</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">ส่ง %1$s?</string>
+    <string name="pay_to">ถึง %1$s</string>
+    <string name="pay_plus_fees">บวกค่าธรรมเนียมราว %1$s — รวมทั้งสิ้น %2$s</string>
+    <string name="pay_irreversible_warning">การชำระ Monero ย้อนกลับหรือยกเลิกไม่ได้ ตรวจที่อยู่ให้ดี — ถ้าผิดจะไม่มีใครให้ร้องเรียน</string>
+    <string name="pay_cancel">ยกเลิก</string>
+</resources>

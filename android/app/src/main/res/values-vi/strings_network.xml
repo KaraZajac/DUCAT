@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">Tầng vận chuyển. Một khoản thanh toán đi qua tuyến ẩn danh, nên phần này phải chạy trước thì một cú chạm mới đi được đâu đó.</string>
+
+    <string name="net_line_bridge">cầu nối android</string>
+    <string name="net_ready">sẵn sàng</string>
+    <string name="net_not_set_up">chưa thiết lập</string>
+    <string name="net_line_node">node</string>
+    <string name="net_running">đang chạy</string>
+    <string name="net_stopped">đã dừng</string>
+    <string name="net_line_attached">đã gắn kết</string>
+    <string name="net_line_route_capable">tạo được tuyến</string>
+    <string name="net_yes">rồi</string>
+    <string name="net_not_yet_routes">chưa — chưa có tuyến nào cho tới khi xong phần này</string>
+    <string name="net_line_peers">peer</string>
+    <string name="net_peers_value">%1$s trực tuyến, %2$s đáng tin</string>
+    <string name="net_waiting">chờ %1$d giây — node phải tự tìm ra cách nó được liên lạc tới trước khi dựng được tuyến</string>
+
+    <string name="net_starting">Đang khởi động…</string>
+    <string name="net_start_node">Khởi động node</string>
+    <string name="net_stop">Dừng</string>
+    <string name="net_testing">Đang thử…</string>
+    <string name="net_test_route">Thử một tuyến</string>
+    <string name="net_route_ok">đã cấp tuyến — khối dữ liệu %1$s byte</string>
+    <string name="net_route_failed">tuyến thất bại: %1$s</string>
+</resources>

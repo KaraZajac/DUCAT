@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">Kartuku</string>
+    <string name="chatlist_new_chat">Chat baru</string>
+    <string name="chatlist_no_conversations">Belum ada percakapan</string>
+    <string name="chatlist_empty_hint">Berikan kartumu langsung ke orangnya, atau kirim lewat aplikasi apa pun yang sudah kamu percaya. Tidak ada yang bisa ditemukan lewat nama — menjangkau seseorang butuh kartu yang mereka berikan.</string>
+    <string name="chatlist_preview_you">Kamu: %1$s</string>
+    <string name="chatlist_no_messages_yet">Belum ada pesan</string>
+    <string name="chatlist_delete_title">Hapus percakapan ini?</string>
+    <string name="chatlist_delete_body">Semua pesan dengan %1$s dihapus dari ponsel ini dan tidak bisa dipulihkan. %1$s tetap ada di kontakmu — Chat baru bisa dimulai kapan saja.</string>
+    <string name="chatlist_delete">Hapus</string>
+    <string name="chatlist_cancel">Batal</string>
+    <string name="chatlist_add_contact">Tambah kontak</string>
+    <string name="chatlist_add_contact_hint">Pindai atau tempel kartu yang diberikan seseorang</string>
+    <string name="chatlist_no_contacts_yet">Belum ada kontak.</string>
+    <string name="chatlist_preview_requested">💸 Meminta %1$s XMR</string>
+    <string name="chatlist_preview_sent">💸 Mengirim %1$s XMR</string>
+    <string name="chatlist_preview_receipt">🧾 Struk — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">Bereaksi %1$s</string>
+    <string name="chatlist_preview_photo">📷 Foto</string>
+    <string name="chatlist_time_now">baru saja</string>
+    <string name="chatlist_time_minutes">%1$dm</string>
+    <string name="chatlist_time_hours">%1$dj</string>
+</resources>

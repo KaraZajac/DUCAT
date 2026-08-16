@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">เผยแพร่โค้ดไม่สำเร็จ</string>
+    <string name="taxi_meter_started_msg">มิเตอร์เริ่มแล้ว — ค่าเริ่มต้น %1$s XMR, นาทีละ %2$s XMR บิลตอนจบจะแสดงจำนวนนาที</string>
+    <string name="taxi_err_terms_not_sent">เขาเชื่อมต่อแล้ว แต่ส่งเงื่อนไขไม่สำเร็จ: %1$s</string>
+    <string name="taxi_set_fare">ตั้งค่าโดยสาร</string>
+    <string name="taxi_base_label">ค่าเริ่มต้น (%1$s)</string>
+    <string name="taxi_per_min_label">ต่อนาที (%1$s)</string>
+    <string name="taxi_price_in_instead">ตั้งราคาเป็น %1$s แทน</string>
+    <string name="taxi_rate_locked_hint">อัตราที่พิมพ์เป็น %1$s จะถูกล็อกเป็น XMR เมื่อเริ่มเดินทาง — ตัวเลขที่ผู้โดยสารตกลงคือตัวเลขที่เขาถูกเรียกเก็บ</string>
+    <string name="taxi_set_rate_hint">ตั้งอัตราต่อนาทีเพื่อเปิดโค้ดรับผู้โดยสาร</string>
+    <string name="taxi_pickup">รับผู้โดยสาร</string>
+    <string name="taxi_scan_hint">ผู้โดยสารสแกนหรือแตะ อัตราจะเข้าไปในบทสนทนาและมิเตอร์เริ่มเอง</string>
+    <string name="taxi_meter_terms">เริ่มต้น %1$s + %2$s/นาที</string>
+    <string name="taxi_rider">ผู้โดยสาร</string>
+    <string name="taxi_line_base_fare">ค่าโดยสารเริ่มต้น</string>
+    <string name="taxi_line_metered">%1$d นาที %2$02d วินาที × %3$s XMR/นาที</string>
+    <string name="taxi_err_send_fare">ส่งค่าโดยสารไม่สำเร็จ</string>
+    <string name="taxi_end_ride_bill">จบการเดินทาง — เรียกเก็บ %1$s</string>
+    <string name="taxi_bill_hint">บิลแสดงจำนวนนาทีและอัตรา ใบเสร็จจะส่งถึงเขาเองเมื่อค่าโดยสารเข้า — แม้เขาจะเดินจากไปแล้วก็ตาม</string>
+    <string name="taxi_cancel_ride_no_bill">ยกเลิกการเดินทาง — ไม่เรียกเก็บ</string>
+    <string name="taxi_cancel_title">ยกเลิกการเดินทางนี้?</string>
+    <string name="taxi_cancel_body">มิเตอร์จะหยุดและไม่มีการส่งบิล นาทีที่นับมาแล้วจะถูกทิ้งและกู้คืนไม่ได้</string>
+    <string name="taxi_cancel_confirm">ยกเลิกการเดินทาง</string>
+    <string name="taxi_keep_going">ขับต่อ</string>
+</resources>

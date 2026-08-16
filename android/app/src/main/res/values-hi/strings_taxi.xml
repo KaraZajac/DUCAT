@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">कोड जारी नहीं हो पाया</string>
+    <string name="taxi_meter_started_msg">मीटर शुरू — बेस %1$s XMR, %2$s XMR प्रति मिनट। आख़िर में बिल मिनट दिखाएगा।</string>
+    <string name="taxi_err_terms_not_sent">वे जुड़ गए, पर शर्तें नहीं गईं: %1$s</string>
+    <string name="taxi_set_fare">किराया तय करें</string>
+    <string name="taxi_base_label">बेस (%1$s)</string>
+    <string name="taxi_per_min_label">प्रति मिनट (%1$s)</string>
+    <string name="taxi_price_in_instead">इसके बजाय %1$s में दाम</string>
+    <string name="taxi_rate_locked_hint">%1$s में लिखी दर राइड शुरू होते ही XMR पर लॉक हो जाती है — राइडर जिस आँकड़े पर राज़ी हुए, बिल उसी का बनता है।</string>
+    <string name="taxi_set_rate_hint">पिकअप कोड खोलने के लिए प्रति मिनट दर तय करें।</string>
+    <string name="taxi_pickup">पिकअप</string>
+    <string name="taxi_scan_hint">राइडर स्कैन करे या टैप। दर बातचीत में पहुँच जाती है और मीटर अपने-आप शुरू हो जाता है।</string>
+    <string name="taxi_meter_terms">बेस %1$s + %2$s/मिनट</string>
+    <string name="taxi_rider">राइडर</string>
+    <string name="taxi_line_base_fare">बेस किराया</string>
+    <string name="taxi_line_metered">%1$d मि %2$02d से × %3$s XMR/मिनट</string>
+    <string name="taxi_err_send_fare">किराया भेजा नहीं जा सका</string>
+    <string name="taxi_end_ride_bill">राइड खत्म — बिल %1$s</string>
+    <string name="taxi_bill_hint">बिल में मिनट और दर दिखते हैं। किराया पहुँचते ही रसीद अपने-आप उन तक जाती है — उनके चले जाने के बाद भी।</string>
+    <string name="taxi_cancel_ride_no_bill">राइड रद्द — कोई बिल नहीं</string>
+    <string name="taxi_cancel_title">यह राइड रद्द करें?</string>
+    <string name="taxi_cancel_body">मीटर रुक जाता है और कोई बिल नहीं जाता। अब तक गिने मिनट फेंक दिए जाते हैं और वापस नहीं आते।</string>
+    <string name="taxi_cancel_confirm">राइड रद्द करें</string>
+    <string name="taxi_keep_going">चलते रहें</string>
+</resources>

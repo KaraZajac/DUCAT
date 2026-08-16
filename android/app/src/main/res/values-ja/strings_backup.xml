@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">バックアップ</string>
+    <string name="backup_body">あなたのアイデンティティ、鍵、設定をひとつの暗号化ファイルにまとめます。重要な変更があるたびに、新しいものをエクスポートしてください。</string>
+    <string name="backup_passphrase">パスフレーズ</string>
+    <string name="backup_export">エクスポート</string>
+    <string name="backup_import">インポート</string>
+    <string name="backup_exported_bytes">%1$dバイトをエクスポートしました</string>
+    <string name="backup_export_failed">エクスポートに失敗しました</string>
+    <string name="backup_restored_title">ウォレットを復元しました</string>
+    <string name="backup_restored_check">信用する前に、このアドレスに見覚えがあるか確認してください。</string>
+    <string name="backup_opened">開きました — エスクローシェア%1$d件、復元高 %2$d</string>
+    <string name="backup_could_not_open">開けませんでした — パスフレーズが違うか、ファイルが改変されています</string>
+    <string name="backup_share_title">DUCATのバックアップを保存</string>
+</resources>

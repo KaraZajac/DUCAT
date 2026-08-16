@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">टॉप-अप</string>
+    <string name="accounts_top_up_desc">किसी भी वॉलेट या एक्सचेंज से इस पते पर Monero भेजें। यह एक सामान्य XMR पता है — इस ट्रांसफ़र का DUCAT से कोई लेना-देना नहीं।</string>
+    <string name="accounts_no_wallet">अभी वॉलेट नहीं है — पहले सेटअप पूरा करें।</string>
+    <string name="accounts_copy">कॉपी करें</string>
+    <string name="accounts_hide">छिपाएँ</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">बैलेंस</string>
+    <string name="accounts_balances_desc">जान-बूझकर अलग रखे गए हैं: जो अभी खर्च हो सकता है, वह वही नहीं जो कुल आपका है।</string>
+    <string name="accounts_waiting_for_node">नोड का इंतज़ार है।</string>
+    <string name="accounts_spendable">खर्च-योग्य</string>
+    <string name="accounts_show_in">%1$s में दिखाएँ</string>
+    <string name="accounts_stagenet_fiat_note">Stagenet के सिक्के टेस्ट सिक्के हैं। वह आँकड़ा बताता है कि इतना असली Monero कितने का होता — इनकी कीमत कुछ भी नहीं।</string>
+    <string name="accounts_notes">नोट</string>
+    <string name="accounts_bond">बॉन्ड</string>
+    <string name="accounts_bond_none">कोई नहीं</string>
+    <string name="accounts_scanning_from_genesis_title">चेन की शुरुआत से पढ़ा जा रहा है</string>
+    <string name="accounts_scanning_from_genesis_desc">यह वॉलेट तब बना था जब ऐप किसी नोड तक पहुँच नहीं पाया था, इसलिए इसे पता नहीं कि यह कब बना। %2$d में से ब्लॉक %1$d पर यह एक दिन से ज़्यादा की पढ़ाई है। अगर आप जानते हैं कि वॉलेट इससे नया है, तो आगे कूद जाएँ।</string>
+    <string name="accounts_skip_ahead">आगे कूदें</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">यहाँ तक आगे कूदें</string>
+    <string name="accounts_skip_ahead_desc">इस बिंदु से पहले मिली कोई भी रकम नहीं मिलेगी। ऐसा समय चुनें जिसके बारे में आप पक्के हों कि तब तक वॉलेट बना ही नहीं था।</string>
+    <string name="accounts_about_a_day_ago">करीब एक दिन पहले</string>
+    <string name="accounts_about_a_week_ago">करीब एक हफ़्ता पहले</string>
+    <string name="accounts_about_a_month_ago">करीब एक महीना पहले</string>
+    <string name="accounts_skip_option">"%1$s  —  ब्लॉक %2$d"</string>
+    <string name="accounts_block_height_label">या कोई ब्लॉक हाइट</string>
+    <string name="accounts_use_that_height">यही हाइट लें</string>
+    <string name="accounts_cancel">रद्द करें</string>
+</resources>

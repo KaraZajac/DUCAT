@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">แชท</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">แชร์นามบัตรของคุณ</string>
+    <string name="contacts_share_card_body">ใช้ได้กับคนเดียว เมื่อเขาใช้แล้วมันจะใช้ไม่ได้อีก — ภาพหน้าจอที่หลุดไปที่อื่นจึงไม่ใช่ช่องทางเข้าถึง</string>
+    <string name="contacts_name_to_show_label">ชื่อที่จะแสดง (ไม่บังคับ)</string>
+    <string name="contacts_name_to_show_support">เขาเปลี่ยนชื่อคุณฝั่งเขาได้ และชื่อนั้นคือชื่อที่เขาจะเห็น</string>
+    <string name="contacts_error_make_card">สร้างนามบัตรไม่สำเร็จ</string>
+    <string name="contacts_publishing_inbox">กำลังเผยแพร่กล่องขาเข้าของคุณ…</string>
+    <string name="contacts_create_card">สร้างนามบัตร</string>
+    <string name="contacts_publishing_note">ขั้นตอนนี้ใช้เวลาสองสามวินาที — ต้องเผยแพร่ข้อมูลสองรายการก่อนที่ใครจะติดต่อคุณได้ ข้อมูลเหล่านี้ยังทำงานต่อหลังคุณปิดแอป</string>
+    <string name="contacts_copy_link">คัดลอกลิงก์</string>
+    <string name="contacts_send">ส่ง</string>
+    <string name="contacts_expires_24h">หมดอายุใน 24 ชั่วโมง</string>
+    <string name="contacts_send_your_card">ส่งนามบัตรของคุณ</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">หันกล้องไปที่นามบัตร DUCAT ของเขา</string>
+    <string name="contacts_card_expired_ask_new">นามบัตรนั้นหมดอายุแล้ว ขอใบใหม่</string>
+    <string name="contacts_not_a_card">นั่นไม่ใช่นามบัตร DUCAT</string>
+    <string name="contacts_add_contact_title">เพิ่มผู้ติดต่อ</string>
+    <string name="contacts_paste_link_label">วางลิงก์ ducat: ของเขา</string>
+    <string name="contacts_paste">วาง</string>
+    <string name="contacts_scan">สแกน</string>
+    <string name="contacts_card_expired_ask_them">นามบัตรนี้หมดอายุแล้ว ขอใบใหม่จากเขา</string>
+    <string name="contacts_read_card">อ่านนามบัตร</string>
+    <string name="contacts_no_name_given">(ไม่ได้ระบุชื่อ)</string>
+    <string name="contacts_unverified_name">ยังไม่ยืนยัน — นี่คือชื่อที่เขาพิมพ์เอง</string>
+    <string name="contacts_check_characters">หากสำคัญว่าคนนี้เป็นใคร ตรวจสอบตัวอักษรเหล่านี้กับเขาผ่านช่องทางที่คุณไว้ใจ</string>
+    <string name="contacts_save_them_as_label">บันทึกเขาในชื่อ</string>
+    <string name="contacts_save_them_as_support">ชื่อที่คุณตั้งให้เขา คุณเห็นคนเดียว</string>
+    <string name="contacts_error_read_inbox">อ่านกล่องขาเข้าของเขาไม่สำเร็จ</string>
+    <string name="contacts_reading_inbox">กำลังอ่านกล่องขาเข้าของเขา…</string>
+    <string name="contacts_add_contact_button">เพิ่มผู้ติดต่อ</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">นามบัตรนั้นถูกใช้ไปแล้ว ขอใบใหม่จากเขา</string>
+    <string name="contacts_reply_expired">นามบัตรนั้นหมดอายุแล้ว ขอใบใหม่จากเขา</string>
+    <string name="contacts_reply_badsig">ลิงก์นั้นเสียหาย — ลองคัดลอกใหม่อีกครั้ง</string>
+    <string name="contacts_reply_own_card">นั่นคือนามบัตรของคุณเอง</string>
+    <string name="contacts_reply_refused">เขาปฏิเสธคำขอ</string>
+</resources>

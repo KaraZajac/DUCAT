@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">プロフィール名を設定</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">表示言語: %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">あなたのペルソナ</string>
+    <string name="drawer_persona_body">あなたのカードに署名する鍵です。この鍵から誰かに見つけられることはありません — カードを受け取った人が、そのカードを照合するためのものです。</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">受け取り</string>
+    <string name="drawer_publish_switch">連絡先からの直接支払いを許可</string>
+    <string name="drawer_publish_off_note">オフの場合、あなたに支払う人はあなたからの請求を待つ必要があります。</string>
+    <string name="drawer_publish_on_warning">アドレスは各連絡先に一度渡され、使い回されます。チェーンを見られる人には、毎回同じ人物が支払いを受けたと分かります — 一度しか支払っていない相手にもです。請求なら毎回新しいアドレスを載せるため、これを避けられます。</string>
+    <string name="drawer_publish_scope_note">オンにした後に追加した連絡先だけがアドレスを受け取ります。</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">まだ連絡先はありません。チャットタブから追加してください。</string>
+    <string name="drawer_open_chat">チャットを開く</string>
+    <string name="drawer_delete_contact">連絡先を削除</string>
+    <string name="drawer_forget_title">%1$sを削除しますか？</string>
+    <string name="drawer_forget_body">連絡先と、その相手からのすべてのメッセージが削除されます。復元はできず、再び連絡を取るには新しいカードが必要です。</string>
+    <string name="drawer_forget_confirm">削除</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">この端末の今の役割を選んでください。モードを選ぶと、ここに戻って「個人」を選ぶまでアプリ全体がそのモードになります。</string>
+    <string name="mode_personal">個人</string>
+    <string name="mode_personal_desc">あなたのウォレット、チャット、履歴。標準のモードです。</string>
+    <string name="mode_pos">POSレジ</string>
+    <string name="mode_pos_desc">レジとして: 商品を打つか合計を入力し、コードを1つ見せるだけ — 請求とレシートは、開いた会話の中を行き来します。</string>
+    <string name="mode_bartab">バーのツケ</string>
+    <string name="mode_bartab_desc">ツケ帳として: 最初に1回スキャン、夜通し追加、閉店時に請求1通。お客は帰った後でも支払えます。</string>
+    <string name="mode_taxi">タクシー</string>
+    <string name="mode_taxi_desc">運賃とメーター: 乗り場の呼び出しを見張り、メーター開始時に料金を文面で提示。請求書には分数が載ります。</string>
+    <string name="mode_donate">寄付</string>
+    <string name="mode_donate_desc">どのMoneroウォレットからでも送れる常設コード。相手側にアプリは不要です。</string>
+</resources>

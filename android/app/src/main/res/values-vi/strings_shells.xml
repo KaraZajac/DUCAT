@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
+    <string name="shells_title_pos">Điểm bán hàng</string>
+    <string name="shells_tab_register">Thu ngân</string>
+    <string name="shells_tab_sales">Đơn hàng</string>
+    <string name="shells_title_bar_tab">Tab quầy bar</string>
+    <string name="shells_tab_tabs">Tab</string>
+    <string name="shells_tab_closed">Đã đóng</string>
+    <string name="shells_title_taxi">Taxi</string>
+    <string name="shells_tab_fares">Cuốc</string>
+    <string name="shells_tab_meter">Đồng hồ</string>
+    <string name="shells_tab_rides">Chuyến</string>
+    <string name="shells_title_donations">Quyên góp</string>
+    <string name="shells_tab_code">Mã</string>
+    <string name="shells_menu">Menu</string>
+    <string name="shells_today">Hôm nay</string>
+    <string name="shells_billed_waiting">Đã gửi hóa đơn — đang chờ</string>
+    <string name="shells_settled">Đã tất toán</string>
+    <string name="shells_no_sales_yet">Hôm nay chưa có đơn nào.</string>
+    <string name="shells_no_rides_yet">Hôm nay chưa có chuyến nào.</string>
+    <string name="shells_payment_seen_settling">đã thấy thanh toán — đang tất toán</string>
+    <string name="shells_billed_unpaid">đã gửi hóa đơn, chưa trả</string>
+    <string name="shells_paid_outside">trả ngoài DUCAT ✓</string>
+    <string name="shells_paid">đã trả ✓</string>
+</resources>

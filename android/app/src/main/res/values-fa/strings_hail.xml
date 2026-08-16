@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">تاکسی گرفتن</string>
+    <string name="hail_card_standing">درخواست سفر فعال است — در انتظار راننده</string>
+    <string name="hail_card_pitch">مقصدت را روی ایستگاهی بگذار که راننده‌ها زیر نظر دارند.</string>
+    <string name="hail_standing_at">فعال در %1$s</string>
+    <string name="hail_take_it_down">برش دار</string>
+    <string name="hail_awaiting_offer">%1$s درخواستت را برداشت — منتظر پیشنهادش…</string>
+    <string name="hail_cancel">لغو</string>
+    <string name="hail_parked_offer">%1$s پیشنهاد می‌دهد: %2$s</string>
+    <string name="hail_view_the_offer">دیدن پیشنهاد</string>
+    <string name="hail_post_it_again">دوباره بگذارش</string>
+    <string name="hail_expired_unclaimed">کسی درخواستت را قبل از انقضا برنداشت.</string>
+    <string name="hail_claimed_check_chats">راننده‌ای درخواستت را برداشت — گفتگوهایت را ببین.</string>
+    <string name="hail_accept_message">به‌زودی می‌بینمت</string>
+    <string name="hail_decline_message">نه، ممنون</string>
+    <string name="hail_declined_post_again">رد کردی — دوباره بگذاری؟</string>
+    <string name="hail_posted_waiting">گذاشته شد. در انتظار راننده…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">مسافر رد کرد</string>
+    <string name="hail_rider_declined_body">پیشنهادت را نپذیرفت. درخواستش از تابلو رفته است.</string>
+    <string name="hail_ok">باشه</string>
+    <string name="hail_on_duty">سر کار</string>
+    <string name="hail_net_wide">تور گسترده — حدود %1$s پهنا</string>
+    <string name="hail_net_nearby">زیر نظر: حدود %1$s پهنا</string>
+    <string name="hail_net_here">فقط محدودهٔ خودت، حدود %1$s</string>
+    <string name="hail_stop">توقف</string>
+    <string name="hail_no_hails_map">درخواستی فعال نیست — همین‌جا سنجاق می‌شوند.</string>
+    <string name="hail_quote_me">قیمت بده</string>
+    <string name="hail_driving_title">رانندگی</string>
+    <string name="hail_driving_pitch">ایستگاهی را زیر نظر بگیر؛ درخواستی بردار. برداشتنش گفتگویی با مسافر باز می‌کند — همان‌جا قیمت بده، همان‌جا قرار بگذار، و مثل هر سفری آخرش صورت‌حساب بده.</string>
+    <string name="hail_range_just_here">همین‌جا</string>
+    <string name="hail_range_nearby">نزدیک</string>
+    <string name="hail_range_wide">گسترده</string>
+    <string name="hail_range_desc_here">حدود %1$s — بلوک‌های شلوغ شهری</string>
+    <string name="hail_range_desc_wide">حدود %1$s پهنا — بیرون شهر یا شب‌های خلوت</string>
+    <string name="hail_range_desc_nearby">حدود %1$s پهنا — حالت معمول</string>
+    <string name="hail_getting_location">در حال یافتن موقعیتت…</string>
+    <string name="hail_drive_here">همین‌جا می‌رانم — محدوده‌ام را زیر نظر بگیر</string>
+    <string name="hail_stand_label">ایستگاه</string>
+    <string name="hail_stand_placeholder">نام ایستگاه، یا 📍 بالا</string>
+    <string name="hail_watch">زیر نظر بگیر</string>
+    <string name="hail_watching_neighbours">سلول تو و 8 همسایه‌اش زیر نظر است — %1$s +8</string>
+    <string name="hail_board_empty">چیزی روی تابلو نیست. هر چند ثانیه یک بار بررسی می‌شود…</string>
+    <string name="hail_offers_amount">پیشنهاد: %1$s</string>
+    <string name="hail_offers_amount_both">پیشنهاد: %1$s · %2$s</string>
+    <string name="hail_asks_quote">از تو قیمت می‌خواهد</string>
+    <string name="hail_triage_pickup">تا مبدأ حدود %1$s</string>
+    <string name="hail_triage_trip">سفر حدود %1$s</string>
+    <string name="hail_stands_for_min">تا %1$d دقیقهٔ دیگر فعال است</string>
+    <string name="hail_view_job">دیدن کار</string>
+    <string name="hail_take_it">بردار</string>
+    <string name="hail_location_fix_failed">موقعیت‌یابی ممکن نشد</string>
+    <string name="hail_beaten_to_it">یکی زودتر از تو برش داشت.</string>
+    <string name="hail_on_my_way">🚕 در راهم.</string>
+    <string name="hail_on_my_way_car">🚕 در راهم — دنبال یک %1$s بگرد.</string>
+    <string name="hail_on_my_way_plate">🚕 در راهم، پلاک %1$s.</string>
+    <string name="hail_on_my_way_car_plate">🚕 در راهم — دنبال یک %1$s بگرد، پلاک %2$s.</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">بستن</string>
+    <string name="hail_job_title">کار</string>
+    <string name="hail_to_pickup">تا مبدأ: %1$s · حدود %2$d دقیقه</string>
+    <string name="hail_the_ride">خود سفر: %1$s · حدود %2$d دقیقه</string>
+    <string name="hail_offer_amount">پیشنهاد: %1$s</string>
+    <string name="hail_offer_amount_both">پیشنهاد: %1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">همه‌اش مال خودت است — یک تاکسی اینترنتی برای این سفر حدود %1$s %2$.0f می‌داد</string>
+    <string name="hail_rider_asks_quote">مسافر از تو قیمت می‌خواهد</string>
+    <string name="hail_routing_job">در حال مسیریابی کار…</string>
+    <string name="hail_your_fare">کرایهٔ تو (%1$s)</string>
+    <string name="hail_offer_counter_hint">پیشنهاد خودش — برای پیشنهاد متقابل تغییرش بده</string>
+    <string name="hail_offer_quote_hint">از تو قیمت خواسته</string>
+    <string name="hail_price_in_instead">قیمت‌گذاری به %1$s</string>
+    <string name="hail_fare_invalid">کرایه باید عددی بزرگ‌تر از صفر باشد.</string>
+    <string name="hail_take_this_ride">این سفر را بردار 🚕</string>
+    <string name="hail_pass">رد شو</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">%1$s پیشنهاد شد — در انتظار %2$s</string>
+    <string name="hail_the_rider">مسافر</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">موقعیت من</string>
+    <string name="hail_no_route">مسیری بین این دو نقطه پیدا نشد</string>
+    <string name="hail_pickup_label">مبدأ</string>
+    <string name="hail_locating">در حال موقعیت‌یابی…</string>
+    <string name="hail_use_my_location">از موقعیت من استفاده کن</string>
+    <string name="hail_where_to">کجا می‌روی؟</string>
+    <string name="hail_address_hint">نشانی یا نام کسب‌وکار</string>
+    <string name="hail_finding_route">در حال یافتن مسیر…</string>
+    <string name="hail_route_summary">%1$s · حدود %2$d دقیقه</string>
+    <string name="hail_route_summary_priced">%1$s · حدود %2$d دقیقه · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">تاکسی اینترنتی حدود %1$s %2$.0f · تاکسی حدود %1$s %3$.0f — راننده‌ات همه‌اش را برمی‌دارد (تاکسی اینترنتی به راننده‌اش حدود %1$s %4$.0f می‌دهد)</string>
+    <string name="hail_your_offer">پیشنهاد تو (%1$s)</string>
+    <string name="hail_offer_invalid">پیشنهاد باید عددی بزرگ‌تر از صفر باشد — یا خالی بگذار تا قیمت بخواهی.</string>
+    <string name="hail_shards_full">اینجا همهٔ شاردهای ایستگاه پرند — کمی بعد دوباره امتحان کن</string>
+    <string name="hail_post_failed">گذاشتن درخواست ممکن نشد</string>
+    <string name="hail_osm_privacy">جستجو، مسیر و نقشه از سرورهای OpenStreetMap استفاده می‌کنند — تنها جایی که DUCAT موقعیت را بیرون از دستگاه می‌فرستد. راننده‌ها فقط محدوده‌هایی حدود %1$s می‌بینند.</string>
+    <string name="hail_post_button">تاکسی بگیر 🚕</string>
+    <string name="hail_search">جستجو</string>
+</resources>

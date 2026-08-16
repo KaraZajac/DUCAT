@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">यह बिक्री</string>
+    <string name="pos_items">चीज़ें</string>
+    <string name="pos_quick_amount">झटपट रकम</string>
+    <string name="pos_total_in">कुल (%1$s)</string>
+    <string name="pos_request_amount">%1$s माँगें</string>
+    <string name="pos_request_payment">भुगतान माँगें</string>
+    <string name="pos_sale">बिक्री</string>
+    <string name="pos_remove">हटाएँ</string>
+    <string name="pos_network_fee_note">नेटवर्क शुल्क ग्राहक का है, नेटवर्क को जाता है — बिल का हिस्सा कभी नहीं।</string>
+    <string name="pos_charge_amount">%1$s लें</string>
+    <string name="pos_add_first_item">बिक्री शुरू करने के लिए पहली चीज़ जोड़ें।</string>
+    <string name="pos_item">चीज़</string>
+    <string name="pos_add_line">लाइन जोड़ें</string>
+    <string name="pos_tax">टैक्स</string>
+    <string name="pos_error_publish_code">कोड जारी नहीं हो पाया</string>
+    <string name="pos_error_bill_not_sent">वे जुड़ गए, पर बिल नहीं गया: %1$s</string>
+    <string name="pos_getting_code_ready">कोड तैयार हो रहा है…</string>
+    <string name="pos_scan_hint">वे इसे DUCAT में स्कैन करते हैं। स्कैन होते ही ऊपर वाला बिल उनके फ़ोन पर पहुँच जाता है।</string>
+    <string name="pos_tap_hint">या फ़ोन टैप करें — बिल दोनों तरह एक ही</string>
+    <string name="pos_payment_seen">भुगतान दिखा ✓</string>
+    <string name="pos_payment_settling">उनका भुगतान नेटवर्क में है — चुकता हो रहा है, करीब दो मिनट। पहुँचते ही रसीद अपने-आप चली जाती है।</string>
+    <string name="pos_bill_sent_to">बिल %1$s को भेजा</string>
+    <string name="pos_the_customer">ग्राहक</string>
+    <string name="pos_billed_hint">वे अपने फ़ोन पर पुष्टि करते हैं। भुगतान चेन पर पहुँचते ही रसीद अपने-आप उन तक जाती है — यहाँ कुछ और करना नहीं।</string>
+    <string name="pos_paid">चुकाया ✓</string>
+    <string name="pos_receipt_sent_to">रसीद %1$s को भेज दी।</string>
+    <string name="pos_back">वापस</string>
+    <string name="pos_new_sale">नई बिक्री</string>
+    <string name="pos_new_sale_settles">नई बिक्री (यह वाली अपने-आप चुकता होगी)</string>
+    <string name="pos_cancel_sale">बिक्री रद्द करें</string>
+</resources>

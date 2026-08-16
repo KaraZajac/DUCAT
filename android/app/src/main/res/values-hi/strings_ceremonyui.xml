@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">बंद करें</string>
+    <string name="ceremony_quoted_body">“%1$s”</string>
+    <string name="ceremony_decline">मना करें</string>
+    <string name="ceremony_open_chat">चैट खोलें</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">आपसे माँग रहे हैं</string>
+    <string name="ceremony_tax">टैक्स</string>
+    <string name="ceremony_accept_and_pay">स्वीकारें &amp; चुकाएँ</string>
+    <string name="ceremony_no_address">इस अनुरोध में कोई पता नहीं — उनसे पूछें कि कहाँ भेजना है।</string>
+    <string name="ceremony_accept_opens_confirm">स्वीकारने पर पुष्टि स्क्रीन खुलती है — वहाँ आपकी मंज़ूरी से पहले कुछ नहीं हिलता।</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">चुकाया ✓</string>
+    <string name="ceremony_paid_to">चुकाया · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">आपको ले चलने की पेशकश, किराया</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="one">करीब %1$d मिनट दूर</item>
+        <item quantity="other">करीब %1$d मिनट दूर</item>
+    </plurals>
+    <string name="ceremony_plate">प्लेट %1$s</string>
+    <string name="ceremony_accept">स्वीकारें</string>
+    <string name="ceremony_accepting_agrees_fare">स्वीकारते ही किराया तय हो जाता है — भुगतान राइड के अंत में, उसी पुष्टि स्क्रीन से।</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">राइड पक्की</string>
+    <string name="ceremony_expecting_you">वे आपकी राह देख रहे हैं — बाकी सब चैट में।</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">आपकी राइड आ रही है</string>
+    <string name="ceremony_eta_in_chat">पहुँचने का समय और बाकी सब — चैट में।</string>
+</resources>

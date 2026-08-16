@@ -1,0 +1,32 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">Belum ada apa-apa</string>
+    <string name="activity_empty_desc">Pembayaran muncul di sini setelah blockchain selesai dibaca. Isi saldo dari Akun untuk melihat sesuatu.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">Menunggu</string>
+    <string name="activity_they_ask">%1$s meminta</string>
+    <string name="activity_you_asked">Kamu meminta dari %1$s</string>
+    <plurals name="activity_items">
+        <item quantity="other">%1$d item</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">Membaca transaksi…</string>
+    <string name="activity_receipt_chip">🧾 struk</string>
+    <string name="activity_note_quoted">“%1$s”</string>
+    <string name="activity_sending">Mengirim — belum masuk blok</string>
+    <string name="activity_spent_unknown">Terpakai, tapi kami tidak bisa bilang ke mana</string>
+    <string name="activity_maybe_change">mungkin kembalian dari pembayaranmu sendiri</string>
+    <!-- %1$s is the date, %2$s the already-pluralized "unlocks in N blocks" -->
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="other">terbuka dalam %1$d blok</item>
+    </plurals>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">Ke %1$s</string>
+    <string name="activity_from">Dari %1$s</string>
+    <string name="activity_sent_unrecorded">Terkirim — penerima tidak tercatat</string>
+    <string name="activity_received_unknown">Diterima — pengirim tidak diketahui</string>
+</resources>

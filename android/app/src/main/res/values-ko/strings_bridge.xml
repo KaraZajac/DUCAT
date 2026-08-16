@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="other">네이티브 코어: 검사 %1$d개 통과</item>
+    </plurals>
+    <string name="bridge_checks_failed">네이티브 코어: %2$d개 중 %1$d개 실패</string>
+    <string name="bridge_jni_note">이 검사들은 JNI를 거쳐 Rust 코어를 호출해요 — Rust 테스트가 닿지 못하는 유일한 층이에요.</string>
+    <string name="bridge_got_expected">결과 %1$s, 기대값 %2$s</string>
+
+    <!-- Check names -->
+    <string name="bridge_check_protocol_version">프로토콜 버전</string>
+    <string name="bridge_check_capacity_6">출력 6개 용량</string>
+    <string name="bridge_check_capacity_1">출력 1개 용량</string>
+    <string name="bridge_check_float_plan">결제 10건 시재금 계획</string>
+    <string name="bridge_check_bucket_floor">4.999 XMR 버킷 하한</string>
+    <string name="bridge_check_stale_rate">오래된 시세 단계 상승</string>
+</resources>

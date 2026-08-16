@@ -1,0 +1,52 @@
+<resources>
+    <!-- App metadata. app_name stays "DUCAT" in every language: it is a name. -->
+    <string name="nfc_service_description">Pembayaran jarak dekat DUCAT</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mi</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">Selesai</string>
+    <string name="common_cancel">Batal</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">Beranda</string>
+    <string name="tab_accounts">Akun</string>
+    <string name="tab_activity">Aktivitas</string>
+    <string name="tab_chat">Chat</string>
+    <string name="tab_send_receive">Kirim/Terima</string>
+
+    <string name="section_status">Status</string>
+    <string name="section_profile">Profil</string>
+    <string name="section_contacts">Kontak</string>
+    <string name="section_logs">Log</string>
+    <string name="section_settings">Pengaturan</string>
+    <string name="section_modes">Mode operasi</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">Bahasa</string>
+    <string name="settings_language_system">Ikuti sistem</string>
+
+    <string name="settings_appearance_title">Tampilan</string>
+    <string name="theme_follow_system">Ikuti sistem</string>
+    <string name="theme_latte">Latte (terang)</string>
+    <string name="theme_mocha">Mocha (gelap)</string>
+
+    <string name="settings_distance_title">Jarak</string>
+    <string name="distance_follow_system">Ikuti sistem</string>
+    <string name="distance_kilometres">Kilometer</string>
+    <string name="distance_miles">Mil</string>
+
+    <string name="settings_prices_title">Harga</string>
+    <string name="prices_show_worth">Tampilkan nilai saldo</string>
+    <string name="prices_currency_title">Mata uang</string>
+    <string name="prices_this_phone">ponsel ini</string>
+    <string name="prices_source_note">Dicek paling banyak dua kali sejam, dari CoinGecko atau Kraken. Kalau dimatikan, permintaannya berhenti sama sekali.</string>
+    <string name="prices_last_from">Terakhir dari %1$s.</string>
+
+    <string name="settings_privacy_title">Privasi</string>
+    <string name="settings_read_receipts">Kirim laporan dibaca</string>
+    <string name="settings_read_receipts_on">Kontak melihat kapan kamu membaca pesan mereka. Laporan mereka tetap tampil untukmu, kalau mereka mengirimnya.</string>
+    <string name="settings_read_receipts_off">Mati — kapan kamu membaca adalah urusanmu. Laporan mereka tetap terlihat kalau mereka mengirimnya.</string>
+</resources>
