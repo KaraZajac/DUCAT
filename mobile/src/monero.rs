@@ -65,7 +65,22 @@ pub fn monero_default_nodes(own_url: Option<String>) -> Vec<NodeCandidate> {
             label: "your node".into(),
         }];
     }
-    vec![
+    let mut nodes = vec![
+        NodeCandidate {
+            url: "http://node.monerodevs.org:38089".into(),
+            trust: NodeTrust::PublicClearnet,
+            label: "monerodevs (stagenet)".into(),
+        },
+        NodeCandidate {
+            url: "http://node2.monerodevs.org:38089".into(),
+            trust: NodeTrust::PublicClearnet,
+            label: "monerodevs 2 (stagenet)".into(),
+        },
+        NodeCandidate {
+            url: "http://node3.monerodevs.org:38089".into(),
+            trust: NodeTrust::PublicClearnet,
+            label: "monerodevs 3 (stagenet)".into(),
+        },
         NodeCandidate {
             url: "http://xmr-lux.boldsuck.org:38081".into(),
             trust: NodeTrust::PublicClearnet,
@@ -76,12 +91,17 @@ pub fn monero_default_nodes(own_url: Option<String>) -> Vec<NodeCandidate> {
             trust: NodeTrust::PublicClearnet,
             label: "xmr-tw (stagenet)".into(),
         },
-        NodeCandidate {
-            url: "http://node.monerodevs.org:38089".into(),
-            trust: NodeTrust::PublicClearnet,
-            label: "monerodevs (stagenet)".into(),
-        },
-    ]
+    ];
+    // A random starting point, so every phone does not probe — and then
+    // settle on — the same first entry. The picker takes the first usable
+    // candidate; without rotation, one flaky-but-answering node at the head
+    // of a fixed list becomes everyone's node (observed in the field: a
+    // whole day fed to boldsuck while two healthy nodes sat unprobed).
+    let mut b = [0u8; 1];
+    rand_core::RngCore::fill_bytes(&mut rand_core::OsRng, &mut b);
+    let n = nodes.len();
+    nodes.rotate_left((b[0] as usize) % n);
+    nodes
 }
 
 /// What a probe found. Named apart from Veilid's `NodeStatus`: two things
@@ -974,6 +994,21 @@ pub fn monero_rate(currency: String, timeout_ms: u32) -> Result<Rate, MoneroErro
         .map(|d| d.as_secs())
         .unwrap_or(0);
 
+    let done = |p: f64, source: &str| Rate {
+        currency: cur.to_uppercase(),
+        per_xmr: p,
+        source: source.into(),
+        fetched_at: now,
+    };
+
+    // Four independent sources, tried in order; the common case is still one
+    // request. A field phone once printed "no price source answered" because
+    // the chain was two entries long and one of them only quoted three
+    // currencies — losing the price is losing the fiat display everywhere, so
+    // the chain is as deep as the free, keyless APIs allow (verified live
+    // 2026-08-17: CryptoCompare now demands a key and is deliberately absent).
+
+    // CoinGecko: every currency the app offers.
     let cg = format!(
         "https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies={cur}"
     );
@@ -981,19 +1016,28 @@ pub fn monero_rate(currency: String, timeout_ms: u32) -> Result<Rate, MoneroErro
         if let Ok(txt) = r.into_string() {
             if let Ok(v) = serde_json::from_str::<serde_json::Value>(&txt) {
                 if let Some(p) = v["monero"][&cur].as_f64() {
-                    return Ok(Rate {
-                        currency: cur.to_uppercase(),
-                        per_xmr: p,
-                        source: "CoinGecko".into(),
-                        fetched_at: now,
-                    });
+                    return Ok(done(p, "CoinGecko"));
                 }
             }
         }
     }
 
-    // Kraken quotes a handful of pairs directly. Only used when the first
-    // source fails, so the common case is one request rather than two.
+    // CoinPaprika: most currencies; a miss falls through rather than failing.
+    let pk = format!(
+        "https://api.coinpaprika.com/v1/tickers/xmr-monero?quotes={}",
+        cur.to_uppercase()
+    );
+    if let Ok(r) = agent.get(&pk).call() {
+        if let Ok(txt) = r.into_string() {
+            if let Ok(v) = serde_json::from_str::<serde_json::Value>(&txt) {
+                if let Some(p) = v["quotes"][cur.to_uppercase()]["price"].as_f64() {
+                    return Ok(done(p, "CoinPaprika"));
+                }
+            }
+        }
+    }
+
+    // Kraken quotes a handful of pairs directly.
     if matches!(cur.as_str(), "usd" | "eur" | "gbp") {
         let pair = format!("XMR{}", cur.to_uppercase());
         let url = format!("https://api.kraken.com/0/public/Ticker?pair={pair}");
@@ -1004,15 +1048,25 @@ pub fn monero_rate(currency: String, timeout_ms: u32) -> Result<Rate, MoneroErro
                         if let Some(first) = obj.values().next() {
                             if let Some(last) = first["c"][0].as_str() {
                                 if let Ok(p) = last.parse::<f64>() {
-                                    return Ok(Rate {
-                                        currency: cur.to_uppercase(),
-                                        per_xmr: p,
-                                        source: "Kraken".into(),
-                                        fetched_at: now,
-                                    });
+                                    return Ok(done(p, "Kraken"));
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    // Bitfinex still lists XMR/USD; index 6 of the ticker array is the last
+    // trade. USD only, and last on purpose: by the time four sources have
+    // failed, the phone is offline and no fifth would answer either.
+    if cur == "usd" {
+        if let Ok(r) = agent.get("https://api-pub.bitfinex.com/v2/ticker/tXMRUSD").call() {
+            if let Ok(txt) = r.into_string() {
+                if let Ok(v) = serde_json::from_str::<serde_json::Value>(&txt) {
+                    if let Some(p) = v.get(6).and_then(|x| x.as_f64()) {
+                        return Ok(done(p, "Bitfinex"));
                     }
                 }
             }

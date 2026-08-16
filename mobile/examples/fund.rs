@@ -36,6 +36,16 @@ fn main() {
         }
         from = r.scanned_to;
     }
+    // `fund CHECKONLY 0` — report holdings and exit; the funds watcher polls
+    // this while a top-up is in flight.
+    if dest == "CHECKONLY" {
+        let total: u64 = outs.iter().map(|o| o.amount_pxmr).sum();
+        let newest = outs.iter().map(|o| o.height).max().unwrap_or(0);
+        println!("CHECK {} output(s) {} pXMR newest_height {} tip {}",
+            outs.len(), total, newest, tip);
+        return;
+    }
+
     // Spendable = deep enough to be unlocked, and not already spent.
     let candidates: Vec<_> = outs.iter().filter(|o| o.height + 10 <= tip).collect();
     let images: Vec<String> = candidates.iter().map(|o| o.key_image_hex.clone()).collect();
