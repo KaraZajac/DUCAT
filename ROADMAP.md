@@ -101,12 +101,17 @@ money. Ordered by what blocks 1.0, not by effort.
 
 ## App robustness — the 0.85 review's unfixed tail
 
-- **State survives rotation and process death everywhere.** The review
-  found zero `rememberSaveable` outside the camera fix: a rotation
-  mid-sale abandons a POS card a customer may have scanned; PaySheet
-  loses target/amount/memo; onboarding can regenerate the wallet being
-  backed up. Sweep the screens, persist in-flight sale state next to the
-  tab record.
+- **State survives rotation and process death.** ~~Onboarding, nav, and
+  the pay sheet~~ **Done, 0.88 (2026-08-17)** — onboarding persists the
+  persona and wallet at creation and resumes from the stores (this also
+  fixed a latent bug: the persona was never persisted, so the app ran
+  under a different identity than its own backup was signed with); the
+  nav tab, the Send/QR sheet flags, and the pay sheet's typed
+  amount/memo/address are rememberSaveable. Verified on the emulator
+  across an Activity recreate and a killed process. **Left:** custom
+  Savers for the Chat overlay's Contact and PaySheet's PayTarget; and the
+  POS in-flight sale card, which wants persisting next to the tab record
+  (a rotation mid-sale still abandons a card a customer may have scanned).
 - ~~**Bill cancellation tracking.**~~ **Done, 0.87** — a vendor cancel
   sends RETRACT(re_own) naming the bill; the request bubble renders
   "Cancelled" instead of a live Review payment button.

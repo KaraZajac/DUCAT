@@ -13,6 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -94,7 +96,19 @@ class MainActivity : ComponentActivity() {
             // Follows the system unless the user has said otherwise (Menu).
             var mode by remember { mutableStateOf(prefs.mode) }
             var onboarded by remember { mutableStateOf(prefs.onboarded) }
-            var setup by remember { mutableStateOf(Onboarding()) }
+            // Resume where a rotation or a killed process left off: the wallet
+            // is persisted the moment it is created, so its presence means the
+            // expensive steps are already done and only the backup remains.
+            // Starting fresh here is what used to regenerate the wallet.
+            var setup by remember {
+                mutableStateOf(
+                    if (WalletStore(this@MainActivity).address() != null) {
+                        Onboarding(step = Step.Backup)
+                    } else {
+                        Onboarding()
+                    }
+                )
+            }
 
             DucatTheme(mode) {
                 if (!onboarded) {
@@ -103,26 +117,16 @@ class MainActivity : ComponentActivity() {
                     OnboardingFlow(setup) { next ->
                         setup = next
                         if (next.step == Step.Done && next.backupConfirmed) {
-                            // Persist the wallet setup created. It used to live
-                            // only in onboarding's Compose state, so the address
-                            // a user was shown during setup vanished the moment
-                            // setup finished — and BackupSettings was handed
-                            // null for the very key it exists to back up.
-                            // The profile choices are settings, not keys, and
-                            // are kept where the rest of the app reads them.
+                            // The persona and wallet were persisted at creation
+                            // (so a rotation could not lose or regenerate them);
+                            // only the profile choices, which are settings and
+                            // not keys, are committed here — and the gate flag,
+                            // which is what actually opens the funded wallet.
                             next.displayName?.let {
                                 NameStore(this@MainActivity).put(it)
                             }
                             ContactStore(this@MainActivity)
                                 .setPublishAddress(next.publishPayto)
-                            next.wallet?.let { w ->
-                                WalletStore(this@MainActivity).save(
-                                    address = w.address,
-                                    spendKeyHex = w.spendKeyHex,
-                                    restoreHeight = w.restoreHeight,
-                                    stagenet = true,
-                                )
-                            }
                             prefs.onboarded = true
                             onboarded = true
                         }
@@ -155,11 +159,18 @@ enum class Tab(val labelRes: Int) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
-    var tab by remember { mutableStateOf(Tab.Home) }
+    // Survive a rotation (and process death): the tab you were on, an open
+    // Send sheet with the address it was aimed at, an open QR sheet. Before
+    // this, a rotation mid-payment dropped you back to Home with the sheet
+    // gone. Overlay stays plain remember for now — its Chat case holds a
+    // Contact that needs a custom Saver, a separate follow-up.
+    var tab by rememberSaveable(
+        stateSaver = Saver(save = { it.name }, restore = { Tab.valueOf(it) }),
+    ) { mutableStateOf(Tab.Home) }
     var overlay by remember { mutableStateOf<Overlay>(Overlay.None) }
-    var payOpen by remember { mutableStateOf(false) }
-    var payAddress by remember { mutableStateOf<String?>(null) }
-    var qrOpen by remember { mutableStateOf(false) }
+    var payOpen by rememberSaveable { mutableStateOf(false) }
+    var payAddress by rememberSaveable { mutableStateOf<String?>(null) }
+    var qrOpen by rememberSaveable { mutableStateOf(false) }
     val drawer = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current

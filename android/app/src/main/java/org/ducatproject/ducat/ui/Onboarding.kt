@@ -20,7 +20,9 @@ import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.WalletStore
 import uniffi.ducat_mobile.BackupInput
 import uniffi.ducat_mobile.NewWallet
 import uniffi.ducat_mobile.createPersonaSecret
@@ -60,8 +62,6 @@ const val UNKNOWN_TIP: ULong = 0uL
 
 data class Onboarding(
     val step: Step = Step.Persona,
-    val persona: ByteArray? = null,
-    val wallet: NewWallet? = null,
     /** The name handed out on cards (§7.5). Optional, and it can change later. */
     val displayName: String? = null,
     /**
@@ -84,6 +84,7 @@ data class Onboarding(
 
 @Composable
 fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
+    val context = LocalContext.current
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
     ) {
@@ -96,7 +97,14 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                 body = stringResource(R.string.onb_persona_body),
                 action = stringResource(R.string.onb_persona_action),
                 onAction = {
-                    onState(state.copy(step = Step.Wallet, persona = createPersonaSecret()))
+                    // Persisted the moment it is created, not held in Compose
+                    // state until Done. A rotation used to throw the persona
+                    // away and mint a fresh one at Finish — so the identity the
+                    // backup was signed with was not the identity the app then
+                    // ran under. secret() writes it once and returns the same
+                    // bytes on every later read.
+                    PersonaStore(context).secret()
+                    onState(state.copy(step = Step.Wallet))
                 },
             )
 
@@ -119,8 +127,16 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                             8000u,
                         ).height
                     }.getOrDefault(UNKNOWN_TIP)
+                    // Persisted at creation, so a rotation cannot regenerate a
+                    // *different* wallet than the address the user was shown and
+                    // the backup they wrote. onboarded stays false until Backup,
+                    // so this does not open a funded wallet before §4.3's step.
                     val w = createWallet(tipHeight = tip, stagenet = true)
-                    onState(state.copy(step = Step.Limits, wallet = w))
+                    WalletStore(context).save(
+                        address = w.address, spendKeyHex = w.spendKeyHex,
+                        restoreHeight = w.restoreHeight, stagenet = true,
+                    )
+                    onState(state.copy(step = Step.Limits))
                 },
             )
 
@@ -248,10 +264,10 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                 }
             }
 
-            state.wallet?.let { w ->
+            WalletStore(context).address()?.let { addr ->
                 Spacer(Modifier.height(12.dp))
                 Text(stringResource(R.string.onb_backup_address_label), style = MaterialTheme.typography.labelMedium)
-                Text(w.address, style = MaterialTheme.typography.bodySmall,
+                Text(addr, style = MaterialTheme.typography.bodySmall,
                     fontFamily = FontFamily.Monospace)
             }
 
@@ -290,12 +306,18 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                 // them do something about it.
                 Button(
                     onClick = {
-                        val w = state.wallet
-                        val persona = state.persona
-                        if (w == null || persona == null) {
+                        // Read the persisted artifacts, not Compose state: a
+                        // rotation during onboarding leaves them in the stores,
+                        // and this is the same persona the app will run under
+                        // and the same wallet its address was shown for.
+                        val ws = WalletStore(context)
+                        val spendKey = ws.spendKeyHex()
+                        if (spendKey == null) {
                             error = context.getString(R.string.onb_backup_error_incomplete)
                             return@Button
                         }
+                        val persona = PersonaStore(context).secret()
+                        val restoreHeight = ws.restoreHeight()
                         busy = true; error = null
                         scope.launch {
                             // Encrypt and write off the main thread so the setup
@@ -304,8 +326,8 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                                 runCatching {
                                     val bytes = exportBackup(
                                         BackupInput(
-                                            w.spendKeyHex,
-                                            w.restoreHeight,
+                                            spendKey,
+                                            restoreHeight,
                                             state.displayName,
                                             state.publishPayto,
                                             state.profile,

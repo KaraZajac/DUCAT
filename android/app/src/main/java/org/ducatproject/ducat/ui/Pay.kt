@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -166,7 +167,7 @@ private fun ChooseTarget(
     val contacts = remember(version) {
         ContactStore(context).all().sortedBy { it.displayName().lowercase() }
     }
-    var address by remember { mutableStateOf("") }
+    var address by rememberSaveable { mutableStateOf("") }
 
     Column(
         Modifier
@@ -262,7 +263,7 @@ private fun AmountStep(
     val scope = rememberCoroutineScope()
     val version by ContactStore.changes.collectAsState()
     val b = remember(version) { Wallet.balances(context) }
-    var fiatEntry by remember { mutableStateOf(Amounts.preferFiat(context)) }
+    var fiatEntry by rememberSaveable { mutableStateOf(Amounts.preferFiat(context)) }
     val rate = remember(version) { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
     var priority by remember { mutableIntStateOf(1) }
@@ -272,11 +273,11 @@ private fun AmountStep(
     // paying anyway would make a payment nothing on their side can match; the
     // honest way to pay a different amount is a different payment.
     val billed = prefillAmountPxmr > 0
-    var tipTyped by remember { mutableStateOf("") }
-    var typed by remember {
+    var tipTyped by rememberSaveable { mutableStateOf("") }
+    var typed by rememberSaveable {
         mutableStateOf(if (prefillAmountPxmr > 0) formatXmr(prefillAmountPxmr) else "")
     }
-    var note by remember { mutableStateOf("") }
+    var note by rememberSaveable { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var done by remember { mutableStateOf<String?>(null) }
