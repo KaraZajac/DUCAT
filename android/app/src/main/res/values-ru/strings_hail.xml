@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">Поймать машину</string>
+    <string name="hail_card_standing">Вызов размещён — ждём водителя</string>
+    <string name="hail_card_pitch">Опубликуй, куда едешь, на стоянке, за которой следят водители.</string>
+    <string name="hail_standing_at">Висит на стоянке %1$s</string>
+    <string name="hail_take_it_down">Снять вызов</string>
+    <string name="hail_awaiting_offer">%1$s взял(а) твой вызов — ждём предложение…</string>
+    <string name="hail_cancel">Отмена</string>
+    <string name="hail_parked_offer">%1$s предлагает %2$s</string>
+    <string name="hail_view_the_offer">Посмотреть предложение</string>
+    <string name="hail_post_it_again">Разместить снова</string>
+    <string name="hail_expired_unclaimed">Никто не взял твой вызов до истечения срока.</string>
+    <string name="hail_claimed_check_chats">Водитель взял твой вызов — загляни в чаты.</string>
+    <string name="hail_accept_message">До скорого</string>
+    <string name="hail_decline_message">Нет, спасибо</string>
+    <string name="hail_declined_post_again">Предложение отклонено — разместить вызов снова?</string>
+    <string name="hail_posted_waiting">Размещено. Ждём водителя…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">Пассажир отказался</string>
+    <string name="hail_rider_declined_body">Твоё предложение не приняли. Вызов исчез с доски.</string>
+    <string name="hail_ok">ОК</string>
+    <string name="hail_on_duty">На линии</string>
+    <string name="hail_net_wide">широкая сеть — ~%1$s в поперечнике</string>
+    <string name="hail_net_nearby">под наблюдением ~%1$s в поперечнике</string>
+    <string name="hail_net_here">только твой район, ~%1$s</string>
+    <string name="hail_stop">Стоп</string>
+    <string name="hail_no_hails_map">Вызовов нет — они будут появляться здесь.</string>
+    <string name="hail_quote_me">назови цену</string>
+    <string name="hail_driving_title">За рулём</string>
+    <string name="hail_driving_pitch">Следи за стоянкой; бери вызов. Взятый вызов открывает переписку с пассажиром — там называешь цену, там договариваетесь о встрече, счёт в конце, как в любой поездке.</string>
+    <string name="hail_range_just_here">Только здесь</string>
+    <string name="hail_range_nearby">Рядом</string>
+    <string name="hail_range_wide">Широко</string>
+    <string name="hail_range_desc_here">~%1$s — плотные городские кварталы</string>
+    <string name="hail_range_desc_wide">~%1$s в поперечнике — глубинка или тихие ночи</string>
+    <string name="hail_range_desc_nearby">~%1$s в поперечнике — обычный вариант</string>
+    <string name="hail_getting_location">Определяем твоё местоположение…</string>
+    <string name="hail_drive_here">Ехать здесь — следить за моим районом</string>
+    <string name="hail_stand_label">Стоянка</string>
+    <string name="hail_stand_placeholder">название стоянки или 📍 выше</string>
+    <string name="hail_watch">Следить</string>
+    <string name="hail_watching_neighbours">Следим за твоей ячейкой и 8 соседними — %1$s +8</string>
+    <string name="hail_board_empty">На доске пусто. Проверяем каждые несколько секунд…</string>
+    <string name="hail_offers_amount">предлагает %1$s</string>
+    <string name="hail_offers_amount_both">предлагает %1$s · %2$s</string>
+    <string name="hail_asks_quote">просит назвать цену</string>
+    <string name="hail_triage_pickup">до посадки ~%1$s</string>
+    <string name="hail_triage_trip">поездка ~%1$s</string>
+    <string name="hail_stands_for_min">висит ещё %1$d мин</string>
+    <string name="hail_view_job">Посмотреть заказ</string>
+    <string name="hail_take_it">Взять</string>
+    <string name="hail_location_fix_failed">не удалось определить местоположение</string>
+    <string name="hail_beaten_to_it">Этот вызов уже перехватили.</string>
+    <string name="hail_on_my_way">🚕 Уже еду.</string>
+    <string name="hail_on_my_way_car">🚕 Уже еду — ищи %1$s.</string>
+    <string name="hail_on_my_way_plate">🚕 Уже еду, номер %1$s.</string>
+    <string name="hail_on_my_way_car_plate">🚕 Уже еду — ищи %1$s, номер %2$s.</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">Закрыть</string>
+    <string name="hail_job_title">Заказ</string>
+    <string name="hail_to_pickup">до посадки: %1$s · ~%2$d мин</string>
+    <string name="hail_the_ride">поездка: %1$s · ~%2$d мин</string>
+    <string name="hail_offer_amount">предложение: %1$s</string>
+    <string name="hail_offer_amount_both">предложение: %1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">всё достаётся тебе — агрегатор заплатил бы за эту поездку ~%1$s %2$.0f</string>
+    <string name="hail_rider_asks_quote">пассажир просит назвать цену</string>
+    <string name="hail_routing_job">Строим маршрут…</string>
+    <string name="hail_your_fare">Твоя цена (%1$s)</string>
+    <string name="hail_offer_counter_hint">их предложение — измени, чтобы предложить своё</string>
+    <string name="hail_offer_quote_hint">тебя просят назвать цену</string>
+    <string name="hail_price_in_instead">Цена в %1$s</string>
+    <string name="hail_fare_invalid">Цена должна быть числом больше нуля.</string>
+    <string name="hail_take_this_ride">Взять эту поездку 🚕</string>
+    <string name="hail_pass">Пропустить</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">Предложено %1$s — ждём, что ответит %2$s</string>
+    <string name="hail_the_rider">пассажир</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">Моё местоположение</string>
+    <string name="hail_no_route">маршрут между этими точками не найден</string>
+    <string name="hail_pickup_label">Посадка</string>
+    <string name="hail_locating">Определяем…</string>
+    <string name="hail_use_my_location">Использовать моё местоположение</string>
+    <string name="hail_where_to">Куда едем?</string>
+    <string name="hail_address_hint">адрес или название места</string>
+    <string name="hail_finding_route">Ищем маршрут…</string>
+    <string name="hail_route_summary">%1$s · ~%2$d мин</string>
+    <string name="hail_route_summary_priced">%1$s · ~%2$d мин · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">агрегатор ~%1$s %2$.0f · такси ~%1$s %3$.0f — твой водитель получает всё (агрегатор платит своему ~%1$s %4$.0f)</string>
+    <string name="hail_your_offer">Твоё предложение (%1$s)</string>
+    <string name="hail_offer_invalid">Предложение должно быть числом больше нуля — или оставь поле пустым, чтобы попросить цену.</string>
+    <string name="hail_shards_full">все сегменты этой стоянки заняты — попробуй чуть позже</string>
+    <string name="hail_post_failed">не удалось разместить вызов</string>
+    <string name="hail_osm_privacy">Поиск, маршрут и карта работают через серверы OpenStreetMap — единственное место, куда DUCAT отправляет геопозицию наружу. Водители видят только районы ~%1$s.</string>
+    <string name="hail_post_button">Поймать 🚕</string>
+    <string name="hail_search">Поиск</string>
+</resources>

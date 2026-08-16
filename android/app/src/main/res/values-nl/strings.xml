@@ -1,0 +1,51 @@
+<resources>
+    <string name="nfc_service_description">Contactloze DUCAT-betalingen</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mi</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">Klaar</string>
+    <string name="common_cancel">Annuleren</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">Home</string>
+    <string name="tab_accounts">Rekeningen</string>
+    <string name="tab_activity">Activiteit</string>
+    <string name="tab_chat">Chat</string>
+    <string name="tab_send_receive">Versturen</string>
+
+    <string name="section_status">Status</string>
+    <string name="section_profile">Profiel</string>
+    <string name="section_contacts">Contacten</string>
+    <string name="section_logs">Logboek</string>
+    <string name="section_settings">Instellingen</string>
+    <string name="section_modes">Gebruiksmodi</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">Taal</string>
+    <string name="settings_language_system">Volg het systeem</string>
+
+    <string name="settings_appearance_title">Weergave</string>
+    <string name="theme_follow_system">Systeem volgen</string>
+    <string name="theme_latte">Latte (licht)</string>
+    <string name="theme_mocha">Mocha (donker)</string>
+
+    <string name="settings_distance_title">Afstand</string>
+    <string name="distance_follow_system">Volg het systeem</string>
+    <string name="distance_kilometres">Kilometers</string>
+    <string name="distance_miles">Mijlen</string>
+
+    <string name="settings_prices_title">Prijzen</string>
+    <string name="prices_show_worth">Toon wat een saldo waard is</string>
+    <string name="prices_currency_title">Valuta</string>
+    <string name="prices_this_phone">deze telefoon</string>
+    <string name="prices_source_note">Hoogstens twee keer per uur opgevraagd, bij CoinGecko of Kraken. Zet je dit uit, dan stopt dat verzoek helemaal.</string>
+    <string name="prices_last_from">Laatste van %1$s.</string>
+
+    <string name="settings_privacy_title">Privacy</string>
+    <string name="settings_read_receipts">Leesbevestigingen versturen</string>
+    <string name="settings_read_receipts_on">Contacten zien wanneer je hun berichten hebt gelezen. Die van hen zie je sowieso, als zij ze versturen.</string>
+    <string name="settings_read_receipts_off">Uit — wanneer jij iets leest, gaat niemand iets aan. Je ziet die van hen nog steeds, als zij ze versturen.</string>
+</resources>

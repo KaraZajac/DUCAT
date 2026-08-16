@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">Проверить ещё раз</string>
+    <string name="monero_subtitle">Здесь транзакции уходят в сеть и читается цепочка.</string>
+    <string name="monero_finding_node">Ищем узел…</string>
+    <string name="monero_no_usable_node">нет пригодного узла</string>
+    <string name="monero_line_height">высота</string>
+    <string name="monero_line_synced">синхронизирован</string>
+    <string name="monero_line_network">сеть</string>
+    <string name="monero_line_round_trip">задержка</string>
+    <string name="monero_synced_yes">да</string>
+    <string name="monero_synced_no">нет — балансы были бы устаревшими</string>
+    <string name="monero_round_trip_ms">%1$s мс</string>
+    <string name="monero_no_node">нет узла</string>
+    <string name="monero_change_your_node">Сменить узел</string>
+    <string name="monero_use_own_node">Использовать свой узел</string>
+    <string name="monero_your_node">Твой узел</string>
+    <string name="monero_use_it">Использовать</string>
+    <string name="monero_back_to_public">Назад к публичным</string>
+    <string name="monero_cancel">Отмена</string>
+    <string name="monero_trust_own_title">Твой узел</string>
+    <string name="monero_trust_own_body">Он не узнаёт о тебе ничего, чего ты не знаешь и так.</string>
+    <string name="monero_trust_onion_title">Чужой узел, через Tor</string>
+    <string name="monero_trust_onion_body">Он видит твои транзакции, но не видит, откуда они пришли.</string>
+    <string name="monero_trust_public_title">Чужой узел</string>
+    <string name="monero_trust_public_body">Он видит твой адрес и твои транзакции вместе. Dandelion++ прячет происхождение транзакции от остальной сети — но не от узла, которому она вручена. Решение — свой узел.</string>
+    <string name="monero_wallet_title">Кошелёк</string>
+    <string name="monero_no_wallet_key_title">На этом устройстве нет ключа кошелька</string>
+    <string name="monero_no_wallet_key_body">Эта установка завершила настройку до того, как приложение стало хранить кошелёк, так что сканировать нечем. Ожидание не поможет — восстановись из резервной копии или сотри данные приложения и настрой заново.</string>
+    <string name="monero_scanning_failed">Сканирование не удалось</string>
+    <string name="monero_unknown">неизвестно</string>
+    <string name="monero_scanning_failed_note">Узел выше ответил, так что дело в чтении цепочки самим кошельком, а не в соединении.</string>
+    <string name="monero_not_started">Не запущено — ищем узел.</string>
+    <string name="monero_caught_up">Догнали цепочку на блоке %1$d</string>
+    <string name="monero_block_of">блок %1$d из %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="one">остался %1$d блок</item>
+        <item quantity="few">осталось %1$d блока</item>
+        <item quantity="many">осталось %1$d блоков</item>
+        <item quantity="other">осталось %1$d блока</item>
+    </plurals>
+    <string name="monero_partial_balance">Баланс — только то, что уже прочитано.</string>
+    <string name="monero_last_window_failed">Последнее окно не удалось: %1$s</string>
+    <string name="monero_rescan_hint">Кошелёк сканирует цепочку с самого начала — если он создан недавно, это куда дольше, чем нужно.</string>
+    <string name="monero_skip_ahead">Перемотать вперёд</string>
+</resources>

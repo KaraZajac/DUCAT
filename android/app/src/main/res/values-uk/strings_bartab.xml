@@ -1,0 +1,47 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">Відкриті рахунки</string>
+    <string name="bartab_start_tab">Відкрити рахунок</string>
+    <string name="bartab_section_running">Триває</string>
+    <string name="bartab_section_billed">Виставлено — чекаємо оплату</string>
+    <string name="bartab_receipt_auto_hint">Чек надішлеться їм сам тієї миті, коли платіж надійде — навіть якщо вони вже пішли.</string>
+    <string name="bartab_section_settled">Розраховано</string>
+    <string name="bartab_clear">Очистити</string>
+    <string name="bartab_nothing_settled">Сьогодні ще нічого не розраховано.</string>
+    <string name="bartab_no_tabs">Рахунків ще немає. Відкрий перший, коли надійде перше замовлення.</string>
+    <plurals name="bartab_items">
+        <item quantity="one">%1$d позиція</item>
+        <item quantity="few">%1$d позиції</item>
+        <item quantity="many">%1$d позицій</item>
+        <item quantity="other">%1$d позиції</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">платіж помічено — розраховується</string>
+    <string name="bartab_state_billed_unpaid">виставлено, не сплачено</string>
+    <string name="bartab_state_paid_oob">сплачено поза DUCAT ✓</string>
+    <string name="bartab_state_cancelled">скасовано</string>
+    <string name="bartab_state_paid">сплачено ✓</string>
+    <string name="bartab_new_customer">Новий клієнт</string>
+    <string name="bartab_scan_hint">Вони сканують або прикладають телефон — рахунок відкривається сам.</string>
+    <string name="bartab_err_publish_code">не вдалося опублікувати код</string>
+    <string name="bartab_or_regular">Або постійний клієнт</string>
+    <string name="bartab_back">Назад</string>
+    <string name="bartab_bill_cancelled_msg">Той рахунок на %1$s XMR скасовано — платити нічого.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · на рахунку вже %3$s XMR</string>
+    <string name="bartab_remove_line">Прибрати</string>
+    <string name="bartab_err_send_bill">не вдалося надіслати рахунок</string>
+    <string name="bartab_settle_bill">Розрахувати — рахунок %1$s</string>
+    <string name="bartab_settle_hint">Один рахунок із переліком позицій у твою розмову з %1$s. Сплатити можна звідки завгодно — розмова не закривається, коли вони йдуть.</string>
+    <string name="bartab_discard_tab">Викинути рахунок</string>
+    <string name="bartab_discard_title">Викинути цей рахунок?</string>
+    <string name="bartab_discard_body">Рахунок і все, що на нього записано, буде видалено з цього телефона. Нічого не надсилається, і цю дію не скасувати.</string>
+    <string name="bartab_discard_confirm">Викинути</string>
+    <string name="bartab_keep_tab">Залишити</string>
+    <string name="bartab_billed_hint">Виставлено. Чек надішлеться їм сам, коли платіж надійде. Якщо розрахувалися якось інакше — познач це тут:</string>
+    <string name="bartab_paid_outside_button">Сплачено поза DUCAT (готівка, картка)</string>
+    <string name="bartab_cancel_bill">Скасувати рахунок</string>
+    <string name="bartab_cancelled_note">Скасовано — їм повідомлено в розмові.</string>
+    <string name="bartab_paid_oob_note">Сплачено поза DUCAT ✓ — чек надіслано, транзакції не додано.</string>
+    <string name="bartab_paid_note">Сплачено ✓ — чек надіслано.</string>
+    <string name="bartab_remove_from_book">Прибрати з книги рахунків</string>
+    <string name="bartab_back_to_tabs">Назад до рахунків</string>
+</resources>

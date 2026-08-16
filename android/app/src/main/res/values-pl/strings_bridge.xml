@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="one">Rdzeń natywny: %1$d test zaliczony</item>
+        <item quantity="few">Rdzeń natywny: %1$d testy zaliczone</item>
+        <item quantity="many">Rdzeń natywny: %1$d testów zaliczonych</item>
+        <item quantity="other">Rdzeń natywny: %1$d testu zaliczone</item>
+    </plurals>
+    <string name="bridge_checks_failed">Rdzeń natywny: %1$d z %2$d NIE PRZESZŁO</string>
+    <string name="bridge_jni_note">Te testy wywołują rdzeń w Ruście przez JNI — jedyną warstwę, do której testy Rusta nie sięgają.</string>
+    <string name="bridge_got_expected">otrzymano %1$s, oczekiwano %2$s</string>
+
+    <!-- Check names -->
+    <string name="bridge_check_protocol_version">wersja protokołu</string>
+    <string name="bridge_check_capacity_6">pojemność 6 wyjść</string>
+    <string name="bridge_check_capacity_1">pojemność 1 wyjścia</string>
+    <string name="bridge_check_float_plan">plan pogotowia kasowego na 10 płatności</string>
+    <string name="bridge_check_bucket_floor">dolna granica koszyka 4.999 XMR</string>
+    <string name="bridge_check_stale_rate">eskalacja przy nieaktualnym kursie</string>
+</resources>

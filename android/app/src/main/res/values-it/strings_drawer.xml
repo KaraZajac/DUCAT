@@ -1,0 +1,39 @@
+<resources>
+    <!-- Intestazione del drawer -->
+    <string name="drawer_set_name">Imposta un nome per il profilo</string>
+
+    <!-- Sezione stato -->
+    <string name="drawer_speaking">parla %1$s</string>
+
+    <!-- Sezione profilo -->
+    <string name="drawer_persona_title">La tua persona</string>
+    <string name="drawer_persona_body">La chiave con cui sono firmati i tuoi biglietti. Nessuno può trovarti tramite essa — è ciò contro cui si verifica un biglietto una volta che lo si ha.</string>
+
+    <!-- Ricevere pagamenti -->
+    <string name="drawer_being_paid_title">Ricevere pagamenti</string>
+    <string name="drawer_publish_switch">Lascia che i contatti mi paghino direttamente</string>
+    <string name="drawer_publish_off_note">Senza questo, chi vuole pagarti deve aspettare una richiesta.</string>
+    <string name="drawer_publish_on_warning">Il tuo indirizzo va a ogni contatto una volta e viene riusato. Chiunque veda la catena può capire che è stata pagata sempre la stessa persona — comprese le persone che ti hanno pagato una volta sola. Le richieste lo evitano portando ogni volta un indirizzo nuovo.</string>
+    <string name="drawer_publish_scope_note">Lo avranno solo i contatti aggiunti da quando è attivo.</string>
+
+    <!-- Gestione contatti -->
+    <string name="drawer_no_contacts">Ancora nessun contatto. Aggiungine uno dalla scheda Chat.</string>
+    <string name="drawer_open_chat">Apri chat</string>
+    <string name="drawer_delete_contact">Elimina contatto</string>
+    <string name="drawer_forget_title">Dimenticare %1$s?</string>
+    <string name="drawer_forget_body">Questo elimina il contatto e ogni suo messaggio. Non si possono recuperare, e per raggiungerlo di nuovo serve un nuovo biglietto.</string>
+    <string name="drawer_forget_confirm">Dimentica</string>
+
+    <!-- Modalità operative -->
+    <string name="modes_intro">Scegli cos\'è questo dispositivo in questo momento. Una modalità prende il controllo di tutta l\'app finché non torni qui e scegli Personale.</string>
+    <string name="mode_personal">Personale</string>
+    <string name="mode_personal_desc">Il tuo portafoglio, le tue chat e la tua attività. La modalità predefinita.</string>
+    <string name="mode_pos">Punto vendita</string>
+    <string name="mode_pos_desc">Una cassa: batti gli articoli o digita un totale, mostra un solo codice — conto e ricevuta viaggiano nella conversazione che apre.</string>
+    <string name="mode_bartab">Conto del bar</string>
+    <string name="mode_bartab_desc">Un registro dei conti: si scansiona una volta, si aggiunge tutta la sera, un solo conto alla chiusura. Possono pagare anche dopo essersene andati.</string>
+    <string name="mode_taxi">Taxi</string>
+    <string name="mode_taxi_desc">Corse e tassametro: sorvegli un posteggio per le chiamate, tariffa messa per iscritto quando parte il tassametro, il conto mostra i minuti.</string>
+    <string name="mode_donate">Donazioni</string>
+    <string name="mode_donate_desc">Un codice fisso a cui può donare qualsiasi portafoglio Monero. Dall\'altra parte non serve nessuna app.</string>
+</resources>

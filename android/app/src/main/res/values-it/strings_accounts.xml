@@ -1,0 +1,34 @@
+<resources>
+    <!-- Scheda ricarica -->
+    <string name="accounts_top_up">Ricarica</string>
+    <string name="accounts_top_up_desc">Invia Monero a questo indirizzo da qualsiasi portafoglio o exchange. È un normale indirizzo XMR — il trasferimento non ha nulla a che fare con DUCAT.</string>
+    <string name="accounts_no_wallet">Ancora nessun portafoglio — prima completa la configurazione.</string>
+    <string name="accounts_copy">Copia</string>
+    <string name="accounts_hide">Nascondi</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Scheda saldi -->
+    <string name="accounts_balances">Saldi</string>
+    <string name="accounts_balances_desc">Tenuti separati apposta: ciò che puoi spendere ora non è ciò che possiedi.</string>
+    <string name="accounts_waiting_for_node">In attesa di un nodo.</string>
+    <string name="accounts_spendable">Spendibile</string>
+    <string name="accounts_show_in">Mostra in %1$s</string>
+    <string name="accounts_stagenet_fiat_note">Le monete stagenet sono monete di prova. Quella cifra è quanto varrebbe altrettanto Monero vero — queste non valgono nulla.</string>
+    <string name="accounts_notes">Banconote</string>
+    <string name="accounts_bond">Cauzione</string>
+    <string name="accounts_bond_none">nessuna</string>
+    <string name="accounts_scanning_from_genesis_title">Scansione dall\'inizio della catena</string>
+    <string name="accounts_scanning_from_genesis_desc">Questo portafoglio è stato creato prima che l\'app potesse raggiungere un nodo, quindi non sa quando è nato. Al blocco %1$d di %2$d significa più di un giorno di lettura. Salta avanti se sai che il portafoglio è più recente.</string>
+    <string name="accounts_skip_ahead">Salta avanti</string>
+
+    <!-- Finestra "salta avanti" -->
+    <string name="accounts_skip_ahead_title">Salta avanti a</string>
+    <string name="accounts_skip_ahead_desc">Tutto ciò che è stato ricevuto prima di questo punto non verrà trovato. Scegli un momento in cui sei sicuro che il portafoglio non esistesse ancora.</string>
+    <string name="accounts_about_a_day_ago">circa un giorno fa</string>
+    <string name="accounts_about_a_week_ago">circa una settimana fa</string>
+    <string name="accounts_about_a_month_ago">circa un mese fa</string>
+    <string name="accounts_skip_option">"%1$s  —  blocco %2$d"</string>
+    <string name="accounts_block_height_label">o un\'altezza di blocco</string>
+    <string name="accounts_use_that_height">Usa quell\'altezza</string>
+    <string name="accounts_cancel">Annulla</string>
+</resources>

@@ -1,0 +1,29 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">Henüz bir şey yok</string>
+    <string name="activity_empty_desc">Zincir okunduğunda ödemeler burada görünür. Bir şey görmek için Hesaplar\'dan para yükle.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">Bekleyen</string>
+    <string name="activity_they_ask">%1$s istiyor</string>
+    <string name="activity_you_asked">%1$s kişisinden istedin</string>
+    <plurals name="activity_items">
+        <item quantity="one">%1$d kalem</item>
+        <item quantity="other">%1$d kalem</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">İşlem okunuyor…</string>
+    <string name="activity_receipt_chip">🧾 makbuz</string>
+    <string name="activity_note_quoted">“%1$s”</string>
+    <string name="activity_sending">Gönderiliyor — henüz bir blokta değil</string>
+    <string name="activity_spent_unknown">Harcandı, ama nereye olduğunu söyleyemiyoruz</string>
+    <string name="activity_maybe_change">kendi ödemenden dönen para üstü olabilir</string>
+    <string name="activity_locked_when">%1$s · %2$d blok sonra açılır</string>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">Kime: %1$s</string>
+    <string name="activity_from">Kimden: %1$s</string>
+    <string name="activity_sent_unrecorded">Gönderildi — alıcı kaydedilmedi</string>
+    <string name="activity_received_unknown">Alındı — gönderen bilinmiyor</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">Kartım</string>
+    <string name="chatlist_new_chat">Yeni sohbet</string>
+    <string name="chatlist_no_conversations">Sohbet yok</string>
+    <string name="chatlist_empty_hint">Kartını birine elden ver ya da zaten güvendiğin herhangi bir uygulamadan gönder. Kimse adıyla bulunamaz — birine ulaşmak, sana verdiği bir kartı gerektirir.</string>
+    <string name="chatlist_preview_you">Sen: %1$s</string>
+    <string name="chatlist_no_messages_yet">Henüz mesaj yok</string>
+    <string name="chatlist_delete_title">Bu sohbet silinsin mi?</string>
+    <string name="chatlist_delete_body">%1$s ile aranızdaki her mesaj bu telefondan silinir ve geri getirilemez. %1$s kişilerinde kalır — Yeni sohbet istediğin an yenisini başlatır.</string>
+    <string name="chatlist_delete">Sil</string>
+    <string name="chatlist_cancel">İptal</string>
+    <string name="chatlist_add_contact">Kişi ekle</string>
+    <string name="chatlist_add_contact_hint">Sana verilen bir kartı tara ya da yapıştır</string>
+    <string name="chatlist_no_contacts_yet">Henüz kişi yok.</string>
+    <string name="chatlist_preview_requested">💸 %1$s XMR istendi</string>
+    <string name="chatlist_preview_sent">💸 %1$s XMR gönderildi</string>
+    <string name="chatlist_preview_receipt">🧾 Makbuz — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">%1$s ile tepki verdi</string>
+    <string name="chatlist_preview_photo">📷 Fotoğraf</string>
+    <string name="chatlist_time_now">şimdi</string>
+    <string name="chatlist_time_minutes">%1$d dk</string>
+    <string name="chatlist_time_hours">%1$d sa</string>
+</resources>

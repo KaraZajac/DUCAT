@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Condivise tra le schermate di cerimonia -->
+    <string name="ceremony_close">Chiudi</string>
+    <string name="ceremony_quoted_body">“%1$s”</string>
+    <string name="ceremony_decline">Rifiuta</string>
+    <string name="ceremony_open_chat">Apri la chat</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">ti chiede</string>
+    <string name="ceremony_tax">imposte</string>
+    <string name="ceremony_accept_and_pay">Accetta e paga</string>
+    <string name="ceremony_no_address">Nessun indirizzo in questa richiesta — chiedigli dove inviare.</string>
+    <string name="ceremony_accept_opens_confirm">Accetta apre la schermata di conferma — non si muove nulla finché non approvi lì.</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">Pagato ✓</string>
+    <string name="ceremony_paid_to">Pagato · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">si offre di portarti per</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="one">a circa %1$d min</item>
+        <item quantity="other">a circa %1$d min</item>
+    </plurals>
+    <string name="ceremony_plate">targa %1$s</string>
+    <string name="ceremony_accept">Accetta</string>
+    <string name="ceremony_accepting_agrees_fare">Accettando concordi la tariffa — paghi a fine corsa, dalla solita schermata di conferma.</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">Corsa confermata</string>
+    <string name="ceremony_expecting_you">Ti stanno aspettando — tutto il resto passa dalla chat.</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">Il tuo passaggio sta arrivando</string>
+    <string name="ceremony_eta_in_chat">Orario di arrivo e tutto il resto — nella chat.</string>
+</resources>

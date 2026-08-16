@@ -1,0 +1,35 @@
+<resources>
+    <string name="sync_synced">Синхронизировано</string>
+    <string name="sync_not_fully">Не до конца синхронизировано</string>
+    <string name="sync_partial_note">Баланс — только то, что уже прочитано; пока сканирование не закончится, он может быть занижен.</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">меньше минуты</string>
+    <plurals name="duration_minutes">
+        <item quantity="one">около %1$d минуты</item>
+        <item quantity="few">около %1$d минут</item>
+        <item quantity="many">около %1$d минут</item>
+        <item quantity="other">около %1$d минуты</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">около %1$d часа</item>
+        <item quantity="few">около %1$d часов</item>
+        <item quantity="many">около %1$d часов</item>
+        <item quantity="other">около %1$d часа</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">около %1$d дня</item>
+        <item quantity="few">около %1$d дней</item>
+        <item quantity="many">около %1$d дней</item>
+        <item quantity="other">около %1$d дня</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">Отмена</string>
+    <string name="scanner_no_camera_title">Камера не разрешена</string>
+    <string name="scanner_no_camera_body">Для сканирования она нужна. Всё остальное в DUCAT работает и без неё — карточку всегда можно вставить ссылкой.</string>
+    <string name="scanner_allow">Разрешить</string>
+    <string name="scanner_would_not_start">Камера не запустилась: %1$s</string>
+    <string name="scanner_torch_off">Фонарик: выкл</string>
+    <string name="scanner_torch_on">Фонарик: вкл</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">Moja wizytówka</string>
+    <string name="chatlist_new_chat">Nowy czat</string>
+    <string name="chatlist_no_conversations">Brak rozmów</string>
+    <string name="chatlist_empty_hint">Wręcz komuś swoją wizytówkę osobiście albo wyślij ją przez dowolną aplikację, której już ufasz. Nikogo nie da się znaleźć po imieniu — do człowieka prowadzi tylko wizytówka, którą ci dał.</string>
+    <string name="chatlist_preview_you">Ty: %1$s</string>
+    <string name="chatlist_no_messages_yet">Nie ma jeszcze wiadomości</string>
+    <string name="chatlist_delete_title">Usunąć tę rozmowę?</string>
+    <string name="chatlist_delete_body">Każda wiadomość z %1$s zostanie usunięta z tego telefonu bez możliwości odzyskania. %1$s zostaje w kontaktach — Nowy czat w każdej chwili zaczyna od nowa.</string>
+    <string name="chatlist_delete">Usuń</string>
+    <string name="chatlist_cancel">Anuluj</string>
+    <string name="chatlist_add_contact">Dodaj kontakt</string>
+    <string name="chatlist_add_contact_hint">Zeskanuj albo wklej wizytówkę od kogoś</string>
+    <string name="chatlist_no_contacts_yet">Nie ma jeszcze kontaktów.</string>
+    <string name="chatlist_preview_requested">💸 Prośba o %1$s XMR</string>
+    <string name="chatlist_preview_sent">💸 Wysłano %1$s XMR</string>
+    <string name="chatlist_preview_receipt">🧾 Paragon — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">Reakcja %1$s</string>
+    <string name="chatlist_preview_photo">📷 Zdjęcie</string>
+    <string name="chatlist_time_now">teraz</string>
+    <string name="chatlist_time_minutes">%1$d min</string>
+    <string name="chatlist_time_hours">%1$d godz.</string>
+</resources>

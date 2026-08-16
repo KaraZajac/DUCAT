@@ -1,0 +1,45 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">Open tabs</string>
+    <string name="bartab_start_tab">Start een tab</string>
+    <string name="bartab_section_running">Lopend</string>
+    <string name="bartab_section_billed">Rekening gestuurd — wacht op betaling</string>
+    <string name="bartab_receipt_auto_hint">De bon gaat vanzelf naar ze zodra de betaling binnenkomt — ook nadat ze al weg zijn.</string>
+    <string name="bartab_section_settled">Afgerekend</string>
+    <string name="bartab_clear">Wissen</string>
+    <string name="bartab_nothing_settled">Vanavond nog niets afgerekend.</string>
+    <string name="bartab_no_tabs">Nog geen tabs. Start er een bij de eerste bestelling.</string>
+    <plurals name="bartab_items">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">betaling gezien — wordt afgerond</string>
+    <string name="bartab_state_billed_unpaid">rekening gestuurd, onbetaald</string>
+    <string name="bartab_state_paid_oob">buiten DUCAT betaald ✓</string>
+    <string name="bartab_state_cancelled">geannuleerd</string>
+    <string name="bartab_state_paid">betaald ✓</string>
+    <string name="bartab_new_customer">Nieuwe klant</string>
+    <string name="bartab_scan_hint">Zij scannen of tikken — de tab opent vanzelf.</string>
+    <string name="bartab_err_publish_code">kon geen code publiceren</string>
+    <string name="bartab_or_regular">Of een vaste klant</string>
+    <string name="bartab_back">Terug</string>
+    <string name="bartab_bill_cancelled_msg">Die rekening van %1$s XMR is geannuleerd — er hoeft niets betaald te worden.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · tab nu %3$s XMR</string>
+    <string name="bartab_remove_line">Verwijderen</string>
+    <string name="bartab_err_send_bill">kon de rekening niet versturen</string>
+    <string name="bartab_settle_bill">Afrekenen — rekening %1$s</string>
+    <string name="bartab_settle_hint">Eén gespecificeerde rekening in je gesprek met %1$s. Ze kunnen overal vandaan betalen — het gesprek sluit niet als ze weggaan.</string>
+    <string name="bartab_discard_tab">Tab weggooien</string>
+    <string name="bartab_discard_title">Deze tab weggooien?</string>
+    <string name="bartab_discard_body">De tab en alles wat erop is aangeslagen worden van deze telefoon verwijderd. Er wordt geen rekening gestuurd, en dit kan niet ongedaan worden gemaakt.</string>
+    <string name="bartab_discard_confirm">Weggooien</string>
+    <string name="bartab_keep_tab">Tab houden</string>
+    <string name="bartab_billed_hint">Rekening gestuurd. De bon gaat vanzelf naar ze zodra de betaling binnenkomt. Is er op een andere manier afgerekend, geef dat dan hier aan:</string>
+    <string name="bartab_paid_outside_button">Buiten DUCAT betaald (contant, pin)</string>
+    <string name="bartab_cancel_bill">Rekening annuleren</string>
+    <string name="bartab_cancelled_note">Geannuleerd — ze zijn in het gesprek op de hoogte gebracht.</string>
+    <string name="bartab_paid_oob_note">Buiten DUCAT betaald ✓ — bon verstuurd, geen transactie gekoppeld.</string>
+    <string name="bartab_paid_note">Betaald ✓ — bon verstuurd.</string>
+    <string name="bartab_remove_from_book">Uit het tabboek verwijderen</string>
+    <string name="bartab_back_to_tabs">Terug naar tabs</string>
+</resources>

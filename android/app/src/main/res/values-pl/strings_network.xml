@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">Warstwa transportowa. Płatność podróżuje anonimową trasą, więc to musi działać, zanim zbliżenie dokądkolwiek dotrze.</string>
+
+    <string name="net_line_bridge">mostek Androida</string>
+    <string name="net_ready">gotowy</string>
+    <string name="net_not_set_up">nieskonfigurowany</string>
+    <string name="net_line_node">węzeł</string>
+    <string name="net_running">działa</string>
+    <string name="net_stopped">zatrzymany</string>
+    <string name="net_line_attached">podłączony</string>
+    <string name="net_line_route_capable">zdolny do tras</string>
+    <string name="net_yes">tak</string>
+    <string name="net_not_yet_routes">jeszcze nie — bez tego nie ma tras</string>
+    <string name="net_line_peers">peery</string>
+    <string name="net_peers_value">%1$s aktywnych, %2$s niezawodnych</string>
+    <string name="net_waiting">czekanie %1$ds — węzeł musi ustalić, jak jest osiągalny, zanim zbuduje trasę</string>
+
+    <string name="net_starting">Uruchamianie…</string>
+    <string name="net_start_node">Uruchom węzeł</string>
+    <string name="net_stop">Zatrzymaj</string>
+    <string name="net_testing">Testowanie…</string>
+    <string name="net_test_route">Przetestuj trasę</string>
+    <string name="net_route_ok">trasa przydzielona — blob %1$s B</string>
+    <string name="net_route_failed">trasa nie powiodła się: %1$s</string>
+</resources>

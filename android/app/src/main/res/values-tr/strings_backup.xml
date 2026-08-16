@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">Yedekleme</string>
+    <string name="backup_body">Kimliğini, anahtarlarını ve ayarlarını tutan tek bir şifreli dosya. Önemli bir şey değiştiğinde yeni bir tane dışa aktar.</string>
+    <string name="backup_passphrase">Parola</string>
+    <string name="backup_export">Dışa aktar</string>
+    <string name="backup_import">İçe aktar</string>
+    <string name="backup_exported_bytes">%1$d bayt dışa aktarıldı</string>
+    <string name="backup_export_failed">dışa aktarma başarısız</string>
+    <string name="backup_restored_title">Geri yüklenen cüzdan</string>
+    <string name="backup_restored_check">Güvenmeden önce bu adresin tanıdığın bir adres olduğunu kontrol et.</string>
+    <string name="backup_opened">Açıldı — %1$d emanet payı, geri yükleme yüksekliği %2$d</string>
+    <string name="backup_could_not_open">Açılamadı — parola yanlış ya da dosya değiştirilmiş</string>
+    <string name="backup_share_title">DUCAT yedeğini kaydet</string>
+</resources>

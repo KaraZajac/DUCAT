@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">Чат</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">Поділися своєю карткою</string>
+    <string name="contacts_share_card_body">Дійсна для однієї людини. Щойно нею скористаються, вона перестає працювати — тож скриншот, який кудись потрапив, нікого не впустить.</string>
+    <string name="contacts_name_to_show_label">Ім\'я для показу (необов\'язково)</string>
+    <string name="contacts_name_to_show_support">На своєму боці тебе можуть перейменувати; саме те ім\'я вони й бачитимуть.</string>
+    <string name="contacts_error_make_card">не вдалося створити картку</string>
+    <string name="contacts_publishing_inbox">Публікуємо твою вхідну скриньку…</string>
+    <string name="contacts_create_card">Створити картку</string>
+    <string name="contacts_publishing_note">Це триває кілька секунд — перш ніж хтось зможе тебе знайти, треба опублікувати два записи. Вони працюють і після закриття застосунку.</string>
+    <string name="contacts_copy_link">Копіювати посилання</string>
+    <string name="contacts_send">Надіслати</string>
+    <string name="contacts_expires_24h">Діє 24 години.</string>
+    <string name="contacts_send_your_card">Надішли свою картку</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">Наведи камеру на їхню картку DUCAT</string>
+    <string name="contacts_card_expired_ask_new">Строк дії цієї картки минув. Попроси нову.</string>
+    <string name="contacts_not_a_card">Це не картка DUCAT</string>
+    <string name="contacts_add_contact_title">Додати контакт</string>
+    <string name="contacts_paste_link_label">Встав їхнє посилання ducat:</string>
+    <string name="contacts_paste">Вставити</string>
+    <string name="contacts_scan">Сканувати</string>
+    <string name="contacts_card_expired_ask_them">Строк дії цієї картки минув. Попроси в них нову.</string>
+    <string name="contacts_read_card">Прочитати картку</string>
+    <string name="contacts_no_name_given">(ім\'я не вказано)</string>
+    <string name="contacts_unverified_name">не перевірено — це ім\'я, яке вони самі ввели</string>
+    <string name="contacts_check_characters">Звір ці символи з ними через канал, якому довіряєш, якщо важливо, хто це.</string>
+    <string name="contacts_save_them_as_label">Зберегти як</string>
+    <string name="contacts_save_them_as_support">Твоє ім\'я для них. Бачиш його лише ти.</string>
+    <string name="contacts_error_read_inbox">не вдалося прочитати їхню скриньку</string>
+    <string name="contacts_reading_inbox">Читаємо їхню скриньку…</string>
+    <string name="contacts_add_contact_button">Додати контакт</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">Цю картку вже використали. Попроси в них нову.</string>
+    <string name="contacts_reply_expired">Строк дії цієї картки минув. Попроси в них нову.</string>
+    <string name="contacts_reply_badsig">Посилання пошкоджене — спробуй скопіювати його ще раз.</string>
+    <string name="contacts_reply_own_card">Це твоя власна картка.</string>
+    <string name="contacts_reply_refused">Вони відхилили запит.</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">Mijn kaartje</string>
+    <string name="chatlist_new_chat">Nieuwe chat</string>
+    <string name="chatlist_no_conversations">Geen gesprekken</string>
+    <string name="chatlist_empty_hint">Geef iemand persoonlijk je kaartje, of stuur het via een app die je al vertrouwt. Niemand is op naam te vinden — iemand bereiken kan alleen met een kaartje dat je van diegene kreeg.</string>
+    <string name="chatlist_preview_you">Jij: %1$s</string>
+    <string name="chatlist_no_messages_yet">Nog geen berichten</string>
+    <string name="chatlist_delete_title">Dit gesprek verwijderen?</string>
+    <string name="chatlist_delete_body">Elk bericht met %1$s wordt van deze telefoon verwijderd en kan niet worden teruggehaald. %1$s blijft in je contacten — met Nieuwe chat begin je op elk moment een nieuw gesprek.</string>
+    <string name="chatlist_delete">Verwijderen</string>
+    <string name="chatlist_cancel">Annuleren</string>
+    <string name="chatlist_add_contact">Voeg een contact toe</string>
+    <string name="chatlist_add_contact_hint">Scan of plak een kaartje dat je van iemand kreeg</string>
+    <string name="chatlist_no_contacts_yet">Nog geen contacten.</string>
+    <string name="chatlist_preview_requested">💸 %1$s XMR gevraagd</string>
+    <string name="chatlist_preview_sent">💸 %1$s XMR verstuurd</string>
+    <string name="chatlist_preview_receipt">🧾 Bon — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">Reageerde met %1$s</string>
+    <string name="chatlist_preview_photo">📷 Foto</string>
+    <string name="chatlist_time_now">nu</string>
+    <string name="chatlist_time_minutes">%1$dm</string>
+    <string name="chatlist_time_hours">%1$du</string>
+</resources>

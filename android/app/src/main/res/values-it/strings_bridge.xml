@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Riga di riepilogo -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="one">Core nativo: %1$d controllo superato</item>
+        <item quantity="other">Core nativo: %1$d controlli superati</item>
+    </plurals>
+    <string name="bridge_checks_failed">Core nativo: %1$d di %2$d FALLITI</string>
+    <string name="bridge_jni_note">Questi chiamano il core Rust attraverso JNI — l\'unico strato che i test Rust non possono raggiungere.</string>
+    <string name="bridge_got_expected">ottenuto %1$s, atteso %2$s</string>
+
+    <!-- Nomi dei controlli -->
+    <string name="bridge_check_protocol_version">versione del protocollo</string>
+    <string name="bridge_check_capacity_6">capacità di 6 output</string>
+    <string name="bridge_check_capacity_1">capacità di 1 output</string>
+    <string name="bridge_check_float_plan">piano di cassa per 10 pagamenti</string>
+    <string name="bridge_check_bucket_floor">soglia minima di 4,999 XMR</string>
+    <string name="bridge_check_stale_rate">il tasso di obsolescenza cresce</string>
+</resources>

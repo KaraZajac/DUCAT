@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">Kapat</string>
+    <string name="ceremony_quoted_body">“%1$s”</string>
+    <string name="ceremony_decline">Reddet</string>
+    <string name="ceremony_open_chat">Sohbeti aç</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">senden şunu istiyor</string>
+    <string name="ceremony_tax">vergi</string>
+    <string name="ceremony_accept_and_pay">Kabul et ve öde</string>
+    <string name="ceremony_no_address">Bu istekte adres yok — nereye göndereceğini onlara sor.</string>
+    <string name="ceremony_accept_opens_confirm">Kabul, onay ekranını açar — sen orada onaylamadan hiçbir şey gitmez.</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">Ödendi ✓</string>
+    <string name="ceremony_paid_to">Ödendi · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">seni şu ücrete götürmeyi öneriyor</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="one">yaklaşık %1$d dk uzakta</item>
+        <item quantity="other">yaklaşık %1$d dk uzakta</item>
+    </plurals>
+    <string name="ceremony_plate">plaka %1$s</string>
+    <string name="ceremony_accept">Kabul et</string>
+    <string name="ceremony_accepting_agrees_fare">Kabul etmek ücrette anlaşmak demek — yolculuğun sonunda, her zamanki onay ekranından ödersin.</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">Yolculuk onaylandı</string>
+    <string name="ceremony_expecting_you">Seni bekliyorlar — geri kalan her şey sohbette.</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">Aracın geliyor</string>
+    <string name="ceremony_eta_in_chat">Varış süresi ve diğer her şey — sohbette.</string>
+</resources>

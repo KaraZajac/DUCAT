@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">Klaar om uit te geven</string>
+    <string name="balance_change_coming_back">%1$s aan wisselgeld, terug over %2$s</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">Je kunt nu niet betalen</string>
+    <string name="balance_running_low_title">Bijna geen biljetten meer</string>
+    <string name="balance_all_locked_body">Je geld is er wel, maar het zit allemaal vast als wisselgeld. Breek een biljet om weer te kunnen uitgeven.</string>
+    <string name="balance_running_low_body">Breek nu een biljet, zodat je niet met lege handen aan de kassa staat.</string>
+    <string name="balance_break_note_action">Breek een biljet</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="one">1 biljet</item>
+        <item quantity="other">%1$d biljetten</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">nog niets ontgrendeld</string>
+    <string name="balance_notes_then_wait">%1$s — genoeg voor één betaling, daarna wachten op wisselgeld</string>
+    <string name="balance_notes_one_more">%1$s, dus nog ongeveer één betaling</string>
+    <string name="balance_notes_more">%1$s, dus nog ongeveer %2$d betalingen</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">elk moment</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="one">ongeveer %1$d minuut</item>
+        <item quantity="other">ongeveer %1$d minuten</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="one">ongeveer %1$d uur</item>
+        <item quantity="other">ongeveer %1$d uur</item>
+    </plurals>
+</resources>

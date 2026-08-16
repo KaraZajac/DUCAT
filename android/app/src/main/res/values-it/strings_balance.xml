@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">Pronto da spendere</string>
+    <string name="balance_change_coming_back">%1$s di resto, di ritorno tra %2$s</string>
+
+    <!-- Scheda di avviso capacità bassa -->
+    <string name="balance_all_locked_title">Al momento non puoi pagare</string>
+    <string name="balance_running_low_title">Banconote quasi finite</string>
+    <string name="balance_all_locked_body">I tuoi soldi sono qui, ma sono tutti bloccati come resto. Spezza una banconota per spendere di nuovo.</string>
+    <string name="balance_running_low_body">Spezza una banconota adesso, così non ti trovi bloccato alla cassa.</string>
+    <string name="balance_break_note_action">Spezza una banconota</string>
+
+    <!-- notesPhrase: la frase mostrata al posto di un saldo grezzo -->
+    <plurals name="balance_notes">
+        <item quantity="one">1 banconota</item>
+        <item quantity="other">%1$d banconote</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">ancora niente di sbloccato</string>
+    <string name="balance_notes_then_wait">%1$s — abbastanza per un pagamento, poi un\'attesa per il resto</string>
+    <string name="balance_notes_one_more">%1$s, quindi circa un altro pagamento</string>
+    <string name="balance_notes_more">%1$s, quindi circa altri %2$d pagamenti</string>
+
+    <!-- minutesFor: tempo prima che il resto si sblocchi -->
+    <string name="balance_unlock_any_moment">da un momento all\'altro</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="one">circa %1$d minuto</item>
+        <item quantity="other">circa %1$d minuti</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="one">circa %1$d ora</item>
+        <item quantity="other">circa %1$d ore</item>
+    </plurals>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">Zamknij</string>
+    <string name="qrhub_scan_code">Zeskanuj kod</string>
+    <string name="qrhub_my_code">Mój kod</string>
+    <string name="qrhub_scan_prompt">Wizytówka DUCAT albo adres Monero</string>
+    <string name="qrhub_not_a_code">Ten kod nie jest ani wizytówką DUCAT, ani adresem Monero.</string>
+    <string name="qrhub_card_failed">ta wizytówka nie zadziałała</string>
+    <string name="qrhub_card_issue_failed">nie udało się utworzyć wizytówki</string>
+    <string name="qrhub_no_name_set">nie ustawiono imienia</string>
+    <string name="qrhub_publishing">Publikowanie dwóch rekordów, żeby ludzie mogli cię znaleźć, gdy ten telefon będzie wyłączony.</string>
+    <string name="qrhub_copy_link">Kopiuj link</string>
+    <string name="qrhub_share">Udostępnij</string>
+    <string name="qrhub_share_chooser">Udostępnij swoją wizytówkę</string>
+    <string name="qrhub_tap_or_scan">Zetknijcie telefony albo zeskanujcie — ta sama wizytówka tak czy tak.</string>
+    <string name="qrhub_one_per_code">Jedna osoba na kod. Gdy tylko ktoś weźmie ten, następny powstaje automatycznie — nic nie musisz robić.</string>
+    <string name="qrhub_name_travels">Podróżuje z nią twoje imię i zdjęcie. Cała reszta, którą udostępniasz, dociera później, przez połączenie, które otwiera.</string>
+</resources>

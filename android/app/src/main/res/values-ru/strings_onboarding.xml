@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">Настройка DUCAT</string>
+    <string name="onb_progress_done">Готово</string>
+    <string name="onb_progress_step">Шаг %1$d из %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">Создай свою личность</string>
+    <string name="onb_persona_body">Пара ключей на этом телефоне. Ни почты, ни номера, ни регистрации — поэтому и восстановить её за тебя никто не сможет.</string>
+    <string name="onb_persona_action">Создать</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">Создай кошелёк</string>
+    <string name="onb_wallet_body">Ключи Monero — созданы здесь и хранятся здесь. Это и есть деньги.</string>
+    <string name="onb_wallet_action">Создать кошелёк</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">Задай лимиты трат</string>
+    <string name="onb_limits_body">Небольшие платежи проходят сразу. Крупные спрашивают PIN. Где проходят эти границы, можно поменять в любой момент — значения по умолчанию уже осторожные.</string>
+    <string name="onb_limits_action">Оставить по умолчанию</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">Готово</string>
+    <string name="onb_done_body">Пополни, когда захочешь. До тех пор рисковать нечем и терять нечего.</string>
+    <string name="onb_done_action">Завершить</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">Сделай резервную копию — сейчас, не потом</string>
+    <string name="onb_backup_body">Один зашифрованный файл под парольной фразой, которую выбираешь ты. Храни там же, где хранишь важное.</string>
+    <string name="onb_backup_forget_title">Если забудешь эту фразу</string>
+    <string name="onb_backup_forget_body">восстановить её будет невозможно. Копии нет ни у кого, и спросить не у кого. По той же причине никто не может заморозить твои деньги или забрать их.</string>
+    <string name="onb_backup_address_label">Твой адрес</string>
+    <string name="onb_backup_passphrase_label">Парольная фраза</string>
+    <string name="onb_backup_passphrase_good">Хорошо</string>
+    <string name="onb_backup_passphrase_short">Не меньше 8 символов</string>
+    <string name="onb_backup_error_incomplete">Настройка не завершена</string>
+    <string name="onb_backup_create">Создать резервную копию</string>
+    <string name="onb_backup_created">Копия создана — %1$d байт.</string>
+    <string name="onb_backup_send_elsewhere">Она на этом телефоне, а это ещё не резервная копия. Отправь её куда-нибудь ещё: в менеджер паролей, на диск, на другое устройство.</string>
+    <string name="onb_backup_send_action">Отправить куда-нибудь</string>
+    <string name="onb_backup_done">Готово</string>
+    <string name="onb_backup_share_chooser">Сохранить резервную копию DUCAT</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">Как тебя называть?</string>
+    <string name="onb_profile_name_body">Это имя идёт на карточки, которые ты раздаёшь. Тот, кто добавит тебя, может переименовать на своей стороне — и увидит именно то имя. Так что это подсказка, а не удостоверение.</string>
+    <string name="onb_profile_name_label">Имя (необязательно)</string>
+    <string name="onb_profile_pay_title">Могут ли контакты платить тебе напрямую?</string>
+    <string name="onb_profile_pay_yes">Да — проще получать деньги</string>
+    <string name="onb_profile_pay_no">Нет — они просят, ты одобряешь</string>
+    <string name="onb_profile_pay_yes_detail">Твой адрес уходит каждому контакту и переиспользуется. Любой, кто читает цепочку, поймёт, что платили одному и тому же человеку, — включая тех, кто платил тебе лишь однажды.</string>
+    <string name="onb_profile_pay_no_detail">Каждый платёж использует свежий адрес, так что на цепочке твои платежи ничто не связывает. Тот, кто хочет заплатить, ждёт, пока ты сначала отправишь запрос.</string>
+    <string name="onb_profile_change_later">Оба пункта можно изменить позже.</string>
+    <string name="onb_profile_continue">Продолжить</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">Kapat</string>
+    <string name="qrhub_scan_code">Kod tara</string>
+    <string name="qrhub_my_code">Kodum</string>
+    <string name="qrhub_scan_prompt">Bir DUCAT kartı ya da bir Monero adresi</string>
+    <string name="qrhub_not_a_code">Bu kod ne bir DUCAT kartı ne de bir Monero adresi.</string>
+    <string name="qrhub_card_failed">o kart işe yaramadı</string>
+    <string name="qrhub_card_issue_failed">kart oluşturulamadı</string>
+    <string name="qrhub_no_name_set">ad belirlenmedi</string>
+    <string name="qrhub_publishing">Bu telefon kapalıyken bile sana ulaşılabilsin diye iki kayıt yayımlanıyor.</string>
+    <string name="qrhub_copy_link">Bağlantıyı kopyala</string>
+    <string name="qrhub_share">Paylaş</string>
+    <string name="qrhub_share_chooser">Kartını paylaş</string>
+    <string name="qrhub_tap_or_scan">Telefonları dokundurun ya da taratın — iki yolda da aynı kart.</string>
+    <string name="qrhub_one_per_code">Her koda bir kişi. Biri bunu aldığı anda sıradaki kendiliğinden oluşturulur — yapman gereken bir şey yok.</string>
+    <string name="qrhub_name_travels">Adın ve resmin kartla birlikte gider. Paylaştığın geri kalan her şey sonradan, kartın açtığı bağlantı üzerinden ulaşır.</string>
+</resources>

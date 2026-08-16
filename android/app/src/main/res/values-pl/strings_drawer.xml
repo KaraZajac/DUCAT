@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">Ustaw nazwę profilu</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">język: %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">Twoja persona</string>
+    <string name="drawer_persona_body">Klucz, którym podpisane są twoje wizytówki. Nikt cię po nim nie znajdzie — to coś, z czym sprawdza się wizytówkę, gdy już się ją ma.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">Otrzymywanie pieniędzy</string>
+    <string name="drawer_publish_switch">Pozwól kontaktom płacić mi bezpośrednio</string>
+    <string name="drawer_publish_off_note">Bez tego ktoś, kto chce ci zapłacić, musi poczekać na prośbę.</string>
+    <string name="drawer_publish_on_warning">Twój adres trafia do każdego kontaktu raz i jest używany wielokrotnie. Każdy, kto widzi łańcuch, pozna, że za każdym razem płacono tej samej osobie — także ci, którzy zapłacili ci tylko raz. Prośby tego unikają, bo za każdym razem niosą świeży adres.</string>
+    <string name="drawer_publish_scope_note">Dostaną go tylko kontakty dodane po włączeniu tej opcji.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">Nie ma jeszcze kontaktów. Dodaj kogoś w zakładce Czat.</string>
+    <string name="drawer_open_chat">Otwórz czat</string>
+    <string name="drawer_delete_contact">Usuń kontakt</string>
+    <string name="drawer_forget_title">Zapomnieć %1$s?</string>
+    <string name="drawer_forget_body">To usuwa kontakt i każdą wiadomość od niego. Nie da się ich odzyskać, a ponowny kontakt wymaga nowej wizytówki.</string>
+    <string name="drawer_forget_confirm">Zapomnij</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">Wybierz, czym to urządzenie jest teraz. Tryb przejmuje całą aplikację, dopóki nie wrócisz tu i nie wybierzesz Osobisty.</string>
+    <string name="mode_personal">Osobisty</string>
+    <string name="mode_personal_desc">Twój portfel, czaty i aktywność. Ustawienie domyślne.</string>
+    <string name="mode_pos">Punkt sprzedaży</string>
+    <string name="mode_pos_desc">Kasa: nabijaj pozycje albo wpisz sumę, pokaż jeden kod — rachunek i paragon podróżują rozmową, którą otwiera.</string>
+    <string name="mode_bartab">Rachunek barowy</string>
+    <string name="mode_bartab_desc">Księga rachunków: jeden skan, dopisywanie przez cały wieczór, jedno rozliczenie na koniec. Mogą zapłacić po wyjściu.</string>
+    <string name="mode_taxi">Taksówka</string>
+    <string name="mode_taxi_desc">Kursy i taksometr: obserwuj postój i czekaj na wezwania, stawka na piśmie przy starcie taksometru, rozliczenie pokazuje minuty.</string>
+    <string name="mode_donate">Darowizny</string>
+    <string name="mode_donate_desc">Stały kod, na który wpłaci każdy portfel Monero. Po ich stronie nie trzeba żadnej aplikacji.</string>
+</resources>

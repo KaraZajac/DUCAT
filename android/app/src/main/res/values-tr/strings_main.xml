@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_back">Geri</string>
+    <string name="main_menu">Menü</string>
+    <string name="main_codes">Kodlar</string>
+    <string name="main_send_or_receive">Gönder veya al</string>
+    <string name="main_bill_decline">%1$s XMR tutarındaki hesabı reddediyorum — bu sefer değil.</string>
+    <string name="main_backup_title">Yedekle</string>
+    <string name="main_backup_body">Son yedeğinde olmayan kişilerin var. Geri yükleme parayı geri getirir, insanları getirmez.</string>
+    <string name="main_open_backup_settings">Yedekleme ayarlarını aç</string>
+    <string name="main_recent">Son hareketler</string>
+    <string name="main_see_all">Tümünü gör</string>
+    <string name="main_sent">Gönderildi</string>
+    <string name="main_received">Alındı</string>
+</resources>

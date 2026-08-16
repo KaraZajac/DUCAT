@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
+    <string name="shells_title_pos">Satış Noktası</string>
+    <string name="shells_tab_register">Kasa</string>
+    <string name="shells_tab_sales">Satışlar</string>
+    <string name="shells_title_bar_tab">Bar Adisyonu</string>
+    <string name="shells_tab_tabs">Adisyonlar</string>
+    <string name="shells_tab_closed">Kapanan</string>
+    <string name="shells_title_taxi">Taksi</string>
+    <string name="shells_tab_fares">Ücretler</string>
+    <string name="shells_tab_meter">Taksimetre</string>
+    <string name="shells_tab_rides">Yolculuklar</string>
+    <string name="shells_title_donations">Bağışlar</string>
+    <string name="shells_tab_code">Kod</string>
+    <string name="shells_menu">Menü</string>
+    <string name="shells_today">Bugün</string>
+    <string name="shells_billed_waiting">Hesap gönderildi — bekliyor</string>
+    <string name="shells_settled">Kapatılan</string>
+    <string name="shells_no_sales_yet">Bugün henüz satış yok.</string>
+    <string name="shells_no_rides_yet">Bugün henüz yolculuk yok.</string>
+    <string name="shells_payment_seen_settling">ödeme görüldü — kapanıyor</string>
+    <string name="shells_billed_unpaid">hesap gönderildi, ödenmedi</string>
+    <string name="shells_paid_outside">DUCAT dışında ödendi ✓</string>
+    <string name="shells_paid">ödendi ✓</string>
+</resources>

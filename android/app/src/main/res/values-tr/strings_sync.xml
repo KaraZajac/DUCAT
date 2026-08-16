@@ -1,0 +1,29 @@
+<resources>
+    <string name="sync_synced">Eşitlendi</string>
+    <string name="sync_not_fully">Tam eşitlenmedi</string>
+    <string name="sync_partial_note">Bu bakiye yalnızca şimdiye kadar okunan kadar — tarama bitene dek düşük görünebilir.</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">bir dakikadan az</string>
+    <plurals name="duration_minutes">
+        <item quantity="one">yaklaşık %1$d dakika</item>
+        <item quantity="other">yaklaşık %1$d dakika</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">yaklaşık %1$d saat</item>
+        <item quantity="other">yaklaşık %1$d saat</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">yaklaşık %1$d gün</item>
+        <item quantity="other">yaklaşık %1$d gün</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">İptal</string>
+    <string name="scanner_no_camera_title">Kameraya izin verilmedi</string>
+    <string name="scanner_no_camera_body">Tarama için kamera gerekli. DUCAT\'ta geri kalan her şey onsuz çalışır — bir kart her zaman bağlantı olarak yapıştırılabilir.</string>
+    <string name="scanner_allow">İzin ver</string>
+    <string name="scanner_would_not_start">Kamera başlatılamadı: %1$s</string>
+    <string name="scanner_torch_off">Fener kapalı</string>
+    <string name="scanner_torch_on">Fener açık</string>
+</resources>

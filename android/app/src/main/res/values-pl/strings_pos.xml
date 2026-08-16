@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">Ta sprzedaż</string>
+    <string name="pos_items">Pozycje</string>
+    <string name="pos_quick_amount">Szybka kwota</string>
+    <string name="pos_total_in">Razem (%1$s)</string>
+    <string name="pos_request_amount">Poproś o %1$s</string>
+    <string name="pos_request_payment">Poproś o płatność</string>
+    <string name="pos_sale">Sprzedaż</string>
+    <string name="pos_remove">Usuń</string>
+    <string name="pos_network_fee_note">Opłata sieciowa jest po stronie klienta i idzie do sieci — nigdy nie jest częścią rachunku.</string>
+    <string name="pos_charge_amount">Pobierz %1$s</string>
+    <string name="pos_add_first_item">Dodaj pierwszą pozycję, żeby zacząć sprzedaż.</string>
+    <string name="pos_item">Pozycja</string>
+    <string name="pos_add_line">Dodaj pozycję</string>
+    <string name="pos_tax">Podatek</string>
+    <string name="pos_error_publish_code">nie udało się opublikować kodu</string>
+    <string name="pos_error_bill_not_sent">Połączyli się, ale rachunek nie doszedł: %1$s</string>
+    <string name="pos_getting_code_ready">Przygotowywanie kodu…</string>
+    <string name="pos_scan_hint">Klient skanuje to w DUCAT. Rachunek powyżej trafia na jego telefon w tej samej chwili.</string>
+    <string name="pos_tap_hint">Albo zetknijcie telefony — ten sam rachunek tak czy tak</string>
+    <string name="pos_payment_seen">Płatność widoczna ✓</string>
+    <string name="pos_payment_settling">Ich płatność jest w sieci — rozliczanie, około dwóch minut. Paragon wyśle się sam, gdy dojdzie.</string>
+    <string name="pos_bill_sent_to">Rachunek wysłany do %1$s</string>
+    <string name="pos_the_customer">klienta</string>
+    <string name="pos_billed_hint">Potwierdzają na własnym telefonie. Gdy płatność trafi na łańcuch, paragon pójdzie do nich automatycznie — tu nie ma już nic do zrobienia.</string>
+    <string name="pos_paid">Zapłacono ✓</string>
+    <string name="pos_receipt_sent_to">Paragon wysłany do %1$s.</string>
+    <string name="pos_back">Wstecz</string>
+    <string name="pos_new_sale">Nowa sprzedaż</string>
+    <string name="pos_new_sale_settles">Nowa sprzedaż (ta rozliczy się sama)</string>
+    <string name="pos_cancel_sale">Anuluj sprzedaż</string>
+</resources>

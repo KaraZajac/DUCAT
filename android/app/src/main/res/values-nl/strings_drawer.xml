@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">Stel een profielnaam in</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">spreekt %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">Jouw persona</string>
+    <string name="drawer_persona_body">De sleutel waarmee je kaartjes worden ondertekend. Niemand kan je erop vinden — het is waar iemand een kaartje tegen controleert zodra die er een heeft.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">Betaald worden</string>
+    <string name="drawer_publish_switch">Laat contacten mij direct betalen</string>
+    <string name="drawer_publish_off_note">Zonder dit moet iemand die jou wil betalen op een verzoek wachten.</string>
+    <string name="drawer_publish_on_warning">Je adres gaat één keer naar elk contact en wordt hergebruikt. Iedereen die de keten kan zien, kan zien dat telkens dezelfde persoon werd betaald — ook mensen die je maar één keer hebben betaald. Verzoeken vermijden dat doordat ze elke keer een vers adres meesturen.</string>
+    <string name="drawer_publish_scope_note">Alleen contacten die je toevoegt nadat dit aanstaat, krijgen het.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">Nog geen contacten. Voeg er een toe via het Chat-tabblad.</string>
+    <string name="drawer_open_chat">Open chat</string>
+    <string name="drawer_delete_contact">Contact verwijderen</string>
+    <string name="drawer_forget_title">%1$s vergeten?</string>
+    <string name="drawer_forget_body">Dit verwijdert het contact en elk bericht van diegene. Ze zijn niet terug te halen, en om ze weer te bereiken is een nieuw kaartje nodig.</string>
+    <string name="drawer_forget_confirm">Vergeten</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">Kies wat dit apparaat nu is. Een modus neemt de hele app over totdat je hier terugkomt en Persoonlijk kiest.</string>
+    <string name="mode_personal">Persoonlijk</string>
+    <string name="mode_personal_desc">Je wallet, chats en activiteit. De standaard.</string>
+    <string name="mode_pos">Kassa</string>
+    <string name="mode_pos_desc">Een kassa: sla artikelen aan of typ een totaal, toon één code — rekening en bon reizen mee in het gesprek dat hij opent.</string>
+    <string name="mode_bartab">Bartab</string>
+    <string name="mode_bartab_desc">Een tabboek: één keer scannen, de hele avond bijschrijven, één rekening bij het sluiten. Betalen kan ook nadat ze weg zijn.</string>
+    <string name="mode_taxi">Taxi</string>
+    <string name="mode_taxi_desc">Ritten en een meter: volg een standplaats voor oproepen, het tarief op schrift als de meter start, de rekening toont de minuten.</string>
+    <string name="mode_donate">Donaties</string>
+    <string name="mode_donate_desc">Een vaste code waaraan elke Monero-wallet kan geven. Geen app nodig aan hun kant.</string>
+</resources>

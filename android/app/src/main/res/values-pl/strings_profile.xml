@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">Wstecz</string>
+    <string name="profile_calls_themselves">przedstawia się jako „%1$s”</string>
+    <string name="profile_label_email">E-mail</string>
+    <string name="profile_label_phone">Telefon</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">Co udostępnili</string>
+    <string name="profile_their_claim_note">To ich deklaracja, nie weryfikacja. Nic nie wiąże persony DUCAT z e-mailem ani numerem — tylko z kluczem.</string>
+    <string name="profile_your_name_for_them_label">Twoja nazwa dla nich</string>
+    <string name="profile_your_name_for_them_support">Widzisz ją tylko ty. To imię pokazywane wszędzie.</string>
+    <string name="profile_saved">Zapisano</string>
+    <string name="profile_save_name">Zapisz imię</string>
+    <string name="profile_checked">Sprawdzone</string>
+    <string name="profile_checked_note">Zweryfikowane kryptograficznie. Każda wizytówka, którą rozdają, jest podpisana tym kluczem i z nim porównywana.</string>
+    <string name="profile_persona">Persona</string>
+    <string name="profile_told_to_you">Powiedziane tobie</string>
+    <string name="profile_told_note">Podane przez nich i przez nic niezweryfikowane. Nic w DUCAT nie wiąże adresu Monero ani imienia z personą, więc jeśli to ważne, sprawdź je inną drogą.</string>
+    <string name="profile_their_name_label">Jak sami się nazywają</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— nie podano —</string>
+    <string name="profile_monero_address">Adres Monero</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— nieudostępniony; muszą wysłać prośbę —</string>
+    <string name="profile_where_reached">Gdzie można ich zastać</string>
+    <string name="profile_their_outbox">Ich skrzynka nadawcza</string>
+    <string name="profile_your_outbox">Twoja skrzynka nadawcza do nich</string>
+    <string name="profile_open_chat">Otwórz czat</string>
+    <string name="profile_not_built_yet">Jeszcze niezbudowane</string>
+    <string name="profile_not_built_note">Zdjęcie, zaimki, adres e-mail i blokowanie. Wszystko opcjonalne, wszystko ustawiane przy konfiguracji i wszystko podróżuje tak samo jak imię — deklarowane przez nich, nigdy nieweryfikowane przez nas.</string>
+    <string name="profile_copy">Kopiuj</string>
+</resources>

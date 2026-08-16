@@ -1,0 +1,31 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">Пока пусто</string>
+    <string name="activity_empty_desc">Платежи появятся здесь после чтения цепочки. Пополни на вкладке «Счета», чтобы что-то увидеть.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">В ожидании</string>
+    <string name="activity_they_ask">%1$s просит</string>
+    <string name="activity_you_asked">Ты просишь у %1$s</string>
+    <plurals name="activity_items">
+        <item quantity="one">%1$d позиция</item>
+        <item quantity="few">%1$d позиции</item>
+        <item quantity="many">%1$d позиций</item>
+        <item quantity="other">%1$d позиции</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">Читаем транзакцию…</string>
+    <string name="activity_receipt_chip">🧾 чек</string>
+    <string name="activity_note_quoted">«%1$s»</string>
+    <string name="activity_sending">Отправляется — ещё не в блоке</string>
+    <string name="activity_spent_unknown">Потрачено, но куда — сказать нельзя</string>
+    <string name="activity_maybe_change">возможно, сдача с твоего же платежа</string>
+    <string name="activity_locked_when">%1$s · разблокируется через %2$d бл.</string>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">Кому: %1$s</string>
+    <string name="activity_from">От: %1$s</string>
+    <string name="activity_sent_unrecorded">Отправлено — получатель не записан</string>
+    <string name="activity_received_unknown">Получено — отправитель неизвестен</string>
+</resources>

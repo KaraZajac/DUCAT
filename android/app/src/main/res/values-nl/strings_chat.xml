@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">Terug</string>
+    <string name="chat_conversation_settings">Gespreksinstellingen</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">kon niet versturen</string>
+    <string name="chat_could_not_send_the">kon %1$s niet versturen</string>
+    <string name="chat_what_picture">de foto</string>
+    <string name="chat_what_file">het bestand</string>
+    <string name="chat_what_location">de locatie</string>
+    <string name="chat_what_voice_memo">de spraakmemo</string>
+    <string name="chat_what_card">het kaartje</string>
+    <string name="chat_what_contact">het contact</string>
+    <string name="chat_error_location_fix">kon geen locatiebepaling krijgen</string>
+    <string name="chat_recording_placeholder">Opnemen… %1$ds</string>
+    <string name="chat_message_placeholder">Bericht</string>
+    <string name="chat_take_picture">Maak een foto</string>
+    <string name="chat_hold_to_record">Houd ingedrukt om een spraakmemo op te nemen</string>
+    <string name="chat_attach">Bijvoegen</string>
+    <string name="chat_close">Sluiten</string>
+    <string name="chat_send">Versturen</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">Galerij</string>
+    <string name="chat_file">Bestand</string>
+    <string name="chat_money_desc">Geld versturen of vragen</string>
+    <string name="chat_money">Geld</string>
+    <string name="chat_contact">Contact</string>
+    <string name="chat_location">Locatie</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 Een kaartje voor mij — geef het door aan wie mij moet kunnen bereiken. Eén claim, één week:\n%1$s</string>
+    <string name="chat_decline_bill">Ik wijs die rekening van %1$s XMR af — deze keer niet.</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">Geen sleutels voor dit contact — de handshake is niet afgerond. Vraag om een nieuw kaartje.</string>
+    <string name="chat_e2e_notice">Berichten worden versleuteld met sleutels die na gebruik worden verwijderd. Eenmaal gelezen zijn ze niet meer terug te halen — zelfs niet door jou.</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">Je hebt een bericht ingetrokken</string>
+    <string name="chat_they_withdrew">%1$s heeft een bericht ingetrokken</string>
+    <string name="chat_you_declined">Je hebt afgewezen</string>
+    <string name="chat_they_declined">%1$s heeft afgewezen</string>
+    <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">Bericht</string>
+    <string name="chat_delete_note">Verwijderen haalt het alleen van deze telefoon. De ander houdt zijn kopie — niets hier kan daarbij.</string>
+    <string name="chat_copy">Kopiëren</string>
+    <string name="chat_delete">Verwijderen</string>
+    <string name="chat_cancel">Annuleren</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">Alles bewaren</string>
+    <string name="chat_1_hour">1 uur</string>
+    <string name="chat_1_day">1 dag</string>
+    <string name="chat_1_week">1 week</string>
+    <string name="chat_clear_confirm_title">Deze chat wissen?</string>
+    <string name="chat_clear_confirm_text">Elk bericht in dit gesprek wordt van deze telefoon verwijderd en kan niet worden teruggehaald. De ander houdt zijn kopie.</string>
+    <string name="chat_clear">Wissen</string>
+    <string name="chat_conversation_title">Gesprek</string>
+    <string name="chat_delete_after">Verwijder berichten op deze telefoon na</string>
+    <string name="chat_only_your_copy">Alleen jouw kopie. De ander houdt de zijne, en niets hier kan daarbij.</string>
+    <string name="chat_clear_this_chat">Deze chat wissen</string>
+    <string name="chat_done">Klaar</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 downloaden…</string>
+    <string name="chat_downloading_audio">🎤 downloaden…</string>
+    <string name="chat_downloading_file">📎 downloaden…</string>
+    <string name="chat_picture_desc">Foto</string>
+    <string name="chat_could_not_decode">📷 (kon niet decoderen)</string>
+    <string name="chat_you_asked_for">Jij vroeg om</string>
+    <string name="chat_asked_you_for">Vroeg jou om</string>
+    <string name="chat_receipt_you_issued">Bon die jij hebt uitgegeven</string>
+    <string name="chat_receipt">Bon</string>
+    <string name="chat_you_offered_to_drive">Jij bood aan te rijden</string>
+    <string name="chat_offers_to_drive_you">Biedt aan je te rijden</string>
+    <string name="chat_you_accepted_ride">Je hebt de rit geaccepteerd</string>
+    <string name="chat_ride_accepted">Rit geaccepteerd</string>
+    <string name="chat_you_sent">Jij stuurde</string>
+    <string name="chat_sent_you">Stuurde jou</string>
+    <string name="chat_min_away">ongeveer %1$d min hiervandaan</string>
+    <string name="chat_paid">Betaald ✓</string>
+    <string name="chat_cancelled">Geannuleerd</string>
+    <string name="chat_review_payment">Betaling bekijken</string>
+    <string name="chat_no_address">Geen adres in dit verzoek — vraag ze waar je het naartoe moet sturen.</string>
+    <string name="chat_no_forward_secrecy">Verstuurd zonder forward secrecy</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">Stop</string>
+    <string name="chat_play_voice_memo">Spraakmemo afspelen</string>
+    <string name="chat_voice_memo">Spraakmemo</string>
+    <string name="chat_size_kb">%1$d KB</string>
+    <string name="chat_size_b">%1$d B</string>
+    <string name="chat_file_fallback">bestand</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">subtotaal</string>
+    <string name="chat_tax">btw</string>
+    <string name="chat_total">totaal</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">geen afbeelding</string>
+    <string name="chat_picture_too_big">kon die foto niet klein genoeg krijgen</string>
+    <string name="chat_nothing_recorded">er is niets opgenomen</string>
+    <string name="chat_memo_too_long">die memo is te lang — een paar minuten is het maximum</string>
+    <string name="chat_could_not_read_file">kon dat bestand niet lezen</string>
+    <string name="chat_file_too_big">dat bestand is %1$d KB — bijlagen mogen tot 1 MB</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">Delen</string>
+    <string name="chat_card_for_me">Een kaartje voor mij</string>
+    <string name="chat_card_for_me_desc">Een link voor één claim, die ze kunnen doorgeven aan iemand die jou moet kunnen bereiken.</string>
+    <string name="chat_someones_profile">Of iemands profiel — de naam en wat diegene zelf heeft gepubliceerd. Geen verbindingscode: die zijn van hen om weg te geven.</string>
+</resources>

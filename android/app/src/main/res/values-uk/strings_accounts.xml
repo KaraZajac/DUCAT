@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">Поповнити</string>
+    <string name="accounts_top_up_desc">Надішли Monero на цю адресу з будь-якого гаманця чи біржі. Це звичайна адреса XMR — сам переказ ніяк не стосується DUCAT.</string>
+    <string name="accounts_no_wallet">Гаманця ще немає — спочатку заверши налаштування.</string>
+    <string name="accounts_copy">Копіювати</string>
+    <string name="accounts_hide">Сховати</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">Баланси</string>
+    <string name="accounts_balances_desc">Розділено навмисно: те, що можна витратити зараз, — не те саме, що ти маєш.</string>
+    <string name="accounts_waiting_for_node">Чекаємо на вузол.</string>
+    <string name="accounts_spendable">Доступно</string>
+    <string name="accounts_show_in">Показати в %1$s</string>
+    <string name="accounts_stagenet_fiat_note">Монети stagenet — тестові. Ця цифра — скільки коштувало б стільки справжніх Monero; ці не варті нічого.</string>
+    <string name="accounts_notes">Купюри</string>
+    <string name="accounts_bond">Застава</string>
+    <string name="accounts_bond_none">немає</string>
+    <string name="accounts_scanning_from_genesis_title">Сканування з самого початку ланцюга</string>
+    <string name="accounts_scanning_from_genesis_desc">Цей гаманець створено до того, як застосунок зміг дістатися вузла, тож він не знає, коли з\'явився. На блоці %1$d з %2$d це понад день читання. Перескоч уперед, якщо точно знаєш, що гаманець новіший.</string>
+    <string name="accounts_skip_ahead">Перескочити вперед</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">Перескочити до</string>
+    <string name="accounts_skip_ahead_desc">Усе, що отримано раніше цієї точки, знайдено не буде. Обери час, який точно передує появі гаманця.</string>
+    <string name="accounts_about_a_day_ago">близько дня тому</string>
+    <string name="accounts_about_a_week_ago">близько тижня тому</string>
+    <string name="accounts_about_a_month_ago">близько місяця тому</string>
+    <string name="accounts_skip_option">"%1$s  —  блок %2$d"</string>
+    <string name="accounts_block_height_label">або висота блока</string>
+    <string name="accounts_use_that_height">Використати цю висоту</string>
+    <string name="accounts_cancel">Скасувати</string>
+</resources>

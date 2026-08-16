@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">Indietro</string>
+    <string name="profile_calls_themselves">si fa chiamare \"%1$s\"</string>
+    <string name="profile_label_email">Email</string>
+    <string name="profile_label_phone">Telefono</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">Cosa hanno condiviso</string>
+    <string name="profile_their_claim_note">Una loro affermazione, non una verifica. Nulla lega una persona DUCAT a un\'email o a un numero — solo a una chiave.</string>
+    <string name="profile_your_name_for_them_label">Il tuo nome per questa persona</string>
+    <string name="profile_your_name_for_them_support">Lo vedi solo tu. È il nome mostrato ovunque.</string>
+    <string name="profile_saved">Salvato</string>
+    <string name="profile_save_name">Salva il nome</string>
+    <string name="profile_checked">Verificato</string>
+    <string name="profile_checked_note">Verificato crittograficamente. Ogni biglietto che consegnano è firmato con questa chiave e controllato contro di essa.</string>
+    <string name="profile_persona">Persona</string>
+    <string name="profile_told_to_you">Detto a te</string>
+    <string name="profile_told_note">Fornito da loro e non verificato da nulla. Niente in DUCAT lega un indirizzo Monero o un nome a una persona, quindi se conta, verificali in un altro modo.</string>
+    <string name="profile_their_name_label">Il nome che si danno</string>
+    <!-- Deve conservare il trattino lungo iniziale: la UI tratta un "—" iniziale come "nessun valore reale" (nasconde il pulsante Copia). -->
+    <string name="profile_none_given">— non indicato —</string>
+    <string name="profile_monero_address">Indirizzo Monero</string>
+    <!-- Deve conservare il trattino lungo iniziale: vedi profile_none_given. -->
+    <string name="profile_not_shared">— non condiviso; devono inviare una richiesta —</string>
+    <string name="profile_where_reached">Dove si raggiungono</string>
+    <string name="profile_their_outbox">La loro casella in uscita</string>
+    <string name="profile_your_outbox">La tua casella in uscita verso di loro</string>
+    <string name="profile_open_chat">Apri chat</string>
+    <string name="profile_not_built_yet">Non ancora costruito</string>
+    <string name="profile_not_built_note">Una foto, i pronomi, un indirizzo email e il blocco. Tutto facoltativo, tutto impostato durante la configurazione, e tutto viaggia come viaggia un nome — affermato da loro, mai verificato da noi.</string>
+    <string name="profile_copy">Copia</string>
+</resources>

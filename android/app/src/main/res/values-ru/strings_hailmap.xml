@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Map marker titles (shown when a marker is tapped) -->
+    <string name="hailmap_pickup">Посадка</string>
+    <string name="hailmap_destination">Назначение</string>
+    <string name="hailmap_you">Ты</string>
+</resources>

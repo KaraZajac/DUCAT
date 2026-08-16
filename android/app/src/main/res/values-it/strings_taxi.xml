@@ -1,0 +1,26 @@
+<resources>
+    <!-- Tassametro (Taxi.kt) -->
+    <string name="taxi_err_publish_code">impossibile pubblicare un codice</string>
+    <string name="taxi_meter_started_msg">Tassametro avviato — base %1$s XMR, %2$s XMR al minuto. Il conto alla fine mostra i minuti.</string>
+    <string name="taxi_err_terms_not_sent">Si sono connessi ma le condizioni non sono partite: %1$s</string>
+    <string name="taxi_set_fare">Imposta la tariffa</string>
+    <string name="taxi_base_label">Base (%1$s)</string>
+    <string name="taxi_per_min_label">Al minuto (%1$s)</string>
+    <string name="taxi_price_in_instead">Prezzo in %1$s invece</string>
+    <string name="taxi_rate_locked_hint">Una tariffa digitata in %1$s viene bloccata in XMR all\'inizio della corsa — la cifra che il passeggero accetta è la cifra che gli viene messa in conto.</string>
+    <string name="taxi_set_rate_hint">Imposta una tariffa al minuto per aprire il codice di ritiro.</string>
+    <string name="taxi_pickup">Ritiro</string>
+    <string name="taxi_scan_hint">Il passeggero scansiona o avvicina il telefono. La tariffa arriva nella conversazione e il tassametro parte da solo.</string>
+    <string name="taxi_meter_terms">base %1$s + %2$s/min</string>
+    <string name="taxi_rider">passeggero</string>
+    <string name="taxi_line_base_fare">Tariffa base</string>
+    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s XMR/min</string>
+    <string name="taxi_err_send_fare">impossibile inviare la tariffa</string>
+    <string name="taxi_end_ride_bill">Fine corsa — conto %1$s</string>
+    <string name="taxi_bill_hint">Il conto mostra i minuti e la tariffa. La ricevuta gli arriva da sola quando la tariffa va a segno — anche dopo che si sono allontanati.</string>
+    <string name="taxi_cancel_ride_no_bill">Annulla la corsa — nessun conto</string>
+    <string name="taxi_cancel_title">Annullare questa corsa?</string>
+    <string name="taxi_cancel_body">Il tassametro si ferma e nessun conto viene inviato. I minuti contati finora vengono scartati e non si possono recuperare.</string>
+    <string name="taxi_cancel_confirm">Annulla la corsa</string>
+    <string name="taxi_keep_going">Continua</string>
+</resources>

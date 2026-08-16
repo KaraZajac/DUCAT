@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">Taşıma katmanı. Ödeme anonim bir rota üzerinden gider; bu yüzden bir dokunuşun bir yere gidebilmesi için önce bunun ayakta olması gerekir.</string>
+
+    <string name="net_line_bridge">android köprüsü</string>
+    <string name="net_ready">hazır</string>
+    <string name="net_not_set_up">kurulmadı</string>
+    <string name="net_line_node">düğüm</string>
+    <string name="net_running">çalışıyor</string>
+    <string name="net_stopped">durdu</string>
+    <string name="net_line_attached">bağlı</string>
+    <string name="net_line_route_capable">rota kurabilir</string>
+    <string name="net_yes">evet</string>
+    <string name="net_not_yet_routes">henüz değil — bu olmadan rota yok</string>
+    <string name="net_line_peers">eşler</string>
+    <string name="net_peers_value">%1$s canlı, %2$s güvenilir</string>
+    <string name="net_waiting">%1$d sn bekleniyor — bir düğümün rota kurabilmesi için önce kendisine nasıl ulaşılabildiğini çözmesi gerekir</string>
+
+    <string name="net_starting">Başlatılıyor…</string>
+    <string name="net_start_node">Düğümü başlat</string>
+    <string name="net_stop">Durdur</string>
+    <string name="net_testing">Sınanıyor…</string>
+    <string name="net_test_route">Rota dene</string>
+    <string name="net_route_ok">rota ayrıldı — %1$s baytlık öbek</string>
+    <string name="net_route_failed">rota başarısız: %1$s</string>
+</resources>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">Bu satış</string>
+    <string name="pos_items">Kalemler</string>
+    <string name="pos_quick_amount">Hızlı tutar</string>
+    <string name="pos_total_in">Toplam (%1$s)</string>
+    <string name="pos_request_amount">%1$s iste</string>
+    <string name="pos_request_payment">Ödeme iste</string>
+    <string name="pos_sale">Satış</string>
+    <string name="pos_remove">Kaldır</string>
+    <string name="pos_network_fee_note">Ağ ücreti müşterinindir ve ağa ödenir — asla hesabın parçası olmaz.</string>
+    <string name="pos_charge_amount">%1$s tahsil et</string>
+    <string name="pos_add_first_item">Satışı başlatmak için ilk kalemi ekle.</string>
+    <string name="pos_item">Kalem</string>
+    <string name="pos_add_line">Satır ekle</string>
+    <string name="pos_tax">Vergi</string>
+    <string name="pos_error_publish_code">kod yayımlanamadı</string>
+    <string name="pos_error_bill_not_sent">Bağlandılar ama hesap gönderilemedi: %1$s</string>
+    <string name="pos_getting_code_ready">Kod hazırlanıyor…</string>
+    <string name="pos_scan_hint">Bunu DUCAT\'ta tararlar. Taradıkları anda yukarıdaki hesap telefonlarına düşer.</string>
+    <string name="pos_tap_hint">Ya da telefonları dokundurun — iki yolda da aynı hesap</string>
+    <string name="pos_payment_seen">Ödeme görüldü ✓</string>
+    <string name="pos_payment_settling">Ödemeleri ağda — kapanıyor, yaklaşık iki dakika. Makbuz, ödeme düşünce kendini gönderir.</string>
+    <string name="pos_bill_sent_to">Hesap gönderildi: %1$s</string>
+    <string name="pos_the_customer">müşteri</string>
+    <string name="pos_billed_hint">Kendi telefonlarında onaylarlar. Ödeme zincire düştüğünde makbuz otomatik olarak onlara gider — burada yapılacak bir şey kalmadı.</string>
+    <string name="pos_paid">Ödendi ✓</string>
+    <string name="pos_receipt_sent_to">Makbuz gönderildi: %1$s.</string>
+    <string name="pos_back">Geri</string>
+    <string name="pos_new_sale">Yeni satış</string>
+    <string name="pos_new_sale_settles">Yeni satış (bu satış kendi kendine kapanır)</string>
+    <string name="pos_cancel_sale">Satışı iptal et</string>
+</resources>

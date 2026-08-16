@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Header counts -->
+    <plurals name="logs_line_count">
+        <item quantity="one">%1$d рядок</item>
+        <item quantity="few">%1$d рядки</item>
+        <item quantity="many">%1$d рядків</item>
+        <item quantity="other">%1$d рядка</item>
+    </plurals>
+    <string name="logs_warn_count">попереджень: %1$d</string>
+    <string name="logs_error_count">помилок: %1$d</string>
+
+    <!-- Toolbar actions -->
+    <string name="logs_copy_all">Копіювати все</string>
+    <string name="logs_share">Поділитися</string>
+    <string name="logs_send_logs">Надіслати журнали</string>
+    <string name="logs_clear">Очистити</string>
+    <string name="logs_copied">Скопійовано. Ключів і тексту повідомлень тут не буває.</string>
+
+    <!-- Level filter chips -->
+    <string name="logs_filter_all">Усі</string>
+    <string name="logs_filter_info">Інфо</string>
+    <string name="logs_filter_warn">Попередження</string>
+    <string name="logs_filter_error">Помилки</string>
+
+    <string name="logs_empty">Поки нічого не записано. Активність з\'являється тут, коли застосунок синхронізується, надсилає й отримує.</string>
+</resources>

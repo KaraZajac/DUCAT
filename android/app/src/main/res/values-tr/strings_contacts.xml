@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">Sohbet</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">Kartını paylaş</string>
+    <string name="contacts_share_card_body">Tek kişilik. Kullanıldığı anda geçerliliğini yitirir — yani başka bir yere düşen bir ekran görüntüsü içeri girmenin yolu olmaz.</string>
+    <string name="contacts_name_to_show_label">Gösterilecek ad (isteğe bağlı)</string>
+    <string name="contacts_name_to_show_support">Kendi taraflarında sana başka bir ad verebilirler; görecekleri ad o olur.</string>
+    <string name="contacts_error_make_card">kart oluşturulamadı</string>
+    <string name="contacts_publishing_inbox">Gelen kutun yayımlanıyor…</string>
+    <string name="contacts_create_card">Kart oluştur</string>
+    <string name="contacts_publishing_note">Bu birkaç saniye sürer — sana ulaşılabilmesi için önce iki kaydın yayımlanması gerekir. Uygulamayı kapattıktan sonra da çalışmayı sürdürürler.</string>
+    <string name="contacts_copy_link">Bağlantıyı kopyala</string>
+    <string name="contacts_send">Gönder</string>
+    <string name="contacts_expires_24h">24 saat içinde süresi dolar.</string>
+    <string name="contacts_send_your_card">Kartını gönder</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">Kamerayı onların DUCAT kartına tut</string>
+    <string name="contacts_card_expired_ask_new">O kartın süresi dolmuş. Yenisini iste.</string>
+    <string name="contacts_not_a_card">Bu bir DUCAT kartı değil</string>
+    <string name="contacts_add_contact_title">Kişi ekle</string>
+    <string name="contacts_paste_link_label">ducat: bağlantısını yapıştır</string>
+    <string name="contacts_paste">Yapıştır</string>
+    <string name="contacts_scan">Tara</string>
+    <string name="contacts_card_expired_ask_them">Bu kartın süresi dolmuş. Onlardan yenisini iste.</string>
+    <string name="contacts_read_card">Kartı oku</string>
+    <string name="contacts_no_name_given">(ad verilmemiş)</string>
+    <string name="contacts_unverified_name">doğrulanmamış — bu, onların yazdığı ad</string>
+    <string name="contacts_check_characters">Kim olduğu önemliyse bu karakterleri güvendiğin bir kanaldan onlarla karşılaştır.</string>
+    <string name="contacts_save_them_as_label">Şu adla kaydet</string>
+    <string name="contacts_save_them_as_support">Onlara senin verdiğin ad. Yalnızca sen görürsün.</string>
+    <string name="contacts_error_read_inbox">gelen kutuları okunamadı</string>
+    <string name="contacts_reading_inbox">Gelen kutuları okunuyor…</string>
+    <string name="contacts_add_contact_button">Kişi ekle</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">O kart zaten kullanılmış. Onlardan yenisini iste.</string>
+    <string name="contacts_reply_expired">O kartın süresi dolmuş. Onlardan yenisini iste.</string>
+    <string name="contacts_reply_badsig">O bağlantı bozuk — yeniden kopyalamayı dene.</string>
+    <string name="contacts_reply_own_card">Bu senin kendi kartın.</string>
+    <string name="contacts_reply_refused">İsteği reddettiler.</string>
+</resources>

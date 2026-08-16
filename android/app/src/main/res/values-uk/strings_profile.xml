@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">Назад</string>
+    <string name="profile_calls_themselves">називає себе \"%1$s\"</string>
+    <string name="profile_label_email">Ел. пошта</string>
+    <string name="profile_label_phone">Телефон</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">Чим вони поділилися</string>
+    <string name="profile_their_claim_note">Це їхня заява, а не перевірка. Ніщо не пов\'язує персону DUCAT з поштою чи номером — лише з ключем.</string>
+    <string name="profile_your_name_for_them_label">Твоє ім\'я для них</string>
+    <string name="profile_your_name_for_them_support">Бачиш його лише ти. Саме воно показується всюди.</string>
+    <string name="profile_saved">Збережено</string>
+    <string name="profile_save_name">Зберегти ім\'я</string>
+    <string name="profile_checked">Перевірено</string>
+    <string name="profile_checked_note">Підтверджено криптографічно. Кожна їхня картка підписана цим ключем і звіряється з ним.</string>
+    <string name="profile_persona">Персона</string>
+    <string name="profile_told_to_you">Сказане тобі</string>
+    <string name="profile_told_note">Надано ними й нічим не перевірено. Ніщо в DUCAT не пов\'язує адресу Monero чи ім\'я з персоною, тож якщо це важливо — перевір іншим шляхом.</string>
+    <string name="profile_their_name_label">Їхнє ім\'я для себе</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— не вказано —</string>
+    <string name="profile_monero_address">Адреса Monero</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— не поділилися; вони мають надіслати запит —</string>
+    <string name="profile_where_reached">Де їх шукати</string>
+    <string name="profile_their_outbox">Їхня вихідна скринька</string>
+    <string name="profile_your_outbox">Твоя вихідна скринька до них</string>
+    <string name="profile_open_chat">Відкрити чат</string>
+    <string name="profile_not_built_yet">Ще не зроблено</string>
+    <string name="profile_not_built_note">Фото, займенники, адреса пошти й блокування. Усе необов\'язкове, усе задається під час налаштування і їде тим самим шляхом, що й ім\'я — заявлене ними, ніколи не перевірене нами.</string>
+    <string name="profile_copy">Копіювати</string>
+</resources>

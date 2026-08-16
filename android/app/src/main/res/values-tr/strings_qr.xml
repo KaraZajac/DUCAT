@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_too_much_data">QR kod için fazla veri — onun yerine bağlantıyı kullan.</string>
+    <string name="qr_code">QR kod</string>
+</resources>

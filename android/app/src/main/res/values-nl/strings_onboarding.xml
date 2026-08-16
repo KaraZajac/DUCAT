@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">DUCAT instellen</string>
+    <string name="onb_progress_done">Klaar</string>
+    <string name="onb_progress_step">Stap %1$d van %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">Maak je identiteit</string>
+    <string name="onb_persona_body">Een sleutelpaar op deze telefoon. Geen e-mail, geen telefoonnummer, niemand om je bij te registreren — wat ook de reden is dat niemand het voor je kan herstellen.</string>
+    <string name="onb_persona_action">Maken</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">Maak je wallet</string>
+    <string name="onb_wallet_body">Monero-sleutels, hier gegenereerd en hier bewaard. Dit is het geld.</string>
+    <string name="onb_wallet_action">Wallet maken</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">Stel je bestedingslimieten in</string>
+    <string name="onb_limits_body">Kleine betalingen gaan er direct doorheen. Grotere vragen om je PIN. Je kunt die grenzen op elk moment verleggen — de standaardwaarden zijn al voorzichtig.</string>
+    <string name="onb_limits_action">Houd de standaard</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">Klaar</string>
+    <string name="onb_done_body">Voeg geld toe wanneer je er klaar voor bent. Tot die tijd staat er niets op het spel en valt er niets te verliezen.</string>
+    <string name="onb_done_action">Afronden</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">Maak een back-up — nu, niet straks</string>
+    <string name="onb_backup_body">Eén versleuteld bestand, beschermd met een wachtwoordzin die jij kiest. Bewaar het waar je belangrijke dingen bewaart.</string>
+    <string name="onb_backup_forget_title">Als je deze wachtwoordzin vergeet</string>
+    <string name="onb_backup_forget_body">is er geen manier om hem terug te krijgen. Niemand heeft een kopie en er is niemand om het aan te vragen. Om diezelfde reden kan niemand je geld bevriezen of afpakken.</string>
+    <string name="onb_backup_address_label">Jouw adres</string>
+    <string name="onb_backup_passphrase_label">Wachtwoordzin</string>
+    <string name="onb_backup_passphrase_good">Goed</string>
+    <string name="onb_backup_passphrase_short">Minstens 8 tekens</string>
+    <string name="onb_backup_error_incomplete">Het instellen is nog niet af</string>
+    <string name="onb_backup_create">Back-up maken</string>
+    <string name="onb_backup_created">Back-up gemaakt — %1$d bytes.</string>
+    <string name="onb_backup_send_elsewhere">Hij staat op deze telefoon, en dat is nog geen back-up. Stuur hem ergens anders heen: een wachtwoordmanager, een schijf, een ander apparaat.</string>
+    <string name="onb_backup_send_action">Stuur hem ergens heen</string>
+    <string name="onb_backup_done">Klaar</string>
+    <string name="onb_backup_share_chooser">Sla je DUCAT-back-up op</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">Hoe moeten mensen je noemen?</string>
+    <string name="onb_profile_name_body">Dit komt op de kaartjes die je uitdeelt. Wie jou toevoegt, kan je aan zijn kant hernoemen, en die naam is wat diegene ziet — dus dit is een suggestie, geen identiteit.</string>
+    <string name="onb_profile_name_label">Naam (optioneel)</string>
+    <string name="onb_profile_pay_title">Mogen contacten je direct betalen?</string>
+    <string name="onb_profile_pay_yes">Ja — makkelijker betaald worden</string>
+    <string name="onb_profile_pay_no">Nee — zij vragen, jij keurt goed</string>
+    <string name="onb_profile_pay_yes_detail">Je adres gaat naar elk contact en wordt hergebruikt. Iedereen die de keten leest, kan zien dat telkens dezelfde persoon werd betaald — ook mensen die je maar één keer hebben betaald.</string>
+    <string name="onb_profile_pay_no_detail">Elke betaling gebruikt een vers adres, dus niets op de keten verbindt je betalingen met elkaar. Wie jou wil betalen, wacht tot jij eerst een verzoek stuurt.</string>
+    <string name="onb_profile_change_later">Je kunt beide later wijzigen.</string>
+    <string name="onb_profile_continue">Doorgaan</string>
+</resources>

@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">Підтримати %1$s</string>
+    <string name="donate_support">Підтримати</string>
+    <string name="donate_no_wallet">Гаманця ще немає — спочатку заверши налаштування.</string>
+    <string name="donate_any_wallet">Пожертвувати сюди може будь-який гаманець Monero — цей застосунок нікому не потрібен.</string>
+    <string name="donate_since_opening">Від відкриття</string>
+    <string name="donate_reuse_warning">Цей єдиний код використовують усі жертводавці, тож у публічному реєстрі Monero пожертви на нього можна пов\'язати між собою. А надрукований код чесний рівно настільки, наскільки чесний той, хто торкався його останнім — перевіряй, що всюди, де він висить, це саме твій код.</string>
+</resources>

@@ -1,0 +1,31 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">Поки нічого</string>
+    <string name="activity_empty_desc">Платежі з\'являться тут, щойно ланцюг буде прочитано. Поповни з вкладки «Рахунки», щоб щось побачити.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">В очікуванні</string>
+    <string name="activity_they_ask">%1$s просить</string>
+    <string name="activity_you_asked">Ти просиш у %1$s</string>
+    <plurals name="activity_items">
+        <item quantity="one">%1$d позиція</item>
+        <item quantity="few">%1$d позиції</item>
+        <item quantity="many">%1$d позицій</item>
+        <item quantity="other">%1$d позиції</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">Читаємо транзакцію…</string>
+    <string name="activity_receipt_chip">🧾 чек</string>
+    <string name="activity_note_quoted">“%1$s”</string>
+    <string name="activity_sending">Надсилається — ще не в блоці</string>
+    <string name="activity_spent_unknown">Витрачено, але куди — сказати не можемо</string>
+    <string name="activity_maybe_change">можливо, решта з твого власного платежу</string>
+    <string name="activity_locked_when">%1$s · розблокується через %2$d блоків</string>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">Кому: %1$s</string>
+    <string name="activity_from">Від %1$s</string>
+    <string name="activity_sent_unrecorded">Надіслано — отримувача не записано</string>
+    <string name="activity_received_unknown">Отримано — відправник невідомий</string>
+</resources>

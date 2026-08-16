@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">Destekle: %1$s</string>
+    <string name="donate_support">Destekle</string>
+    <string name="donate_no_wallet">Henüz cüzdan yok — önce kurulumu bitir.</string>
+    <string name="donate_any_wallet">Buraya her Monero cüzdanı bağış yapabilir — kimsenin bu uygulamaya ihtiyacı yok.</string>
+    <string name="donate_since_opening">Açılıştan beri</string>
+    <string name="donate_reuse_warning">Bu tek kod her bağışçı tarafından yeniden kullanılır; bu yüzden Monero\'nun herkese açık defterinde ona yapılan bağışlar birbirine bağlanabilir. Basılı bir kod da ancak ona en son dokunan kadar dürüsttür — astığın her yerde kodun senin olduğunu kontrol et.</string>
+</resources>

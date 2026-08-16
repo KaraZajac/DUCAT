@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">Текущая продажа</string>
+    <string name="pos_items">Позиции</string>
+    <string name="pos_quick_amount">Быстрая сумма</string>
+    <string name="pos_total_in">Итого (%1$s)</string>
+    <string name="pos_request_amount">Запросить %1$s</string>
+    <string name="pos_request_payment">Запросить оплату</string>
+    <string name="pos_sale">Продажа</string>
+    <string name="pos_remove">Убрать</string>
+    <string name="pos_network_fee_note">Сетевая комиссия — на покупателе и уходит сети; в счёт она не входит никогда.</string>
+    <string name="pos_charge_amount">К оплате %1$s</string>
+    <string name="pos_add_first_item">Добавь первую позицию, чтобы начать продажу.</string>
+    <string name="pos_item">Позиция</string>
+    <string name="pos_add_line">Добавить строку</string>
+    <string name="pos_tax">Налог</string>
+    <string name="pos_error_publish_code">не удалось опубликовать код</string>
+    <string name="pos_error_bill_not_sent">Подключение было, но счёт не отправился: %1$s</string>
+    <string name="pos_getting_code_ready">Готовим код…</string>
+    <string name="pos_scan_hint">Покупатель сканирует это в DUCAT. Счёт выше приходит на его телефон в ту же секунду.</string>
+    <string name="pos_tap_hint">Или приложите телефоны — счёт тот же</string>
+    <string name="pos_payment_seen">Платёж замечен ✓</string>
+    <string name="pos_payment_settling">Платёж уже в сети — расчёт займёт около двух минут. Чек отправится сам, когда платёж дойдёт.</string>
+    <string name="pos_bill_sent_to">Счёт отправлен: %1$s</string>
+    <string name="pos_the_customer">покупатель</string>
+    <string name="pos_billed_hint">Покупатель подтверждает на своём телефоне. Когда платёж окажется в цепочке, чек уйдёт ему автоматически — здесь делать больше нечего.</string>
+    <string name="pos_paid">Оплачено ✓</string>
+    <string name="pos_receipt_sent_to">Чек отправлен: %1$s.</string>
+    <string name="pos_back">Назад</string>
+    <string name="pos_new_sale">Новая продажа</string>
+    <string name="pos_new_sale_settles">Новая продажа (эта закроется сама)</string>
+    <string name="pos_cancel_sale">Отменить продажу</string>
+</resources>

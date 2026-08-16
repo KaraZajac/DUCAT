@@ -1,0 +1,35 @@
+<resources>
+    <string name="sync_synced">Синхронізовано</string>
+    <string name="sync_not_fully">Не повністю синхронізовано</string>
+    <string name="sync_partial_note">Цей баланс — лише те, що вже прочитано; він може бути занижений, доки сканування не завершиться.</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">менше хвилини</string>
+    <plurals name="duration_minutes">
+        <item quantity="one">приблизно %1$d хвилина</item>
+        <item quantity="few">приблизно %1$d хвилини</item>
+        <item quantity="many">приблизно %1$d хвилин</item>
+        <item quantity="other">приблизно %1$d хвилини</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">приблизно %1$d година</item>
+        <item quantity="few">приблизно %1$d години</item>
+        <item quantity="many">приблизно %1$d годин</item>
+        <item quantity="other">приблизно %1$d години</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">приблизно %1$d день</item>
+        <item quantity="few">приблизно %1$d дні</item>
+        <item quantity="many">приблизно %1$d днів</item>
+        <item quantity="other">приблизно %1$d дня</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">Скасувати</string>
+    <string name="scanner_no_camera_title">Камера не дозволена</string>
+    <string name="scanner_no_camera_body">Для сканування вона потрібна. Усе інше в DUCAT працює без неї — картку завжди можна вставити як посилання.</string>
+    <string name="scanner_allow">Дозволити</string>
+    <string name="scanner_would_not_start">Камера не запустилася: %1$s</string>
+    <string name="scanner_torch_off">Ліхтарик вимкнено</string>
+    <string name="scanner_torch_on">Ліхтарик увімкнено</string>
+</resources>

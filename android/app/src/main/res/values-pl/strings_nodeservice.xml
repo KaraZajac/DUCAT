@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Foreground-service channel and permanent notification -->
+    <string name="nodeservice_channel_name">Utrzymywanie osiągalności</string>
+    <string name="nodeservice_channel_desc">Utrzymuje DUCAT osiągalnym, żeby kontakty mogły ci płacić i pisać.</string>
+    <string name="nodeservice_notification_title">DUCAT jest osiągalny</string>
+    <string name="nodeservice_notification_text">Kontakty mogą do ciebie dotrzeć, póki to działa.</string>
+</resources>

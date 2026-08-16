@@ -1,0 +1,52 @@
+<resources>
+    <!-- App metadata. app_name stays "DUCAT" in every language: it is a name. -->
+    <string name="nfc_service_description">Бесконтактные платежи DUCAT</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">км</string>
+    <string name="unit_mi">ми</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">Готово</string>
+    <string name="common_cancel">Отмена</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">Главная</string>
+    <string name="tab_accounts">Счета</string>
+    <string name="tab_activity">История</string>
+    <string name="tab_chat">Чат</string>
+    <string name="tab_send_receive">Перевод</string>
+
+    <string name="section_status">Статус</string>
+    <string name="section_profile">Профиль</string>
+    <string name="section_contacts">Контакты</string>
+    <string name="section_logs">Журнал</string>
+    <string name="section_settings">Настройки</string>
+    <string name="section_modes">Режимы работы</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">Язык</string>
+    <string name="settings_language_system">Как в системе</string>
+
+    <string name="settings_appearance_title">Оформление</string>
+    <string name="theme_follow_system">Как в системе</string>
+    <string name="theme_latte">Латте (светлая)</string>
+    <string name="theme_mocha">Мокко (тёмная)</string>
+
+    <string name="settings_distance_title">Расстояние</string>
+    <string name="distance_follow_system">Как в системе</string>
+    <string name="distance_kilometres">Километры</string>
+    <string name="distance_miles">Мили</string>
+
+    <string name="settings_prices_title">Цены</string>
+    <string name="prices_show_worth">Показывать, сколько стоит баланс</string>
+    <string name="prices_currency_title">Валюта</string>
+    <string name="prices_this_phone">этот телефон</string>
+    <string name="prices_source_note">Проверяется не чаще двух раз в час, через CoinGecko или Kraken. Если выключить, запрос не отправляется вовсе.</string>
+    <string name="prices_last_from">Последние данные: %1$s.</string>
+
+    <string name="settings_privacy_title">Приватность</string>
+    <string name="settings_read_receipts">Отправлять уведомления о прочтении</string>
+    <string name="settings_read_receipts_on">Контакты видят, когда ты читаешь их сообщения. Их отметки ты видишь в любом случае, если они их шлют.</string>
+    <string name="settings_read_receipts_off">Выключено — когда ты читаешь, никого не касается. Их отметки ты по-прежнему видишь, если они их шлют.</string>
+</resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Gusci delle modalità (Shells.kt): impalcature per lavoro e registro dei saldati -->
+    <string name="shells_title_pos">Punto vendita</string>
+    <string name="shells_tab_register">Cassa</string>
+    <string name="shells_tab_sales">Vendite</string>
+    <string name="shells_title_bar_tab">Conto del bar</string>
+    <string name="shells_tab_tabs">Conti</string>
+    <string name="shells_tab_closed">Chiusi</string>
+    <string name="shells_title_taxi">Taxi</string>
+    <string name="shells_tab_fares">Tariffe</string>
+    <string name="shells_tab_meter">Tassametro</string>
+    <string name="shells_tab_rides">Corse</string>
+    <string name="shells_title_donations">Donazioni</string>
+    <string name="shells_tab_code">Codice</string>
+    <string name="shells_menu">Menu</string>
+    <string name="shells_today">Oggi</string>
+    <string name="shells_billed_waiting">Conto presentato — in attesa</string>
+    <string name="shells_settled">Saldati</string>
+    <string name="shells_no_sales_yet">Ancora nessuna vendita oggi.</string>
+    <string name="shells_no_rides_yet">Ancora nessuna corsa oggi.</string>
+    <string name="shells_payment_seen_settling">pagamento visto — in liquidazione</string>
+    <string name="shells_billed_unpaid">conto presentato, non pagato</string>
+    <string name="shells_paid_outside">pagato fuori da DUCAT ✓</string>
+    <string name="shells_paid">pagato ✓</string>
+</resources>

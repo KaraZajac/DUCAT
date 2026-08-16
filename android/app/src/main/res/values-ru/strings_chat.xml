@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">Назад</string>
+    <string name="chat_conversation_settings">Настройки переписки</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">не удалось отправить</string>
+    <string name="chat_could_not_send_the">не удалось отправить %1$s</string>
+    <string name="chat_what_picture">фото</string>
+    <string name="chat_what_file">файл</string>
+    <string name="chat_what_location">геопозицию</string>
+    <string name="chat_what_voice_memo">голосовое сообщение</string>
+    <string name="chat_what_card">карточку</string>
+    <string name="chat_what_contact">контакт</string>
+    <string name="chat_error_location_fix">не удалось определить местоположение</string>
+    <string name="chat_recording_placeholder">Запись… %1$d с</string>
+    <string name="chat_message_placeholder">Сообщение</string>
+    <string name="chat_take_picture">Сделать фото</string>
+    <string name="chat_hold_to_record">Удерживай, чтобы записать голосовое</string>
+    <string name="chat_attach">Прикрепить</string>
+    <string name="chat_close">Закрыть</string>
+    <string name="chat_send">Отправить</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">Галерея</string>
+    <string name="chat_file">Файл</string>
+    <string name="chat_money_desc">Отправить или попросить деньги</string>
+    <string name="chat_money">Деньги</string>
+    <string name="chat_contact">Контакт</string>
+    <string name="chat_location">Геопозиция</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 Карточка для связи со мной — передай её тому, кто должен до меня достучаться. Одно использование, одна неделя:\n%1$s</string>
+    <string name="chat_decline_bill">Отклоняю счёт на %1$s XMR — не в этот раз.</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">Нет ключей для этого контакта — рукопожатие не завершилось. Попроси новую карточку.</string>
+    <string name="chat_e2e_notice">Сообщения шифруются ключами, которые удаляются после использования. Прочитанное восстановить нельзя — даже тебе.</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">Ты отозвал(а) сообщение</string>
+    <string name="chat_they_withdrew">%1$s отозвал(а) сообщение</string>
+    <string name="chat_you_declined">Ты отклонил(а)</string>
+    <string name="chat_they_declined">%1$s отклонил(а)</string>
+    <string name="chat_retract_with_quote">%1$s — «%2$s»</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">Сообщение</string>
+    <string name="chat_delete_note">Удаление убирает его только с этого телефона. У собеседника остаётся своя копия — отсюда до неё не дотянуться.</string>
+    <string name="chat_copy">Копировать</string>
+    <string name="chat_delete">Удалить</string>
+    <string name="chat_cancel">Отмена</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">Хранить всё</string>
+    <string name="chat_1_hour">1 час</string>
+    <string name="chat_1_day">1 день</string>
+    <string name="chat_1_week">1 неделя</string>
+    <string name="chat_clear_confirm_title">Очистить этот чат?</string>
+    <string name="chat_clear_confirm_text">Все сообщения этой переписки удаляются с этого телефона без возможности восстановления. У собеседника остаётся своя копия.</string>
+    <string name="chat_clear">Очистить</string>
+    <string name="chat_conversation_title">Переписка</string>
+    <string name="chat_delete_after">Удалять сообщения на этом телефоне через</string>
+    <string name="chat_only_your_copy">Только твоя копия. Собеседник сохраняет свою, и отсюда до неё не дотянуться.</string>
+    <string name="chat_clear_this_chat">Очистить этот чат</string>
+    <string name="chat_done">Готово</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 загрузка…</string>
+    <string name="chat_downloading_audio">🎤 загрузка…</string>
+    <string name="chat_downloading_file">📎 загрузка…</string>
+    <string name="chat_picture_desc">Изображение</string>
+    <string name="chat_could_not_decode">📷 (не удалось открыть)</string>
+    <string name="chat_you_asked_for">Ты просишь</string>
+    <string name="chat_asked_you_for">У тебя просят</string>
+    <string name="chat_receipt_you_issued">Выданный тобой чек</string>
+    <string name="chat_receipt">Чек</string>
+    <string name="chat_you_offered_to_drive">Ты предлагаешь подвезти</string>
+    <string name="chat_offers_to_drive_you">Предлагает подвезти тебя</string>
+    <string name="chat_you_accepted_ride">Ты принял(а) поездку</string>
+    <string name="chat_ride_accepted">Поездка принята</string>
+    <string name="chat_you_sent">Ты отправил(а)</string>
+    <string name="chat_sent_you">Тебе отправили</string>
+    <string name="chat_min_away">примерно %1$d мин в пути</string>
+    <string name="chat_paid">Оплачено ✓</string>
+    <string name="chat_cancelled">Отменено</string>
+    <string name="chat_review_payment">Проверить платёж</string>
+    <string name="chat_no_address">В запросе нет адреса — спроси, куда отправить.</string>
+    <string name="chat_no_forward_secrecy">Отправлено без прямой секретности</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">Стоп</string>
+    <string name="chat_play_voice_memo">Воспроизвести голосовое</string>
+    <string name="chat_voice_memo">Голосовое сообщение</string>
+    <string name="chat_size_kb">%1$d КБ</string>
+    <string name="chat_size_b">%1$d Б</string>
+    <string name="chat_file_fallback">файл</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">промежуточный итог</string>
+    <string name="chat_tax">налог</string>
+    <string name="chat_total">итого</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">это не изображение</string>
+    <string name="chat_picture_too_big">не удалось достаточно сжать это фото</string>
+    <string name="chat_nothing_recorded">ничего не записалось</string>
+    <string name="chat_memo_too_long">слишком длинное голосовое — максимум несколько минут</string>
+    <string name="chat_could_not_read_file">не удалось прочитать этот файл</string>
+    <string name="chat_file_too_big">файл весит %1$d КБ — вложения до 1 МБ</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">Поделиться</string>
+    <string name="chat_card_for_me">Карточка для связи со мной</string>
+    <string name="chat_card_for_me_desc">Одноразовая ссылка — её можно передать тому, кто должен до тебя достучаться.</string>
+    <string name="chat_someones_profile">Или чей-то профиль — имя и то, что человек сам решил опубликовать. Не код для связи: такие коды раздают только они сами.</string>
+</resources>

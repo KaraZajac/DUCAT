@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">Steun %1$s</string>
+    <string name="donate_support">Steun</string>
+    <string name="donate_no_wallet">Nog geen wallet — rond eerst het instellen af.</string>
+    <string name="donate_any_wallet">Elke Monero-wallet kan hier geven — niemand heeft deze app nodig.</string>
+    <string name="donate_since_opening">Sinds opening</string>
+    <string name="donate_reuse_warning">Deze ene code wordt door elke donateur hergebruikt, dus op het openbare grootboek van Monero zijn de donaties eraan aan elkaar te koppelen. En een afgedrukte code is maar zo eerlijk als degene die hem het laatst heeft aangeraakt — controleer of hij van jou is waar je hem ophangt.</string>
+</resources>

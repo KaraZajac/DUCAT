@@ -1,0 +1,31 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">Jeszcze nic</string>
+    <string name="activity_empty_desc">Płatności pojawią się tu po odczytaniu łańcucha. Doładuj w zakładce Konta, żeby coś zobaczyć.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">Oczekujące</string>
+    <string name="activity_they_ask">%1$s prosi o</string>
+    <string name="activity_you_asked">Prosisz %1$s o</string>
+    <plurals name="activity_items">
+        <item quantity="one">%1$d pozycja</item>
+        <item quantity="few">%1$d pozycje</item>
+        <item quantity="many">%1$d pozycji</item>
+        <item quantity="other">%1$d pozycji</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">Odczytywanie transakcji…</string>
+    <string name="activity_receipt_chip">🧾 paragon</string>
+    <string name="activity_note_quoted">„%1$s”</string>
+    <string name="activity_sending">Wysyłanie — jeszcze nie w bloku</string>
+    <string name="activity_spent_unknown">Wydane, ale nie umiemy powiedzieć gdzie</string>
+    <string name="activity_maybe_change">może być resztą z twojej własnej płatności</string>
+    <string name="activity_locked_when">%1$s · odblokuje się za %2$d bloków</string>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">Do: %1$s</string>
+    <string name="activity_from">Od: %1$s</string>
+    <string name="activity_sent_unrecorded">Wysłane — odbiorca niezapisany</string>
+    <string name="activity_received_unknown">Otrzymane — nadawca nieznany</string>
+</resources>

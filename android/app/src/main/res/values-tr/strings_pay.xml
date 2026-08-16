@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">Bir Monero adresi, bir monero: kodu ya da bir DUCAT kartı</string>
+    <string name="pay_close">Kapat</string>
+    <string name="pay_send_or_request">Gönder veya iste</string>
+    <string name="pay_scan_a_code">Kod tara</string>
+    <string name="pay_your_contacts">Kişilerin</string>
+    <string name="pay_contact_vs_address">Bir kişiye yapılan ödeme not taşır ve sohbetine düşer. Bir adrese yapılan taşımaz.</string>
+    <string name="pay_or_monero_address">Ya da bir Monero adresi</string>
+    <string name="pay_address_placeholder">5… veya 7…</string>
+    <string name="pay_continue">Devam</string>
+    <string name="pay_not_monero_address">Bu bir Monero adresine benzemiyor.</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">Geri</string>
+    <string name="pay_in_ducat">DUCAT\'ta</string>
+    <string name="pay_monero_address">Monero adresi</string>
+    <string name="pay_bill">Hesap</string>
+    <string name="pay_add_tip">Bahşiş ekle (%1$s) — isteğe bağlı</string>
+    <string name="pay_total_with_tip">Bahşişle toplam: %1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">Bu, %1$s tarafından ödenmesini istediğin tutar. Bakiye ve ağ ücreti onların derdi, senin değil — bu bir mesaj, işlem değil.</string>
+    <string name="pay_them">onlar</string>
+    <string name="pay_up_to_after_fees">Ücretler sonrası en çok %1$s</string>
+    <string name="pay_max">Maks</string>
+    <string name="pay_max_done">Maks ✓</string>
+    <string name="pay_over_max">Ücret hesaba katılınca bu, gönderebileceğinden fazla.</string>
+    <string name="pay_amount">Tutar</string>
+    <string name="pay_network_fee_estimated">Ağ ücreti (tahmini)</string>
+    <string name="pay_total">Toplam</string>
+    <string name="pay_left_after">Sonrasında kalan</string>
+    <string name="pay_uses_notes">%1$d banknot kullanır · genellikle yaklaşık %2$d dakikada onaylanır</string>
+    <string name="pay_fee_estimate_note">Ücret, işlem kurulana dek bir tahmindir; kesin olanı gönderimden sonra gösterilir.</string>
+    <string name="pay_speed">Hız</string>
+    <string name="pay_speed_slow">Yavaş</string>
+    <string name="pay_speed_normal">Normal</string>
+    <string name="pay_speed_fast">Hızlı</string>
+    <string name="pay_speed_fastest">En hızlı</string>
+    <string name="pay_memo_label">Not — bu ne için?</string>
+    <string name="pay_send">Gönder</string>
+    <string name="pay_request">İste</string>
+    <string name="pay_no_address_hint">%1$s adres paylaşmadı; bu yüzden isteyebilirsin ama henüz gönderemezsin. İste\'ye geç — istek bir adres taşıyıp getirir.</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">Ödeme isteği</string>
+    <string name="pay_payment">Ödeme</string>
+    <string name="pay_request_sent">İstek gönderildi</string>
+    <string name="pay_could_not_send">gönderilemedi</string>
+    <string name="pay_no_node">düğüm yok — Durum\'a bak</string>
+    <string name="pay_no_address_error">Adres paylaşmamışlar. Bir istek göndermelerini ya da \"kişiler bana doğrudan ödeme yapabilsin\"i açmalarını iste.</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">%1$s gönderilsin mi?</string>
+    <string name="pay_to">Alıcı: %1$s</string>
+    <string name="pay_plus_fees">Artı yaklaşık %1$s ücret — toplam %2$s.</string>
+    <string name="pay_irreversible_warning">Monero ödemeleri geri alınamaz ve iptal edilemez. Adresi kontrol et — yanlışsa başvuracak kimse yok.</string>
+    <string name="pay_cancel">İptal</string>
+</resources>

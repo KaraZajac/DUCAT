@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">Yeniden kontrol et</string>
+    <string name="monero_subtitle">İşlemlerin yayımlandığı ve zincirin okunduğu yer.</string>
+    <string name="monero_finding_node">Düğüm aranıyor…</string>
+    <string name="monero_no_usable_node">kullanılabilir düğüm yok</string>
+    <string name="monero_line_height">yükseklik</string>
+    <string name="monero_line_synced">eşitlendi</string>
+    <string name="monero_line_network">ağ</string>
+    <string name="monero_line_round_trip">gidiş dönüş</string>
+    <string name="monero_synced_yes">evet</string>
+    <string name="monero_synced_no">hayır — bakiyeler bayat olurdu</string>
+    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_no_node">düğüm yok</string>
+    <string name="monero_change_your_node">Düğümünü değiştir</string>
+    <string name="monero_use_own_node">Kendi düğümünü kullan</string>
+    <string name="monero_your_node">Kendi düğümün</string>
+    <string name="monero_use_it">Kullan</string>
+    <string name="monero_back_to_public">Herkese açık olana dön</string>
+    <string name="monero_cancel">İptal</string>
+    <string name="monero_trust_own_title">Kendi düğümün</string>
+    <string name="monero_trust_own_body">Senin hakkında zaten bilmediğin hiçbir şey öğrenmez.</string>
+    <string name="monero_trust_onion_title">Başkasının düğümü, Tor üzerinden</string>
+    <string name="monero_trust_onion_body">İşlemlerini görür ama nereden geldiklerini görmez.</string>
+    <string name="monero_trust_public_title">Başkasının düğümü</string>
+    <string name="monero_trust_public_body">Adresini ve işlemlerini bir arada görür. Dandelion++ bir işlemin çıkış noktasını ağın geri kalanından gizler — teslim ettiğin düğümden gizleyemez. Çözüm, kendi düğümünü çalıştırmak.</string>
+    <string name="monero_wallet_title">Cüzdan</string>
+    <string name="monero_no_wallet_key_title">Bu cihazda cüzdan anahtarı yok</string>
+    <string name="monero_no_wallet_key_body">Bu kurulum, uygulama cüzdanı saklamaya başlamadan önce tamamlanmış; bu yüzden taranacak bir şey yok. Beklemek düzeltmez — bir yedekten geri yükle ya da uygulamanın verilerini temizleyip yeniden kur.</string>
+    <string name="monero_scanning_failed">Tarama başarısız</string>
+    <string name="monero_unknown">bilinmiyor</string>
+    <string name="monero_scanning_failed_note">Yukarıdaki düğüm yanıt verdi; yani bu, bağlantı değil cüzdanın zinciri kendi okuması.</string>
+    <string name="monero_not_started">Başlamadı — düğüm aranıyor.</string>
+    <string name="monero_caught_up">Blok %1$d itibarıyla güncel</string>
+    <string name="monero_block_of">blok %1$d / %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="one">%1$d blok kaldı</item>
+        <item quantity="other">%1$d blok kaldı</item>
+    </plurals>
+    <string name="monero_partial_balance">Bakiyen yalnızca şimdiye kadar okunan kadar.</string>
+    <string name="monero_last_window_failed">Son pencere başarısız: %1$s</string>
+    <string name="monero_rescan_hint">Bu cüzdan zincirin en başından tarıyor; yakın zamanda oluşturulduysa bu gereğinden çok daha uzun sürer.</string>
+    <string name="monero_skip_ahead">İleri atla</string>
+</resources>

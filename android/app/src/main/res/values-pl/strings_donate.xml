@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">Wesprzyj %1$s</string>
+    <string name="donate_support">Wesprzyj</string>
+    <string name="donate_no_wallet">Nie ma jeszcze portfela — najpierw dokończ konfigurację.</string>
+    <string name="donate_any_wallet">Wpłacić może tu każdy portfel Monero — nikt nie potrzebuje tej aplikacji.</string>
+    <string name="donate_since_opening">Od otwarcia</string>
+    <string name="donate_reuse_warning">Ten jeden kod jest używany przez wszystkich darczyńców, więc w publicznym rejestrze Monero wpłaty na niego dają się ze sobą powiązać. A wydrukowany kod jest tak uczciwy, jak ostatnia osoba, która go dotknęła — sprawdzaj, czy tam, gdzie go umieszczasz, wciąż jest twój.</string>
+</resources>

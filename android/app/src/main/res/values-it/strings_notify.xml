@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Canale di notifica -->
+    <string name="notify_channel_name">Messaggi e pagamenti</string>
+    <string name="notify_channel_desc">Un messaggio, un conto, una ricevuta, o denaro in arrivo.</string>
+
+    <!-- Testo pubblico sulla schermata di blocco: il fatto, mai la cifra -->
+    <string name="notify_public_activity">Attività</string>
+
+    <!-- Messaggi in arrivo; %1$s mittente, %2$s importo, %3$s nota -->
+    <string name="notify_asks_for">%1$s chiede %2$s</string>
+    <string name="notify_asks_for_note">%1$s chiede %2$s — %3$s</string>
+    <string name="notify_sent">%1$s ha inviato %2$s</string>
+    <string name="notify_receipt">Ricevuta da %1$s — %2$s</string>
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">Закрити</string>
+    <string name="ceremony_quoted_body">“%1$s”</string>
+    <string name="ceremony_decline">Відхилити</string>
+    <string name="ceremony_open_chat">Відкрити чат</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">просить у тебе</string>
+    <string name="ceremony_tax">податок</string>
+    <string name="ceremony_accept_and_pay">Прийняти й сплатити</string>
+    <string name="ceremony_no_address">У цьому запиті немає адреси — спитай, куди надсилати.</string>
+    <string name="ceremony_accept_opens_confirm">«Прийняти» відкриває екран підтвердження — ніщо не рушить, доки ти там не схвалиш.</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">Сплачено ✓</string>
+    <string name="ceremony_paid_to">Сплачено · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">пропонує підвезти тебе за</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="one">приблизно за %1$d хв</item>
+        <item quantity="few">приблизно за %1$d хв</item>
+        <item quantity="many">приблизно за %1$d хв</item>
+        <item quantity="other">приблизно за %1$d хв</item>
+    </plurals>
+    <string name="ceremony_plate">номер %1$s</string>
+    <string name="ceremony_accept">Прийняти</string>
+    <string name="ceremony_accepting_agrees_fare">Прийняття узгоджує ціну — платиш наприкінці поїздки, через звичний екран підтвердження.</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">Поїздку підтверджено</string>
+    <string name="ceremony_expecting_you">На тебе чекають — усе інше в чаті.</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">Твоє авто вже їде</string>
+    <string name="ceremony_eta_in_chat">Час прибуття й усе інше — в чаті.</string>
+</resources>

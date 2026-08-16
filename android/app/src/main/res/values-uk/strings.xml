@@ -1,0 +1,51 @@
+<resources>
+    <string name="nfc_service_description">Безконтактні платежі DUCAT</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">км</string>
+    <string name="unit_mi">мі</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">Готово</string>
+    <string name="common_cancel">Скасувати</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">Головна</string>
+    <string name="tab_accounts">Рахунки</string>
+    <string name="tab_activity">Історія</string>
+    <string name="tab_chat">Чат</string>
+    <string name="tab_send_receive">Переказ</string>
+
+    <string name="section_status">Статус</string>
+    <string name="section_profile">Профіль</string>
+    <string name="section_contacts">Контакти</string>
+    <string name="section_logs">Журнали</string>
+    <string name="section_settings">Налаштування</string>
+    <string name="section_modes">Режими роботи</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">Мова</string>
+    <string name="settings_language_system">Як у системі</string>
+
+    <string name="settings_appearance_title">Вигляд</string>
+    <string name="theme_follow_system">Як у системі</string>
+    <string name="theme_latte">Лате (світла)</string>
+    <string name="theme_mocha">Мока (темна)</string>
+
+    <string name="settings_distance_title">Відстань</string>
+    <string name="distance_follow_system">Як у системі</string>
+    <string name="distance_kilometres">Кілометри</string>
+    <string name="distance_miles">Милі</string>
+
+    <string name="settings_prices_title">Ціни</string>
+    <string name="prices_show_worth">Показувати, скільки коштує баланс</string>
+    <string name="prices_currency_title">Валюта</string>
+    <string name="prices_this_phone">цей телефон</string>
+    <string name="prices_source_note">Перевіряється щонайбільше двічі на годину, з CoinGecko або Kraken. Якщо це вимкнути, запити припиняються зовсім.</string>
+    <string name="prices_last_from">Востаннє з %1$s.</string>
+
+    <string name="settings_privacy_title">Приватність</string>
+    <string name="settings_read_receipts">Надсилати сповіщення про прочитання</string>
+    <string name="settings_read_receipts_on">Контакти бачать, коли ти прочитаєш їхні повідомлення. Їхні тобі видно в будь-якому разі, якщо вони їх надсилають.</string>
+    <string name="settings_read_receipts_off">Вимкнено — коли ти читаєш, це твоя справа. Їхні сповіщення ти все одно бачиш, якщо вони їх надсилають.</string>
+</resources>

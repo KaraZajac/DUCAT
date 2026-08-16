@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">Готово к трате</string>
+    <string name="balance_change_coming_back">%1$s сдачи — ждать ещё %2$s</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">Прямо сейчас заплатить не получится</string>
+    <string name="balance_running_low_title">Купюры на исходе</string>
+    <string name="balance_all_locked_body">Деньги на месте, но все они связаны как сдача. Разменяй купюру, чтобы снова тратить.</string>
+    <string name="balance_running_low_body">Разменяй купюру сейчас, чтобы не застрять у кассы.</string>
+    <string name="balance_break_note_action">Разменять купюру</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="one">%1$d купюра</item>
+        <item quantity="few">%1$d купюры</item>
+        <item quantity="many">%1$d купюр</item>
+        <item quantity="other">%1$d купюры</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">пока ничего не разблокировано</string>
+    <string name="balance_notes_then_wait">%1$s — хватит на один платёж, потом ждать сдачу</string>
+    <string name="balance_notes_one_more">%1$s — примерно ещё один платёж</string>
+    <string name="balance_notes_more">%1$s — ещё платежей: примерно %2$d</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">с минуты на минуту</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="one">около %1$d минуты</item>
+        <item quantity="few">около %1$d минут</item>
+        <item quantity="many">около %1$d минут</item>
+        <item quantity="other">около %1$d минуты</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="one">около %1$d часа</item>
+        <item quantity="few">около %1$d часов</item>
+        <item quantity="many">около %1$d часов</item>
+        <item quantity="other">около %1$d часа</item>
+    </plurals>
+</resources>

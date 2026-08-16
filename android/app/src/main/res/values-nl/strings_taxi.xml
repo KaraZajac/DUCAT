@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">kon geen code publiceren</string>
+    <string name="taxi_meter_started_msg">Meter gestart — basis %1$s XMR, %2$s XMR per minuut. De rekening aan het eind toont de minuten.</string>
+    <string name="taxi_err_terms_not_sent">Ze hebben verbinding gemaakt, maar de voorwaarden zijn niet verstuurd: %1$s</string>
+    <string name="taxi_set_fare">Stel de ritprijs in</string>
+    <string name="taxi_base_label">Basis (%1$s)</string>
+    <string name="taxi_per_min_label">Per min (%1$s)</string>
+    <string name="taxi_price_in_instead">Prijs liever in %1$s</string>
+    <string name="taxi_rate_locked_hint">Een tarief in %1$s wordt bij de start van de rit vastgezet in XMR — het bedrag waarmee de passagier instemt, is het bedrag op de rekening.</string>
+    <string name="taxi_set_rate_hint">Stel een minuuttarief in om de ophaalcode te openen.</string>
+    <string name="taxi_pickup">Ophalen</string>
+    <string name="taxi_scan_hint">De passagier scant of tikt. Het tarief landt in het gesprek en de meter start vanzelf.</string>
+    <string name="taxi_meter_terms">basis %1$s + %2$s/min</string>
+    <string name="taxi_rider">passagier</string>
+    <string name="taxi_line_base_fare">Basisprijs</string>
+    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s XMR/min</string>
+    <string name="taxi_err_send_fare">kon de ritprijs niet versturen</string>
+    <string name="taxi_end_ride_bill">Rit beëindigen — rekening %1$s</string>
+    <string name="taxi_bill_hint">De rekening toont de minuten en het tarief. De bon gaat vanzelf naar ze zodra de ritprijs binnenkomt — ook als ze al zijn weggelopen.</string>
+    <string name="taxi_cancel_ride_no_bill">Rit annuleren — geen rekening</string>
+    <string name="taxi_cancel_title">Deze rit annuleren?</string>
+    <string name="taxi_cancel_body">De meter stopt en er wordt geen rekening gestuurd. De tot nu toe getelde minuten worden weggegooid en zijn niet terug te halen.</string>
+    <string name="taxi_cancel_confirm">Rit annuleren</string>
+    <string name="taxi_keep_going">Doorrijden</string>
+</resources>

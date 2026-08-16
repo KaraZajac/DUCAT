@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">Geri</string>
+    <string name="profile_calls_themselves">kendine \"%1$s\" diyor</string>
+    <string name="profile_label_email">E-posta</string>
+    <string name="profile_label_phone">Telefon</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">Paylaştıkları</string>
+    <string name="profile_their_claim_note">Bu onların beyanı, bir doğrulama değil. Hiçbir şey bir DUCAT personasını bir e-postaya ya da numaraya bağlamaz — yalnızca bir anahtara.</string>
+    <string name="profile_your_name_for_them_label">Ona verdiğin ad</string>
+    <string name="profile_your_name_for_them_support">Bunu yalnızca sen görürsün. Her yerde gösterilen ad budur.</string>
+    <string name="profile_saved">Kaydedildi</string>
+    <string name="profile_save_name">Adı kaydet</string>
+    <string name="profile_checked">Doğrulanan</string>
+    <string name="profile_checked_note">Kriptografik olarak doğrulandı. Dağıttıkları her kart bu anahtarla imzalanır ve bu anahtara karşı denetlenir.</string>
+    <string name="profile_persona">Persona</string>
+    <string name="profile_told_to_you">Sana söylenen</string>
+    <string name="profile_told_note">Onlar tarafından verildi ve hiçbir şeyle doğrulanmadı. DUCAT\'ta hiçbir şey bir Monero adresini ya da bir adı bir personaya bağlamaz; önemliyse bunları başka bir yoldan kontrol et.</string>
+    <string name="profile_their_name_label">Kendilerine verdikleri ad</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— verilmemiş —</string>
+    <string name="profile_monero_address">Monero adresi</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— paylaşılmadı; istek göndermeleri gerekir —</string>
+    <string name="profile_where_reached">Nereden ulaşılıyor</string>
+    <string name="profile_their_outbox">Onların giden kutusu</string>
+    <string name="profile_your_outbox">Senin onlara giden kutun</string>
+    <string name="profile_open_chat">Sohbeti aç</string>
+    <string name="profile_not_built_yet">Henüz yapılmadı</string>
+    <string name="profile_not_built_note">Bir resim, zamirler, bir e-posta adresi ve engelleme. Hepsi isteğe bağlı, hepsi kurulumda ayarlanır ve hepsi adla aynı yoldan gider — onların beyanı, asla bizim doğrulamamız değil.</string>
+    <string name="profile_copy">Kopyala</string>
+</resources>

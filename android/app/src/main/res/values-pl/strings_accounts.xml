@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">Doładuj</string>
+    <string name="accounts_top_up_desc">Wyślij Monero na ten adres z dowolnego portfela lub giełdy. To zwykły adres XMR — sam przelew nie ma nic wspólnego z DUCAT.</string>
+    <string name="accounts_no_wallet">Nie ma jeszcze portfela — najpierw dokończ konfigurację.</string>
+    <string name="accounts_copy">Kopiuj</string>
+    <string name="accounts_hide">Ukryj</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">Salda</string>
+    <string name="accounts_balances_desc">Rozdzielone celowo: to, co możesz teraz wydać, to nie to samo, co posiadasz.</string>
+    <string name="accounts_waiting_for_node">Oczekiwanie na węzeł.</string>
+    <string name="accounts_spendable">Do wydania</string>
+    <string name="accounts_show_in">Pokaż w %1$s</string>
+    <string name="accounts_stagenet_fiat_note">Monety stagenet to monety testowe. Ta kwota pokazuje, ile byłoby warte tyle prawdziwego Monero — te są nic niewarte.</string>
+    <string name="accounts_notes">Banknoty</string>
+    <string name="accounts_bond">Kaucja</string>
+    <string name="accounts_bond_none">brak</string>
+    <string name="accounts_scanning_from_genesis_title">Skanowanie od początku łańcucha</string>
+    <string name="accounts_scanning_from_genesis_desc">Ten portfel powstał, zanim aplikacja mogła połączyć się z węzłem, więc nie wie, kiedy został utworzony. Przy bloku %1$d z %2$d to ponad dzień czytania. Przeskocz dalej, jeśli wiesz, że portfel jest nowszy.</string>
+    <string name="accounts_skip_ahead">Przeskocz dalej</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">Przeskocz do</string>
+    <string name="accounts_skip_ahead_desc">Nic otrzymanego przed tym punktem nie zostanie znalezione. Wybierz moment, co do którego masz pewność, że portfel jeszcze wtedy nie istniał.</string>
+    <string name="accounts_about_a_day_ago">około dnia temu</string>
+    <string name="accounts_about_a_week_ago">około tygodnia temu</string>
+    <string name="accounts_about_a_month_ago">około miesiąca temu</string>
+    <string name="accounts_skip_option">"%1$s  —  blok %2$d"</string>
+    <string name="accounts_block_height_label">albo wysokość bloku</string>
+    <string name="accounts_use_that_height">Użyj tej wysokości</string>
+    <string name="accounts_cancel">Anuluj</string>
+</resources>

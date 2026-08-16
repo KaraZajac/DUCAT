@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">Налаштування DUCAT</string>
+    <string name="onb_progress_done">Готово</string>
+    <string name="onb_progress_step">Крок %1$d з %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">Створи свою особу</string>
+    <string name="onb_persona_body">Пара ключів на цьому телефоні. Ні пошти, ні номера, ні реєстрації — саме тому ніхто й не зможе відновити її за тебе.</string>
+    <string name="onb_persona_action">Створити</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">Створи свій гаманець</string>
+    <string name="onb_wallet_body">Ключі Monero, згенеровані тут і збережені тут. Це і є гроші.</string>
+    <string name="onb_wallet_action">Створити гаманець</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">Задай ліміти витрат</string>
+    <string name="onb_limits_body">Малі платежі проходять одразу. Більші питають твій PIN. Де провести ці межі, можна змінити будь-коли — типові значення вже обережні.</string>
+    <string name="onb_limits_action">Лишити типові</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">Готово</string>
+    <string name="onb_done_body">Додай гроші, коли захочеш. Доти ніщо не під загрозою і втрачати нічого.</string>
+    <string name="onb_done_action">Завершити</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">Зроби копію — зараз, не потім</string>
+    <string name="onb_backup_body">Один зашифрований файл під парольною фразою, яку обираєш ти. Тримай його там, де тримаєш важливі речі.</string>
+    <string name="onb_backup_forget_title">Якщо забудеш цю парольну фразу</string>
+    <string name="onb_backup_forget_body">відновити її неможливо. Ні в кого немає копії, і спитати нема кого. З тієї самої причини ніхто не може заморозити твої гроші чи забрати їх.</string>
+    <string name="onb_backup_address_label">Твоя адреса</string>
+    <string name="onb_backup_passphrase_label">Парольна фраза</string>
+    <string name="onb_backup_passphrase_good">Добре</string>
+    <string name="onb_backup_passphrase_short">Щонайменше 8 символів</string>
+    <string name="onb_backup_error_incomplete">Налаштування не завершено</string>
+    <string name="onb_backup_create">Створити копію</string>
+    <string name="onb_backup_created">Копію створено — %1$d байтів.</string>
+    <string name="onb_backup_send_elsewhere">Вона на цьому телефоні, а це ще не резервна копія. Надішли її кудись іще: у менеджер паролів, на диск, на інший пристрій.</string>
+    <string name="onb_backup_send_action">Надіслати кудись</string>
+    <string name="onb_backup_done">Готово</string>
+    <string name="onb_backup_share_chooser">Збережи свою резервну копію DUCAT</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">Як до тебе звертатися?</string>
+    <string name="onb_profile_name_body">Це піде на картки, які ти роздаватимеш. Той, хто тебе додасть, може перейменувати тебе на своєму боці — і бачитиме саме те ім\'я. Тож це підказка, а не ідентичність.</string>
+    <string name="onb_profile_name_label">Ім\'я (необов\'язково)</string>
+    <string name="onb_profile_pay_title">Чи можуть контакти платити тобі напряму?</string>
+    <string name="onb_profile_pay_yes">Так — простіше отримувати</string>
+    <string name="onb_profile_pay_no">Ні — вони просять, ти схвалюєш</string>
+    <string name="onb_profile_pay_yes_detail">Твоя адреса надсилається кожному контакту й використовується повторно. Будь-хто, хто читає ланцюг, зможе зрозуміти, що щоразу платили тій самій людині — включно з тими, хто заплатив тобі лише раз.</string>
+    <string name="onb_profile_pay_no_detail">Кожен платіж використовує свіжу адресу, тож на ланцюзі ніщо не пов\'язує твої платежі між собою. Той, хто хоче заплатити, чекає, поки ти надішлеш запит.</string>
+    <string name="onb_profile_change_later">І те, і те можна змінити пізніше.</string>
+    <string name="onb_profile_continue">Далі</string>
+</resources>

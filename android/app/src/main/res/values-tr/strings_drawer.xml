@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">Profil adı belirle</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">konuşulan dil: %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">Personan</string>
+    <string name="drawer_persona_body">Kartlarının imzalandığı anahtar. Kimse seni onunla bulamaz — biri eline bir kart geçtiğinde onu bu anahtara karşı denetler.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">Ödeme almak</string>
+    <string name="drawer_publish_switch">Kişiler bana doğrudan ödeme yapabilsin</string>
+    <string name="drawer_publish_off_note">Bu kapalıyken, sana ödeme yapacak biri bir istek beklemek zorunda.</string>
+    <string name="drawer_publish_on_warning">Adresin her kişiye bir kez gider ve yeniden kullanılır. Zinciri görebilen herkes her seferinde aynı kişiye ödendiğini anlayabilir — sana yalnızca bir kez ödeme yapmış olanlar dahil. İstekler her seferinde taze bir adres taşıyarak bundan kaçınır.</string>
+    <string name="drawer_publish_scope_note">Yalnızca bu açıldıktan sonra eklenen kişilerde olur.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">Henüz kişi yok. Sohbet sekmesinden ekle.</string>
+    <string name="drawer_open_chat">Sohbeti aç</string>
+    <string name="drawer_delete_contact">Kişiyi sil</string>
+    <string name="drawer_forget_title">%1$s unutulsun mu?</string>
+    <string name="drawer_forget_body">Bu, kişiyi ve ondan gelen her mesajı siler. Geri getirilemezler; ona yeniden ulaşmak yeni bir kart gerektirir.</string>
+    <string name="drawer_forget_confirm">Unut</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">Bu cihazın şu anda ne olduğunu seç. Bir mod, buraya dönüp Kişisel\'i seçene kadar tüm uygulamayı devralır.</string>
+    <string name="mode_personal">Kişisel</string>
+    <string name="mode_personal_desc">Cüzdanın, sohbetlerin ve hareketlerin. Varsayılan.</string>
+    <string name="mode_pos">Satış noktası</string>
+    <string name="mode_pos_desc">Bir yazar kasa: kalemleri gir ya da toplamı yaz, tek bir kod göster — hesap ve makbuz, açtığı sohbet üzerinden gider.</string>
+    <string name="mode_bartab">Bar adisyonu</string>
+    <string name="mode_bartab_desc">Bir adisyon defteri: bir kez tarat, bütün gece ekle, kapanışta tek hesap. Ayrıldıktan sonra da ödeyebilirler.</string>
+    <string name="mode_taxi">Taksi</string>
+    <string name="mode_taxi_desc">Ücretler ve bir taksimetre: durakta çağrıları izle, taksimetre başlarken tarifeyi yazılı ver, hesap dakikaları gösterir.</string>
+    <string name="mode_donate">Bağışlar</string>
+    <string name="mode_donate_desc">Her Monero cüzdanının bağış yapabildiği sabit bir kod. Karşı tarafta uygulama gerekmez.</string>
+</resources>

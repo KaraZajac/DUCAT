@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">Адрес Monero, код monero: или карточка DUCAT</string>
+    <string name="pay_close">Закрыть</string>
+    <string name="pay_send_or_request">Отправить или запросить</string>
+    <string name="pay_scan_a_code">Сканировать код</string>
+    <string name="pay_your_contacts">Твои контакты</string>
+    <string name="pay_contact_vs_address">Платёж контакту несёт заметку и попадает в чат. Платёж на адрес — нет.</string>
+    <string name="pay_or_monero_address">Или адрес Monero</string>
+    <string name="pay_address_placeholder">5… или 7…</string>
+    <string name="pay_continue">Продолжить</string>
+    <string name="pay_not_monero_address">Это не похоже на адрес Monero.</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">Назад</string>
+    <string name="pay_in_ducat">в DUCAT</string>
+    <string name="pay_monero_address">Адрес Monero</string>
+    <string name="pay_bill">Счёт</string>
+    <string name="pay_add_tip">Добавить чаевые (%1$s) — по желанию</string>
+    <string name="pay_total_with_tip">Итого с чаевыми: %1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">Столько ты просишь у %1$s. Баланс и сетевая комиссия — их забота, не твоя: это сообщение, а не транзакция.</string>
+    <string name="pay_them">них</string>
+    <string name="pay_up_to_after_fees">До %1$s с учётом комиссии</string>
+    <string name="pay_max">Макс.</string>
+    <string name="pay_max_done">Макс. ✓</string>
+    <string name="pay_over_max">Это больше, чем можно отправить с учётом комиссии.</string>
+    <string name="pay_amount">Сумма</string>
+    <string name="pay_network_fee_estimated">Сетевая комиссия (оценка)</string>
+    <string name="pay_total">Итого</string>
+    <string name="pay_left_after">Останется</string>
+    <string name="pay_uses_notes">Купюр: %1$d · обычно подтверждается примерно за %2$d мин</string>
+    <string name="pay_fee_estimate_note">Комиссия — оценка, пока транзакция не собрана; точная показывается после отправки.</string>
+    <string name="pay_speed">Скорость</string>
+    <string name="pay_speed_slow">Медленно</string>
+    <string name="pay_speed_normal">Обычно</string>
+    <string name="pay_speed_fast">Быстро</string>
+    <string name="pay_speed_fastest">Максимум</string>
+    <string name="pay_memo_label">Заметка — за что это?</string>
+    <string name="pay_send">Отправить</string>
+    <string name="pay_request">Запросить</string>
+    <string name="pay_no_address_hint">У %1$s нет открытого адреса, так что попросить можно, а отправить пока нет. Переключись на «Запросить» — он принесёт адрес обратно.</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">Запрос платежа</string>
+    <string name="pay_payment">Платёж</string>
+    <string name="pay_request_sent">Запрос отправлен</string>
+    <string name="pay_could_not_send">не удалось отправить</string>
+    <string name="pay_no_node">нет узла — проверь «Статус»</string>
+    <string name="pay_no_address_error">Они не поделились адресом. Попроси их отправить запрос или включить «разрешить контактам платить мне напрямую».</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">Отправить %1$s?</string>
+    <string name="pay_to">Кому: %1$s</string>
+    <string name="pay_plus_fees">Плюс примерно %1$s комиссии — всего %2$s.</string>
+    <string name="pay_irreversible_warning">Платежи Monero нельзя отменить или вернуть. Проверь адрес — если он неверен, обращаться будет не к кому.</string>
+    <string name="pay_cancel">Отмена</string>
+</resources>

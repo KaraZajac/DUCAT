@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
+    <string name="shells_title_pos">Kassa</string>
+    <string name="shells_tab_register">Aanslaan</string>
+    <string name="shells_tab_sales">Verkopen</string>
+    <string name="shells_title_bar_tab">Bartab</string>
+    <string name="shells_tab_tabs">Tabs</string>
+    <string name="shells_tab_closed">Gesloten</string>
+    <string name="shells_title_taxi">Taxi</string>
+    <string name="shells_tab_fares">Klussen</string>
+    <string name="shells_tab_meter">Meter</string>
+    <string name="shells_tab_rides">Ritten</string>
+    <string name="shells_title_donations">Donaties</string>
+    <string name="shells_tab_code">Code</string>
+    <string name="shells_menu">Menu</string>
+    <string name="shells_today">Vandaag</string>
+    <string name="shells_billed_waiting">Rekening gestuurd — wachten</string>
+    <string name="shells_settled">Afgerekend</string>
+    <string name="shells_no_sales_yet">Vandaag nog geen verkopen.</string>
+    <string name="shells_no_rides_yet">Vandaag nog geen ritten.</string>
+    <string name="shells_payment_seen_settling">betaling gezien — wordt afgerond</string>
+    <string name="shells_billed_unpaid">rekening gestuurd, onbetaald</string>
+    <string name="shells_paid_outside">buiten DUCAT betaald ✓</string>
+    <string name="shells_paid">betaald ✓</string>
+</resources>

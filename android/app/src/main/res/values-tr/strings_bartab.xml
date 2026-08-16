@@ -1,0 +1,45 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">Açık adisyonlar</string>
+    <string name="bartab_start_tab">Adisyon aç</string>
+    <string name="bartab_section_running">Devam eden</string>
+    <string name="bartab_section_billed">Hesap gönderildi — ödeme bekleniyor</string>
+    <string name="bartab_receipt_auto_hint">Ödeme düştüğü anda makbuz kendiliğinden onlara gider — gitmiş olsalar bile.</string>
+    <string name="bartab_section_settled">Kapatılan</string>
+    <string name="bartab_clear">Temizle</string>
+    <string name="bartab_nothing_settled">Bu gece henüz kapanan hesap yok.</string>
+    <string name="bartab_no_tabs">Henüz adisyon yok. İlk sipariş gelince bir tane aç.</string>
+    <plurals name="bartab_items">
+        <item quantity="one">%1$d kalem</item>
+        <item quantity="other">%1$d kalem</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">ödeme görüldü — kapanıyor</string>
+    <string name="bartab_state_billed_unpaid">hesap gönderildi, ödenmedi</string>
+    <string name="bartab_state_paid_oob">DUCAT dışında ödendi ✓</string>
+    <string name="bartab_state_cancelled">iptal edildi</string>
+    <string name="bartab_state_paid">ödendi ✓</string>
+    <string name="bartab_new_customer">Yeni müşteri</string>
+    <string name="bartab_scan_hint">Onlar tarar ya da telefon dokundurur — adisyon kendiliğinden açılır.</string>
+    <string name="bartab_err_publish_code">kod yayımlanamadı</string>
+    <string name="bartab_or_regular">Ya da bir müdavim</string>
+    <string name="bartab_back">Geri</string>
+    <string name="bartab_bill_cancelled_msg">%1$s XMR tutarındaki o hesap iptal edildi — ödenecek bir şey yok.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · adisyon şimdi %3$s XMR</string>
+    <string name="bartab_remove_line">Kaldır</string>
+    <string name="bartab_err_send_bill">hesap gönderilemedi</string>
+    <string name="bartab_settle_bill">Kapat — hesap %1$s</string>
+    <string name="bartab_settle_hint">%1$s ile sohbetine tek bir dökümlü hesap düşer. İstedikleri yerden ödeyebilirler — onlar çıkınca konuşma kapanmaz.</string>
+    <string name="bartab_discard_tab">Adisyonu sil</string>
+    <string name="bartab_discard_title">Bu adisyon silinsin mi?</string>
+    <string name="bartab_discard_body">Adisyon ve üzerine yazılan her şey bu telefondan silinir. Hesap gönderilmez ve bu geri alınamaz.</string>
+    <string name="bartab_discard_confirm">Sil</string>
+    <string name="bartab_keep_tab">Adisyonu tut</string>
+    <string name="bartab_billed_hint">Hesap gönderildi. Ödeme düşünce makbuz kendiliğinden onlara gider. Başka bir yolla ödendiyse burada belirt:</string>
+    <string name="bartab_paid_outside_button">DUCAT dışında ödendi (nakit, kart)</string>
+    <string name="bartab_cancel_bill">Hesabı iptal et</string>
+    <string name="bartab_cancelled_note">İptal edildi — sohbette kendilerine bildirildi.</string>
+    <string name="bartab_paid_oob_note">DUCAT dışında ödendi ✓ — makbuz gönderildi, işlem eklenmedi.</string>
+    <string name="bartab_paid_note">Ödendi ✓ — makbuz gönderildi.</string>
+    <string name="bartab_remove_from_book">Adisyon defterinden kaldır</string>
+    <string name="bartab_back_to_tabs">Adisyonlara dön</string>
+</resources>

@@ -14,7 +14,7 @@
     <string name="tab_accounts">الحسابات</string>
     <string name="tab_activity">النشاط</string>
     <string name="tab_chat">الدردشة</string>
-    <string name="tab_send_receive">إرسال/استقبال</string>
+    <string name="tab_send_receive">إرسال</string>
 
     <string name="section_status">الحالة</string>
     <string name="section_profile">الملف الشخصي</string>

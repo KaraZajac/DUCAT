@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">Het transport. Een betaling reist over een anonieme route, dus dit moet draaien voordat een tik ergens heen kan.</string>
+
+    <string name="net_line_bridge">android-bridge</string>
+    <string name="net_ready">gereed</string>
+    <string name="net_not_set_up">niet ingesteld</string>
+    <string name="net_line_node">node</string>
+    <string name="net_running">draait</string>
+    <string name="net_stopped">gestopt</string>
+    <string name="net_line_attached">gekoppeld</string>
+    <string name="net_line_route_capable">route-geschikt</string>
+    <string name="net_yes">ja</string>
+    <string name="net_not_yet_routes">nog niet — geen routes tot dit er is</string>
+    <string name="net_line_peers">peers</string>
+    <string name="net_peers_value">%1$s live, %2$s betrouwbaar</string>
+    <string name="net_waiting">wacht %1$ds — een node moet eerst uitzoeken hoe hij bereikbaar is voordat hij een route kan bouwen</string>
+
+    <string name="net_starting">Starten…</string>
+    <string name="net_start_node">Start node</string>
+    <string name="net_stop">Stop</string>
+    <string name="net_testing">Testen…</string>
+    <string name="net_test_route">Test een route</string>
+    <string name="net_route_ok">route toegewezen — blob van %1$s bytes</string>
+    <string name="net_route_failed">route mislukt: %1$s</string>
+</resources>

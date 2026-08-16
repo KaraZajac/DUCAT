@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notification channel -->
+    <string name="notify_channel_name">Сообщения и платежи</string>
+    <string name="notify_channel_desc">Сообщение, счёт, чек или пришедшие деньги.</string>
+
+    <!-- Lock-screen public fallback: the fact, never the figure -->
+    <string name="notify_public_activity">Активность</string>
+
+    <!-- Inbound message wording; %1$s sender, %2$s amount, %3$s note -->
+    <string name="notify_asks_for">%1$s просит %2$s</string>
+    <string name="notify_asks_for_note">%1$s просит %2$s — %3$s</string>
+    <string name="notify_sent">От %1$s пришло %2$s</string>
+    <string name="notify_receipt">Чек от %1$s — %2$s</string>
+</resources>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">DUCAT\'ı kur</string>
+    <string name="onb_progress_done">Bitti</string>
+    <string name="onb_progress_step">Adım %1$d / %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">Kimliğini oluştur</string>
+    <string name="onb_persona_body">Bu telefonda bir anahtar çifti. E-posta yok, telefon numarası yok, kayıt olunacak kimse yok — kimsenin onu senin yerine geri getirememesinin nedeni de bu.</string>
+    <string name="onb_persona_action">Oluştur</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">Cüzdanını oluştur</string>
+    <string name="onb_wallet_body">Monero anahtarları; burada üretilir, burada tutulur. Para bunlar.</string>
+    <string name="onb_wallet_action">Cüzdan oluştur</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">Harcama limitlerini belirle</string>
+    <string name="onb_limits_body">Küçük ödemeler doğrudan geçer. Büyükleri PIN\'ini sorar. Bu çizgilerin yerini istediğin zaman değiştirebilirsin — varsayılanlar zaten temkinli.</string>
+    <string name="onb_limits_action">Varsayılanları koru</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">Hazır</string>
+    <string name="onb_done_body">Hazır olduğunda para ekle. Ekleyene kadar riskte olan da kaybedilecek olan da yok.</string>
+    <string name="onb_done_action">Bitir</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">Yedeğini al — sonra değil, şimdi</string>
+    <string name="onb_backup_body">Seçtiğin bir parolayla korunan tek bir şifreli dosya. Önemli şeyleri nerede saklıyorsan orada sakla.</string>
+    <string name="onb_backup_forget_title">Bu parolayı unutursan</string>
+    <string name="onb_backup_forget_body">geri getirmenin yolu yok. Kimsede kopyası yok ve soracak kimse yok. Paranı kimsenin donduramamasının ya da elinden alamamasının nedeni de aynı.</string>
+    <string name="onb_backup_address_label">Adresin</string>
+    <string name="onb_backup_passphrase_label">Parola</string>
+    <string name="onb_backup_passphrase_good">İyi</string>
+    <string name="onb_backup_passphrase_short">En az 8 karakter</string>
+    <string name="onb_backup_error_incomplete">Kurulum tamamlanmadı</string>
+    <string name="onb_backup_create">Yedek oluştur</string>
+    <string name="onb_backup_created">Yedek oluşturuldu — %1$d bayt.</string>
+    <string name="onb_backup_send_elsewhere">Şu anda bu telefonda; bu henüz bir yedek sayılmaz. Başka bir yere gönder: bir parola yöneticisine, bir diske, başka bir cihaza.</string>
+    <string name="onb_backup_send_action">Bir yere gönder</string>
+    <string name="onb_backup_done">Bitti</string>
+    <string name="onb_backup_share_chooser">DUCAT yedeğini kaydet</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">İnsanlar sana ne desin?</string>
+    <string name="onb_profile_name_body">Bu, dağıttığın kartların üzerine yazılır. Seni ekleyen kendi tarafında adını değiştirebilir ve görecekleri ad o olur — yani bu bir kimlik değil, bir öneri.</string>
+    <string name="onb_profile_name_label">Ad (isteğe bağlı)</string>
+    <string name="onb_profile_pay_title">Kişiler sana doğrudan ödeme yapabilsin mi?</string>
+    <string name="onb_profile_pay_yes">Evet — ödeme almak kolaylaşır</string>
+    <string name="onb_profile_pay_no">Hayır — onlar ister, sen onaylarsın</string>
+    <string name="onb_profile_pay_yes_detail">Adresin her kişiye gider ve yeniden kullanılır. Zinciri okuyan herkes her seferinde aynı kişiye ödendiğini anlayabilir — sana yalnızca bir kez ödeme yapmış olanlar dahil.</string>
+    <string name="onb_profile_pay_no_detail">Her ödeme taze bir adres kullanır; böylece zincirde ödemelerini birbirine bağlayan hiçbir şey olmaz. Sana ödeme yapacak biri önce senden bir istek bekler.</string>
+    <string name="onb_profile_change_later">İkisini de sonradan değiştirebilirsin.</string>
+    <string name="onb_profile_continue">Devam</string>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">Harcamaya hazır</string>
+    <string name="balance_change_coming_back">%1$s para üstü — dönmesine kalan: %2$s</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">Şu anda ödeme yapamazsın</string>
+    <string name="balance_running_low_title">Banknotların azalıyor</string>
+    <string name="balance_all_locked_body">Paran burada, ama hepsi para üstü olarak bağlı. Yeniden harcayabilmek için bir banknot boz.</string>
+    <string name="balance_running_low_body">Kasa önünde açıkta kalmamak için şimdiden bir banknot boz.</string>
+    <string name="balance_break_note_action">Banknot boz</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="one">1 banknot</item>
+        <item quantity="other">%1$d banknot</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">henüz açılan yok</string>
+    <string name="balance_notes_then_wait">%1$s — bir ödemeye yeter, sonra para üstü beklenir</string>
+    <string name="balance_notes_one_more">%1$s, yani aşağı yukarı bir ödeme daha</string>
+    <string name="balance_notes_more">%1$s, yani aşağı yukarı %2$d ödeme daha</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">an meselesi</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="one">yaklaşık %1$d dakika</item>
+        <item quantity="other">yaklaşık %1$d dakika</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="one">yaklaşık %1$d saat</item>
+        <item quantity="other">yaklaşık %1$d saat</item>
+    </plurals>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="one">Нативне ядро: %1$d перевірка пройдена</item>
+        <item quantity="few">Нативне ядро: %1$d перевірки пройдено</item>
+        <item quantity="many">Нативне ядро: %1$d перевірок пройдено</item>
+        <item quantity="other">Нативне ядро: %1$d перевірки пройдено</item>
+    </plurals>
+    <string name="bridge_checks_failed">Нативне ядро: %1$d з %2$d ПРОВАЛЕНО</string>
+    <string name="bridge_jni_note">Ці виклики йдуть у ядро на Rust через JNI — єдиний шар, до якого тести Rust не дістають.</string>
+    <string name="bridge_got_expected">отримано %1$s, очікувалося %2$s</string>
+
+    <!-- Check names -->
+    <string name="bridge_check_protocol_version">версія протоколу</string>
+    <string name="bridge_check_capacity_6">місткість 6 виходів</string>
+    <string name="bridge_check_capacity_1">місткість 1 вихід</string>
+    <string name="bridge_check_float_plan">план розмінного запасу на 10 платежів</string>
+    <string name="bridge_check_bucket_floor">нижня межа кошика 4.999 XMR</string>
+    <string name="bridge_check_stale_rate">застарілий курс ескалюється</string>
+</resources>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">Deze verkoop</string>
+    <string name="pos_items">Artikelen</string>
+    <string name="pos_quick_amount">Snel bedrag</string>
+    <string name="pos_total_in">Totaal (%1$s)</string>
+    <string name="pos_request_amount">Vraag %1$s</string>
+    <string name="pos_request_payment">Vraag betaling</string>
+    <string name="pos_sale">Verkoop</string>
+    <string name="pos_remove">Verwijderen</string>
+    <string name="pos_network_fee_note">De netwerkkosten zijn voor de klant en gaan naar het netwerk — nooit onderdeel van de rekening.</string>
+    <string name="pos_charge_amount">Reken %1$s af</string>
+    <string name="pos_add_first_item">Voeg het eerste artikel toe om een verkoop te starten.</string>
+    <string name="pos_item">Artikel</string>
+    <string name="pos_add_line">Regel toevoegen</string>
+    <string name="pos_tax">Btw</string>
+    <string name="pos_error_publish_code">kon de code niet publiceren</string>
+    <string name="pos_error_bill_not_sent">Ze hebben verbinding gemaakt, maar de rekening is niet verstuurd: %1$s</string>
+    <string name="pos_getting_code_ready">Code klaarzetten…</string>
+    <string name="pos_scan_hint">Zij scannen dit in DUCAT. De rekening hierboven komt op hun telefoon aan zodra ze dat doen.</string>
+    <string name="pos_tap_hint">Of houd de telefoons tegen elkaar — dezelfde rekening, hoe dan ook</string>
+    <string name="pos_payment_seen">Betaling gezien ✓</string>
+    <string name="pos_payment_settling">Hun betaling is in het netwerk — wordt afgerond, ongeveer twee minuten. De bon verstuurt zichzelf zodra hij landt.</string>
+    <string name="pos_bill_sent_to">Rekening verstuurd aan %1$s</string>
+    <string name="pos_the_customer">de klant</string>
+    <string name="pos_billed_hint">Ze bevestigen op hun eigen telefoon. Zodra de betaling op de keten landt, gaat de bon automatisch naar ze — hier is niets meer te doen.</string>
+    <string name="pos_paid">Betaald ✓</string>
+    <string name="pos_receipt_sent_to">Bon verstuurd aan %1$s.</string>
+    <string name="pos_back">Terug</string>
+    <string name="pos_new_sale">Nieuwe verkoop</string>
+    <string name="pos_new_sale_settles">Nieuwe verkoop (deze rondt zichzelf af)</string>
+    <string name="pos_cancel_sale">Verkoop annuleren</string>
+</resources>

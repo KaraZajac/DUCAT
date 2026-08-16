@@ -1,0 +1,29 @@
+<resources>
+    <string name="sync_synced">Gesynchroniseerd</string>
+    <string name="sync_not_fully">Niet volledig gesynchroniseerd</string>
+    <string name="sync_partial_note">Dit saldo is alleen wat tot nu toe is gelezen — het kan te laag zijn totdat de scan klaar is.</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">minder dan een minuut</string>
+    <plurals name="duration_minutes">
+        <item quantity="one">ongeveer %1$d minuut</item>
+        <item quantity="other">ongeveer %1$d minuten</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">ongeveer %1$d uur</item>
+        <item quantity="other">ongeveer %1$d uur</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">ongeveer %1$d dag</item>
+        <item quantity="other">ongeveer %1$d dagen</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">Annuleren</string>
+    <string name="scanner_no_camera_title">De camera is niet toegestaan</string>
+    <string name="scanner_no_camera_body">Scannen heeft hem nodig. Al het andere in DUCAT werkt zonder — een kaartje kan altijd als link worden geplakt.</string>
+    <string name="scanner_allow">Toestaan</string>
+    <string name="scanner_would_not_start">De camera wilde niet starten: %1$s</string>
+    <string name="scanner_torch_off">Zaklamp uit</string>
+    <string name="scanner_torch_on">Zaklamp aan</string>
+</resources>

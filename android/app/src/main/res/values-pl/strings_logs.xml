@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Header counts -->
+    <plurals name="logs_line_count">
+        <item quantity="one">%1$d wiersz</item>
+        <item quantity="few">%1$d wiersze</item>
+        <item quantity="many">%1$d wierszy</item>
+        <item quantity="other">%1$d wiersza</item>
+    </plurals>
+    <string name="logs_warn_count">%1$d ostrz.</string>
+    <string name="logs_error_count">%1$d bł.</string>
+
+    <!-- Toolbar actions -->
+    <string name="logs_copy_all">Kopiuj wszystko</string>
+    <string name="logs_share">Udostępnij</string>
+    <string name="logs_send_logs">Wyślij dziennik</string>
+    <string name="logs_clear">Wyczyść</string>
+    <string name="logs_copied">Skopiowano. Kluczy ani treści wiadomości nigdy tu nie ma.</string>
+
+    <!-- Level filter chips -->
+    <string name="logs_filter_all">Wszystko</string>
+    <string name="logs_filter_info">Info</string>
+    <string name="logs_filter_warn">Ostrzeżenia</string>
+    <string name="logs_filter_error">Błędy</string>
+
+    <string name="logs_empty">Jeszcze niczego nie zapisano. Aktywność pojawia się tu, gdy aplikacja synchronizuje, wysyła i odbiera.</string>
+</resources>

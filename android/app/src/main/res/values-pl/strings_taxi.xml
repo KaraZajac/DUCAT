@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">nie udało się opublikować kodu</string>
+    <string name="taxi_meter_started_msg">Taksometr wystartował — baza %1$s XMR, %2$s XMR za minutę. Rozliczenie na końcu pokaże minuty.</string>
+    <string name="taxi_err_terms_not_sent">Połączyli się, ale warunki nie doszły: %1$s</string>
+    <string name="taxi_set_fare">Ustal stawkę</string>
+    <string name="taxi_base_label">Baza (%1$s)</string>
+    <string name="taxi_per_min_label">Za minutę (%1$s)</string>
+    <string name="taxi_price_in_instead">Podaj cenę w %1$s</string>
+    <string name="taxi_rate_locked_hint">Stawka wpisana w %1$s zostaje zamrożona w XMR, gdy przejazd się zaczyna — kwota, na którą pasażer się godzi, to kwota, którą dostaje na rachunku.</string>
+    <string name="taxi_set_rate_hint">Ustaw stawkę za minutę, żeby otworzyć kod odbioru.</string>
+    <string name="taxi_pickup">Odbiór</string>
+    <string name="taxi_scan_hint">Pasażer skanuje albo przykłada telefon. Stawka ląduje w rozmowie, a taksometr rusza sam.</string>
+    <string name="taxi_meter_terms">baza %1$s + %2$s/min</string>
+    <string name="taxi_rider">pasażer</string>
+    <string name="taxi_line_base_fare">Opłata bazowa</string>
+    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s XMR/min</string>
+    <string name="taxi_err_send_fare">nie udało się wysłać rozliczenia</string>
+    <string name="taxi_end_ride_bill">Zakończ przejazd — rozliczenie %1$s</string>
+    <string name="taxi_bill_hint">Rozliczenie pokazuje minuty i stawkę. Paragon trafi do nich sam, gdy zapłata dojdzie — nawet jeśli już odeszli.</string>
+    <string name="taxi_cancel_ride_no_bill">Anuluj przejazd — bez rozliczenia</string>
+    <string name="taxi_cancel_title">Anulować ten przejazd?</string>
+    <string name="taxi_cancel_body">Taksometr się zatrzyma i żadne rozliczenie nie zostanie wysłane. Naliczone dotąd minuty przepadną bez możliwości odzyskania.</string>
+    <string name="taxi_cancel_confirm">Anuluj przejazd</string>
+    <string name="taxi_keep_going">Jedź dalej</string>
+</resources>

@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">kod yayımlanamadı</string>
+    <string name="taxi_meter_started_msg">Taksimetre başladı — açılış %1$s XMR, dakika başına %2$s XMR. Sondaki hesap dakikaları gösterir.</string>
+    <string name="taxi_err_terms_not_sent">Bağlandılar ama koşullar gönderilemedi: %1$s</string>
+    <string name="taxi_set_fare">Ücreti belirle</string>
+    <string name="taxi_base_label">Açılış (%1$s)</string>
+    <string name="taxi_per_min_label">Dakika başı (%1$s)</string>
+    <string name="taxi_price_in_instead">Bunun yerine %1$s ile fiyatla</string>
+    <string name="taxi_rate_locked_hint">%1$s cinsinden yazılan tarife, yolculuk başlarken XMR\'ye sabitlenir — yolcunun kabul ettiği rakam, hesaba yazılan rakamdır.</string>
+    <string name="taxi_set_rate_hint">Alış kodunu açmak için dakika başı bir tarife belirle.</string>
+    <string name="taxi_pickup">Alış</string>
+    <string name="taxi_scan_hint">Yolcu tarar ya da dokundurur. Tarife sohbete düşer ve taksimetre kendiliğinden başlar.</string>
+    <string name="taxi_meter_terms">açılış %1$s + %2$s/dk</string>
+    <string name="taxi_rider">yolcu</string>
+    <string name="taxi_line_base_fare">Açılış ücreti</string>
+    <string name="taxi_line_metered">%1$d dk %2$02d sn × %3$s XMR/dk</string>
+    <string name="taxi_err_send_fare">ücret gönderilemedi</string>
+    <string name="taxi_end_ride_bill">Yolculuğu bitir — hesap %1$s</string>
+    <string name="taxi_bill_hint">Hesap dakikaları ve tarifeyi gösterir. Ücret düştüğünde makbuz kendiliğinden onlara gider — yürüyüp gitmiş olsalar bile.</string>
+    <string name="taxi_cancel_ride_no_bill">Yolculuğu iptal et — hesap yok</string>
+    <string name="taxi_cancel_title">Bu yolculuk iptal edilsin mi?</string>
+    <string name="taxi_cancel_body">Taksimetre durur ve hesap gönderilmez. Şimdiye kadar sayılan dakikalar atılır ve geri getirilemez.</string>
+    <string name="taxi_cancel_confirm">Yolculuğu iptal et</string>
+    <string name="taxi_keep_going">Devam et</string>
+</resources>

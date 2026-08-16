@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">не вдалося опублікувати код</string>
+    <string name="taxi_meter_started_msg">Лічильник запущено — база %1$s XMR, %2$s XMR за хвилину. У рахунку наприкінці буде видно хвилини.</string>
+    <string name="taxi_err_terms_not_sent">Вони під\'єдналися, але умови не надіслано: %1$s</string>
+    <string name="taxi_set_fare">Задай тариф</string>
+    <string name="taxi_base_label">База (%1$s)</string>
+    <string name="taxi_per_min_label">За хв (%1$s)</string>
+    <string name="taxi_price_in_instead">Указати ціну в %1$s</string>
+    <string name="taxi_rate_locked_hint">Тариф, набраний у %1$s, фіксується в XMR на старті поїздки — цифра, на яку погодився пасажир, і є цифрою в рахунку.</string>
+    <string name="taxi_set_rate_hint">Задай похвилинний тариф, щоб відкрити код посадки.</string>
+    <string name="taxi_pickup">Посадка</string>
+    <string name="taxi_scan_hint">Пасажир сканує або прикладає телефон. Тариф лягає в розмову, і лічильник запускається сам.</string>
+    <string name="taxi_meter_terms">база %1$s + %2$s/хв</string>
+    <string name="taxi_rider">пасажир</string>
+    <string name="taxi_line_base_fare">Базовий тариф</string>
+    <string name="taxi_line_metered">%1$d хв %2$02d с × %3$s XMR/хв</string>
+    <string name="taxi_err_send_fare">не вдалося надіслати рахунок</string>
+    <string name="taxi_end_ride_bill">Завершити поїздку — рахунок %1$s</string>
+    <string name="taxi_bill_hint">У рахунку видно хвилини й тариф. Чек піде пасажирові сам, коли оплата ляже — навіть якщо він уже пішов.</string>
+    <string name="taxi_cancel_ride_no_bill">Скасувати поїздку — без рахунку</string>
+    <string name="taxi_cancel_title">Скасувати цю поїздку?</string>
+    <string name="taxi_cancel_body">Лічильник зупиняється, рахунок не надсилається. Відлічені хвилини буде відкинуто без можливості відновлення.</string>
+    <string name="taxi_cancel_confirm">Скасувати поїздку</string>
+    <string name="taxi_keep_going">Продовжити</string>
+</resources>

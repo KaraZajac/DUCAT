@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">Kopia zapasowa</string>
+    <string name="backup_body">Jeden zaszyfrowany plik z twoją tożsamością, kluczami i ustawieniami. Eksportuj świeży za każdym razem, gdy zmieni się coś ważnego.</string>
+    <string name="backup_passphrase">Hasło</string>
+    <string name="backup_export">Eksportuj</string>
+    <string name="backup_import">Importuj</string>
+    <string name="backup_exported_bytes">Wyeksportowano %1$d bajtów</string>
+    <string name="backup_export_failed">eksport nie powiódł się</string>
+    <string name="backup_restored_title">Przywrócony portfel</string>
+    <string name="backup_restored_check">Zanim mu zaufasz, sprawdź, czy rozpoznajesz ten adres.</string>
+    <string name="backup_opened">Otwarto — udziały escrow: %1$d, wysokość przywracania: %2$d</string>
+    <string name="backup_could_not_open">Nie udało się otworzyć — złe hasło albo plik został zmieniony</string>
+    <string name="backup_share_title">Zapisz kopię zapasową DUCAT</string>
+</resources>

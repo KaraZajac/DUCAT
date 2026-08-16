@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">Моя картка</string>
+    <string name="chatlist_new_chat">Новий чат</string>
+    <string name="chatlist_no_conversations">Розмов немає</string>
+    <string name="chatlist_empty_hint">Передай комусь свою картку особисто або надішли її через будь-який застосунок, якому вже довіряєш. Нікого не можна знайти за іменем — щоб дістатися людини, потрібна картка, яку вона дала.</string>
+    <string name="chatlist_preview_you">Ти: %1$s</string>
+    <string name="chatlist_no_messages_yet">Повідомлень ще немає</string>
+    <string name="chatlist_delete_title">Видалити цю розмову?</string>
+    <string name="chatlist_delete_body">Усі повідомлення з %1$s буде видалено з цього телефона без можливості відновлення. %1$s лишається в контактах — «Новий чат» будь-коли почне нову.</string>
+    <string name="chatlist_delete">Видалити</string>
+    <string name="chatlist_cancel">Скасувати</string>
+    <string name="chatlist_add_contact">Додати контакт</string>
+    <string name="chatlist_add_contact_hint">Скануй або встав картку, яку тобі дали</string>
+    <string name="chatlist_no_contacts_yet">Контактів ще немає.</string>
+    <string name="chatlist_preview_requested">💸 Запит на %1$s XMR</string>
+    <string name="chatlist_preview_sent">💸 Надіслано %1$s XMR</string>
+    <string name="chatlist_preview_receipt">🧾 Чек — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">Реакція %1$s</string>
+    <string name="chatlist_preview_photo">📷 Фото</string>
+    <string name="chatlist_time_now">зараз</string>
+    <string name="chatlist_time_minutes">%1$d хв</string>
+    <string name="chatlist_time_hours">%1$d год</string>
+</resources>

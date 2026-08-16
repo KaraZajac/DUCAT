@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="one">Yerel çekirdek: %1$d kontrol geçti</item>
+        <item quantity="other">Yerel çekirdek: %1$d kontrol geçti</item>
+    </plurals>
+    <string name="bridge_checks_failed">Yerel çekirdek: %2$d kontrolün %1$d tanesi BAŞARISIZ</string>
+    <string name="bridge_jni_note">Bunlar JNI üzerinden Rust çekirdeğini çağırır — Rust testlerinin erişemediği tek katman.</string>
+    <string name="bridge_got_expected">alınan %1$s, beklenen %2$s</string>
+
+    <!-- Check names (rendered per row; expected/got values stay in code — they
+         are compared with == against what the bridge returns) -->
+    <string name="bridge_check_protocol_version">protokol sürümü</string>
+    <string name="bridge_check_capacity_6">6 çıktılık kapasite</string>
+    <string name="bridge_check_capacity_1">1 çıktılık kapasite</string>
+    <string name="bridge_check_float_plan">10 ödemelik kasa planı</string>
+    <string name="bridge_check_bucket_floor">4.999 XMR kova tabanı</string>
+    <string name="bridge_check_stale_rate">bayat kur oranı tırmanır</string>
+</resources>

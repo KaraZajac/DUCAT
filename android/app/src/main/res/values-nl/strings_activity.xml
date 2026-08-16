@@ -1,0 +1,29 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">Nog niets</string>
+    <string name="activity_empty_desc">Betalingen verschijnen hier zodra de keten is gelezen. Waardeer op via Rekeningen om iets te zien.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">In afwachting</string>
+    <string name="activity_they_ask">%1$s vraagt om</string>
+    <string name="activity_you_asked">Jij vroeg %1$s om</string>
+    <plurals name="activity_items">
+        <item quantity="one">%1$d artikel</item>
+        <item quantity="other">%1$d artikelen</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">Transactie lezen…</string>
+    <string name="activity_receipt_chip">🧾 bon</string>
+    <string name="activity_note_quoted">“%1$s”</string>
+    <string name="activity_sending">Wordt verstuurd — nog niet in een blok</string>
+    <string name="activity_spent_unknown">Uitgegeven, maar waarheen kunnen we niet zeggen</string>
+    <string name="activity_maybe_change">kan wisselgeld van je eigen betaling zijn</string>
+    <string name="activity_locked_when">%1$s · ontgrendelt over %2$d blokken</string>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">Aan %1$s</string>
+    <string name="activity_from">Van %1$s</string>
+    <string name="activity_sent_unrecorded">Verstuurd — ontvanger niet vastgelegd</string>
+    <string name="activity_received_unknown">Ontvangen — afzender onbekend</string>
+</resources>

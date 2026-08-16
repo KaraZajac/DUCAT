@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="one">Нативное ядро: пройдена %1$d проверка</item>
+        <item quantity="few">Нативное ядро: пройдены %1$d проверки</item>
+        <item quantity="many">Нативное ядро: пройдено %1$d проверок</item>
+        <item quantity="other">Нативное ядро: пройдено %1$d проверки</item>
+    </plurals>
+    <string name="bridge_checks_failed">Нативное ядро: %1$d из %2$d ПРОВАЛЕНО</string>
+    <string name="bridge_jni_note">Эти проверки вызывают ядро на Rust через JNI — единственный слой, до которого не достают тесты самого Rust.</string>
+    <string name="bridge_got_expected">получено %1$s, ожидалось %2$s</string>
+
+    <!-- Check names -->
+    <string name="bridge_check_protocol_version">версия протокола</string>
+    <string name="bridge_check_capacity_6">ёмкость на 6 выходов</string>
+    <string name="bridge_check_capacity_1">ёмкость на 1 выход</string>
+    <string name="bridge_check_float_plan">план размена на 10 платежей</string>
+    <string name="bridge_check_bucket_floor">нижний порог корзины 4.999 XMR</string>
+    <string name="bridge_check_stale_rate">устаревший курс эскалирует</string>
+</resources>

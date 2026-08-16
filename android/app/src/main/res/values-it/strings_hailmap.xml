@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Titoli dei marcatori sulla mappa (mostrati al tocco) -->
+    <string name="hailmap_pickup">Punto di ritiro</string>
+    <string name="hailmap_destination">Destinazione</string>
+    <string name="hailmap_you">Tu</string>
+</resources>

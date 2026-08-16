@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Schermata del punto vendita (Pos.kt) -->
+    <string name="pos_this_sale">Questa vendita</string>
+    <string name="pos_items">Articoli</string>
+    <string name="pos_quick_amount">Importo rapido</string>
+    <string name="pos_total_in">Totale (%1$s)</string>
+    <string name="pos_request_amount">Richiedi %1$s</string>
+    <string name="pos_request_payment">Richiedi il pagamento</string>
+    <string name="pos_sale">Vendita</string>
+    <string name="pos_remove">Rimuovi</string>
+    <string name="pos_network_fee_note">La commissione di rete è del cliente, pagata alla rete — mai parte del conto.</string>
+    <string name="pos_charge_amount">Incassa %1$s</string>
+    <string name="pos_add_first_item">Aggiungi il primo articolo per iniziare una vendita.</string>
+    <string name="pos_item">Articolo</string>
+    <string name="pos_add_line">Aggiungi riga</string>
+    <string name="pos_tax">Imposte</string>
+    <string name="pos_error_publish_code">impossibile pubblicare il codice</string>
+    <string name="pos_error_bill_not_sent">Si sono connessi, ma il conto non è partito: %1$s</string>
+    <string name="pos_getting_code_ready">Preparazione del codice…</string>
+    <string name="pos_scan_hint">Lo scansionano in DUCAT. Il conto qui sopra arriva sul loro telefono nel momento in cui lo fanno.</string>
+    <string name="pos_tap_hint">O avvicinate i telefoni — stesso conto in ogni caso</string>
+    <string name="pos_payment_seen">Pagamento visto ✓</string>
+    <string name="pos_payment_settling">Il loro pagamento è in rete — in liquidazione, circa due minuti. La ricevuta parte da sola quando va a segno.</string>
+    <string name="pos_bill_sent_to">Conto inviato a %1$s</string>
+    <string name="pos_the_customer">il cliente</string>
+    <string name="pos_billed_hint">Confermano sul loro telefono. Quando il pagamento arriva sulla catena la ricevuta gli va automaticamente — qui non resta niente da fare.</string>
+    <string name="pos_paid">Pagato ✓</string>
+    <string name="pos_receipt_sent_to">Ricevuta inviata a %1$s.</string>
+    <string name="pos_back">Indietro</string>
+    <string name="pos_new_sale">Nuova vendita</string>
+    <string name="pos_new_sale_settles">Nuova vendita (questa si liquida da sola)</string>
+    <string name="pos_cancel_sale">Annulla la vendita</string>
+</resources>

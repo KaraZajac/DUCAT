@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: riga della lista contatti -->
+    <string name="contacts_chat">Chat</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">Condividi il tuo biglietto</string>
+    <string name="contacts_share_card_body">Vale per una persona sola. Una volta usato, smette di funzionare — quindi uno screenshot finito altrove non è una porta d\'ingresso.</string>
+    <string name="contacts_name_to_show_label">Nome da mostrare (facoltativo)</string>
+    <string name="contacts_name_to_show_support">Possono rinominarti dalla loro parte; quello sarà il nome che vedranno.</string>
+    <string name="contacts_error_make_card">impossibile creare un biglietto</string>
+    <string name="contacts_publishing_inbox">Pubblicazione della tua casella in arrivo…</string>
+    <string name="contacts_create_card">Crea biglietto</string>
+    <string name="contacts_publishing_note">Ci vogliono alcuni secondi — vanno pubblicati due record prima che qualcuno possa raggiungerti. Continuano a funzionare anche dopo che chiudi l\'app.</string>
+    <string name="contacts_copy_link">Copia link</string>
+    <string name="contacts_send">Invia</string>
+    <string name="contacts_expires_24h">Scade tra 24 ore.</string>
+    <string name="contacts_send_your_card">Invia il tuo biglietto</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">Inquadra il loro biglietto DUCAT con la fotocamera</string>
+    <string name="contacts_card_expired_ask_new">Quel biglietto è scaduto. Chiedine uno nuovo.</string>
+    <string name="contacts_not_a_card">Questo non è un biglietto DUCAT</string>
+    <string name="contacts_add_contact_title">Aggiungi un contatto</string>
+    <string name="contacts_paste_link_label">Incolla il loro link ducat:</string>
+    <string name="contacts_paste">Incolla</string>
+    <string name="contacts_scan">Scansiona</string>
+    <string name="contacts_card_expired_ask_them">Questo biglietto è scaduto. Chiedigliene uno nuovo.</string>
+    <string name="contacts_read_card">Leggi biglietto</string>
+    <string name="contacts_no_name_given">(nessun nome indicato)</string>
+    <string name="contacts_unverified_name">non verificato — è il nome che hanno digitato</string>
+    <string name="contacts_check_characters">Se conta sapere chi è, verifica questi caratteri con loro su un canale di cui ti fidi.</string>
+    <string name="contacts_save_them_as_label">Salva come</string>
+    <string name="contacts_save_them_as_support">Il tuo nome per loro. Lo vedi solo tu.</string>
+    <string name="contacts_error_read_inbox">impossibile leggere la loro casella in arrivo</string>
+    <string name="contacts_reading_inbox">Lettura della loro casella in arrivo…</string>
+    <string name="contacts_add_contact_button">Aggiungi contatto</string>
+
+    <!-- Contacts.kt: replyReason — formulazione umana dei rifiuti di rete §18.5 -->
+    <string name="contacts_reply_replay">Quel biglietto è già stato usato. Chiedigliene uno nuovo.</string>
+    <string name="contacts_reply_expired">Quel biglietto è scaduto. Chiedigliene uno nuovo.</string>
+    <string name="contacts_reply_badsig">Quel link è danneggiato — prova a copiarlo di nuovo.</string>
+    <string name="contacts_reply_own_card">Quello è il tuo stesso biglietto.</string>
+    <string name="contacts_reply_refused">Hanno rifiutato la richiesta.</string>
+</resources>

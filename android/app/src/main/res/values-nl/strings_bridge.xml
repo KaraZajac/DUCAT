@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="one">Native core: %1$d controle geslaagd</item>
+        <item quantity="other">Native core: %1$d controles geslaagd</item>
+    </plurals>
+    <string name="bridge_checks_failed">Native core: %1$d van %2$d MISLUKT</string>
+    <string name="bridge_jni_note">Deze roepen via JNI de Rust-core aan — de ene laag die de Rust-tests niet kunnen bereiken.</string>
+    <string name="bridge_got_expected">kreeg %1$s, verwachtte %2$s</string>
+
+    <!-- Check names -->
+    <string name="bridge_check_protocol_version">protocolversie</string>
+    <string name="bridge_check_capacity_6">capaciteit van 6 outputs</string>
+    <string name="bridge_check_capacity_1">capaciteit van 1 output</string>
+    <string name="bridge_check_float_plan">kasgeldplan voor 10 betalingen</string>
+    <string name="bridge_check_bucket_floor">bucket-ondergrens van 4.999 XMR</string>
+    <string name="bridge_check_stale_rate">verouderde koers escaleert</string>
+</resources>

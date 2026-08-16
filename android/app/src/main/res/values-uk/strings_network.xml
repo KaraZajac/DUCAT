@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">Транспорт. Платіж їде анонімним маршрутом, тож це має працювати, перш ніж дотик кудись дійде.</string>
+
+    <string name="net_line_bridge">android-міст</string>
+    <string name="net_ready">готовий</string>
+    <string name="net_not_set_up">не налаштовано</string>
+    <string name="net_line_node">вузол</string>
+    <string name="net_running">працює</string>
+    <string name="net_stopped">зупинено</string>
+    <string name="net_line_attached">приєднано</string>
+    <string name="net_line_route_capable">готовність до маршрутів</string>
+    <string name="net_yes">так</string>
+    <string name="net_not_yet_routes">ще ні — без цього маршрутів не буде</string>
+    <string name="net_line_peers">піри</string>
+    <string name="net_peers_value">%1$s живих, %2$s надійних</string>
+    <string name="net_waiting">очікування %1$d с — вузол мусить з\'ясувати, як він досяжний, перш ніж будувати маршрут</string>
+
+    <string name="net_starting">Запуск…</string>
+    <string name="net_start_node">Запустити вузол</string>
+    <string name="net_stop">Стоп</string>
+    <string name="net_testing">Тестуємо…</string>
+    <string name="net_test_route">Перевірити маршрут</string>
+    <string name="net_route_ok">маршрут виділено — блоб %1$s байтів</string>
+    <string name="net_route_failed">маршрут не вдався: %1$s</string>
+</resources>

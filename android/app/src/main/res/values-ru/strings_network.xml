@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">Транспорт. Платёж идёт по анонимному маршруту, так что это должно подняться прежде, чем касание сможет куда-то уйти.</string>
+
+    <string name="net_line_bridge">мост android</string>
+    <string name="net_ready">готов</string>
+    <string name="net_not_set_up">не настроен</string>
+    <string name="net_line_node">узел</string>
+    <string name="net_running">работает</string>
+    <string name="net_stopped">остановлен</string>
+    <string name="net_line_attached">прикреплён</string>
+    <string name="net_line_route_capable">готов к маршрутам</string>
+    <string name="net_yes">да</string>
+    <string name="net_not_yet_routes">ещё нет — без этого маршрутов не будет</string>
+    <string name="net_line_peers">пиры</string>
+    <string name="net_peers_value">%1$s активных, %2$s надёжных</string>
+    <string name="net_waiting">ждём %1$d с — узлу нужно понять, как он достижим, прежде чем строить маршрут</string>
+
+    <string name="net_starting">Запускаем…</string>
+    <string name="net_start_node">Запустить узел</string>
+    <string name="net_stop">Остановить</string>
+    <string name="net_testing">Проверяем…</string>
+    <string name="net_test_route">Проверить маршрут</string>
+    <string name="net_route_ok">маршрут выделен — блоб %1$s байт</string>
+    <string name="net_route_failed">маршрут не удался: %1$s</string>
+</resources>

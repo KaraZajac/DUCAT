@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">Указать имя профиля</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">язык: %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">Твоя персона</string>
+    <string name="drawer_persona_body">Ключ, которым подписаны твои карточки. Найти тебя по нему нельзя — по нему проверяют карточку, когда она уже на руках.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">Приём платежей</string>
+    <string name="drawer_publish_switch">Разрешить контактам платить мне напрямую</string>
+    <string name="drawer_publish_off_note">Без этого тому, кто хочет заплатить, придётся ждать запроса.</string>
+    <string name="drawer_publish_on_warning">Твой адрес уходит каждому контакту один раз и потом переиспользуется. Любой, кто видит цепочку, поймёт, что платили одному и тому же человеку, — включая тех, кто заплатил тебе лишь однажды. Запросы избегают этого: каждый несёт свежий адрес.</string>
+    <string name="drawer_publish_scope_note">Адрес получат только контакты, добавленные после включения.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">Контактов пока нет. Добавь на вкладке «Чат».</string>
+    <string name="drawer_open_chat">Открыть чат</string>
+    <string name="drawer_delete_contact">Удалить контакт</string>
+    <string name="drawer_forget_title">Забыть %1$s?</string>
+    <string name="drawer_forget_body">Удаляется контакт и все сообщения от него. Восстановить их нельзя, а для новой связи понадобится новая карточка.</string>
+    <string name="drawer_forget_confirm">Забыть</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">Выбери, чем это устройство будет прямо сейчас. Режим забирает всё приложение, пока не вернёшься сюда и не выберешь «Личный».</string>
+    <string name="mode_personal">Личный</string>
+    <string name="mode_personal_desc">Твой кошелёк, чаты и активность. Режим по умолчанию.</string>
+    <string name="mode_pos">Точка продаж</string>
+    <string name="mode_pos_desc">Касса: пробивай позиции или вводи сумму, показывай один код — счёт и чек идут через открывшуюся переписку.</string>
+    <string name="mode_bartab">Барный счёт</string>
+    <string name="mode_bartab_desc">Книга счетов: одно сканирование, дописывай весь вечер, один счёт под закрытие. Оплатить можно и после ухода.</string>
+    <string name="mode_taxi">Такси</string>
+    <string name="mode_taxi_desc">Поездки и счётчик: следи за вызовами на стоянке, ставка письменно при старте счётчика, счёт показывает минуты.</string>
+    <string name="mode_donate">Пожертвования</string>
+    <string name="mode_donate_desc">Постоянный код, на который может отправить любой кошелёк Monero. На их стороне приложение не нужно.</string>
+</resources>

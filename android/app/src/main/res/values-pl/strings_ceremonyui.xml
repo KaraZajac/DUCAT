@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">Zamknij</string>
+    <string name="ceremony_quoted_body">„%1$s”</string>
+    <string name="ceremony_decline">Odrzuć</string>
+    <string name="ceremony_open_chat">Otwórz czat</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">prosi cię o</string>
+    <string name="ceremony_tax">podatek</string>
+    <string name="ceremony_accept_and_pay">Przyjmij i zapłać</string>
+    <string name="ceremony_no_address">W tej prośbie nie ma adresu — zapytaj, dokąd wysłać.</string>
+    <string name="ceremony_accept_opens_confirm">Przyjęcie otwiera ekran potwierdzenia — nic nie ruszy, dopóki tam nie zatwierdzisz.</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">Zapłacono ✓</string>
+    <string name="ceremony_paid_to">Zapłacono · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">oferuje przejazd za</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="one">około %1$d min stąd</item>
+        <item quantity="few">około %1$d min stąd</item>
+        <item quantity="many">około %1$d min stąd</item>
+        <item quantity="other">około %1$d min stąd</item>
+    </plurals>
+    <string name="ceremony_plate">rejestracja %1$s</string>
+    <string name="ceremony_accept">Przyjmij</string>
+    <string name="ceremony_accepting_agrees_fare">Przyjęcie oznacza zgodę na stawkę — płacisz na końcu przejazdu, przez zwykły ekran potwierdzenia.</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">Przejazd potwierdzony</string>
+    <string name="ceremony_expecting_you">Kierowca na ciebie czeka — cała reszta w czacie.</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">Twój przejazd jedzie</string>
+    <string name="ceremony_eta_in_chat">Czas dojazdu i cała reszta — w czacie.</string>
+</resources>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">Sprawdź ponownie</string>
+    <string name="monero_subtitle">Tu nadawane są transakcje i stąd czytany jest łańcuch.</string>
+    <string name="monero_finding_node">Szukanie węzła…</string>
+    <string name="monero_no_usable_node">brak zdatnego węzła</string>
+    <string name="monero_line_height">wysokość</string>
+    <string name="monero_line_synced">zsynchronizowany</string>
+    <string name="monero_line_network">sieć</string>
+    <string name="monero_line_round_trip">czas odpowiedzi</string>
+    <string name="monero_synced_yes">tak</string>
+    <string name="monero_synced_no">nie — salda byłyby nieaktualne</string>
+    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_no_node">brak węzła</string>
+    <string name="monero_change_your_node">Zmień węzeł</string>
+    <string name="monero_use_own_node">Użyj własnego węzła</string>
+    <string name="monero_your_node">Twój węzeł</string>
+    <string name="monero_use_it">Użyj go</string>
+    <string name="monero_back_to_public">Wróć do publicznego</string>
+    <string name="monero_cancel">Anuluj</string>
+    <string name="monero_trust_own_title">Twój węzeł</string>
+    <string name="monero_trust_own_body">Nie dowiaduje się o tobie niczego, czego już nie wiesz.</string>
+    <string name="monero_trust_onion_title">Cudzy węzeł, przez Tor</string>
+    <string name="monero_trust_onion_body">Widzi twoje transakcje, ale nie widzi, skąd przyszły.</string>
+    <string name="monero_trust_public_title">Cudzy węzeł</string>
+    <string name="monero_trust_public_body">Widzi twój adres i twoje transakcje razem. Dandelion++ ukrywa pochodzenie transakcji przed resztą sieci — nie ukryje go przed węzłem, któremu ją wręczasz. Rozwiązaniem jest własny węzeł.</string>
+    <string name="monero_wallet_title">Portfel</string>
+    <string name="monero_no_wallet_key_title">Na tym urządzeniu nie ma klucza portfela</string>
+    <string name="monero_no_wallet_key_body">Ta instalacja ukończyła konfigurację, zanim aplikacja zaczęła przechowywać portfel, więc nie ma czym skanować. Czekanie tego nie naprawi — przywróć z kopii zapasowej albo wyczyść dane aplikacji i skonfiguruj od nowa.</string>
+    <string name="monero_scanning_failed">Skanowanie nie powiodło się</string>
+    <string name="monero_unknown">nieznane</string>
+    <string name="monero_scanning_failed_note">Węzeł powyżej odpowiedział, więc to problem odczytu łańcucha przez portfel, a nie połączenia.</string>
+    <string name="monero_not_started">Nie rozpoczęto — szukanie węzła.</string>
+    <string name="monero_caught_up">Dogoniono łańcuch na bloku %1$d</string>
+    <string name="monero_block_of">blok %1$d z %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="one">pozostał %1$d blok</item>
+        <item quantity="few">pozostały %1$d bloki</item>
+        <item quantity="many">pozostało %1$d bloków</item>
+        <item quantity="other">pozostało %1$d bloku</item>
+    </plurals>
+    <string name="monero_partial_balance">Twoje saldo to tylko to, co dotąd odczytano.</string>
+    <string name="monero_last_window_failed">Ostatnie okno nie powiodło się: %1$s</string>
+    <string name="monero_rescan_hint">Ten portfel skanuje od początku łańcucha, co trwa o wiele dłużej, niż musi, jeśli powstał niedawno.</string>
+    <string name="monero_skip_ahead">Przeskocz dalej</string>
+</resources>

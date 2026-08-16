@@ -1,0 +1,35 @@
+<resources>
+    <string name="sync_synced">Zsynchronizowano</string>
+    <string name="sync_not_fully">Niezsynchronizowane do końca</string>
+    <string name="sync_partial_note">To saldo obejmuje tylko to, co dotąd odczytano — może być zaniżone, dopóki skan się nie skończy.</string>
+
+    <!-- humanDuration -->
+    <string name="duration_under_minute">mniej niż minuta</string>
+    <plurals name="duration_minutes">
+        <item quantity="one">około %1$d minuty</item>
+        <item quantity="few">około %1$d minut</item>
+        <item quantity="many">około %1$d minut</item>
+        <item quantity="other">około %1$d minuty</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">około %1$d godziny</item>
+        <item quantity="few">około %1$d godzin</item>
+        <item quantity="many">około %1$d godzin</item>
+        <item quantity="other">około %1$d godziny</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">około %1$d dnia</item>
+        <item quantity="few">około %1$d dni</item>
+        <item quantity="many">około %1$d dni</item>
+        <item quantity="other">około %1$d dnia</item>
+    </plurals>
+
+    <!-- Scanner -->
+    <string name="scanner_cancel">Anuluj</string>
+    <string name="scanner_no_camera_title">Brak zgody na aparat</string>
+    <string name="scanner_no_camera_body">Skanowanie go potrzebuje. Cała reszta DUCAT działa bez niego — wizytówkę zawsze można wkleić jako link.</string>
+    <string name="scanner_allow">Zezwól</string>
+    <string name="scanner_would_not_start">Aparat nie chciał się uruchomić: %1$s</string>
+    <string name="scanner_torch_off">Latarka wyłączona</string>
+    <string name="scanner_torch_on">Latarka włączona</string>
+</resources>

@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">Chat</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">Deel je kaartje</string>
+    <string name="contacts_share_card_body">Goed voor één persoon. Zodra die het gebruikt, werkt het niet meer — dus een screenshot die ergens anders belandt, is geen ingang.</string>
+    <string name="contacts_name_to_show_label">Naam om te tonen (optioneel)</string>
+    <string name="contacts_name_to_show_support">Ze kunnen je aan hun kant hernoemen; die naam is dan wat ze zien.</string>
+    <string name="contacts_error_make_card">kon geen kaartje maken</string>
+    <string name="contacts_publishing_inbox">Je inbox publiceren…</string>
+    <string name="contacts_create_card">Kaartje maken</string>
+    <string name="contacts_publishing_note">Dit duurt een paar seconden — er moeten twee records gepubliceerd worden voordat iemand je kan bereiken. Ze blijven werken nadat je de app sluit.</string>
+    <string name="contacts_copy_link">Link kopiëren</string>
+    <string name="contacts_send">Versturen</string>
+    <string name="contacts_expires_24h">Verloopt over 24 uur.</string>
+    <string name="contacts_send_your_card">Stuur je kaartje</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">Richt de camera op hun DUCAT-kaartje</string>
+    <string name="contacts_card_expired_ask_new">Dat kaartje is verlopen. Vraag om een nieuw.</string>
+    <string name="contacts_not_a_card">Dat is geen DUCAT-kaartje</string>
+    <string name="contacts_add_contact_title">Voeg een contact toe</string>
+    <string name="contacts_paste_link_label">Plak hun ducat:-link</string>
+    <string name="contacts_paste">Plakken</string>
+    <string name="contacts_scan">Scannen</string>
+    <string name="contacts_card_expired_ask_them">Dit kaartje is verlopen. Vraag ze om een nieuw.</string>
+    <string name="contacts_read_card">Kaartje lezen</string>
+    <string name="contacts_no_name_given">(geen naam opgegeven)</string>
+    <string name="contacts_unverified_name">niet geverifieerd — dit is de naam die ze zelf hebben getypt</string>
+    <string name="contacts_check_characters">Controleer deze tekens met ze via een kanaal dat je vertrouwt, als het uitmaakt wie dit is.</string>
+    <string name="contacts_save_them_as_label">Opslaan als</string>
+    <string name="contacts_save_them_as_support">Jouw naam voor ze. Alleen jij ziet die.</string>
+    <string name="contacts_error_read_inbox">kon hun inbox niet lezen</string>
+    <string name="contacts_reading_inbox">Hun inbox lezen…</string>
+    <string name="contacts_add_contact_button">Contact toevoegen</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">Dat kaartje is al gebruikt. Vraag ze om een nieuw.</string>
+    <string name="contacts_reply_expired">Dat kaartje is verlopen. Vraag ze om een nieuw.</string>
+    <string name="contacts_reply_badsig">Die link is beschadigd — probeer hem opnieuw te kopiëren.</string>
+    <string name="contacts_reply_own_card">Dat is je eigen kaartje.</string>
+    <string name="contacts_reply_refused">Ze hebben het verzoek geweigerd.</string>
+</resources>

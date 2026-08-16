@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">Резервна копія</string>
+    <string name="backup_body">Один зашифрований файл із твоєю особою, ключами й налаштуваннями. Експортуй свіжий щоразу, коли змінюється щось важливе.</string>
+    <string name="backup_passphrase">Парольна фраза</string>
+    <string name="backup_export">Експортувати</string>
+    <string name="backup_import">Імпортувати</string>
+    <string name="backup_exported_bytes">Експортовано %1$d байтів</string>
+    <string name="backup_export_failed">не вдалося експортувати</string>
+    <string name="backup_restored_title">Гаманець відновлено</string>
+    <string name="backup_restored_check">Перевір, що ця адреса тобі знайома, перш ніж їй довіряти.</string>
+    <string name="backup_opened">Відкрито — часток ескроу: %1$d, висота відновлення %2$d</string>
+    <string name="backup_could_not_open">Не вдалося відкрити — хибна парольна фраза, або файл було змінено</string>
+    <string name="backup_share_title">Збережи свою резервну копію DUCAT</string>
+</resources>

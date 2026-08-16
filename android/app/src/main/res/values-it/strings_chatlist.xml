@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">Il mio biglietto</string>
+    <string name="chatlist_new_chat">Nuova chat</string>
+    <string name="chatlist_no_conversations">Nessuna conversazione</string>
+    <string name="chatlist_empty_hint">Consegna il tuo biglietto di persona, o invialo con qualsiasi app di cui già ti fidi. Nessuno può essere trovato per nome — per raggiungere una persona serve un biglietto che ti ha dato lei.</string>
+    <string name="chatlist_preview_you">Tu: %1$s</string>
+    <string name="chatlist_no_messages_yet">Ancora nessun messaggio</string>
+    <string name="chatlist_delete_title">Eliminare questa conversazione?</string>
+    <string name="chatlist_delete_body">Ogni messaggio con %1$s viene cancellato da questo telefono e non può essere recuperato. %1$s resta nei tuoi contatti — Nuova chat ne apre una nuova in qualsiasi momento.</string>
+    <string name="chatlist_delete">Elimina</string>
+    <string name="chatlist_cancel">Annulla</string>
+    <string name="chatlist_add_contact">Aggiungi un contatto</string>
+    <string name="chatlist_add_contact_hint">Scansiona o incolla un biglietto che ti hanno dato</string>
+    <string name="chatlist_no_contacts_yet">Ancora nessun contatto.</string>
+    <string name="chatlist_preview_requested">💸 Richiesti %1$s XMR</string>
+    <string name="chatlist_preview_sent">💸 Inviati %1$s XMR</string>
+    <string name="chatlist_preview_receipt">🧾 Ricevuta — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">Ha reagito con %1$s</string>
+    <string name="chatlist_preview_photo">📷 Foto</string>
+    <string name="chatlist_time_now">adesso</string>
+    <string name="chatlist_time_minutes">%1$dm</string>
+    <string name="chatlist_time_hours">%1$dh</string>
+</resources>

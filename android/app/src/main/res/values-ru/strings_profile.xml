@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">Назад</string>
+    <string name="profile_calls_themselves">называет себя «%1$s»</string>
+    <string name="profile_label_email">Почта</string>
+    <string name="profile_label_phone">Телефон</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">Чем они поделились</string>
+    <string name="profile_their_claim_note">Это их утверждение, а не проверка. Ничто не привязывает персону DUCAT к почте или номеру — только к ключу.</string>
+    <string name="profile_your_name_for_them_label">Твоё имя для них</string>
+    <string name="profile_your_name_for_them_support">Видишь только ты. Именно это имя показывается везде.</string>
+    <string name="profile_saved">Сохранено</string>
+    <string name="profile_save_name">Сохранить имя</string>
+    <string name="profile_checked">Проверено</string>
+    <string name="profile_checked_note">Проверено криптографически. Каждая карточка, которую они раздают, подписана этим ключом и сверяется с ним.</string>
+    <string name="profile_persona">Персона</string>
+    <string name="profile_told_to_you">Сказано тебе</string>
+    <string name="profile_told_note">Указано ими и ничем не проверено. В DUCAT ничто не привязывает адрес Monero или имя к персоне, так что если это важно — проверь другим способом.</string>
+    <string name="profile_their_name_label">Их имя для себя</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— не указано —</string>
+    <string name="profile_monero_address">Адрес Monero</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— не открыт; они должны отправить запрос —</string>
+    <string name="profile_where_reached">Где их искать</string>
+    <string name="profile_their_outbox">Их исходящий ящик</string>
+    <string name="profile_your_outbox">Твой исходящий ящик к ним</string>
+    <string name="profile_open_chat">Открыть чат</string>
+    <string name="profile_not_built_yet">Ещё не готово</string>
+    <string name="profile_not_built_note">Фото, местоимения, почта и блокировка. Всё это необязательно, задаётся при настройке и путешествует так же, как имя, — заявлено ими, а не проверено нами.</string>
+    <string name="profile_copy">Копировать</string>
+</resources>

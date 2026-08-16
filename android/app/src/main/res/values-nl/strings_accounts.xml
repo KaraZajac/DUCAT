@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">Opwaarderen</string>
+    <string name="accounts_top_up_desc">Stuur Monero naar dit adres vanuit elke wallet of exchange. Het is een gewoon XMR-adres — niets aan de overboeking heeft met DUCAT te maken.</string>
+    <string name="accounts_no_wallet">Nog geen wallet — rond eerst het instellen af.</string>
+    <string name="accounts_copy">Kopiëren</string>
+    <string name="accounts_hide">Verbergen</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">Saldo\'s</string>
+    <string name="accounts_balances_desc">Bewust gescheiden gehouden: wat je nu kunt uitgeven is niet hetzelfde als wat je bezit.</string>
+    <string name="accounts_waiting_for_node">Wachten op een node.</string>
+    <string name="accounts_spendable">Besteedbaar</string>
+    <string name="accounts_show_in">Toon in %1$s</string>
+    <string name="accounts_stagenet_fiat_note">Stagenet-munten zijn testmunten. Dat bedrag is wat zoveel echte Monero waard zou zijn — deze zijn niets waard.</string>
+    <string name="accounts_notes">Biljetten</string>
+    <string name="accounts_bond">Borg</string>
+    <string name="accounts_bond_none">geen</string>
+    <string name="accounts_scanning_from_genesis_title">Scannen vanaf het begin van de keten</string>
+    <string name="accounts_scanning_from_genesis_desc">Deze wallet is gemaakt voordat de app een node kon bereiken, dus hij weet niet wanneer hij is aangemaakt. Op blok %1$d van %2$d is dat meer dan een dag lezen. Spring vooruit als je weet dat de wallet nieuwer is dan dat.</string>
+    <string name="accounts_skip_ahead">Spring vooruit</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">Spring vooruit naar</string>
+    <string name="accounts_skip_ahead_desc">Alles wat vóór dit punt is ontvangen, wordt niet gevonden. Kies een moment waarvan je zeker weet dat het vóór het bestaan van de wallet ligt.</string>
+    <string name="accounts_about_a_day_ago">ongeveer een dag geleden</string>
+    <string name="accounts_about_a_week_ago">ongeveer een week geleden</string>
+    <string name="accounts_about_a_month_ago">ongeveer een maand geleden</string>
+    <string name="accounts_skip_option">"%1$s  —  blok %2$d"</string>
+    <string name="accounts_block_height_label">of een blokhoogte</string>
+    <string name="accounts_use_that_height">Gebruik die hoogte</string>
+    <string name="accounts_cancel">Annuleren</string>
+</resources>

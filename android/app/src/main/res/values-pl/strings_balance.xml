@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">Gotowe do wydania</string>
+    <string name="balance_change_coming_back">%1$s reszty wróci za %2$s</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">Teraz nie możesz zapłacić</string>
+    <string name="balance_running_low_title">Kończą się banknoty</string>
+    <string name="balance_all_locked_body">Twoje pieniądze tu są, ale wszystkie utknęły jako reszta. Rozmień banknot, żeby znów płacić.</string>
+    <string name="balance_running_low_body">Rozmień banknot teraz, żeby nie zostać z niczym przy kasie.</string>
+    <string name="balance_break_note_action">Rozmień banknot</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="one">1 banknot</item>
+        <item quantity="few">%1$d banknoty</item>
+        <item quantity="many">%1$d banknotów</item>
+        <item quantity="other">%1$d banknotu</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">nic jeszcze nie odblokowane</string>
+    <string name="balance_notes_then_wait">%1$s — starczy na jedną płatność, potem czekanie na resztę</string>
+    <string name="balance_notes_one_more">%1$s, czyli mniej więcej jeszcze jedna płatność</string>
+    <string name="balance_notes_more">%1$s, czyli mniej więcej jeszcze %2$d płatności</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">lada moment</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="one">około %1$d minuty</item>
+        <item quantity="few">około %1$d minut</item>
+        <item quantity="many">około %1$d minut</item>
+        <item quantity="other">około %1$d minuty</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="one">około %1$d godziny</item>
+        <item quantity="few">około %1$d godzin</item>
+        <item quantity="many">około %1$d godzin</item>
+        <item quantity="other">około %1$d godziny</item>
+    </plurals>
+</resources>

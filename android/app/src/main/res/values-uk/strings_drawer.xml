@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">Вкажи ім\'я профілю</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">мова: %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">Твоя персона</string>
+    <string name="drawer_persona_body">Ключ, яким підписуються твої картки. Знайти тебе за ним не можна — це те, з чим звіряють картку, коли вона вже в руках.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">Отримання платежів</string>
+    <string name="drawer_publish_switch">Дозволити контактам платити мені напряму</string>
+    <string name="drawer_publish_off_note">Без цього тому, хто хоче тобі заплатити, доведеться чекати на запит.</string>
+    <string name="drawer_publish_on_warning">Твоя адреса надсилається кожному контакту один раз і використовується повторно. Будь-хто, хто бачить ланцюг, зможе зрозуміти, що щоразу платили тій самій людині — включно з тими, хто заплатив тобі лише раз. Запити уникають цього: кожен несе свіжу адресу.</string>
+    <string name="drawer_publish_scope_note">Її матимуть лише контакти, додані після ввімкнення.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">Контактів ще немає. Додай когось на вкладці «Чат».</string>
+    <string name="drawer_open_chat">Відкрити чат</string>
+    <string name="drawer_delete_contact">Видалити контакт</string>
+    <string name="drawer_forget_title">Забути %1$s?</string>
+    <string name="drawer_forget_body">Це видаляє контакт і кожне повідомлення від нього. Відновити їх не можна, а щоб знову зв\'язатися, знадобиться нова картка.</string>
+    <string name="drawer_forget_confirm">Забути</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">Обери, чим цей пристрій є зараз. Режим бере на себе весь застосунок, доки ти не повернешся сюди й не вибереш «Особистий».</string>
+    <string name="mode_personal">Особистий</string>
+    <string name="mode_personal_desc">Твій гаманець, чати й активність. Типовий режим.</string>
+    <string name="mode_pos">Точка продажу</string>
+    <string name="mode_pos_desc">Каса: пробивай позиції або вводь суму, показуй один код — рахунок і чек їдуть розмовою, яку він відкриває.</string>
+    <string name="mode_bartab">Барний рахунок</string>
+    <string name="mode_bartab_desc">Книга рахунків: скануєш раз, дописуєш весь вечір, один рахунок наприкінці. Заплатити можна й після того, як пішли.</string>
+    <string name="mode_taxi">Таксі</string>
+    <string name="mode_taxi_desc">Поїздки й лічильник: стеж за стоянкою й чекай на виклики, тариф письмово на старті лічильника, у рахунку видно хвилини.</string>
+    <string name="mode_donate">Пожертви</string>
+    <string name="mode_donate_desc">Постійний код, на який може дати будь-який гаманець Monero. Застосунок з їхнього боку не потрібен.</string>
+</resources>

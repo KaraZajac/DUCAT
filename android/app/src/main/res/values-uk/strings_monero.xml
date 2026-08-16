@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">Перевірити ще раз</string>
+    <string name="monero_subtitle">Де транслюються транзакції та читається ланцюг.</string>
+    <string name="monero_finding_node">Шукаємо вузол…</string>
+    <string name="monero_no_usable_node">немає придатного вузла</string>
+    <string name="monero_line_height">висота</string>
+    <string name="monero_line_synced">синхронізовано</string>
+    <string name="monero_line_network">мережа</string>
+    <string name="monero_line_round_trip">затримка</string>
+    <string name="monero_synced_yes">так</string>
+    <string name="monero_synced_no">ні — баланси були б застарілі</string>
+    <string name="monero_round_trip_ms">%1$s мс</string>
+    <string name="monero_no_node">немає вузла</string>
+    <string name="monero_change_your_node">Змінити вузол</string>
+    <string name="monero_use_own_node">Використати власний вузол</string>
+    <string name="monero_your_node">Твій вузол</string>
+    <string name="monero_use_it">Використати</string>
+    <string name="monero_back_to_public">Назад до публічних</string>
+    <string name="monero_cancel">Скасувати</string>
+    <string name="monero_trust_own_title">Твій вузол</string>
+    <string name="monero_trust_own_body">Він не дізнається про тебе нічого, чого ти й так не знаєш.</string>
+    <string name="monero_trust_onion_title">Чужий вузол, через Tor</string>
+    <string name="monero_trust_onion_body">Він бачить твої транзакції, але не бачить, звідки вони прийшли.</string>
+    <string name="monero_trust_public_title">Чужий вузол</string>
+    <string name="monero_trust_public_body">Він бачить твою адресу разом із транзакціями. Dandelion++ ховає походження транзакції від решти мережі — але не від вузла, якому ти її віддаєш. Ліки — власний вузол.</string>
+    <string name="monero_wallet_title">Гаманець</string>
+    <string name="monero_no_wallet_key_title">На цьому пристрої немає ключа гаманця</string>
+    <string name="monero_no_wallet_key_body">Ця інсталяція завершила налаштування ще до того, як застосунок почав зберігати гаманець, тож сканувати нема чим. Чекання не допоможе — віднови з резервної копії або зітри дані застосунку й налаштуй заново.</string>
+    <string name="monero_scanning_failed">Сканування не вдалося</string>
+    <string name="monero_unknown">невідомо</string>
+    <string name="monero_scanning_failed_note">Вузол вище відповів, тож це власне читання ланцюга гаманцем, а не проблема з\'єднання.</string>
+    <string name="monero_not_started">Не почато — шукаємо вузол.</string>
+    <string name="monero_caught_up">Наздогнали ланцюг на блоці %1$d</string>
+    <string name="monero_block_of">блок %1$d з %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="one">лишився %1$d блок</item>
+        <item quantity="few">лишилося %1$d блоки</item>
+        <item quantity="many">лишилося %1$d блоків</item>
+        <item quantity="other">лишилося %1$d блока</item>
+    </plurals>
+    <string name="monero_partial_balance">Твій баланс — лише те, що вже прочитано.</string>
+    <string name="monero_last_window_failed">Останнє вікно не вдалося: %1$s</string>
+    <string name="monero_rescan_hint">Цей гаманець сканує з самого початку ланцюга — це набагато довше, ніж треба, якщо його створено нещодавно.</string>
+    <string name="monero_skip_ahead">Перескочити вперед</string>
+</resources>

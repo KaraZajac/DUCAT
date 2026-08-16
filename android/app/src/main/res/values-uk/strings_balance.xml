@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">Готово до витрат</string>
+    <string name="balance_change_coming_back">%1$s решти, повернеться за %2$s</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">Зараз платити нічим</string>
+    <string name="balance_running_low_title">Купюри закінчуються</string>
+    <string name="balance_all_locked_body">Гроші тут, але всі вони зв\'язані як решта. Розміняй купюру, щоб знову витрачати.</string>
+    <string name="balance_running_low_body">Розміняй купюру зараз, щоб не застрягти біля каси.</string>
+    <string name="balance_break_note_action">Розміняти купюру</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="one">%1$d купюра</item>
+        <item quantity="few">%1$d купюри</item>
+        <item quantity="many">%1$d купюр</item>
+        <item quantity="other">%1$d купюри</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">поки нічого не розблоковано</string>
+    <string name="balance_notes_then_wait">%1$s — вистачить на один платіж, потім чекати на решту</string>
+    <string name="balance_notes_one_more">%1$s, тобто ще приблизно один платіж</string>
+    <string name="balance_notes_more">%1$s, тобто ще приблизно %2$d платежів</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">ось-ось</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="one">приблизно %1$d хвилина</item>
+        <item quantity="few">приблизно %1$d хвилини</item>
+        <item quantity="many">приблизно %1$d хвилин</item>
+        <item quantity="other">приблизно %1$d хвилини</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="one">приблизно %1$d година</item>
+        <item quantity="few">приблизно %1$d години</item>
+        <item quantity="many">приблизно %1$d годин</item>
+        <item quantity="other">приблизно %1$d години</item>
+    </plurals>
+</resources>

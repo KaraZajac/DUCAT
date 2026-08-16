@@ -1,0 +1,52 @@
+<resources>
+    <!-- App metadata. app_name stays "DUCAT" in every language: it is a name. -->
+    <string name="nfc_service_description">DUCAT yakınlık ödemeleri</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mil</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">Bitti</string>
+    <string name="common_cancel">İptal</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">Ana sayfa</string>
+    <string name="tab_accounts">Hesaplar</string>
+    <string name="tab_activity">Hareketler</string>
+    <string name="tab_chat">Sohbet</string>
+    <string name="tab_send_receive">Gönder/Al</string>
+
+    <string name="section_status">Durum</string>
+    <string name="section_profile">Profil</string>
+    <string name="section_contacts">Kişiler</string>
+    <string name="section_logs">Kayıtlar</string>
+    <string name="section_settings">Ayarlar</string>
+    <string name="section_modes">Çalışma modları</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">Dil</string>
+    <string name="settings_language_system">Sistemi takip et</string>
+
+    <string name="settings_appearance_title">Görünüm</string>
+    <string name="theme_follow_system">Sistemi takip et</string>
+    <string name="theme_latte">Latte (açık)</string>
+    <string name="theme_mocha">Mocha (koyu)</string>
+
+    <string name="settings_distance_title">Mesafe</string>
+    <string name="distance_follow_system">Sistemi takip et</string>
+    <string name="distance_kilometres">Kilometre</string>
+    <string name="distance_miles">Mil</string>
+
+    <string name="settings_prices_title">Fiyatlar</string>
+    <string name="prices_show_worth">Bakiyenin ne ettiğini göster</string>
+    <string name="prices_currency_title">Para birimi</string>
+    <string name="prices_this_phone">bu telefon</string>
+    <string name="prices_source_note">Saatte en fazla iki kez, CoinGecko veya Kraken\'den kontrol edilir. Bunu kapatmak isteği tamamen durdurur.</string>
+    <string name="prices_last_from">Son veri: %1$s.</string>
+
+    <string name="settings_privacy_title">Gizlilik</string>
+    <string name="settings_read_receipts">Okundu bilgisi gönder</string>
+    <string name="settings_read_receipts_on">Kişiler, mesajlarını ne zaman okuduğunu görür. Onlar gönderdiği sürece sen de onlarınkini her halükârda görürsün.</string>
+    <string name="settings_read_receipts_off">Kapalı — ne zaman okuduğun senin bileceğin iş. Onlar gönderiyorsa sen yine de görürsün.</string>
+</resources>

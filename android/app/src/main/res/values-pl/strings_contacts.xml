@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">Czat</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">Udostępnij swoją wizytówkę</string>
+    <string name="contacts_share_card_body">Dobra dla jednej osoby. Gdy jej użyje, przestaje działać — więc zrzut ekranu, który trafi gdzie indziej, nikogo nie wpuści.</string>
+    <string name="contacts_name_to_show_label">Imię do pokazania (opcjonalnie)</string>
+    <string name="contacts_name_to_show_support">Mogą cię u siebie przemianować; zobaczą właśnie tamto imię.</string>
+    <string name="contacts_error_make_card">nie udało się utworzyć wizytówki</string>
+    <string name="contacts_publishing_inbox">Publikowanie twojej skrzynki…</string>
+    <string name="contacts_create_card">Utwórz wizytówkę</string>
+    <string name="contacts_publishing_note">To potrwa kilka sekund — zanim ktokolwiek będzie mógł cię znaleźć, trzeba opublikować dwa rekordy. Działają dalej po zamknięciu aplikacji.</string>
+    <string name="contacts_copy_link">Kopiuj link</string>
+    <string name="contacts_send">Wyślij</string>
+    <string name="contacts_expires_24h">Wygasa za 24 godziny.</string>
+    <string name="contacts_send_your_card">Wyślij swoją wizytówkę</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">Wyceluj aparatem w ich wizytówkę DUCAT</string>
+    <string name="contacts_card_expired_ask_new">Ta wizytówka wygasła. Poproś o nową.</string>
+    <string name="contacts_not_a_card">To nie jest wizytówka DUCAT</string>
+    <string name="contacts_add_contact_title">Dodaj kontakt</string>
+    <string name="contacts_paste_link_label">Wklej ich link ducat:</string>
+    <string name="contacts_paste">Wklej</string>
+    <string name="contacts_scan">Skanuj</string>
+    <string name="contacts_card_expired_ask_them">Ta wizytówka wygasła. Poproś ich o nową.</string>
+    <string name="contacts_read_card">Odczytaj wizytówkę</string>
+    <string name="contacts_no_name_given">(nie podano imienia)</string>
+    <string name="contacts_unverified_name">niezweryfikowane — to imię, które sami wpisali</string>
+    <string name="contacts_check_characters">Jeśli ważne jest, kto to, porównaj te znaki z nimi przez kanał, któremu ufasz.</string>
+    <string name="contacts_save_them_as_label">Zapisz jako</string>
+    <string name="contacts_save_them_as_support">Twoja nazwa dla nich. Widzisz ją tylko ty.</string>
+    <string name="contacts_error_read_inbox">nie udało się odczytać ich skrzynki</string>
+    <string name="contacts_reading_inbox">Odczytywanie ich skrzynki…</string>
+    <string name="contacts_add_contact_button">Dodaj kontakt</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">Ta wizytówka została już użyta. Poproś ich o nową.</string>
+    <string name="contacts_reply_expired">Ta wizytówka wygasła. Poproś ich o nową.</string>
+    <string name="contacts_reply_badsig">Ten link jest uszkodzony — spróbuj skopiować go jeszcze raz.</string>
+    <string name="contacts_reply_own_card">To twoja własna wizytówka.</string>
+    <string name="contacts_reply_refused">Odmówili przyjęcia prośby.</string>
+</resources>

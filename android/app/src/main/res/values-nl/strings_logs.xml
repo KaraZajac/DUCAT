@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Header counts -->
+    <plurals name="logs_line_count">
+        <item quantity="one">%1$d regel</item>
+        <item quantity="other">%1$d regels</item>
+    </plurals>
+    <string name="logs_warn_count">%1$d × waarschuwing</string>
+    <string name="logs_error_count">%1$d × fout</string>
+
+    <!-- Toolbar actions -->
+    <string name="logs_copy_all">Alles kopiëren</string>
+    <string name="logs_share">Delen</string>
+    <string name="logs_send_logs">Logs versturen</string>
+    <string name="logs_clear">Wissen</string>
+    <string name="logs_copied">Gekopieerd. Sleutels en berichttekst staan hier nooit in.</string>
+
+    <!-- Level filter chips -->
+    <string name="logs_filter_all">Alles</string>
+    <string name="logs_filter_info">Info</string>
+    <string name="logs_filter_warn">Waarschuwing</string>
+    <string name="logs_filter_error">Fout</string>
+
+    <string name="logs_empty">Nog niets gelogd. Activiteit verschijnt hier terwijl de app synchroniseert, verstuurt en ontvangt.</string>
+</resources>

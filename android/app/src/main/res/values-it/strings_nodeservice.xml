@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Canale del servizio in primo piano e notifica permanente -->
+    <string name="nodeservice_channel_name">Restare raggiungibile</string>
+    <string name="nodeservice_channel_desc">Mantiene DUCAT raggiungibile così i contatti possono pagarti e scriverti.</string>
+    <string name="nodeservice_notification_title">DUCAT è raggiungibile</string>
+    <string name="nodeservice_notification_text">I contatti possono raggiungerti finché questo è in esecuzione.</string>
+</resources>

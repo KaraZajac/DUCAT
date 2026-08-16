@@ -1,0 +1,51 @@
+<resources>
+    <string name="nfc_service_description">Pagamenti di prossimità DUCAT</string>
+
+    <!-- ===== Unità di distanza ===== -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mi</string>
+
+    <!-- ===== Comuni ===== -->
+    <string name="common_done">Fatto</string>
+    <string name="common_cancel">Annulla</string>
+
+    <!-- ===== Navigazione ===== -->
+    <string name="tab_home">Home</string>
+    <string name="tab_accounts">Conti</string>
+    <string name="tab_activity">Attività</string>
+    <string name="tab_chat">Chat</string>
+    <string name="tab_send_receive">Invia/Ricevi</string>
+
+    <string name="section_status">Stato</string>
+    <string name="section_profile">Profilo</string>
+    <string name="section_contacts">Contatti</string>
+    <string name="section_logs">Log</string>
+    <string name="section_settings">Impostazioni</string>
+    <string name="section_modes">Modalità operative</string>
+
+    <!-- ===== Impostazioni ===== -->
+    <string name="settings_language_title">Lingua</string>
+    <string name="settings_language_system">Segui il sistema</string>
+
+    <string name="settings_appearance_title">Aspetto</string>
+    <string name="theme_follow_system">Segui il sistema</string>
+    <string name="theme_latte">Latte (chiaro)</string>
+    <string name="theme_mocha">Mocha (scuro)</string>
+
+    <string name="settings_distance_title">Distanza</string>
+    <string name="distance_follow_system">Segui il sistema</string>
+    <string name="distance_kilometres">Chilometri</string>
+    <string name="distance_miles">Miglia</string>
+
+    <string name="settings_prices_title">Prezzi</string>
+    <string name="prices_show_worth">Mostra quanto vale un saldo</string>
+    <string name="prices_currency_title">Valuta</string>
+    <string name="prices_this_phone">questo telefono</string>
+    <string name="prices_source_note">Controllato al massimo due volte l\'ora, da CoinGecko o Kraken. Se lo disattivi, la richiesta non parte affatto.</string>
+    <string name="prices_last_from">Ultimo dato da %1$s.</string>
+
+    <string name="settings_privacy_title">Privacy</string>
+    <string name="settings_read_receipts">Invia conferme di lettura</string>
+    <string name="settings_read_receipts_on">I contatti vedono quando hai letto i loro messaggi. Le loro conferme le vedi comunque, se le inviano.</string>
+    <string name="settings_read_receipts_off">Disattivate — quando leggi sono affari tuoi. Le loro le vedi comunque, se le inviano.</string>
+</resources>

@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">Terug</string>
+    <string name="profile_calls_themselves">noemt zichzelf \"%1$s\"</string>
+    <string name="profile_label_email">E-mail</string>
+    <string name="profile_label_phone">Telefoon</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">Wat ze hebben gedeeld</string>
+    <string name="profile_their_claim_note">Hun bewering, geen controle. Niets verbindt een DUCAT-persona aan een e-mailadres of een nummer — alleen aan een sleutel.</string>
+    <string name="profile_your_name_for_them_label">Jouw naam voor ze</string>
+    <string name="profile_your_name_for_them_support">Alleen jij ziet dit. Het is de naam die overal wordt getoond.</string>
+    <string name="profile_saved">Opgeslagen</string>
+    <string name="profile_save_name">Naam opslaan</string>
+    <string name="profile_checked">Gecontroleerd</string>
+    <string name="profile_checked_note">Cryptografisch geverifieerd. Elk kaartje dat ze uitdelen is met deze sleutel ondertekend en wordt ertegen gecontroleerd.</string>
+    <string name="profile_persona">Persona</string>
+    <string name="profile_told_to_you">Aan jou verteld</string>
+    <string name="profile_told_note">Door hen opgegeven en door niets geverifieerd. Niets in DUCAT verbindt een Monero-adres of een naam aan een persona, dus controleer dit op een andere manier als het uitmaakt.</string>
+    <string name="profile_their_name_label">Hun naam voor zichzelf</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— geen opgegeven —</string>
+    <string name="profile_monero_address">Monero-adres</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— niet gedeeld; ze moeten een verzoek sturen —</string>
+    <string name="profile_where_reached">Waar ze bereikt worden</string>
+    <string name="profile_their_outbox">Hun outbox</string>
+    <string name="profile_your_outbox">Jouw outbox naar ze</string>
+    <string name="profile_open_chat">Open chat</string>
+    <string name="profile_not_built_yet">Nog niet gebouwd</string>
+    <string name="profile_not_built_note">Een foto, voornaamwoorden, een e-mailadres en blokkeren. Allemaal optioneel, allemaal ingesteld tijdens het instellen, en allemaal reizend zoals een naam dat doet — door hen beweerd, nooit door ons geverifieerd.</string>
+    <string name="profile_copy">Kopiëren</string>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">Sluiten</string>
+    <string name="ceremony_quoted_body">“%1$s”</string>
+    <string name="ceremony_decline">Afwijzen</string>
+    <string name="ceremony_open_chat">Open de chat</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">vraagt je om</string>
+    <string name="ceremony_tax">btw</string>
+    <string name="ceremony_accept_and_pay">Accepteren &amp; betalen</string>
+    <string name="ceremony_no_address">Geen adres in dit verzoek — vraag ze waar je het naartoe moet sturen.</string>
+    <string name="ceremony_accept_opens_confirm">Accepteren opent het bevestigingsscherm — er gaat niets weg totdat je het daar goedkeurt.</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">Betaald ✓</string>
+    <string name="ceremony_paid_to">Betaald · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">biedt aan je te rijden voor</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="one">ongeveer %1$d min hiervandaan</item>
+        <item quantity="other">ongeveer %1$d min hiervandaan</item>
+    </plurals>
+    <string name="ceremony_plate">kenteken %1$s</string>
+    <string name="ceremony_accept">Accepteren</string>
+    <string name="ceremony_accepting_agrees_fare">Accepteren legt de ritprijs vast — je betaalt aan het einde van de rit, via het gebruikelijke bevestigingsscherm.</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">Rit bevestigd</string>
+    <string name="ceremony_expecting_you">Ze verwachten je — al het andere gaat via de chat.</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">Je rit komt eraan</string>
+    <string name="ceremony_eta_in_chat">Aankomsttijd en al het andere — in de chat.</string>
+</resources>

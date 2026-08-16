@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">Закрыть</string>
+    <string name="qrhub_scan_code">Сканировать код</string>
+    <string name="qrhub_my_code">Мой код</string>
+    <string name="qrhub_scan_prompt">Карточка DUCAT или адрес Monero</string>
+    <string name="qrhub_not_a_code">Этот код — не карточка DUCAT и не адрес Monero.</string>
+    <string name="qrhub_card_failed">карточка не сработала</string>
+    <string name="qrhub_card_issue_failed">не удалось создать карточку</string>
+    <string name="qrhub_no_name_set">имя не задано</string>
+    <string name="qrhub_publishing">Публикуем две записи, чтобы с тобой могли связаться, даже когда телефон выключен.</string>
+    <string name="qrhub_copy_link">Копировать ссылку</string>
+    <string name="qrhub_share">Поделиться</string>
+    <string name="qrhub_share_chooser">Поделиться карточкой</string>
+    <string name="qrhub_tap_or_scan">Приложите телефоны или сканируй — карточка одна и та же.</string>
+    <string name="qrhub_one_per_code">Один человек на код. Как только кто-то заберёт этот, следующий создастся сам — делать ничего не нужно.</string>
+    <string name="qrhub_name_travels">С карточкой едут твоё имя и фото. Всё остальное, чем ты делишься, приходит потом — по открывшемуся соединению.</string>
+</resources>

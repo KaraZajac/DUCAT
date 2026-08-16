@@ -1,0 +1,9 @@
+<resources>
+    <!-- Riquadro donazioni (Donate.kt) -->
+    <string name="donate_support_name">Sostieni %1$s</string>
+    <string name="donate_support">Sostieni</string>
+    <string name="donate_no_wallet">Ancora nessun portafoglio — prima completa la configurazione.</string>
+    <string name="donate_any_wallet">Qualsiasi portafoglio Monero può donare qui — a nessuno serve questa app.</string>
+    <string name="donate_since_opening">Da quando è aperto</string>
+    <string name="donate_reuse_warning">Questo unico codice è riusato da ogni donatore, quindi sul registro pubblico di Monero le donazioni a esso sono collegabili tra loro. E un codice stampato è onesto solo quanto l\'ultima persona che l\'ha toccato — verifica che sia il tuo là dove lo esponi.</string>
+</resources>

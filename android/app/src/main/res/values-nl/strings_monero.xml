@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">Controleer opnieuw</string>
+    <string name="monero_subtitle">Waar transacties worden uitgezonden en de keten wordt gelezen.</string>
+    <string name="monero_finding_node">Node zoeken…</string>
+    <string name="monero_no_usable_node">geen bruikbare node</string>
+    <string name="monero_line_height">hoogte</string>
+    <string name="monero_line_synced">gesynchroniseerd</string>
+    <string name="monero_line_network">netwerk</string>
+    <string name="monero_line_round_trip">responstijd</string>
+    <string name="monero_synced_yes">ja</string>
+    <string name="monero_synced_no">nee — saldo\'s zouden verouderd zijn</string>
+    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_no_node">geen node</string>
+    <string name="monero_change_your_node">Wijzig je node</string>
+    <string name="monero_use_own_node">Gebruik je eigen node</string>
+    <string name="monero_your_node">Jouw node</string>
+    <string name="monero_use_it">Gebruiken</string>
+    <string name="monero_back_to_public">Terug naar publiek</string>
+    <string name="monero_cancel">Annuleren</string>
+    <string name="monero_trust_own_title">Jouw node</string>
+    <string name="monero_trust_own_body">Die leert niets over jou wat je zelf nog niet wist.</string>
+    <string name="monero_trust_onion_title">De node van iemand anders, via Tor</string>
+    <string name="monero_trust_onion_body">Die ziet je transacties, maar niet waar ze vandaan komen.</string>
+    <string name="monero_trust_public_title">De node van iemand anders</string>
+    <string name="monero_trust_public_body">Die ziet je adres en je transacties samen. Dandelion++ verbergt de oorsprong van een transactie voor de rest van het netwerk — niet voor de node waaraan je hem afgeeft. Zelf een node draaien is de oplossing.</string>
+    <string name="monero_wallet_title">Wallet</string>
+    <string name="monero_no_wallet_key_title">Geen walletsleutel op dit apparaat</string>
+    <string name="monero_no_wallet_key_body">Deze installatie heeft het instellen afgerond voordat de app de wallet bewaarde, dus er is niets om mee te scannen. Wachten lost dit niet op — herstel vanuit een back-up, of wis de gegevens van de app en stel opnieuw in.</string>
+    <string name="monero_scanning_failed">Scannen mislukt</string>
+    <string name="monero_unknown">onbekend</string>
+    <string name="monero_scanning_failed_note">De node hierboven antwoordde, dus dit ligt aan het lezen van de keten door de wallet zelf, niet aan de verbinding.</string>
+    <string name="monero_not_started">Niet gestart — op zoek naar een node.</string>
+    <string name="monero_caught_up">Bijgewerkt tot blok %1$d</string>
+    <string name="monero_block_of">blok %1$d van %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="one">nog %1$d blok</item>
+        <item quantity="other">nog %1$d blokken</item>
+    </plurals>
+    <string name="monero_partial_balance">Je saldo is alleen wat tot nu toe is gelezen.</string>
+    <string name="monero_last_window_failed">Laatste venster mislukt: %1$s</string>
+    <string name="monero_rescan_hint">Deze wallet scant vanaf het begin van de keten, wat veel langer duurt dan nodig als hij recent is gemaakt.</string>
+    <string name="monero_skip_ahead">Spring vooruit</string>
+</resources>

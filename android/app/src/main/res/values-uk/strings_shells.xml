@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
+    <string name="shells_title_pos">Точка продажу</string>
+    <string name="shells_tab_register">Каса</string>
+    <string name="shells_tab_sales">Продажі</string>
+    <string name="shells_title_bar_tab">Барний рахунок</string>
+    <string name="shells_tab_tabs">Рахунки</string>
+    <string name="shells_tab_closed">Закриті</string>
+    <string name="shells_title_taxi">Таксі</string>
+    <string name="shells_tab_fares">Виклики</string>
+    <string name="shells_tab_meter">Лічильник</string>
+    <string name="shells_tab_rides">Поїздки</string>
+    <string name="shells_title_donations">Пожертви</string>
+    <string name="shells_tab_code">Код</string>
+    <string name="shells_menu">Меню</string>
+    <string name="shells_today">Сьогодні</string>
+    <string name="shells_billed_waiting">Виставлено — очікування</string>
+    <string name="shells_settled">Розраховано</string>
+    <string name="shells_no_sales_yet">Сьогодні продажів ще немає.</string>
+    <string name="shells_no_rides_yet">Сьогодні поїздок ще немає.</string>
+    <string name="shells_payment_seen_settling">платіж помічено — розраховується</string>
+    <string name="shells_billed_unpaid">виставлено, не сплачено</string>
+    <string name="shells_paid_outside">сплачено поза DUCAT ✓</string>
+    <string name="shells_paid">сплачено ✓</string>
+</resources>

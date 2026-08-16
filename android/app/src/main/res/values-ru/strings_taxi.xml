@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">не удалось опубликовать код</string>
+    <string name="taxi_meter_started_msg">Счётчик запущен — базовая ставка %1$s XMR, %2$s XMR в минуту. Счёт в конце покажет минуты.</string>
+    <string name="taxi_err_terms_not_sent">Подключение было, но условия не отправились: %1$s</string>
+    <string name="taxi_set_fare">Задай тариф</string>
+    <string name="taxi_base_label">Базовая ставка (%1$s)</string>
+    <string name="taxi_per_min_label">За минуту (%1$s)</string>
+    <string name="taxi_price_in_instead">Цена в %1$s</string>
+    <string name="taxi_rate_locked_hint">Ставка, введённая в %1$s, фиксируется в XMR при старте поездки — сколько пассажир согласовал, столько ему и выставят.</string>
+    <string name="taxi_set_rate_hint">Задай поминутную ставку, чтобы открыть код посадки.</string>
+    <string name="taxi_pickup">Посадка</string>
+    <string name="taxi_scan_hint">Пассажир сканирует или прикладывает телефон. Ставка попадает в переписку, и счётчик запускается сам.</string>
+    <string name="taxi_meter_terms">база %1$s + %2$s/мин</string>
+    <string name="taxi_rider">пассажир</string>
+    <string name="taxi_line_base_fare">Базовая ставка</string>
+    <string name="taxi_line_metered">%1$d мин %2$02d с × %3$s XMR/мин</string>
+    <string name="taxi_err_send_fare">не удалось отправить счёт за поездку</string>
+    <string name="taxi_end_ride_bill">Завершить поездку — счёт %1$s</string>
+    <string name="taxi_bill_hint">В счёте видны минуты и ставка. Чек уйдёт пассажиру сам, когда придут деньги, — даже если он уже ушёл.</string>
+    <string name="taxi_cancel_ride_no_bill">Отменить поездку — без счёта</string>
+    <string name="taxi_cancel_title">Отменить эту поездку?</string>
+    <string name="taxi_cancel_body">Счётчик остановится, счёт не отправится. Насчитанные минуты будут отброшены безвозвратно.</string>
+    <string name="taxi_cancel_confirm">Отменить поездку</string>
+    <string name="taxi_keep_going">Продолжить</string>
+</resources>

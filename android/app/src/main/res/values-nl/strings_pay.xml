@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">Een Monero-adres, een monero:-code of een DUCAT-kaartje</string>
+    <string name="pay_close">Sluiten</string>
+    <string name="pay_send_or_request">Versturen of vragen</string>
+    <string name="pay_scan_a_code">Scan een code</string>
+    <string name="pay_your_contacts">Je contacten</string>
+    <string name="pay_contact_vs_address">Een betaling aan een contact draagt een notitie en komt in je chat terecht. Een adres niet.</string>
+    <string name="pay_or_monero_address">Of een Monero-adres</string>
+    <string name="pay_address_placeholder">5… of 7…</string>
+    <string name="pay_continue">Doorgaan</string>
+    <string name="pay_not_monero_address">Dat ziet er niet uit als een Monero-adres.</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">Terug</string>
+    <string name="pay_in_ducat">in DUCAT</string>
+    <string name="pay_monero_address">Monero-adres</string>
+    <string name="pay_bill">Rekening</string>
+    <string name="pay_add_tip">Fooi toevoegen (%1$s) — optioneel</string>
+    <string name="pay_total_with_tip">Totaal met fooi: %1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">Wat je %1$s vraagt. Hun saldo en de netwerkkosten zijn hun zorg, niet de jouwe — dit is een bericht, geen transactie.</string>
+    <string name="pay_them">ze</string>
+    <string name="pay_up_to_after_fees">Tot %1$s na kosten</string>
+    <string name="pay_max">Max</string>
+    <string name="pay_max_done">Max ✓</string>
+    <string name="pay_over_max">Dat is meer dan je kunt versturen als de kosten meetellen.</string>
+    <string name="pay_amount">Bedrag</string>
+    <string name="pay_network_fee_estimated">Netwerkkosten (geschat)</string>
+    <string name="pay_total">Totaal</string>
+    <string name="pay_left_after">Over daarna</string>
+    <string name="pay_uses_notes">Gebruikt %1$d biljet(ten) · meestal bevestigd binnen ongeveer %2$d minuten</string>
+    <string name="pay_fee_estimate_note">De kosten zijn een schatting totdat de transactie is gebouwd; het exacte bedrag zie je na het versturen.</string>
+    <string name="pay_speed">Snelheid</string>
+    <string name="pay_speed_slow">Langzaam</string>
+    <string name="pay_speed_normal">Normaal</string>
+    <string name="pay_speed_fast">Snel</string>
+    <string name="pay_speed_fastest">Snelst</string>
+    <string name="pay_memo_label">Memo — waar is dit voor?</string>
+    <string name="pay_send">Versturen</string>
+    <string name="pay_request">Vragen</string>
+    <string name="pay_no_address_hint">%1$s heeft geen adres gedeeld, dus je kunt wel vragen maar nog niet sturen. Schakel over naar Vragen — dat verzoek brengt er een mee terug.</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">Betaalverzoek</string>
+    <string name="pay_payment">Betaling</string>
+    <string name="pay_request_sent">Verzoek verstuurd</string>
+    <string name="pay_could_not_send">kon niet versturen</string>
+    <string name="pay_no_node">geen node — kijk bij Status</string>
+    <string name="pay_no_address_error">Ze hebben geen adres gedeeld. Vraag ze een verzoek te sturen, of om \"laat contacten mij direct betalen\" aan te zetten.</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">%1$s versturen?</string>
+    <string name="pay_to">Aan %1$s</string>
+    <string name="pay_plus_fees">Plus ongeveer %1$s aan kosten — %2$s in totaal.</string>
+    <string name="pay_irreversible_warning">Monero-betalingen kunnen niet worden teruggedraaid of geannuleerd. Controleer het adres — er is niemand om bij aan te kloppen als het verkeerd is.</string>
+    <string name="pay_cancel">Annuleren</string>
+</resources>

@@ -15,7 +15,7 @@
     <string name="tab_accounts">Konten</string>
     <string name="tab_activity">Aktivität</string>
     <string name="tab_chat">Chat</string>
-    <string name="tab_send_receive">Senden/Empfangen</string>
+    <string name="tab_send_receive">Senden</string>
 
     <string name="section_status">Status</string>
     <string name="section_profile">Profil</string>
