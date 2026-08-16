@@ -168,6 +168,16 @@ pub struct ContactDetails {
     pub car_model: Option<String>,
     pub car_color: Option<String>,
     pub plate: Option<String>,
+    /// What this handshake is *for* — "profile" for a standing contact code,
+    /// "sale"/"hail"/"tab"/… for a transaction (§16.9).
+    ///
+    /// It travels so the party answering the card can scope what *they* reveal
+    /// to the moment: a plate belongs on a hail and a phone number belongs in a
+    /// contact exchange, but neither has any business riding a bar tab. The
+    /// issuer stamps it; the claimant reads it and trims its reply accordingly.
+    /// None (an older record, or a card that did not say) is treated as the
+    /// most private case — reveal nothing optional beyond a name.
+    pub purpose: Option<String>,
 }
 
 /// How to refer to someone.
@@ -231,6 +241,9 @@ pub const MAX_SIGNAL_CHARS: usize = 48;
 pub const MAX_CAR_MODEL_CHARS: usize = 24;
 pub const MAX_CAR_COLOR_CHARS: usize = 16;
 pub const MAX_PLATE_CHARS: usize = 12;
+/// Long enough for the handshake kinds a client sends ("profile", "sale",
+/// "hail", "tab", "intro"); short enough that it is a tag and not a payload.
+pub const MAX_PURPOSE_CHARS: usize = 16;
 
 /// `local@domain.tld`, deliberately strict.
 ///
@@ -348,6 +361,9 @@ impl ContactDetails {
         if let Some(v) = &self.plate {
             m.insert(f::DET_PLATE, Value::Text(v.clone()));
         }
+        if let Some(v) = &self.purpose {
+            m.insert(f::DET_PURPOSE, Value::Text(v.clone()));
+        }
         Value::Map(m)
     }
 
@@ -382,6 +398,7 @@ impl ContactDetails {
             car_model: r.opt_text(f::DET_CAR_MODEL, MAX_CAR_MODEL_CHARS)?,
             car_color: r.opt_text(f::DET_CAR_COLOR, MAX_CAR_COLOR_CHARS)?,
             plate: r.opt_text(f::DET_PLATE, MAX_PLATE_CHARS)?,
+            purpose: r.opt_text(f::DET_PURPOSE, MAX_PURPOSE_CHARS)?,
         };
         r.finish()?;
         for (v, what) in [

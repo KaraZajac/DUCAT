@@ -1205,6 +1205,7 @@ fn contact_cases() -> Vec<J> {
         car_model: None,
         car_color: None,
         plate: None,
+        purpose: None,
     };
     let mut detail = |name: &str, why: &str, d: &ContactDetails, bad: Option<(RejectCode, &str)>| {
         let hex_body = hex(&d.to_value().encode());

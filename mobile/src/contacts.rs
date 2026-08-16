@@ -235,6 +235,10 @@ pub fn build_contact_details(
     // cost of the address being reused — the caller decides, not this function.
     payto: Option<String>,
     profile: Profile,
+    // What this handshake is for ("profile", "sale", "hail", …). It rides so
+    // the party answering can scope their own reply to the moment; the caller
+    // is expected to have already trimmed `profile` to match.
+    purpose: Option<String>,
 ) -> Result<Vec<u8>, ContactError> {
     let sk = persona_key(&persona_secret)?;
     let pronouns = profile.pronouns_enum()?;
@@ -257,6 +261,7 @@ pub fn build_contact_details(
         car_model: profile.car_model,
         car_color: profile.car_color,
         plate: profile.plate,
+        purpose,
     }
     .to_value()
     .encode();
@@ -274,6 +279,11 @@ pub struct PeerDetails {
     /// Where they can be paid without asking, if they chose to publish it.
     pub payto: Option<String>,
     pub profile: Profile,
+    /// What the issuer said this handshake is for (§16.9) — "profile" for a
+    /// standing contact code, "sale"/"hail"/… for a transaction. The claimant
+    /// reads it to decide how much of their own profile to send back. None on
+    /// an older record that predates the field.
+    pub purpose: Option<String>,
 }
 
 #[uniffi::export]
@@ -295,6 +305,7 @@ pub fn parse_contact_details(bytes: Vec<u8>) -> Result<PeerDetails, ContactError
             car_color: d.car_color,
             plate: d.plate,
         },
+        purpose: d.purpose,
     })
 }
 

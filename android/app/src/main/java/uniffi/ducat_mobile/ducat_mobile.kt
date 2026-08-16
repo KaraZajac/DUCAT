@@ -912,7 +912,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_attachment_seal(`key`: RustBuffer.ByValue,`nonce`: RustBuffer.ByValue,`plaintext`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_build_contact_details(`personaSecret`: RustBuffer.ByValue,`outboxKey`: RustBuffer.ByValue,`prekeyBundle`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`profile`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_build_contact_details(`personaSecret`: RustBuffer.ByValue,`outboxKey`: RustBuffer.ByValue,`prekeyBundle`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`profile`: RustBuffer.ByValue,`purpose`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_build_log_head(`nextSeq`: Long,`prekeyBundle`: RustBuffer.ByValue,`readUpTo`: RustBuffer.ByValue,`ring`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1398,7 +1398,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_attachment_seal() != 27745.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_build_contact_details() != 30064.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_build_contact_details() != 60559.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_build_log_head() != 471.toShort()) {
@@ -3167,7 +3167,14 @@ data class PeerDetails (
      * Where they can be paid without asking, if they chose to publish it.
      */
     var `payto`: kotlin.String?, 
-    var `profile`: Profile
+    var `profile`: Profile, 
+    /**
+     * What the issuer said this handshake is for (§16.9) — "profile" for a
+     * standing contact code, "sale"/"hail"/… for a transaction. The claimant
+     * reads it to decide how much of their own profile to send back. None on
+     * an older record that predates the field.
+     */
+    var `purpose`: kotlin.String?
 ) {
     
     companion object
@@ -3185,6 +3192,7 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterTypeProfile.read(buf),
+            FfiConverterOptionalString.read(buf),
         )
     }
 
@@ -3194,7 +3202,8 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
             FfiConverterByteArray.allocationSize(value.`prekeyBundle`) +
             FfiConverterOptionalString.allocationSize(value.`assertedName`) +
             FfiConverterOptionalString.allocationSize(value.`payto`) +
-            FfiConverterTypeProfile.allocationSize(value.`profile`)
+            FfiConverterTypeProfile.allocationSize(value.`profile`) +
+            FfiConverterOptionalString.allocationSize(value.`purpose`)
     )
 
     override fun write(value: PeerDetails, buf: ByteBuffer) {
@@ -3204,6 +3213,7 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
             FfiConverterOptionalString.write(value.`assertedName`, buf)
             FfiConverterOptionalString.write(value.`payto`, buf)
             FfiConverterTypeProfile.write(value.`profile`, buf)
+            FfiConverterOptionalString.write(value.`purpose`, buf)
     }
 }
 
@@ -5173,11 +5183,11 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
         /**
          * the keys to seal with.
          */
-    @Throws(ContactException::class) fun `buildContactDetails`(`personaSecret`: kotlin.ByteArray, `outboxKey`: kotlin.String, `prekeyBundle`: kotlin.ByteArray, `displayName`: kotlin.String?, `payto`: kotlin.String?, `profile`: Profile): kotlin.ByteArray {
+    @Throws(ContactException::class) fun `buildContactDetails`(`personaSecret`: kotlin.ByteArray, `outboxKey`: kotlin.String, `prekeyBundle`: kotlin.ByteArray, `displayName`: kotlin.String?, `payto`: kotlin.String?, `profile`: Profile, `purpose`: kotlin.String?): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_build_contact_details(
-        FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`outboxKey`),FfiConverterByteArray.lower(`prekeyBundle`),FfiConverterOptionalString.lower(`displayName`),FfiConverterOptionalString.lower(`payto`),FfiConverterTypeProfile.lower(`profile`),_status)
+        FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`outboxKey`),FfiConverterByteArray.lower(`prekeyBundle`),FfiConverterOptionalString.lower(`displayName`),FfiConverterOptionalString.lower(`payto`),FfiConverterTypeProfile.lower(`profile`),FfiConverterOptionalString.lower(`purpose`),_status)
 }
     )
     }

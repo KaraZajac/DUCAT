@@ -118,8 +118,12 @@ object Mailbox {
                     WalletStore(context).addressFor("card_${inbox.key}")
                 } else null,
                 // §16.9: the profile rides the record, never the card. A card
-                // carrying a picture is a QR code nobody can scan.
-                MyProfile(context).toWire(),
+                // carrying a picture is a QR code nobody can scan. Scoped to
+                // the purpose — a "sale" card does not carry the till owner's
+                // phone number to every customer who claims it.
+                MyProfile(context).toWire(purpose = purpose),
+                // Stamped so the claimant can scope their reply to match.
+                purpose,
             ),
         )
 
@@ -204,7 +208,13 @@ object Mailbox {
                 if (store.publishAddress()) {
                     WalletStore(context).addressFor(theirs.persona.toHexString())
                 } else null,
-                MyProfile(context).toWire(driving = asDriver),
+                // Scope our reply to what the issuer said this handshake is for
+                // (§16.9): answering a "sale" card sends no reach-me identifiers,
+                // and a null purpose — an older card — is read as not a contact
+                // exchange, the private default. A driver claiming a hail still
+                // sends the car, which is what a rider is scanning the curb for.
+                MyProfile(context).toWire(purpose = theirs.purpose, driving = asDriver),
+                theirs.purpose,
             ),
         )
 

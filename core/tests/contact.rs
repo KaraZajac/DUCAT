@@ -94,6 +94,7 @@ fn details() -> ContactDetails {
         car_model: None,
         car_color: None,
         plate: None,
+        purpose: Some("sale".into()),
     }
 }
 

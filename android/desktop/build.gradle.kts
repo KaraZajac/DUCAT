@@ -59,6 +59,15 @@ tasks.register<JavaExec>("backuptest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// Proves §16.9's profile scope offline: reach-me identifiers ride only a
+// "profile" handshake, the car only a driving one, and the purpose survives the
+// wire. `./gradlew :desktop:profilescope`.
+tasks.register<JavaExec>("profilescope") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ProfileScopeTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The desk driven blind over the live network; pairs with the Rust harness
 // claiming the card it prints. `./gradlew :desktop:e2e`.
 tasks.register<JavaExec>("e2e") {

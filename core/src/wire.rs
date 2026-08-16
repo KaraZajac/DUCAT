@@ -202,6 +202,10 @@ pub mod f {
     pub const DET_CAR_MODEL: u64 = 210;
     pub const DET_CAR_COLOR: u64 = 211;
     pub const DET_PLATE: u64 = 212;
+    /// What kind of handshake this record answers: "profile" for a standing
+    /// contact code, "sale"/"hail"/etc. for a transaction. It scopes what the
+    /// *other* side reveals in reply — see ContactDetails::purpose.
+    pub const DET_PURPOSE: u64 = 217;
 
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;

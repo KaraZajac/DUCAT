@@ -78,22 +78,34 @@ class MyProfile(context: Context) {
 
     /** What actually goes on the record, after the share switch.
      *
-     *  The car rides only when [driving] — it exists for the one moment a
-     *  rider scans a curb for a stranger's vehicle (§15.12), and a plate is
-     *  a real-world identifier that has no business on every card handed
-     *  across a bar. */
-    fun toWire(driving: Boolean = false): Profile =
-        if (!shareProfile()) Profile(null, null, null, null, null, null, null, null)
-        else Profile(
+     *  Scoped to the handshake (§16.9), the same way the plate is. Email, phone
+     *  and signal are real-world identifiers — ways to reach a person off
+     *  DUCAT — and they ride only a deliberate contact exchange ([purpose] ==
+     *  "profile"), never a till, a tab, a ride or a hail. A plate has no
+     *  business on a card handed across a bar; neither does a phone number.
+     *
+     *  The car rides only when [driving] — the one moment a rider scans a curb
+     *  for a stranger's vehicle (§15.12). A face, a name and pronouns are the
+     *  low-cost gesture of introduction and ride wherever the share switch
+     *  allows: recognising who is at the counter is worth something and locates
+     *  no one off the app.
+     *
+     *  [purpose] null (an older peer's card, or one that did not say) is read
+     *  as *not* a contact exchange — the private default. */
+    fun toWire(purpose: String? = "profile", driving: Boolean = false): Profile {
+        if (!shareProfile()) return Profile(null, null, null, null, null, null, null, null)
+        val relational = purpose == "profile"
+        return Profile(
             avatar = avatar(),
-            email = email(),
-            phone = phone(),
-            signal = signal(),
+            email = if (relational) email() else null,
+            phone = if (relational) phone() else null,
+            signal = if (relational) signal() else null,
             pronouns = pronouns()?.toUInt(),
             carModel = if (driving) carModel() else null,
             carColor = if (driving) carColor() else null,
             plate = if (driving) plate() else null,
         )
+    }
 
     private fun put(key: String, v: String?) {
         prefs.edit().putString(key, v).apply()
