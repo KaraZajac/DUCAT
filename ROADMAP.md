@@ -92,9 +92,13 @@ money. Ordered by what blocks 1.0, not by effort.
 - ~~**Extraction.**~~ **Done, 0.88** — ~848 entries across 31 per-screen
   resource files; plurals used where count-driven; wire sentinels, state
   strings, and Locale.US parse formats deliberately left in code.
-- **Translations.** In flight: es fr de pt zh ar first, then it nl ru uk
-  pl tr ja ko fa hi id vi th. Each language is one values-<tag>/ mirror;
-  untranslated keys fall back to English per-string.
+- ~~**Translations.**~~ **Done, 0.88** — nineteen languages: es fr de pt
+  it nl ru uk pl tr zh ja ko ar fa hi id vi th. One values-<tag>/ mirror
+  per screen file, 845 strings + 15 plurals each, all mechanically
+  validated (placeholder multisets, key sets, sentinel dashes, plural
+  quantities per CLDR). RTL proven twice (ar, fa) with mirrored layout
+  and native digits. Untranslated keys fall back per-string, so a new
+  language can land partially and still ship.
 - **Known gaps.** Pronoun labels come from the bridge's pronounOptions()
   and need a mapping layer; notification text keeps the process-start
   language until restart (attachBaseContext runs once per process);
