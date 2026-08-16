@@ -88,9 +88,21 @@ money. Ordered by what blocks 1.0, not by effort.
   all three scanners watch every allocated minor; outputs record their
   receiving minor, and tab reconcile refuses an output that landed on
   someone else's — attribution by construction, not by believing a note.
-- **Storage encryption for the message store.** Threads, receipts, and
-  contact state sit in SharedPreferences plaintext; a lost phone is a
-  transcript. Android Keystore-wrapped encryption for the store files.
+- ~~**Storage encryption for the message store.**~~ **Done, 0.88
+  (2026-08-16)** — ducat_contacts (spend key, persona secret, contacts,
+  the whole message/receipt history) and ducat_ceremonies (escrow key
+  shares) now route through securePrefs(), an EncryptedSharedPreferences
+  chokepoint: AES-GCM values, AES-SIV keys, a master key that lives in the
+  Android Keystore and never touches disk. A one-time migration copies each
+  plaintext file into its _enc twin and deletes the original, ordered
+  commit-before-delete so a crash mid-migrate just re-copies next launch;
+  DucatApplication names both stores at startup so ceremonies migrate on
+  the first post-upgrade launch, not the next escrow. Settings (locale,
+  units, ride draft, map cache) stay plaintext by design — no secret, no
+  gain. Desktop gets a plaintext delegate of the same signature (no
+  Keystore, different threat model). Verified live: installed over real
+  plaintext data, 72+1 keys migrated, plaintext gone, _enc ciphertext with
+  the wallet address appearing zero times, wallet/contacts/history intact.
 - **Profile-wide privacy pass.** For every profile field: who needs it,
   at what moment, over which channel. Car/plate scoped to the hail claim
   was the pattern; apply it everywhere.
