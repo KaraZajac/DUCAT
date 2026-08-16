@@ -47,7 +47,12 @@ fi
 TAPS="tap-ducat tap-ducat2"
 
 down() {
-  pkill -f "dnsmasq.*ducat-taps" 2>/dev/null || true
+  # Both generations: v1 ran one dnsmasq per tap (…tap-ducat / …tap-ducat2),
+  # v2 runs one for both (…ducat-taps). A survivor from either keeps
+  # 10.0.2.3:53 bound to a deleted interface and silently breaks DNS for
+  # every guest, so the match is deliberately broad.
+  pkill -f "dnsmasq.*ducat" 2>/dev/null || true
+  sleep 0.5
   for TAP in $TAPS; do
     ip link del $TAP 2>/dev/null || true
   done
@@ -115,6 +120,14 @@ dnsmasq --listen-address=10.0.2.3 --bind-interfaces --except-interface=lo \
   --conf-file=/dev/null --pid-file=/run/dnsmasq-ducat-taps.pid \
   -k >/dev/null 2>&1 &
 disown
+
+# A resolver that failed to bind is indistinguishable from one that is
+# working, from the guest's side, until every hostname quietly fails.
+sleep 1
+if ! ss -lun | grep -q '10\.0\.2\.3:53'; then
+  echo "ERROR: dnsmasq did not bind 10.0.2.3:53 (stale process holding it?)" >&2
+  exit 1
+fi
 
 echo "ready: both taps speak the guest's native 10.0.2 dialect"
 echo "launch: scripts/emulator.sh [1|2]"
