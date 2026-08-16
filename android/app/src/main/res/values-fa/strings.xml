@@ -6,7 +6,6 @@
     <string name="unit_mi">مایل</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">تمام</string>
     <string name="common_cancel">لغو</string>
 
     <!-- ===== Navigation ===== -->
@@ -39,7 +38,6 @@
 
     <string name="settings_prices_title">قیمت‌ها</string>
     <string name="prices_show_worth">نشان بده موجودی چقدر می‌ارزد</string>
-    <string name="prices_currency_title">ارز</string>
     <string name="prices_this_phone">این گوشی</string>
     <string name="prices_source_note">حداکثر دو بار در ساعت از CoinGecko یا Kraken بررسی می‌شود. اگر خاموشش کنی، این درخواست به‌کلی متوقف می‌شود.</string>
     <string name="prices_last_from">آخرین قیمت از %1$s.</string>

@@ -7,7 +7,6 @@
     <string name="unit_mi">마일</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">완료</string>
     <string name="common_cancel">취소</string>
 
     <!-- ===== Navigation ===== -->
@@ -40,7 +39,6 @@
 
     <string name="settings_prices_title">시세</string>
     <string name="prices_show_worth">잔액의 가치 표시</string>
-    <string name="prices_currency_title">통화</string>
     <string name="prices_this_phone">이 휴대폰</string>
     <string name="prices_source_note">CoinGecko나 Kraken에서 한 시간에 최대 두 번 확인해요. 이 기능을 끄면 요청 자체를 보내지 않아요.</string>
     <string name="prices_last_from">마지막 출처: %1$s.</string>

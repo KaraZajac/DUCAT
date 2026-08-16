@@ -6,7 +6,6 @@
     <string name="unit_mi">mi</string>
 
     <!-- Common -->
-    <string name="common_done">Hecho</string>
     <string name="common_cancel">Cancelar</string>
 
     <!-- Navigation -->
@@ -39,7 +38,6 @@
 
     <string name="settings_prices_title">Precios</string>
     <string name="prices_show_worth">Mostrar cuánto vale un saldo</string>
-    <string name="prices_currency_title">Moneda</string>
     <string name="prices_this_phone">este teléfono</string>
     <string name="prices_source_note">Se consulta como máximo dos veces por hora, desde CoinGecko o Kraken. Al desactivarlo se detiene la solicitud por completo.</string>
     <string name="prices_last_from">Última desde %1$s.</string>

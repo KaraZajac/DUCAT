@@ -6,7 +6,6 @@
     <string name="unit_mi">ميل</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">تم</string>
     <string name="common_cancel">إلغاء</string>
 
     <!-- ===== Navigation ===== -->
@@ -39,7 +38,6 @@
 
     <string name="settings_prices_title">الأسعار</string>
     <string name="prices_show_worth">إظهار قيمة الرصيد</string>
-    <string name="prices_currency_title">العملة</string>
     <string name="prices_this_phone">هذا الهاتف</string>
     <string name="prices_source_note">يُتحقق منها مرتين في الساعة على الأكثر، من CoinGecko أو Kraken. إيقاف هذا يوقف الطلب تمامًا.</string>
     <string name="prices_last_from">آخر سعر من %1$s.</string>

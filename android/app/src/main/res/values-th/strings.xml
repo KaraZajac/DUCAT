@@ -7,7 +7,6 @@
     <string name="unit_mi">ไมล์</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">เสร็จ</string>
     <string name="common_cancel">ยกเลิก</string>
 
     <!-- ===== Navigation ===== -->
@@ -40,7 +39,6 @@
 
     <string name="settings_prices_title">ราคา</string>
     <string name="prices_show_worth">แสดงมูลค่าของยอดคงเหลือ</string>
-    <string name="prices_currency_title">สกุลเงิน</string>
     <string name="prices_this_phone">โทรศัพท์เครื่องนี้</string>
     <string name="prices_source_note">ตรวจสอบไม่เกินสองครั้งต่อชั่วโมง จาก CoinGecko หรือ Kraken การปิดตัวเลือกนี้จะหยุดคำขอทั้งหมด</string>
     <string name="prices_last_from">ล่าสุดจาก %1$s</string>

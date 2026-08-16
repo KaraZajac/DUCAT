@@ -331,30 +331,24 @@ private fun RateSettings() {
         }
         if (on) {
             Spacer(Modifier.height(8.dp))
-            var picking by remember { mutableStateOf(false) }
-            OutlinedButton(onClick = { picking = true }) {
-                Text(cur)
-                Spacer(Modifier.width(6.dp))
-                Icon(Icons.Filled.ArrowDropDown, null, Modifier.size(18.dp))
-            }
-            if (picking) {
-                AlertDialog(
-                    onDismissRequest = { picking = false },
-                    title = { Text(stringResource(R.string.prices_currency_title)) },
-                    text = {
-                        LazyColumn(Modifier.heightIn(max = 360.dp)) {
-                            items(RateStore.SUPPORTED) { c ->
-                                Row(
-                                    Modifier.fillMaxWidth()
-                                        .clickable { cur = c; store.setCurrency(c); picking = false }
-                                        .padding(vertical = 10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    RadioButton(
-                                        selected = cur == c,
-                                        onClick = { cur = c; store.setCurrency(c); picking = false },
-                                    )
-                                    Spacer(Modifier.width(8.dp))
+            var open by remember { mutableStateOf(false) }
+            // The same shape as the language picker above: a dropdown at the
+            // button, scrolling in place, dismissed by tapping elsewhere.
+            Box {
+                OutlinedButton(onClick = { open = true }) {
+                    Text(cur)
+                    Spacer(Modifier.width(6.dp))
+                    Icon(Icons.Filled.ArrowDropDown, null, Modifier.size(18.dp))
+                }
+                DropdownMenu(
+                    expanded = open,
+                    onDismissRequest = { open = false },
+                    modifier = Modifier.heightIn(max = 420.dp),
+                ) {
+                    RateStore.SUPPORTED.forEach { c ->
+                        DropdownMenuItem(
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(c)
                                     if (c == store.deviceCurrency()) {
                                         Spacer(Modifier.width(8.dp))
@@ -365,15 +359,14 @@ private fun RateSettings() {
                                         )
                                     }
                                 }
-                            }
-                        }
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { picking = false }) {
-                            Text(stringResource(R.string.common_done))
-                        }
-                    },
-                )
+                            },
+                            onClick = { cur = c; store.setCurrency(c); open = false },
+                            trailingIcon = if (cur == c) {
+                                { Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }
+                            } else null,
+                        )
+                    }
+                }
             }
             Spacer(Modifier.height(8.dp))
             val note = stringResource(R.string.prices_source_note)

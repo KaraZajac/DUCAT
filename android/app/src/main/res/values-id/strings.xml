@@ -7,7 +7,6 @@
     <string name="unit_mi">mi</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">Selesai</string>
     <string name="common_cancel">Batal</string>
 
     <!-- ===== Navigation ===== -->
@@ -40,7 +39,6 @@
 
     <string name="settings_prices_title">Harga</string>
     <string name="prices_show_worth">Tampilkan nilai saldo</string>
-    <string name="prices_currency_title">Mata uang</string>
     <string name="prices_this_phone">ponsel ini</string>
     <string name="prices_source_note">Dicek paling banyak dua kali sejam, dari CoinGecko atau Kraken. Kalau dimatikan, permintaannya berhenti sama sekali.</string>
     <string name="prices_last_from">Terakhir dari %1$s.</string>

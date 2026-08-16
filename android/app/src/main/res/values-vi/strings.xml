@@ -7,7 +7,6 @@
     <string name="unit_mi">dặm</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">Xong</string>
     <string name="common_cancel">Hủy</string>
 
     <!-- ===== Navigation ===== -->
@@ -40,7 +39,6 @@
 
     <string name="settings_prices_title">Giá</string>
     <string name="prices_show_worth">Hiện giá trị của số dư</string>
-    <string name="prices_currency_title">Tiền tệ</string>
     <string name="prices_this_phone">điện thoại này</string>
     <string name="prices_source_note">Kiểm tra nhiều nhất hai lần mỗi giờ, từ CoinGecko hoặc Kraken. Tắt đi thì yêu cầu này dừng hẳn.</string>
     <string name="prices_last_from">Lần gần nhất từ %1$s.</string>

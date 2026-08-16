@@ -7,7 +7,6 @@
     <string name="unit_mi">mi</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">Terminé</string>
     <string name="common_cancel">Annuler</string>
 
     <!-- ===== Navigation ===== -->
@@ -40,7 +39,6 @@
 
     <string name="settings_prices_title">Prix</string>
     <string name="prices_show_worth">Afficher ce que vaut un solde</string>
-    <string name="prices_currency_title">Devise</string>
     <string name="prices_this_phone">ce téléphone</string>
     <string name="prices_source_note">Vérifié au plus deux fois par heure, auprès de CoinGecko ou Kraken. Désactiver coupe entièrement la requête.</string>
     <string name="prices_last_from">Dernier relevé : %1$s.</string>

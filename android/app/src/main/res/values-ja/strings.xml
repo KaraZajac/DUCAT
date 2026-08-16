@@ -7,7 +7,6 @@
     <string name="unit_mi">マイル</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">完了</string>
     <string name="common_cancel">キャンセル</string>
 
     <!-- ===== Navigation ===== -->
@@ -40,7 +39,6 @@
 
     <string name="settings_prices_title">価格</string>
     <string name="prices_show_worth">残高の価値を表示する</string>
-    <string name="prices_currency_title">通貨</string>
     <string name="prices_this_phone">この端末</string>
     <string name="prices_source_note">CoinGeckoまたはKrakenから、多くても1時間に2回確認します。オフにするとリクエスト自体を行いません。</string>
     <string name="prices_last_from">最終取得元: %1$s。</string>

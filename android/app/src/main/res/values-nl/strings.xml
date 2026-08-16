@@ -6,7 +6,6 @@
     <string name="unit_mi">mi</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">Klaar</string>
     <string name="common_cancel">Annuleren</string>
 
     <!-- ===== Navigation ===== -->
@@ -39,7 +38,6 @@
 
     <string name="settings_prices_title">Prijzen</string>
     <string name="prices_show_worth">Toon wat een saldo waard is</string>
-    <string name="prices_currency_title">Valuta</string>
     <string name="prices_this_phone">deze telefoon</string>
     <string name="prices_source_note">Hoogstens twee keer per uur opgevraagd, bij CoinGecko of Kraken. Zet je dit uit, dan stopt dat verzoek helemaal.</string>
     <string name="prices_last_from">Laatste van %1$s.</string>

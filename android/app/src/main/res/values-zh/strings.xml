@@ -7,7 +7,6 @@
     <string name="unit_mi">英里</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">完成</string>
     <string name="common_cancel">取消</string>
 
     <!-- ===== Navigation ===== -->
@@ -40,7 +39,6 @@
 
     <string name="settings_prices_title">价格</string>
     <string name="prices_show_worth">显示余额值多少钱</string>
-    <string name="prices_currency_title">货币</string>
     <string name="prices_this_phone">本机</string>
     <string name="prices_source_note">每小时最多查询两次，来自 CoinGecko 或 Kraken。关闭后将完全不再发出请求。</string>
     <string name="prices_last_from">最近一次来自 %1$s。</string>

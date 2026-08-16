@@ -7,7 +7,6 @@
     <string name="unit_mi">mil</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">Bitti</string>
     <string name="common_cancel">İptal</string>
 
     <!-- ===== Navigation ===== -->
@@ -40,7 +39,6 @@
 
     <string name="settings_prices_title">Fiyatlar</string>
     <string name="prices_show_worth">Bakiyenin ne ettiğini göster</string>
-    <string name="prices_currency_title">Para birimi</string>
     <string name="prices_this_phone">bu telefon</string>
     <string name="prices_source_note">Saatte en fazla iki kez, CoinGecko veya Kraken\'den kontrol edilir. Bunu kapatmak isteği tamamen durdurur.</string>
     <string name="prices_last_from">Son veri: %1$s.</string>

@@ -6,7 +6,6 @@
     <string name="unit_mi">मील</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">हो गया</string>
     <string name="common_cancel">रद्द करें</string>
 
     <!-- ===== Navigation ===== -->
@@ -39,7 +38,6 @@
 
     <string name="settings_prices_title">भाव</string>
     <string name="prices_show_worth">बैलेंस की कीमत दिखाएँ</string>
-    <string name="prices_currency_title">मुद्रा</string>
     <string name="prices_this_phone">यह फ़ोन</string>
     <string name="prices_source_note">घंटे में ज़्यादा-से-ज़्यादा दो बार, CoinGecko या Kraken से पूछा जाता है। इसे बंद करने पर यह अनुरोध पूरी तरह रुक जाता है।</string>
     <string name="prices_last_from">पिछली बार %1$s से।</string>

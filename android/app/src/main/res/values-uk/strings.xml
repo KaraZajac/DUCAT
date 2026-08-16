@@ -6,7 +6,6 @@
     <string name="unit_mi">мі</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">Готово</string>
     <string name="common_cancel">Скасувати</string>
 
     <!-- ===== Navigation ===== -->
@@ -39,7 +38,6 @@
 
     <string name="settings_prices_title">Ціни</string>
     <string name="prices_show_worth">Показувати, скільки коштує баланс</string>
-    <string name="prices_currency_title">Валюта</string>
     <string name="prices_this_phone">цей телефон</string>
     <string name="prices_source_note">Перевіряється щонайбільше двічі на годину, з CoinGecko або Kraken. Якщо це вимкнути, запити припиняються зовсім.</string>
     <string name="prices_last_from">Востаннє з %1$s.</string>

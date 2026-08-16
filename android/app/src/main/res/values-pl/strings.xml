@@ -6,7 +6,6 @@
     <string name="unit_mi">mi</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">Gotowe</string>
     <string name="common_cancel">Anuluj</string>
 
     <!-- ===== Navigation ===== -->
@@ -39,7 +38,6 @@
 
     <string name="settings_prices_title">Ceny</string>
     <string name="prices_show_worth">Pokazuj, ile warte jest saldo</string>
-    <string name="prices_currency_title">Waluta</string>
     <string name="prices_this_phone">ten telefon</string>
     <string name="prices_source_note">Sprawdzane najwyżej dwa razy na godzinę, ze źródeł CoinGecko lub Kraken. Wyłączenie tego całkowicie zatrzymuje zapytania.</string>
     <string name="prices_last_from">Ostatnio z: %1$s.</string>

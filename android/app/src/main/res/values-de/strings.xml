@@ -7,7 +7,6 @@
     <string name="unit_mi">mi</string>
 
     <!-- ===== Common ===== -->
-    <string name="common_done">Fertig</string>
     <string name="common_cancel">Abbrechen</string>
 
     <!-- ===== Navigation ===== -->
@@ -40,7 +39,6 @@
 
     <string name="settings_prices_title">Preise</string>
     <string name="prices_show_worth">Zeigen, was ein Guthaben wert ist</string>
-    <string name="prices_currency_title">Währung</string>
     <string name="prices_this_phone">dieses Telefon</string>
     <string name="prices_source_note">Höchstens zweimal pro Stunde abgefragt, von CoinGecko oder Kraken. Ausschalten stoppt die Anfrage komplett.</string>
     <string name="prices_last_from">Zuletzt von %1$s.</string>
