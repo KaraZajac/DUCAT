@@ -721,7 +721,18 @@ private fun AmountStep(
                 scope.launch {
                     val r = withContext(Dispatchers.IO) {
                         runCatching {
+                            // A demoted node leaves lastGood empty; the user's
+                            // retry deserves a fresh probe, not "no node".
                             val node = NodeStore(context).lastGood()
+                                ?: runCatching {
+                                    uniffi.ducat_mobile.moneroPickNode(
+                                        uniffi.ducat_mobile.moneroDefaultNodes(
+                                            NodeStore(context).ownUrl()),
+                                        "stagenet", 8000u,
+                                    ).also {
+                                        NodeStore(context).rememberLastGood(it.url)
+                                    }.url
+                                }.getOrNull()
                                 ?: throw IllegalStateException(
                                     context.getString(R.string.pay_no_node)
                                 )

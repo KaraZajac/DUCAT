@@ -205,6 +205,7 @@ object Wallet {
             val known = store.entries().map { it.keyImage }.toSet()
             store.recordScan(r.scannedTo.toLong(), r.tip.toLong(), r.outputs)
             store.recordScanError(null)
+            NodeStore(context).nodeSucceeded()
             for (o in r.outputs.filter { it.keyImageHex !in known }) {
                 DucatLog.i(
                     TAG,
@@ -224,6 +225,9 @@ object Wallet {
             // cause disappear while the screen said "not started".
             DucatLog.w(TAG, "scan failed: ${e}")
             store.recordScanError(e.message ?: e.toString())
+            if (NodeStore(context).nodeFailed()) {
+                DucatLog.w(TAG, "node demoted after repeated failures — will re-probe")
+            }
             false
         }
     }
@@ -325,7 +329,14 @@ object Wallet {
         val node = NodeStore(context).lastGood() ?: return 0
         val key = "$node|$inputs|$priority"
         val now = System.currentTimeMillis()
-        feeCache?.let { (k, fee, at) -> if (k == key && now - at < 60_000) return fee }
+        // A zero is a cached *failure* and expires sooner, so a sick node is
+        // retried in seconds — but not once per keystroke, which is what the
+        // field log showed: a burst of identical estimate errors as the
+        // amount field recomposed against a node that had stopped answering.
+        feeCache?.let { (k, fee, at) ->
+            val ttl = if (fee == 0L) 15_000 else 60_000
+            if (k == key && now - at < ttl) return fee
+        }
         return try {
             val e = uniffi.ducat_mobile.moneroFeeEstimate(
                 node, inputs.coerceAtLeast(1).toUInt(), 2u, priority.toUInt(),
@@ -334,6 +345,7 @@ object Wallet {
             e.feePxmr.toLong()
         } catch (e: Exception) {
             DucatLog.w(TAG, "fee estimate: ${e.message}")
+            feeCache = Triple(key, 0L, now)
             0
         }
     }
@@ -423,6 +435,12 @@ object Wallet {
             )
         } catch (e: Throwable) {
             DucatLog.e(TAG, "send failed: ${e.message ?: e}")
+            // A failed send counts against the node like a failed scan does:
+            // the retry the user is about to make should not be fed to the
+            // same dying node until it re-earns its place.
+            if (NodeStore(context).nodeFailed()) {
+                DucatLog.w(TAG, "node demoted after repeated failures — will re-probe")
+            }
             throw e
         }
         DucatLog.i(

@@ -1687,6 +1687,29 @@ class NodeStore(context: Context) {
         prefs.edit().putString("monero_last_good", url).apply()
 
     fun lastGood(): String? = prefs.getString("monero_last_good", null)
+
+    /** A node call worked: the current node keeps its job. */
+    fun nodeSucceeded() = prefs.edit().putInt("monero_node_fails", 0).apply()
+
+    /**
+     * A node call failed. Three strikes clears [lastGood] so the next poll
+     * cycle re-probes the candidates instead of hammering a dying node
+     * forever — which is exactly what a field phone did for nine hours
+     * (2026-08-17): scans, fee estimates and finally a send all fed to a
+     * node that had stopped answering, because nothing ever demoted it.
+     *
+     * @return true when this failure demoted the node.
+     */
+    fun nodeFailed(): Boolean {
+        val n = prefs.getInt("monero_node_fails", 0) + 1
+        return if (n >= 3) {
+            prefs.edit().remove("monero_last_good").putInt("monero_node_fails", 0).apply()
+            true
+        } else {
+            prefs.edit().putInt("monero_node_fails", n).apply()
+            false
+        }
+    }
 }
 
 
