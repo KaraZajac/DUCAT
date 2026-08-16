@@ -8,11 +8,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.WalletStore
 
 /**
@@ -57,13 +59,14 @@ fun DonateScreen() {
         Avatar(name ?: "?", pic, size = 72)
         Spacer(Modifier.height(10.dp))
         Text(
-            if (name != null) "Support $name" else "Support",
+            if (name != null) stringResource(R.string.donate_support_name, name)
+            else stringResource(R.string.donate_support),
             style = MaterialTheme.typography.headlineMedium,
         )
         Spacer(Modifier.height(16.dp))
 
         if (address == null) {
-            Text("No wallet yet — finish setup first.",
+            Text(stringResource(R.string.donate_no_wallet),
                 color = MaterialTheme.colorScheme.error)
             return@Column
         }
@@ -71,7 +74,7 @@ fun DonateScreen() {
         QrBlock("monero:$address")
         Spacer(Modifier.height(10.dp))
         Text(
-            "Any Monero wallet can give here — nobody needs this app.",
+            stringResource(R.string.donate_any_wallet),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -80,7 +83,7 @@ fun DonateScreen() {
         if (since > 0) {
             Spacer(Modifier.height(20.dp))
             Text(
-                "Since opening",
+                stringResource(R.string.donate_since_opening),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -101,10 +104,7 @@ fun DonateScreen() {
             shape = MaterialTheme.shapes.large,
         ) {
             Text(
-                "This one code is reused by every donor, so on Monero's public " +
-                    "ledger the donations to it are linkable to each other. And a " +
-                    "printed code is only as honest as whoever last touched it — " +
-                    "check it is yours where you post it.",
+                stringResource(R.string.donate_reuse_warning),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(14.dp),

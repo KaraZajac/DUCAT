@@ -8,6 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.NodeStore
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.SyncBlocker
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
@@ -58,7 +61,10 @@ fun MoneroPanel() {
             }
             busy = false
             r.onSuccess { status = it; store.rememberLastGood(it.url) }
-                .onFailure { status = null; error = it.message ?: "no usable node" }
+                .onFailure {
+                    status = null
+                    error = it.message ?: context.getString(R.string.monero_no_usable_node)
+                }
         }
     }
 
@@ -67,16 +73,16 @@ fun MoneroPanel() {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Monero", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.monero_title), style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.weight(1f))
                 AssistChip(onClick = {}, label = { Text("stagenet") })
                 IconButton(onClick = { refresh() }, enabled = !busy) {
-                    Icon(Icons.Filled.Refresh, "Check again")
+                    Icon(Icons.Filled.Refresh, stringResource(R.string.monero_check_again))
                 }
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                "Where transactions are broadcast and the chain is read.",
+                stringResource(R.string.monero_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -86,7 +92,7 @@ fun MoneroPanel() {
                 busy && status == null -> Row(verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                     Spacer(Modifier.width(10.dp))
-                    Text("Finding a node…")
+                    Text(stringResource(R.string.monero_finding_node))
                 }
                 status != null -> {
                     val s = status!!
@@ -97,15 +103,22 @@ fun MoneroPanel() {
                              style = MaterialTheme.typography.bodySmall)
                     }
                     Spacer(Modifier.height(8.dp))
-                    Line("height", "${s.height}")
-                    Line("synced", if (s.synced) "yes" else "no — balances would be stale")
-                    Line("network", s.nettype)
-                    Line("round trip", "${s.rttMs} ms")
+                    Line(stringResource(R.string.monero_line_height), "${s.height}")
+                    Line(
+                        stringResource(R.string.monero_line_synced),
+                        if (s.synced) stringResource(R.string.monero_synced_yes)
+                        else stringResource(R.string.monero_synced_no),
+                    )
+                    Line(stringResource(R.string.monero_line_network), s.nettype)
+                    Line(
+                        stringResource(R.string.monero_line_round_trip),
+                        stringResource(R.string.monero_round_trip_ms, "${s.rttMs}"),
+                    )
                     Spacer(Modifier.height(10.dp))
                     TrustNote(trustOf(store.ownUrl(), s.url))
                 }
                 else -> Text(
-                    error ?: "no node",
+                    error ?: stringResource(R.string.monero_no_node),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -117,13 +130,16 @@ fun MoneroPanel() {
             Spacer(Modifier.height(14.dp))
             if (!editing) {
                 TextButton(onClick = { editing = true }) {
-                    Text(if (store.ownUrl() != null) "Change your node" else "Use your own node")
+                    Text(
+                        if (store.ownUrl() != null) stringResource(R.string.monero_change_your_node)
+                        else stringResource(R.string.monero_use_own_node)
+                    )
                 }
             } else {
                 OutlinedTextField(
                     value = ownUrl,
                     onValueChange = { ownUrl = it },
-                    label = { Text("Your node") },
+                    label = { Text(stringResource(R.string.monero_your_node)) },
                     placeholder = { Text("http://192.168.1.10:38081") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -134,13 +150,13 @@ fun MoneroPanel() {
                         store.setOwnUrl(ownUrl.ifBlank { null })
                         editing = false
                         refresh()
-                    }) { Text("Use it") }
+                    }) { Text(stringResource(R.string.monero_use_it)) }
                     if (store.ownUrl() != null) {
                         OutlinedButton(onClick = {
                             store.setOwnUrl(null); ownUrl = ""; editing = false; refresh()
-                        }) { Text("Back to public") }
+                        }) { Text(stringResource(R.string.monero_back_to_public)) }
                     }
-                    TextButton(onClick = { editing = false }) { Text("Cancel") }
+                    TextButton(onClick = { editing = false }) { Text(stringResource(R.string.monero_cancel)) }
                 }
             }
         }
@@ -157,21 +173,18 @@ private fun trustOf(own: String?, inUse: String): NodeTrust = when {
 private fun TrustNote(trust: NodeTrust) {
     val (title, body, colour) = when (trust) {
         NodeTrust.OWN -> Triple(
-            "Your node",
-            "It learns nothing about you that you did not already know.",
+            stringResource(R.string.monero_trust_own_title),
+            stringResource(R.string.monero_trust_own_body),
             MaterialTheme.ducat.settled,
         )
         NodeTrust.ONION -> Triple(
-            "Someone else's node, over Tor",
-            "It sees your transactions but not where they came from.",
+            stringResource(R.string.monero_trust_onion_title),
+            stringResource(R.string.monero_trust_onion_body),
             MaterialTheme.colorScheme.onSurfaceVariant,
         )
         NodeTrust.PUBLIC_CLEARNET -> Triple(
-            "Someone else's node",
-            "It sees your address and your transactions together. Dandelion++ " +
-                "hides a transaction's origin from the rest of the network — it " +
-                "cannot hide it from the node you handed it to. Running your own " +
-                "is the fix.",
+            stringResource(R.string.monero_trust_public_title),
+            stringResource(R.string.monero_trust_public_body),
             MaterialTheme.ducat.lowCapacity,
         )
     }
@@ -212,50 +225,46 @@ private fun WalletSync(nodeHeight: Long) {
     val b = remember(version, nodeHeight) { Wallet.balances(context) }
     var rescanOpen by remember { mutableStateOf(false) }
 
-    Text("Wallet", style = MaterialTheme.typography.titleSmall)
+    Text(stringResource(R.string.monero_wallet_title), style = MaterialTheme.typography.titleSmall)
     Spacer(Modifier.height(6.dp))
 
     when {
         b.tip == 0L -> when (remember(version) { Wallet.blocker(context) }) {
             SyncBlocker.NoWallet -> Column {
                 Text(
-                    "No wallet key on this device",
+                    stringResource(R.string.monero_no_wallet_key_title),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.error,
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "This install finished setup before the app kept the wallet, so " +
-                        "there is nothing to scan with. Waiting will not fix it — " +
-                        "restore from a backup, or clear the app's data and set up " +
-                        "again.",
+                    stringResource(R.string.monero_no_wallet_key_body),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             SyncBlocker.Failing -> Column {
                 Text(
-                    "Scanning failed",
+                    stringResource(R.string.monero_scanning_failed),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.error,
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    Wallet.lastError(context) ?: "unknown",
+                    Wallet.lastError(context) ?: stringResource(R.string.monero_unknown),
                     style = MaterialTheme.typography.bodySmall,
                     fontFamily = FontFamily.Monospace,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    "The node above answered, so this is the wallet's own read of " +
-                        "the chain rather than the connection.",
+                    stringResource(R.string.monero_scanning_failed_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             else -> Text(
-                "Not started — looking for a node.",
+                stringResource(R.string.monero_not_started),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -264,7 +273,10 @@ private fun WalletSync(nodeHeight: Long) {
         !b.syncing -> Row(verticalAlignment = Alignment.CenterVertically) {
             Text("✓", color = MaterialTheme.ducat.settled)
             Spacer(Modifier.width(8.dp))
-            Text("Caught up at block ${b.tip}", style = MaterialTheme.typography.bodySmall)
+            Text(
+                stringResource(R.string.monero_caught_up, b.tip),
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
 
         else -> Column {
@@ -275,7 +287,7 @@ private fun WalletSync(nodeHeight: Long) {
             Spacer(Modifier.height(8.dp))
             Row {
                 Text(
-                    "block ${b.scannedTo} of ${b.tip}",
+                    stringResource(R.string.monero_block_of, b.scannedTo, b.tip),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -288,7 +300,12 @@ private fun WalletSync(nodeHeight: Long) {
             Spacer(Modifier.height(4.dp))
             Text(
                 buildString {
-                    append("${b.blocksLeft} blocks to go")
+                    append(
+                        pluralStringResource(
+                            R.plurals.monero_blocks_to_go,
+                            b.blocksLeft.toInt(), b.blocksLeft,
+                        )
+                    )
                     // Only when it has been measured. A made-up estimate is
                     // worse than none, because people plan around it.
                     b.secondsLeft?.let { append(" · ${humanDuration(it)}") }
@@ -298,7 +315,7 @@ private fun WalletSync(nodeHeight: Long) {
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                "Your balance is only what has been read so far.",
+                stringResource(R.string.monero_partial_balance),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.ducat.changePending,
             )
@@ -309,7 +326,7 @@ private fun WalletSync(nodeHeight: Long) {
             b.error?.let { e ->
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Last window failed: $e",
+                    stringResource(R.string.monero_last_window_failed, e),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                 )
@@ -320,13 +337,12 @@ private fun WalletSync(nodeHeight: Long) {
             if (b.scannedTo in 1..(b.tip - 100_000)) {
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    "This wallet is scanning from the beginning of the chain, which " +
-                        "takes far longer than it needs to if it was made recently.",
+                    stringResource(R.string.monero_rescan_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                 )
                 Spacer(Modifier.height(6.dp))
-                OutlinedButton(onClick = { rescanOpen = true }) { Text("Skip ahead") }
+                OutlinedButton(onClick = { rescanOpen = true }) { Text(stringResource(R.string.monero_skip_ahead)) }
             }
         }
     }

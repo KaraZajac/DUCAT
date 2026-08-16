@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">Back</string>
+    <string name="profile_calls_themselves">calls themselves \"%1$s\"</string>
+    <string name="profile_label_email">Email</string>
+    <string name="profile_label_phone">Phone</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">What they shared</string>
+    <string name="profile_their_claim_note">Their claim, not a check. Nothing ties a DUCAT persona to an email or a number — only to a key.</string>
+    <string name="profile_your_name_for_them_label">Your name for them</string>
+    <string name="profile_your_name_for_them_support">Only you see this. It is the name shown everywhere.</string>
+    <string name="profile_saved">Saved</string>
+    <string name="profile_save_name">Save name</string>
+    <string name="profile_checked">Checked</string>
+    <string name="profile_checked_note">Verified cryptographically. Every card they hand out is signed by this key and checked against it.</string>
+    <string name="profile_persona">Persona</string>
+    <string name="profile_told_to_you">Told to you</string>
+    <string name="profile_told_note">Supplied by them and not verified by anything. Nothing in DUCAT ties a Monero address or a name to a persona, so check these another way if it matters.</string>
+    <string name="profile_their_name_label">Their name for themselves</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— none given —</string>
+    <string name="profile_monero_address">Monero address</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— not shared; they must send a request —</string>
+    <string name="profile_where_reached">Where they are reached</string>
+    <string name="profile_their_outbox">Their outbox</string>
+    <string name="profile_your_outbox">Your outbox to them</string>
+    <string name="profile_open_chat">Open chat</string>
+    <string name="profile_not_built_yet">Not built yet</string>
+    <string name="profile_not_built_note">A picture, pronouns, an email address, and blocking. All optional, all set during setup, and all travelling the same way a name does — asserted by them, never verified by us.</string>
+    <string name="profile_copy">Copy</string>
+</resources>

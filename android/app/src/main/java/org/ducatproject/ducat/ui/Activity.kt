@@ -139,7 +139,7 @@ fun ActivityScreen() {
                             (if (r.items.isNotEmpty())
                                 pluralStringResource(
                                     R.plurals.activity_items, r.items.size, r.items.size,
-                                ) + " · " else "") + whenText(r.timestamp),
+                                ) + " · " else "") + whenText(context, r.timestamp),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline,
                         )
@@ -271,9 +271,9 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
                         e.provisional -> stringResource(R.string.activity_maybe_change)
                         e.locked -> stringResource(
                             R.string.activity_locked_when,
-                            whenText(e.timestamp), e.unlocksInBlocks,
+                            whenText(context, e.timestamp), e.unlocksInBlocks,
                         )
-                        else -> whenText(e.timestamp)
+                        else -> whenText(context, e.timestamp)
                     },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline,
@@ -305,8 +305,8 @@ private fun who(context: Context, e: Ledger.Event): String {
 }
 
 /** A date and a time, because a block height is not a moment to anybody. */
-internal fun whenText(epochSecs: Long): String {
-    if (epochSecs <= 0) return "time unknown"
+internal fun whenText(context: Context, epochSecs: Long): String {
+    if (epochSecs <= 0) return context.getString(R.string.txdetail_time_unknown)
     val d = java.util.Date(epochSecs * 1000)
     return java.text.SimpleDateFormat("d MMM yyyy, HH:mm", java.util.Locale.getDefault()).format(d)
 }

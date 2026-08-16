@@ -29,10 +29,10 @@ object Notify {
         val mgr = context.getSystemService(NotificationManager::class.java) ?: return null
         mgr.createNotificationChannel(
             NotificationChannel(
-                CHANNEL, "Messages & payments",
+                CHANNEL, context.getString(R.string.notify_channel_name),
                 NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
-                description = "A message, a bill, a receipt, or money arriving."
+                description = context.getString(R.string.notify_channel_desc)
             }
         )
         return mgr
@@ -61,8 +61,8 @@ object Notify {
         )
         val fact = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_ducat_mono)
-            .setContentTitle("DUCAT")
-            .setContentText("Activity")
+            .setContentTitle(context.getString(R.string.app_name))
+            .setContentText(context.getString(R.string.notify_public_activity))
             .build()
         val full = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_ducat_mono)
@@ -83,11 +83,15 @@ object Notify {
     /** An inbound thread message, worded by what it is (§16.13's kinds). */
     fun message(context: Context, from: String, personaHex: String, m: StoredMessage) {
         val what = when (m.kind) {
-            1 -> "$from asks for ${xmr(m.amountPxmr)}" +
-                (m.body.takeIf { it.isNotBlank() && it != "Payment request" }
-                    ?.let { " — $it" } ?: "")
-            2 -> "$from sent ${xmr(m.amountPxmr)}"
-            3 -> "Receipt from $from — ${xmr(m.amountPxmr)}"
+            1 -> {
+                val note = m.body.takeIf { it.isNotBlank() && it != "Payment request" }
+                if (note != null) context.getString(
+                    R.string.notify_asks_for_note, from, xmr(m.amountPxmr), note)
+                else context.getString(
+                    R.string.notify_asks_for, from, xmr(m.amountPxmr))
+            }
+            2 -> context.getString(R.string.notify_sent, from, xmr(m.amountPxmr))
+            3 -> context.getString(R.string.notify_receipt, from, xmr(m.amountPxmr))
             else -> m.body
         }
         post(context, from, what, openChat = personaHex)

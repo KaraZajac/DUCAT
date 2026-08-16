@@ -23,9 +23,9 @@
     <string name="hail_rider_declined_body">They passed on your offer. Their hail is gone from the board.</string>
     <string name="hail_ok">OK</string>
     <string name="hail_on_duty">On duty</string>
-    <string name="hail_net_wide">wide net — ~6 km across</string>
-    <string name="hail_net_nearby">watching ~3.5 km across</string>
-    <string name="hail_net_here">just your area, ~1.2 km</string>
+    <string name="hail_net_wide">wide net — ~%1$s across</string>
+    <string name="hail_net_nearby">watching ~%1$s across</string>
+    <string name="hail_net_here">just your area, ~%1$s</string>
     <string name="hail_stop">Stop</string>
     <string name="hail_no_hails_map">No hails standing — they\'ll pin here.</string>
     <string name="hail_quote_me">quote me</string>
@@ -34,9 +34,9 @@
     <string name="hail_range_just_here">Just here</string>
     <string name="hail_range_nearby">Nearby</string>
     <string name="hail_range_wide">Wide</string>
-    <string name="hail_range_desc_here">~1.2 km — dense city blocks</string>
-    <string name="hail_range_desc_wide">~6 km across — rural or slow nights</string>
-    <string name="hail_range_desc_nearby">~3.5 km across — the usual</string>
+    <string name="hail_range_desc_here">~%1$s — dense city blocks</string>
+    <string name="hail_range_desc_wide">~%1$s across — rural or slow nights</string>
+    <string name="hail_range_desc_nearby">~%1$s across — the usual</string>
     <string name="hail_getting_location">Getting your location…</string>
     <string name="hail_drive_here">Drive here — watch my area</string>
     <string name="hail_stand_label">Stand</string>
@@ -47,8 +47,8 @@
     <string name="hail_offers_amount">offers %1$s</string>
     <string name="hail_offers_amount_both">offers %1$s · %2$s</string>
     <string name="hail_asks_quote">asks you to quote</string>
-    <string name="hail_triage_pickup">pickup ~%1$.1f km</string>
-    <string name="hail_triage_trip">trip ~%1$.1f km</string>
+    <string name="hail_triage_pickup">pickup ~%1$s</string>
+    <string name="hail_triage_trip">trip ~%1$s</string>
     <string name="hail_stands_for_min">stands for another %1$d min</string>
     <string name="hail_view_job">View job</string>
     <string name="hail_take_it">Take it</string>
@@ -62,8 +62,8 @@
     <!-- Driver: the fare-detail screen -->
     <string name="hail_close">Close</string>
     <string name="hail_job_title">The job</string>
-    <string name="hail_to_pickup">to the pickup: %1$.1f km · ~%2$d min</string>
-    <string name="hail_the_ride">the ride: %1$.1f km · ~%2$d min</string>
+    <string name="hail_to_pickup">to the pickup: %1$s · ~%2$d min</string>
+    <string name="hail_the_ride">the ride: %1$s · ~%2$d min</string>
     <string name="hail_offer_amount">offer: %1$s</string>
     <string name="hail_offer_amount_both">offer: %1$s · %2$s</string>
     <string name="hail_keep_all_vs_rideshare">you keep all of it — a rideshare would pay ~%1$s %2$.0f for this trip</string>
@@ -90,14 +90,14 @@
     <string name="hail_where_to">Where to?</string>
     <string name="hail_address_hint">address or business name</string>
     <string name="hail_finding_route">Finding the route…</string>
-    <string name="hail_route_summary">%1$.1f km · ~%2$d min</string>
-    <string name="hail_route_summary_priced">%1$.1f km · ~%2$d min · %3$s %4$.2f</string>
+    <string name="hail_route_summary">%1$s · ~%2$d min</string>
+    <string name="hail_route_summary_priced">%1$s · ~%2$d min · %3$s %4$.2f</string>
     <string name="hail_vs_competitors">rideshare ~%1$s %2$.0f · taxi ~%1$s %3$.0f — your driver keeps all of it (a rideshare pays theirs ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Your offer (%1$s)</string>
     <string name="hail_offer_invalid">The offer must be a number above zero — or leave it blank to ask for a quote.</string>
     <string name="hail_shards_full">every stand shard is full here — try again shortly</string>
     <string name="hail_post_failed">could not post the hail</string>
-    <string name="hail_osm_privacy">Search, route and map use OpenStreetMap\'s servers — the one place DUCAT sends location off-device. Drivers see only ~1 km areas.</string>
+    <string name="hail_osm_privacy">Search, route and map use OpenStreetMap\'s servers — the one place DUCAT sends location off-device. Drivers see only ~%1$s areas.</string>
     <string name="hail_post_button">Hail 🚕</string>
     <string name="hail_search">Search</string>
 </resources>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">This sale</string>
+    <string name="pos_items">Items</string>
+    <string name="pos_quick_amount">Quick amount</string>
+    <string name="pos_total_in">Total (%1$s)</string>
+    <string name="pos_request_amount">Request %1$s</string>
+    <string name="pos_request_payment">Request payment</string>
+    <string name="pos_sale">Sale</string>
+    <string name="pos_remove">Remove</string>
+    <string name="pos_network_fee_note">The network fee is the customer\'s, paid to the network — never part of the bill.</string>
+    <string name="pos_charge_amount">Charge %1$s</string>
+    <string name="pos_add_first_item">Add the first item to start a sale.</string>
+    <string name="pos_item">Item</string>
+    <string name="pos_add_line">Add line</string>
+    <string name="pos_tax">Tax</string>
+    <string name="pos_error_publish_code">could not publish the code</string>
+    <string name="pos_error_bill_not_sent">They connected, but the bill did not send: %1$s</string>
+    <string name="pos_getting_code_ready">Getting the code ready…</string>
+    <string name="pos_scan_hint">They scan this in DUCAT. The bill above arrives on their phone the moment they do.</string>
+    <string name="pos_tap_hint">Or tap phones — same bill either way</string>
+    <string name="pos_payment_seen">Payment seen ✓</string>
+    <string name="pos_payment_settling">Their payment is in the network — settling, about two minutes. The receipt sends itself when it lands.</string>
+    <string name="pos_bill_sent_to">Bill sent to %1$s</string>
+    <string name="pos_the_customer">the customer</string>
+    <string name="pos_billed_hint">They confirm on their own phone. When the payment lands on chain the receipt goes to them automatically — nothing left to do here.</string>
+    <string name="pos_paid">Paid ✓</string>
+    <string name="pos_receipt_sent_to">Receipt sent to %1$s.</string>
+    <string name="pos_back">Back</string>
+    <string name="pos_new_sale">New sale</string>
+    <string name="pos_new_sale_settles">New sale (this one settles by itself)</string>
+    <string name="pos_cancel_sale">Cancel sale</string>
+</resources>

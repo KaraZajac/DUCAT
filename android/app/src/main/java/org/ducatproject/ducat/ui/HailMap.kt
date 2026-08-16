@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.viewinterop.AndroidView
+import org.ducatproject.ducat.R
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
@@ -52,7 +53,7 @@ fun RouteMap(
                 val g = GeoPoint(it.first / 1e7, it.second / 1e7)
                 pts += g
                 map.overlays.add(Marker(map).apply {
-                    position = g; title = "Pickup"
+                    position = g; title = map.context.getString(R.string.hailmap_pickup)
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 })
             }
@@ -60,7 +61,7 @@ fun RouteMap(
                 val g = GeoPoint(it.first / 1e7, it.second / 1e7)
                 pts += g
                 map.overlays.add(Marker(map).apply {
-                    position = g; title = "Destination"
+                    position = g; title = map.context.getString(R.string.hailmap_destination)
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 })
             }
@@ -147,7 +148,7 @@ fun DriverMap(
                 val g = GeoPoint(it.first / 1e7, it.second / 1e7)
                 pts += g
                 map.overlays.add(Marker(map).apply {
-                    position = g; title = "You"
+                    position = g; title = map.context.getString(R.string.hailmap_you)
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 })
             }

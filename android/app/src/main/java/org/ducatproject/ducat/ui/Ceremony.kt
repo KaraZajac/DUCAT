@@ -20,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -65,14 +67,14 @@ fun BillScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Row(Modifier.fillMaxWidth().padding(8.dp)) {
-                    IconButton(onClick = onClose) { Icon(Icons.Filled.Close, "Close") }
+                    IconButton(onClick = onClose) { Icon(Icons.Filled.Close, stringResource(R.string.ceremony_close)) }
                 }
                 Spacer(Modifier.height(12.dp))
                 Avatar(contact.displayName(), contact.avatar, size = 72)
                 Spacer(Modifier.height(10.dp))
                 Text(contact.displayName(), style = MaterialTheme.typography.titleLarge)
                 Text(
-                    "asks you for",
+                    stringResource(R.string.ceremony_asks_you_for),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -85,7 +87,8 @@ fun BillScreen(
                 }
                 if (m.body.isNotBlank() && m.body != "Payment request") {
                     Spacer(Modifier.height(6.dp))
-                    Text("“${m.body}”", style = MaterialTheme.typography.bodyMedium,
+                    Text(stringResource(R.string.ceremony_quoted_body, m.body),
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
@@ -109,7 +112,8 @@ fun BillScreen(
                                     color = MaterialTheme.colorScheme.outlineVariant,
                                 )
                                 Row(Modifier.fillMaxWidth()) {
-                                    Text("tax", style = MaterialTheme.typography.bodyMedium,
+                                    Text(stringResource(R.string.ceremony_tax),
+                                        style = MaterialTheme.typography.bodyMedium,
                                         modifier = Modifier.weight(1f))
                                     Text(formatXmr(it),
                                         style = MaterialTheme.typography.bodySmall,
@@ -126,10 +130,11 @@ fun BillScreen(
                         onClick = onPay,
                         enabled = m.payto != null,
                         modifier = Modifier.fillMaxWidth().height(54.dp),
-                    ) { Text("Accept & pay", style = MaterialTheme.typography.titleMedium) }
+                    ) { Text(stringResource(R.string.ceremony_accept_and_pay),
+                        style = MaterialTheme.typography.titleMedium) }
                     if (m.payto == null) {
                         Text(
-                            "No address in this request — ask them where to send it.",
+                            stringResource(R.string.ceremony_no_address),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline,
                         )
@@ -138,11 +143,11 @@ fun BillScreen(
                     OutlinedButton(
                         onClick = onDecline,
                         modifier = Modifier.fillMaxWidth().height(48.dp),
-                    ) { Text("Decline", color = MaterialTheme.colorScheme.error) }
+                    ) { Text(stringResource(R.string.ceremony_decline),
+                        color = MaterialTheme.colorScheme.error) }
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Accept opens the confirm screen — nothing moves until " +
-                            "you approve it there.",
+                        stringResource(R.string.ceremony_accept_opens_confirm),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                     )
@@ -204,7 +209,8 @@ fun PaidSplash(amountPxmr: Long, toName: String?, onDone: () -> Unit) {
                     color = MaterialTheme.colorScheme.onTertiary,
                 )
                 Text(
-                    "Paid" + (toName?.let { " · $it" } ?: "") + " ✓",
+                    if (toName != null) stringResource(R.string.ceremony_paid_to, toName)
+                    else stringResource(R.string.ceremony_paid),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onTertiary,
                 )
@@ -241,14 +247,14 @@ fun RideOfferScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Row(Modifier.fillMaxWidth().padding(8.dp)) {
-                    IconButton(onClick = onClose) { Icon(Icons.Filled.Close, "Close") }
+                    IconButton(onClick = onClose) { Icon(Icons.Filled.Close, stringResource(R.string.ceremony_close)) }
                 }
                 Spacer(Modifier.height(12.dp))
                 Avatar(contact.displayName(), contact.avatar, size = 72)
                 Spacer(Modifier.height(10.dp))
                 Text(contact.displayName(), style = MaterialTheme.typography.titleLarge)
                 Text(
-                    "offers to drive you for",
+                    stringResource(R.string.ceremony_offers_to_drive),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -261,8 +267,9 @@ fun RideOfferScreen(
                 }
                 m.etaSecs?.let { secs ->
                     Spacer(Modifier.height(6.dp))
+                    val mins = (secs / 60).coerceAtLeast(1).toInt()
                     Text(
-                        "about ${(secs / 60).coerceAtLeast(1)} min away",
+                        pluralStringResource(R.plurals.ceremony_minutes_away, mins, mins),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }
@@ -274,13 +281,15 @@ fun RideOfferScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 contact.plate?.let { plate ->
-                    Text("plate $plate", style = MaterialTheme.typography.bodyMedium,
+                    Text(stringResource(R.string.ceremony_plate, plate),
+                        style = MaterialTheme.typography.bodyMedium,
                         fontFamily = FontFamily.Monospace,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 if (m.body.isNotBlank()) {
                     Spacer(Modifier.height(6.dp))
-                    Text("“${m.body}”", style = MaterialTheme.typography.bodyMedium,
+                    Text(stringResource(R.string.ceremony_quoted_body, m.body),
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Spacer(Modifier.weight(1f))
@@ -288,16 +297,17 @@ fun RideOfferScreen(
                     Button(
                         onClick = onAccept,
                         modifier = Modifier.fillMaxWidth().height(54.dp),
-                    ) { Text("Accept", style = MaterialTheme.typography.titleMedium) }
+                    ) { Text(stringResource(R.string.ceremony_accept),
+                        style = MaterialTheme.typography.titleMedium) }
                     Spacer(Modifier.height(8.dp))
                     OutlinedButton(
                         onClick = onDecline,
                         modifier = Modifier.fillMaxWidth().height(48.dp),
-                    ) { Text("Decline", color = MaterialTheme.colorScheme.error) }
+                    ) { Text(stringResource(R.string.ceremony_decline),
+                        color = MaterialTheme.colorScheme.error) }
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Accepting agrees the fare — you pay at the end of the " +
-                            "ride, through the usual confirm screen.",
+                        stringResource(R.string.ceremony_accepting_agrees_fare),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                     )
@@ -331,12 +341,13 @@ fun RideConfirmed(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Row(Modifier.fillMaxWidth()) {
-                    IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, "Close") }
+                    IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, stringResource(R.string.ceremony_close)) }
                 }
                 Spacer(Modifier.weight(0.6f))
                 Text("🚕", style = MaterialTheme.typography.displaySmall)
                 Spacer(Modifier.height(8.dp))
-                Text("Ride confirmed", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.ceremony_ride_confirmed),
+                    style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(8.dp))
                 val shown = Amounts.show(context, farePxmr)
                 Text(shown.primary, style = MaterialTheme.typography.displayMedium)
@@ -350,7 +361,7 @@ fun RideConfirmed(
                 Text(contact.displayName(), style = MaterialTheme.typography.headlineSmall)
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "They're expecting you — anything else goes in the chat.",
+                    stringResource(R.string.ceremony_expecting_you),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -358,7 +369,7 @@ fun RideConfirmed(
                 Button(
                     onClick = onOpenChat,
                     modifier = Modifier.fillMaxWidth().height(52.dp),
-                ) { Text("Open the chat") }
+                ) { Text(stringResource(R.string.ceremony_open_chat)) }
             }
         }
     }
@@ -377,12 +388,13 @@ fun DriverFound(contact: Contact, onOpenChat: () -> Unit, onDismiss: () -> Unit)
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Row(Modifier.fillMaxWidth()) {
-                    IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, "Close") }
+                    IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, stringResource(R.string.ceremony_close)) }
                 }
                 Spacer(Modifier.weight(0.6f))
                 Text("🚕", style = MaterialTheme.typography.displaySmall)
                 Spacer(Modifier.height(8.dp))
-                Text("Your ride is coming", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.ceremony_ride_coming),
+                    style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(20.dp))
                 Avatar(contact.displayName(), contact.avatar, size = 88)
                 Spacer(Modifier.height(10.dp))
@@ -417,7 +429,7 @@ fun DriverFound(contact: Contact, onOpenChat: () -> Unit, onDismiss: () -> Unit)
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "ETA and anything else — in the chat.",
+                    stringResource(R.string.ceremony_eta_in_chat),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -425,7 +437,7 @@ fun DriverFound(contact: Contact, onOpenChat: () -> Unit, onDismiss: () -> Unit)
                 Button(
                     onClick = onOpenChat,
                     modifier = Modifier.fillMaxWidth().height(52.dp),
-                ) { Text("Open the chat") }
+                ) { Text(stringResource(R.string.ceremony_open_chat)) }
             }
         }
     }

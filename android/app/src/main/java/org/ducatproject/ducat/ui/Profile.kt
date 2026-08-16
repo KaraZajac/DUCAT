@@ -12,11 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.R
 import androidx.compose.foundation.clickable
 
 /**
@@ -50,7 +52,7 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
             ),
                             title = { Text(c.displayName()) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, stringResource(R.string.profile_back)) }
                 },
             )
         },
@@ -82,7 +84,7 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                     }
                     c.assertedName?.takeIf { it != c.petname }?.let {
                         Text(
-                            "calls themselves \"$it\"",
+                            stringResource(R.string.profile_calls_themselves, it),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -96,17 +98,16 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
             // beside a persona is what that persona said, which is useful and
             // is not identity.
             val told = listOfNotNull(
-                c.email?.let { "Email" to it },
-                c.phone?.let { "Phone" to it },
-                c.signal?.let { "Signal" to it },
+                c.email?.let { stringResource(R.string.profile_label_email) to it },
+                c.phone?.let { stringResource(R.string.profile_label_phone) to it },
+                c.signal?.let { stringResource(R.string.profile_label_signal) to it },
             )
             if (told.isNotEmpty()) {
                 Spacer(Modifier.height(18.dp))
-                Text("What they shared", style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.profile_what_they_shared), style = MaterialTheme.typography.titleSmall)
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    "Their claim, not a check. Nothing ties a DUCAT persona to an " +
-                        "email or a number — only to a key.",
+                    stringResource(R.string.profile_their_claim_note),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline,
                 )
@@ -132,8 +133,8 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
             OutlinedTextField(
                 value = petname,
                 onValueChange = { if (it.length <= 32) { petname = it; saved = false } },
-                label = { Text("Your name for them") },
-                supportingText = { Text("Only you see this. It is the name shown everywhere.") },
+                label = { Text(stringResource(R.string.profile_your_name_for_them_label)) },
+                supportingText = { Text(stringResource(R.string.profile_your_name_for_them_support)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -142,57 +143,56 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 store.add(c.copy(petname = petname.trim().ifBlank { null }))
                 c = store.all().first { it.personaHex == c.personaHex }
                 saved = true
-            }) { Text(if (saved) "Saved" else "Save name") }
+            }) { Text(if (saved) stringResource(R.string.profile_saved) else stringResource(R.string.profile_save_name)) }
 
             Spacer(Modifier.height(24.dp))
-            Text("Checked", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.profile_checked), style = MaterialTheme.typography.titleMedium)
             Text(
-                "Verified cryptographically. Every card they hand out is signed by " +
-                    "this key and checked against it.",
+                stringResource(R.string.profile_checked_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
-            Field("Persona", c.personaHex, clipboard)
+            Field(stringResource(R.string.profile_persona), c.personaHex, clipboard)
 
             Spacer(Modifier.height(24.dp))
-            Text("Told to you", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.profile_told_to_you), style = MaterialTheme.typography.titleMedium)
             Text(
-                "Supplied by them and not verified by anything. Nothing in DUCAT " +
-                    "ties a Monero address or a name to a persona, so check these " +
-                    "another way if it matters.",
+                stringResource(R.string.profile_told_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.ducat.changePending,
             )
             Spacer(Modifier.height(8.dp))
-            Field("Their name for themselves", c.assertedName ?: "— none given —", clipboard)
             Field(
-                "Monero address",
-                c.theirAddress ?: "— not shared; they must send a request —",
+                stringResource(R.string.profile_their_name_label),
+                c.assertedName ?: stringResource(R.string.profile_none_given),
+                clipboard,
+            )
+            Field(
+                stringResource(R.string.profile_monero_address),
+                c.theirAddress ?: stringResource(R.string.profile_not_shared),
                 clipboard,
             )
 
             Spacer(Modifier.height(24.dp))
-            Text("Where they are reached", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.profile_where_reached), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
-            Field("Their outbox", c.theirOutbox.ifBlank { "—" }, clipboard)
-            Field("Your outbox to them", c.myOutbox.ifBlank { "—" }, clipboard)
+            Field(stringResource(R.string.profile_their_outbox), c.theirOutbox.ifBlank { "—" }, clipboard)
+            Field(stringResource(R.string.profile_your_outbox), c.myOutbox.ifBlank { "—" }, clipboard)
 
             Spacer(Modifier.height(24.dp))
             Button(onClick = { onOpenChat(c) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Open chat")
+                Text(stringResource(R.string.profile_open_chat))
             }
 
             Spacer(Modifier.height(28.dp))
             // Named rather than silently absent: a profile screen with no
             // mention of these reads as "DUCAT has no notion of them", when the
             // truth is they are next.
-            Text("Not built yet", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.profile_not_built_yet), style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(4.dp))
             Text(
-                "A picture, pronouns, an email address, and blocking. All optional, " +
-                    "all set during setup, and all travelling the same way a name " +
-                    "does — asserted by them, never verified by us.",
+                stringResource(R.string.profile_not_built_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -222,7 +222,7 @@ private fun Field(
             }
             if (!value.startsWith("—")) {
                 TextButton(onClick = { clipboard.setText(AnnotatedString(value)) }) {
-                    Text("Copy", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.profile_copy), style = MaterialTheme.typography.labelSmall)
                 }
             }
         }

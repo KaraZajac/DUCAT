@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
+    <string name="shells_title_pos">Point of Sale</string>
+    <string name="shells_tab_register">Register</string>
+    <string name="shells_tab_sales">Sales</string>
+    <string name="shells_title_bar_tab">Bar Tab</string>
+    <string name="shells_tab_tabs">Tabs</string>
+    <string name="shells_tab_closed">Closed</string>
+    <string name="shells_title_taxi">Taxi</string>
+    <string name="shells_tab_fares">Fares</string>
+    <string name="shells_tab_meter">Meter</string>
+    <string name="shells_tab_rides">Rides</string>
+    <string name="shells_title_donations">Donations</string>
+    <string name="shells_tab_code">Code</string>
+    <string name="shells_menu">Menu</string>
+    <string name="shells_today">Today</string>
+    <string name="shells_billed_waiting">Billed — waiting</string>
+    <string name="shells_settled">Settled</string>
+    <string name="shells_no_sales_yet">No sales yet today.</string>
+    <string name="shells_no_rides_yet">No rides yet today.</string>
+    <string name="shells_payment_seen_settling">payment seen — settling</string>
+    <string name="shells_billed_unpaid">billed, unpaid</string>
+    <string name="shells_paid_outside">paid outside DUCAT ✓</string>
+    <string name="shells_paid">paid ✓</string>
+</resources>

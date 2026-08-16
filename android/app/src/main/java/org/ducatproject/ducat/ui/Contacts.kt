@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +32,7 @@ import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.NameStore
 import org.ducatproject.ducat.PersonaStore
+import org.ducatproject.ducat.R
 import uniffi.ducat_mobile.createContactCard
 import uniffi.ducat_mobile.readContactCard
 
@@ -73,7 +75,7 @@ private fun ContactRow(c: Contact, onClick: () -> Unit) {
                 )
             }
         },
-        trailingContent = { Icon(Icons.Filled.ChatBubbleOutline, "Chat") },
+        trailingContent = { Icon(Icons.Filled.ChatBubbleOutline, stringResource(R.string.contacts_chat)) },
         modifier = Modifier.clickable { onClick() },
     )
 }
@@ -98,11 +100,10 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(20.dp).verticalScroll(rememberScrollState())) {
-            Text("Share your card", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.contacts_share_card_title), style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
             Text(
-                "Good for one person. Once they use it, it stops working — so a " +
-                    "screenshot that ends up somewhere else is not a way in.",
+                stringResource(R.string.contacts_share_card_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -110,8 +111,8 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
             OutlinedTextField(
                 value = name,
                 onValueChange = { if (it.length <= 32) name = it },
-                label = { Text("Name to show (optional)") },
-                supportingText = { Text("They can rename you on their side; that name is the one they'll see.") },
+                label = { Text(stringResource(R.string.contacts_name_to_show_label)) },
+                supportingText = { Text(stringResource(R.string.contacts_name_to_show_support)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -138,7 +139,7 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                             r.onSuccess {
                                 NameStore(context).put(name)
                                 uri = it.uri
-                            }.onFailure { error = it.message ?: "could not make a card" }
+                            }.onFailure { error = it.message ?: context.getString(R.string.contacts_error_make_card) }
                         }
                     },
                     enabled = !busy && personaSecret != null,
@@ -147,17 +148,15 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                     if (busy) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                         Spacer(Modifier.width(10.dp))
-                        Text("Publishing your inbox…")
+                        Text(stringResource(R.string.contacts_publishing_inbox))
                     } else {
-                        Text("Create card")
+                        Text(stringResource(R.string.contacts_create_card))
                     }
                 }
                 if (busy) {
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "This takes a few seconds — two records have to be published " +
-                            "before anyone can reach you. They keep working after you " +
-                            "close the app.",
+                        stringResource(R.string.contacts_publishing_note),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -172,7 +171,7 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                     ) {
                         Icon(Icons.Filled.ContentCopy, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Copy link")
+                        Text(stringResource(R.string.contacts_copy_link))
                     }
                     OutlinedButton(
                         onClick = { shareText(context, uri!!) },
@@ -180,12 +179,12 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                     ) {
                         Icon(Icons.Filled.Send, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Send")
+                        Text(stringResource(R.string.contacts_send))
                     }
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Expires in 24 hours.",
+                    stringResource(R.string.contacts_expires_24h),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -215,7 +214,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
 
     if (scanning) {
         QrScanner(
-            prompt = "Point the camera at their DUCAT card",
+            prompt = stringResource(R.string.contacts_scan_prompt),
             onResult = { raw ->
                 scanning = false
                 // Read it here rather than dropping the text into the box: a
@@ -223,10 +222,10 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                 // find out it was the wrong code.
                 runCatching { readContactCard(raw) }
                     .onSuccess {
-                        if (it.expired) error = "That card has expired. Ask for a new one."
+                        if (it.expired) error = context.getString(R.string.contacts_card_expired_ask_new)
                         else { scanned = it; petname = it.assertedName ?: "" }
                     }
-                    .onFailure { error = "That is not a DUCAT card"; text = raw }
+                    .onFailure { error = context.getString(R.string.contacts_not_a_card); text = raw }
             },
             onDismiss = { scanning = false },
         )
@@ -235,14 +234,14 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(20.dp).verticalScroll(rememberScrollState())) {
-            Text("Add a contact", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.contacts_add_contact_title), style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(16.dp))
 
             if (scanned == null) {
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it; error = null },
-                    label = { Text("Paste their ducat: link") },
+                    label = { Text(stringResource(R.string.contacts_paste_link_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
                 )
@@ -250,11 +249,11 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = {
                         clipboard.getText()?.let { text = it.text }
-                    }) { Text("Paste") }
+                    }) { Text(stringResource(R.string.contacts_paste)) }
                     TextButton(onClick = { scanning = true }) {
                         Icon(Icons.Filled.QrCodeScanner, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Scan")
+                        Text(stringResource(R.string.contacts_scan))
                     }
                 }
                 Spacer(Modifier.height(8.dp))
@@ -263,17 +262,17 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                         runCatching { readContactCard(text) }
                             .onSuccess {
                                 if (it.expired) {
-                                    error = "This card has expired. Ask them for a new one."
+                                    error = context.getString(R.string.contacts_card_expired_ask_them)
                                 } else {
                                     scanned = it
                                     petname = it.assertedName ?: ""
                                 }
                             }
-                            .onFailure { error = it.message ?: "That is not a DUCAT card" }
+                            .onFailure { error = it.message ?: context.getString(R.string.contacts_not_a_card) }
                     },
                     enabled = text.isNotBlank(),
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text("Read card") }
+                ) { Text(stringResource(R.string.contacts_read_card)) }
             } else {
                 val s = scanned!!
                 // §16.9 requires the asserted name be shown as unverified. A
@@ -287,12 +286,12 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                 ) {
                     Column(Modifier.padding(16.dp)) {
                         Text(
-                            s.assertedName ?: "(no name given)",
+                            s.assertedName ?: stringResource(R.string.contacts_no_name_given),
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "unverified — this is the name they typed",
+                            stringResource(R.string.contacts_unverified_name),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
                         )
@@ -304,8 +303,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(
-                            "Check these characters with them over a channel you " +
-                                "trust if it matters who this is.",
+                            stringResource(R.string.contacts_check_characters),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -315,8 +313,8 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                 OutlinedTextField(
                     value = petname,
                     onValueChange = { if (it.length <= 32) petname = it },
-                    label = { Text("Save them as") },
-                    supportingText = { Text("Your name for them. Only you see it.") },
+                    label = { Text(stringResource(R.string.contacts_save_them_as_label)) },
+                    supportingText = { Text(stringResource(R.string.contacts_save_them_as_support)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -337,7 +335,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                             }
                             adding = false
                             r.onSuccess { onAdded() }
-                                .onFailure { error = it.message ?: "could not read their inbox" }
+                                .onFailure { error = it.message ?: context.getString(R.string.contacts_error_read_inbox) }
                         }
                     },
                     enabled = petname.isNotBlank() && !adding,
@@ -346,9 +344,9 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                     if (adding) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                         Spacer(Modifier.width(10.dp))
-                        Text("Reading their inbox…")
+                        Text(stringResource(R.string.contacts_reading_inbox))
                     } else {
-                        Text("Add contact")
+                        Text(stringResource(R.string.contacts_add_contact_button))
                     }
                 }
             }
@@ -369,12 +367,12 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
  * answer and a useless sentence; what the user needs to know is that the card
  * was already used and they should ask for another.
  */
-private fun replyReason(raw: String): String = when {
-    raw.contains("Replay") -> "That card has already been used. Ask them for a new one."
-    raw.contains("Expired") -> "That card has expired. Ask them for a new one."
-    raw.contains("BadSig") -> "That link is damaged — try copying it again."
-    raw.contains("PolicyRefused") -> "That is your own card."
-    else -> "They refused the request."
+private fun replyReason(context: Context, raw: String): String = when {
+    raw.contains("Replay") -> context.getString(R.string.contacts_reply_replay)
+    raw.contains("Expired") -> context.getString(R.string.contacts_reply_expired)
+    raw.contains("BadSig") -> context.getString(R.string.contacts_reply_badsig)
+    raw.contains("PolicyRefused") -> context.getString(R.string.contacts_reply_own_card)
+    else -> context.getString(R.string.contacts_reply_refused)
 }
 
 private fun shareText(context: Context, text: String) {
@@ -382,7 +380,7 @@ private fun shareText(context: Context, text: String) {
         type = "text/plain"
         putExtra(android.content.Intent.EXTRA_TEXT, text)
     }
-    context.startActivity(android.content.Intent.createChooser(i, "Send your card"))
+    context.startActivity(android.content.Intent.createChooser(i, context.getString(R.string.contacts_send_your_card)))
 }
 
 fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it) }

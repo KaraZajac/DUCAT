@@ -58,13 +58,13 @@ class NodeService : Service() {
             mgr.createNotificationChannel(
                 NotificationChannel(
                     CHANNEL,
-                    "Staying reachable",
+                    getString(R.string.nodeservice_channel_name),
                     // Low: it is a status, not an event. IMPORTANCE_MIN would
                     // hide it, which the system does not allow for a foreground
                     // service anyway.
                     NotificationManager.IMPORTANCE_LOW,
                 ).apply {
-                    description = "Keeps DUCAT reachable so contacts can pay you and message you."
+                    description = getString(R.string.nodeservice_channel_desc)
                     setShowBadge(false)
                 }
             )
@@ -78,8 +78,8 @@ class NodeService : Service() {
             PendingIntent.FLAG_IMMUTABLE,
         )
         val n: Notification = NotificationCompat.Builder(this, CHANNEL)
-            .setContentTitle("DUCAT is reachable")
-            .setContentText("Contacts can reach you while this is running.")
+            .setContentTitle(getString(R.string.nodeservice_notification_title))
+            .setContentText(getString(R.string.nodeservice_notification_text))
             .setSmallIcon(R.drawable.ic_ducat_mono)
             .setContentIntent(tap)
             .setOngoing(true)

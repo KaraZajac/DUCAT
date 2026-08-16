@@ -1,13 +1,18 @@
 package org.ducatproject.ducat.ui
 
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import org.ducatproject.ducat.R
 import uniffi.ducat_mobile.*
 
 /**
@@ -33,18 +38,24 @@ private fun run(name: String, expected: String, body: () -> String): Check =
         Check(name, expected, "${t::class.simpleName}: ${t.message}", false)
     }
 
-fun bridgeChecks(): List<Check> = listOf(
+fun bridgeChecks(context: Context): List<Check> = listOf(
     // A string crossing the boundary: exercises RustBuffer and UTF-8 decoding.
-    run("protocol version", "DUCAT-v1") { protocolVersion() },
+    run(context.getString(R.string.bridge_check_protocol_version), "DUCAT-v1") {
+        protocolVersion()
+    },
 
     // §17.2, the number the home screen must not overstate. Six unlocked
     // outputs bought four payments in the drain test, so this is the measured
     // answer and not a guess.
-    run("capacity of 6 outputs", "4") { approxPaymentsSupported(6u).toString() },
-    run("capacity of 1 output", "0") { approxPaymentsSupported(1u).toString() },
+    run(context.getString(R.string.bridge_check_capacity_6), "4") {
+        approxPaymentsSupported(6u).toString()
+    },
+    run(context.getString(R.string.bridge_check_capacity_1), "0") {
+        approxPaymentsSupported(1u).toString()
+    },
 
     // A record crossing back: two fields, one of them 64-bit.
-    run("float plan for 10 payments", "15 outputs") {
+    run(context.getString(R.string.bridge_check_float_plan), "15 outputs") {
         "${planFloat(10u, 2_000_000_000uL).outputs} outputs"
     },
 
@@ -57,7 +68,7 @@ fun bridgeChecks(): List<Check> = listOf(
     // by asking core rather than by reasoning about the ladder, which is the
     // only reason it is not now a failing check on someone's phone that looks
     // like a bridge fault.
-    run("bucket floor of 4.999 XMR", "2000000000") {
+    run(context.getString(R.string.bridge_check_bucket_floor), "2000000000") {
         capacityBucket(4_999_999_999uL).toString()
     },
 
@@ -69,7 +80,7 @@ fun bridgeChecks(): List<Check> = listOf(
     // `AppSecret` arrives as `APP_SECRET`. A test that asserts on how a value is
     // spelled rather than which value it is will keep finding bugs that are not
     // there, and eventually be ignored when it finds one that is.
-    run("stale rate escalates", "escalated") {
+    run(context.getString(R.string.bridge_check_stale_rate), "escalated") {
         val out = checkVerification(
             defaultVerificationPolicy(),
             deviceUnlocked = true,
@@ -87,7 +98,8 @@ fun bridgeChecks(): List<Check> = listOf(
 
 @Composable
 fun BridgeSelfTest() {
-    val checks = remember { bridgeChecks() }
+    val context = LocalContext.current
+    val checks = remember { bridgeChecks(context) }
     val failed = checks.count { !it.ok }
 
     Card(
@@ -96,16 +108,17 @@ fun BridgeSelfTest() {
     ) {
         Column(Modifier.padding(16.dp)) {
             Text(
-                if (failed == 0) "Native core: ${checks.size} checks passed"
-                else "Native core: $failed of ${checks.size} FAILED",
+                if (failed == 0)
+                    pluralStringResource(
+                        R.plurals.bridge_checks_passed, checks.size, checks.size)
+                else stringResource(R.string.bridge_checks_failed, failed, checks.size),
                 style = MaterialTheme.typography.titleMedium,
                 color = if (failed == 0) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.error,
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "These call into the Rust core across JNI — the one layer the " +
-                    "Rust tests cannot reach.",
+                stringResource(R.string.bridge_jni_note),
                 style = MaterialTheme.typography.bodySmall,
             )
             Spacer(Modifier.height(12.dp))
@@ -115,7 +128,9 @@ fun BridgeSelfTest() {
                     Column {
                         Text(c.name, style = MaterialTheme.typography.bodyMedium)
                         Text(
-                            if (c.ok) c.got else "got ${c.got}, expected ${c.expected}",
+                            if (c.ok) c.got
+                            else stringResource(
+                                R.string.bridge_got_expected, c.got, c.expected),
                             style = MaterialTheme.typography.bodySmall,
                             fontFamily = FontFamily.Monospace,
                             color = if (c.ok) MaterialTheme.colorScheme.onSurfaceVariant

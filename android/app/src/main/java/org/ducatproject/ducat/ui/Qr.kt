@@ -17,8 +17,10 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.zxing.BarcodeFormat
+import org.ducatproject.ducat.R
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
@@ -61,13 +63,13 @@ fun QrBlock(text: String) {
                 CircularProgressIndicator()
             }
             b.isFailure -> Text(
-                "Too much data for a QR code — use the link instead.",
+                stringResource(R.string.qr_too_much_data),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
             )
             else -> Image(
                 bitmap = b.getOrThrow(),
-                contentDescription = "QR code",
+                contentDescription = stringResource(R.string.qr_code),
                 modifier = Modifier.size(260.dp),
                 contentScale = ContentScale.Fit,
                 filterQuality = FilterQuality.None,

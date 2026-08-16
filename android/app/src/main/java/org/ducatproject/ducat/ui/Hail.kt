@@ -793,11 +793,15 @@ fun DriveScreen() {
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.hail_on_duty), style = MaterialTheme.typography.titleMedium)
                     val n = watching?.size ?: 0
+                    val distCtx = androidx.compose.ui.platform.LocalContext.current
                     Text(
                         when {
-                            n >= 25 -> stringResource(R.string.hail_net_wide)
-                            n >= 9 -> stringResource(R.string.hail_net_nearby)
-                            else -> stringResource(R.string.hail_net_here)
+                            n >= 25 -> stringResource(R.string.hail_net_wide,
+                                org.ducatproject.ducat.Units.distance(distCtx, 6000.0))
+                            n >= 9 -> stringResource(R.string.hail_net_nearby,
+                                org.ducatproject.ducat.Units.distance(distCtx, 3500.0))
+                            else -> stringResource(R.string.hail_net_here,
+                                org.ducatproject.ducat.Units.distance(distCtx, 1200.0))
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
@@ -900,11 +904,15 @@ fun DriveScreen() {
                     ) { Text(label) }
                 }
             }
+            val rangeCtx = androidx.compose.ui.platform.LocalContext.current
             Text(
                 when (range) {
-                    1 -> stringResource(R.string.hail_range_desc_here)
-                    5 -> stringResource(R.string.hail_range_desc_wide)
-                    else -> stringResource(R.string.hail_range_desc_nearby)
+                    1 -> stringResource(R.string.hail_range_desc_here,
+                        org.ducatproject.ducat.Units.distance(rangeCtx, 1200.0))
+                    5 -> stringResource(R.string.hail_range_desc_wide,
+                        org.ducatproject.ducat.Units.distance(rangeCtx, 6000.0))
+                    else -> stringResource(R.string.hail_range_desc_nearby,
+                        org.ducatproject.ducat.Units.distance(rangeCtx, 3500.0))
                 },
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
@@ -993,7 +1001,9 @@ fun DriveScreen() {
                                     val m = uniffi.ducat_mobile.haversineM(
                                         fix.first, fix.second, o[0], o[1])
                                     parts += context.getString(
-                                        R.string.hail_triage_pickup, m.toLong() / 1000.0)
+                                        R.string.hail_triage_pickup,
+                                        org.ducatproject.ducat.Units.distance(
+                                            context, m.toDouble()))
                                 }
                                 val d = n.destCell?.let {
                                     uniffi.ducat_mobile.geohashCenter(it)
@@ -1003,7 +1013,8 @@ fun DriveScreen() {
                                         o[0], o[1], d[0], d[1])
                                     parts += context.getString(
                                         R.string.hail_triage_trip,
-                                        m.toLong() / 1000.0 * org.ducatproject.ducat.Fare.CIRCUITY)
+                                        org.ducatproject.ducat.Units.distance(context,
+                                            m.toDouble() * org.ducatproject.ducat.Fare.CIRCUITY))
                                 }
                                 parts.joinToString(" · ")
                             }.getOrDefault("")
@@ -1179,14 +1190,18 @@ private fun FareDetail(
                         toPickup?.let {
                             if (myFix != null) Text(
                                 stringResource(R.string.hail_to_pickup,
-                                    it.first / 1000.0, (it.second / 60).coerceAtLeast(1)),
+                                    org.ducatproject.ducat.Units.distance(
+                                        context, it.first.toDouble()),
+                                    (it.second / 60).coerceAtLeast(1)),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         }
                         trip?.let {
                             Text(
                                 stringResource(R.string.hail_the_ride,
-                                    it.first / 1000.0, (it.second / 60).coerceAtLeast(1)),
+                                    org.ducatproject.ducat.Units.distance(
+                                        context, it.first.toDouble()),
+                                    (it.second / 60).coerceAtLeast(1)),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         }
@@ -1462,9 +1477,13 @@ fun HailSheet(
                         Text(
                             est?.let {
                                 stringResource(R.string.hail_route_summary_priced,
-                                    r.meters / 1000.0, r.seconds / 60, cur, it.first)
+                                    org.ducatproject.ducat.Units.distance(
+                                        context, r.meters.toDouble()),
+                                    r.seconds / 60, cur, it.first)
                             } ?: stringResource(R.string.hail_route_summary,
-                                r.meters / 1000.0, r.seconds / 60),
+                                org.ducatproject.ducat.Units.distance(
+                                    context, r.meters.toDouble()),
+                                r.seconds / 60),
                             style = MaterialTheme.typography.titleMedium,
                         )
                         est?.let { (fiat, _) ->
@@ -1652,7 +1671,8 @@ fun HailSheet(
                             style = MaterialTheme.typography.bodySmall)
                     }
                     Text(
-                        stringResource(R.string.hail_osm_privacy),
+                        stringResource(R.string.hail_osm_privacy,
+                            org.ducatproject.ducat.Units.distance(context, 1000.0)),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                         modifier = Modifier.padding(vertical = 8.dp),

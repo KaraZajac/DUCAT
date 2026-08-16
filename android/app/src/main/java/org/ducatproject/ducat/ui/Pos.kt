@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +26,7 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RateStore
 import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
@@ -73,7 +75,7 @@ fun PosScreen() {
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
             Spacer(Modifier.height(16.dp))
             Text(
-                "This sale",
+                stringResource(R.string.pos_this_sale),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -92,12 +94,12 @@ fun PosScreen() {
                     selected = !quick, onClick = { quick = false },
                     shape = SegmentedButtonDefaults.itemShape(0, 2),
                     icon = {},
-                ) { Text("Items") }
+                ) { Text(stringResource(R.string.pos_items)) }
                 SegmentedButton(
                     selected = quick, onClick = { quick = true },
                     shape = SegmentedButtonDefaults.itemShape(1, 2),
                     icon = {},
-                ) { Text("Quick amount") }
+                ) { Text(stringResource(R.string.pos_quick_amount)) }
             }
             Spacer(Modifier.height(12.dp))
         }
@@ -112,7 +114,9 @@ fun PosScreen() {
                         onValueChange = {
                             quickAmount = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
                         },
-                        label = { Text(if (quickFiat) "Total ($cur)" else "Total (XMR)") },
+                        label = {
+                            Text(stringResource(R.string.pos_total_in, if (quickFiat) cur else "XMR"))
+                        },
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                             keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
                         ),
@@ -135,7 +139,7 @@ fun PosScreen() {
                 }?.takeIf { it > 0 }
                 Button(
                     onClick = {
-                        basket = listOf(BillItem("Sale", pxmr!!))
+                        basket = listOf(BillItem(context.getString(R.string.pos_sale), pxmr!!))
                         taxPxmr = 0L
                         quickAmount = ""
                         charging = true
@@ -144,8 +148,9 @@ fun PosScreen() {
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                 ) {
                     Text(
-                        pxmr?.let { "Request ${Amounts.show(context, it).primary}" }
-                            ?: "Request payment",
+                        pxmr?.let {
+                            stringResource(R.string.pos_request_amount, Amounts.show(context, it).primary)
+                        } ?: stringResource(R.string.pos_request_payment),
                         style = MaterialTheme.typography.labelLarge,
                     )
                 }
@@ -174,7 +179,10 @@ fun PosScreen() {
                             IconButton(
                                 onClick = { basket = basket.filterIndexed { j, _ -> j != i } },
                                 modifier = Modifier.size(32.dp),
-                            ) { Icon(Icons.Filled.Close, "Remove", Modifier.size(16.dp)) }
+                            ) {
+                                Icon(Icons.Filled.Close, stringResource(R.string.pos_remove),
+                                    Modifier.size(16.dp))
+                            }
                         }
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -188,8 +196,7 @@ fun PosScreen() {
             // customer's wallet builds the transaction. §16.13 has no field
             // for it for exactly this reason.
             Text(
-                "The network fee is the customer's, paid to the network — never " +
-                    "part of the bill.",
+                stringResource(R.string.pos_network_fee_note),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -202,7 +209,7 @@ fun PosScreen() {
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(56.dp),
             ) {
                 Text(
-                    "Charge ${Amounts.show(context, total).primary}",
+                    stringResource(R.string.pos_charge_amount, Amounts.show(context, total).primary),
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
@@ -210,7 +217,7 @@ fun PosScreen() {
         } else {
             Spacer(Modifier.height(12.dp))
             Text(
-                "Add the first item to start a sale.",
+                stringResource(R.string.pos_add_first_item),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -272,7 +279,7 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
         OutlinedTextField(
             value = desc,
             onValueChange = { if (it.length <= 64) desc = it },
-            label = { Text("Item") },
+            label = { Text(stringResource(R.string.pos_item)) },
             singleLine = true,
             modifier = Modifier.weight(1.5f),
         )
@@ -295,7 +302,7 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
         FilledIconButton(
             onClick = { onAdd(desc.trim(), pxmr!!); desc = ""; amount = "" },
             enabled = desc.isNotBlank() && pxmr != null,
-        ) { Icon(Icons.Filled.Add, "Add line") }
+        ) { Icon(Icons.Filled.Add, stringResource(R.string.pos_add_line)) }
     }
 }
 
@@ -308,7 +315,7 @@ private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
-            Text("Tax", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.pos_tax), style = MaterialTheme.typography.bodyLarge)
             if (taxPxmr > 0) {
                 Amounts.show(context, taxPxmr).secondary?.let {
                     Text(
@@ -396,7 +403,7 @@ private fun PresentScreen(
         }
         r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
             .onFailure {
-                error = it.message ?: "could not publish the code"
+                error = it.message ?: context.getString(R.string.pos_error_publish_code)
                 DucatLog.e(TAG, "card: ${it.message}")
             }
     }
@@ -428,7 +435,7 @@ private fun PresentScreen(
                     saleTabId = id
                     DucatLog.i(TAG, "billed ${fresh.displayName()} ${formatXmr(totalPxmr)} XMR")
                 }.onFailure {
-                    error = "They connected, but the bill did not send: ${it.message}"
+                    error = context.getString(R.string.pos_error_bill_not_sent, it.message)
                     DucatLog.e(TAG, "bill: ${it.message}")
                 }
             }
@@ -462,7 +469,7 @@ private fun PresentScreen(
                 }
                 taxPxmr?.let {
                     Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
-                        Text("Tax", Modifier.weight(1f),
+                        Text(stringResource(R.string.pos_tax), Modifier.weight(1f),
                             style = MaterialTheme.typography.bodyMedium)
                         Text("${formatXmr(it)} XMR",
                             style = MaterialTheme.typography.bodyMedium,
@@ -478,7 +485,7 @@ private fun PresentScreen(
                 cardUri == null && error == null -> {
                     CircularProgressIndicator()
                     Spacer(Modifier.height(10.dp))
-                    Text("Getting the code ready…",
+                    Text(stringResource(R.string.pos_getting_code_ready),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -486,8 +493,7 @@ private fun PresentScreen(
                     QrBlock(cardUri!!)
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        "They scan this in DUCAT. The bill above arrives on their " +
-                            "phone the moment they do.",
+                        stringResource(R.string.pos_scan_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -498,7 +504,7 @@ private fun PresentScreen(
                             tint = MaterialTheme.colorScheme.outline)
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            "Or tap phones — same bill either way",
+                            stringResource(R.string.pos_tap_hint),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline,
                         )
@@ -508,14 +514,13 @@ private fun PresentScreen(
             }
             Sale.Seen -> {
                 Text(
-                    "Payment seen ✓",
+                    stringResource(R.string.pos_payment_seen),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.ducat.changePending,
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Their payment is in the network — settling, about two " +
-                        "minutes. The receipt sends itself when it lands.",
+                    stringResource(R.string.pos_payment_settling),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -524,13 +529,15 @@ private fun PresentScreen(
                 CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
             }
             Sale.Billed -> {
-                Text("Bill sent to ${customer?.displayName() ?: "the customer"}",
+                Text(
+                    stringResource(
+                        R.string.pos_bill_sent_to,
+                        customer?.displayName() ?: stringResource(R.string.pos_the_customer),
+                    ),
                     style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    "They confirm on their own phone. When the payment lands on " +
-                        "chain the receipt goes to them automatically — nothing " +
-                        "left to do here.",
+                    stringResource(R.string.pos_billed_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -539,11 +546,14 @@ private fun PresentScreen(
                 CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
             }
             Sale.Paid -> {
-                Text("Paid ✓", style = MaterialTheme.typography.headlineMedium,
+                Text(stringResource(R.string.pos_paid), style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.ducat.settled)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Receipt sent to ${customer?.displayName() ?: "the customer"}.",
+                    stringResource(
+                        R.string.pos_receipt_sent_to,
+                        customer?.displayName() ?: stringResource(R.string.pos_the_customer),
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -581,7 +591,7 @@ private fun PresentScreen(
                 OutlinedButton(
                     onClick = { abandon(); onBack() },
                     modifier = Modifier.weight(1f).height(48.dp),
-                ) { Text("Back") }
+                ) { Text(stringResource(R.string.pos_back)) }
             }
             Button(
                 onClick = {
@@ -595,9 +605,9 @@ private fun PresentScreen(
             ) {
                 Text(
                     when (stage) {
-                        Sale.Paid -> "New sale"
-                        Sale.Seen -> "New sale (this one settles by itself)"
-                        else -> "Cancel sale"
+                        Sale.Paid -> stringResource(R.string.pos_new_sale)
+                        Sale.Seen -> stringResource(R.string.pos_new_sale_settles)
+                        else -> stringResource(R.string.pos_cancel_sale)
                     },
                     maxLines = 1, softWrap = false,
                     style = MaterialTheme.typography.labelMedium,

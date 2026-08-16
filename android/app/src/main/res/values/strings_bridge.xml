@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="one">Native core: %1$d check passed</item>
+        <item quantity="other">Native core: %1$d checks passed</item>
+    </plurals>
+    <string name="bridge_checks_failed">Native core: %1$d of %2$d FAILED</string>
+    <string name="bridge_jni_note">These call into the Rust core across JNI — the one layer the Rust tests cannot reach.</string>
+    <string name="bridge_got_expected">got %1$s, expected %2$s</string>
+
+    <!-- Check names (rendered per row; expected/got values stay in code — they
+         are compared with == against what the bridge returns) -->
+    <string name="bridge_check_protocol_version">protocol version</string>
+    <string name="bridge_check_capacity_6">capacity of 6 outputs</string>
+    <string name="bridge_check_capacity_1">capacity of 1 output</string>
+    <string name="bridge_check_float_plan">float plan for 10 payments</string>
+    <string name="bridge_check_bucket_floor">bucket floor of 4.999 XMR</string>
+    <string name="bridge_check_stale_rate">stale rate escalates</string>
+</resources>

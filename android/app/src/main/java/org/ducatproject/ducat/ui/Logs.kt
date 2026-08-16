@@ -15,11 +15,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ducatproject.ducat.DucatLog
+import org.ducatproject.ducat.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,9 +65,11 @@ fun LogsScreen() {
             val warns = all.count { it.level == DucatLog.Level.Warn }
             val errors = all.count { it.level == DucatLog.Level.Error }
             Text(
-                "${all.size} line(s)" +
-                    (if (warns > 0) " · $warns warn" else "") +
-                    (if (errors > 0) " · $errors error" else ""),
+                pluralStringResource(R.plurals.logs_line_count, all.size, all.size) +
+                    (if (warns > 0)
+                        " · " + stringResource(R.string.logs_warn_count, warns) else "") +
+                    (if (errors > 0)
+                        " · " + stringResource(R.string.logs_error_count, errors) else ""),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (errors > 0) MaterialTheme.colorScheme.error
                 else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -73,22 +78,23 @@ fun LogsScreen() {
             IconButton(onClick = {
                 clipboard.setText(AnnotatedString(DucatLog.asText()))
                 copied = true
-            }) { Icon(Icons.Filled.ContentCopy, "Copy all") }
+            }) { Icon(Icons.Filled.ContentCopy, stringResource(R.string.logs_copy_all)) }
             IconButton(onClick = {
                 val i = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TEXT, DucatLog.asText())
                 }
-                context.startActivity(Intent.createChooser(i, "Send logs"))
-            }) { Icon(Icons.Filled.Share, "Share") }
+                context.startActivity(Intent.createChooser(
+                    i, context.getString(R.string.logs_send_logs)))
+            }) { Icon(Icons.Filled.Share, stringResource(R.string.logs_share)) }
             IconButton(onClick = { DucatLog.clear() }) {
-                Icon(Icons.Filled.DeleteOutline, "Clear")
+                Icon(Icons.Filled.DeleteOutline, stringResource(R.string.logs_clear))
             }
         }
 
         if (copied) {
             Text(
-                "Copied. Keys and message text are never in here.",
+                stringResource(R.string.logs_copied),
                 Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.ducat.settled,
@@ -104,18 +110,17 @@ fun LogsScreen() {
                 onClick = { filter = if (filter == level) null else level },
                 label = { Text(label, style = MaterialTheme.typography.labelSmall) },
             )
-            chip("All", null)
-            chip("Info", DucatLog.Level.Info)
-            chip("Warn", DucatLog.Level.Warn)
-            chip("Error", DucatLog.Level.Error)
+            chip(stringResource(R.string.logs_filter_all), null)
+            chip(stringResource(R.string.logs_filter_info), DucatLog.Level.Info)
+            chip(stringResource(R.string.logs_filter_warn), DucatLog.Level.Warn)
+            chip(stringResource(R.string.logs_filter_error), DucatLog.Level.Error)
         }
         HorizontalDivider()
 
         if (entries.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
                 Text(
-                    "Nothing logged yet. Activity appears here as the app syncs, " +
-                        "sends and receives.",
+                    stringResource(R.string.logs_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

@@ -11,7 +11,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import org.ducatproject.ducat.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -61,12 +63,11 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
 
     Card(Modifier.fillMaxWidth().padding(vertical = 8.dp), shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(16.dp)) {
-            Text("Backup", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.backup_title),
+                style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             Text(
-                "One encrypted file holding your identity, your keys and your " +
-                    "settings. Export a fresh one whenever something important " +
-                    "changes.",
+                stringResource(R.string.backup_body),
                 style = MaterialTheme.typography.bodySmall,
             )
 
@@ -74,7 +75,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
             OutlinedTextField(
                 value = passphrase,
                 onValueChange = { passphrase = it; message = null },
-                label = { Text("Passphrase") },
+                label = { Text(stringResource(R.string.backup_passphrase)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -120,21 +121,24 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                             // the main thread, so it waits for the IO to finish.
                             result.onSuccess { (f, size) ->
                                 share(context, f)
-                                message = "Exported $size bytes"
-                            }.onFailure { message = it.message ?: "export failed" }
+                                message = context.getString(R.string.backup_exported_bytes, size)
+                            }.onFailure {
+                                message = it.message
+                                    ?: context.getString(R.string.backup_export_failed)
+                            }
                             busy = false
                         }
                     },
                 ) {
                     if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                    else Text("Export")
+                    else Text(stringResource(R.string.backup_export))
                 }
 
                 Spacer(Modifier.width(8.dp))
                 OutlinedButton(
                     enabled = !busy && passphrase.length >= 8,
                     onClick = { picker.launch(arrayOf("*/*")) },
-                ) { Text("Import") }
+                ) { Text(stringResource(R.string.backup_import)) }
             }
 
             message?.let {
@@ -144,9 +148,10 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
 
             restored?.let {
                 Spacer(Modifier.height(12.dp))
-                Text("Restored wallet", fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.backup_restored_title),
+                    fontWeight = FontWeight.SemiBold)
                 Text(
-                    "Check this address is one you recognise before trusting it.",
+                    stringResource(R.string.backup_restored_check),
                     style = MaterialTheme.typography.bodySmall,
                 )
                 Text(it, fontFamily = FontFamily.Monospace,
@@ -191,12 +196,13 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
             DucatLog.i("Backup", "imported: ${r.contacts.size} contact(s), " +
                 "${r.prekeyOneTime.size} prekey(s), escrow ${r.escrowCount}")
             restored = addressForSpendKey(r.spendKeyHex, stagenet = true)
-            "Opened — ${r.escrowCount} escrow share(s), restore height ${r.restoreHeight}"
+            context.getString(R.string.backup_opened,
+                r.escrowCount.toInt(), r.restoreHeight.toLong())
         } catch (t: Throwable) {
             // A wrong passphrase and a tampered file are the same error, on
             // purpose: telling them apart would say whether a guess was close.
             DucatLog.w("Backup", "import failed: ${t.javaClass.simpleName}")
-            "Could not open it — wrong passphrase, or the file has been altered"
+            context.getString(R.string.backup_could_not_open)
         }
         busy = false
     }
@@ -209,5 +215,6 @@ private fun share(context: Context, file: File) {
         putExtra(Intent.EXTRA_STREAM, uri)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
-    context.startActivity(Intent.createChooser(send, "Save your DUCAT backup"))
+    context.startActivity(
+        Intent.createChooser(send, context.getString(R.string.backup_share_title)))
 }

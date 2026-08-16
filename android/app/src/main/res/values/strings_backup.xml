@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">Backup</string>
+    <string name="backup_body">One encrypted file holding your identity, your keys and your settings. Export a fresh one whenever something important changes.</string>
+    <string name="backup_passphrase">Passphrase</string>
+    <string name="backup_export">Export</string>
+    <string name="backup_import">Import</string>
+    <string name="backup_exported_bytes">Exported %1$d bytes</string>
+    <string name="backup_export_failed">export failed</string>
+    <string name="backup_restored_title">Restored wallet</string>
+    <string name="backup_restored_check">Check this address is one you recognise before trusting it.</string>
+    <string name="backup_opened">Opened — %1$d escrow share(s), restore height %2$d</string>
+    <string name="backup_could_not_open">Could not open it — wrong passphrase, or the file has been altered</string>
+    <string name="backup_share_title">Save your DUCAT backup</string>
+</resources>

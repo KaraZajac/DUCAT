@@ -22,11 +22,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.R
 import java.io.ByteArrayOutputStream
 
 /**
@@ -66,7 +68,7 @@ fun MyProfileEditor() {
         runCatching { squareThumbnail(context, uri) }
             .onSuccess { avatar = it; p.setAvatar(it); saved = false }
             .onFailure {
-                avatarError = "Could not read that picture."
+                avatarError = context.getString(R.string.myprofile_avatar_read_error)
                 DucatLog.w("Profile", "avatar: ${it.message}")
             }
     }
@@ -86,7 +88,7 @@ fun MyProfileEditor() {
                 }
                 if (bmp != null) {
                     Image(
-                        bmp.asImageBitmap(), "Your picture",
+                        bmp.asImageBitmap(), stringResource(R.string.myprofile_your_picture),
                         Modifier.fillMaxSize(), contentScale = ContentScale.Crop,
                     )
                 } else if (name.isNotBlank()) {
@@ -96,23 +98,22 @@ fun MyProfileEditor() {
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                 } else {
-                    Icon(Icons.Filled.AddAPhoto, "Add a picture")
+                    Icon(Icons.Filled.AddAPhoto, stringResource(R.string.myprofile_add_picture))
                 }
             }
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text("Your picture", style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.myprofile_your_picture), style = MaterialTheme.typography.titleSmall)
                 Text(
                     // Said here because it is a real limit someone will hit: it
                     // has to fit in a record beside the keys, and a profile that
                     // does not fit is a contact who cannot be reached at all.
-                    "Shrunk to a thumbnail before it is sent — it travels in your " +
-                        "contact record, which has room for a face and not a photo.",
+                    stringResource(R.string.myprofile_picture_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (avatar != null) {
-                    TextButton(onClick = { avatar = null; p.setAvatar(null) }) { Text("Remove") }
+                    TextButton(onClick = { avatar = null; p.setAvatar(null) }) { Text(stringResource(R.string.myprofile_remove)) }
                 }
             }
         }
@@ -125,16 +126,16 @@ fun MyProfileEditor() {
         OutlinedTextField(
             value = name,
             onValueChange = { if (it.length <= 32) { name = it; saved = false } },
-            label = { Text("Name") },
+            label = { Text(stringResource(R.string.myprofile_name_label)) },
             supportingText = {
-                Text("Shown on cards you hand out. Whoever adds you can rename you.")
+                Text(stringResource(R.string.myprofile_name_support))
             },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
 
         Spacer(Modifier.height(12.dp))
-        Text("Pronouns", style = MaterialTheme.typography.labelLarge)
+        Text(stringResource(R.string.myprofile_pronouns), style = MaterialTheme.typography.labelLarge)
         Spacer(Modifier.height(6.dp))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             labels.forEachIndexed { i, label ->
@@ -155,26 +156,25 @@ fun MyProfileEditor() {
         }
 
         Spacer(Modifier.height(16.dp))
-        Field("Email", email, MyProfile.emailProblem(email)) { email = it; saved = false }
-        Field("Phone", phone, MyProfile.phoneProblem(phone),
-            hint = "Digits only, country code included") { phone = it; saved = false }
-        Field("Signal", signal, MyProfile.signalProblem(signal),
-            hint = "name.12") { signal = it; saved = false }
+        Field(stringResource(R.string.myprofile_email), email, MyProfile.emailProblem(email)) { email = it; saved = false }
+        Field(stringResource(R.string.myprofile_phone), phone, MyProfile.phoneProblem(phone),
+            hint = stringResource(R.string.myprofile_phone_hint)) { phone = it; saved = false }
+        Field(stringResource(R.string.myprofile_signal), signal, MyProfile.signalProblem(signal),
+            hint = stringResource(R.string.myprofile_signal_hint)) { signal = it; saved = false }
 
         Spacer(Modifier.height(10.dp))
         Text(
-            "Driving? Riders see this when you take their hail — it is how a " +
-                "stranger finds the right car at the curb.",
+            stringResource(R.string.myprofile_driving_note),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Field("Car model", carModel, null, hint = "Toyota Corolla") {
+        Field(stringResource(R.string.myprofile_car_model), carModel, null, hint = stringResource(R.string.myprofile_car_model_hint)) {
             carModel = it.take(24); saved = false
         }
-        Field("Car colour", carColor, null, hint = "blue") {
+        Field(stringResource(R.string.myprofile_car_colour), carColor, null, hint = stringResource(R.string.myprofile_car_colour_hint)) {
             carColor = it.take(16); saved = false
         }
-        Field("License plate", plate, null, hint = "KAR-4242") {
+        Field(stringResource(R.string.myprofile_plate), plate, null, hint = stringResource(R.string.myprofile_plate_hint)) {
             plate = it.take(12).uppercase(); saved = false
         }
 
@@ -183,13 +183,12 @@ fun MyProfileEditor() {
             Switch(checked = share, onCheckedChange = { share = it; p.setShareProfile(it) })
             Spacer(Modifier.width(12.dp))
             Column {
-                Text("Share this with new contacts")
+                Text(stringResource(R.string.myprofile_share_switch))
                 Text(
                     if (share)
-                        "Everything above goes out when someone takes your card. " +
-                            "Your Monero address has its own switch."
+                        stringResource(R.string.myprofile_share_on_note)
                     else
-                        "Only your name travels. The rest stays on this device.",
+                        stringResource(R.string.myprofile_share_off_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -215,7 +214,7 @@ fun MyProfileEditor() {
                 Icon(Icons.Filled.Check, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
             }
-            Text(if (saved) "Saved" else "Save")
+            Text(if (saved) stringResource(R.string.myprofile_saved) else stringResource(R.string.myprofile_save))
         }
     }
 }

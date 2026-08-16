@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -20,6 +21,7 @@ import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.PersonaStore
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RateStore
 import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
@@ -132,7 +134,7 @@ private fun NewRideScreen(rides: RideStore) {
             }
         }
         r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure { error = it.message ?: "could not publish a code" }
+            .onFailure { error = it.message ?: context.getString(R.string.taxi_err_publish_code) }
     }
 
     // Scan → terms into the thread → meter starts. The rider has the rate in
@@ -154,9 +156,10 @@ private fun NewRideScreen(rides: RideStore) {
                 runCatching {
                     Mailbox.send(
                         context, fresh,
-                        "Meter started — base ${formatXmr(basePxmr!!)} XMR, " +
-                            "${formatXmr(perMinPxmr!!)} XMR per minute. " +
-                            "The bill at the end shows the minutes.",
+                        context.getString(
+                            R.string.taxi_meter_started_msg,
+                            formatXmr(basePxmr!!), formatXmr(perMinPxmr!!),
+                        ),
                         PersonaStore(context).personaHex(),
                     )
                 }.onSuccess {
@@ -164,7 +167,7 @@ private fun NewRideScreen(rides: RideStore) {
                         .putString("taxi_permin_text", perMin).apply()
                     rides.start(fresh.personaHex, basePxmr, perMinPxmr)
                     DucatLog.i(TAG, "ride started with ${fresh.displayName()}")
-                }.onFailure { error = "They connected but the terms did not send: ${it.message}" }
+                }.onFailure { error = context.getString(R.string.taxi_err_terms_not_sent, it.message) }
             }
             break
         }
@@ -174,13 +177,13 @@ private fun NewRideScreen(rides: RideStore) {
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Set the fare", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.taxi_set_fare), style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(10.dp))
         Row {
             OutlinedTextField(
                 value = base,
                 onValueChange = { base = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
-                label = { Text("Base (${if (fiat) cur else "XMR"})") },
+                label = { Text(stringResource(R.string.taxi_base_label, if (fiat) cur else "XMR")) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
             )
@@ -188,20 +191,19 @@ private fun NewRideScreen(rides: RideStore) {
             OutlinedTextField(
                 value = perMin,
                 onValueChange = { perMin = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
-                label = { Text("Per min (${if (fiat) cur else "XMR"})") },
+                label = { Text(stringResource(R.string.taxi_per_min_label, if (fiat) cur else "XMR")) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
             )
         }
         if (rate != null) {
             TextButton(onClick = { fiat = !fiat; base = ""; perMin = "" }) {
-                Text("Price in ${if (fiat) "XMR" else cur} instead")
+                Text(stringResource(R.string.taxi_price_in_instead, if (fiat) "XMR" else cur))
             }
         }
         // Snapshotted, and said here because it is a real term of the deal.
         Text(
-            "A rate typed in $cur is locked to XMR when the ride starts — the " +
-                "figure the rider agrees to is the figure they are billed.",
+            stringResource(R.string.taxi_rate_locked_hint, cur),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.outline,
         )
@@ -209,18 +211,17 @@ private fun NewRideScreen(rides: RideStore) {
         Spacer(Modifier.height(20.dp))
         when {
             !ready -> Text(
-                "Set a per-minute rate to open the pickup code.",
+                stringResource(R.string.taxi_set_rate_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             cardUri != null -> {
-                Text("Pickup", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.taxi_pickup), style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
                 QrBlock(cardUri!!)
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "The rider scans or taps. The rate lands in the conversation " +
-                        "and the meter starts by itself.",
+                    stringResource(R.string.taxi_scan_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -274,9 +275,10 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
         }
         Spacer(Modifier.height(4.dp))
         Text(
-            "base ${formatXmr(rides.basePxmr())} + " +
-                "${formatXmr(rides.perMinPxmr())}/min · " +
-                (contact?.displayName() ?: "rider"),
+            stringResource(
+                R.string.taxi_meter_terms,
+                formatXmr(rides.basePxmr()), formatXmr(rides.perMinPxmr()),
+            ) + " · " + (contact?.displayName() ?: stringResource(R.string.taxi_rider)),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -292,9 +294,10 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
                     .coerceAtLeast(0)
                 val meteredEnd = rides.perMinPxmr() * endSecs / 60
                 val lines = buildList {
-                    if (rides.basePxmr() > 0) add(BillItem("Base fare", rides.basePxmr()))
+                    if (rides.basePxmr() > 0) add(BillItem(context.getString(R.string.taxi_line_base_fare), rides.basePxmr()))
                     add(BillItem(
-                        "%d min %02d s × %s XMR/min".format(
+                        context.getString(
+                            R.string.taxi_line_metered,
                             endSecs / 60, endSecs % 60, formatXmr(rides.perMinPxmr()),
                         ),
                         meteredEnd,
@@ -311,18 +314,17 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
                     }
                     busy = false
                     r.onSuccess { rides.clear() }
-                        .onFailure { error = it.message ?: "could not send the fare" }
+                        .onFailure { error = it.message ?: context.getString(R.string.taxi_err_send_fare) }
                 }
             },
             enabled = !busy,
             modifier = Modifier.fillMaxWidth().height(56.dp),
         ) {
             if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-            else Text("End ride — bill ${Amounts.show(context, fare).primary}")
+            else Text(stringResource(R.string.taxi_end_ride_bill, Amounts.show(context, fare).primary))
         }
         Text(
-            "The bill shows the minutes and the rate. The receipt goes to them " +
-                "by itself when the fare lands — even after they have walked away.",
+            stringResource(R.string.taxi_bill_hint),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.outline,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -331,7 +333,7 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
 
         Spacer(Modifier.height(10.dp))
         TextButton(onClick = { confirmCancel = true }) {
-            Text("Cancel ride — no bill", color = MaterialTheme.colorScheme.error)
+            Text(stringResource(R.string.taxi_cancel_ride_no_bill), color = MaterialTheme.colorScheme.error)
         }
         error?.let {
             Text(it, color = MaterialTheme.colorScheme.error,
@@ -344,20 +346,17 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
     if (confirmCancel) {
         AlertDialog(
             onDismissRequest = { confirmCancel = false },
-            title = { Text("Cancel this ride?") },
+            title = { Text(stringResource(R.string.taxi_cancel_title)) },
             text = {
-                Text(
-                    "The meter stops and no bill is sent. The minutes counted so " +
-                        "far are discarded and cannot be recovered."
-                )
+                Text(stringResource(R.string.taxi_cancel_body))
             },
             confirmButton = {
                 TextButton(onClick = { confirmCancel = false; rides.clear() }) {
-                    Text("Cancel ride", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.taxi_cancel_confirm), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { confirmCancel = false }) { Text("Keep going") }
+                TextButton(onClick = { confirmCancel = false }) { Text(stringResource(R.string.taxi_keep_going)) }
             },
         )
     }

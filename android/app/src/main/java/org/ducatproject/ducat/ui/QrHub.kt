@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -26,6 +27,7 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.R
 
 private const val TAG = "QrHub"
 
@@ -70,7 +72,7 @@ fun QrHub(
         busy = false
         r.onSuccess { uri = it.uri }
             .onFailure {
-                error = it.message ?: "could not make a card"
+                error = it.message ?: context.getString(R.string.qrhub_card_issue_failed)
                 DucatLog.w(TAG, "issue: ${it.message}")
             }
     }
@@ -93,7 +95,7 @@ fun QrHub(
                                             title = {},
                         navigationIcon = {
                             IconButton(onClick = onClose) {
-                                Icon(Icons.Filled.ArrowBack, contentDescription = "Close")
+                                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.qrhub_close))
                             }
                         },
                     )
@@ -119,7 +121,7 @@ fun QrHub(
                             // and the icon shoves the label sideways when it appears.
                             icon = {},
                             modifier = Modifier.weight(1f),
-                        ) { Text("Scan code", maxLines = 1, softWrap = false) }
+                        ) { Text(stringResource(R.string.qrhub_scan_code), maxLines = 1, softWrap = false) }
                         SegmentedButton(
                             selected = !scanning,
                             onClick = { scanning = false },
@@ -128,7 +130,7 @@ fun QrHub(
                             // and the icon shoves the label sideways when it appears.
                             icon = {},
                             modifier = Modifier.weight(1f),
-                        ) { Text("My code", maxLines = 1, softWrap = false) }
+                        ) { Text(stringResource(R.string.qrhub_my_code), maxLines = 1, softWrap = false) }
                     }
                     if (scanning) {
                         // One scanner for both kinds. A person holding a phone at
@@ -138,7 +140,7 @@ fun QrHub(
                         // and a nested dialog painted over its own tab bar —
                         // which is why the toggle appeared not to exist.
                         QrScannerContent(
-                            prompt = "A DUCAT card or a Monero address",
+                            prompt = stringResource(R.string.qrhub_scan_prompt),
                             onResult = { raw ->
                                 val text = raw.trim()
                                 if (!text.startsWith("ducat:card/")) {
@@ -148,7 +150,7 @@ fun QrHub(
                                     // wanted in the first place.
                                     val addr = text.removePrefix("monero:").substringBefore("?")
                                     if (addr.length in 90..110) onScanAddress(addr)
-                                    else error = "That code is neither a DUCAT card nor a Monero address."
+                                    else error = context.getString(R.string.qrhub_not_a_code)
                                 } else {
                                     busy = true; error = null
                                     scope.launch {
@@ -160,7 +162,7 @@ fun QrHub(
                                         }
                                         busy = false
                                         r.onSuccess(onOpenChat).onFailure {
-                                            error = it.message ?: "that card did not work"
+                                            error = it.message ?: context.getString(R.string.qrhub_card_failed)
                                             DucatLog.w(TAG, "claim: ${it.message}")
                                         }
                                     }
@@ -199,7 +201,7 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
     ) {
         Avatar(name ?: "?", pic, size = 72)
         Spacer(Modifier.height(10.dp))
-        Text(name ?: "no name set", style = MaterialTheme.typography.titleLarge)
+        Text(name ?: stringResource(R.string.qrhub_no_name_set), style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(20.dp))
 
         when {
@@ -207,8 +209,7 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
                 CircularProgressIndicator()
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Publishing two records so people can reach you while this " +
-                        "phone is off.",
+                    stringResource(R.string.qrhub_publishing),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -220,7 +221,7 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
                     OutlinedButton(onClick = onCopy) {
                         Icon(Icons.Filled.ContentCopy, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Copy link")
+                        Text(stringResource(R.string.qrhub_copy_link))
                     }
                     OutlinedButton(onClick = {
                         val i = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
@@ -228,17 +229,19 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
                             putExtra(android.content.Intent.EXTRA_TEXT, uri)
                         }
                         context.startActivity(
-                            android.content.Intent.createChooser(i, "Share your card")
+                            android.content.Intent.createChooser(
+                                i, context.getString(R.string.qrhub_share_chooser),
+                            )
                         )
                     }) {
                         Icon(Icons.Filled.Share, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Share")
+                        Text(stringResource(R.string.qrhub_share))
                     }
                 }
                 Spacer(Modifier.height(20.dp))
                 Text(
-                    "Tap phones, or scan — same card either way.",
+                    stringResource(R.string.qrhub_tap_or_scan),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -247,15 +250,13 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
                     // Worth saying because it is surprising, and because someone
                     // who does not know it will hand the same code to two people
                     // and wonder why the second one never arrives.
-                    "One person per code. As soon as somebody takes this one, the " +
-                        "next is made automatically — nothing to do.",
+                    stringResource(R.string.qrhub_one_per_code),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Your name and picture travel with it. Everything else you " +
-                        "share arrives afterwards, over the connection it opens.",
+                    stringResource(R.string.qrhub_name_travels),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline,
                 )

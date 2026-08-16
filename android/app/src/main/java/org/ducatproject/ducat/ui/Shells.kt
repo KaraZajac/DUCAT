@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -17,11 +18,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Mode
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RunningTab
 import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
@@ -42,39 +45,39 @@ import org.ducatproject.ducat.formatXmr
 fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
     when (mode) {
         Mode.Pos -> Shell(
-            title = "Point of Sale",
+            title = stringResource(R.string.shells_title_pos),
             openDrawer = openDrawer,
             tabs = listOf(
-                ShellTab("Register", Icons.Filled.PointOfSale) { PosScreen() },
-                ShellTab("Sales", Icons.Filled.Receipt) {
-                    SettledList(origin = "pos", noun = "sale")
+                ShellTab(stringResource(R.string.shells_tab_register), Icons.Filled.PointOfSale) { PosScreen() },
+                ShellTab(stringResource(R.string.shells_tab_sales), Icons.Filled.Receipt) {
+                    SettledList(origin = "pos", emptyTextRes = R.string.shells_no_sales_yet)
                 },
             ),
         )
         Mode.BarTab -> Shell(
-            title = "Bar Tab",
+            title = stringResource(R.string.shells_title_bar_tab),
             openDrawer = openDrawer,
             tabs = listOf(
-                ShellTab("Tabs", Icons.Filled.LocalBar) { BarTabScreen(section = "open") },
-                ShellTab("Closed", Icons.Filled.Receipt) { BarTabScreen(section = "closed") },
+                ShellTab(stringResource(R.string.shells_tab_tabs), Icons.Filled.LocalBar) { BarTabScreen(section = "open") },
+                ShellTab(stringResource(R.string.shells_tab_closed), Icons.Filled.Receipt) { BarTabScreen(section = "closed") },
             ),
         )
         Mode.Taxi -> Shell(
-            title = "Taxi",
+            title = stringResource(R.string.shells_title_taxi),
             openDrawer = openDrawer,
             tabs = listOf(
-                ShellTab("Fares", Icons.Filled.Search) { DriveScreen() },
-                ShellTab("Meter", Icons.Filled.Speed) { TaxiScreen() },
-                ShellTab("Rides", Icons.Filled.DirectionsCar) {
-                    SettledList(origin = "taxi", noun = "ride")
+                ShellTab(stringResource(R.string.shells_tab_fares), Icons.Filled.Search) { DriveScreen() },
+                ShellTab(stringResource(R.string.shells_tab_meter), Icons.Filled.Speed) { TaxiScreen() },
+                ShellTab(stringResource(R.string.shells_tab_rides), Icons.Filled.DirectionsCar) {
+                    SettledList(origin = "taxi", emptyTextRes = R.string.shells_no_rides_yet)
                 },
             ),
         )
         Mode.Donate -> Shell(
-            title = "Donations",
+            title = stringResource(R.string.shells_title_donations),
             openDrawer = openDrawer,
             tabs = listOf(
-                ShellTab("Code", Icons.Filled.RadioButtonUnchecked) { DonateScreen() },
+                ShellTab(stringResource(R.string.shells_tab_code), Icons.Filled.RadioButtonUnchecked) { DonateScreen() },
             ),
         )
         Mode.None -> {} // personal mode renders the full app, not a shell
@@ -100,7 +103,8 @@ private fun Shell(title: String, openDrawer: () -> Unit, tabs: List<ShellTab>) {
                 title = { Text(title, style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = openDrawer) {
-                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                        Icon(Icons.Filled.Menu,
+                            contentDescription = stringResource(R.string.shells_menu))
                     }
                 },
             )
@@ -137,7 +141,7 @@ private fun Shell(title: String, openDrawer: () -> Unit, tabs: List<ShellTab>) {
  * Rides tab, because both are the same question about a different `origin`.
  */
 @Composable
-private fun SettledList(origin: String, noun: String) {
+private fun SettledList(origin: String, @StringRes emptyTextRes: Int) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val store = remember { TabStore(context) }
@@ -154,7 +158,7 @@ private fun SettledList(origin: String, noun: String) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
             Spacer(Modifier.height(16.dp))
             Text(
-                "Today",
+                stringResource(R.string.shells_today),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -167,14 +171,14 @@ private fun SettledList(origin: String, noun: String) {
         }
 
         if (waiting.isNotEmpty()) {
-            SettledSection("Billed — waiting", waiting)
+            SettledSection(stringResource(R.string.shells_billed_waiting), waiting)
         }
         if (done.isNotEmpty()) {
-            SettledSection("Settled", done)
+            SettledSection(stringResource(R.string.shells_settled), done)
         }
         if (mine.isEmpty()) {
             Text(
-                "No ${noun}s yet today.",
+                stringResource(emptyTextRes),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(24.dp),
@@ -214,10 +218,11 @@ private fun SettledSection(label: String, tabs: List<RunningTab>) {
                         )
                         Text(
                             when (t.state) {
-                                "settled" -> if (t.seenTx != null) "payment seen — settling"
-                                    else "billed, unpaid"
-                                "paid_oob" -> "paid outside DUCAT ✓"
-                                else -> "paid ✓"
+                                "settled" -> if (t.seenTx != null)
+                                    stringResource(R.string.shells_payment_seen_settling)
+                                    else stringResource(R.string.shells_billed_unpaid)
+                                "paid_oob" -> stringResource(R.string.shells_paid_outside)
+                                else -> stringResource(R.string.shells_paid)
                             },
                             style = MaterialTheme.typography.labelSmall,
                             color = if (t.state == "settled")

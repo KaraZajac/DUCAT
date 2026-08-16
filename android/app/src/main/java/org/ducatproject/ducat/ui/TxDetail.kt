@@ -16,6 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,6 +27,7 @@ import androidx.compose.ui.window.DialogProperties
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.LOCK_BLOCKS
 import org.ducatproject.ducat.Ledger
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.formatXmr
 
 /**
@@ -64,10 +67,15 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
                     colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                 ),
-                                    title = { Text(if (sent) "Payment sent" else "Payment received") },
+                                    title = {
+                        Text(
+                            if (sent) stringResource(R.string.txdetail_payment_sent)
+                            else stringResource(R.string.txdetail_payment_received)
+                        )
+                    },
                     navigationIcon = {
                         IconButton(onClick = onClose) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.txdetail_back))
                         }
                     },
                 )
@@ -90,42 +98,46 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
             Spacer(Modifier.height(4.dp))
             Text(
                 when {
-                    e.pending -> "Broadcast, not yet in a block"
-                    e.unexplained -> "This output was spent and the transaction " +
-                        "is not one we can identify"
-                    confirmations in 1 until LOCK_BLOCKS ->
-                        "$confirmations of $LOCK_BLOCKS confirmations"
-                    confirmations > 0 -> "Confirmed · $confirmations confirmations"
-                    else -> "Not yet confirmed"
+                    e.pending -> stringResource(R.string.txdetail_status_broadcast)
+                    e.unexplained -> stringResource(R.string.txdetail_status_unexplained)
+                    confirmations in 1 until LOCK_BLOCKS -> stringResource(
+                        R.string.txdetail_confirmations_progress, confirmations, LOCK_BLOCKS,
+                    )
+                    confirmations > 0 -> pluralStringResource(
+                        R.plurals.txdetail_confirmed, confirmations.toInt(), confirmations,
+                    )
+                    else -> stringResource(R.string.txdetail_not_yet_confirmed)
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = if (e.pending || confirmations < LOCK_BLOCKS)
                     MaterialTheme.ducat.changePending else MaterialTheme.ducat.settled,
             )
 
-            Section("Payment")
-            Field("When", whenText(e.timestamp))
-            Field(if (sent) "To" else "From", counterpartyText(e))
-            e.address?.let { Field("Address", it, mono = true, copyable = true) }
-            e.note?.takeIf { it.isNotBlank() }?.let { Field("Note", it) }
+            Section(stringResource(R.string.txdetail_section_payment))
+            Field(stringResource(R.string.txdetail_when), whenText(context, e.timestamp))
+            Field(
+                if (sent) stringResource(R.string.txdetail_to) else stringResource(R.string.txdetail_from),
+                counterpartyText(context, e),
+            )
+            e.address?.let { Field(stringResource(R.string.txdetail_address), it, mono = true, copyable = true) }
+            e.note?.takeIf { it.isNotBlank() }?.let { Field(stringResource(R.string.txdetail_note), it) }
             if (sent) {
-                Field("Amount", "${formatXmr(e.amountPxmr)} XMR")
-                Field("Network fee", "${formatXmr(e.feePxmr)} XMR")
+                Field(stringResource(R.string.txdetail_amount), "${formatXmr(e.amountPxmr)} XMR")
+                Field(stringResource(R.string.txdetail_network_fee), "${formatXmr(e.feePxmr)} XMR")
                 if (e.changePxmr > 0) {
                     // Named explicitly because it is the number that makes a
                     // send look like a receipt when it is not labelled.
                     Field(
-                        "Change back to you", "${formatXmr(e.changePxmr)} XMR",
-                        note = "Monero spends whole outputs, so the remainder " +
-                            "returns to your own wallet as a new one.",
+                        stringResource(R.string.txdetail_change_back), "${formatXmr(e.changePxmr)} XMR",
+                        note = stringResource(R.string.txdetail_change_back_note),
                     )
                 }
-                Field("Total leaving the wallet", "${formatXmr(-e.netPxmr)} XMR")
+                Field(stringResource(R.string.txdetail_total_leaving), "${formatXmr(-e.netPxmr)} XMR")
             }
             Field(
-                "Balance after this",
+                stringResource(R.string.txdetail_balance_after),
                 "${formatXmr(e.balanceAfterPxmr)} XMR",
-                note = if (e.pending) "Unchanged until the spend is seen on chain." else null,
+                note = if (e.pending) stringResource(R.string.txdetail_balance_after_note) else null,
             )
 
             // The half a bank statement never has: what the money was *for*.
@@ -135,83 +147,100 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
             // shows nothing here, which is itself the argument for paying
             // through DUCAT.
             if (e.receipted) {
-                Section("Receipt")
+                Section(stringResource(R.string.txdetail_section_receipt))
                 e.items.forEach { i ->
                     Field(i.description, "${formatXmr(i.amountPxmr)} XMR", mono = true)
                 }
-                e.taxPxmr?.let { Field("Tax", "${formatXmr(it)} XMR", mono = true) }
-                Field("Total receipted", "${formatXmr(e.amountPxmr)} XMR", mono = true)
+                e.taxPxmr?.let { Field(stringResource(R.string.txdetail_tax), "${formatXmr(it)} XMR", mono = true) }
+                Field(stringResource(R.string.txdetail_total_receipted), "${formatXmr(e.amountPxmr)} XMR", mono = true)
                 Field(
-                    "Issued by",
-                    e.receiptBy ?: "the payee",
-                    note = if (e.receiptAt > 0) whenText(e.receiptAt) else null,
+                    stringResource(R.string.txdetail_issued_by),
+                    e.receiptBy ?: stringResource(R.string.txdetail_the_payee),
+                    note = if (e.receiptAt > 0) whenText(context, e.receiptAt) else null,
                 )
             }
             e.contactHex?.let { hex ->
                 TextButton(onClick = {
                     org.ducatproject.ducat.MainActivity.openChat.value = hex
-                }) { Text("Open the conversation") }
+                }) { Text(stringResource(R.string.txdetail_open_conversation)) }
             }
 
-            Section("On the chain")
+            Section(stringResource(R.string.txdetail_section_chain))
             if (e.txid.isNotEmpty()) {
-                Field("Transaction", e.txid, mono = true, copyable = true)
+                Field(stringResource(R.string.txdetail_transaction), e.txid, mono = true, copyable = true)
             } else {
-                Field("Transaction", "not known",
-                    note = "Recorded before the wallet kept transaction ids.")
+                Field(stringResource(R.string.txdetail_transaction), stringResource(R.string.txdetail_not_known),
+                    note = stringResource(R.string.txdetail_not_known_note))
             }
-            Field("Block", if (e.height > 0) "${e.height}" else "not yet in a block")
-            Field("Confirmations", if (confirmations > 0) "$confirmations" else "0")
+            Field(
+                stringResource(R.string.txdetail_block),
+                if (e.height > 0) "${e.height}" else stringResource(R.string.txdetail_not_in_block),
+            )
+            Field(stringResource(R.string.txdetail_confirmations), if (confirmations > 0) "$confirmations" else "0")
             val c = e.chain
             if (c != null) {
-                Field("Format", "RingCT v${c.version}${if (c.coinbase) " · coinbase" else ""}")
-                Field("Ring size", "${c.ringSize}",
-                    note = "Decoys plus the real spend. Nobody reading the chain " +
-                        "can tell which of the ${c.ringSize} was actually spent.")
-                Field("Inputs / outputs", "${c.inputCount} in · ${c.outputCount} out")
-                Field("Fee", "${formatXmr(c.feePxmr)} XMR")
-                Field("Extra field", "${c.extraLen} bytes",
-                    note = "Carries the transaction public key, and a payment id if one was used.")
+                Field(
+                    stringResource(R.string.txdetail_format),
+                    stringResource(R.string.txdetail_format_ringct, c.version) +
+                        if (c.coinbase) stringResource(R.string.txdetail_format_coinbase_suffix) else "",
+                )
+                Field(stringResource(R.string.txdetail_ring_size), "${c.ringSize}",
+                    note = stringResource(R.string.txdetail_ring_size_note, c.ringSize))
+                Field(
+                    stringResource(R.string.txdetail_inputs_outputs),
+                    stringResource(R.string.txdetail_in_out, c.inputCount, c.outputCount),
+                )
+                Field(stringResource(R.string.txdetail_fee), "${formatXmr(c.feePxmr)} XMR")
+                Field(
+                    stringResource(R.string.txdetail_extra_field),
+                    pluralStringResource(R.plurals.txdetail_extra_bytes, c.extraLen, c.extraLen),
+                    note = stringResource(R.string.txdetail_extra_field_note))
                 if (c.additionalTimelock > 0) {
-                    Field("Extra timelock", "${c.additionalTimelock}")
+                    Field(stringResource(R.string.txdetail_extra_timelock), "${c.additionalTimelock}")
                 }
             } else if (!e.pending) {
                 Field(
-                    "Chain details", "not fetched yet",
-                    note = "The wallet reads these a few at a time in the " +
-                        "background. Leave the app open for a moment.",
+                    stringResource(R.string.txdetail_chain_details), stringResource(R.string.txdetail_not_fetched),
+                    note = stringResource(R.string.txdetail_not_fetched_note),
                 )
             }
 
             if (e.ours.isNotEmpty()) {
-                Section(if (sent) "Outputs returned to you" else "Outputs you received")
+                Section(
+                    if (sent) stringResource(R.string.txdetail_outputs_returned)
+                    else stringResource(R.string.txdetail_outputs_received)
+                )
                 e.ours.forEach { o ->
                     Field(
                         "${formatXmr(o.amountPxmr)} XMR",
-                        if (o.spent) "spent" else "unspent",
-                        note = "block ${o.height}",
+                        if (o.spent) stringResource(R.string.txdetail_spent)
+                        else stringResource(R.string.txdetail_unspent),
+                        note = stringResource(R.string.txdetail_block_n, o.height),
                     )
-                    Field("  Key image", o.keyImage.ifEmpty { "none" }, mono = true, copyable = true)
+                    Field(
+                        stringResource(R.string.txdetail_key_image),
+                        o.keyImage.ifEmpty { stringResource(R.string.txdetail_none) },
+                        mono = true, copyable = true,
+                    )
                 }
             }
             if (e.consumed.isNotEmpty()) {
-                Section("Outputs this spent")
+                Section(stringResource(R.string.txdetail_outputs_this_spent))
                 e.consumed.forEach { o ->
-                    Field("${formatXmr(o.amountPxmr)} XMR", "from block ${o.height}")
-                    Field("  Key image", o.keyImage, mono = true, copyable = true)
+                    Field(
+                        "${formatXmr(o.amountPxmr)} XMR",
+                        stringResource(R.string.txdetail_from_block, o.height),
+                    )
+                    Field(stringResource(R.string.txdetail_key_image), o.keyImage, mono = true, copyable = true)
                 }
             }
 
-            Section("Privacy")
+            Section(stringResource(R.string.txdetail_section_privacy))
             Text(
                 if (sent)
-                    "The recipient is not on the chain. What is published is a " +
-                        "one-time key nobody can link to their address, and a ring " +
-                        "of ${e.chain?.ringSize ?: 16} possible sources for each input."
+                    stringResource(R.string.txdetail_privacy_sent, e.chain?.ringSize ?: 16)
                 else
-                    "Monero does not record who sent this. A name appears here only " +
-                        "when a contact told us in the conversation, and even then it " +
-                        "is their claim — the money is verified, the sender is not.",
+                    stringResource(R.string.txdetail_privacy_received),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -222,14 +251,14 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
     }
 }
 
-private fun counterpartyText(e: Ledger.Event): String = when {
+private fun counterpartyText(context: Context, e: Ledger.Event): String = when {
     e.counterparty != null -> when (e.source) {
-        Ledger.Source.Notice -> "${e.counterparty} (they said so in chat)"
+        Ledger.Source.Notice -> context.getString(R.string.txdetail_counterparty_chat, e.counterparty)
         else -> e.counterparty
     }
-    e.address != null -> "an address"
-    e.direction == Ledger.Direction.Sent -> "not recorded"
-    else -> "unknown — Monero does not carry a sender"
+    e.address != null -> context.getString(R.string.txdetail_an_address)
+    e.direction == Ledger.Direction.Sent -> context.getString(R.string.txdetail_not_recorded)
+    else -> context.getString(R.string.txdetail_unknown_sender)
 }
 
 @Composable
@@ -288,5 +317,5 @@ private fun Field(
 private fun copy(context: Context, label: String, value: String) {
     val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     cm.setPrimaryClip(ClipData.newPlainText(label, value))
-    Toast.makeText(context, "$label copied", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, context.getString(R.string.txdetail_copied, label), Toast.LENGTH_SHORT).show()
 }

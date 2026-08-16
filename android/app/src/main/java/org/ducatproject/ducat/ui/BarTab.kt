@@ -13,6 +13,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +27,7 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RunningTab
 import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
@@ -89,7 +92,7 @@ fun BarTabScreen(
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
             Spacer(Modifier.height(16.dp))
             Text(
-                "Open tabs",
+                stringResource(R.string.bartab_open_tabs),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -106,11 +109,11 @@ fun BarTabScreen(
         Button(
             onClick = { opening = true },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(52.dp),
-        ) { Text("Start a tab") }
+        ) { Text(stringResource(R.string.bartab_start_tab)) }
 
         }
         if (section != "closed" && open.isNotEmpty()) {
-            SectionLabel("Running")
+            SectionLabel(stringResource(R.string.bartab_section_running))
             Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Column {
                     open.forEach { t -> TabRow(t) { openId = t.id } }
@@ -119,15 +122,14 @@ fun BarTabScreen(
         }
 
         if (section != "closed" && awaiting.isNotEmpty()) {
-            SectionLabel("Billed — waiting for payment")
+            SectionLabel(stringResource(R.string.bartab_section_billed))
             Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Column {
                     awaiting.forEach { t -> TabRow(t) { openId = t.id } }
                 }
             }
             Text(
-                "The receipt goes to them by itself the moment the payment lands " +
-                    "— even after they have left.",
+                stringResource(R.string.bartab_receipt_auto_hint),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
@@ -139,12 +141,12 @@ fun BarTabScreen(
                 Modifier.fillMaxWidth().padding(end = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                SectionLabel("Settled")
+                SectionLabel(stringResource(R.string.bartab_section_settled))
                 Spacer(Modifier.weight(1f))
                 // Local bookkeeping only: the receipts already live in the
                 // threads, which is where the record of the night belongs.
                 TextButton(onClick = { done.forEach { store.delete(it.id) } }) {
-                    Text("Clear", style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(R.string.bartab_clear), style = MaterialTheme.typography.labelMedium)
                 }
             }
             Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
@@ -154,7 +156,7 @@ fun BarTabScreen(
 
         if (section == "closed" && done.isEmpty()) {
             Text(
-                "Nothing settled yet tonight.",
+                stringResource(R.string.bartab_nothing_settled),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(24.dp),
@@ -162,7 +164,7 @@ fun BarTabScreen(
         }
         if (section != "closed" && tabs.isEmpty()) {
             Text(
-                "No tabs yet. Start one when the first order lands.",
+                stringResource(R.string.bartab_no_tabs),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -198,18 +200,18 @@ private fun TabRow(t: RunningTab, onClick: () -> Unit) {
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(name, style = MaterialTheme.typography.titleMedium)
+            val status = when (t.state) {
+                "open" -> pluralStringResource(R.plurals.bartab_items, t.lines.size, t.lines.size)
+                "settled" -> if (t.seenTx != null) stringResource(R.string.bartab_state_payment_seen)
+                    else stringResource(R.string.bartab_state_billed_unpaid)
+                "paid_oob" -> stringResource(R.string.bartab_state_paid_oob)
+                "cancelled" -> stringResource(R.string.bartab_state_cancelled)
+                else -> stringResource(R.string.bartab_state_paid)
+            }
             Text(
                 buildString {
                     if (t.origin != "bar") append("${t.origin} · ")
-                    append(
-                        when (t.state) {
-                            "open" -> "${t.lines.size} item(s)"
-                            "settled" -> if (t.seenTx != null) "payment seen — settling" else "billed, unpaid"
-                            "paid_oob" -> "paid outside DUCAT ✓"
-                            "cancelled" -> "cancelled"
-                            else -> "paid ✓"
-                        }
-                    )
+                    append(status)
                 },
                 style = MaterialTheme.typography.labelSmall,
                 color = when (t.state) {
@@ -262,7 +264,7 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
             }
         }
         r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure { error = it.message ?: "could not publish a code" }
+            .onFailure { error = it.message ?: context.getString(R.string.bartab_err_publish_code) }
     }
 
     // A scan opens the tab by itself — the bartender should not need a second
@@ -295,14 +297,14 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("New customer", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.bartab_new_customer), style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(10.dp))
         when {
             cardUri != null -> {
                 QrBlock(cardUri!!)
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "They scan or tap — the tab opens by itself.",
+                    stringResource(R.string.bartab_scan_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -314,7 +316,7 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
 
         if (regulars.isNotEmpty()) {
             Spacer(Modifier.height(24.dp))
-            Text("Or a regular", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.bartab_or_regular), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(6.dp))
             Card(Modifier.fillMaxWidth()) {
                 Column {
@@ -336,7 +338,7 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
 
         Spacer(Modifier.height(20.dp))
         OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth().height(48.dp)) {
-            Text("Back")
+            Text(stringResource(R.string.bartab_back))
         }
     }
 }
@@ -370,8 +372,7 @@ internal fun cancelTabWithRetract(
     runCatching {
         Mailbox.send(
             context, contact,
-            "That bill for ${formatXmr(tab.settledTotal)} XMR is cancelled — " +
-                "nothing to pay.",
+            context.getString(R.string.bartab_bill_cancelled_msg, formatXmr(tab.settledTotal)),
             org.ducatproject.ducat.PersonaStore(context).personaHex(),
             kind = 5, reSeq = billSeq, reOwn = true,
         )
@@ -428,8 +429,10 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                             .first { it.personaHex == tab.personaHex }
                         Mailbox.send(
                             context, c,
-                            "$d — ${formatXmr(a)} XMR · tab now " +
-                                "${formatXmr(updated.totalPxmr)} XMR",
+                            context.getString(
+                                R.string.bartab_drink_notice,
+                                d, formatXmr(a), formatXmr(updated.totalPxmr),
+                            ),
                             org.ducatproject.ducat.PersonaStore(context).personaHex(),
                         )
                     }.onFailure { DucatLog.w(TAG, "drink notice: ${it.message}") }
@@ -459,7 +462,7 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                                         ))
                                     },
                                     modifier = Modifier.size(30.dp),
-                                ) { Icon(Icons.Filled.Close, "Remove", Modifier.size(14.dp)) }
+                                ) { Icon(Icons.Filled.Close, stringResource(R.string.bartab_remove_line), Modifier.size(14.dp)) }
                             }
                         }
                     }
@@ -478,18 +481,17 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                                 runCatching { store.settle(tab) }
                             }
                             busy = false
-                            r.onFailure { error = it.message ?: "could not send the bill" }
+                            r.onFailure { error = it.message ?: context.getString(R.string.bartab_err_send_bill) }
                         }
                     },
                     enabled = !busy && tab.lines.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(52.dp),
                 ) {
                     if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                    else Text("Settle — bill ${Amounts.show(context, tab.totalPxmr).primary}")
+                    else Text(stringResource(R.string.bartab_settle_bill, Amounts.show(context, tab.totalPxmr).primary))
                 }
                 Text(
-                    "One itemised bill into your conversation with $name. They can " +
-                        "pay from anywhere — the thread does not close when they leave.",
+                    stringResource(R.string.bartab_settle_hint, name),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
@@ -497,35 +499,31 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 TextButton(
                     onClick = { confirmDiscard = true },
                     modifier = Modifier.padding(horizontal = 16.dp),
-                ) { Text("Discard tab", color = MaterialTheme.colorScheme.error) }
+                ) { Text(stringResource(R.string.bartab_discard_tab), color = MaterialTheme.colorScheme.error) }
 
                 // An open tab discarded takes its line items with it and cannot
                 // be recovered, so it asks first — the same courtesy Forget gets.
                 if (confirmDiscard) {
                     AlertDialog(
                         onDismissRequest = { confirmDiscard = false },
-                        title = { Text("Discard this tab?") },
+                        title = { Text(stringResource(R.string.bartab_discard_title)) },
                         text = {
-                            Text(
-                                "The tab and everything rung up on it are deleted from " +
-                                    "this phone. No bill is sent, and this cannot be undone."
-                            )
+                            Text(stringResource(R.string.bartab_discard_body))
                         },
                         confirmButton = {
                             TextButton(onClick = {
                                 confirmDiscard = false; store.delete(tab.id); onBack()
-                            }) { Text("Discard", color = MaterialTheme.colorScheme.error) }
+                            }) { Text(stringResource(R.string.bartab_discard_confirm), color = MaterialTheme.colorScheme.error) }
                         },
                         dismissButton = {
-                            TextButton(onClick = { confirmDiscard = false }) { Text("Keep tab") }
+                            TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.bartab_keep_tab)) }
                         },
                     )
                 }
             }
             "settled" -> Column(Modifier.padding(horizontal = 16.dp)) {
                 Text(
-                    "Billed. The receipt goes to them by itself when the payment " +
-                        "lands. If it was settled some other way, say so here:",
+                    stringResource(R.string.bartab_billed_hint),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 8.dp),
@@ -540,7 +538,7 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                         onBack()
                     },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
-                ) { Text("Paid outside DUCAT (cash, card)") }
+                ) { Text(stringResource(R.string.bartab_paid_outside_button)) }
                 Spacer(Modifier.height(8.dp))
                 // Withdrawing the bill tells them in the thread — their app
                 // still shows a Review button pointing at money nobody is
@@ -554,22 +552,22 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                         onBack()
                     },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
-                ) { Text("Cancel the bill", color = MaterialTheme.colorScheme.error) }
+                ) { Text(stringResource(R.string.bartab_cancel_bill), color = MaterialTheme.colorScheme.error) }
             }
             "cancelled" -> Text(
-                "Cancelled — they were told in the conversation.",
+                stringResource(R.string.bartab_cancelled_note),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
             "paid_oob" -> Text(
-                "Paid outside DUCAT ✓ — receipt sent, no transaction attached.",
+                stringResource(R.string.bartab_paid_oob_note),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.ducat.settled,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
             else -> Text(
-                "Paid ✓ — receipt sent.",
+                stringResource(R.string.bartab_paid_note),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.ducat.settled,
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -584,7 +582,7 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
             TextButton(
                 onClick = { store.delete(tab.id); onBack() },
                 modifier = Modifier.padding(horizontal = 16.dp),
-            ) { Text("Remove from tab book", color = MaterialTheme.colorScheme.error) }
+            ) { Text(stringResource(R.string.bartab_remove_from_book), color = MaterialTheme.colorScheme.error) }
         }
 
         error?.let {
@@ -597,7 +595,7 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
         OutlinedButton(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(48.dp),
-        ) { Text("Back to tabs") }
+        ) { Text(stringResource(R.string.bartab_back_to_tabs)) }
         Spacer(Modifier.height(24.dp))
     }
 }

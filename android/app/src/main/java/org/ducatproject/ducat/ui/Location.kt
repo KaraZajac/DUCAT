@@ -15,8 +15,9 @@ fun grabLocation(
         val la = lat / 1e7; val lo = lon / 1e7
         // Locale.US or a comma-decimal locale mints mlat=52,52000 — a URL
         // no map can open. Same rule as every coordinate URL in Geo.kt.
-        "📍 Where I am: https://www.openstreetmap.org/?mlat=%.5f&mlon=%.5f#map=17/%.5f/%.5f"
+        val url = "https://www.openstreetmap.org/?mlat=%.5f&mlon=%.5f#map=17/%.5f/%.5f"
             .format(java.util.Locale.US, la, lo, la, lo)
+        context.getString(org.ducatproject.ducat.R.string.location_where_i_am, url)
     })
 }
 
