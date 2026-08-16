@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.*
 import org.ducatproject.ducat.DucatLog
+import org.ducatproject.ducat.R
 import java.math.BigDecimal
 
 /**
@@ -67,7 +69,7 @@ fun PaySheet(
 
     if (scanning) {
         QrScanner(
-            prompt = "A Monero address, a monero: code, or a DUCAT card",
+            prompt = stringResource(R.string.pay_scan_prompt),
             onResult = { raw ->
                 scanning = false
                 target = readScan(context, raw)
@@ -175,24 +177,23 @@ private fun ChooseTarget(
             .padding(bottom = 24.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 12.dp)) {
-            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, "Close") }
+            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, stringResource(R.string.pay_close)) }
             Spacer(Modifier.width(4.dp))
-            Text("Send or request", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.pay_send_or_request), style = MaterialTheme.typography.titleLarge)
         }
         Spacer(Modifier.height(12.dp))
 
         OutlinedButton(onClick = onScan, modifier = Modifier.fillMaxWidth()) {
             Icon(Icons.Filled.QrCodeScanner, null, Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text("Scan a code")
+            Text(stringResource(R.string.pay_scan_a_code))
         }
 
         if (contacts.isNotEmpty()) {
             Spacer(Modifier.height(16.dp))
-            Text("Your contacts", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.pay_your_contacts), style = MaterialTheme.typography.labelLarge)
             Text(
-                "A payment to a contact carries a note and lands in your chat. " +
-                    "An address does not.",
+                stringResource(R.string.pay_contact_vs_address),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -218,12 +219,12 @@ private fun ChooseTarget(
         }
 
         Spacer(Modifier.height(16.dp))
-        Text("Or a Monero address", style = MaterialTheme.typography.labelLarge)
+        Text(stringResource(R.string.pay_or_monero_address), style = MaterialTheme.typography.labelLarge)
         Spacer(Modifier.height(6.dp))
         OutlinedTextField(
             value = address,
             onValueChange = { address = it },
-            placeholder = { Text("5… or 7…") },
+            placeholder = { Text(stringResource(R.string.pay_address_placeholder)) },
             modifier = Modifier.fillMaxWidth(),
             minLines = 2,
         )
@@ -232,10 +233,10 @@ private fun ChooseTarget(
             onClick = { onPick(PayTarget.ToAddress(address.trim())) },
             enabled = address.trim().length in 90..110,
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Continue") }
+        ) { Text(stringResource(R.string.pay_continue)) }
         if (address.isNotBlank() && address.trim().length !in 90..110) {
             Text(
-                "That does not look like a Monero address.",
+                stringResource(R.string.pay_not_monero_address),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )
@@ -391,7 +392,7 @@ private fun AmountStep(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(top = 12.dp),
         ) {
-            IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Back") }
+            IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, stringResource(R.string.pay_back)) }
             Spacer(Modifier.width(4.dp))
             when (target) {
                 is PayTarget.ToContact -> {
@@ -401,14 +402,14 @@ private fun AmountStep(
                         Text(target.contact.displayName(),
                              style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "in DUCAT",
+                            stringResource(R.string.pay_in_ducat),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline,
                         )
                     }
                 }
                 is PayTarget.ToAddress -> Column {
-                    Text("Monero address", style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.pay_monero_address), style = MaterialTheme.typography.titleSmall)
                     Text(
                         target.address.take(10) + "…" + target.address.takeLast(6),
                         fontFamily = FontFamily.Monospace,
@@ -424,7 +425,7 @@ private fun AmountStep(
             // Their number, shown as a fact rather than a field. What is
             // editable on a bill is the tip, and only the tip.
             Text(
-                "Bill",
+                stringResource(R.string.pay_bill),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -438,7 +439,7 @@ private fun AmountStep(
             OutlinedTextField(
                 value = tipTyped,
                 onValueChange = { tipTyped = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
-                label = { Text("Add a tip (${if (fiatEntry) cur else "XMR"}) — optional") },
+                label = { Text(stringResource(R.string.pay_add_tip, if (fiatEntry) cur else "XMR")) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
@@ -447,7 +448,7 @@ private fun AmountStep(
                 Spacer(Modifier.height(6.dp))
                 val t = Amounts.show(context, pxmr ?: 0L)
                 Text(
-                    "Total with tip: ${t.primary}" +
+                    stringResource(R.string.pay_total_with_tip, t.primary) +
                         (t.secondary?.let { " · $it" } ?: ""),
                     style = MaterialTheme.typography.titleMedium,
                 )
@@ -461,7 +462,7 @@ private fun AmountStep(
                     typed = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
                     maxLocked = false
                 },
-                placeholder = { Text("0") },
+                placeholder = { Text(stringResource(R.string.pay_amount_placeholder)) },
                 textStyle = MaterialTheme.typography.displayMedium,
                 singleLine = true,
                 isError = overMax,
@@ -501,17 +502,18 @@ private fun AmountStep(
         Spacer(Modifier.height(12.dp))
         if (asking) {
             Text(
-                "What you are asking ${
-                    (target as? PayTarget.ToContact)?.contact?.displayName() ?: "them"
-                } for. Your balance and the network fee are theirs to worry " +
-                    "about, not yours — this is a message, not a transaction.",
+                stringResource(
+                    R.string.pay_asking_explainer,
+                    (target as? PayTarget.ToContact)?.contact?.displayName()
+                        ?: stringResource(R.string.pay_them),
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "Up to ${inUnit(context, maxPxmr, fiatEntry, rate, cur)} after fees",
+                stringResource(R.string.pay_up_to_after_fees, inUnit(context, maxPxmr, fiatEntry, rate, cur)),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (overMax) MaterialTheme.colorScheme.error
                         else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -520,11 +522,11 @@ private fun AmountStep(
             TextButton(
                 onClick = { maxLocked = true },
                 enabled = maxPxmr > 0,
-            ) { Text(if (maxLocked) "Max ✓" else "Max") }
+            ) { Text(if (maxLocked) stringResource(R.string.pay_max_done) else stringResource(R.string.pay_max)) }
         }
         if (overMax) {
             Text(
-                "That is more than you can send once the fee is counted.",
+                stringResource(R.string.pay_over_max),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )
@@ -536,24 +538,22 @@ private fun AmountStep(
             Card(colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                 Column(Modifier.padding(14.dp)) {
-                    CostRow("Amount", Amounts.show(context, q.amountPxmr).primary)
+                    CostRow(stringResource(R.string.pay_amount), Amounts.show(context, q.amountPxmr).primary)
                     CostRow(
-                        "Network fee (estimated)",
+                        stringResource(R.string.pay_network_fee_estimated),
                         Amounts.show(context, q.feePxmr).primary,
                     )
                     HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                    CostRow("Total", Amounts.show(context, q.totalPxmr).primary, bold = true)
-                    CostRow("Left after", Amounts.show(context, q.remainingPxmr).primary)
+                    CostRow(stringResource(R.string.pay_total), Amounts.show(context, q.totalPxmr).primary, bold = true)
+                    CostRow(stringResource(R.string.pay_left_after), Amounts.show(context, q.remainingPxmr).primary)
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Uses ${q.notes} note(s) · usually confirmed in about " +
-                            "${q.minutesToConfirm} minutes",
+                        stringResource(R.string.pay_uses_notes, q.notes, q.minutesToConfirm),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        "The fee is an estimate until the transaction is built; the " +
-                            "exact one is shown after sending.",
+                        stringResource(R.string.pay_fee_estimate_note),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                     )
@@ -561,10 +561,15 @@ private fun AmountStep(
             }
 
             Spacer(Modifier.height(10.dp))
-            Text("Speed", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.pay_speed), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(4.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                listOf("Slow", "Normal", "Fast", "Fastest").forEachIndexed { i, label ->
+                listOf(
+                    stringResource(R.string.pay_speed_slow),
+                    stringResource(R.string.pay_speed_normal),
+                    stringResource(R.string.pay_speed_fast),
+                    stringResource(R.string.pay_speed_fastest),
+                ).forEachIndexed { i, label ->
                     FilterChip(
                         selected = priority == i,
                         onClick = { priority = i },
@@ -583,7 +588,7 @@ private fun AmountStep(
                 // The memo. It rides the sealed notice, never the chain — a
                 // public memo field would be a note stapled to a banknote —
                 // and Activity shows it on the transaction like a bank line.
-                label = { Text("Memo — what's this for?") },
+                label = { Text(stringResource(R.string.pay_memo_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -602,7 +607,7 @@ private fun AmountStep(
                     // and the icon shoves the label sideways when it appears.
                     icon = {},
                     modifier = Modifier.weight(1f),
-                ) { Text("Send", maxLines = 1, softWrap = false) }
+                ) { Text(stringResource(R.string.pay_send), maxLines = 1, softWrap = false) }
                 SegmentedButton(
                     selected = asking,
                     onClick = { asking = true },
@@ -611,7 +616,7 @@ private fun AmountStep(
                     // and the icon shoves the label sideways when it appears.
                     icon = {},
                     modifier = Modifier.weight(1f),
-                ) { Text("Request", maxLines = 1, softWrap = false) }
+                ) { Text(stringResource(R.string.pay_request), maxLines = 1, softWrap = false) }
             }
             Spacer(Modifier.height(12.dp))
         }
@@ -627,7 +632,7 @@ private fun AmountStep(
                                 runCatching {
                                     Mailbox.send(
                                         context, target.contact,
-                                        note.ifBlank { "Payment request" },
+                                        note.ifBlank { context.getString(R.string.pay_payment_request) },
                                         PersonaStore(context).personaHex(),
                                         kind = 1, amountPxmr = amt,
                                         payto = WalletStore(context)
@@ -636,8 +641,8 @@ private fun AmountStep(
                                 }
                             }
                             busy = false
-                            r.onSuccess { done = "Request sent" }
-                                .onFailure { error = it.message ?: "could not send" }
+                            r.onSuccess { done = context.getString(R.string.pay_request_sent) }
+                                .onFailure { error = it.message ?: context.getString(R.string.pay_could_not_send) }
                         }
                     },
                     // Asking for more than you hold is perfectly reasonable, so
@@ -648,7 +653,7 @@ private fun AmountStep(
                     modifier = Modifier.weight(1f).height(52.dp),
                 ) {
                     if (busy) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                    else Text("Request")
+                    else Text(stringResource(R.string.pay_request))
                 }
             } else {
                 val payable = target !is PayTarget.ToContact ||
@@ -660,7 +665,7 @@ private fun AmountStep(
                     modifier = Modifier.weight(1f).height(52.dp),
                 ) {
                     if (busy) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                    else Text("Send")
+                    else Text(stringResource(R.string.pay_send))
                 }
             }
         }
@@ -670,8 +675,7 @@ private fun AmountStep(
         ) {
             Spacer(Modifier.height(8.dp))
             Text(
-                "${target.contact.displayName()} has not shared an address, so you can " +
-                    "ask but not send yet. Switch to Request — it carries one back.",
+                stringResource(R.string.pay_no_address_hint, target.contact.displayName()),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -718,12 +722,12 @@ private fun AmountStep(
                     val r = withContext(Dispatchers.IO) {
                         runCatching {
                             val node = NodeStore(context).lastGood()
-                                ?: throw IllegalStateException("no node — check Status")
+                                ?: throw IllegalStateException(
+                                    context.getString(R.string.pay_no_node)
+                                )
                             val to = dest
                                 ?: throw IllegalStateException(
-                                    "They have not shared an address. Ask them to send " +
-                                        "a request, or to turn on \"let contacts pay me " +
-                                        "directly\"."
+                                    context.getString(R.string.pay_no_address_error)
                                 )
                             val contact = (target as? PayTarget.ToContact)?.contact
                             val res = Wallet.send(
@@ -740,7 +744,7 @@ private fun AmountStep(
                                 runCatching {
                                     Mailbox.send(
                                         context, c,
-                                        note.ifBlank { "Payment" },
+                                        note.ifBlank { context.getString(R.string.pay_payment) },
                                         PersonaStore(context).personaHex(),
                                         kind = 2, amountPxmr = pxmr,
                                         // Names the transaction, which is what
@@ -761,7 +765,7 @@ private fun AmountStep(
                     }
                     busy = false
                     r.onSuccess { paidPxmr = pxmr }
-                        .onFailure { error = it.message ?: "could not send" }
+                        .onFailure { error = it.message ?: context.getString(R.string.pay_could_not_send) }
                 }
             },
         )
@@ -823,7 +827,7 @@ private fun ConfirmSend(
         onDismissRequest = onCancel,
         title = {
             Column {
-                Text("Send ${a.primary}?")
+                Text(stringResource(R.string.pay_confirm_send_title, a.primary))
                 a.secondary?.let {
                     Text(it, style = MaterialTheme.typography.labelMedium,
                          color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -832,7 +836,7 @@ private fun ConfirmSend(
         },
         text = {
             Column {
-                contactName?.let { Text("To $it", style = MaterialTheme.typography.bodyMedium) }
+                contactName?.let { Text(stringResource(R.string.pay_to, it), style = MaterialTheme.typography.bodyMedium) }
                 destination?.let {
                     Spacer(Modifier.height(6.dp))
                     Text(it, fontFamily = FontFamily.Monospace,
@@ -841,15 +845,17 @@ private fun ConfirmSend(
                 quote?.let { q ->
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        "Plus about ${Amounts.show(context, q.feePxmr).primary} in fees — " +
-                            "${Amounts.show(context, q.totalPxmr).primary} in total.",
+                        stringResource(
+                            R.string.pay_plus_fees,
+                            Amounts.show(context, q.feePxmr).primary,
+                            Amounts.show(context, q.totalPxmr).primary,
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    "Monero payments cannot be reversed or cancelled. Check the " +
-                        "address — there is nobody to appeal to if it is wrong.",
+                    stringResource(R.string.pay_irreversible_warning),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.ducat.changePending,
                 )
@@ -857,7 +863,7 @@ private fun ConfirmSend(
         },
         // Disabled once a send is in flight — the second half of the
         // double-tap guard, alongside the latch in onConfirm itself.
-        confirmButton = { TextButton(onClick = onConfirm, enabled = !busy) { Text("Send") } },
-        dismissButton = { TextButton(onClick = onCancel) { Text("Cancel") } },
+        confirmButton = { TextButton(onClick = onConfirm, enabled = !busy) { Text(stringResource(R.string.pay_send)) } },
+        dismissButton = { TextButton(onClick = onCancel) { Text(stringResource(R.string.pay_cancel)) } },
     )
 }

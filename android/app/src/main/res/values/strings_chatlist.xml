@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">My card</string>
+    <string name="chatlist_new_chat">New chat</string>
+    <string name="chatlist_no_conversations">No conversations</string>
+    <string name="chatlist_empty_hint">Hand someone your card in person, or send it over any app you already trust. Nobody can be found by name — reaching a person takes a card they gave you.</string>
+    <string name="chatlist_preview_you">You: %1$s</string>
+    <string name="chatlist_no_messages_yet">No messages yet</string>
+    <string name="chatlist_delete_title">Delete this conversation?</string>
+    <string name="chatlist_delete_body">Every message with %1$s is deleted from this phone and cannot be recovered. %1$s stays in your contacts — New chat starts a fresh one any time.</string>
+    <string name="chatlist_delete">Delete</string>
+    <string name="chatlist_cancel">Cancel</string>
+    <string name="chatlist_add_contact">Add a contact</string>
+    <string name="chatlist_add_contact_hint">Scan or paste a card someone gave you</string>
+    <string name="chatlist_no_contacts_yet">No contacts yet.</string>
+    <string name="chatlist_preview_requested">💸 Requested %1$s XMR</string>
+    <string name="chatlist_preview_sent">💸 Sent %1$s XMR</string>
+    <string name="chatlist_preview_receipt">🧾 Receipt — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">Reacted %1$s</string>
+    <string name="chatlist_preview_photo">📷 Photo</string>
+    <string name="chatlist_time_now">now</string>
+    <string name="chatlist_time_minutes">%1$dm</string>
+    <string name="chatlist_time_hours">%1$dh</string>
+</resources>

@@ -6,7 +6,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import org.ducatproject.ducat.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +33,7 @@ import uniffi.ducat_mobile.nodeTestRoute
  */
 @Composable
 fun NetworkPanel(storageDir: String) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     var status by remember { mutableStateOf(NodeStatus(false, false, false, 0u, 0u, "stopped", null)) }
     var starting by remember { mutableStateOf(false) }
     var routeResult by remember { mutableStateOf<String?>(null) }
@@ -57,28 +60,42 @@ fun NetworkPanel(storageDir: String) {
             Text("Veilid", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             Text(
-                "The transport. A payment travels over an anonymous route, so this " +
-                    "has to be up before a tap can go anywhere.",
+                stringResource(R.string.net_veilid_body),
                 style = MaterialTheme.typography.bodySmall,
             )
             Spacer(Modifier.height(12.dp))
 
             // "Not initialised" and "no peers" look identical in a status line
             // and have nothing to do with each other.
-            Line("android bridge", if (androidReady()) "ready" else "not set up", androidReady())
-            Line("node", if (status.running) "running" else "stopped", status.running)
-            Line("attached", status.state, status.attached)
+            Line(
+                stringResource(R.string.net_line_bridge),
+                stringResource(
+                    if (androidReady()) R.string.net_ready else R.string.net_not_set_up),
+                androidReady(),
+            )
+            Line(
+                stringResource(R.string.net_line_node),
+                stringResource(
+                    if (status.running) R.string.net_running else R.string.net_stopped),
+                status.running,
+            )
+            Line(stringResource(R.string.net_line_attached), status.state, status.attached)
             // The distinction that matters, spelled out rather than merged.
             Line(
-                "route-capable",
-                if (status.publicInternetReady) "yes" else "not yet — no routes until this",
+                stringResource(R.string.net_line_route_capable),
+                if (status.publicInternetReady) stringResource(R.string.net_yes)
+                else stringResource(R.string.net_not_yet_routes),
                 status.publicInternetReady,
             )
-            Line("peers", "${status.peers} live, ${status.reliablePeers} reliable", status.peers > 0u)
+            Line(
+                stringResource(R.string.net_line_peers),
+                stringResource(R.string.net_peers_value,
+                    status.peers.toString(), status.reliablePeers.toString()),
+                status.peers > 0u,
+            )
             if (status.running && !status.publicInternetReady) {
                 Text(
-                    "waiting ${elapsed}s — a node has to work out how it is reachable " +
-                        "before it can build a route",
+                    stringResource(R.string.net_waiting, elapsed),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -103,13 +120,16 @@ fun NetworkPanel(storageDir: String) {
                             routeResult = null
                             elapsed = 0
                         },
-                    ) { Text(if (starting) "Starting…" else "Start node") }
+                    ) {
+                        Text(stringResource(
+                            if (starting) R.string.net_starting else R.string.net_start_node))
+                    }
                 } else {
                     OutlinedButton(onClick = {
                         nodeStop()
                         status = NodeStatus(false, false, false, 0u, 0u, "stopped", null)
                         routeResult = null
-                    }) { Text("Stop") }
+                    }) { Text(stringResource(R.string.net_stop)) }
                     Spacer(Modifier.width(8.dp))
                     // The only proof a route can be built is building one.
                     Button(
@@ -117,7 +137,11 @@ fun NetworkPanel(storageDir: String) {
                         // so a second tap cannot restart it mid-test.
                         enabled = status.publicInternetReady && routeResult != "…",
                         onClick = { routeResult = "…" },
-                    ) { Text(if (routeResult == "…") "Testing…" else "Test a route") }
+                    ) {
+                        Text(stringResource(
+                            if (routeResult == "…") R.string.net_testing
+                            else R.string.net_test_route))
+                    }
                 }
             }
         }
@@ -138,8 +162,9 @@ fun NetworkPanel(storageDir: String) {
     LaunchedEffect(routeResult) {
         if (routeResult != "…") return@LaunchedEffect
         routeResult = withContext(Dispatchers.IO) {
-            runCatching { "route allocated — ${nodeTestRoute()} byte blob" }
-                .getOrElse { "route failed: ${it.message}" }
+            runCatching {
+                context.getString(R.string.net_route_ok, nodeTestRoute().toString())
+            }.getOrElse { context.getString(R.string.net_route_failed, it.message ?: "?") }
         }
     }
 }

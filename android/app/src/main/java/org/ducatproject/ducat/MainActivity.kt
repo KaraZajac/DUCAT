@@ -145,8 +145,11 @@ private sealed interface Overlay {
     data class Drawer(val section: Section) : Overlay
 }
 
-enum class Tab(val label: String) {
-    Home("Home"), Accounts("Accounts"), Activity("Activity"), Chat("Chat")
+enum class Tab(val labelRes: Int) {
+    Home(R.string.tab_home),
+    Accounts(R.string.tab_accounts),
+    Activity(R.string.tab_activity),
+    Chat(R.string.tab_chat),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -256,8 +259,9 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             onDecline = {
                 markSeen()
                 val mine = PersonaStore(context).personaHex()
-                val body = "Declining that bill for " +
-                    "${formatXmr(m.amountPxmr)} XMR — not this time."
+                val body = context.getString(
+                    R.string.main_bill_decline, formatXmr(m.amountPxmr),
+                )
                 // Advisory, but not fire-and-forget: the other side is waiting
                 // on this bill, and a decline that never leaves reads as being
                 // ignored. One retry, then a log line so field logs show the
@@ -312,10 +316,16 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.background,
                             ),
-                            title = { Text(o.section.label) },
+                            title = {
+                                Text(androidx.compose.ui.res.stringResource(o.section.labelRes))
+                            },
                             navigationIcon = {
                                 IconButton(onClick = { overlay = Overlay.None }) {
-                                    Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                                    Icon(
+                                        Icons.Filled.ArrowBack,
+                                        contentDescription = androidx.compose.ui.res
+                                            .stringResource(R.string.main_back),
+                                    )
                                 }
                             },
                         )
@@ -364,17 +374,20 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     ),
                     title = {
                         if (tab != Tab.Home) {
-                            Text(tab.label, style = MaterialTheme.typography.titleLarge)
+                            Text(androidx.compose.ui.res.stringResource(tab.labelRes),
+                                style = MaterialTheme.typography.titleLarge)
                         }
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawer.open() } }) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                            Icon(Icons.Filled.Menu, contentDescription =
+                                androidx.compose.ui.res.stringResource(R.string.main_menu))
                         }
                     },
                     actions = {
                         IconButton(onClick = { qrOpen = true }) {
-                            Icon(Icons.Filled.QrCode2, contentDescription = "Codes")
+                            Icon(Icons.Filled.QrCode2, contentDescription =
+                                androidx.compose.ui.res.stringResource(R.string.main_codes))
                         }
                         // Your own face, where Venmo puts it, and it goes where
                         // a face should: the profile. Re-read on store changes
@@ -426,7 +439,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                                 contentAlignment = Alignment.BottomCenter,
                             ) {
                                 Text(
-                                    "Send/Receive",
+                                    androidx.compose.ui.res.stringResource(
+                                        R.string.tab_send_receive),
                                     style = MaterialTheme.typography.labelSmall,
                                     maxLines = 1,
                                     softWrap = false,
@@ -445,10 +459,13 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                                     BadgedBox(badge = {
                                         if (unread > 0) Badge { Text("$unread") }
                                     }) {
-                                        Icon(Icons.Filled.ChatBubble, contentDescription = Tab.Chat.label)
+                                        Icon(Icons.Filled.ChatBubble, contentDescription =
+                                            androidx.compose.ui.res.stringResource(Tab.Chat.labelRes))
                                     }
                                 },
-                                label = { Text(Tab.Chat.label) },
+                                label = {
+                                    Text(androidx.compose.ui.res.stringResource(Tab.Chat.labelRes))
+                                },
                             )
                         }
                     }
@@ -470,7 +487,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             // the app crashing on open.
                             androidx.compose.foundation.Image(
                                 painterResource(R.drawable.ducat_cat),
-                                contentDescription = "Send or receive",
+                                contentDescription = androidx.compose.ui.res
+                                    .stringResource(R.string.main_send_or_receive),
                                 modifier = Modifier.size(48.dp),
                             )
                         }
@@ -556,10 +574,12 @@ private fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
-                    Text("Back up", style = MaterialTheme.typography.titleSmall)
                     Text(
-                        "You have contacts your last backup does not. A restore " +
-                            "would bring back the money and not the people.",
+                        androidx.compose.ui.res.stringResource(R.string.main_backup_title),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    Text(
+                        androidx.compose.ui.res.stringResource(R.string.main_backup_body),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -567,7 +587,8 @@ private fun HomeScreen(
                 Spacer(Modifier.width(8.dp))
                 Icon(
                     Icons.Filled.ChevronRight,
-                    contentDescription = "Open backup settings",
+                    contentDescription = androidx.compose.ui.res
+                        .stringResource(R.string.main_open_backup_settings),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -584,12 +605,14 @@ private fun HomeScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                "Recent",
+                androidx.compose.ui.res.stringResource(R.string.main_recent),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.weight(1f))
-            TextButton(onClick = onSeeActivity) { Text("See all") }
+            TextButton(onClick = onSeeActivity) {
+                Text(androidx.compose.ui.res.stringResource(R.string.main_see_all))
+            }
         }
         recent.forEach { e ->
             val sent = e.direction == Ledger.Direction.Sent
@@ -609,13 +632,14 @@ private fun HomeScreen(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        e.counterparty ?: if (sent) "Sent" else "Received",
+                        e.counterparty ?: androidx.compose.ui.res.stringResource(
+                            if (sent) R.string.main_sent else R.string.main_received),
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     )
                     Text(
-                        org.ducatproject.ducat.ui.shortWhen(e.timestamp),
+                        org.ducatproject.ducat.ui.shortWhen(context, e.timestamp),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                     )
@@ -641,8 +665,11 @@ private fun RowScope.NavItem(
     NavigationBarItem(
         selected = current == target,
         onClick = { onSelect(target) },
-        icon = { Icon(icon, contentDescription = target.label) },
-        label = { Text(target.label) },
+        icon = {
+            Icon(icon, contentDescription =
+                androidx.compose.ui.res.stringResource(target.labelRes))
+        },
+        label = { Text(androidx.compose.ui.res.stringResource(target.labelRes)) },
     )
 }
 

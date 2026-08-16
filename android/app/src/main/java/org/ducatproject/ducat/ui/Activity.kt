@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +17,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +27,7 @@ import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Ledger
 import org.ducatproject.ducat.NodeStore
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.Wallet
 
 /**
@@ -79,11 +83,10 @@ fun ActivityScreen() {
                 tint = MaterialTheme.colorScheme.outline,
             )
             Spacer(Modifier.height(12.dp))
-            Text("Nothing yet", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.activity_nothing_yet), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(6.dp))
             Text(
-                "Payments appear here once the chain has been read. Top up from " +
-                    "Accounts to see something.",
+                stringResource(R.string.activity_empty_desc),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -98,7 +101,7 @@ fun ActivityScreen() {
         if (pending.isNotEmpty()) {
             item {
                 Text(
-                    "Awaiting",
+                    stringResource(R.string.activity_awaiting),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 4.dp),
@@ -122,8 +125,9 @@ fun ActivityScreen() {
                     headlineContent = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                if (r.theyAsked) "${r.counterparty} asks for"
-                                else "You asked ${r.counterparty} for",
+                                if (r.theyAsked)
+                                    stringResource(R.string.activity_they_ask, r.counterparty)
+                                else stringResource(R.string.activity_you_asked, r.counterparty),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                             Spacer(Modifier.weight(1f))
@@ -133,7 +137,9 @@ fun ActivityScreen() {
                     supportingContent = {
                         Text(
                             (if (r.items.isNotEmpty())
-                                "${r.items.size} item(s) · " else "") + whenText(r.timestamp),
+                                pluralStringResource(
+                                    R.plurals.activity_items, r.items.size, r.items.size,
+                                ) + " · " else "") + whenText(r.timestamp),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline,
                         )
@@ -230,7 +236,8 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
                 Spacer(Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        if (e.provisional) "Reading the transaction…" else who(e),
+                        if (e.provisional) stringResource(R.string.activity_reading_transaction)
+                        else who(context, e),
                         style = MaterialTheme.typography.bodySmall,
                         color = if (e.provisional) MaterialTheme.ducat.changePending
                         else MaterialTheme.colorScheme.onSurface,
@@ -241,7 +248,7 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
                         // thread, which is what separates a DUCAT payment from
                         // a bare transfer.
                         Text(
-                            "🧾 receipt",
+                            stringResource(R.string.activity_receipt_chip),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.ducat.settled,
                         )
@@ -249,7 +256,7 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
                 }
                 e.note?.let {
                     Text(
-                        "“$it”",
+                        stringResource(R.string.activity_note_quoted, it),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -257,12 +264,15 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
                 }
                 Text(
                     when {
-                        e.pending -> "Sending — not yet in a block"
-                        e.unexplained -> "Spent, but we cannot say where"
+                        e.pending -> stringResource(R.string.activity_sending)
+                        e.unexplained -> stringResource(R.string.activity_spent_unknown)
                         // Until the transaction is read, this could be change
                         // from a payment you made rather than money arriving.
-                        e.provisional -> "may be change from your own payment"
-                        e.locked -> "${whenText(e.timestamp)} · unlocks in ${e.unlocksInBlocks} blocks"
+                        e.provisional -> stringResource(R.string.activity_maybe_change)
+                        e.locked -> stringResource(
+                            R.string.activity_locked_when,
+                            whenText(e.timestamp), e.unlocksInBlocks,
+                        )
                         else -> whenText(e.timestamp)
                     },
                     style = MaterialTheme.typography.labelSmall,
@@ -281,11 +291,17 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
  * transaction (§16.13). Saying "unknown sender" is the honest result, and
  * inventing anything else would be inventing a counterparty.
  */
-private fun who(e: Ledger.Event): String {
+private fun who(context: Context, e: Ledger.Event): String {
     val sent = e.direction == Ledger.Direction.Sent
-    e.counterparty?.let { return if (sent) "To $it" else "From $it" }
-    e.address?.let { return "To ${it.take(12)}…${it.takeLast(6)}" }
-    return if (sent) "Sent — recipient not recorded" else "Received — sender unknown"
+    e.counterparty?.let {
+        return if (sent) context.getString(R.string.activity_to, it)
+        else context.getString(R.string.activity_from, it)
+    }
+    e.address?.let {
+        return context.getString(R.string.activity_to, "${it.take(12)}…${it.takeLast(6)}")
+    }
+    return if (sent) context.getString(R.string.activity_sent_unrecorded)
+    else context.getString(R.string.activity_received_unknown)
 }
 
 /** A date and a time, because a block height is not a moment to anybody. */

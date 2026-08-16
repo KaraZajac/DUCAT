@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,10 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ducatproject.ducat.Capacity
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.Float as DucatFloat
 import org.ducatproject.ducat.Money
 
@@ -48,7 +51,7 @@ fun BalanceCard(
     Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
         Spacer(Modifier.height(20.dp))
         Text(
-            "Ready to spend",
+            stringResource(R.string.balance_ready_to_spend),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -86,7 +89,7 @@ fun BalanceCard(
             // §17.2 forbids an exact promise, so the wording carries the
             // approximation rather than hiding it behind a precise-looking digit.
             Text(
-                notesPhrase(float.unlockedOutputs, capacity.approxPayments),
+                notesPhrase(ctx, float.unlockedOutputs, capacity.approxPayments),
                 style = MaterialTheme.typography.bodyMedium,
             )
 
@@ -105,7 +108,11 @@ fun BalanceCard(
                     // consequence of having spent, and naming it that way is both
                     // accurate and not alarming.
                     Text(
-                        "$locked in change, back in ${minutesFor(float.blocksToUnlock)}",
+                        stringResource(
+                            R.string.balance_change_coming_back,
+                            locked.toString(),
+                            minutesFor(ctx, float.blocksToUnlock),
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -130,22 +137,20 @@ fun BalanceCard(
         ) {
             Column(Modifier.padding(20.dp)) {
                 Text(
-                    if (allLocked) "You can't pay right now" else "Running low on notes",
+                    if (allLocked) stringResource(R.string.balance_all_locked_title)
+                    else stringResource(R.string.balance_running_low_title),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    if (allLocked)
-                        "Your money is here, but it's all tied up as change. " +
-                            "Break a note to spend again."
-                    else
-                        "Break a note now so you're not caught out at a counter.",
+                    if (allLocked) stringResource(R.string.balance_all_locked_body)
+                    else stringResource(R.string.balance_running_low_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                 )
                 Spacer(Modifier.height(12.dp))
-                Button(onClick = onTopUp) { Text("Break a note") }
+                Button(onClick = onTopUp) { Text(stringResource(R.string.balance_break_note_action)) }
             }
         }
     }
@@ -158,24 +163,28 @@ fun BalanceCard(
  * is an upper bound on payments, not an equality — six bought four in the drain
  * test — so the copy says "about".
  */
-internal fun notesPhrase(outputs: Int, approxPayments: Int): String {
-    val notes = if (outputs == 1) "1 note" else "$outputs notes"
+internal fun notesPhrase(context: Context, outputs: Int, approxPayments: Int): String {
+    val notes = context.resources.getQuantityString(R.plurals.balance_notes, outputs, outputs)
     // `approxPayments` answers "how many spends in a row without waiting for
     // change" — it is §17.2's planning figure, and floor(1/1.5) is 0. Using it
     // to answer "can I pay at all" told someone holding a perfectly spendable
     // note that they could not spend it.
     return when {
-        outputs == 0 -> "nothing unlocked yet"
-        approxPayments == 0 -> "$notes — enough for one payment, then a wait for change"
-        approxPayments == 1 -> "$notes, so about one more payment"
-        else -> "$notes, so about $approxPayments more payments"
+        outputs == 0 -> context.getString(R.string.balance_nothing_unlocked)
+        approxPayments == 0 -> context.getString(R.string.balance_notes_then_wait, notes)
+        approxPayments == 1 -> context.getString(R.string.balance_notes_one_more, notes)
+        else -> context.getString(R.string.balance_notes_more, notes, approxPayments)
     }
 }
 
 
 /** Monero stagenet and mainnet both target two-minute blocks. */
-internal fun minutesFor(blocks: Int): String = when {
-    blocks <= 0 -> "any moment"
-    blocks * 2 < 60 -> "about ${blocks * 2} minutes"
-    else -> "about ${(blocks * 2) / 60} hours"
+internal fun minutesFor(context: Context, blocks: Int): String = when {
+    blocks <= 0 -> context.getString(R.string.balance_unlock_any_moment)
+    blocks * 2 < 60 -> context.resources.getQuantityString(
+        R.plurals.balance_unlock_minutes, blocks * 2, blocks * 2,
+    )
+    else -> context.resources.getQuantityString(
+        R.plurals.balance_unlock_hours, (blocks * 2) / 60, (blocks * 2) / 60,
+    )
 }

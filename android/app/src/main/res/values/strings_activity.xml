@@ -1,0 +1,29 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">Nothing yet</string>
+    <string name="activity_empty_desc">Payments appear here once the chain has been read. Top up from Accounts to see something.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">Awaiting</string>
+    <string name="activity_they_ask">%1$s asks for</string>
+    <string name="activity_you_asked">You asked %1$s for</string>
+    <plurals name="activity_items">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">Reading the transaction…</string>
+    <string name="activity_receipt_chip">🧾 receipt</string>
+    <string name="activity_note_quoted">“%1$s”</string>
+    <string name="activity_sending">Sending — not yet in a block</string>
+    <string name="activity_spent_unknown">Spent, but we cannot say where</string>
+    <string name="activity_maybe_change">may be change from your own payment</string>
+    <string name="activity_locked_when">%1$s · unlocks in %2$d blocks</string>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">To %1$s</string>
+    <string name="activity_from">From %1$s</string>
+    <string name="activity_sent_unrecorded">Sent — recipient not recorded</string>
+    <string name="activity_received_unknown">Received — sender unknown</string>
+</resources>

@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">Top up</string>
+    <string name="accounts_top_up_desc">Send Monero to this address from any wallet or exchange. It is a normal XMR address — nothing about the transfer involves DUCAT.</string>
+    <string name="accounts_no_wallet">No wallet yet — finish setup first.</string>
+    <string name="accounts_copy">Copy</string>
+    <string name="accounts_hide">Hide</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">Balances</string>
+    <string name="accounts_balances_desc">Kept apart on purpose: what you can spend now is not what you own.</string>
+    <string name="accounts_waiting_for_node">Waiting for a node.</string>
+    <string name="accounts_spendable">Spendable</string>
+    <string name="accounts_show_in">Show in %1$s</string>
+    <string name="accounts_stagenet_fiat_note">Stagenet coins are test coins. That figure is what this much real Monero would be worth — these are worth nothing.</string>
+    <string name="accounts_notes">Notes</string>
+    <string name="accounts_bond">Bond</string>
+    <string name="accounts_bond_none">none</string>
+    <string name="accounts_scanning_from_genesis_title">Scanning from the beginning of the chain</string>
+    <string name="accounts_scanning_from_genesis_desc">This wallet was made before the app could reach a node, so it does not know when it was created. At block %1$d of %2$d that is more than a day of reading. Skip ahead if you know the wallet is newer than that.</string>
+    <string name="accounts_skip_ahead">Skip ahead</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">Skip ahead to</string>
+    <string name="accounts_skip_ahead_desc">Anything received before this point will not be found. Pick a time you are sure is before the wallet existed.</string>
+    <string name="accounts_about_a_day_ago">about a day ago</string>
+    <string name="accounts_about_a_week_ago">about a week ago</string>
+    <string name="accounts_about_a_month_ago">about a month ago</string>
+    <string name="accounts_skip_option">"%1$s  —  block %2$d"</string>
+    <string name="accounts_block_height_label">or a block height</string>
+    <string name="accounts_use_that_height">Use that height</string>
+    <string name="accounts_cancel">Cancel</string>
+</resources>

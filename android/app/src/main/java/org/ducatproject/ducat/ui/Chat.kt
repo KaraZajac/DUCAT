@@ -22,8 +22,10 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.ducatproject.ducat.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -154,11 +156,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             ),
                             title = { Text(c.displayName()) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Back") }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Filled.ArrowBack, stringResource(R.string.chat_back))
+                    }
                 },
                 actions = {
                     IconButton(onClick = { settingsOpen = true }) {
-                        Icon(Icons.Filled.MoreVert, "Conversation settings")
+                        Icon(Icons.Filled.MoreVert, stringResource(R.string.chat_conversation_settings))
                     }
                 },
             )
@@ -189,7 +193,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 draft = ""
                                 messages = store.thread(c.personaHex)
                             }.onFailure {
-                                error = it.message ?: "could not send"
+                                error = it.message
+                                    ?: context.getString(R.string.chat_could_not_send)
                             }
                         }
                     }
@@ -212,7 +217,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     val afterSend: (Result<*>, String) -> Unit = { r, what ->
                         r.onSuccess { messages = store.thread(c.personaHex) }
                             .onFailure {
-                                error = it.message ?: "could not send the $what"
+                                error = it.message
+                                    ?: context.getString(R.string.chat_could_not_send_the, what)
                                 DucatLog.w("Chat", "$what: ${it.message}")
                             }
                         sending = false
@@ -227,7 +233,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         if (uri != null) {
                             sending = true
                             scope.launch(Dispatchers.IO) {
-                                afterSend(runCatching { sendPicture(context, c, mine, uri) }, "picture")
+                                afterSend(runCatching { sendPicture(context, c, mine, uri) },
+                                    context.getString(R.string.chat_what_picture))
                             }
                         }
                     }
@@ -237,7 +244,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         if (uri != null) {
                             sending = true
                             scope.launch(Dispatchers.IO) {
-                                afterSend(runCatching { sendFile(context, c, mine, uri) }, "file")
+                                afterSend(runCatching { sendFile(context, c, mine, uri) },
+                                    context.getString(R.string.chat_what_file))
                             }
                         }
                     }
@@ -258,7 +266,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         if (ok && uri != null) {
                             sending = true
                             scope.launch(Dispatchers.IO) {
-                                afterSend(runCatching { sendPicture(context, c, mine, uri) }, "picture")
+                                afterSend(runCatching { sendPicture(context, c, mine, uri) },
+                                    context.getString(R.string.chat_what_picture))
                             }
                         }
                     }
@@ -288,12 +297,12 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         trayOpen = false
                         grabLocation(context) { place ->
                             if (place == null) {
-                                error = "could not get a location fix"
+                                error = context.getString(R.string.chat_error_location_fix)
                             } else {
                                 scope.launch(Dispatchers.IO) {
                                     afterSend(
                                         runCatching { Mailbox.send(context, c, place, mine) },
-                                        "location",
+                                        context.getString(R.string.chat_what_location),
                                     )
                                 }
                             }
@@ -312,7 +321,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             onValueChange = { if (it.length <= 2000) draft = it },
                             placeholder = {
                                 Text(
-                                    if (recording) "Recording… ${recSecs}s" else "Message",
+                                    if (recording) {
+                                        stringResource(R.string.chat_recording_placeholder, recSecs)
+                                    } else stringResource(R.string.chat_message_placeholder),
                                     color = if (recording) MaterialTheme.colorScheme.error
                                     else Color.Unspecified,
                                 )
@@ -338,7 +349,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                         enabled = c.theirBundle != null && !sending,
                                     ) {
                                         Icon(
-                                            Icons.Filled.PhotoCamera, "Take a picture",
+                                            Icons.Filled.PhotoCamera,
+                                            stringResource(R.string.chat_take_picture),
                                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
                                     }
@@ -370,7 +382,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                                                 runCatching {
                                                                     sendVoice(context, c, mine, memo)
                                                                 },
-                                                                "voice memo",
+                                                                context.getString(
+                                                                    R.string.chat_what_voice_memo
+                                                                ),
                                                             )
                                                         }
                                                     }
@@ -379,7 +393,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Icon(
-                                            Icons.Filled.Mic, "Hold to record a voice memo",
+                                            Icons.Filled.Mic,
+                                            stringResource(R.string.chat_hold_to_record),
                                             tint = if (recording) MaterialTheme.colorScheme.error
                                             else MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
@@ -387,7 +402,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 } else {
                                     IconButton(onClick = { trayOpen = !trayOpen }) {
                                         Icon(
-                                            Icons.Filled.Add, "Attach",
+                                            Icons.Filled.Add, stringResource(R.string.chat_attach),
                                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
                                     }
@@ -404,7 +419,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             ) {
                                 Icon(
                                     if (trayOpen) Icons.Filled.Close else Icons.Filled.Add,
-                                    if (trayOpen) "Close" else "Attach",
+                                    if (trayOpen) stringResource(R.string.chat_close)
+                                    else stringResource(R.string.chat_attach),
                                 )
                             }
                         } else {
@@ -415,7 +431,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 if (sending) {
                                     CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                                 } else {
-                                    Icon(Icons.Filled.Send, "Send")
+                                    Icon(Icons.Filled.Send, stringResource(R.string.chat_send))
                                 }
                             }
                         }
@@ -426,10 +442,16 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             Modifier.fillMaxWidth().padding(bottom = 12.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            TrayItem(Icons.Filled.Image, "Gallery", enabled = !sending) {
+                            TrayItem(
+                                Icons.Filled.Image, stringResource(R.string.chat_gallery),
+                                enabled = !sending,
+                            ) {
                                 trayOpen = false; pickImage.launch("image/*")
                             }
-                            TrayItem(Icons.Filled.InsertDriveFile, "File", enabled = !sending) {
+                            TrayItem(
+                                Icons.Filled.InsertDriveFile, stringResource(R.string.chat_file),
+                                enabled = !sending,
+                            ) {
                                 trayOpen = false; pickFile.launch("*/*")
                             }
                             // The cat: the app's money button everywhere, drawn
@@ -443,16 +465,26 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                         androidx.compose.ui.res.painterResource(
                                             org.ducatproject.ducat.R.drawable.ducat_cat
                                         ),
-                                        contentDescription = "Send or ask for money",
+                                        contentDescription =
+                                            stringResource(R.string.chat_money_desc),
                                         modifier = Modifier.size(30.dp),
                                     )
                                 }
-                                Text("Money", style = MaterialTheme.typography.labelSmall)
+                                Text(
+                                    stringResource(R.string.chat_money),
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
                             }
-                            TrayItem(Icons.Filled.Person, "Contact", enabled = !sending) {
+                            TrayItem(
+                                Icons.Filled.Person, stringResource(R.string.chat_contact),
+                                enabled = !sending,
+                            ) {
                                 trayOpen = false; contactPick = true
                             }
-                            TrayItem(Icons.Filled.LocationOn, "Location", enabled = !sending) {
+                            TrayItem(
+                                Icons.Filled.LocationOn, stringResource(R.string.chat_location),
+                                enabled = !sending,
+                            ) {
                                 if (granted(android.Manifest.permission.ACCESS_FINE_LOCATION)) {
                                     sendLocation()
                                 } else {
@@ -487,13 +519,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                             )
                                             Mailbox.send(
                                                 context, c,
-                                                "🎟 A card for me — pass it to whoever " +
-                                                    "should reach me. One claim, one week:\n" +
-                                                    card.uri,
+                                                context.getString(
+                                                    R.string.chat_intro_card_body, card.uri
+                                                ),
                                                 mine,
                                             )
                                         },
-                                        "card",
+                                        context.getString(R.string.chat_what_card),
                                     )
                                 }
                             },
@@ -504,7 +536,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                         runCatching {
                                             Mailbox.send(context, c, contactCard(chosen), mine)
                                         },
-                                        "contact",
+                                        context.getString(R.string.chat_what_contact),
                                     )
                                 }
                             },
@@ -513,8 +545,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     }
                     if (c.theirBundle == null) {
                         Text(
-                            "No keys for this contact — the handshake did not complete. " +
-                                "Ask them for a new card.",
+                            stringResource(R.string.chat_no_keys),
                             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -532,8 +563,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         ) {
             item {
                 Text(
-                    "Messages are encrypted to keys that are deleted after use. " +
-                        "Once read, they cannot be recovered — not even by you.",
+                    stringResource(R.string.chat_e2e_notice),
                     Modifier.fillMaxWidth().padding(bottom = 12.dp),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -545,12 +575,17 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     // A retraction is a remark about the thread, not a message
                     // in it: one quiet centred line, no bubble and no buttons —
                     // the bill or offer it names greys out where it stands.
+                    val retractLine = if (m.reOwn) {
+                        if (m.outgoing) stringResource(R.string.chat_you_withdrew)
+                        else stringResource(R.string.chat_they_withdrew, c.displayName())
+                    } else {
+                        if (m.outgoing) stringResource(R.string.chat_you_declined)
+                        else stringResource(R.string.chat_they_declined, c.displayName())
+                    }
                     Text(
-                        buildString {
-                            append(if (m.outgoing) "You " else "${c.displayName()} ")
-                            append(if (m.reOwn) "withdrew a message" else "declined")
-                            if (m.body.isNotBlank()) append(" — “${m.body}”")
-                        },
+                        if (m.body.isNotBlank()) {
+                            stringResource(R.string.chat_retract_with_quote, retractLine, m.body)
+                        } else retractLine,
                         Modifier.fillMaxWidth().padding(vertical = 2.dp),
                         style = MaterialTheme.typography.labelMedium,
                         fontStyle = FontStyle.Italic,
@@ -625,8 +660,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     runCatching {
                         Mailbox.send(
                             context, c,
-                            "Declining that bill for ${formatXmr(b.amountPxmr)} XMR — " +
-                                "not this time.",
+                            context.getString(
+                                R.string.chat_decline_bill, formatXmr(b.amountPxmr)
+                            ),
                             mine,
                         )
                     }
@@ -672,7 +708,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     confirmDelete?.let { m ->
         AlertDialog(
             onDismissRequest = { confirmDelete = null },
-            title = { Text("Message") },
+            title = { Text(stringResource(R.string.chat_message_title)) },
             text = {
                 Column {
                     if (m.kind != 4 && c.theirBundle != null) {
@@ -708,10 +744,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         }
                         Spacer(Modifier.height(12.dp))
                     }
-                    Text(
-                        "Delete removes it from this phone only. The other side " +
-                            "keeps their copy — nothing here can reach it."
-                    )
+                    Text(stringResource(R.string.chat_delete_note))
                 }
             },
             confirmButton = {
@@ -727,16 +760,25 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 android.content.ClipData.newPlainText("message", m.body)
                             )
                             confirmDelete = null
-                        }) { Text("Copy") }
+                        }) { Text(stringResource(R.string.chat_copy)) }
                     }
                     TextButton(onClick = {
                         store.deleteMessage(c.personaHex, m.seq, m.outgoing)
                         messages = store.thread(c.personaHex)
                         confirmDelete = null
-                    }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+                    }) {
+                        Text(
+                            stringResource(R.string.chat_delete),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
                 }
             },
-            dismissButton = { TextButton(onClick = { confirmDelete = null }) { Text("Cancel") } },
+            dismissButton = {
+                TextButton(onClick = { confirmDelete = null }) {
+                    Text(stringResource(R.string.chat_cancel))
+                }
+            },
         )
     }
 }
@@ -756,10 +798,10 @@ private fun ChatSettingsDialog(
     onDismiss: () -> Unit,
 ) {
     val options = listOf(
-        0L to "Keep everything",
-        3600L to "1 hour",
-        86_400L to "1 day",
-        604_800L to "1 week",
+        0L to stringResource(R.string.chat_keep_everything),
+        3600L to stringResource(R.string.chat_1_hour),
+        86_400L to stringResource(R.string.chat_1_day),
+        604_800L to stringResource(R.string.chat_1_week),
     )
     var confirmClear by remember { mutableStateOf(false) }
 
@@ -768,30 +810,35 @@ private fun ChatSettingsDialog(
     if (confirmClear) {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
-            title = { Text("Clear this chat?") },
+            title = { Text(stringResource(R.string.chat_clear_confirm_title)) },
             text = {
-                Text(
-                    "Every message in this conversation is deleted from this phone " +
-                        "and cannot be recovered. The other side keeps their copy."
-                )
+                Text(stringResource(R.string.chat_clear_confirm_text))
             },
             confirmButton = {
                 TextButton(onClick = { confirmClear = false; onClearAll() }) {
-                    Text("Clear", color = MaterialTheme.colorScheme.error)
+                    Text(
+                        stringResource(R.string.chat_clear),
+                        color = MaterialTheme.colorScheme.error,
+                    )
                 }
             },
             dismissButton = {
-                TextButton(onClick = { confirmClear = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmClear = false }) {
+                    Text(stringResource(R.string.chat_cancel))
+                }
             },
         )
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Conversation") },
+        title = { Text(stringResource(R.string.chat_conversation_title)) },
         text = {
             Column {
-                Text("Delete messages on this phone after", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    stringResource(R.string.chat_delete_after),
+                    style = MaterialTheme.typography.labelLarge,
+                )
                 Spacer(Modifier.height(8.dp))
                 options.forEach { (secs, label) ->
                     Row(
@@ -805,8 +852,7 @@ private fun ChatSettingsDialog(
                 }
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    "Only your copy. The other side keeps theirs, and nothing here " +
-                        "can reach it.",
+                    stringResource(R.string.chat_only_your_copy),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -814,10 +860,15 @@ private fun ChatSettingsDialog(
         },
         confirmButton = {
             TextButton(onClick = { confirmClear = true }) {
-                Text("Clear this chat", color = MaterialTheme.colorScheme.error)
+                Text(
+                    stringResource(R.string.chat_clear_this_chat),
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Done") } },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.chat_done)) }
+        },
     )
 }
 
@@ -871,9 +922,11 @@ private fun Bubble(
                     when {
                         !file.exists() -> Text(
                             when {
-                                mime.startsWith("image/") -> "📷 downloading…"
-                                mime.startsWith("audio/") -> "🎤 downloading…"
-                                else -> "📎 downloading…"
+                                mime.startsWith("image/") ->
+                                    stringResource(R.string.chat_downloading_image)
+                                mime.startsWith("audio/") ->
+                                    stringResource(R.string.chat_downloading_audio)
+                                else -> stringResource(R.string.chat_downloading_file)
                             },
                             color = fg.copy(alpha = 0.8f),
                             style = MaterialTheme.typography.bodySmall,
@@ -892,18 +945,25 @@ private fun Bubble(
                             }
                             if (bmp != null) {
                                 androidx.compose.foundation.Image(
-                                    bmp.asImageBitmap(), "Picture",
+                                    bmp.asImageBitmap(), stringResource(R.string.chat_picture_desc),
                                     modifier = Modifier
                                         .widthIn(max = 240.dp)
                                         .clip(MaterialTheme.shapes.medium),
                                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                                 )
                             } else {
-                                Text("📷 (could not decode)", color = fg.copy(alpha = 0.8f))
+                                Text(
+                                    stringResource(R.string.chat_could_not_decode),
+                                    color = fg.copy(alpha = 0.8f),
+                                )
                             }
                         }
                         mime.startsWith("audio/") -> AudioBubble(file, fg)
-                        else -> FileBubble(file, m.attName ?: "file", m.attLen, mime, fg)
+                        else -> FileBubble(
+                            file,
+                            m.attName ?: stringResource(R.string.chat_file_fallback),
+                            m.attLen, mime, fg,
+                        )
                     }
                     if (m.body.isNotBlank() && m.body !in setOf("📷", "🎤") &&
                         m.body != "📎 ${m.attName}"
@@ -948,19 +1008,23 @@ private fun Bubble(
                         Spacer(Modifier.width(4.dp))
                         Text(
                             when {
-                                m.kind == 1 && m.outgoing -> "You asked for"
-                                m.kind == 1 -> "Asked you for"
+                                m.kind == 1 && m.outgoing ->
+                                    stringResource(R.string.chat_you_asked_for)
+                                m.kind == 1 -> stringResource(R.string.chat_asked_you_for)
                                 // A receipt is issued by whoever *received* the
                                 // money, so the direction reads the other way
                                 // round from a notice.
-                                m.kind == 3 && m.outgoing -> "Receipt you issued"
-                                m.kind == 3 -> "Receipt"
-                                m.kind == 6 && m.outgoing -> "You offered to drive"
-                                m.kind == 6 -> "Offers to drive you"
-                                m.kind == 7 && m.outgoing -> "You accepted the ride"
-                                m.kind == 7 -> "Ride accepted"
-                                m.outgoing -> "You sent"
-                                else -> "Sent you"
+                                m.kind == 3 && m.outgoing ->
+                                    stringResource(R.string.chat_receipt_you_issued)
+                                m.kind == 3 -> stringResource(R.string.chat_receipt)
+                                m.kind == 6 && m.outgoing ->
+                                    stringResource(R.string.chat_you_offered_to_drive)
+                                m.kind == 6 -> stringResource(R.string.chat_offers_to_drive_you)
+                                m.kind == 7 && m.outgoing ->
+                                    stringResource(R.string.chat_you_accepted_ride)
+                                m.kind == 7 -> stringResource(R.string.chat_ride_accepted)
+                                m.outgoing -> stringResource(R.string.chat_you_sent)
+                                else -> stringResource(R.string.chat_sent_you)
                             },
                             style = MaterialTheme.typography.labelSmall,
                             color = fg.copy(alpha = 0.8f),
@@ -978,7 +1042,7 @@ private fun Bubble(
                     }
                     if (m.kind == 6) m.etaSecs?.let { secs ->
                         Text(
-                            "about ${(secs / 60).coerceAtLeast(1)} min away",
+                            stringResource(R.string.chat_min_away, (secs / 60).coerceAtLeast(1)),
                             style = MaterialTheme.typography.labelSmall,
                             color = fg.copy(alpha = 0.8f),
                         )
@@ -1000,7 +1064,7 @@ private fun Bubble(
                             // Settled: a live button here would offer to pay
                             // the same bill twice.
                             Text(
-                                "Paid ✓",
+                                stringResource(R.string.chat_paid),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = fg.copy(alpha = 0.8f),
                             )
@@ -1009,7 +1073,7 @@ private fun Bubble(
                             // would offer to pay money nobody is watching
                             // for (§15.11).
                             Text(
-                                "Cancelled",
+                                stringResource(R.string.chat_cancelled),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = fg.copy(alpha = 0.8f),
                             )
@@ -1022,10 +1086,15 @@ private fun Bubble(
                             FilledTonalButton(
                                 onClick = { onPay(m) },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                            ) { Text("Review payment", style = MaterialTheme.typography.labelMedium) }
+                            ) {
+                                Text(
+                                    stringResource(R.string.chat_review_payment),
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                            }
                         } else {
                             Text(
-                                "No address in this request — ask them where to send it.",
+                                stringResource(R.string.chat_no_address),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = fg.copy(alpha = 0.7f),
                             )
@@ -1040,7 +1109,7 @@ private fun Bubble(
                 // surfaced rather than swallowed.
                 Icon(
                     Icons.Filled.LockOpen,
-                    "Sent without forward secrecy",
+                    stringResource(R.string.chat_no_forward_secrecy),
                     Modifier.size(12.dp),
                     tint = MaterialTheme.colorScheme.error,
                 )
@@ -1129,11 +1198,15 @@ private fun AudioBubble(file: java.io.File, fg: androidx.compose.ui.graphics.Col
         }) {
             Icon(
                 if (playing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-                if (playing) "Stop" else "Play voice memo",
+                if (playing) stringResource(R.string.chat_stop)
+                else stringResource(R.string.chat_play_voice_memo),
                 tint = fg,
             )
         }
-        Text("Voice memo", color = fg, style = MaterialTheme.typography.bodyMedium)
+        Text(
+            stringResource(R.string.chat_voice_memo),
+            color = fg, style = MaterialTheme.typography.bodyMedium,
+        )
     }
 }
 
@@ -1167,7 +1240,8 @@ private fun FileBubble(
         Column {
             Text(name, color = fg, style = MaterialTheme.typography.bodyMedium)
             Text(
-                if (len >= 1024) "${len / 1024} KB" else "$len B",
+                if (len >= 1024) stringResource(R.string.chat_size_kb, len / 1024)
+                else stringResource(R.string.chat_size_b, len),
                 color = fg.copy(alpha = 0.7f),
                 style = MaterialTheme.typography.labelSmall,
             )
@@ -1227,13 +1301,13 @@ private fun Bill(m: StoredMessage, fg: androidx.compose.ui.graphics.Color) {
             Spacer(Modifier.height(4.dp))
             HorizontalDivider(color = fg.copy(alpha = 0.25f))
             Spacer(Modifier.height(4.dp))
-            line("subtotal", subtotal)
-            line("tax", m.taxPxmr)
+            line(stringResource(R.string.chat_subtotal), subtotal)
+            line(stringResource(R.string.chat_tax), m.taxPxmr)
         }
         Spacer(Modifier.height(4.dp))
         HorizontalDivider(color = fg.copy(alpha = 0.25f))
         Spacer(Modifier.height(4.dp))
-        line("total", m.amountPxmr, strong = true)
+        line(stringResource(R.string.chat_total), m.amountPxmr, strong = true)
         Amounts.show(context, m.amountPxmr).secondary?.let {
             Text(
                 it,
@@ -1262,7 +1336,7 @@ private fun sendPicture(
 ) {
     val src = context.contentResolver.openInputStream(uri).use {
         android.graphics.BitmapFactory.decodeStream(it)
-    } ?: throw IllegalArgumentException("not an image")
+    } ?: throw IllegalArgumentException(context.getString(R.string.chat_not_an_image))
     val maxDim = 1280
     val scale = minOf(1f, maxDim.toFloat() / maxOf(src.width, src.height))
     val scaled = if (scale < 1f) android.graphics.Bitmap.createScaledBitmap(
@@ -1276,7 +1350,9 @@ private fun sendPicture(
         val b = out.toByteArray()
         if (b.size <= 900_000) { plain = b; break }
     }
-    val bytes = plain ?: throw IllegalArgumentException("could not shrink that picture enough")
+    val bytes = plain ?: throw IllegalArgumentException(
+        context.getString(R.string.chat_picture_too_big)
+    )
     sendAttachmentBytes(context, c, mine, bytes, "image/jpeg", null, "📷")
 }
 
@@ -1337,9 +1413,11 @@ private fun sendVoice(
 ) {
     try {
         val bytes = memo.readBytes()
-        if (bytes.isEmpty()) throw IllegalArgumentException("nothing was recorded")
+        if (bytes.isEmpty()) {
+            throw IllegalArgumentException(context.getString(R.string.chat_nothing_recorded))
+        }
         if (bytes.size > MAX_FILE_BYTES) {
-            throw IllegalArgumentException("that memo is too long — a few minutes is the most")
+            throw IllegalArgumentException(context.getString(R.string.chat_memo_too_long))
         }
         sendAttachmentBytes(context, c, mine, bytes, "audio/mp4", "Voice memo.m4a", "🎤")
     } finally {
@@ -1358,12 +1436,12 @@ private fun sendFile(
     val name = resolver.query(uri, null, null, null, null)?.use { cur ->
         val i = cur.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
         if (i >= 0 && cur.moveToFirst()) cur.getString(i) else null
-    } ?: "file"
+    } ?: context.getString(R.string.chat_file_fallback)
     val bytes = resolver.openInputStream(uri)?.use { it.readBytes() }
-        ?: throw IllegalArgumentException("could not read that file")
+        ?: throw IllegalArgumentException(context.getString(R.string.chat_could_not_read_file))
     if (bytes.size > MAX_FILE_BYTES) {
         throw IllegalArgumentException(
-            "that file is ${bytes.size / 1024} KB — attachments go up to 1 MB"
+            context.getString(R.string.chat_file_too_big, bytes.size / 1024)
         )
     }
     val mime = resolver.getType(uri) ?: "application/octet-stream"
@@ -1476,7 +1554,7 @@ private fun ContactPickDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Share") },
+        title = { Text(stringResource(R.string.chat_share)) },
         text = {
             Column {
                 Row(
@@ -1487,10 +1565,12 @@ private fun ContactPickDialog(
                     Text("🎟", style = MaterialTheme.typography.headlineSmall)
                     Spacer(Modifier.width(12.dp))
                     Column {
-                        Text("A card for me", style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            "A one-claim link they can pass to someone who " +
-                                "should reach you.",
+                            stringResource(R.string.chat_card_for_me),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Text(
+                            stringResource(R.string.chat_card_for_me_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -1499,9 +1579,7 @@ private fun ContactPickDialog(
                 if (contacts.isNotEmpty()) {
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        "Or someone's profile — their name and whatever they " +
-                            "chose to publish. Not a connection code: those are " +
-                            "theirs to give.",
+                        stringResource(R.string.chat_someones_profile),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -1521,6 +1599,8 @@ private fun ContactPickDialog(
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.chat_cancel)) }
+        },
     )
 }

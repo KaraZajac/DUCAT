@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">Hail a ride</string>
+    <string name="hail_card_standing">Hail standing — waiting for a driver</string>
+    <string name="hail_card_pitch">Post where you\'re going to a stand drivers watch.</string>
+    <string name="hail_standing_at">Standing at %1$s</string>
+    <string name="hail_take_it_down">Take it down</string>
+    <string name="hail_awaiting_offer">%1$s took your hail — waiting for their offer…</string>
+    <string name="hail_cancel">Cancel</string>
+    <string name="hail_parked_offer">%1$s offers %2$s</string>
+    <string name="hail_view_the_offer">View the offer</string>
+    <string name="hail_post_it_again">Post it again</string>
+    <string name="hail_expired_unclaimed">Nobody took your hail before it expired.</string>
+    <string name="hail_claimed_check_chats">A driver took your hail — check your chats.</string>
+    <string name="hail_accept_message">See you soon</string>
+    <string name="hail_decline_message">No thanks</string>
+    <string name="hail_declined_post_again">You declined — post again?</string>
+    <string name="hail_posted_waiting">Posted. Waiting for a driver…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">Rider declined</string>
+    <string name="hail_rider_declined_body">They passed on your offer. Their hail is gone from the board.</string>
+    <string name="hail_ok">OK</string>
+    <string name="hail_on_duty">On duty</string>
+    <string name="hail_net_wide">wide net — ~6 km across</string>
+    <string name="hail_net_nearby">watching ~3.5 km across</string>
+    <string name="hail_net_here">just your area, ~1.2 km</string>
+    <string name="hail_stop">Stop</string>
+    <string name="hail_no_hails_map">No hails standing — they\'ll pin here.</string>
+    <string name="hail_quote_me">quote me</string>
+    <string name="hail_driving_title">Driving</string>
+    <string name="hail_driving_pitch">Watch a stand; take a hail. Taking one opens a conversation with the rider — quote there, meet there, bill at the end like any ride.</string>
+    <string name="hail_range_just_here">Just here</string>
+    <string name="hail_range_nearby">Nearby</string>
+    <string name="hail_range_wide">Wide</string>
+    <string name="hail_range_desc_here">~1.2 km — dense city blocks</string>
+    <string name="hail_range_desc_wide">~6 km across — rural or slow nights</string>
+    <string name="hail_range_desc_nearby">~3.5 km across — the usual</string>
+    <string name="hail_getting_location">Getting your location…</string>
+    <string name="hail_drive_here">Drive here — watch my area</string>
+    <string name="hail_stand_label">Stand</string>
+    <string name="hail_stand_placeholder">stand name, or 📍 above</string>
+    <string name="hail_watch">Watch</string>
+    <string name="hail_watching_neighbours">Watching your cell and its 8 neighbours — %1$s +8</string>
+    <string name="hail_board_empty">Nothing on the board. Checking every few seconds…</string>
+    <string name="hail_offers_amount">offers %1$s</string>
+    <string name="hail_offers_amount_both">offers %1$s · %2$s</string>
+    <string name="hail_asks_quote">asks you to quote</string>
+    <string name="hail_triage_pickup">pickup ~%1$.1f km</string>
+    <string name="hail_triage_trip">trip ~%1$.1f km</string>
+    <string name="hail_stands_for_min">stands for another %1$d min</string>
+    <string name="hail_view_job">View job</string>
+    <string name="hail_take_it">Take it</string>
+    <string name="hail_location_fix_failed">could not get a location fix</string>
+    <string name="hail_beaten_to_it">Someone beat you to that one.</string>
+    <string name="hail_on_my_way">🚕 On my way.</string>
+    <string name="hail_on_my_way_car">🚕 On my way — look for a %1$s.</string>
+    <string name="hail_on_my_way_plate">🚕 On my way, plate %1$s.</string>
+    <string name="hail_on_my_way_car_plate">🚕 On my way — look for a %1$s, plate %2$s.</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">Close</string>
+    <string name="hail_job_title">The job</string>
+    <string name="hail_to_pickup">to the pickup: %1$.1f km · ~%2$d min</string>
+    <string name="hail_the_ride">the ride: %1$.1f km · ~%2$d min</string>
+    <string name="hail_offer_amount">offer: %1$s</string>
+    <string name="hail_offer_amount_both">offer: %1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">you keep all of it — a rideshare would pay ~%1$s %2$.0f for this trip</string>
+    <string name="hail_rider_asks_quote">rider asks you to quote</string>
+    <string name="hail_routing_job">Routing the job…</string>
+    <string name="hail_your_fare">Your fare (%1$s)</string>
+    <string name="hail_offer_counter_hint">their offer — change it to counter</string>
+    <string name="hail_offer_quote_hint">they asked you to quote</string>
+    <string name="hail_price_in_instead">Price in %1$s instead</string>
+    <string name="hail_fare_invalid">The fare must be a number above zero.</string>
+    <string name="hail_take_this_ride">Take this ride 🚕</string>
+    <string name="hail_pass">Pass</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">Offered %1$s — waiting for %2$s</string>
+    <string name="hail_the_rider">the rider</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">My location</string>
+    <string name="hail_no_route">no route found between those points</string>
+    <string name="hail_pickup_label">Pickup</string>
+    <string name="hail_locating">Locating…</string>
+    <string name="hail_use_my_location">Use my location</string>
+    <string name="hail_where_to">Where to?</string>
+    <string name="hail_address_hint">address or business name</string>
+    <string name="hail_finding_route">Finding the route…</string>
+    <string name="hail_route_summary">%1$.1f km · ~%2$d min</string>
+    <string name="hail_route_summary_priced">%1$.1f km · ~%2$d min · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">rideshare ~%1$s %2$.0f · taxi ~%1$s %3$.0f — your driver keeps all of it (a rideshare pays theirs ~%1$s %4$.0f)</string>
+    <string name="hail_your_offer">Your offer (%1$s)</string>
+    <string name="hail_offer_invalid">The offer must be a number above zero — or leave it blank to ask for a quote.</string>
+    <string name="hail_shards_full">every stand shard is full here — try again shortly</string>
+    <string name="hail_post_failed">could not post the hail</string>
+    <string name="hail_osm_privacy">Search, route and map use OpenStreetMap\'s servers — the one place DUCAT sends location off-device. Drivers see only ~1 km areas.</string>
+    <string name="hail_post_button">Hail 🚕</string>
+    <string name="hail_search">Search</string>
+</resources>

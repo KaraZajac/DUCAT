@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
@@ -33,6 +34,7 @@ import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MainActivity
 import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RideStore
 import org.ducatproject.ducat.StoredMessage
 import org.ducatproject.ducat.formatXmr
@@ -226,7 +228,7 @@ fun HailCard() {
                     rides.clear()
                 }
                 DucatLog.i(TAG, "hail expired unclaimed")
-                status = "Nobody took your hail before it expired."
+                status = context.getString(R.string.hail_expired_unclaimed)
                 expired = true
                 posted = null
                 break
@@ -256,7 +258,7 @@ fun HailCard() {
                     // The claim landed but the contact did not materialise;
                     // the chat path still works, so say what is known
                     // rather than nothing.
-                    status = "A driver took your hail — check your chats."
+                    status = context.getString(R.string.hail_claimed_check_chats)
                 }
                 break
             }
@@ -300,10 +302,10 @@ fun HailCard() {
             Text("🚕", style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
-                Text("Hail a ride", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.hail_card_title), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    if (posted != null) "Hail standing — waiting for a driver"
-                    else "Post where you're going to a stand drivers watch.",
+                    if (posted != null) stringResource(R.string.hail_card_standing)
+                    else stringResource(R.string.hail_card_pitch),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -314,7 +316,8 @@ fun HailCard() {
         val p = posted
         if (p != null) {
             Spacer(Modifier.height(10.dp))
-            Text("Standing at ${p.cell.removePrefix("geo:").substringBefore("-")}",
+            Text(stringResource(R.string.hail_standing_at,
+                    p.cell.removePrefix("geo:").substringBefore("-")),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(8.dp))
@@ -330,13 +333,13 @@ fun HailCard() {
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Take it down") }
+            ) { Text(stringResource(R.string.hail_take_it_down)) }
         }
 
         awaitingOffer?.let { d ->
             Spacer(Modifier.height(10.dp))
             Text(
-                "${d.displayName()} took your hail — waiting for their offer…",
+                stringResource(R.string.hail_awaiting_offer, d.displayName()),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -349,20 +352,20 @@ fun HailCard() {
                 // This only stops the wait.
                 onClick = { awaitingOffer = null; status = null },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Cancel") }
+            ) { Text(stringResource(R.string.hail_cancel)) }
         }
         parkedOffer?.let { (d, o) ->
             Spacer(Modifier.height(10.dp))
             Text(
-                "${d.displayName()} offers " +
-                    Amounts.show(context, o.amountPxmr).primary,
+                stringResource(R.string.hail_parked_offer, d.displayName(),
+                    Amounts.show(context, o.amountPxmr).primary),
                 style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(Modifier.height(8.dp))
             Button(
                 onClick = { rideOffer = parkedOffer; parkedOffer = null },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("View the offer") }
+            ) { Text(stringResource(R.string.hail_view_the_offer)) }
         }
         status?.let {
             if (posted == null) {
@@ -374,7 +377,7 @@ fun HailCard() {
                     OutlinedButton(
                         onClick = { expired = false; status = null; sheetOpen = true },
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text("Post it again") }
+                    ) { Text(stringResource(R.string.hail_post_it_again)) }
                 }
             }
         }
@@ -408,7 +411,7 @@ fun HailCard() {
                 hailScope.launch {
                     runCatchingCancellable {
                         Mailbox.send(
-                            context, d, "See you soon",
+                            context, d, context.getString(R.string.hail_accept_message),
                             org.ducatproject.ducat.PersonaStore(context).personaHex(),
                             kind = 7, amountPxmr = offer.amountPxmr,
                             reSeq = offer.seq,
@@ -422,13 +425,13 @@ fun HailCard() {
                 hailScope.launch {
                     runCatchingCancellable {
                         Mailbox.send(
-                            context, d, "No thanks",
+                            context, d, context.getString(R.string.hail_decline_message),
                             org.ducatproject.ducat.PersonaStore(context).personaHex(),
                             kind = 5, reSeq = offer.seq, reOwn = false,
                         )
                     }.onFailure { DucatLog.w(TAG, "ride decline: ${it.message}") }
                 }
-                status = "You declined — post again?"
+                status = context.getString(R.string.hail_declined_post_again)
                 expired = true
             },
             // Backed out without deciding: park it. Re-polling would only
@@ -444,7 +447,7 @@ fun HailCard() {
                 // store is the truth even if this card was rebuilt meanwhile.
                 posted = rides.load()?.asPosted()
                 expired = false
-                status = "Posted. Waiting for a driver…"
+                status = context.getString(R.string.hail_posted_waiting)
             },
             onClose = { sheetOpen = false },
         )
@@ -557,7 +560,7 @@ fun DriveScreen() {
         locating = true
         grabFix(context) { fix ->
             locating = false
-            if (fix == null) { error = "could not get a location fix"; return@grabFix }
+            if (fix == null) { error = context.getString(R.string.hail_location_fix_failed); return@grabFix }
             myFix = fix
             runCatching {
                 val home = uniffi.ducat_mobile.geohashEncode(fix.first, fix.second, 6u)
@@ -623,11 +626,15 @@ fun DriveScreen() {
                             } else null
                             val car = listOfNotNull(me.carColor(), me.carModel())
                                 .joinToString(" ").ifBlank { null }
-                            val msg = buildString {
-                                append("🚕 On my way")
-                                car?.let { append(" — look for a $it") }
-                                me.plate()?.let { append(", plate $it") }
-                                append(".")
+                            val plate = me.plate()
+                            val msg = when {
+                                car != null && plate != null -> context.getString(
+                                    R.string.hail_on_my_way_car_plate, car, plate)
+                                car != null -> context.getString(
+                                    R.string.hail_on_my_way_car, car)
+                                plate != null -> context.getString(
+                                    R.string.hail_on_my_way_plate, plate)
+                                else -> context.getString(R.string.hail_on_my_way)
                             }
                             val offerSeq = rider.outSeq
                             Mailbox.send(
@@ -657,7 +664,7 @@ fun DriveScreen() {
                     }.onFailure {
                         DucatLog.w(TAG, "claim: ${it.message}")
                         withContext(Dispatchers.Main) {
-                            error = "Someone beat you to that one."
+                            error = context.getString(R.string.hail_beaten_to_it)
                         }
                     }
                     withContext(Dispatchers.Main) { busy = false }
@@ -710,10 +717,10 @@ fun DriveScreen() {
     if (riderDeclined) {
         AlertDialog(
             onDismissRequest = { riderDeclined = false },
-            title = { Text("Rider declined") },
-            text = { Text("They passed on your offer. Their hail is gone from the board.") },
+            title = { Text(stringResource(R.string.hail_rider_declined_title)) },
+            text = { Text(stringResource(R.string.hail_rider_declined_body)) },
             confirmButton = {
-                TextButton(onClick = { riderDeclined = false }) { Text("OK") }
+                TextButton(onClick = { riderDeclined = false }) { Text(stringResource(R.string.hail_ok)) }
             },
         )
     }
@@ -784,20 +791,20 @@ fun DriveScreen() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
-                    Text("On duty", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.hail_on_duty), style = MaterialTheme.typography.titleMedium)
                     val n = watching?.size ?: 0
                     Text(
                         when {
-                            n >= 25 -> "wide net — ~6 km across"
-                            n >= 9 -> "watching ~3.5 km across"
-                            else -> "just your area, ~1.2 km"
+                            n >= 25 -> stringResource(R.string.hail_net_wide)
+                            n >= 9 -> stringResource(R.string.hail_net_nearby)
+                            else -> stringResource(R.string.hail_net_here)
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                     )
                 }
                 OutlinedButton(onClick = { watching = null; notices = emptyList() }) {
-                    Text("Stop")
+                    Text(stringResource(R.string.hail_stop))
                 }
             }
             pendingOffer?.let {
@@ -823,7 +830,7 @@ fun DriveScreen() {
                         modifier = Modifier.align(Alignment.TopCenter).padding(12.dp),
                     ) {
                         Text(
-                            "No hails standing — they'll pin here.",
+                            stringResource(R.string.hail_no_hails_map),
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         )
@@ -845,7 +852,7 @@ fun DriveScreen() {
                                     n.farePxmr?.let {
                                         val sh = Amounts.show(context, it)
                                         sh.secondary ?: sh.primary
-                                    } ?: "quote me",
+                                    } ?: stringResource(R.string.hail_quote_me),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.ducat.settled,
                                 )
@@ -865,12 +872,10 @@ fun DriveScreen() {
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
-        Text("Driving", style = MaterialTheme.typography.headlineSmall)
+        Text(stringResource(R.string.hail_driving_title), style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(4.dp))
         Text(
-            "Watch a stand; take a hail. Taking one opens a conversation with " +
-                "the rider — quote there, meet there, bill at the end like any " +
-                "ride.",
+            stringResource(R.string.hail_driving_pitch),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -882,7 +887,11 @@ fun DriveScreen() {
 
         if (watching == null) {
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                listOf(1 to "Just here", 3 to "Nearby", 5 to "Wide").forEachIndexed { i, (v, label) ->
+                listOf(
+                    1 to stringResource(R.string.hail_range_just_here),
+                    3 to stringResource(R.string.hail_range_nearby),
+                    5 to stringResource(R.string.hail_range_wide),
+                ).forEachIndexed { i, (v, label) ->
                     SegmentedButton(
                         selected = range == v,
                         onClick = { range = v; rangePrefs.edit().putInt("drive_range", v).apply() },
@@ -893,9 +902,9 @@ fun DriveScreen() {
             }
             Text(
                 when (range) {
-                    1 -> "~1.2 km — dense city blocks"
-                    5 -> "~6 km across — rural or slow nights"
-                    else -> "~3.5 km across — the usual"
+                    1 -> stringResource(R.string.hail_range_desc_here)
+                    5 -> stringResource(R.string.hail_range_desc_wide)
+                    else -> stringResource(R.string.hail_range_desc_nearby)
                 },
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
@@ -909,11 +918,11 @@ fun DriveScreen() {
                 if (locating) {
                     CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
-                    Text("Getting your location…")
+                    Text(stringResource(R.string.hail_getting_location))
                 } else {
                     Icon(Icons.Filled.MyLocation, null, Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Drive here — watch my area")
+                    Text(stringResource(R.string.hail_drive_here))
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -921,26 +930,26 @@ fun DriveScreen() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = cell, onValueChange = { cell = it.take(64) },
-                label = { Text("Stand") },
-                placeholder = { Text("stand name, or 📍 above") },
+                label = { Text(stringResource(R.string.hail_stand_label)) },
+                placeholder = { Text(stringResource(R.string.hail_stand_placeholder)) },
                 modifier = Modifier.weight(1f), singleLine = true,
                 enabled = watching == null,
             )
             Spacer(Modifier.width(8.dp))
             if (watching == null) {
                 Button(onClick = { watching = listOf(cell.trim()) },
-                    enabled = cell.isNotBlank()) { Text("Watch") }
+                    enabled = cell.isNotBlank()) { Text(stringResource(R.string.hail_watch)) }
             } else {
                 OutlinedButton(onClick = {
                     watching = null; notices = emptyList()
-                }) { Text("Stop") }
+                }) { Text(stringResource(R.string.hail_stop)) }
             }
         }
         watching?.let { w ->
             if (w.size > 1) {
                 Text(
-                    "Watching your cell and its 8 neighbours — " +
-                        w.first().removePrefix("geo:") + " +8",
+                    stringResource(R.string.hail_watching_neighbours,
+                        w.first().removePrefix("geo:")),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline,
                 )
@@ -951,7 +960,7 @@ fun DriveScreen() {
             Spacer(Modifier.height(16.dp))
             if (notices.isEmpty()) {
                 Text(
-                    "Nothing on the board. Checking every few seconds…",
+                    stringResource(R.string.hail_board_empty),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -963,9 +972,11 @@ fun DriveScreen() {
                         Text(
                             n.farePxmr?.let {
                                 val shown = Amounts.show(context, it)
-                                "offers ${shown.primary}" +
-                                    (shown.secondary?.let { s -> " · $s" } ?: "")
-                            } ?: "asks you to quote",
+                                shown.secondary?.let { s ->
+                                    stringResource(R.string.hail_offers_amount_both,
+                                        shown.primary, s)
+                                } ?: stringResource(R.string.hail_offers_amount, shown.primary)
+                            } ?: stringResource(R.string.hail_asks_quote),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -981,7 +992,8 @@ fun DriveScreen() {
                                 if (o != null && fix != null) {
                                     val m = uniffi.ducat_mobile.haversineM(
                                         fix.first, fix.second, o[0], o[1])
-                                    parts += "pickup ~%.1f km".format(m.toLong() / 1000.0)
+                                    parts += context.getString(
+                                        R.string.hail_triage_pickup, m.toLong() / 1000.0)
                                 }
                                 val d = n.destCell?.let {
                                     uniffi.ducat_mobile.geohashCenter(it)
@@ -989,7 +1001,8 @@ fun DriveScreen() {
                                 if (o != null && d != null) {
                                     val m = uniffi.ducat_mobile.haversineM(
                                         o[0], o[1], d[0], d[1])
-                                    parts += "trip ~%.1f km".format(
+                                    parts += context.getString(
+                                        R.string.hail_triage_trip,
                                         m.toLong() / 1000.0 * org.ducatproject.ducat.Fare.CIRCUITY)
                                 }
                                 parts.joinToString(" · ")
@@ -1003,7 +1016,7 @@ fun DriveScreen() {
                         // countdown is nonsense, so say nothing instead.
                         val mins = (n.expiry - System.currentTimeMillis() / 1000) / 60
                         if (mins > 0) {
-                            Text("stands for another ${mins} min",
+                            Text(stringResource(R.string.hail_stands_for_min, mins),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.outline)
                         }
@@ -1012,7 +1025,7 @@ fun DriveScreen() {
                         OutlinedButton(
                             onClick = { selected = n },
                             modifier = Modifier.weight(1f).height(44.dp),
-                        ) { Text("View job") }
+                        ) { Text(stringResource(R.string.hail_view_job)) }
                         Spacer(Modifier.width(8.dp))
                         Button(
                             onClick = {
@@ -1025,7 +1038,7 @@ fun DriveScreen() {
                             },
                             enabled = !busy,
                             modifier = Modifier.weight(1f).height(44.dp),
-                        ) { Text("Take it") }
+                        ) { Text(stringResource(R.string.hail_take_it)) }
                         }
                     }
                 }
@@ -1147,8 +1160,8 @@ private fun FareDetail(
                     Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    IconButton(onClick = onClose) { Icon(Icons.Filled.Close, "Close") }
-                    Text("The job", style = MaterialTheme.typography.titleLarge)
+                    IconButton(onClick = onClose) { Icon(Icons.Filled.Close, stringResource(R.string.hail_close)) }
+                    Text(stringResource(R.string.hail_job_title), style = MaterialTheme.typography.titleLarge)
                 }
                 RouteMap(
                     from = myFix ?: origin?.let { it[0] to it[1] },
@@ -1165,14 +1178,14 @@ private fun FareDetail(
                         val trip = if (r.legs.size >= 2) r.legs[1] else r.legs.getOrNull(0)
                         toPickup?.let {
                             if (myFix != null) Text(
-                                "to the pickup: %.1f km · ~%d min".format(
+                                stringResource(R.string.hail_to_pickup,
                                     it.first / 1000.0, (it.second / 60).coerceAtLeast(1)),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         }
                         trip?.let {
                             Text(
-                                "the ride: %.1f km · ~%d min".format(
+                                stringResource(R.string.hail_the_ride,
                                     it.first / 1000.0, (it.second / 60).coerceAtLeast(1)),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
@@ -1181,8 +1194,10 @@ private fun FareDetail(
                         n.farePxmr?.let { fare ->
                             val shown = Amounts.show(context, fare)
                             Text(
-                                "offer: ${shown.primary}" +
-                                    (shown.secondary?.let { s -> " · $s" } ?: ""),
+                                shown.secondary?.let { s ->
+                                    stringResource(R.string.hail_offer_amount_both,
+                                        shown.primary, s)
+                                } ?: stringResource(R.string.hail_offer_amount, shown.primary),
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             trip?.let { t ->
@@ -1190,28 +1205,28 @@ private fun FareDetail(
                                     .competitors(t.first, t.second)
                                 val cur = Amounts.currency(context)
                                 Text(
-                                    ("you keep all of it — a rideshare would pay " +
-                                        "~$cur %.0f for this trip").format(uberDriver),
+                                    stringResource(R.string.hail_keep_all_vs_rideshare,
+                                        cur, uberDriver),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.ducat.settled,
                                 )
                             }
-                        } ?: Text("rider asks you to quote",
+                        } ?: Text(stringResource(R.string.hail_rider_asks_quote),
                             style = MaterialTheme.typography.titleMedium)
                     } ?: Row(verticalAlignment = Alignment.CenterVertically) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                         Spacer(Modifier.width(8.dp))
-                        Text("Routing the job…", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.hail_routing_job), style = MaterialTheme.typography.bodySmall)
                     }
                     Spacer(Modifier.height(14.dp))
                     OutlinedTextField(
                         value = fareXmr,
                         onValueChange = { fareXmr = it; fareError = null },
-                        label = { Text("Your fare (${if (fiat) cur else "XMR"})") },
+                        label = { Text(stringResource(R.string.hail_your_fare, if (fiat) cur else "XMR")) },
                         supportingText = {
                             Text(
-                                if (n.farePxmr != null) "their offer — change it to counter"
-                                else "they asked you to quote",
+                                if (n.farePxmr != null) stringResource(R.string.hail_offer_counter_hint)
+                                else stringResource(R.string.hail_offer_quote_hint),
                             )
                         },
                         modifier = Modifier.fillMaxWidth(), singleLine = true,
@@ -1224,7 +1239,7 @@ private fun FareDetail(
                             fiat = !fiat
                             fareXmr = pxmr?.let { pxmrToField(it, fiat, rate) } ?: ""
                             fareError = null
-                        }) { Text("Price in ${if (fiat) "XMR" else cur} instead") }
+                        }) { Text(stringResource(R.string.hail_price_in_instead, if (fiat) "XMR" else cur)) }
                     }
                     Spacer(Modifier.height(10.dp))
                     Button(
@@ -1235,14 +1250,14 @@ private fun FareDetail(
                             // repricing.
                             val pxmr = offerToPxmr(fareXmr, fiat, rate)
                             if (pxmr == null || pxmr <= 0) {
-                                fareError = "The fare must be a number above zero."
+                                fareError = context.getString(R.string.hail_fare_invalid)
                                 return@onClick
                             }
                             onTake(n, pxmr)
                         },
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(52.dp),
-                    ) { Text("Take this ride 🚕") }
+                    ) { Text(stringResource(R.string.hail_take_this_ride)) }
                     fareError?.let {
                         Spacer(Modifier.height(4.dp))
                         Text(it, color = MaterialTheme.colorScheme.error,
@@ -1252,7 +1267,7 @@ private fun FareDetail(
                     OutlinedButton(
                         onClick = onClose,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
-                    ) { Text("Pass") }
+                    ) { Text(stringResource(R.string.hail_pass)) }
                 }
             }
         }
@@ -1274,8 +1289,9 @@ private fun OfferWaitCard(po: DriveOffer, modifier: Modifier = Modifier) {
     Card(modifier) {
         Column(Modifier.padding(12.dp)) {
             Text(
-                "Offered ${Amounts.show(context, po.farePxmr).primary} — " +
-                    "waiting for ${name ?: "the rider"}",
+                stringResource(R.string.hail_offered_waiting,
+                    Amounts.show(context, po.farePxmr).primary,
+                    name ?: stringResource(R.string.hail_the_rider)),
                 style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(Modifier.height(6.dp))
@@ -1328,7 +1344,10 @@ fun HailSheet(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { ok ->
         if (ok) grabFix(context) { f ->
-            from = f?.let { org.ducatproject.ducat.Geo.Hit("My location", it.first, it.second) }
+            from = f?.let {
+                org.ducatproject.ducat.Geo.Hit(
+                    context.getString(R.string.hail_my_location), it.first, it.second)
+            }
         }
     }
     var locating by remember { mutableStateOf(false) }
@@ -1339,8 +1358,11 @@ fun HailSheet(
             locating = true
             grabFix(context) { f ->
                 locating = false
-                from = f?.let { org.ducatproject.ducat.Geo.Hit("My location", it.first, it.second) }
-                if (f == null) error = "could not get a location fix"
+                from = f?.let {
+                    org.ducatproject.ducat.Geo.Hit(
+                        context.getString(R.string.hail_my_location), it.first, it.second)
+                }
+                if (f == null) error = context.getString(R.string.hail_location_fix_failed)
             }
         } else locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
     }
@@ -1361,7 +1383,7 @@ fun HailSheet(
         routing = false
         route = r
         if (r == null) {
-            error = "no route found between those points"
+            error = context.getString(R.string.hail_no_route)
         } else {
             error = null
             org.ducatproject.ducat.Fare.estimateExact(context, r.meters, r.seconds)
@@ -1383,32 +1405,32 @@ fun HailSheet(
                     Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    IconButton(onClick = onClose) { Icon(Icons.Filled.Close, "Close") }
-                    Text("Hail a ride", style = MaterialTheme.typography.titleLarge)
+                    IconButton(onClick = onClose) { Icon(Icons.Filled.Close, stringResource(R.string.hail_close)) }
+                    Text(stringResource(R.string.hail_card_title), style = MaterialTheme.typography.titleLarge)
                 }
 
                 Column(Modifier.padding(horizontal = 16.dp)) {
                     AddressField(
-                        label = "Pickup",
+                        label = stringResource(R.string.hail_pickup_label),
                         chosen = from,
                         onChosen = { from = it },
                         near = from?.let { it.latE7 to it.lonE7 },
-                        hint = if (locating) "Locating…" else null,
+                        hint = if (locating) stringResource(R.string.hail_locating) else null,
                         trailing = {
                             FilledTonalIconButton(onClick = { useMyLocation() }) {
-                                Icon(Icons.Filled.MyLocation, "Use my location")
+                                Icon(Icons.Filled.MyLocation, stringResource(R.string.hail_use_my_location))
                             }
                         },
                     )
                     Spacer(Modifier.height(8.dp))
                     AddressField(
-                        label = "Where to?",
+                        label = stringResource(R.string.hail_where_to),
                         chosen = to,
                         onChosen = { to = it },
                         // Bias toward the pickup: a business name means the
                         // one near you, not the one in another hemisphere.
                         near = from?.let { it.latE7 to it.lonE7 },
-                        hint = "address or business name",
+                        hint = stringResource(R.string.hail_address_hint),
                     )
 
                     if (routing) {
@@ -1416,7 +1438,7 @@ fun HailSheet(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                             Spacer(Modifier.width(8.dp))
-                            Text("Finding the route…",
+                            Text(stringResource(R.string.hail_finding_route),
                                 style = MaterialTheme.typography.bodySmall)
                         }
                     }
@@ -1438,19 +1460,19 @@ fun HailSheet(
                         // was the estimate hedging against a distance we had
                         // already measured.
                         Text(
-                            "%.1f km · ~%d min%s".format(
-                                r.meters / 1000.0, r.seconds / 60,
-                                est?.let { " · $cur %.2f".format(it.first) } ?: "",
-                            ),
+                            est?.let {
+                                stringResource(R.string.hail_route_summary_priced,
+                                    r.meters / 1000.0, r.seconds / 60, cur, it.first)
+                            } ?: stringResource(R.string.hail_route_summary,
+                                r.meters / 1000.0, r.seconds / 60),
                             style = MaterialTheme.typography.titleMedium,
                         )
                         est?.let { (fiat, _) ->
                             val (uber, uberDriver, taxi) =
                                 org.ducatproject.ducat.Fare.competitors(r.meters, r.seconds)
                             Text(
-                                ("rideshare ~$cur %.0f · taxi ~$cur %.0f — your driver " +
-                                    "keeps all of it (a rideshare pays theirs ~$cur %.0f)")
-                                    .format(uber, taxi, uberDriver),
+                                stringResource(R.string.hail_vs_competitors,
+                                    cur, uber, taxi, uberDriver),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.ducat.settled,
                             )
@@ -1459,7 +1481,7 @@ fun HailSheet(
                         OutlinedTextField(
                             value = fareXmr,
                             onValueChange = { fareXmr = it },
-                            label = { Text("Your offer (${if (fiat) cur else "XMR"})") },
+                            label = { Text(stringResource(R.string.hail_your_offer, if (fiat) cur else "XMR")) },
                             modifier = Modifier.fillMaxWidth(), singleLine = true,
                         )
                         if (rate != null) {
@@ -1469,7 +1491,7 @@ fun HailSheet(
                                 val pxmr = offerToPxmr(fareXmr, fiat, rate)
                                 fiat = !fiat
                                 fareXmr = pxmr?.let { pxmrToField(it, fiat, rate) } ?: ""
-                            }) { Text("Price in ${if (fiat) "XMR" else cur} instead") }
+                            }) { Text(stringResource(R.string.hail_price_in_instead, if (fiat) "XMR" else cur)) }
                         }
                         Spacer(Modifier.height(10.dp))
                         Button(
@@ -1482,8 +1504,7 @@ fun HailSheet(
                                 if (fareXmr.trim().isNotEmpty()) {
                                     val pxmr = offerToPxmr(fareXmr, fiat, rate)
                                     if (pxmr == null || pxmr <= 0) {
-                                        error = "The offer must be a number above zero — " +
-                                            "or leave it blank to ask for a quote."
+                                        error = context.getString(R.string.hail_offer_invalid)
                                         return@onClick
                                     }
                                     fare = pxmr.toULong()
@@ -1551,7 +1572,7 @@ fun HailSheet(
                                             }
                                         }
                                         val (board, sub) = placed
-                                            ?: error("every stand shard is full here — try again shortly")
+                                            ?: error(context.getString(R.string.hail_shards_full))
                                         // §15.12's density rule: a deserted
                                         // corner earns a second copy on the
                                         // containing 5-cell, where a driver
@@ -1610,7 +1631,7 @@ fun HailSheet(
                                         }
                                     }.onFailure { e ->
                                         withContext(Dispatchers.Main) {
-                                            error = e.message ?: "could not post the hail"
+                                            error = e.message ?: context.getString(R.string.hail_post_failed)
                                         }
                                     }
                                     withContext(Dispatchers.Main) { busy = false }
@@ -1621,7 +1642,7 @@ fun HailSheet(
                         ) {
                             if (busy) CircularProgressIndicator(
                                 Modifier.size(18.dp), strokeWidth = 2.dp)
-                            else Text("Hail 🚕")
+                            else Text(stringResource(R.string.hail_post_button))
                         }
                     }
 
@@ -1631,9 +1652,7 @@ fun HailSheet(
                             style = MaterialTheme.typography.bodySmall)
                     }
                     Text(
-                        "Search, route and map use OpenStreetMap's servers — the " +
-                            "one place DUCAT sends location off-device. Drivers see " +
-                            "only ~1 km areas.",
+                        stringResource(R.string.hail_osm_privacy),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -1689,7 +1708,7 @@ private fun AddressField(
             trailingIcon = {
                 IconButton(onClick = { search() }, enabled = query.isNotBlank() && !searching) {
                     if (searching) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                    else Icon(Icons.Filled.Search, "Search")
+                    else Icon(Icons.Filled.Search, stringResource(R.string.hail_search))
                 }
             },
         )

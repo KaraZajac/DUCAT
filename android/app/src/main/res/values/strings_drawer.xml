@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">Set a profile name</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">speaking %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">Your persona</string>
+    <string name="drawer_persona_body">The key your cards are signed with. Nobody can find you by it — it is what someone checks a card against once they have one.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">Being paid</string>
+    <string name="drawer_publish_switch">Let contacts pay me directly</string>
+    <string name="drawer_publish_off_note">Without this, someone paying you has to wait for a request.</string>
+    <string name="drawer_publish_on_warning">Your address goes to each contact once, and gets reused. Anyone who can see the chain can tell that the same person was paid each time — including people who only ever paid you once. Requests avoid that by carrying a fresh address each time.</string>
+    <string name="drawer_publish_scope_note">Only contacts added after this is on will have it.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">No contacts yet. Add one from the Chat tab.</string>
+    <string name="drawer_open_chat">Open chat</string>
+    <string name="drawer_delete_contact">Delete contact</string>
+    <string name="drawer_forget_title">Forget %1$s?</string>
+    <string name="drawer_forget_body">This deletes the contact and every message from them. They cannot be recovered, and reaching them again needs a new card.</string>
+    <string name="drawer_forget_confirm">Forget</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">Pick what this device is right now. A mode takes over the whole app until you come back here and pick Personal.</string>
+    <string name="mode_personal">Personal</string>
+    <string name="mode_personal_desc">Your wallet, chats and activity. The default.</string>
+    <string name="mode_pos">Point of sale</string>
+    <string name="mode_pos_desc">A register: ring up items or type a total, show one code — bill and receipt travel the conversation it opens.</string>
+    <string name="mode_bartab">Bar tab</string>
+    <string name="mode_bartab_desc">A tab book: scan once, add all night, one bill at close. They can pay after they leave.</string>
+    <string name="mode_taxi">Taxi</string>
+    <string name="mode_taxi_desc">Fares and a meter: watch a stand for hails, rate in writing when the meter starts, the bill shows the minutes.</string>
+    <string name="mode_donate">Donations</string>
+    <string name="mode_donate_desc">A standing code any Monero wallet can give to. No app needed on their side.</string>
+</resources>

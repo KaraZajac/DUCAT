@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">Ready to spend</string>
+    <string name="balance_change_coming_back">%1$s in change, back in %2$s</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">You can\'t pay right now</string>
+    <string name="balance_running_low_title">Running low on notes</string>
+    <string name="balance_all_locked_body">Your money is here, but it\'s all tied up as change. Break a note to spend again.</string>
+    <string name="balance_running_low_body">Break a note now so you\'re not caught out at a counter.</string>
+    <string name="balance_break_note_action">Break a note</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="one">1 note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">nothing unlocked yet</string>
+    <string name="balance_notes_then_wait">%1$s — enough for one payment, then a wait for change</string>
+    <string name="balance_notes_one_more">%1$s, so about one more payment</string>
+    <string name="balance_notes_more">%1$s, so about %2$d more payments</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">any moment</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="one">about %1$d minute</item>
+        <item quantity="other">about %1$d minutes</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="one">about %1$d hour</item>
+        <item quantity="other">about %1$d hours</item>
+    </plurals>
+</resources>

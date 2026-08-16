@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">Back</string>
+    <string name="chat_conversation_settings">Conversation settings</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">could not send</string>
+    <string name="chat_could_not_send_the">could not send the %1$s</string>
+    <string name="chat_what_picture">picture</string>
+    <string name="chat_what_file">file</string>
+    <string name="chat_what_location">location</string>
+    <string name="chat_what_voice_memo">voice memo</string>
+    <string name="chat_what_card">card</string>
+    <string name="chat_what_contact">contact</string>
+    <string name="chat_error_location_fix">could not get a location fix</string>
+    <string name="chat_recording_placeholder">Recording… %1$ds</string>
+    <string name="chat_message_placeholder">Message</string>
+    <string name="chat_take_picture">Take a picture</string>
+    <string name="chat_hold_to_record">Hold to record a voice memo</string>
+    <string name="chat_attach">Attach</string>
+    <string name="chat_close">Close</string>
+    <string name="chat_send">Send</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">Gallery</string>
+    <string name="chat_file">File</string>
+    <string name="chat_money_desc">Send or ask for money</string>
+    <string name="chat_money">Money</string>
+    <string name="chat_contact">Contact</string>
+    <string name="chat_location">Location</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 A card for me — pass it to whoever should reach me. One claim, one week:\n%1$s</string>
+    <string name="chat_decline_bill">Declining that bill for %1$s XMR — not this time.</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">No keys for this contact — the handshake did not complete. Ask them for a new card.</string>
+    <string name="chat_e2e_notice">Messages are encrypted to keys that are deleted after use. Once read, they cannot be recovered — not even by you.</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">You withdrew a message</string>
+    <string name="chat_they_withdrew">%1$s withdrew a message</string>
+    <string name="chat_you_declined">You declined</string>
+    <string name="chat_they_declined">%1$s declined</string>
+    <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">Message</string>
+    <string name="chat_delete_note">Delete removes it from this phone only. The other side keeps their copy — nothing here can reach it.</string>
+    <string name="chat_copy">Copy</string>
+    <string name="chat_delete">Delete</string>
+    <string name="chat_cancel">Cancel</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">Keep everything</string>
+    <string name="chat_1_hour">1 hour</string>
+    <string name="chat_1_day">1 day</string>
+    <string name="chat_1_week">1 week</string>
+    <string name="chat_clear_confirm_title">Clear this chat?</string>
+    <string name="chat_clear_confirm_text">Every message in this conversation is deleted from this phone and cannot be recovered. The other side keeps their copy.</string>
+    <string name="chat_clear">Clear</string>
+    <string name="chat_conversation_title">Conversation</string>
+    <string name="chat_delete_after">Delete messages on this phone after</string>
+    <string name="chat_only_your_copy">Only your copy. The other side keeps theirs, and nothing here can reach it.</string>
+    <string name="chat_clear_this_chat">Clear this chat</string>
+    <string name="chat_done">Done</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 downloading…</string>
+    <string name="chat_downloading_audio">🎤 downloading…</string>
+    <string name="chat_downloading_file">📎 downloading…</string>
+    <string name="chat_picture_desc">Picture</string>
+    <string name="chat_could_not_decode">📷 (could not decode)</string>
+    <string name="chat_you_asked_for">You asked for</string>
+    <string name="chat_asked_you_for">Asked you for</string>
+    <string name="chat_receipt_you_issued">Receipt you issued</string>
+    <string name="chat_receipt">Receipt</string>
+    <string name="chat_you_offered_to_drive">You offered to drive</string>
+    <string name="chat_offers_to_drive_you">Offers to drive you</string>
+    <string name="chat_you_accepted_ride">You accepted the ride</string>
+    <string name="chat_ride_accepted">Ride accepted</string>
+    <string name="chat_you_sent">You sent</string>
+    <string name="chat_sent_you">Sent you</string>
+    <string name="chat_min_away">about %1$d min away</string>
+    <string name="chat_paid">Paid ✓</string>
+    <string name="chat_cancelled">Cancelled</string>
+    <string name="chat_review_payment">Review payment</string>
+    <string name="chat_no_address">No address in this request — ask them where to send it.</string>
+    <string name="chat_no_forward_secrecy">Sent without forward secrecy</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">Stop</string>
+    <string name="chat_play_voice_memo">Play voice memo</string>
+    <string name="chat_voice_memo">Voice memo</string>
+    <string name="chat_size_kb">%1$d KB</string>
+    <string name="chat_size_b">%1$d B</string>
+    <string name="chat_file_fallback">file</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">subtotal</string>
+    <string name="chat_tax">tax</string>
+    <string name="chat_total">total</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">not an image</string>
+    <string name="chat_picture_too_big">could not shrink that picture enough</string>
+    <string name="chat_nothing_recorded">nothing was recorded</string>
+    <string name="chat_memo_too_long">that memo is too long — a few minutes is the most</string>
+    <string name="chat_could_not_read_file">could not read that file</string>
+    <string name="chat_file_too_big">that file is %1$d KB — attachments go up to 1 MB</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">Share</string>
+    <string name="chat_card_for_me">A card for me</string>
+    <string name="chat_card_for_me_desc">A one-claim link they can pass to someone who should reach you.</string>
+    <string name="chat_someones_profile">Or someone\'s profile — their name and whatever they chose to publish. Not a connection code: those are theirs to give.</string>
+</resources>

@@ -13,10 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.Amounts
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.formatXmr
@@ -62,7 +64,7 @@ fun AccountsScreen() {
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Top up", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.accounts_top_up), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.weight(1f))
                     if (wallet.stagenet()) {
                         AssistChip(onClick = {}, label = { Text("stagenet") })
@@ -70,9 +72,7 @@ fun AccountsScreen() {
                 }
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    "Send Monero to this address from any wallet or exchange. " +
-                        "It is a normal XMR address — nothing about the transfer " +
-                        "involves DUCAT.",
+                    stringResource(R.string.accounts_top_up_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -80,7 +80,7 @@ fun AccountsScreen() {
 
                 if (address == null) {
                     Text(
-                        "No wallet yet — finish setup first.",
+                        stringResource(R.string.accounts_no_wallet),
                         color = MaterialTheme.colorScheme.error,
                     )
                 } else {
@@ -99,7 +99,7 @@ fun AccountsScreen() {
                         ) {
                             Icon(Icons.Filled.ContentCopy, null, Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text("Copy")
+                            Text(stringResource(R.string.accounts_copy))
                         }
                         OutlinedButton(
                             onClick = { showQr = !showQr },
@@ -107,7 +107,10 @@ fun AccountsScreen() {
                         ) {
                             Icon(Icons.Filled.QrCode2, null, Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text(if (showQr) "Hide" else "QR")
+                            Text(
+                                if (showQr) stringResource(R.string.accounts_hide)
+                                else stringResource(R.string.accounts_qr)
+                            )
                         }
                     }
                     if (showQr) {
@@ -122,11 +125,10 @@ fun AccountsScreen() {
         Spacer(Modifier.height(16.dp))
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
-                Text("Balances", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.accounts_balances), style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Kept apart on purpose: what you can spend now is " +
-                        "not what you own.",
+                    stringResource(R.string.accounts_balances_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -134,18 +136,18 @@ fun AccountsScreen() {
                 val b = balances
                 if (b.tip == 0L) {
                     Text(
-                        "Waiting for a node.",
+                        stringResource(R.string.accounts_waiting_for_node),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else {
                     val spend = Amounts.show(context, b.spendablePxmr, wallet.stagenet())
-                    BalanceRow("Spendable", spend.primary, spend.secondary)
+                    BalanceRow(stringResource(R.string.accounts_spendable), spend.primary, spend.secondary)
                     if (Amounts.canConvert(context)) {
                         Spacer(Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                "Show in ${Amounts.currency(context)}",
+                                stringResource(R.string.accounts_show_in, Amounts.currency(context)),
                                 style = MaterialTheme.typography.bodySmall,
                             )
                             Spacer(Modifier.weight(1f))
@@ -158,16 +160,15 @@ fun AccountsScreen() {
                         }
                         if (preferFiat && wallet.stagenet()) {
                             Text(
-                                "Stagenet coins are test coins. That figure is what this " +
-                                    "much real Monero would be worth — these are worth nothing.",
+                                stringResource(R.string.accounts_stagenet_fiat_note),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.ducat.changePending,
                             )
                         }
                         Spacer(Modifier.height(6.dp))
                     }
-                    BalanceRow("Notes", "${b.spendableOutputs}")
-                    BalanceRow("Bond", "none")
+                    BalanceRow(stringResource(R.string.accounts_notes), "${b.spendableOutputs}")
+                    BalanceRow(stringResource(R.string.accounts_bond), stringResource(R.string.accounts_bond_none))
                     // A wallet whose restore height is zero is scanning from
                     // genesis, which looks exactly like having no money for the
                     // day and a half it takes to arrive.
@@ -181,20 +182,21 @@ fun AccountsScreen() {
                             containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                             Column(Modifier.padding(12.dp)) {
                                 Text(
-                                    "Scanning from the beginning of the chain",
+                                    stringResource(R.string.accounts_scanning_from_genesis_title),
                                     style = MaterialTheme.typography.labelLarge,
                                 )
                                 Spacer(Modifier.height(4.dp))
                                 Text(
-                                    "This wallet was made before the app could reach a " +
-                                        "node, so it does not know when it was created. " +
-                                        "At block ${b.scannedTo} of ${b.tip} that is more " +
-                                        "than a day of reading. Skip ahead if you know the " +
-                                        "wallet is newer than that.",
+                                    stringResource(
+                                        R.string.accounts_scanning_from_genesis_desc,
+                                        b.scannedTo, b.tip,
+                                    ),
                                     style = MaterialTheme.typography.bodySmall,
                                 )
                                 Spacer(Modifier.height(10.dp))
-                                Button(onClick = { rescanOpen = true }) { Text("Skip ahead") }
+                                Button(onClick = { rescanOpen = true }) {
+                                    Text(stringResource(R.string.accounts_skip_ahead))
+                                }
                             }
                         }
                     }
@@ -250,19 +252,18 @@ private fun BalanceRow(label: String, value: String, secondary: String? = null) 
 @Composable
 internal fun SkipAheadDialog(tip: Long, onPick: (Long) -> Unit, onDismiss: () -> Unit) {
     val suggestions = listOf(
-        720L to "about a day ago",
-        5_040L to "about a week ago",
-        21_600L to "about a month ago",
+        720L to stringResource(R.string.accounts_about_a_day_ago),
+        5_040L to stringResource(R.string.accounts_about_a_week_ago),
+        21_600L to stringResource(R.string.accounts_about_a_month_ago),
     )
     var custom by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Skip ahead to") },
+        title = { Text(stringResource(R.string.accounts_skip_ahead_title)) },
         text = {
             Column {
                 Text(
-                    "Anything received before this point will not be found. Pick a " +
-                        "time you are sure is before the wallet existed.",
+                    stringResource(R.string.accounts_skip_ahead_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -270,14 +271,17 @@ internal fun SkipAheadDialog(tip: Long, onPick: (Long) -> Unit, onDismiss: () ->
                 suggestions.forEach { (back, label) ->
                     val h = (tip - back).coerceAtLeast(0)
                     TextButton(onClick = { onPick(h) }, modifier = Modifier.fillMaxWidth()) {
-                        Text("$label  —  block $h", modifier = Modifier.fillMaxWidth())
+                        Text(
+                            stringResource(R.string.accounts_skip_option, label, h),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                 }
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = custom,
                     onValueChange = { custom = it.filter { c -> c.isDigit() } },
-                    label = { Text("or a block height") },
+                    label = { Text(stringResource(R.string.accounts_block_height_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -287,8 +291,10 @@ internal fun SkipAheadDialog(tip: Long, onPick: (Long) -> Unit, onDismiss: () ->
             TextButton(
                 onClick = { custom.toLongOrNull()?.let(onPick) },
                 enabled = custom.toLongOrNull()?.let { it in 0..tip } == true,
-            ) { Text("Use that height") }
+            ) { Text(stringResource(R.string.accounts_use_that_height)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.accounts_cancel)) }
+        },
     )
 }

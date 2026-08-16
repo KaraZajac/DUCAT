@@ -35,13 +35,13 @@ import org.ducatproject.ducat.findActivity
  * Each entry is a whole screen rather than a section of one scroll: settings
  * that share a page with a node status readout make both harder to find.
  */
-enum class Section(val label: String) {
-    Status("Status"),
-    Profile("Profile"),
-    Contacts("Contacts"),
-    Logs("Logs"),
-    Settings("Settings"),
-    Modes("Operating modes"),
+enum class Section(val labelRes: Int) {
+    Status(R.string.section_status),
+    Profile(R.string.section_profile),
+    Contacts(R.string.section_contacts),
+    Logs(R.string.section_logs),
+    Settings(R.string.section_settings),
+    Modes(R.string.section_modes),
 }
 
 @Composable
@@ -59,7 +59,7 @@ fun DrawerContent(onPick: (Section) -> Unit) {
             Text("DUCAT", style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.height(4.dp))
             Text(
-                name ?: "Set a profile name",
+                name ?: stringResource(R.string.drawer_set_name),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -68,7 +68,7 @@ fun DrawerContent(onPick: (Section) -> Unit) {
         Spacer(Modifier.height(8.dp))
         Section.entries.forEach { s ->
             NavigationDrawerItem(
-                label = { Text(s.label) },
+                label = { Text(stringResource(s.labelRes)) },
                 icon = { Icon(iconFor(s), null) },
                 selected = false,
                 // Modes is listed and disabled rather than hidden: §8.8's
@@ -106,8 +106,11 @@ fun SectionScreen(
             Spacer(Modifier.height(16.dp))
             MoneroPanel()
             Spacer(Modifier.height(16.dp))
-            Text("speaking ${uniffi.ducat_mobile.protocolVersion()}",
-                 style = MaterialTheme.typography.bodySmall)
+            Text(
+                stringResource(R.string.drawer_speaking,
+                    uniffi.ducat_mobile.protocolVersion()),
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
 
         Section.Profile -> ProfileSection()
@@ -405,11 +408,11 @@ private fun ProfileSection() {
             PublishAddressSetting()
 
             Spacer(Modifier.height(28.dp))
-            Text("Your persona", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.drawer_persona_title),
+                style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             Text(
-                "The key your cards are signed with. Nobody can find you by it — " +
-                    "it is what someone checks a card against once they have one.",
+                stringResource(R.string.drawer_persona_body),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -433,15 +436,16 @@ private fun PublishAddressSetting() {
     var on by remember { mutableStateOf(store.publishAddress()) }
 
     Column {
-        Text("Being paid", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.drawer_being_paid_title),
+            style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Switch(checked = on, onCheckedChange = { on = it; store.setPublishAddress(it) })
             Spacer(Modifier.width(12.dp))
             Column {
-                Text("Let contacts pay me directly")
+                Text(stringResource(R.string.drawer_publish_switch))
                 Text(
-                    "Without this, someone paying you has to wait for a request.",
+                    stringResource(R.string.drawer_publish_off_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -450,17 +454,14 @@ private fun PublishAddressSetting() {
         if (on) {
             Spacer(Modifier.height(8.dp))
             Text(
-                "Your address goes to each contact once, and gets reused. Anyone " +
-                    "who can see the chain can tell that the same person was paid " +
-                    "each time — including people who only ever paid you once. " +
-                    "Requests avoid that by carrying a fresh address each time.",
+                stringResource(R.string.drawer_publish_on_warning),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.ducat.changePending,
             )
         }
         Spacer(Modifier.height(6.dp))
         Text(
-            "Only contacts added after this is on will have it.",
+            stringResource(R.string.drawer_publish_scope_note),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.outline,
         )
@@ -508,7 +509,7 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
     if (contacts.isEmpty()) {
         Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
             Text(
-                "No contacts yet. Add one from the Chat tab.",
+                stringResource(R.string.drawer_no_contacts),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -531,12 +532,13 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
                 trailingContent = {
                     Row {
                         IconButton(onClick = { onOpenChat(c) }) {
-                            Icon(Icons.Filled.ChatBubbleOutline, "Open chat")
+                            Icon(Icons.Filled.ChatBubbleOutline,
+                                stringResource(R.string.drawer_open_chat))
                         }
                         IconButton(onClick = { confirm = c }) {
                             Icon(
                                 Icons.Filled.DeleteOutline,
-                                "Delete contact",
+                                stringResource(R.string.drawer_delete_contact),
                                 tint = MaterialTheme.colorScheme.error,
                             )
                         }
@@ -550,23 +552,22 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
     confirm?.let { c ->
         AlertDialog(
             onDismissRequest = { confirm = null },
-            title = { Text("Forget ${c.displayName()}?") },
-            text = {
-                Text(
-                    "This deletes the contact and every message from them. They " +
-                        "cannot be recovered, and reaching them again needs a new " +
-                        "card."
-                )
-            },
+            title = { Text(stringResource(R.string.drawer_forget_title, c.displayName())) },
+            text = { Text(stringResource(R.string.drawer_forget_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     store.forget(c.personaHex)
                     contacts = store.all()
                     confirm = null
-                }) { Text("Forget", color = MaterialTheme.colorScheme.error) }
+                }) {
+                    Text(stringResource(R.string.drawer_forget_confirm),
+                        color = MaterialTheme.colorScheme.error)
+                }
             },
             dismissButton = {
-                TextButton(onClick = { confirm = null }) { Text("Cancel") }
+                TextButton(onClick = { confirm = null }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
             },
         )
     }
@@ -605,35 +606,35 @@ fun ModesScreen() {
 
     val options = listOf(
         Triple(
-            org.ducatproject.ducat.Mode.None, "Personal",
-            "Your wallet, chats and activity. The default.",
+            org.ducatproject.ducat.Mode.None,
+            stringResource(R.string.mode_personal),
+            stringResource(R.string.mode_personal_desc),
         ),
         Triple(
-            org.ducatproject.ducat.Mode.Pos, "Point of sale",
-            "A register: ring up items or type a total, show one code — " +
-                "bill and receipt travel the conversation it opens.",
+            org.ducatproject.ducat.Mode.Pos,
+            stringResource(R.string.mode_pos),
+            stringResource(R.string.mode_pos_desc),
         ),
         Triple(
-            org.ducatproject.ducat.Mode.BarTab, "Bar tab",
-            "A tab book: scan once, add all night, one bill at close. " +
-                "They can pay after they leave.",
+            org.ducatproject.ducat.Mode.BarTab,
+            stringResource(R.string.mode_bartab),
+            stringResource(R.string.mode_bartab_desc),
         ),
         Triple(
-            org.ducatproject.ducat.Mode.Taxi, "Taxi",
-            "Fares and a meter: watch a stand for hails, rate in writing " +
-                "when the meter starts, the bill shows the minutes.",
+            org.ducatproject.ducat.Mode.Taxi,
+            stringResource(R.string.mode_taxi),
+            stringResource(R.string.mode_taxi_desc),
         ),
         Triple(
-            org.ducatproject.ducat.Mode.Donate, "Donations",
-            "A standing code any Monero wallet can give to. No app needed " +
-                "on their side.",
+            org.ducatproject.ducat.Mode.Donate,
+            stringResource(R.string.mode_donate),
+            stringResource(R.string.mode_donate_desc),
         ),
     )
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
         Text(
-            "Pick what this device is right now. A mode takes over the whole " +
-                "app until you come back here and pick Personal.",
+            stringResource(R.string.modes_intro),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -19,6 +20,7 @@ import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ducatproject.ducat.R
 import uniffi.ducat_mobile.BackupInput
 import uniffi.ducat_mobile.NewWallet
 import uniffi.ducat_mobile.createPersonaSecret
@@ -90,19 +92,18 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
 
         when (state.step) {
             Step.Persona -> StepCard(
-                title = "Create your identity",
-                body = "A keypair on this phone. No email, no phone number, nobody to " +
-                    "register with — which is also why nobody can restore it for you.",
-                action = "Create",
+                title = stringResource(R.string.onb_persona_title),
+                body = stringResource(R.string.onb_persona_body),
+                action = stringResource(R.string.onb_persona_action),
                 onAction = {
                     onState(state.copy(step = Step.Wallet, persona = createPersonaSecret()))
                 },
             )
 
             Step.Wallet -> StepCard(
-                title = "Create your wallet",
-                body = "Monero keys, generated here and held here. This is the money.",
-                action = "Create wallet",
+                title = stringResource(R.string.onb_wallet_title),
+                body = stringResource(R.string.onb_wallet_body),
+                action = stringResource(R.string.onb_wallet_action),
                 onAction = {
                     // Genesis until a node supplies a real tip — slow to
                     // restore, and recoverable, which is the side of §4.3.1's
@@ -138,11 +139,9 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
             )
 
             Step.Limits -> StepCard(
-                title = "Set your spending limits",
-                body = "Small payments go straight through. Larger ones ask for your " +
-                    "PIN. You can change where those lines sit at any time — the " +
-                    "defaults are already cautious.",
-                action = "Keep the defaults",
+                title = stringResource(R.string.onb_limits_title),
+                body = stringResource(R.string.onb_limits_body),
+                action = stringResource(R.string.onb_limits_action),
                 onAction = { onState(state.copy(step = Step.Backup)) },
             )
 
@@ -153,10 +152,9 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
             )
 
             Step.Done -> StepCard(
-                title = "Ready",
-                body = "Add money when you're ready. Until you do, there is nothing at " +
-                    "risk and nothing to lose.",
-                action = "Finish",
+                title = stringResource(R.string.onb_done_title),
+                body = stringResource(R.string.onb_done_body),
+                action = stringResource(R.string.onb_done_action),
                 onAction = { onState(state.copy(step = Step.Done)) },
             )
         }
@@ -182,7 +180,7 @@ private fun Progress(step: Step) {
         Step.Done -> total
     }
     Column {
-        Text("Set up DUCAT", style = MaterialTheme.typography.headlineSmall)
+        Text(stringResource(R.string.onb_progress_title), style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(8.dp))
         LinearProgressIndicator(
             progress = { n.toFloat() / total },
@@ -190,7 +188,8 @@ private fun Progress(step: Step) {
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            if (step == Step.Done) "Done" else "Step $n of $total",
+            if (step == Step.Done) stringResource(R.string.onb_progress_done)
+            else stringResource(R.string.onb_progress_step, n, total),
             style = MaterialTheme.typography.bodySmall,
         )
     }
@@ -229,11 +228,10 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
 
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(20.dp)) {
-            Text("Back it up — now, not later", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.onb_backup_title), style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
             Text(
-                "One encrypted file, protected by a passphrase you choose. Keep it " +
-                    "wherever you keep important things.",
+                stringResource(R.string.onb_backup_body),
                 style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(Modifier.height(12.dp))
@@ -242,11 +240,9 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                 shape = RoundedCornerShape(12.dp),
             ) {
                 Column(Modifier.padding(12.dp)) {
-                    Text("If you forget this passphrase", fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.onb_backup_forget_title), fontWeight = FontWeight.SemiBold)
                     Text(
-                        "there is no way to recover it. Nobody holds a copy and there " +
-                            "is no one to ask. That is the same reason nobody can " +
-                            "freeze your money or take it.",
+                        stringResource(R.string.onb_backup_forget_body),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
@@ -254,7 +250,7 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
 
             state.wallet?.let { w ->
                 Spacer(Modifier.height(12.dp))
-                Text("Your address", style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(R.string.onb_backup_address_label), style = MaterialTheme.typography.labelMedium)
                 Text(w.address, style = MaterialTheme.typography.bodySmall,
                     fontFamily = FontFamily.Monospace)
             }
@@ -263,10 +259,11 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
             OutlinedTextField(
                 value = passphrase,
                 onValueChange = { passphrase = it; error = null },
-                label = { Text("Passphrase") },
+                label = { Text(stringResource(R.string.onb_backup_passphrase_label)) },
                 supportingText = {
                     Text(
-                        if (longEnough) "Good" else "At least 8 characters",
+                        if (longEnough) stringResource(R.string.onb_backup_passphrase_good)
+                        else stringResource(R.string.onb_backup_passphrase_short),
                         color = if (longEnough) MaterialTheme.ducat.settled
                                 else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -296,7 +293,7 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                         val w = state.wallet
                         val persona = state.persona
                         if (w == null || persona == null) {
-                            error = "Setup is incomplete"
+                            error = context.getString(R.string.onb_backup_error_incomplete)
                             return@Button
                         }
                         busy = true; error = null
@@ -332,23 +329,22 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                     enabled = longEnough && !busy,
                 ) {
                     if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                    else Text("Create backup")
+                    else Text(stringResource(R.string.onb_backup_create))
                 }
             } else {
                 Text(
-                    "Backup created — ${written!!.length()} bytes.",
+                    stringResource(R.string.onb_backup_created, written!!.length()),
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    "It is on this phone, which is not a backup yet. Send it " +
-                        "somewhere else: a password manager, a drive, another device.",
+                    stringResource(R.string.onb_backup_send_elsewhere),
                     style = MaterialTheme.typography.bodySmall,
                 )
                 Spacer(Modifier.height(8.dp))
                 Row {
-                    Button(onClick = { shareBackup(context, written!!) }) { Text("Send it somewhere") }
+                    Button(onClick = { shareBackup(context, written!!) }) { Text(stringResource(R.string.onb_backup_send_action)) }
                     Spacer(Modifier.width(8.dp))
-                    TextButton(onClick = onDone) { Text("Done") }
+                    TextButton(onClick = onDone) { Text(stringResource(R.string.onb_backup_done)) }
                 }
             }
         }
@@ -368,7 +364,7 @@ private fun shareBackup(context: Context, file: File) {
         putExtra(Intent.EXTRA_STREAM, uri)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
-    context.startActivity(Intent.createChooser(send, "Save your DUCAT backup"))
+    context.startActivity(Intent.createChooser(send, context.getString(R.string.onb_backup_share_chooser)))
 }
 
 
@@ -396,12 +392,10 @@ private fun ProfileStep(
 
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(20.dp)) {
-            Text("What should people call you?", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.onb_profile_name_title), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             Text(
-                "This goes on the cards you hand out. Whoever adds you can rename " +
-                    "you on their side, and that name is the one they see — so this " +
-                    "is a suggestion, not an identity.",
+                stringResource(R.string.onb_profile_name_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -409,41 +403,34 @@ private fun ProfileStep(
             OutlinedTextField(
                 value = name,
                 onValueChange = { if (it.length <= 32) name = it },
-                label = { Text("Name (optional)") },
+                label = { Text(stringResource(R.string.onb_profile_name_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(Modifier.height(22.dp))
-            Text("Can contacts pay you directly?", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.onb_profile_pay_title), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Switch(checked = publish, onCheckedChange = { publish = it })
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    if (publish) "Yes — easier to be paid"
-                    else "No — they ask, you approve",
+                    if (publish) stringResource(R.string.onb_profile_pay_yes)
+                    else stringResource(R.string.onb_profile_pay_no),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
             Spacer(Modifier.height(8.dp))
             Text(
-                if (publish) {
-                    "Your address goes to each contact and gets reused. Anyone " +
-                        "reading the chain can tell the same person was paid each " +
-                        "time — including people who only ever paid you once."
-                } else {
-                    "Each payment uses a fresh address, so nothing on the chain ties " +
-                        "your payments together. Someone paying you waits for you to " +
-                        "send a request first."
-                },
+                if (publish) stringResource(R.string.onb_profile_pay_yes_detail)
+                else stringResource(R.string.onb_profile_pay_no_detail),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (publish) MaterialTheme.ducat.changePending
                         else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "You can change both later.",
+                stringResource(R.string.onb_profile_change_later),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
             )
@@ -452,7 +439,7 @@ private fun ProfileStep(
             Button(
                 onClick = { onNext(name.trim(), publish) },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Continue") }
+            ) { Text(stringResource(R.string.onb_profile_continue)) }
         }
     }
 }

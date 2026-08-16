@@ -12,11 +12,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import android.content.Context
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.R
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.draw.clip
 import org.ducatproject.ducat.StoredMessage
@@ -66,12 +69,12 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
             ) {
                 Icon(Icons.Filled.Share, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("My card")
+                Text(stringResource(R.string.chatlist_my_card))
             }
             OutlinedButton(onClick = { sheet = Sheet.New }, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Filled.ChatBubbleOutline, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("New chat")
+                Text(stringResource(R.string.chatlist_new_chat))
             }
         }
 
@@ -85,12 +88,13 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     tint = MaterialTheme.colorScheme.outline,
                 )
                 Spacer(Modifier.height(12.dp))
-                Text("No conversations", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.chatlist_no_conversations),
+                    style = MaterialTheme.typography.titleMedium,
+                )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    "Hand someone your card in person, or send it over any app you " +
-                        "already trust. Nobody can be found by name — reaching a " +
-                        "person takes a card they gave you.",
+                    stringResource(R.string.chatlist_empty_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -112,8 +116,12 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                         },
                         supportingContent = {
                             Text(
-                                last?.let { (if (it.outgoing) "You: " else "") + previewOf(it) }
-                                    ?: "No messages yet",
+                                last?.let {
+                                    val preview = previewOf(context, it)
+                                    if (it.outgoing) {
+                                        stringResource(R.string.chatlist_preview_you, preview)
+                                    } else preview
+                                } ?: stringResource(R.string.chatlist_no_messages_yet),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 style = MaterialTheme.typography.bodySmall,
@@ -125,7 +133,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                             Column(horizontalAlignment = Alignment.End) {
                                 last?.let {
                                     Text(
-                                        shortWhen(it.timestamp),
+                                        shortWhen(context, it.timestamp),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = if (unread) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.outline,
@@ -157,13 +165,9 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     confirm?.let { c ->
         AlertDialog(
             onDismissRequest = { confirm = null },
-            title = { Text("Delete this conversation?") },
+            title = { Text(stringResource(R.string.chatlist_delete_title)) },
             text = {
-                Text(
-                    "Every message with ${c.displayName()} is deleted from this " +
-                        "phone and cannot be recovered. ${c.displayName()} stays in " +
-                        "your contacts — New chat starts a fresh one any time."
-                )
+                Text(stringResource(R.string.chatlist_delete_body, c.displayName()))
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -171,9 +175,18 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     store.setChatVisible(c.personaHex, false)
                     all = store.all()
                     confirm = null
-                }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+                }) {
+                    Text(
+                        stringResource(R.string.chatlist_delete),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             },
-            dismissButton = { TextButton(onClick = { confirm = null }) { Text("Cancel") } },
+            dismissButton = {
+                TextButton(onClick = { confirm = null }) {
+                    Text(stringResource(R.string.chatlist_cancel))
+                }
+            },
         )
     }
 
@@ -217,7 +230,7 @@ private fun NewChatSheet(
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(bottom = 24.dp)) {
             Text(
-                "New chat",
+                stringResource(R.string.chatlist_new_chat),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(20.dp),
             )
@@ -225,8 +238,10 @@ private fun NewChatSheet(
                 colors = ListItemDefaults.colors(
                     containerColor = androidx.compose.ui.graphics.Color.Transparent,
                 ),
-                headlineContent = { Text("Add a contact") },
-                supportingContent = { Text("Scan or paste a card someone gave you") },
+                headlineContent = { Text(stringResource(R.string.chatlist_add_contact)) },
+                supportingContent = {
+                    Text(stringResource(R.string.chatlist_add_contact_hint))
+                },
                 leadingContent = {
                     Icon(
                         Icons.Filled.PersonAdd, null,
@@ -237,7 +252,7 @@ private fun NewChatSheet(
             )
             if (contacts.isEmpty()) {
                 Text(
-                    "No contacts yet.",
+                    stringResource(R.string.chatlist_no_contacts_yet),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
@@ -298,23 +313,26 @@ internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
 
 
 /** What one message looks like from a list away (§16.13's kinds included). */
-internal fun previewOf(m: StoredMessage): String = when {
-    m.kind == 1 -> "💸 Requested ${formatXmr(m.amountPxmr)} XMR"
-    m.kind == 2 -> "💸 Sent ${formatXmr(m.amountPxmr)} XMR"
-    m.kind == 3 -> "🧾 Receipt — ${formatXmr(m.amountPxmr)} XMR"
-    m.kind == 4 -> "Reacted ${m.body}"
-    m.attHash != null -> "📷 Photo"
+internal fun previewOf(context: Context, m: StoredMessage): String = when {
+    m.kind == 1 ->
+        context.getString(R.string.chatlist_preview_requested, formatXmr(m.amountPxmr))
+    m.kind == 2 ->
+        context.getString(R.string.chatlist_preview_sent, formatXmr(m.amountPxmr))
+    m.kind == 3 ->
+        context.getString(R.string.chatlist_preview_receipt, formatXmr(m.amountPxmr))
+    m.kind == 4 -> context.getString(R.string.chatlist_preview_reacted, m.body)
+    m.attHash != null -> context.getString(R.string.chatlist_preview_photo)
     else -> m.body
 }
 
 /** Now, minutes, hours, weekday, then a date — the resolution a list needs. */
-internal fun shortWhen(epochSecs: Long): String {
+internal fun shortWhen(context: Context, epochSecs: Long): String {
     val now = System.currentTimeMillis() / 1000
     val d = now - epochSecs
     return when {
-        d < 60 -> "now"
-        d < 3600 -> "${d / 60}m"
-        d < 86_400 -> "${d / 3600}h"
+        d < 60 -> context.getString(R.string.chatlist_time_now)
+        d < 3600 -> context.getString(R.string.chatlist_time_minutes, d / 60)
+        d < 86_400 -> context.getString(R.string.chatlist_time_hours, d / 3600)
         d < 7 * 86_400 -> java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault())
             .format(java.util.Date(epochSecs * 1000))
         else -> java.text.SimpleDateFormat("d MMM", java.util.Locale.getDefault())
