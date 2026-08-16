@@ -179,12 +179,15 @@ money. Ordered by what blocks 1.0, not by effort.
   quantities per CLDR). RTL proven twice (ar, fa) with mirrored layout
   and native digits. Untranslated keys fall back per-string, so a new
   language can land partially and still ship.
-- **Known gaps.** Pronoun labels come from the bridge's pronounOptions()
-  and need a mapping layer; notification text keeps the process-start
-  language until restart (attachBaseContext runs once per process);
-  outbound chat bodies ("Meter started…") localize to the *sender's*
-  language by design — the receiver sees the sender's words, like any
-  message.
+- **Known gaps.** ~~Pronoun labels come from the bridge's
+  pronounOptions() and need a mapping layer~~ **done, 0.88** — a
+  pronoun_labels array per locale, indexed by the wire code; Romance
+  locales use their live neopronouns (elle/iel/elu), Chinese uses TA, and
+  genderless-pronoun languages (tr fa hi id) keep the English sets by
+  intent. Still open: notification text keeps the process-start language
+  until restart (attachBaseContext runs once per process); outbound chat
+  bodies ("Meter started…") localize to the *sender's* language by design
+  — the receiver sees the sender's words, like any message.
 
 ## Small bugs spotted, not yet fixed
 
