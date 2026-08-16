@@ -68,6 +68,14 @@ tasks.register<JavaExec>("profilescope") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// One real message from the desk's standing identity, to ring a phone's DHT
+// watch — the poller battery-tier check. `./gradlew :desktop:ringtest`.
+tasks.register<JavaExec>("ringtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.RingTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The desk driven blind over the live network; pairs with the Rust harness
 // claiming the card it prints. `./gradlew :desktop:e2e`.
 tasks.register<JavaExec>("e2e") {

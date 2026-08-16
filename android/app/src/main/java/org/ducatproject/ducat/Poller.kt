@@ -42,7 +42,35 @@ class Poller(private val context: Context) {
 
     fun start(scope: CoroutineScope) {
         scope.launch(Dispatchers.IO) {
+            // The pace follows the screen (the roadmap's battery tier): while
+            // someone is looking, every wake below runs the full sweep — the
+            // hot path is exactly what it always was. In a pocket, a wake
+            // sweeps only when a watch rang (a message deserves its
+            // notification promptly) or on a heartbeat, so a quiet phone does
+            // roughly one sweep every three minutes instead of five a minute.
+            // The wait stays short in both tiers: a ring or a return to the
+            // foreground is answered within one chunk, never one sleep.
+            var rang = true // the first pass sweeps: boot is "what did we miss"
+            var quietWakes = 0
             while (isActive) {
+                val fg = AppVisibility.foreground
+                if (!fg && !rang && quietWakes < BG_HEARTBEAT_WAKES) {
+                    quietWakes++
+                    rang = withContext(Dispatchers.IO) {
+                        runCatching { uniffi.ducat_mobile.nodeWaitChange(WAIT_MS) }
+                            .getOrDefault(false)
+                    }
+                    continue
+                }
+                if (!fg) {
+                    DucatLog.i(
+                        TAG,
+                        if (rang) "background sweep — a watch rang"
+                        else "background heartbeat sweep",
+                    )
+                }
+                quietWakes = 0
+
                 // The transport's own narration (attach progress, dial
                 // failures), which otherwise has nowhere to go on a phone.
                 runCatching {
@@ -160,11 +188,22 @@ class Poller(private val context: Context) {
                 // Sleep until the network rings or the interval passes —
                 // instant messages when watches hold, the old cadence when
                 // they do not.
-                val rang = withContext(Dispatchers.IO) {
-                    runCatching { uniffi.ducat_mobile.nodeWaitChange(10_000u) }.getOrDefault(false)
+                rang = withContext(Dispatchers.IO) {
+                    runCatching { uniffi.ducat_mobile.nodeWaitChange(WAIT_MS) }.getOrDefault(false)
                 }
                 if (rang) DucatLog.i(TAG, "a watched record changed — polling now")
             }
         }
+    }
+
+    private companion object {
+        /** One wait chunk. Short in both tiers so a ring or a return to the
+         *  foreground is answered within a chunk, never within a sleep. */
+        const val WAIT_MS = 10_000u
+
+        /** Quiet background wakes between heartbeat sweeps: 18 × 10 s ≈ 3
+         *  minutes. Watches make messages instant regardless; the heartbeat
+         *  is the guarantee behind them, exactly like the sweep itself. */
+        const val BG_HEARTBEAT_WAKES = 18
     }
 }

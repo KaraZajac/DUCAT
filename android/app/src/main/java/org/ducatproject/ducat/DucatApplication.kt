@@ -19,6 +19,19 @@ import uniffi.ducat_mobile.nodeStart
  * app works without a network, and a wallet that refuses to open because a
  * transport is down would be worse than one that cannot currently tap.
  */
+/**
+ * Whether anyone is looking, app-wide.
+ *
+ * The poller reads this to pick its pace: every wake sweeps while a screen is
+ * up; in a pocket the sweep runs when a watch rings or on a heartbeat. Counted
+ * from activity starts/stops rather than any single screen, because the answer
+ * is about the app, not a composable.
+ */
+object AppVisibility {
+    @Volatile var foreground = false
+        internal set
+}
+
 class DucatApplication : Application() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -34,6 +47,22 @@ class DucatApplication : Application() {
         // First, so everything after it — including a crash in the next
         // line — is on the record.
         DucatLog.init(this)
+        // Started-activity count → foreground flag. Config changes pass
+        // through as stop+start of different instances; the count holds.
+        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
+            private var started = 0
+            override fun onActivityStarted(a: android.app.Activity) {
+                AppVisibility.foreground = ++started > 0
+            }
+            override fun onActivityStopped(a: android.app.Activity) {
+                AppVisibility.foreground = --started > 0
+            }
+            override fun onActivityCreated(a: android.app.Activity, b: android.os.Bundle?) {}
+            override fun onActivityResumed(a: android.app.Activity) {}
+            override fun onActivityPaused(a: android.app.Activity) {}
+            override fun onActivitySaveInstanceState(a: android.app.Activity, b: android.os.Bundle) {}
+            override fun onActivityDestroyed(a: android.app.Activity) {}
+        })
         VeilidInit.ensure(this)
         scope.launch {
             // Migrate the sensitive stores to their encrypted form here, once,
