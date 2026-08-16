@@ -61,11 +61,20 @@ money. Ordered by what blocks 1.0, not by effort.
   0.00012176 XMR), and phone 1 completed and broadcast — release txid
   fad3de2c…, accepted to the pool, 0.0098 XMR back to phone 1's own
   wallet. Both UIs carry the outcome ("Deposit returned ✓" / "Co-signed
-  — the release is theirs to broadcast"). **Left:** (1) the arbiter-set
-  role (2-of-3); (2) the rest of the bond UI — co-signer consent needs a
-  payments accessor on monero-wallet's SignableTransaction (0.2.0 keeps
-  them private; until then the co-signer sees only the fee), plus bond
-  amount and funding flow.
+  — the release is theirs to broadcast").
+  ~~Arbiter-set role (2-of-3)~~ **Done + proven live, 0.88 (2026-08-17)**
+  — a three-party bond ran two phones plus the desktop client as arbiter,
+  all three deriving one escrow (58gijsFj…KeJg2Sz), each holding only its
+  share; any two can sign, so a lost phone strands nothing. Ceremonies
+  carry a roster now (round-0 frames it; a joiner verifies it hashes to
+  the ceremony id); the desk is a full participant because Ceremony.kt is
+  shared logic. Flushed out a real bug — an early round-1 share dropped at
+  stage "committed" deadlocked one party — fixed by recording every round
+  before advancing. The arbiter-assisted *dispute* release (arbiter
+  co-signs when a principal is gone) is engine-ready, UI later. **Left:**
+  the rest of the bond UI — co-signer consent needs a payments accessor on
+  monero-wallet's SignableTransaction (0.2.0 keeps them private; until then
+  the co-signer sees only the fee), plus bond amount and funding flow.
 - **Opt-in live location after commitment.** Rider and driver may share
   positions *after* mutual acceptance, never before, off by default,
   clearly bounded to the ride. Presence streaming is a different threat
