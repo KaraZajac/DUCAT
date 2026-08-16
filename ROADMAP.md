@@ -52,9 +52,20 @@ money. Ordered by what blocks 1.0, not by effort.
   at entry. Networking got there via emulator-tap v2 (stock guests,
   host-side conntrack marks) plus guest-side DNS DNAT to a public
   resolver — no host resolver dependency at all. **Left:**
-  (1) FROST-release glue (kind 9) mirroring the DKG glue; (2) the
-  arbiter-set role; (3) the rest of the bond UI (return deposit, bond
-  amount, funding flow).
+  ~~FROST-release glue (kind 9)~~ **Done + proven live, 0.88
+  (2026-08-16)** — the escrow the two phones built was funded 0.01 XMR
+  (txid ebf1a064…) and, after the ten-block unlock, phone 1 tapped
+  "Return the deposit": frost_propose swept the escrow into one
+  transaction and sent [tx][preprocess] as FrostRound 0, phone 2
+  co-signed in one step over the mailbox (fee it read from the bytes:
+  0.00012176 XMR), and phone 1 completed and broadcast — release txid
+  fad3de2c…, accepted to the pool, 0.0098 XMR back to phone 1's own
+  wallet. Both UIs carry the outcome ("Deposit returned ✓" / "Co-signed
+  — the release is theirs to broadcast"). **Left:** (1) the arbiter-set
+  role (2-of-3); (2) the rest of the bond UI — co-signer consent needs a
+  payments accessor on monero-wallet's SignableTransaction (0.2.0 keeps
+  them private; until then the co-signer sees only the fee), plus bond
+  amount and funding flow.
 - **Opt-in live location after commitment.** Rider and driver may share
   positions *after* mutual acceptance, never before, off by default,
   clearly bounded to the ride. Presence streaming is a different threat
