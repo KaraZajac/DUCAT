@@ -58,7 +58,9 @@ fun MyProfileEditor() {
     var saved by remember { mutableStateOf(false) }
     var avatarError by remember { mutableStateOf<String?>(null) }
 
-    val labels = remember { uniffi.ducat_mobile.pronounOptions() }
+    // The wire carries the code (§16.9, core's Pronouns enum); the labels are
+    // presentation and follow the app language. Same order as the codes.
+    val labels = androidx.compose.ui.res.stringArrayResource(R.array.pronoun_labels)
 
     val pick = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()

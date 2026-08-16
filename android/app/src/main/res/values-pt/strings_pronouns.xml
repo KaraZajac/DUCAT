@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pronoun labels, one per wire code (§16.9: 1 she/her, 2 she/they, 3 he/him,
+     4 he/they, 5 they/them, 6 any). The codes are the protocol's (core's
+     Pronouns enum, via pronounOptions()); these labels are presentation and
+     follow the app language. Order is the code order — never reorder. -->
+<resources>
+    <string-array name="pronoun_labels">
+        <item>ela/dela</item>
+        <item>ela/elu</item>
+        <item>ele/dele</item>
+        <item>ele/elu</item>
+        <item>elu/delu</item>
+        <item>qualquer um</item>
+    </string-array>
+</resources>

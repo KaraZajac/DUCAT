@@ -74,7 +74,10 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(c.displayName(), style = MaterialTheme.typography.headlineSmall)
                         c.pronouns?.let { code ->
-                            val labels = remember { uniffi.ducat_mobile.pronounOptions() }
+                            // The wire carries the code (§16.9); the label is
+                            // presentation and follows the app language.
+                            val labels =
+                                androidx.compose.ui.res.stringArrayResource(R.array.pronoun_labels)
                             labels.getOrNull(code - 1)?.let {
                                 Spacer(Modifier.width(8.dp))
                                 Text(
