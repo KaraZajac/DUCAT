@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">Belum dibangun</string>
     <string name="profile_not_built_note">Foto, kata ganti, alamat email, dan pemblokiran. Semuanya opsional, semuanya diatur saat penyiapan, dan semuanya berjalan seperti sebuah nama — diklaim oleh mereka, tidak pernah kami verifikasi.</string>
     <string name="profile_copy">Salin</string>
+    <string name="profile_bond_title">Jaminan</string>
+    <string name="profile_bond_note">Simpanan yang kalian bangun bersama: membelanjakannya butuh kedua kunci, jadi tidak ada pihak yang bisa mengambilnya sendirian.</string>
+    <string name="profile_bond_post">Pasang jaminan</string>
+    <string name="profile_bond_waiting">Membangun simpanan bersama — menunggu mereka…</string>
+    <string name="profile_bond_finishing">Kunci dipertukarkan — menyelesaikan…</string>
+    <string name="profile_bond_done">Alamat escrow</string>
+    <string name="profile_bond_failed">Tidak bisa memulai: %1$s</string>
+    <string name="profile_bond_release">Kembalikan simpanan</string>
+    <string name="profile_bond_releasing">Mengembalikan — menunggu tanda tangan mereka…</string>
+    <string name="profile_bond_cosigned">Sudah ditandatangani — penyiaran ada di pihak mereka.</string>
+    <string name="profile_bond_released">Simpanan kembali ✓</string>
+    <string name="profile_bond_txid">Transaksi pengembalian</string>
 </resources>

@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">Pas encore construit</string>
     <string name="profile_not_built_note">Une photo, des pronoms, une adresse e-mail, et le blocage. Tout est facultatif, tout se règle à la configuration, et tout voyage comme un nom — affirmé par la personne, jamais vérifié par nous.</string>
     <string name="profile_copy">Copier</string>
+    <string name="profile_bond_title">Caution</string>
+    <string name="profile_bond_note">Un dépôt que vous construisez à deux : le dépenser exige les deux clés, donc aucun côté ne peut le prendre seul.</string>
+    <string name="profile_bond_post">Déposer une caution</string>
+    <string name="profile_bond_waiting">Construction du dépôt partagé — en attente de l\'autre côté…</string>
+    <string name="profile_bond_finishing">Clés échangées — finalisation…</string>
+    <string name="profile_bond_done">Adresse du séquestre</string>
+    <string name="profile_bond_failed">Impossible de démarrer : %1$s</string>
+    <string name="profile_bond_release">Restituer le dépôt</string>
+    <string name="profile_bond_releasing">Restitution — en attente de leur cosignature…</string>
+    <string name="profile_bond_cosigned">Cosigné — la diffusion est de leur côté.</string>
+    <string name="profile_bond_released">Dépôt restitué ✓</string>
+    <string name="profile_bond_txid">Transaction de restitution</string>
 </resources>

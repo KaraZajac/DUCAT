@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">Chưa xây dựng</string>
     <string name="profile_not_built_note">Ảnh, đại từ xưng hô, địa chỉ email, và chặn. Tất cả đều tùy chọn, đều đặt lúc thiết lập, và đều đi theo đúng cách một cái tên đi — do họ tự khai, chúng tôi không bao giờ xác minh.</string>
     <string name="profile_copy">Sao chép</string>
+    <string name="profile_bond_title">Tiền ký quỹ</string>
+    <string name="profile_bond_note">Khoản tiền hai bên cùng tạo: muốn chi tiêu cần cả hai khóa, nên không bên nào tự lấy được.</string>
+    <string name="profile_bond_post">Đặt tiền ký quỹ</string>
+    <string name="profile_bond_waiting">Đang tạo khoản chung — chờ bên kia…</string>
+    <string name="profile_bond_finishing">Đã trao đổi khóa — đang hoàn tất…</string>
+    <string name="profile_bond_done">Địa chỉ ký quỹ</string>
+    <string name="profile_bond_failed">Không thể bắt đầu: %1$s</string>
+    <string name="profile_bond_release">Hoàn lại tiền ký quỹ</string>
+    <string name="profile_bond_releasing">Đang hoàn lại — chờ chữ ký của bên kia…</string>
+    <string name="profile_bond_cosigned">Đã ký — việc phát đi thuộc về bên kia.</string>
+    <string name="profile_bond_released">Đã hoàn tiền ký quỹ ✓</string>
+    <string name="profile_bond_txid">Giao dịch hoàn trả</string>
 </resources>

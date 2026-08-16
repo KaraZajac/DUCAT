@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">لم يُبنَ بعد</string>
     <string name="profile_not_built_note">صورة وضمائر وبريد إلكتروني وحظر. كلها اختيارية، كلها تُضبط أثناء الإعداد، وكلها تسافر كما يسافر الاسم — يؤكدونها هم، ولا نتحقق منها نحن أبدًا.</string>
     <string name="profile_copy">نسخ</string>
+    <string name="profile_bond_title">الضمان</string>
+    <string name="profile_bond_note">وديعة تبنيانها معًا: إنفاقها يحتاج المفتاحين، فلا يمكن لأي طرف أخذها وحده.</string>
+    <string name="profile_bond_post">إيداع الضمان</string>
+    <string name="profile_bond_waiting">يجري بناء الوديعة المشتركة — بانتظارهم…</string>
+    <string name="profile_bond_finishing">تم تبادل المفاتيح — جارٍ الإنهاء…</string>
+    <string name="profile_bond_done">عنوان الضمان</string>
+    <string name="profile_bond_failed">تعذّر البدء: %1$s</string>
+    <string name="profile_bond_release">استرداد الوديعة</string>
+    <string name="profile_bond_releasing">يجري الاسترداد — بانتظار توقيعهم…</string>
+    <string name="profile_bond_cosigned">تم التوقيع — البثّ في يدهم.</string>
+    <string name="profile_bond_released">أُعيدت الوديعة ✓</string>
+    <string name="profile_bond_txid">معاملة الاسترداد</string>
 </resources>

@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">अभी बना नहीं</string>
     <string name="profile_not_built_note">तस्वीर, सर्वनाम, ईमेल पता, और ब्लॉक करना। सब वैकल्पिक, सब सेटअप में तय, और सब उसी तरह चलते हैं जैसे नाम — उनका कहा हुआ, हमारा जाँचा हुआ कभी नहीं।</string>
     <string name="profile_copy">कॉपी करें</string>
+    <string name="profile_bond_title">जमानत राशि</string>
+    <string name="profile_bond_note">एक जमा राशि जो आप दोनों मिलकर बनाते हैं: खर्च करने के लिए दोनों कुंजियाँ चाहिए, इसलिए कोई भी पक्ष इसे अकेले नहीं ले सकता।</string>
+    <string name="profile_bond_post">जमानत राशि जमा करें</string>
+    <string name="profile_bond_waiting">साझा जमा बनाई जा रही है — उनका इंतज़ार…</string>
+    <string name="profile_bond_finishing">कुंजियाँ बदलीं — पूरा हो रहा है…</string>
+    <string name="profile_bond_done">एस्क्रो पता</string>
+    <string name="profile_bond_failed">शुरू नहीं हो सका: %1$s</string>
+    <string name="profile_bond_release">जमा वापस लें</string>
+    <string name="profile_bond_releasing">वापसी जारी — उनके सह-हस्ताक्षर का इंतज़ार…</string>
+    <string name="profile_bond_cosigned">सह-हस्ताक्षर हो गया — प्रसारण उनके हाथ में है।</string>
+    <string name="profile_bond_released">जमा वापस मिल गई ✓</string>
+    <string name="profile_bond_txid">वापसी लेनदेन</string>
 </resources>

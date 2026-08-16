@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">Ещё не готово</string>
     <string name="profile_not_built_note">Фото, местоимения, почта и блокировка. Всё это необязательно, задаётся при настройке и путешествует так же, как имя, — заявлено ими, а не проверено нами.</string>
     <string name="profile_copy">Копировать</string>
+    <string name="profile_bond_title">Залог</string>
+    <string name="profile_bond_note">Вклад, который вы создаёте вместе: потратить его можно только двумя ключами, так что ни одна сторона не заберёт его в одиночку.</string>
+    <string name="profile_bond_post">Внести залог</string>
+    <string name="profile_bond_waiting">Создаём общий вклад — ждём другую сторону…</string>
+    <string name="profile_bond_finishing">Ключи обменяны — завершаем…</string>
+    <string name="profile_bond_done">Адрес эскроу</string>
+    <string name="profile_bond_failed">Не удалось начать: %1$s</string>
+    <string name="profile_bond_release">Вернуть вклад</string>
+    <string name="profile_bond_releasing">Возврат — ждём их подпись…</string>
+    <string name="profile_bond_cosigned">Подписано — отправка на их стороне.</string>
+    <string name="profile_bond_released">Вклад возвращён ✓</string>
+    <string name="profile_bond_txid">Транзакция возврата</string>
 </resources>

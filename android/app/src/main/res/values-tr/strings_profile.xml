@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">Henüz yapılmadı</string>
     <string name="profile_not_built_note">Bir resim, zamirler, bir e-posta adresi ve engelleme. Hepsi isteğe bağlı, hepsi kurulumda ayarlanır ve hepsi adla aynı yoldan gider — onların beyanı, asla bizim doğrulamamız değil.</string>
     <string name="profile_copy">Kopyala</string>
+    <string name="profile_bond_title">Teminat</string>
+    <string name="profile_bond_note">Birlikte oluşturduğunuz bir depozito: harcamak iki anahtarı da gerektirir, yani hiçbir taraf onu tek başına alamaz.</string>
+    <string name="profile_bond_post">Teminat yatır</string>
+    <string name="profile_bond_waiting">Ortak depozito oluşturuluyor — karşı taraf bekleniyor…</string>
+    <string name="profile_bond_finishing">Anahtarlar değişti — bitiriliyor…</string>
+    <string name="profile_bond_done">Emanet adresi</string>
+    <string name="profile_bond_failed">Başlatılamadı: %1$s</string>
+    <string name="profile_bond_release">Depozitoyu geri al</string>
+    <string name="profile_bond_releasing">Geri alınıyor — karşı imza bekleniyor…</string>
+    <string name="profile_bond_cosigned">İmzalandı — yayınlamak karşı tarafta.</string>
+    <string name="profile_bond_released">Depozito geri alındı ✓</string>
+    <string name="profile_bond_txid">Geri alma işlemi</string>
 </resources>

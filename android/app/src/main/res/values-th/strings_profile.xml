@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">ยังไม่ได้สร้าง</string>
     <string name="profile_not_built_note">รูปภาพ สรรพนาม อีเมล และการบล็อก ทั้งหมดไม่บังคับ ตั้งได้ระหว่างตั้งค่า และเดินทางแบบเดียวกับชื่อ — เขาเป็นผู้กล่าวอ้าง เราไม่เคยตรวจสอบ</string>
     <string name="profile_copy">คัดลอก</string>
+    <string name="profile_bond_title">เงินค้ำประกัน</string>
+    <string name="profile_bond_note">เงินฝากที่สร้างร่วมกัน: การใช้ต้องใช้กุญแจทั้งสองฝ่าย จึงไม่มีฝ่ายใดเอาไปได้ตามลำพัง</string>
+    <string name="profile_bond_post">วางเงินค้ำประกัน</string>
+    <string name="profile_bond_waiting">กำลังสร้างเงินฝากร่วม — รออีกฝ่าย…</string>
+    <string name="profile_bond_finishing">แลกกุญแจแล้ว — กำลังเสร็จสิ้น…</string>
+    <string name="profile_bond_done">ที่อยู่เอสโครว์</string>
+    <string name="profile_bond_failed">เริ่มไม่ได้: %1$s</string>
+    <string name="profile_bond_release">ขอคืนเงินฝาก</string>
+    <string name="profile_bond_releasing">กำลังคืน — รอลายเซ็นร่วมของอีกฝ่าย…</string>
+    <string name="profile_bond_cosigned">ลงนามแล้ว — การส่งอยู่ที่อีกฝ่าย</string>
+    <string name="profile_bond_released">คืนเงินฝากแล้ว ✓</string>
+    <string name="profile_bond_txid">ธุรกรรมการคืน</string>
 </resources>

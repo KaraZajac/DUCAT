@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">Noch nicht gebaut</string>
     <string name="profile_not_built_note">Ein Bild, Pronomen, eine E-Mail-Adresse und Blockieren. Alles optional, alles bei der Einrichtung gesetzt, und alles reist wie ein Name — behauptet von der Person, nie von uns geprüft.</string>
     <string name="profile_copy">Kopieren</string>
+    <string name="profile_bond_title">Kaution</string>
+    <string name="profile_bond_note">Eine gemeinsam aufgebaute Einlage: Ausgeben braucht beide Schlüssel, also kann keine Seite sie allein nehmen.</string>
+    <string name="profile_bond_post">Kaution hinterlegen</string>
+    <string name="profile_bond_waiting">Gemeinsame Einlage wird aufgebaut — warte auf die Gegenseite…</string>
+    <string name="profile_bond_finishing">Schlüssel getauscht — Abschluss…</string>
+    <string name="profile_bond_done">Treuhand-Adresse</string>
+    <string name="profile_bond_failed">Konnte nicht starten: %1$s</string>
+    <string name="profile_bond_release">Einlage zurückgeben</string>
+    <string name="profile_bond_releasing">Rückgabe — warte auf ihre Gegenzeichnung…</string>
+    <string name="profile_bond_cosigned">Gegengezeichnet — das Senden liegt bei der Gegenseite.</string>
+    <string name="profile_bond_released">Einlage zurückgegeben ✓</string>
+    <string name="profile_bond_txid">Rückgabe-Transaktion</string>
 </resources>

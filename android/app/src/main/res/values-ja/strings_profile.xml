@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">未実装</string>
     <string name="profile_not_built_note">写真、代名詞、メールアドレス、ブロック機能。すべて任意で、すべてセットアップ時に設定し、名前と同じ経路で伝わります — 本人の申告であって、こちらで検証はしません。</string>
     <string name="profile_copy">コピー</string>
+    <string name="profile_bond_title">保証金</string>
+    <string name="profile_bond_note">ふたりで作る保証金です。使うには両方の鍵が必要なので、どちらか一方だけでは動かせません。</string>
+    <string name="profile_bond_post">保証金を預ける</string>
+    <string name="profile_bond_waiting">共有の保証金を作成中 — 相手を待っています…</string>
+    <string name="profile_bond_finishing">鍵を交換しました — 仕上げ中…</string>
+    <string name="profile_bond_done">エスクローアドレス</string>
+    <string name="profile_bond_failed">開始できません: %1$s</string>
+    <string name="profile_bond_release">保証金を返す</string>
+    <string name="profile_bond_releasing">返却中 — 相手の署名を待っています…</string>
+    <string name="profile_bond_cosigned">署名しました — 送信は相手側です。</string>
+    <string name="profile_bond_released">保証金を返しました ✓</string>
+    <string name="profile_bond_txid">返却トランザクション</string>
 </resources>

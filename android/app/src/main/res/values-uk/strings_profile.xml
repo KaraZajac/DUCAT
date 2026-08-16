@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">Ще не зроблено</string>
     <string name="profile_not_built_note">Фото, займенники, адреса пошти й блокування. Усе необов\'язкове, усе задається під час налаштування і їде тим самим шляхом, що й ім\'я — заявлене ними, ніколи не перевірене нами.</string>
     <string name="profile_copy">Копіювати</string>
+    <string name="profile_bond_title">Застава</string>
+    <string name="profile_bond_note">Вклад, який ви створюєте разом: витратити його можна лише двома ключами, тож жодна сторона не забере його сама.</string>
+    <string name="profile_bond_post">Внести заставу</string>
+    <string name="profile_bond_waiting">Створюємо спільний вклад — чекаємо на них…</string>
+    <string name="profile_bond_finishing">Ключі обміняні — завершуємо…</string>
+    <string name="profile_bond_done">Адреса ескроу</string>
+    <string name="profile_bond_failed">Не вдалося почати: %1$s</string>
+    <string name="profile_bond_release">Повернути вклад</string>
+    <string name="profile_bond_releasing">Повернення — чекаємо на їхній підпис…</string>
+    <string name="profile_bond_cosigned">Підписано — трансляція на їхньому боці.</string>
+    <string name="profile_bond_released">Вклад повернено ✓</string>
+    <string name="profile_bond_txid">Транзакція повернення</string>
 </resources>

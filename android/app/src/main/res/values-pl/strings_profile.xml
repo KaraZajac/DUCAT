@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">Jeszcze niezbudowane</string>
     <string name="profile_not_built_note">Zdjęcie, zaimki, adres e-mail i blokowanie. Wszystko opcjonalne, wszystko ustawiane przy konfiguracji i wszystko podróżuje tak samo jak imię — deklarowane przez nich, nigdy nieweryfikowane przez nas.</string>
     <string name="profile_copy">Kopiuj</string>
+    <string name="profile_bond_title">Kaucja</string>
+    <string name="profile_bond_note">Depozyt budowany wspólnie: wydanie wymaga obu kluczy, więc żadna strona nie zabierze go sama.</string>
+    <string name="profile_bond_post">Wpłać kaucję</string>
+    <string name="profile_bond_waiting">Budowanie wspólnego depozytu — czekam na nich…</string>
+    <string name="profile_bond_finishing">Klucze wymienione — kończenie…</string>
+    <string name="profile_bond_done">Adres depozytu</string>
+    <string name="profile_bond_failed">Nie udało się rozpocząć: %1$s</string>
+    <string name="profile_bond_release">Zwróć depozyt</string>
+    <string name="profile_bond_releasing">Zwracanie — czekam na ich podpis…</string>
+    <string name="profile_bond_cosigned">Podpisano — nadanie jest po ich stronie.</string>
+    <string name="profile_bond_released">Depozyt zwrócony ✓</string>
+    <string name="profile_bond_txid">Transakcja zwrotu</string>
 </resources>

@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">Nog niet gebouwd</string>
     <string name="profile_not_built_note">Een foto, voornaamwoorden, een e-mailadres en blokkeren. Allemaal optioneel, allemaal ingesteld tijdens het instellen, en allemaal reizend zoals een naam dat doet — door hen beweerd, nooit door ons geverifieerd.</string>
     <string name="profile_copy">Kopiëren</string>
+    <string name="profile_bond_title">Borg</string>
+    <string name="profile_bond_note">Een borg die jullie samen opbouwen: uitgeven vereist beide sleutels, dus geen van beiden kan hem alleen meenemen.</string>
+    <string name="profile_bond_post">Borg plaatsen</string>
+    <string name="profile_bond_waiting">Gedeelde borg wordt opgebouwd — wachten op hen…</string>
+    <string name="profile_bond_finishing">Sleutels uitgewisseld — afronden…</string>
+    <string name="profile_bond_done">Escrow-adres</string>
+    <string name="profile_bond_failed">Kon niet starten: %1$s</string>
+    <string name="profile_bond_release">Borg terughalen</string>
+    <string name="profile_bond_releasing">Terughalen — wachten op hun medeondertekening…</string>
+    <string name="profile_bond_cosigned">Medeondertekend — uitzenden is aan hen.</string>
+    <string name="profile_bond_released">Borg terug ✓</string>
+    <string name="profile_bond_txid">Terugave-transactie</string>
 </resources>

@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">아직 안 만들어졌어요</string>
     <string name="profile_not_built_note">사진, 대명사, 이메일 주소, 차단. 전부 선택이고, 전부 설정 때 정하고, 전부 이름과 같은 방식으로 전달돼요 — 본인이 주장할 뿐, 우리는 검증하지 않아요.</string>
     <string name="profile_copy">복사</string>
+    <string name="profile_bond_title">보증금</string>
+    <string name="profile_bond_note">함께 만드는 보증금이에요. 쓰려면 두 키가 모두 필요해서 어느 쪽도 혼자 가져갈 수 없어요.</string>
+    <string name="profile_bond_post">보증금 걸기</string>
+    <string name="profile_bond_waiting">공동 보증금 만드는 중 — 상대방 대기 중…</string>
+    <string name="profile_bond_finishing">키 교환 완료 — 마무리 중…</string>
+    <string name="profile_bond_done">에스크로 주소</string>
+    <string name="profile_bond_failed">시작할 수 없어요: %1$s</string>
+    <string name="profile_bond_release">보증금 돌려받기</string>
+    <string name="profile_bond_releasing">돌려받는 중 — 상대 서명 대기 중…</string>
+    <string name="profile_bond_cosigned">서명 완료 — 전송은 상대방 몫이에요.</string>
+    <string name="profile_bond_released">보증금 반환 완료 ✓</string>
+    <string name="profile_bond_txid">반환 트랜잭션</string>
 </resources>

@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">Non ancora costruito</string>
     <string name="profile_not_built_note">Una foto, i pronomi, un indirizzo email e il blocco. Tutto facoltativo, tutto impostato durante la configurazione, e tutto viaggia come viaggia un nome — affermato da loro, mai verificato da noi.</string>
     <string name="profile_copy">Copia</string>
+    <string name="profile_bond_title">Cauzione</string>
+    <string name="profile_bond_note">Un deposito costruito insieme: spenderlo richiede entrambe le chiavi, quindi nessuna parte può prenderlo da sola.</string>
+    <string name="profile_bond_post">Versare una cauzione</string>
+    <string name="profile_bond_waiting">Costruzione del deposito condiviso — in attesa dell\'altra parte…</string>
+    <string name="profile_bond_finishing">Chiavi scambiate — completamento…</string>
+    <string name="profile_bond_done">Indirizzo del deposito di garanzia</string>
+    <string name="profile_bond_failed">Impossibile avviare: %1$s</string>
+    <string name="profile_bond_release">Restituire il deposito</string>
+    <string name="profile_bond_releasing">Restituzione — in attesa della loro controfirma…</string>
+    <string name="profile_bond_cosigned">Controfirmato — la trasmissione spetta a loro.</string>
+    <string name="profile_bond_released">Deposito restituito ✓</string>
+    <string name="profile_bond_txid">Transazione di restituzione</string>
 </resources>

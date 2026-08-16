@@ -29,4 +29,16 @@
     <string name="profile_not_built_yet">هنوز ساخته نشده</string>
     <string name="profile_not_built_note">عکس، ضمیرها، ایمیل، و مسدودسازی. همه اختیاری، همه هنگام راه‌اندازی، و همه از همان راهی می‌روند که نام می‌رود — ادعای خودشان، نه تأیید ما.</string>
     <string name="profile_copy">کپی</string>
+    <string name="profile_bond_title">ودیعه</string>
+    <string name="profile_bond_note">سپرده‌ای که با هم می‌سازید: خرج‌کردنش هر دو کلید را می‌خواهد، پس هیچ‌کدام به‌تنهایی نمی‌تواند آن را بردارد.</string>
+    <string name="profile_bond_post">سپردن ودیعه</string>
+    <string name="profile_bond_waiting">در حال ساخت سپردهٔ مشترک — در انتظار طرف مقابل…</string>
+    <string name="profile_bond_finishing">کلیدها ردوبدل شد — در حال پایان…</string>
+    <string name="profile_bond_done">نشانی امانی</string>
+    <string name="profile_bond_failed">شروع نشد: %1$s</string>
+    <string name="profile_bond_release">بازگرداندن سپرده</string>
+    <string name="profile_bond_releasing">در حال بازگرداندن — در انتظار امضای طرف مقابل…</string>
+    <string name="profile_bond_cosigned">امضا شد — پخش با طرف مقابل است.</string>
+    <string name="profile_bond_released">سپرده بازگردانده شد ✓</string>
+    <string name="profile_bond_txid">تراکنش بازگشت</string>
 </resources>
