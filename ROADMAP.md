@@ -149,9 +149,18 @@ money. Ordered by what blocks 1.0, not by effort.
 - ~~**Bill cancellation tracking.**~~ **Done, 0.87** — a vendor cancel
   sends RETRACT(re_own) naming the bill; the request bubble renders
   "Cancelled" instead of a live Review payment button.
-- **Poller cadence and battery.** The 3 s claim-poll and 4 s board sweep
-  are field-test numbers. Measure, then tier: hot when the screen is on
-  and a hail is standing, slow otherwise.
+- ~~**Poller cadence and battery.**~~ **Done, 0.88 (2026-08-16)** — the
+  screen-local loops (POS 2 s, hail 3 s/4 s) were already innocent: they
+  stop with their screen. The real sink was the background poller running
+  a full sweep after every 10 s wait, five a minute, forever. Now the wake
+  chunk stays 10 s but the sweep is tiered by visibility (started-activity
+  count in the Application): foreground sweeps every wake exactly as
+  before; background sweeps only when a watch rang or on a ~3-min
+  heartbeat, so an idle pocket does ~20 sweeps an hour instead of ~300.
+  Measured live: heartbeat at 18 quiet wakes on the nose; a real message
+  sent from the desk's new :desktop:ringtest woke the backgrounded poller
+  163 ms after the send. True battery numbers still want hardware — folded
+  into the NFC/field-day item.
 
 ## Localization — global like the rails it rides (started 2026-08-15)
 
