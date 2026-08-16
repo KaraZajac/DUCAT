@@ -23,7 +23,15 @@
     <string name="activity_sending">قيد الإرسال — ليست في كتلة بعد</string>
     <string name="activity_spent_unknown">أُنفق، لكن لا يمكننا تحديد أين</string>
     <string name="activity_maybe_change">قد يكون باقيًا من دفعة قمت بها أنت</string>
-    <string name="activity_locked_when">%1$s · يُفتح بعد %2$d كتلة</string>
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="zero">يُفتح الآن</item>
+        <item quantity="one">يُفتح بعد كتلة واحدة</item>
+        <item quantity="two">يُفتح بعد كتلتين</item>
+        <item quantity="few">يُفتح بعد %1$d كتل</item>
+        <item quantity="many">يُفتح بعد %1$d كتلة</item>
+        <item quantity="other">يُفتح بعد %1$d كتلة</item>
+    </plurals>
 
     <!-- Counterparty line -->
     <string name="activity_to">إلى %1$s</string>

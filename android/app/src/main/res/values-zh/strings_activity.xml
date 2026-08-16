@@ -18,7 +18,10 @@
     <string name="activity_sending">发送中 — 尚未进入区块</string>
     <string name="activity_spent_unknown">已花费，但无法确定去向</string>
     <string name="activity_maybe_change">可能是你自己付款的找零</string>
-    <string name="activity_locked_when">%1$s · %2$d 个区块后解锁</string>
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="other">%1$d 个区块后解锁</item>
+    </plurals>
 
     <!-- Counterparty line -->
     <string name="activity_to">付给 %1$s</string>

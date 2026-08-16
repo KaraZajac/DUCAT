@@ -19,7 +19,12 @@
     <string name="activity_sending">Sending — not yet in a block</string>
     <string name="activity_spent_unknown">Spent, but we cannot say where</string>
     <string name="activity_maybe_change">may be change from your own payment</string>
-    <string name="activity_locked_when">%1$s · unlocks in %2$d blocks</string>
+    <!-- %1$s is the date, %2$s the already-pluralized "unlocks in N blocks" -->
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="one">unlocks in %1$d block</item>
+        <item quantity="other">unlocks in %1$d blocks</item>
+    </plurals>
 
     <!-- Counterparty line -->
     <string name="activity_to">To %1$s</string>

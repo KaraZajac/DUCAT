@@ -19,7 +19,11 @@
     <string name="activity_sending">Wordt verstuurd — nog niet in een blok</string>
     <string name="activity_spent_unknown">Uitgegeven, maar waarheen kunnen we niet zeggen</string>
     <string name="activity_maybe_change">kan wisselgeld van je eigen betaling zijn</string>
-    <string name="activity_locked_when">%1$s · ontgrendelt over %2$d blokken</string>
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="one">ontgrendelt over %1$d blok</item>
+        <item quantity="other">ontgrendelt over %1$d blokken</item>
+    </plurals>
 
     <!-- Counterparty line -->
     <string name="activity_to">Aan %1$s</string>

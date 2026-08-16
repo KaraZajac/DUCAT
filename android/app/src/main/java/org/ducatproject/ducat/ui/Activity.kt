@@ -271,7 +271,11 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
                         e.provisional -> stringResource(R.string.activity_maybe_change)
                         e.locked -> stringResource(
                             R.string.activity_locked_when,
-                            whenText(context, e.timestamp), e.unlocksInBlocks,
+                            whenText(context, e.timestamp),
+                            androidx.compose.ui.res.pluralStringResource(
+                                R.plurals.activity_unlocks_blocks,
+                                e.unlocksInBlocks.toInt(), e.unlocksInBlocks.toInt(),
+                            ),
                         )
                         else -> whenText(context, e.timestamp)
                     },

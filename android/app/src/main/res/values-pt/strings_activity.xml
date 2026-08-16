@@ -19,7 +19,11 @@
     <string name="activity_sending">Enviando — ainda não está em um bloco</string>
     <string name="activity_spent_unknown">Gasto, mas não sabemos dizer onde</string>
     <string name="activity_maybe_change">pode ser troco de um pagamento seu</string>
-    <string name="activity_locked_when">%1$s · desbloqueia em %2$d blocos</string>
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="one">desbloqueia em %1$d bloco</item>
+        <item quantity="other">desbloqueia em %1$d blocos</item>
+    </plurals>
 
     <!-- Linha da contraparte -->
     <string name="activity_to">Para %1$s</string>

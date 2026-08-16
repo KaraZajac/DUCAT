@@ -21,7 +21,13 @@
     <string name="activity_sending">Wysyłanie — jeszcze nie w bloku</string>
     <string name="activity_spent_unknown">Wydane, ale nie umiemy powiedzieć gdzie</string>
     <string name="activity_maybe_change">może być resztą z twojej własnej płatności</string>
-    <string name="activity_locked_when">%1$s · odblokuje się za %2$d bloków</string>
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="one">odblokuje się za %1$d blok</item>
+        <item quantity="few">odblokuje się za %1$d bloki</item>
+        <item quantity="many">odblokuje się za %1$d bloków</item>
+        <item quantity="other">odblokuje się za %1$d bloku</item>
+    </plurals>
 
     <!-- Counterparty line -->
     <string name="activity_to">Do: %1$s</string>

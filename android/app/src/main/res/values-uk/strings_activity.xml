@@ -21,7 +21,13 @@
     <string name="activity_sending">Надсилається — ще не в блоці</string>
     <string name="activity_spent_unknown">Витрачено, але куди — сказати не можемо</string>
     <string name="activity_maybe_change">можливо, решта з твого власного платежу</string>
-    <string name="activity_locked_when">%1$s · розблокується через %2$d блоків</string>
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="one">розблокується через %1$d блок</item>
+        <item quantity="few">розблокується через %1$d блоки</item>
+        <item quantity="many">розблокується через %1$d блоків</item>
+        <item quantity="other">розблокується через %1$d блока</item>
+    </plurals>
 
     <!-- Counterparty line -->
     <string name="activity_to">Кому: %1$s</string>

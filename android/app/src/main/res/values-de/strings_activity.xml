@@ -19,7 +19,11 @@
     <string name="activity_sending">Wird gesendet — noch in keinem Block</string>
     <string name="activity_spent_unknown">Ausgegeben, aber wohin, lässt sich nicht sagen</string>
     <string name="activity_maybe_change">könnte Wechselgeld aus deiner eigenen Zahlung sein</string>
-    <string name="activity_locked_when">%1$s · entsperrt in %2$d Blöcken</string>
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="one">entsperrt in %1$d Block</item>
+        <item quantity="other">entsperrt in %1$d Blöcken</item>
+    </plurals>
 
     <!-- Counterparty line -->
     <string name="activity_to">An %1$s</string>

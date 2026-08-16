@@ -19,7 +19,11 @@
     <string name="activity_sending">In invio — non ancora in un blocco</string>
     <string name="activity_spent_unknown">Speso, ma non sappiamo dire dove</string>
     <string name="activity_maybe_change">potrebbe essere il resto di un tuo pagamento</string>
-    <string name="activity_locked_when">%1$s · si sblocca tra %2$d blocchi</string>
+    <string name="activity_locked_when">%1$s · %2$s</string>
+    <plurals name="activity_unlocks_blocks">
+        <item quantity="one">si sblocca tra %1$d blocco</item>
+        <item quantity="other">si sblocca tra %1$d blocchi</item>
+    </plurals>
 
     <!-- Riga controparte -->
     <string name="activity_to">A %1$s</string>
