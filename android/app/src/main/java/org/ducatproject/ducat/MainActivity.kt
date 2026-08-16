@@ -160,20 +160,44 @@ enum class Tab(val labelRes: Int) {
 @Composable
 fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     // Survive a rotation (and process death): the tab you were on, an open
-    // Send sheet with the address it was aimed at, an open QR sheet. Before
-    // this, a rotation mid-payment dropped you back to Home with the sheet
-    // gone. Overlay stays plain remember for now — its Chat case holds a
-    // Contact that needs a custom Saver, a separate follow-up.
+    // Send sheet with the address it was aimed at, an open QR sheet, and the
+    // overlay — the conversation you were reading, the drawer section you had
+    // open. Before this, a rotation mid-payment dropped you back to Home with
+    // the sheet gone.
+    val context = LocalContext.current
     var tab by rememberSaveable(
         stateSaver = Saver(save = { it.name }, restore = { Tab.valueOf(it) }),
     ) { mutableStateOf(Tab.Home) }
-    var overlay by remember { mutableStateOf<Overlay>(Overlay.None) }
+    // The Chat case holds a Contact, which does not fit a Bundle; its persona
+    // hex does, and the store re-resolves it on restore. A contact deleted
+    // while the process was dead restores to None rather than a dead chat.
+    var overlay by rememberSaveable(
+        stateSaver = Saver<Overlay, String>(
+            save = {
+                when (it) {
+                    is Overlay.None -> ""
+                    is Overlay.Chat -> "chat:${it.contact.personaHex}"
+                    is Overlay.Drawer -> "drawer:${it.section.name}"
+                }
+            },
+            restore = { s ->
+                when {
+                    s.startsWith("chat:") -> ContactStore(context).all()
+                        .firstOrNull { it.personaHex == s.removePrefix("chat:") }
+                        ?.let { Overlay.Chat(it) } ?: Overlay.None
+                    s.startsWith("drawer:") -> runCatching {
+                        Overlay.Drawer(Section.valueOf(s.removePrefix("drawer:")))
+                    }.getOrDefault(Overlay.None)
+                    else -> Overlay.None
+                }
+            },
+        ),
+    ) { mutableStateOf<Overlay>(Overlay.None) }
     var payOpen by rememberSaveable { mutableStateOf(false) }
     var payAddress by rememberSaveable { mutableStateOf<String?>(null) }
     var qrOpen by rememberSaveable { mutableStateOf(false) }
     val drawer = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val persona = remember { PersonaStore(context).secret() }
 
     // Android 13+ gates notifications behind a runtime ask. Once, up front:

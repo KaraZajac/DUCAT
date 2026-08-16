@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,7 +58,30 @@ fun PaySheet(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
-    var target by remember {
+    // The destination survives recreation and process death: a Contact does
+    // not fit a Bundle, its persona hex does, and the store re-resolves it —
+    // fresher than a snapshot would be. A vanished contact (or no saved
+    // target) falls back to the init value, which is the chooser.
+    var target by rememberSaveable(
+        stateSaver = Saver<PayTarget?, String>(
+            save = {
+                when (it) {
+                    is PayTarget.ToContact -> "c:${it.contact.personaHex}"
+                    is PayTarget.ToAddress -> "a:${it.address}"
+                    null -> ""
+                }
+            },
+            restore = { s ->
+                when {
+                    s.startsWith("c:") -> ContactStore(context).all()
+                        .firstOrNull { it.personaHex == s.removePrefix("c:") }
+                        ?.let { PayTarget.ToContact(it) }
+                    s.startsWith("a:") -> PayTarget.ToAddress(s.removePrefix("a:"))
+                    else -> null
+                }
+            },
+        ),
+    ) {
         mutableStateOf<PayTarget?>(
             when {
                 prefillContact != null -> PayTarget.ToContact(prefillContact)
