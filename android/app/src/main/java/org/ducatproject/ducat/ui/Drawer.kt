@@ -13,14 +13,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.Languages
+import org.ducatproject.ducat.LocaleStore
 import org.ducatproject.ducat.NameStore
 import org.ducatproject.ducat.PersonaStore
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RateStore
+import org.ducatproject.ducat.UnitsStore
 import org.ducatproject.ducat.WalletStore
+import org.ducatproject.ducat.findActivity
 
 /**
  * What the hamburger opens.
@@ -110,64 +116,192 @@ fun SectionScreen(
 
         Section.Logs -> LogsScreen()
 
-        Section.Settings -> Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)
-        ) {
-            // §16.16, and the default is the privacy stance: when a message
-            // was read is behavioural data, and it leaves this device by
-            // choice, not by installing a chat app.
-            val cs = remember { ContactStore(context) }
-            var receipts by remember { mutableStateOf(cs.readReceipts()) }
-            Text("Privacy", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Switch(checked = receipts, onCheckedChange = {
-                    receipts = it; cs.setReadReceipts(it)
-                })
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text("Send read receipts")
-                    Text(
-                        if (receipts)
-                            "Contacts see when you have read their messages. " +
-                                "Yours show regardless, if they send them."
-                        else
-                            "Off — when you read is your business. You still see " +
-                                "theirs if they send them.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-            Spacer(Modifier.height(24.dp))
-            Text("Appearance", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(8.dp))
-            ThemeMode.entries.forEach { m ->
-                Row(
-                    Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(selected = themeMode == m, onClick = { onThemeChange(m) })
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        when (m) {
-                            ThemeMode.System -> "Follow system"
-                            ThemeMode.Latte -> "Latte (light)"
-                            ThemeMode.Mocha -> "Mocha (dark)"
-                        }
-                    )
-                }
-            }
-            Spacer(Modifier.height(20.dp))
-            val w = remember { WalletStore(context) }
-            BackupSettings(
-                spendKeyHex = w.spendKeyHex(),
-                restoreHeight = w.restoreHeight(),
-                personaSecret = PersonaStore(context).secret(),
-            )
-        }
+        Section.Settings -> SettingsScreen(themeMode, onThemeChange)
 
         Section.Modes -> ModesScreen()
+    }
+}
+
+/**
+ * The one screen where the app is configured, gathered on one scroll: how it
+ * speaks (language), how it looks, how it measures distance and money, what it
+ * discloses, and where the keys are backed up.
+ */
+@Composable
+fun SettingsScreen(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
+    val context = LocalContext.current
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)
+    ) {
+        LanguageSetting()
+        Spacer(Modifier.height(24.dp))
+
+        Text(stringResource(R.string.settings_appearance_title),
+            style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        ThemeMode.entries.forEach { m ->
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(selected = themeMode == m, onClick = { onThemeChange(m) })
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    stringResource(
+                        when (m) {
+                            ThemeMode.System -> R.string.theme_follow_system
+                            ThemeMode.Latte -> R.string.theme_latte
+                            ThemeMode.Mocha -> R.string.theme_mocha
+                        }
+                    )
+                )
+            }
+        }
+        Spacer(Modifier.height(24.dp))
+
+        DistanceSetting()
+        Spacer(Modifier.height(24.dp))
+
+        RateSettings()
+        Spacer(Modifier.height(24.dp))
+
+        // §16.16, and the default is the privacy stance: when a message was
+        // read is behavioural data, and it leaves this device by choice, not by
+        // installing a chat app.
+        val cs = remember { ContactStore(context) }
+        var receipts by remember { mutableStateOf(cs.readReceipts()) }
+        Text(stringResource(R.string.settings_privacy_title),
+            style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Switch(checked = receipts, onCheckedChange = {
+                receipts = it; cs.setReadReceipts(it)
+            })
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(stringResource(R.string.settings_read_receipts))
+                Text(
+                    stringResource(
+                        if (receipts) R.string.settings_read_receipts_on
+                        else R.string.settings_read_receipts_off
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Spacer(Modifier.height(24.dp))
+
+        val w = remember { WalletStore(context) }
+        BackupSettings(
+            spendKeyHex = w.spendKeyHex(),
+            restoreHeight = w.restoreHeight(),
+            personaSecret = PersonaStore(context).secret(),
+        )
+    }
+}
+
+/**
+ * The app's language. Every choice is named in its own language, so the row is
+ * recognisable to someone who cannot yet read the rest of the app. Choosing one
+ * recreates the activity, which is where the new language is applied.
+ */
+@Composable
+private fun LanguageSetting() {
+    val context = LocalContext.current
+    val store = remember { LocaleStore(context) }
+    val tag = remember { store.tag() }
+    var picking by remember { mutableStateOf(false) }
+
+    val current =
+        if (tag.isBlank()) stringResource(R.string.settings_language_system)
+        else Languages.endonymFor(tag) ?: tag
+
+    fun choose(newTag: String) {
+        store.setTag(newTag)
+        picking = false
+        // attachBaseContext runs again on recreate, applying the new locale
+        // before any screen is drawn.
+        context.findActivity()?.recreate()
+    }
+
+    Column {
+        Text(stringResource(R.string.settings_language_title),
+            style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(onClick = { picking = true }) {
+            Text(current)
+            Spacer(Modifier.width(6.dp))
+            Icon(Icons.Filled.ArrowDropDown, null, Modifier.size(18.dp))
+        }
+    }
+    if (picking) {
+        AlertDialog(
+            onDismissRequest = { picking = false },
+            title = { Text(stringResource(R.string.settings_language_title)) },
+            text = {
+                LazyColumn(Modifier.heightIn(max = 420.dp)) {
+                    item {
+                        LanguageRow(
+                            stringResource(R.string.settings_language_system),
+                            tag.isBlank(),
+                        ) { choose("") }
+                    }
+                    items(Languages.SUPPORTED) { l ->
+                        LanguageRow(l.endonym, tag == l.tag) { choose(l.tag) }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { picking = false }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun LanguageRow(label: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = selected, onClick = onClick)
+        Spacer(Modifier.width(8.dp))
+        Text(label)
+    }
+}
+
+/** Kilometres or miles, defaulting to what the device's region uses. */
+@Composable
+private fun DistanceSetting() {
+    val context = LocalContext.current
+    val store = remember { UnitsStore(context) }
+    var sys by remember { mutableStateOf(store.system()) }
+
+    val options = listOf(
+        UnitsStore.SYSTEM to stringResource(R.string.distance_follow_system),
+        UnitsStore.METRIC to stringResource(R.string.distance_kilometres),
+        UnitsStore.IMPERIAL to stringResource(R.string.distance_miles),
+    )
+    Column {
+        Text(stringResource(R.string.settings_distance_title),
+            style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        options.forEach { (value, label) ->
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(
+                    selected = sys == value,
+                    onClick = { sys = value; store.setSystem(value); ContactStore.bump() },
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(label)
+            }
+        }
     }
 }
 
@@ -187,12 +321,13 @@ private fun RateSettings() {
     var cur by remember { mutableStateOf(store.currency()) }
 
     Column {
-        Text("Prices", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.settings_prices_title),
+            style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Switch(checked = on, onCheckedChange = { on = it; store.setEnabled(it) })
             Spacer(Modifier.width(12.dp))
-            Text("Show what a balance is worth")
+            Text(stringResource(R.string.prices_show_worth))
         }
         if (on) {
             Spacer(Modifier.height(8.dp))
@@ -205,7 +340,7 @@ private fun RateSettings() {
             if (picking) {
                 AlertDialog(
                     onDismissRequest = { picking = false },
-                    title = { Text("Currency") },
+                    title = { Text(stringResource(R.string.prices_currency_title)) },
                     text = {
                         LazyColumn(Modifier.heightIn(max = 360.dp)) {
                             items(RateStore.SUPPORTED) { c ->
@@ -224,7 +359,7 @@ private fun RateSettings() {
                                     if (c == store.deviceCurrency()) {
                                         Spacer(Modifier.width(8.dp))
                                         Text(
-                                            "this phone",
+                                            stringResource(R.string.prices_this_phone),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
@@ -233,14 +368,20 @@ private fun RateSettings() {
                             }
                         }
                     },
-                    confirmButton = { TextButton(onClick = { picking = false }) { Text("Done") } },
+                    confirmButton = {
+                        TextButton(onClick = { picking = false }) {
+                            Text(stringResource(R.string.common_done))
+                        }
+                    },
                 )
             }
             Spacer(Modifier.height(8.dp))
+            val note = stringResource(R.string.prices_source_note)
+            val full = if (store.source().isNotEmpty())
+                note + " " + stringResource(R.string.prices_last_from, store.source())
+            else note
             Text(
-                "Checked at most twice an hour, from CoinGecko or Kraken. Turning " +
-                    "this off stops the request entirely." +
-                    (if (store.source().isNotEmpty()) " Last from ${store.source()}." else ""),
+                full,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

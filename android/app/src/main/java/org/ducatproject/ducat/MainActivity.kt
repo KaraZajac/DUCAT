@@ -71,6 +71,13 @@ class MainActivity : ComponentActivity() {
         i?.getStringExtra("open_chat")?.let { openChat.value = it }
     }
 
+    // The chosen language is applied here, before any resource is read, so a
+    // screen never renders in the wrong language and corrects itself. Changing
+    // it in Settings calls recreate(), which runs this again.
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(LocaleWrapper.wrap(newBase))
+    }
+
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         readIntent(intent)

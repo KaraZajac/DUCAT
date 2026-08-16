@@ -1,5 +1,42 @@
 <resources>
-    <string name="app_name">DUCAT</string>
+    <!-- App metadata. app_name stays "DUCAT" in every language: it is a name. -->
+    <string name="app_name" translatable="false">DUCAT</string>
     <string name="nfc_service_description">DUCAT proximity payments</string>
-    <string name="nfc_aid_group_description">DUCAT</string>
+    <string name="nfc_aid_group_description" translatable="false">DUCAT</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mi</string>
+    <!-- number, then unit symbol -->
+    <string name="distance_value" translatable="false">%1$s %2$s</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">Done</string>
+    <string name="common_cancel">Cancel</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_system">Follow the system</string>
+
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="theme_follow_system">Follow system</string>
+    <string name="theme_latte">Latte (light)</string>
+    <string name="theme_mocha">Mocha (dark)</string>
+
+    <string name="settings_distance_title">Distance</string>
+    <string name="distance_follow_system">Follow the system</string>
+    <string name="distance_kilometres">Kilometres</string>
+    <string name="distance_miles">Miles</string>
+
+    <string name="settings_prices_title">Prices</string>
+    <string name="prices_show_worth">Show what a balance is worth</string>
+    <string name="prices_currency_title">Currency</string>
+    <string name="prices_this_phone">this phone</string>
+    <string name="prices_source_note">Checked at most twice an hour, from CoinGecko or Kraken. Turning this off stops the request entirely.</string>
+    <string name="prices_last_from">Last from %1$s.</string>
+
+    <string name="settings_privacy_title">Privacy</string>
+    <string name="settings_read_receipts">Send read receipts</string>
+    <string name="settings_read_receipts_on">Contacts see when you have read their messages. Yours show regardless, if they send them.</string>
+    <string name="settings_read_receipts_off">Off — when you read is your business. You still see theirs if they send them.</string>
 </resources>

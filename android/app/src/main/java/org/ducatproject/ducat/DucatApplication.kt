@@ -22,6 +22,13 @@ import uniffi.ducat_mobile.nodeStart
 class DucatApplication : Application() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    // So the app context — the one background notifications and the node service
+    // format their text against — speaks the user's chosen language too, not
+    // only the screens the activity draws.
+    override fun attachBaseContext(base: android.content.Context) {
+        super.attachBaseContext(LocaleWrapper.wrap(base))
+    }
+
     override fun onCreate() {
         super.onCreate()
         // First, so everything after it — including a crash in the next

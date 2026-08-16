@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The languages DUCAT ships. Listing them here lets Android 13+ show the app in
+  its per-app language settings; on older versions the in-app picker (Settings)
+  drives the same choice. A tag can appear before its values-<tag> folder is
+  fully translated — resource resolution falls back to English cleanly.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="es" />
+    <locale android:name="fr" />
+    <locale android:name="de" />
+    <locale android:name="pt" />
+    <locale android:name="it" />
+    <locale android:name="nl" />
+    <locale android:name="ru" />
+    <locale android:name="uk" />
+    <locale android:name="pl" />
+    <locale android:name="tr" />
+    <locale android:name="zh" />
+    <locale android:name="ja" />
+    <locale android:name="ko" />
+    <locale android:name="ar" />
+    <locale android:name="fa" />
+    <locale android:name="hi" />
+    <locale android:name="id" />
+    <locale android:name="vi" />
+    <locale android:name="th" />
+</locale-config>

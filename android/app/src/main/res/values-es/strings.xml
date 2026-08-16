@@ -1,0 +1,37 @@
+<resources>
+    <string name="nfc_service_description">Pagos de proximidad DUCAT</string>
+
+    <!-- Units -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mi</string>
+
+    <!-- Common -->
+    <string name="common_done">Hecho</string>
+    <string name="common_cancel">Cancelar</string>
+
+    <!-- Settings -->
+    <string name="settings_language_title">Idioma</string>
+    <string name="settings_language_system">Seguir el sistema</string>
+
+    <string name="settings_appearance_title">Apariencia</string>
+    <string name="theme_follow_system">Seguir el sistema</string>
+    <string name="theme_latte">Latte (claro)</string>
+    <string name="theme_mocha">Mocha (oscuro)</string>
+
+    <string name="settings_distance_title">Distancia</string>
+    <string name="distance_follow_system">Seguir el sistema</string>
+    <string name="distance_kilometres">Kilómetros</string>
+    <string name="distance_miles">Millas</string>
+
+    <string name="settings_prices_title">Precios</string>
+    <string name="prices_show_worth">Mostrar cuánto vale un saldo</string>
+    <string name="prices_currency_title">Moneda</string>
+    <string name="prices_this_phone">este teléfono</string>
+    <string name="prices_source_note">Se consulta como máximo dos veces por hora, desde CoinGecko o Kraken. Al desactivarlo se detiene la solicitud por completo.</string>
+    <string name="prices_last_from">Última desde %1$s.</string>
+
+    <string name="settings_privacy_title">Privacidad</string>
+    <string name="settings_read_receipts">Enviar confirmaciones de lectura</string>
+    <string name="settings_read_receipts_on">Tus contactos ven cuándo has leído sus mensajes. Los tuyos se muestran igualmente, si los envían.</string>
+    <string name="settings_read_receipts_off">Desactivado: cuándo lees es asunto tuyo. Sigues viendo las suyas si las envían.</string>
+</resources>
