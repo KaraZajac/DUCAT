@@ -103,9 +103,20 @@ money. Ordered by what blocks 1.0, not by effort.
   Keystore, different threat model). Verified live: installed over real
   plaintext data, 72+1 keys migrated, plaintext gone, _enc ciphertext with
   the wallet address appearing zero times, wallet/contacts/history intact.
-- **Profile-wide privacy pass.** For every profile field: who needs it,
-  at what moment, over which channel. Car/plate scoped to the hail claim
-  was the pattern; apply it everywhere.
+- ~~**Profile-wide privacy pass.**~~ **Done, 0.88 (2026-08-16)** — audited
+  every field for who needs it, when, over which channel. The profile's only
+  transmission surface is the card handshake (issue + claim); a later change
+  reissues rather than pushing, and the backup is the user's own. The gap:
+  email/phone/signal — real-world locators, the plate's own class — rode
+  *every* handshake, so a "sale" till published the owner's Signal to every
+  customer and the customer sent theirs back. Fixed by carrying the
+  handshake's `purpose` in the record: issuer stamps and scopes, claimant
+  reads and scopes its reply, both directions of a transaction now carry no
+  reach-me identifiers while a deliberate contact exchange still does; a null
+  purpose (older card) is the private default. Car/plate stay scoped to a
+  driving claim; name/face/pronouns stay the low-cost introduction gesture;
+  the payto address keeps its own §16.12 switch. Verified via
+  :desktop:profilescope through the real toWire → build/parse path.
 - ~~**Backup hygiene for device-local state.**~~ **Done, 0.88
   (2026-08-17)** — the audit found the scars (`stuck_`/`slotseen_`, prekey
   burn state) are already excluded: backupAppState is an allowlist, so
