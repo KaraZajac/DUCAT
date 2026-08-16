@@ -29,4 +29,11 @@
     <string name="profile_not_built_yet">Not built yet</string>
     <string name="profile_not_built_note">A picture, pronouns, an email address, and blocking. All optional, all set during setup, and all travelling the same way a name does — asserted by them, never verified by us.</string>
     <string name="profile_copy">Copy</string>
+    <string name="profile_bond_title">Bond</string>
+    <string name="profile_bond_note">A deposit you build together: spending it needs both keys, so neither side can take it alone.</string>
+    <string name="profile_bond_post">Post a bond</string>
+    <string name="profile_bond_waiting">Building the shared deposit — waiting for them…</string>
+    <string name="profile_bond_finishing">Keys exchanged — finishing…</string>
+    <string name="profile_bond_done">Escrow address</string>
+    <string name="profile_bond_failed">Could not start: %1$s</string>
 </resources>

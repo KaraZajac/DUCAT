@@ -879,6 +879,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1010,6 +1012,8 @@ internal interface UniffiLib : Library {
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_dht_watch(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Byte
+    fun uniffi_ducat_mobile_fn_func_node_logs(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_poll_call(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_reply(`id`: Long,`message`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1290,6 +1294,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_watch(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_logs(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_poll_call(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_reply(
@@ -1531,6 +1537,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_watch() != 21226.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_logs() != 19323.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_poll_call() != 3546.toShort()) {
@@ -5830,6 +5839,18 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     uniffiRustCallWithError(NodeException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_watch(
         FfiConverterString.lower(`key`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Drain the node's buffered log lines, oldest first.
+         */ fun `nodeLogs`(): List<kotlin.String> {
+            return FfiConverterSequenceString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_logs(
+        _status)
 }
     )
     }

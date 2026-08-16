@@ -11,10 +11,16 @@
 #   -feature -Vulkan   the bundled Vulkan loader fails the same way
 #   TAP networking     SLIRP cannot carry a Veilid node (reads yes, writes
 #                      never) — scripts/emulator-tap.sh raises two TAPs
-#   route rule 15500   Android prefers its emulated WiFi (SLIRP) even wired
-#                      to a TAP; one policy rule sends packets out eth0
-#   phone 2 re-address the guest is baked to 10.0.2.15; phone 2 moves to
-#                      10.0.3.15 over adb root so both fit on one host
+#   wifi disabled      the emulated WiFi is SLIRP behind netsim; when it wins
+#                      default-network election, apps (Veilid included)
+#                      follow it into an IPv6 black hole and never dial.
+#                      With WiFi off, the default network is eth0 — the TAP —
+#                      speaking the guest's own baked 10.0.2 dialect.
+#   no guest surgery   netd owns eth0 and reasserts 10.0.2.15/gw .2/dns .3 on
+#                      every network event; re-addressing the guest is a
+#                      losing fight (learned 2026-08-16). Both phones keep
+#                      the same address; the host's per-flow conntrack marks
+#                      (emulator-tap.sh v2) tell them apart.
 set -e
 cd "$(dirname "$0")/.."
 export ANDROID_HOME=${ANDROID_HOME:-$HOME/Android/Sdk}
@@ -23,8 +29,8 @@ export DISPLAY=${DISPLAY:-:0}
 
 N=${1:-1}
 case "$N" in
-  1) AVD=ducat;  TAP=tap-ducat;  NET=10.0.2; SERIAL=emulator-5554; PORT=5554 ;;
-  2) AVD=ducat2; TAP=tap-ducat2; NET=10.0.3; SERIAL=emulator-5556; PORT=5556 ;;
+  1) AVD=ducat;  TAP=tap-ducat;  SERIAL=emulator-5554; PORT=5554 ;;
+  2) AVD=ducat2; TAP=tap-ducat2; SERIAL=emulator-5556; PORT=5556 ;;
   *) echo "usage: $0 [1|2] [install]"; exit 1 ;;
 esac
 
@@ -49,17 +55,10 @@ done
 echo "booted."
 
 if [ -n "$NETFLAGS" ]; then
-  adb -s $SERIAL root >/dev/null 2>&1 && sleep 2
-  if [ "$N" = "2" ]; then
-    # Phone 2 leaves the baked-in subnet so both phones fit on one host.
-    adb -s $SERIAL shell "ip addr flush dev eth0" 2>/dev/null || true
-    adb -s $SERIAL shell "ip addr add $NET.15/24 dev eth0"
-    adb -s $SERIAL shell "ip link set eth0 up"
-    adb -s $SERIAL shell "ip route replace default via $NET.2 dev eth0 table eth0" 2>/dev/null || \
-      adb -s $SERIAL shell "ip route replace default via $NET.2 dev eth0"
-  fi
-  adb -s $SERIAL shell "ip rule add from all lookup eth0 pref 15500" 2>/dev/null || true
-  echo "guest routed via $TAP"
+  # WiFi off so the default network is deterministically the TAP-backed
+  # eth0. Everything else is stock: netd's own config matches the wire.
+  adb -s $SERIAL shell svc wifi disable >/dev/null 2>&1 || true
+  echo "guest on $TAP, wifi off — native 10.0.2 dialect"
 fi
 
 if [ "$2" = "install" ] || [ "$1" = "install" ]; then

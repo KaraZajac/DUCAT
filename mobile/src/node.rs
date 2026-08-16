@@ -51,6 +51,28 @@ fn inbox() -> &'static Mutex<VecDeque<(u64, Vec<u8>)>> {
     INBOX.get_or_init(|| Mutex::new(VecDeque::new()))
 }
 
+/// Veilid's own words, waiting for the app log to drain them.
+///
+/// The node's tracing has nowhere to go on Android — no terminal, no
+/// subscriber — which made "attaching forever with zero peers" a black box on
+/// the second emulated phone. With `logging.api` on, veilid narrates through
+/// the update callback; this ring keeps the tail and `node_logs` hands it to
+/// whoever polls (the Kotlin poller writes it into ducat.log). Bounded for the
+/// same reason the inbox is.
+const MAX_LOGS: usize = 256;
+
+static LOGS: OnceLock<Mutex<VecDeque<String>>> = OnceLock::new();
+
+fn logs() -> &'static Mutex<VecDeque<String>> {
+    LOGS.get_or_init(|| Mutex::new(VecDeque::new()))
+}
+
+/// Drain the node's buffered log lines, oldest first.
+#[uniffi::export]
+pub fn node_logs() -> Vec<String> {
+    logs().lock().unwrap().drain(..).collect()
+}
+
 /// Take a clone of what a call needs, and **release the lock before doing any
 /// network work**.
 ///
@@ -129,6 +151,12 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         if !udp {
             cfg["network"]["protocol"]["udp"]["enabled"] = serde_json::json!(false);
         }
+        // NOTE (2026-08-16): veilid-core 0.5.7's config has no "logging"
+        // section — api-level logging is wired through a tracing layer, not
+        // the JSON config — so the `node_logs` ring below stays empty until
+        // that layer is installed. The ring and its export are kept: the
+        // two-phone debugging session proved a silent transport is the worst
+        // kind of black box on a phone.
 
         // `AppCall` is now consumed: it is how a contact's message reaches us
         // (§16.11). Everything else is still dropped, and deliberately — a
@@ -152,6 +180,13 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
                     let (flag, cond) = change_signal();
                     *flag.lock().unwrap() = true;
                     cond.notify_all();
+                }
+                VeilidUpdate::Log(l) => {
+                    let mut q = logs().lock().unwrap();
+                    if q.len() >= MAX_LOGS {
+                        q.pop_front();
+                    }
+                    q.push_back(format!("{} {}", l.log_level, l.message));
                 }
                 _ => {}
             }

@@ -43,6 +43,12 @@ class Poller(private val context: Context) {
     fun start(scope: CoroutineScope) {
         scope.launch(Dispatchers.IO) {
             while (isActive) {
+                // The transport's own narration (attach progress, dial
+                // failures), which otherwise has nowhere to go on a phone.
+                runCatching {
+                    uniffi.ducat_mobile.nodeLogs().forEach { DucatLog.i("veilid", it) }
+                }
+
                 runCatching {
                     // Answers to a card we handed out land in its inbox, and
                     // that only becomes a contact once somebody looks.

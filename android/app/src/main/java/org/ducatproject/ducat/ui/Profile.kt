@@ -16,6 +16,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.R
@@ -185,6 +188,9 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 Text(stringResource(R.string.profile_open_chat))
             }
 
+            Spacer(Modifier.height(24.dp))
+            BondSection(c, clipboard)
+
             Spacer(Modifier.height(28.dp))
             // Named rather than silently absent: a profile screen with no
             // mention of these reads as "DUCAT has no notion of them", when the
@@ -197,6 +203,82 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+    }
+}
+
+/**
+ * The bond with this contact (§17.9): none yet, in ceremony, or done.
+ *
+ * One button starts the DKG; every later round arrives through the poll loop
+ * and advances the engine without this screen's help, so all the section does
+ * is read the recorded stage back — keyed on the store version, because a
+ * ceremony only ever advances when a message lands, and message arrival is
+ * exactly what bumps it.
+ */
+@Composable
+private fun BondSection(
+    c: Contact,
+    clipboard: androidx.compose.ui.platform.ClipboardManager,
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val version by ContactStore.changes.collectAsState()
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val ceremony = remember(version, busy) {
+        org.ducatproject.ducat.Ceremony.all(context)
+            .filter { it.optString("peer") == c.personaHex }
+            .lastOrNull()
+    }
+
+    Text(stringResource(R.string.profile_bond_title),
+        style = MaterialTheme.typography.titleMedium)
+    Text(
+        stringResource(R.string.profile_bond_note),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(8.dp))
+    when (ceremony?.optString("stage").orEmpty()) {
+        "" -> {
+            // Sealing and sending the commitment is network work; the button
+            // shows it working rather than freezing the profile.
+            Button(
+                enabled = !busy,
+                onClick = {
+                    busy = true; error = null
+                    scope.launch {
+                        val r = withContext(Dispatchers.IO) {
+                            runCatching {
+                                org.ducatproject.ducat.Ceremony.startBond(context, c)
+                            }
+                        }
+                        r.onFailure { error = it.message ?: "?" }
+                        busy = false
+                    }
+                },
+            ) {
+                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Text(stringResource(R.string.profile_bond_post))
+            }
+            error?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.profile_bond_failed, it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+        "committed" -> Text(stringResource(R.string.profile_bond_waiting),
+            style = MaterialTheme.typography.bodyMedium)
+        "shared" -> Text(stringResource(R.string.profile_bond_finishing),
+            style = MaterialTheme.typography.bodyMedium)
+        else -> Field(
+            stringResource(R.string.profile_bond_done),
+            ceremony?.optString("address").orEmpty(),
+            clipboard,
+        )
     }
 }
 
