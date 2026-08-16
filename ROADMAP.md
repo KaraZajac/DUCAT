@@ -41,17 +41,19 @@ money. Ordered by what blocks 1.0, not by effort.
   (Ceremony.kt) drives it from the poll loop: startBond → DkgRound →
   engine → escrow address. Builds, installs, no regression. The contact
   profile now carries the first bond UI: "Post a bond" plus the live
-  ceremony stage, ending in the escrow address. **Left:**
-  (1) full two-phone live run — the first attempt (2026-08-16) found the
-  guest-re-addressing design unsound: Android's netd reasserts the baked
-  10.0.2 config on every network event, and a SLIRP-WiFi default network
-  starves Veilid entirely (zero dials on the wire). emulator-tap.sh v2
-  keeps both guests bone-stock and disambiguates them on the host with
-  per-flow conntrack marks; needs one `sudo bash scripts/emulator-tap.sh`
-  to take effect, then the run is: card exchange over the DHT, Post a
-  bond, both phones converge on one escrow address.
-  (2) FROST-release glue (kind 9) mirroring the DKG glue; (3) the
-  arbiter-set role; (4) the rest of the bond UI (return deposit, bond
+  ceremony stage, ending in the escrow address.
+  ~~Full two-phone live run~~ **Done, 0.88 (2026-08-16)** — two emulated
+  phones exchanged cards over the DHT, one tapped Post a bond, and both
+  independently derived the same escrow address (59D2GZaC…RLqYe), each
+  holding only its own share. The run flushed out a real ceremony bug:
+  two rounds sent in one poll cycle reused the same outbox seq (the
+  share overwrote the commitment in the ring); onDkgRound now threads
+  the updated contact through consecutive sends and re-reads the store
+  at entry. Networking got there via emulator-tap v2 (stock guests,
+  host-side conntrack marks) plus guest-side DNS DNAT to a public
+  resolver — no host resolver dependency at all. **Left:**
+  (1) FROST-release glue (kind 9) mirroring the DKG glue; (2) the
+  arbiter-set role; (3) the rest of the bond UI (return deposit, bond
   amount, funding flow).
 - **Opt-in live location after commitment.** Rider and driver may share
   positions *after* mutual acceptance, never before, off by default,

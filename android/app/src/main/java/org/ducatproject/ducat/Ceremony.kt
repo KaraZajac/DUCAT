@@ -114,14 +114,24 @@ object Ceremony {
         val i = myParticipant(mineHex, theirsHex)
         val theirI = theirParticipant(mineHex, theirsHex)
 
+        // Every send returns the contact with its outbox sequence advanced,
+        // and the NEXT send must use that one. Reusing the argument sent two
+        // rounds as the same seq in one poll cycle — the share overwrote the
+        // commitment in the ring, and the peer only ever saw the second
+        // (found live, first two-phone run, 2026-08-16). The argument can be
+        // stale the same way when two rounds arrive in one poll, so start
+        // from the store's copy, not the caller's.
+        var c = ContactStore(context).all()
+            .firstOrNull { it.personaHex == contact.personaHex } ?: contact
+
         // A peer's round-0 with no ceremony of ours is an invitation: commit
         // in response so both sides converge, then treat their round-0 as the
         // one we were waiting for.
         var o = load(context, idHex)
         if (o == null && round.toInt() == 0) {
             val commit = uniffi.ducat_mobile.dkgCommit(id, i.toUShort(), T.toUShort(), N.toUShort())
-            Mailbox.send(
-                context, contact, "bond: building a shared deposit",
+            c = Mailbox.send(
+                context, c, "bond: building a shared deposit",
                 mineHex, kind = 8, round = 0, ceremonyId = id, payload = commit,
             )
             o = JSONObject().apply {
@@ -142,8 +152,8 @@ object Ceremony {
                         id, i.toUShort(), T.toUShort(), N.toUShort(), from,
                     )
                     val mine = shares.firstOrNull { it.participant.toInt() == theirI } ?: return
-                    Mailbox.send(
-                        context, contact, "bond: your share",
+                    c = Mailbox.send(
+                        context, c, "bond: your share",
                         mineHex, kind = 8, round = 1, ceremonyId = id, payload = mine.bytes,
                     )
                     o.put("stage", "shared"); save(context, idHex, o)

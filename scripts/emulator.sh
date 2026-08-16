@@ -58,7 +58,18 @@ if [ -n "$NETFLAGS" ]; then
   # WiFi off so the default network is deterministically the TAP-backed
   # eth0. Everything else is stock: netd's own config matches the wire.
   adb -s $SERIAL shell svc wifi disable >/dev/null 2>&1 || true
-  echo "guest on $TAP, wifi off — native 10.0.2 dialect"
+  # The guest is baked to ask 10.0.2.3 for DNS. Rather than depend on a
+  # host resolver on that address (root-owned, killable only with sudo,
+  # and a stale one silently blackholes every lookup), redirect it inside
+  # the guest to a public resolver — the NAT path is already proven.
+  adb -s $SERIAL root >/dev/null 2>&1 && sleep 2
+  for RULE in \
+    "-p udp --dport 53 -j DNAT --to-destination 8.8.8.8:53" \
+    "-p tcp --dport 53 -j DNAT --to-destination 8.8.8.8:53" \
+    "-p tcp --dport 853 -j DNAT --to-destination 8.8.8.8:853"; do
+    adb -s $SERIAL shell "su root iptables -t nat -C OUTPUT -d 10.0.2.3 $RULE 2>/dev/null || su root iptables -t nat -A OUTPUT -d 10.0.2.3 $RULE" >/dev/null 2>&1 || true
+  done
+  echo "guest on $TAP, wifi off, dns via 8.8.8.8 — native 10.0.2 dialect"
 fi
 
 if [ "$2" = "install" ] || [ "$1" = "install" ]; then
