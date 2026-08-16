@@ -176,4 +176,3 @@ is already cross-platform Rust; the path, cheapest first:
 - Offline OSM routing (fare estimates without the one stated leak).
 - Multi-hail per rider; fleets; anything dispatcher-shaped.
 - Reputation systems beyond the receipts a relationship accretes.
-- Localization (the strings are English; the money already isn't).
