@@ -1,0 +1,51 @@
+<resources>
+    <string name="nfc_service_description">مدفوعات DUCAT عن قرب</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">كم</string>
+    <string name="unit_mi">ميل</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">تم</string>
+    <string name="common_cancel">إلغاء</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">الرئيسية</string>
+    <string name="tab_accounts">الحسابات</string>
+    <string name="tab_activity">النشاط</string>
+    <string name="tab_chat">الدردشة</string>
+    <string name="tab_send_receive">إرسال/استقبال</string>
+
+    <string name="section_status">الحالة</string>
+    <string name="section_profile">الملف الشخصي</string>
+    <string name="section_contacts">جهات الاتصال</string>
+    <string name="section_logs">السجلات</string>
+    <string name="section_settings">الإعدادات</string>
+    <string name="section_modes">أوضاع التشغيل</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">اللغة</string>
+    <string name="settings_language_system">اتباع النظام</string>
+
+    <string name="settings_appearance_title">المظهر</string>
+    <string name="theme_follow_system">اتباع النظام</string>
+    <string name="theme_latte">لاتيه (فاتح)</string>
+    <string name="theme_mocha">موكا (داكن)</string>
+
+    <string name="settings_distance_title">المسافة</string>
+    <string name="distance_follow_system">اتباع النظام</string>
+    <string name="distance_kilometres">كيلومترات</string>
+    <string name="distance_miles">أميال</string>
+
+    <string name="settings_prices_title">الأسعار</string>
+    <string name="prices_show_worth">إظهار قيمة الرصيد</string>
+    <string name="prices_currency_title">العملة</string>
+    <string name="prices_this_phone">هذا الهاتف</string>
+    <string name="prices_source_note">يُتحقق منها مرتين في الساعة على الأكثر، من CoinGecko أو Kraken. إيقاف هذا يوقف الطلب تمامًا.</string>
+    <string name="prices_last_from">آخر سعر من %1$s.</string>
+
+    <string name="settings_privacy_title">الخصوصية</string>
+    <string name="settings_read_receipts">إرسال إشعارات القراءة</string>
+    <string name="settings_read_receipts_on">ترى جهات اتصالك متى قرأت رسائلها. أما إشعاراتها فتظهر لك على أي حال إن أرسلتها.</string>
+    <string name="settings_read_receipts_off">متوقف — وقت قراءتك شأنك وحدك. وما زلت ترى إشعاراتهم إن أرسلوها.</string>
+</resources>

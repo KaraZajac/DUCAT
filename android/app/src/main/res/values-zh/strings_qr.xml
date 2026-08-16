@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_too_much_data">数据太多，QR 码装不下 — 改用链接。</string>
+    <string name="qr_code">QR 码</string>
+</resources>

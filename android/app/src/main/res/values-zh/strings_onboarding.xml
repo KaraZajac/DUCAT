@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">设置 DUCAT</string>
+    <string name="onb_progress_done">完成</string>
+    <string name="onb_progress_step">第 %1$d 步，共 %2$d 步</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">创建你的身份</string>
+    <string name="onb_persona_body">一对存在这台手机上的密钥。不要邮箱、不要手机号、没有注册对象 — 这也正是没有人能替你找回它的原因。</string>
+    <string name="onb_persona_action">创建</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">创建你的钱包</string>
+    <string name="onb_wallet_body">Monero 密钥，在这里生成，也存在这里。这就是钱本身。</string>
+    <string name="onb_wallet_action">创建钱包</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">设定你的消费限额</string>
+    <string name="onb_limits_body">小额付款直接通过。大额付款会要求输入 PIN。这两条线随时可以调整 — 默认值已经足够谨慎。</string>
+    <string name="onb_limits_action">保留默认</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">就绪</string>
+    <string name="onb_done_body">准备好了再充钱。在那之前，没有任何风险，也没有任何可失去的。</string>
+    <string name="onb_done_action">完成</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">备份 — 就现在，别拖</string>
+    <string name="onb_backup_body">一个加密文件，由你选的口令保护。放到你放重要东西的地方。</string>
+    <string name="onb_backup_forget_title">如果你忘了这个口令</string>
+    <string name="onb_backup_forget_body">就没有任何找回的办法。没有人存有副本，也没有人可问。也正因为如此，没有人能冻结或拿走你的钱。</string>
+    <string name="onb_backup_address_label">你的地址</string>
+    <string name="onb_backup_passphrase_label">口令</string>
+    <string name="onb_backup_passphrase_good">不错</string>
+    <string name="onb_backup_passphrase_short">至少 8 个字符</string>
+    <string name="onb_backup_error_incomplete">设置尚未完成</string>
+    <string name="onb_backup_create">创建备份</string>
+    <string name="onb_backup_created">备份已创建 — %1$d 字节。</string>
+    <string name="onb_backup_send_elsewhere">它还在这台手机上，这还算不上备份。把它送到别处：密码管理器、网盘、另一台设备。</string>
+    <string name="onb_backup_send_action">送到别处</string>
+    <string name="onb_backup_done">完成</string>
+    <string name="onb_backup_share_chooser">保存你的 DUCAT 备份</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">大家该怎么称呼你？</string>
+    <string name="onb_profile_name_body">它会写在你发出的名片上。添加你的人可以在他们那边给你改名，他们看到的是改后的名字 — 所以这只是个建议，不是身份。</string>
+    <string name="onb_profile_name_label">名字（可选）</string>
+    <string name="onb_profile_pay_title">允许联系人直接付钱给你吗？</string>
+    <string name="onb_profile_pay_yes">允许 — 收钱更省事</string>
+    <string name="onb_profile_pay_no">不允许 — 对方先问，你再批</string>
+    <string name="onb_profile_pay_yes_detail">你的地址会发给每位联系人并被重复使用。任何读链的人都能看出每次收款的是同一个人 — 包括只付过你一次钱的人。</string>
+    <string name="onb_profile_pay_no_detail">每笔付款用一个全新地址，链上没有任何东西能把你的收款串在一起。想付钱给你的人要先等你发请求。</string>
+    <string name="onb_profile_change_later">两项以后都能改。</string>
+    <string name="onb_profile_continue">继续</string>
+</resources>

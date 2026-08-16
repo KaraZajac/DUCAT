@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">无法发布接客码</string>
+    <string name="taxi_meter_started_msg">计价器已启动 — 起步 %1$s XMR，每分钟 %2$s XMR。结束时账单列明分钟数。</string>
+    <string name="taxi_err_terms_not_sent">对方已连接，但计费条款没发出去：%1$s</string>
+    <string name="taxi_set_fare">设定车费</string>
+    <string name="taxi_base_label">起步价（%1$s）</string>
+    <string name="taxi_per_min_label">每分钟（%1$s）</string>
+    <string name="taxi_price_in_instead">改用 %1$s 计价</string>
+    <string name="taxi_rate_locked_hint">以 %1$s 输入的费率在行程开始时锁定为 XMR — 乘客同意的数字就是账单上的数字。</string>
+    <string name="taxi_set_rate_hint">设定每分钟费率后，接客码才会开启。</string>
+    <string name="taxi_pickup">接客</string>
+    <string name="taxi_scan_hint">乘客扫码或碰一下手机。费率落进对话，计价器自动开始。</string>
+    <string name="taxi_meter_terms">起步 %1$s + %2$s/分钟</string>
+    <string name="taxi_rider">乘客</string>
+    <string name="taxi_line_base_fare">起步价</string>
+    <string name="taxi_line_metered">%1$d 分 %2$02d 秒 × %3$s XMR/分钟</string>
+    <string name="taxi_err_send_fare">车费发不出去</string>
+    <string name="taxi_end_ride_bill">结束行程 — 出账 %1$s</string>
+    <string name="taxi_bill_hint">账单列明分钟数和费率。车费到账后收据会自动发给对方 — 哪怕人已经走远。</string>
+    <string name="taxi_cancel_ride_no_bill">取消行程 — 不出账</string>
+    <string name="taxi_cancel_title">取消这趟行程？</string>
+    <string name="taxi_cancel_body">计价器停止，不发账单。已计的分钟数将被丢弃，无法恢复。</string>
+    <string name="taxi_cancel_confirm">取消行程</string>
+    <string name="taxi_keep_going">继续行程</string>
+</resources>

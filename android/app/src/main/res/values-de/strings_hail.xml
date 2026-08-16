@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">Fahrt rufen</string>
+    <string name="hail_card_standing">Ruf steht — wartet auf einen Fahrer</string>
+    <string name="hail_card_pitch">Poste dein Ziel an einen Stand, den Fahrer beobachten.</string>
+    <string name="hail_standing_at">Steht bei %1$s</string>
+    <string name="hail_take_it_down">Zurückziehen</string>
+    <string name="hail_awaiting_offer">%1$s hat deinen Ruf angenommen — warte auf das Angebot…</string>
+    <string name="hail_cancel">Abbrechen</string>
+    <string name="hail_parked_offer">%1$s bietet %2$s</string>
+    <string name="hail_view_the_offer">Angebot ansehen</string>
+    <string name="hail_post_it_again">Noch einmal posten</string>
+    <string name="hail_expired_unclaimed">Niemand hat deinen Ruf angenommen, bevor er ablief.</string>
+    <string name="hail_claimed_check_chats">Ein Fahrer hat deinen Ruf angenommen — sieh in deine Chats.</string>
+    <string name="hail_accept_message">Bis gleich</string>
+    <string name="hail_decline_message">Nein danke</string>
+    <string name="hail_declined_post_again">Du hast abgelehnt — noch einmal posten?</string>
+    <string name="hail_posted_waiting">Gepostet. Warte auf einen Fahrer…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">Fahrgast hat abgelehnt</string>
+    <string name="hail_rider_declined_body">Dein Angebot wurde ausgeschlagen. Der Ruf ist vom Brett.</string>
+    <string name="hail_ok">OK</string>
+    <string name="hail_on_duty">Im Dienst</string>
+    <string name="hail_net_wide">weites Netz — ~%1$s breit</string>
+    <string name="hail_net_nearby">beobachtet ~%1$s breit</string>
+    <string name="hail_net_here">nur deine Gegend, ~%1$s</string>
+    <string name="hail_stop">Stopp</string>
+    <string name="hail_no_hails_map">Keine Rufe offen — sie erscheinen hier als Pins.</string>
+    <string name="hail_quote_me">Preis erbeten</string>
+    <string name="hail_driving_title">Fahren</string>
+    <string name="hail_driving_pitch">Beobachte einen Stand; nimm einen Ruf an. Das öffnet eine Unterhaltung mit dem Fahrgast — Preis dort nennen, dort treffen, am Ende abrechnen wie bei jeder Fahrt.</string>
+    <string name="hail_range_just_here">Nur hier</string>
+    <string name="hail_range_nearby">In der Nähe</string>
+    <string name="hail_range_wide">Weit</string>
+    <string name="hail_range_desc_here">~%1$s — dichte Innenstadt</string>
+    <string name="hail_range_desc_wide">~%1$s breit — Land oder ruhige Nächte</string>
+    <string name="hail_range_desc_nearby">~%1$s breit — der Normalfall</string>
+    <string name="hail_getting_location">Standort wird ermittelt…</string>
+    <string name="hail_drive_here">Hier fahren — meine Gegend beobachten</string>
+    <string name="hail_stand_label">Stand</string>
+    <string name="hail_stand_placeholder">Standname, oder 📍 oben</string>
+    <string name="hail_watch">Beobachten</string>
+    <string name="hail_watching_neighbours">Beobachte deine Zelle und ihre 8 Nachbarn — %1$s +8</string>
+    <string name="hail_board_empty">Nichts auf dem Brett. Wird alle paar Sekunden geprüft…</string>
+    <string name="hail_offers_amount">bietet %1$s</string>
+    <string name="hail_offers_amount_both">bietet %1$s · %2$s</string>
+    <string name="hail_asks_quote">bittet dich um einen Preis</string>
+    <string name="hail_triage_pickup">Abholung ~%1$s</string>
+    <string name="hail_triage_trip">Fahrt ~%1$s</string>
+    <string name="hail_stands_for_min">steht noch %1$d Min.</string>
+    <string name="hail_view_job">Auftrag ansehen</string>
+    <string name="hail_take_it">Annehmen</string>
+    <string name="hail_location_fix_failed">Standort ließ sich nicht bestimmen</string>
+    <string name="hail_beaten_to_it">Da war jemand schneller.</string>
+    <string name="hail_on_my_way">🚕 Bin unterwegs.</string>
+    <string name="hail_on_my_way_car">🚕 Bin unterwegs — mein Wagen: %1$s.</string>
+    <string name="hail_on_my_way_plate">🚕 Bin unterwegs, Kennzeichen %1$s.</string>
+    <string name="hail_on_my_way_car_plate">🚕 Bin unterwegs — mein Wagen: %1$s, Kennzeichen %2$s.</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">Schließen</string>
+    <string name="hail_job_title">Der Auftrag</string>
+    <string name="hail_to_pickup">zur Abholung: %1$s · ~%2$d Min.</string>
+    <string name="hail_the_ride">die Fahrt: %1$s · ~%2$d Min.</string>
+    <string name="hail_offer_amount">Angebot: %1$s</string>
+    <string name="hail_offer_amount_both">Angebot: %1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">alles davon bleibt bei dir — ein Fahrdienst würde für diese Fahrt ~%1$s %2$.0f zahlen</string>
+    <string name="hail_rider_asks_quote">Fahrgast bittet dich um einen Preis</string>
+    <string name="hail_routing_job">Route wird berechnet…</string>
+    <string name="hail_your_fare">Dein Fahrpreis (%1$s)</string>
+    <string name="hail_offer_counter_hint">das Angebot des Fahrgasts — ändere es für ein Gegenangebot</string>
+    <string name="hail_offer_quote_hint">du wurdest um einen Preis gebeten</string>
+    <string name="hail_price_in_instead">Stattdessen in %1$s angeben</string>
+    <string name="hail_fare_invalid">Der Fahrpreis muss eine Zahl über null sein.</string>
+    <string name="hail_take_this_ride">Fahrt annehmen 🚕</string>
+    <string name="hail_pass">Passen</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">%1$s geboten — warte auf %2$s</string>
+    <string name="hail_the_rider">den Fahrgast</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">Mein Standort</string>
+    <string name="hail_no_route">keine Route zwischen diesen Punkten gefunden</string>
+    <string name="hail_pickup_label">Abholung</string>
+    <string name="hail_locating">Orten…</string>
+    <string name="hail_use_my_location">Meinen Standort verwenden</string>
+    <string name="hail_where_to">Wohin?</string>
+    <string name="hail_address_hint">Adresse oder Name eines Orts</string>
+    <string name="hail_finding_route">Route wird gesucht…</string>
+    <string name="hail_route_summary">%1$s · ~%2$d Min.</string>
+    <string name="hail_route_summary_priced">%1$s · ~%2$d Min. · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">Fahrdienst ~%1$s %2$.0f · Taxi ~%1$s %3$.0f — dein Fahrer behält alles (ein Fahrdienst zahlt seinem ~%1$s %4$.0f)</string>
+    <string name="hail_your_offer">Dein Angebot (%1$s)</string>
+    <string name="hail_offer_invalid">Das Angebot muss eine Zahl über null sein — oder lass es leer und bitte um einen Preis.</string>
+    <string name="hail_shards_full">hier ist jeder Stand-Shard voll — versuch es gleich noch einmal</string>
+    <string name="hail_post_failed">der Ruf ließ sich nicht posten</string>
+    <string name="hail_osm_privacy">Suche, Route und Karte laufen über die Server von OpenStreetMap — die eine Stelle, an der DUCAT den Standort vom Gerät gibt. Fahrer sehen nur Gebiete von ~%1$s.</string>
+    <string name="hail_post_button">Rufen 🚕</string>
+    <string name="hail_search">Suchen</string>
+</resources>

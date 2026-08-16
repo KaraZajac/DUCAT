@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">叫车</string>
+    <string name="hail_card_standing">叫车已挂出 — 正在等司机</string>
+    <string name="hail_card_pitch">把你要去的地方挂到司机盯着的候车点上。</string>
+    <string name="hail_standing_at">挂在 %1$s</string>
+    <string name="hail_take_it_down">撤下来</string>
+    <string name="hail_awaiting_offer">%1$s 接下了你的叫车 — 等待对方报价…</string>
+    <string name="hail_cancel">取消</string>
+    <string name="hail_parked_offer">%1$s 报价 %2$s</string>
+    <string name="hail_view_the_offer">查看报价</string>
+    <string name="hail_post_it_again">再挂一次</string>
+    <string name="hail_expired_unclaimed">叫车过期了，没有司机接。</string>
+    <string name="hail_claimed_check_chats">有司机接下了你的叫车 — 看看你的聊天。</string>
+    <string name="hail_accept_message">一会儿见</string>
+    <string name="hail_decline_message">不用了，谢谢</string>
+    <string name="hail_declined_post_again">你拒绝了 — 再挂一次？</string>
+    <string name="hail_posted_waiting">已挂出。正在等司机…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">乘客拒绝了</string>
+    <string name="hail_rider_declined_body">对方没要你的报价。这条叫车已从板上消失。</string>
+    <string name="hail_ok">好</string>
+    <string name="hail_on_duty">接单中</string>
+    <string name="hail_net_wide">大范围 — 横跨约 %1$s</string>
+    <string name="hail_net_nearby">盯着横跨约 %1$s 的范围</string>
+    <string name="hail_net_here">只看你这片，约 %1$s</string>
+    <string name="hail_stop">停止</string>
+    <string name="hail_no_hails_map">没有挂出的叫车 — 有了会钉在这里。</string>
+    <string name="hail_quote_me">请报价</string>
+    <string name="hail_driving_title">出车</string>
+    <string name="hail_driving_pitch">盯一个候车点；接一单。接单会打开与乘客的对话 — 在那里报价、碰面，行程结束照常出账单。</string>
+    <string name="hail_range_just_here">就在这儿</string>
+    <string name="hail_range_nearby">附近</string>
+    <string name="hail_range_wide">大范围</string>
+    <string name="hail_range_desc_here">约 %1$s — 密集的市区街块</string>
+    <string name="hail_range_desc_wide">横跨约 %1$s — 乡下或冷清的夜晚</string>
+    <string name="hail_range_desc_nearby">横跨约 %1$s — 常规选择</string>
+    <string name="hail_getting_location">正在获取你的位置…</string>
+    <string name="hail_drive_here">在这儿出车 — 盯我这片</string>
+    <string name="hail_stand_label">候车点</string>
+    <string name="hail_stand_placeholder">候车点名字，或点上面的 📍</string>
+    <string name="hail_watch">盯守</string>
+    <string name="hail_watching_neighbours">盯着你所在的网格和相邻 8 格 — %1$s +8</string>
+    <string name="hail_board_empty">板上空空如也。每隔几秒查一次…</string>
+    <string name="hail_offers_amount">出价 %1$s</string>
+    <string name="hail_offers_amount_both">出价 %1$s · %2$s</string>
+    <string name="hail_asks_quote">请你报价</string>
+    <string name="hail_triage_pickup">接客约 %1$s</string>
+    <string name="hail_triage_trip">行程约 %1$s</string>
+    <string name="hail_stands_for_min">还会挂 %1$d 分钟</string>
+    <string name="hail_view_job">查看这单</string>
+    <string name="hail_take_it">接单</string>
+    <string name="hail_location_fix_failed">无法获取定位</string>
+    <string name="hail_beaten_to_it">那单被别人抢先了。</string>
+    <string name="hail_on_my_way">🚕 这就来。</string>
+    <string name="hail_on_my_way_car">🚕 这就来 — 认准一辆%1$s。</string>
+    <string name="hail_on_my_way_plate">🚕 这就来，车牌 %1$s。</string>
+    <string name="hail_on_my_way_car_plate">🚕 这就来 — 认准一辆%1$s，车牌 %2$s。</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">关闭</string>
+    <string name="hail_job_title">这单活</string>
+    <string name="hail_to_pickup">到上车点：%1$s · 约 %2$d 分钟</string>
+    <string name="hail_the_ride">行程：%1$s · 约 %2$d 分钟</string>
+    <string name="hail_offer_amount">出价：%1$s</string>
+    <string name="hail_offer_amount_both">出价：%1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">全归你 — 同样一趟，网约车平台付给司机约 %1$s %2$.0f</string>
+    <string name="hail_rider_asks_quote">乘客请你报价</string>
+    <string name="hail_routing_job">正在为这单规划路线…</string>
+    <string name="hail_your_fare">你的车费（%1$s）</string>
+    <string name="hail_offer_counter_hint">这是对方的出价 — 改动即还价</string>
+    <string name="hail_offer_quote_hint">对方请你报价</string>
+    <string name="hail_price_in_instead">改用 %1$s 计价</string>
+    <string name="hail_fare_invalid">车费必须是大于零的数字。</string>
+    <string name="hail_take_this_ride">接这一单 🚕</string>
+    <string name="hail_pass">跳过</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">已报价 %1$s — 等待 %2$s</string>
+    <string name="hail_the_rider">乘客</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">我的位置</string>
+    <string name="hail_no_route">这两点之间找不到路线</string>
+    <string name="hail_pickup_label">上车点</string>
+    <string name="hail_locating">定位中…</string>
+    <string name="hail_use_my_location">使用我的位置</string>
+    <string name="hail_where_to">去哪儿？</string>
+    <string name="hail_address_hint">地址或商家名</string>
+    <string name="hail_finding_route">正在查找路线…</string>
+    <string name="hail_route_summary">%1$s · 约 %2$d 分钟</string>
+    <string name="hail_route_summary_priced">%1$s · 约 %2$d 分钟 · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">网约车约 %1$s %2$.0f · 出租车约 %1$s %3$.0f — 你的司机全额拿到（网约车付给司机约 %1$s %4$.0f）</string>
+    <string name="hail_your_offer">你的出价（%1$s）</string>
+    <string name="hail_offer_invalid">出价必须是大于零的数字 — 或留空请对方报价。</string>
+    <string name="hail_shards_full">这里的候车点分片全满了 — 稍后再试</string>
+    <string name="hail_post_failed">叫车挂不出去</string>
+    <string name="hail_osm_privacy">搜索、路线和地图使用 OpenStreetMap 的服务器 — 这是 DUCAT 唯一把位置发离设备的地方。司机只能看到约 %1$s 的区域。</string>
+    <string name="hail_post_button">叫车 🚕</string>
+    <string name="hail_search">搜索</string>
+</resources>

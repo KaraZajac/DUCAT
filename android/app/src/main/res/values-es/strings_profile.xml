@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">Atrás</string>
+    <string name="profile_calls_themselves">se hace llamar \"%1$s\"</string>
+    <string name="profile_label_email">Correo</string>
+    <string name="profile_label_phone">Teléfono</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">Lo que compartió</string>
+    <string name="profile_their_claim_note">Es su afirmación, no una verificación. Nada vincula una persona de DUCAT con un correo o un número — solo con una clave.</string>
+    <string name="profile_your_name_for_them_label">Tu nombre para esta persona</string>
+    <string name="profile_your_name_for_them_support">Solo tú lo ves. Es el nombre que se muestra en todas partes.</string>
+    <string name="profile_saved">Guardado</string>
+    <string name="profile_save_name">Guardar nombre</string>
+    <string name="profile_checked">Verificado</string>
+    <string name="profile_checked_note">Verificado criptográficamente. Cada tarjeta que entrega está firmada por esta clave y se comprueba contra ella.</string>
+    <string name="profile_persona">Persona</string>
+    <string name="profile_told_to_you">Lo que te dijo</string>
+    <string name="profile_told_note">Proporcionado por esa persona y no verificado por nada. Nada en DUCAT vincula una dirección de Monero o un nombre con una persona, así que compruébalos por otra vía si importa.</string>
+    <string name="profile_their_name_label">Su nombre para sí</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— no indicado —</string>
+    <string name="profile_monero_address">Dirección de Monero</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— no compartida; debe enviarte una solicitud —</string>
+    <string name="profile_where_reached">Dónde se le contacta</string>
+    <string name="profile_their_outbox">Su buzón de salida</string>
+    <string name="profile_your_outbox">Tu buzón de salida hacia esta persona</string>
+    <string name="profile_open_chat">Abrir chat</string>
+    <string name="profile_not_built_yet">Aún no construido</string>
+    <string name="profile_not_built_note">Una foto, pronombres, un correo y el bloqueo. Todo opcional, todo definido durante la configuración, y todo viaja igual que un nombre — afirmado por la persona, nunca verificado por nosotros.</string>
+    <string name="profile_copy">Copiar</string>
+</resources>

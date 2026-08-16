@@ -1,0 +1,49 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">الحسابات المفتوحة</string>
+    <string name="bartab_start_tab">افتح حسابًا</string>
+    <string name="bartab_section_running">جارية</string>
+    <string name="bartab_section_billed">صدرت فاتورتها — في انتظار الدفع</string>
+    <string name="bartab_receipt_auto_hint">يصلهم الإيصال من تلقاء نفسه لحظة وصول الدفعة — حتى بعد مغادرتهم.</string>
+    <string name="bartab_section_settled">مسوّاة</string>
+    <string name="bartab_clear">مسح</string>
+    <string name="bartab_nothing_settled">لم يُسوَّ شيء بعد الليلة.</string>
+    <string name="bartab_no_tabs">لا حسابات بعد. افتح واحدًا عند وصول أول طلب.</string>
+    <plurals name="bartab_items">
+        <item quantity="zero">لا عناصر</item>
+        <item quantity="one">عنصر واحد</item>
+        <item quantity="two">عنصران</item>
+        <item quantity="few">%1$d عناصر</item>
+        <item quantity="many">%1$d عنصرًا</item>
+        <item quantity="other">%1$d عنصر</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">ظهرت الدفعة — قيد التسوية</string>
+    <string name="bartab_state_billed_unpaid">صدرت الفاتورة، لم تُدفع</string>
+    <string name="bartab_state_paid_oob">دُفع خارج DUCAT ✓</string>
+    <string name="bartab_state_cancelled">أُلغي</string>
+    <string name="bartab_state_paid">مدفوع ✓</string>
+    <string name="bartab_new_customer">زبون جديد</string>
+    <string name="bartab_scan_hint">يمسحون الرمز أو يقرّبون الهاتف — فيُفتح الحساب من تلقاء نفسه.</string>
+    <string name="bartab_err_publish_code">تعذّر نشر رمز</string>
+    <string name="bartab_or_regular">أو زبون دائم</string>
+    <string name="bartab_back">رجوع</string>
+    <string name="bartab_bill_cancelled_msg">أُلغيت تلك الفاتورة البالغة %1$s XMR — لا شيء للدفع.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · الحساب الآن %3$s XMR</string>
+    <string name="bartab_remove_line">إزالة</string>
+    <string name="bartab_err_send_bill">تعذّر إرسال الفاتورة</string>
+    <string name="bartab_settle_bill">تسوية — فاتورة بـ %1$s</string>
+    <string name="bartab_settle_hint">فاتورة مفصّلة واحدة تصل إلى محادثتك مع %1$s. يمكنهم الدفع من أي مكان — المحادثة لا تُغلق عند مغادرتهم.</string>
+    <string name="bartab_discard_tab">حذف الحساب</string>
+    <string name="bartab_discard_title">أتحذف هذا الحساب؟</string>
+    <string name="bartab_discard_body">يُحذف الحساب وكل ما سُجّل عليه من هذا الهاتف. لا تُرسل فاتورة، ولا يمكن التراجع عن هذا.</string>
+    <string name="bartab_discard_confirm">حذف</string>
+    <string name="bartab_keep_tab">الإبقاء على الحساب</string>
+    <string name="bartab_billed_hint">صدرت الفاتورة. يصلهم الإيصال من تلقاء نفسه عند وصول الدفعة. إن سُوّي الحساب بطريقة أخرى، فقل ذلك هنا:</string>
+    <string name="bartab_paid_outside_button">دُفع خارج DUCAT (نقدًا أو ببطاقة)</string>
+    <string name="bartab_cancel_bill">إلغاء الفاتورة</string>
+    <string name="bartab_cancelled_note">أُلغيت — وقد أُخبروا بذلك في المحادثة.</string>
+    <string name="bartab_paid_oob_note">دُفع خارج DUCAT ✓ — أُرسل الإيصال، بلا معاملة مرفقة.</string>
+    <string name="bartab_paid_note">مدفوع ✓ — أُرسل الإيصال.</string>
+    <string name="bartab_remove_from_book">إزالة من دفتر الحسابات</string>
+    <string name="bartab_back_to_tabs">العودة إلى الحسابات</string>
+</resources>

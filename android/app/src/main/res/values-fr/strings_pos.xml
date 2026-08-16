@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">Cette vente</string>
+    <string name="pos_items">Articles</string>
+    <string name="pos_quick_amount">Montant rapide</string>
+    <string name="pos_total_in">Total (%1$s)</string>
+    <string name="pos_request_amount">Demander %1$s</string>
+    <string name="pos_request_payment">Demander le paiement</string>
+    <string name="pos_sale">Vente</string>
+    <string name="pos_remove">Retirer</string>
+    <string name="pos_network_fee_note">Les frais de réseau sont à la charge du client, payés au réseau — jamais une part de la facture.</string>
+    <string name="pos_charge_amount">Encaisser %1$s</string>
+    <string name="pos_add_first_item">Ajoute le premier article pour démarrer une vente.</string>
+    <string name="pos_item">Article</string>
+    <string name="pos_add_line">Ajouter une ligne</string>
+    <string name="pos_tax">Taxes</string>
+    <string name="pos_error_publish_code">impossible de publier le code</string>
+    <string name="pos_error_bill_not_sent">Il y a eu connexion, mais la facture n\'est pas partie : %1$s</string>
+    <string name="pos_getting_code_ready">Préparation du code…</string>
+    <string name="pos_scan_hint">Le client le scanne dans DUCAT. La facture ci-dessus arrive sur son téléphone à l\'instant même.</string>
+    <string name="pos_tap_hint">Ou approchez les téléphones — même facture dans les deux cas</string>
+    <string name="pos_payment_seen">Paiement vu ✓</string>
+    <string name="pos_payment_settling">Son paiement est dans le réseau — règlement en cours, environ deux minutes. Le reçu s\'envoie tout seul quand il arrive.</string>
+    <string name="pos_bill_sent_to">Facture envoyée à %1$s</string>
+    <string name="pos_the_customer">le client</string>
+    <string name="pos_billed_hint">Le client confirme sur son propre téléphone. Quand le paiement arrive sur la chaîne, le reçu lui parvient automatiquement — plus rien à faire ici.</string>
+    <string name="pos_paid">Payé ✓</string>
+    <string name="pos_receipt_sent_to">Reçu envoyé à %1$s.</string>
+    <string name="pos_back">Retour</string>
+    <string name="pos_new_sale">Nouvelle vente</string>
+    <string name="pos_new_sale_settles">Nouvelle vente (celle-ci se règle toute seule)</string>
+    <string name="pos_cancel_sale">Annuler la vente</string>
+</resources>

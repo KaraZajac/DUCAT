@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">El transporte. Un pago viaja por una ruta anónima, así que esto tiene que estar en marcha antes de que un toque pueda ir a alguna parte.</string>
+
+    <string name="net_line_bridge">puente android</string>
+    <string name="net_ready">listo</string>
+    <string name="net_not_set_up">sin configurar</string>
+    <string name="net_line_node">nodo</string>
+    <string name="net_running">en marcha</string>
+    <string name="net_stopped">detenido</string>
+    <string name="net_line_attached">conectado</string>
+    <string name="net_line_route_capable">con capacidad de rutas</string>
+    <string name="net_yes">sí</string>
+    <string name="net_not_yet_routes">todavía no — sin rutas hasta esto</string>
+    <string name="net_line_peers">pares</string>
+    <string name="net_peers_value">%1$s activos, %2$s confiables</string>
+    <string name="net_waiting">esperando %1$ds — un nodo tiene que averiguar cómo es alcanzable antes de poder construir una ruta</string>
+
+    <string name="net_starting">Iniciando…</string>
+    <string name="net_start_node">Iniciar nodo</string>
+    <string name="net_stop">Detener</string>
+    <string name="net_testing">Probando…</string>
+    <string name="net_test_route">Probar una ruta</string>
+    <string name="net_route_ok">ruta asignada — blob de %1$s bytes</string>
+    <string name="net_route_failed">la ruta falló: %1$s</string>
+</resources>

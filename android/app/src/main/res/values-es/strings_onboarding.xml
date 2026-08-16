@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">Configura DUCAT</string>
+    <string name="onb_progress_done">Listo</string>
+    <string name="onb_progress_step">Paso %1$d de %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">Crea tu identidad</string>
+    <string name="onb_persona_body">Un par de claves en este teléfono. Sin correo, sin número de teléfono, sin nadie ante quien registrarse — que es también la razón por la que nadie puede restaurarla por ti.</string>
+    <string name="onb_persona_action">Crear</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">Crea tu billetera</string>
+    <string name="onb_wallet_body">Claves de Monero, generadas aquí y guardadas aquí. Esto es el dinero.</string>
+    <string name="onb_wallet_action">Crear billetera</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">Define tus límites de gasto</string>
+    <string name="onb_limits_body">Los pagos pequeños pasan directo. Los más grandes piden tu PIN. Puedes mover esas líneas cuando quieras — los valores por defecto ya son prudentes.</string>
+    <string name="onb_limits_action">Mantener los valores por defecto</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">Listo</string>
+    <string name="onb_done_body">Agrega dinero cuando quieras. Hasta que lo hagas, no hay nada en riesgo ni nada que perder.</string>
+    <string name="onb_done_action">Terminar</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">Respáldalo — ahora, no después</string>
+    <string name="onb_backup_body">Un solo archivo cifrado, protegido por una frase secreta que tú eliges. Guárdalo donde guardas las cosas importantes.</string>
+    <string name="onb_backup_forget_title">Si olvidas esta frase secreta</string>
+    <string name="onb_backup_forget_body">no hay manera de recuperarla. Nadie tiene una copia y no hay a quién preguntar. Esa es la misma razón por la que nadie puede congelar tu dinero ni quitártelo.</string>
+    <string name="onb_backup_address_label">Tu dirección</string>
+    <string name="onb_backup_passphrase_label">Frase secreta</string>
+    <string name="onb_backup_passphrase_good">Buena</string>
+    <string name="onb_backup_passphrase_short">Al menos 8 caracteres</string>
+    <string name="onb_backup_error_incomplete">La configuración está incompleta</string>
+    <string name="onb_backup_create">Crear respaldo</string>
+    <string name="onb_backup_created">Respaldo creado — %1$d bytes.</string>
+    <string name="onb_backup_send_elsewhere">Está en este teléfono, lo que todavía no es un respaldo. Envíalo a otra parte: un gestor de contraseñas, una nube, otro dispositivo.</string>
+    <string name="onb_backup_send_action">Enviarlo a otra parte</string>
+    <string name="onb_backup_done">Hecho</string>
+    <string name="onb_backup_share_chooser">Guarda tu respaldo de DUCAT</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">¿Cómo quieres que te llamen?</string>
+    <string name="onb_profile_name_body">Esto va en las tarjetas que entregas. Quien te agregue puede renombrarte de su lado, y ese nombre es el que verá — así que esto es una sugerencia, no una identidad.</string>
+    <string name="onb_profile_name_label">Nombre (opcional)</string>
+    <string name="onb_profile_pay_title">¿Pueden tus contactos pagarte directamente?</string>
+    <string name="onb_profile_pay_yes">Sí — más fácil recibir pagos</string>
+    <string name="onb_profile_pay_no">No — ellos piden, tú apruebas</string>
+    <string name="onb_profile_pay_yes_detail">Tu dirección le llega a cada contacto y se reutiliza. Cualquiera que lea la cadena puede notar que se pagó a la misma persona cada vez — incluida gente que solo te pagó una vez.</string>
+    <string name="onb_profile_pay_no_detail">Cada pago usa una dirección nueva, así que nada en la cadena vincula tus pagos entre sí. Quien quiera pagarte espera a que primero envíes una solicitud.</string>
+    <string name="onb_profile_change_later">Puedes cambiar ambas cosas después.</string>
+    <string name="onb_profile_continue">Continuar</string>
+</resources>

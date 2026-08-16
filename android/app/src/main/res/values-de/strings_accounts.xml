@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">Aufladen</string>
+    <string name="accounts_top_up_desc">Sende Monero von einer beliebigen Wallet oder Börse an diese Adresse. Es ist eine normale XMR-Adresse — nichts an der Überweisung hat mit DUCAT zu tun.</string>
+    <string name="accounts_no_wallet">Noch keine Wallet — schließ erst die Einrichtung ab.</string>
+    <string name="accounts_copy">Kopieren</string>
+    <string name="accounts_hide">Verbergen</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">Guthaben</string>
+    <string name="accounts_balances_desc">Mit Absicht getrennt: Was du jetzt ausgeben kannst, ist nicht dasselbe wie das, was dir gehört.</string>
+    <string name="accounts_waiting_for_node">Warten auf einen Node.</string>
+    <string name="accounts_spendable">Verfügbar</string>
+    <string name="accounts_show_in">In %1$s anzeigen</string>
+    <string name="accounts_stagenet_fiat_note">Stagenet-Coins sind Testcoins. Die Zahl ist, was so viel echtes Monero wert wäre — diese hier sind nichts wert.</string>
+    <string name="accounts_notes">Scheine</string>
+    <string name="accounts_bond">Kaution</string>
+    <string name="accounts_bond_none">keine</string>
+    <string name="accounts_scanning_from_genesis_title">Lesen vom Anfang der Blockchain</string>
+    <string name="accounts_scanning_from_genesis_desc">Diese Wallet entstand, bevor die App einen Node erreichen konnte — sie weiß deshalb nicht, wann sie angelegt wurde. Bei Block %1$d von %2$d ist das mehr als ein Tag Lesearbeit. Spring vor, wenn du weißt, dass die Wallet neuer ist.</string>
+    <string name="accounts_skip_ahead">Vorspringen</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">Vorspringen zu</string>
+    <string name="accounts_skip_ahead_desc">Alles, was vor diesem Punkt empfangen wurde, wird nicht gefunden. Wähl einen Zeitpunkt, der sicher vor der Entstehung der Wallet liegt.</string>
+    <string name="accounts_about_a_day_ago">vor etwa einem Tag</string>
+    <string name="accounts_about_a_week_ago">vor etwa einer Woche</string>
+    <string name="accounts_about_a_month_ago">vor etwa einem Monat</string>
+    <string name="accounts_skip_option">"%1$s  —  Block %2$d"</string>
+    <string name="accounts_block_height_label">oder eine Blockhöhe</string>
+    <string name="accounts_use_that_height">Diese Höhe nehmen</string>
+    <string name="accounts_cancel">Abbrechen</string>
+</resources>

@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">Profilnamen festlegen</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">spricht %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">Deine Persona</string>
+    <string name="drawer_persona_body">Der Schlüssel, mit dem deine Karten signiert sind. Niemand kann dich darüber finden — er ist das, wogegen eine Karte geprüft wird, wenn jemand eine hat.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">Bezahlt werden</string>
+    <string name="drawer_publish_switch">Kontakte dürfen mich direkt bezahlen</string>
+    <string name="drawer_publish_off_note">Ohne das muss jemand, der dich bezahlen will, auf eine Anfrage warten.</string>
+    <string name="drawer_publish_on_warning">Deine Adresse geht einmal an jeden Kontakt und wird wiederverwendet. Wer die Blockchain einsehen kann, erkennt, dass jedes Mal dieselbe Person bezahlt wurde — auch Leute, die dich nur ein einziges Mal bezahlt haben. Anfragen vermeiden das, weil jede eine frische Adresse trägt.</string>
+    <string name="drawer_publish_scope_note">Nur Kontakte, die hinzukommen, während das an ist, bekommen sie.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">Noch keine Kontakte. Füge einen im Chat-Tab hinzu.</string>
+    <string name="drawer_open_chat">Chat öffnen</string>
+    <string name="drawer_delete_contact">Kontakt löschen</string>
+    <string name="drawer_forget_title">%1$s vergessen?</string>
+    <string name="drawer_forget_body">Das löscht den Kontakt und jede Nachricht von ihm — beides ist nicht wiederherstellbar, und um ihn wieder zu erreichen, braucht es eine neue Karte.</string>
+    <string name="drawer_forget_confirm">Vergessen</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">Wähle, was dieses Gerät gerade ist. Ein Modus übernimmt die ganze App, bis du hierher zurückkommst und Persönlich wählst.</string>
+    <string name="mode_personal">Persönlich</string>
+    <string name="mode_personal_desc">Deine Wallet, deine Chats, deine Aktivität. Der Standard.</string>
+    <string name="mode_pos">Kasse</string>
+    <string name="mode_pos_desc">Eine Kasse: Posten bongen oder eine Summe eintippen, einen Code zeigen — Rechnung und Quittung reisen durch die Unterhaltung, die er öffnet.</string>
+    <string name="mode_bartab">Deckel</string>
+    <string name="mode_bartab_desc">Ein Deckelbuch: einmal scannen, den ganzen Abend anschreiben, eine Rechnung zum Schluss. Bezahlen geht auch nach dem Gehen.</string>
+    <string name="mode_taxi">Taxi</string>
+    <string name="mode_taxi_desc">Fahrpreise und ein Taxameter: einen Stand auf Rufe beobachten, der Tarif schriftlich beim Start, die Rechnung zeigt die Minuten.</string>
+    <string name="mode_donate">Spenden</string>
+    <string name="mode_donate_desc">Ein fester Code, an den jede Monero-Wallet geben kann. Keine App auf der anderen Seite nötig.</string>
+</resources>

@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">Recharger</string>
+    <string name="accounts_top_up_desc">Envoie du Monero à cette adresse depuis n\'importe quel portefeuille ou plateforme d\'échange. C\'est une adresse XMR normale — rien dans le transfert ne fait intervenir DUCAT.</string>
+    <string name="accounts_no_wallet">Pas encore de portefeuille — termine d\'abord la configuration.</string>
+    <string name="accounts_copy">Copier</string>
+    <string name="accounts_hide">Masquer</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">Soldes</string>
+    <string name="accounts_balances_desc">Séparés exprès : ce que tu peux dépenser maintenant n\'est pas ce que tu possèdes.</string>
+    <string name="accounts_waiting_for_node">En attente d\'un nœud.</string>
+    <string name="accounts_spendable">Disponible</string>
+    <string name="accounts_show_in">Afficher en %1$s</string>
+    <string name="accounts_stagenet_fiat_note">Les pièces stagenet sont des pièces de test. Ce chiffre est ce que vaudrait la même quantité de vrai Monero — celles-ci ne valent rien.</string>
+    <string name="accounts_notes">Billets</string>
+    <string name="accounts_bond">Caution</string>
+    <string name="accounts_bond_none">aucune</string>
+    <string name="accounts_scanning_from_genesis_title">Lecture depuis le début de la chaîne</string>
+    <string name="accounts_scanning_from_genesis_desc">Ce portefeuille a été créé avant que l\'app puisse joindre un nœud, donc il ne sait pas quand il a été créé. Au bloc %1$d sur %2$d, cela fait plus d\'une journée de lecture. Saute en avant si tu sais que le portefeuille est plus récent que ça.</string>
+    <string name="accounts_skip_ahead">Sauter en avant</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">Sauter jusqu\'à</string>
+    <string name="accounts_skip_ahead_desc">Tout ce qui a été reçu avant ce point ne sera pas retrouvé. Choisis un moment dont tu es sûr qu\'il précède l\'existence du portefeuille.</string>
+    <string name="accounts_about_a_day_ago">il y a environ un jour</string>
+    <string name="accounts_about_a_week_ago">il y a environ une semaine</string>
+    <string name="accounts_about_a_month_ago">il y a environ un mois</string>
+    <string name="accounts_skip_option">"%1$s  —  bloc %2$d"</string>
+    <string name="accounts_block_height_label">ou une hauteur de bloc</string>
+    <string name="accounts_use_that_height">Utiliser cette hauteur</string>
+    <string name="accounts_cancel">Annuler</string>
+</resources>

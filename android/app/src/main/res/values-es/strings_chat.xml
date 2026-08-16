@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">Atrás</string>
+    <string name="chat_conversation_settings">Ajustes de la conversación</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">no se pudo enviar</string>
+    <string name="chat_could_not_send_the">no se pudo enviar %1$s</string>
+    <string name="chat_what_picture">la foto</string>
+    <string name="chat_what_file">el archivo</string>
+    <string name="chat_what_location">la ubicación</string>
+    <string name="chat_what_voice_memo">la nota de voz</string>
+    <string name="chat_what_card">la tarjeta</string>
+    <string name="chat_what_contact">el contacto</string>
+    <string name="chat_error_location_fix">no se pudo obtener tu ubicación</string>
+    <string name="chat_recording_placeholder">Grabando… %1$ds</string>
+    <string name="chat_message_placeholder">Mensaje</string>
+    <string name="chat_take_picture">Tomar una foto</string>
+    <string name="chat_hold_to_record">Mantén presionado para grabar una nota de voz</string>
+    <string name="chat_attach">Adjuntar</string>
+    <string name="chat_close">Cerrar</string>
+    <string name="chat_send">Enviar</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">Galería</string>
+    <string name="chat_file">Archivo</string>
+    <string name="chat_money_desc">Enviar o pedir dinero</string>
+    <string name="chat_money">Dinero</string>
+    <string name="chat_contact">Contacto</string>
+    <string name="chat_location">Ubicación</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 Una tarjeta para mí — pásasela a quien deba poder contactarme. Un solo uso, una semana:\n%1$s</string>
+    <string name="chat_decline_bill">Rechazo esa cuenta de %1$s XMR — esta vez no.</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">No hay claves para este contacto — el intercambio inicial no se completó. Pídele una tarjeta nueva.</string>
+    <string name="chat_e2e_notice">Los mensajes se cifran con claves que se eliminan después de usarse. Una vez leídos, no se pueden recuperar — ni siquiera tú puedes.</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">Retiraste un mensaje</string>
+    <string name="chat_they_withdrew">%1$s retiró un mensaje</string>
+    <string name="chat_you_declined">Rechazaste</string>
+    <string name="chat_they_declined">%1$s rechazó</string>
+    <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">Mensaje</string>
+    <string name="chat_delete_note">Eliminar lo quita solo de este teléfono. El otro lado conserva su copia — nada desde aquí puede alcanzarla.</string>
+    <string name="chat_copy">Copiar</string>
+    <string name="chat_delete">Eliminar</string>
+    <string name="chat_cancel">Cancelar</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">Conservar todo</string>
+    <string name="chat_1_hour">1 hora</string>
+    <string name="chat_1_day">1 día</string>
+    <string name="chat_1_week">1 semana</string>
+    <string name="chat_clear_confirm_title">¿Vaciar este chat?</string>
+    <string name="chat_clear_confirm_text">Todos los mensajes de esta conversación se eliminan de este teléfono y no se pueden recuperar. El otro lado conserva su copia.</string>
+    <string name="chat_clear">Vaciar</string>
+    <string name="chat_conversation_title">Conversación</string>
+    <string name="chat_delete_after">Eliminar los mensajes de este teléfono después de</string>
+    <string name="chat_only_your_copy">Solo tu copia. El otro lado conserva la suya, y nada desde aquí puede alcanzarla.</string>
+    <string name="chat_clear_this_chat">Vaciar este chat</string>
+    <string name="chat_done">Hecho</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 descargando…</string>
+    <string name="chat_downloading_audio">🎤 descargando…</string>
+    <string name="chat_downloading_file">📎 descargando…</string>
+    <string name="chat_picture_desc">Foto</string>
+    <string name="chat_could_not_decode">📷 (no se pudo decodificar)</string>
+    <string name="chat_you_asked_for">Pediste</string>
+    <string name="chat_asked_you_for">Te pidió</string>
+    <string name="chat_receipt_you_issued">Recibo que emitiste</string>
+    <string name="chat_receipt">Recibo</string>
+    <string name="chat_you_offered_to_drive">Ofreciste el viaje</string>
+    <string name="chat_offers_to_drive_you">Ofrece llevarte</string>
+    <string name="chat_you_accepted_ride">Aceptaste el viaje</string>
+    <string name="chat_ride_accepted">Viaje aceptado</string>
+    <string name="chat_you_sent">Enviaste</string>
+    <string name="chat_sent_you">Te envió</string>
+    <string name="chat_min_away">a unos %1$d min</string>
+    <string name="chat_paid">Pagado ✓</string>
+    <string name="chat_cancelled">Cancelado</string>
+    <string name="chat_review_payment">Revisar el pago</string>
+    <string name="chat_no_address">No hay dirección en esta solicitud — pregúntale adónde enviarlo.</string>
+    <string name="chat_no_forward_secrecy">Enviado sin secreto hacia adelante</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">Detener</string>
+    <string name="chat_play_voice_memo">Reproducir nota de voz</string>
+    <string name="chat_voice_memo">Nota de voz</string>
+    <string name="chat_size_kb">%1$d KB</string>
+    <string name="chat_size_b">%1$d B</string>
+    <string name="chat_file_fallback">archivo</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">subtotal</string>
+    <string name="chat_tax">impuesto</string>
+    <string name="chat_total">total</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">no es una imagen</string>
+    <string name="chat_picture_too_big">no se pudo reducir esa foto lo suficiente</string>
+    <string name="chat_nothing_recorded">no se grabó nada</string>
+    <string name="chat_memo_too_long">esa nota es demasiado larga — unos minutos es el máximo</string>
+    <string name="chat_could_not_read_file">no se pudo leer ese archivo</string>
+    <string name="chat_file_too_big">ese archivo pesa %1$d KB — los adjuntos llegan hasta 1 MB</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">Compartir</string>
+    <string name="chat_card_for_me">Una tarjeta para mí</string>
+    <string name="chat_card_for_me_desc">Un enlace de un solo uso que pueden pasarle a alguien que deba poder contactarte.</string>
+    <string name="chat_someones_profile">O el perfil de alguien — su nombre y lo que haya decidido publicar. No es un código de conexión: esos son suyos y les toca a ellos darlos.</string>
+</resources>

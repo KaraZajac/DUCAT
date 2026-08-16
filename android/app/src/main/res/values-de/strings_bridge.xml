@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="one">Nativer Kern: %1$d Prüfung bestanden</item>
+        <item quantity="other">Nativer Kern: %1$d Prüfungen bestanden</item>
+    </plurals>
+    <string name="bridge_checks_failed">Nativer Kern: %1$d von %2$d FEHLGESCHLAGEN</string>
+    <string name="bridge_jni_note">Diese rufen über JNI in den Rust-Kern — die eine Schicht, die die Rust-Tests nicht erreichen.</string>
+    <string name="bridge_got_expected">erhalten %1$s, erwartet %2$s</string>
+
+    <!-- Check names -->
+    <string name="bridge_check_protocol_version">Protokollversion</string>
+    <string name="bridge_check_capacity_6">Kapazität von 6 Outputs</string>
+    <string name="bridge_check_capacity_1">Kapazität von 1 Output</string>
+    <string name="bridge_check_float_plan">Wechselgeldplan für 10 Zahlungen</string>
+    <string name="bridge_check_bucket_floor">Bucket-Untergrenze von 4.999 XMR</string>
+    <string name="bridge_check_stale_rate">veralteter Kurs eskaliert</string>
+</resources>

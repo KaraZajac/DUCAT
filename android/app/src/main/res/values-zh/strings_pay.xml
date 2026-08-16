@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">Monero 地址、monero: 码，或 DUCAT 名片</string>
+    <string name="pay_close">关闭</string>
+    <string name="pay_send_or_request">转账或请求</string>
+    <string name="pay_scan_a_code">扫码</string>
+    <string name="pay_your_contacts">你的联系人</string>
+    <string name="pay_contact_vs_address">付给联系人的款项可以带备注，并落进你们的聊天。付给地址的没有这些。</string>
+    <string name="pay_or_monero_address">或输入 Monero 地址</string>
+    <string name="pay_address_placeholder">5… 或 7…</string>
+    <string name="pay_continue">继续</string>
+    <string name="pay_not_monero_address">这看起来不像 Monero 地址。</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">返回</string>
+    <string name="pay_in_ducat">在 DUCAT 内</string>
+    <string name="pay_monero_address">Monero 地址</string>
+    <string name="pay_bill">账单</string>
+    <string name="pay_add_tip">加小费（%1$s）— 可选</string>
+    <string name="pay_total_with_tip">含小费合计：%1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">这是你向 %1$s 请求的数目。对方的余额和网络手续费由对方操心，与你无关 — 这是一条消息，不是一笔交易。</string>
+    <string name="pay_them">对方</string>
+    <string name="pay_up_to_after_fees">扣除手续费后最多 %1$s</string>
+    <string name="pay_max">最大</string>
+    <string name="pay_max_done">最大 ✓</string>
+    <string name="pay_over_max">算上手续费，这超出了你一次能发的数目。</string>
+    <string name="pay_amount">金额</string>
+    <string name="pay_network_fee_estimated">网络手续费（估算）</string>
+    <string name="pay_total">合计</string>
+    <string name="pay_left_after">付完剩余</string>
+    <string name="pay_uses_notes">使用 %1$d 张纸币 · 通常约 %2$d 分钟确认</string>
+    <string name="pay_fee_estimate_note">交易构建之前手续费只是估算；发送后会显示确切数目。</string>
+    <string name="pay_speed">速度</string>
+    <string name="pay_speed_slow">慢</string>
+    <string name="pay_speed_normal">正常</string>
+    <string name="pay_speed_fast">快</string>
+    <string name="pay_speed_fastest">最快</string>
+    <string name="pay_memo_label">备注 — 这笔钱是做什么的？</string>
+    <string name="pay_send">发送</string>
+    <string name="pay_request">请求</string>
+    <string name="pay_no_address_hint">%1$s 没有分享地址，所以你可以先问，暂时还发不了。切换到「请求」— 它会把地址捎回来。</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">付款请求</string>
+    <string name="pay_payment">付款</string>
+    <string name="pay_request_sent">请求已发送</string>
+    <string name="pay_could_not_send">发送失败</string>
+    <string name="pay_no_node">没有节点 — 查看「状态」</string>
+    <string name="pay_no_address_error">对方没有分享地址。请对方发一个请求，或开启「让联系人直接付钱给我」。</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">发送 %1$s？</string>
+    <string name="pay_to">给 %1$s</string>
+    <string name="pay_plus_fees">另加约 %1$s 手续费 — 共 %2$s。</string>
+    <string name="pay_irreversible_warning">Monero 付款无法撤销或取消。仔细核对地址 — 发错了没有任何人可以申诉。</string>
+    <string name="pay_cancel">取消</string>
+</resources>

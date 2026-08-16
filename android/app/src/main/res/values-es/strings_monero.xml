@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">Comprobar de nuevo</string>
+    <string name="monero_subtitle">Donde se difunden las transacciones y se lee la cadena.</string>
+    <string name="monero_finding_node">Buscando un nodo…</string>
+    <string name="monero_no_usable_node">ningún nodo utilizable</string>
+    <string name="monero_line_height">altura</string>
+    <string name="monero_line_synced">sincronizado</string>
+    <string name="monero_line_network">red</string>
+    <string name="monero_line_round_trip">ida y vuelta</string>
+    <string name="monero_synced_yes">sí</string>
+    <string name="monero_synced_no">no — los saldos estarían desactualizados</string>
+    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_no_node">sin nodo</string>
+    <string name="monero_change_your_node">Cambiar de nodo</string>
+    <string name="monero_use_own_node">Usa tu propio nodo</string>
+    <string name="monero_your_node">Tu nodo</string>
+    <string name="monero_use_it">Usarlo</string>
+    <string name="monero_back_to_public">Volver al público</string>
+    <string name="monero_cancel">Cancelar</string>
+    <string name="monero_trust_own_title">Tu nodo</string>
+    <string name="monero_trust_own_body">No aprende nada de ti que tú no supieras ya.</string>
+    <string name="monero_trust_onion_title">El nodo de otra persona, por Tor</string>
+    <string name="monero_trust_onion_body">Ve tus transacciones pero no de dónde vinieron.</string>
+    <string name="monero_trust_public_title">El nodo de otra persona</string>
+    <string name="monero_trust_public_body">Ve tu dirección y tus transacciones juntas. Dandelion++ oculta el origen de una transacción ante el resto de la red — no puede ocultarlo del nodo al que se la entregaste. Correr tu propio nodo es la solución.</string>
+    <string name="monero_wallet_title">Billetera</string>
+    <string name="monero_no_wallet_key_title">No hay clave de billetera en este dispositivo</string>
+    <string name="monero_no_wallet_key_body">Esta instalación terminó la configuración antes de que la app conservara la billetera, así que no hay con qué escanear. Esperar no lo va a arreglar — restaura desde un respaldo, o borra los datos de la app y configúrala de nuevo.</string>
+    <string name="monero_scanning_failed">Falló el escaneo</string>
+    <string name="monero_unknown">desconocido</string>
+    <string name="monero_scanning_failed_note">El nodo de arriba respondió, así que esto es la lectura de la cadena por parte de la billetera y no la conexión.</string>
+    <string name="monero_not_started">Sin comenzar — buscando un nodo.</string>
+    <string name="monero_caught_up">Al día en el bloque %1$d</string>
+    <string name="monero_block_of">bloque %1$d de %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="one">falta %1$d bloque</item>
+        <item quantity="other">faltan %1$d bloques</item>
+    </plurals>
+    <string name="monero_partial_balance">Tu saldo es solo lo que se ha leído hasta ahora.</string>
+    <string name="monero_last_window_failed">La última ventana falló: %1$s</string>
+    <string name="monero_rescan_hint">Esta billetera está escaneando desde el principio de la cadena, lo que toma mucho más tiempo del necesario si se creó hace poco.</string>
+    <string name="monero_skip_ahead">Saltar adelante</string>
+</resources>

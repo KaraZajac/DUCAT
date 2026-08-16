@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">支持 %1$s</string>
+    <string name="donate_support">支持</string>
+    <string name="donate_no_wallet">还没有钱包 — 先完成设置。</string>
+    <string name="donate_any_wallet">任何 Monero 钱包都能在这里捐 — 谁都不需要这个应用。</string>
+    <string name="donate_since_opening">自开启以来</string>
+    <string name="donate_reuse_warning">这一个收款码被所有捐款人重复使用，所以在 Monero 的公开账本上，捐给它的款项彼此可以关联起来。而印出来的码只取决于最后经手的人是否诚实 — 在张贴的地方核对它确实是你的。</string>
+</resources>

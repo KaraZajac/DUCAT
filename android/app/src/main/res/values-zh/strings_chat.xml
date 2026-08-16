@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">返回</string>
+    <string name="chat_conversation_settings">对话设置</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">发送失败</string>
+    <string name="chat_could_not_send_the">无法发送%1$s</string>
+    <string name="chat_what_picture">图片</string>
+    <string name="chat_what_file">文件</string>
+    <string name="chat_what_location">位置</string>
+    <string name="chat_what_voice_memo">语音消息</string>
+    <string name="chat_what_card">名片</string>
+    <string name="chat_what_contact">联系人</string>
+    <string name="chat_error_location_fix">无法获取定位</string>
+    <string name="chat_recording_placeholder">录音中… %1$d 秒</string>
+    <string name="chat_message_placeholder">消息</string>
+    <string name="chat_take_picture">拍照</string>
+    <string name="chat_hold_to_record">按住录制语音消息</string>
+    <string name="chat_attach">附件</string>
+    <string name="chat_close">关闭</string>
+    <string name="chat_send">发送</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">相册</string>
+    <string name="chat_file">文件</string>
+    <string name="chat_money_desc">转钱或请求付款</string>
+    <string name="chat_money">钱</string>
+    <string name="chat_contact">联系人</string>
+    <string name="chat_location">位置</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 一张联系我的名片 — 交给应该能联系到我的人。一次认领，有效一周：\n%1$s</string>
+    <string name="chat_decline_bill">拒绝那张 %1$s XMR 的账单 — 这次先不付了。</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">没有这位联系人的密钥 — 握手没有完成。请向对方要一张新名片。</string>
+    <string name="chat_e2e_notice">消息加密所用的密钥在使用后即被删除。消息一经读取便无法恢复 — 连你自己也不行。</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">你撤回了一条消息</string>
+    <string name="chat_they_withdrew">%1$s 撤回了一条消息</string>
+    <string name="chat_you_declined">你拒绝了</string>
+    <string name="chat_they_declined">%1$s 拒绝了</string>
+    <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">消息</string>
+    <string name="chat_delete_note">删除只会从这台手机上移除。对方仍保留他们的副本 — 这里没有任何办法碰到它。</string>
+    <string name="chat_copy">复制</string>
+    <string name="chat_delete">删除</string>
+    <string name="chat_cancel">取消</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">全部保留</string>
+    <string name="chat_1_hour">1 小时</string>
+    <string name="chat_1_day">1 天</string>
+    <string name="chat_1_week">1 周</string>
+    <string name="chat_clear_confirm_title">清空这个聊天？</string>
+    <string name="chat_clear_confirm_text">这段对话里的所有消息都会从这台手机上删除，无法恢复。对方仍保留他们的副本。</string>
+    <string name="chat_clear">清空</string>
+    <string name="chat_conversation_title">对话</string>
+    <string name="chat_delete_after">此手机上的消息在以下时间后删除</string>
+    <string name="chat_only_your_copy">只删你这份。对方保留他们的副本，这里没有任何办法碰到它。</string>
+    <string name="chat_clear_this_chat">清空这个聊天</string>
+    <string name="chat_done">完成</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 下载中…</string>
+    <string name="chat_downloading_audio">🎤 下载中…</string>
+    <string name="chat_downloading_file">📎 下载中…</string>
+    <string name="chat_picture_desc">图片</string>
+    <string name="chat_could_not_decode">📷（无法解码）</string>
+    <string name="chat_you_asked_for">你请求了</string>
+    <string name="chat_asked_you_for">向你请求</string>
+    <string name="chat_receipt_you_issued">你开出的收据</string>
+    <string name="chat_receipt">收据</string>
+    <string name="chat_you_offered_to_drive">你提出载对方</string>
+    <string name="chat_offers_to_drive_you">愿意载你</string>
+    <string name="chat_you_accepted_ride">你接受了行程</string>
+    <string name="chat_ride_accepted">行程已接受</string>
+    <string name="chat_you_sent">你发送了</string>
+    <string name="chat_sent_you">发给你</string>
+    <string name="chat_min_away">距你约 %1$d 分钟</string>
+    <string name="chat_paid">已付 ✓</string>
+    <string name="chat_cancelled">已取消</string>
+    <string name="chat_review_payment">核对付款</string>
+    <string name="chat_no_address">这个请求里没有地址 — 问问对方要把钱发到哪里。</string>
+    <string name="chat_no_forward_secrecy">发送时未使用前向保密</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">停止</string>
+    <string name="chat_play_voice_memo">播放语音消息</string>
+    <string name="chat_voice_memo">语音消息</string>
+    <string name="chat_size_kb">%1$d KB</string>
+    <string name="chat_size_b">%1$d B</string>
+    <string name="chat_file_fallback">文件</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">小计</string>
+    <string name="chat_tax">税</string>
+    <string name="chat_total">合计</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">不是图片</string>
+    <string name="chat_picture_too_big">这张图片压不到够小</string>
+    <string name="chat_nothing_recorded">什么也没录到</string>
+    <string name="chat_memo_too_long">这条语音太长了 — 最多几分钟</string>
+    <string name="chat_could_not_read_file">无法读取那个文件</string>
+    <string name="chat_file_too_big">那个文件有 %1$d KB — 附件上限 1 MB</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">分享</string>
+    <string name="chat_card_for_me">联系我的名片</string>
+    <string name="chat_card_for_me_desc">一条只能认领一次的链接，对方可以转交给应该联系到你的人。</string>
+    <string name="chat_someones_profile">或者分享某人的资料 — 他们的名字和他们选择公开的内容。这不是连接码：连接码只能由本人给出。</string>
+</resources>

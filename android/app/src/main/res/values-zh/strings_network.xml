@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">传输层。付款要走一条匿名路由，所以在它就绪之前，碰一下手机哪儿也去不了。</string>
+
+    <string name="net_line_bridge">Android 桥接</string>
+    <string name="net_ready">就绪</string>
+    <string name="net_not_set_up">未设置</string>
+    <string name="net_line_node">节点</string>
+    <string name="net_running">运行中</string>
+    <string name="net_stopped">已停止</string>
+    <string name="net_line_attached">已接入</string>
+    <string name="net_line_route_capable">可建路由</string>
+    <string name="net_yes">是</string>
+    <string name="net_not_yet_routes">还不行 — 在此之前没有路由</string>
+    <string name="net_line_peers">对等节点</string>
+    <string name="net_peers_value">%1$s 个在线，%2$s 个可靠</string>
+    <string name="net_waiting">已等待 %1$d 秒 — 节点得先弄清自己如何可达，才能建路由</string>
+
+    <string name="net_starting">启动中…</string>
+    <string name="net_start_node">启动节点</string>
+    <string name="net_stop">停止</string>
+    <string name="net_testing">测试中…</string>
+    <string name="net_test_route">测试路由</string>
+    <string name="net_route_ok">路由已分配 — %1$s 字节数据块</string>
+    <string name="net_route_failed">路由失败：%1$s</string>
+</resources>

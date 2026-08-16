@@ -9,6 +9,20 @@
     <string name="common_done">Hecho</string>
     <string name="common_cancel">Cancelar</string>
 
+    <!-- Navigation -->
+    <string name="tab_home">Inicio</string>
+    <string name="tab_accounts">Cuentas</string>
+    <string name="tab_activity">Actividad</string>
+    <string name="tab_chat">Chat</string>
+    <string name="tab_send_receive">Enviar/Recibir</string>
+
+    <string name="section_status">Estado</string>
+    <string name="section_profile">Perfil</string>
+    <string name="section_contacts">Contactos</string>
+    <string name="section_logs">Registros</string>
+    <string name="section_settings">Ajustes</string>
+    <string name="section_modes">Modos de operación</string>
+
     <!-- Settings -->
     <string name="settings_language_title">Idioma</string>
     <string name="settings_language_system">Seguir el sistema</string>

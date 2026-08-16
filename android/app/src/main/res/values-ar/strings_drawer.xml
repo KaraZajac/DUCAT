@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">عيّن اسمًا للملف الشخصي</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">يتحدث %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">شخصيتك</string>
+    <string name="drawer_persona_body">المفتاح الذي تُوقَّع به بطاقاتك. لا يستطيع أحد العثور عليك من خلاله — إنه ما تُفحص به البطاقة متى صارت بيد أحدهم.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">استلام المدفوعات</string>
+    <string name="drawer_publish_switch">السماح لجهات الاتصال بالدفع لي مباشرة</string>
+    <string name="drawer_publish_off_note">من دون هذا، على من يريد الدفع لك انتظار طلب منك.</string>
+    <string name="drawer_publish_on_warning">يذهب عنوانك إلى كل جهة اتصال مرة واحدة، ويُعاد استخدامه. كل من يستطيع رؤية السلسلة يمكنه معرفة أن الشخص نفسه هو من تلقّى الدفعات كل مرة — بمن فيهم من لم يدفعوا لك إلا مرة واحدة. الطلبات تتجنب ذلك بحمل عنوان جديد كل مرة.</string>
+    <string name="drawer_publish_scope_note">لن يحصل عليه إلا جهات الاتصال المضافة بعد تفعيل هذا.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">لا جهات اتصال بعد. أضف واحدة من تبويب الدردشة.</string>
+    <string name="drawer_open_chat">افتح الدردشة</string>
+    <string name="drawer_delete_contact">حذف جهة الاتصال</string>
+    <string name="drawer_forget_title">أتنسى %1$s؟</string>
+    <string name="drawer_forget_body">هذا يحذف جهة الاتصال وكل رسالة منها. لا يمكن استرجاعها، والوصول إليهم من جديد يحتاج إلى بطاقة جديدة.</string>
+    <string name="drawer_forget_confirm">نسيان</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">اختر ما يكون عليه هذا الجهاز الآن. الوضع يستولي على التطبيق كله حتى تعود إلى هنا وتختار «شخصي».</string>
+    <string name="mode_personal">شخصي</string>
+    <string name="mode_personal_desc">محفظتك ودردشاتك ونشاطك. الوضع الافتراضي.</string>
+    <string name="mode_pos">نقطة بيع</string>
+    <string name="mode_pos_desc">آلة تسجيل: سجّل الأصناف أو اكتب الإجمالي، واعرض رمزًا واحدًا — الفاتورة والإيصال يسافران في المحادثة التي يفتحها.</string>
+    <string name="mode_bartab">حساب البار</string>
+    <string name="mode_bartab_desc">دفتر حسابات: مسح واحد، وإضافة طوال الليل، وفاتورة واحدة عند الإغلاق. يمكنهم الدفع بعد مغادرتهم.</string>
+    <string name="mode_taxi">تاكسي</string>
+    <string name="mode_taxi_desc">أجرة وعدّاد: راقب موقفًا للنداءات، وثبّت السعر كتابةً عند بدء العدّاد، والفاتورة تعرض الدقائق.</string>
+    <string name="mode_donate">تبرعات</string>
+    <string name="mode_donate_desc">رمز دائم يمكن لأي محفظة Monero التبرع من خلاله. لا حاجة إلى تطبيق عندهم.</string>
+</resources>

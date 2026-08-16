@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">Configurer DUCAT</string>
+    <string name="onb_progress_done">Terminé</string>
+    <string name="onb_progress_step">Étape %1$d sur %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">Crée ton identité</string>
+    <string name="onb_persona_body">Une paire de clés sur ce téléphone. Pas d\'e-mail, pas de numéro de téléphone, personne auprès de qui s\'inscrire — c\'est aussi pourquoi personne ne peut la restaurer à ta place.</string>
+    <string name="onb_persona_action">Créer</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">Crée ton portefeuille</string>
+    <string name="onb_wallet_body">Des clés Monero, générées ici et gardées ici. C\'est ça, l\'argent.</string>
+    <string name="onb_wallet_action">Créer le portefeuille</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">Fixe tes limites de dépense</string>
+    <string name="onb_limits_body">Les petits paiements passent directement. Les plus gros demandent ton PIN. Tu peux déplacer ces seuils à tout moment — les valeurs par défaut sont déjà prudentes.</string>
+    <string name="onb_limits_action">Garder les valeurs par défaut</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">Prêt</string>
+    <string name="onb_done_body">Ajoute de l\'argent quand tu veux. D\'ici là, rien n\'est en jeu et rien à perdre.</string>
+    <string name="onb_done_action">Terminer</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">Sauvegarde — maintenant, pas plus tard</string>
+    <string name="onb_backup_body">Un seul fichier chiffré, protégé par une phrase secrète que tu choisis. Garde-le là où tu gardes les choses importantes.</string>
+    <string name="onb_backup_forget_title">Si tu oublies cette phrase secrète</string>
+    <string name="onb_backup_forget_body">il n\'y a aucun moyen de la récupérer. Personne n\'en détient de copie et il n\'y a personne à qui demander. C\'est pour la même raison que personne ne peut geler ton argent ni te le prendre.</string>
+    <string name="onb_backup_address_label">Ton adresse</string>
+    <string name="onb_backup_passphrase_label">Phrase secrète</string>
+    <string name="onb_backup_passphrase_good">Bien</string>
+    <string name="onb_backup_passphrase_short">Au moins 8 caractères</string>
+    <string name="onb_backup_error_incomplete">La configuration est incomplète</string>
+    <string name="onb_backup_create">Créer la sauvegarde</string>
+    <string name="onb_backup_created">Sauvegarde créée — %1$d octets.</string>
+    <string name="onb_backup_send_elsewhere">Elle est sur ce téléphone, ce qui n\'est pas encore une sauvegarde. Envoie-la ailleurs : un gestionnaire de mots de passe, un disque, un autre appareil.</string>
+    <string name="onb_backup_send_action">L\'envoyer quelque part</string>
+    <string name="onb_backup_done">Terminé</string>
+    <string name="onb_backup_share_chooser">Enregistre ta sauvegarde DUCAT</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">Comment doit-on t\'appeler ?</string>
+    <string name="onb_profile_name_body">Ce nom figure sur les cartes que tu distribues. Qui t\'ajoute peut te renommer de son côté, et c\'est ce nom-là qu\'il verra — c\'est donc une suggestion, pas une identité.</string>
+    <string name="onb_profile_name_label">Nom (facultatif)</string>
+    <string name="onb_profile_pay_title">Tes contacts peuvent-ils te payer directement ?</string>
+    <string name="onb_profile_pay_yes">Oui — plus simple d\'être payé</string>
+    <string name="onb_profile_pay_no">Non — ils demandent, tu approuves</string>
+    <string name="onb_profile_pay_yes_detail">Ton adresse part chez chaque contact et est réutilisée. Quiconque lit la chaîne peut dire que la même personne a été payée à chaque fois — y compris des gens qui ne t\'ont payé qu\'une seule fois.</string>
+    <string name="onb_profile_pay_no_detail">Chaque paiement utilise une adresse neuve, donc rien sur la chaîne ne relie tes paiements entre eux. Quelqu\'un qui veut te payer attend que tu envoies d\'abord une demande.</string>
+    <string name="onb_profile_change_later">Tu peux changer les deux plus tard.</string>
+    <string name="onb_profile_continue">Continuer</string>
+</resources>

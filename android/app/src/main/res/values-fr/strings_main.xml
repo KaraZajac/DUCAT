@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_back">Retour</string>
+    <string name="main_menu">Menu</string>
+    <string name="main_codes">Codes</string>
+    <string name="main_send_or_receive">Envoyer ou recevoir</string>
+    <string name="main_bill_decline">Je refuse cette facture de %1$s XMR — pas cette fois.</string>
+    <string name="main_backup_title">Sauvegarder</string>
+    <string name="main_backup_body">Tu as des contacts que ta dernière sauvegarde n\'a pas. Une restauration ramènerait l\'argent, mais pas les gens.</string>
+    <string name="main_open_backup_settings">Ouvrir les réglages de sauvegarde</string>
+    <string name="main_recent">Récent</string>
+    <string name="main_see_all">Tout voir</string>
+    <string name="main_sent">Envoyé</string>
+    <string name="main_received">Reçu</string>
+</resources>

@@ -1,0 +1,45 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">Offene Deckel</string>
+    <string name="bartab_start_tab">Deckel anlegen</string>
+    <string name="bartab_section_running">Laufend</string>
+    <string name="bartab_section_billed">Abgerechnet — wartet auf Zahlung</string>
+    <string name="bartab_receipt_auto_hint">Die Quittung geht von selbst raus, sobald die Zahlung eintrifft — auch wenn die Gäste längst weg sind.</string>
+    <string name="bartab_section_settled">Beglichen</string>
+    <string name="bartab_clear">Leeren</string>
+    <string name="bartab_nothing_settled">Heute Abend noch nichts beglichen.</string>
+    <string name="bartab_no_tabs">Noch keine Deckel. Leg einen an, wenn die erste Bestellung kommt.</string>
+    <plurals name="bartab_items">
+        <item quantity="one">%1$d Posten</item>
+        <item quantity="other">%1$d Posten</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">Zahlung gesehen — wird beglichen</string>
+    <string name="bartab_state_billed_unpaid">abgerechnet, unbezahlt</string>
+    <string name="bartab_state_paid_oob">außerhalb von DUCAT bezahlt ✓</string>
+    <string name="bartab_state_cancelled">storniert</string>
+    <string name="bartab_state_paid">bezahlt ✓</string>
+    <string name="bartab_new_customer">Neuer Gast</string>
+    <string name="bartab_scan_hint">Der Gast scannt oder hält das Telefon dran — der Deckel öffnet sich von selbst.</string>
+    <string name="bartab_err_publish_code">Code ließ sich nicht veröffentlichen</string>
+    <string name="bartab_or_regular">Oder ein Stammgast</string>
+    <string name="bartab_back">Zurück</string>
+    <string name="bartab_bill_cancelled_msg">Die Rechnung über %1$s XMR ist storniert — nichts zu zahlen.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · Deckel jetzt %3$s XMR</string>
+    <string name="bartab_remove_line">Entfernen</string>
+    <string name="bartab_err_send_bill">Rechnung ließ sich nicht senden</string>
+    <string name="bartab_settle_bill">Abrechnen — Rechnung %1$s</string>
+    <string name="bartab_settle_hint">Eine aufgeschlüsselte Rechnung in deine Unterhaltung mit %1$s. Bezahlt werden kann von überall — der Thread schließt nicht, wenn der Gast geht.</string>
+    <string name="bartab_discard_tab">Deckel verwerfen</string>
+    <string name="bartab_discard_title">Diesen Deckel verwerfen?</string>
+    <string name="bartab_discard_body">Der Deckel und alles, was darauf gebongt wurde, werden von diesem Telefon gelöscht. Es geht keine Rechnung raus, und rückgängig machen lässt es sich nicht.</string>
+    <string name="bartab_discard_confirm">Verwerfen</string>
+    <string name="bartab_keep_tab">Deckel behalten</string>
+    <string name="bartab_billed_hint">Abgerechnet. Die Quittung geht von selbst raus, sobald die Zahlung eintrifft. Wurde anders beglichen? Dann sag es hier:</string>
+    <string name="bartab_paid_outside_button">Außerhalb von DUCAT bezahlt (bar, Karte)</string>
+    <string name="bartab_cancel_bill">Rechnung stornieren</string>
+    <string name="bartab_cancelled_note">Storniert — der Gast wurde in der Unterhaltung informiert.</string>
+    <string name="bartab_paid_oob_note">Außerhalb von DUCAT bezahlt ✓ — Quittung gesendet, keine Transaktion angehängt.</string>
+    <string name="bartab_paid_note">Bezahlt ✓ — Quittung gesendet.</string>
+    <string name="bartab_remove_from_book">Aus dem Deckelbuch entfernen</string>
+    <string name="bartab_back_to_tabs">Zurück zu den Deckeln</string>
+</resources>

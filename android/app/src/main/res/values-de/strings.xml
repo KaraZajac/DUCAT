@@ -1,0 +1,52 @@
+<resources>
+    <!-- App metadata. app_name bleibt "DUCAT" — ein Name. -->
+    <string name="nfc_service_description">Kontaktlose DUCAT-Zahlungen</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mi</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">Fertig</string>
+    <string name="common_cancel">Abbrechen</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">Start</string>
+    <string name="tab_accounts">Konten</string>
+    <string name="tab_activity">Aktivität</string>
+    <string name="tab_chat">Chat</string>
+    <string name="tab_send_receive">Senden/Empfangen</string>
+
+    <string name="section_status">Status</string>
+    <string name="section_profile">Profil</string>
+    <string name="section_contacts">Kontakte</string>
+    <string name="section_logs">Logs</string>
+    <string name="section_settings">Einstellungen</string>
+    <string name="section_modes">Betriebsmodi</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">Sprache</string>
+    <string name="settings_language_system">Wie das System</string>
+
+    <string name="settings_appearance_title">Aussehen</string>
+    <string name="theme_follow_system">Wie das System</string>
+    <string name="theme_latte">Latte (hell)</string>
+    <string name="theme_mocha">Mocha (dunkel)</string>
+
+    <string name="settings_distance_title">Entfernung</string>
+    <string name="distance_follow_system">Wie das System</string>
+    <string name="distance_kilometres">Kilometer</string>
+    <string name="distance_miles">Meilen</string>
+
+    <string name="settings_prices_title">Preise</string>
+    <string name="prices_show_worth">Zeigen, was ein Guthaben wert ist</string>
+    <string name="prices_currency_title">Währung</string>
+    <string name="prices_this_phone">dieses Telefon</string>
+    <string name="prices_source_note">Höchstens zweimal pro Stunde abgefragt, von CoinGecko oder Kraken. Ausschalten stoppt die Anfrage komplett.</string>
+    <string name="prices_last_from">Zuletzt von %1$s.</string>
+
+    <string name="settings_privacy_title">Privatsphäre</string>
+    <string name="settings_read_receipts">Lesebestätigungen senden</string>
+    <string name="settings_read_receipts_on">Kontakte sehen, wann du ihre Nachrichten gelesen hast. Ihre siehst du so oder so, wenn sie welche senden.</string>
+    <string name="settings_read_receipts_off">Aus — wann du liest, geht nur dich etwas an. Ihre siehst du trotzdem, wenn sie welche senden.</string>
+</resources>

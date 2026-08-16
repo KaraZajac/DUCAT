@@ -1,0 +1,45 @@
+<resources>
+    <!-- Livro de comandas (BarTab.kt) -->
+    <string name="bartab_open_tabs">Comandas abertas</string>
+    <string name="bartab_start_tab">Abrir uma comanda</string>
+    <string name="bartab_section_running">Em andamento</string>
+    <string name="bartab_section_billed">Conta enviada — aguardando pagamento</string>
+    <string name="bartab_receipt_auto_hint">O recibo vai para a pessoa sozinho assim que o pagamento chega — mesmo depois de ela ter ido embora.</string>
+    <string name="bartab_section_settled">Quitadas</string>
+    <string name="bartab_clear">Limpar</string>
+    <string name="bartab_nothing_settled">Nada quitado ainda esta noite.</string>
+    <string name="bartab_no_tabs">Nenhuma comanda ainda. Abra uma quando o primeiro pedido chegar.</string>
+    <plurals name="bartab_items">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d itens</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">pagamento visto — liquidando</string>
+    <string name="bartab_state_billed_unpaid">conta enviada, não paga</string>
+    <string name="bartab_state_paid_oob">pago fora do DUCAT ✓</string>
+    <string name="bartab_state_cancelled">cancelada</string>
+    <string name="bartab_state_paid">pago ✓</string>
+    <string name="bartab_new_customer">Novo cliente</string>
+    <string name="bartab_scan_hint">A pessoa escaneia ou encosta o telefone — a comanda abre sozinha.</string>
+    <string name="bartab_err_publish_code">não foi possível publicar um código</string>
+    <string name="bartab_or_regular">Ou um cliente habitual</string>
+    <string name="bartab_back">Voltar</string>
+    <string name="bartab_bill_cancelled_msg">Aquela conta de %1$s XMR foi cancelada — nada a pagar.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · comanda agora em %3$s XMR</string>
+    <string name="bartab_remove_line">Remover</string>
+    <string name="bartab_err_send_bill">não foi possível enviar a conta</string>
+    <string name="bartab_settle_bill">Fechar — conta %1$s</string>
+    <string name="bartab_settle_hint">Uma conta detalhada na sua conversa com %1$s. A pessoa pode pagar de onde estiver — a conversa não fecha quando ela vai embora.</string>
+    <string name="bartab_discard_tab">Descartar comanda</string>
+    <string name="bartab_discard_title">Descartar esta comanda?</string>
+    <string name="bartab_discard_body">A comanda e tudo o que foi lançado nela são apagados deste telefone. Nenhuma conta é enviada, e isso não pode ser desfeito.</string>
+    <string name="bartab_discard_confirm">Descartar</string>
+    <string name="bartab_keep_tab">Manter comanda</string>
+    <string name="bartab_billed_hint">Conta enviada. O recibo vai para a pessoa sozinho quando o pagamento chegar. Se foi acertado de outro jeito, diga aqui:</string>
+    <string name="bartab_paid_outside_button">Pago fora do DUCAT (dinheiro, cartão)</string>
+    <string name="bartab_cancel_bill">Cancelar a conta</string>
+    <string name="bartab_cancelled_note">Cancelada — a pessoa foi avisada na conversa.</string>
+    <string name="bartab_paid_oob_note">Pago fora do DUCAT ✓ — recibo enviado, sem transação anexada.</string>
+    <string name="bartab_paid_note">Pago ✓ — recibo enviado.</string>
+    <string name="bartab_remove_from_book">Remover do livro de comandas</string>
+    <string name="bartab_back_to_tabs">Voltar às comandas</string>
+</resources>

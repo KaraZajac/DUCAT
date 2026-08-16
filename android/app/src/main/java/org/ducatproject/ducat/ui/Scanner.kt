@@ -15,6 +15,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import org.ducatproject.ducat.R
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -108,7 +110,7 @@ fun QrScannerContent(
                     Modifier.fillMaxWidth().padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TextButton(onClick = cancel) { Text("Cancel") }
+                    TextButton(onClick = cancel) { Text(stringResource(R.string.scanner_cancel)) }
                     Spacer(Modifier.weight(1f))
                 }
             }
@@ -126,17 +128,16 @@ fun QrScannerContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    Text("The camera is not allowed", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.scanner_no_camera_title), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Scanning needs it. Everything else in DUCAT works without it — " +
-                            "a card can always be pasted as a link instead.",
+                        stringResource(R.string.scanner_no_camera_body),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.height(16.dp))
-                    Button(onClick = { ask.launch(Manifest.permission.CAMERA) }) { Text("Allow") }
+                    Button(onClick = { ask.launch(Manifest.permission.CAMERA) }) { Text(stringResource(R.string.scanner_allow)) }
                 }
                 return@Column
             }
@@ -144,7 +145,7 @@ fun QrScannerContent(
             var failure by remember { mutableStateOf<String?>(null) }
             failure?.let {
                 Text(
-                    "The camera would not start: $it",
+                    stringResource(R.string.scanner_would_not_start, it),
                     Modifier.padding(20.dp),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
@@ -226,7 +227,7 @@ private fun CameraPreview(onResult: (String) -> Unit, onFailure: (String) -> Uni
         ) {
             Icon(
                 if (torch) Icons.Filled.FlashlightOff else Icons.Filled.FlashlightOn,
-                if (torch) "Torch off" else "Torch on",
+                stringResource(if (torch) R.string.scanner_torch_off else R.string.scanner_torch_on),
             )
         }
     }

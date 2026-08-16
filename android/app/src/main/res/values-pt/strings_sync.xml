@@ -1,0 +1,25 @@
+<resources>
+    <string name="sync_synced">Sincronizado</string>
+    <string name="sync_not_fully">Ainda não totalmente sincronizado</string>
+    <string name="sync_partial_note">Este saldo é só o que foi lido até agora — pode estar baixo até o escaneamento terminar.</string>
+    <string name="duration_under_minute">menos de um minuto</string>
+    <plurals name="duration_minutes">
+        <item quantity="one">cerca de %1$d minuto</item>
+        <item quantity="other">cerca de %1$d minutos</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">cerca de %1$d hora</item>
+        <item quantity="other">cerca de %1$d horas</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">cerca de %1$d dia</item>
+        <item quantity="other">cerca de %1$d dias</item>
+    </plurals>
+    <string name="scanner_cancel">Cancelar</string>
+    <string name="scanner_no_camera_title">A câmera não está permitida</string>
+    <string name="scanner_no_camera_body">Escanear precisa dela. Todo o resto no DUCAT funciona sem — um cartão sempre pode ser colado como link.</string>
+    <string name="scanner_allow">Permitir</string>
+    <string name="scanner_would_not_start">A câmera não iniciou: %1$s</string>
+    <string name="scanner_torch_off">Desligar lanterna</string>
+    <string name="scanner_torch_on">Ligar lanterna</string>
+</resources>

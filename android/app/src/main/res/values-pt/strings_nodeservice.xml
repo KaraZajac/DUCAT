@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Canal do serviço em primeiro plano e notificação permanente -->
+    <string name="nodeservice_channel_name">Mantendo você acessível</string>
+    <string name="nodeservice_channel_desc">Mantém o DUCAT acessível para que contatos possam pagar e mandar mensagens a você.</string>
+    <string name="nodeservice_notification_title">O DUCAT está acessível</string>
+    <string name="nodeservice_notification_text">Contatos podem alcançar você enquanto isto roda.</string>
+</resources>

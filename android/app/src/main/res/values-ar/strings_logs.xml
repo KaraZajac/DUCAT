@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Header counts -->
+    <plurals name="logs_line_count">
+        <item quantity="zero">لا أسطر</item>
+        <item quantity="one">سطر واحد</item>
+        <item quantity="two">سطران</item>
+        <item quantity="few">%1$d أسطر</item>
+        <item quantity="many">%1$d سطرًا</item>
+        <item quantity="other">%1$d سطر</item>
+    </plurals>
+    <string name="logs_warn_count">%1$d تحذير</string>
+    <string name="logs_error_count">%1$d خطأ</string>
+
+    <!-- Toolbar actions -->
+    <string name="logs_copy_all">نسخ الكل</string>
+    <string name="logs_share">مشاركة</string>
+    <string name="logs_send_logs">إرسال السجلات</string>
+    <string name="logs_clear">مسح</string>
+    <string name="logs_copied">نُسخت. المفاتيح ونصوص الرسائل لا تظهر هنا أبدًا.</string>
+
+    <!-- Level filter chips -->
+    <string name="logs_filter_all">الكل</string>
+    <string name="logs_filter_info">معلومات</string>
+    <string name="logs_filter_warn">تحذير</string>
+    <string name="logs_filter_error">خطأ</string>
+
+    <string name="logs_empty">لا شيء مسجَّل بعد. يظهر النشاط هنا مع مزامنة التطبيق وإرساله واستقباله.</string>
+</resources>

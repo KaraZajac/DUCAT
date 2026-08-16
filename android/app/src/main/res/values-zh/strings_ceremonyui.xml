@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">关闭</string>
+    <string name="ceremony_quoted_body">“%1$s”</string>
+    <string name="ceremony_decline">拒绝</string>
+    <string name="ceremony_open_chat">打开聊天</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">向你请求</string>
+    <string name="ceremony_tax">税</string>
+    <string name="ceremony_accept_and_pay">接受并付款</string>
+    <string name="ceremony_no_address">这个请求里没有地址 — 问问对方要把钱发到哪里。</string>
+    <string name="ceremony_accept_opens_confirm">点「接受」会打开确认页 — 在那里批准之前，钱不会动。</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">已付 ✓</string>
+    <string name="ceremony_paid_to">已付 · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">愿意载你，收费</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="other">距你约 %1$d 分钟</item>
+    </plurals>
+    <string name="ceremony_plate">车牌 %1$s</string>
+    <string name="ceremony_accept">接受</string>
+    <string name="ceremony_accepting_agrees_fare">接受即确认车费 — 行程结束时付款，走平常的确认页。</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">行程已确认</string>
+    <string name="ceremony_expecting_you">对方在等你 — 其他事在聊天里说。</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">你的车正在路上</string>
+    <string name="ceremony_eta_in_chat">预计到达时间和其他事 — 都在聊天里。</string>
+</resources>

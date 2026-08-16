@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">عنوان Monero، أو رمز monero:، أو بطاقة DUCAT</string>
+    <string name="pay_close">إغلاق</string>
+    <string name="pay_send_or_request">أرسل أو اطلب</string>
+    <string name="pay_scan_a_code">امسح رمزًا</string>
+    <string name="pay_your_contacts">جهات اتصالك</string>
+    <string name="pay_contact_vs_address">الدفعة إلى جهة اتصال تحمل ملاحظة وتصل إلى دردشتك. أما العنوان فلا.</string>
+    <string name="pay_or_monero_address">أو عنوان Monero</string>
+    <string name="pay_address_placeholder">5… أو 7…</string>
+    <string name="pay_continue">متابعة</string>
+    <string name="pay_not_monero_address">هذا لا يبدو عنوان Monero.</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">رجوع</string>
+    <string name="pay_in_ducat">في DUCAT</string>
+    <string name="pay_monero_address">عنوان Monero</string>
+    <string name="pay_bill">الفاتورة</string>
+    <string name="pay_add_tip">أضف بقشيشًا (%1$s) — اختياري</string>
+    <string name="pay_total_with_tip">الإجمالي مع البقشيش: %1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">ما تطلبه من %1$s. رصيدهم ورسوم الشبكة شأنهم لا شأنك — هذه رسالة، لا معاملة.</string>
+    <string name="pay_them">الطرف الآخر</string>
+    <string name="pay_up_to_after_fees">حتى %1$s بعد الرسوم</string>
+    <string name="pay_max">الأقصى</string>
+    <string name="pay_max_done">الأقصى ✓</string>
+    <string name="pay_over_max">هذا أكثر مما يمكنك إرساله بعد احتساب الرسوم.</string>
+    <string name="pay_amount">المبلغ</string>
+    <string name="pay_network_fee_estimated">رسوم الشبكة (تقديرية)</string>
+    <string name="pay_total">الإجمالي</string>
+    <string name="pay_left_after">المتبقي بعدها</string>
+    <string name="pay_uses_notes">تستخدم %1$d من الأوراق · تتأكد عادةً خلال نحو %2$d دقيقة</string>
+    <string name="pay_fee_estimate_note">الرسوم تقديرية حتى تُبنى المعاملة؛ الرقم الدقيق يظهر بعد الإرسال.</string>
+    <string name="pay_speed">السرعة</string>
+    <string name="pay_speed_slow">بطيء</string>
+    <string name="pay_speed_normal">عادي</string>
+    <string name="pay_speed_fast">سريع</string>
+    <string name="pay_speed_fastest">الأسرع</string>
+    <string name="pay_memo_label">ملاحظة — علامَ هذا؟</string>
+    <string name="pay_send">إرسال</string>
+    <string name="pay_request">طلب</string>
+    <string name="pay_no_address_hint">%1$s لم يشارك عنوانًا، فيمكنك أن تطلب لكن لا أن ترسل بعد. بدّل إلى «طلب» — فهو يعيد عنوانًا معه.</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">طلب دفع</string>
+    <string name="pay_payment">دفعة</string>
+    <string name="pay_request_sent">أُرسل الطلب</string>
+    <string name="pay_could_not_send">تعذّر الإرسال</string>
+    <string name="pay_no_node">لا عقدة — راجع الحالة</string>
+    <string name="pay_no_address_error">لم يشاركوا عنوانًا. اطلب منهم إرسال طلب دفع، أو تفعيل «السماح لجهات الاتصال بالدفع لي مباشرة».</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">أترسل %1$s؟</string>
+    <string name="pay_to">إلى %1$s</string>
+    <string name="pay_plus_fees">زائد نحو %1$s رسومًا — %2$s في المجموع.</string>
+    <string name="pay_irreversible_warning">مدفوعات Monero لا يمكن عكسها ولا إلغاؤها. تحقق من العنوان — لا جهة تلجأ إليها إن كان خاطئًا.</string>
+    <string name="pay_cancel">إلغاء</string>
+</resources>

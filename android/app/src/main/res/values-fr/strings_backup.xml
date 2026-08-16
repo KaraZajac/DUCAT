@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">Sauvegarde</string>
+    <string name="backup_body">Un seul fichier chiffré contenant ton identité, tes clés et tes réglages. Exportes-en un nouveau chaque fois que quelque chose d\'important change.</string>
+    <string name="backup_passphrase">Phrase secrète</string>
+    <string name="backup_export">Exporter</string>
+    <string name="backup_import">Importer</string>
+    <string name="backup_exported_bytes">%1$d octets exportés</string>
+    <string name="backup_export_failed">échec de l\'export</string>
+    <string name="backup_restored_title">Portefeuille restauré</string>
+    <string name="backup_restored_check">Vérifie que cette adresse est une adresse que tu reconnais avant de lui faire confiance.</string>
+    <string name="backup_opened">Ouvert — %1$d part(s) de séquestre, hauteur de restauration %2$d</string>
+    <string name="backup_could_not_open">Impossible de l\'ouvrir — mauvaise phrase secrète, ou le fichier a été modifié</string>
+    <string name="backup_share_title">Enregistre ta sauvegarde DUCAT</string>
+</resources>

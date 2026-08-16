@@ -9,8 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.Balances
+import org.ducatproject.ducat.R
 import org.ducatproject.ducat.humanDuration
 
 /**
@@ -37,7 +40,7 @@ fun SyncStatus(b: Balances, modifier: Modifier = Modifier) {
                 color = MaterialTheme.ducat.settled)
             Spacer(Modifier.width(6.dp))
             Text(
-                "Synced",
+                stringResource(R.string.sync_synced),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.ducat.settled,
             )
@@ -45,10 +48,11 @@ fun SyncStatus(b: Balances, modifier: Modifier = Modifier) {
         return
     }
 
+    val context = LocalContext.current
     Column(modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "Not fully synced",
+                stringResource(R.string.sync_not_fully),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.ducat.changePending,
             )
@@ -56,7 +60,7 @@ fun SyncStatus(b: Balances, modifier: Modifier = Modifier) {
             Text(
                 buildString {
                     append("${(b.progress * 100).toInt()}%")
-                    b.secondsLeft?.let { append(" · ${humanDuration(it)}") }
+                    b.secondsLeft?.let { append(" · ${humanDuration(context, it)}") }
                 },
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -70,8 +74,7 @@ fun SyncStatus(b: Balances, modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(6.dp))
         Text(
-            "This balance is only what has been read so far — it may be low " +
-                "until the scan finishes.",
+            stringResource(R.string.sync_partial_note),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -82,12 +82,31 @@ money. Ordered by what blocks 1.0, not by effort.
   are field-test numbers. Measure, then tier: hot when the screen is on
   and a hail is standing, slow otherwise.
 
+## Localization — global like the rails it rides (started 2026-08-15)
+
+- ~~**Infrastructure.**~~ **Done, 0.88** — LocaleStore + attachBaseContext
+  wrapper (activity and Application), in-app language picker named in each
+  language's own name, locales_config for Android 13+, Units (km/mi with
+  locale default), currency picker revived; Settings proven in Spanish on
+  the emulator, choice survives restarts.
+- ~~**Extraction.**~~ **Done, 0.88** — ~848 entries across 31 per-screen
+  resource files; plurals used where count-driven; wire sentinels, state
+  strings, and Locale.US parse formats deliberately left in code.
+- **Translations.** In flight: es fr de pt zh ar first, then it nl ru uk
+  pl tr ja ko fa hi id vi th. Each language is one values-<tag>/ mirror;
+  untranslated keys fall back to English per-string.
+- **Known gaps.** Pronoun labels come from the bridge's pronounOptions()
+  and need a mapping layer; notification text keeps the process-start
+  language until restart (attachBaseContext runs once per process);
+  outbound chat bodies ("Meter started…") localize to the *sender's*
+  language by design — the receiver sees the sender's words, like any
+  message.
+
 ## Small bugs spotted, not yet fixed
 
-- **"Break a note" card shows on a zero-balance wallet** (seen on the
-  emulated phone's first run): the not-spendable warning fires when
-  spendable == 0 even though total == 0 too — an empty wallet is not
-  "all tied up as change". Guard on total > 0.
+- ~~**"Break a note" card shows on a zero-balance wallet**~~ **Fixed,
+  0.88** — the card now fires only when money exists (hasMoney/allLocked
+  guards in BalanceCard); an empty wallet says nothing.
 
 ## Validation — before the number says 1.0
 

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">إعداد DUCAT</string>
+    <string name="onb_progress_done">تم</string>
+    <string name="onb_progress_step">الخطوة %1$d من %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">أنشئ هويتك</string>
+    <string name="onb_persona_body">زوج مفاتيح على هذا الهاتف. لا بريد إلكتروني، لا رقم هاتف، لا جهة تسجّل عندها — وهو أيضًا سبب عجز أي أحد عن استعادتها بدلًا منك.</string>
+    <string name="onb_persona_action">إنشاء</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">أنشئ محفظتك</string>
+    <string name="onb_wallet_body">مفاتيح Monero، تولَّد هنا وتبقى هنا. هذه هي النقود.</string>
+    <string name="onb_wallet_action">إنشاء المحفظة</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">حدد سقوف إنفاقك</string>
+    <string name="onb_limits_body">الدفعات الصغيرة تمر مباشرة. والأكبر منها تطلب رمز PIN. يمكنك تغيير موضع هذه الحدود في أي وقت — والإعدادات الافتراضية حذرة أصلًا.</string>
+    <string name="onb_limits_action">الإبقاء على الافتراضيات</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">جاهز</string>
+    <string name="onb_done_body">أضف المال متى شئت. وإلى أن تفعل، لا شيء في خطر ولا شيء تخسره.</string>
+    <string name="onb_done_action">إنهاء</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">انسخها احتياطيًا — الآن لا لاحقًا</string>
+    <string name="onb_backup_body">ملف مشفَّر واحد، تحميه عبارة مرور تختارها أنت. احفظه حيث تحفظ الأشياء المهمة.</string>
+    <string name="onb_backup_forget_title">إن نسيت عبارة المرور هذه</string>
+    <string name="onb_backup_forget_body">فلا سبيل إلى استعادتها. لا أحد يحتفظ بنسخة ولا أحد تسأله. وهو السبب نفسه الذي يمنع أي أحد من تجميد مالك أو أخذه.</string>
+    <string name="onb_backup_address_label">عنوانك</string>
+    <string name="onb_backup_passphrase_label">عبارة المرور</string>
+    <string name="onb_backup_passphrase_good">جيدة</string>
+    <string name="onb_backup_passphrase_short">8 محارف على الأقل</string>
+    <string name="onb_backup_error_incomplete">الإعداد غير مكتمل</string>
+    <string name="onb_backup_create">إنشاء النسخة الاحتياطية</string>
+    <string name="onb_backup_created">أُنشئت النسخة الاحتياطية — %1$d بايت.</string>
+    <string name="onb_backup_send_elsewhere">إنها على هذا الهاتف، وهذا ليس نسخًا احتياطيًا بعد. أرسلها إلى مكان آخر: مدير كلمات مرور، أو وحدة تخزين، أو جهاز آخر.</string>
+    <string name="onb_backup_send_action">أرسلها إلى مكان ما</string>
+    <string name="onb_backup_done">تم</string>
+    <string name="onb_backup_share_chooser">احفظ نسخة DUCAT الاحتياطية</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">بماذا يناديك الناس؟</string>
+    <string name="onb_profile_name_body">يوضع هذا على البطاقات التي تسلّمها. ومن يضيفك يمكنه إعادة تسميتك من جهته، وذلك الاسم هو ما يراه — فهذا اقتراح لا هوية.</string>
+    <string name="onb_profile_name_label">الاسم (اختياري)</string>
+    <string name="onb_profile_pay_title">أيمكن لجهات الاتصال الدفع لك مباشرة؟</string>
+    <string name="onb_profile_pay_yes">نعم — يسهل الدفع لي</string>
+    <string name="onb_profile_pay_no">لا — يطلبون، وأنا أوافق</string>
+    <string name="onb_profile_pay_yes_detail">يذهب عنوانك إلى كل جهة اتصال ويُعاد استخدامه. كل من يقرأ السلسلة يمكنه معرفة أن الشخص نفسه هو من تلقّى الدفعات كل مرة — بمن فيهم من لم يدفعوا لك إلا مرة واحدة.</string>
+    <string name="onb_profile_pay_no_detail">كل دفعة تستخدم عنوانًا جديدًا، فلا شيء على السلسلة يربط دفعاتك ببعضها. ومن يريد الدفع لك ينتظر أن ترسل طلبًا أولًا.</string>
+    <string name="onb_profile_change_later">يمكنك تغيير الاثنين لاحقًا.</string>
+    <string name="onb_profile_continue">متابعة</string>
+</resources>

@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">no se pudo publicar un código</string>
+    <string name="taxi_meter_started_msg">Taxímetro iniciado — base %1$s XMR, %2$s XMR por minuto. La cuenta al final muestra los minutos.</string>
+    <string name="taxi_err_terms_not_sent">Se conectó pero los términos no se enviaron: %1$s</string>
+    <string name="taxi_set_fare">Fija la tarifa</string>
+    <string name="taxi_base_label">Base (%1$s)</string>
+    <string name="taxi_per_min_label">Por min (%1$s)</string>
+    <string name="taxi_price_in_instead">Poner el precio en %1$s</string>
+    <string name="taxi_rate_locked_hint">Una tarifa escrita en %1$s queda fijada en XMR cuando arranca el viaje — la cifra que el pasajero acepta es la cifra que se le cobra.</string>
+    <string name="taxi_set_rate_hint">Define una tarifa por minuto para abrir el código de recogida.</string>
+    <string name="taxi_pickup">Recogida</string>
+    <string name="taxi_scan_hint">El pasajero escanea o acerca el teléfono. La tarifa aterriza en la conversación y el taxímetro arranca solo.</string>
+    <string name="taxi_meter_terms">base %1$s + %2$s/min</string>
+    <string name="taxi_rider">pasajero</string>
+    <string name="taxi_line_base_fare">Tarifa base</string>
+    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s XMR/min</string>
+    <string name="taxi_err_send_fare">no se pudo enviar la tarifa</string>
+    <string name="taxi_end_ride_bill">Terminar viaje — cobrar %1$s</string>
+    <string name="taxi_bill_hint">La cuenta muestra los minutos y la tarifa. El recibo le llega solo cuando cae el pago — incluso después de que se haya bajado.</string>
+    <string name="taxi_cancel_ride_no_bill">Cancelar viaje — sin cobro</string>
+    <string name="taxi_cancel_title">¿Cancelar este viaje?</string>
+    <string name="taxi_cancel_body">El taxímetro se detiene y no se envía ninguna cuenta. Los minutos contados hasta ahora se descartan y no se pueden recuperar.</string>
+    <string name="taxi_cancel_confirm">Cancelar viaje</string>
+    <string name="taxi_keep_going">Seguir</string>
+</resources>

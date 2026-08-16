@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Enviado como mensagem de conversa; %1$s é o link do mapa -->
+    <string name="location_where_i_am">📍 Onde estou: %1$s</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="one">Núcleo nativo: %1$d comprobación superada</item>
+        <item quantity="other">Núcleo nativo: %1$d comprobaciones superadas</item>
+    </plurals>
+    <string name="bridge_checks_failed">Núcleo nativo: %1$d de %2$d FALLARON</string>
+    <string name="bridge_jni_note">Estas llaman al núcleo en Rust a través de JNI — la única capa que las pruebas de Rust no alcanzan.</string>
+    <string name="bridge_got_expected">se obtuvo %1$s, se esperaba %2$s</string>
+
+    <!-- Check names (rendered per row; expected/got values stay in code — they
+         are compared with == against what the bridge returns) -->
+    <string name="bridge_check_protocol_version">versión del protocolo</string>
+    <string name="bridge_check_capacity_6">capacidad de 6 salidas</string>
+    <string name="bridge_check_capacity_1">capacidad de 1 salida</string>
+    <string name="bridge_check_float_plan">plan de fondo de caja para 10 pagos</string>
+    <string name="bridge_check_bucket_floor">piso de cubeta de 4.999 XMR</string>
+    <string name="bridge_check_stale_rate">la tasa obsoleta escala</string>
+</resources>

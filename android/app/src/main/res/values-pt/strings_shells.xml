@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cascas de modo (Shells.kt): estruturas por função e o livro de liquidados -->
+    <string name="shells_title_pos">Ponto de Venda</string>
+    <string name="shells_tab_register">Caixa</string>
+    <string name="shells_tab_sales">Vendas</string>
+    <string name="shells_title_bar_tab">Comanda</string>
+    <string name="shells_tab_tabs">Comandas</string>
+    <string name="shells_tab_closed">Fechadas</string>
+    <string name="shells_title_taxi">Táxi</string>
+    <string name="shells_tab_fares">Tarifas</string>
+    <string name="shells_tab_meter">Taxímetro</string>
+    <string name="shells_tab_rides">Corridas</string>
+    <string name="shells_title_donations">Doações</string>
+    <string name="shells_tab_code">Código</string>
+    <string name="shells_menu">Menu</string>
+    <string name="shells_today">Hoje</string>
+    <string name="shells_billed_waiting">Cobrado — aguardando</string>
+    <string name="shells_settled">Liquidado</string>
+    <string name="shells_no_sales_yet">Nenhuma venda hoje ainda.</string>
+    <string name="shells_no_rides_yet">Nenhuma corrida hoje ainda.</string>
+    <string name="shells_payment_seen_settling">pagamento visto — liquidando</string>
+    <string name="shells_billed_unpaid">cobrado, não pago</string>
+    <string name="shells_paid_outside">pago fora do DUCAT ✓</string>
+    <string name="shells_paid">pago ✓</string>
+</resources>

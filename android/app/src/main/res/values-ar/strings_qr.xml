@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_too_much_data">بيانات أكثر مما يتسع له رمز QR — استخدم الرابط بدلًا منه.</string>
+    <string name="qr_code">رمز QR</string>
+</resources>

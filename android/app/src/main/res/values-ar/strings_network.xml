@@ -1,0 +1,25 @@
+<resources>
+    <string name="net_veilid_body">وسيلة النقل. تسافر الدفعة عبر مسار مجهول الهوية، لذا يجب أن يكون هذا عاملًا قبل أن تنطلق أي لمسة إلى أي مكان.</string>
+
+    <string name="net_line_bridge">جسر أندرويد</string>
+    <string name="net_ready">جاهز</string>
+    <string name="net_not_set_up">غير مهيّأ</string>
+    <string name="net_line_node">العقدة</string>
+    <string name="net_running">تعمل</string>
+    <string name="net_stopped">متوقفة</string>
+    <string name="net_line_attached">الالتحاق</string>
+    <string name="net_line_route_capable">قادرة على المسارات</string>
+    <string name="net_yes">نعم</string>
+    <string name="net_not_yet_routes">ليس بعد — لا مسارات قبل هذا</string>
+    <string name="net_line_peers">النظراء</string>
+    <string name="net_peers_value">%1$s نشط، %2$s موثوق</string>
+    <string name="net_waiting">انتظار %1$d ث — على العقدة أن تعرف كيف يمكن الوصول إليها قبل أن تستطيع بناء مسار</string>
+
+    <string name="net_starting">جارٍ البدء…</string>
+    <string name="net_start_node">شغّل العقدة</string>
+    <string name="net_stop">إيقاف</string>
+    <string name="net_testing">جارٍ الاختبار…</string>
+    <string name="net_test_route">اختبر مسارًا</string>
+    <string name="net_route_ok">خُصص مسار — حزمة بحجم %1$s بايت</string>
+    <string name="net_route_failed">فشل المسار: %1$s</string>
+</resources>

@@ -1,0 +1,28 @@
+<resources>
+    <!-- MyProfileEditor.kt -->
+    <string name="myprofile_avatar_read_error">Não foi possível ler essa foto.</string>
+    <string name="myprofile_your_picture">Sua foto</string>
+    <string name="myprofile_add_picture">Adicionar uma foto</string>
+    <string name="myprofile_picture_note">Reduzida a uma miniatura antes de ser enviada — ela viaja no seu registro de contato, que tem espaço para um rosto, não para uma fotografia.</string>
+    <string name="myprofile_remove">Remover</string>
+    <string name="myprofile_name_label">Nome</string>
+    <string name="myprofile_name_support">Aparece nos cartões que você entrega. Quem adicionar você pode renomear.</string>
+    <string name="myprofile_pronouns">Pronomes</string>
+    <string name="myprofile_email">E-mail</string>
+    <string name="myprofile_phone">Telefone</string>
+    <string name="myprofile_phone_hint">Só dígitos, com o código do país</string>
+    <string name="myprofile_signal">Signal</string>
+    <string name="myprofile_signal_hint">name.12</string>
+    <string name="myprofile_driving_note">Vai dirigir? Passageiros veem isto quando você pega o chamado deles — é assim que um desconhecido encontra o carro certo na calçada.</string>
+    <string name="myprofile_car_model">Modelo do carro</string>
+    <string name="myprofile_car_model_hint">Toyota Corolla</string>
+    <string name="myprofile_car_colour">Cor do carro</string>
+    <string name="myprofile_car_colour_hint">azul</string>
+    <string name="myprofile_plate">Placa</string>
+    <string name="myprofile_plate_hint">KAR-4242</string>
+    <string name="myprofile_share_switch">Compartilhar isto com novos contatos</string>
+    <string name="myprofile_share_on_note">Tudo acima é enviado quando alguém usa seu cartão. Seu endereço Monero tem um interruptor próprio.</string>
+    <string name="myprofile_share_off_note">Só o seu nome viaja. O resto fica neste aparelho.</string>
+    <string name="myprofile_saved">Salvo</string>
+    <string name="myprofile_save">Salvar</string>
+</resources>

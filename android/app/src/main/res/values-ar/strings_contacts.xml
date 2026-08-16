@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">دردشة</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">شارك بطاقتك</string>
+    <string name="contacts_share_card_body">صالحة لشخص واحد. متى استخدمها توقفت عن العمل — فلقطة شاشة تصل إلى مكان آخر ليست بابًا للدخول.</string>
+    <string name="contacts_name_to_show_label">الاسم المعروض (اختياري)</string>
+    <string name="contacts_name_to_show_support">يمكنهم إعادة تسميتك من جهتهم؛ وذلك الاسم هو ما سيرونه.</string>
+    <string name="contacts_error_make_card">تعذّر إنشاء بطاقة</string>
+    <string name="contacts_publishing_inbox">جارٍ نشر صندوق واردك…</string>
+    <string name="contacts_create_card">إنشاء بطاقة</string>
+    <string name="contacts_publishing_note">يستغرق هذا بضع ثوانٍ — لا بد من نشر سجلّين قبل أن يستطيع أحد الوصول إليك. ويبقيان يعملان بعد إغلاقك التطبيق.</string>
+    <string name="contacts_copy_link">نسخ الرابط</string>
+    <string name="contacts_send">إرسال</string>
+    <string name="contacts_expires_24h">تنتهي صلاحيتها خلال 24 ساعة.</string>
+    <string name="contacts_send_your_card">أرسل بطاقتك</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">وجّه الكاميرا نحو بطاقة DUCAT الخاصة بهم</string>
+    <string name="contacts_card_expired_ask_new">انتهت صلاحية تلك البطاقة. اطلب واحدة جديدة.</string>
+    <string name="contacts_not_a_card">هذه ليست بطاقة DUCAT</string>
+    <string name="contacts_add_contact_title">إضافة جهة اتصال</string>
+    <string name="contacts_paste_link_label">الصق رابط ducat: الخاص بهم</string>
+    <string name="contacts_paste">لصق</string>
+    <string name="contacts_scan">مسح</string>
+    <string name="contacts_card_expired_ask_them">انتهت صلاحية هذه البطاقة. اطلب منهم واحدة جديدة.</string>
+    <string name="contacts_read_card">قراءة البطاقة</string>
+    <string name="contacts_no_name_given">(بدون اسم)</string>
+    <string name="contacts_unverified_name">غير موثَّق — هذا الاسم كما كتبوه</string>
+    <string name="contacts_check_characters">قارن هذه المحارف معهم عبر قناة تثق بها إن كان يهمّك من يكون هذا.</string>
+    <string name="contacts_save_them_as_label">احفظهم باسم</string>
+    <string name="contacts_save_them_as_support">اسمك أنت لهم. لا يراه أحد غيرك.</string>
+    <string name="contacts_error_read_inbox">تعذّرت قراءة صندوق واردهم</string>
+    <string name="contacts_reading_inbox">جارٍ قراءة صندوق واردهم…</string>
+    <string name="contacts_add_contact_button">إضافة جهة الاتصال</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">استُخدمت تلك البطاقة من قبل. اطلب منهم واحدة جديدة.</string>
+    <string name="contacts_reply_expired">انتهت صلاحية تلك البطاقة. اطلب منهم واحدة جديدة.</string>
+    <string name="contacts_reply_badsig">ذلك الرابط تالف — جرّب نسخه من جديد.</string>
+    <string name="contacts_reply_own_card">هذه بطاقتك أنت.</string>
+    <string name="contacts_reply_refused">رفضوا الطلب.</string>
+</resources>

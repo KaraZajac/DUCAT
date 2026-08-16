@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">返回</string>
+    <string name="profile_calls_themselves">自称“%1$s”</string>
+    <string name="profile_label_email">邮箱</string>
+    <string name="profile_label_phone">电话</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">对方分享的内容</string>
+    <string name="profile_their_claim_note">这是对方的自述，不是核验。没有什么能把一个 DUCAT 身份和邮箱或号码绑在一起 — 只有密钥。</string>
+    <string name="profile_your_name_for_them_label">你给对方的名字</string>
+    <string name="profile_your_name_for_them_support">只有你能看到。各处显示的都是这个名字。</string>
+    <string name="profile_saved">已保存</string>
+    <string name="profile_save_name">保存名字</string>
+    <string name="profile_checked">已核验</string>
+    <string name="profile_checked_note">经密码学验证。对方发出的每张名片都由这把密钥签名，并据此核验。</string>
+    <string name="profile_persona">身份</string>
+    <string name="profile_told_to_you">对方告诉你的</string>
+    <string name="profile_told_note">由对方提供，未经任何验证。DUCAT 里没有什么能把 Monero 地址或名字和身份绑在一起，重要的话请另行核实。</string>
+    <string name="profile_their_name_label">对方给自己起的名字</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— 没有留 —</string>
+    <string name="profile_monero_address">Monero 地址</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— 未分享；对方必须发送请求 —</string>
+    <string name="profile_where_reached">对方在哪里被联系到</string>
+    <string name="profile_their_outbox">对方的发件箱</string>
+    <string name="profile_your_outbox">你发给对方的发件箱</string>
+    <string name="profile_open_chat">打开聊天</string>
+    <string name="profile_not_built_yet">还没做好</string>
+    <string name="profile_not_built_note">照片、人称代词、邮箱地址和屏蔽。全部可选，全部在设置时填写，全部像名字一样传递 — 由对方声称，我们从不验证。</string>
+    <string name="profile_copy">复制</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">إغلاق</string>
+    <string name="qrhub_scan_code">امسح رمزًا</string>
+    <string name="qrhub_my_code">رمزي</string>
+    <string name="qrhub_scan_prompt">بطاقة DUCAT أو عنوان Monero</string>
+    <string name="qrhub_not_a_code">هذا الرمز ليس بطاقة DUCAT ولا عنوان Monero.</string>
+    <string name="qrhub_card_failed">لم تعمل تلك البطاقة</string>
+    <string name="qrhub_card_issue_failed">تعذّر إنشاء بطاقة</string>
+    <string name="qrhub_no_name_set">لا اسم معيَّن</string>
+    <string name="qrhub_publishing">جارٍ نشر سجلّين ليستطيع الناس الوصول إليك حتى وهذا الهاتف مطفأ.</string>
+    <string name="qrhub_copy_link">نسخ الرابط</string>
+    <string name="qrhub_share">مشاركة</string>
+    <string name="qrhub_share_chooser">شارك بطاقتك</string>
+    <string name="qrhub_tap_or_scan">قرّبا الهاتفين، أو امسح — البطاقة نفسها في الحالين.</string>
+    <string name="qrhub_one_per_code">شخص واحد لكل رمز. ما إن يأخذ أحدهم هذا حتى يُنشأ التالي تلقائيًا — لا شيء عليك فعله.</string>
+    <string name="qrhub_name_travels">اسمك وصورتك يسافران معها. وكل ما تشاركه غير ذلك يصل لاحقًا، عبر الاتصال الذي تفتحه.</string>
+</resources>

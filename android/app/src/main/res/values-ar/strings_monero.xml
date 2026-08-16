@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">تحقق من جديد</string>
+    <string name="monero_subtitle">حيث تُبث المعاملات وتُقرأ السلسلة.</string>
+    <string name="monero_finding_node">جارٍ البحث عن عقدة…</string>
+    <string name="monero_no_usable_node">لا عقدة صالحة</string>
+    <string name="monero_line_height">الارتفاع</string>
+    <string name="monero_line_synced">التزامن</string>
+    <string name="monero_line_network">الشبكة</string>
+    <string name="monero_line_round_trip">زمن الذهاب والإياب</string>
+    <string name="monero_synced_yes">نعم</string>
+    <string name="monero_synced_no">لا — ستكون الأرصدة قديمة</string>
+    <string name="monero_round_trip_ms">%1$s م.ث</string>
+    <string name="monero_no_node">لا عقدة</string>
+    <string name="monero_change_your_node">غيّر عقدتك</string>
+    <string name="monero_use_own_node">استخدم عقدتك الخاصة</string>
+    <string name="monero_your_node">عقدتك</string>
+    <string name="monero_use_it">استخدمها</string>
+    <string name="monero_back_to_public">العودة إلى العامة</string>
+    <string name="monero_cancel">إلغاء</string>
+    <string name="monero_trust_own_title">عقدتك</string>
+    <string name="monero_trust_own_body">لا تتعلم عنك شيئًا لم تكن تعرفه أنت أصلًا.</string>
+    <string name="monero_trust_onion_title">عقدة شخص آخر، عبر Tor</string>
+    <string name="monero_trust_onion_body">ترى معاملاتك لكن لا ترى من أين أتت.</string>
+    <string name="monero_trust_public_title">عقدة شخص آخر</string>
+    <string name="monero_trust_public_body">ترى عنوانك ومعاملاتك معًا. يخفي Dandelion++ مصدر المعاملة عن بقية الشبكة — لكنه لا يستطيع إخفاءه عن العقدة التي سلّمتها إياها. تشغيل عقدتك الخاصة هو الحل.</string>
+    <string name="monero_wallet_title">المحفظة</string>
+    <string name="monero_no_wallet_key_title">لا مفتاح محفظة على هذا الجهاز</string>
+    <string name="monero_no_wallet_key_body">أُكمل الإعداد في هذا التثبيت قبل أن يحتفظ التطبيق بالمحفظة، فليس هناك ما يُفحص به. الانتظار لن يصلح الأمر — استعد من نسخة احتياطية، أو امسح بيانات التطبيق وأعد الإعداد.</string>
+    <string name="monero_scanning_failed">فشل الفحص</string>
+    <string name="monero_unknown">غير معروف</string>
+    <string name="monero_scanning_failed_note">العقدة أعلاه أجابت، فهذه إذن قراءة المحفظة نفسها للسلسلة لا مشكلة الاتصال.</string>
+    <string name="monero_not_started">لم يبدأ — جارٍ البحث عن عقدة.</string>
+    <string name="monero_caught_up">مواكب عند الكتلة %1$d</string>
+    <string name="monero_block_of">الكتلة %1$d من %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="zero">لا كتل متبقية</item>
+        <item quantity="one">كتلة واحدة متبقية</item>
+        <item quantity="two">كتلتان متبقيتان</item>
+        <item quantity="few">%1$d كتل متبقية</item>
+        <item quantity="many">%1$d كتلة متبقية</item>
+        <item quantity="other">%1$d كتلة متبقية</item>
+    </plurals>
+    <string name="monero_partial_balance">رصيدك هو ما قُرئ حتى الآن فقط.</string>
+    <string name="monero_last_window_failed">فشلت النافذة الأخيرة: %1$s</string>
+    <string name="monero_rescan_hint">هذه المحفظة تفحص من بداية السلسلة، وهو ما يستغرق أطول بكثير مما يلزم إن كانت حديثة الإنشاء.</string>
+    <string name="monero_skip_ahead">تجاوز إلى الأمام</string>
+</resources>

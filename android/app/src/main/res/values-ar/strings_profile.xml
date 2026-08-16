@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">رجوع</string>
+    <string name="profile_calls_themselves">يسمّي نفسه \"%1$s\"</string>
+    <string name="profile_label_email">البريد الإلكتروني</string>
+    <string name="profile_label_phone">الهاتف</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">ما شاركوه</string>
+    <string name="profile_their_claim_note">ادّعاؤهم، لا تحقق. لا شيء يربط شخصية DUCAT ببريد إلكتروني أو رقم — بل بمفتاح فقط.</string>
+    <string name="profile_your_name_for_them_label">اسمك لهم</string>
+    <string name="profile_your_name_for_them_support">لا يراه أحد غيرك. وهو الاسم الظاهر في كل مكان.</string>
+    <string name="profile_saved">حُفظ</string>
+    <string name="profile_save_name">حفظ الاسم</string>
+    <string name="profile_checked">مُتحقَّق منه</string>
+    <string name="profile_checked_note">موثَّق تشفيريًا. كل بطاقة يسلّمونها موقعة بهذا المفتاح وتُفحص به.</string>
+    <string name="profile_persona">الشخصية</string>
+    <string name="profile_told_to_you">قيل لك</string>
+    <string name="profile_told_note">قدّموه بأنفسهم ولا يتحقق منه شيء. لا شيء في DUCAT يربط عنوان Monero أو اسمًا بشخصية، فتحقق من هذه بطريقة أخرى إن كان الأمر مهمًا.</string>
+    <string name="profile_their_name_label">اسمهم لأنفسهم</string>
+    <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
+    <string name="profile_none_given">— لم يُعطَ اسم —</string>
+    <string name="profile_monero_address">عنوان Monero</string>
+    <!-- Must keep the leading em dash: see profile_none_given. -->
+    <string name="profile_not_shared">— غير مشارَك؛ عليهم إرسال طلب —</string>
+    <string name="profile_where_reached">أين يُوصَل إليهم</string>
+    <string name="profile_their_outbox">صندوق صادرهم</string>
+    <string name="profile_your_outbox">صندوق صادرك إليهم</string>
+    <string name="profile_open_chat">افتح الدردشة</string>
+    <string name="profile_not_built_yet">لم يُبنَ بعد</string>
+    <string name="profile_not_built_note">صورة وضمائر وبريد إلكتروني وحظر. كلها اختيارية، كلها تُضبط أثناء الإعداد، وكلها تسافر كما يسافر الاسم — يؤكدونها هم، ولا نتحقق منها نحن أبدًا.</string>
+    <string name="profile_copy">نسخ</string>
+</resources>

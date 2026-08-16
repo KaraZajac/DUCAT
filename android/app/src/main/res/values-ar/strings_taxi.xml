@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">تعذّر نشر رمز</string>
+    <string name="taxi_meter_started_msg">بدأ العدّاد — الأساس %1$s XMR، و%2$s XMR لكل دقيقة. الفاتورة في النهاية تعرض الدقائق.</string>
+    <string name="taxi_err_terms_not_sent">اتصلوا لكن الشروط لم تُرسل: %1$s</string>
+    <string name="taxi_set_fare">حدد الأجرة</string>
+    <string name="taxi_base_label">الأساس (%1$s)</string>
+    <string name="taxi_per_min_label">لكل دقيقة (%1$s)</string>
+    <string name="taxi_price_in_instead">التسعير بـ %1$s بدلًا من ذلك</string>
+    <string name="taxi_rate_locked_hint">السعر المكتوب بـ %1$s يُثبَّت على XMR عند بدء المشوار — الرقم الذي يوافق عليه الراكب هو الرقم الذي يُفوتر به.</string>
+    <string name="taxi_set_rate_hint">حدد سعرًا لكل دقيقة لفتح رمز الركوب.</string>
+    <string name="taxi_pickup">الركوب</string>
+    <string name="taxi_scan_hint">يمسح الراكب الرمز أو يقرّب هاتفه. السعر يصل إلى المحادثة ويبدأ العدّاد من تلقاء نفسه.</string>
+    <string name="taxi_meter_terms">الأساس %1$s + %2$s/دقيقة</string>
+    <string name="taxi_rider">الراكب</string>
+    <string name="taxi_line_base_fare">الأجرة الأساسية</string>
+    <string name="taxi_line_metered">%1$d د %2$02d ث × %3$s XMR/دقيقة</string>
+    <string name="taxi_err_send_fare">تعذّر إرسال الأجرة</string>
+    <string name="taxi_end_ride_bill">أنهِ المشوار — فاتورة بـ %1$s</string>
+    <string name="taxi_bill_hint">تعرض الفاتورة الدقائق والسعر. والإيصال يذهب إليهم من تلقاء نفسه عند وصول الأجرة — حتى بعد أن يبتعدوا.</string>
+    <string name="taxi_cancel_ride_no_bill">ألغِ المشوار — بلا فاتورة</string>
+    <string name="taxi_cancel_title">أتلغي هذا المشوار؟</string>
+    <string name="taxi_cancel_body">يتوقف العدّاد ولا تُرسل فاتورة. الدقائق المحسوبة حتى الآن تُهمل ولا يمكن استرجاعها.</string>
+    <string name="taxi_cancel_confirm">إلغاء المشوار</string>
+    <string name="taxi_keep_going">متابعة</string>
+</resources>

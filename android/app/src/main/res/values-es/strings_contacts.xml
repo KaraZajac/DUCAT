@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">Chat</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">Comparte tu tarjeta</string>
+    <string name="contacts_share_card_body">Vale para una sola persona. En cuanto la usan, deja de funcionar — así que una captura de pantalla que termine en otra parte no es una vía de entrada.</string>
+    <string name="contacts_name_to_show_label">Nombre a mostrar (opcional)</string>
+    <string name="contacts_name_to_show_support">Pueden renombrarte de su lado; ese nombre es el que verán.</string>
+    <string name="contacts_error_make_card">no se pudo crear la tarjeta</string>
+    <string name="contacts_publishing_inbox">Publicando tu buzón…</string>
+    <string name="contacts_create_card">Crear tarjeta</string>
+    <string name="contacts_publishing_note">Esto toma unos segundos — hay que publicar dos registros antes de que alguien pueda contactarte. Siguen funcionando después de que cierres la app.</string>
+    <string name="contacts_copy_link">Copiar enlace</string>
+    <string name="contacts_send">Enviar</string>
+    <string name="contacts_expires_24h">Caduca en 24 horas.</string>
+    <string name="contacts_send_your_card">Envía tu tarjeta</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">Apunta la cámara a su tarjeta DUCAT</string>
+    <string name="contacts_card_expired_ask_new">Esa tarjeta caducó. Pide una nueva.</string>
+    <string name="contacts_not_a_card">Eso no es una tarjeta DUCAT</string>
+    <string name="contacts_add_contact_title">Agregar un contacto</string>
+    <string name="contacts_paste_link_label">Pega su enlace ducat:</string>
+    <string name="contacts_paste">Pegar</string>
+    <string name="contacts_scan">Escanear</string>
+    <string name="contacts_card_expired_ask_them">Esta tarjeta caducó. Pídele una nueva.</string>
+    <string name="contacts_read_card">Leer tarjeta</string>
+    <string name="contacts_no_name_given">(sin nombre)</string>
+    <string name="contacts_unverified_name">sin verificar — este es el nombre que escribió</string>
+    <string name="contacts_check_characters">Verifica estos caracteres con la persona por un canal de confianza si importa quién es.</string>
+    <string name="contacts_save_them_as_label">Guardar como</string>
+    <string name="contacts_save_them_as_support">Tu nombre para esta persona. Solo tú lo ves.</string>
+    <string name="contacts_error_read_inbox">no se pudo leer su buzón</string>
+    <string name="contacts_reading_inbox">Leyendo su buzón…</string>
+    <string name="contacts_add_contact_button">Agregar contacto</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">Esa tarjeta ya fue usada. Pídele una nueva.</string>
+    <string name="contacts_reply_expired">Esa tarjeta caducó. Pídele una nueva.</string>
+    <string name="contacts_reply_badsig">Ese enlace está dañado — intenta copiarlo de nuevo.</string>
+    <string name="contacts_reply_own_card">Esa es tu propia tarjeta.</string>
+    <string name="contacts_reply_refused">Rechazó la solicitud.</string>
+</resources>

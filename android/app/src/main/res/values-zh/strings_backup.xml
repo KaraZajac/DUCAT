@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">备份</string>
+    <string name="backup_body">一个加密文件，装着你的身份、密钥和设置。每当有重要变动，就重新导出一份。</string>
+    <string name="backup_passphrase">口令</string>
+    <string name="backup_export">导出</string>
+    <string name="backup_import">导入</string>
+    <string name="backup_exported_bytes">已导出 %1$d 字节</string>
+    <string name="backup_export_failed">导出失败</string>
+    <string name="backup_restored_title">已恢复钱包</string>
+    <string name="backup_restored_check">信任之前，先确认这个地址是你认得的。</string>
+    <string name="backup_opened">已打开 — %1$d 份托管份额，恢复高度 %2$d</string>
+    <string name="backup_could_not_open">打不开 — 口令不对，或文件被改动过</string>
+    <string name="backup_share_title">保存你的 DUCAT 备份</string>
+</resources>

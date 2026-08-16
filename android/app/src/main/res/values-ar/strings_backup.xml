@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">النسخ الاحتياطي</string>
+    <string name="backup_body">ملف مشفَّر واحد يحوي هويتك ومفاتيحك وإعداداتك. صدِّر نسخة جديدة كلما تغيّر شيء مهم.</string>
+    <string name="backup_passphrase">عبارة المرور</string>
+    <string name="backup_export">تصدير</string>
+    <string name="backup_import">استيراد</string>
+    <string name="backup_exported_bytes">صُدِّر %1$d بايت</string>
+    <string name="backup_export_failed">فشل التصدير</string>
+    <string name="backup_restored_title">المحفظة المستعادة</string>
+    <string name="backup_restored_check">تحقق أن هذا العنوان عنوان تعرفه قبل أن تثق به.</string>
+    <string name="backup_opened">فُتح — %1$d حصة (حصص) ضمان، ارتفاع الاستعادة %2$d</string>
+    <string name="backup_could_not_open">تعذّر فتحه — عبارة المرور خاطئة، أو الملف قد عُدِّل</string>
+    <string name="backup_share_title">احفظ نسخة DUCAT الاحتياطية</string>
+</resources>

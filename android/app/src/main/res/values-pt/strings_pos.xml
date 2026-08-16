@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tela de ponto de venda (Pos.kt) -->
+    <string name="pos_this_sale">Esta venda</string>
+    <string name="pos_items">Itens</string>
+    <string name="pos_quick_amount">Valor rápido</string>
+    <string name="pos_total_in">Total (%1$s)</string>
+    <string name="pos_request_amount">Pedir %1$s</string>
+    <string name="pos_request_payment">Pedir pagamento</string>
+    <string name="pos_sale">Venda</string>
+    <string name="pos_remove">Remover</string>
+    <string name="pos_network_fee_note">A taxa de rede é do cliente, paga à rede — nunca parte da conta.</string>
+    <string name="pos_charge_amount">Cobrar %1$s</string>
+    <string name="pos_add_first_item">Adicione o primeiro item para começar uma venda.</string>
+    <string name="pos_item">Item</string>
+    <string name="pos_add_line">Adicionar linha</string>
+    <string name="pos_tax">Imposto</string>
+    <string name="pos_error_publish_code">não foi possível publicar o código</string>
+    <string name="pos_error_bill_not_sent">A pessoa conectou, mas a conta não foi enviada: %1$s</string>
+    <string name="pos_getting_code_ready">Preparando o código…</string>
+    <string name="pos_scan_hint">O cliente escaneia isto no DUCAT. A conta acima chega no telefone dele no mesmo instante.</string>
+    <string name="pos_tap_hint">Ou encoste os telefones — a mesma conta de qualquer jeito</string>
+    <string name="pos_payment_seen">Pagamento visto ✓</string>
+    <string name="pos_payment_settling">O pagamento está na rede — liquidando, uns dois minutos. O recibo sai sozinho quando o pagamento chega.</string>
+    <string name="pos_bill_sent_to">Conta enviada para %1$s</string>
+    <string name="pos_the_customer">o cliente</string>
+    <string name="pos_billed_hint">A pessoa confirma no próprio telefone. Quando o pagamento entra na cadeia, o recibo vai automaticamente — nada mais a fazer aqui.</string>
+    <string name="pos_paid">Pago ✓</string>
+    <string name="pos_receipt_sent_to">Recibo enviado para %1$s.</string>
+    <string name="pos_back">Voltar</string>
+    <string name="pos_new_sale">Nova venda</string>
+    <string name="pos_new_sale_settles">Nova venda (esta liquida sozinha)</string>
+    <string name="pos_cancel_sale">Cancelar venda</string>
+</resources>

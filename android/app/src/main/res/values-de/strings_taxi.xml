@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">Code ließ sich nicht veröffentlichen</string>
+    <string name="taxi_meter_started_msg">Taxameter gestartet — Grundpreis %1$s XMR, %2$s XMR pro Minute. Die Rechnung am Ende zeigt die Minuten.</string>
+    <string name="taxi_err_terms_not_sent">Verbunden, aber die Konditionen gingen nicht raus: %1$s</string>
+    <string name="taxi_set_fare">Fahrpreis festlegen</string>
+    <string name="taxi_base_label">Grundpreis (%1$s)</string>
+    <string name="taxi_per_min_label">Pro Min. (%1$s)</string>
+    <string name="taxi_price_in_instead">Stattdessen in %1$s angeben</string>
+    <string name="taxi_rate_locked_hint">Ein in %1$s eingetippter Tarif wird beim Start der Fahrt auf XMR festgeschrieben — die Zahl, der der Fahrgast zustimmt, ist die Zahl auf der Rechnung.</string>
+    <string name="taxi_set_rate_hint">Lege einen Minutentarif fest, um den Abhol-Code zu öffnen.</string>
+    <string name="taxi_pickup">Abholung</string>
+    <string name="taxi_scan_hint">Der Fahrgast scannt oder hält das Telefon dran. Der Tarif landet in der Unterhaltung, und das Taxameter startet von selbst.</string>
+    <string name="taxi_meter_terms">Grundpreis %1$s + %2$s/Min.</string>
+    <string name="taxi_rider">Fahrgast</string>
+    <string name="taxi_line_base_fare">Grundpreis</string>
+    <string name="taxi_line_metered">%1$d Min. %2$02d s × %3$s XMR/Min.</string>
+    <string name="taxi_err_send_fare">Fahrpreis ließ sich nicht senden</string>
+    <string name="taxi_end_ride_bill">Fahrt beenden — Rechnung %1$s</string>
+    <string name="taxi_bill_hint">Die Rechnung zeigt die Minuten und den Tarif. Die Quittung geht von selbst raus, sobald der Fahrpreis eintrifft — auch wenn der Fahrgast längst weg ist.</string>
+    <string name="taxi_cancel_ride_no_bill">Fahrt abbrechen — keine Rechnung</string>
+    <string name="taxi_cancel_title">Diese Fahrt abbrechen?</string>
+    <string name="taxi_cancel_body">Das Taxameter stoppt, und es geht keine Rechnung raus. Die bisher gezählten Minuten werden verworfen und sind nicht wiederherstellbar.</string>
+    <string name="taxi_cancel_confirm">Fahrt abbrechen</string>
+    <string name="taxi_keep_going">Weiterfahren</string>
+</resources>

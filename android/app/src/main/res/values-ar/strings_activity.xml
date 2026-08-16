@@ -1,0 +1,33 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">لا شيء بعد</string>
+    <string name="activity_empty_desc">تظهر المدفوعات هنا بعد قراءة السلسلة. اشحن رصيدك من «الحسابات» لترى شيئًا.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">قيد الانتظار</string>
+    <string name="activity_they_ask">%1$s يطلب</string>
+    <string name="activity_you_asked">طلبت من %1$s</string>
+    <plurals name="activity_items">
+        <item quantity="zero">لا عناصر</item>
+        <item quantity="one">عنصر واحد</item>
+        <item quantity="two">عنصران</item>
+        <item quantity="few">%1$d عناصر</item>
+        <item quantity="many">%1$d عنصرًا</item>
+        <item quantity="other">%1$d عنصر</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">جارٍ قراءة المعاملة…</string>
+    <string name="activity_receipt_chip">🧾 إيصال</string>
+    <string name="activity_note_quoted">“%1$s”</string>
+    <string name="activity_sending">قيد الإرسال — ليست في كتلة بعد</string>
+    <string name="activity_spent_unknown">أُنفق، لكن لا يمكننا تحديد أين</string>
+    <string name="activity_maybe_change">قد يكون باقيًا من دفعة قمت بها أنت</string>
+    <string name="activity_locked_when">%1$s · يُفتح بعد %2$d كتلة</string>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">إلى %1$s</string>
+    <string name="activity_from">من %1$s</string>
+    <string name="activity_sent_unrecorded">أُرسلت — المستلم غير مسجَّل</string>
+    <string name="activity_received_unknown">استُلمت — المرسل مجهول</string>
+</resources>

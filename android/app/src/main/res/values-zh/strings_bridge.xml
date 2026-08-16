@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="other">原生核心：%1$d 项检查通过</item>
+    </plurals>
+    <string name="bridge_checks_failed">原生核心：%2$d 项中有 %1$d 项失败</string>
+    <string name="bridge_jni_note">这些检查经由 JNI 调用 Rust 核心 — 这是 Rust 测试唯一够不到的一层。</string>
+    <string name="bridge_got_expected">得到 %1$s，期望 %2$s</string>
+
+    <!-- Check names -->
+    <string name="bridge_check_protocol_version">协议版本</string>
+    <string name="bridge_check_capacity_6">6 个输出的容量</string>
+    <string name="bridge_check_capacity_1">1 个输出的容量</string>
+    <string name="bridge_check_float_plan">10 笔付款的备用金方案</string>
+    <string name="bridge_check_bucket_floor">4.999 XMR 的桶下限</string>
+    <string name="bridge_check_stale_rate">陈旧率逐级上升</string>
+</resources>

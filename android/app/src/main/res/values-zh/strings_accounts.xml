@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">充值</string>
+    <string name="accounts_top_up_desc">从任意钱包或交易所向这个地址发送 Monero。这是一个普通的 XMR 地址 — 整个转账过程与 DUCAT 毫无关系。</string>
+    <string name="accounts_no_wallet">还没有钱包 — 先完成设置。</string>
+    <string name="accounts_copy">复制</string>
+    <string name="accounts_hide">隐藏</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">余额</string>
+    <string name="accounts_balances_desc">特意分开显示：你现在能花的，并不等于你拥有的。</string>
+    <string name="accounts_waiting_for_node">正在等待节点。</string>
+    <string name="accounts_spendable">可花费</string>
+    <string name="accounts_show_in">以 %1$s 显示</string>
+    <string name="accounts_stagenet_fiat_note">stagenet 币是测试币。这个数字是等量真实 Monero 的价值 — 这些币本身一文不值。</string>
+    <string name="accounts_notes">纸币</string>
+    <string name="accounts_bond">保证金</string>
+    <string name="accounts_bond_none">无</string>
+    <string name="accounts_scanning_from_genesis_title">正在从链的起点扫描</string>
+    <string name="accounts_scanning_from_genesis_desc">这个钱包创建时应用还连不上节点，所以它不知道自己是什么时候创建的。目前在第 %1$d 个区块（共 %2$d 个），照这样读完要一天多。如果你确定钱包比这更新，可以直接跳过一段。</string>
+    <string name="accounts_skip_ahead">跳过一段</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">跳到</string>
+    <string name="accounts_skip_ahead_desc">在此之前收到的任何款项都不会被找到。选一个你确定早于钱包创建的时间。</string>
+    <string name="accounts_about_a_day_ago">大约一天前</string>
+    <string name="accounts_about_a_week_ago">大约一周前</string>
+    <string name="accounts_about_a_month_ago">大约一个月前</string>
+    <string name="accounts_skip_option">"%1$s  —  区块 %2$d"</string>
+    <string name="accounts_block_height_label">或输入区块高度</string>
+    <string name="accounts_use_that_height">使用该高度</string>
+    <string name="accounts_cancel">取消</string>
+</resources>

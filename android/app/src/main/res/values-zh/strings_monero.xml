@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monero_title">Monero</string>
+    <string name="monero_check_again">再查一次</string>
+    <string name="monero_subtitle">交易在这里广播，链也从这里读取。</string>
+    <string name="monero_finding_node">正在找节点…</string>
+    <string name="monero_no_usable_node">没有可用节点</string>
+    <string name="monero_line_height">高度</string>
+    <string name="monero_line_synced">已同步</string>
+    <string name="monero_line_network">网络</string>
+    <string name="monero_line_round_trip">往返时延</string>
+    <string name="monero_synced_yes">是</string>
+    <string name="monero_synced_no">否 — 余额会是过时的</string>
+    <string name="monero_round_trip_ms">%1$s 毫秒</string>
+    <string name="monero_no_node">无节点</string>
+    <string name="monero_change_your_node">更换节点</string>
+    <string name="monero_use_own_node">使用你自己的节点</string>
+    <string name="monero_your_node">你的节点</string>
+    <string name="monero_use_it">使用它</string>
+    <string name="monero_back_to_public">换回公共节点</string>
+    <string name="monero_cancel">取消</string>
+    <string name="monero_trust_own_title">你的节点</string>
+    <string name="monero_trust_own_body">它了解不到任何你原本不知道的关于你的事。</string>
+    <string name="monero_trust_onion_title">别人的节点，走 Tor</string>
+    <string name="monero_trust_onion_body">它能看到你的交易，但看不到交易来自哪里。</string>
+    <string name="monero_trust_public_title">别人的节点</string>
+    <string name="monero_trust_public_body">它能把你的地址和交易放在一起看。Dandelion++ 能对网络其余部分隐藏交易的来源 — 却藏不过你亲手递交的那个节点。自己跑一个节点才是解法。</string>
+    <string name="monero_wallet_title">钱包</string>
+    <string name="monero_no_wallet_key_title">此设备上没有钱包密钥</string>
+    <string name="monero_no_wallet_key_body">这次安装在应用保存钱包之前就完成了设置，所以没有可用来扫描的东西。等下去也没用 — 从备份恢复，或清除应用数据重新设置。</string>
+    <string name="monero_scanning_failed">扫描失败</string>
+    <string name="monero_unknown">未知</string>
+    <string name="monero_scanning_failed_note">上面的节点有响应，所以问题出在钱包自己读链，而不是连接。</string>
+    <string name="monero_not_started">尚未开始 — 正在找节点。</string>
+    <string name="monero_caught_up">已追到区块 %1$d</string>
+    <string name="monero_block_of">区块 %1$d / %2$d</string>
+    <plurals name="monero_blocks_to_go">
+        <item quantity="other">还剩 %1$d 个区块</item>
+    </plurals>
+    <string name="monero_partial_balance">你的余额只包含目前已读到的部分。</string>
+    <string name="monero_last_window_failed">上一窗口失败：%1$s</string>
+    <string name="monero_rescan_hint">这个钱包正从链的起点扫描；如果它是最近创建的，这比实际需要的时间长得多。</string>
+    <string name="monero_skip_ahead">跳过一段</string>
+</resources>

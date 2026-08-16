@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Header counts -->
+    <plurals name="logs_line_count">
+        <item quantity="one">%1$d ligne</item>
+        <item quantity="other">%1$d lignes</item>
+    </plurals>
+    <string name="logs_warn_count">%1$d avert.</string>
+    <string name="logs_error_count">%1$d erreur</string>
+
+    <!-- Toolbar actions -->
+    <string name="logs_copy_all">Tout copier</string>
+    <string name="logs_share">Partager</string>
+    <string name="logs_send_logs">Envoyer les journaux</string>
+    <string name="logs_clear">Effacer</string>
+    <string name="logs_copied">Copié. Les clés et le texte des messages n\'y figurent jamais.</string>
+
+    <!-- Level filter chips -->
+    <string name="logs_filter_all">Tout</string>
+    <string name="logs_filter_info">Info</string>
+    <string name="logs_filter_warn">Avert.</string>
+    <string name="logs_filter_error">Erreur</string>
+
+    <string name="logs_empty">Rien dans le journal pour l\'instant. L\'activité apparaît ici au fil des synchronisations, envois et réceptions.</string>
+</resources>

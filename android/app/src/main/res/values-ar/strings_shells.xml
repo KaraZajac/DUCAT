@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
+    <string name="shells_title_pos">نقطة البيع</string>
+    <string name="shells_tab_register">الصندوق</string>
+    <string name="shells_tab_sales">المبيعات</string>
+    <string name="shells_title_bar_tab">حساب البار</string>
+    <string name="shells_tab_tabs">الحسابات</string>
+    <string name="shells_tab_closed">المغلقة</string>
+    <string name="shells_title_taxi">تاكسي</string>
+    <string name="shells_tab_fares">الأجرة</string>
+    <string name="shells_tab_meter">العدّاد</string>
+    <string name="shells_tab_rides">المشاوير</string>
+    <string name="shells_title_donations">التبرعات</string>
+    <string name="shells_tab_code">الرمز</string>
+    <string name="shells_menu">القائمة</string>
+    <string name="shells_today">اليوم</string>
+    <string name="shells_billed_waiting">صدرت الفاتورة — في الانتظار</string>
+    <string name="shells_settled">مسوّاة</string>
+    <string name="shells_no_sales_yet">لا مبيعات بعد اليوم.</string>
+    <string name="shells_no_rides_yet">لا مشاوير بعد اليوم.</string>
+    <string name="shells_payment_seen_settling">ظهرت الدفعة — قيد التسوية</string>
+    <string name="shells_billed_unpaid">صدرت الفاتورة، لم تُدفع</string>
+    <string name="shells_paid_outside">دُفع خارج DUCAT ✓</string>
+    <string name="shells_paid">مدفوع ✓</string>
+</resources>

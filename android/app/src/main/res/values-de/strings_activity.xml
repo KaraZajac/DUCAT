@@ -1,0 +1,29 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">Noch nichts</string>
+    <string name="activity_empty_desc">Zahlungen erscheinen hier, sobald die Blockchain gelesen ist. Lade unter Konten auf, um etwas zu sehen.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">Ausstehend</string>
+    <string name="activity_they_ask">%1$s bittet um</string>
+    <string name="activity_you_asked">Du bittest %1$s um</string>
+    <plurals name="activity_items">
+        <item quantity="one">%1$d Posten</item>
+        <item quantity="other">%1$d Posten</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">Transaktion wird gelesen…</string>
+    <string name="activity_receipt_chip">🧾 Quittung</string>
+    <string name="activity_note_quoted">„%1$s“</string>
+    <string name="activity_sending">Wird gesendet — noch in keinem Block</string>
+    <string name="activity_spent_unknown">Ausgegeben, aber wohin, lässt sich nicht sagen</string>
+    <string name="activity_maybe_change">könnte Wechselgeld aus deiner eigenen Zahlung sein</string>
+    <string name="activity_locked_when">%1$s · entsperrt in %2$d Blöcken</string>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">An %1$s</string>
+    <string name="activity_from">Von %1$s</string>
+    <string name="activity_sent_unrecorded">Gesendet — Empfänger nicht festgehalten</string>
+    <string name="activity_received_unknown">Empfangen — Absender unbekannt</string>
+</resources>

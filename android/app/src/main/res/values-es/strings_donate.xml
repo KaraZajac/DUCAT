@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">Apoya a %1$s</string>
+    <string name="donate_support">Apoyar</string>
+    <string name="donate_no_wallet">Aún no hay billetera — primero termina la configuración.</string>
+    <string name="donate_any_wallet">Cualquier billetera Monero puede donar aquí — nadie necesita esta app.</string>
+    <string name="donate_since_opening">Desde la apertura</string>
+    <string name="donate_reuse_warning">Este único código lo reutilizan todos los donantes, así que en el libro público de Monero las donaciones que recibe pueden vincularse entre sí. Y un código impreso es tan honesto como la última persona que lo tocó — revisa que sea el tuyo allí donde lo publiques.</string>
+</resources>

@@ -1,0 +1,52 @@
+<resources>
+    <!-- app_name and other translatable="false" entries are omitted: they fall back to values/. -->
+    <string name="nfc_service_description">Paiements de proximité DUCAT</string>
+
+    <!-- ===== Units of distance ===== -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mi</string>
+
+    <!-- ===== Common ===== -->
+    <string name="common_done">Terminé</string>
+    <string name="common_cancel">Annuler</string>
+
+    <!-- ===== Navigation ===== -->
+    <string name="tab_home">Accueil</string>
+    <string name="tab_accounts">Comptes</string>
+    <string name="tab_activity">Activité</string>
+    <string name="tab_chat">Discussions</string>
+    <string name="tab_send_receive">Envoyer/Recevoir</string>
+
+    <string name="section_status">État</string>
+    <string name="section_profile">Profil</string>
+    <string name="section_contacts">Contacts</string>
+    <string name="section_logs">Journaux</string>
+    <string name="section_settings">Réglages</string>
+    <string name="section_modes">Modes de fonctionnement</string>
+
+    <!-- ===== Settings ===== -->
+    <string name="settings_language_title">Langue</string>
+    <string name="settings_language_system">Suivre le système</string>
+
+    <string name="settings_appearance_title">Apparence</string>
+    <string name="theme_follow_system">Suivre le système</string>
+    <string name="theme_latte">Latte (clair)</string>
+    <string name="theme_mocha">Moka (sombre)</string>
+
+    <string name="settings_distance_title">Distance</string>
+    <string name="distance_follow_system">Suivre le système</string>
+    <string name="distance_kilometres">Kilomètres</string>
+    <string name="distance_miles">Miles</string>
+
+    <string name="settings_prices_title">Prix</string>
+    <string name="prices_show_worth">Afficher ce que vaut un solde</string>
+    <string name="prices_currency_title">Devise</string>
+    <string name="prices_this_phone">ce téléphone</string>
+    <string name="prices_source_note">Vérifié au plus deux fois par heure, auprès de CoinGecko ou Kraken. Désactiver coupe entièrement la requête.</string>
+    <string name="prices_last_from">Dernier relevé : %1$s.</string>
+
+    <string name="settings_privacy_title">Confidentialité</string>
+    <string name="settings_read_receipts">Envoyer les accusés de lecture</string>
+    <string name="settings_read_receipts_on">Tes contacts voient quand tu as lu leurs messages. Les leurs s\'affichent de toute façon, s\'ils les envoient.</string>
+    <string name="settings_read_receipts_off">Désactivé — quand tu lis, ça ne regarde que toi. Tu vois toujours les leurs s\'ils les envoient.</string>
+</resources>

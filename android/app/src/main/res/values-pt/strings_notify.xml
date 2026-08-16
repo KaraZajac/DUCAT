@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Canal de notificação -->
+    <string name="notify_channel_name">Mensagens e pagamentos</string>
+    <string name="notify_channel_desc">Uma mensagem, uma conta, um recibo ou dinheiro chegando.</string>
+
+    <!-- Reserva pública da tela de bloqueio: o fato, nunca o valor -->
+    <string name="notify_public_activity">Atividade</string>
+
+    <!-- Texto de mensagens recebidas; %1$s remetente, %2$s valor, %3$s recado -->
+    <string name="notify_asks_for">%1$s pede %2$s</string>
+    <string name="notify_asks_for_note">%1$s pede %2$s — %3$s</string>
+    <string name="notify_sent">%1$s enviou %2$s</string>
+    <string name="notify_receipt">Recibo de %1$s — %2$s</string>
+</resources>

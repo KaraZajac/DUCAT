@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">聊天</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">分享你的名片</string>
+    <string name="contacts_share_card_body">只对一个人有效。一旦被使用就会失效 — 所以截图流传到别处也进不来。</string>
+    <string name="contacts_name_to_show_label">显示的名字（可选）</string>
+    <string name="contacts_name_to_show_support">对方可以在他们那边给你改名；他们看到的是改后的名字。</string>
+    <string name="contacts_error_make_card">无法生成名片</string>
+    <string name="contacts_publishing_inbox">正在发布你的收件箱…</string>
+    <string name="contacts_create_card">生成名片</string>
+    <string name="contacts_publishing_note">这需要几秒钟 — 得先发布两条记录，别人才能联系到你。它们在你关掉应用后仍然有效。</string>
+    <string name="contacts_copy_link">复制链接</string>
+    <string name="contacts_send">发送</string>
+    <string name="contacts_expires_24h">24 小时后过期。</string>
+    <string name="contacts_send_your_card">发送你的名片</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">将相机对准对方的 DUCAT 名片</string>
+    <string name="contacts_card_expired_ask_new">这张名片已过期。请对方给一张新的。</string>
+    <string name="contacts_not_a_card">这不是 DUCAT 名片</string>
+    <string name="contacts_add_contact_title">添加联系人</string>
+    <string name="contacts_paste_link_label">粘贴对方的 ducat: 链接</string>
+    <string name="contacts_paste">粘贴</string>
+    <string name="contacts_scan">扫描</string>
+    <string name="contacts_card_expired_ask_them">这张名片已过期。请对方给一张新的。</string>
+    <string name="contacts_read_card">读取名片</string>
+    <string name="contacts_no_name_given">（没有留名字）</string>
+    <string name="contacts_unverified_name">未验证 — 这是对方自己输入的名字</string>
+    <string name="contacts_check_characters">如果对方是谁很重要，请通过你信任的渠道与对方核对这些字符。</string>
+    <string name="contacts_save_them_as_label">保存为</string>
+    <string name="contacts_save_them_as_support">你给对方起的名字。只有你能看到。</string>
+    <string name="contacts_error_read_inbox">无法读取对方的收件箱</string>
+    <string name="contacts_reading_inbox">正在读取对方的收件箱…</string>
+    <string name="contacts_add_contact_button">添加联系人</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">这张名片已经被用过了。请对方给一张新的。</string>
+    <string name="contacts_reply_expired">这张名片已过期。请对方给一张新的。</string>
+    <string name="contacts_reply_badsig">这条链接已损坏 — 重新复制一次试试。</string>
+    <string name="contacts_reply_own_card">这是你自己的名片。</string>
+    <string name="contacts_reply_refused">对方拒绝了请求。</string>
+</resources>

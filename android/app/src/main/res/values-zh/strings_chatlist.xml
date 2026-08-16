@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">我的名片</string>
+    <string name="chatlist_new_chat">新聊天</string>
+    <string name="chatlist_no_conversations">没有对话</string>
+    <string name="chatlist_empty_hint">当面把名片交给对方，或通过你已经信任的任何应用发过去。没有人能靠名字被找到 — 要联系一个人，得有对方给你的名片。</string>
+    <string name="chatlist_preview_you">你：%1$s</string>
+    <string name="chatlist_no_messages_yet">还没有消息</string>
+    <string name="chatlist_delete_title">删除这段对话？</string>
+    <string name="chatlist_delete_body">与 %1$s 的所有消息都会从这台手机上删除，无法恢复。%1$s 仍留在你的联系人里 — 随时可以用「新聊天」重新开始。</string>
+    <string name="chatlist_delete">删除</string>
+    <string name="chatlist_cancel">取消</string>
+    <string name="chatlist_add_contact">添加联系人</string>
+    <string name="chatlist_add_contact_hint">扫描或粘贴对方给你的名片</string>
+    <string name="chatlist_no_contacts_yet">还没有联系人。</string>
+    <string name="chatlist_preview_requested">💸 请求 %1$s XMR</string>
+    <string name="chatlist_preview_sent">💸 发送了 %1$s XMR</string>
+    <string name="chatlist_preview_receipt">🧾 收据 — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">回应了 %1$s</string>
+    <string name="chatlist_preview_photo">📷 照片</string>
+    <string name="chatlist_time_now">刚刚</string>
+    <string name="chatlist_time_minutes">%1$d分</string>
+    <string name="chatlist_time_hours">%1$d时</string>
+</resources>

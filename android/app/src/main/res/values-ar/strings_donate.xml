@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">ادعم %1$s</string>
+    <string name="donate_support">ادعم</string>
+    <string name="donate_no_wallet">لا محفظة بعد — أكمل الإعداد أولًا.</string>
+    <string name="donate_any_wallet">أي محفظة Monero يمكنها التبرع هنا — لا يحتاج أحد إلى هذا التطبيق.</string>
+    <string name="donate_since_opening">منذ الافتتاح</string>
+    <string name="donate_reuse_warning">هذا الرمز الواحد يعاد استخدامه من كل متبرع، فتكون التبرعات إليه قابلة للربط ببعضها على سجل Monero العلني. والرمز المطبوع صادق بقدر صدق آخر من لمسه — تحقق أنه رمزك حيثما تنشره.</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_back">Voltar</string>
+    <string name="main_menu">Menu</string>
+    <string name="main_codes">Códigos</string>
+    <string name="main_send_or_receive">Enviar ou receber</string>
+    <string name="main_bill_decline">Recusando essa conta de %1$s XMR — desta vez não.</string>
+    <string name="main_backup_title">Fazer backup</string>
+    <string name="main_backup_body">Você tem contatos que seu último backup não tem. Uma restauração traria de volta o dinheiro, mas não as pessoas.</string>
+    <string name="main_open_backup_settings">Abrir configurações de backup</string>
+    <string name="main_recent">Recentes</string>
+    <string name="main_see_all">Ver tudo</string>
+    <string name="main_sent">Enviado</string>
+    <string name="main_received">Recebido</string>
+</resources>

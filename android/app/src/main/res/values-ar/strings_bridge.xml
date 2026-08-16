@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Summary line -->
+    <plurals name="bridge_checks_passed">
+        <item quantity="zero">النواة الأصلية: لم يُجرَ أي فحص</item>
+        <item quantity="one">النواة الأصلية: نجح فحص واحد</item>
+        <item quantity="two">النواة الأصلية: نجح فحصان</item>
+        <item quantity="few">النواة الأصلية: نجحت %1$d فحوص</item>
+        <item quantity="many">النواة الأصلية: نجح %1$d فحصًا</item>
+        <item quantity="other">النواة الأصلية: نجح %1$d فحص</item>
+    </plurals>
+    <string name="bridge_checks_failed">النواة الأصلية: فشل %1$d من %2$d</string>
+    <string name="bridge_jni_note">هذه تستدعي نواة Rust عبر JNI — الطبقة الوحيدة التي لا تصلها اختبارات Rust.</string>
+    <string name="bridge_got_expected">النتيجة %1$s، والمتوقع %2$s</string>
+
+    <!-- Check names (rendered per row; expected/got values stay in code — they
+         are compared with == against what the bridge returns) -->
+    <string name="bridge_check_protocol_version">إصدار البروتوكول</string>
+    <string name="bridge_check_capacity_6">سعة 6 مخرجات</string>
+    <string name="bridge_check_capacity_1">سعة مخرج واحد</string>
+    <string name="bridge_check_float_plan">خطة رصيد الصندوق لـ 10 دفعات</string>
+    <string name="bridge_check_bucket_floor">حد أدنى للسلة عند 4.999 XMR</string>
+    <string name="bridge_check_stale_rate">معدل التقادم يتصاعد</string>
+</resources>

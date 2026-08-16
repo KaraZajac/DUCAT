@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_too_much_data">Zu viele Daten für einen QR-Code — nimm stattdessen den Link.</string>
+    <string name="qr_code">QR-Code</string>
+</resources>

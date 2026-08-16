@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Top bar -->
+    <string name="chat_back">رجوع</string>
+    <string name="chat_conversation_settings">إعدادات المحادثة</string>
+
+    <!-- Composer / sending -->
+    <string name="chat_could_not_send">تعذّر الإرسال</string>
+    <string name="chat_could_not_send_the">تعذّر إرسال %1$s</string>
+    <string name="chat_what_picture">الصورة</string>
+    <string name="chat_what_file">الملف</string>
+    <string name="chat_what_location">الموقع</string>
+    <string name="chat_what_voice_memo">الرسالة الصوتية</string>
+    <string name="chat_what_card">البطاقة</string>
+    <string name="chat_what_contact">جهة الاتصال</string>
+    <string name="chat_error_location_fix">تعذّر تحديد الموقع</string>
+    <string name="chat_recording_placeholder">جارٍ التسجيل… %1$d ث</string>
+    <string name="chat_message_placeholder">رسالة</string>
+    <string name="chat_take_picture">التقاط صورة</string>
+    <string name="chat_hold_to_record">اضغط مطوّلًا لتسجيل رسالة صوتية</string>
+    <string name="chat_attach">إرفاق</string>
+    <string name="chat_close">إغلاق</string>
+    <string name="chat_send">إرسال</string>
+
+    <!-- Attachment tray -->
+    <string name="chat_gallery">المعرض</string>
+    <string name="chat_file">ملف</string>
+    <string name="chat_money_desc">أرسل مالًا أو اطلبه</string>
+    <string name="chat_money">المال</string>
+    <string name="chat_contact">جهة اتصال</string>
+    <string name="chat_location">الموقع</string>
+
+    <!-- Message bodies composed by the app -->
+    <string name="chat_intro_card_body">🎟 بطاقة تخصّني — مرّرها إلى من ينبغي أن يصل إليّ. استخدام واحد، أسبوع واحد:\n%1$s</string>
+    <string name="chat_decline_bill">أرفض تلك الفاتورة البالغة %1$s XMR — ليس هذه المرة.</string>
+
+    <!-- Thread notices -->
+    <string name="chat_no_keys">لا مفاتيح لجهة الاتصال هذه — لم تكتمل المصافحة. اطلب منهم بطاقة جديدة.</string>
+    <string name="chat_e2e_notice">الرسائل مشفَّرة بمفاتيح تُحذف بعد استخدامها. متى قُرئت تعذّر استرجاعها — حتى عليك أنت.</string>
+
+    <!-- Retractions (kind 5) -->
+    <string name="chat_you_withdrew">سحبت رسالة</string>
+    <string name="chat_they_withdrew">سحب %1$s رسالة</string>
+    <string name="chat_you_declined">رفضت</string>
+    <string name="chat_they_declined">رفض %1$s</string>
+    <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
+
+    <!-- Long-press dialog -->
+    <string name="chat_message_title">الرسالة</string>
+    <string name="chat_delete_note">الحذف يزيلها من هذا الهاتف فقط. الطرف الآخر يحتفظ بنسخته — ولا شيء هنا يستطيع الوصول إليها.</string>
+    <string name="chat_copy">نسخ</string>
+    <string name="chat_delete">حذف</string>
+    <string name="chat_cancel">إلغاء</string>
+
+    <!-- Conversation settings dialog -->
+    <string name="chat_keep_everything">الاحتفاظ بكل شيء</string>
+    <string name="chat_1_hour">ساعة</string>
+    <string name="chat_1_day">يوم</string>
+    <string name="chat_1_week">أسبوع</string>
+    <string name="chat_clear_confirm_title">أتمسح هذه الدردشة؟</string>
+    <string name="chat_clear_confirm_text">تُحذف كل رسالة في هذه المحادثة من هذا الهاتف ولا يمكن استرجاعها. الطرف الآخر يحتفظ بنسخته.</string>
+    <string name="chat_clear">مسح</string>
+    <string name="chat_conversation_title">المحادثة</string>
+    <string name="chat_delete_after">حذف الرسائل على هذا الهاتف بعد</string>
+    <string name="chat_only_your_copy">نسختك فقط. الطرف الآخر يحتفظ بنسخته، ولا شيء هنا يستطيع الوصول إليها.</string>
+    <string name="chat_clear_this_chat">مسح هذه الدردشة</string>
+    <string name="chat_done">تم</string>
+
+    <!-- Bubbles -->
+    <string name="chat_downloading_image">📷 جارٍ التنزيل…</string>
+    <string name="chat_downloading_audio">🎤 جارٍ التنزيل…</string>
+    <string name="chat_downloading_file">📎 جارٍ التنزيل…</string>
+    <string name="chat_picture_desc">صورة</string>
+    <string name="chat_could_not_decode">📷 (تعذّر فك الترميز)</string>
+    <string name="chat_you_asked_for">طلبت</string>
+    <string name="chat_asked_you_for">طلب منك</string>
+    <string name="chat_receipt_you_issued">إيصال أصدرته</string>
+    <string name="chat_receipt">إيصال</string>
+    <string name="chat_you_offered_to_drive">عرضت أن توصّل</string>
+    <string name="chat_offers_to_drive_you">يعرض أن يوصّلك</string>
+    <string name="chat_you_accepted_ride">قبلت المشوار</string>
+    <string name="chat_ride_accepted">قُبل المشوار</string>
+    <string name="chat_you_sent">أرسلت</string>
+    <string name="chat_sent_you">أرسل لك</string>
+    <string name="chat_min_away">على بعد %1$d دقيقة تقريبًا</string>
+    <string name="chat_paid">مدفوع ✓</string>
+    <string name="chat_cancelled">أُلغي</string>
+    <string name="chat_review_payment">مراجعة الدفعة</string>
+    <string name="chat_no_address">لا عنوان في هذا الطلب — اسألهم أين تُرسل المال.</string>
+    <string name="chat_no_forward_secrecy">أُرسلت دون سرّية أمامية</string>
+
+    <!-- Audio / file bubbles -->
+    <string name="chat_stop">إيقاف</string>
+    <string name="chat_play_voice_memo">تشغيل الرسالة الصوتية</string>
+    <string name="chat_voice_memo">رسالة صوتية</string>
+    <string name="chat_size_kb">%1$d ك.ب</string>
+    <string name="chat_size_b">%1$d بايت</string>
+    <string name="chat_file_fallback">ملف</string>
+
+    <!-- Bill breakdown -->
+    <string name="chat_subtotal">المجموع الفرعي</string>
+    <string name="chat_tax">الضريبة</string>
+    <string name="chat_total">الإجمالي</string>
+
+    <!-- Attachment errors (surfaced via the error line) -->
+    <string name="chat_not_an_image">ليست صورة</string>
+    <string name="chat_picture_too_big">تعذّر تصغير تلك الصورة بما يكفي</string>
+    <string name="chat_nothing_recorded">لم يُسجَّل شيء</string>
+    <string name="chat_memo_too_long">تلك الرسالة الصوتية طويلة جدًا — بضع دقائق هي الحد الأقصى</string>
+    <string name="chat_could_not_read_file">تعذّرت قراءة ذلك الملف</string>
+    <string name="chat_file_too_big">حجم ذلك الملف %1$d ك.ب — الحد الأقصى للمرفقات 1 م.ب</string>
+
+    <!-- Share-contact dialog -->
+    <string name="chat_share">مشاركة</string>
+    <string name="chat_card_for_me">بطاقة تخصّني</string>
+    <string name="chat_card_for_me_desc">رابط يُستخدم مرة واحدة يمكنهم تمريره إلى من ينبغي أن يصل إليك.</string>
+    <string name="chat_someones_profile">أو ملف شخص ما — اسمه وما اختار نشره. ليست رمز اتصال: تلك رموز أصحابها وهم من يمنحونها.</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Map marker titles (shown when a marker is tapped) -->
+    <string name="hailmap_pickup">上车点</string>
+    <string name="hailmap_destination">目的地</string>
+    <string name="hailmap_you">你</string>
+</resources>

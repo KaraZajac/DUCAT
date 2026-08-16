@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">Backup</string>
+    <string name="backup_body">Eine verschlüsselte Datei mit deiner Identität, deinen Schlüsseln und deinen Einstellungen. Exportiere eine frische, wann immer sich etwas Wichtiges ändert.</string>
+    <string name="backup_passphrase">Passphrase</string>
+    <string name="backup_export">Exportieren</string>
+    <string name="backup_import">Importieren</string>
+    <string name="backup_exported_bytes">%1$d Bytes exportiert</string>
+    <string name="backup_export_failed">Export fehlgeschlagen</string>
+    <string name="backup_restored_title">Wallet wiederhergestellt</string>
+    <string name="backup_restored_check">Prüfe, ob du diese Adresse wiedererkennst, bevor du ihr vertraust.</string>
+    <string name="backup_opened">Geöffnet — %1$d Treuhand-Anteil(e), Wiederherstellungshöhe %2$d</string>
+    <string name="backup_could_not_open">Ließ sich nicht öffnen — falsche Passphrase, oder die Datei wurde verändert</string>
+    <string name="backup_share_title">Dein DUCAT-Backup speichern</string>
+</resources>

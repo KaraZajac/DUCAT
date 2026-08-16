@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">Fechar</string>
+    <string name="qrhub_scan_code">Escanear código</string>
+    <string name="qrhub_my_code">Meu código</string>
+    <string name="qrhub_scan_prompt">Um cartão DUCAT ou um endereço Monero</string>
+    <string name="qrhub_not_a_code">Esse código não é nem um cartão DUCAT nem um endereço Monero.</string>
+    <string name="qrhub_card_failed">esse cartão não funcionou</string>
+    <string name="qrhub_card_issue_failed">não foi possível criar um cartão</string>
+    <string name="qrhub_no_name_set">nenhum nome definido</string>
+    <string name="qrhub_publishing">Publicando dois registros para que as pessoas possam alcançar você mesmo com este telefone desligado.</string>
+    <string name="qrhub_copy_link">Copiar link</string>
+    <string name="qrhub_share">Compartilhar</string>
+    <string name="qrhub_share_chooser">Compartilhe seu cartão</string>
+    <string name="qrhub_tap_or_scan">Encoste os telefones, ou escaneie — o mesmo cartão de qualquer jeito.</string>
+    <string name="qrhub_one_per_code">Uma pessoa por código. Assim que alguém usa este, o próximo é criado automaticamente — nada a fazer.</string>
+    <string name="qrhub_name_travels">Seu nome e sua foto viajam com ele. Todo o resto que você compartilha chega depois, pela conexão que ele abre.</string>
+</resources>

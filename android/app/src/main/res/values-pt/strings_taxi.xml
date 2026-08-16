@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxímetro (Taxi.kt) -->
+    <string name="taxi_err_publish_code">não foi possível publicar um código</string>
+    <string name="taxi_meter_started_msg">Taxímetro ligado — base %1$s XMR, %2$s XMR por minuto. A conta no fim mostra os minutos.</string>
+    <string name="taxi_err_terms_not_sent">A pessoa conectou, mas os termos não foram enviados: %1$s</string>
+    <string name="taxi_set_fare">Definir a tarifa</string>
+    <string name="taxi_base_label">Base (%1$s)</string>
+    <string name="taxi_per_min_label">Por min (%1$s)</string>
+    <string name="taxi_price_in_instead">Cobrar em %1$s em vez disso</string>
+    <string name="taxi_rate_locked_hint">Uma tarifa digitada em %1$s é travada em XMR quando a corrida começa — o valor que o passageiro aceita é o valor cobrado.</string>
+    <string name="taxi_set_rate_hint">Defina uma tarifa por minuto para abrir o código de embarque.</string>
+    <string name="taxi_pickup">Embarque</string>
+    <string name="taxi_scan_hint">O passageiro escaneia ou encosta o telefone. A tarifa cai na conversa e o taxímetro liga sozinho.</string>
+    <string name="taxi_meter_terms">base %1$s + %2$s/min</string>
+    <string name="taxi_rider">passageiro</string>
+    <string name="taxi_line_base_fare">Tarifa base</string>
+    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s XMR/min</string>
+    <string name="taxi_err_send_fare">não foi possível enviar a tarifa</string>
+    <string name="taxi_end_ride_bill">Encerrar corrida — conta %1$s</string>
+    <string name="taxi_bill_hint">A conta mostra os minutos e a tarifa. O recibo vai para o passageiro sozinho quando o valor chega — mesmo depois de ele já ter ido.</string>
+    <string name="taxi_cancel_ride_no_bill">Cancelar corrida — sem conta</string>
+    <string name="taxi_cancel_title">Cancelar esta corrida?</string>
+    <string name="taxi_cancel_body">O taxímetro para e nenhuma conta é enviada. Os minutos contados até aqui são descartados e não podem ser recuperados.</string>
+    <string name="taxi_cancel_confirm">Cancelar corrida</string>
+    <string name="taxi_keep_going">Continuar</string>
+</resources>

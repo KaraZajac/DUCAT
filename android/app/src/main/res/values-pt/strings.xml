@@ -1,0 +1,52 @@
+<resources>
+    <!-- App metadata. app_name fica "DUCAT" em todos os idiomas: é um nome. -->
+    <string name="nfc_service_description">Pagamentos por aproximação DUCAT</string>
+
+    <!-- ===== Unidades de distância ===== -->
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mi</string>
+
+    <!-- ===== Comum ===== -->
+    <string name="common_done">Concluído</string>
+    <string name="common_cancel">Cancelar</string>
+
+    <!-- ===== Navegação ===== -->
+    <string name="tab_home">Início</string>
+    <string name="tab_accounts">Contas</string>
+    <string name="tab_activity">Atividade</string>
+    <string name="tab_chat">Conversas</string>
+    <string name="tab_send_receive">Enviar/Receber</string>
+
+    <string name="section_status">Status</string>
+    <string name="section_profile">Perfil</string>
+    <string name="section_contacts">Contatos</string>
+    <string name="section_logs">Registros</string>
+    <string name="section_settings">Configurações</string>
+    <string name="section_modes">Modos de operação</string>
+
+    <!-- ===== Configurações ===== -->
+    <string name="settings_language_title">Idioma</string>
+    <string name="settings_language_system">Seguir o sistema</string>
+
+    <string name="settings_appearance_title">Aparência</string>
+    <string name="theme_follow_system">Seguir o sistema</string>
+    <string name="theme_latte">Latte (claro)</string>
+    <string name="theme_mocha">Mocha (escuro)</string>
+
+    <string name="settings_distance_title">Distância</string>
+    <string name="distance_follow_system">Seguir o sistema</string>
+    <string name="distance_kilometres">Quilômetros</string>
+    <string name="distance_miles">Milhas</string>
+
+    <string name="settings_prices_title">Preços</string>
+    <string name="prices_show_worth">Mostrar quanto vale um saldo</string>
+    <string name="prices_currency_title">Moeda</string>
+    <string name="prices_this_phone">este telefone</string>
+    <string name="prices_source_note">Consultado no máximo duas vezes por hora, no CoinGecko ou na Kraken. Desligar isto interrompe a consulta por completo.</string>
+    <string name="prices_last_from">Último de %1$s.</string>
+
+    <string name="settings_privacy_title">Privacidade</string>
+    <string name="settings_read_receipts">Enviar confirmações de leitura</string>
+    <string name="settings_read_receipts_on">Os contatos veem quando você leu as mensagens deles. As confirmações das suas mensagens continuam aparecendo, se eles as enviarem.</string>
+    <string name="settings_read_receipts_off">Desligado — quando você lê é assunto seu. Você ainda vê as confirmações deles, se eles as enviarem.</string>
+</resources>

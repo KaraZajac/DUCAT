@@ -1,0 +1,45 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">Ardoises ouvertes</string>
+    <string name="bartab_start_tab">Ouvrir une ardoise</string>
+    <string name="bartab_section_running">En cours</string>
+    <string name="bartab_section_billed">Facturées — en attente de paiement</string>
+    <string name="bartab_receipt_auto_hint">Le reçu leur parvient tout seul dès que le paiement arrive — même après leur départ.</string>
+    <string name="bartab_section_settled">Réglées</string>
+    <string name="bartab_clear">Effacer</string>
+    <string name="bartab_nothing_settled">Rien de réglé ce soir pour l\'instant.</string>
+    <string name="bartab_no_tabs">Pas encore d\'ardoise. Ouvres-en une à la première commande.</string>
+    <plurals name="bartab_items">
+        <item quantity="one">%1$d article</item>
+        <item quantity="other">%1$d articles</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">paiement vu — règlement en cours</string>
+    <string name="bartab_state_billed_unpaid">facturée, impayée</string>
+    <string name="bartab_state_paid_oob">payée hors DUCAT ✓</string>
+    <string name="bartab_state_cancelled">annulée</string>
+    <string name="bartab_state_paid">payée ✓</string>
+    <string name="bartab_new_customer">Nouveau client</string>
+    <string name="bartab_scan_hint">Il scanne ou approche son téléphone — l\'ardoise s\'ouvre toute seule.</string>
+    <string name="bartab_err_publish_code">impossible de publier un code</string>
+    <string name="bartab_or_regular">Ou un habitué</string>
+    <string name="bartab_back">Retour</string>
+    <string name="bartab_bill_cancelled_msg">Cette addition de %1$s XMR est annulée — rien à payer.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · ardoise à %3$s XMR</string>
+    <string name="bartab_remove_line">Retirer</string>
+    <string name="bartab_err_send_bill">impossible d\'envoyer l\'addition</string>
+    <string name="bartab_settle_bill">Clôturer — addition %1$s</string>
+    <string name="bartab_settle_hint">Une addition détaillée dans ta conversation avec %1$s. Le paiement peut se faire de n\'importe où — le fil ne se ferme pas quand la personne s\'en va.</string>
+    <string name="bartab_discard_tab">Jeter l\'ardoise</string>
+    <string name="bartab_discard_title">Jeter cette ardoise ?</string>
+    <string name="bartab_discard_body">L\'ardoise et tout ce qui y a été inscrit sont supprimés de ce téléphone. Aucune addition n\'est envoyée, et c\'est irréversible.</string>
+    <string name="bartab_discard_confirm">Jeter</string>
+    <string name="bartab_keep_tab">Garder l\'ardoise</string>
+    <string name="bartab_billed_hint">Facturée. Le reçu leur parvient tout seul quand le paiement arrive. Si elle a été réglée autrement, indique-le ici :</string>
+    <string name="bartab_paid_outside_button">Payée hors DUCAT (espèces, carte)</string>
+    <string name="bartab_cancel_bill">Annuler l\'addition</string>
+    <string name="bartab_cancelled_note">Annulée — la personne a été prévenue dans la conversation.</string>
+    <string name="bartab_paid_oob_note">Payée hors DUCAT ✓ — reçu envoyé, aucune transaction attachée.</string>
+    <string name="bartab_paid_note">Payée ✓ — reçu envoyé.</string>
+    <string name="bartab_remove_from_book">Retirer du carnet d\'ardoises</string>
+    <string name="bartab_back_to_tabs">Retour aux ardoises</string>
+</resources>

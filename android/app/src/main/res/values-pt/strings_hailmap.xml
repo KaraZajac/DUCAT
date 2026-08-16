@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Títulos dos marcadores do mapa (mostrados ao tocar em um marcador) -->
+    <string name="hailmap_pickup">Embarque</string>
+    <string name="hailmap_destination">Destino</string>
+    <string name="hailmap_you">Você</string>
+</resources>

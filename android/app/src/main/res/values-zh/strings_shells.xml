@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
+    <string name="shells_title_pos">收银台</string>
+    <string name="shells_tab_register">收银</string>
+    <string name="shells_tab_sales">销售</string>
+    <string name="shells_title_bar_tab">酒吧挂账</string>
+    <string name="shells_tab_tabs">挂账</string>
+    <string name="shells_tab_closed">已关</string>
+    <string name="shells_title_taxi">出租车</string>
+    <string name="shells_tab_fares">接单</string>
+    <string name="shells_tab_meter">计价器</string>
+    <string name="shells_tab_rides">行程</string>
+    <string name="shells_title_donations">捐赠</string>
+    <string name="shells_tab_code">收款码</string>
+    <string name="shells_menu">菜单</string>
+    <string name="shells_today">今天</string>
+    <string name="shells_billed_waiting">已出账 — 等待中</string>
+    <string name="shells_settled">已结清</string>
+    <string name="shells_no_sales_yet">今天还没有销售。</string>
+    <string name="shells_no_rides_yet">今天还没有行程。</string>
+    <string name="shells_payment_seen_settling">已看到付款 — 结算中</string>
+    <string name="shells_billed_unpaid">已出账，未付</string>
+    <string name="shells_paid_outside">在 DUCAT 之外付清 ✓</string>
+    <string name="shells_paid">已付 ✓</string>
+</resources>

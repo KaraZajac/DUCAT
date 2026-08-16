@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qrhub_close">关闭</string>
+    <string name="qrhub_scan_code">扫码</string>
+    <string name="qrhub_my_code">我的码</string>
+    <string name="qrhub_scan_prompt">DUCAT 名片或 Monero 地址</string>
+    <string name="qrhub_not_a_code">这个码既不是 DUCAT 名片，也不是 Monero 地址。</string>
+    <string name="qrhub_card_failed">那张名片没起作用</string>
+    <string name="qrhub_card_issue_failed">无法生成名片</string>
+    <string name="qrhub_no_name_set">没有设置名字</string>
+    <string name="qrhub_publishing">正在发布两条记录，这样手机关机时别人也能联系到你。</string>
+    <string name="qrhub_copy_link">复制链接</string>
+    <string name="qrhub_share">分享</string>
+    <string name="qrhub_share_chooser">分享你的名片</string>
+    <string name="qrhub_tap_or_scan">手机碰一碰，或者扫码 — 都是同一张名片。</string>
+    <string name="qrhub_one_per_code">一个码只给一个人。一旦有人领取，下一个码会自动生成 — 什么都不用做。</string>
+    <string name="qrhub_name_travels">你的名字和照片随它一起送出。其余你分享的内容随后经它打开的连接送达。</string>
+</resources>

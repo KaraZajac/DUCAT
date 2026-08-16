@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chatlist_my_card">بطاقتي</string>
+    <string name="chatlist_new_chat">دردشة جديدة</string>
+    <string name="chatlist_no_conversations">لا محادثات</string>
+    <string name="chatlist_empty_hint">سلّم بطاقتك لشخص وجهًا لوجه، أو أرسلها عبر أي تطبيق تثق به أصلًا. لا يمكن العثور على أحد بالاسم — الوصول إلى شخص يحتاج إلى بطاقة أعطاك إياها.</string>
+    <string name="chatlist_preview_you">أنت: %1$s</string>
+    <string name="chatlist_no_messages_yet">لا رسائل بعد</string>
+    <string name="chatlist_delete_title">أتحذف هذه المحادثة؟</string>
+    <string name="chatlist_delete_body">تُحذف كل رسالة مع %1$s من هذا الهاتف ولا يمكن استرجاعها. يبقى %1$s في جهات اتصالك — و«دردشة جديدة» تبدأ واحدة جديدة في أي وقت.</string>
+    <string name="chatlist_delete">حذف</string>
+    <string name="chatlist_cancel">إلغاء</string>
+    <string name="chatlist_add_contact">إضافة جهة اتصال</string>
+    <string name="chatlist_add_contact_hint">امسح أو الصق بطاقة أعطاك إياها أحدهم</string>
+    <string name="chatlist_no_contacts_yet">لا جهات اتصال بعد.</string>
+    <string name="chatlist_preview_requested">💸 طلب %1$s XMR</string>
+    <string name="chatlist_preview_sent">💸 أُرسل %1$s XMR</string>
+    <string name="chatlist_preview_receipt">🧾 إيصال — %1$s XMR</string>
+    <string name="chatlist_preview_reacted">تفاعل بـ %1$s</string>
+    <string name="chatlist_preview_photo">📷 صورة</string>
+    <string name="chatlist_time_now">الآن</string>
+    <string name="chatlist_time_minutes">%1$d د</string>
+    <string name="chatlist_time_hours">%1$d س</string>
+</resources>

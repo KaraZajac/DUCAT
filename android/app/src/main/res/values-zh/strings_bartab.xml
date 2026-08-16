@@ -1,0 +1,44 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">进行中的挂账</string>
+    <string name="bartab_start_tab">开一笔挂账</string>
+    <string name="bartab_section_running">进行中</string>
+    <string name="bartab_section_billed">已出账 — 等待付款</string>
+    <string name="bartab_receipt_auto_hint">付款一到账，收据就会自动发给对方 — 哪怕人已经走了。</string>
+    <string name="bartab_section_settled">已结清</string>
+    <string name="bartab_clear">清除</string>
+    <string name="bartab_nothing_settled">今晚还没有结清的账。</string>
+    <string name="bartab_no_tabs">还没有挂账。第一单来了就开一笔。</string>
+    <plurals name="bartab_items">
+        <item quantity="other">%1$d 项</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">已看到付款 — 结算中</string>
+    <string name="bartab_state_billed_unpaid">已出账，未付</string>
+    <string name="bartab_state_paid_oob">在 DUCAT 之外付清 ✓</string>
+    <string name="bartab_state_cancelled">已取消</string>
+    <string name="bartab_state_paid">已付 ✓</string>
+    <string name="bartab_new_customer">新顾客</string>
+    <string name="bartab_scan_hint">对方扫码或手机碰一下 — 挂账自动开好。</string>
+    <string name="bartab_err_publish_code">无法发布连接码</string>
+    <string name="bartab_or_regular">或选一位常客</string>
+    <string name="bartab_back">返回</string>
+    <string name="bartab_bill_cancelled_msg">那张 %1$s XMR 的账单已取消 — 不用付了。</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · 挂账现共 %3$s XMR</string>
+    <string name="bartab_remove_line">移除</string>
+    <string name="bartab_err_send_bill">账单发不出去</string>
+    <string name="bartab_settle_bill">结账 — 账单 %1$s</string>
+    <string name="bartab_settle_hint">一张逐项列明的账单会发进你和 %1$s 的对话。对方在哪儿都能付 — 人走了，对话也不会关。</string>
+    <string name="bartab_discard_tab">丢弃挂账</string>
+    <string name="bartab_discard_title">丢弃这笔挂账？</string>
+    <string name="bartab_discard_body">这笔挂账和上面记的所有项目都会从这台手机上删除。不会发出账单，而且无法撤销。</string>
+    <string name="bartab_discard_confirm">丢弃</string>
+    <string name="bartab_keep_tab">保留挂账</string>
+    <string name="bartab_billed_hint">已出账。付款到账后，收据会自动发给对方。如果已通过其他方式结清，请在这里注明：</string>
+    <string name="bartab_paid_outside_button">在 DUCAT 之外付清（现金、刷卡）</string>
+    <string name="bartab_cancel_bill">取消账单</string>
+    <string name="bartab_cancelled_note">已取消 — 已在对话中告知对方。</string>
+    <string name="bartab_paid_oob_note">在 DUCAT 之外付清 ✓ — 收据已发送，未附交易。</string>
+    <string name="bartab_paid_note">已付 ✓ — 收据已发送。</string>
+    <string name="bartab_remove_from_book">从挂账簿中移除</string>
+    <string name="bartab_back_to_tabs">返回挂账列表</string>
+</resources>

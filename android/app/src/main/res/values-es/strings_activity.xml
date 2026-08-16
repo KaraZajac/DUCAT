@@ -1,0 +1,29 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">Nada todavía</string>
+    <string name="activity_empty_desc">Los pagos aparecen aquí una vez leída la cadena. Recarga desde Cuentas para ver algo.</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">En espera</string>
+    <string name="activity_they_ask">%1$s te pide</string>
+    <string name="activity_you_asked">Le pediste a %1$s</string>
+    <plurals name="activity_items">
+        <item quantity="one">%1$d artículo</item>
+        <item quantity="other">%1$d artículos</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">Leyendo la transacción…</string>
+    <string name="activity_receipt_chip">🧾 recibo</string>
+    <string name="activity_note_quoted">“%1$s”</string>
+    <string name="activity_sending">Enviando — aún no está en un bloque</string>
+    <string name="activity_spent_unknown">Gastado, pero no podemos decir adónde</string>
+    <string name="activity_maybe_change">puede ser cambio de un pago tuyo</string>
+    <string name="activity_locked_when">%1$s · se desbloquea en %2$d bloques</string>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">Para %1$s</string>
+    <string name="activity_from">De %1$s</string>
+    <string name="activity_sent_unrecorded">Enviado — destinatario no registrado</string>
+    <string name="activity_received_unknown">Recibido — remitente desconocido</string>
+</resources>

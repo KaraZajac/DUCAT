@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Contagens do cabeçalho -->
+    <plurals name="logs_line_count">
+        <item quantity="one">%1$d linha</item>
+        <item quantity="other">%1$d linhas</item>
+    </plurals>
+    <string name="logs_warn_count">%1$d avisos</string>
+    <string name="logs_error_count">%1$d erros</string>
+
+    <!-- Ações da barra -->
+    <string name="logs_copy_all">Copiar tudo</string>
+    <string name="logs_share">Compartilhar</string>
+    <string name="logs_send_logs">Enviar registros</string>
+    <string name="logs_clear">Limpar</string>
+    <string name="logs_copied">Copiado. Chaves e texto de mensagens nunca aparecem aqui.</string>
+
+    <!-- Filtros de nível -->
+    <string name="logs_filter_all">Tudo</string>
+    <string name="logs_filter_info">Info</string>
+    <string name="logs_filter_warn">Aviso</string>
+    <string name="logs_filter_error">Erro</string>
+
+    <string name="logs_empty">Nada registrado ainda. A atividade aparece aqui conforme o app sincroniza, envia e recebe.</string>
+</resources>

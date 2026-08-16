@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">本单</string>
+    <string name="pos_items">商品</string>
+    <string name="pos_quick_amount">快捷金额</string>
+    <string name="pos_total_in">总额（%1$s）</string>
+    <string name="pos_request_amount">收款 %1$s</string>
+    <string name="pos_request_payment">请求付款</string>
+    <string name="pos_sale">销售</string>
+    <string name="pos_remove">移除</string>
+    <string name="pos_network_fee_note">网络手续费由顾客承担，付给网络 — 从不计入账单。</string>
+    <string name="pos_charge_amount">收 %1$s</string>
+    <string name="pos_add_first_item">添加第一件商品，开始一单。</string>
+    <string name="pos_item">商品</string>
+    <string name="pos_add_line">加一行</string>
+    <string name="pos_tax">税</string>
+    <string name="pos_error_publish_code">无法发布收款码</string>
+    <string name="pos_error_bill_not_sent">对方已连接，但账单没发出去：%1$s</string>
+    <string name="pos_getting_code_ready">正在准备收款码…</string>
+    <string name="pos_scan_hint">顾客在 DUCAT 里扫这个码。一扫，上面的账单立刻出现在对方手机上。</string>
+    <string name="pos_tap_hint">或者手机碰一碰 — 账单一样送达</string>
+    <string name="pos_payment_seen">已看到付款 ✓</string>
+    <string name="pos_payment_settling">对方的付款已进入网络 — 结算中，约两分钟。到账后收据会自动发送。</string>
+    <string name="pos_bill_sent_to">账单已发给 %1$s</string>
+    <string name="pos_the_customer">顾客</string>
+    <string name="pos_billed_hint">对方在自己手机上确认。付款上链后收据会自动发给对方 — 这边不用再做什么。</string>
+    <string name="pos_paid">已付 ✓</string>
+    <string name="pos_receipt_sent_to">收据已发给 %1$s。</string>
+    <string name="pos_back">返回</string>
+    <string name="pos_new_sale">新的一单</string>
+    <string name="pos_new_sale_settles">新的一单（这单会自行结算）</string>
+    <string name="pos_cancel_sale">取消这单</string>
+</resources>

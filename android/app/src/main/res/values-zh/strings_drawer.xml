@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">设置个人资料名字</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">使用%1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">你的身份</string>
+    <string name="drawer_persona_body">为你的名片签名的密钥。没有人能靠它找到你 — 拿到名片的人用它来核验那张名片。</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">收款</string>
+    <string name="drawer_publish_switch">让联系人直接付钱给我</string>
+    <string name="drawer_publish_off_note">不开启的话，想付钱给你的人得等你发请求。</string>
+    <string name="drawer_publish_on_warning">你的地址会发给每位联系人一次，并被重复使用。任何能看到链的人都能看出每次收款的是同一个人 — 包括只付过你一次钱的人。请求则每次带一个全新地址，避免了这一点。</string>
+    <string name="drawer_publish_scope_note">只有在开启之后添加的联系人才会拿到地址。</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">还没有联系人。到「聊天」标签页添加。</string>
+    <string name="drawer_open_chat">打开聊天</string>
+    <string name="drawer_delete_contact">删除联系人</string>
+    <string name="drawer_forget_title">忘掉 %1$s？</string>
+    <string name="drawer_forget_body">这会删除该联系人以及来自对方的所有消息，且无法恢复。要再联系上对方，需要一张新名片。</string>
+    <string name="drawer_forget_confirm">忘掉</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">选定这台设备当下的角色。选定的模式会接管整个应用，直到你回到这里选回「个人」。</string>
+    <string name="mode_personal">个人</string>
+    <string name="mode_personal_desc">你的钱包、聊天和记录。默认模式。</string>
+    <string name="mode_pos">收银台</string>
+    <string name="mode_pos_desc">一台收银机：逐项录入或直接输入总额，出示一个码 — 账单和收据都走它打开的那段对话。</string>
+    <string name="mode_bartab">酒吧挂账</string>
+    <string name="mode_bartab_desc">一本挂账簿：扫一次码，整晚记账，打烊时出一张账单。客人走了以后也能付。</string>
+    <string name="mode_taxi">出租车</string>
+    <string name="mode_taxi_desc">车费和计价器：盯一个候车点等人叫车，计价器一启动费率就白纸黑字写下，账单列明分钟数。</string>
+    <string name="mode_donate">捐赠</string>
+    <string name="mode_donate_desc">一个常设收款码，任何 Monero 钱包都能捐。对方无需安装应用。</string>
+</resources>

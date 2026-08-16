@@ -1,0 +1,26 @@
+<resources>
+    <!-- Taxi meter (Taxi.kt) -->
+    <string name="taxi_err_publish_code">impossible de publier un code</string>
+    <string name="taxi_meter_started_msg">Compteur démarré — prise en charge %1$s XMR, %2$s XMR par minute. L\'addition à la fin affiche les minutes.</string>
+    <string name="taxi_err_terms_not_sent">Il y a eu connexion mais les conditions ne sont pas parties : %1$s</string>
+    <string name="taxi_set_fare">Fixe le tarif</string>
+    <string name="taxi_base_label">Base (%1$s)</string>
+    <string name="taxi_per_min_label">Par min (%1$s)</string>
+    <string name="taxi_price_in_instead">Tarifer en %1$s à la place</string>
+    <string name="taxi_rate_locked_hint">Un tarif tapé en %1$s est verrouillé en XMR au départ de la course — le chiffre que le passager accepte est le chiffre qu\'on lui facture.</string>
+    <string name="taxi_set_rate_hint">Fixe un tarif à la minute pour ouvrir le code de prise en charge.</string>
+    <string name="taxi_pickup">Départ</string>
+    <string name="taxi_scan_hint">Le passager scanne ou approche son téléphone. Le tarif arrive dans la conversation et le compteur démarre tout seul.</string>
+    <string name="taxi_meter_terms">base %1$s + %2$s/min</string>
+    <string name="taxi_rider">passager</string>
+    <string name="taxi_line_base_fare">Prise en charge</string>
+    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s XMR/min</string>
+    <string name="taxi_err_send_fare">impossible d\'envoyer le montant de la course</string>
+    <string name="taxi_end_ride_bill">Fin de course — addition %1$s</string>
+    <string name="taxi_bill_hint">L\'addition affiche les minutes et le tarif. Le reçu parvient au passager tout seul quand le paiement arrive — même après son départ.</string>
+    <string name="taxi_cancel_ride_no_bill">Annuler la course — sans addition</string>
+    <string name="taxi_cancel_title">Annuler cette course ?</string>
+    <string name="taxi_cancel_body">Le compteur s\'arrête et aucune addition n\'est envoyée. Les minutes comptées jusqu\'ici sont jetées et ne peuvent pas être récupérées.</string>
+    <string name="taxi_cancel_confirm">Annuler la course</string>
+    <string name="taxi_keep_going">Continuer</string>
+</resources>

@@ -1,0 +1,32 @@
+<resources>
+    <!-- Profile.kt: ContactProfile -->
+    <string name="profile_back">Voltar</string>
+    <string name="profile_calls_themselves">se apresenta como \"%1$s\"</string>
+    <string name="profile_label_email">E-mail</string>
+    <string name="profile_label_phone">Telefone</string>
+    <string name="profile_label_signal">Signal</string>
+    <string name="profile_what_they_shared">O que a pessoa compartilhou</string>
+    <string name="profile_their_claim_note">Afirmação dela, não uma verificação. Nada liga uma persona DUCAT a um e-mail ou a um número — só a uma chave.</string>
+    <string name="profile_your_name_for_them_label">Seu nome para a pessoa</string>
+    <string name="profile_your_name_for_them_support">Só você vê isto. É o nome mostrado em toda parte.</string>
+    <string name="profile_saved">Salvo</string>
+    <string name="profile_save_name">Salvar nome</string>
+    <string name="profile_checked">Verificado</string>
+    <string name="profile_checked_note">Verificado criptograficamente. Todo cartão que a pessoa entrega é assinado por esta chave e conferido contra ela.</string>
+    <string name="profile_persona">Persona</string>
+    <string name="profile_told_to_you">Dito a você</string>
+    <string name="profile_told_note">Fornecido pela pessoa e não verificado por nada. Nada no DUCAT liga um endereço Monero ou um nome a uma persona, então confira por outro meio se isso importa.</string>
+    <string name="profile_their_name_label">O nome que a pessoa usa para si</string>
+    <!-- Precisa manter o travessão inicial: a interface trata um "—" inicial como "sem valor real" (esconde o botão Copiar). -->
+    <string name="profile_none_given">— nenhum informado —</string>
+    <string name="profile_monero_address">Endereço Monero</string>
+    <!-- Precisa manter o travessão inicial: ver profile_none_given. -->
+    <string name="profile_not_shared">— não compartilhado; a pessoa precisa enviar um pedido —</string>
+    <string name="profile_where_reached">Onde a pessoa é alcançada</string>
+    <string name="profile_their_outbox">A caixa de saída dela</string>
+    <string name="profile_your_outbox">Sua caixa de saída para ela</string>
+    <string name="profile_open_chat">Abrir conversa</string>
+    <string name="profile_not_built_yet">Ainda não construído</string>
+    <string name="profile_not_built_note">Uma foto, pronomes, um endereço de e-mail e bloqueio. Tudo opcional, tudo definido na configuração, e tudo viajando do mesmo jeito que um nome — afirmado pela pessoa, nunca verificado por nós.</string>
+    <string name="profile_copy">Copiar</string>
+</resources>

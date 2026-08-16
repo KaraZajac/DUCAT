@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across ceremony screens -->
+    <string name="ceremony_close">إغلاق</string>
+    <string name="ceremony_quoted_body">“%1$s”</string>
+    <string name="ceremony_decline">رفض</string>
+    <string name="ceremony_open_chat">افتح الدردشة</string>
+
+    <!-- BillScreen -->
+    <string name="ceremony_asks_you_for">يطلب منك</string>
+    <string name="ceremony_tax">الضريبة</string>
+    <string name="ceremony_accept_and_pay">قبول ودفع</string>
+    <string name="ceremony_no_address">لا عنوان في هذا الطلب — اسألهم أين تُرسل المال.</string>
+    <string name="ceremony_accept_opens_confirm">القبول يفتح شاشة التأكيد — لا يتحرك شيء حتى توافق هناك.</string>
+
+    <!-- PaidSplash -->
+    <string name="ceremony_paid">تم الدفع ✓</string>
+    <string name="ceremony_paid_to">تم الدفع · %1$s ✓</string>
+
+    <!-- RideOfferScreen -->
+    <string name="ceremony_offers_to_drive">يعرض أن يوصّلك مقابل</string>
+    <plurals name="ceremony_minutes_away">
+        <item quantity="zero">على بعد أقل من دقيقة</item>
+        <item quantity="one">على بعد دقيقة تقريبًا</item>
+        <item quantity="two">على بعد دقيقتين تقريبًا</item>
+        <item quantity="few">على بعد %1$d دقائق تقريبًا</item>
+        <item quantity="many">على بعد %1$d دقيقة تقريبًا</item>
+        <item quantity="other">على بعد %1$d دقيقة تقريبًا</item>
+    </plurals>
+    <string name="ceremony_plate">اللوحة %1$s</string>
+    <string name="ceremony_accept">قبول</string>
+    <string name="ceremony_accepting_agrees_fare">القبول اتفاق على الأجرة — تدفع في نهاية المشوار، عبر شاشة التأكيد المعتادة.</string>
+
+    <!-- RideConfirmed -->
+    <string name="ceremony_ride_confirmed">تأكّد المشوار</string>
+    <string name="ceremony_expecting_you">إنهم في انتظارك — وأي شيء آخر مكانه الدردشة.</string>
+
+    <!-- DriverFound -->
+    <string name="ceremony_ride_coming">مشوارك قادم</string>
+    <string name="ceremony_eta_in_chat">وقت الوصول وكل ما عداه — في الدردشة.</string>
+</resources>

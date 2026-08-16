@@ -1,0 +1,28 @@
+<resources>
+    <!-- MyProfileEditor.kt -->
+    <string name="myprofile_avatar_read_error">No se pudo leer esa imagen.</string>
+    <string name="myprofile_your_picture">Tu foto</string>
+    <string name="myprofile_add_picture">Agregar una foto</string>
+    <string name="myprofile_picture_note">Se reduce a una miniatura antes de enviarse — viaja en tu registro de contacto, que tiene espacio para una cara y no para una fotografía.</string>
+    <string name="myprofile_remove">Quitar</string>
+    <string name="myprofile_name_label">Nombre</string>
+    <string name="myprofile_name_support">Se muestra en las tarjetas que entregas. Quien te agregue puede renombrarte.</string>
+    <string name="myprofile_pronouns">Pronombres</string>
+    <string name="myprofile_email">Correo</string>
+    <string name="myprofile_phone">Teléfono</string>
+    <string name="myprofile_phone_hint">Solo dígitos, con código de país</string>
+    <string name="myprofile_signal">Signal</string>
+    <string name="myprofile_signal_hint">nombre.12</string>
+    <string name="myprofile_driving_note">¿Conduces? Los pasajeros ven esto cuando tomas su pedido — así es como un desconocido encuentra el auto correcto en la acera.</string>
+    <string name="myprofile_car_model">Modelo del auto</string>
+    <string name="myprofile_car_model_hint">Toyota Corolla</string>
+    <string name="myprofile_car_colour">Color del auto</string>
+    <string name="myprofile_car_colour_hint">azul</string>
+    <string name="myprofile_plate">Placa</string>
+    <string name="myprofile_plate_hint">KAR-4242</string>
+    <string name="myprofile_share_switch">Compartir esto con contactos nuevos</string>
+    <string name="myprofile_share_on_note">Todo lo de arriba se envía cuando alguien toma tu tarjeta. Tu dirección de Monero tiene su propio interruptor.</string>
+    <string name="myprofile_share_off_note">Solo viaja tu nombre. El resto se queda en este dispositivo.</string>
+    <string name="myprofile_saved">Guardado</string>
+    <string name="myprofile_save">Guardar</string>
+</resources>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pay.kt — target picker -->
+    <string name="pay_scan_prompt">Une adresse Monero, un code monero:, ou une carte DUCAT</string>
+    <string name="pay_close">Fermer</string>
+    <string name="pay_send_or_request">Envoyer ou demander</string>
+    <string name="pay_scan_a_code">Scanner un code</string>
+    <string name="pay_your_contacts">Tes contacts</string>
+    <string name="pay_contact_vs_address">Un paiement à un contact porte une note et arrive dans ta discussion. Un paiement à une adresse, non.</string>
+    <string name="pay_or_monero_address">Ou une adresse Monero</string>
+    <string name="pay_address_placeholder">5… ou 7…</string>
+    <string name="pay_continue">Continuer</string>
+    <string name="pay_not_monero_address">Ça ne ressemble pas à une adresse Monero.</string>
+
+    <!-- Pay.kt — amount step -->
+    <string name="pay_back">Retour</string>
+    <string name="pay_in_ducat">dans DUCAT</string>
+    <string name="pay_monero_address">Adresse Monero</string>
+    <string name="pay_bill">Facture</string>
+    <string name="pay_add_tip">Ajouter un pourboire (%1$s) — facultatif</string>
+    <string name="pay_total_with_tip">Total avec pourboire : %1$s</string>
+    <string name="pay_amount_placeholder">0</string>
+    <string name="pay_asking_explainer">Ce que tu demandes à %1$s. Son solde et les frais de réseau sont son affaire, pas la tienne — ceci est un message, pas une transaction.</string>
+    <string name="pay_them">cette personne</string>
+    <string name="pay_up_to_after_fees">Jusqu\'à %1$s après frais</string>
+    <string name="pay_max">Max</string>
+    <string name="pay_max_done">Max ✓</string>
+    <string name="pay_over_max">C\'est plus que ce que tu peux envoyer une fois les frais comptés.</string>
+    <string name="pay_amount">Montant</string>
+    <string name="pay_network_fee_estimated">Frais de réseau (estimés)</string>
+    <string name="pay_total">Total</string>
+    <string name="pay_left_after">Restant après</string>
+    <string name="pay_uses_notes">Utilise %1$d billet(s) · confirmé en général en %2$d minutes environ</string>
+    <string name="pay_fee_estimate_note">Les frais sont une estimation tant que la transaction n\'est pas construite ; le montant exact s\'affiche après l\'envoi.</string>
+    <string name="pay_speed">Vitesse</string>
+    <string name="pay_speed_slow">Lente</string>
+    <string name="pay_speed_normal">Normale</string>
+    <string name="pay_speed_fast">Rapide</string>
+    <string name="pay_speed_fastest">La plus rapide</string>
+    <string name="pay_memo_label">Mémo — c\'est pour quoi ?</string>
+    <string name="pay_send">Envoyer</string>
+    <string name="pay_request">Demander</string>
+    <string name="pay_no_address_hint">%1$s n\'a pas partagé d\'adresse, donc tu peux demander mais pas encore envoyer. Passe sur Demander — la demande en rapporte une.</string>
+
+    <!-- Pay.kt — messages, results, and errors -->
+    <string name="pay_payment_request">Demande de paiement</string>
+    <string name="pay_payment">Paiement</string>
+    <string name="pay_request_sent">Demande envoyée</string>
+    <string name="pay_could_not_send">envoi impossible</string>
+    <string name="pay_no_node">aucun nœud — vérifie l\'état</string>
+    <string name="pay_no_address_error">Cette personne n\'a pas partagé d\'adresse. Demande-lui d\'envoyer une demande, ou d\'activer \"laisser mes contacts me payer directement\".</string>
+
+    <!-- Pay.kt — confirm dialog -->
+    <string name="pay_confirm_send_title">Envoyer %1$s ?</string>
+    <string name="pay_to">À %1$s</string>
+    <string name="pay_plus_fees">Plus environ %1$s de frais — %2$s au total.</string>
+    <string name="pay_irreversible_warning">Les paiements Monero ne peuvent être ni annulés ni inversés. Vérifie l\'adresse — il n\'y a personne auprès de qui faire appel si elle est fausse.</string>
+    <string name="pay_cancel">Annuler</string>
+</resources>

@@ -1,0 +1,37 @@
+<resources>
+    <string name="sync_synced">مُزامَن</string>
+    <string name="sync_not_fully">لم تكتمل المزامنة بعد</string>
+    <string name="sync_partial_note">هذا الرصيد هو ما قُرئ حتى الآن فقط — وقد يبدو منخفضًا حتى ينتهي الفحص.</string>
+    <string name="duration_under_minute">أقل من دقيقة</string>
+    <plurals name="duration_minutes">
+        <item quantity="zero">أقل من دقيقة</item>
+        <item quantity="one">حوالي دقيقة واحدة</item>
+        <item quantity="two">حوالي دقيقتين</item>
+        <item quantity="few">حوالي %1$d دقائق</item>
+        <item quantity="many">حوالي %1$d دقيقة</item>
+        <item quantity="other">حوالي %1$d دقيقة</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="zero">أقل من ساعة</item>
+        <item quantity="one">حوالي ساعة واحدة</item>
+        <item quantity="two">حوالي ساعتين</item>
+        <item quantity="few">حوالي %1$d ساعات</item>
+        <item quantity="many">حوالي %1$d ساعة</item>
+        <item quantity="other">حوالي %1$d ساعة</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="zero">أقل من يوم</item>
+        <item quantity="one">حوالي يوم واحد</item>
+        <item quantity="two">حوالي يومين</item>
+        <item quantity="few">حوالي %1$d أيام</item>
+        <item quantity="many">حوالي %1$d يومًا</item>
+        <item quantity="other">حوالي %1$d يوم</item>
+    </plurals>
+    <string name="scanner_cancel">إلغاء</string>
+    <string name="scanner_no_camera_title">الكاميرا غير مسموح بها</string>
+    <string name="scanner_no_camera_body">المسح يحتاجها. كل شيء آخر في DUCAT يعمل بدونها — ويمكن دائمًا لصق البطاقة كرابط.</string>
+    <string name="scanner_allow">السماح</string>
+    <string name="scanner_would_not_start">تعذّر تشغيل الكاميرا: %1$s</string>
+    <string name="scanner_torch_off">إطفاء المصباح</string>
+    <string name="scanner_torch_on">تشغيل المصباح</string>
+</resources>

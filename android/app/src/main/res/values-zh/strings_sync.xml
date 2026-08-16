@@ -1,0 +1,22 @@
+<resources>
+    <string name="sync_synced">已同步</string>
+    <string name="sync_not_fully">尚未完全同步</string>
+    <string name="sync_partial_note">这个余额只是目前已读取的部分 — 在扫描完成前可能偏低。</string>
+    <string name="duration_under_minute">不到一分钟</string>
+    <plurals name="duration_minutes">
+        <item quantity="other">约 %1$d 分钟</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="other">约 %1$d 小时</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="other">约 %1$d 天</item>
+    </plurals>
+    <string name="scanner_cancel">取消</string>
+    <string name="scanner_no_camera_title">未获相机权限</string>
+    <string name="scanner_no_camera_body">扫码需要相机。DUCAT 的其他功能都不需要它 — 名片也随时可以作为链接粘贴。</string>
+    <string name="scanner_allow">允许</string>
+    <string name="scanner_would_not_start">相机无法启动：%1$s</string>
+    <string name="scanner_torch_off">关闭手电筒</string>
+    <string name="scanner_torch_on">打开手电筒</string>
+</resources>

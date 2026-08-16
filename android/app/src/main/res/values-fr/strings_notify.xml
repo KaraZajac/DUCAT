@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notification channel -->
+    <string name="notify_channel_name">Messages et paiements</string>
+    <string name="notify_channel_desc">Un message, une facture, un reçu, ou de l\'argent qui arrive.</string>
+
+    <!-- Lock-screen public fallback: the fact, never the figure -->
+    <string name="notify_public_activity">Activité</string>
+
+    <!-- Inbound message wording; %1$s sender, %2$s amount, %3$s note -->
+    <string name="notify_asks_for">%1$s demande %2$s</string>
+    <string name="notify_asks_for_note">%1$s demande %2$s — %3$s</string>
+    <string name="notify_sent">%1$s a envoyé %2$s</string>
+    <string name="notify_receipt">Reçu de %1$s — %2$s</string>
+</resources>

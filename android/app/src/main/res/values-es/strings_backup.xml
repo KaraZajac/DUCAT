@@ -1,0 +1,14 @@
+<resources>
+    <string name="backup_title">Respaldo</string>
+    <string name="backup_body">Un solo archivo cifrado con tu identidad, tus claves y tus ajustes. Exporta uno nuevo cada vez que cambie algo importante.</string>
+    <string name="backup_passphrase">Frase secreta</string>
+    <string name="backup_export">Exportar</string>
+    <string name="backup_import">Importar</string>
+    <string name="backup_exported_bytes">Se exportaron %1$d bytes</string>
+    <string name="backup_export_failed">falló la exportación</string>
+    <string name="backup_restored_title">Billetera restaurada</string>
+    <string name="backup_restored_check">Verifica que esta dirección sea una que reconoces antes de confiar en ella.</string>
+    <string name="backup_opened">Abierto — %1$d parte(s) del depósito en garantía, altura de restauración %2$d</string>
+    <string name="backup_could_not_open">No se pudo abrir — frase secreta incorrecta, o el archivo fue alterado</string>
+    <string name="backup_share_title">Guarda tu respaldo de DUCAT</string>
+</resources>

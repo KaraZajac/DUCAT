@@ -1,0 +1,28 @@
+<resources>
+    <!-- Empty state -->
+    <string name="activity_nothing_yet">还没有内容</string>
+    <string name="activity_empty_desc">读完链上数据后，付款会显示在这里。从「账户」充值就能看到内容。</string>
+
+    <!-- Pending requests -->
+    <string name="activity_awaiting">待处理</string>
+    <string name="activity_they_ask">%1$s 向你请求</string>
+    <string name="activity_you_asked">你向 %1$s 请求</string>
+    <plurals name="activity_items">
+        <item quantity="other">%1$d 项</item>
+    </plurals>
+
+    <!-- Event rows -->
+    <string name="activity_reading_transaction">正在读取交易…</string>
+    <string name="activity_receipt_chip">🧾 收据</string>
+    <string name="activity_note_quoted">“%1$s”</string>
+    <string name="activity_sending">发送中 — 尚未进入区块</string>
+    <string name="activity_spent_unknown">已花费，但无法确定去向</string>
+    <string name="activity_maybe_change">可能是你自己付款的找零</string>
+    <string name="activity_locked_when">%1$s · %2$d 个区块后解锁</string>
+
+    <!-- Counterparty line -->
+    <string name="activity_to">付给 %1$s</string>
+    <string name="activity_from">来自 %1$s</string>
+    <string name="activity_sent_unrecorded">已发送 — 未记录收款人</string>
+    <string name="activity_received_unknown">已收到 — 付款人未知</string>
+</resources>

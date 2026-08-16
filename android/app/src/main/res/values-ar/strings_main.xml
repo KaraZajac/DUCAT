@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_back">رجوع</string>
+    <string name="main_menu">القائمة</string>
+    <string name="main_codes">الرموز</string>
+    <string name="main_send_or_receive">إرسال أو استقبال</string>
+    <string name="main_bill_decline">أرفض تلك الفاتورة البالغة %1$s XMR — ليس هذه المرة.</string>
+    <string name="main_backup_title">انسخ احتياطيًا</string>
+    <string name="main_backup_body">لديك جهات اتصال ليست في نسختك الاحتياطية الأخيرة. الاستعادة ستعيد المال لا الأشخاص.</string>
+    <string name="main_open_backup_settings">افتح إعدادات النسخ الاحتياطي</string>
+    <string name="main_recent">الأخيرة</string>
+    <string name="main_see_all">عرض الكل</string>
+    <string name="main_sent">مُرسَل</string>
+    <string name="main_received">مُستلَم</string>
+</resources>

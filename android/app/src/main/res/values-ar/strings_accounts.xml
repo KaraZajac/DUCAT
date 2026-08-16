@@ -1,0 +1,34 @@
+<resources>
+    <!-- Top up card -->
+    <string name="accounts_top_up">شحن الرصيد</string>
+    <string name="accounts_top_up_desc">أرسل Monero إلى هذا العنوان من أي محفظة أو منصة تداول. إنه عنوان XMR عادي — لا شيء في التحويل له علاقة بـ DUCAT.</string>
+    <string name="accounts_no_wallet">لا محفظة بعد — أكمل الإعداد أولًا.</string>
+    <string name="accounts_copy">نسخ</string>
+    <string name="accounts_hide">إخفاء</string>
+    <string name="accounts_qr">QR</string>
+
+    <!-- Balances card -->
+    <string name="accounts_balances">الأرصدة</string>
+    <string name="accounts_balances_desc">مفصولة عمدًا: ما يمكنك إنفاقه الآن ليس كل ما تملكه.</string>
+    <string name="accounts_waiting_for_node">في انتظار عقدة.</string>
+    <string name="accounts_spendable">القابل للإنفاق</string>
+    <string name="accounts_show_in">العرض بـ %1$s</string>
+    <string name="accounts_stagenet_fiat_note">عملات stagenet عملات تجريبية. هذا الرقم هو ما يساويه هذا القدر من Monero الحقيقي — أما هذه فلا قيمة لها.</string>
+    <string name="accounts_notes">الأوراق</string>
+    <string name="accounts_bond">الضمان</string>
+    <string name="accounts_bond_none">لا شيء</string>
+    <string name="accounts_scanning_from_genesis_title">الفحص من بداية السلسلة</string>
+    <string name="accounts_scanning_from_genesis_desc">أُنشئت هذه المحفظة قبل أن يستطيع التطبيق الوصول إلى عقدة، فهي لا تعرف متى أُنشئت. عند الكتلة %1$d من %2$d يعني ذلك أكثر من يوم من القراءة. تجاوز إلى الأمام إن كنت تعلم أن المحفظة أحدث من ذلك.</string>
+    <string name="accounts_skip_ahead">تجاوز إلى الأمام</string>
+
+    <!-- Skip-ahead dialog -->
+    <string name="accounts_skip_ahead_title">التجاوز إلى</string>
+    <string name="accounts_skip_ahead_desc">أي شيء استُلم قبل هذه النقطة لن يُعثر عليه. اختر وقتًا أنت متأكد أنه قبل وجود المحفظة.</string>
+    <string name="accounts_about_a_day_ago">قبل يوم تقريبًا</string>
+    <string name="accounts_about_a_week_ago">قبل أسبوع تقريبًا</string>
+    <string name="accounts_about_a_month_ago">قبل شهر تقريبًا</string>
+    <string name="accounts_skip_option">"%1$s  —  الكتلة %2$d"</string>
+    <string name="accounts_block_height_label">أو ارتفاع كتلة</string>
+    <string name="accounts_use_that_height">استخدم هذا الارتفاع</string>
+    <string name="accounts_cancel">إلغاء</string>
+</resources>

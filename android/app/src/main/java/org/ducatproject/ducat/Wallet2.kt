@@ -77,13 +77,16 @@ data class Balances(
 }
 
 /** "about 3 minutes", "about 2 hours" — never a false precision. */
-fun humanDuration(secs: Long): String {
-    fun plural(n: Int, unit: String) = "about $n $unit" + if (n == 1) "" else "s"
+fun humanDuration(context: android.content.Context, secs: Long): String {
+    fun plural(res: Int, n: Int) = context.resources.getQuantityString(res, n, n)
     return when {
-        secs < 90 -> "under a minute"
-        secs < 5400 -> plural((secs / 60.0).roundToInt().coerceAtLeast(1), "minute")
-        secs < 172_800 -> plural((secs / 3600.0).roundToInt().coerceAtLeast(1), "hour")
-        else -> plural((secs / 86_400.0).roundToInt().coerceAtLeast(1), "day")
+        secs < 90 -> context.getString(R.string.duration_under_minute)
+        secs < 5400 ->
+            plural(R.plurals.duration_minutes, (secs / 60.0).roundToInt().coerceAtLeast(1))
+        secs < 172_800 ->
+            plural(R.plurals.duration_hours, (secs / 3600.0).roundToInt().coerceAtLeast(1))
+        else ->
+            plural(R.plurals.duration_days, (secs / 86_400.0).roundToInt().coerceAtLeast(1))
     }
 }
 

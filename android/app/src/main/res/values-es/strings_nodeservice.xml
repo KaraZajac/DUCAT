@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Foreground-service channel and permanent notification -->
+    <string name="nodeservice_channel_name">Mantenerse localizable</string>
+    <string name="nodeservice_channel_desc">Mantiene a DUCAT localizable para que tus contactos puedan pagarte y escribirte.</string>
+    <string name="nodeservice_notification_title">DUCAT está localizable</string>
+    <string name="nodeservice_notification_text">Tus contactos pueden contactarte mientras esto esté activo.</string>
+</resources>

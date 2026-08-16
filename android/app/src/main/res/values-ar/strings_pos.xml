@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Point of Sale screen (Pos.kt) -->
+    <string name="pos_this_sale">هذه العملية</string>
+    <string name="pos_items">الأصناف</string>
+    <string name="pos_quick_amount">مبلغ سريع</string>
+    <string name="pos_total_in">الإجمالي (%1$s)</string>
+    <string name="pos_request_amount">اطلب %1$s</string>
+    <string name="pos_request_payment">اطلب الدفع</string>
+    <string name="pos_sale">بيع</string>
+    <string name="pos_remove">إزالة</string>
+    <string name="pos_network_fee_note">رسوم الشبكة على الزبون وتُدفع للشبكة — وليست جزءًا من الفاتورة أبدًا.</string>
+    <string name="pos_charge_amount">حصّل %1$s</string>
+    <string name="pos_add_first_item">أضف الصنف الأول لبدء عملية بيع.</string>
+    <string name="pos_item">صنف</string>
+    <string name="pos_add_line">أضف سطرًا</string>
+    <string name="pos_tax">الضريبة</string>
+    <string name="pos_error_publish_code">تعذّر نشر الرمز</string>
+    <string name="pos_error_bill_not_sent">اتصلوا، لكن الفاتورة لم تُرسل: %1$s</string>
+    <string name="pos_getting_code_ready">جارٍ تجهيز الرمز…</string>
+    <string name="pos_scan_hint">يمسحونه في DUCAT. والفاتورة أعلاه تصل إلى هاتفهم لحظة المسح.</string>
+    <string name="pos_tap_hint">أو قرّبا الهاتفين — الفاتورة نفسها في الحالين</string>
+    <string name="pos_payment_seen">ظهرت الدفعة ✓</string>
+    <string name="pos_payment_settling">دفعتهم في الشبكة — قيد التسوية، نحو دقيقتين. الإيصال يرسل نفسه عند وصولها.</string>
+    <string name="pos_bill_sent_to">أُرسلت الفاتورة إلى %1$s</string>
+    <string name="pos_the_customer">الزبون</string>
+    <string name="pos_billed_hint">يؤكدون على هاتفهم. وعند وصول الدفعة إلى السلسلة يذهب الإيصال إليهم تلقائيًا — لا شيء يتبقى هنا.</string>
+    <string name="pos_paid">مدفوع ✓</string>
+    <string name="pos_receipt_sent_to">أُرسل الإيصال إلى %1$s.</string>
+    <string name="pos_back">رجوع</string>
+    <string name="pos_new_sale">بيع جديد</string>
+    <string name="pos_new_sale_settles">بيع جديد (هذه تُسوّى من تلقاء نفسها)</string>
+    <string name="pos_cancel_sale">إلغاء البيع</string>
+</resources>

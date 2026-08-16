@@ -1,0 +1,9 @@
+<resources>
+    <!-- Donation box (Donate.kt) -->
+    <string name="donate_support_name">Soutenir %1$s</string>
+    <string name="donate_support">Soutenir</string>
+    <string name="donate_no_wallet">Pas encore de portefeuille — termine d\'abord la configuration.</string>
+    <string name="donate_any_wallet">N\'importe quel portefeuille Monero peut donner ici — personne n\'a besoin de cette app.</string>
+    <string name="donate_since_opening">Depuis l\'ouverture</string>
+    <string name="donate_reuse_warning">Ce code unique est réutilisé par chaque donateur, donc sur le registre public de Monero, les dons qui lui sont faits peuvent être reliés entre eux. Et un code imprimé n\'est honnête que si la dernière personne à l\'avoir touché l\'est — vérifie qu\'il est bien le tien là où tu l\'affiches.</string>
+</resources>

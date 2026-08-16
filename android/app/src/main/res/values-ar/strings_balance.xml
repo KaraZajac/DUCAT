@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">جاهز للإنفاق</string>
+    <string name="balance_change_coming_back">%1$s من الباقي، يعود خلال %2$s</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">لا يمكنك الدفع الآن</string>
+    <string name="balance_running_low_title">الأوراق تنفد</string>
+    <string name="balance_all_locked_body">مالك هنا، لكنه كله محجوز كباقٍ. فُكّ ورقة لتستطيع الإنفاق من جديد.</string>
+    <string name="balance_running_low_body">فُكّ ورقة الآن كي لا تتفاجأ عند صندوق الدفع.</string>
+    <string name="balance_break_note_action">فكّ ورقة</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="zero">لا أوراق</item>
+        <item quantity="one">ورقة واحدة</item>
+        <item quantity="two">ورقتان</item>
+        <item quantity="few">%1$d أوراق</item>
+        <item quantity="many">%1$d ورقة</item>
+        <item quantity="other">%1$d ورقة</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">لا شيء متاح بعد</string>
+    <string name="balance_notes_then_wait">%1$s — تكفي لدفعة واحدة، ثم انتظار للباقي</string>
+    <string name="balance_notes_one_more">%1$s، أي دفعة واحدة أخرى تقريبًا</string>
+    <string name="balance_notes_more">%1$s، أي ما يكفي لنحو %2$d دفعات أخرى</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">في أي لحظة</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="zero">أقل من دقيقة</item>
+        <item quantity="one">دقيقة واحدة تقريبًا</item>
+        <item quantity="two">دقيقتان تقريبًا</item>
+        <item quantity="few">%1$d دقائق تقريبًا</item>
+        <item quantity="many">%1$d دقيقة تقريبًا</item>
+        <item quantity="other">%1$d دقيقة تقريبًا</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="zero">أقل من ساعة</item>
+        <item quantity="one">ساعة واحدة تقريبًا</item>
+        <item quantity="two">ساعتان تقريبًا</item>
+        <item quantity="few">%1$d ساعات تقريبًا</item>
+        <item quantity="many">%1$d ساعة تقريبًا</item>
+        <item quantity="other">%1$d ساعة تقريبًا</item>
+    </plurals>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">Bereit zum Ausgeben</string>
+    <string name="balance_change_coming_back">%1$s Wechselgeld, zurück in %2$s</string>
+
+    <!-- Low-capacity warning card -->
+    <string name="balance_all_locked_title">Du kannst gerade nicht zahlen</string>
+    <string name="balance_running_low_title">Die Scheine werden knapp</string>
+    <string name="balance_all_locked_body">Dein Geld ist da, aber es steckt komplett im Wechselgeld. Wechsle einen Schein, um wieder zahlen zu können.</string>
+    <string name="balance_running_low_body">Wechsle jetzt einen Schein, damit du an der Kasse nicht aufgeschmissen bist.</string>
+    <string name="balance_break_note_action">Schein wechseln</string>
+
+    <!-- notesPhrase: the sentence shown instead of a raw balance -->
+    <plurals name="balance_notes">
+        <item quantity="one">1 Schein</item>
+        <item quantity="other">%1$d Scheine</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">noch nichts entsperrt</string>
+    <string name="balance_notes_then_wait">%1$s — genug für eine Zahlung, dann heißt es warten aufs Wechselgeld</string>
+    <string name="balance_notes_one_more">%1$s, also etwa noch eine Zahlung</string>
+    <string name="balance_notes_more">%1$s, also etwa %2$d weitere Zahlungen</string>
+
+    <!-- minutesFor: time until change unlocks -->
+    <string name="balance_unlock_any_moment">jeden Moment</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="one">etwa %1$d Minute</item>
+        <item quantity="other">etwa %1$d Minuten</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="one">etwa %1$d Stunde</item>
+        <item quantity="other">etwa %1$d Stunden</item>
+    </plurals>
+</resources>

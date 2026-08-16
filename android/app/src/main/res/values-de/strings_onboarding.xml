@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Progress header -->
+    <string name="onb_progress_title">DUCAT einrichten</string>
+    <string name="onb_progress_done">Fertig</string>
+    <string name="onb_progress_step">Schritt %1$d von %2$d</string>
+
+    <!-- Persona step -->
+    <string name="onb_persona_title">Erstelle deine Identität</string>
+    <string name="onb_persona_body">Ein Schlüsselpaar auf diesem Telefon. Keine E-Mail, keine Telefonnummer, keine Registrierung — weshalb sie dir auch niemand wiederherstellen kann.</string>
+    <string name="onb_persona_action">Erstellen</string>
+
+    <!-- Wallet step -->
+    <string name="onb_wallet_title">Erstelle deine Wallet</string>
+    <string name="onb_wallet_body">Monero-Schlüssel, hier erzeugt und hier verwahrt. Das ist das Geld.</string>
+    <string name="onb_wallet_action">Wallet erstellen</string>
+
+    <!-- Limits step -->
+    <string name="onb_limits_title">Lege deine Ausgabelimits fest</string>
+    <string name="onb_limits_body">Kleine Zahlungen gehen direkt durch. Größere fragen nach deiner PIN. Wo diese Grenzen liegen, kannst du jederzeit ändern — die Voreinstellungen sind schon vorsichtig.</string>
+    <string name="onb_limits_action">Voreinstellungen behalten</string>
+
+    <!-- Done step -->
+    <string name="onb_done_title">Bereit</string>
+    <string name="onb_done_body">Lade Geld auf, wenn du so weit bist. Bis dahin ist nichts im Risiko und nichts zu verlieren.</string>
+    <string name="onb_done_action">Abschließen</string>
+
+    <!-- Backup step -->
+    <string name="onb_backup_title">Sichern — jetzt, nicht später</string>
+    <string name="onb_backup_body">Eine verschlüsselte Datei, geschützt durch eine Passphrase deiner Wahl. Bewahr sie dort auf, wo du Wichtiges aufbewahrst.</string>
+    <string name="onb_backup_forget_title">Wenn du diese Passphrase vergisst</string>
+    <string name="onb_backup_forget_body">gibt es keinen Weg, sie wiederzubekommen. Niemand hält eine Kopie, und es gibt niemanden, den man fragen könnte. Aus demselben Grund kann auch niemand dein Geld einfrieren oder dir wegnehmen.</string>
+    <string name="onb_backup_address_label">Deine Adresse</string>
+    <string name="onb_backup_passphrase_label">Passphrase</string>
+    <string name="onb_backup_passphrase_good">Gut</string>
+    <string name="onb_backup_passphrase_short">Mindestens 8 Zeichen</string>
+    <string name="onb_backup_error_incomplete">Die Einrichtung ist unvollständig</string>
+    <string name="onb_backup_create">Backup erstellen</string>
+    <string name="onb_backup_created">Backup erstellt — %1$d Bytes.</string>
+    <string name="onb_backup_send_elsewhere">Es liegt auf diesem Telefon — das ist noch kein Backup. Schick es woandershin: Passwortmanager, Laufwerk, ein anderes Gerät.</string>
+    <string name="onb_backup_send_action">Woandershin schicken</string>
+    <string name="onb_backup_done">Fertig</string>
+    <string name="onb_backup_share_chooser">Dein DUCAT-Backup speichern</string>
+
+    <!-- Profile step -->
+    <string name="onb_profile_name_title">Wie sollen dich die Leute nennen?</string>
+    <string name="onb_profile_name_body">Das steht auf den Karten, die du weitergibst. Wer dich hinzufügt, kann dich auf seiner Seite umbenennen, und dieser Name ist dann der sichtbare — das hier ist also ein Vorschlag, keine Identität.</string>
+    <string name="onb_profile_name_label">Name (optional)</string>
+    <string name="onb_profile_pay_title">Dürfen Kontakte dich direkt bezahlen?</string>
+    <string name="onb_profile_pay_yes">Ja — einfacher, bezahlt zu werden</string>
+    <string name="onb_profile_pay_no">Nein — sie fragen, du gibst frei</string>
+    <string name="onb_profile_pay_yes_detail">Deine Adresse geht an jeden Kontakt und wird wiederverwendet. Wer die Blockchain liest, erkennt, dass jedes Mal dieselbe Person bezahlt wurde — auch Leute, die dich nur ein einziges Mal bezahlt haben.</string>
+    <string name="onb_profile_pay_no_detail">Jede Zahlung nutzt eine frische Adresse, also verbindet nichts auf der Blockchain deine Zahlungen miteinander. Wer dich bezahlen will, wartet erst auf eine Anfrage von dir.</string>
+    <string name="onb_profile_change_later">Beides lässt sich später ändern.</string>
+    <string name="onb_profile_continue">Weiter</string>
+</resources>

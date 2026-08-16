@@ -1,0 +1,45 @@
+<resources>
+    <!-- Bar tab book (BarTab.kt) -->
+    <string name="bartab_open_tabs">Cuentas abiertas</string>
+    <string name="bartab_start_tab">Abrir una cuenta</string>
+    <string name="bartab_section_running">En curso</string>
+    <string name="bartab_section_billed">Cuenta enviada — esperando el pago</string>
+    <string name="bartab_receipt_auto_hint">El recibo les llega solo en cuanto cae el pago — incluso después de que se hayan ido.</string>
+    <string name="bartab_section_settled">Saldadas</string>
+    <string name="bartab_clear">Limpiar</string>
+    <string name="bartab_nothing_settled">Nada saldado todavía esta noche.</string>
+    <string name="bartab_no_tabs">Sin cuentas todavía. Abre una cuando caiga el primer pedido.</string>
+    <plurals name="bartab_items">
+        <item quantity="one">%1$d artículo</item>
+        <item quantity="other">%1$d artículos</item>
+    </plurals>
+    <string name="bartab_state_payment_seen">pago visto — saldando</string>
+    <string name="bartab_state_billed_unpaid">cuenta enviada, sin pagar</string>
+    <string name="bartab_state_paid_oob">pagada fuera de DUCAT ✓</string>
+    <string name="bartab_state_cancelled">cancelada</string>
+    <string name="bartab_state_paid">pagada ✓</string>
+    <string name="bartab_new_customer">Cliente nuevo</string>
+    <string name="bartab_scan_hint">Escanean o acercan el teléfono — la cuenta se abre sola.</string>
+    <string name="bartab_err_publish_code">no se pudo publicar un código</string>
+    <string name="bartab_or_regular">O un cliente habitual</string>
+    <string name="bartab_back">Atrás</string>
+    <string name="bartab_bill_cancelled_msg">Esa cuenta de %1$s XMR está cancelada — no hay nada que pagar.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s XMR · la cuenta va en %3$s XMR</string>
+    <string name="bartab_remove_line">Quitar</string>
+    <string name="bartab_err_send_bill">no se pudo enviar la cuenta</string>
+    <string name="bartab_settle_bill">Cerrar — cobrar %1$s</string>
+    <string name="bartab_settle_hint">Una cuenta detallada en tu conversación con %1$s. Puede pagar desde cualquier parte — el hilo no se cierra cuando se va.</string>
+    <string name="bartab_discard_tab">Descartar cuenta</string>
+    <string name="bartab_discard_title">¿Descartar esta cuenta?</string>
+    <string name="bartab_discard_body">La cuenta y todo lo anotado en ella se borran de este teléfono. No se envía ningún cobro, y esto no se puede deshacer.</string>
+    <string name="bartab_discard_confirm">Descartar</string>
+    <string name="bartab_keep_tab">Conservar cuenta</string>
+    <string name="bartab_billed_hint">Cuenta enviada. El recibo les llega solo cuando cae el pago. Si se saldó de otra forma, indícalo aquí:</string>
+    <string name="bartab_paid_outside_button">Pagada fuera de DUCAT (efectivo, tarjeta)</string>
+    <string name="bartab_cancel_bill">Cancelar la cuenta</string>
+    <string name="bartab_cancelled_note">Cancelada — se les avisó en la conversación.</string>
+    <string name="bartab_paid_oob_note">Pagada fuera de DUCAT ✓ — recibo enviado, sin transacción adjunta.</string>
+    <string name="bartab_paid_note">Pagada ✓ — recibo enviado.</string>
+    <string name="bartab_remove_from_book">Quitar del libro de cuentas</string>
+    <string name="bartab_back_to_tabs">Volver a las cuentas</string>
+</resources>

@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: linha da lista de contatos -->
+    <string name="contacts_chat">Conversar</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">Compartilhe seu cartão</string>
+    <string name="contacts_share_card_body">Vale para uma pessoa. Depois de usado, ele para de funcionar — então uma captura de tela que vá parar em outro lugar não é uma porta de entrada.</string>
+    <string name="contacts_name_to_show_label">Nome a mostrar (opcional)</string>
+    <string name="contacts_name_to_show_support">A pessoa pode renomear você do lado dela; esse é o nome que ela verá.</string>
+    <string name="contacts_error_make_card">não foi possível criar um cartão</string>
+    <string name="contacts_publishing_inbox">Publicando sua caixa de entrada…</string>
+    <string name="contacts_create_card">Criar cartão</string>
+    <string name="contacts_publishing_note">Isto leva alguns segundos — dois registros precisam ser publicados antes que alguém possa contatar você. Eles continuam funcionando depois que você fecha o app.</string>
+    <string name="contacts_copy_link">Copiar link</string>
+    <string name="contacts_send">Enviar</string>
+    <string name="contacts_expires_24h">Expira em 24 horas.</string>
+    <string name="contacts_send_your_card">Envie seu cartão</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">Aponte a câmera para o cartão DUCAT da pessoa</string>
+    <string name="contacts_card_expired_ask_new">Esse cartão expirou. Peça um novo.</string>
+    <string name="contacts_not_a_card">Isso não é um cartão DUCAT</string>
+    <string name="contacts_add_contact_title">Adicionar um contato</string>
+    <string name="contacts_paste_link_label">Cole o link ducat: da pessoa</string>
+    <string name="contacts_paste">Colar</string>
+    <string name="contacts_scan">Escanear</string>
+    <string name="contacts_card_expired_ask_them">Este cartão expirou. Peça um novo à pessoa.</string>
+    <string name="contacts_read_card">Ler cartão</string>
+    <string name="contacts_no_name_given">(nenhum nome informado)</string>
+    <string name="contacts_unverified_name">não verificado — este é o nome que a pessoa digitou</string>
+    <string name="contacts_check_characters">Confira estes caracteres com a pessoa por um canal em que você confia, se importa saber quem é.</string>
+    <string name="contacts_save_them_as_label">Salvar como</string>
+    <string name="contacts_save_them_as_support">Seu nome para a pessoa. Só você o vê.</string>
+    <string name="contacts_error_read_inbox">não foi possível ler a caixa de entrada da pessoa</string>
+    <string name="contacts_reading_inbox">Lendo a caixa de entrada…</string>
+    <string name="contacts_add_contact_button">Adicionar contato</string>
+
+    <!-- Contacts.kt: replyReason — recusas de protocolo §18.5 em linguagem humana -->
+    <string name="contacts_reply_replay">Esse cartão já foi usado. Peça um novo à pessoa.</string>
+    <string name="contacts_reply_expired">Esse cartão expirou. Peça um novo à pessoa.</string>
+    <string name="contacts_reply_badsig">Esse link está danificado — tente copiá-lo de novo.</string>
+    <string name="contacts_reply_own_card">Esse é o seu próprio cartão.</string>
+    <string name="contacts_reply_refused">A pessoa recusou o pedido.</string>
+</resources>

@@ -1,0 +1,39 @@
+<resources>
+    <!-- Drawer header -->
+    <string name="drawer_set_name">Choisir un nom de profil</string>
+
+    <!-- Status section -->
+    <string name="drawer_speaking">langue : %1$s</string>
+
+    <!-- Profile section -->
+    <string name="drawer_persona_title">Ton persona</string>
+    <string name="drawer_persona_body">La clé avec laquelle tes cartes sont signées. Personne ne peut te trouver par elle — c\'est ce contre quoi on vérifie une carte une fois qu\'on l\'a.</string>
+
+    <!-- Being paid -->
+    <string name="drawer_being_paid_title">Être payé</string>
+    <string name="drawer_publish_switch">Laisser mes contacts me payer directement</string>
+    <string name="drawer_publish_off_note">Sans ça, quelqu\'un qui veut te payer doit attendre une demande.</string>
+    <string name="drawer_publish_on_warning">Ton adresse part une fois chez chaque contact, puis est réutilisée. Quiconque peut voir la chaîne peut dire que la même personne a été payée à chaque fois — y compris des gens qui ne t\'ont payé qu\'une seule fois. Les demandes évitent ça en portant chacune une adresse neuve.</string>
+    <string name="drawer_publish_scope_note">Seuls les contacts ajoutés après l\'activation l\'auront.</string>
+
+    <!-- Contacts admin -->
+    <string name="drawer_no_contacts">Pas encore de contact. Ajoutes-en un depuis l\'onglet Discussions.</string>
+    <string name="drawer_open_chat">Ouvrir la discussion</string>
+    <string name="drawer_delete_contact">Supprimer le contact</string>
+    <string name="drawer_forget_title">Oublier %1$s ?</string>
+    <string name="drawer_forget_body">Cela supprime le contact et tous ses messages. Ils ne peuvent pas être récupérés, et le joindre à nouveau demande une nouvelle carte.</string>
+    <string name="drawer_forget_confirm">Oublier</string>
+
+    <!-- Operating modes -->
+    <string name="modes_intro">Choisis ce qu\'est cet appareil en ce moment. Un mode prend toute l\'app jusqu\'à ce que tu reviennes ici choisir Personnel.</string>
+    <string name="mode_personal">Personnel</string>
+    <string name="mode_personal_desc">Ton portefeuille, tes discussions et ton activité. Le mode par défaut.</string>
+    <string name="mode_pos">Point de vente</string>
+    <string name="mode_pos_desc">Une caisse : enregistre des articles ou tape un total, montre un seul code — facture et reçu voyagent dans la conversation qu\'il ouvre.</string>
+    <string name="mode_bartab">Ardoise de bar</string>
+    <string name="mode_bartab_desc">Un carnet d\'ardoises : un scan à l\'arrivée, des ajouts toute la soirée, une addition à la fermeture. Le client peut payer après son départ.</string>
+    <string name="mode_taxi">Taxi</string>
+    <string name="mode_taxi_desc">Courses et compteur : surveille une station pour les appels, tarif par écrit au départ du compteur, l\'addition affiche les minutes.</string>
+    <string name="mode_donate">Dons</string>
+    <string name="mode_donate_desc">Un code permanent auquel n\'importe quel portefeuille Monero peut donner. Aucune app nécessaire de leur côté.</string>
+</resources>

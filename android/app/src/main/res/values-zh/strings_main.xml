@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_back">返回</string>
+    <string name="main_menu">菜单</string>
+    <string name="main_codes">二维码</string>
+    <string name="main_send_or_receive">收付款</string>
+    <string name="main_bill_decline">拒绝那张 %1$s XMR 的账单 — 这次先不付了。</string>
+    <string name="main_backup_title">备份</string>
+    <string name="main_backup_body">你有一些联系人不在上次备份里。现在恢复的话，钱能回来，人回不来。</string>
+    <string name="main_open_backup_settings">打开备份设置</string>
+    <string name="main_recent">最近</string>
+    <string name="main_see_all">查看全部</string>
+    <string name="main_sent">已发送</string>
+    <string name="main_received">已收到</string>
+</resources>

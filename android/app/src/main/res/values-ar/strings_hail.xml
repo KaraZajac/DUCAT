@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rider: the Home-screen hail card -->
+    <string name="hail_card_title">اطلب مشوارًا</string>
+    <string name="hail_card_standing">النداء قائم — في انتظار سائق</string>
+    <string name="hail_card_pitch">انشر وجهتك في موقف يراقبه السائقون.</string>
+    <string name="hail_standing_at">قائم عند %1$s</string>
+    <string name="hail_take_it_down">أنزله</string>
+    <string name="hail_awaiting_offer">التقط %1$s نداءك — في انتظار عرضه…</string>
+    <string name="hail_cancel">إلغاء</string>
+    <string name="hail_parked_offer">%1$s يعرض %2$s</string>
+    <string name="hail_view_the_offer">اطّلع على العرض</string>
+    <string name="hail_post_it_again">انشره من جديد</string>
+    <string name="hail_expired_unclaimed">لم يلتقط أحد نداءك قبل انتهاء مدته.</string>
+    <string name="hail_claimed_check_chats">التقط سائق نداءك — راجع دردشاتك.</string>
+    <string name="hail_accept_message">أراك قريبًا</string>
+    <string name="hail_decline_message">لا شكرًا</string>
+    <string name="hail_declined_post_again">رفضت — أتنشر من جديد؟</string>
+    <string name="hail_posted_waiting">نُشر. في انتظار سائق…</string>
+
+    <!-- Driver: DriveScreen -->
+    <string name="hail_rider_declined_title">رفض الراكب</string>
+    <string name="hail_rider_declined_body">لم يقبلوا عرضك. زال نداؤهم عن اللوحة.</string>
+    <string name="hail_ok">حسنًا</string>
+    <string name="hail_on_duty">في الخدمة</string>
+    <string name="hail_net_wide">شبكة واسعة — عرضها ~%1$s</string>
+    <string name="hail_net_nearby">مراقبة نطاق عرضه ~%1$s</string>
+    <string name="hail_net_here">منطقتك فقط، ~%1$s</string>
+    <string name="hail_stop">إيقاف</string>
+    <string name="hail_no_hails_map">لا نداءات قائمة — ستُثبَّت هنا.</string>
+    <string name="hail_quote_me">حدّد سعرك</string>
+    <string name="hail_driving_title">القيادة</string>
+    <string name="hail_driving_pitch">راقب موقفًا؛ التقط نداءً. التقاطه يفتح محادثة مع الراكب — حدّد السعر هناك، وتقابلا هناك، والفاتورة في النهاية كأي مشوار.</string>
+    <string name="hail_range_just_here">هنا فقط</string>
+    <string name="hail_range_nearby">الجوار</string>
+    <string name="hail_range_wide">واسع</string>
+    <string name="hail_range_desc_here">~%1$s — أحياء مدينة مكتظة</string>
+    <string name="hail_range_desc_wide">عرضه ~%1$s — للأرياف أو الليالي الهادئة</string>
+    <string name="hail_range_desc_nearby">عرضه ~%1$s — المعتاد</string>
+    <string name="hail_getting_location">جارٍ تحديد موقعك…</string>
+    <string name="hail_drive_here">القيادة هنا — مراقبة منطقتي</string>
+    <string name="hail_stand_label">الموقف</string>
+    <string name="hail_stand_placeholder">اسم الموقف، أو 📍 أعلاه</string>
+    <string name="hail_watch">راقب</string>
+    <string name="hail_watching_neighbours">مراقبة خليتك وجاراتها الثماني — %1$s +8</string>
+    <string name="hail_board_empty">لا شيء على اللوحة. نتفقّد كل بضع ثوانٍ…</string>
+    <string name="hail_offers_amount">يعرض %1$s</string>
+    <string name="hail_offers_amount_both">يعرض %1$s · %2$s</string>
+    <string name="hail_asks_quote">يطلب منك تحديد السعر</string>
+    <string name="hail_triage_pickup">الوصول إليه ~%1$s</string>
+    <string name="hail_triage_trip">الرحلة ~%1$s</string>
+    <string name="hail_stands_for_min">يبقى قائمًا %1$d دقيقة أخرى</string>
+    <string name="hail_view_job">اعرض المهمة</string>
+    <string name="hail_take_it">التقطه</string>
+    <string name="hail_location_fix_failed">تعذّر تحديد الموقع</string>
+    <string name="hail_beaten_to_it">سبقك إليه أحدهم.</string>
+    <string name="hail_on_my_way">🚕 في الطريق.</string>
+    <string name="hail_on_my_way_car">🚕 في الطريق — ابحث عن %1$s.</string>
+    <string name="hail_on_my_way_plate">🚕 في الطريق، اللوحة %1$s.</string>
+    <string name="hail_on_my_way_car_plate">🚕 في الطريق — ابحث عن %1$s، اللوحة %2$s.</string>
+
+    <!-- Driver: the fare-detail screen -->
+    <string name="hail_close">إغلاق</string>
+    <string name="hail_job_title">المهمة</string>
+    <string name="hail_to_pickup">إلى نقطة الانطلاق: %1$s · ~%2$d د</string>
+    <string name="hail_the_ride">المشوار: %1$s · ~%2$d د</string>
+    <string name="hail_offer_amount">العرض: %1$s</string>
+    <string name="hail_offer_amount_both">العرض: %1$s · %2$s</string>
+    <string name="hail_keep_all_vs_rideshare">تحتفظ به كله — تطبيق نقل تشاركي كان سيدفع نحو %1$s %2$.0f عن هذه الرحلة</string>
+    <string name="hail_rider_asks_quote">يطلب الراكب منك تحديد السعر</string>
+    <string name="hail_routing_job">جارٍ حساب مسار المهمة…</string>
+    <string name="hail_your_fare">أجرتك (%1$s)</string>
+    <string name="hail_offer_counter_hint">عرضهم — غيّره لتقدّم عرضًا مضادًا</string>
+    <string name="hail_offer_quote_hint">طلبوا منك تحديد السعر</string>
+    <string name="hail_price_in_instead">التسعير بـ %1$s بدلًا من ذلك</string>
+    <string name="hail_fare_invalid">يجب أن تكون الأجرة رقمًا أكبر من صفر.</string>
+    <string name="hail_take_this_ride">التقط هذا المشوار 🚕</string>
+    <string name="hail_pass">تجاوَز</string>
+
+    <!-- Driver: offer-in-flight card -->
+    <string name="hail_offered_waiting">عرضت %1$s — في انتظار %2$s</string>
+    <string name="hail_the_rider">الراكب</string>
+
+    <!-- Rider: the hail sheet -->
+    <string name="hail_my_location">موقعي</string>
+    <string name="hail_no_route">لم يوجد مسار بين هاتين النقطتين</string>
+    <string name="hail_pickup_label">نقطة الانطلاق</string>
+    <string name="hail_locating">جارٍ تحديد الموقع…</string>
+    <string name="hail_use_my_location">استخدم موقعي</string>
+    <string name="hail_where_to">إلى أين؟</string>
+    <string name="hail_address_hint">عنوان أو اسم نشاط تجاري</string>
+    <string name="hail_finding_route">جارٍ إيجاد المسار…</string>
+    <string name="hail_route_summary">%1$s · ~%2$d د</string>
+    <string name="hail_route_summary_priced">%1$s · ~%2$d د · %3$s %4$.2f</string>
+    <string name="hail_vs_competitors">النقل التشاركي ~%1$s %2$.0f · التاكسي ~%1$s %3$.0f — سائقك يحتفظ بالمبلغ كله (تطبيقات النقل تدفع لسائقيها ~%1$s %4$.0f)</string>
+    <string name="hail_your_offer">عرضك (%1$s)</string>
+    <string name="hail_offer_invalid">يجب أن يكون العرض رقمًا أكبر من صفر — أو اتركه فارغًا لطلب تسعيرة.</string>
+    <string name="hail_shards_full">كل شظايا الموقف ممتلئة هنا — حاول بعد قليل</string>
+    <string name="hail_post_failed">تعذّر نشر النداء</string>
+    <string name="hail_osm_privacy">البحث والمسار والخريطة تستخدم خوادم OpenStreetMap — المكان الوحيد الذي يرسل فيه DUCAT الموقع خارج الجهاز. لا يرى السائقون سوى مناطق بعرض ~%1$s.</string>
+    <string name="hail_post_button">اطلب 🚕</string>
+    <string name="hail_search">بحث</string>
+</resources>

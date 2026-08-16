@@ -1,0 +1,44 @@
+<resources>
+    <!-- Contacts.kt: contact list row -->
+    <string name="contacts_chat">Chat</string>
+
+    <!-- Contacts.kt: ShareCardSheet -->
+    <string name="contacts_share_card_title">Deine Karte teilen</string>
+    <string name="contacts_share_card_body">Gut für eine Person. Sobald sie eingelöst ist, funktioniert sie nicht mehr — ein Screenshot, der woanders landet, ist also kein Einfallstor.</string>
+    <string name="contacts_name_to_show_label">Angezeigter Name (optional)</string>
+    <string name="contacts_name_to_show_support">Auf ihrer Seite können sie dich umbenennen; dann sehen sie jenen Namen.</string>
+    <string name="contacts_error_make_card">Karte ließ sich nicht erstellen</string>
+    <string name="contacts_publishing_inbox">Dein Postfach wird veröffentlicht…</string>
+    <string name="contacts_create_card">Karte erstellen</string>
+    <string name="contacts_publishing_note">Das dauert ein paar Sekunden — zwei Einträge müssen veröffentlicht werden, bevor dich jemand erreichen kann. Sie funktionieren auch nach dem Schließen der App weiter.</string>
+    <string name="contacts_copy_link">Link kopieren</string>
+    <string name="contacts_send">Senden</string>
+    <string name="contacts_expires_24h">Läuft in 24 Stunden ab.</string>
+    <string name="contacts_send_your_card">Deine Karte senden</string>
+
+    <!-- Contacts.kt: AddContactSheet -->
+    <string name="contacts_scan_prompt">Richte die Kamera auf die DUCAT-Karte</string>
+    <string name="contacts_card_expired_ask_new">Die Karte ist abgelaufen. Bitte um eine neue.</string>
+    <string name="contacts_not_a_card">Das ist keine DUCAT-Karte</string>
+    <string name="contacts_add_contact_title">Kontakt hinzufügen</string>
+    <string name="contacts_paste_link_label">Den ducat:-Link einfügen</string>
+    <string name="contacts_paste">Einfügen</string>
+    <string name="contacts_scan">Scannen</string>
+    <string name="contacts_card_expired_ask_them">Diese Karte ist abgelaufen. Bitte um eine neue.</string>
+    <string name="contacts_read_card">Karte lesen</string>
+    <string name="contacts_no_name_given">(kein Name angegeben)</string>
+    <string name="contacts_unverified_name">unbestätigt — so wurde der Name eingetippt</string>
+    <string name="contacts_check_characters">Gleiche diese Zeichen über einen Kanal ab, dem du vertraust, wenn es darauf ankommt, wer das ist.</string>
+    <string name="contacts_save_them_as_label">Speichern als</string>
+    <string name="contacts_save_them_as_support">Dein Name für diese Person. Nur du siehst ihn.</string>
+    <string name="contacts_error_read_inbox">das Postfach ließ sich nicht lesen</string>
+    <string name="contacts_reading_inbox">Postfach wird gelesen…</string>
+    <string name="contacts_add_contact_button">Kontakt hinzufügen</string>
+
+    <!-- Contacts.kt: replyReason — human wording for §18.5 wire refusals -->
+    <string name="contacts_reply_replay">Diese Karte wurde schon eingelöst. Bitte um eine neue.</string>
+    <string name="contacts_reply_expired">Diese Karte ist abgelaufen. Bitte um eine neue.</string>
+    <string name="contacts_reply_badsig">Der Link ist beschädigt — kopiere ihn noch einmal.</string>
+    <string name="contacts_reply_own_card">Das ist deine eigene Karte.</string>
+    <string name="contacts_reply_refused">Die Anfrage wurde abgelehnt.</string>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance_ready_to_spend">Pronto para gastar</string>
+    <string name="balance_change_coming_back">%1$s em troco, de volta em %2$s</string>
+
+    <!-- Cartão de aviso de baixa capacidade -->
+    <string name="balance_all_locked_title">Você não pode pagar agora</string>
+    <string name="balance_running_low_title">Poucas notas restando</string>
+    <string name="balance_all_locked_body">Seu dinheiro está aqui, mas está todo preso como troco. Troque uma nota para gastar de novo.</string>
+    <string name="balance_running_low_body">Troque uma nota agora para não ficar na mão na hora de pagar.</string>
+    <string name="balance_break_note_action">Trocar uma nota</string>
+
+    <!-- notesPhrase: a frase mostrada em vez de um saldo cru -->
+    <plurals name="balance_notes">
+        <item quantity="one">1 nota</item>
+        <item quantity="other">%1$d notas</item>
+    </plurals>
+    <string name="balance_nothing_unlocked">nada desbloqueado ainda</string>
+    <string name="balance_notes_then_wait">%1$s — o suficiente para um pagamento, depois uma espera pelo troco</string>
+    <string name="balance_notes_one_more">%1$s, ou seja, cerca de mais um pagamento</string>
+    <string name="balance_notes_more">%1$s, ou seja, cerca de mais %2$d pagamentos</string>
+
+    <!-- minutesFor: tempo até o troco desbloquear -->
+    <string name="balance_unlock_any_moment">a qualquer momento</string>
+    <plurals name="balance_unlock_minutes">
+        <item quantity="one">cerca de %1$d minuto</item>
+        <item quantity="other">cerca de %1$d minutos</item>
+    </plurals>
+    <plurals name="balance_unlock_hours">
+        <item quantity="one">cerca de %1$d hora</item>
+        <item quantity="other">cerca de %1$d horas</item>
+    </plurals>
+</resources>

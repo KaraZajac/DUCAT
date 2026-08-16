@@ -1,0 +1,39 @@
+<resources>
+    <!-- Cabeçalho da gaveta -->
+    <string name="drawer_set_name">Defina um nome de perfil</string>
+
+    <!-- Seção de status -->
+    <string name="drawer_speaking">falando %1$s</string>
+
+    <!-- Seção de perfil -->
+    <string name="drawer_persona_title">Sua persona</string>
+    <string name="drawer_persona_body">A chave com que seus cartões são assinados. Ninguém pode encontrar você por ela — é o que alguém usa para conferir um cartão depois de tê-lo.</string>
+
+    <!-- Receber pagamentos -->
+    <string name="drawer_being_paid_title">Receber pagamentos</string>
+    <string name="drawer_publish_switch">Deixar contatos me pagarem diretamente</string>
+    <string name="drawer_publish_off_note">Sem isto, quem quer pagar você precisa esperar um pedido.</string>
+    <string name="drawer_publish_on_warning">Seu endereço vai uma vez para cada contato e é reutilizado. Qualquer um que consiga ver a cadeia pode perceber que a mesma pessoa foi paga todas as vezes — inclusive quem pagou você uma única vez. Pedidos evitam isso levando um endereço novo a cada vez.</string>
+    <string name="drawer_publish_scope_note">Só contatos adicionados depois de isto estar ligado o terão.</string>
+
+    <!-- Administração de contatos -->
+    <string name="drawer_no_contacts">Nenhum contato ainda. Adicione um na aba Conversas.</string>
+    <string name="drawer_open_chat">Abrir conversa</string>
+    <string name="drawer_delete_contact">Apagar contato</string>
+    <string name="drawer_forget_title">Esquecer %1$s?</string>
+    <string name="drawer_forget_body">Isto apaga o contato e todas as mensagens dele. Não há como recuperá-los, e para contatá-lo de novo será preciso um cartão novo.</string>
+    <string name="drawer_forget_confirm">Esquecer</string>
+
+    <!-- Modos de operação -->
+    <string name="modes_intro">Escolha o que este aparelho é agora. Um modo assume o app inteiro até você voltar aqui e escolher Pessoal.</string>
+    <string name="mode_personal">Pessoal</string>
+    <string name="mode_personal_desc">Sua carteira, suas conversas e sua atividade. O padrão.</string>
+    <string name="mode_pos">Ponto de venda</string>
+    <string name="mode_pos_desc">Uma caixa registradora: lance itens ou digite um total, mostre um código — conta e recibo viajam pela conversa que ele abre.</string>
+    <string name="mode_bartab">Comanda</string>
+    <string name="mode_bartab_desc">Um livro de comandas: escaneia uma vez, adiciona a noite toda, uma conta no fechamento. A pessoa pode pagar depois de sair.</string>
+    <string name="mode_taxi">Táxi</string>
+    <string name="mode_taxi_desc">Corridas e um taxímetro: observe um ponto por chamados, tarifa por escrito quando o taxímetro liga, a conta mostra os minutos.</string>
+    <string name="mode_donate">Doações</string>
+    <string name="mode_donate_desc">Um código permanente para o qual qualquer carteira Monero pode doar. Sem app do outro lado.</string>
+</resources>

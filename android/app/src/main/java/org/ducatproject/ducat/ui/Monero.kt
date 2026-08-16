@@ -308,7 +308,7 @@ private fun WalletSync(nodeHeight: Long) {
                     )
                     // Only when it has been measured. A made-up estimate is
                     // worse than none, because people plan around it.
-                    b.secondsLeft?.let { append(" · ${humanDuration(it)}") }
+                    b.secondsLeft?.let { append(" · ${humanDuration(context, it)}") }
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
