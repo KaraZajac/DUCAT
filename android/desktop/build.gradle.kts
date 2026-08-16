@@ -51,6 +51,14 @@ tasks.register<JavaExec>("smoke") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// A backup app-state round-trip, offline: proves claimed_kis_v1 (a
+// StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
+tasks.register<JavaExec>("backuptest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.BackupTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The desk driven blind over the live network; pairs with the Rust harness
 // claiming the card it prints. `./gradlew :desktop:e2e`.
 tasks.register<JavaExec>("e2e") {

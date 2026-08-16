@@ -94,10 +94,15 @@ money. Ordered by what blocks 1.0, not by effort.
 - **Profile-wide privacy pass.** For every profile field: who needs it,
   at what moment, over which channel. Car/plate scoped to the hail claim
   was the pattern; apply it everywhere.
-- **Backup hygiene for device-local state.** `stuck_`/`slotseen_` slot
-  memory and the burn pen are *this device's* transport state — restoring
-  them to a new device would mislead its reader. Audit `appStateKeys`
-  so backups carry identity and history, never transport scars.
+- ~~**Backup hygiene for device-local state.**~~ **Done, 0.88
+  (2026-08-17)** — the audit found the scars (`stuck_`/`slotseen_`, prekey
+  burn state) are already excluded: backupAppState is an allowlist, so
+  transport keys in the same prefs file never enter a backup. The real bug
+  was the inverse — claimed_kis_v1, a StringSet that MUST survive (it stops
+  a deleted paid tab's output re-matching a still-open bill), was exported
+  mangled and dropped on restore because restore only handled Boolean and
+  String. Fixed the round-trip (JSONArray both ways), gave the desktop
+  shim StringSet parity, and added :desktop:backuptest as a regression.
 
 ## App robustness — the 0.85 review's unfixed tail
 

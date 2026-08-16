@@ -576,7 +576,16 @@ class ContactStore(context: Context) {
             ?: threads.put(k, prefs.getLong(k, 0L)) }
         o.put("kv", threads)
         appStateKeys.forEach { k ->
-            prefs.all[k]?.let { v -> o.put(k, v) }
+            when (val v = prefs.all[k]) {
+                null -> {}
+                // claimed_kis_v1 is a StringSet; org.json would mangle it and
+                // restore silently dropped it — so a restored device forgot
+                // which outputs were already matched to a bill, and a still-open
+                // tab for the same amount could re-claim a spent payment (the
+                // exact double-match claimedKis exists to prevent).
+                is Set<*> -> o.put(k, JSONArray(v.toList()))
+                else -> o.put(k, v)
+            }
         }
         // Their profiles ride inside the contacts JSON already; carry it whole
         // so avatars and pronouns survive on the same client.
@@ -607,6 +616,9 @@ class ContactStore(context: Context) {
                     if (o.has(k)) when (val v = o.get(k)) {
                         is Boolean -> e.putBoolean(k, v)
                         is String -> e.putString(k, v)
+                        is JSONArray -> e.putStringSet(
+                            k, (0 until v.length()).map { v.getString(it) }.toSet(),
+                        )
                     }
                 }
                 e.apply()

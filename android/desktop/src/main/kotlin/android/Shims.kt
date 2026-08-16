@@ -29,6 +29,7 @@ abstract class Context {
 
 interface SharedPreferences {
     fun getString(key: String, def: String?): String?
+    fun getStringSet(key: String, def: Set<String>?): Set<String>?
     fun getInt(key: String, def: Int): Int
     fun getLong(key: String, def: Long): Long
     fun getBoolean(key: String, def: Boolean): Boolean
@@ -39,6 +40,7 @@ interface SharedPreferences {
 
     interface Editor {
         fun putString(key: String, v: String?): Editor
+        fun putStringSet(key: String, v: Set<String>?): Editor
         fun putInt(key: String, v: Int): Editor
         fun putLong(key: String, v: Long): Editor
         fun putBoolean(key: String, v: Boolean): Editor
@@ -76,6 +78,13 @@ class FilePreferences(private val file: File) : SharedPreferences {
 
     override fun getString(key: String, def: String?) =
         synchronized(lock) { map[key] as? String ?: def }
+    override fun getStringSet(key: String, def: Set<String>?): Set<String>? =
+        synchronized(lock) {
+            // Stored as a JSONArray (see putStringSet); read it back as a Set.
+            (map[key] as? org.json.JSONArray)?.let { a ->
+                (0 until a.length()).map { a.getString(it) }.toSet()
+            } ?: def
+        }
     override fun getInt(key: String, def: Int) =
         synchronized(lock) { (map[key] as? Number)?.toInt() ?: def }
     override fun getLong(key: String, def: Long) =
@@ -94,6 +103,10 @@ class FilePreferences(private val file: File) : SharedPreferences {
 
         override fun putString(key: String, v: String?) =
             apply2 { if (v == null) removes += key else puts[key] = v }
+        override fun putStringSet(key: String, v: Set<String>?) =
+            // A JSONArray so save()'s o.put serializes it correctly and
+            // getStringSet reads it back; org.json would not wrap a raw Set.
+            apply2 { if (v == null) removes += key else puts[key] = org.json.JSONArray(v.toList()) }
         override fun putInt(key: String, v: Int) = apply2 { puts[key] = v }
         override fun putLong(key: String, v: Long) = apply2 { puts[key] = v }
         override fun putBoolean(key: String, v: Boolean) = apply2 { puts[key] = v }
