@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,19 +44,27 @@ private const val TAG = "POS"
  * times a shift, so every step that can happen by itself does — the bill sends
  * on scan, the receipt sends on payment.
  */
+/** The basket across recreation and process death: a till is a tablet that
+ *  rotates and a phone Android reclaims mid-rush, and a rung-up sale is real
+ *  work. Flattened to [desc, amount, desc, amount, …] — both bundle-safe. */
+private val BasketSaver = androidx.compose.runtime.saveable.listSaver<List<BillItem>, Any>(
+    save = { it.flatMap { b -> listOf(b.description, b.amountPxmr) } },
+    restore = { flat -> flat.chunked(2).map { (d, a) -> BillItem(d as String, a as Long) } },
+)
+
 @Composable
 fun PosScreen() {
     val context = LocalContext.current
-    var basket by remember { mutableStateOf(listOf<BillItem>()) }
-    var taxPxmr by remember { mutableStateOf(0L) }
-    var charging by remember { mutableStateOf(false) }
+    var basket by rememberSaveable(stateSaver = BasketSaver) { mutableStateOf(listOf<BillItem>()) }
+    var taxPxmr by rememberSaveable { mutableStateOf(0L) }
+    var charging by rememberSaveable { mutableStateOf(false) }
     // Two registers, one till: itemised for the shop that rings up lines,
     // quick for the coffee cart that only ever needs a number. Both end in
     // the same card, the same bill, the same receipt — quick just bills one
     // line named "Sale", because a §16.13 bill must still add up.
-    var quick by remember { mutableStateOf(false) }
-    var quickAmount by remember { mutableStateOf("") }
-    var quickFiat by remember { mutableStateOf(Amounts.preferFiat(context)) }
+    var quick by rememberSaveable { mutableStateOf(false) }
+    var quickAmount by rememberSaveable { mutableStateOf("") }
+    var quickFiat by rememberSaveable { mutableStateOf(Amounts.preferFiat(context)) }
 
     val total = basket.sumOf { it.amountPxmr } + taxPxmr
 
@@ -257,9 +266,11 @@ private fun AmountBoth(pxmr: Long) {
 @Composable
 internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
     val context = LocalContext.current
-    var desc by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
-    var fiat by remember { mutableStateOf(Amounts.preferFiat(context)) }
+    // Saveable like the basket above it: the half-typed line is the sale's
+    // newest work, and rotation happens exactly when a hand is busy.
+    var desc by rememberSaveable { mutableStateOf("") }
+    var amount by rememberSaveable { mutableStateOf("") }
+    var fiat by rememberSaveable { mutableStateOf(Amounts.preferFiat(context)) }
     val rate = remember { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
 
@@ -309,7 +320,7 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
 @Composable
 private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
     val context = LocalContext.current
-    var text by remember { mutableStateOf(if (taxPxmr > 0) formatXmr(taxPxmr) else "") }
+    var text by rememberSaveable { mutableStateOf(if (taxPxmr > 0) formatXmr(taxPxmr) else "") }
     Row(
         Modifier.fillMaxWidth().padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -362,11 +373,19 @@ private fun PresentScreen(
 ) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    var cardUri by remember { mutableStateOf<String?>(null) }
-    var cardInbox by remember { mutableStateOf<String?>(null) }
+    // The card survives recreation: reissuing on rotation would put a fresh QR
+    // on screen while the customer is mid-scan of the old one — their claim
+    // would answer a card nobody is watching, and the bill would never send.
+    var cardUri by rememberSaveable { mutableStateOf<String?>(null) }
+    var cardInbox by rememberSaveable { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
-    var customer by remember { mutableStateOf<Contact?>(null) }
-    var saleTabId by remember { mutableStateOf<String?>(null) }
+    // The customer as a persona hex — Contact does not fit a Bundle, the hex
+    // does, and the store is the source of truth for the rest of them anyway.
+    var customerHex by rememberSaveable { mutableStateOf<String?>(null) }
+    var saleTabId by rememberSaveable { mutableStateOf<String?>(null) }
+    val customer: Contact? = remember(customerHex, version) {
+        customerHex?.let { h -> ContactStore(context).all().firstOrNull { it.personaHex == h } }
+    }
 
     // The stage is *derived* from the settlement store, which the poller
     // drives — so a sale marked paid while this screen was backgrounded shows
@@ -392,8 +411,10 @@ private fun PresentScreen(
 
     // A card per sale, marked as one: a "sale" card never auto-reissues, and
     // this flow waits for *its* claimant — a profile-code scan mid-sale must
-    // not be billed as the customer.
+    // not be billed as the customer. Issued once per sale, not per screen
+    // instance: a restored screen already holds its card and keeps it.
     LaunchedEffect(Unit) {
+        if (cardUri != null) return@LaunchedEffect
         val r = withContext(Dispatchers.IO) {
             runCatching {
                 Mailbox.issueCard(
@@ -413,7 +434,10 @@ private fun PresentScreen(
     // and the sale becomes a settlement the poller watches.
     LaunchedEffect(cardInbox) {
         val inbox = cardInbox ?: return@LaunchedEffect
-        while (customer == null) {
+        // Keyed on the tab, not the contact: the tab is the work this loop
+        // exists to do, and a restored screen whose sale is already billed
+        // (saleTabId saved) must not bill it twice.
+        while (saleTabId == null) {
             delay(2_000)
             val fresh = withContext(Dispatchers.IO) {
                 runCatching {
@@ -431,7 +455,7 @@ private fun PresentScreen(
                     store.settle(store.get(tab.id)!!)
                     tab.id
                 }.onSuccess { id ->
-                    customer = fresh
+                    customerHex = fresh.personaHex
                     saleTabId = id
                     DucatLog.i(TAG, "billed ${fresh.displayName()} ${formatXmr(totalPxmr)} XMR")
                 }.onFailure {
