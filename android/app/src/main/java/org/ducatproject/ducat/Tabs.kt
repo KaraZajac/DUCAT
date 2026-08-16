@@ -89,7 +89,7 @@ data class RunningTab(
 }
 
 class TabStore(private val context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
 
     fun all(): List<RunningTab> {
         val raw = prefs.getString("tabs_v1", null) ?: return emptyList()

@@ -580,7 +580,7 @@ data class ChainTx(
  * recomposition.
  */
 class TxStore(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
 
     fun get(txid: String): ChainTx? =
         prefs.getString("tx_${txid.lowercase()}", null)?.let {

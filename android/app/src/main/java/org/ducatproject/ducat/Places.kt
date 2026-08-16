@@ -69,5 +69,5 @@ object Fare {
     }
 
     private fun pref(context: Context) =
-        context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+        securePrefs(context, "ducat_contacts")
 }

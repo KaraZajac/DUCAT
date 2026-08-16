@@ -39,7 +39,7 @@ object Mailbox {
      *  made a dead letter immortal — sixteen observed minutes on a ten-minute
      *  window, with live receipts queued behind it forever. */
     private fun waitPrefs(context: Context) =
-        context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+        securePrefs(context, "ducat_contacts")
 
     private fun stuckSince(context: Context, key: String): Long {
         val p = waitPrefs(context)

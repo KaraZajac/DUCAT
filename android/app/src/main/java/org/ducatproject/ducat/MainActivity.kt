@@ -235,7 +235,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     }
     var billPay by remember { mutableStateOf<Pair<Contact, Long>?>(null) }
     val billPrefs = remember {
-        context.getSharedPreferences("ducat_contacts", android.content.Context.MODE_PRIVATE)
+        securePrefs(context, "ducat_contacts")
     }
     val billV by ContactStore.changes.collectAsState()
     // Keyed on the flows a bill can be behind, not just the store: one

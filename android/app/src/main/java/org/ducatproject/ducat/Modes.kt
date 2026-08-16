@@ -21,7 +21,7 @@ import android.content.Context
 enum class Mode { None, Pos, BarTab, Taxi, Donate }
 
 class ModeStore(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
 
     fun current(): Mode =
         runCatching { Mode.valueOf(prefs.getString("mode_current", null) ?: "None") }

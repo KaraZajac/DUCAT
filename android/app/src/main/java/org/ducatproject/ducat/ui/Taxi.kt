@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import org.ducatproject.ducat.securePrefs
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -48,7 +49,7 @@ private const val TAG = "Taxi"
 
 /** The active ride, in plain prefs: at most one, because the car has one seat row. */
 private class RideStore(context: android.content.Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", android.content.Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
     fun personaHex(): String? = prefs.getString("ride_persona", null)
     fun startedAt(): Long = prefs.getLong("ride_started", 0L)
     fun basePxmr(): Long = prefs.getLong("ride_base", 0L)
@@ -85,7 +86,7 @@ fun TaxiScreen() {
 private fun NewRideScreen(rides: RideStore) {
     val context = LocalContext.current
     val prefs = remember {
-        context.getSharedPreferences("ducat_contacts", android.content.Context.MODE_PRIVATE)
+        securePrefs(context, "ducat_contacts")
     }
     // Empty fields inherit the fare card's positioned defaults (§15.12's
     // pricing: inside the platform margin) rather than making every driver

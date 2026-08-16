@@ -20,7 +20,7 @@ import uniffi.ducat_mobile.Profile
  * refused after publishing.
  */
 class MyProfile(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
 
     fun name(): String? = prefs.getString("my_name", null)
     fun setName(v: String?) = put("my_name", v?.trim()?.ifBlank { null })

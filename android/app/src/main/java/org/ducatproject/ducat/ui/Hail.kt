@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import org.ducatproject.ducat.securePrefs
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -534,7 +535,7 @@ fun DriveScreen() {
     // The net's size is the driver's call: one cell where hails are thick,
     // 5×5 where a fare is worth chasing across a rural county.
     val rangePrefs = remember {
-        context.getSharedPreferences("ducat_contacts", android.content.Context.MODE_PRIVATE)
+        securePrefs(context, "ducat_contacts")
     }
     var range by remember { mutableStateOf(rangePrefs.getInt("drive_range", 3)) }
     var error by remember { mutableStateOf<String?>(null) }

@@ -36,6 +36,18 @@ class DucatApplication : Application() {
         DucatLog.init(this)
         VeilidInit.ensure(this)
         scope.launch {
+            // Migrate the sensitive stores to their encrypted form here, once,
+            // off the main thread, before anything reads them. Both are lazy by
+            // construction — a store migrates the first time securePrefs() names
+            // it — but ducat_ceremonies is only named when a ceremony runs, so a
+            // phone that upgraded and never opened another escrow would leave its
+            // key shares in plaintext indefinitely. Naming both now closes that
+            // window on the first post-upgrade launch. Idempotent after: the
+            // _migrated flag makes each of these a cached lookup.
+            runCatching {
+                securePrefs(this@DucatApplication, "ducat_contacts")
+                securePrefs(this@DucatApplication, "ducat_ceremonies")
+            }
             // Tried and measured on the emulator: UDP-on reads but its set
             // fanout dies inside QEMU user-net; UDP-off gets zero peers at
             // all. SLIRP cannot carry a Veilid node either way, so the flag

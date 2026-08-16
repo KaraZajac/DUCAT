@@ -24,7 +24,7 @@ import org.json.JSONObject
  * is only true if the bytes are gone.
  */
 class ContactStore(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
 
     companion object {
         /**
@@ -1207,7 +1207,7 @@ data class StoredMessage(
 
 /** Our own display name, and the last card we issued. */
 class NameStore(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
     fun get(): String? = prefs.getString("my_name", null)
     fun put(v: String) = prefs.edit().putString("my_name", v).apply()
 }
@@ -1227,7 +1227,7 @@ data class IssuedCardState(
 )
 
 class CardStore(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
 
     fun cardBytes(): ByteArray? = prefs.getString("my_card", null)?.let { unb64(it) }
 }
@@ -1251,7 +1251,7 @@ private fun unb64(s: String): ByteArray = Base64.decode(s, Base64.NO_WRAP)
  * behind the OS keystore.
  */
 class PersonaStore(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
 
     /** Our own persona, in the same hex form contacts are keyed by. */
     fun personaHex(): String =
@@ -1291,7 +1291,7 @@ fun threadAad(minePersonaHex: String, theirsPersonaHex: String): ByteArray =
  * the key that controls the money.
  */
 class WalletStore(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
 
     fun save(address: String, spendKeyHex: String, restoreHeight: ULong, stagenet: Boolean) {
         prefs.edit()
@@ -1604,7 +1604,7 @@ class WalletStore(context: Context) {
  * Half an hour is a long time for a price and a short time for a pattern.
  */
 class RateStore(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
 
     companion object {
         /**
@@ -1681,7 +1681,7 @@ class RateStore(context: Context) {
 
 /** Which Monero node to use, and the last one that worked. */
 class NodeStore(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_contacts", Context.MODE_PRIVATE)
+    private val prefs = securePrefs(context, "ducat_contacts")
 
     fun ownUrl(): String? = prefs.getString("monero_own_node", null)?.ifBlank { null }
 

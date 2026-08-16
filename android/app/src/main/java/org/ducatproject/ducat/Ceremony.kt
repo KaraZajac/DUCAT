@@ -34,7 +34,7 @@ object Ceremony {
     private const val T = 2
 
     private fun prefs(context: Context) =
-        context.getSharedPreferences("ducat_ceremonies", Context.MODE_PRIVATE)
+        securePrefs(context, "ducat_ceremonies")
 
     private fun load(context: Context, id: String): JSONObject? =
         prefs(context).getString("c_$id", null)?.let { JSONObject(it) }
