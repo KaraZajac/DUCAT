@@ -18,11 +18,11 @@ DRAFT=$(grep -m1 -oP '^\*\*Draft \K[0-9.]+' ducat-protocol.md)
 # because it is the thing you can actually look up.
 BUILD=$(git rev-list --count HEAD)
 TAG="${1:-v${DRAFT}.${BUILD}-$(git rev-parse --short HEAD)}"
-OUT=android/app/build/outputs/apk/debug
+OUT=applications/android/build/outputs/apk/debug
 
 echo "building ${TAG}…"
 bash mobile/build-android.sh >/dev/null
-(cd android && ./gradlew :app:assembleDebug -q >/dev/null)
+(cd applications && ./gradlew :android:assembleDebug -q >/dev/null)
 
 # Every ABI, because "which phone is this for" should not be a question the
 # person installing has to answer wrong once to learn.
@@ -38,9 +38,9 @@ done
 # workflows/desk.yml, started by the tag push below) spends its twenty
 # minutes producing the .deb/.rpm/.msi/.dmg on each OS that can.
 echo "building the desk…"
-(cd android && ./gradlew :desktop:createDistributable -q >/dev/null)
-DESK=android/desktop/build/compose/binaries/ducat-desk-linux-x64.tar.gz
-tar czf "$DESK" -C android/desktop/build/compose/binaries/main/app ducat-desk
+(cd applications && ./gradlew :desktop:createDistributable -q >/dev/null)
+DESK=applications/desktop/build/compose/binaries/ducat-desk-linux-x64.tar.gz
+tar czf "$DESK" -C applications/desktop/build/compose/binaries/main/app ducat-desk
 APKS+=("$DESK#DUCAT Desk ${TAG} (Linux x64, portable)")
 
 NOTES=$(mktemp)

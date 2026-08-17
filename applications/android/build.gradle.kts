@@ -6,6 +6,12 @@ plugins {
 
 android {
     namespace = "org.ducatproject.ducat"
+
+    // The module is :android now (applications/android), but the artifact
+    // keeps the name every published release URL already uses. A rename
+    // here would break /releases/latest/download/app-arm64-v8a-debug.apk,
+    // which is the install link in the README and in people's browsers.
+    base.archivesName.set("app")
     compileSdk = 35
 
     defaultConfig {

@@ -14,5 +14,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ducat"
-include(":app")
+include(":android")
 include(":desktop")

@@ -15,11 +15,22 @@ artifact here. Everything else exists to keep it honest.
 
 ## Install
 
-Phone browser, newest build, no release page to navigate:
+**Android** — phone browser, newest build, no release page to navigate:
 
     https://github.com/KaraZajac/DUCAT/releases/latest/download/app-arm64-v8a-debug.apk
 
 Use `armeabi-v7a` only for phones older than about 2016; `x86_64` is for emulators.
+
+**DUCAT Desk**, the desktop client — same protocol, a shopkeeper's window:
+
+| | |
+|---|---|
+| Linux | [`.deb`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-linux-x64.deb) · [`.rpm`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-linux-x64.rpm) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-linux-x64.tar.gz) |
+| Windows | [`.msi`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-windows-x64.msi) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-windows-x64.zip) |
+| macOS | [`.dmg` (Apple Silicon)](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-arm64.dmg) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-arm64.tar.gz) |
+
+Each carries its own Rust library and JVM — nothing to install first. They are
+unsigned, so both desktop OSes will warn on first open.
 
 **Debug-signed, stagenet only.** Not for real money.
 
@@ -118,10 +129,11 @@ vectors/            241 conformance vectors + schema — the published artifact
 conformance/        three checkers: schema, second implementation, spec audit
 harness/            end-to-end over real Veilid routes and real settlement
 sim/                offline simulator and market scenarios
-android/            the client (Kotlin/Compose over a UniFFI bridge); its
-                    desktop/ compiles the same protocol sources verbatim into
-                    the desk, which has played bar counter, driver, and
-                    standing escrow arbiter
+applications/       every client: android/ (Kotlin/Compose over a UniFFI
+                    bridge) and desktop/, which compiles the same protocol
+                    sources verbatim into DUCAT Desk for Linux/Windows/macOS
+                    — it has played bar counter, driver, and standing escrow
+                    arbiter. iOS gets a folder when it earns one.
 mobile/             the Rust bridge: wallet, scanner, mailbox, node
 research/           one-off measurements: Veilid throughput, Monero multisig,
                     FROSTLASS, wallet-layer probes. Evidence, not product.

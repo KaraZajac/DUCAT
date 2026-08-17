@@ -28,7 +28,7 @@ val sharedLogic = listOf(
 )
 
 kotlin.sourceSets["main"].kotlin.apply {
-    srcDir(rootProject.file("app/src/main/java"))
+    srcDir(rootProject.file("android/src/main/java"))
     include("org/ducatproject/desk/**", "uniffi/**", "android/**", "org/ducatproject/ducat/SecurePrefsDesk.kt")
     sharedLogic.forEach { include(it) }
 }

@@ -35,7 +35,7 @@ ABIS=${DUCAT_ABIS:-"aarch64-linux-android:arm64-v8a armv7-linux-androideabi:arme
 for t in $ABIS; do
   target=${t%%:*}; abi=${t##*:}
   cargo build -p ducat-mobile --target "$target" --release
-  cp "target/$target/release/libducat_mobile.so" "android/app/src/main/jniLibs/$abi/"
+  cp "target/$target/release/libducat_mobile.so" "applications/android/src/main/jniLibs/$abi/"
 done
 rm -rf /tmp/uniffi-out
 # Bindings come from the **host debug** build, not from a shipped library.
@@ -48,8 +48,8 @@ cargo build -p ducat-mobile
 cargo run -p ducat-mobile --bin uniffi-bindgen -- generate \
   --library target/debug/libducat_mobile.so \
   --language kotlin --out-dir /tmp/uniffi-out
-rm -rf android/app/src/main/java/uniffi/ducat_mobile
-cp -r /tmp/uniffi-out/uniffi/ducat_mobile android/app/src/main/java/uniffi/
+rm -rf applications/android/src/main/java/uniffi/ducat_mobile
+cp -r /tmp/uniffi-out/uniffi/ducat_mobile applications/android/src/main/java/uniffi/
 # The desktop client compiles the app's copy of these bindings directly
 # (its source set includes app/src/main/java with a filter), against the
 # host library built by `cargo build --release -p ducat-mobile`.

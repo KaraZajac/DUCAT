@@ -73,8 +73,8 @@ if [ -n "$NETFLAGS" ]; then
 fi
 
 if [ "$2" = "install" ] || [ "$1" = "install" ]; then
-  (cd android && ./gradlew :app:assembleDebug -q)
-  adb -s $SERIAL install -r android/app/build/outputs/apk/debug/app-x86_64-debug.apk
+  (cd applications && ./gradlew :android:assembleDebug -q)
+  adb -s $SERIAL install -r applications/android/build/outputs/apk/debug/app-x86_64-debug.apk
   adb -s $SERIAL shell am start -n org.ducatproject.ducat/.MainActivity
   echo "DUCAT is running on $SERIAL."
 fi

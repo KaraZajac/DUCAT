@@ -50,14 +50,14 @@ jobs:
       - name: Package the desk
         shell: bash
         run: |
-          cd android
+          cd applications
           ./gradlew --no-daemon :desktop:packageDistributionForCurrentOS :desktop:createDistributable
 
       - name: Collect artifacts under stable names
         shell: bash
         run: |
           set -x
-          out=android/desktop/build/compose/binaries/main
+          out=applications/desktop/build/compose/binaries/main
           mkdir -p dist
           shopt -s nullglob
           for f in "$out"/deb/*.deb; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.deb"; done
