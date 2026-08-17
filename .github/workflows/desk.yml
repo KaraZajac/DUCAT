@@ -25,19 +25,30 @@ jobs:
             slug: windows-x64
           - os: macos-latest
             slug: macos-arm64
-          # Intel Mac runners are on their way out upstream; take one while
-          # the label still exists, lose nothing when it stops.
-          - os: macos-13
+          # Intel Macs, built on an Apple Silicon runner: the macos-13 label
+          # queues forever now that GitHub is retiring it, so instead this
+          # job takes an x86_64 JDK (running under Rosetta) and an x86_64
+          # Rust target. jpackage bundles the JVM it is itself running on,
+          # so an x64 JVM produces an x64 app — no Intel hardware needed.
+          - os: macos-latest
             slug: macos-x64
+            jdk_arch: x64
+            rust_target: x86_64-apple-darwin
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.os == 'macos-13' }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Rosetta, for the x86_64 JDK on Apple Silicon
+        if: matrix.jdk_arch == 'x64'
+        run: sudo softwareupdate --install-rosetta --agree-to-license || true
 
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
+          # Empty means "this runner's own architecture", which is what
+          # every job but the Intel-Mac cross-build wants.
+          architecture: ${{ matrix.jdk_arch }}
 
       - name: Linux packaging tools (rpm beside the preinstalled dpkg)
         if: matrix.slug == 'linux-x64'
@@ -45,7 +56,16 @@ jobs:
 
       - name: Build the host Rust library
         shell: bash
-        run: cargo build --release -p ducat-mobile
+        run: |
+          if [ -n "${{ matrix.rust_target }}" ]; then
+            rustup target add "${{ matrix.rust_target }}"
+            cargo build --release --target "${{ matrix.rust_target }}" -p ducat-mobile
+            # Where the desk's build expects to find it, whoever built it.
+            mkdir -p target/release
+            cp target/"${{ matrix.rust_target }}"/release/libducat_mobile.dylib target/release/
+          else
+            cargo build --release -p ducat-mobile
+          fi
 
       - name: Package the desk
         shell: bash

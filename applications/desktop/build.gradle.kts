@@ -155,8 +155,25 @@ compose.desktop {
             // JNA reaches for sun.misc.Unsafe; jlink strips it unless asked.
             modules("jdk.unsupported")
             appResourcesRootDir.set(layout.projectDirectory.dir("resources"))
+            // icons/ holds the phone's own artwork in each platform's format
+            // (see icons/make-icons.py, which regenerates all of them). An
+            // installer with a default Java icon looks like something that
+            // escaped a build server rather than a thing anyone meant.
             linux {
-                iconFile.set(rootProject.file("../docs/mascot.png"))
+                iconFile.set(project.file("icons/ducat.png"))
+                menuGroup = "Network"
+            }
+            windows {
+                iconFile.set(project.file("icons/ducat.ico"))
+                menuGroup = "DUCAT"
+                // Fixed for the life of the product: it is how Windows knows
+                // a new .msi replaces this app instead of installing beside it.
+                upgradeUuid = "6f3c1d5a-9b24-4a17-8f0e-2c7d5b91ae43"
+            }
+            macOS {
+                iconFile.set(project.file("icons/ducat.icns"))
+                bundleID = "org.ducatproject.desk"
+                dockName = "DUCAT Desk"
             }
         }
     }

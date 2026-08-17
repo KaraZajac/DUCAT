@@ -107,12 +107,9 @@ private object DeskTray {
     private val icon: java.awt.TrayIcon? by lazy {
         runCatching {
             if (!java.awt.SystemTray.isSupported()) return@runCatching null
-            val img = java.awt.image.BufferedImage(16, 16, java.awt.image.BufferedImage.TYPE_INT_ARGB)
-            img.createGraphics().apply {
-                color = java.awt.Color(0xF5, 0xA9, 0x7F)
-                fillOval(1, 1, 14, 14)
-                dispose()
-            }
+            val img = javax.imageio.ImageIO.read(
+                DeskTray::class.java.getResourceAsStream("/desk-tray.png"),
+            )
             java.awt.TrayIcon(img, "DUCAT Desk").also {
                 it.isImageAutoSize = true
                 java.awt.SystemTray.getSystemTray().add(it)
@@ -170,7 +167,12 @@ fun main() {
 }
 
 private fun runDesk(deskDir: File) = application {
-    Window(onCloseRequest = ::exitApplication, title = "DUCAT Desk") {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "DUCAT Desk",
+        // The window's own icon: what a taskbar, an alt-tab and a Dock show.
+        icon = androidx.compose.ui.res.painterResource("desk-icon.png"),
+    ) {
         val context = remember { DeskContext(deskDir) }
         var ready by remember { mutableStateOf(false) }
         var netWord by remember { mutableStateOf("starting…") }
