@@ -18,6 +18,7 @@ import java.io.File
 abstract class Context {
     companion object {
         @JvmField val MODE_PRIVATE: Int = 0
+        @JvmField val CLIPBOARD_SERVICE: String = "clipboard"
     }
 
     abstract val filesDir: File
@@ -25,6 +26,28 @@ abstract class Context {
     open val packageName: String get() = "org.ducatproject.desk"
     open val packageManager: android.content.pm.PackageManager
         get() = android.content.pm.PackageManager()
+
+    // Screens read their words through the Context too, not only through
+    // Compose's stringResource — 257 call sites' worth. See Resources.kt.
+    open fun getString(id: Int): String = android.res.DeskRes.string(id)
+    open fun getString(id: Int, vararg args: Any?): String =
+        android.res.DeskRes.string(id, *args)
+    open val resources: Resources get() = Resources
+
+    /** Only the services a screen asks for by name. */
+    open fun getSystemService(name: String): Any? = when (name) {
+        CLIPBOARD_SERVICE -> ClipboardManager()
+        else -> null
+    }
+}
+
+/** Only the corner of android.content.res.Resources the screens touch. */
+object Resources {
+    fun getString(id: Int): String = android.res.DeskRes.string(id)
+    fun getQuantityString(id: Int, count: Int): String =
+        android.res.DeskRes.plural(id, count)
+    fun getQuantityString(id: Int, count: Int, vararg args: Any?): String =
+        android.res.DeskRes.plural(id, count, *args)
 }
 
 interface SharedPreferences {

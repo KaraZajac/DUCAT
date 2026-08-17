@@ -154,7 +154,13 @@ fun main() {
     System.getProperty("compose.application.resources.dir")?.let {
         System.setProperty("jna.library.path", it)
     }
+    // The phone's screens read their words through R; point the table at the
+    // chosen language before any of them draws. LocaleStore is the phone's
+    // own setting, so a desk and a phone in one household agree.
     val dir = dataDir()
+    runCatching {
+        android.res.DeskRes.setLocale(org.ducatproject.ducat.LocaleStore(DeskContext(dir)).tag())
+    }
     if (lockOrExplain(dir) == null) {
         System.err.println(
             "ducat-desk: ${dir.absolutePath} is already in use by another desk.\n" +
@@ -191,6 +197,7 @@ private fun runDesk(deskDir: File) = application {
         var renameOpen by remember { mutableStateOf(false) }
         var receiveOpen by remember { mutableStateOf(false) }
         var payFor by remember { mutableStateOf<StoredMessage?>(null) }
+        var activityOpen by remember { mutableStateOf(false) }
         var focused by remember { mutableStateOf(true) }
 
         // The tray only speaks for messages that land while the operator is
@@ -297,6 +304,11 @@ private fun runDesk(deskDir: File) = application {
             }
         }
 
+        // Every phone screen hosted here asks for LocalContext.current; the
+        // desk's Context is the same one its stores already use.
+        androidx.compose.runtime.CompositionLocalProvider(
+            androidx.compose.ui.platform.LocalContext provides context,
+        ) {
         MaterialTheme(colorScheme = darkColorScheme()) {
             Surface(Modifier.fillMaxSize()) {
                 Column(Modifier.fillMaxSize()) {
@@ -327,6 +339,8 @@ private fun runDesk(deskDir: File) = application {
                             }
                         }
                         Row {
+                            OutlinedButton(onClick = { activityOpen = true }) { Text("Activity") }
+                            Spacer(Modifier.width(8.dp))
                             OutlinedButton(
                                 enabled = WalletStore(context).address() != null,
                                 onClick = { receiveOpen = true },
@@ -575,7 +589,36 @@ private fun runDesk(deskDir: File) = application {
                         onDone = { payFor = null },
                     )
                 }
+
+                // The phone's own Activity tab, compiled from the phone's
+                // source and hosted in a desk window: the same ledger, the
+                // same wording, the same twenty languages. Nothing here is a
+                // desk reimplementation of it.
+                if (activityOpen) {
+                    androidx.compose.ui.window.Dialog(
+                        onDismissRequest = { activityOpen = false },
+                        properties = org.ducatproject.ducat.ui.fullScreenDialogProperties(),
+                    ) {
+                        Surface(
+                            Modifier.fillMaxWidth(0.7f).fillMaxHeight(0.8f),
+                            color = MaterialTheme.colorScheme.background,
+                        ) {
+                            Column {
+                                Row(
+                                    Modifier.fillMaxWidth().padding(8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text("Activity", style = MaterialTheme.typography.titleMedium)
+                                    TextButton(onClick = { activityOpen = false }) { Text("Close") }
+                                }
+                                org.ducatproject.ducat.ui.ActivityScreen()
+                            }
+                        }
+                    }
+                }
             }
+        }
         }
     }
 }

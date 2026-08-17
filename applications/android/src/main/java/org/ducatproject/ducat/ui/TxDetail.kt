@@ -54,11 +54,7 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
     // bottom navigation over a screen that is not a tab.
     Dialog(
         onDismissRequest = onClose,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            dismissOnBackPress = true,
-            decorFitsSystemWindows = false,
-        ),
+        properties = fullScreenDialogProperties(),
     ) {
       Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Scaffold(

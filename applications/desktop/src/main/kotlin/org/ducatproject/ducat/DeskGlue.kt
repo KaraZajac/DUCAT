@@ -27,3 +27,16 @@ object Notify {
         sink?.invoke(from, personaHex, m)
     }
 }
+
+/**
+ * The phone's navigation channel, desk edition.
+ *
+ * Screens ask to open a conversation by writing a persona into
+ * `MainActivity.openChat` — a flow rather than intent plumbing, precisely so
+ * it works from anywhere. The desk's window collects the same flow, so a
+ * receipt tapped in the Activity list opens the thread here too, and the
+ * screens need no desk-specific edit to do it.
+ */
+object MainActivity {
+    val openChat = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+}

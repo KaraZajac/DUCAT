@@ -21,21 +21,200 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/DucatLog.kt",
     "org/ducatproject/ducat/RideStore.kt",
     "org/ducatproject/ducat/Wallet2.kt",
+    // The screens themselves, now that R and stringResource resolve here.
+    // Each one that crosses is a capability the desk stops lacking and a
+    // wording the two clients cannot disagree about.
+    "org/ducatproject/ducat/Ledger.kt",
+    "org/ducatproject/ducat/Amounts.kt",
+    "org/ducatproject/ducat/Locales.kt",
+    "org/ducatproject/ducat/ui/Theme.kt",
+    "org/ducatproject/ducat/ui/Type.kt",
+    "org/ducatproject/ducat/ui/Catppuccin.kt",
+    "org/ducatproject/ducat/ui/Activity.kt",
+    "org/ducatproject/ducat/ui/TxDetail.kt",
     // Desk-side glue that lives inside the shared package — these two match
     // files in *this* module's tree (like SecurePrefsDesk below), not app/.
     "org/ducatproject/ducat/DeskGlue.kt",
     "org/ducatproject/ducat/ui/DeskHailOps.kt",
 )
 
+// The phone's resources, made available to the phone's screens compiled here.
+//
+// R is generated from the same res/values XML the APK is built from, so an
+// id cannot mean one string on the phone and another on the desk; the tables
+// are emitted per locale and read at runtime by android/Resources.kt. This
+// is what lets a screen come across verbatim, translations and all, instead
+// of being retyped into a second implementation that drifts.
+val deskResDir = layout.buildDirectory.dir("generated/deskres")
+val generateDeskRes = tasks.register("generateDeskRes") {
+    val resRoot = rootProject.file("android/src/main/res")
+    inputs.dir(resRoot)
+    outputs.dir(deskResDir)
+    doLast {
+        val out = deskResDir.get().asFile
+        val src = File(out, "kotlin/org/ducatproject/ducat").apply { mkdirs() }
+        val tables = File(out, "resources/deskres").apply { mkdirs() }
+        val drawables = File(tables, "drawable").apply { mkdirs() }
+
+        fun textOf(node: org.w3c.dom.Node): String {
+            // Android's escaping: \' \" \n, and CDATA-free markup is rare
+            // enough here that the child text is the whole value.
+            val raw = StringBuilder()
+            val kids = node.childNodes
+            for (i in 0 until kids.length) raw.append(kids.item(i).textContent)
+            return raw.toString()
+                .replace("\\'", "'").replace("\\\"", "\"").replace("\\n", "\n")
+        }
+
+        val builder = javax.xml.parsers.DocumentBuilderFactory.newInstance()
+            .newDocumentBuilder()
+        // values/ is the base; values-xx/ are the translations.
+        val dirs = resRoot.listFiles { f: File -> f.isDirectory && f.name.startsWith("values") }
+            ?.sortedBy { it.name } ?: emptyList()
+        // Ids come from the base locale, sorted, so they are stable across
+        // builds and machines — a resource id that moves is a mistranslation.
+        val strings = sortedSetOf<String>()
+        val plurals = sortedSetOf<String>()
+        val perLocale = linkedMapOf<String, Pair<MutableMap<String, String>, MutableMap<String, MutableMap<String, String>>>>()
+
+        for (dir in dirs) {
+            val tag = if (dir.name == "values") "en" else dir.name.removePrefix("values-")
+            val s = linkedMapOf<String, String>()
+            val p = linkedMapOf<String, MutableMap<String, String>>()
+            dir.listFiles { f: File -> f.name.endsWith(".xml") }?.sortedBy { it.name }?.forEach { f ->
+                val doc = runCatching { builder.parse(f) }.getOrNull() ?: return@forEach
+                val ss = doc.getElementsByTagName("string")
+                for (i in 0 until ss.length) {
+                    val e = ss.item(i) as org.w3c.dom.Element
+                    val name = e.getAttribute("name")
+                    if (name.isNotEmpty()) s[name] = textOf(e)
+                }
+                val ps = doc.getElementsByTagName("plurals")
+                for (i in 0 until ps.length) {
+                    val e = ps.item(i) as org.w3c.dom.Element
+                    val name = e.getAttribute("name")
+                    if (name.isEmpty()) continue
+                    val items = e.getElementsByTagName("item")
+                    val q = linkedMapOf<String, String>()
+                    for (j in 0 until items.length) {
+                        val it2 = items.item(j) as org.w3c.dom.Element
+                        q[it2.getAttribute("quantity")] = textOf(it2)
+                    }
+                    p[name] = q
+                }
+            }
+            if (tag == "en") { strings += s.keys; plurals += p.keys }
+            perLocale[tag] = s to p
+        }
+
+        val stringId = strings.withIndex().associate { (i, n) -> n to i + 1 }
+        val pluralId = plurals.withIndex().associate { (i, n) -> n to i + 100_000 }
+
+        // The raster drawables the screens name, by id, copied in.
+        val drawableNames = listOf("ducat_cat" to "drawable-nodpi/ducat_cat.png")
+        val mipmapNames = listOf("ic_launcher" to "mipmap-xxxhdpi/ic_launcher.png")
+        var nextArt = 200_000
+        val artIds = linkedMapOf<String, Int>()
+        (drawableNames + mipmapNames).forEach { (name, rel) ->
+            val id = nextArt++
+            artIds[name] = id
+            val f = File(resRoot, rel)
+            if (f.isFile) f.copyTo(File(drawables, "$id.png"), overwrite = true)
+        }
+
+        // JSON string escaping, including the control characters Android's
+        // own \n unescaping puts back into the text.
+        fun esc(s: String) = buildString {
+            for (c in s) when {
+                c == '\\' -> append("\\\\")
+                c == '"' -> append("\\\"")
+                c == '\n' -> append("\\n")
+                c == '\r' -> append("\\r")
+                c == '\t' -> append("\\t")
+                c < ' ' -> append("\\u%04x".format(c.code))
+                else -> append(c)
+            }
+        }
+        File(src, "R.kt").writeText(buildString {
+            appendLine("// Generated by :desktop:generateDeskRes — do not edit.")
+            appendLine("// Ids are the phone's resource names, sorted; the strings behind them")
+            appendLine("// are read at runtime from /deskres/<locale>.json (android/Resources.kt).")
+            appendLine("package org.ducatproject.ducat")
+            appendLine()
+            appendLine("object R {")
+            appendLine("    object string {")
+            stringId.forEach { (n, i) -> appendLine("        const val $n = $i") }
+            appendLine("    }")
+            appendLine("    object plurals {")
+            pluralId.forEach { (n, i) -> appendLine("        const val $n = $i") }
+            appendLine("    }")
+            appendLine("    object drawable {")
+            drawableNames.forEach { (n, _) -> appendLine("        const val $n = ${artIds[n]}") }
+            // Vector-only drawables still need to resolve; they draw nothing.
+            appendLine("        const val ic_ducat_mono = 299998")
+            appendLine("        const val ic_ducat_coin = 299999")
+            appendLine("    }")
+            appendLine("    object mipmap {")
+            mipmapNames.forEach { (n, _) -> appendLine("        const val $n = ${artIds[n]}") }
+            appendLine("    }")
+            appendLine("}")
+        })
+
+        perLocale.forEach { (tag, pair) ->
+            val (s, p) = pair
+            val json = StringBuilder("{\"strings\":{")
+            json.append(
+                s.entries.mapNotNull { (n, v) ->
+                    stringId[n]?.let { "\"$it\":\"${esc(v)}\"" }
+                }.joinToString(","),
+            )
+            json.append("},\"plurals\":{")
+            json.append(
+                p.entries.mapNotNull { (n, q) ->
+                    pluralId[n]?.let { id ->
+                        "\"$id\":{" + q.entries.joinToString(",") { (k, v) -> "\"$k\":\"${esc(v)}\"" } + "}"
+                    }
+                }.joinToString(","),
+            )
+            json.append("}}")
+            File(tables, "$tag.json").writeText(json.toString())
+        }
+        File(tables, "index.json").writeText(
+            "{\"locales\":[" + perLocale.keys.joinToString(",") { "\"$it\"" } + "]}",
+        )
+        logger.lifecycle(
+            "deskres: ${strings.size} strings, ${plurals.size} plurals, ${perLocale.size} locales",
+        )
+    }
+}
+tasks.matching { it.name == "compileKotlin" || it.name == "processResources" }
+    .configureEach { dependsOn(generateDeskRes) }
+
+sourceSets["main"].resources.srcDir(deskResDir.map { it.dir("resources") })
+
 kotlin.sourceSets["main"].kotlin.apply {
+    srcDir(deskResDir.map { it.dir("kotlin") })
     srcDir(rootProject.file("android/src/main/java"))
-    include("org/ducatproject/desk/**", "uniffi/**", "android/**", "org/ducatproject/ducat/SecurePrefsDesk.kt")
+    include(
+        "org/ducatproject/desk/**", "uniffi/**", "android/**",
+        "org/ducatproject/ducat/SecurePrefsDesk.kt",
+        // Generated by generateDeskRes, and outside sharedLogic because it
+        // has no counterpart in the phone's tree — AGP generates the phone's.
+        "org/ducatproject/ducat/R.kt",
+        // The desk's half of the phone's PlatformWindow.kt. Distinct file
+        // name because the include patterns cover both source trees: two
+        // files at one path would be two declarations of one function.
+        "org/ducatproject/ducat/ui/PlatformWindowDesk.kt",
+    )
     sharedLogic.forEach { include(it) }
 }
 
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
+    // The screens name icons from the extended set (Receipt, ArrowUpward,
+    // …); the phone gets them from the same artifact.
+    implementation(compose.materialIconsExtended)
     // The generated bindings speak JNA on a plain JVM.
     implementation("net.java.dev.jna:jna:5.14.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
@@ -90,6 +269,14 @@ tasks.register<JavaExec>("ringtest") {
 tasks.register<JavaExec>("tilltest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.TillTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The resource bridge without a window: ids, languages, plurals.
+// `./gradlew :desktop:restest`.
+tasks.register<JavaExec>("restest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ResTestKt"
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
