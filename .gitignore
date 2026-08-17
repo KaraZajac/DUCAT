@@ -22,3 +22,4 @@ research/monero-rs/*/group/
 android/desktop/build/
 research/monero-rs/escrow*.party*
 research/monero-rs/escrow*.height
+android/desktop/resources/

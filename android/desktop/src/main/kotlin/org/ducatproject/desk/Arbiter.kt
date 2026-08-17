@@ -32,6 +32,12 @@ fun main(args: Array<String>) {
     check(lock != null) { "ARBITER_FAIL another desk is running on $dir" }
 
     val context = DeskContext(dir)
+    // `--name Marta` names the standing identity once; cards and the serving
+    // line read it from then on. An unnamed arbiter serves fine — but a card
+    // that says who it is gets flipped on with more confidence.
+    args.indexOf("--name").takeIf { it >= 0 && it + 1 < args.size }?.let {
+        NameStore(context).put(args[it + 1])
+    }
     nodeStart("${dir.absolutePath}/veilid", true)
     val deadline = System.currentTimeMillis() + 90_000
     while (System.currentTimeMillis() < deadline && !nodeStatus().publicInternetReady) {

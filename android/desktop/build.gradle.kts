@@ -21,7 +21,8 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/DucatLog.kt",
     "org/ducatproject/ducat/RideStore.kt",
     "org/ducatproject/ducat/Wallet2.kt",
-    // Desk-side glue that lives inside the shared package (see DeskGlue.kt).
+    // Desk-side glue that lives inside the shared package — these two match
+    // files in *this* module's tree (like SecurePrefsDesk below), not app/.
     "org/ducatproject/ducat/DeskGlue.kt",
     "org/ducatproject/ducat/ui/DeskHailOps.kt",
 )
@@ -92,16 +93,41 @@ tasks.register<JavaExec>("e2e") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// A packaged desk must carry its own Rust: the host ducat_mobile library is
+// copied into the compose resources tree, which jpackage ships beside the
+// app and names at runtime via compose.application.resources.dir — main()
+// points JNA there when the property exists. Dev runs keep ../target/release.
+val nativeLibDir = layout.projectDirectory.dir("resources/linux-x64")
+val prepareNativeLib = tasks.register<Copy>("prepareNativeLib") {
+    from(rootProject.file("../target/release/libducat_mobile.so"))
+    into(nativeLibDir)
+}
+// The plugin's own resource sync (prepareAppResources) is what actually
+// reads the directory, so the copy must precede *it*, not just the
+// package/distributable tasks that sit above it in the graph.
+tasks.matching {
+    it.name.startsWith("package") || it.name.startsWith("prepareAppResources") ||
+        it.name == "createDistributable" || it.name == "runDistributable" ||
+        it.name == "createReleaseDistributable"
+}.configureEach { dependsOn(prepareNativeLib) }
+
 compose.desktop {
     application {
         mainClass = "org.ducatproject.desk.MainKt"
         jvmArgs += "-Djna.library.path=${rootProject.projectDir}/../target/release"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Deb, TargetFormat.Msi, TargetFormat.Dmg)
+            targetFormats(TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.Msi, TargetFormat.Dmg)
             packageName = "ducat-desk"
+            description = "DUCAT Desk — peer-to-peer proximity commerce, no operator"
             // Dmg insists MAJOR > 0; the protocol's own versioning lives in the spec.
             packageVersion = "1.0.0"
+            // JNA reaches for sun.misc.Unsafe; jlink strips it unless asked.
+            modules("jdk.unsupported")
+            appResourcesRootDir.set(layout.projectDirectory.dir("resources"))
+            linux {
+                iconFile.set(rootProject.file("../docs/mascot.png"))
+            }
         }
     }
 }

@@ -275,9 +275,23 @@ is already cross-platform Rust; the path, cheapest first:
    phone's protocol sources verbatim against a four-class Android shim:
    one implementation of Mailbox/ContactStore on every screen. Window:
    contacts, chat, claimable card QR, the phone's poll loop; headless
-   `:desktop:smoke` gates the stack in CI. Next: bills/pay rendering,
-   wallet scan loop, notifications, then packageDeb/Msi/Dmg artifacts.
-   The shim retires into a real shared module once the surface is known.
+   `:desktop:smoke` gates the stack in CI. ~~Next: bills/pay rendering,
+   wallet scan loop, notifications, then packageDeb/Msi/Dmg artifacts.~~
+   **v3, 0.88 (2026-08-17)** — the desk earns its till: a wallet born at
+   first run (creation height from a live node, same as onboarding), the
+   scan loop folded beside the mailbox sweep, balance + fiat in the top
+   bar, a Receive QR; bills render their lines (already proven to sum),
+   an incoming request's Pay quotes fee/total/remaining before the one
+   button that spends (§5's review, desk-shaped) and sends the §16.13
+   notice after; incoming payments offer the receipt the desk owes, once;
+   tray notifications ride the shared announce funnel (DeskGlue's Notify
+   grew a sink — headless desks stay quiet by construction). Packaging:
+   the app image bundles the host Rust library and jdk.unsupported, and
+   the distribution's own jars + bundled .so passed the live smoke gate;
+   `ducat-desk-1.0.0-linux-x64.tar.gz` builds today. Deb/Rpm need host
+   tools (`dnf install rpm-build fakeroot dpkg`), Msi/Dmg their own OS or
+   CI. The arbiter takes `--name` now. The shim retires into a real
+   shared module once the surface is known.
 3. **iPhone** eventually: uniffi generates Swift bindings natively and
    the Rust stack compiles for iOS — the protocol layer is free; the UI
    and App Store review are the cost. Nothing now forecloses it.
