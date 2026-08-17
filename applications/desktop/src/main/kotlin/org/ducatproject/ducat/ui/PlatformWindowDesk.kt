@@ -8,7 +8,8 @@ import androidx.compose.ui.window.DialogProperties
  * There are no system bars to draw behind here, so the phone's third flag
  * has nothing to say.
  */
-fun fullScreenDialogProperties(): DialogProperties = DialogProperties(
-    usePlatformDefaultWidth = false,
-    dismissOnBackPress = true,
-)
+fun fullScreenDialogProperties(dismissOnBackPress: Boolean = true): DialogProperties =
+    DialogProperties(
+        usePlatformDefaultWidth = false,
+        dismissOnBackPress = dismissOnBackPress,
+    )

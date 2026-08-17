@@ -28,6 +28,9 @@ fun pluralStringResource(id: Int, count: Int): String =
 fun pluralStringResource(id: Int, count: Int, vararg formatArgs: Any): String =
     android.res.DeskRes.plural(id, count, *formatArgs)
 
+@Composable
+fun stringArrayResource(id: Int): Array<String> = android.res.DeskRes.array(id)
+
 /**
  * A drawable by id. Only the handful of raster drawables the phone's screens
  * name are shipped (generateDeskRes copies them); a vector XML has no meaning

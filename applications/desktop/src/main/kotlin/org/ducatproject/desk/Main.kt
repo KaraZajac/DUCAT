@@ -197,7 +197,9 @@ private fun runDesk(deskDir: File) = application {
         var renameOpen by remember { mutableStateOf(false) }
         var receiveOpen by remember { mutableStateOf(false) }
         var payFor by remember { mutableStateOf<StoredMessage?>(null) }
-        var activityOpen by remember { mutableStateOf(false) }
+        var room by remember { mutableStateOf(Room.Conversations) }
+        var payOpen by remember { mutableStateOf(false) }
+        var profileFor by remember { mutableStateOf<Contact?>(null) }
         var focused by remember { mutableStateOf(true) }
 
         // The tray only speaks for messages that land while the operator is
@@ -339,7 +341,10 @@ private fun runDesk(deskDir: File) = application {
                             }
                         }
                         Row {
-                            OutlinedButton(onClick = { activityOpen = true }) { Text("Activity") }
+                            OutlinedButton(
+                                enabled = WalletStore(context).address() != null,
+                                onClick = { payOpen = true },
+                            ) { Text("Send") }
                             Spacer(Modifier.width(8.dp))
                             OutlinedButton(
                                 enabled = WalletStore(context).address() != null,
@@ -362,6 +367,21 @@ private fun runDesk(deskDir: File) = application {
                     HorizontalDivider()
 
                     Row(Modifier.fillMaxSize()) {
+                        RoomRail(room, unread.size) { room = it }
+                        VerticalDivider()
+                        if (room != Room.Conversations) {
+                            // A phone screen, hosted whole.
+                            when (room) {
+                                Room.Till -> TillRoom()
+                                Room.BarTab -> BarTabRoom()
+                                Room.Donate -> DonateRoom()
+                                Room.Activity -> ActivityRoom()
+                                Room.Wallet -> WalletRoom(onTopUp = { receiveOpen = true })
+                                Room.Settings -> SettingsRoom()
+                                else -> Unit
+                            }
+                            return@Row
+                        }
                         // Contacts, the unread marked.
                         LazyColumn(Modifier.width(230.dp).fillMaxHeight()) {
                             items(contacts, key = { it.personaHex }) { c ->
@@ -590,32 +610,26 @@ private fun runDesk(deskDir: File) = application {
                     )
                 }
 
-                // The phone's own Activity tab, compiled from the phone's
-                // source and hosted in a desk window: the same ledger, the
-                // same wording, the same twenty languages. Nothing here is a
-                // desk reimplementation of it.
-                if (activityOpen) {
-                    androidx.compose.ui.window.Dialog(
-                        onDismissRequest = { activityOpen = false },
-                        properties = org.ducatproject.ducat.ui.fullScreenDialogProperties(),
-                    ) {
-                        Surface(
-                            Modifier.fillMaxWidth(0.7f).fillMaxHeight(0.8f),
-                            color = MaterialTheme.colorScheme.background,
-                        ) {
-                            Column {
-                                Row(
-                                    Modifier.fillMaxWidth().padding(8.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text("Activity", style = MaterialTheme.typography.titleMedium)
-                                    TextButton(onClick = { activityOpen = false }) { Text("Close") }
-                                }
-                                org.ducatproject.ducat.ui.ActivityScreen()
-                            }
-                        }
-                    }
+                // The phone's own send screen: fiat and XMR, a fee-aware
+                // Max, speed, memo, and the confirm that never one-taps —
+                // its source, not a desk imitation of it.
+                if (payOpen) {
+                    org.ducatproject.ducat.ui.PaySheet(
+                        prefillContact = contacts.firstOrNull { it.personaHex == selected },
+                        onDismiss = { payOpen = false },
+                    )
+                }
+
+                profileFor?.let { c ->
+                    ProfileDialog(
+                        contact = c,
+                        onOpenChat = {
+                            selected = it.personaHex
+                            room = Room.Conversations
+                            profileFor = null
+                        },
+                        onClose = { profileFor = null },
+                    )
                 }
             }
         }

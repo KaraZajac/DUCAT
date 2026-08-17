@@ -22,7 +22,9 @@ object DeskRes {
     private var strings: JSONObject = JSONObject()
     private var plurals: JSONObject = JSONObject()
     private var fallbackStrings: JSONObject = JSONObject()
+    private var arrays: JSONObject = JSONObject()
     private var fallbackPlurals: JSONObject = JSONObject()
+    private var fallbackArrays: JSONObject = JSONObject()
     private var lang: String = "en"
 
     /** Every language the phone ships, as the generator found them. */
@@ -51,10 +53,12 @@ object DeskRes {
         val base = load("en") ?: JSONObject()
         fallbackStrings = base.optJSONObject("strings") ?: JSONObject()
         fallbackPlurals = base.optJSONObject("plurals") ?: JSONObject()
+        fallbackArrays = base.optJSONObject("arrays") ?: JSONObject()
         val hit = tries.firstNotNullOfOrNull { t -> load(t)?.let { t to it } }
         lang = hit?.first ?: "en"
         strings = hit?.second?.optJSONObject("strings") ?: fallbackStrings
         plurals = hit?.second?.optJSONObject("plurals") ?: fallbackPlurals
+        arrays = hit?.second?.optJSONObject("arrays") ?: fallbackArrays
     }
 
     fun string(id: Int): String {
@@ -78,6 +82,14 @@ object DeskRes {
             set.optString(q, null)?.let { return it }
         }
         return "#$id"
+    }
+
+    fun array(id: Int): Array<String> {
+        if (arrays.length() == 0) setLocale("")
+        val k = id.toString()
+        val a = arrays.optJSONArray(k) ?: fallbackArrays.optJSONArray(k)
+            ?: return emptyArray()
+        return Array(a.length()) { a.getString(it) }
     }
 
     fun plural(id: Int, count: Int, vararg args: Any?): String =

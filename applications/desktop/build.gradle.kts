@@ -27,11 +27,32 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Ledger.kt",
     "org/ducatproject/ducat/Amounts.kt",
     "org/ducatproject/ducat/Locales.kt",
+    "org/ducatproject/ducat/Modes.kt",
+    "org/ducatproject/ducat/Units.kt",
     "org/ducatproject/ducat/ui/Theme.kt",
     "org/ducatproject/ducat/ui/Type.kt",
     "org/ducatproject/ducat/ui/Catppuccin.kt",
     "org/ducatproject/ducat/ui/Activity.kt",
     "org/ducatproject/ducat/ui/TxDetail.kt",
+    "org/ducatproject/ducat/Wallet.kt",
+    "org/ducatproject/ducat/Tabs.kt",
+    "org/ducatproject/ducat/ui/Qr.kt",
+    "org/ducatproject/ducat/ui/Balance.kt",
+    "org/ducatproject/ducat/ui/Monero.kt",
+    "org/ducatproject/ducat/ui/SyncStatus.kt",
+    "org/ducatproject/ducat/ui/Accounts.kt",
+    "org/ducatproject/ducat/ui/Network.kt",
+    "org/ducatproject/ducat/ui/Logs.kt",
+    "org/ducatproject/ducat/ui/Diagnostics.kt",
+    "org/ducatproject/ducat/ui/Donate.kt",
+    "org/ducatproject/ducat/ui/Pos.kt",
+    "org/ducatproject/ducat/ui/BarTab.kt",
+    "org/ducatproject/ducat/ui/Profile.kt",
+    "org/ducatproject/ducat/ui/ChatList.kt",
+    "org/ducatproject/ducat/ui/Contacts.kt",
+    "org/ducatproject/ducat/ui/Pay.kt",
+    "org/ducatproject/ducat/ui/Ceremony.kt",
+    "org/ducatproject/ducat/ui/QrHub.kt",
     // Desk-side glue that lives inside the shared package — these two match
     // files in *this* module's tree (like SecurePrefsDesk below), not app/.
     "org/ducatproject/ducat/DeskGlue.kt",
@@ -75,12 +96,14 @@ val generateDeskRes = tasks.register("generateDeskRes") {
         // builds and machines — a resource id that moves is a mistranslation.
         val strings = sortedSetOf<String>()
         val plurals = sortedSetOf<String>()
-        val perLocale = linkedMapOf<String, Pair<MutableMap<String, String>, MutableMap<String, MutableMap<String, String>>>>()
+        val arrays = sortedSetOf<String>()
+        val perLocale = linkedMapOf<String, Triple<MutableMap<String, String>, MutableMap<String, MutableMap<String, String>>, MutableMap<String, MutableList<String>>>>()
 
         for (dir in dirs) {
             val tag = if (dir.name == "values") "en" else dir.name.removePrefix("values-")
             val s = linkedMapOf<String, String>()
             val p = linkedMapOf<String, MutableMap<String, String>>()
+            val a = linkedMapOf<String, MutableList<String>>()
             dir.listFiles { f: File -> f.name.endsWith(".xml") }?.sortedBy { it.name }?.forEach { f ->
                 val doc = runCatching { builder.parse(f) }.getOrNull() ?: return@forEach
                 val ss = doc.getElementsByTagName("string")
@@ -102,13 +125,23 @@ val generateDeskRes = tasks.register("generateDeskRes") {
                     }
                     p[name] = q
                 }
+                val az = doc.getElementsByTagName("string-array")
+                for (i in 0 until az.length) {
+                    val e = az.item(i) as org.w3c.dom.Element
+                    val name = e.getAttribute("name")
+                    if (name.isEmpty()) continue
+                    val items = e.getElementsByTagName("item")
+                    a[name] = (0 until items.length)
+                        .map { textOf(items.item(it)) }.toMutableList()
+                }
             }
-            if (tag == "en") { strings += s.keys; plurals += p.keys }
-            perLocale[tag] = s to p
+            if (tag == "en") { strings += s.keys; plurals += p.keys; arrays += a.keys }
+            perLocale[tag] = Triple(s, p, a)
         }
 
         val stringId = strings.withIndex().associate { (i, n) -> n to i + 1 }
         val pluralId = plurals.withIndex().associate { (i, n) -> n to i + 100_000 }
+        val arrayId = arrays.withIndex().associate { (i, n) -> n to i + 150_000 }
 
         // The raster drawables the screens name, by id, copied in.
         val drawableNames = listOf("ducat_cat" to "drawable-nodpi/ducat_cat.png")
@@ -148,6 +181,9 @@ val generateDeskRes = tasks.register("generateDeskRes") {
             appendLine("    object plurals {")
             pluralId.forEach { (n, i) -> appendLine("        const val $n = $i") }
             appendLine("    }")
+            appendLine("    object array {")
+            arrayId.forEach { (n, i) -> appendLine("        const val $n = $i") }
+            appendLine("    }")
             appendLine("    object drawable {")
             drawableNames.forEach { (n, _) -> appendLine("        const val $n = ${artIds[n]}") }
             // Vector-only drawables still need to resolve; they draw nothing.
@@ -160,8 +196,8 @@ val generateDeskRes = tasks.register("generateDeskRes") {
             appendLine("}")
         })
 
-        perLocale.forEach { (tag, pair) ->
-            val (s, p) = pair
+        perLocale.forEach { (tag, triple) ->
+            val (s, p, a) = triple
             val json = StringBuilder("{\"strings\":{")
             json.append(
                 s.entries.mapNotNull { (n, v) ->
@@ -176,6 +212,14 @@ val generateDeskRes = tasks.register("generateDeskRes") {
                     }
                 }.joinToString(","),
             )
+            json.append("},\"arrays\":{")
+            json.append(
+                a.entries.mapNotNull { (n, items) ->
+                    arrayId[n]?.let { id ->
+                        "\"$id\":[" + items.joinToString(",") { "\"${esc(it)}\"" } + "]"
+                    }
+                }.joinToString(","),
+            )
             json.append("}}")
             File(tables, "$tag.json").writeText(json.toString())
         }
@@ -183,7 +227,8 @@ val generateDeskRes = tasks.register("generateDeskRes") {
             "{\"locales\":[" + perLocale.keys.joinToString(",") { "\"$it\"" } + "]}",
         )
         logger.lifecycle(
-            "deskres: ${strings.size} strings, ${plurals.size} plurals, ${perLocale.size} locales",
+            "deskres: ${strings.size} strings, ${plurals.size} plurals, " +
+                "${arrays.size} arrays, ${perLocale.size} locales",
         )
     }
 }
@@ -205,6 +250,10 @@ kotlin.sourceSets["main"].kotlin.apply {
         // name because the include patterns cover both source trees: two
         // files at one path would be two declarations of one function.
         "org/ducatproject/ducat/ui/PlatformWindowDesk.kt",
+        "org/ducatproject/ducat/nfc/TapDesk.kt",
+        "org/ducatproject/ducat/ui/ScannerDesk.kt",
+        "org/ducatproject/ducat/DeskWindowHandle.kt",
+        "org/ducatproject/ducat/nfc/TapDesk.kt",
     )
     sharedLogic.forEach { include(it) }
 }

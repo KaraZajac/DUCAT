@@ -12,8 +12,9 @@ import androidx.compose.ui.window.DialogProperties
  * supplies its own version of this file: the content crosses, the window
  * chrome stays where its platform is.
  */
-fun fullScreenDialogProperties(): DialogProperties = DialogProperties(
-    usePlatformDefaultWidth = false,
-    dismissOnBackPress = true,
-    decorFitsSystemWindows = false,
-)
+fun fullScreenDialogProperties(dismissOnBackPress: Boolean = true): DialogProperties =
+    DialogProperties(
+        usePlatformDefaultWidth = false,
+        dismissOnBackPress = dismissOnBackPress,
+        decorFitsSystemWindows = false,
+    )

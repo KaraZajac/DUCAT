@@ -79,11 +79,7 @@ fun QrHub(
 
     Dialog(
         onDismissRequest = onClose,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            dismissOnBackPress = true,
-            decorFitsSystemWindows = false,
-        ),
+        properties = fullScreenDialogProperties(),
     ) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Scaffold(

@@ -33,6 +33,22 @@ abstract class Context {
     open fun getString(id: Int, vararg args: Any?): String =
         android.res.DeskRes.string(id, *args)
     open val resources: Resources get() = Resources
+    open val contentResolver: ContentResolver get() = ContentResolver()
+
+    /**
+     * A phone would hand this to the share sheet. The desk's honest
+     * equivalent is the clipboard — the text leaves the app, which is what
+     * the button promised — and Toast says which.
+     */
+    open fun startActivity(intent: Intent) {
+        val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+        if (text != null) {
+            ClipboardManager().setPrimaryClip(ClipData.newPlainText(null, text))
+            android.widget.Toast
+                .makeText(this, "Copied to the clipboard", android.widget.Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
 
     /** Only the services a screen asks for by name. */
     open fun getSystemService(name: String): Any? = when (name) {
@@ -152,4 +168,16 @@ class FilePreferences(private val file: File) : SharedPreferences {
             return true
         }
     }
+}
+
+/**
+ * Reading what a picker returned. On a phone the Uri is an opaque handle a
+ * ContentProvider resolves; here every Uri is a file, so this is the file.
+ */
+class ContentResolver {
+    fun openInputStream(uri: android.net.Uri): java.io.InputStream? =
+        uri.toFile()?.takeIf { it.isFile }?.inputStream()
+
+    fun openOutputStream(uri: android.net.Uri): java.io.OutputStream? =
+        uri.toFile()?.outputStream()
 }

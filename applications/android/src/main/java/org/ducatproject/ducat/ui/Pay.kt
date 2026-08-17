@@ -110,13 +110,10 @@ fun PaySheet(
     // imePadding do its job inside a dialog.
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            // Off, because the dialog's own handling drops the whole sheet
-            // from any step; back is handled inside, where it can step.
-            dismissOnBackPress = false,
-            decorFitsSystemWindows = false,
-        ),
+        // dismissOnBackPress off, because the dialog's own handling drops
+        // the whole sheet from any step; back is handled inside, where it
+        // can step.
+        properties = fullScreenDialogProperties(dismissOnBackPress = false),
     ) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             // The system back mirrors the on-screen arrow: a step back, not a

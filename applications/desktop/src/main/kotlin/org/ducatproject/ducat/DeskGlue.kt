@@ -18,6 +18,10 @@ object Notify {
     @Volatile
     var sink: ((from: String, personaHex: String, m: StoredMessage) -> Unit)? = null
 
+    /** A title/body announcement with no message behind it. */
+    @Volatile
+    var plain: ((title: String, body: String) -> Unit)? = null
+
     fun message(context: Context, from: String, personaHex: String, m: StoredMessage) {
         DucatLog.i("Desk", "message from $from")
         // Machinery stays quiet: ceremony rounds (8–10) drive the threshold
@@ -39,4 +43,11 @@ object Notify {
  */
 object MainActivity {
     val openChat = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+}
+
+/** The shared stores announce their own news too (a tab paid, a bill
+ *  settled). Same sink as an arriving message, same tray. */
+fun Notify.post(context: Context, title: String, body: String, openChat: String? = null) {
+    DucatLog.i("Desk", "$title — $body")
+    Notify.plain?.invoke(title, body)
 }
