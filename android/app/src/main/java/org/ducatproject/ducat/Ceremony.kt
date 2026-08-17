@@ -458,6 +458,10 @@ object Ceremony {
         ceremonyId: ByteArray?,
         round: Long?,
         payload: ByteArray?,
+        /** What the proposal claims the funder gets back — display for the
+         *  consent screen. The signature is over the payload; this is the
+         *  statement beside it (§15.12: the claimed split, where it signs). */
+        riderBackPxmr: Long? = null,
     ) {
         val id = ceremonyId ?: return
         val idHex = id.toHexString()
@@ -480,20 +484,22 @@ object Ceremony {
             when {
                 (stage == "done" ||
                     (o.optInt("kind") == KIND_RIDE &&
-                        stage in listOf("release_pending", "release_cosigned"))) &&
+                        stage in listOf("releasing", "release_pending", "release_cosigned"))) &&
                     round.toInt() == 0 -> {
-                    // A ride's release is money moving to the driver, and the
-                    // rider's yes is a screen, not an automatic signature —
-                    // §15.5's confirm rule surviving into escrow. Park the
-                    // proposal; approveRideRelease() is the tap. A fresh
-                    // proposal supersedes a parked or even a co-signed one —
-                    // the driver re-proposes when a broadcast dies, and the
-                    // rider's yes is asked again. A plain bond keeps the
-                    // proven auto-cosign (deposit back to its owner).
+                    // A ride's release is money moving, and the other side's
+                    // yes is a screen, not an automatic signature — §15.5's
+                    // confirm rule surviving into escrow. Park the proposal;
+                    // approveRideRelease() is the tap. A fresh proposal
+                    // supersedes a parked, co-signed, or even our own
+                    // outstanding one — that last case is the counter-offer:
+                    // both sides can propose, and whoever signs ends it. A
+                    // plain bond keeps the proven auto-cosign.
                     if (o.optInt("kind") == KIND_RIDE) {
                         o.put("stage", "release_pending")
                         o.put("pendingPayload", payload.toHexString())
                         o.put("proposerIdx", senderIdx)
+                        if (riderBackPxmr != null) o.put("pendingRiderBack", riderBackPxmr)
+                        else o.remove("pendingRiderBack")
                         save(context, idHex, o)
                         ContactStore.bump()
                         DucatLog.i(TAG, "ride $idHex: release proposed — waiting for the yes")
@@ -612,65 +618,116 @@ object Ceremony {
     }
 
     /**
-     * The driver marks the ride complete: propose the release, destination
-     * this device's own wallet — the payee proposing to be paid, which is
-     * why the missing co-signer consent view does not bite here: the sweep
-     * can only go where the proposer says, and the proposer is the party
-     * the fare was always for.
+     * The driver marks the ride complete: the default proposal, giving the
+     * rider back exactly their margin and the fare to the driver.
      */
     fun proposeRideRelease(context: Context, idHex: String): Long {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
-        // "releasing" is retryable: a broadcast can die on the node ("no relay
-        // took the release", found live) and a fresh proposal — new nonces,
-        // same inputs — is always safe. What is not retryable is done money:
-        // released is final.
-        check(o.optString("stage") in listOf("done", "releasing")) {
+        val keys = hexToBytes(o.optString("keys"))
+            ?: throw IllegalStateException("this device holds no key share")
+        val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
+        val from = o.optLong("scanFrom").takeIf { it > 0 }
+            ?: WalletStore(context).restoreHeight().toLong()
+        val total = runCatching {
+            uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+        }.getOrDefault(0L)
+        val margin = (total - o.optLong("farePxmr")).coerceAtLeast(0L)
+        return proposeRideSplit(context, idHex, margin)
+    }
+
+    /**
+     * Propose any split of the escrow: `riderBackPxmr` home to the funder's
+     * refund address, the rest (minus the true network fee) to the driver.
+     *
+     * **Either principal may propose** — this is the settlement screen's
+     * engine (§15.12): a counter-offer is just a fresh proposal, and it
+     * supersedes whatever was parked, including the proposer's own earlier
+     * one. Whoever signs first ends the negotiation; the burn is only what
+     * happens if nobody ever does. The proposal message carries the claimed
+     * number so the other side's consent screen can state it — the payload
+     * is signed, the statement is beside it.
+     *
+     * When nearly everything goes back to the rider, the roles in the
+     * transaction flip: the refund address becomes the residual claimant
+     * (and pays the fee), because a residual too small to cover the fee is
+     * not a transaction.
+     */
+    fun proposeRideSplit(context: Context, idHex: String, riderBackPxmr: Long): Long {
+        val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
+        // done → first proposal; releasing → retry or self-supersede;
+        // release_pending / release_cosigned → the counter-offer. Only
+        // "released" is final: broadcast money does not renegotiate.
+        check(o.optString("stage") in
+            listOf("done", "releasing", "release_pending", "release_cosigned")) {
             "the escrow is not ready to release"
         }
-        check(!isFunder(o) && !isArbiter(o)) { "only the driver proposes the fare's release" }
+        check(!isArbiter(o)) { "the arbiter holds a share, not an opinion" }
         val id = hexToBytes(idHex)!!
         val i = o.optInt("i")
         val keys = hexToBytes(o.optString("keys"))
             ?: throw IllegalStateException("this device holds no key share")
-        val dest = WalletStore(context).address()
-            ?: throw IllegalStateException("no wallet to receive the fare")
         val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
         val from = o.optLong("scanFrom").takeIf { it > 0 }
             ?: WalletStore(context).restoreHeight().toLong()
-        val riderHex = otherPrincipal(o) ?: throw IllegalStateException("no counterparty")
-        val rider = contactFor(context, riderHex)
-            ?: throw IllegalStateException("the rider is not a contact")
+        val peerHex = otherPrincipal(o) ?: throw IllegalStateException("no counterparty")
+        val peer = contactFor(context, peerHex)
+            ?: throw IllegalStateException("the counterparty is not a contact")
+        val refund = o.optString("refundAddr")
+        check(refund.isNotEmpty()) { "this ceremony has no refund address" }
+        // The driver's payout address: their own wallet when the driver
+        // proposes; when the rider proposes, the driver's published
+        // subaddress from the handshake — a rider cannot route the fare
+        // anywhere the driver did not name.
+        val driverDest = if (isFunder(o)) {
+            contactFor(context, peerHex)?.theirAddress
+                ?: throw IllegalStateException(
+                    "the driver has not published an address — ask them to propose instead")
+        } else {
+            WalletStore(context).address()
+                ?: throw IllegalStateException("no wallet to receive the fare")
+        }
 
-        // The split: everything above the fare is the rider's margin and
-        // comes home to the refund address the ceremony named at birth; the
-        // fare (minus the real network fee) is the residual — the driver's.
-        val fare = o.optLong("farePxmr")
         val total = runCatching {
             uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
         }.getOrDefault(0L)
-        val refund = o.optString("refundAddr")
-        val margin = (total - fare).coerceAtLeast(0L)
-        val payments = if (refund.isNotEmpty() && margin > 0) {
-            listOf(uniffi.ducat_mobile.SplitOut(refund, margin.toULong()))
-        } else emptyList()
-
-        val prop = uniffi.ducat_mobile.frostProposeSplit(
-            id, i.toUShort(), keys, payments, dest, nodeUrl, from.toULong(),
-        )
+        val back = riderBackPxmr.coerceIn(0L, total)
+        // Two shapes, one meaning: normally the rider's slice is fixed and
+        // the driver is residual; when the driver's remainder could not
+        // cover the fee, the driver's slice is fixed (possibly zero) and
+        // the rider is residual.
+        val flip = total - back < 400_000_000L // 2× the fee reserve
+        val prop = if (!flip) {
+            uniffi.ducat_mobile.frostProposeSplit(
+                id, i.toUShort(), keys,
+                if (back > 0) listOf(uniffi.ducat_mobile.SplitOut(refund, back.toULong()))
+                else emptyList(),
+                driverDest, nodeUrl, from.toULong(),
+            )
+        } else {
+            uniffi.ducat_mobile.frostProposeSplit(
+                id, i.toUShort(), keys,
+                if (total - back > 0)
+                    listOf(uniffi.ducat_mobile.SplitOut(driverDest, (total - back).toULong()))
+                else emptyList(),
+                refund, nodeUrl, from.toULong(),
+            )
+        }
         Mailbox.send(
-            context, rider, "ride complete — requesting the fare",
+            context, peer, "ride: proposed a split",
             PersonaStore(context).personaHex(),
             kind = 9, round = 0, ceremonyId = id, payload = prop.payload,
+            amountPxmr = back,
         )
         o.put("stage", "releasing")
         o.put("cosignerIdx", indexOf(
             o.getJSONArray("roster").let { arr -> (0 until arr.length()).map { arr.getString(it) } },
-            riderHex,
+            peerHex,
         ))
+        o.put("myRiderBack", back)
         o.put("payoutPxmr", prop.payoutPxmr.toLong())
         save(context, idHex, o)
         ContactStore.bump()
-        DucatLog.i(TAG, "ride $idHex: proposed release of ${prop.payoutPxmr} pXMR to the driver")
+        DucatLog.i(TAG, "ride $idHex: proposed split — $back pXMR back to the rider")
         return prop.payoutPxmr.toLong()
     }
 

@@ -16,4 +16,9 @@
     <string name="profile_arbiter">Depot-arbiter</string>
     <string name="profile_arbiter_note">Houdt de doorslaggevende sleutel van je rit-depots. Wordt alleen benaderd als er iets misgaat.</string>
     <string name="bond_margin_back">Je marge (%1$s) komt naar je terug.</string>
+    <string name="bond_split_stated">Voorstel: %1$s terug naar de passagier, %2$s naar de chauffeur.</string>
+    <string name="bond_sign_split">Deze verdeling ondertekenen</string>
+    <string name="bond_propose_split">Andere verdeling voorstellen</string>
+    <string name="bond_back_to_rider">Naar de passagier (XMR)</string>
+    <string name="bond_counter">Voorstellen</string>
 </resources>

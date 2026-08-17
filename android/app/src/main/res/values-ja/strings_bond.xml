@@ -16,4 +16,9 @@
     <string name="profile_arbiter">エスクロー仲裁者</string>
     <string name="profile_arbiter_note">ボンド付き乗車の決定キーを保持します。問題が起きない限り出番はありません。</string>
     <string name="bond_margin_back">マージン（%1$s）はあなたに戻ります。</string>
+    <string name="bond_split_stated">提案：乗客へ %1$s、ドライバーへ %2$s。</string>
+    <string name="bond_sign_split">この配分に署名</string>
+    <string name="bond_propose_split">別の配分を提案</string>
+    <string name="bond_back_to_rider">乗客へ (XMR)</string>
+    <string name="bond_counter">提案</string>
 </resources>

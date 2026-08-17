@@ -16,4 +16,9 @@
     <string name="profile_arbiter">Арбитр эскроу</string>
     <string name="profile_arbiter_note">Держит решающий ключ ваших поездок с эскроу. Участвует, только если что-то пошло не так.</string>
     <string name="bond_margin_back">Ваш залог (%1$s) вернётся вам.</string>
+    <string name="bond_split_stated">Предложение: %1$s пассажиру, %2$s водителю.</string>
+    <string name="bond_sign_split">Подписать это разделение</string>
+    <string name="bond_propose_split">Предложить другое разделение</string>
+    <string name="bond_back_to_rider">Пассажиру (XMR)</string>
+    <string name="bond_counter">Предложить</string>
 </resources>

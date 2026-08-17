@@ -16,4 +16,9 @@
     <string name="profile_arbiter">Treuhand-Schiedsperson</string>
     <string name="profile_arbiter_note">Hält den entscheidenden Schlüssel deiner Treuhand-Fahrten. Wird nur bei Problemen kontaktiert.</string>
     <string name="bond_margin_back">Deine Marge (%1$s) kommt zu dir zurück.</string>
+    <string name="bond_split_stated">Vorschlag: %1$s zurück an den Fahrgast, %2$s an den Fahrer.</string>
+    <string name="bond_sign_split">Diese Aufteilung signieren</string>
+    <string name="bond_propose_split">Andere Aufteilung vorschlagen</string>
+    <string name="bond_back_to_rider">Zurück an den Fahrgast (XMR)</string>
+    <string name="bond_counter">Vorschlagen</string>
 </resources>

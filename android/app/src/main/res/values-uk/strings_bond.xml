@@ -16,4 +16,9 @@
     <string name="profile_arbiter">Арбітр ескроу</string>
     <string name="profile_arbiter_note">Тримає вирішальний ключ ваших поїздок з ескроу. Долучається, лише якщо щось піде не так.</string>
     <string name="bond_margin_back">Ваша застава (%1$s) повернеться вам.</string>
+    <string name="bond_split_stated">Пропозиція: %1$s пасажиру, %2$s водієві.</string>
+    <string name="bond_sign_split">Підписати цей розподіл</string>
+    <string name="bond_propose_split">Запропонувати інший розподіл</string>
+    <string name="bond_back_to_rider">Пасажиру (XMR)</string>
+    <string name="bond_counter">Запропонувати</string>
 </resources>

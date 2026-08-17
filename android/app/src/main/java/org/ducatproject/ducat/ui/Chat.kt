@@ -1634,6 +1634,8 @@ private fun RideBondBanner(contact: Contact) {
     val idHex = ride.optString("id")
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var countering by remember { mutableStateOf(false) }
+    var counterXmr by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
     // Nudge the mail and, while the escrow waits for its money, ask the
@@ -1719,6 +1721,19 @@ private fun RideBondBanner(contact: Contact) {
                 }
                 stage == "releasing" -> {
                     BondLine(spin = true, text = stringResource(R.string.bond_waiting_release))
+                    val mine = ride.optLong("myRiderBack", -1L)
+                    if (mine >= 0) {
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            stringResource(
+                                R.string.bond_split_stated,
+                                Amounts.show(context, mine).primary,
+                                Amounts.show(context, (funded - mine).coerceAtLeast(0L)).primary,
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                    }
                     // The proposer can re-propose: a broadcast can die on the
                     // node, and a fresh proposal (new nonces, same inputs) is
                     // the retry. The rider is simply asked for their yes again.
@@ -1742,23 +1757,23 @@ private fun RideBondBanner(contact: Contact) {
                         ) { Text(stringResource(R.string.bond_complete_ride)) }
                     }
                 }
-                stage == "release_pending" && rider -> {
+                stage == "release_pending" -> {
+                    // A proposal stands, from the other side (either side may
+                    // propose — §15.12's settlement). State the claimed split
+                    // and offer the only two moves: sign it, or counter.
+                    val riderBack = ride.optLong("pendingRiderBack", (funded - fare).coerceAtLeast(0L))
+                    val toDriver = (funded - riderBack).coerceAtLeast(0L)
                     BondLine(spin = false, text = stringResource(R.string.bond_ride_complete_ask))
-                    // The split, stated: the fare to the driver, the margin
-                    // home. What the release claims to do, on the screen that
-                    // approves it.
-                    val margin = (funded - fare).coerceAtLeast(0L)
-                    if (margin > 0) {
-                        Spacer(Modifier.height(2.dp))
-                        Text(
-                            stringResource(
-                                R.string.bond_margin_back,
-                                Amounts.show(context, margin).primary,
-                            ),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        )
-                    }
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        stringResource(
+                            R.string.bond_split_stated,
+                            Amounts.show(context, riderBack).primary,
+                            Amounts.show(context, toDriver).primary,
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
                     Spacer(Modifier.height(6.dp))
                     Button(
                         onClick = {
@@ -1775,7 +1790,50 @@ private fun RideBondBanner(contact: Contact) {
                         },
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
-                    ) { Text(stringResource(R.string.bond_release_fare, fareShown)) }
+                    ) { Text(stringResource(R.string.bond_sign_split)) }
+                    // The counter: one number — what goes back to the rider —
+                    // and a fresh proposal supersedes theirs, roles swapped.
+                    Spacer(Modifier.height(4.dp))
+                    if (!countering) {
+                        OutlinedButton(
+                            onClick = { countering = true },
+                            enabled = !busy,
+                            modifier = Modifier.fillMaxWidth().height(40.dp),
+                        ) { Text(stringResource(R.string.bond_propose_split)) }
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedTextField(
+                                value = counterXmr,
+                                onValueChange = {
+                                    counterXmr = it.filter { c -> c.isDigit() || c == '.' }
+                                },
+                                label = { Text(stringResource(R.string.bond_back_to_rider)) },
+                                singleLine = true,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Button(
+                                onClick = {
+                                    val pxmr = counterXmr.toDoubleOrNull()
+                                        ?.let { (it * 1e12).toLong() }
+                                    if (pxmr != null) {
+                                        busy = true; error = null
+                                        scope.launch {
+                                            withContext(Dispatchers.IO) {
+                                                runCatching {
+                                                    org.ducatproject.ducat.Ceremony
+                                                        .proposeRideSplit(context, idHex, pxmr)
+                                                }
+                                            }.onFailure { error = it.message }
+                                            busy = false
+                                            countering = false
+                                        }
+                                    }
+                                },
+                                enabled = !busy && counterXmr.isNotBlank(),
+                            ) { Text(stringResource(R.string.bond_counter)) }
+                        }
+                    }
                 }
                 stage == "release_cosigned" ->
                     BondLine(spin = false, text = stringResource(R.string.bond_released))

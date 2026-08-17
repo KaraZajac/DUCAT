@@ -16,4 +16,9 @@
     <string name="profile_arbiter">Árbitro da caução</string>
     <string name="profile_arbiter_note">Guarda a chave de desempate das tuas viagens com caução. Só entra se algo correr mal.</string>
     <string name="bond_margin_back">A tua margem (%1$s) volta para ti.</string>
+    <string name="bond_split_stated">Proposta: %1$s de volta ao passageiro, %2$s ao motorista.</string>
+    <string name="bond_sign_split">Assinar esta divisão</string>
+    <string name="bond_propose_split">Propor outra divisão</string>
+    <string name="bond_back_to_rider">Ao passageiro (XMR)</string>
+    <string name="bond_counter">Propor</string>
 </resources>

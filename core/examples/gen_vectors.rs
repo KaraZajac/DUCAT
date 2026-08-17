@@ -1655,6 +1655,11 @@ fn contact_cases() -> Vec<J> {
         &Message { kind: MessageKind::FrostRound, amount_pxmr: None,
                    payload: Some(vec![0xf2; 128]), round: Some(1), ceremony_id: Some([0x22; 32]),
                    ..base_pay.clone() }, None);
+    money("frost_round_with_claimed_return",
+        "A release proposal (round 0) MAY state the amount the funder gets back — the consent screen shows it beside the signed payload (§15.12's settlement). A statement, not authority: nothing verifies it but the chain.",
+        &Message { kind: MessageKind::FrostRound, amount_pxmr: Some(200_000_000),
+                   payload: Some(vec![0xf3; 128]), round: Some(0), ceremony_id: Some([0x22; 32]),
+                   ..base_pay.clone() }, None);
     money("ceremony_abort",
         "An abort names the ceremony it ends and carries no round payload — 'nothing happens' is never safe, so a dead build says so (§9.3.4).",
         &Message { kind: MessageKind::CeremonyAbort, amount_pxmr: None,

@@ -16,4 +16,9 @@
     <string name="profile_arbiter">حَكَم الضمان</string>
     <string name="profile_arbiter_note">يحمل مفتاح الترجيح في رحلاتك المضمونة. لا يُستدعى إلا إذا ساء شيء.</string>
     <string name="bond_margin_back">هامشك (%1$s) يعود إليك.</string>
+    <string name="bond_split_stated">الاقتراح: %1$s للراكب، %2$s للسائق.</string>
+    <string name="bond_sign_split">توقيع هذا التقسيم</string>
+    <string name="bond_propose_split">اقتراح تقسيم مختلف</string>
+    <string name="bond_back_to_rider">للراكب (XMR)</string>
+    <string name="bond_counter">اقتراح</string>
 </resources>

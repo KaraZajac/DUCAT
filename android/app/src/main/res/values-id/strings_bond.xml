@@ -16,4 +16,9 @@
     <string name="profile_arbiter">Arbiter escrow</string>
     <string name="profile_arbiter_note">Memegang kunci penentu perjalanan ber-escrow Anda. Hanya dihubungi jika ada masalah.</string>
     <string name="bond_margin_back">Margin Anda (%1$s) kembali kepada Anda.</string>
+    <string name="bond_split_stated">Usulan: %1$s kembali ke penumpang, %2$s ke pengemudi.</string>
+    <string name="bond_sign_split">Tanda tangani pembagian ini</string>
+    <string name="bond_propose_split">Usulkan pembagian lain</string>
+    <string name="bond_back_to_rider">Ke penumpang (XMR)</string>
+    <string name="bond_counter">Usulkan</string>
 </resources>

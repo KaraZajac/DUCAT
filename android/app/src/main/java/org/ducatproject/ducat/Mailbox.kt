@@ -805,7 +805,13 @@ object Mailbox {
             }
             if (arrived.kind == 9) {
                 runCatching {
-                    Ceremony.onFrostRound(context, c, opened.ceremonyId, opened.round?.toLong(), opened.payload)
+                    // The amount rides along: a release proposal names what
+                    // the funder gets back, and the consent screen states it
+                    // (§15.12 — the claimed split, on the screen that signs).
+                    Ceremony.onFrostRound(
+                        context, c, opened.ceremonyId, opened.round?.toLong(), opened.payload,
+                        arrived.amountPxmr.takeIf { it > 0 },
+                    )
                 }.onFailure { DucatLog.w(TAG, "frost round: ${it.message}") }
             }
             // A request carries a fresher address than anything stored (§16.12).

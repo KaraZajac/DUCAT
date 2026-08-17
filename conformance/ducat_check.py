@@ -1317,7 +1317,10 @@ def parse_message(buf):
 
     # A payment with no amount is a screen with a blank where the number goes;
     # an amount on text is a number nothing will honour. Neither is ignorable.
-    if kind in (0, 4, 5, 8, 9, 10) and out["amount"] is not None:
+    # A FROST round (9) is the exception: a release proposal MAY state the
+    # amount the funder gets back — the consent screen shows it beside the
+    # signed payload (§15.12's settlement); a statement, not authority.
+    if kind in (0, 4, 5, 8, 10) and out["amount"] is not None:
         raise Reject("Malformed", "this kind must not carry an amount")
     if kind in (1, 2, 3) and out["amount"] is None:
         raise Reject("Malformed", "a payment message must carry an amount")

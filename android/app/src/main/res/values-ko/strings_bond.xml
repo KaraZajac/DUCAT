@@ -16,4 +16,9 @@
     <string name="profile_arbiter">에스크로 중재자</string>
     <string name="profile_arbiter_note">보증된 운행의 결정 키를 보관합니다. 문제가 생기지 않는 한 관여하지 않습니다.</string>
     <string name="bond_margin_back">마진(%1$s)은 당신에게 돌아옵니다.</string>
+    <string name="bond_split_stated">제안: 승객에게 %1$s, 기사에게 %2$s.</string>
+    <string name="bond_sign_split">이 분배에 서명</string>
+    <string name="bond_propose_split">다른 분배 제안</string>
+    <string name="bond_back_to_rider">승객에게 (XMR)</string>
+    <string name="bond_counter">제안</string>
 </resources>

@@ -16,4 +16,9 @@
     <string name="profile_arbiter">ผู้ชี้ขาดเอสโครว์</string>
     <string name="profile_arbiter_note">ถือกุญแจชี้ขาดของการเดินทางแบบมีเอสโครว์ จะถูกติดต่อก็ต่อเมื่อมีปัญหา</string>
     <string name="bond_margin_back">ส่วนต่างของคุณ (%1$s) จะกลับคืนสู่คุณ</string>
+    <string name="bond_split_stated">ข้อเสนอ: คืนผู้โดยสาร %1$s ให้คนขับ %2$s</string>
+    <string name="bond_sign_split">ลงนามการแบ่งนี้</string>
+    <string name="bond_propose_split">เสนอการแบ่งแบบอื่น</string>
+    <string name="bond_back_to_rider">คืนผู้โดยสาร (XMR)</string>
+    <string name="bond_counter">เสนอ</string>
 </resources>

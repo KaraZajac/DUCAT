@@ -1010,10 +1010,15 @@ impl Message {
         // an amount on a text message is a number nothing will honour. Both are
         // refused rather than ignored.
         match (out.kind, out.amount_pxmr) {
+            // FrostRound is deliberately absent from this arm: a release
+            // proposal (round 0) MAY carry the amount it claims the funder
+            // gets back — the consent screen states it beside the signed
+            // payload (§15.12's settlement). Rounds that answer carry none,
+            // and nothing verifies the claim but the eventual chain — it is
+            // a statement, not authority, like every number in §16.13.
             (MessageKind::Text, Some(_))
             | (MessageKind::Retract, Some(_))
             | (MessageKind::DkgRound, Some(_))
-            | (MessageKind::FrostRound, Some(_))
             | (MessageKind::CeremonyAbort, Some(_)) => {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,

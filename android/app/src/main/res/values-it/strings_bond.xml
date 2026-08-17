@@ -16,4 +16,9 @@
     <string name="profile_arbiter">Arbitro del deposito</string>
     <string name="profile_arbiter_note">Custodisce la chiave decisiva delle corse con deposito. Interviene solo se qualcosa va storto.</string>
     <string name="bond_margin_back">Il tuo margine (%1$s) ti torna indietro.</string>
+    <string name="bond_split_stated">Proposta: %1$s al passeggero, %2$s all\'autista.</string>
+    <string name="bond_sign_split">Firma questa divisione</string>
+    <string name="bond_propose_split">Proponi un\'altra divisione</string>
+    <string name="bond_back_to_rider">Al passeggero (XMR)</string>
+    <string name="bond_counter">Proponi</string>
 </resources>

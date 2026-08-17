@@ -16,4 +16,9 @@
     <string name="profile_arbiter">Emanet hakemi</string>
     <string name="profile_arbiter_note">Emanetli yolculuklarında belirleyici anahtarı tutar. Yalnızca bir sorun olursa devreye girer.</string>
     <string name="bond_margin_back">Marjın (%1$s) sana geri döner.</string>
+    <string name="bond_split_stated">Öneri: %1$s yolcuya geri, %2$s sürücüye.</string>
+    <string name="bond_sign_split">Bu paylaşımı imzala</string>
+    <string name="bond_propose_split">Farklı bir paylaşım öner</string>
+    <string name="bond_back_to_rider">Yolcuya (XMR)</string>
+    <string name="bond_counter">Öner</string>
 </resources>

@@ -16,4 +16,9 @@
     <string name="profile_arbiter">Trọng tài ký quỹ</string>
     <string name="profile_arbiter_note">Giữ chìa khóa quyết định cho các chuyến đi ký quỹ. Chỉ được liên hệ khi có sự cố.</string>
     <string name="bond_margin_back">Khoản ký quỹ (%1$s) sẽ trở về với bạn.</string>
+    <string name="bond_split_stated">Đề xuất: %1$s về hành khách, %2$s cho tài xế.</string>
+    <string name="bond_sign_split">Ký chia phần này</string>
+    <string name="bond_propose_split">Đề xuất chia khác</string>
+    <string name="bond_back_to_rider">Về hành khách (XMR)</string>
+    <string name="bond_counter">Đề xuất</string>
 </resources>
