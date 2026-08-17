@@ -1,0 +1,87 @@
+# The desk, packaged where each OS can only package itself: jpackage makes
+# .deb/.rpm only on Linux, .msi only on Windows, .dmg only on macOS. A tag
+# push (release.sh) starts this; each job builds the host Rust library, the
+# desk, and uploads its installers to the release the tag names. The
+# Android APKs and the immediate Linux tarball come from release.sh itself,
+# so the release is never empty while these build.
+name: desk
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            slug: linux-x64
+          - os: windows-latest
+            slug: windows-x64
+          - os: macos-latest
+            slug: macos-arm64
+          # Intel Mac runners are on their way out upstream; take one while
+          # the label still exists, lose nothing when it stops.
+          - os: macos-13
+            slug: macos-x64
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.os == 'macos-13' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Linux packaging tools (rpm beside the preinstalled dpkg)
+        if: matrix.slug == 'linux-x64'
+        run: sudo apt-get update && sudo apt-get install -y rpm fakeroot
+
+      - name: Build the host Rust library
+        shell: bash
+        run: cargo build --release -p ducat-mobile
+
+      - name: Package the desk
+        shell: bash
+        run: |
+          cd android
+          ./gradlew --no-daemon :desktop:packageDistributionForCurrentOS :desktop:createDistributable
+
+      - name: Collect artifacts under stable names
+        shell: bash
+        run: |
+          set -x
+          out=android/desktop/build/compose/binaries/main
+          mkdir -p dist
+          shopt -s nullglob
+          for f in "$out"/deb/*.deb; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.deb"; done
+          for f in "$out"/rpm/*.rpm; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.rpm"; done
+          for f in "$out"/msi/*.msi; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.msi"; done
+          for f in "$out"/dmg/*.dmg; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.dmg"; done
+          # The portable build: unzip-and-run, no installer rights needed.
+          if [ "${{ matrix.slug }}" = "windows-x64" ]; then
+            (cd "$out/app" && 7z a "$GITHUB_WORKSPACE/dist/ducat-desk-${{ matrix.slug }}.zip" ducat-desk)
+          else
+            tar czf "dist/ducat-desk-${{ matrix.slug }}.tar.gz" -C "$out/app" ducat-desk
+          fi
+          ls -la dist
+
+      - name: Upload to the tag's release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          # release.sh creates the release moments after pushing the tag;
+          # these jobs spend twenty minutes compiling first, but wait anyway.
+          for i in $(seq 1 30); do
+            gh release view "$TAG" >/dev/null 2>&1 && break
+            sleep 10
+          done
+          gh release upload "$TAG" dist/* --clobber

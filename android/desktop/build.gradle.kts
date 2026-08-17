@@ -113,10 +113,24 @@ tasks.register<JavaExec>("e2e") {
 // copied into the compose resources tree, which jpackage ships beside the
 // app and names at runtime via compose.application.resources.dir — main()
 // points JNA there when the property exists. Dev runs keep ../target/release.
-val nativeLibDir = layout.projectDirectory.dir("resources/linux-x64")
+// Name and destination follow the machine doing the building, so the same
+// file works on this desk and on each of CI's three OSes.
+val hostOs = org.gradle.internal.os.OperatingSystem.current()
+val nativeLibName = when {
+    hostOs.isWindows -> "ducat_mobile.dll"
+    hostOs.isMacOsX -> "libducat_mobile.dylib"
+    else -> "libducat_mobile.so"
+}
+val resourcesArchDir = when {
+    hostOs.isWindows -> "windows-x64"
+    hostOs.isMacOsX ->
+        if (System.getProperty("os.arch") in listOf("aarch64", "arm64")) "macos-arm64"
+        else "macos-x64"
+    else -> "linux-x64"
+}
 val prepareNativeLib = tasks.register<Copy>("prepareNativeLib") {
-    from(rootProject.file("../target/release/libducat_mobile.so"))
-    into(nativeLibDir)
+    from(rootProject.file("../target/release/$nativeLibName"))
+    into(layout.projectDirectory.dir("resources/$resourcesArchDir"))
 }
 // The plugin's own resource sync (prepareAppResources) is what actually
 // reads the directory, so the copy must precede *it*, not just the

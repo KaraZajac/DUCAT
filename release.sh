@@ -33,6 +33,16 @@ for a in arm64-v8a armeabi-v7a x86_64; do
 done
 [ ${#APKS[@]} -gt 0 ] || { echo "no APKs built"; exit 1; }
 
+# The desk rides along: this machine can make the Linux portable build
+# immediately, so the release is never desk-less while CI (.github/
+# workflows/desk.yml, started by the tag push below) spends its twenty
+# minutes producing the .deb/.rpm/.msi/.dmg on each OS that can.
+echo "building the desk…"
+(cd android && ./gradlew :desktop:createDistributable -q >/dev/null)
+DESK=android/desktop/build/compose/binaries/ducat-desk-linux-x64.tar.gz
+tar czf "$DESK" -C android/desktop/build/compose/binaries/main/app ducat-desk
+APKS+=("$DESK#DUCAT Desk ${TAG} (Linux x64, portable)")
+
 NOTES=$(mktemp)
 {
   echo "Draft ${DRAFT} · $(git rev-parse --short HEAD)"
@@ -40,6 +50,10 @@ NOTES=$(mktemp)
   echo "**Debug-signed, stagenet only.** Not for real money."
   echo
   echo "Install \`arm64-v8a\` unless you know your phone is older."
+  echo
+  echo "**DUCAT Desk** (the desktop client) attaches below: the Linux"
+  echo "portable build immediately, and the .deb/.rpm/.msi/.dmg for each"
+  echo "OS as CI finishes building them (~30 min after the tag)."
   echo
   echo "### Since the last release"
   echo
