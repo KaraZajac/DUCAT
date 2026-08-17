@@ -242,6 +242,85 @@ fn main() {
             let dest = MoneroAddress::from_str_with_unchecked_network(dest).expect("address");
             release(dest, &height_path);
         }
+        // The 2-of-3 built through the shipping engine, three parties in one
+        // process: rider (1), driver (2), arbiter (3), threshold 2. Writes
+        // escrow3.party* and escrow3.height. `escrowtest dkg3`.
+        "dkg3" => {
+            use ducat_mobile::ceremony as cer;
+            let cid = vec![0x3Bu8; 32];
+            let n = 3u16;
+            let commits: Vec<Vec<u8>> =
+                (1..=n).map(|i| cer::dkg_commit(cid.clone(), i, 2, n).expect("commit")).collect();
+            let mut shares_for: HashMap<u16, Vec<cer::FromParty>> = HashMap::new();
+            for i in 1..=n {
+                let from: Vec<cer::FromParty> = (1..=n)
+                    .filter(|j| *j != i)
+                    .map(|j| cer::FromParty {
+                        participant: j,
+                        bytes: commits[(j - 1) as usize].clone(),
+                    })
+                    .collect();
+                for s in cer::dkg_share(cid.clone(), i, 2, n, from).expect("share") {
+                    shares_for
+                        .entry(s.participant)
+                        .or_default()
+                        .push(cer::FromParty { participant: i, bytes: s.bytes });
+                }
+            }
+            let mut addr = String::new();
+            for i in 1..=n {
+                let a = cer::dkg_finish(
+                    cid.clone(),
+                    i,
+                    2,
+                    n,
+                    shares_for.remove(&i).expect("shares"),
+                    true,
+                )
+                .expect("finish");
+                if addr.is_empty() {
+                    addr = a;
+                } else {
+                    assert_eq!(addr, a, "every party derives one escrow");
+                }
+                let keys = cer::dkg_take_keys(cid.clone(), i).expect("keys");
+                std::fs::write(state_dir().join(format!("escrow3.party{i}")), keys).unwrap();
+            }
+            use monero_daemon_rpc::prelude::*;
+            let rt =
+                tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
+            let tip = rt.block_on(async {
+                let rpc =
+                    monero_daemon_rpc::MoneroDaemon::new(Ureq::new(NODE.into())).await.expect("c");
+                rpc.latest_block_number().await.expect("height") as u64
+            });
+            std::fs::write(state_dir().join("escrow3.height"), tip.to_string()).unwrap();
+            println!("escrow (2-of-3, shipping engine — rider/driver/arbiter)");
+            println!("  address  {addr}");
+            println!("  birth    {tip}");
+        }
+        // The ruling: the rider is gone, so the DRIVER (2) proposes and the
+        // ARBITER (3) co-signs — §9.3's ruling as a co-signature, on-chain.
+        // `escrowtest rule <driver_dest>`.
+        "rule" => {
+            use ducat_mobile::ceremony as cer;
+            let dest = args.get(2).expect("rule <driver_dest>").clone();
+            let from: u64 = std::fs::read_to_string(state_dir().join("escrow3.height"))
+                .expect("run dkg3 first")
+                .parse()
+                .unwrap();
+            let k2 = std::fs::read(state_dir().join("escrow3.party2")).expect("party2");
+            let k3 = std::fs::read(state_dir().join("escrow3.party3")).expect("party3");
+            let cid = vec![0x3Bu8; 32];
+            let prop = cer::frost_propose(cid.clone(), 2, k2, dest, NODE.into(), from)
+                .expect("propose");
+            println!("  driver proposes: {} pXMR of {}", prop.payout_pxmr, prop.total_pxmr);
+            let ans = cer::frost_cosign(cid.clone(), 3, 2, k3, prop.payload).expect("cosign");
+            println!("  ARBITER co-signs (fee {} pXMR) — the ruling is a signature", ans.fee_pxmr);
+            let txid =
+                cer::frost_complete(cid, 2, 3, ans.payload, NODE.into()).expect("complete");
+            println!("  RULED — txid {txid}");
+        }
         // The split release, through the *shipping* bridge functions — the
         // primitive under the escrow ladder (§15.12): a fixed slice to the
         // refund address, the residual to the payee, one transaction, two

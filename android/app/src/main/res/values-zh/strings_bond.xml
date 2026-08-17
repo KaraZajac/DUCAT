@@ -21,4 +21,5 @@
     <string name="bond_propose_split">提议不同的分配</string>
     <string name="bond_back_to_rider">退还乘客 (XMR)</string>
     <string name="bond_counter">提议</string>
+    <string name="bond_ask_arbiter">请仲裁人裁决</string>
 </resources>

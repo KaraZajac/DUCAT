@@ -21,4 +21,5 @@
     <string name="bond_propose_split">다른 분배 제안</string>
     <string name="bond_back_to_rider">승객에게 (XMR)</string>
     <string name="bond_counter">제안</string>
+    <string name="bond_ask_arbiter">중재자에게 판정 요청</string>
 </resources>

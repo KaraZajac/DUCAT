@@ -47,15 +47,48 @@ fun main(args: Array<String>) {
     }
 
     println("ARBITER_UP serving as ${NameStore(context).get() ?: "unnamed"} — ctrl-c to stop")
+    // The ruling console (§9.3): a parked proposal is a ruling REQUEST — the
+    // arbiter's co-signature is the ruling, and declining is simply never
+    // signing. Approval arrives as a line in <state>/rulings.txt:
+    //   approve <ceremony id prefix>
+    // File-based so a human (or a policy process) sits between the request
+    // and the signature — the judgment is exactly what must not be automated.
+    val rulings = File(dir, "rulings.txt")
+    val actedOn = HashSet<String>()
     var lastStages = ""
     while (true) {
         runCatching { Mailbox.collectClaims(context) }
         runCatching { Mailbox.poll(context) }
-        val stages = Ceremony.all(context)
-            .joinToString { "${it.optString("id").take(8)}=${it.optString("stage")}" }
+        val all = Ceremony.all(context)
+        val stages = all.joinToString { "${it.optString("id").take(8)}=${it.optString("stage")}" }
         if (stages != lastStages) {
             println("ARBITER_CEREMONIES $stages")
             lastStages = stages
+        }
+        for (o in all.filter { it.optString("stage") == "release_pending" }) {
+            val id = o.optString("id")
+            if (id !in actedOn) {
+                println(
+                    "ARBITER_RULING_REQUESTED ${id.take(8)} " +
+                        "riderBack=${o.optLong("pendingRiderBack", -1)} pXMR " +
+                        "(approve with: echo 'approve ${id.take(8)}' >> ${rulings.absolutePath})"
+                )
+                actedOn.add(id)
+            }
+        }
+        if (rulings.isFile) {
+            for (line in rulings.readLines().map { it.trim() }.filter { it.startsWith("approve ") }) {
+                val prefix = line.removePrefix("approve ").trim()
+                val target = all.firstOrNull {
+                    it.optString("stage") == "release_pending" &&
+                        it.optString("id").startsWith(prefix)
+                } ?: continue
+                val id = target.optString("id")
+                runCatching { Ceremony.approveRideRelease(context, id) }
+                    .onSuccess { println("ARBITER_RULED ${id.take(8)} — co-signed; the proposer completes") }
+                    .onFailure { println("ARBITER_RULING_FAILED ${id.take(8)}: ${it.message}") }
+            }
+            rulings.delete()
         }
         Thread.sleep(2_000)
     }

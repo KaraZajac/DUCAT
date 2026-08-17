@@ -21,4 +21,5 @@
     <string name="bond_propose_split">Đề xuất chia khác</string>
     <string name="bond_back_to_rider">Về hành khách (XMR)</string>
     <string name="bond_counter">Đề xuất</string>
+    <string name="bond_ask_arbiter">Nhờ trọng tài phân xử</string>
 </resources>

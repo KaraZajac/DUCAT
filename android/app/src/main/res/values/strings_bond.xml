@@ -21,4 +21,5 @@
     <string name="bond_propose_split">Propose a different split</string>
     <string name="bond_back_to_rider">Back to the rider (XMR)</string>
     <string name="bond_counter">Propose</string>
+    <string name="bond_ask_arbiter">Ask the arbiter to rule</string>
 </resources>

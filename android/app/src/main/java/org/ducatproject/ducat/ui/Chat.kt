@@ -1695,8 +1695,32 @@ private fun RideBondBanner(contact: Contact) {
                 }
                 stage == "done" && rider && funded < fare ->
                     BondLine(spin = true, text = stringResource(R.string.bond_fare_sent))
-                stage == "done" && rider ->
+                stage == "done" && rider -> {
                     BondLine(spin = false, text = stringResource(R.string.bond_fare_secured))
+                    if (ride.optInt("arbiterIdx") != 0) {
+                        Spacer(Modifier.height(4.dp))
+                        OutlinedButton(
+                            onClick = {
+                                busy = true; error = null
+                                scope.launch {
+                                    withContext(Dispatchers.IO) {
+                                        runCatching {
+                                            // The stranded rider asks for
+                                            // everything back; the arbiter
+                                            // judges, and can decline by
+                                            // simply not signing.
+                                            org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                                                context, idHex, funded, toArbiter = true)
+                                        }
+                                    }.onFailure { error = it.message }
+                                    busy = false
+                                }
+                            },
+                            enabled = !busy,
+                            modifier = Modifier.fillMaxWidth().height(40.dp),
+                        ) { Text(stringResource(R.string.bond_ask_arbiter)) }
+                    }
+                }
                 stage == "done" && !rider && funded < fare ->
                     BondLine(spin = true, text = stringResource(R.string.bond_waiting_funding))
                 stage == "done" && !rider -> {
@@ -1721,6 +1745,30 @@ private fun RideBondBanner(contact: Contact) {
                 }
                 stage == "releasing" -> {
                     BondLine(spin = true, text = stringResource(R.string.bond_waiting_release))
+                    // §9.3: the counterparty gone, the arbiter is the way out.
+                    // Same proposal, different signer; their signature is the
+                    // ruling.
+                    if (ride.optInt("arbiterIdx") != 0) {
+                        Spacer(Modifier.height(4.dp))
+                        OutlinedButton(
+                            onClick = {
+                                busy = true; error = null
+                                val back = ride.optLong("myRiderBack",
+                                    (funded - fare).coerceAtLeast(0L))
+                                scope.launch {
+                                    withContext(Dispatchers.IO) {
+                                        runCatching {
+                                            org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                                                context, idHex, back, toArbiter = true)
+                                        }
+                                    }.onFailure { error = it.message }
+                                    busy = false
+                                }
+                            },
+                            enabled = !busy,
+                            modifier = Modifier.fillMaxWidth().height(40.dp),
+                        ) { Text(stringResource(R.string.bond_ask_arbiter)) }
+                    }
                     val mine = ride.optLong("myRiderBack", -1L)
                     if (mine >= 0) {
                         Spacer(Modifier.height(2.dp))

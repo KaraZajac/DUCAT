@@ -652,7 +652,15 @@ object Ceremony {
      * (and pays the fee), because a residual too small to cover the fee is
      * not a transaction.
      */
-    fun proposeRideSplit(context: Context, idHex: String, riderBackPxmr: Long): Long {
+    fun proposeRideSplit(
+        context: Context,
+        idHex: String,
+        riderBackPxmr: Long,
+        /** §9.3: the counterparty is gone, so this proposal goes to the
+         *  arbiter instead — their co-signature IS the ruling. The split's
+         *  destinations do not change; only who is asked to agree does. */
+        toArbiter: Boolean = false,
+    ): Long {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
         // done → first proposal; releasing → retry or self-supersede;
         // release_pending / release_cosigned → the counter-offer. Only
@@ -669,7 +677,16 @@ object Ceremony {
         val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
         val from = o.optLong("scanFrom").takeIf { it > 0 }
             ?: WalletStore(context).restoreHeight().toLong()
-        val peerHex = otherPrincipal(o) ?: throw IllegalStateException("no counterparty")
+        val roster0 = o.getJSONArray("roster").let { arr ->
+            (0 until arr.length()).map { arr.getString(it) }
+        }
+        val peerHex = if (toArbiter) {
+            val arb = o.optInt("arbiterIdx")
+            check(arb != 0) { "this escrow has no arbiter — only the counterparty can sign" }
+            roster0[arb - 1]
+        } else {
+            otherPrincipal(o) ?: throw IllegalStateException("no counterparty")
+        }
         val peer = contactFor(context, peerHex)
             ?: throw IllegalStateException("the counterparty is not a contact")
         val refund = o.optString("refundAddr")
@@ -677,9 +694,12 @@ object Ceremony {
         // The driver's payout address: their own wallet when the driver
         // proposes; when the rider proposes, the driver's published
         // subaddress from the handshake — a rider cannot route the fare
-        // anywhere the driver did not name.
+        // anywhere the driver did not name. Always the DRIVER's address,
+        // whoever the proposal is being sent to.
         val driverDest = if (isFunder(o)) {
-            contactFor(context, peerHex)?.theirAddress
+            val driverHex = otherPrincipal(o)
+                ?: throw IllegalStateException("no counterparty")
+            contactFor(context, driverHex)?.theirAddress
                 ?: throw IllegalStateException(
                     "the driver has not published an address — ask them to propose instead")
         } else {
@@ -713,7 +733,8 @@ object Ceremony {
             )
         }
         Mailbox.send(
-            context, peer, "ride: proposed a split",
+            context, peer,
+            if (toArbiter) "ride: asking the arbiter to rule" else "ride: proposed a split",
             PersonaStore(context).personaHex(),
             kind = 9, round = 0, ceremonyId = id, payload = prop.payload,
             amountPxmr = back,

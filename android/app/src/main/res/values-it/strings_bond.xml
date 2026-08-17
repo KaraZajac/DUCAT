@@ -21,4 +21,5 @@
     <string name="bond_propose_split">Proponi un\'altra divisione</string>
     <string name="bond_back_to_rider">Al passeggero (XMR)</string>
     <string name="bond_counter">Proponi</string>
+    <string name="bond_ask_arbiter">Chiedi all’arbitro di decidere</string>
 </resources>
