@@ -15,4 +15,5 @@
     <string name="bond_released">運賃をリリースしました</string>
     <string name="profile_arbiter">エスクロー仲裁者</string>
     <string name="profile_arbiter_note">ボンド付き乗車の決定キーを保持します。問題が起きない限り出番はありません。</string>
+    <string name="bond_margin_back">マージン（%1$s）はあなたに戻ります。</string>
 </resources>

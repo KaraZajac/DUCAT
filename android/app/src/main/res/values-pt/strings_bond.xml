@@ -15,4 +15,5 @@
     <string name="bond_released">Tarifa libertada</string>
     <string name="profile_arbiter">Árbitro da caução</string>
     <string name="profile_arbiter_note">Guarda a chave de desempate das tuas viagens com caução. Só entra se algo correr mal.</string>
+    <string name="bond_margin_back">A tua margem (%1$s) volta para ti.</string>
 </resources>

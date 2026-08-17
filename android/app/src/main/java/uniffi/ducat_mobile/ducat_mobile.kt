@@ -889,6 +889,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -955,6 +957,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_frost_cosign(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`proposer`: Short,`keys`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_frost_propose(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`keys`: RustBuffer.ByValue,`dest`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,`fromHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_frost_propose_split(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`keys`: RustBuffer.ByValue,`payments`: RustBuffer.ByValue,`residualDest`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,`fromHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_generate_prekeys(`count`: Int,`validSecs`: Long,`startId`: Int,`reuseSignedSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1246,6 +1250,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_frost_propose(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_frost_propose_split(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_generate_prekeys(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_generate_writer_keys(
@@ -1464,7 +1470,10 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_frost_cosign() != 7598.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_frost_propose() != 60353.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_frost_propose() != 21602.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_frost_propose_split() != 36015.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_generate_prekeys() != 12451.toShort()) {
@@ -3829,6 +3838,41 @@ public object FfiConverterTypeSendResult: FfiConverterRustBuffer<SendResult> {
 
 
 /**
+ * One fixed slice of a split release: this much, to this address.
+ */
+data class SplitOut (
+    var `dest`: kotlin.String, 
+    var `amountPxmr`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSplitOut: FfiConverterRustBuffer<SplitOut> {
+    override fun read(buf: ByteBuffer): SplitOut {
+        return SplitOut(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SplitOut) = (
+            FfiConverterString.allocationSize(value.`dest`) +
+            FfiConverterULong.allocationSize(value.`amountPxmr`)
+    )
+
+    override fun write(value: SplitOut, buf: ByteBuffer) {
+            FfiConverterString.write(value.`dest`, buf)
+            FfiConverterULong.write(value.`amountPxmr`, buf)
+    }
+}
+
+
+
+/**
  * One pinned notice, as raw bytes the caller decodes (§16.17).
  */
 data class StandNotice (
@@ -5066,6 +5110,34 @@ public object FfiConverterSequenceTypePrekeyEntry: FfiConverterRustBuffer<List<P
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypeSplitOut: FfiConverterRustBuffer<List<SplitOut>> {
+    override fun read(buf: ByteBuffer): List<SplitOut> {
+        val len = buf.getInt()
+        return List<SplitOut>(len) {
+            FfiConverterTypeSplitOut.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<SplitOut>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeSplitOut.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<SplitOut>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeSplitOut.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypeStandNotice: FfiConverterRustBuffer<List<StandNotice>> {
     override fun read(buf: ByteBuffer): List<StandNotice> {
         val len = buf.getInt()
@@ -5498,15 +5570,39 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     
 
         /**
-         * Round 0 — propose the release. Scans the escrow, builds one sweep to
-         * `dest`, preprocesses, and returns `[tx][preprocess]` for the co-signer.
-         * The signing machine waits in its slot for `frost_complete`.
+         * Round 0 — propose the release as a sweep to one destination. The common
+         * case (a deposit coming home, a fare with no margin) and a thin wrapper:
+         * every release is a split with an empty fixed list.
          */
     @Throws(ContactException::class) fun `frostPropose`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `keys`: kotlin.ByteArray, `dest`: kotlin.String, `nodeUrl`: kotlin.String, `fromHeight`: kotlin.ULong): FrostProposal {
             return FfiConverterTypeFrostProposal.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_propose(
         FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterByteArray.lower(`keys`),FfiConverterString.lower(`dest`),FfiConverterString.lower(`nodeUrl`),FfiConverterULong.lower(`fromHeight`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Round 0 — propose a **split** release: the fixed slices in `payments`,
+         * and everything left after them and the network fee to `residual_dest`.
+         *
+         * One transaction, several destinations — the primitive under everything
+         * the escrow ladder promises: a rider's margin coming home beside the
+         * driver's fare, a MAD escrow returning two deposits, a negotiated 80/20
+         * settlement, an arbiter's partial ruling. The residual claimant pays the
+         * fee, which is the right default: the party being made whole should not
+         * have their fixed slice nibbled by fee estimation.
+         *
+         * Zero-amount slices are skipped rather than refused — "no margin this
+         * time" is a sweep, not an error.
+         */
+    @Throws(ContactException::class) fun `frostProposeSplit`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `keys`: kotlin.ByteArray, `payments`: List<SplitOut>, `residualDest`: kotlin.String, `nodeUrl`: kotlin.String, `fromHeight`: kotlin.ULong): FrostProposal {
+            return FfiConverterTypeFrostProposal.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_propose_split(
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterByteArray.lower(`keys`),FfiConverterSequenceTypeSplitOut.lower(`payments`),FfiConverterString.lower(`residualDest`),FfiConverterString.lower(`nodeUrl`),FfiConverterULong.lower(`fromHeight`),_status)
 }
     )
     }

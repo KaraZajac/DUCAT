@@ -242,6 +242,43 @@ fn main() {
             let dest = MoneroAddress::from_str_with_unchecked_network(dest).expect("address");
             release(dest, &height_path);
         }
+        // The split release, through the *shipping* bridge functions — the
+        // primitive under the escrow ladder (§15.12): a fixed slice to the
+        // refund address, the residual to the payee, one transaction, two
+        // FROST signers. `escrowtest split <residual_dest> <refund_dest>
+        // <refund_pxmr>`.
+        "split" => {
+            let dest = args.get(2).expect("split <residual> <refund> <pxmr>").clone();
+            let refund = args.get(3).expect("split <residual> <refund> <pxmr>").clone();
+            let amount: u64 =
+                args.get(4).expect("split <residual> <refund> <pxmr>").parse().expect("pxmr");
+            let from: u64 =
+                std::fs::read_to_string(&height_path).expect("run dkg first").parse().unwrap();
+            let keys1 = std::fs::read(state_dir().join("escrow.party1")).expect("party1");
+            let keys2 = std::fs::read(state_dir().join("escrow.party2")).expect("party2");
+            let cid = vec![0x5Au8; 32]; // any 32 bytes, consistent across the calls
+
+            let prop = ducat_mobile::ceremony::frost_propose_split(
+                cid.clone(),
+                1,
+                keys1,
+                vec![ducat_mobile::ceremony::SplitOut { dest: refund.clone(), amount_pxmr: amount }],
+                dest.clone(),
+                NODE.into(),
+                from,
+            )
+            .expect("propose");
+            println!(
+                "  proposed: total {} pXMR, residual ≈{} pXMR to payee, {} pXMR to refund",
+                prop.total_pxmr, prop.payout_pxmr, amount
+            );
+            let ans = ducat_mobile::ceremony::frost_cosign(cid.clone(), 2, 1, keys2, prop.payload)
+                .expect("cosign");
+            println!("  co-signed (fee {} pXMR)", ans.fee_pxmr);
+            let txid = ducat_mobile::ceremony::frost_complete(cid, 1, 2, ans.payload, NODE.into())
+                .expect("complete");
+            println!("  SPLIT RELEASED — txid {txid}");
+        }
         other => eprintln!("unknown mode {other}"),
     }
 }

@@ -15,4 +15,5 @@
     <string name="bond_released">کرایه آزاد شد</string>
     <string name="profile_arbiter">داور امانت</string>
     <string name="profile_arbiter_note">کلید تعیین‌کننده سفرهای امانت‌دار شما را نگه می‌دارد. فقط در صورت بروز مشکل وارد می‌شود.</string>
+    <string name="bond_margin_back">حاشیه شما (%1$s) به شما بازمی‌گردد.</string>
 </resources>

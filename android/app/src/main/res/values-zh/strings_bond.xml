@@ -15,4 +15,5 @@
     <string name="bond_released">车费已释放</string>
     <string name="profile_arbiter">托管仲裁人</string>
     <string name="profile_arbiter_note">持有你担保行程的决定性密钥。除非出了问题，否则不会参与。</string>
+    <string name="bond_margin_back">你的保证金（%1$s）将退还给你。</string>
 </resources>

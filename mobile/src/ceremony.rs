@@ -282,7 +282,7 @@ fn scan_escrow(
     keys: &ThresholdKeys<Ed25519>,
     node_url: &str,
     from_height: u64,
-) -> Result<(u64, Vec<monero_wallet::WalletOutput>), ContactError> {
+) -> Result<(u64, Vec<monero_wallet::WalletOutput>, u64), ContactError> {
     use monero_daemon_rpc::prelude::*;
     use monero_wallet::Scanner;
 
@@ -309,6 +309,9 @@ fn scan_escrow(
             .map_err(|e| ContactError::Refused(format!("height: {e:?}")))? as u64;
         let mut scanner = Scanner::new(vp);
         let mut outputs = Vec::new();
+        // The youngest output's height rides back out: Monero's ten-block
+        // rule is judged against it, and WalletOutput does not carry it.
+        let mut youngest = 0u64;
         let mut h = from_height;
         while h <= tip {
             let Ok(block) = rpc.block_by_number(h as usize).await else {
@@ -322,11 +325,12 @@ fn scan_escrow(
             if let Ok(found) = scanner.scan(sb) {
                 for o in found.not_additionally_locked() {
                     outputs.push(o);
+                    youngest = youngest.max(h);
                 }
             }
             h += 1;
         }
-        Ok((tip, outputs))
+        Ok((tip, outputs, youngest))
     })
 }
 
@@ -342,7 +346,7 @@ pub fn escrow_balance(
     from_height: u64,
 ) -> Result<u64, ContactError> {
     let keys = read_keys(&keys)?;
-    let (_, outputs) = scan_escrow(&keys, &node_url, from_height)?;
+    let (_, outputs, _) = scan_escrow(&keys, &node_url, from_height)?;
     Ok(outputs.iter().map(|o| o.commitment().amount).sum())
 }
 
@@ -374,15 +378,47 @@ pub struct FrostCosign {
 /// stagenet, so 0.0002 covers it with margin (escrowtest, 2026-08-15).
 const FEE_RESERVE: u64 = 200_000_000;
 
-/// Round 0 — propose the release. Scans the escrow, builds one sweep to
-/// `dest`, preprocesses, and returns `[tx][preprocess]` for the co-signer.
-/// The signing machine waits in its slot for `frost_complete`.
+/// One fixed slice of a split release: this much, to this address.
+#[derive(uniffi::Record)]
+pub struct SplitOut {
+    pub dest: String,
+    pub amount_pxmr: u64,
+}
+
+/// Round 0 — propose the release as a sweep to one destination. The common
+/// case (a deposit coming home, a fare with no margin) and a thin wrapper:
+/// every release is a split with an empty fixed list.
 #[uniffi::export]
 pub fn frost_propose(
     ceremony_id: Vec<u8>,
     i: u16,
     keys: Vec<u8>,
     dest: String,
+    node_url: String,
+    from_height: u64,
+) -> Result<FrostProposal, ContactError> {
+    frost_propose_split(ceremony_id, i, keys, Vec::new(), dest, node_url, from_height)
+}
+
+/// Round 0 — propose a **split** release: the fixed slices in `payments`,
+/// and everything left after them and the network fee to `residual_dest`.
+///
+/// One transaction, several destinations — the primitive under everything
+/// the escrow ladder promises: a rider's margin coming home beside the
+/// driver's fare, a MAD escrow returning two deposits, a negotiated 80/20
+/// settlement, an arbiter's partial ruling. The residual claimant pays the
+/// fee, which is the right default: the party being made whole should not
+/// have their fixed slice nibbled by fee estimation.
+///
+/// Zero-amount slices are skipped rather than refused — "no margin this
+/// time" is a sweep, not an error.
+#[uniffi::export]
+pub fn frost_propose_split(
+    ceremony_id: Vec<u8>,
+    i: u16,
+    keys: Vec<u8>,
+    payments: Vec<SplitOut>,
+    residual_dest: String,
     node_url: String,
     from_height: u64,
 ) -> Result<FrostProposal, ContactError> {
@@ -394,18 +430,40 @@ pub fn frost_propose(
 
     let id = cid(&ceremony_id)?;
     let keys = read_keys(&keys)?;
-    let dest = MoneroAddress::from_str_with_unchecked_network(&dest)
+    let dest = MoneroAddress::from_str_with_unchecked_network(&residual_dest)
         .map_err(|e| ContactError::Refused(format!("destination: {e:?}")))?;
+    let mut fixed = Vec::new();
+    for p in payments.iter().filter(|p| p.amount_pxmr > 0) {
+        fixed.push((
+            MoneroAddress::from_str_with_unchecked_network(&p.dest)
+                .map_err(|e| ContactError::Refused(format!("split destination: {e:?}")))?,
+            p.amount_pxmr,
+        ));
+    }
 
-    let (_, outputs) = scan_escrow(&keys, &node_url, from_height)?;
+    let (tip, outputs, youngest) = scan_escrow(&keys, &node_url, from_height)?;
     if outputs.is_empty() {
         return Err(ContactError::Refused("the escrow holds nothing to release".into()));
     }
-    let total: u64 = outputs.iter().map(|o| o.commitment().amount).sum();
-    if total <= FEE_RESERVE {
-        return Err(ContactError::Refused("the escrow is too small to cover the fee".into()));
+    // Monero's ten-block rule: an output younger than that is unspendable and
+    // the daemon refuses the ring with an unexplained invalid_input. Say the
+    // real reason and how long is left — on a slow stagenet this is the
+    // common case, not the corner (found live, 2026-08-16: five rejected
+    // releases that were nothing but a 7-of-10-confirmations wait).
+    if youngest + 10 > tip + 1 {
+        let left = youngest + 10 - (tip + 1);
+        return Err(ContactError::Refused(format!(
+            "the fare needs {left} more confirmation(s) before it can move"
+        )));
     }
-    let payout = total - FEE_RESERVE;
+    let total: u64 = outputs.iter().map(|o| o.commitment().amount).sum();
+    let fixed_sum: u64 = fixed.iter().map(|(_, a)| a).sum();
+    if total <= fixed_sum + FEE_RESERVE {
+        return Err(ContactError::Refused(
+            "the escrow cannot cover the split and the fee".into(),
+        ));
+    }
+    let payout = total - fixed_sum - FEE_RESERVE;
 
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
@@ -435,11 +493,15 @@ pub fn frost_propose(
             .map_err(|e| ContactError::Refused(format!("fee: {e:?}")))?;
         let mut outgoing = Zeroizing::new([0u8; 32]);
         OsRng.fill_bytes(outgoing.as_mut());
+        // The residual claimant is the change address, so the true fee comes
+        // out of their side and every fixed slice arrives exactly as named.
+        // With no fixed slices this is the original sweep, byte for byte.
+        let explicit = if fixed.is_empty() { vec![(dest, payout)] } else { fixed };
         SignableTransaction::new(
             RctType::ClsagBulletproofPlus,
             outgoing,
             decoyed,
-            vec![(dest, payout)],
+            explicit,
             Change::fingerprintable(Some(dest)),
             vec![],
             fee_rate,
@@ -555,27 +617,40 @@ pub fn frost_complete(
         .enable_all()
         .build()
         .map_err(|e| ContactError::Refused(format!("runtime: {e}")))?;
-    let accepted = rt.block_on(async {
+    let (accepted, last_err) = rt.block_on(async {
         let mut accepted = 0u32;
+        let mut last_err = String::new();
         for url in [
             node_url.as_str(),
             "http://node.monerodevs.org:38089",
             "http://stagenet.xmr-tw.org:38081",
         ] {
-            if let Ok(rpc) = monero_daemon_rpc::MoneroDaemon::new(
-                crate::monero::UreqTransport::new(url.to_string()),
-            )
+            match monero_daemon_rpc::MoneroDaemon::new(crate::monero::UreqTransport::new(
+                url.to_string(),
+            ))
             .await
             {
-                if rpc.publish_transaction(&tx).await.is_ok() {
-                    accepted += 1;
-                }
+                Ok(rpc) => match rpc.publish_transaction(&tx).await {
+                    Ok(_) => accepted += 1,
+                    // The daemon's refusal reason is the whole diagnosis —
+                    // "too few outputs", "fee too low", "key image spent" are
+                    // three different bugs, and a silent is_ok() hid which.
+                    Err(e) => last_err = format!("{e:?}"),
+                },
+                Err(e) => last_err = format!("connect {url}: {e:?}"),
             }
         }
-        accepted
+        (accepted, last_err)
     });
     if accepted == 0 {
-        return Err(ContactError::Refused("no relay took the release".into()));
+        // Debug aid while the daemons' reasons stay empty through the
+        // wrapper: the raw bytes let a curl to sendrawtransaction read the
+        // full flag set (double_spend, invalid_input, …) off any node.
+        if std::env::var("DUCAT_DUMP_TX").is_ok() {
+            let hex: String = tx.serialize().iter().map(|b| format!("{b:02x}")).collect();
+            eprintln!("DUCAT_TX_HEX {hex}");
+        }
+        return Err(ContactError::Refused(format!("no relay took the release: {last_err}")));
     }
     Ok(txid)
 }

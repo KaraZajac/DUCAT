@@ -284,7 +284,8 @@ fun HailCard() {
                     // answer to an offer they never made (found live,
                     // 2026-08-16 — second hail in one thread).
                     ContactStore(context).thread(d.personaHex)
-                        .lastOrNull { !it.outgoing && it.kind == 6 }
+                        .filter { !it.outgoing && it.kind == 6 }
+                        .maxByOrNull { it.timestamp }
                 }.getOrNull()
             } ?: continue
             // Re-read the contact: the profile (car, plate) may have landed
@@ -423,25 +424,32 @@ fun HailCard() {
                             reSeq = offer.seq,
                         )
                     }.onFailure { DucatLog.w(TAG, "ride accept: ${it.message}") }
-                    // §15.12: the accept is where the escrow starts. With an
-                    // arbiter configured and mutual, the fare goes 2-of-3;
-                    // without one the ride stays what it always was — a
-                    // mutual promise, like flagging a cab. The bond banner
-                    // in the thread carries it from here.
+                    // §15.12: the accept is where the escrow starts, and the
+                    // ladder picks the strongest rung available. An arbiter
+                    // configured and mutual → 2-of-3 (recovery + judgment).
+                    // None → 2-of-2 on mutual stakes: the fare is the
+                    // driver's skin, the rider's margin is theirs, and
+                    // walking away burns both. The bond banner in the thread
+                    // carries it from here either way.
                     val fare = offer.amountPxmr
-                    val arbHex = org.ducatproject.ducat.ArbiterStore(context).hex()
-                    if (fare != null && fare > 0 && arbHex != null && arbHex != d.personaHex) {
-                        val arb = org.ducatproject.ducat.ContactStore(context).all()
-                            .firstOrNull { it.personaHex == arbHex }
-                        if (arb != null) {
-                            runCatchingCancellable {
-                                org.ducatproject.ducat.Ceremony
-                                    .startRide(context, d, arb, fare)
-                            }.onSuccess {
-                                DucatLog.i(TAG, "ride escrow started for ${formatXmr(fare)} XMR")
-                            }.onFailure {
-                                DucatLog.w(TAG, "ride escrow: ${it.message}")
-                            }
+                    if (fare != null && fare > 0) {
+                        val arbHex = org.ducatproject.ducat.ArbiterStore(context).hex()
+                            ?.takeIf { it != d.personaHex }
+                        val arb = arbHex?.let { h ->
+                            org.ducatproject.ducat.ContactStore(context).all()
+                                .firstOrNull { it.personaHex == h }
+                        }
+                        runCatchingCancellable {
+                            org.ducatproject.ducat.Ceremony
+                                .startRide(context, d, arb, fare)
+                        }.onSuccess {
+                            DucatLog.i(
+                                TAG,
+                                "ride escrow started for ${formatXmr(fare)} XMR " +
+                                    (if (arb != null) "(2-of-3)" else "(2-of-2 mutual stake)"),
+                            )
+                        }.onFailure {
+                            DucatLog.w(TAG, "ride escrow: ${it.message}")
                         }
                     }
                 }
@@ -511,6 +519,11 @@ private data class DriveOffer(
     val personaHex: String,
     val seq: Long,
     val farePxmr: Long,
+    /** Epoch seconds when the offer went out: an answer must be newer. A
+     *  re-claimed thread resets sequence numbers, and a years-old accept
+     *  whose reSeq collides must never confirm a ride it predates (found
+     *  live, 2026-08-16 — a fresh offer "confirmed" by history). */
+    val sentAt: Long = 0,
 )
 
 private fun ridePrefs(context: android.content.Context) =
@@ -521,13 +534,17 @@ private fun saveDriveOffer(context: android.content.Context, o: DriveOffer) {
         .putString("driveoffer_persona", o.personaHex)
         .putLong("driveoffer_seq", o.seq)
         .putLong("driveoffer_fare", o.farePxmr)
+        .putLong("driveoffer_sent", o.sentAt)
         .apply()
 }
 
 private fun loadDriveOffer(context: android.content.Context): DriveOffer? {
     val p = ridePrefs(context)
     val persona = p.getString("driveoffer_persona", null) ?: return null
-    return DriveOffer(persona, p.getLong("driveoffer_seq", 0), p.getLong("driveoffer_fare", 0))
+    return DriveOffer(
+        persona, p.getLong("driveoffer_seq", 0), p.getLong("driveoffer_fare", 0),
+        p.getLong("driveoffer_sent", 0),
+    )
 }
 
 private fun clearDriveOffer(context: android.content.Context) {
@@ -669,7 +686,10 @@ fun DriveScreen() {
                                 org.ducatproject.ducat.PersonaStore(context).personaHex(),
                                 kind = 6, amountPxmr = farePxmr, etaSecs = etaSecs,
                             )
-                            DriveOffer(rider.personaHex, offerSeq, farePxmr)
+                            DriveOffer(
+                                rider.personaHex, offerSeq, farePxmr,
+                                System.currentTimeMillis() / 1000,
+                            )
                         }.onFailure {
                             DucatLog.w(TAG, "ride offer: ${it.message}")
                         }.getOrNull()
@@ -711,6 +731,7 @@ fun DriveScreen() {
                     Mailbox.poll(context)
                     ContactStore(context).thread(po.personaHex).firstOrNull {
                         !it.outgoing && it.reSeq == po.seq &&
+                            it.timestamp >= po.sentAt - 60 &&
                             (it.kind == 7 || (it.kind == 5 && !it.reOwn))
                     }
                 }.getOrNull()

@@ -15,4 +15,5 @@
     <string name="bond_released">Оплату відпущено</string>
     <string name="profile_arbiter">Арбітр ескроу</string>
     <string name="profile_arbiter_note">Тримає вирішальний ключ ваших поїздок з ескроу. Долучається, лише якщо щось піде не так.</string>
+    <string name="bond_margin_back">Ваша застава (%1$s) повернеться вам.</string>
 </resources>

@@ -68,7 +68,13 @@ object Ceremony {
     //
     // [u8 n][n × 32-byte personas, sorted][u8 arbiterIdx (0 = none)]
     // [u8 kind (0 = bond, 1 = ride)][u8 funderIdx (0 = none)]
-    // [u64 farePxmr LE][u8 nonceLen][nonce][commitment…]
+    // [u64 farePxmr LE][u8 refundLen][refund addr]
+    // [u8 nonceLen][nonce][commitment…]
+    //
+    // The refund address is where the funder's residual comes home in the
+    // split release — the margin above the fare, a deposit, a negotiated
+    // slice. A fresh subaddress per ceremony, so nothing links two rides.
+    // Empty for a plain bond (a sweep needs no second destination).
     //
     // The same format for two parties and three: one parser, no special
     // cases, and a 2-party bond is simply a roster with no arbiter. The kind
@@ -89,6 +95,7 @@ object Ceremony {
         kind: Int,
         funderIdx: Int,
         farePxmr: Long,
+        refundAddr: String,
         nonce: String,
         commitment: ByteArray,
     ): ByteArray {
@@ -102,6 +109,9 @@ object Ceremony {
             java.nio.ByteBuffer.allocate(8)
                 .order(java.nio.ByteOrder.LITTLE_ENDIAN).putLong(farePxmr).array()
         )
+        val rb = refundAddr.toByteArray()
+        out.write(rb.size)
+        out.write(rb)
         val nb = nonce.toByteArray()
         out.write(nb.size)
         out.write(nb)
@@ -115,6 +125,7 @@ object Ceremony {
         val kind: Int,
         val funderIdx: Int,
         val farePxmr: Long,
+        val refundAddr: String,
         val nonce: String,
         val commitment: ByteArray,
     )
@@ -134,11 +145,13 @@ object Ceremony {
         val fare = take(8)?.let {
             java.nio.ByteBuffer.wrap(it).order(java.nio.ByteOrder.LITTLE_ENDIAN).long
         } ?: return null
+        val refundLen = take(1)?.get(0)?.toInt() ?: return null
+        val refund = String(take(refundLen) ?: return null)
         val nonceLen = take(1)?.get(0)?.toInt() ?: return null
         val nonce = String(take(nonceLen) ?: return null)
         val commitment = payload.copyOfRange(p, payload.size)
         if (commitment.isEmpty()) return null
-        return Invite(roster, arbiterIdx, kind, funderIdx, fare, nonce, commitment)
+        return Invite(roster, arbiterIdx, kind, funderIdx, fare, refund, nonce, commitment)
     }
 
     private fun contactFor(context: Context, personaHex: String): Contact? =
@@ -155,12 +168,23 @@ object Ceremony {
     /**
      * Start a ride escrow (§15.12): the caller is the rider — the funder —
      * the contact is the driver, and the fare is the number the accept
-     * echoed. 2-of-3 with the arbiter, so a lost phone strands nothing and
-     * a dispute has somewhere to go; the arbiter holds a share and, on the
-     * happy path, never hears from anyone again.
+     * echoed.
+     *
+     * The escrow ladder's top two rungs, one entry point: with an arbiter, a
+     * 2-of-3 — a lost phone strands nothing and a dispute has somewhere to
+     * go. Without one, a 2-of-2 on mutual stakes: the rider's margin above
+     * the fare is what makes releasing strictly better than sulking, and
+     * walking away burns both sides. Nobody is blocked because a third party
+     * does not exist; the third party is simply better when it does.
      */
-    fun startRide(context: Context, driver: Contact, arbiter: Contact, farePxmr: Long): String =
+    fun startRide(context: Context, driver: Contact, arbiter: Contact?, farePxmr: Long): String =
         start(context, driver, arbiter, KIND_RIDE, farePxmr)
+
+    /** What the funder actually locks: the fare plus the margin that makes
+     *  releasing strictly better than walking away. One fifth, floored at
+     *  nothing — a tiny fare's margin is symbolic, and that is fine: the
+     *  fare itself is the driver's stake either way. */
+    fun rideFundAmount(farePxmr: Long): Long = farePxmr + farePxmr / 5
 
     private fun start(
         context: Context,
@@ -180,9 +204,14 @@ object Ceremony {
         val idHex = id.toHexString()
         val i = funderIdx
         val n = roster.size
+        // Where the funder's residual comes home in the split release: a
+        // fresh subaddress per ceremony, so two rides never link.
+        val refundAddr = if (kind == KIND_RIDE) {
+            WalletStore(context).addressFor("ride_$idHex") ?: ""
+        } else ""
 
         val commit = uniffi.ducat_mobile.dkgCommit(id, i.toUShort(), T.toUShort(), n.toUShort())
-        val frame = frameRound0(roster, arbiterIdx, kind, funderIdx, farePxmr, nonce, commit)
+        val frame = frameRound0(roster, arbiterIdx, kind, funderIdx, farePxmr, refundAddr, nonce, commit)
         for (peerHex in roster.filter { it != mineHex }) {
             val peer = contactFor(context, peerHex)
                 ?: throw IllegalStateException("everyone in a bond must be your contact")
@@ -195,6 +224,7 @@ object Ceremony {
             put("id", idHex); put("nonce", nonce)
             put("roster", JSONArray(roster)); put("arbiterIdx", arbiterIdx)
             put("kind", kind); put("funderIdx", funderIdx); put("farePxmr", farePxmr)
+            put("refundAddr", refundAddr)
             put("created", System.currentTimeMillis())
             put("peer", contact.personaHex)
             put("i", i); put("stage", "committed")
@@ -250,7 +280,7 @@ object Ceremony {
             // is the ceremony's self-description and every copy must agree.
             val frame = frameRound0(
                 inv.roster, inv.arbiterIdx, inv.kind, inv.funderIdx, inv.farePxmr,
-                inv.nonce, commit,
+                inv.refundAddr, inv.nonce, commit,
             )
             for (peerHex in inv.roster.filter { it != mineHex }) {
                 val peer = contactFor(context, peerHex) ?: run {
@@ -267,6 +297,7 @@ object Ceremony {
                 put("roster", JSONArray(inv.roster)); put("arbiterIdx", inv.arbiterIdx)
                 put("kind", inv.kind); put("funderIdx", inv.funderIdx)
                 put("farePxmr", inv.farePxmr)
+                put("refundAddr", inv.refundAddr)
                 put("created", System.currentTimeMillis())
                 put("peer", contact.personaHex)
                 put("i", i); put("stage", "committed")
@@ -547,7 +578,9 @@ object Ceremony {
         val fare = o.optLong("farePxmr")
         check(addr.isNotEmpty() && fare > 0) { "no address or fare" }
         val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
-        val r = Wallet.send(context, nodeUrl, addr, fare)
+        // Fare plus margin, one send: the margin is what comes home in the
+        // split release, and what makes releasing beat sulking (2-of-2).
+        val r = Wallet.send(context, nodeUrl, addr, rideFundAmount(fare))
         o.put("fundTxid", r.txidHex)
         save(context, idHex, o)
         ContactStore.bump()
@@ -608,8 +641,21 @@ object Ceremony {
         val rider = contactFor(context, riderHex)
             ?: throw IllegalStateException("the rider is not a contact")
 
-        val prop = uniffi.ducat_mobile.frostPropose(
-            id, i.toUShort(), keys, dest, nodeUrl, from.toULong(),
+        // The split: everything above the fare is the rider's margin and
+        // comes home to the refund address the ceremony named at birth; the
+        // fare (minus the real network fee) is the residual — the driver's.
+        val fare = o.optLong("farePxmr")
+        val total = runCatching {
+            uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+        }.getOrDefault(0L)
+        val refund = o.optString("refundAddr")
+        val margin = (total - fare).coerceAtLeast(0L)
+        val payments = if (refund.isNotEmpty() && margin > 0) {
+            listOf(uniffi.ducat_mobile.SplitOut(refund, margin.toULong()))
+        } else emptyList()
+
+        val prop = uniffi.ducat_mobile.frostProposeSplit(
+            id, i.toUShort(), keys, payments, dest, nodeUrl, from.toULong(),
         )
         Mailbox.send(
             context, rider, "ride complete — requesting the fare",

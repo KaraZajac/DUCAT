@@ -15,4 +15,5 @@
     <string name="bond_released">Tarifa liberada</string>
     <string name="profile_arbiter">Árbitro del depósito</string>
     <string name="profile_arbiter_note">Guarda la llave de desempate de tus viajes con depósito. Solo interviene si algo sale mal.</string>
+    <string name="bond_margin_back">Tu margen (%1$s) vuelve a ti.</string>
 </resources>

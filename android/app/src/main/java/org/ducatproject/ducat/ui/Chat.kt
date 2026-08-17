@@ -1669,6 +1669,12 @@ private fun RideBondBanner(contact: Contact) {
                 stage == "done" && rider && ride.optString("fundTxid").isEmpty() -> {
                     BondLine(spin = false, text = stringResource(R.string.bond_escrow_ready))
                     Spacer(Modifier.height(6.dp))
+                    // Fare plus margin: the margin comes home in the release,
+                    // and is what makes releasing beat sulking when there is
+                    // no arbiter to appeal to.
+                    val fundShown = Amounts.show(
+                        context, org.ducatproject.ducat.Ceremony.rideFundAmount(fare),
+                    ).primary
                     Button(
                         onClick = {
                             busy = true; error = null
@@ -1683,7 +1689,7 @@ private fun RideBondBanner(contact: Contact) {
                         },
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
-                    ) { Text(stringResource(R.string.bond_secure_fare, fareShown)) }
+                    ) { Text(stringResource(R.string.bond_secure_fare, fundShown)) }
                 }
                 stage == "done" && rider && funded < fare ->
                     BondLine(spin = true, text = stringResource(R.string.bond_fare_sent))
@@ -1738,6 +1744,21 @@ private fun RideBondBanner(contact: Contact) {
                 }
                 stage == "release_pending" && rider -> {
                     BondLine(spin = false, text = stringResource(R.string.bond_ride_complete_ask))
+                    // The split, stated: the fare to the driver, the margin
+                    // home. What the release claims to do, on the screen that
+                    // approves it.
+                    val margin = (funded - fare).coerceAtLeast(0L)
+                    if (margin > 0) {
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            stringResource(
+                                R.string.bond_margin_back,
+                                Amounts.show(context, margin).primary,
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                    }
                     Spacer(Modifier.height(6.dp))
                     Button(
                         onClick = {

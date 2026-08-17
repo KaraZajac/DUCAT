@@ -15,4 +15,5 @@
     <string name="bond_released">Ücret serbest bırakıldı</string>
     <string name="profile_arbiter">Emanet hakemi</string>
     <string name="profile_arbiter_note">Emanetli yolculuklarında belirleyici anahtarı tutar. Yalnızca bir sorun olursa devreye girer.</string>
+    <string name="bond_margin_back">Marjın (%1$s) sana geri döner.</string>
 </resources>

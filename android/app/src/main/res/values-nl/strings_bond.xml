@@ -15,4 +15,5 @@
     <string name="bond_released">Ritprijs vrijgegeven</string>
     <string name="profile_arbiter">Depot-arbiter</string>
     <string name="profile_arbiter_note">Houdt de doorslaggevende sleutel van je rit-depots. Wordt alleen benaderd als er iets misgaat.</string>
+    <string name="bond_margin_back">Je marge (%1$s) komt naar je terug.</string>
 </resources>

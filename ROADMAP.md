@@ -83,8 +83,13 @@ money. Ordered by what blocks 1.0, not by effort.
   both sides' own scans (new escrowBalance bridge fn) flip to "fare
   secured", driver's Complete proposes the FROST release to their own
   wallet, and the rider's release is a consent tap, never an auto-cosign.
-  Proven live through funding + fare-secured on two phones with the desk
-  as headless standing arbiter (:desktop:arbiter). Two live finds fixed:
+  Proven live end to end on two phones with the desk as headless standing
+  arbiter (:desktop:arbiter): funding, fare-secured by own scan, consent
+  release, broadcast, driver paid +0.001878 XMR. The ladder's 2-of-2 rung
+  (no arbiter: fare + rider margin, mutual stakes) and the split release
+  under it are engine-proven on-chain (one FROST tx, two destinations,
+  txid de818596…); the 2-of-2 accept flow is code-complete, its own
+  two-phone live pass folded into the field day. Two live finds fixed:
   concurrent Mailbox.poll double-joining a ceremony (poll + ceremony
   rounds now synchronized; the race cost one stranded 0.006 stagenet
   escrow), and a repeat thread accepting a stale kind-6 (newest wins).

@@ -15,4 +15,5 @@
     <string name="bond_released">Tariffa sbloccata</string>
     <string name="profile_arbiter">Arbitro del deposito</string>
     <string name="profile_arbiter_note">Custodisce la chiave decisiva delle corse con deposito. Interviene solo se qualcosa va storto.</string>
+    <string name="bond_margin_back">Il tuo margine (%1$s) ti torna indietro.</string>
 </resources>

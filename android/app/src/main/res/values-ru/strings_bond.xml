@@ -15,4 +15,5 @@
     <string name="bond_released">Оплата отпущена</string>
     <string name="profile_arbiter">Арбитр эскроу</string>
     <string name="profile_arbiter_note">Держит решающий ключ ваших поездок с эскроу. Участвует, только если что-то пошло не так.</string>
+    <string name="bond_margin_back">Ваш залог (%1$s) вернётся вам.</string>
 </resources>

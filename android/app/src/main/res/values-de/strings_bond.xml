@@ -15,4 +15,5 @@
     <string name="bond_released">Fahrpreis freigegeben</string>
     <string name="profile_arbiter">Treuhand-Schiedsperson</string>
     <string name="profile_arbiter_note">Hält den entscheidenden Schlüssel deiner Treuhand-Fahrten. Wird nur bei Problemen kontaktiert.</string>
+    <string name="bond_margin_back">Deine Marge (%1$s) kommt zu dir zurück.</string>
 </resources>
