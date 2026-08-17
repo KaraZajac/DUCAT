@@ -290,8 +290,19 @@ is already cross-platform Rust; the path, cheapest first:
    the distribution's own jars + bundled .so passed the live smoke gate;
    `ducat-desk-1.0.0-linux-x64.tar.gz` builds today. Deb/Rpm need host
    tools (`dnf install rpm-build fakeroot dpkg`), Msi/Dmg their own OS or
-   CI. The arbiter takes `--name` now. The shim retires into a real
-   shared module once the surface is known.
+   CI. The arbiter takes `--name` now. **The UX pass + cross-client till
+   run (2026-08-17)**: the window speaks shopkeeper — one status word
+   (peers/heights behind a click), fiat beside amounts, unread dots,
+   Copy buttons over base64 walls, no transaction hex in the thread —
+   and `:desktop:tilltest` proved the whole till story against a real
+   phone over the live network: deep-link claim → itemised bill → the
+   phone's takeover/review → stagenet payment (tx 91319291…, mined
+   2187457) → notice → tray funnel → receipt on the phone, the till's
+   own scan holding 0.0005 locked. Found and fixed along the way: the
+   manifest registered ducat: links since the beginning and readIntent
+   never read them — a tapped card opened the app to Home; it now claims
+   behind one confirm, in all twenty locales. The shim retires into a
+   real shared module once the surface is known.
 3. **iPhone** eventually: uniffi generates Swift bindings natively and
    the Rust stack compiles for iOS — the protocol layer is free; the UI
    and App Store review are the cost. Nothing now forecloses it.
