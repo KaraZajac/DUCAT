@@ -12,4 +12,12 @@
     <string name="main_see_all">सब देखें</string>
     <string name="main_sent">भेजा</string>
     <string name="main_received">मिला</string>
+    <string name="main_card_link_title">संपर्क जोड़ें?</string>
+    <string name="main_card_link_body">यह लिंक “%1$s” का संपर्क कार्ड खोलता है। जोड़ें? इसके बाद आप एक-दूसरे को संदेश और भुगतान भेज सकते हैं।</string>
+    <string name="main_card_link_add">जोड़ें</string>
+    <string name="main_card_link_not_now">अभी नहीं</string>
+    <string name="main_card_link_failed_title">वह कार्ड जोड़ा नहीं जा सका</string>
+    <string name="main_card_link_failed_body">लिंक टूटा हुआ, पहले ही लिया जा चुका या अब मान्य नहीं हो सकता है।</string>
+    <string name="main_card_link_expired">वह कार्ड समाप्त हो चुका है — नया मांगें।</string>
+    <string name="main_card_link_ok">ठीक है</string>
 </resources>

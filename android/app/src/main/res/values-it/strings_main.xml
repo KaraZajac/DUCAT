@@ -12,4 +12,12 @@
     <string name="main_see_all">Vedi tutto</string>
     <string name="main_sent">Inviato</string>
     <string name="main_received">Ricevuto</string>
+    <string name="main_card_link_title">Aggiungere un contatto?</string>
+    <string name="main_card_link_body">Questo link apre una scheda di contatto per “%1$s”. Aggiungerla? Poi potrete scrivervi e pagarvi.</string>
+    <string name="main_card_link_add">Aggiungi</string>
+    <string name="main_card_link_not_now">Non ora</string>
+    <string name="main_card_link_failed_title">Impossibile aggiungere quella scheda</string>
+    <string name="main_card_link_failed_body">Il link potrebbe essere rotto, già riscattato o non più valido.</string>
+    <string name="main_card_link_expired">Quella scheda è scaduta: chiedine una nuova.</string>
+    <string name="main_card_link_ok">OK</string>
 </resources>

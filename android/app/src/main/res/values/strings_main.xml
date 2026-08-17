@@ -12,4 +12,12 @@
     <string name="main_see_all">See all</string>
     <string name="main_sent">Sent</string>
     <string name="main_received">Received</string>
+    <string name="main_card_link_title">Add a contact?</string>
+    <string name="main_card_link_body">This link opens a contact card for “%1$s”. Add them? You can message and pay each other afterwards.</string>
+    <string name="main_card_link_add">Add</string>
+    <string name="main_card_link_not_now">Not now</string>
+    <string name="main_card_link_failed_title">That card could not be added</string>
+    <string name="main_card_link_failed_body">The link may be broken, already claimed, or no longer valid.</string>
+    <string name="main_card_link_expired">That card has expired — ask them for a fresh one.</string>
+    <string name="main_card_link_ok">OK</string>
 </resources>

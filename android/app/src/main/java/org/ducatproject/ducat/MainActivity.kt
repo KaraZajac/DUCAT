@@ -67,10 +67,18 @@ class MainActivity : ComponentActivity() {
          * long ago, and this is the only channel both paths share.
          */
         val openChat = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
+        /** A tapped ducat: link, waiting for the shell to show who it is. */
+        val claimLink = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
     }
 
     private fun readIntent(i: android.content.Intent?) {
         i?.getStringExtra("open_chat")?.let { openChat.value = it }
+        // §18.7 token mode: the manifest registers ducat: links, and this URI
+        // used to stop right here, read by nobody — a tapped card opened the
+        // app to Home, silently. It now reaches the same claim the scanner
+        // runs, behind one confirm.
+        if (i?.data?.scheme == "ducat") claimLink.value = i.dataString
     }
 
     // The chosen language is applied here, before any resource is read, so a
@@ -222,6 +230,70 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         MainActivity.openChat.value = null
         ContactStore(context).all().firstOrNull { it.personaHex == hex }
             ?.let { overlay = Overlay.Chat(it) }
+    }
+
+    // A tapped ducat: link (a chat app, an email, an NDEF sticker's browser
+    // fallback). Unlike a scan — aimed at a code in front of you — a link can
+    // be sent by anyone, so the card is named before it becomes a contact.
+    // The name shown is the card's own claim (§16.9), like every name here.
+    val tappedCard by MainActivity.claimLink.collectAsState()
+    var cardAsk by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var cardFail by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(tappedCard) {
+        val uri = tappedCard ?: return@LaunchedEffect
+        MainActivity.claimLink.value = null
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching { uniffi.ducat_mobile.readContactCard(uri) }
+        }.onSuccess { card ->
+            if (card.expired) cardFail = R.string.main_card_link_expired
+            else cardAsk = uri to (card.assertedName ?: "?")
+        }.onFailure {
+            DucatLog.w("Main", "card link unreadable: ${it.message}")
+            cardFail = R.string.main_card_link_failed_body
+        }
+    }
+    cardAsk?.let { (uri, who) ->
+        AlertDialog(
+            onDismissRequest = { cardAsk = null },
+            title = { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_title)) },
+            text = { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_body, who)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    cardAsk = null
+                    scope.launch {
+                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            runCatching {
+                                val card = uniffi.ducat_mobile.readContactCard(uri)
+                                Mailbox.claimCard(context, card, null)
+                            }
+                        }.onSuccess { overlay = Overlay.Chat(it) }
+                            .onFailure {
+                                DucatLog.w("Main", "card link claim: ${it.message}")
+                                cardFail = R.string.main_card_link_failed_body
+                            }
+                    }
+                }) { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_add)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { cardAsk = null }) {
+                    Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_not_now))
+                }
+            },
+        )
+    }
+    cardFail?.let { why ->
+        AlertDialog(
+            onDismissRequest = { cardFail = null },
+            confirmButton = {
+                TextButton(onClick = { cardFail = null }) {
+                    Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_ok))
+                }
+            },
+            title = {
+                Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_failed_title))
+            },
+            text = { Text(androidx.compose.ui.res.stringResource(why)) },
+        )
     }
 
     // The mode owns the whole scaffold (§15.11): a till is a different app

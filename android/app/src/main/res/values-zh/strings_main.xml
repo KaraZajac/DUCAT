@@ -12,4 +12,12 @@
     <string name="main_see_all">查看全部</string>
     <string name="main_sent">已发送</string>
     <string name="main_received">已收到</string>
+    <string name="main_card_link_title">添加联系人？</string>
+    <string name="main_card_link_body">此链接是“%1$s”的联系人名片。要添加吗？添加后你们可以互发消息和付款。</string>
+    <string name="main_card_link_add">添加</string>
+    <string name="main_card_link_not_now">暂不</string>
+    <string name="main_card_link_failed_title">无法添加该名片</string>
+    <string name="main_card_link_failed_body">链接可能已损坏、已被领取或已失效。</string>
+    <string name="main_card_link_expired">该名片已过期——请对方发一张新的。</string>
+    <string name="main_card_link_ok">好</string>
 </resources>

@@ -12,4 +12,12 @@
     <string name="main_see_all">Tümünü gör</string>
     <string name="main_sent">Gönderildi</string>
     <string name="main_received">Alındı</string>
+    <string name="main_card_link_title">Kişi eklensin mi?</string>
+    <string name="main_card_link_body">Bu bağlantı “%1$s” için bir kişi kartı açıyor. Eklensin mi? Sonrasında birbirinize yazabilir ve ödeme yapabilirsiniz.</string>
+    <string name="main_card_link_add">Ekle</string>
+    <string name="main_card_link_not_now">Şimdi değil</string>
+    <string name="main_card_link_failed_title">Kart eklenemedi</string>
+    <string name="main_card_link_failed_body">Bağlantı bozuk, zaten kullanılmış ya da artık geçersiz olabilir.</string>
+    <string name="main_card_link_expired">Bu kartın süresi dolmuş — yenisini isteyin.</string>
+    <string name="main_card_link_ok">Tamam</string>
 </resources>

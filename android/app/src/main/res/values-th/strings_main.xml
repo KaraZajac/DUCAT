@@ -12,4 +12,12 @@
     <string name="main_see_all">ดูทั้งหมด</string>
     <string name="main_sent">ส่งแล้ว</string>
     <string name="main_received">ได้รับแล้ว</string>
+    <string name="main_card_link_title">เพิ่มผู้ติดต่อไหม?</string>
+    <string name="main_card_link_body">ลิงก์นี้เปิดบัตรผู้ติดต่อของ “%1$s” เพิ่มเลยไหม? หลังจากนั้นจะส่งข้อความและจ่ายเงินให้กันได้</string>
+    <string name="main_card_link_add">เพิ่ม</string>
+    <string name="main_card_link_not_now">ไว้ก่อน</string>
+    <string name="main_card_link_failed_title">เพิ่มบัตรนั้นไม่ได้</string>
+    <string name="main_card_link_failed_body">ลิงก์อาจเสีย ถูกใช้ไปแล้ว หรือหมดอายุแล้ว</string>
+    <string name="main_card_link_expired">บัตรนั้นหมดอายุแล้ว — ขอใบใหม่</string>
+    <string name="main_card_link_ok">ตกลง</string>
 </resources>

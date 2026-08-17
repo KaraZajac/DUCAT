@@ -12,4 +12,12 @@
     <string name="main_see_all">すべて見る</string>
     <string name="main_sent">送金</string>
     <string name="main_received">受取</string>
+    <string name="main_card_link_title">連絡先を追加しますか？</string>
+    <string name="main_card_link_body">このリンクは「%1$s」の連絡先カードです。追加しますか？追加後はメッセージや支払いをやり取りできます。</string>
+    <string name="main_card_link_add">追加</string>
+    <string name="main_card_link_not_now">後で</string>
+    <string name="main_card_link_failed_title">カードを追加できませんでした</string>
+    <string name="main_card_link_failed_body">リンクが壊れているか、すでに使用済みか、無効になっている可能性があります。</string>
+    <string name="main_card_link_expired">このカードは期限切れです。新しいカードをもらってください。</string>
+    <string name="main_card_link_ok">OK</string>
 </resources>

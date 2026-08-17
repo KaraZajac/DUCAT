@@ -12,4 +12,12 @@
     <string name="main_see_all">Xem tất cả</string>
     <string name="main_sent">Đã gửi</string>
     <string name="main_received">Đã nhận</string>
+    <string name="main_card_link_title">Thêm liên hệ?</string>
+    <string name="main_card_link_body">Liên kết này mở thẻ liên hệ của “%1$s”. Thêm chứ? Sau đó hai bên có thể nhắn tin và thanh toán cho nhau.</string>
+    <string name="main_card_link_add">Thêm</string>
+    <string name="main_card_link_not_now">Để sau</string>
+    <string name="main_card_link_failed_title">Không thể thêm thẻ đó</string>
+    <string name="main_card_link_failed_body">Liên kết có thể bị hỏng, đã được nhận hoặc không còn hiệu lực.</string>
+    <string name="main_card_link_expired">Thẻ đó đã hết hạn — hãy xin thẻ mới.</string>
+    <string name="main_card_link_ok">OK</string>
 </resources>

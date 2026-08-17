@@ -12,4 +12,12 @@
     <string name="main_see_all">Alle ansehen</string>
     <string name="main_sent">Gesendet</string>
     <string name="main_received">Empfangen</string>
+    <string name="main_card_link_title">Kontakt hinzufügen?</string>
+    <string name="main_card_link_body">Dieser Link öffnet eine Kontaktkarte für „%1$s“. Hinzufügen? Danach könnt ihr euch schreiben und bezahlen.</string>
+    <string name="main_card_link_add">Hinzufügen</string>
+    <string name="main_card_link_not_now">Jetzt nicht</string>
+    <string name="main_card_link_failed_title">Karte konnte nicht hinzugefügt werden</string>
+    <string name="main_card_link_failed_body">Der Link ist womöglich defekt, schon eingelöst oder nicht mehr gültig.</string>
+    <string name="main_card_link_expired">Diese Karte ist abgelaufen — bitte um eine neue.</string>
+    <string name="main_card_link_ok">OK</string>
 </resources>

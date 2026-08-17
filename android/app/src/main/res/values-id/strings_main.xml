@@ -12,4 +12,12 @@
     <string name="main_see_all">Lihat semua</string>
     <string name="main_sent">Terkirim</string>
     <string name="main_received">Diterima</string>
+    <string name="main_card_link_title">Tambahkan kontak?</string>
+    <string name="main_card_link_body">Tautan ini membuka kartu kontak untuk “%1$s”. Tambahkan? Setelah itu kalian bisa saling berkirim pesan dan membayar.</string>
+    <string name="main_card_link_add">Tambah</string>
+    <string name="main_card_link_not_now">Nanti saja</string>
+    <string name="main_card_link_failed_title">Kartu itu tidak dapat ditambahkan</string>
+    <string name="main_card_link_failed_body">Tautannya mungkin rusak, sudah diklaim, atau tidak berlaku lagi.</string>
+    <string name="main_card_link_expired">Kartu itu sudah kedaluwarsa — mintalah yang baru.</string>
+    <string name="main_card_link_ok">Oke</string>
 </resources>

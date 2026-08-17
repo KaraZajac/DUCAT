@@ -12,4 +12,12 @@
     <string name="main_see_all">Усе</string>
     <string name="main_sent">Надіслано</string>
     <string name="main_received">Отримано</string>
+    <string name="main_card_link_title">Додати контакт?</string>
+    <string name="main_card_link_body">Це посилання відкриває картку контакту «%1$s». Додати? Потім ви зможете листуватися й платити одне одному.</string>
+    <string name="main_card_link_add">Додати</string>
+    <string name="main_card_link_not_now">Не зараз</string>
+    <string name="main_card_link_failed_title">Не вдалося додати картку</string>
+    <string name="main_card_link_failed_body">Посилання може бути пошкоджене, вже використане або недійсне.</string>
+    <string name="main_card_link_expired">Термін картки минув — попросіть нову.</string>
+    <string name="main_card_link_ok">OK</string>
 </resources>

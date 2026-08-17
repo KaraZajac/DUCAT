@@ -12,4 +12,12 @@
     <string name="main_see_all">دیدن همه</string>
     <string name="main_sent">ارسالی</string>
     <string name="main_received">دریافتی</string>
+    <string name="main_card_link_title">مخاطب افزوده شود؟</string>
+    <string name="main_card_link_body">این پیوند کارت مخاطبِ «%1$s» را باز می‌کند. افزوده شود؟ سپس می‌توانید پیام بدهید و به هم پرداخت کنید.</string>
+    <string name="main_card_link_add">افزودن</string>
+    <string name="main_card_link_not_now">حالا نه</string>
+    <string name="main_card_link_failed_title">افزودن کارت ممکن نشد</string>
+    <string name="main_card_link_failed_body">شاید پیوند خراب، قبلاً استفاده‌شده یا دیگر معتبر نباشد.</string>
+    <string name="main_card_link_expired">این کارت منقضی شده — کارت تازه‌ای بخواهید.</string>
+    <string name="main_card_link_ok">باشه</string>
 </resources>

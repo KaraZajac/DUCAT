@@ -12,4 +12,12 @@
     <string name="main_see_all">Alles bekijken</string>
     <string name="main_sent">Verstuurd</string>
     <string name="main_received">Ontvangen</string>
+    <string name="main_card_link_title">Contact toevoegen?</string>
+    <string name="main_card_link_body">Deze link opent een contactkaart voor “%1$s”. Toevoegen? Daarna kunnen jullie elkaar berichten en betalen.</string>
+    <string name="main_card_link_add">Toevoegen</string>
+    <string name="main_card_link_not_now">Niet nu</string>
+    <string name="main_card_link_failed_title">Die kaart kon niet worden toegevoegd</string>
+    <string name="main_card_link_failed_body">De link is mogelijk kapot, al geclaimd of niet meer geldig.</string>
+    <string name="main_card_link_expired">Die kaart is verlopen — vraag een nieuwe.</string>
+    <string name="main_card_link_ok">OK</string>
 </resources>

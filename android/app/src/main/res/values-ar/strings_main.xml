@@ -12,4 +12,12 @@
     <string name="main_see_all">عرض الكل</string>
     <string name="main_sent">مُرسَل</string>
     <string name="main_received">مُستلَم</string>
+    <string name="main_card_link_title">إضافة جهة اتصال؟</string>
+    <string name="main_card_link_body">يفتح هذا الرابط بطاقة اتصال لـ«%1$s». هل تريد الإضافة؟ بعدها يمكنكما التراسل والدفع لبعضكما.</string>
+    <string name="main_card_link_add">إضافة</string>
+    <string name="main_card_link_not_now">ليس الآن</string>
+    <string name="main_card_link_failed_title">تعذّرت إضافة البطاقة</string>
+    <string name="main_card_link_failed_body">قد يكون الرابط معطوبًا أو مُطالَبًا به من قبل أو لم يعد صالحًا.</string>
+    <string name="main_card_link_expired">انتهت صلاحية البطاقة — اطلب واحدة جديدة.</string>
+    <string name="main_card_link_ok">حسنًا</string>
 </resources>
