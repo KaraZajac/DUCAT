@@ -91,15 +91,38 @@ load a stale one and behave like an older protocol, which is §18.12's drift
 wearing different clothes. `jniLibs/` is gitignored for the same reason — a
 committed binary is a binary nobody rebuilds.
 
-## How the desk borrows the phone's brain
+## How the desk borrows the phone's brain — and its screens
 
 `desktop/build.gradle.kts` compiles a named list of the phone's own source
 files (`android/src/main/java/org/ducatproject/ducat/...`) against a small
 Android shim in `desktop/src/main/kotlin/android/`. Mailbox, ContactStore,
-Ceremony, the wallet and the chain rules are therefore **one implementation
-on every screen** — editing them changes both clients, which is the point and
-also the hazard worth remembering. Anything screen-shaped stays on its own
-side.
+Ceremony, the wallet and the chain rules are **one implementation on every
+client** — editing them changes both, which is the point and also the hazard
+worth remembering.
+
+Since 0.88 that extends to the *screens*. `generateDeskRes` reads the phone's
+own `res/values` XML, emits `R.kt` with stable sorted ids, and writes one JSON
+table per locale; `android/Resources.kt` serves them at runtime with per-string
+English fallback and real CLDR plural classes. So `stringResource(R.string.…)`
+resolves here, and the phone's till, bar tab, chat, wallet, activity, profile
+editor, backup and settings run on the desk **as the same source**, in all
+twenty languages, rather than as a second implementation that drifts.
+
+Six phone files stay phone-side, each for a reason no shim can fix:
+
+| File | Why | The desk's answer |
+|---|---|---|
+| `Scanner.kt` | camera | `ScannerDesk.kt` — paste the code |
+| `NfcReader.kt` | NFC radio | none; the QR is how a desk is tapped |
+| `HailMap.kt` | osmdroid is an Android view | `RouteMapDesk.kt` — Compose-drawn route and driver net, no tile server |
+| `Location.kt` | GPS | `LocationDesk.kt` — a position typed once |
+| `PlatformWindow.kt` | Android inset flags | `PlatformWindowDesk.kt` |
+| `Onboarding.kt` | a phone's first-run flow | the desk mints its wallet at first launch |
+
+**The rule for anything new:** content crosses, window chrome stays home. When
+a screen needs a platform's own behaviour, split it the way `PlatformWindow`
+and `Locales`/`Localization` are split — a shared half and a named per-platform
+half — rather than forking the screen.
 
 Headless gates, all runnable without a window:
 
@@ -111,4 +134,12 @@ cd applications
 ./gradlew :desktop:tilltest      # the whole till story against a real phone
 ./gradlew :desktop:tillcheck     # read-only: what has this till been paid?
 ./gradlew :desktop:arbiter       # the standing escrow arbiter (§15.12)
+./gradlew :desktop:restest       # resource bridge: ids, languages, plurals
+./gradlew :desktop:shimtest      # the shim layer: every id, avatar encoder, clipboard
+DUCAT_DESK_STATE=/tmp/r ./gradlew :desktop:rendertest   # every screen, drawn off-screen
 ```
+
+`rendertest` is the one that earns its keep: it renders each hosted screen
+through `ImageComposeScene` with no display attached and fails if the result is
+a blank rectangle. Compiling is not drawing — it caught two rooms that crashed
+on first composition.
