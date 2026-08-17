@@ -1,10 +1,10 @@
 target/
 **/target/
-android/local.properties
-android/.gradle/
-android/build/
-android/app/build/
-android/app/src/main/jniLibs/
+applications/local.properties
+applications/.gradle/
+applications/build/
+applications/android/build/
+applications/android/src/main/jniLibs/
 research/monero-rs/testwallet.key
 
 # Monero key material never belongs in the repository. These were committed
@@ -19,7 +19,7 @@ view.hex
 **/wallets/
 **/clitest/
 research/monero-rs/*/group/
-android/desktop/build/
+applications/desktop/build/
 research/monero-rs/escrow*.party*
 research/monero-rs/escrow*.height
-android/desktop/resources/
+applications/desktop/resources/
