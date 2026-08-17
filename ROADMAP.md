@@ -101,7 +101,16 @@ money. Ordered by what blocks 1.0, not by effort.
   rounds now synchronized; the race cost one stranded 0.006 stagenet
   escrow), and a repeat thread accepting a stale kind-6 (newest wins).
   Same primitive is the Airbnb/Turo shape: offer terms → accept binds →
-  escrow holds → mutual release or ruling. **Settlement shipped (0.88,
+  escrow holds → mutual release or ruling. **The reservation shipped
+  (0.88, 2026-08-17)**: KIND_RESERVATION — guest initiates from the chat
+  tray with rent + both deposits in the frame; the host's acceptance IS
+  funding their deposit; secured = rent + both deposits by own scan;
+  default checkout splits each deposit home beside the rent; settlement/
+  counters/rulings inherited verbatim. Chain-proven with the last
+  unproven shape — a TWO-INPUT FROST release (guest tx 4d6de9d8… + host
+  tx bef0d57c… → one split 8ccf79ab…). Left: listings/discovery (a Host
+  mode is only worth building with it) and the live two-phone pass,
+  folded into the field day. **Settlement shipped (0.88,
   2026-08-17)**: either principal proposes a split (one number — what the
   funder gets back), the other's banner states it and offers Sign or
   Counter; fresh proposals supersede, whoever signs ends it; a rider's
