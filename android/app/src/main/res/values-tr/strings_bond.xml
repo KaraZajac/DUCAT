@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">Yolcuya (XMR)</string>
     <string name="bond_counter">Öner</string>
     <string name="bond_ask_arbiter">Hakemden karar iste</string>
+    <string name="res_tray">Rezervasyon</string>
+    <string name="res_title">Rezervasyon öner</string>
+    <string name="res_note">Kira ve iki depozito tek emanete girer. Sen kira + depozitonu yatırırsın; kabulleri kendi depozitolarını yatırmaktır. Depozitolar serbest bırakmada döner.</string>
+    <string name="res_rent">Kira (XMR)</string>
+    <string name="res_my_deposit">Depoziton (XMR)</string>
+    <string name="res_host_deposit">Onların depozitosu (XMR)</string>
+    <string name="res_need_rent">Kira gerekli.</string>
+    <string name="res_send">Rezervasyonu öner</string>
+    <string name="res_proposed">Rezervasyon önerildi — depozitonu yatırmak kabul etmektir.</string>
+    <string name="res_accept_fund">Kabul et — depozito yatır (%1$s)</string>
+    <string name="res_secured">Rezervasyon güvencede</string>
+    <string name="res_settle">Hesabı kapat — konaklamayı bitir</string>
 </resources>

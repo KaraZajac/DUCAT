@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">للراكب (XMR)</string>
     <string name="bond_counter">اقتراح</string>
     <string name="bond_ask_arbiter">اطلب من الحَكَم أن يفصل</string>
+    <string name="res_tray">حجز</string>
+    <string name="res_title">اقتراح حجز</string>
+    <string name="res_note">الإيجار والوديعتان في ضمان واحد. تدفع الإيجار + وديعتك؛ وقبولهم هو دفع وديعتهم. تعود الودائع عند التحرير.</string>
+    <string name="res_rent">الإيجار (XMR)</string>
+    <string name="res_my_deposit">وديعتك (XMR)</string>
+    <string name="res_host_deposit">وديعتهم (XMR)</string>
+    <string name="res_need_rent">الإيجار مطلوب.</string>
+    <string name="res_send">اقتراح الحجز</string>
+    <string name="res_proposed">اقتُرح الحجز — دفع وديعتك يعني قبوله.</string>
+    <string name="res_accept_fund">قبول — دفع الوديعة (%1$s)</string>
+    <string name="res_secured">الحجز مؤمَّن</string>
+    <string name="res_settle">تسوية — إنهاء الإقامة</string>
 </resources>

@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">Пасажиру (XMR)</string>
     <string name="bond_counter">Запропонувати</string>
     <string name="bond_ask_arbiter">Попросити арбітра вирішити</string>
+    <string name="res_tray">Бронювання</string>
+    <string name="res_title">Запропонувати бронювання</string>
+    <string name="res_note">Оренда й обидві застави йдуть в одне ескроу. Ви вносите оренду + свою заставу; їхня згода — внести свою. Застави повертаються при випуску.</string>
+    <string name="res_rent">Оренда (XMR)</string>
+    <string name="res_my_deposit">Ваша застава (XMR)</string>
+    <string name="res_host_deposit">Їхня застава (XMR)</string>
+    <string name="res_need_rent">Вкажіть оренду.</string>
+    <string name="res_send">Запропонувати бронювання</string>
+    <string name="res_proposed">Бронювання запропоновано — внести заставу означає прийняти.</string>
+    <string name="res_accept_fund">Прийняти — внести заставу (%1$s)</string>
+    <string name="res_secured">Бронювання забезпечено</string>
+    <string name="res_settle">Розрахуватися — завершити перебування</string>
 </resources>

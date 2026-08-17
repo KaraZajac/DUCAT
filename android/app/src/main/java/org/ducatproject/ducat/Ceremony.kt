@@ -69,6 +69,7 @@ object Ceremony {
     // [u8 n][n × 32-byte personas, sorted][u8 arbiterIdx (0 = none)]
     // [u8 kind (0 = bond, 1 = ride)][u8 funderIdx (0 = none)]
     // [u64 farePxmr LE][u8 refundLen][refund addr]
+    // [u64 funderDepPxmr LE][u64 hostDepPxmr LE]
     // [u8 nonceLen][nonce][commitment…]
     //
     // The refund address is where the funder's residual comes home in the
@@ -88,6 +89,11 @@ object Ceremony {
     /** A fare in escrow (§15.12): funder pays in, payee proposes the release,
      *  and the funder's yes is a screen, never an automatic signature. */
     const val KIND_RIDE = 1
+    /** A reservation (§15.12's Airbnb/Turo shape): the guest funds rent plus
+     *  their deposit, the host funds a deposit of their own — funding IS the
+     *  host's acceptance — and the default release sends each deposit home
+     *  beside the rent. Same consent gates, settlement and ruling as a ride. */
+    const val KIND_RESERVATION = 2
 
     private fun frameRound0(
         roster: List<String>,
@@ -96,6 +102,8 @@ object Ceremony {
         funderIdx: Int,
         farePxmr: Long,
         refundAddr: String,
+        funderDepPxmr: Long,
+        hostDepPxmr: Long,
         nonce: String,
         commitment: ByteArray,
     ): ByteArray {
@@ -112,6 +120,12 @@ object Ceremony {
         val rb = refundAddr.toByteArray()
         out.write(rb.size)
         out.write(rb)
+        for (v in listOf(funderDepPxmr, hostDepPxmr)) {
+            out.write(
+                java.nio.ByteBuffer.allocate(8)
+                    .order(java.nio.ByteOrder.LITTLE_ENDIAN).putLong(v).array()
+            )
+        }
         val nb = nonce.toByteArray()
         out.write(nb.size)
         out.write(nb)
@@ -126,6 +140,8 @@ object Ceremony {
         val funderIdx: Int,
         val farePxmr: Long,
         val refundAddr: String,
+        val funderDepPxmr: Long,
+        val hostDepPxmr: Long,
         val nonce: String,
         val commitment: ByteArray,
     )
@@ -147,11 +163,16 @@ object Ceremony {
         } ?: return null
         val refundLen = take(1)?.get(0)?.toInt() ?: return null
         val refund = String(take(refundLen) ?: return null)
+        fun u64(): Long? = take(8)?.let {
+            java.nio.ByteBuffer.wrap(it).order(java.nio.ByteOrder.LITTLE_ENDIAN).long
+        }
+        val fDep = u64() ?: return null
+        val hDep = u64() ?: return null
         val nonceLen = take(1)?.get(0)?.toInt() ?: return null
         val nonce = String(take(nonceLen) ?: return null)
         val commitment = payload.copyOfRange(p, payload.size)
         if (commitment.isEmpty()) return null
-        return Invite(roster, arbiterIdx, kind, funderIdx, fare, refund, nonce, commitment)
+        return Invite(roster, arbiterIdx, kind, funderIdx, fare, refund, fDep, hDep, nonce, commitment)
     }
 
     private fun contactFor(context: Context, personaHex: String): Contact? =
@@ -186,12 +207,49 @@ object Ceremony {
      *  fare itself is the driver's stake either way. */
     fun rideFundAmount(farePxmr: Long): Long = farePxmr + farePxmr / 5
 
+    /**
+     * Start a reservation escrow (§15.12's Airbnb/Turo shape): the caller is
+     * the guest — the funder — the contact is the host. Rent and both
+     * deposits ride the frame, so the escrow names its whole arithmetic and
+     * the host's phone can state exactly what accepting costs. The host's
+     * acceptance IS funding their deposit: until money moves, nothing is at
+     * risk and nothing needs a signature.
+     */
+    fun startReservation(
+        context: Context,
+        host: Contact,
+        arbiter: Contact?,
+        rentPxmr: Long,
+        guestDepPxmr: Long,
+        hostDepPxmr: Long,
+    ): String = start(context, host, arbiter, KIND_RESERVATION, rentPxmr, guestDepPxmr, hostDepPxmr)
+
+    /** What a fully funded escrow holds: ride = fare + margin; reservation =
+     *  rent + both deposits. */
+    fun expectedTotalPxmr(o: JSONObject): Long = when (o.optInt("kind")) {
+        KIND_RESERVATION ->
+            o.optLong("farePxmr") + o.optLong("funderDepPxmr") + o.optLong("hostDepPxmr")
+        else -> rideFundAmount(o.optLong("farePxmr"))
+    }
+
+    /** What THIS party still owes the escrow: the funder their side, the
+     *  host (reservations only) their deposit. */
+    fun mySharePxmr(o: JSONObject): Long = when {
+        o.optInt("kind") == KIND_RESERVATION && isFunder(o) ->
+            o.optLong("farePxmr") + o.optLong("funderDepPxmr")
+        o.optInt("kind") == KIND_RESERVATION && !isArbiter(o) -> o.optLong("hostDepPxmr")
+        isFunder(o) -> rideFundAmount(o.optLong("farePxmr"))
+        else -> 0L
+    }
+
     private fun start(
         context: Context,
         contact: Contact,
         arbiter: Contact?,
         kind: Int,
         farePxmr: Long,
+        funderDepPxmr: Long = 0L,
+        hostDepPxmr: Long = 0L,
     ): String {
         val mineHex = PersonaStore(context).personaHex()
         val roster = buildList {
@@ -206,12 +264,15 @@ object Ceremony {
         val n = roster.size
         // Where the funder's residual comes home in the split release: a
         // fresh subaddress per ceremony, so two rides never link.
-        val refundAddr = if (kind == KIND_RIDE) {
+        val refundAddr = if (kind != KIND_BOND) {
             WalletStore(context).addressFor("ride_$idHex") ?: ""
         } else ""
 
         val commit = uniffi.ducat_mobile.dkgCommit(id, i.toUShort(), T.toUShort(), n.toUShort())
-        val frame = frameRound0(roster, arbiterIdx, kind, funderIdx, farePxmr, refundAddr, nonce, commit)
+        val frame = frameRound0(
+            roster, arbiterIdx, kind, funderIdx, farePxmr, refundAddr,
+            funderDepPxmr, hostDepPxmr, nonce, commit,
+        )
         for (peerHex in roster.filter { it != mineHex }) {
             val peer = contactFor(context, peerHex)
                 ?: throw IllegalStateException("everyone in a bond must be your contact")
@@ -225,13 +286,16 @@ object Ceremony {
             put("roster", JSONArray(roster)); put("arbiterIdx", arbiterIdx)
             put("kind", kind); put("funderIdx", funderIdx); put("farePxmr", farePxmr)
             put("refundAddr", refundAddr)
+            put("funderDepPxmr", funderDepPxmr); put("hostDepPxmr", hostDepPxmr)
             put("created", System.currentTimeMillis())
             put("peer", contact.personaHex)
             put("i", i); put("stage", "committed")
             put("commits", JSONObject()); put("shares", JSONObject())
         }
         save(context, idHex, o)
-        DucatLog.i(TAG, "started ${if (kind == KIND_RIDE) "ride escrow" else "bond"} $idHex (i=$i of $n)")
+        DucatLog.i(TAG, "started ${when (kind) {
+            KIND_RIDE -> "ride escrow"; KIND_RESERVATION -> "reservation escrow"; else -> "bond"
+        }} $idHex (i=$i of $n)")
         return idHex
     }
 
@@ -280,7 +344,7 @@ object Ceremony {
             // is the ceremony's self-description and every copy must agree.
             val frame = frameRound0(
                 inv.roster, inv.arbiterIdx, inv.kind, inv.funderIdx, inv.farePxmr,
-                inv.refundAddr, inv.nonce, commit,
+                inv.refundAddr, inv.funderDepPxmr, inv.hostDepPxmr, inv.nonce, commit,
             )
             for (peerHex in inv.roster.filter { it != mineHex }) {
                 val peer = contactFor(context, peerHex) ?: run {
@@ -298,6 +362,7 @@ object Ceremony {
                 put("kind", inv.kind); put("funderIdx", inv.funderIdx)
                 put("farePxmr", inv.farePxmr)
                 put("refundAddr", inv.refundAddr)
+                put("funderDepPxmr", inv.funderDepPxmr); put("hostDepPxmr", inv.hostDepPxmr)
                 put("created", System.currentTimeMillis())
                 put("peer", contact.personaHex)
                 put("i", i); put("stage", "committed")
@@ -483,7 +548,7 @@ object Ceremony {
         runCatching {
             when {
                 (stage == "done" ||
-                    (o.optInt("kind") == KIND_RIDE &&
+                    (o.optInt("kind") != KIND_BOND &&
                         stage in listOf("releasing", "release_pending", "release_cosigned"))) &&
                     round.toInt() == 0 -> {
                     // A ride's release is money moving, and the other side's
@@ -494,7 +559,7 @@ object Ceremony {
                     // outstanding one — that last case is the counter-offer:
                     // both sides can propose, and whoever signs ends it. A
                     // plain bond keeps the proven auto-cosign.
-                    if (o.optInt("kind") == KIND_RIDE) {
+                    if (o.optInt("kind") != KIND_BOND) {
                         o.put("stage", "release_pending")
                         o.put("pendingPayload", payload.toHexString())
                         o.put("proposerIdx", senderIdx)
@@ -569,7 +634,7 @@ object Ceremony {
      *  released or aborted one is history, not a banner. */
     fun rideWith(context: Context, peerHex: String): JSONObject? =
         all(context)
-            .filter { it.optInt("kind") == KIND_RIDE && !isArbiter(it) }
+            .filter { it.optInt("kind") != KIND_BOND && !isArbiter(it) }
             .filter { otherPrincipal(it) == peerHex }
             .sortedByDescending { it.optLong("created") }
             .firstOrNull { it.optString("stage") !in listOf("released", "aborted") }
@@ -579,18 +644,25 @@ object Ceremony {
     fun fundRide(context: Context, idHex: String): String {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
         check(o.optString("stage") == "done") { "the escrow is not built yet" }
-        check(isFunder(o)) { "only the rider funds the fare" }
+        // Rides: the rider alone. Reservations: each principal funds their
+        // own share — and the host funding theirs IS the acceptance.
+        check(!isArbiter(o)) { "the arbiter funds nothing" }
+        if (o.optInt("kind") != KIND_RESERVATION) {
+            check(isFunder(o)) { "only the rider funds the fare" }
+        }
         val addr = o.optString("address")
-        val fare = o.optLong("farePxmr")
-        check(addr.isNotEmpty() && fare > 0) { "no address or fare" }
+        val share = mySharePxmr(o)
+        check(addr.isNotEmpty() && share > 0) { "no address or nothing owed" }
         val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
-        // Fare plus margin, one send: the margin is what comes home in the
-        // split release, and what makes releasing beat sulking (2-of-2).
-        val r = Wallet.send(context, nodeUrl, addr, rideFundAmount(fare))
-        o.put("fundTxid", r.txidHex)
+        // One send for this party's whole share: the deposits come home in
+        // the split release, and are what make releasing beat sulking.
+        val r = Wallet.send(context, nodeUrl, addr, share)
+        // Per-party mark: for reservations both sides fund, each records
+        // their own send.
+        o.put(if (isFunder(o)) "fundTxid" else "hostFundTxid", r.txidHex)
         save(context, idHex, o)
         ContactStore.bump()
-        DucatLog.i(TAG, "ride $idHex: fare ${formatXmr(fare)} XMR sent to escrow — ${r.txidHex.take(16)}…")
+        DucatLog.i(TAG, "escrow $idHex: ${formatXmr(share)} XMR sent — ${r.txidHex.take(16)}…")
         return r.txidHex
     }
 
@@ -631,8 +703,15 @@ object Ceremony {
         val total = runCatching {
             uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
         }.getOrDefault(0L)
-        val margin = (total - o.optLong("farePxmr")).coerceAtLeast(0L)
-        return proposeRideSplit(context, idHex, margin)
+        // Ride: everything above the fare is the rider's margin. Reservation:
+        // the guest's deposit comes home; rent and the host's deposit are the
+        // residual, so a host who under-funded shorts only themselves.
+        val back = if (o.optInt("kind") == KIND_RESERVATION) {
+            o.optLong("funderDepPxmr").coerceAtMost(total)
+        } else {
+            (total - o.optLong("farePxmr")).coerceAtLeast(0L)
+        }
+        return proposeRideSplit(context, idHex, back)
     }
 
     /**

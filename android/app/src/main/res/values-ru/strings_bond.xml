@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">Пассажиру (XMR)</string>
     <string name="bond_counter">Предложить</string>
     <string name="bond_ask_arbiter">Попросить арбитра решить</string>
+    <string name="res_tray">Бронирование</string>
+    <string name="res_title">Предложить бронирование</string>
+    <string name="res_note">Аренда и оба залога идут в одно эскроу. Вы вносите аренду + свой залог; их согласие — внести свой. Залоги возвращаются при выпуске.</string>
+    <string name="res_rent">Аренда (XMR)</string>
+    <string name="res_my_deposit">Ваш залог (XMR)</string>
+    <string name="res_host_deposit">Их залог (XMR)</string>
+    <string name="res_need_rent">Укажите аренду.</string>
+    <string name="res_send">Предложить бронирование</string>
+    <string name="res_proposed">Бронирование предложено — внести залог значит принять.</string>
+    <string name="res_accept_fund">Принять — внести залог (%1$s)</string>
+    <string name="res_secured">Бронирование обеспечено</string>
+    <string name="res_settle">Рассчитаться — завершить проживание</string>
 </resources>

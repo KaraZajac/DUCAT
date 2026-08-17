@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">Ke penumpang (XMR)</string>
     <string name="bond_counter">Usulkan</string>
     <string name="bond_ask_arbiter">Minta arbiter memutuskan</string>
+    <string name="res_tray">Reservasi</string>
+    <string name="res_title">Usulkan reservasi</string>
+    <string name="res_note">Sewa dan kedua deposit masuk satu escrow. Anda menyetor sewa + deposit Anda; penerimaan mereka adalah menyetor milik mereka. Deposit kembali saat rilis.</string>
+    <string name="res_rent">Sewa (XMR)</string>
+    <string name="res_my_deposit">Deposit Anda (XMR)</string>
+    <string name="res_host_deposit">Deposit mereka (XMR)</string>
+    <string name="res_need_rent">Sewa wajib diisi.</string>
+    <string name="res_send">Usulkan reservasi</string>
+    <string name="res_proposed">Reservasi diusulkan — menyetor deposit berarti menerima.</string>
+    <string name="res_accept_fund">Terima — setor deposit (%1$s)</string>
+    <string name="res_secured">Reservasi aman</string>
+    <string name="res_settle">Selesaikan — akhiri masa inap</string>
 </resources>

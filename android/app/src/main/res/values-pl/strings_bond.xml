@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">Dla pasażera (XMR)</string>
     <string name="bond_counter">Zaproponuj</string>
     <string name="bond_ask_arbiter">Poproś arbitra o decyzję</string>
+    <string name="res_tray">Rezerwacja</string>
+    <string name="res_title">Zaproponuj rezerwację</string>
+    <string name="res_note">Czynsz i oba depozyty trafiają do jednego depozytu. Ty wpłacasz czynsz + swój; ich akceptacją jest wpłata ich. Depozyty wracają przy zwolnieniu.</string>
+    <string name="res_rent">Czynsz (XMR)</string>
+    <string name="res_my_deposit">Twój depozyt (XMR)</string>
+    <string name="res_host_deposit">Ich depozyt (XMR)</string>
+    <string name="res_need_rent">Podaj czynsz.</string>
+    <string name="res_send">Zaproponuj rezerwację</string>
+    <string name="res_proposed">Rezerwacja zaproponowana — wpłata depozytu ją akceptuje.</string>
+    <string name="res_accept_fund">Akceptuj — wpłać depozyt (%1$s)</string>
+    <string name="res_secured">Rezerwacja zabezpieczona</string>
+    <string name="res_settle">Rozlicz — zakończ pobyt</string>
 </resources>

@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">คืนผู้โดยสาร (XMR)</string>
     <string name="bond_counter">เสนอ</string>
     <string name="bond_ask_arbiter">ขอให้ผู้ชี้ขาดตัดสิน</string>
+    <string name="res_tray">การจอง</string>
+    <string name="res_title">เสนอการจอง</string>
+    <string name="res_note">ค่าเช่าและมัดจำทั้งสองเข้าเอสโครว์เดียว คุณจ่ายค่าเช่า+มัดจำของคุณ การยอมรับของเขาคือจ่ายของเขา มัดจำคืนเมื่อปล่อย</string>
+    <string name="res_rent">ค่าเช่า (XMR)</string>
+    <string name="res_my_deposit">มัดจำของคุณ (XMR)</string>
+    <string name="res_host_deposit">มัดจำของเขา (XMR)</string>
+    <string name="res_need_rent">ต้องระบุค่าเช่า</string>
+    <string name="res_send">เสนอการจอง</string>
+    <string name="res_proposed">เสนอการจองแล้ว — จ่ายมัดจำคือการยอมรับ</string>
+    <string name="res_accept_fund">ยอมรับ — จ่ายมัดจำ (%1$s)</string>
+    <string name="res_secured">การจองได้รับการคุ้มครอง</string>
+    <string name="res_settle">ชำระ — จบการเข้าพัก</string>
 </resources>

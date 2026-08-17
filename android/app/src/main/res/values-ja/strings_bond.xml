@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">乗客へ (XMR)</string>
     <string name="bond_counter">提案</string>
     <string name="bond_ask_arbiter">仲裁者に裁定を依頼</string>
+    <string name="res_tray">予約</string>
+    <string name="res_title">予約を提案</string>
+    <string name="res_note">家賃と両方の保証金は一つのエスクローへ。あなたは家賃+自分の保証金、相手の受諾は相手の保証金の入金。リリースで保証金は戻ります。</string>
+    <string name="res_rent">家賃 (XMR)</string>
+    <string name="res_my_deposit">あなたの保証金 (XMR)</string>
+    <string name="res_host_deposit">相手の保証金 (XMR)</string>
+    <string name="res_need_rent">家賃は必須です。</string>
+    <string name="res_send">予約を提案</string>
+    <string name="res_proposed">予約が提案されました — 保証金の入金が受諾です。</string>
+    <string name="res_accept_fund">受諾 — 保証金を入金 (%1$s)</string>
+    <string name="res_secured">予約が確保されました</string>
+    <string name="res_settle">精算 — 滞在を終える</string>
 </resources>

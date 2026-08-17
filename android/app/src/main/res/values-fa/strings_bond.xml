@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">به مسافر (XMR)</string>
     <string name="bond_counter">پیشنهاد</string>
     <string name="bond_ask_arbiter">از داور بخواهید حکم کند</string>
+    <string name="res_tray">رزرو</string>
+    <string name="res_title">پیشنهاد رزرو</string>
+    <string name="res_note">اجاره و هر دو ودیعه در یک امانت. شما اجاره + ودیعه خود را می‌پردازید؛ پذیرش آن‌ها پرداخت ودیعه خودشان است. ودیعه‌ها هنگام آزادسازی بازمی‌گردند.</string>
+    <string name="res_rent">اجاره (XMR)</string>
+    <string name="res_my_deposit">ودیعه شما (XMR)</string>
+    <string name="res_host_deposit">ودیعه آن‌ها (XMR)</string>
+    <string name="res_need_rent">اجاره لازم است.</string>
+    <string name="res_send">پیشنهاد رزرو</string>
+    <string name="res_proposed">رزرو پیشنهاد شد — پرداخت ودیعه یعنی پذیرش.</string>
+    <string name="res_accept_fund">پذیرش — پرداخت ودیعه (%1$s)</string>
+    <string name="res_secured">رزرو تضمین شد</string>
+    <string name="res_settle">تسویه — پایان اقامت</string>
 </resources>

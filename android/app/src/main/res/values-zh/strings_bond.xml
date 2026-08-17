@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">退还乘客 (XMR)</string>
     <string name="bond_counter">提议</string>
     <string name="bond_ask_arbiter">请仲裁人裁决</string>
+    <string name="res_tray">预订</string>
+    <string name="res_title">提议预订</string>
+    <string name="res_note">租金和双方押金进入同一托管。你存入租金+你的押金；对方接受即存入其押金。释放时押金退还。</string>
+    <string name="res_rent">租金 (XMR)</string>
+    <string name="res_my_deposit">你的押金 (XMR)</string>
+    <string name="res_host_deposit">对方押金 (XMR)</string>
+    <string name="res_need_rent">必须填写租金。</string>
+    <string name="res_send">提议预订</string>
+    <string name="res_proposed">已提议预订 — 存入押金即为接受。</string>
+    <string name="res_accept_fund">接受 — 存入押金（%1$s）</string>
+    <string name="res_secured">预订已保障</string>
+    <string name="res_settle">结算 — 结束入住</string>
 </resources>

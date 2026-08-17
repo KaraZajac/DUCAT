@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">सवार को (XMR)</string>
     <string name="bond_counter">प्रस्ताव</string>
     <string name="bond_ask_arbiter">मध्यस्थ से निर्णय माँगें</string>
+    <string name="res_tray">आरक्षण</string>
+    <string name="res_title">आरक्षण प्रस्तावित करें</string>
+    <string name="res_note">किराया और दोनों जमा एक एस्क्रो में। आप किराया + अपनी जमा डालें; उनकी स्वीकृति उनकी जमा डालना है। रिलीज़ पर जमा वापस।</string>
+    <string name="res_rent">किराया (XMR)</string>
+    <string name="res_my_deposit">आपकी जमा (XMR)</string>
+    <string name="res_host_deposit">उनकी जमा (XMR)</string>
+    <string name="res_need_rent">किराया आवश्यक है।</string>
+    <string name="res_send">आरक्षण प्रस्तावित करें</string>
+    <string name="res_proposed">आरक्षण प्रस्तावित — जमा डालना ही स्वीकृति है।</string>
+    <string name="res_accept_fund">स्वीकारें — जमा डालें (%1$s)</string>
+    <string name="res_secured">आरक्षण सुरक्षित</string>
+    <string name="res_settle">हिसाब करें — प्रवास समाप्त</string>
 </resources>

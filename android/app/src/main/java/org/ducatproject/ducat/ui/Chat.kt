@@ -137,6 +137,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     var askOpen by remember { mutableStateOf(false) }
     var payRequest by remember { mutableStateOf<StoredMessage?>(null) }
     var billView by remember { mutableStateOf<StoredMessage?>(null) }
+    var reserveOpen by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf<StoredMessage?>(null) }
 
     // Applied on open and whenever the thread changes, because nothing else
@@ -483,6 +484,12 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 trayOpen = false; contactPick = true
                             }
                             TrayItem(
+                                Icons.Filled.Lock, stringResource(R.string.res_tray),
+                                enabled = !sending,
+                            ) {
+                                trayOpen = false; reserveOpen = true
+                            }
+                            TrayItem(
                                 Icons.Filled.LocationOn, stringResource(R.string.chat_location),
                                 enabled = !sending,
                             ) {
@@ -652,6 +659,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     // Nothing to fetch: their prekeys arrived with the handshake and live in
     // the contact record. §16.12's whole point is that the first message needs
     // no round trip to someone who may not be there.
+
+    if (reserveOpen) {
+        ReserveSheet(
+            contact = c,
+            onDone = { reserveOpen = false },
+        )
+    }
 
     billView?.let { b ->
         // The bill gets the whole screen (Ceremony.kt): a decision, not a
@@ -1631,6 +1645,11 @@ private fun RideBondBanner(contact: Contact) {
     val fare = ride.optLong("farePxmr")
     val funded = ride.optLong("fundedPxmr")
     val rider = org.ducatproject.ducat.Ceremony.isFunder(ride)
+    val reservation = ride.optInt("kind") == org.ducatproject.ducat.Ceremony.KIND_RESERVATION
+    // What "secured" means: a ride waits for the fare; a reservation for
+    // rent plus both deposits — the host's included, because their funding
+    // is their acceptance.
+    val need = if (reservation) org.ducatproject.ducat.Ceremony.expectedTotalPxmr(ride) else fare
     val idHex = ride.optString("id")
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -1649,7 +1668,7 @@ private fun RideBondBanner(contact: Contact) {
             tick++
             withContext(Dispatchers.IO) {
                 runCatching { Mailbox.poll(context) }
-                if (stage == "done" && funded < fare && tick % 3 == 0) {
+                if (stage == "done" && funded < need && tick % 3 == 0) {
                     runCatching {
                         org.ducatproject.ducat.Ceremony.checkRideFunding(context, idHex)
                     }
@@ -1675,7 +1694,7 @@ private fun RideBondBanner(contact: Contact) {
                     // and is what makes releasing beat sulking when there is
                     // no arbiter to appeal to.
                     val fundShown = Amounts.show(
-                        context, org.ducatproject.ducat.Ceremony.rideFundAmount(fare),
+                        context, org.ducatproject.ducat.Ceremony.mySharePxmr(ride),
                     ).primary
                     Button(
                         onClick = {
@@ -1693,10 +1712,11 @@ private fun RideBondBanner(contact: Contact) {
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                     ) { Text(stringResource(R.string.bond_secure_fare, fundShown)) }
                 }
-                stage == "done" && rider && funded < fare ->
+                stage == "done" && rider && funded < need ->
                     BondLine(spin = true, text = stringResource(R.string.bond_fare_sent))
                 stage == "done" && rider -> {
-                    BondLine(spin = false, text = stringResource(R.string.bond_fare_secured))
+                    BondLine(spin = false, text = stringResource(
+                        if (reservation) R.string.res_secured else R.string.bond_fare_secured))
                     if (ride.optInt("arbiterIdx") != 0) {
                         Spacer(Modifier.height(4.dp))
                         OutlinedButton(
@@ -1721,10 +1741,36 @@ private fun RideBondBanner(contact: Contact) {
                         ) { Text(stringResource(R.string.bond_ask_arbiter)) }
                     }
                 }
-                stage == "done" && !rider && funded < fare ->
+                stage == "done" && !rider && reservation &&
+                    ride.optString("hostFundTxid").isEmpty() -> {
+                    // The host's acceptance is money, not a signature: fund
+                    // the deposit the frame named, or simply never do.
+                    BondLine(spin = false, text = stringResource(R.string.res_proposed))
+                    Spacer(Modifier.height(6.dp))
+                    val myShown = Amounts.show(
+                        context, org.ducatproject.ducat.Ceremony.mySharePxmr(ride),
+                    ).primary
+                    Button(
+                        onClick = {
+                            busy = true; error = null
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching {
+                                        org.ducatproject.ducat.Ceremony.fundRide(context, idHex)
+                                    }
+                                }.onFailure { error = it.message }
+                                busy = false
+                            }
+                        },
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth().height(44.dp),
+                    ) { Text(stringResource(R.string.res_accept_fund, myShown)) }
+                }
+                stage == "done" && !rider && funded < need ->
                     BondLine(spin = true, text = stringResource(R.string.bond_waiting_funding))
                 stage == "done" && !rider -> {
-                    BondLine(spin = false, text = stringResource(R.string.bond_fare_secured))
+                    BondLine(spin = false, text = stringResource(
+                        if (reservation) R.string.res_secured else R.string.bond_fare_secured))
                     Spacer(Modifier.height(6.dp))
                     Button(
                         onClick = {
@@ -1741,7 +1787,8 @@ private fun RideBondBanner(contact: Contact) {
                         },
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
-                    ) { Text(stringResource(R.string.bond_complete_ride)) }
+                    ) { Text(stringResource(
+                        if (reservation) R.string.res_settle else R.string.bond_complete_ride)) }
                 }
                 stage == "releasing" -> {
                     BondLine(spin = true, text = stringResource(R.string.bond_waiting_release))
@@ -1913,5 +1960,87 @@ private fun BondLine(spin: Boolean, text: String) {
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
         )
+    }
+}
+
+/**
+ * Propose a reservation to this contact (§15.12's Airbnb/Turo shape): rent
+ * and both deposits, stated up front — the escrow will name its whole
+ * arithmetic in the ceremony frame, and the host's phone shows exactly what
+ * accepting costs. Nothing is at risk until money moves: the guest funds
+ * rent + their deposit, and the host's acceptance IS funding theirs.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var rent by remember { mutableStateOf("") }
+    var myDep by remember { mutableStateOf("") }
+    var hostDep by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    fun pxmr(s: String): Long? = s.toDoubleOrNull()?.let { (it * 1e12).toLong() }?.takeIf { it > 0 }
+
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDone) {
+        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
+            Text(stringResource(R.string.res_title), style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                stringResource(R.string.res_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(
+                value = rent, onValueChange = { rent = it.filter { c -> c.isDigit() || c == '.' } },
+                label = { Text(stringResource(R.string.res_rent)) },
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = myDep, onValueChange = { myDep = it.filter { c -> c.isDigit() || c == '.' } },
+                label = { Text(stringResource(R.string.res_my_deposit)) },
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = hostDep, onValueChange = { hostDep = it.filter { c -> c.isDigit() || c == '.' } },
+                label = { Text(stringResource(R.string.res_host_deposit)) },
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
+            )
+            error?.let {
+                Spacer(Modifier.height(6.dp))
+                Text(it, color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall)
+            }
+            Spacer(Modifier.height(12.dp))
+            Button(
+                onClick = {
+                    val r = pxmr(rent); val g = pxmr(myDep); val h = pxmr(hostDep)
+                    if (r == null) { error = context.getString(R.string.res_need_rent); return@Button }
+                    busy = true; error = null
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            runCatching {
+                                val arbHex = org.ducatproject.ducat.ArbiterStore(context).hex()
+                                    ?.takeIf { it != contact.personaHex }
+                                val arb = arbHex?.let { hx ->
+                                    org.ducatproject.ducat.ContactStore(context).all()
+                                        .firstOrNull { it.personaHex == hx }
+                                }
+                                org.ducatproject.ducat.Ceremony.startReservation(
+                                    context, contact, arb, r, g ?: 0L, h ?: 0L,
+                                )
+                            }
+                        }.onSuccess {
+                            busy = false; onDone()
+                        }.onFailure { error = it.message; busy = false }
+                    }
+                },
+                enabled = !busy && rent.isNotBlank(),
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+            ) { Text(stringResource(R.string.res_send)) }
+        }
     }
 }

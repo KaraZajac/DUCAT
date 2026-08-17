@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">Ao passageiro (XMR)</string>
     <string name="bond_counter">Propor</string>
     <string name="bond_ask_arbiter">Pedir ao árbitro para decidir</string>
+    <string name="res_tray">Reserva</string>
+    <string name="res_title">Propor uma reserva</string>
+    <string name="res_note">A renda e ambas as cauções vão para uma só caução. Tu pões renda + a tua; a aceitação deles é porem a deles. As cauções voltam na libertação.</string>
+    <string name="res_rent">Renda (XMR)</string>
+    <string name="res_my_deposit">A tua caução (XMR)</string>
+    <string name="res_host_deposit">A caução deles (XMR)</string>
+    <string name="res_need_rent">Falta a renda.</string>
+    <string name="res_send">Propor reserva</string>
+    <string name="res_proposed">Reserva proposta — pôr a tua caução aceita-a.</string>
+    <string name="res_accept_fund">Aceitar — pôr a tua caução (%1$s)</string>
+    <string name="res_secured">Reserva garantida</string>
+    <string name="res_settle">Acertar — terminar a estadia</string>
 </resources>

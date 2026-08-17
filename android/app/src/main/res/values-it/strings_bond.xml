@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">Al passeggero (XMR)</string>
     <string name="bond_counter">Proponi</string>
     <string name="bond_ask_arbiter">Chiedi all’arbitro di decidere</string>
+    <string name="res_tray">Prenotazione</string>
+    <string name="res_title">Proponi una prenotazione</string>
+    <string name="res_note">Affitto e le due cauzioni vanno in un unico deposito. Tu versi affitto + la tua; la loro accettazione è versare la loro. Le cauzioni tornano allo sblocco.</string>
+    <string name="res_rent">Affitto (XMR)</string>
+    <string name="res_my_deposit">La tua cauzione (XMR)</string>
+    <string name="res_host_deposit">La loro cauzione (XMR)</string>
+    <string name="res_need_rent">Manca l\'affitto.</string>
+    <string name="res_send">Proponi prenotazione</string>
+    <string name="res_proposed">Prenotazione proposta — versare la tua cauzione la accetta.</string>
+    <string name="res_accept_fund">Accetta — versa la cauzione (%1$s)</string>
+    <string name="res_secured">Prenotazione garantita</string>
+    <string name="res_settle">Salda — concludi il soggiorno</string>
 </resources>

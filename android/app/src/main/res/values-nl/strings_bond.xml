@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">Naar de passagier (XMR)</string>
     <string name="bond_counter">Voorstellen</string>
     <string name="bond_ask_arbiter">De arbiter laten beslissen</string>
+    <string name="res_tray">Reservering</string>
+    <string name="res_title">Reservering voorstellen</string>
+    <string name="res_note">Huur en beide borgen gaan in één depot. Jij stort huur + jouw borg; hun acceptatie is het storten van de hunne. Borgen komen terug bij vrijgave.</string>
+    <string name="res_rent">Huur (XMR)</string>
+    <string name="res_my_deposit">Jouw borg (XMR)</string>
+    <string name="res_host_deposit">Hun borg (XMR)</string>
+    <string name="res_need_rent">Huur ontbreekt.</string>
+    <string name="res_send">Reservering voorstellen</string>
+    <string name="res_proposed">Reservering voorgesteld — jouw borg storten is accepteren.</string>
+    <string name="res_accept_fund">Accepteren — borg storten (%1$s)</string>
+    <string name="res_secured">Reservering veiliggesteld</string>
+    <string name="res_settle">Afrekenen — verblijf beëindigen</string>
 </resources>

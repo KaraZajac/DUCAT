@@ -22,4 +22,16 @@
     <string name="bond_back_to_rider">Back to the rider (XMR)</string>
     <string name="bond_counter">Propose</string>
     <string name="bond_ask_arbiter">Ask the arbiter to rule</string>
+    <string name="res_tray">Reservation</string>
+    <string name="res_title">Propose a reservation</string>
+    <string name="res_note">Rent and both deposits go into one escrow. You fund rent + your deposit; their acceptance is funding theirs. Deposits come home in the release.</string>
+    <string name="res_rent">Rent (XMR)</string>
+    <string name="res_my_deposit">Your deposit (XMR)</string>
+    <string name="res_host_deposit">Their deposit (XMR)</string>
+    <string name="res_need_rent">Rent is required.</string>
+    <string name="res_send">Propose reservation</string>
+    <string name="res_proposed">Reservation proposed — funding your deposit accepts it.</string>
+    <string name="res_accept_fund">Accept — fund your deposit (%1$s)</string>
+    <string name="res_secured">Reservation secured</string>
+    <string name="res_settle">Settle up — end the stay</string>
 </resources>
