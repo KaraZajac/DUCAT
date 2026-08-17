@@ -10,6 +10,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.icons.filled.PointOfSale
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.LocalTaxi
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -52,6 +55,9 @@ enum class Room(val label: String, val icon: ImageVector) {
     Donate("Donations", Icons.Filled.Favorite),
     Activity("Activity", Icons.Filled.Receipt),
     Wallet("Wallet", Icons.Filled.AccountBalanceWallet),
+    Ride("Ride", Icons.Filled.LocalTaxi),
+    Codes("Codes", Icons.Filled.QrCode),
+    Me("Me", Icons.Filled.Person),
     Settings("Settings", Icons.Filled.Settings),
 }
 
@@ -114,12 +120,65 @@ fun WalletRoom(onTopUp: () -> Unit) {
     }
 }
 
+/**
+ * Hailing and driving, from a machine that does not move.
+ *
+ * The rider half needs a position, and a desk has one the moment its
+ * operator types it (Settings → Where this desk is). Everything downstream
+ * is the phone's: the same geocells, the same claim-once boards, the same
+ * offer ceremony. The driver half is here for completeness and for the
+ * standing-arbiter case; a person actually driving wants the phone.
+ */
+@Composable
+fun RideRoom() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var driving by remember { mutableStateOf(false) }
+    val placed = remember { org.ducatproject.ducat.ui.DeskLocation.get(context) != null }
+    Column(Modifier.fillMaxSize()) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(if (driving) "Driving" else "Ride", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.weight(1f))
+            TextButton(onClick = { driving = !driving }) {
+                Text(if (driving) "I need a ride" else "I am driving")
+            }
+        }
+        HorizontalDivider()
+        if (!placed) {
+            Column(Modifier.padding(16.dp)) {
+                Text(
+                    "This desk does not know where it is yet.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    "A phone reads its GPS; a desk is told once — Settings, " +
+                        "then \"Where this desk is\". Boards are ~1.2 km coarse, " +
+                        "so the nearest corner is precise enough.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+        Box(Modifier.fillMaxSize()) {
+            if (driving) org.ducatproject.ducat.ui.DriveScreen()
+            else org.ducatproject.ducat.ui.TaxiScreen()
+        }
+    }
+}
+
+/** Who this desk is, to everyone it hands a card. */
+@Composable
+fun MeRoom() {
+    Box(Modifier.fillMaxSize()) { org.ducatproject.ducat.ui.MyProfileEditor() }
+}
+
 /** Everything a desk operator adjusts, in one place. */
 @Composable
 fun SettingsRoom() {
     val context = androidx.compose.ui.platform.LocalContext.current
     var tab by remember { mutableStateOf(0) }
-    val tabs = listOf("Monero", "Network", "Logs", "Self-test")
+    val tabs = listOf("General", "Where", "Backup", "Monero", "Network", "Logs", "Self-test")
     Column(Modifier.fillMaxSize()) {
         TabRow(selectedTabIndex = tab) {
             tabs.forEachIndexed { i, t ->
@@ -128,9 +187,20 @@ fun SettingsRoom() {
         }
         Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp)) {
             when (tab) {
-                0 -> MoneroPanel()
-                1 -> NetworkPanel(storageDir = java.io.File(context.filesDir, "veilid").absolutePath)
-                2 -> LogsScreen()
+                // The phone's own settings: language, currency, units, theme.
+                0 -> org.ducatproject.ducat.ui.SettingsScreen(
+                    themeMode = org.ducatproject.ducat.ui.ThemeMode.Mocha,
+                    onThemeChange = {},
+                )
+                1 -> DeskPlaceSetting()
+                2 -> org.ducatproject.ducat.ui.BackupSettings(
+                    spendKeyHex = org.ducatproject.ducat.WalletStore(context).spendKeyHex(),
+                    restoreHeight = org.ducatproject.ducat.WalletStore(context).restoreHeight(),
+                    personaSecret = org.ducatproject.ducat.PersonaStore(context).secret(),
+                )
+                3 -> MoneroPanel()
+                4 -> NetworkPanel(storageDir = java.io.File(context.filesDir, "veilid").absolutePath)
+                5 -> LogsScreen()
                 else -> BridgeSelfTest()
             }
         }
@@ -179,3 +249,68 @@ fun DonateRoom() = RoomHost("Donations") { DonateScreen() }
 
 @Composable
 fun ActivityRoom() = RoomHost("Activity") { ActivityScreen() }
+
+
+/**
+ * Where this desk is — the one thing a phone reads from a satellite and a
+ * desk has to be told. Typed once, it makes the geocell features work here
+ * exactly as they do on a phone; left empty, every one of them reports "no
+ * fix", which is what a phone indoors reports too.
+ */
+@Composable
+fun DeskPlaceSetting() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val current = remember { org.ducatproject.ducat.ui.DeskLocation.get(context) }
+    var text by remember {
+        mutableStateOf(current?.let { org.ducatproject.ducat.ui.DeskLocation.format(it) } ?: "")
+    }
+    var saved by remember { mutableStateOf<String?>(null) }
+    Column(Modifier.padding(4.dp)) {
+        Text("Where this desk is", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "Latitude, longitude. Boards are about 1.2 km across, so the " +
+                "nearest street corner is as precise as this needs to be — and " +
+                "it never leaves this machine except as the coarse cell a hail " +
+                "is posted to.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Spacer(Modifier.height(12.dp))
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it; saved = null },
+            singleLine = true,
+            placeholder = { Text("52.5200, 13.4050") },
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Button(onClick = {
+                val fix = org.ducatproject.ducat.ui.DeskLocation.parse(text)
+                if (fix == null) {
+                    saved = "That is not a pair of coordinates."
+                } else {
+                    org.ducatproject.ducat.ui.DeskLocation.set(context, fix.first, fix.second)
+                    saved = "Saved."
+                }
+            }) { Text("Save") }
+            Spacer(Modifier.width(8.dp))
+            TextButton(onClick = {
+                org.ducatproject.ducat.ui.DeskLocation.clear(context)
+                text = ""
+                saved = "Cleared — this desk has no position again."
+            }) { Text("Forget") }
+            Spacer(Modifier.width(12.dp))
+            saved?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+        }
+    }
+}
+
+/** The phone's code hub: this desk's card, and a place to paste one. */
+@Composable
+fun CodesRoom(onOpenChat: (Contact) -> Unit, onScanAddress: (String) -> Unit) {
+    org.ducatproject.ducat.ui.QrHub(
+        onOpenChat = onOpenChat,
+        onScanAddress = onScanAddress,
+        onClose = {},
+    )
+}

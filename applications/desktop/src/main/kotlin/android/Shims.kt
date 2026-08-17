@@ -22,6 +22,7 @@ abstract class Context {
     }
 
     abstract val filesDir: File
+    open val cacheDir: File get() = File(filesDir.parentFile, "cache").apply { mkdirs() }
     abstract fun getSharedPreferences(name: String, mode: Int): SharedPreferences
     open val packageName: String get() = "org.ducatproject.desk"
     open val packageManager: android.content.pm.PackageManager
@@ -40,7 +41,28 @@ abstract class Context {
      * equivalent is the clipboard — the text leaves the app, which is what
      * the button promised — and Toast says which.
      */
+    /**
+     * Runtime permissions are Android's model; a desk's answer is its own
+     * settings, and the file dialog *is* the consent. Granting here is not a
+     * pretence — nothing is bypassed, because nothing gates it.
+     */
+    open fun checkSelfPermission(permission: String): Int = android.content.pm.PackageManager.PERMISSION_GRANTED
+
     open fun startActivity(intent: Intent) {
+        // A file: hand it to the desktop, which knows what opens it.
+        intent.streamUri?.toFile()?.let { f ->
+            runCatching {
+                if (java.awt.Desktop.isDesktopSupported()) {
+                    java.awt.Desktop.getDesktop().open(f)
+                    return
+                }
+            }
+            ClipboardManager().setPrimaryClip(ClipData.newPlainText(null, f.absolutePath))
+            android.widget.Toast
+                .makeText(this, "Saved — path copied: ${f.name}", android.widget.Toast.LENGTH_LONG)
+                .show()
+            return
+        }
         val text = intent.getStringExtra(Intent.EXTRA_TEXT)
         if (text != null) {
             ClipboardManager().setPrimaryClip(ClipData.newPlainText(null, text))
@@ -53,6 +75,13 @@ abstract class Context {
     /** Only the services a screen asks for by name. */
     open fun getSystemService(name: String): Any? = when (name) {
         CLIPBOARD_SERVICE -> ClipboardManager()
+        else -> null
+    }
+
+    /** The typed form: `getSystemService(ClipboardManager::class.java)`. */
+    @Suppress("UNCHECKED_CAST")
+    open fun <T> getSystemService(type: Class<T>): T? = when (type) {
+        ClipboardManager::class.java -> ClipboardManager() as T
         else -> null
     }
 }
@@ -180,4 +209,25 @@ class ContentResolver {
 
     fun openOutputStream(uri: android.net.Uri): java.io.OutputStream? =
         uri.toFile()?.outputStream()
+
+    fun query(
+        uri: android.net.Uri,
+        projection: Array<String>?,
+        selection: String?,
+        args: Array<String>?,
+        sort: String?,
+    ): Cursor? = uri.toFile()?.takeIf { it.isFile }?.let { Cursor(it) }
+
+    fun getType(uri: android.net.Uri): String? =
+        uri.toFile()?.let { runCatching { java.nio.file.Files.probeContentType(it.toPath()) }.getOrNull() }
+}
+
+/** The one column a screen ever reads off a picked file. */
+class Cursor internal constructor(private val file: java.io.File) {
+    fun getColumnIndex(name: String): Int =
+        if (name == android.provider.OpenableColumns.DISPLAY_NAME) 0 else -1
+    fun moveToFirst(): Boolean = true
+    fun getString(index: Int): String = file.name
+    fun close() {}
+    inline fun <R> use(block: (Cursor) -> R): R = block(this).also { close() }
 }

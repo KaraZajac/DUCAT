@@ -1440,7 +1440,17 @@ private fun sendVoice(
         if (bytes.size > MAX_FILE_BYTES) {
             throw IllegalArgumentException(context.getString(R.string.chat_memo_too_long))
         }
-        sendAttachmentBytes(context, c, mine, bytes, "audio/mp4", "Voice memo.m4a", "🎤")
+        // The recorder names the format it actually produced: a phone's is
+        // AAC in MP4, a desk's is WAV, because a JVM ships no AAC encoder.
+        // Labelling by extension rather than by assumption is what lets a
+        // memo recorded on either one play on the other.
+        val wav = memo.extension.equals("wav", ignoreCase = true)
+        sendAttachmentBytes(
+            context, c, mine, bytes,
+            if (wav) "audio/wav" else "audio/mp4",
+            if (wav) "Voice memo.wav" else "Voice memo.m4a",
+            "🎤",
+        )
     } finally {
         memo.delete()
     }
@@ -1482,7 +1492,7 @@ private class VoiceRecorder(private val context: android.content.Context) {
     private var startedAt = 0L
 
     fun start(): Boolean = runCatching {
-        val f = java.io.File(context.cacheDir, "voice-memo.m4a")
+        val f = voiceMemoFile(context)
         @Suppress("DEPRECATION")
         val r = android.media.MediaRecorder()
         r.setAudioSource(android.media.MediaRecorder.AudioSource.MIC)

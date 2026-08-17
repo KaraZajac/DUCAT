@@ -18,3 +18,14 @@ fun fullScreenDialogProperties(dismissOnBackPress: Boolean = true): DialogProper
         dismissOnBackPress = dismissOnBackPress,
         decorFitsSystemWindows = false,
     )
+
+/**
+ * Where a voice memo is recorded, and — by its extension — in what format.
+ *
+ * A phone records AAC in MP4: universally decodable, and a minute of speech
+ * lands near 250 KB. The desk's half of this file answers wav instead,
+ * because a JVM ships no AAC encoder; the sender labels the attachment from
+ * this name, so neither client has to assume what the other produced.
+ */
+fun voiceMemoFile(context: android.content.Context): java.io.File =
+    java.io.File(context.cacheDir, "voice-memo.m4a")

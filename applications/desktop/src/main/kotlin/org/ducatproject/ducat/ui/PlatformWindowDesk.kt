@@ -13,3 +13,11 @@ fun fullScreenDialogProperties(dismissOnBackPress: Boolean = true): DialogProper
         usePlatformDefaultWidth = false,
         dismissOnBackPress = dismissOnBackPress,
     )
+
+/**
+ * Where a voice memo is recorded here, and in what format: WAV, because the
+ * JVM has no AAC encoder and a mislabelled m4a is worse than a larger file
+ * that every decoder — including Android's — actually reads.
+ */
+fun voiceMemoFile(context: android.content.Context): java.io.File =
+    java.io.File(context.cacheDir, "voice-memo.wav")

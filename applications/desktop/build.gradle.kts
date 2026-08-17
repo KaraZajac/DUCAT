@@ -52,11 +52,20 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/ui/Contacts.kt",
     "org/ducatproject/ducat/ui/Pay.kt",
     "org/ducatproject/ducat/ui/Ceremony.kt",
+    "org/ducatproject/ducat/Geo.kt",
+    "org/ducatproject/ducat/Places.kt",
+    "org/ducatproject/ducat/ui/Drawer.kt",
+    "org/ducatproject/ducat/ui/Shells.kt",
+    "org/ducatproject/ducat/ui/Hail.kt",
+    "org/ducatproject/ducat/ui/Taxi.kt",
+    "org/ducatproject/ducat/ui/LocationShared.kt",
+    "org/ducatproject/ducat/ui/BackupSettings.kt",
+    "org/ducatproject/ducat/ui/MyProfileEditor.kt",
+    "org/ducatproject/ducat/ui/Chat.kt",
     "org/ducatproject/ducat/ui/QrHub.kt",
     // Desk-side glue that lives inside the shared package — these two match
     // files in *this* module's tree (like SecurePrefsDesk below), not app/.
     "org/ducatproject/ducat/DeskGlue.kt",
-    "org/ducatproject/ducat/ui/DeskHailOps.kt",
 )
 
 // The phone's resources, made available to the phone's screens compiled here.
@@ -252,6 +261,8 @@ kotlin.sourceSets["main"].kotlin.apply {
         "org/ducatproject/ducat/ui/PlatformWindowDesk.kt",
         "org/ducatproject/ducat/nfc/TapDesk.kt",
         "org/ducatproject/ducat/ui/ScannerDesk.kt",
+        "org/ducatproject/ducat/ui/LocationDesk.kt",
+        "org/ducatproject/ducat/ui/RouteMapDesk.kt",
         "org/ducatproject/ducat/DeskWindowHandle.kt",
         "org/ducatproject/ducat/nfc/TapDesk.kt",
     )
@@ -318,6 +329,14 @@ tasks.register<JavaExec>("ringtest") {
 tasks.register<JavaExec>("tilltest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.TillTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The shim layer that hosts the phone's screens, checked headlessly.
+// `./gradlew :desktop:shimtest`.
+tasks.register<JavaExec>("shimtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ShimTestKt"
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 

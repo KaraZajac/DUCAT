@@ -189,14 +189,12 @@ private fun runDesk(deskDir: File) = application {
         var selected by remember { mutableStateOf<String?>(null) }
         var thread by remember { mutableStateOf<List<StoredMessage>>(emptyList()) }
         var cardUri by remember { mutableStateOf<String?>(null) }
-        var draft by remember { mutableStateOf("") }
         var error by remember { mutableStateOf<String?>(null) }
         var balances by remember { mutableStateOf<Balances?>(null) }
         var fiat by remember { mutableStateOf<String?>(null) }
         var deskName by remember { mutableStateOf<String?>(null) }
         var renameOpen by remember { mutableStateOf(false) }
         var receiveOpen by remember { mutableStateOf(false) }
-        var payFor by remember { mutableStateOf<StoredMessage?>(null) }
         var room by remember { mutableStateOf(Room.Conversations) }
         var payOpen by remember { mutableStateOf(false) }
         var profileFor by remember { mutableStateOf<Contact?>(null) }
@@ -377,6 +375,15 @@ private fun runDesk(deskDir: File) = application {
                                 Room.Donate -> DonateRoom()
                                 Room.Activity -> ActivityRoom()
                                 Room.Wallet -> WalletRoom(onTopUp = { receiveOpen = true })
+                                Room.Ride -> RideRoom()
+                                Room.Me -> MeRoom()
+                                Room.Codes -> CodesRoom(
+                                    onOpenChat = {
+                                        selected = it.personaHex
+                                        room = Room.Conversations
+                                    },
+                                    onScanAddress = { payOpen = true },
+                                )
                                 Room.Settings -> SettingsRoom()
                                 else -> Unit
                             }
@@ -419,80 +426,30 @@ private fun runDesk(deskDir: File) = application {
                         }
                         VerticalDivider()
 
-                        // The thread.
-                        Column(Modifier.weight(1f).fillMaxHeight().padding(12.dp)) {
-                            val listState = rememberLazyListState()
-                            // Ceremony rounds are machinery, not conversation.
-                            val visible = thread.filter { it.kind !in 8..10 }
-                            LaunchedEffect(visible.size) {
-                                if (visible.isNotEmpty()) listState.scrollToItem(visible.size - 1)
-                            }
-                            LazyColumn(Modifier.weight(1f), state = listState) {
-                                items(visible) { m ->
-                                    MessageRow(
-                                        context = context,
-                                        m = m,
-                                        thread = thread,
-                                        onPay = { payFor = it },
-                                        onReceipt = { paid ->
-                                            val to = selected ?: return@MessageRow
-                                            Thread {
-                                                runCatching {
-                                                    val store = ContactStore(context)
-                                                    val c = store.all().first { it.personaHex == to }
-                                                    Mailbox.send(
-                                                        context, c, "Receipt — thank you",
-                                                        PersonaStore(context).personaHex(),
-                                                        kind = 3, amountPxmr = paid.amountPxmr,
-                                                        txidHex = paid.txidHex,
-                                                    )
-                                                }.onFailure {
-                                                    error = "The receipt did not go out: ${it.message}"
-                                                }
-                                            }.start()
-                                        },
-                                    )
-                                }
-                            }
-                            error?.let {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                        // The thread: the phone's own ChatScreen, which is
+                        // where all of it lives — bills that render as bills,
+                        // receipts, reactions, attachments, the ride and
+                        // escrow banners, the settlement counters. The desk
+                        // used to draw a smaller imitation of this; it does
+                        // not any more, because two chat screens is two
+                        // places for a payment rule to be wrong.
+                        Box(Modifier.weight(1f).fillMaxHeight()) {
+                            val open = contacts.firstOrNull { it.personaHex == selected }
+                            if (open == null) {
+                                Box(
+                                    Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center,
+                                ) {
                                     Text(
-                                        it, Modifier.weight(1f),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.error,
+                                        "Pick someone on the left, or hand out a card.",
+                                        style = MaterialTheme.typography.bodyMedium,
                                     )
-                                    TextButton(onClick = { error = null }) { Text("dismiss") }
                                 }
-                            }
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                OutlinedTextField(
-                                    value = draft,
-                                    onValueChange = { draft = it },
-                                    modifier = Modifier.weight(1f),
-                                    placeholder = { Text("Message") },
-                                    singleLine = true,
+                            } else {
+                                org.ducatproject.ducat.ui.ChatScreen(
+                                    contact = open,
+                                    onBack = { selected = null },
                                 )
-                                Spacer(Modifier.width(8.dp))
-                                Button(
-                                    enabled = draft.isNotBlank() && selected != null,
-                                    onClick = {
-                                        val to = selected ?: return@Button
-                                        val text = draft
-                                        draft = ""
-                                        Thread {
-                                            runCatching {
-                                                val store = ContactStore(context)
-                                                val c = store.all().first { it.personaHex == to }
-                                                Mailbox.send(
-                                                    context, c, text,
-                                                    PersonaStore(context).personaHex(),
-                                                )
-                                            }.onFailure {
-                                                error = "The message did not go out: ${it.message}"
-                                            }
-                                        }.start()
-                                    },
-                                ) { Text("Send") }
                             }
                         }
                     }
@@ -601,14 +558,6 @@ private fun runDesk(deskDir: File) = application {
                 }
 
                 // Pay: quoted before signed, §5's review made a desk dialog.
-                payFor?.let { req ->
-                    PayDialog(
-                        context = context,
-                        req = req,
-                        contact = contacts.firstOrNull { it.personaHex == selected },
-                        onDone = { payFor = null },
-                    )
-                }
 
                 // The phone's own send screen: fiat and XMR, a fee-aware
                 // Max, speed, memo, and the confirm that never one-taps —
@@ -635,180 +584,4 @@ private fun runDesk(deskDir: File) = application {
         }
         }
     }
-}
-
-/**
- * One message, rendered as what it is. Bills carry their lines (already
- * proven to sum — core refused them otherwise), requests carry a Pay that
- * quotes first, incoming payments offer the receipt this desk owes. What
- * does not appear: transaction hex, sequence numbers, ceremony bytes — the
- * thread is a conversation, and the protocol keeps its own books.
- */
-@Composable
-private fun MessageRow(
-    context: DeskContext,
-    m: StoredMessage,
-    thread: List<StoredMessage>,
-    onPay: (StoredMessage) -> Unit,
-    onReceipt: (StoredMessage) -> Unit,
-) {
-    val who = if (m.outgoing) "me" else "them"
-    val head = m.headline()
-    val fiat = if (m.amountPxmr > 0) fiatOf(context, m.amountPxmr) else null
-    Column(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                if (head.isEmpty()) "$who: ${m.body}"
-                else "$who: $head" + (fiat?.let { " ($it)" } ?: ""),
-                Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(clock(m.timestamp), style = MaterialTheme.typography.labelSmall)
-        }
-        if (head.isNotEmpty() && m.body.isNotBlank() && m.kind != 5) {
-            Text("  ${m.body}", style = MaterialTheme.typography.bodySmall)
-        }
-        if (m.items.isNotEmpty()) {
-            m.items.forEach {
-                Text(
-                    "    ${it.description} — ${formatXmr(it.amountPxmr)}",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-            m.taxPxmr?.takeIf { it > 0 }?.let {
-                Text("    tax — ${formatXmr(it)}", style = MaterialTheme.typography.bodySmall)
-            }
-        }
-        when {
-            // An incoming request that names where to pay, and that the
-            // sender has not since withdrawn (§16.14 re_own on its seq).
-            m.kind == 1 && !m.outgoing && m.payto != null -> {
-                val cancelled = thread.any {
-                    !it.outgoing && it.kind == 5 && it.reOwn && it.reSeq == m.seq
-                }
-                if (cancelled) {
-                    Text("    cancelled by them", style = MaterialTheme.typography.bodySmall)
-                } else {
-                    TextButton(onClick = { onPay(m) }) { Text("Pay ${formatXmr(m.amountPxmr)} XMR") }
-                }
-            }
-            // An incoming payment: the receipt is the payee's to give, once.
-            m.kind == 2 && !m.outgoing -> {
-                val receipted = thread.any {
-                    it.outgoing && it.kind == 3 &&
-                        (it.txidHex == m.txidHex || (m.txidHex == null && it.amountPxmr == m.amountPxmr))
-                }
-                if (receipted) {
-                    Text("    receipted ✓", style = MaterialTheme.typography.bodySmall)
-                } else {
-                    TextButton(onClick = { onReceipt(m) }) { Text("Send receipt") }
-                }
-            }
-        }
-    }
-}
-
-/**
- * The §5 rule, desk-shaped: a request is *reviewed*, never one-tap paid.
- * The dialog is the review — who, how much, the fee, what remains — and
- * the button under it is the only thing that spends.
- */
-@Composable
-private fun PayDialog(
-    context: DeskContext,
-    req: StoredMessage,
-    contact: Contact?,
-    onDone: () -> Unit,
-) {
-    var quote by remember { mutableStateOf<org.ducatproject.ducat.Quote?>(null) }
-    var busy by remember { mutableStateOf(false) }
-    var payErr by remember { mutableStateOf<String?>(null) }
-    var sent by remember { mutableStateOf(false) }
-    LaunchedEffect(req.seq) {
-        withContext(Dispatchers.IO) {
-            quote = runCatching { Wallet.quote(context, req.amountPxmr) }.getOrNull()
-        }
-    }
-    AlertDialog(
-        onDismissRequest = { if (!busy) onDone() },
-        title = {
-            Text(
-                if (sent) "Paid"
-                else "Pay ${contact?.displayName() ?: "them"} ${formatXmr(req.amountPxmr)} XMR",
-            )
-        },
-        text = {
-            Column {
-                if (sent) {
-                    Text("Done — they have been told in the thread.")
-                    return@Column
-                }
-                fiatOf(context, req.amountPxmr)?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall)
-                }
-                if (req.body.isNotBlank()) {
-                    Text("for: ${req.body}", style = MaterialTheme.typography.bodySmall)
-                }
-                Spacer(Modifier.height(6.dp))
-                quote?.let { q ->
-                    Text("network fee ${formatXmr(q.feePxmr)} XMR")
-                    Text(
-                        "leaves ${formatXmr(q.remainingPxmr)} XMR in the wallet",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    if (!q.affordable) {
-                        Text(
-                            "not enough in the wallet yet",
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                } ?: Text("working out the fee…", style = MaterialTheme.typography.bodySmall)
-                payErr?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            }
-        },
-        confirmButton = {
-            if (!sent) {
-                Button(
-                    enabled = !busy && quote?.affordable == true && req.payto != null,
-                    onClick = {
-                        busy = true
-                        payErr = null
-                        Thread {
-                            runCatching {
-                                val node = NodeStore(context).lastGood() ?: pickNode(context)
-                                    ?: throw IllegalStateException("no Monero node reachable")
-                                val res = Wallet.send(
-                                    context, node, req.payto!!, req.amountPxmr,
-                                    contactHex = contact?.personaHex,
-                                    note = null,
-                                )
-                                // §16.13's notice: names the transaction so
-                                // their wallet can put this desk's name on the
-                                // arriving output. Monero carries no sender.
-                                contact?.let { c ->
-                                    runCatching {
-                                        Mailbox.send(
-                                            context, c, "Payment",
-                                            PersonaStore(context).personaHex(),
-                                            kind = 2, amountPxmr = req.amountPxmr,
-                                            txidHex = res.txidHex,
-                                        )
-                                    }
-                                }
-                                sent = true
-                            }.onFailure { payErr = "The payment did not go through: ${it.message}" }
-                            busy = false
-                        }.start()
-                    },
-                ) { Text(if (busy) "Sending…" else "Confirm and send") }
-            } else {
-                TextButton(onClick = onDone) { Text("Done") }
-            }
-        },
-        dismissButton = {
-            if (!sent) {
-                TextButton(enabled = !busy, onClick = onDone) { Text("Cancel") }
-            }
-        },
-    )
 }

@@ -27,9 +27,70 @@ class Bitmap internal constructor(
         }
     }
 
+    enum class CompressFormat { JPEG, PNG, WEBP }
+
+    /**
+     * Re-encode. The phone steps quality down until the bytes fit a record;
+     * ImageIO's JPEG writer takes the same 0..100 scale, so the loop above
+     * behaves the same on both clients.
+     */
+    fun compress(format: CompressFormat, quality: Int, out: java.io.OutputStream): Boolean {
+        val img = image ?: return false
+        if (format != CompressFormat.JPEG) {
+            return javax.imageio.ImageIO.write(img, format.name.lowercase(), out)
+        }
+        val writer = javax.imageio.ImageIO.getImageWritersByFormatName("jpeg").next()
+        val params = writer.defaultWriteParam.apply {
+            compressionMode = javax.imageio.ImageWriteParam.MODE_EXPLICIT
+            compressionQuality = quality.coerceIn(0, 100) / 100f
+        }
+        javax.imageio.ImageIO.createImageOutputStream(out).use { ios ->
+            writer.output = ios
+            // JPEG has no alpha; flatten onto white as the phone's encoder does.
+            val rgb = java.awt.image.BufferedImage(
+                img.width, img.height, java.awt.image.BufferedImage.TYPE_INT_RGB,
+            )
+            rgb.createGraphics().apply {
+                color = java.awt.Color.WHITE
+                fillRect(0, 0, img.width, img.height)
+                drawImage(img, 0, 0, null)
+                dispose()
+            }
+            writer.write(null, javax.imageio.IIOImage(rgb, null, null), params)
+        }
+        writer.dispose()
+        return true
+    }
+
     companion object {
         @JvmStatic
         fun createBitmap(w: Int, h: Int, config: Config): Bitmap = Bitmap(w, h)
+
+        /** The crop the avatar editor takes before scaling: a square middle. */
+        @JvmStatic
+        fun createBitmap(src: Bitmap, x: Int, y: Int, w: Int, h: Int): Bitmap {
+            val img = src.image ?: return Bitmap(w, h)
+            return Bitmap(w, h, img.getSubimage(x, y, w, h))
+        }
+
+        @JvmStatic
+        fun createScaledBitmap(src: Bitmap, w: Int, h: Int, filter: Boolean): Bitmap {
+            val img = src.image ?: return Bitmap(w, h)
+            val out = java.awt.image.BufferedImage(
+                w, h, java.awt.image.BufferedImage.TYPE_INT_ARGB,
+            )
+            out.createGraphics().apply {
+                if (filter) {
+                    setRenderingHint(
+                        java.awt.RenderingHints.KEY_INTERPOLATION,
+                        java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR,
+                    )
+                }
+                drawImage(img, 0, 0, w, h, null)
+                dispose()
+            }
+            return Bitmap(w, h, out)
+        }
     }
 }
 
@@ -40,6 +101,27 @@ class Bitmap internal constructor(
  * does, and the caller already draws initials in that case.
  */
 object BitmapFactory {
+    /** The phone's bounded-decode knob. ImageIO decodes whole; the protocol
+     *  already capped the bytes, so the sample size has nothing to do here. */
+    class Options {
+        @JvmField var inSampleSize: Int = 1
+        @JvmField var inJustDecodeBounds: Boolean = false
+        @JvmField var outWidth: Int = 0
+        @JvmField var outHeight: Int = 0
+    }
+
+    @JvmStatic
+    fun decodeFile(path: String, opts: Options? = null): Bitmap? = runCatching {
+        val img = javax.imageio.ImageIO.read(java.io.File(path)) ?: return null
+        Bitmap(img.width, img.height, img)
+    }.getOrNull()
+
+    @JvmStatic
+    fun decodeStream(input: java.io.InputStream?): Bitmap? = runCatching {
+        val img = javax.imageio.ImageIO.read(input ?: return null) ?: return null
+        Bitmap(img.width, img.height, img)
+    }.getOrNull()
+
     @JvmStatic
     fun decodeByteArray(data: ByteArray?, offset: Int, length: Int): Bitmap? = runCatching {
         if (data == null || length <= 0) return null
