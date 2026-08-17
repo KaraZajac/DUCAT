@@ -1,0 +1,138 @@
+# The field day
+
+Everything 1.0 still needs that only real hardware can give. One afternoon,
+two phones, this laptop. Passes are ordered so the slow chain waits (Monero's
+ten-block maturity, ~20 min on stagenet) overlap other work instead of
+stalling it.
+
+**Bring:** two Android phones (NFC-capable — that is the point), this laptop
+on the same internet, and nothing else. Every pass runs on the live Veilid
+network and stagenet; there is no lab setup to carry.
+
+## Before leaving the desk
+
+1. Install the release on both phones — phone browser:
+   `https://github.com/KaraZajac/DUCAT/releases/latest/download/app-arm64-v8a-debug.apk`
+2. Onboard both; **name them differently** (two contacts with the same
+   display name has burned us — threads get opened on the wrong person).
+3. Fund phone 1 from the test wallet: Settings → the laptop's
+   `research/monero-rs` tools or any stagenet faucet. It needs roughly
+   0.05 XMR to run every escrow pass with slack. Fund **first** — the
+   ten-block unlock runs while you do passes 1–3.
+4. Start the standing arbiter on the laptop and leave it running all day
+   (its DKG machines are in-memory — restarting it mid-ceremony strands
+   that ceremony):
+   `DUCAT_DESK_STATE=/home/kara/ducat-arbiter ./gradlew :desktop:arbiter`
+   Pair BOTH phones to it (`--args="--issue"` prints a card once), and on
+   each phone flip the arbiter contact's **Escrow-arbiter** switch.
+5. On each phone, open the other's profile and confirm a payto address is
+   published (settlement pays the driver only at the address they
+   published; unpublished = the propose button errors).
+
+Record as you go: pass, result, txids, and the moment anything surprises
+you. The surprise is the data.
+
+## Pass 1 — NFC (never once tested on hardware)
+
+The §15 core gesture. Compile-verified only; assume nothing.
+
+- **Tap-to-contact:** both phones on the contact-exchange screen, back to
+  back. Expect the HCE card to cross and a thread to open both ways.
+  Record which orientation worked and how many attempts.
+- **Tap-to-pay:** phone 2 shows a payment request, phone 1 taps. The §15.5
+  confirm screen MUST appear — a tap must never move money by itself. If
+  it pays without the confirm, that is a release-blocking bug; stop and
+  write down everything.
+- **NDEF sticker** (if one was written): tap it, expect the `ducat:` link
+  to open the claim flow.
+- Record tap-to-read latency by feel (instant / a beat / retries). §8.7.2's
+  numbers are a desktop's; these are the real ones.
+
+## Pass 2 — dispatch, phone to phone, no harness
+
+Real GPS at last (the emulator's `geo fix` lied to us; a real phone won't).
+
+1. Phone 1 (rider): hail from where you stand — destination a few blocks
+   away, check the quoted fare against the route.
+2. Phone 2 (driver): Drive mode, watch the live map, find the notice,
+   read the job card (pickup distance, trip, payout), claim it.
+3. Rider sees the acceptance with the driver's face/car/plate; driver
+   drives (walk it), meter runs, geofenced bill fires on arrival.
+4. Pay with tip. Receipt lands on both. Record every message that needed
+   a retry — on emulators the boards were slow; real-network numbers are
+   wanted here.
+
+## Pass 3 — bonded hail, 2-of-3 (re-prove on hardware)
+
+Proven on emulators end to end; the hardware run should be boring. Hail →
+accept (arbiter set) → banner builds the escrow → rider funds → both
+sides flip to "fare secured" **by their own scan** → driver Complete →
+rider consent tap → paid. If funding is younger than ten blocks the
+release refuses with "the fare needs N more confirmation(s)" — that is
+maturity, not failure; wait and retry with the banner's retry.
+
+## Pass 4 — 2-of-2 mutual stakes (first live pass ever)
+
+Turn the Escrow-arbiter switch OFF on both phones' contact profiles first.
+
+1. Hail, accept: banner should build a 2-of-2 and quote the rider
+   fare + fare/5 (the margin — both sides hostage, honestly).
+2. Fund, wait secured, drive, Complete: default release splits margin →
+   rider's refund address, fare − fee → driver.
+3. Verify the numbers on both banners match, then on chain.
+
+## Pass 5 — settlement (first live pass ever)
+
+On a fresh 2-of-2 ride (or the same one before releasing):
+
+1. Driver proposes a partial refund (say a third back to the rider).
+2. Rider's banner must state the exact split with a **Sign** and a
+   **Counter** field. Counter with a different number.
+3. Driver's banner now states the counter (a fresh proposal supersedes —
+   whoever signs ends it). Sign it. Verify on chain both slices.
+
+## Pass 6 — the ruling (desk arbiter UI pass)
+
+On a 2-of-3 ride, complete it but have the rider "vanish" (pocket the
+phone). Driver taps **Ask the arbiter to rule**. On the laptop the console
+prints `ARBITER_RULING_REQUESTED <id> riderBack=…`; a human types the
+judgment: `echo 'approve <id8>' >> /home/kara/ducat-arbiter/rulings.txt`.
+Driver's banner completes the release without the rider. This is the
+lost-phone story working in front of you.
+
+## Pass 7 — the reservation (first live pass ever)
+
+1. Phone 1 (guest): chat tray → the Lock icon → rent + both deposits.
+2. Phone 2 (host): banner shows the terms; **accepting IS funding** their
+   deposit — one button, no separate agree step.
+3. Both flip to secured only when their own scan sees rent + both
+   deposits. Checkout: guest deposit comes home, rent + host deposit −
+   fee to the host. Verify all three numbers on chain.
+
+## Pass 8 — battery (runs all afternoon by itself)
+
+Note both phones' battery % when you leave the desk and each hour after.
+The poller backgrounds to ~20 sweeps/hour; the claim to verify is that an
+idle pocketed phone is not visibly warmer or hungrier than its neighbors.
+Screen-on time will dominate — note it so the number is honest.
+
+## What the field day unblocks
+
+- **Live position after the accept** (§15.12): spec'd and waiting for a
+  real ride on real GPS to build against.
+- True §8.7.2 latency figures from a handset.
+- The README's "what is not proven" paragraph loses four entries.
+
+## Known traps, so they don't cost daylight
+
+- **Ten-block maturity** presents as a refusal with a countdown, by
+  design. Stagenet blocks are slow (~4 min, sometimes much worse). Fund
+  early, do other passes during the wait.
+- **The arbiter process must stay up** across any ceremony it is part of.
+- **Release/broadcast can fail transiently** ("no relay took the
+  release") — the banner's retry re-proposes with fresh nonces; it is
+  safe to mash.
+- **Same-name contacts** open wrong threads. Name the phones differently
+  at onboarding.
+- If a ceremony wedges (a phone died mid-DKG), abandon it and start a
+  fresh ride — ceremonies are cheap; debugging one in the field is not.
