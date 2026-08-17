@@ -595,7 +595,15 @@ object Mailbox {
         return m.bundle
     }
 
-    /** Read everything new from every contact's outbox. Returns how many landed. */
+    /** Read everything new from every contact's outbox. Returns how many landed.
+     *
+     *  @Synchronized: the global poller, a screen's pump, and a hail's wait
+     *  all call this on their own clocks. Two polls running at once processed
+     *  the same sealed message twice — a ceremony round-0 handled in parallel
+     *  joined a bond twice and double-committed (found live, 2026-08-16). One
+     *  poll at a time; a second caller waits and then finds the log already
+     *  drained, which costs nothing but the wait. */
+    @Synchronized
     fun poll(context: Context): Int {
         val store = ContactStore(context)
         // Each poll is also the clock for the forward-secrecy delete: burned

@@ -887,6 +887,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -944,6 +946,8 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_dkg_take_keys(`ceremonyId`: RustBuffer.ByValue,`i`: Short,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_escrow_balance(`keys`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,`fromHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
     fun uniffi_ducat_mobile_fn_func_export_backup(`input`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_frost_complete(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`cosigner`: Short,`payload`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1232,6 +1236,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_dkg_take_keys(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_escrow_balance(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_export_backup(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_frost_complete(
@@ -1444,6 +1450,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_dkg_take_keys() != 37798.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_escrow_balance() != 36940.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_export_backup() != 50604.toShort()) {
@@ -5409,6 +5418,23 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_dkg_take_keys(
         FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * What an escrow currently holds, by this party's own scan (§17.5: a
+         * payment is verified by finding the output, never by believing a note
+         * from the party who benefits from being believed). `from_height` is the
+         * chain height near the ceremony's build — an escrow minted minutes ago
+         * needs minutes of chain, not the wallet's whole history.
+         */
+    @Throws(ContactException::class) fun `escrowBalance`(`keys`: kotlin.ByteArray, `nodeUrl`: kotlin.String, `fromHeight`: kotlin.ULong): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_escrow_balance(
+        FfiConverterByteArray.lower(`keys`),FfiConverterString.lower(`nodeUrl`),FfiConverterULong.lower(`fromHeight`),_status)
 }
     )
     }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">Đang bảo đảm cước phí (%1$s) — đang tạo ký quỹ…</string>
+    <string name="bond_escrow_ready">Ký quỹ sẵn sàng — cước phí được nạp trước chuyến đi.</string>
+    <string name="bond_secure_fare">Bảo đảm cước phí (%1$s)</string>
+    <string name="bond_fare_sent">Đã gửi cước phí — đang xác nhận trên chuỗi…</string>
+    <string name="bond_fare_secured">Cước phí đã được bảo đảm</string>
+    <string name="bond_waiting_funding">Đang chờ hành khách bảo đảm cước phí…</string>
+    <string name="bond_complete_ride">Hoàn tất chuyến đi — yêu cầu cước phí</string>
+    <string name="bond_waiting_release">Chuyến đi hoàn tất — chờ hành khách giải phóng cước phí…</string>
+    <string name="bond_ride_complete_ask">Tài xế đã đánh dấu chuyến đi hoàn tất.</string>
+    <string name="bond_release_fare">Giải phóng cước phí (%1$s)</string>
+    <string name="bond_released">Đã giải phóng cước phí</string>
+    <string name="profile_arbiter">Trọng tài ký quỹ</string>
+    <string name="profile_arbiter_note">Giữ chìa khóa quyết định cho các chuyến đi ký quỹ. Chỉ được liên hệ khi có sự cố.</string>
+</resources>

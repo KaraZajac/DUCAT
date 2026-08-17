@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.RequestQuote
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -555,8 +556,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             }
         },
     ) { padding ->
+        Column(Modifier.padding(padding).fillMaxSize()) {
+        // §15.12: the ride's escrow, carried where both parties already are.
+        // One banner serves rider and driver — the roles come from the
+        // ceremony's own frame, and each stage shows its one next action.
+        RideBondBanner(c)
         LazyColumn(
-            Modifier.padding(padding).fillMaxSize(),
+            Modifier.weight(1f).fillMaxWidth(),
             state = listState,
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -639,6 +645,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     }
                 }
             }
+        }
         }
     }
 
@@ -1603,4 +1610,181 @@ private fun ContactPickDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.chat_cancel)) }
         },
     )
+}
+
+/**
+ * The ride's escrow, as one quiet banner above the thread (§15.12).
+ *
+ * Every stage shows the one thing that can happen next, and only to the
+ * party who can do it: the rider funds and releases, the driver completes.
+ * The stage lives in the ceremony store and every device derives its own
+ * view of it — nothing here is authority, the FROST signatures are.
+ */
+@Composable
+private fun RideBondBanner(contact: Contact) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val ride = remember(version, contact.personaHex) {
+        org.ducatproject.ducat.Ceremony.rideWith(context, contact.personaHex)
+    } ?: return
+    val stage = ride.optString("stage")
+    val fare = ride.optLong("farePxmr")
+    val funded = ride.optLong("fundedPxmr")
+    val rider = org.ducatproject.ducat.Ceremony.isFunder(ride)
+    val idHex = ride.optString("id")
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    // Nudge the mail and, while the escrow waits for its money, ask the
+    // chain. The global poller would get there; a ride at a curb wants
+    // seconds. Funding checks every third tick — a scan is a real RPC.
+    LaunchedEffect(idHex, stage, funded) {
+        if (stage == "released" || stage == "release_cosigned") return@LaunchedEffect
+        var tick = 0
+        while (true) {
+            kotlinx.coroutines.delay(3_000)
+            tick++
+            withContext(Dispatchers.IO) {
+                runCatching { Mailbox.poll(context) }
+                if (stage == "done" && funded < fare && tick % 3 == 0) {
+                    runCatching {
+                        org.ducatproject.ducat.Ceremony.checkRideFunding(context, idHex)
+                    }
+                }
+            }
+        }
+    }
+
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+            val fareShown = Amounts.show(context, fare).primary
+            when {
+                stage == "committed" || stage == "shared" -> {
+                    BondLine(spin = true, text = stringResource(R.string.bond_building, fareShown))
+                }
+                stage == "done" && rider && ride.optString("fundTxid").isEmpty() -> {
+                    BondLine(spin = false, text = stringResource(R.string.bond_escrow_ready))
+                    Spacer(Modifier.height(6.dp))
+                    Button(
+                        onClick = {
+                            busy = true; error = null
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching {
+                                        org.ducatproject.ducat.Ceremony.fundRide(context, idHex)
+                                    }
+                                }.onFailure { error = it.message }
+                                busy = false
+                            }
+                        },
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth().height(44.dp),
+                    ) { Text(stringResource(R.string.bond_secure_fare, fareShown)) }
+                }
+                stage == "done" && rider && funded < fare ->
+                    BondLine(spin = true, text = stringResource(R.string.bond_fare_sent))
+                stage == "done" && rider ->
+                    BondLine(spin = false, text = stringResource(R.string.bond_fare_secured))
+                stage == "done" && !rider && funded < fare ->
+                    BondLine(spin = true, text = stringResource(R.string.bond_waiting_funding))
+                stage == "done" && !rider -> {
+                    BondLine(spin = false, text = stringResource(R.string.bond_fare_secured))
+                    Spacer(Modifier.height(6.dp))
+                    Button(
+                        onClick = {
+                            busy = true; error = null
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching {
+                                        org.ducatproject.ducat.Ceremony
+                                            .proposeRideRelease(context, idHex)
+                                    }
+                                }.onFailure { error = it.message }
+                                busy = false
+                            }
+                        },
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth().height(44.dp),
+                    ) { Text(stringResource(R.string.bond_complete_ride)) }
+                }
+                stage == "releasing" -> {
+                    BondLine(spin = true, text = stringResource(R.string.bond_waiting_release))
+                    // The proposer can re-propose: a broadcast can die on the
+                    // node, and a fresh proposal (new nonces, same inputs) is
+                    // the retry. The rider is simply asked for their yes again.
+                    if (!rider) {
+                        Spacer(Modifier.height(6.dp))
+                        OutlinedButton(
+                            onClick = {
+                                busy = true; error = null
+                                scope.launch {
+                                    withContext(Dispatchers.IO) {
+                                        runCatching {
+                                            org.ducatproject.ducat.Ceremony
+                                                .proposeRideRelease(context, idHex)
+                                        }
+                                    }.onFailure { error = it.message }
+                                    busy = false
+                                }
+                            },
+                            enabled = !busy,
+                            modifier = Modifier.fillMaxWidth().height(40.dp),
+                        ) { Text(stringResource(R.string.bond_complete_ride)) }
+                    }
+                }
+                stage == "release_pending" && rider -> {
+                    BondLine(spin = false, text = stringResource(R.string.bond_ride_complete_ask))
+                    Spacer(Modifier.height(6.dp))
+                    Button(
+                        onClick = {
+                            busy = true; error = null
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching {
+                                        org.ducatproject.ducat.Ceremony
+                                            .approveRideRelease(context, idHex)
+                                    }
+                                }.onFailure { error = it.message }
+                                busy = false
+                            }
+                        },
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth().height(44.dp),
+                    ) { Text(stringResource(R.string.bond_release_fare, fareShown)) }
+                }
+                stage == "release_cosigned" ->
+                    BondLine(spin = false, text = stringResource(R.string.bond_released))
+                else -> return@Column
+            }
+            error?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(it, color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+}
+
+@Composable
+private fun BondLine(spin: Boolean, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (spin) {
+            CircularProgressIndicator(Modifier.size(14.dp), strokeWidth = 2.dp)
+        } else {
+            Icon(
+                Icons.Filled.Lock, null, Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+        }
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+        )
+    }
 }

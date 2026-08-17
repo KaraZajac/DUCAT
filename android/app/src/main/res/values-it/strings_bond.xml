@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">Blocco della tariffa (%1$s) — creazione del deposito…</string>
+    <string name="bond_escrow_ready">Deposito pronto — la tariffa si versa prima della corsa.</string>
+    <string name="bond_secure_fare">Blocca tariffa (%1$s)</string>
+    <string name="bond_fare_sent">Tariffa inviata — conferma sulla catena…</string>
+    <string name="bond_fare_secured">Tariffa bloccata</string>
+    <string name="bond_waiting_funding">In attesa che il passeggero blocchi la tariffa…</string>
+    <string name="bond_complete_ride">Concludi corsa — richiedi la tariffa</string>
+    <string name="bond_waiting_release">Corsa conclusa — in attesa che il passeggero sblocchi la tariffa…</string>
+    <string name="bond_ride_complete_ask">L\'autista ha segnato la corsa come conclusa.</string>
+    <string name="bond_release_fare">Sblocca tariffa (%1$s)</string>
+    <string name="bond_released">Tariffa sbloccata</string>
+    <string name="profile_arbiter">Arbitro del deposito</string>
+    <string name="profile_arbiter_note">Custodisce la chiave decisiva delle corse con deposito. Interviene solo se qualcosa va storto.</string>
+</resources>

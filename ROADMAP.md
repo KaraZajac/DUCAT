@@ -75,6 +75,21 @@ money. Ordered by what blocks 1.0, not by effort.
   the rest of the bond UI — co-signer consent needs a payments accessor on
   monero-wallet's SignableTransaction (0.2.0 keeps them private; until then
   the co-signer sees only the fee), plus bond amount and funding flow.
+- **The bonded hail (0.88, 2026-08-16): every accepted ride can escrow its
+  fare.** With an arbiter contact configured (the Escrow-arbiter switch on
+  a contact's profile), the rider's accept starts a 2-of-3 DKG with driver
+  + arbiter; the round-0 frame self-describes (kind/funder/fare); the ride
+  banner in the thread carries the rest — rider funds the derived address,
+  both sides' own scans (new escrowBalance bridge fn) flip to "fare
+  secured", driver's Complete proposes the FROST release to their own
+  wallet, and the rider's release is a consent tap, never an auto-cosign.
+  Proven live through funding + fare-secured on two phones with the desk
+  as headless standing arbiter (:desktop:arbiter). Two live finds fixed:
+  concurrent Mailbox.poll double-joining a ceremony (poll + ceremony
+  rounds now synchronized; the race cost one stranded 0.006 stagenet
+  escrow), and a repeat thread accepting a stale kind-6 (newest wins).
+  Same primitive is the Airbnb/Turo shape: offer terms → accept binds →
+  escrow holds → mutual release or ruling.
 - **Opt-in live location after commitment.** ~~Spec it before building
   it~~ **specified, 0.88 (2026-08-16)** — §15.12 "Live position after the
   accept": gated on RIDE_ACCEPT, consent per ride per direction, off by

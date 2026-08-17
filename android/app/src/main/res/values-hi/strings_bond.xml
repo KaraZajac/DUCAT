@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">किराया (%1$s) सुरक्षित किया जा रहा है — एस्क्रो बन रहा है…</string>
+    <string name="bond_escrow_ready">एस्क्रो तैयार — किराया सवारी से पहले जमा होता है।</string>
+    <string name="bond_secure_fare">किराया सुरक्षित करें (%1$s)</string>
+    <string name="bond_fare_sent">किराया भेजा गया — चेन पर पुष्टि हो रही है…</string>
+    <string name="bond_fare_secured">किराया सुरक्षित</string>
+    <string name="bond_waiting_funding">सवार के किराया सुरक्षित करने की प्रतीक्षा…</string>
+    <string name="bond_complete_ride">सवारी पूरी करें — किराया माँगें</string>
+    <string name="bond_waiting_release">सवारी पूरी — सवार द्वारा किराया जारी करने की प्रतीक्षा…</string>
+    <string name="bond_ride_complete_ask">चालक ने सवारी पूरी होने का चिह्न लगाया।</string>
+    <string name="bond_release_fare">किराया जारी करें (%1$s)</string>
+    <string name="bond_released">किराया जारी किया गया</string>
+    <string name="profile_arbiter">एस्क्रो मध्यस्थ</string>
+    <string name="profile_arbiter_note">आपकी बॉन्ड सवारियों की निर्णायक कुंजी रखता है। कुछ गड़बड़ होने पर ही संपर्क होता है।</string>
+</resources>

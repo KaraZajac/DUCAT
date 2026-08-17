@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">Asegurando la tarifa (%1$s) — creando el depósito…</string>
+    <string name="bond_escrow_ready">Depósito listo — la tarifa se ingresa antes del viaje.</string>
+    <string name="bond_secure_fare">Asegurar tarifa (%1$s)</string>
+    <string name="bond_fare_sent">Tarifa enviada — confirmando en la cadena…</string>
+    <string name="bond_fare_secured">Tarifa asegurada</string>
+    <string name="bond_waiting_funding">Esperando a que el pasajero asegure la tarifa…</string>
+    <string name="bond_complete_ride">Terminar viaje — solicitar la tarifa</string>
+    <string name="bond_waiting_release">Viaje terminado — esperando a que el pasajero libere la tarifa…</string>
+    <string name="bond_ride_complete_ask">El conductor marcó el viaje como terminado.</string>
+    <string name="bond_release_fare">Liberar tarifa (%1$s)</string>
+    <string name="bond_released">Tarifa liberada</string>
+    <string name="profile_arbiter">Árbitro del depósito</string>
+    <string name="profile_arbiter_note">Guarda la llave de desempate de tus viajes con depósito. Solo interviene si algo sale mal.</string>
+</resources>

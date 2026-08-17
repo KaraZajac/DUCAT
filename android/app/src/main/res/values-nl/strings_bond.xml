@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">Ritprijs (%1$s) veiligstellen — depot wordt opgebouwd…</string>
+    <string name="bond_escrow_ready">Depot gereed — de ritprijs gaat er vóór de rit in.</string>
+    <string name="bond_secure_fare">Ritprijs veiligstellen (%1$s)</string>
+    <string name="bond_fare_sent">Ritprijs verstuurd — bevestiging op de keten…</string>
+    <string name="bond_fare_secured">Ritprijs veiliggesteld</string>
+    <string name="bond_waiting_funding">Wachten tot de passagier de ritprijs veiligstelt…</string>
+    <string name="bond_complete_ride">Rit afronden — ritprijs opvragen</string>
+    <string name="bond_waiting_release">Rit afgerond — wachten tot de passagier de ritprijs vrijgeeft…</string>
+    <string name="bond_ride_complete_ask">De chauffeur heeft de rit als afgerond gemarkeerd.</string>
+    <string name="bond_release_fare">Ritprijs vrijgeven (%1$s)</string>
+    <string name="bond_released">Ritprijs vrijgegeven</string>
+    <string name="profile_arbiter">Depot-arbiter</string>
+    <string name="profile_arbiter_note">Houdt de doorslaggevende sleutel van je rit-depots. Wordt alleen benaderd als er iets misgaat.</string>
+</resources>

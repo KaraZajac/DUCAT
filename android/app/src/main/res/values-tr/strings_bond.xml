@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">Ücret (%1$s) güvenceye alınıyor — emanet oluşturuluyor…</string>
+    <string name="bond_escrow_ready">Emanet hazır — ücret yolculuktan önce yatırılır.</string>
+    <string name="bond_secure_fare">Ücreti güvenceye al (%1$s)</string>
+    <string name="bond_fare_sent">Ücret gönderildi — zincirde onaylanıyor…</string>
+    <string name="bond_fare_secured">Ücret güvencede</string>
+    <string name="bond_waiting_funding">Yolcunun ücreti güvenceye alması bekleniyor…</string>
+    <string name="bond_complete_ride">Yolculuğu tamamla — ücreti iste</string>
+    <string name="bond_waiting_release">Yolculuk tamam — yolcunun ücreti serbest bırakması bekleniyor…</string>
+    <string name="bond_ride_complete_ask">Sürücü yolculuğu tamamlandı olarak işaretledi.</string>
+    <string name="bond_release_fare">Ücreti serbest bırak (%1$s)</string>
+    <string name="bond_released">Ücret serbest bırakıldı</string>
+    <string name="profile_arbiter">Emanet hakemi</string>
+    <string name="profile_arbiter_note">Emanetli yolculuklarında belirleyici anahtarı tutar. Yalnızca bir sorun olursa devreye girer.</string>
+</resources>

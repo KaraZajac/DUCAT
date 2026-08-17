@@ -1679,6 +1679,23 @@ class RateStore(context: Context) {
     }
 }
 
+/**
+ * Which contact arbitrates this device's ride escrows (§15.12): the third
+ * key in every 2-of-3 the accept builds. One at a time, chosen by the user
+ * from their contacts — until markets carry arbiter descriptors (§10), the
+ * arbiter is somebody you already trust enough to hold a tie-breaking share.
+ * Nobody is a default: with none set, a hail is the unbonded mutual promise
+ * it always was.
+ */
+class ArbiterStore(context: Context) {
+    private val prefs = securePrefs(context, "ducat_contacts")
+
+    fun hex(): String? = prefs.getString("arbiter_hex", null)?.ifBlank { null }
+
+    fun set(personaHex: String?) =
+        prefs.edit().putString("arbiter_hex", personaHex ?: "").apply()
+}
+
 /** Which Monero node to use, and the last one that worked. */
 class NodeStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")

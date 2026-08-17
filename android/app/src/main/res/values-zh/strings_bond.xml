@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">正在保障车费（%1$s）— 正在建立托管…</string>
+    <string name="bond_escrow_ready">托管已就绪 — 车费在乘车前存入。</string>
+    <string name="bond_secure_fare">保障车费（%1$s）</string>
+    <string name="bond_fare_sent">车费已发送 — 正在链上确认…</string>
+    <string name="bond_fare_secured">车费已保障</string>
+    <string name="bond_waiting_funding">等待乘客保障车费…</string>
+    <string name="bond_complete_ride">完成行程 — 请求车费</string>
+    <string name="bond_waiting_release">行程结束 — 等待乘客释放车费…</string>
+    <string name="bond_ride_complete_ask">司机已将行程标记为完成。</string>
+    <string name="bond_release_fare">释放车费（%1$s）</string>
+    <string name="bond_released">车费已释放</string>
+    <string name="profile_arbiter">托管仲裁人</string>
+    <string name="profile_arbiter_note">持有你担保行程的决定性密钥。除非出了问题，否则不会参与。</string>
+</resources>

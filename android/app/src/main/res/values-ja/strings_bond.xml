@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">運賃(%1$s)を確保中 — エスクローを作成しています…</string>
+    <string name="bond_escrow_ready">エスクロー準備完了 — 運賃は乗車前に預けます。</string>
+    <string name="bond_secure_fare">運賃を確保 (%1$s)</string>
+    <string name="bond_fare_sent">運賃送信済み — チェーン上で確認中…</string>
+    <string name="bond_fare_secured">運賃を確保しました</string>
+    <string name="bond_waiting_funding">乗客が運賃を確保するのを待っています…</string>
+    <string name="bond_complete_ride">乗車終了 — 運賃を請求</string>
+    <string name="bond_waiting_release">乗車終了 — 乗客の運賃リリースを待っています…</string>
+    <string name="bond_ride_complete_ask">ドライバーが乗車終了としました。</string>
+    <string name="bond_release_fare">運賃をリリース (%1$s)</string>
+    <string name="bond_released">運賃をリリースしました</string>
+    <string name="profile_arbiter">エスクロー仲裁者</string>
+    <string name="profile_arbiter_note">ボンド付き乗車の決定キーを保持します。問題が起きない限り出番はありません。</string>
+</resources>

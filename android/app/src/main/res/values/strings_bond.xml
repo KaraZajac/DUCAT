@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">Securing the fare (%1$s) — building the escrow…</string>
+    <string name="bond_escrow_ready">Escrow ready — the fare goes in before the ride.</string>
+    <string name="bond_secure_fare">Secure fare (%1$s)</string>
+    <string name="bond_fare_sent">Fare sent — confirming on chain…</string>
+    <string name="bond_fare_secured">Fare secured</string>
+    <string name="bond_waiting_funding">Waiting for the rider to secure the fare…</string>
+    <string name="bond_complete_ride">Complete ride — request the fare</string>
+    <string name="bond_waiting_release">Ride complete — waiting for the rider to release the fare…</string>
+    <string name="bond_ride_complete_ask">The driver marked the ride complete.</string>
+    <string name="bond_release_fare">Release fare (%1$s)</string>
+    <string name="bond_released">Fare released</string>
+    <string name="profile_arbiter">Escrow arbiter</string>
+    <string name="profile_arbiter_note">Holds the tie-breaking key in your bonded rides. Never contacted unless something goes wrong.</string>
+</resources>

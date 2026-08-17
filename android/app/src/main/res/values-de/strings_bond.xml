@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">Fahrpreis (%1$s) wird gesichert — Treuhand wird aufgebaut…</string>
+    <string name="bond_escrow_ready">Treuhand bereit — der Fahrpreis wird vor der Fahrt hinterlegt.</string>
+    <string name="bond_secure_fare">Fahrpreis sichern (%1$s)</string>
+    <string name="bond_fare_sent">Fahrpreis gesendet — Bestätigung auf der Chain…</string>
+    <string name="bond_fare_secured">Fahrpreis gesichert</string>
+    <string name="bond_waiting_funding">Warten, bis der Fahrgast den Fahrpreis sichert…</string>
+    <string name="bond_complete_ride">Fahrt abschließen — Fahrpreis anfordern</string>
+    <string name="bond_waiting_release">Fahrt beendet — warten, bis der Fahrgast den Fahrpreis freigibt…</string>
+    <string name="bond_ride_complete_ask">Der Fahrer hat die Fahrt als beendet markiert.</string>
+    <string name="bond_release_fare">Fahrpreis freigeben (%1$s)</string>
+    <string name="bond_released">Fahrpreis freigegeben</string>
+    <string name="profile_arbiter">Treuhand-Schiedsperson</string>
+    <string name="profile_arbiter_note">Hält den entscheidenden Schlüssel deiner Treuhand-Fahrten. Wird nur bei Problemen kontaktiert.</string>
+</resources>

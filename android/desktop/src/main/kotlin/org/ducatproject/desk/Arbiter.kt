@@ -1,0 +1,62 @@
+package org.ducatproject.desk
+
+import org.ducatproject.ducat.Ceremony
+import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.Mailbox
+import org.ducatproject.ducat.NameStore
+import java.io.File
+import uniffi.ducat_mobile.nodeStart
+import uniffi.ducat_mobile.nodeStatus
+
+/**
+ * The standing arbiter (§15.12): a desk that holds the third key in ride
+ * escrows and, on the happy path, does nothing at all.
+ *
+ * It loops the same poll the phones run — the shared Mailbox dispatches
+ * ceremony rounds into the shared Ceremony — so joining a 2-of-3 build is
+ * not arbiter code, it is the ordinary machinery running on a machine that
+ * stays on. It never proposes and never co-signs a ride release (the
+ * consent gate parks proposals, and nothing here approves them): a ruling
+ * UI is future work, and until it exists this arbiter can only ever help
+ * build keys, which is exactly the trust a dormant third party should need.
+ *
+ * DUCAT_DESK_STATE names the identity. `--issue` prints a fresh contact
+ * card URI and exits — how a phone gets this arbiter into its contacts.
+ */
+fun main(args: Array<String>) {
+    val base = System.getenv("XDG_DATA_HOME")?.takeIf { it.isNotEmpty() }
+        ?: "${System.getProperty("user.home")}/.local/share"
+    val dir = File(System.getenv("DUCAT_DESK_STATE")?.takeIf { it.isNotEmpty() } ?: "$base/ducat-desk")
+    check(dir.isDirectory) { "ARBITER_FAIL no desk state at $dir" }
+    val lock = java.io.RandomAccessFile(File(dir, "desk.lock"), "rw").channel.tryLock()
+    check(lock != null) { "ARBITER_FAIL another desk is running on $dir" }
+
+    val context = DeskContext(dir)
+    nodeStart("${dir.absolutePath}/veilid", true)
+    val deadline = System.currentTimeMillis() + 90_000
+    while (System.currentTimeMillis() < deadline && !nodeStatus().publicInternetReady) {
+        Thread.sleep(2_000)
+    }
+    check(nodeStatus().publicInternetReady) { "ARBITER_FAIL node never became ready" }
+
+    if (args.contains("--issue")) {
+        val h = Mailbox.issueCard(context, NameStore(context).get(), 60uL * 60uL * 24uL)
+        println("ARBITER_CARD ${h.uri}")
+        // Fall through into serving: the card's claim needs this process to
+        // collect it, and the ceremony that follows needs it running.
+    }
+
+    println("ARBITER_UP serving as ${NameStore(context).get() ?: "unnamed"} — ctrl-c to stop")
+    var lastStages = ""
+    while (true) {
+        runCatching { Mailbox.collectClaims(context) }
+        runCatching { Mailbox.poll(context) }
+        val stages = Ceremony.all(context)
+            .joinToString { "${it.optString("id").take(8)}=${it.optString("stage")}" }
+        if (stages != lastStages) {
+            println("ARBITER_CEREMONIES $stages")
+            lastStages = stages
+        }
+        Thread.sleep(2_000)
+    }
+}

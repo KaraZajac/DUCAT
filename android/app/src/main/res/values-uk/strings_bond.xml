@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">Захищаємо оплату (%1$s) — створюємо ескроу…</string>
+    <string name="bond_escrow_ready">Ескроу готове — оплата вноситься до поїздки.</string>
+    <string name="bond_secure_fare">Внести оплату (%1$s)</string>
+    <string name="bond_fare_sent">Оплату надіслано — підтверджується в мережі…</string>
+    <string name="bond_fare_secured">Оплату захищено</string>
+    <string name="bond_waiting_funding">Чекаємо, поки пасажир внесе оплату…</string>
+    <string name="bond_complete_ride">Завершити поїздку — запросити оплату</string>
+    <string name="bond_waiting_release">Поїздку завершено — чекаємо, поки пасажир відпустить оплату…</string>
+    <string name="bond_ride_complete_ask">Водій позначив поїздку завершеною.</string>
+    <string name="bond_release_fare">Відпустити оплату (%1$s)</string>
+    <string name="bond_released">Оплату відпущено</string>
+    <string name="profile_arbiter">Арбітр ескроу</string>
+    <string name="profile_arbiter_note">Тримає вирішальний ключ ваших поїздок з ескроу. Долучається, лише якщо щось піде не так.</string>
+</resources>

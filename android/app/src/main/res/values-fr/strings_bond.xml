@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">Sécurisation du prix (%1$s) — création du séquestre…</string>
+    <string name="bond_escrow_ready">Séquestre prêt — le prix est versé avant la course.</string>
+    <string name="bond_secure_fare">Sécuriser le prix (%1$s)</string>
+    <string name="bond_fare_sent">Prix envoyé — confirmation sur la chaîne…</string>
+    <string name="bond_fare_secured">Prix sécurisé</string>
+    <string name="bond_waiting_funding">En attente que le passager sécurise le prix…</string>
+    <string name="bond_complete_ride">Terminer la course — demander le prix</string>
+    <string name="bond_waiting_release">Course terminée — en attente que le passager libère le prix…</string>
+    <string name="bond_ride_complete_ask">Le conducteur a marqué la course comme terminée.</string>
+    <string name="bond_release_fare">Libérer le prix (%1$s)</string>
+    <string name="bond_released">Prix libéré</string>
+    <string name="profile_arbiter">Arbitre du séquestre</string>
+    <string name="profile_arbiter_note">Détient la clé d\'arbitrage de vos courses sous séquestre. Jamais sollicité, sauf problème.</string>
+</resources>

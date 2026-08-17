@@ -330,6 +330,22 @@ fn scan_escrow(
     })
 }
 
+/// What an escrow currently holds, by this party's own scan (§17.5: a
+/// payment is verified by finding the output, never by believing a note
+/// from the party who benefits from being believed). `from_height` is the
+/// chain height near the ceremony's build — an escrow minted minutes ago
+/// needs minutes of chain, not the wallet's whole history.
+#[uniffi::export]
+pub fn escrow_balance(
+    keys: Vec<u8>,
+    node_url: String,
+    from_height: u64,
+) -> Result<u64, ContactError> {
+    let keys = read_keys(&keys)?;
+    let (_, outputs) = scan_escrow(&keys, &node_url, from_height)?;
+    Ok(outputs.iter().map(|o| o.commitment().amount).sum())
+}
+
 /// What the proposer sends and shows: the wire payload plus the figures the
 /// screen states before anything is signed.
 #[derive(uniffi::Record)]

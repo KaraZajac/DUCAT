@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">A garantir a tarifa (%1$s) — a criar a caução…</string>
+    <string name="bond_escrow_ready">Caução pronta — a tarifa entra antes da viagem.</string>
+    <string name="bond_secure_fare">Garantir tarifa (%1$s)</string>
+    <string name="bond_fare_sent">Tarifa enviada — a confirmar na cadeia…</string>
+    <string name="bond_fare_secured">Tarifa garantida</string>
+    <string name="bond_waiting_funding">À espera de que o passageiro garanta a tarifa…</string>
+    <string name="bond_complete_ride">Concluir viagem — pedir a tarifa</string>
+    <string name="bond_waiting_release">Viagem concluída — à espera de que o passageiro liberte a tarifa…</string>
+    <string name="bond_ride_complete_ask">O motorista marcou a viagem como concluída.</string>
+    <string name="bond_release_fare">Libertar tarifa (%1$s)</string>
+    <string name="bond_released">Tarifa libertada</string>
+    <string name="profile_arbiter">Árbitro da caução</string>
+    <string name="profile_arbiter_note">Guarda a chave de desempate das tuas viagens com caução. Só entra se algo correr mal.</string>
+</resources>

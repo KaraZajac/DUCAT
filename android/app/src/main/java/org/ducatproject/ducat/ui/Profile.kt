@@ -151,6 +151,37 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 saved = true
             }) { Text(if (saved) stringResource(R.string.profile_saved) else stringResource(R.string.profile_save_name)) }
 
+            // §15.12: the third key in every ride escrow this device builds.
+            // A choice about *this* contact, made where they are looked at.
+            Spacer(Modifier.height(20.dp))
+            val arbiters = remember { org.ducatproject.ducat.ArbiterStore(context) }
+            var isArbiter by remember(c.personaHex) {
+                mutableStateOf(arbiters.hex() == c.personaHex)
+            }
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.profile_arbiter),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        stringResource(R.string.profile_arbiter_note),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
+                Switch(
+                    checked = isArbiter,
+                    onCheckedChange = { on ->
+                        isArbiter = on
+                        arbiters.set(if (on) c.personaHex else null)
+                    },
+                )
+            }
+
             Spacer(Modifier.height(24.dp))
             Text(stringResource(R.string.profile_checked), style = MaterialTheme.typography.titleMedium)
             Text(

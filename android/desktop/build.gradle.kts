@@ -68,6 +68,14 @@ tasks.register<JavaExec>("profilescope") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// The standing ride-escrow arbiter (§15.12): joins 2-of-3 builds, never
+// signs a release. `./gradlew :desktop:arbiter [--args="--issue"]`.
+tasks.register<JavaExec>("arbiter") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ArbiterKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // One real message from the desk's standing identity, to ring a phone's DHT
 // watch — the poller battery-tier check. `./gradlew :desktop:ringtest`.
 tasks.register<JavaExec>("ringtest") {

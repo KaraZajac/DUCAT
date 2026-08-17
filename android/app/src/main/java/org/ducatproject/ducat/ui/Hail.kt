@@ -278,8 +278,13 @@ fun HailCard() {
             val offer = withContext(Dispatchers.IO) {
                 runCatchingCancellable {
                     Mailbox.poll(context)
+                    // The NEWEST offer, not the first: a repeat rider's thread
+                    // already holds last week's kind-6, and accepting a stale
+                    // fare against a stale seq leaves the driver waiting on an
+                    // answer to an offer they never made (found live,
+                    // 2026-08-16 — second hail in one thread).
                     ContactStore(context).thread(d.personaHex)
-                        .firstOrNull { !it.outgoing && it.kind == 6 }
+                        .lastOrNull { !it.outgoing && it.kind == 6 }
                 }.getOrNull()
             } ?: continue
             // Re-read the contact: the profile (car, plate) may have landed
@@ -418,6 +423,27 @@ fun HailCard() {
                             reSeq = offer.seq,
                         )
                     }.onFailure { DucatLog.w(TAG, "ride accept: ${it.message}") }
+                    // §15.12: the accept is where the escrow starts. With an
+                    // arbiter configured and mutual, the fare goes 2-of-3;
+                    // without one the ride stays what it always was — a
+                    // mutual promise, like flagging a cab. The bond banner
+                    // in the thread carries it from here.
+                    val fare = offer.amountPxmr
+                    val arbHex = org.ducatproject.ducat.ArbiterStore(context).hex()
+                    if (fare != null && fare > 0 && arbHex != null && arbHex != d.personaHex) {
+                        val arb = org.ducatproject.ducat.ContactStore(context).all()
+                            .firstOrNull { it.personaHex == arbHex }
+                        if (arb != null) {
+                            runCatchingCancellable {
+                                org.ducatproject.ducat.Ceremony
+                                    .startRide(context, d, arb, fare)
+                            }.onSuccess {
+                                DucatLog.i(TAG, "ride escrow started for ${formatXmr(fare)} XMR")
+                            }.onFailure {
+                                DucatLog.w(TAG, "ride escrow: ${it.message}")
+                            }
+                        }
+                    }
                 }
                 driverFound = d
             },

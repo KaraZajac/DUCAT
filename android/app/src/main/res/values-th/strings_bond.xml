@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">กำลังคุ้มครองค่าโดยสาร (%1$s) — กำลังสร้างเอสโครว์…</string>
+    <string name="bond_escrow_ready">เอสโครว์พร้อมแล้ว — ค่าโดยสารเข้าก่อนเริ่มเดินทาง</string>
+    <string name="bond_secure_fare">คุ้มครองค่าโดยสาร (%1$s)</string>
+    <string name="bond_fare_sent">ส่งค่าโดยสารแล้ว — กำลังยืนยันบนเชน…</string>
+    <string name="bond_fare_secured">ค่าโดยสารได้รับการคุ้มครอง</string>
+    <string name="bond_waiting_funding">กำลังรอผู้โดยสารคุ้มครองค่าโดยสาร…</string>
+    <string name="bond_complete_ride">จบการเดินทาง — ขอรับค่าโดยสาร</string>
+    <string name="bond_waiting_release">จบการเดินทางแล้ว — รอผู้โดยสารปล่อยค่าโดยสาร…</string>
+    <string name="bond_ride_complete_ask">คนขับระบุว่าการเดินทางเสร็จสิ้นแล้ว</string>
+    <string name="bond_release_fare">ปล่อยค่าโดยสาร (%1$s)</string>
+    <string name="bond_released">ปล่อยค่าโดยสารแล้ว</string>
+    <string name="profile_arbiter">ผู้ชี้ขาดเอสโครว์</string>
+    <string name="profile_arbiter_note">ถือกุญแจชี้ขาดของการเดินทางแบบมีเอสโครว์ จะถูกติดต่อก็ต่อเมื่อมีปัญหา</string>
+</resources>

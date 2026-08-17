@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">تأمين الأجرة (%1$s) — يجري إنشاء الضمان…</string>
+    <string name="bond_escrow_ready">الضمان جاهز — تُودَع الأجرة قبل الرحلة.</string>
+    <string name="bond_secure_fare">تأمين الأجرة (%1$s)</string>
+    <string name="bond_fare_sent">أُرسلت الأجرة — يجري التأكيد على السلسلة…</string>
+    <string name="bond_fare_secured">الأجرة مؤمَّنة</string>
+    <string name="bond_waiting_funding">في انتظار أن يؤمّن الراكب الأجرة…</string>
+    <string name="bond_complete_ride">إنهاء الرحلة — طلب الأجرة</string>
+    <string name="bond_waiting_release">انتهت الرحلة — في انتظار أن يحرر الراكب الأجرة…</string>
+    <string name="bond_ride_complete_ask">حدّد السائق الرحلة على أنها انتهت.</string>
+    <string name="bond_release_fare">تحرير الأجرة (%1$s)</string>
+    <string name="bond_released">حُررت الأجرة</string>
+    <string name="profile_arbiter">حَكَم الضمان</string>
+    <string name="profile_arbiter_note">يحمل مفتاح الترجيح في رحلاتك المضمونة. لا يُستدعى إلا إذا ساء شيء.</string>
+</resources>

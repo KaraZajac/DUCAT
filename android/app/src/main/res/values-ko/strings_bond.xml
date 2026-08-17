@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
+     switch on a contact. -->
+<resources>
+    <string name="bond_building">요금(%1$s) 확보 중 — 에스크로 생성 중…</string>
+    <string name="bond_escrow_ready">에스크로 준비 완료 — 요금은 탑승 전에 예치합니다.</string>
+    <string name="bond_secure_fare">요금 확보 (%1$s)</string>
+    <string name="bond_fare_sent">요금 전송됨 — 체인에서 확인 중…</string>
+    <string name="bond_fare_secured">요금 확보됨</string>
+    <string name="bond_waiting_funding">승객이 요금을 확보하기를 기다리는 중…</string>
+    <string name="bond_complete_ride">운행 완료 — 요금 요청</string>
+    <string name="bond_waiting_release">운행 완료 — 승객의 요금 지급을 기다리는 중…</string>
+    <string name="bond_ride_complete_ask">기사가 운행 완료로 표시했습니다.</string>
+    <string name="bond_release_fare">요금 지급 (%1$s)</string>
+    <string name="bond_released">요금이 지급되었습니다</string>
+    <string name="profile_arbiter">에스크로 중재자</string>
+    <string name="profile_arbiter_note">보증된 운행의 결정 키를 보관합니다. 문제가 생기지 않는 한 관여하지 않습니다.</string>
+</resources>
