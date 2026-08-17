@@ -85,6 +85,22 @@ tasks.register<JavaExec>("ringtest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// The till driven blind against a real phone: card → claim → greeting →
+// bill → payment watched onto the chain → receipt. `./gradlew :desktop:tilltest`.
+tasks.register<JavaExec>("tilltest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.TillTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// Read-only: scan a desk wallet forward, print what it holds.
+// `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:tillcheck`.
+tasks.register<JavaExec>("tillcheck") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.TillCheckKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The desk driven blind over the live network; pairs with the Rust harness
 // claiming the card it prints. `./gradlew :desktop:e2e`.
 tasks.register<JavaExec>("e2e") {

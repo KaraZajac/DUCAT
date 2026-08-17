@@ -5,13 +5,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -25,6 +26,7 @@ import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.NameStore
 import org.ducatproject.ducat.NodeStore
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.Rates
@@ -43,9 +45,13 @@ import uniffi.ducat_mobile.nodeStatus
  * ships: Mailbox's patience windows and atomic sends, ContactStore's
  * partitioned prekeys, the wallet's plan/quote/send, the chain rules. The
  * desk adds a window: contacts on the left, the thread on the right, a card
- * on screen for a phone to claim — and now a wallet that scans, bills that
- * render as bills, a Pay that quotes before it spends, receipts the desk
- * can issue, and a tray notification when a message lands unwatched.
+ * on screen for a phone to claim — a wallet that scans, bills that render,
+ * a Pay that quotes before it spends, receipts, a tray bell.
+ *
+ * The window's language is a shopkeeper's, on purpose: "online", "checking
+ * for new payments", names instead of hex. Peer counts, block heights and
+ * node errors exist — one click away, behind the status word — because the
+ * person at the till needs "is it working", not a telemetry feed.
  */
 
 private fun dataDir(): File {
@@ -126,12 +132,23 @@ private fun StoredMessage.headline(): String = when (kind) {
     1 -> "asks for ${formatXmr(amountPxmr)} XMR"
     2 -> "sent ${formatXmr(amountPxmr)} XMR"
     3 -> "receipt for ${formatXmr(amountPxmr)} XMR" + if (oob) " — settled outside DUCAT" else ""
-    5 -> "withdrew message ${reSeq ?: "?"}"
+    5 -> "withdrew a message"
     6 -> "offers to drive — ${formatXmr(amountPxmr)} XMR" +
         (etaSecs?.let { ", ${it / 60} min away" } ?: "")
     7 -> "ride accepted — ${formatXmr(amountPxmr)} XMR"
     else -> ""
 }
+
+/** "≈ USD 1.23", when a rate exists; silence when it does not. */
+private fun fiatOf(context: DeskContext, pxmr: Long): String? =
+    runCatching {
+        Rates.view(context, pxmr, WalletStore(context).stagenet())?.let { "≈ ${it.text}" }
+    }.getOrNull()
+
+private fun clock(ts: Long): String =
+    java.time.LocalTime.ofInstant(
+        java.time.Instant.ofEpochSecond(ts), java.time.ZoneId.systemDefault(),
+    ).let { "%02d:%02d".format(it.hour, it.minute) }
 
 fun main() {
     // Packaged, the native library travels inside the distribution; the
@@ -153,11 +170,14 @@ fun main() {
 }
 
 private fun runDesk(deskDir: File) = application {
-    Window(onCloseRequest = ::exitApplication, title = "DUCAT Desk — ${deskDir.name}") {
+    Window(onCloseRequest = ::exitApplication, title = "DUCAT Desk") {
         val context = remember { DeskContext(deskDir) }
         var ready by remember { mutableStateOf(false) }
-        var statusLine by remember { mutableStateOf("starting…") }
+        var netWord by remember { mutableStateOf("starting…") }
+        var netDetail by remember { mutableStateOf("") }
+        var netOpen by remember { mutableStateOf(false) }
         var contacts by remember { mutableStateOf<List<Contact>>(emptyList()) }
+        var unread by remember { mutableStateOf<Set<String>>(emptySet()) }
         var selected by remember { mutableStateOf<String?>(null) }
         var thread by remember { mutableStateOf<List<StoredMessage>>(emptyList()) }
         var cardUri by remember { mutableStateOf<String?>(null) }
@@ -165,6 +185,8 @@ private fun runDesk(deskDir: File) = application {
         var error by remember { mutableStateOf<String?>(null) }
         var balances by remember { mutableStateOf<Balances?>(null) }
         var fiat by remember { mutableStateOf<String?>(null) }
+        var deskName by remember { mutableStateOf<String?>(null) }
+        var renameOpen by remember { mutableStateOf(false) }
         var receiveOpen by remember { mutableStateOf(false) }
         var payFor by remember { mutableStateOf<StoredMessage?>(null) }
         var focused by remember { mutableStateOf(true) }
@@ -192,9 +214,10 @@ private fun runDesk(deskDir: File) = application {
         // The node, then the poller: the same loop the phone's service runs,
         // with the wallet's scan folded in beside the mailbox sweep.
         LaunchedEffect(Unit) {
+            deskName = runCatching { MyProfile(context).name() }.getOrNull()
             withContext(Dispatchers.IO) {
                 runCatching { nodeStart(File(deskDir, "veilid").absolutePath, true) }
-                    .onFailure { error = it.message }
+                    .onFailure { error = "The network could not start: ${it.message}" }
                 // A desk born without a wallet mints one now, exactly as
                 // onboarding does: creation height from a live node so the
                 // scan starts at today instead of genesis.
@@ -207,17 +230,30 @@ private fun runDesk(deskDir: File) = application {
                         }.getOrDefault(0uL)
                         val w = uniffi.ducat_mobile.createWallet(tipHeight = tip, stagenet = true)
                         WalletStore(context).save(w.address, w.spendKeyHex, w.restoreHeight, true)
-                    }.onFailure { error = "wallet: ${it.message}" }
+                    }.onFailure { error = "The wallet could not be created: ${it.message}" }
                 }
             }
             var tick = 0L
             while (true) {
                 val s = runCatching { nodeStatus() }.getOrNull()
-                statusLine = when {
-                    error != null -> "node: $error"
-                    s == null -> "node: starting…"
-                    s.publicInternetReady -> "ready — ${s.reliablePeers}/${s.peers} peers"
-                    else -> "attaching… (${s?.peers ?: 0u} peers)"
+                // One word for the till; the numbers wait behind a click.
+                netWord = when {
+                    s?.publicInternetReady == true -> "online"
+                    s != null -> "connecting…"
+                    else -> "starting…"
+                }
+                netDetail = buildString {
+                    append("Network: ")
+                    append(
+                        if (s == null) "starting"
+                        else "${if (s.publicInternetReady) "connected" else "attaching"} — " +
+                            "${s.reliablePeers}/${s.peers} peers",
+                    )
+                    balances?.let {
+                        append("\nWallet: scanned to block ${it.scannedTo} of ${it.tip}")
+                        it.error?.let { e -> append("\nLast scan problem: $e") }
+                    }
+                    NodeStore(context).lastGood()?.let { append("\nMonero node: $it") }
                 }
                 if (s?.publicInternetReady == true && !ready) ready = true
                 if (ready) {
@@ -237,16 +273,22 @@ private fun runDesk(deskDir: File) = application {
                                     while (steps < 3 && Wallet.scanStep(context, node)) steps++
                                 }
                                 balances = Wallet.balances(context)
-                                fiat = balances?.let {
-                                    Rates.view(context, it.spendablePxmr, WalletStore(context).stagenet())?.text
-                                }
+                                fiat = balances?.let { fiatOf(context, it.spendablePxmr) }
                             }
                         }
                         if (tick % 225L == 0L) runCatching { Rates.refresh(context) }
                     }
                     val store = ContactStore(context)
                     contacts = store.all().sortedBy { it.displayName().lowercase() }
-                    selected?.let { thread = store.thread(it) }
+                    unread = contacts
+                        .filter { it.inSeq > store.chatSeen(it.personaHex) }
+                        .map { it.personaHex }.toSet()
+                    selected?.let { sel ->
+                        thread = store.thread(sel)
+                        // Watching the thread is reading it.
+                        contacts.firstOrNull { it.personaHex == sel }
+                            ?.let { store.setChatSeen(sel, it.inSeq) }
+                    }
                 }
                 tick++
                 delay(4_000)
@@ -256,25 +298,30 @@ private fun runDesk(deskDir: File) = application {
         MaterialTheme(colorScheme = darkColorScheme()) {
             Surface(Modifier.fillMaxSize()) {
                 Column(Modifier.fillMaxSize()) {
-                    // Top bar: who this desk is, how connected, and what it holds.
+                    // Top bar: who this desk is, one status word, what it holds.
                     Row(
                         Modifier.fillMaxWidth().padding(12.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text("DUCAT Desk", style = MaterialTheme.typography.titleLarge)
+                        TextButton(onClick = { renameOpen = true }) {
+                            Text(
+                                deskName ?: "DUCAT Desk",
+                                style = MaterialTheme.typography.titleLarge,
+                            )
+                        }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(statusLine, style = MaterialTheme.typography.bodySmall)
+                            TextButton(onClick = { netOpen = true }) { Text(netWord) }
                             balances?.let { b ->
-                                val syncing =
-                                    if (b.syncing) " · scanning ${b.scannedTo}/${b.tip}" else ""
-                                val locked =
-                                    if (b.lockedPxmr > 0) " (+${formatXmr(b.lockedPxmr)} arriving)" else ""
-                                Text(
-                                    "${formatXmr(b.spendablePxmr)} XMR$locked" +
-                                        (fiat?.let { " · $it" } ?: "") + syncing,
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
+                                val money = buildString {
+                                    fiat?.let { append("$it · ") }
+                                    append("${formatXmr(b.spendablePxmr)} XMR")
+                                    if (b.lockedPxmr > 0) {
+                                        append(" (+${formatXmr(b.lockedPxmr)} arriving)")
+                                    }
+                                    if (b.syncing) append(" · checking for new payments…")
+                                }
+                                Text(money, style = MaterialTheme.typography.bodySmall)
                             }
                         }
                         Row {
@@ -299,19 +346,27 @@ private fun runDesk(deskDir: File) = application {
                     HorizontalDivider()
 
                     Row(Modifier.fillMaxSize()) {
-                        // Contacts.
+                        // Contacts, the unread marked.
                         LazyColumn(Modifier.width(230.dp).fillMaxHeight()) {
                             items(contacts, key = { it.personaHex }) { c ->
                                 val here = c.personaHex == selected
                                 TextButton(
                                     onClick = {
                                         selected = c.personaHex
-                                        thread = ContactStore(context).thread(c.personaHex)
+                                        val store = ContactStore(context)
+                                        thread = store.thread(c.personaHex)
+                                        store.setChatSeen(c.personaHex, c.inSeq)
+                                        unread = unread - c.personaHex
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                 ) {
+                                    val mark = when {
+                                        here -> "▸ "
+                                        c.personaHex in unread -> "● "
+                                        else -> ""
+                                    }
                                     Text(
-                                        (if (here) "▸ " else "") + c.displayName(),
+                                        mark + c.displayName(),
                                         style = MaterialTheme.typography.bodyMedium,
                                     )
                                 }
@@ -339,6 +394,7 @@ private fun runDesk(deskDir: File) = application {
                             LazyColumn(Modifier.weight(1f), state = listState) {
                                 items(visible) { m ->
                                     MessageRow(
+                                        context = context,
                                         m = m,
                                         thread = thread,
                                         onPay = { payFor = it },
@@ -354,17 +410,23 @@ private fun runDesk(deskDir: File) = application {
                                                         kind = 3, amountPxmr = paid.amountPxmr,
                                                         txidHex = paid.txidHex,
                                                     )
-                                                }.onFailure { error = it.message }
+                                                }.onFailure {
+                                                    error = "The receipt did not go out: ${it.message}"
+                                                }
                                             }.start()
                                         },
                                     )
                                 }
                             }
                             error?.let {
-                                Text(
-                                    it, style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.error,
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        it, Modifier.weight(1f),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
+                                    TextButton(onClick = { error = null }) { Text("dismiss") }
+                                }
                             }
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 OutlinedTextField(
@@ -389,7 +451,9 @@ private fun runDesk(deskDir: File) = application {
                                                     context, c, text,
                                                     PersonaStore(context).personaHex(),
                                                 )
-                                            }.onFailure { error = it.message }
+                                            }.onFailure {
+                                                error = "The message did not go out: ${it.message}"
+                                            }
                                         }.start()
                                     },
                                 ) { Text("Send") }
@@ -399,47 +463,104 @@ private fun runDesk(deskDir: File) = application {
                 }
 
                 // The card, full screen: a phone at the desk scans this and
-                // the claim lands in the poller like any other.
+                // the claim lands in the poller like any other. The link is a
+                // copy button, not a wall of base64 — it is for pasting into
+                // a chat app, not for reading.
                 cardUri?.let { uri ->
+                    val clipboard = LocalClipboardManager.current
                     AlertDialog(
                         onDismissRequest = { cardUri = null },
                         confirmButton = {
                             TextButton(onClick = { cardUri = null }) { Text("Done") }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { clipboard.setText(AnnotatedString(uri)) },
+                            ) { Text("Copy link") }
                         },
                         title = { Text("Scan to connect") },
                         text = {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Image(qrBitmap(uri), contentDescription = "contact card")
                                 Spacer(Modifier.height(8.dp))
-                                SelectionContainer {
-                                    Text(uri, style = MaterialTheme.typography.bodySmall, maxLines = 3)
-                                }
+                                Text(
+                                    "Good for 24 hours, one claim.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
                             }
                         },
                     )
                 }
 
-                // Give-to-this-desk: the wallet's standing address. §16.12's
-                // linkability cost is the donate screen's lesson — one address,
-                // every giver can see it is the same till. For a till, that is
-                // the point.
+                // Give-to-this-desk: the wallet's standing address. One
+                // address, every giver can see it is the same till — for a
+                // till, that is the point (§16.12 stated its cost).
                 if (receiveOpen) {
                     val addr = WalletStore(context).address() ?: ""
+                    val clipboard = LocalClipboardManager.current
                     AlertDialog(
                         onDismissRequest = { receiveOpen = false },
                         confirmButton = {
                             TextButton(onClick = { receiveOpen = false }) { Text("Done") }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { clipboard.setText(AnnotatedString(addr)) },
+                            ) { Text("Copy address") }
                         },
                         title = { Text("Pay this desk") },
                         text = {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Image(qrBitmap(addr), contentDescription = "wallet address")
                                 Spacer(Modifier.height(8.dp))
-                                SelectionContainer {
-                                    Text(addr, style = MaterialTheme.typography.bodySmall, maxLines = 4)
-                                }
+                                Text(
+                                    "${addr.take(12)}…${addr.takeLast(6)}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
                             }
                         },
+                    )
+                }
+
+                // Naming the desk names the cards it hands out.
+                if (renameOpen) {
+                    var name by remember { mutableStateOf(deskName ?: "") }
+                    AlertDialog(
+                        onDismissRequest = { renameOpen = false },
+                        confirmButton = {
+                            TextButton(
+                                enabled = name.isNotBlank(),
+                                onClick = {
+                                    runCatching { NameStore(context).put(name.trim()) }
+                                    deskName = name.trim()
+                                    renameOpen = false
+                                },
+                            ) { Text("Save") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { renameOpen = false }) { Text("Cancel") }
+                        },
+                        title = { Text("What should people call this desk?") },
+                        text = {
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = { name = it },
+                                singleLine = true,
+                                placeholder = { Text("Corner Café") },
+                            )
+                        },
+                    )
+                }
+
+                // The numbers, for whoever clicks the status word.
+                if (netOpen) {
+                    AlertDialog(
+                        onDismissRequest = { netOpen = false },
+                        confirmButton = {
+                            TextButton(onClick = { netOpen = false }) { Text("Done") }
+                        },
+                        title = { Text("Connection") },
+                        text = { Text(netDetail.ifEmpty { "starting…" }) },
                     )
                 }
 
@@ -448,7 +569,7 @@ private fun runDesk(deskDir: File) = application {
                     PayDialog(
                         context = context,
                         req = req,
-                        contactHex = selected,
+                        contact = contacts.firstOrNull { it.personaHex == selected },
                         onDone = { payFor = null },
                     )
                 }
@@ -460,10 +581,13 @@ private fun runDesk(deskDir: File) = application {
 /**
  * One message, rendered as what it is. Bills carry their lines (already
  * proven to sum — core refused them otherwise), requests carry a Pay that
- * quotes first, incoming payments offer the receipt this desk owes.
+ * quotes first, incoming payments offer the receipt this desk owes. What
+ * does not appear: transaction hex, sequence numbers, ceremony bytes — the
+ * thread is a conversation, and the protocol keeps its own books.
  */
 @Composable
 private fun MessageRow(
+    context: DeskContext,
     m: StoredMessage,
     thread: List<StoredMessage>,
     onPay: (StoredMessage) -> Unit,
@@ -471,11 +595,17 @@ private fun MessageRow(
 ) {
     val who = if (m.outgoing) "me" else "them"
     val head = m.headline()
+    val fiat = if (m.amountPxmr > 0) fiatOf(context, m.amountPxmr) else null
     Column(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
-        Text(
-            if (head.isEmpty()) "$who: ${m.body}" else "$who: $head",
-            style = MaterialTheme.typography.bodyMedium,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                if (head.isEmpty()) "$who: ${m.body}"
+                else "$who: $head" + (fiat?.let { " ($it)" } ?: ""),
+                Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(clock(m.timestamp), style = MaterialTheme.typography.labelSmall)
+        }
         if (head.isNotEmpty() && m.body.isNotBlank() && m.kind != 5) {
             Text("  ${m.body}", style = MaterialTheme.typography.bodySmall)
         }
@@ -489,9 +619,6 @@ private fun MessageRow(
             m.taxPxmr?.takeIf { it > 0 }?.let {
                 Text("    tax — ${formatXmr(it)}", style = MaterialTheme.typography.bodySmall)
             }
-        }
-        m.txidHex?.let {
-            Text("    tx ${it.take(12)}…", style = MaterialTheme.typography.bodySmall)
         }
         when {
             // An incoming request that names where to pay, and that the
@@ -524,20 +651,20 @@ private fun MessageRow(
 
 /**
  * The §5 rule, desk-shaped: a request is *reviewed*, never one-tap paid.
- * The dialog is the review — amount, fee, what remains — and the button
- * under it is the only thing that spends.
+ * The dialog is the review — who, how much, the fee, what remains — and
+ * the button under it is the only thing that spends.
  */
 @Composable
 private fun PayDialog(
     context: DeskContext,
     req: StoredMessage,
-    contactHex: String?,
+    contact: Contact?,
     onDone: () -> Unit,
 ) {
     var quote by remember { mutableStateOf<org.ducatproject.ducat.Quote?>(null) }
     var busy by remember { mutableStateOf(false) }
     var payErr by remember { mutableStateOf<String?>(null) }
-    var sentTx by remember { mutableStateOf<String?>(null) }
+    var sent by remember { mutableStateOf(false) }
     LaunchedEffect(req.seq) {
         withContext(Dispatchers.IO) {
             quote = runCatching { Wallet.quote(context, req.amountPxmr) }.getOrNull()
@@ -545,29 +672,43 @@ private fun PayDialog(
     }
     AlertDialog(
         onDismissRequest = { if (!busy) onDone() },
-        title = { Text(if (sentTx == null) "Pay ${formatXmr(req.amountPxmr)} XMR" else "Paid") },
+        title = {
+            Text(
+                if (sent) "Paid"
+                else "Pay ${contact?.displayName() ?: "them"} ${formatXmr(req.amountPxmr)} XMR",
+            )
+        },
         text = {
             Column {
-                sentTx?.let {
-                    Text("tx ${it.take(16)}… — they have been told in the thread")
+                if (sent) {
+                    Text("Done — they have been told in the thread.")
                     return@Column
                 }
-                Text("to ${req.payto?.take(24)}…", style = MaterialTheme.typography.bodySmall)
+                fiatOf(context, req.amountPxmr)?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall)
+                }
+                if (req.body.isNotBlank()) {
+                    Text("for: ${req.body}", style = MaterialTheme.typography.bodySmall)
+                }
+                Spacer(Modifier.height(6.dp))
                 quote?.let { q ->
-                    Text("fee ${formatXmr(q.feePxmr)} XMR · total ${formatXmr(q.totalPxmr)} XMR")
+                    Text("network fee ${formatXmr(q.feePxmr)} XMR")
                     Text(
-                        "leaves ${formatXmr(q.remainingPxmr)} XMR unlocked",
+                        "leaves ${formatXmr(q.remainingPxmr)} XMR in the wallet",
                         style = MaterialTheme.typography.bodySmall,
                     )
                     if (!q.affordable) {
-                        Text("not enough unlocked", color = MaterialTheme.colorScheme.error)
+                        Text(
+                            "not enough in the wallet yet",
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     }
-                } ?: Text("quoting…", style = MaterialTheme.typography.bodySmall)
+                } ?: Text("working out the fee…", style = MaterialTheme.typography.bodySmall)
                 payErr?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             }
         },
         confirmButton = {
-            if (sentTx == null) {
+            if (!sent) {
                 Button(
                     enabled = !busy && quote?.affordable == true && req.payto != null,
                     onClick = {
@@ -579,16 +720,14 @@ private fun PayDialog(
                                     ?: throw IllegalStateException("no Monero node reachable")
                                 val res = Wallet.send(
                                     context, node, req.payto!!, req.amountPxmr,
-                                    contactHex = contactHex,
+                                    contactHex = contact?.personaHex,
                                     note = null,
                                 )
                                 // §16.13's notice: names the transaction so
                                 // their wallet can put this desk's name on the
                                 // arriving output. Monero carries no sender.
-                                contactHex?.let { hex ->
+                                contact?.let { c ->
                                     runCatching {
-                                        val store = ContactStore(context)
-                                        val c = store.all().first { it.personaHex == hex }
                                         Mailbox.send(
                                             context, c, "Payment",
                                             PersonaStore(context).personaHex(),
@@ -597,8 +736,8 @@ private fun PayDialog(
                                         )
                                     }
                                 }
-                                sentTx = res.txidHex
-                            }.onFailure { payErr = it.message }
+                                sent = true
+                            }.onFailure { payErr = "The payment did not go through: ${it.message}" }
                             busy = false
                         }.start()
                     },
@@ -608,7 +747,7 @@ private fun PayDialog(
             }
         },
         dismissButton = {
-            if (sentTx == null) {
+            if (!sent) {
                 TextButton(enabled = !busy, onClick = onDone) { Text("Cancel") }
             }
         },
