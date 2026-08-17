@@ -65,10 +65,13 @@ jobs:
           for f in "$out"/msi/*.msi; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.msi"; done
           for f in "$out"/dmg/*.dmg; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.dmg"; done
           # The portable build: unzip-and-run, no installer rights needed.
+          # The directory is ducat-desk on Linux/Windows and ducat-desk.app
+          # on a Mac — ls, don't guess.
+          APP=$(ls "$out/app" | head -1)
           if [ "${{ matrix.slug }}" = "windows-x64" ]; then
-            (cd "$out/app" && 7z a "$GITHUB_WORKSPACE/dist/ducat-desk-${{ matrix.slug }}.zip" ducat-desk)
+            (cd "$out/app" && 7z a "$GITHUB_WORKSPACE/dist/ducat-desk-${{ matrix.slug }}.zip" "$APP")
           else
-            tar czf "dist/ducat-desk-${{ matrix.slug }}.tar.gz" -C "$out/app" ducat-desk
+            tar czf "dist/ducat-desk-${{ matrix.slug }}.tar.gz" -C "$out/app" "$APP"
           fi
           ls -la dist
 
@@ -84,4 +87,11 @@ jobs:
             gh release view "$TAG" >/dev/null 2>&1 && break
             sleep 10
           done
-          gh release upload "$TAG" dist/* --clobber
+          # The API 503s on its own schedule; one file of several failing
+          # must not strand the rest, so keep asking.
+          for i in $(seq 1 6); do
+            gh release upload "$TAG" dist/* --clobber && exit 0
+            echo "upload attempt $i failed; retrying in 30s"
+            sleep 30
+          done
+          exit 1
