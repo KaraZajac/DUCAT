@@ -302,7 +302,24 @@ is already cross-platform Rust; the path, cheapest first:
    manifest registered ducat: links since the beginning and readIntent
    never read them — a tapped card opened the app to Home; it now claims
    behind one confirm, in all twenty locales. The shim retires into a
-   real shared module once the surface is known.
+   real shared module once the surface is known. **Feature parity, 0.88
+   (2026-08-17)**: the desk now runs the phone's *screens*, not just its
+   protocol — a build-time resource bridge (generateDeskRes → R.kt + one
+   JSON table per locale; android/Resources.kt with per-string fallback
+   and real CLDR plural classes) makes `stringResource(R.string.…)`
+   resolve, so chat, the till, the bar tab, donations, the wallet,
+   activity, contacts, profiles, the profile editor, backup, settings,
+   the code hub and hailing are the phone's own source running here, in
+   all twenty languages. Six phone files stay phone-side — camera, NFC,
+   osmdroid, GPS, the Android inset flags, first-run — and each has a
+   named desk half: a paste field, a Compose-drawn route and driver net
+   that touches no tile server, a position typed once, WAV voice memos
+   (the JVM has no AAC encoder, so the sender labels by what was actually
+   recorded). Smoke-tested headlessly: :desktop:shimtest (902 ids × 20
+   languages, Slavic plurals, the avatar encoder's 12 KB ceiling) and
+   :desktop:rendertest, which draws every hosted screen through
+   ImageComposeScene with no display and caught two rooms that crashed on
+   first composition.
 3. **iPhone** eventually: uniffi generates Swift bindings natively and
    the Rust stack compiles for iOS — the protocol layer is free; the UI
    and App Store review are the cost. Nothing now forecloses it.
