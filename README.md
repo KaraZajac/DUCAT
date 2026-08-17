@@ -27,7 +27,8 @@ Use `armeabi-v7a` only for phones older than about 2016; `x86_64` is for emulato
 |---|---|
 | Linux | [`.deb`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-linux-x64.deb) · [`.rpm`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-linux-x64.rpm) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-linux-x64.tar.gz) |
 | Windows | [`.msi`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-windows-x64.msi) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-windows-x64.zip) |
-| macOS | [`.dmg` (Apple Silicon)](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-arm64.dmg) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-arm64.tar.gz) |
+| macOS (Apple Silicon) | [`.dmg`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-arm64.dmg) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-arm64.tar.gz) |
+| macOS (Intel) | [`.dmg`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-x64.dmg) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-x64.tar.gz) |
 
 Each carries its own Rust library and JVM — nothing to install first. They are
 unsigned, so both desktop OSes will warn on first open.
