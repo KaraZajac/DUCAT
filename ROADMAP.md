@@ -94,7 +94,16 @@ money. Ordered by what blocks 1.0, not by effort.
   rounds now synchronized; the race cost one stranded 0.006 stagenet
   escrow), and a repeat thread accepting a stale kind-6 (newest wins).
   Same primitive is the Airbnb/Turo shape: offer terms → accept binds →
-  escrow holds → mutual release or ruling.
+  escrow holds → mutual release or ruling. **Settlement shipped (0.88,
+  2026-08-17)**: either principal proposes a split (one number — what the
+  funder gets back), the other's banner states it and offers Sign or
+  Counter; fresh proposals supersede, whoever signs ends it; a rider's
+  proposal can only pay the driver at the address the driver published;
+  near-total refunds flip the fee to the rider's side. FROST_ROUND round 0
+  MAY carry the claimed amount now — the second implementation caught the
+  rule drift (O21 doing its job) and both agree on 241 vectors. **Left for
+  the field day:** the 2-of-2 accept flow and the settlement UI's live
+  two-phone pass (the underlying split tx is chain-proven, de818596…).
 - **Opt-in live location after commitment.** ~~Spec it before building
   it~~ **specified, 0.88 (2026-08-16)** — §15.12 "Live position after the
   accept": gated on RIDE_ACCEPT, consent per ride per direction, off by
