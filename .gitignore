@@ -19,3 +19,4 @@ view.hex
 **/wallets/
 **/clitest/
 research/monero-rs/*/group/
+android/desktop/build/
