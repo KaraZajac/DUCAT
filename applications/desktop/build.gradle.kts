@@ -275,6 +275,9 @@ dependencies {
     // The screens name icons from the extended set (Receipt, ArrowUpward,
     // …); the phone gets them from the same artifact.
     implementation(compose.materialIconsExtended)
+    // Skia directly, for the off-screen render test: ImageComposeScene hands
+    // back a skia Image, and reading its pixels is how "did it draw" is asked.
+    implementation("org.jetbrains.skiko:skiko-awt:0.8.18")
     // The generated bindings speak JNA on a plain JVM.
     implementation("net.java.dev.jna:jna:5.14.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
@@ -329,6 +332,14 @@ tasks.register<JavaExec>("ringtest") {
 tasks.register<JavaExec>("tilltest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.TillTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// Every hosted screen rendered off-screen, to prove it draws something.
+// `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:rendertest`.
+tasks.register<JavaExec>("rendertest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.RenderTestKt"
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 

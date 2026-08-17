@@ -99,7 +99,7 @@ fun WalletRoom(onTopUp: () -> Unit) {
     val approx = remember(b.spendableOutputs) {
         uniffi.ducat_mobile.approxPaymentsSupported(b.spendableOutputs.toUInt()).toInt()
     }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+    Column(Modifier.fillMaxSize().padding(16.dp)) {
         BalanceCard(
             spendablePxmr = b.spendablePxmr,
             capacity = org.ducatproject.ducat.Capacity(approxPayments = approx),
@@ -116,7 +116,9 @@ fun WalletRoom(onTopUp: () -> Unit) {
             sync = b,
         )
         Spacer(Modifier.height(16.dp))
-        AccountsScreen()
+        // Its own scrolling list: it must not be inside another scroller,
+        // which measures with unbounded height and throws.
+        Box(Modifier.weight(1f)) { AccountsScreen() }
     }
 }
 
@@ -185,7 +187,7 @@ fun SettingsRoom() {
                 Tab(selected = i == tab, onClick = { tab = i }, text = { Text(t) })
             }
         }
-        Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp)) {
+        Box(Modifier.fillMaxSize().padding(12.dp)) {
             when (tab) {
                 // The phone's own settings: language, currency, units, theme.
                 0 -> org.ducatproject.ducat.ui.SettingsScreen(
