@@ -70,8 +70,15 @@ money. Ordered by what blocks 1.0, not by effort.
   the ceremony id); the desk is a full participant because Ceremony.kt is
   shared logic. Flushed out a real bug — an early round-1 share dropped at
   stage "committed" deadlocked one party — fixed by recording every round
-  before advancing. The arbiter-assisted *dispute* release (arbiter
-  co-signs when a principal is gone) is engine-ready, UI later. **Left:**
+  before advancing. ~~The arbiter-assisted *dispute* release~~ **Done +
+  chain-proven, 0.88 (2026-08-17)** — proposeRideSplit(toArbiter): the
+  identical release proposal goes to the third key; the arbiter's
+  co-signature is the ruling; a captured arbiter can at worst pick a
+  split between the named parties. Proven via escrowtest dkg3/rule:
+  driver + arbiter released a funded 2-of-3 with the rider absent (txid
+  ec401a91…). Phone: one "Ask the arbiter to rule" button for the
+  stranded; desk: a ruling console — requests print, approval is a
+  human-written line, the judgment deliberately unautomated. **Left:**
   the rest of the bond UI — co-signer consent needs a payments accessor on
   monero-wallet's SignableTransaction (0.2.0 keeps them private; until then
   the co-signer sees only the fee), plus bond amount and funding flow.
