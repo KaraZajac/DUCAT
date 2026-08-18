@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.NameStore
+import org.ducatproject.ducat.WalletStore
 import uniffi.ducat_mobile.BackupInput
 import uniffi.ducat_mobile.addressForSpendKey
 import uniffi.ducat_mobile.createPersonaSecret
@@ -203,10 +204,28 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                 // then the typed contacts as the authoritative overlay — so a
                 // bundle from another client still restores everyone.
                 ContactStore(context).restoreFromBackup(r)
+                // The money, which is the whole point, and which nothing here
+                // used to write. The bundle carries the spend key and the
+                // height that key was born at, and the import applied the
+                // contacts and dropped the wallet on the floor: the device kept
+                // the empty one it had made minutes earlier, showed 0.000000
+                // XMR under a green "Synced", and printed the *backup's*
+                // address below under "Restored wallet" — so the one check
+                // offered to the user passed against a wallet that was not the
+                // one in use.
+                val address = addressForSpendKey(r.spendKeyHex, stagenet = true)
+                val wallet = WalletStore(context)
+                wallet.save(address, r.spendKeyHex, r.restoreHeight, stagenet = true)
+                // The outputs belong to the key being replaced, and so does the
+                // scan progress. Left alone, `scannedTo` stays at the tip it
+                // reached for the old wallet, so the scanner never looks at the
+                // range where this one's money actually is — a restore that
+                // reports success and then finds nothing, forever.
+                wallet.rescanFrom(r.restoreHeight.toLong())
                 // The address is the check that matters. A bundle that decrypts
                 // has proved the passphrase, not that it holds the wallet you
                 // meant.
-                r to addressForSpendKey(r.spendKeyHex, stagenet = true)
+                r to address
             }
         }
         message = outcome.fold(
