@@ -21,4 +21,5 @@
     <string name="main_card_link_expired">บัตรนั้นหมดอายุแล้ว — ขอใบใหม่</string>
     <string name="main_card_link_ok">ตกลง</string>
     <string name="main_card_link_offline">ยังไม่ได้เชื่อมต่อ — เครื่องนี้ยังเข้าร่วมเครือข่ายไม่เสร็จ การ์ดไม่มีปัญหา ลองใหม่อีกสักครู่</string>
+    <string name="main_card_link_not_ready">ยังอ่านการ์ดของเขาไม่ได้ ถ้าเขาอยู่กับคุณ รอสักครู่แล้วสแกนใหม่ ถ้าไม่ ให้ขอให้เขาเปิด DUCAT</string>
 </resources>

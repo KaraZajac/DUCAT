@@ -21,4 +21,5 @@
     <string name="main_card_link_expired">이 카드는 만료되었습니다. 새 카드를 요청하세요.</string>
     <string name="main_card_link_ok">확인</string>
     <string name="main_card_link_offline">아직 연결되지 않았습니다 — 이 기기가 네트워크 참여를 끝내지 못했습니다. 카드는 멀쩡하니 잠시 후 다시 시도하세요.</string>
+    <string name="main_card_link_not_ready">상대의 카드를 아직 읽을 수 없습니다. 함께 있다면 잠시 후 다시 스캔하고, 아니라면 DUCAT을 열어 달라고 하세요.</string>
 </resources>

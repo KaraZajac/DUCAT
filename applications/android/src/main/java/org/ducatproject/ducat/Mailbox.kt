@@ -188,7 +188,7 @@ object Mailbox {
         }
 
         val raw = nodeDhtGet(scanned.inboxKey, 0u, true)
-            ?: throw IllegalStateException("Their details are not published yet — ask them to open DUCAT.")
+            ?: throw DetailsNotPublished()
         val theirs = parseContactDetails(raw)
 
         val outbox = createLog(context)
@@ -642,6 +642,17 @@ object Mailbox {
      * language instead of repeating an exception message.
      */
     class CardAlreadyUsed : IllegalStateException("card already claimed")
+
+    /**
+     * The card exists but the details behind it have not arrived yet.
+     *
+     * Ordinary at a counter: the till mints a fresh card per sale, and a
+     * customer scanning the moment it appears can outrun the DHT write. Timed
+     * at about forty seconds on stagenet, after which the same card claims
+     * fine — so this is "wait and scan again", not a broken code, and it must
+     * not be reported as one.
+     */
+    class DetailsNotPublished : IllegalStateException("card details not published yet")
 
     /**
      * Veilid's TryAgain surfacing through the bridge as message text.

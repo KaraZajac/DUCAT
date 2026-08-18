@@ -21,4 +21,5 @@
     <string name="main_card_link_expired">Cette carte a expiré — demandez-en une nouvelle.</string>
     <string name="main_card_link_ok">OK</string>
     <string name="main_card_link_offline">Pas encore connecté : ce téléphone n’a pas fini de rejoindre le réseau. La carte est valable ; réessayez dans un instant.</string>
+    <string name="main_card_link_not_ready">Leur carte n’est pas encore lisible. S’ils sont avec vous, attendez un instant et rescannez ; sinon, demandez-leur d’ouvrir DUCAT.</string>
 </resources>

@@ -21,4 +21,5 @@
     <string name="main_card_link_expired">वह कार्ड समाप्त हो चुका है — नया मांगें।</string>
     <string name="main_card_link_ok">ठीक है</string>
     <string name="main_card_link_offline">अभी कनेक्ट नहीं हुआ — यह फ़ोन अभी नेटवर्क से जुड़ना पूरा नहीं कर पाया है। कार्ड ठीक है; थोड़ी देर बाद फिर कोशिश करें।</string>
+    <string name="main_card_link_not_ready">उनका कार्ड अभी पढ़ा नहीं जा सकता। अगर वे आपके साथ हैं तो थोड़ी देर रुककर दोबारा स्कैन करें — वरना उनसे DUCAT खोलने को कहें।</string>
 </resources>

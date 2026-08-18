@@ -21,4 +21,5 @@
     <string name="main_card_link_expired">该名片已过期——请对方发一张新的。</string>
     <string name="main_card_link_ok">好</string>
     <string name="main_card_link_offline">还没连上——这台手机尚未加入网络。名片没问题，稍等片刻再试。</string>
+    <string name="main_card_link_not_ready">对方的名片还读不到。如果对方就在旁边，稍等片刻再扫一次；否则请他们打开 DUCAT。</string>
 </resources>
