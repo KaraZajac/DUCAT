@@ -111,6 +111,10 @@ jobs:
         run: cd applications && ./gradlew --no-daemon :desktop:build
 
       # The resource bridge and the shim layer the phone's screens stand on.
+      # The arithmetic behind the promise users are given out loud.
+      - name: the stake sums add up
+        run: cd applications && ./gradlew --no-daemon :desktop:staketest
+
       - name: the shim layer holds
         run: cd applications && ./gradlew --no-daemon :desktop:restest :desktop:shimtest
 
