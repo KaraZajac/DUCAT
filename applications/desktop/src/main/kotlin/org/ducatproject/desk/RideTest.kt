@@ -140,6 +140,24 @@ fun main() {
         return txid
     }
 
+    /**
+     * The escrow this pair built, at whatever stage it has reached.
+     *
+     * Waiting for stage == "done" exactly was wrong: a proposal moves both
+     * sides past it, so a harness restarted after one would sit waiting for
+     * a state the ceremony had already left. What "built" means is that an
+     * address exists and this device holds a share.
+     */
+    fun builtRide(theirHex: String? = null): org.json.JSONObject? =
+        Ceremony.all(context)
+            .filter { it.optString("address").isNotEmpty() }
+            .filter { it.optString("stage") !in listOf("shared", "committed") }
+            .lastOrNull { o ->
+                theirHex == null || o.optJSONArray("roster")?.let { r ->
+                    (0 until r.length()).any { r.getString(it) == theirHex }
+                } == true
+            }
+
     /** This side's own scan of the escrow — never the other party's word. */
     fun potByOwnScan(idHex: String): Long =
         runCatching { Ceremony.checkRideFunding(context, idHex) }.getOrDefault(0L)
@@ -157,8 +175,7 @@ fun main() {
 
         // The rider starts the escrow; this side joins it from the mailbox.
         val ride = await("the escrow invitation", seconds = 900) {
-            Ceremony.rideWith(context, rider.personaHex)
-                ?.takeIf { it.optString("stage") == "done" && it.optString("address").isNotEmpty() }
+            builtRide(rider.personaHex)
         } ?: return
         val id = ride.optString("id")
         println("RIDE_BUILT ${ride.optString("address")} (id ${id.take(8)})")
@@ -189,6 +206,12 @@ fun main() {
         // stagenet that is up to forty minutes of waiting, so the proposal
         // retries rather than failing — which is exactly what the app's own
         // retry button does, and the reason it exists.
+        // Always propose afresh, even when a proposal is already standing.
+        // FROST's signing state lives in memory keyed by (ceremony, party)
+        // and dies with the process, so a restarted driver cannot complete
+        // the round it started last time — the co-signature would arrive for
+        // a machine that no longer exists. A fresh proposal supersedes, with
+        // fresh nonces, which is exactly what the app's retry button does.
         var said = ""
         var hardFailure: String? = null
         val proposed = await("the escrow's funding to mature", seconds = 3600) {
@@ -208,10 +231,21 @@ fun main() {
         if (proposed != true) return
         println("RIDE_PROPOSED driver asked for the fare")
 
-        val txid = await("the rider to consent and the release to land", seconds = 1800) {
-            Ceremony.all(context).firstOrNull { it.optString("id") == id }
-                ?.optString("releaseTxid")?.takeIf { it.isNotEmpty() }
-        } ?: return
+        var txid: String? = null
+        // Re-propose on a long silence rather than waiting forever: over a
+        // network that drops messages, "ask again" is the whole recovery
+        // strategy, and the ceremony is built to be asked again.
+        for (attempt in 1..6) {
+            txid = await("the rider to consent and the release to land", seconds = 600) {
+                Ceremony.all(context).firstOrNull { it.optString("id") == id }
+                    ?.optString("releaseTxid")?.takeIf { it.isNotEmpty() }
+            }
+            if (txid != null) break
+            println("RIDE_RETRY no release yet — proposing again ($attempt)")
+            runCatching { Ceremony.proposeRideRelease(context, id) }
+                .onFailure { println("RIDE_WAIT re-propose: ${it.message}") }
+        }
+        if (txid == null) { println("RIDE_FAIL the release never landed"); return }
         println("RIDE_RELEASED $txid")
 
         // What the driver actually holds, by its own scan — the only figure
@@ -264,8 +298,9 @@ fun main() {
     println("RIDE_STARTED ${id.take(8)} fare=${formatXmr(fare)} stake=${formatXmr(stake)}")
 
     val ride = await("both sides to derive the escrow", seconds = 900) {
-        Ceremony.all(context).firstOrNull { it.optString("id") == id }
-            ?.takeIf { it.optString("stage") == "done" && it.optString("address").isNotEmpty() }
+        Ceremony.all(context).firstOrNull {
+            it.optString("id") == id && it.optString("address").isNotEmpty()
+        }
     } ?: return
     println("RIDE_BUILT ${ride.optString("address")}")
 
@@ -299,17 +334,25 @@ fun main() {
 
     // The driver proposes; consent is the rider's, and never automatic in
     // the app. Here the test plays the tap.
-    val pending = await("the driver's proposal", seconds = 1800) {
-        Ceremony.all(context).firstOrNull {
-            it.optString("id") == id && it.optString("stage") == "release_pending"
+    // Sign every proposal that arrives, until the release is on chain. A
+    // driver whose process restarted must propose again (its signing state
+    // died with it), and the rider's consent is asked for again — the same
+    // tap, not a different decision.
+    var signed = 0
+    val landed = await("the release to land", seconds = 3600) {
+        val o = Ceremony.all(context).firstOrNull { it.optString("id") == id }
+        val done = o?.optString("releaseTxid").orEmpty()
+        if (done.isNotEmpty()) return@await done
+        if (o?.optString("stage") == "release_pending") {
+            println("RIDE_PROPOSED rider sees back=${o.optLong("pendingRiderBack")} pXMR")
+            runCatching { Ceremony.approveRideRelease(context, id) }
+                .onSuccess { signed++; println("RIDE_SIGNED rider consented ($signed)") }
+                .onFailure { println("RIDE_WAIT sign: ${it.message}") }
         }
-    } ?: return
-    println("RIDE_PROPOSED rider sees back=${pending.optLong("pendingRiderBack")} pXMR")
-
-    runCatching { Ceremony.approveRideRelease(context, id) }.getOrElse {
-        println("RIDE_FAIL rider could not sign: ${it.message}"); return
+        null
     }
-    println("RIDE_SIGNED rider consented")
+    if (landed == null) { println("RIDE_FAIL no release after consenting $signed time(s)"); return }
+    println("RIDE_RELEASED $landed")
 
     val before = Wallet.balances(context).let { it.spendablePxmr + it.lockedPxmr }
     await("the margin to come home", seconds = 1800) {
