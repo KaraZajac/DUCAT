@@ -22,6 +22,7 @@ fun main() {
     // process-death test is exactly "same state, new process".
     val dir = System.getenv("DUCAT_DESK_STATE")?.let { java.io.File(it).apply { mkdirs() } }
         ?: kotlin.io.path.createTempDirectory("ducat-desk-e2e").toFile()
+    Unlock.orExit(dir)
     val context = DeskContext(dir)
     println("e2e: state in ${dir.absolutePath}")
     nodeStart("${dir.absolutePath}/veilid", true)

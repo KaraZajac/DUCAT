@@ -31,6 +31,8 @@ fun main(args: Array<String>) {
     val lock = java.io.RandomAccessFile(File(dir, "desk.lock"), "rw").channel.tryLock()
     check(lock != null) { "ARBITER_FAIL another desk is running on $dir" }
 
+    Unlock.orExit(dir)
+
     val context = DeskContext(dir)
     // `--name Marta` names the standing identity once; cards and the serving
     // line read it from then on. An unnamed arbiter serves fine — but a card

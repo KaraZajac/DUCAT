@@ -27,6 +27,8 @@ fun main() {
     val lock = java.io.RandomAccessFile(File(dir, "desk.lock"), "rw").channel.tryLock()
     check(lock != null) { "RINGTEST_FAIL the desk UI is running on $dir — close it first" }
 
+    Unlock.orExit(dir)
+
     val context = DeskContext(dir)
     val contacts = ContactStore(context).all()
     println("ringtest: ${contacts.size} contact(s): " +

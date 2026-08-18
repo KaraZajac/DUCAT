@@ -596,6 +596,23 @@ const KDF_MEM_KIB: u32 = 64 * 1024;
 const KDF_PASSES: u32 = 3;
 const KDF_LANES: u32 = 1;
 
+/// The same Argon2id, for a key that is not a backup's.
+///
+/// A desk keeps its stores in files rather than behind an Android Keystore, so
+/// it needs a key from a passphrase too — and it must not be the *same* key as
+/// the backup's, or a stolen backup passphrase would open the live store and a
+/// stolen store would open the backup. `context` is the domain separator: it
+/// is hashed in ahead of the passphrase, so two purposes with one passphrase
+/// derive two unrelated keys. The parameters are shared deliberately, because
+/// they are the reviewed ones (§4.3).
+pub fn derive_for(context: &[u8], passphrase: &[u8], salt: &[u8; 16]) -> Result<[u8; 32], Reject> {
+    let mut input = Vec::with_capacity(context.len() + 1 + passphrase.len());
+    input.extend_from_slice(context);
+    input.push(0x1f); // a byte no context string contains: an unambiguous join
+    input.extend_from_slice(passphrase);
+    derive(&input, salt)
+}
+
 fn derive(passphrase: &[u8], salt: &[u8; 16]) -> Result<[u8; 32], Reject> {
     let params = argon2::Params::new(KDF_MEM_KIB, KDF_PASSES, KDF_LANES, Some(32))
         .map_err(|_| Reject::with_detail(RejectCode::Malformed, "bad kdf parameters"))?;

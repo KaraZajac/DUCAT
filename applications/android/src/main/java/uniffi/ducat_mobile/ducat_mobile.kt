@@ -891,6 +891,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1066,6 +1070,8 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_prune_prekey(`bundleBytes`: RustBuffer.ByValue,`id`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_random_bytes(`n`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_read_contact_card(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_reconcile_float(`maxExposurePxmr`: Long,`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -1083,6 +1089,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_stand_record_key(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_thread_aad(`mineHex`: RustBuffer.ByValue,`theirsHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_vault_key(`passphrase`: RustBuffer.ByValue,`salt`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_verify_thread(`messages`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
@@ -1358,6 +1366,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_prune_prekey(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_random_bytes(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_read_contact_card(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_reconcile_float(
@@ -1375,6 +1385,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_stand_record_key(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_thread_aad(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_vault_key(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_verify_thread(
     ): Short
@@ -1437,7 +1449,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_create_contact_card() != 49005.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_create_persona_secret() != 62676.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_create_persona_secret() != 6852.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_create_wallet() != 2937.toShort()) {
@@ -1635,6 +1647,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_prune_prekey() != 19780.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_random_bytes() != 387.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_read_contact_card() != 34176.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1660,6 +1675,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_thread_aad() != 26627.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_vault_key() != 41389.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_verify_thread() != 14473.toShort()) {
@@ -5397,10 +5415,7 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     )
     }
     
-
-        /**
-         * A persona key. Thirty-two bytes of nothing in particular, which is the point.
-         */ fun `createPersonaSecret`(): kotlin.ByteArray {
+ fun `createPersonaSecret`(): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_create_persona_secret(
@@ -6385,6 +6400,18 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     
 
         /**
+         * Sixteen fresh bytes, for a salt or a nonce the caller stores in the clear.
+         */ fun `randomBytes`(`n`: kotlin.UInt): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_random_bytes(
+        FfiConverterUInt.lower(`n`),_status)
+}
+    )
+    }
+    
+
+        /**
          * Read a card that arrived by NFC, QR or a pasted `ducat:` URI.
          *
          * The signature proves the persona key made this card. It does **not** prove
@@ -6501,6 +6528,29 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_thread_aad(
         FfiConverterString.lower(`mineHex`),FfiConverterString.lower(`theirsHex`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * A persona key. Thirty-two bytes of nothing in particular, which is the point.
+         * A desk's store key, from a passphrase.
+         *
+         * The phone keeps its secrets in EncryptedSharedPreferences with a key the
+         * Android Keystore holds and never hands over. A desktop has no such box, so
+         * the desk derives its key from a passphrase the operator types — same
+         * Argon2id parameters as §4.3's backup, domain-separated so the two keys are
+         * unrelated even when the passphrase is the same.
+         *
+         * `salt` is stored beside the data in the clear, which is correct: a salt is
+         * not a secret, and reusing one would be.
+         */
+    @Throws(BackupException::class) fun `vaultKey`(`passphrase`: kotlin.String, `salt`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(BackupException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_vault_key(
+        FfiConverterString.lower(`passphrase`),FfiConverterByteArray.lower(`salt`),_status)
 }
     )
     }

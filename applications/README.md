@@ -117,7 +117,7 @@ Six phone files stay phone-side, each for a reason no shim can fix:
 | `HailMap.kt` | osmdroid is an Android view | `RouteMapDesk.kt` — Compose-drawn route and driver net, no tile server |
 | `Location.kt` | GPS | `LocationDesk.kt` — a position typed once |
 | `PlatformWindow.kt` | Android inset flags | `PlatformWindowDesk.kt` |
-| `Onboarding.kt` | a phone's first-run flow | the desk mints its wallet at first launch |
+| `Onboarding.kt` | a phone's first-run flow | the desk sets a passphrase, then requires a backup |
 
 **The rule for anything new:** content crosses, window chrome stays home. When
 a screen needs a platform's own behaviour, split it the way `PlatformWindow`
@@ -136,6 +136,7 @@ cd applications
 ./gradlew :desktop:arbiter       # the standing escrow arbiter (§15.12)
 ./gradlew :desktop:restest       # resource bridge: ids, languages, plurals
 ./gradlew :desktop:shimtest      # the shim layer: every id, avatar encoder, clipboard
+DUCAT_DESK_STATE=/tmp/v ./gradlew :desktop:vaulttest     # encryption at rest
 DUCAT_DESK_STATE=/tmp/r ./gradlew :desktop:rendertest   # every screen, drawn off-screen
 ```
 
@@ -143,3 +144,29 @@ DUCAT_DESK_STATE=/tmp/r ./gradlew :desktop:rendertest   # every screen, drawn of
 through `ImageComposeScene` with no display attached and fails if the result is
 a blank rectangle. Compiling is not drawing — it caught two rooms that crashed
 on first composition.
+
+
+## The desk's keys at rest
+
+The phone keeps its spend key, persona secret and prekeys in
+EncryptedSharedPreferences, whose master key lives in the Android Keystore and
+never touches disk. A desktop has no such box, so the desk derives its key from
+a passphrase: Argon2id with §4.3's reviewed parameters, domain-separated from
+the backup's key, and XChaCha20-Poly1305 per store file.
+
+```sh
+# lock a desk that predates the vault (arbiters, tills)
+DUCAT_DESK_STATE=~/ducat-arbiter DUCAT_DESK_PASSPHRASE='…' ./gradlew :desktop:vaultset
+# headless tools take the same variable
+DUCAT_DESK_STATE=~/ducat-arbiter DUCAT_DESK_PASSPHRASE='…' ./gradlew :desktop:arbiter
+```
+
+What it buys: a stolen disk, a synced home directory, a laptop backup, another
+user on the machine — none of those yield the keys. What it does not buy:
+anything against code running as the operator while the desk is open, because
+the key is in memory then, as it must be.
+
+**A locked desk refuses to read a store rather than reporting an empty one.**
+That distinction is the whole game: empty means "no wallet", no wallet means
+the desk mints a fresh one, and a till would then take payments into a wallet
+nobody can restore while the real one sits sealed beside it.

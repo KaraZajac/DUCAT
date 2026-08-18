@@ -108,6 +108,8 @@ fun main() {
     }
     render("place") { DeskPlaceSetting() }
     render("firstrun") { FirstRun(onDone = {}) }
+    render("protect") { ProtectStep(dir, onSettled = {}) }
+    render("unlock") { UnlockScreen(dir, onUnlocked = {}) }
     render("phone-settings") {
         org.ducatproject.ducat.ui.SettingsScreen(
             themeMode = org.ducatproject.ducat.ui.ThemeMode.Mocha,

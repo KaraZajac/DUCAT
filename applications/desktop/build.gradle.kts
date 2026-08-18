@@ -335,6 +335,22 @@ tasks.register<JavaExec>("tilltest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// Lock an existing desk (or sweep one already locked).
+// `DUCAT_DESK_STATE=… DUCAT_DESK_PASSPHRASE=… ./gradlew :desktop:vaultset`.
+tasks.register<JavaExec>("vaultset") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.VaultSetKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// Encryption at rest: the secret is gone from the bytes, or it is not.
+// `DUCAT_DESK_STATE=<throwaway> ./gradlew :desktop:vaulttest`.
+tasks.register<JavaExec>("vaulttest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.VaultTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Every hosted screen rendered off-screen, to prove it draws something.
 // `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:rendertest`.
 tasks.register<JavaExec>("rendertest") {

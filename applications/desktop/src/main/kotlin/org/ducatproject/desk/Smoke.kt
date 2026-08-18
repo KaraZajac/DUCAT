@@ -13,6 +13,7 @@ import org.ducatproject.ducat.PersonaStore
  */
 fun main() {
     val dir = kotlin.io.path.createTempDirectory("ducat-desk-smoke").toFile()
+    Unlock.orExit(dir)
     val context = DeskContext(dir)
     println("smoke: starting node in ${dir.absolutePath}")
     nodeStart("${dir.absolutePath}/veilid", true)

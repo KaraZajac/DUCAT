@@ -86,6 +86,9 @@ Reviewing this list back to us is not useful; breaking something *not* on it is.
   being the proposer.
 - **NFC has never run on hardware.** Compile-verified, never field-tested.
 - **Everything is stagenet.** No mainnet transaction has ever been made.
+- **A desk's vault key is only as good as its passphrase**, and unlike a
+  phone there is no hardware to rate-limit guesses against a stolen disk.
+  Argon2id at 64 MiB / 3 passes is the only brake.
 - **Builds are debug-signed.** §11's reproducible-build-and-independent-key
   requirement is not met.
 - **No clean-room implementer.** O21 asks for someone who has never read

@@ -33,6 +33,8 @@ fun main() {
     val lock = java.io.RandomAccessFile(File(dir, "desk.lock"), "rw").channel.tryLock()
     check(lock != null) { "TILL_FAIL another desk is running on $dir" }
 
+    Unlock.orExit(dir)
+
     val context = DeskContext(dir)
     NameStore(context).get() ?: NameStore(context).put("Corner Café")
     nodeStart("${dir.absolutePath}/veilid", true)

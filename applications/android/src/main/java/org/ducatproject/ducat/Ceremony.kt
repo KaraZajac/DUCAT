@@ -257,7 +257,18 @@ object Ceremony {
         }.sorted()
         val arbiterIdx = arbiter?.let { indexOf(roster, it.personaHex) } ?: 0
         val funderIdx = indexOf(roster, mineHex)
-        val nonce = java.util.UUID.randomUUID().toString().take(8)
+        // 128 bits, not the 32 that `UUID…take(8)` was giving. The ceremony
+        // id is SHA-256 over the roster and this nonce, and it is the DKG's
+        // context string as well as the seed for the funder's refund
+        // subaddress — so its requirement is uniqueness, not secrecy, and two
+        // ceremonies colliding would share a refund address ("so two rides
+        // never link" is the comment below) and collide in the engine's
+        // (ceremony_id, i) state map while one is still in flight. For a
+        // fixed roster, eight hex characters put the birthday bound around
+        // 65k ceremonies; the full sixteen bytes cost nothing.
+        val nonce = ByteArray(16)
+            .also(java.security.SecureRandom()::nextBytes)
+            .joinToString("") { "%02x".format(it) }
         val id = ceremonyId(roster, nonce)
         val idHex = id.toHexString()
         val i = funderIdx

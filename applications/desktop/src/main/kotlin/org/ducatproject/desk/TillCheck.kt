@@ -18,6 +18,7 @@ fun main() {
             ?: error("TILLCHECK_FAIL set DUCAT_DESK_STATE"),
     )
     check(dir.isDirectory) { "TILLCHECK_FAIL no desk state at $dir" }
+    Unlock.orExit(dir)
     val context = DeskContext(dir)
     check(WalletStore(context).address() != null) { "TILLCHECK_FAIL no wallet here" }
 

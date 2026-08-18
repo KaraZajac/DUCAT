@@ -108,6 +108,12 @@ jobs:
       - name: the shim layer holds
         run: cd applications && ./gradlew --no-daemon :desktop:restest :desktop:shimtest
 
+      # Encryption at rest, checked by looking for the secret in the bytes.
+      - name: the desk's vault keeps its secret
+        env:
+          DUCAT_DESK_STATE: ${{ runner.temp }}/desk-vault
+        run: cd applications && ./gradlew --no-daemon :desktop:vaulttest
+
       - name: backup round-trip and profile scoping
         run: cd applications && ./gradlew --no-daemon :desktop:backuptest :desktop:profilescope
 

@@ -198,8 +198,16 @@ private fun runDesk(deskDir: File) = application {
         var room by remember { mutableStateOf(Room.Conversations) }
         // §4.3: the same gate the phone keeps. Read once at launch; the
         // first-run screen sets it when a backup has actually been exported.
-        var onboarded by remember {
-            mutableStateOf(org.ducatproject.ducat.ui.ThemePreference(context).onboarded)
+        // The vault first: a locked desk cannot read the preference that
+        // says whether it is onboarded, let alone a wallet.
+        var locked by remember { mutableStateOf(!Unlock.tryQuiet(deskDir)) }
+        var protected by remember {
+            mutableStateOf(org.ducatproject.ducat.DeskVault.exists(deskDir))
+        }
+        var onboarded by remember(locked) {
+            mutableStateOf(
+                !locked && org.ducatproject.ducat.ui.ThemePreference(context).onboarded,
+            )
         }
         var payOpen by remember { mutableStateOf(false) }
         var profileFor by remember { mutableStateOf<Contact?>(null) }
@@ -227,7 +235,8 @@ private fun runDesk(deskDir: File) = application {
 
         // The node, then the poller: the same loop the phone's service runs,
         // with the wallet's scan folded in beside the mailbox sweep.
-        LaunchedEffect(Unit) {
+        LaunchedEffect(locked) {
+            if (locked) return@LaunchedEffect
             deskName = runCatching { MyProfile(context).name() }.getOrNull()
             withContext(Dispatchers.IO) {
                 runCatching { nodeStart(File(deskDir, "veilid").absolutePath, true) }
@@ -316,6 +325,15 @@ private fun runDesk(deskDir: File) = application {
         ) {
         MaterialTheme(colorScheme = darkColorScheme()) {
             Surface(Modifier.fillMaxSize()) {
+                if (locked) {
+                    UnlockScreen(deskDir, onUnlocked = { locked = false })
+                    return@Surface
+                }
+                if (!protected) {
+                    // Offered once, before anything is worth stealing.
+                    ProtectStep(deskDir, onSettled = { protected = true })
+                    return@Surface
+                }
                 if (!onboarded) {
                     // Nothing else is reachable until the keys have a copy
                     // that outlives this machine.

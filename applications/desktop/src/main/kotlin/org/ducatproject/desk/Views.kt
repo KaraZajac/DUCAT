@@ -377,3 +377,136 @@ fun FirstRun(onDone: () -> Unit) {
         }
     }
 }
+
+
+/**
+ * The lock screen: a desk whose vault exists but is closed.
+ *
+ * There is nothing behind this — the stores cannot be read without the key,
+ * so this is not a screen guarding a door, it is the door.
+ */
+@Composable
+fun UnlockScreen(dir: java.io.File, onUnlocked: () -> Unit) {
+    var pass by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(Modifier.width(420.dp)) {
+            Text("This desk is locked", style = MaterialTheme.typography.headlineSmall)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Its keys are encrypted on disk. The passphrase is the only " +
+                    "thing that opens them — it is not stored anywhere, here " +
+                    "or elsewhere.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Spacer(Modifier.height(16.dp))
+            OutlinedTextField(
+                value = pass,
+                onValueChange = { pass = it; error = null },
+                singleLine = true,
+                label = { Text("Passphrase") },
+                visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            error?.let {
+                Spacer(Modifier.height(6.dp))
+                Text(it, color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall)
+            }
+            Spacer(Modifier.height(12.dp))
+            Button(
+                enabled = !busy && pass.isNotEmpty(),
+                onClick = {
+                    busy = true
+                    // Argon2id at 64 MiB is meant to take a moment; off the
+                    // frame thread so the window does not appear to hang.
+                    Thread {
+                        val r = org.ducatproject.ducat.DeskVault.unlock(dir, pass)
+                        busy = false
+                        if (r.isSuccess) onUnlocked()
+                        else error = "That passphrase does not open this desk."
+                    }.start()
+                },
+            ) { Text(if (busy) "Opening…" else "Unlock") }
+        }
+    }
+}
+
+/**
+ * Choosing a passphrase, on a desk that has none.
+ *
+ * Declining is allowed and says what it costs, because a desk that refuses to
+ * run without one would strand every desk that already exists — and a warning
+ * someone read beats a lock they worked around.
+ */
+@Composable
+fun ProtectStep(dir: java.io.File, onSettled: () -> Unit) {
+    var pass by remember { mutableStateOf("") }
+    var again by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    Column(Modifier.fillMaxSize().padding(24.dp)) {
+        Text("Lock this desk's keys", style = MaterialTheme.typography.headlineSmall)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "A phone keeps its keys in hardware this machine does not have, so " +
+                "the desk encrypts them with a passphrase you choose. You will " +
+                "be asked for it each time the desk starts.",
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "It is not stored anywhere and cannot be recovered — the backup you " +
+                "export next is what survives a forgotten one.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Spacer(Modifier.height(16.dp))
+        OutlinedTextField(
+            value = pass,
+            onValueChange = { pass = it; error = null },
+            singleLine = true,
+            label = { Text("Passphrase") },
+            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+        )
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = again,
+            onValueChange = { again = it; error = null },
+            singleLine = true,
+            label = { Text("Again") },
+            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+        )
+        error?.let {
+            Spacer(Modifier.height(6.dp))
+            Text(it, color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall)
+        }
+        Spacer(Modifier.height(16.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Button(
+                enabled = !busy && pass.length >= 8 && pass == again,
+                onClick = {
+                    busy = true
+                    Thread {
+                        val r = org.ducatproject.ducat.DeskVault.create(dir, pass)
+                        busy = false
+                        if (r.isSuccess) onSettled()
+                        else error = r.exceptionOrNull()?.message ?: "Could not lock this desk."
+                    }.start()
+                },
+            ) { Text(if (busy) "Locking…" else "Use this passphrase") }
+            Spacer(Modifier.width(12.dp))
+            TextButton(onClick = onSettled) { Text("Not now") }
+            Spacer(Modifier.width(12.dp))
+            Text(
+                when {
+                    pass.isNotEmpty() && pass.length < 8 -> "At least eight characters."
+                    pass.isNotEmpty() && pass != again -> "The two do not match."
+                    else -> "Without one, the keys stay readable to anything that can read your home directory."
+                },
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}

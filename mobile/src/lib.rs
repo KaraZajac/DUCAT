@@ -580,6 +580,35 @@ pub fn export_backup(
 }
 
 /// A persona key. Thirty-two bytes of nothing in particular, which is the point.
+/// A desk's store key, from a passphrase.
+///
+/// The phone keeps its secrets in EncryptedSharedPreferences with a key the
+/// Android Keystore holds and never hands over. A desktop has no such box, so
+/// the desk derives its key from a passphrase the operator types — same
+/// Argon2id parameters as §4.3's backup, domain-separated so the two keys are
+/// unrelated even when the passphrase is the same.
+///
+/// `salt` is stored beside the data in the clear, which is correct: a salt is
+/// not a secret, and reusing one would be.
+#[uniffi::export]
+pub fn vault_key(passphrase: String, salt: Vec<u8>) -> Result<Vec<u8>, BackupError> {
+    let salt: [u8; 16] = salt
+        .try_into()
+        .map_err(|_| BackupError::Failed("a vault salt is 16 bytes".into()))?;
+    ducat_core::backup::derive_for(b"DUCAT-DESK-VAULT-v1", passphrase.as_bytes(), &salt)
+        .map(|k| k.to_vec())
+        .map_err(|e| BackupError::Failed(format!("vault key: {e:?}")))
+}
+
+/// Sixteen fresh bytes, for a salt or a nonce the caller stores in the clear.
+#[uniffi::export]
+pub fn random_bytes(n: u32) -> Vec<u8> {
+    use rand_core::{OsRng, RngCore};
+    let mut b = vec![0u8; n as usize];
+    OsRng.fill_bytes(&mut b);
+    b
+}
+
 #[uniffi::export]
 pub fn create_persona_secret() -> Vec<u8> {
     use rand_core::{OsRng, RngCore};
