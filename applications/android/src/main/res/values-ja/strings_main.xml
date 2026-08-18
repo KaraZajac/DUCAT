@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">リンクが壊れているか、すでに使用済みか、無効になっている可能性があります。</string>
     <string name="main_card_link_expired">このカードは期限切れです。新しいカードをもらってください。</string>
     <string name="main_card_link_ok">OK</string>
+    <string name="main_card_link_offline">まだ接続できていません。この端末はネットワークへの参加が完了していません。カードは問題ありません。少し待ってからもう一度お試しください。</string>
 </resources>

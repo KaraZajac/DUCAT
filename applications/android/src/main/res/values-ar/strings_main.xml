@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">قد يكون الرابط معطوبًا أو مُطالَبًا به من قبل أو لم يعد صالحًا.</string>
     <string name="main_card_link_expired">انتهت صلاحية البطاقة — اطلب واحدة جديدة.</string>
     <string name="main_card_link_ok">حسنًا</string>
+    <string name="main_card_link_offline">لا يوجد اتصال بعد — لم ينتهِ هذا الهاتف من الانضمام إلى الشبكة. البطاقة سليمة؛ أعد المحاولة بعد لحظة.</string>
 </resources>

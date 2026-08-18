@@ -243,7 +243,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     var cardFail by remember { mutableStateOf<Int?>(null) }
     LaunchedEffect(tappedCard) {
         val uri = tappedCard ?: return@LaunchedEffect
-        MainActivity.claimLink.value = null
+        // Cleared at the end, not here: this effect is keyed on the flow, so
+        // emptying it first changes the key and cancels the read below at its
+        // first suspension point. Reading a card is fast enough to usually win
+        // that race, which is the worst kind of bug to leave lying around.
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             runCatching { uniffi.ducat_mobile.readContactCard(uri) }
         }.onSuccess { card ->
@@ -251,8 +254,13 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             else cardAsk = uri to (card.assertedName ?: "?")
         }.onFailure {
             DucatLog.w("Main", "card link unreadable: ${it.message}")
-            cardFail = R.string.main_card_link_failed_body
+            cardFail = if (Mailbox.isOffline(it)) {
+                R.string.main_card_link_offline
+            } else {
+                R.string.main_card_link_failed_body
+            }
         }
+        MainActivity.claimLink.value = null
     }
     cardAsk?.let { (uri, who) ->
         AlertDialog(
@@ -271,7 +279,23 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                         }.onSuccess { overlay = Overlay.Chat(it) }
                             .onFailure {
                                 DucatLog.w("Main", "card link claim: ${it.message}")
-                                cardFail = R.string.main_card_link_failed_body
+                                // A node that has not finished connecting is
+                                // not a bad card. Saying "broken, already
+                                // claimed, or no longer valid" over a claim
+                                // that failed offline sends someone back to ask
+                                // for a replacement — burning the good card
+                                // they are holding, since a card is claim-once.
+                                cardFail = when {
+                                    Mailbox.isOffline(it) ->
+                                        R.string.main_card_link_offline
+                                    // The precise reason, in the reader's own
+                                    // language: a claimed card really does need
+                                    // replacing, and saying so beats a list of
+                                    // three maybes.
+                                    it is Mailbox.CardAlreadyUsed ->
+                                        R.string.contacts_reply_replay
+                                    else -> R.string.main_card_link_failed_body
+                                }
                             }
                     }
                 }) { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_add)) }

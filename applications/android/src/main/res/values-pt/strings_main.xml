@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">O link pode estar quebrado, já reclamado ou fora de validade.</string>
     <string name="main_card_link_expired">Esse cartão expirou — peça um novo.</string>
     <string name="main_card_link_ok">OK</string>
+    <string name="main_card_link_offline">Ainda sem ligação — este telefone ainda não acabou de entrar na rede. O cartão está bom; tente daqui a pouco.</string>
 </resources>

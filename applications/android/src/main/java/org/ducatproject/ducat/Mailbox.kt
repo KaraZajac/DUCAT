@@ -181,7 +181,10 @@ object Mailbox {
         // nowhere left to write and this is the only way to find out.
         val already = nodeDhtGet(scanned.inboxKey, 1u, true)
         if (already != null && already.isNotEmpty()) {
-            throw IllegalStateException("That card has already been used. Ask them for a new one.")
+            // Typed, because callers have to tell this apart from "the network
+            // is not up yet" and from a genuinely malformed card, and matching
+            // on English prose to do it would break in every other language.
+            throw CardAlreadyUsed()
         }
 
         val raw = nodeDhtGet(scanned.inboxKey, 0u, true)
@@ -631,8 +634,24 @@ object Mailbox {
         return got
     }
 
-    /** Veilid's TryAgain surfacing through the bridge as message text. */
-    private fun isOffline(e: Exception) =
+    /**
+     * A card whose one reply slot is already written (§7.5's claim-once).
+     *
+     * The English sentence it used to carry is a string resource
+     * (`contacts_reply_replay`), so the screen can say it in the reader's own
+     * language instead of repeating an exception message.
+     */
+    class CardAlreadyUsed : IllegalStateException("card already claimed")
+
+    /**
+     * Veilid's TryAgain surfacing through the bridge as message text.
+     *
+     * Not private: a screen that tells someone their contact card is "broken,
+     * already claimed, or no longer valid" when the node simply has not
+     * finished connecting sends them back to ask for a replacement card and
+     * burn a perfectly good one.
+     */
+    fun isOffline(e: Throwable) =
         e.message?.contains("TryAgain", ignoreCase = true) == true
 
     private fun pollOne(context: Context, store: ContactStore, c: Contact, minePersonaHex: String): Int {

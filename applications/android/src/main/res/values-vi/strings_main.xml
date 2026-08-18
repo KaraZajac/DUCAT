@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">Liên kết có thể bị hỏng, đã được nhận hoặc không còn hiệu lực.</string>
     <string name="main_card_link_expired">Thẻ đó đã hết hạn — hãy xin thẻ mới.</string>
     <string name="main_card_link_ok">OK</string>
+    <string name="main_card_link_offline">Chưa kết nối — máy này chưa tham gia xong mạng lưới. Thẻ vẫn tốt; hãy thử lại sau giây lát.</string>
 </resources>

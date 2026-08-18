@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">شاید پیوند خراب، قبلاً استفاده‌شده یا دیگر معتبر نباشد.</string>
     <string name="main_card_link_expired">این کارت منقضی شده — کارت تازه‌ای بخواهید.</string>
     <string name="main_card_link_ok">باشه</string>
+    <string name="main_card_link_offline">هنوز متصل نیست — این گوشی هنوز پیوستن به شبکه را تمام نکرده است. کارت سالم است؛ کمی بعد دوباره تلاش کنید.</string>
 </resources>

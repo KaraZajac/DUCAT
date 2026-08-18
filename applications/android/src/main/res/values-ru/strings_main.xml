@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">Ссылка может быть повреждена, уже использована или недействительна.</string>
     <string name="main_card_link_expired">Срок карточки истёк — попросите новую.</string>
     <string name="main_card_link_ok">OK</string>
+    <string name="main_card_link_offline">Ещё нет соединения — телефон не закончил подключение к сети. С карточкой всё в порядке, попробуйте через мгновение.</string>
 </resources>

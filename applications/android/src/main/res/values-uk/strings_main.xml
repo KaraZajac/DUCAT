@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">Посилання може бути пошкоджене, вже використане або недійсне.</string>
     <string name="main_card_link_expired">Термін картки минув — попросіть нову.</string>
     <string name="main_card_link_ok">OK</string>
+    <string name="main_card_link_offline">Ще немає з’єднання — телефон не завершив підключення до мережі. З карткою все гаразд, спробуйте за мить.</string>
 </resources>

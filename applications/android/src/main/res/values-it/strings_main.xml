@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">Il link potrebbe essere rotto, già riscattato o non più valido.</string>
     <string name="main_card_link_expired">Quella scheda è scaduta: chiedine una nuova.</string>
     <string name="main_card_link_ok">OK</string>
+    <string name="main_card_link_offline">Non ancora connesso: questo telefono non ha finito di entrare nella rete. La scheda è valida, riprova tra un momento.</string>
 </resources>

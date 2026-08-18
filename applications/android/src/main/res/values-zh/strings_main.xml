@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">链接可能已损坏、已被领取或已失效。</string>
     <string name="main_card_link_expired">该名片已过期——请对方发一张新的。</string>
     <string name="main_card_link_ok">好</string>
+    <string name="main_card_link_offline">还没连上——这台手机尚未加入网络。名片没问题，稍等片刻再试。</string>
 </resources>

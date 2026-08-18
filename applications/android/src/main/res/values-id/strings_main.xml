@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">Tautannya mungkin rusak, sudah diklaim, atau tidak berlaku lagi.</string>
     <string name="main_card_link_expired">Kartu itu sudah kedaluwarsa — mintalah yang baru.</string>
     <string name="main_card_link_ok">Oke</string>
+    <string name="main_card_link_offline">Belum tersambung — ponsel ini belum selesai bergabung ke jaringan. Kartunya baik-baik saja; coba lagi sebentar.</string>
 </resources>

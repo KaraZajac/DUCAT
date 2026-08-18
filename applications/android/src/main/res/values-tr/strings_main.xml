@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">Bağlantı bozuk, zaten kullanılmış ya da artık geçersiz olabilir.</string>
     <string name="main_card_link_expired">Bu kartın süresi dolmuş — yenisini isteyin.</string>
     <string name="main_card_link_ok">Tamam</string>
+    <string name="main_card_link_offline">Henüz bağlı değil — bu telefon ağa katılmayı bitirmedi. Kart sağlam; birazdan tekrar dene.</string>
 </resources>

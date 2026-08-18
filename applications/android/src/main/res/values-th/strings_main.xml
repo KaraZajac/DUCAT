@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">ลิงก์อาจเสีย ถูกใช้ไปแล้ว หรือหมดอายุแล้ว</string>
     <string name="main_card_link_expired">บัตรนั้นหมดอายุแล้ว — ขอใบใหม่</string>
     <string name="main_card_link_ok">ตกลง</string>
+    <string name="main_card_link_offline">ยังไม่ได้เชื่อมต่อ — เครื่องนี้ยังเข้าร่วมเครือข่ายไม่เสร็จ การ์ดไม่มีปัญหา ลองใหม่อีกสักครู่</string>
 </resources>

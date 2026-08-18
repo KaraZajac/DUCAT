@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">Link może być uszkodzony, już wykorzystany albo nieważny.</string>
     <string name="main_card_link_expired">Ta wizytówka wygasła — poproś o nową.</string>
     <string name="main_card_link_ok">OK</string>
+    <string name="main_card_link_offline">Jeszcze bez połączenia — ten telefon nie skończył dołączać do sieci. Karta jest w porządku; spróbuj za chwilę.</string>
 </resources>

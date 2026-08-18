@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">El enlace puede estar roto, ya reclamado o haber dejado de ser válido.</string>
     <string name="main_card_link_expired">Esa tarjeta ha caducado; pídele una nueva.</string>
     <string name="main_card_link_ok">OK</string>
+    <string name="main_card_link_offline">Todavía sin conexión: este teléfono aún no ha terminado de unirse a la red. La tarjeta está bien; inténtalo dentro de un momento.</string>
 </resources>

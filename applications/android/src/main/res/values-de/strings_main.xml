@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">Der Link ist womöglich defekt, schon eingelöst oder nicht mehr gültig.</string>
     <string name="main_card_link_expired">Diese Karte ist abgelaufen — bitte um eine neue.</string>
     <string name="main_card_link_ok">OK</string>
+    <string name="main_card_link_offline">Noch nicht verbunden — dieses Telefon ist dem Netz noch nicht ganz beigetreten. Die Karte ist in Ordnung; versuche es gleich noch einmal.</string>
 </resources>

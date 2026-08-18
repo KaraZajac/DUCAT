@@ -20,4 +20,5 @@
     <string name="main_card_link_failed_body">De link is mogelijk kapot, al geclaimd of niet meer geldig.</string>
     <string name="main_card_link_expired">Die kaart is verlopen — vraag een nieuwe.</string>
     <string name="main_card_link_ok">OK</string>
+    <string name="main_card_link_offline">Nog niet verbonden — deze telefoon is nog niet klaar met verbinden. De kaart is in orde; probeer het zo nog eens.</string>
 </resources>
