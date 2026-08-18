@@ -34,4 +34,6 @@
     <string name="res_accept_fund">接受 — 存入押金（%1$s）</string>
     <string name="res_secured">预订已保障</string>
     <string name="res_settle">结算 — 结束入住</string>
+    <string name="bond_stake_asked">对方请你缴纳保证金</string>
+    <string name="bond_post_stake">缴纳保证金（%1$s）</string>
 </resources>

@@ -34,4 +34,6 @@
     <string name="res_accept_fund">Terima — setor deposit (%1$s)</string>
     <string name="res_secured">Reservasi aman</string>
     <string name="res_settle">Selesaikan — akhiri masa inap</string>
+    <string name="bond_stake_asked">Anda diminta menaruh jaminan</string>
+    <string name="bond_post_stake">Setor jaminan Anda (%1$s)</string>
 </resources>

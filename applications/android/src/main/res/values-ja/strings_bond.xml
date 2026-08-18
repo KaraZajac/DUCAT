@@ -34,4 +34,6 @@
     <string name="res_accept_fund">受諾 — 保証金を入金 (%1$s)</string>
     <string name="res_secured">予約が確保されました</string>
     <string name="res_settle">精算 — 滞在を終える</string>
+    <string name="bond_stake_asked">保証金を求められています</string>
+    <string name="bond_post_stake">保証金を預ける（%1$s）</string>
 </resources>

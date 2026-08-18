@@ -34,4 +34,6 @@
     <string name="res_accept_fund">قبول — دفع الوديعة (%1$s)</string>
     <string name="res_secured">الحجز مؤمَّن</string>
     <string name="res_settle">تسوية — إنهاء الإقامة</string>
+    <string name="bond_stake_asked">مطلوب منك تأمين</string>
+    <string name="bond_post_stake">أودع تأمينك (%1$s)</string>
 </resources>

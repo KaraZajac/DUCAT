@@ -34,4 +34,6 @@
     <string name="res_accept_fund">수락 — 보증금 입금 (%1$s)</string>
     <string name="res_secured">예약 확보됨</string>
     <string name="res_settle">정산 — 숙박 종료</string>
+    <string name="bond_stake_asked">보증금을 요청받았습니다</string>
+    <string name="bond_post_stake">보증금 예치 (%1$s)</string>
 </resources>

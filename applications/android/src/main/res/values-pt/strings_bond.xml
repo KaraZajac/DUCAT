@@ -34,4 +34,6 @@
     <string name="res_accept_fund">Aceitar — pôr a tua caução (%1$s)</string>
     <string name="res_secured">Reserva garantida</string>
     <string name="res_settle">Acertar — terminar a estadia</string>
+    <string name="bond_stake_asked">Foi-lhe pedida uma caução</string>
+    <string name="bond_post_stake">Depositar a sua caução (%1$s)</string>
 </resources>

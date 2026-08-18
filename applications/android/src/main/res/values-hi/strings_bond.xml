@@ -34,4 +34,6 @@
     <string name="res_accept_fund">स्वीकारें — जमा डालें (%1$s)</string>
     <string name="res_secured">आरक्षण सुरक्षित</string>
     <string name="res_settle">हिसाब करें — प्रवास समाप्त</string>
+    <string name="bond_stake_asked">आपसे जमानत राशि मांगी गई है</string>
+    <string name="bond_post_stake">अपनी जमानत राशि जमा करें (%1$s)</string>
 </resources>

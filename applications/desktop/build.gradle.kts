@@ -335,6 +335,15 @@ tasks.register<JavaExec>("tilltest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// The bonded ride end to end between two headless desks, over the live
+// network and live stagenet. Two processes, two roles — see RideTest.kt.
+// `DUCAT_RIDE_ROLE=… DUCAT_DESK_STATE=… ./gradlew :desktop:ridetest`.
+tasks.register<JavaExec>("ridetest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.RideTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Lock an existing desk (or sweep one already locked).
 // `DUCAT_DESK_STATE=… DUCAT_DESK_PASSPHRASE=… ./gradlew :desktop:vaultset`.
 tasks.register<JavaExec>("vaultset") {

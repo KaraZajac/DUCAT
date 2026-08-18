@@ -34,4 +34,6 @@
     <string name="res_accept_fund">Accetta — versa la cauzione (%1$s)</string>
     <string name="res_secured">Prenotazione garantita</string>
     <string name="res_settle">Salda — concludi il soggiorno</string>
+    <string name="bond_stake_asked">Ti è stata chiesta una cauzione</string>
+    <string name="bond_post_stake">Versa la tua cauzione (%1$s)</string>
 </resources>

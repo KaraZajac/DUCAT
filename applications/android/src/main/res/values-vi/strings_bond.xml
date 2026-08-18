@@ -34,4 +34,6 @@
     <string name="res_accept_fund">Chấp nhận — nạp cọc (%1$s)</string>
     <string name="res_secured">Đặt chỗ đã được bảo đảm</string>
     <string name="res_settle">Tất toán — kết thúc lưu trú</string>
+    <string name="bond_stake_asked">Bạn được yêu cầu đặt cọc</string>
+    <string name="bond_post_stake">Đặt cọc của bạn (%1$s)</string>
 </resources>

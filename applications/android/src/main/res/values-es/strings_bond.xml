@@ -34,4 +34,6 @@
     <string name="res_accept_fund">Aceptar — poner tu depósito (%1$s)</string>
     <string name="res_secured">Reserva asegurada</string>
     <string name="res_settle">Liquidar — terminar la estancia</string>
+    <string name="bond_stake_asked">Se te pide una fianza</string>
+    <string name="bond_post_stake">Deposita tu fianza (%1$s)</string>
 </resources>

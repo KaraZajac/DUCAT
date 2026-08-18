@@ -34,4 +34,6 @@
     <string name="res_accept_fund">Kabul et — depozito yatır (%1$s)</string>
     <string name="res_secured">Rezervasyon güvencede</string>
     <string name="res_settle">Hesabı kapat — konaklamayı bitir</string>
+    <string name="bond_stake_asked">Sizden teminat isteniyor</string>
+    <string name="bond_post_stake">Teminatı yatır (%1$s)</string>
 </resources>

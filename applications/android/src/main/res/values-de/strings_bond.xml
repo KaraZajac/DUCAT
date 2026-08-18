@@ -34,4 +34,6 @@
     <string name="res_accept_fund">Annehmen — Kaution einzahlen (%1$s)</string>
     <string name="res_secured">Reservierung gesichert</string>
     <string name="res_settle">Abrechnen — Aufenthalt beenden</string>
+    <string name="bond_stake_asked">Eine Sicherheit wird erbeten</string>
+    <string name="bond_post_stake">Sicherheit hinterlegen (%1$s)</string>
 </resources>

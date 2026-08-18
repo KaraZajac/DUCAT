@@ -34,4 +34,6 @@
     <string name="res_accept_fund">ยอมรับ — จ่ายมัดจำ (%1$s)</string>
     <string name="res_secured">การจองได้รับการคุ้มครอง</string>
     <string name="res_settle">ชำระ — จบการเข้าพัก</string>
+    <string name="bond_stake_asked">คุณถูกขอให้วางหลักประกัน</string>
+    <string name="bond_post_stake">วางหลักประกันของคุณ (%1$s)</string>
 </resources>

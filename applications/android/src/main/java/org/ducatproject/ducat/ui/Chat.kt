@@ -1751,11 +1751,20 @@ private fun RideBondBanner(contact: Contact) {
                         ) { Text(stringResource(R.string.bond_ask_arbiter)) }
                     }
                 }
-                stage == "done" && !rider && reservation &&
+                // Whoever owes this escrow something and has not sent it:
+                // a reservation's host accepting by funding their deposit,
+                // or a driver posting a stake on a two-sided ride. Same
+                // gesture, same button, because it is the same act — money
+                // in, which is the only acceptance that means anything.
+                stage == "done" && !rider &&
+                    org.ducatproject.ducat.Ceremony.mySharePxmr(ride) > 0 &&
                     ride.optString("hostFundTxid").isEmpty() -> {
-                    // The host's acceptance is money, not a signature: fund
-                    // the deposit the frame named, or simply never do.
-                    BondLine(spin = false, text = stringResource(R.string.res_proposed))
+                    BondLine(
+                        spin = false,
+                        text = stringResource(
+                            if (reservation) R.string.res_proposed else R.string.bond_stake_asked,
+                        ),
+                    )
                     Spacer(Modifier.height(6.dp))
                     val myShown = Amounts.show(
                         context, org.ducatproject.ducat.Ceremony.mySharePxmr(ride),
@@ -1774,7 +1783,15 @@ private fun RideBondBanner(contact: Contact) {
                         },
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
-                    ) { Text(stringResource(R.string.res_accept_fund, myShown)) }
+                    ) {
+                        Text(
+                            stringResource(
+                                if (reservation) R.string.res_accept_fund
+                                else R.string.bond_post_stake,
+                                myShown,
+                            ),
+                        )
+                    }
                 }
                 stage == "done" && !rider && funded < need ->
                     BondLine(spin = true, text = stringResource(R.string.bond_waiting_funding))

@@ -34,4 +34,6 @@
     <string name="res_accept_fund">Accepteren — borg storten (%1$s)</string>
     <string name="res_secured">Reservering veiliggesteld</string>
     <string name="res_settle">Afrekenen — verblijf beëindigen</string>
+    <string name="bond_stake_asked">Er wordt een borg gevraagd</string>
+    <string name="bond_post_stake">Borg storten (%1$s)</string>
 </resources>

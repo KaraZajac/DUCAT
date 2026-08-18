@@ -34,4 +34,6 @@
     <string name="res_accept_fund">پذیرش — پرداخت ودیعه (%1$s)</string>
     <string name="res_secured">رزرو تضمین شد</string>
     <string name="res_settle">تسویه — پایان اقامت</string>
+    <string name="bond_stake_asked">از شما ودیعه خواسته شده</string>
+    <string name="bond_post_stake">ودیعه‌تان را بگذارید (%1$s)</string>
 </resources>

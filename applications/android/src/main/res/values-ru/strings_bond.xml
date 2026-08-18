@@ -34,4 +34,6 @@
     <string name="res_accept_fund">Принять — внести залог (%1$s)</string>
     <string name="res_secured">Бронирование обеспечено</string>
     <string name="res_settle">Рассчитаться — завершить проживание</string>
+    <string name="bond_stake_asked">У вас просят залог</string>
+    <string name="bond_post_stake">Внести залог (%1$s)</string>
 </resources>

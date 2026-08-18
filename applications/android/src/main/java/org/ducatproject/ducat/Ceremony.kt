@@ -198,8 +198,24 @@ object Ceremony {
      * walking away burns both sides. Nobody is blocked because a third party
      * does not exist; the third party is simply better when it does.
      */
-    fun startRide(context: Context, driver: Contact, arbiter: Contact?, farePxmr: Long): String =
-        start(context, driver, arbiter, KIND_RIDE, farePxmr)
+    fun startRide(
+        context: Context,
+        driver: Contact,
+        arbiter: Contact?,
+        farePxmr: Long,
+        /**
+         * What the driver puts in beside the fare, if anything.
+         *
+         * Zero is the one-sided ride: the rider funds, and the driver's skin
+         * is the fare they forfeit by not finishing. A non-zero stake makes
+         * it symmetric — both sides have money in the pot, and the default
+         * release hands each their own back with the fare going to the
+         * driver. Nothing downstream needs to know which it was: the stake
+         * simply joins the escrow and comes home in the residual.
+         */
+        driverStakePxmr: Long = 0L,
+    ): String =
+        start(context, driver, arbiter, KIND_RIDE, farePxmr, hostDepPxmr = driverStakePxmr)
 
     /** What the funder actually locks: the fare plus the margin that makes
      *  releasing strictly better than walking away. One fifth, floored at
@@ -229,7 +245,10 @@ object Ceremony {
     fun expectedTotalPxmr(o: JSONObject): Long = when (o.optInt("kind")) {
         KIND_RESERVATION ->
             o.optLong("farePxmr") + o.optLong("funderDepPxmr") + o.optLong("hostDepPxmr")
-        else -> rideFundAmount(o.optLong("farePxmr"))
+        // A ride's pot is what the rider locks plus whatever the driver
+        // staked beside it — zero on the one-sided ride, which is the same
+        // arithmetic it has always been.
+        else -> rideFundAmount(o.optLong("farePxmr")) + o.optLong("hostDepPxmr")
     }
 
     /** What THIS party still owes the escrow: the funder their side, the
@@ -239,6 +258,8 @@ object Ceremony {
             o.optLong("farePxmr") + o.optLong("funderDepPxmr")
         o.optInt("kind") == KIND_RESERVATION && !isArbiter(o) -> o.optLong("hostDepPxmr")
         isFunder(o) -> rideFundAmount(o.optLong("farePxmr"))
+        // The driver on a two-sided ride owes exactly their stake.
+        !isArbiter(o) -> o.optLong("hostDepPxmr")
         else -> 0L
     }
 
@@ -655,15 +676,15 @@ object Ceremony {
     fun fundRide(context: Context, idHex: String): String {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
         check(o.optString("stage") == "done") { "the escrow is not built yet" }
-        // Rides: the rider alone. Reservations: each principal funds their
-        // own share — and the host funding theirs IS the acceptance.
+        // Whoever owes the escrow something may pay it, and nobody else:
+        // the rider's fare, the driver's stake on a two-sided ride, each
+        // principal's own share of a reservation — where the host funding
+        // theirs IS the acceptance.
         check(!isArbiter(o)) { "the arbiter funds nothing" }
-        if (o.optInt("kind") != KIND_RESERVATION) {
-            check(isFunder(o)) { "only the rider funds the fare" }
-        }
         val addr = o.optString("address")
         val share = mySharePxmr(o)
-        check(addr.isNotEmpty() && share > 0) { "no address or nothing owed" }
+        check(addr.isNotEmpty()) { "the escrow has no address yet" }
+        check(share > 0) { "you owe this escrow nothing" }
         val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
         // One send for this party's whole share: the deposits come home in
         // the split release, and are what make releasing beat sulking.
