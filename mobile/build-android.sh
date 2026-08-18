@@ -28,10 +28,12 @@ export AR_armv7_linux_androideabi=$NDK/llvm-ar
 export CC_x86_64_linux_android=$NDK/x86_64-linux-android26-clang
 export CXX_x86_64_linux_android=$NDK/x86_64-linux-android26-clang++
 export AR_x86_64_linux_android=$NDK/llvm-ar
-# x86_64 is emulator-only and veilid-core 0.5.7's build script hardcodes an NDK
-# version in its glob for libclang_rt.builtins-x86_64-android.a. Set DUCAT_ABIS
-# to include it once a matching NDK is installed; a real phone is ARM.
-ABIS=${DUCAT_ABIS:-"aarch64-linux-android:arm64-v8a armv7-linux-androideabi:armeabi-v7a"}
+# All three, always. x86_64 is emulator-only, but the emulator is where this
+# gets tested, and building a subset is worse than it sounds: the bindings
+# below are regenerated every run, so any ABI left out keeps an older .so and
+# the app dies on launch with "UniFFI API checksum mismatch" — a crash whose
+# message points at the build system rather than at the skipped architecture.
+ABIS=${DUCAT_ABIS:-"aarch64-linux-android:arm64-v8a armv7-linux-androideabi:armeabi-v7a x86_64-linux-android:x86_64"}
 for t in $ABIS; do
   target=${t%%:*}; abi=${t##*:}
   cargo build -p ducat-mobile --target "$target" --release
@@ -53,4 +55,18 @@ cp -r /tmp/uniffi-out/uniffi/ducat_mobile applications/android/src/main/java/uni
 # The desktop client compiles the app's copy of these bindings directly
 # (its source set includes app/src/main/java with a filter), against the
 # host library built by `cargo build --release -p ducat-mobile`.
+
+# An ABI directory that exists but was not rebuilt now holds a library older
+# than the bindings just written, and the app dies on launch for whoever
+# installs that one. Catch it here rather than in a logcat trace on a device.
+built=" $(for t in $ABIS; do printf '%s ' "${t##*:}"; done)"
+for dir in applications/android/src/main/jniLibs/*/; do
+  abi=$(basename "$dir")
+  case "$built" in
+    *" $abi "*) ;;
+    *) echo "STALE: jniLibs/$abi was not rebuilt — its library no longer matches" \
+            "the bindings, and the app will crash on launch with a UniFFI" \
+            "checksum mismatch. Rebuild without DUCAT_ABIS set." >&2; exit 1 ;;
+  esac
+done
 echo "native libraries and bindings refreshed"

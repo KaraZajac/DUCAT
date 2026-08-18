@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/mascot.png" width="220" alt="The DUCAT maneki-neko, holding a Monero coin">
+  <img src="docs/mascot.png" width="200" alt="The DUCAT maneki-neko, holding a Monero coin">
 </p>
 
 # DUCAT
@@ -35,116 +35,210 @@ unsigned, so both desktop OSes will warn on first open.
 
 **Debug-signed, stagenet only.** Not for real money.
 
-## What it does today
+## Setting up takes about a minute
+
+Five steps, no account, nothing to sign up for. Every screenshot below is the
+app running on a phone, not a mockup.
 
 <p align="center">
-  <img src="docs/screenshots/chat-tab.png" width="290" alt="A bar tab in chat: drink notices, an itemised bill, a receipt">
-  &nbsp;&nbsp;
-  <img src="docs/screenshots/pay.png" width="290" alt="The pay screen: fiat and XMR, fee breakdown, speed, request or send">
+  <img src="docs/screenshots/onboarding-identity.png" width="260" alt="Step 1 of 5: create your identity — a keypair on this phone">
+  &nbsp;
+  <img src="docs/screenshots/onboarding-trust.png" width="260" alt="Step 4 of 5: how strangers trust each other here">
+  &nbsp;
+  <img src="docs/screenshots/onboarding-backup.png" width="260" alt="Step 5 of 5: back it up now, with one encrypted file">
 </p>
 
-**Money between people.** A self-custodial stagenet Monero wallet with fiat
-conversion throughout, a fee-aware Max, speed selection, and a transaction
-history rebuilt from the chain — sends identified by key image, change never
-shown as income, every row carrying the running balance so the history and the
-balance screen can be checked against each other.
+Your identity is a keypair made on the phone — no email, no phone number, nobody
+to register with, *which is also why nobody can restore it for you*. The app
+says that out loud rather than burying it, and the last step is the backup,
+because a wallet you cannot restore is the one way a person actually loses
+money here.
 
-**Contacts without identifiers.** A persona is a keypair. Contact cards travel
-by QR, `ducat:` link, or **NFC tap** (phone-to-phone HCE, plus NDEF stickers);
-one scan opens a mailbox-based conversation that works while either side is
-offline. Profiles — name, picture, pronouns, email, phone, Signal — are
-optional, validated on the wire, and always presented as the *claim* they are.
+## Money that is yours
 
-**Chat that carries commerce.** End-to-end encryption with one-time prekeys and
-forward secrecy (X3DH-shaped, the signed-prekey fallback surfaced with an open
-lock, never hidden). Payment requests the recipient reviews but can never
-one-tap pay; itemised bills whose lines **must** sum to their total or the
-message is refused; receipts issued by the payee, pointing at the transaction
-they acknowledge; pictures (sealed chunks in their own DHT records); reactions;
-opt-in read receipts that ride the log head for free.
+<p align="center">
+  <img src="docs/screenshots/home.png" width="260" alt="Home: balance in XMR and USD, synced, a warning that the wallet is low on notes">
+  &nbsp;
+  <img src="docs/screenshots/pay.png" width="260" alt="Paying: amount, fiat, fee breakdown, what is left after, speed">
+  &nbsp;
+  <img src="docs/screenshots/activity.png" width="260" alt="Activity: a statement with counterparty, receipts and running balance">
+</p>
 
-**Operating modes are whole apps.** Pick one in the drawer and the entire
-scaffold hands over — its own tabs, nothing of the wallet's: a **point of
-sale** (itemised or type-a-total register, one code, receipt on payment,
-mempool sighting shown as *seen, never settled*), a **bar tab** (every drink
-pinged to the customer, one bill at close, tip on top, pay from the bus home),
-a **taxi** (fares, meter, and today's take — see below), and a **donation
-box** (a standing address any Monero wallet can give to, its linkability cost
-stated on screen). Almost none of this needed a new wire object — the spec's
-proudest sentence.
+A self-custodial Monero wallet with fiat conversion throughout. Paying shows the
+whole arithmetic before you commit — amount, the estimated network fee, the
+total, **what you have left afterwards**, how many notes it spends and roughly
+how long it will take — and lets you pick a speed. The history is rebuilt from
+the chain: sends identified by key image, change never shown as income, every
+row carrying the running balance so the statement and the balance screen can be
+checked against each other.
 
-**Ride-hailing with no dispatcher (§15.12).** A rider's phone turns a GPS fix
-into a geocell — a public bulletin board *whose address is the place itself* —
-and posts a hail: a claim-once card, a destination, an offer priced from the
-real driving route. Drivers watch their cell and its neighbours (the net drawn
-on a live map, its size their call), read the job — pickup distance, trip
-length, what a rideshare would have paid them — and claim it; the DHT referees
-the race, no matchmaker exists. Acceptance arrives with a face on it: name,
-car, colour, plate, ETA. Fares run ~15% under a rideshare's rider price while
-the driver keeps 100% minus a cent of network fee, which is what deleting the
-platform's ~30% take makes arithmetically possible. Demonstrated end to end on
-the live network: hail → claim → quote → ride → payment with tip → receipt.
-One stated trade: address search, routing and map tiles query OpenStreetMap's
-servers — the single place DUCAT sends location off-device; the boards
-themselves never carry better than ~1.2 km.
+Monero spends discrete notes rather than a balance, so a wallet holding one big
+note can be unable to pay twice in a row. That is the red banner on the left:
+the app counts the notes it can spend and tells you to break one **before** you
+are standing at a counter, rather than failing there.
 
-**Escrow with no company behind it (§17.9).** Accepting a ride can bond its
-fare: rider, driver and a mutually trusted arbiter contact run a distributed
-key generation over the sealed thread — three devices derive one Monero
-address, each holding only a share, any two able to sign, no dealer anywhere.
-The fare sits where nobody can spend it alone. The happy path is two taps:
-the driver proposes the FROST release, the rider consents. Anything else is a
-settlement — either side proposes a split (one number: what goes back), the
-other signs or counters, whoever signs ends it. A stranded party asks the
-arbiter, whose co-signature *is* the ruling; a captured arbiter can at worst
-pick between the named parties, never pay itself, and the desk arbiter keeps
-the judgment human — requests print, approval is a line someone types. No
-shared arbiter? Then the sentence a user has to understand is one sentence:
-**you both put up a stake, and finishing gives it back.** Each side stakes a
-share of the price — about 10% on a ride, 20% on a place to stay, 30% on a
-vehicle, because the more an asset can be damaged beyond its rental price,
-the more each side puts down. Finish and both stakes come home; the fare
-goes to the driver. Nobody can take a stake, including us: the money sits in
-an address only the two of them can open, and the release hands each side
-their own back by name.
+## People, and conversations that carry money
+
+<p align="center">
+  <img src="docs/screenshots/card.png" width="260" alt="Share your card: good for one person, QR, copy link, expires in 24 hours">
+  &nbsp;
+  <img src="docs/screenshots/chat-tab.png" width="260" alt="A café conversation: itemised bill marked paid, the payment, the receipt">
+</p>
+
+A contact is a keypair, not an identifier. You hand someone a card — by QR,
+`ducat:` link, or an **NFC tap** — and it is *good for one person*: once claimed
+it stops working, so a screenshot that ends up somewhere else is not a way in.
+One scan opens a mailbox-based conversation that works while either side is
+offline.
+
+Those conversations carry commerce, not just text: itemised bills whose lines
+**must** sum to their total or the message is refused, payments, and receipts
+issued by the payee pointing at the transaction they acknowledge. Encryption is
+X3DH-shaped with one-time prekeys and forward secrecy — and when the app has to
+fall back to the signed prekey it shows you an open lock rather than hiding it.
+
+## A ride, with nobody dispatching it
+
+<p align="center">
+  <img src="docs/screenshots/hail.png" width="300" alt="Hail a ride: route on a map, distance, time, price, and what a rideshare would charge">
+</p>
+
+Type where you are going. Your phone turns a GPS fix into a geocell — a public
+bulletin board *whose address is the place itself* — and posts a hail: a
+claim-once card, a destination, and an offer priced from the real driving route.
+Drivers watch their cell and its neighbours and claim it; the DHT referees the
+race, and no matchmaker exists.
+
+The green line is the point. DUCAT's rates sit about 15% under a rideshare's
+rider-side rates — on this short trip its fare floor puts it further under still,
+$6.00 against about $9 — **and the driver keeps all of it**, where a rideshare
+would have paid them roughly 71% of what the rider handed over. Pricing inside
+that gap is what lets the rider pay less *and* the driver earn more at the same
+time; it is the absent platform cut, handed to both of them. Acceptance arrives
+with a face on it: name, car, colour, plate, ETA.
+
+One trade, stated plainly on the screen: address search, routing and map tiles
+query OpenStreetMap's servers — the single place DUCAT sends location
+off-device. The boards themselves never carry better than ~1.2 km.
+
+## Your phone is the whole business
+
+<p align="center">
+  <img src="docs/screenshots/modes.png" width="260" alt="Operating modes: personal, point of sale, bar tab, taxi, donations, renting">
+  &nbsp;
+  <img src="docs/screenshots/pos.png" width="260" alt="Point of sale: two items rung up, running total in XMR and USD">
+  &nbsp;
+  <img src="docs/screenshots/pos-code.png" width="260" alt="One code to scan; the itemised bill arrives on the customer's phone">
+</p>
+
+Pick a mode and the entire app hands over — its own tabs, nothing of the
+wallet's. A **point of sale** rings up items or takes a typed total and shows
+one code; the bill arrives on the customer's phone the moment they scan it, and
+a receipt goes back when they pay. A **bar tab** pings every drink to the
+customer and closes with one bill they can settle from the bus home. A
+**donation box** is a standing address any Monero wallet can give to, with its
+linkability cost stated on screen.
+
+<p align="center">
+  <img src="docs/screenshots/taxi.png" width="300" alt="Taxi mode: watch a stand, choose how wide an area, fares and meter tabs">
+</p>
+
+**Taxi** mode is a driver's whole day: choose how wide an area to watch, take a
+hail, run the meter, and see today's take. Almost none of this needed a new wire
+object — the spec's proudest sentence.
+
+## Renting out a room or a car
+
+<p align="center">
+  <img src="docs/screenshots/renting-form.png" width="260" alt="Listing a vehicle: the public half that goes on the board">
+  &nbsp;
+  <img src="docs/screenshots/renting-private.png" width="260" alt="Only for whoever books it: the address and handover details never go on the board">
+  &nbsp;
+  <img src="docs/screenshots/rent-search.png" width="260" alt="Finding a car nearby: price, stake, specs and a way to ask">
+</p>
+
+Listings work like hails, on coarser boards — about five kilometres across,
+because people will travel to collect a set of keys. The form is split in two
+and the app tells you which half is which: everything in the first part **goes
+on a public board that anyone nearby can read**, and the address, where the keys
+are, and the plate go in the second, which never leaves your phone until a
+booking is real.
+
+Searching reads your board and the ring around it, showing what it finds as each
+board answers. What comes back is enough to decide on — make, model, year,
+gearbox, fuel, price and the stake — plus a card to open a conversation with.
+
+## Why a stranger can trust you
+
+There is no company in the middle to take sides, so DUCAT does something
+simpler: **you both put up a stake, and finishing gives it back.**
+
+Each side stakes a share of the price — about **10% on a ride, 20% on a place to
+stay, 30% on a vehicle**, because the more an asset can be damaged beyond its
+rental price, the more each side puts down. Finish and both stakes come home;
+the fare goes to the driver. Nobody can take a stake, including us: the money
+sits in an address only the two of them can open, and the release hands each
+side their own back by name. The phone explains this before your first deal —
+it is the fourth screen you ever see.
 
 Those numbers are argued rather than guessed. Bisq is the closest working
-precedent — 2-of-2 with no custodian, deposits from both sides, a 15% floor
-and a 50% ceiling, chosen expressly so cooperation is likely *without* a
-reputation system, which is a privacy cost DUCAT also declines. The
-dual-deposit literature proves the arrangement cheat-proof at equilibrium
-but derives no optimum, so the ceiling comes from practice, where large
-deposits are known to price people out. Two bounds fall out: a stake worth
-less than the fee to return it becomes zero rather than decoration, and none
-exceeds half the price. The exposed side funds second — the payer carries
-the price *and* a stake, so their money never sits alone in a shared
-address. The same frame is a reservation: rent and two deposits in one
-escrow, the host's acceptance *being* the funding of their own stake.
-Chain-proven on stagenet in every shape, including a two-input FROST
-release.
+precedent — 2-of-2 with no custodian, deposits from both sides, a 15% floor and
+a 50% ceiling, chosen expressly so cooperation is likely *without* a reputation
+system, which is a privacy cost DUCAT also declines. The dual-deposit literature
+proves the arrangement cheat-proof at equilibrium but derives no optimum, so the
+ceiling comes from practice, where large deposits are known to price people out.
+Two bounds fall out: a stake worth less than the fee to return it becomes zero
+rather than decoration, and none exceeds half the price. The exposed side funds
+second — the payer carries the price *and* a stake, so their money never sits
+alone in a shared address.
 
-**Receipts are records, not messages.** Every receipt lives in its own store,
-survives thread and contact deletion, rides the backup, and dresses the
-Activity tab like a bank statement: counterparty, memo, itemisation, and a
-pending section for requests not yet answered. The memo travels in the sealed
-notice — never on the chain, because a public memo is a note stapled to a
-banknote.
+When a deal wants more than that, **escrow with no company behind it (§17.9)**:
+rider, driver and a mutually trusted arbiter contact run a distributed key
+generation over the sealed thread — three devices derive one Monero address,
+each holding only a share, any two able to sign, no dealer anywhere. The happy
+path is two taps. Anything else is a settlement — either side proposes a split,
+the other signs or counters. A stranded party asks the arbiter, whose
+co-signature *is* the ruling; a captured arbiter can at worst pick between the
+named parties, never pay itself. Chain-proven on stagenet in every shape,
+including a two-input FROST release.
 
-**And the app behaves like an app**: notifications that hide amounts from the
-lock screen and deep-link into the thread they announce, unread badges, an
-encrypted backup that carries the *people* (contacts, outbox keys, prekeys,
-chain counters) as well as the money, a staleness nudge when contacts outgrow
-the last export, redacted crash-surviving logs, and a torch on the scanner —
-because codes get scanned across dark bars. It speaks twenty languages —
-every screen reads from resources, plurals are composed rather than
-concatenated, and Arabic and Farsi prove the mirror.
+## It tells you what things cost you
+
+<p align="center">
+  <img src="docs/screenshots/profile-privacy.png" width="300" alt="Profile: the linkability cost of letting contacts pay you directly, stated in orange">
+</p>
+
+Convenience has a price in a privacy system, and the app names it at the moment
+you choose rather than in a policy nobody reads. Letting contacts pay you
+directly means reusing one address — so it says that anyone watching the chain
+can tell the same person was paid each time, *including people who only ever paid
+you once*, and points at the alternative. The same habit runs through the app:
+a mempool sighting is shown as *seen, never settled*; a profile is always
+presented as the **claim** it is; a donation address states its linkability cost
+on screen.
+
+## And it behaves like an app
+
+Notifications that hide amounts from the lock screen and deep-link into the
+thread they announce, unread badges, an encrypted backup that carries the
+*people* (contacts, outbox keys, prekeys, chain counters) as well as the money,
+a staleness nudge when contacts outgrow the last export, redacted
+crash-surviving logs, and a torch on the scanner — because codes get scanned
+across dark bars. It speaks twenty languages — every screen reads from
+resources, plurals are composed rather than concatenated, and Arabic and Farsi
+prove the mirror.
+
+Receipts are records, not messages: every receipt lives in its own store,
+survives thread and contact deletion, and rides the backup. The memo travels in
+the sealed notice — never on the chain, because a public memo is a note stapled
+to a banknote.
 
 ## The repository
 
 ```
 ducat-protocol.md   the spec — draft 0.88, changelog first
 core/               reference implementation (Rust)
-vectors/            241 conformance vectors + schema — the published artifact
+vectors/            255 conformance cases + schema — the published artifact
 conformance/        three checkers: schema, second implementation, spec audit
 harness/            end-to-end over real Veilid routes and real settlement
 sim/                offline simulator and market scenarios
@@ -204,7 +298,10 @@ fare-secured-by-own-scan → consent release → broadcast, driver paid. Every
 release shape is a distinct transaction verified on-chain through the one
 shipping engine: the plain sweep, the split, the arbiter ruling signed with
 the funder absent, and a reservation's two-input release spending both
-parties' stakes at once.
+parties' stakes at once. Renting was proven the same way: two unrelated desks,
+one posting and one searching, converging on a board addressed by the
+neighbourhood — including the overflow ladder, where thirteen cars spread
+across two shards of a full board and a stranger found every one of them.
 
 Not proven, and stated here rather than buried: **no external adversarial
 review** (§2.5 is the project's own argument for why that matters), no
@@ -215,6 +312,9 @@ The latency figures in §8.7.2 are a desktop with an attached node. The
 cryptography proven, but their own two-phone UI passes are still owed; and a
 co-signer today consents to a stated fee, not an itemised destination list —
 honest consent waits on an upstream wallet API making payments readable.
+Searching a quiet neighbourhood is slow and honest about it: a populated board
+answers in seconds but an empty one has taken up to 85 s to conclude it is
+empty, so results appear as each board answers rather than all at the end.
 
 ## License
 
