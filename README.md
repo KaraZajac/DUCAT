@@ -148,6 +148,7 @@ cargo test --workspace                      # core, sim, harness
 python3 conformance/validate_vectors.py     # every vector against schema.json
 python3 conformance/ducat_check.py          # a second implementation runs them
 python3 conformance/audit_spec.py           # the document against the code
+python3 conformance/check_requirements.py   # nothing imported goes undeclared
 ```
 
 All of it runs on every push (`.github/workflows/checks.yml`), together with

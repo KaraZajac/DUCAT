@@ -40,6 +40,13 @@ jobs:
       - name: the checkers' own dependencies
         run: python3 -m pip install --quiet -r conformance/requirements.txt
 
+      # A dependency nobody declared shows up on a clean machine as a
+      # *crashed vector*, which looks exactly like a disagreement — the worst
+      # possible disguise for a missing package. This fails on the import
+      # rather than on the vector.
+      - name: no undeclared dependencies
+        run: python3 conformance/check_requirements.py
+
       # Cheapest first, and the ones that catch the most: a vector that no
       # longer validates, a second implementation that disagrees, or a
       # sentence in the spec that stopped describing the code.

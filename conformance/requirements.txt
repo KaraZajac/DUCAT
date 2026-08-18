@@ -1,8 +1,9 @@
 # What the checkers need beyond the standard library.
 #
 # The second implementation deliberately re-derives everything it can, but
-# three primitives are not worth re-deriving in Python: a JSON-Schema
-# validator, Ed25519/P-256 signature verification, and Argon2id. Pinned
+# four primitives are not worth re-deriving in Python: a JSON-Schema
+# validator, Ed25519/P-256 signature verification, Argon2id, and AES-GCM /
+# ChaCha20-Poly1305. Pinned
 # loosely — the point of a second implementation is that it is an
 # independent reading of the spec, not an independent cryptography library.
 #
@@ -10,3 +11,4 @@
 jsonschema>=4.0
 cryptography>=41.0
 argon2-cffi>=21.0
+pycryptodome>=3.18
