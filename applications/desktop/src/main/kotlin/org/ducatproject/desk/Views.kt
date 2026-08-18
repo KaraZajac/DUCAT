@@ -358,6 +358,30 @@ fun FirstRun(onDone: () -> Unit) {
             style = MaterialTheme.typography.bodySmall,
         )
         Spacer(Modifier.height(16.dp))
+        // The same explanation the phone gives before a first deal, from the
+        // same strings — a desk operator is exactly as entitled to know how
+        // trust works here, and more likely to be the one asked about it.
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                Text(
+                    androidx.compose.ui.res.stringResource(
+                        org.ducatproject.ducat.R.string.onb_trust_title,
+                    ),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    androidx.compose.ui.res.stringResource(
+                        org.ducatproject.ducat.R.string.onb_trust_body,
+                        org.ducatproject.ducat.Stakes.Deal.Ride.percent,
+                        org.ducatproject.ducat.Stakes.Deal.Stay.percent,
+                        org.ducatproject.ducat.Stakes.Deal.Vehicle.percent,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+        Spacer(Modifier.height(16.dp))
         Box(Modifier.weight(1f)) {
             org.ducatproject.ducat.ui.BackupSettings(
                 spendKeyHex = wallet.spendKeyHex(),

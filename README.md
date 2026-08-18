@@ -99,11 +99,29 @@ other signs or counters, whoever signs ends it. A stranded party asks the
 arbiter, whose co-signature *is* the ruling; a captured arbiter can at worst
 pick between the named parties, never pay itself, and the desk arbiter keeps
 the judgment human — requests print, approval is a line someone types. No
-shared arbiter? The 2-of-2 rung holds both sides hostage honestly: fare plus
-a rider margin, released only together. The same frame is a reservation —
-rent and two deposits in one escrow, the host's acceptance *being* the
-funding of their own stake. Chain-proven on stagenet in every shape,
-including a two-input FROST release.
+shared arbiter? Then the sentence a user has to understand is one sentence:
+**you both put up a stake, and finishing gives it back.** Each side stakes a
+share of the price — about 10% on a ride, 20% on a place to stay, 30% on a
+vehicle, because the more an asset can be damaged beyond its rental price,
+the more each side puts down. Finish and both stakes come home; the fare
+goes to the driver. Nobody can take a stake, including us: the money sits in
+an address only the two of them can open, and the release hands each side
+their own back by name.
+
+Those numbers are argued rather than guessed. Bisq is the closest working
+precedent — 2-of-2 with no custodian, deposits from both sides, a 15% floor
+and a 50% ceiling, chosen expressly so cooperation is likely *without* a
+reputation system, which is a privacy cost DUCAT also declines. The
+dual-deposit literature proves the arrangement cheat-proof at equilibrium
+but derives no optimum, so the ceiling comes from practice, where large
+deposits are known to price people out. Two bounds fall out: a stake worth
+less than the fee to return it becomes zero rather than decoration, and none
+exceeds half the price. The exposed side funds second — the payer carries
+the price *and* a stake, so their money never sits alone in a shared
+address. The same frame is a reservation: rent and two deposits in one
+escrow, the host's acceptance *being* the funding of their own stake.
+Chain-proven on stagenet in every shape, including a two-input FROST
+release.
 
 **Receipts are records, not messages.** Every receipt lives in its own store,
 survives thread and contact deletion, rides the backup, and dresses the
