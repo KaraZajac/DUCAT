@@ -1,0 +1,118 @@
+# What must be true of every commit.
+#
+# Until now none of this ran unless someone typed it: 241 vectors, a second
+# implementation, a spec audit and a render test, all invoked by hand. That
+# was survivable while the two clients were independent. They are not — the
+# desk compiles the phone's own screens, so a phone-side edit can break the
+# desk silently, and the only thing that catches it is a build nobody was
+# running.
+name: checks
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  protocol:
+    name: protocol — vectors, second impl, spec audit, tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      # Cheapest first, and the ones that catch the most: a vector that no
+      # longer validates, a second implementation that disagrees, or a
+      # sentence in the spec that stopped describing the code.
+      - name: vectors validate against the schema
+        run: python3 conformance/validate_vectors.py
+
+      - name: the second implementation agrees
+        run: python3 conformance/ducat_check.py
+
+      - name: the document matches the code
+        run: python3 conformance/audit_spec.py
+
+      - name: cargo test
+        run: cargo test --workspace
+
+  clients:
+    name: clients — phone builds, desk builds, screens draw
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('applications/**/*.gradle.kts', 'applications/gradle/**') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      # The desk loads this through JNA at runtime; the render test really
+      # does call into it, because the screens it draws read a real wallet.
+      - name: build the host Rust library
+        run: cargo build --release -p ducat-mobile
+
+      - name: the phone compiles
+        run: cd applications && ./gradlew --no-daemon :android:assembleDebug
+
+      - name: the phone's unit tests
+        run: cd applications && ./gradlew --no-daemon :android:testDebugUnitTest
+
+      - name: the desk compiles
+        run: cd applications && ./gradlew --no-daemon :desktop:build
+
+      # The resource bridge and the shim layer the phone's screens stand on.
+      - name: the shim layer holds
+        run: cd applications && ./gradlew --no-daemon :desktop:restest :desktop:shimtest
+
+      - name: backup round-trip and profile scoping
+        run: cd applications && ./gradlew --no-daemon :desktop:backuptest :desktop:profilescope
+
+      # Compiling is not drawing. This renders every hosted screen with no
+      # display attached and fails on a blank rectangle — it is what caught
+      # two rooms that crashed on first composition.
+      - name: every screen draws
+        env:
+          DUCAT_DESK_STATE: ${{ runner.temp }}/desk-render
+        run: cd applications && ./gradlew --no-daemon :desktop:rendertest
+
+      # Kept when a screen goes blank, so the failure can be looked at
+      # rather than reasoned about.
+      - name: keep the renders
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screen-renders
+          path: ${{ runner.temp }}/desk-render/renders
+          if-no-files-found: ignore
+          retention-days: 7
