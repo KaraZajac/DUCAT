@@ -238,7 +238,7 @@ fun main() {
         for (attempt in 1..6) {
             txid = await("the rider to consent and the release to land", seconds = 600) {
                 Ceremony.all(context).firstOrNull { it.optString("id") == id }
-                    ?.optString("releaseTxid")?.takeIf { it.isNotEmpty() }
+                    ?.optString("txid")?.takeIf { it.isNotEmpty() }
             }
             if (txid != null) break
             println("RIDE_RETRY no release yet — proposing again ($attempt)")
@@ -341,7 +341,7 @@ fun main() {
     var signed = 0
     val landed = await("the release to land", seconds = 3600) {
         val o = Ceremony.all(context).firstOrNull { it.optString("id") == id }
-        val done = o?.optString("releaseTxid").orEmpty()
+        val done = o?.optString("txid").orEmpty()
         if (done.isNotEmpty()) return@await done
         if (o?.optString("stage") == "release_pending") {
             println("RIDE_PROPOSED rider sees back=${o.optLong("pendingRiderBack")} pXMR")
