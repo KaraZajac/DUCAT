@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import java.io.File
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -162,49 +163,72 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
 
     LaunchedEffect(pendingImport) {
         val uri = pendingImport ?: return@LaunchedEffect
-        pendingImport = null
         busy = true
-        message = try {
-            // Read and decrypt off the main thread — a large bundle would
-            // otherwise freeze the frame while it works.
-            val r = withContext(Dispatchers.IO) {
-                val bytes = context.contentResolver.openInputStream(uri)!!.use { it.readBytes() }
-                importBackup(bytes, passphrase)
+        // NonCancellable, and `pendingImport` is cleared at the very end.
+        //
+        // This effect is keyed on `pendingImport`, so clearing it *first* — as
+        // this did — changed the key and cancelled the coroutine that was
+        // running the restore. Argon2id is deliberately slow, so it lost that
+        // race every time: every import died as LeftCompositionCancellationException
+        // and was reported to the user as "wrong passphrase, or the file has
+        // been altered", which is a lie about their backup at the worst
+        // possible moment.
+        //
+        // The writes below are the other reason. A restore puts back the name,
+        // the publish choice, the profile and every contact; interrupted
+        // halfway it leaves a device that is neither the old identity nor the
+        // new one, with nothing to say so.
+        val outcome = withContext(Dispatchers.IO + NonCancellable) {
+            runCatching {
+                val bytes = context.contentResolver.openInputStream(uri)!!
+                    .use { it.readBytes() }
+                val r = importBackup(bytes, passphrase)
+                // Settings come back too. A restore that keeps the money and
+                // drops the name and the privacy choice has quietly changed
+                // both, and the user has no way to notice — publishing
+                // especially, where the wrong direction is a silent disclosure.
+                r.displayName?.let { NameStore(context).put(it) }
+                ContactStore(context).setPublishAddress(r.publishPayto)
+                // §16.9's profile with it. A persona that comes back with the
+                // right money and no face is not the same person to anyone who
+                // knew them, and nothing else in the app would report the loss.
+                MyProfile(context).let { p ->
+                    p.setAvatar(r.profile.avatar)
+                    p.setEmail(r.profile.email)
+                    p.setPhone(r.profile.phone)
+                    p.setSignal(r.profile.signal)
+                    p.setPronouns(r.profile.pronouns?.toInt())
+                }
+                // The relationships. Threads and tabs from the opaque blob,
+                // then the typed contacts as the authoritative overlay — so a
+                // bundle from another client still restores everyone.
+                ContactStore(context).restoreFromBackup(r)
+                // The address is the check that matters. A bundle that decrypts
+                // has proved the passphrase, not that it holds the wallet you
+                // meant.
+                r to addressForSpendKey(r.spendKeyHex, stagenet = true)
             }
-            // Settings come back too. A restore that keeps the money and drops
-            // the name and the privacy choice has quietly changed both, and the
-            // user has no way to notice — publishing especially, where the
-            // wrong direction is a silent disclosure.
-            r.displayName?.let { NameStore(context).put(it) }
-            ContactStore(context).setPublishAddress(r.publishPayto)
-            // §16.9's profile with it. A persona that comes back with the right
-            // money and no face is not the same person to anyone who knew them,
-            // and nothing else in the app would report that it had been lost.
-            MyProfile(context).let { p ->
-                p.setAvatar(r.profile.avatar)
-                p.setEmail(r.profile.email)
-                p.setPhone(r.profile.phone)
-                p.setSignal(r.profile.signal)
-                p.setPronouns(r.profile.pronouns?.toInt())
-            }
-            // The relationships. Threads and tabs from the opaque blob, then
-            // the typed contacts as the authoritative overlay — so a bundle
-            // from another client still restores everyone.
-            ContactStore(context).restoreFromBackup(r)
-            // The address is the check that matters. A bundle that decrypts has
-            // proved the passphrase, not that it holds the wallet you meant.
-            DucatLog.i("Backup", "imported: ${r.contacts.size} contact(s), " +
-                "${r.prekeyOneTime.size} prekey(s), escrow ${r.escrowCount}")
-            restored = addressForSpendKey(r.spendKeyHex, stagenet = true)
-            context.getString(R.string.backup_opened,
-                r.escrowCount.toInt(), r.restoreHeight.toLong())
-        } catch (t: Throwable) {
-            // A wrong passphrase and a tampered file are the same error, on
-            // purpose: telling them apart would say whether a guess was close.
-            DucatLog.w("Backup", "import failed: ${t.javaClass.simpleName}")
-            context.getString(R.string.backup_could_not_open)
         }
+        message = outcome.fold(
+            onSuccess = { (r, address) ->
+                DucatLog.i("Backup", "imported: ${r.contacts.size} contact(s), " +
+                    "${r.prekeyOneTime.size} prekey(s), escrow ${r.escrowCount}")
+                restored = address
+                context.getString(R.string.backup_opened,
+                    r.escrowCount.toInt(), r.restoreHeight.toLong())
+            },
+            onFailure = { t ->
+                // A wrong passphrase and a tampered file are the same error, on
+                // purpose: telling them apart would say whether a guess was
+                // close. The class name goes to the log so that a failure which
+                // is *neither* — the cancellation above, an unreadable file —
+                // can still be told apart by whoever reads it.
+                DucatLog.w("Backup", "import failed: ${t.javaClass.simpleName}: ${t.message}")
+                context.getString(R.string.backup_could_not_open)
+            },
+        )
         busy = false
+        pendingImport = null
     }
 }
 
