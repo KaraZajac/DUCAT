@@ -154,7 +154,9 @@ class MainActivity : ComponentActivity() {
 private sealed interface Overlay {
     data object None : Overlay
     data class Chat(val contact: Contact) : Overlay
-    data class Drawer(val section: Section) : Overlay
+    /** [jumpToBackup] lands on the backup card rather than the top of a long
+     *  settings screen — the nudge that sent you there was about backups. */
+    data class Drawer(val section: Section, val jumpToBackup: Boolean = false) : Overlay
 }
 
 enum class Tab(val labelRes: Int) {
@@ -439,7 +441,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     },
                 ) { padding ->
                     Box(Modifier.padding(padding)) {
-                        SectionScreen(o.section, themeMode, onThemeChange) {
+                        SectionScreen(
+                            o.section, themeMode, onThemeChange,
+                            jumpToBackup = o.jumpToBackup,
+                        ) {
                             overlay = Overlay.Chat(it)
                         }
                     }
@@ -618,7 +623,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                         HomeScreen(
                             onTopUp = { tab = Tab.Accounts },
                             onSeeActivity = { tab = Tab.Activity },
-                            onBackup = { overlay = Overlay.Drawer(Section.Settings) },
+                            onBackup = {
+                                overlay = Overlay.Drawer(
+                                    Section.Settings, jumpToBackup = true,
+                                )
+                            },
                             onOpenChat = { overlay = Overlay.Chat(it) },
                         )
                     }

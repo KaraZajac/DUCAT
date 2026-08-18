@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -95,6 +96,7 @@ fun SectionScreen(
     section: Section,
     themeMode: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit,
+    jumpToBackup: Boolean = false,
     onOpenChat: (Contact) -> Unit,
 ) {
     val context = LocalContext.current
@@ -119,7 +121,7 @@ fun SectionScreen(
 
         Section.Logs -> LogsScreen()
 
-        Section.Settings -> SettingsScreen(themeMode, onThemeChange)
+        Section.Settings -> SettingsScreen(themeMode, onThemeChange, jumpToBackup)
 
         Section.Modes -> ModesScreen()
     }
@@ -131,10 +133,27 @@ fun SectionScreen(
  * discloses, and where the keys are backed up.
  */
 @Composable
-fun SettingsScreen(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
+fun SettingsScreen(
+    themeMode: ThemeMode,
+    onThemeChange: (ThemeMode) -> Unit,
+    jumpToBackup: Boolean = false,
+) {
     val context = LocalContext.current
+    val scroll = rememberScrollState()
+    // Sent here by the "back up" nudge rather than by curiosity about
+    // languages: backup is the last card on a long screen, and landing at the
+    // top of it asks someone who was told to protect their money to go
+    // hunting for the way to do it. Scrolling to the end lands on it, because
+    // it *is* the end.
+    LaunchedEffect(jumpToBackup) {
+        if (!jumpToBackup) return@LaunchedEffect
+        // maxValue is zero until the column has been measured, and scrolling
+        // to zero is the one place this must not land.
+        val end = snapshotFlow { scroll.maxValue }.first { it > 0 }
+        scroll.animateScrollTo(end)
+    }
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)
+        Modifier.fillMaxSize().verticalScroll(scroll).padding(20.dp)
     ) {
         LanguageSetting()
         Spacer(Modifier.height(24.dp))
