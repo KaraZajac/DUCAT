@@ -34,6 +34,12 @@ jobs:
           key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: cargo-${{ runner.os }}-
 
+      # Three primitives the second implementation does not re-derive: a
+      # schema validator, signature verification, Argon2id. Undeclared until
+      # this workflow existed and found them missing on a clean machine.
+      - name: the checkers' own dependencies
+        run: python3 -m pip install --quiet -r conformance/requirements.txt
+
       # Cheapest first, and the ones that catch the most: a vector that no
       # longer validates, a second implementation that disagrees, or a
       # sentence in the spec that stopped describing the code.

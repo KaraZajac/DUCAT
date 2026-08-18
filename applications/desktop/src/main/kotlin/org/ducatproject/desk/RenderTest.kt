@@ -107,6 +107,7 @@ fun main() {
         org.ducatproject.ducat.ui.QrScannerContent("Scan a card", onResult = {})
     }
     render("place") { DeskPlaceSetting() }
+    render("firstrun") { FirstRun(onDone = {}) }
     render("phone-settings") {
         org.ducatproject.ducat.ui.SettingsScreen(
             themeMode = org.ducatproject.ducat.ui.ThemeMode.Mocha,

@@ -263,6 +263,9 @@ class ContactStore(context: Context) {
         bump()
     }
 
+    /** When a backup was last exported, or 0 if one never has been. */
+    fun backupExportedAt(): Long = prefs.getLong("backup_at", 0L)
+
     fun backupStale(): Boolean {
         val at = prefs.getLong("backup_at", 0L)
         if (at == 0L) return all().isNotEmpty()

@@ -196,6 +196,11 @@ private fun runDesk(deskDir: File) = application {
         var renameOpen by remember { mutableStateOf(false) }
         var receiveOpen by remember { mutableStateOf(false) }
         var room by remember { mutableStateOf(Room.Conversations) }
+        // §4.3: the same gate the phone keeps. Read once at launch; the
+        // first-run screen sets it when a backup has actually been exported.
+        var onboarded by remember {
+            mutableStateOf(org.ducatproject.ducat.ui.ThemePreference(context).onboarded)
+        }
         var payOpen by remember { mutableStateOf(false) }
         var profileFor by remember { mutableStateOf<Contact?>(null) }
         var focused by remember { mutableStateOf(true) }
@@ -311,6 +316,15 @@ private fun runDesk(deskDir: File) = application {
         ) {
         MaterialTheme(colorScheme = darkColorScheme()) {
             Surface(Modifier.fillMaxSize()) {
+                if (!onboarded) {
+                    // Nothing else is reachable until the keys have a copy
+                    // that outlives this machine.
+                    FirstRun(onDone = {
+                        org.ducatproject.ducat.ui.ThemePreference(context).onboarded = true
+                        onboarded = true
+                    })
+                    return@Surface
+                }
                 Column(Modifier.fillMaxSize()) {
                     // Top bar: who this desk is, one status word, what it holds.
                     Row(

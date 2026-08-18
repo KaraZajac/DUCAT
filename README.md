@@ -143,11 +143,15 @@ research/           one-off measurements: Veilid throughput, Monero multisig,
 ## Checking it
 
 ```sh
+python3 -m pip install -r conformance/requirements.txt   # once
 cargo test --workspace                      # core, sim, harness
 python3 conformance/validate_vectors.py     # every vector against schema.json
 python3 conformance/ducat_check.py          # a second implementation runs them
 python3 conformance/audit_spec.py           # the document against the code
 ```
+
+All of it runs on every push (`.github/workflows/checks.yml`), together with
+both clients' builds and a render of every desk screen.
 
 The last one exists because prose drifts from code silently — a stale sentence
 throws no exception. It has caught a normative section that was referenced three

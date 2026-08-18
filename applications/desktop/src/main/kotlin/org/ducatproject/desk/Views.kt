@@ -316,3 +316,64 @@ fun CodesRoom(onOpenChat: (Contact) -> Unit, onScanAddress: (String) -> Unit) {
         onClose = {},
     )
 }
+
+
+/**
+ * §4.3, enforced on the desk as the phone enforces it.
+ *
+ * The phone will not show a funded wallet until its backup step is done —
+ * `onboarded` stays false until then. The desk used to mint a wallet
+ * silently at first launch, which meant a shopkeeper could take payments
+ * into a key nobody had exported and one disk failure would end it.
+ *
+ * The wallet is still created at startup, exactly as onboarding creates it,
+ * because the backup screen needs a key to show. What waits is *everything
+ * else*: until a backup has actually been exported, this is the only screen
+ * the desk has. And it is a real export, not a promise — BackupSettings
+ * records one (`markBackupExported`), and the button below reads that record
+ * rather than the operator's word for it.
+ */
+@Composable
+fun FirstRun(onDone: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val version by org.ducatproject.ducat.ContactStore.changes.collectAsState()
+    val exported = remember(version) {
+        org.ducatproject.ducat.ContactStore(context).backupExportedAt() > 0L
+    }
+    val wallet = remember(version) { org.ducatproject.ducat.WalletStore(context) }
+    Column(Modifier.fillMaxSize().padding(24.dp)) {
+        Text("Before this desk takes money", style = MaterialTheme.typography.headlineSmall)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "This desk has its own wallet and its own identity — the keys are " +
+                "on this machine and nowhere else. There is no operator to ask " +
+                "for them back, so a backup is not housekeeping: it is the only " +
+                "copy that will ever exist.",
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "Export it below, keep it somewhere that survives this machine, " +
+                "then this desk opens.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Spacer(Modifier.height(16.dp))
+        Box(Modifier.weight(1f)) {
+            org.ducatproject.ducat.ui.BackupSettings(
+                spendKeyHex = wallet.spendKeyHex(),
+                restoreHeight = wallet.restoreHeight(),
+                personaSecret = org.ducatproject.ducat.PersonaStore(context).secret(),
+            )
+        }
+        Spacer(Modifier.height(12.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Button(enabled = exported, onClick = onDone) { Text("Open the desk") }
+            Spacer(Modifier.width(12.dp))
+            Text(
+                if (exported) "Backup exported — keep it safe."
+                else "Waiting for a backup to be exported.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
