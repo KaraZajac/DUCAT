@@ -24,7 +24,7 @@
     </plurals>
     <string name="ceremony_plate">车牌 %1$s</string>
     <string name="ceremony_accept">接受</string>
-    <string name="ceremony_accepting_agrees_fare">接受即确认车费 — 行程结束时付款，走平常的确认页。</string>
+    <string name="ceremony_accepting_agrees_fare">接受后，车费和你的押金会锁进一个只有你们两人才能打开的托管地址。</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">行程已确认</string>
@@ -33,4 +33,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">你的车正在路上</string>
     <string name="ceremony_eta_in_chat">预计到达时间和其他事 — 都在聊天里。</string>
+    <string name="ceremony_stake_note">你放入 %2$s：车费加上 %1$s 押金。司机同样押 %1$s，行程结束后两份都退回。</string>
 </resources>

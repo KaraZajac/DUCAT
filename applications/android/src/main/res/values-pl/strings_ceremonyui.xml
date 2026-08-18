@@ -27,7 +27,7 @@
     </plurals>
     <string name="ceremony_plate">rejestracja %1$s</string>
     <string name="ceremony_accept">Przyjmij</string>
-    <string name="ceremony_accepting_agrees_fare">Przyjęcie oznacza zgodę na stawkę — płacisz na końcu przejazdu, przez zwykły ekran potwierdzenia.</string>
+    <string name="ceremony_accepting_agrees_fare">Akceptacja blokuje cenę i twoją kaucję w depozycie, który możecie otworzyć tylko we dwoje.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Przejazd potwierdzony</string>
@@ -36,4 +36,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Twój przejazd jedzie</string>
     <string name="ceremony_eta_in_chat">Czas dojazdu i cała reszta — w czacie.</string>
+    <string name="ceremony_stake_note">Wpłacasz %2$s: cenę plus kaucję %1$s. Kierowca też wpłaca %1$s, a obie wracają po zakończeniu przejazdu.</string>
 </resources>

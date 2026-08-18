@@ -24,7 +24,7 @@
     </plurals>
     <string name="ceremony_plate">biển số %1$s</string>
     <string name="ceremony_accept">Chấp nhận</string>
-    <string name="ceremony_accepting_agrees_fare">Chấp nhận là chốt giá cước — bạn trả khi kết thúc chuyến, qua màn hình xác nhận như thường lệ.</string>
+    <string name="ceremony_accepting_agrees_fare">Chấp nhận sẽ khóa giá cước và tiền cọc của bạn vào một tài khoản ký quỹ chỉ hai người mở được.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Đã chốt chuyến</string>
@@ -33,4 +33,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Xe của bạn đang tới</string>
     <string name="ceremony_eta_in_chat">Giờ tới nơi và mọi thứ khác — trong cuộc trò chuyện.</string>
+    <string name="ceremony_stake_note">Bạn đặt %2$s: giá cước cộng tiền cọc %1$s. Tài xế cũng đặt %1$s, và cả hai quay về khi chuyến đi kết thúc.</string>
 </resources>

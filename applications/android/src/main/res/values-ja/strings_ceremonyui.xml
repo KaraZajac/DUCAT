@@ -24,7 +24,7 @@
     </plurals>
     <string name="ceremony_plate">ナンバー %1$s</string>
     <string name="ceremony_accept">承認</string>
-    <string name="ceremony_accepting_agrees_fare">承認すると運賃が確定します — 支払いは降車時に、いつもの確認画面から行います。</string>
+    <string name="ceremony_accepting_agrees_fare">承諾すると、運賃とあなたの預り金は二人だけで開ける預託先に入ります。</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">配車が確定しました</string>
@@ -33,4 +33,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">車が向かっています</string>
     <string name="ceremony_eta_in_chat">到着予定など、連絡はチャットで。</string>
+    <string name="ceremony_stake_note">あなたは %2$s を預けます。運賃に %1$s の預り金を足した額です。ドライバーも %1$s を預け、乗車が終われば両方戻ります。</string>
 </resources>

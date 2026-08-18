@@ -25,7 +25,7 @@
     </plurals>
     <string name="ceremony_plate">placa %1$s</string>
     <string name="ceremony_accept">Aceptar</string>
-    <string name="ceremony_accepting_agrees_fare">Aceptar fija la tarifa — pagas al final del viaje, por la pantalla de confirmación de siempre.</string>
+    <string name="ceremony_accepting_agrees_fare">Aceptar bloquea la tarifa y tu garantía en un depósito que solo vosotros dos podéis abrir.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Viaje confirmado</string>
@@ -34,4 +34,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Tu viaje viene en camino</string>
     <string name="ceremony_eta_in_chat">La hora de llegada y todo lo demás — en el chat.</string>
+    <string name="ceremony_stake_note">Pones %2$s: la tarifa más una garantía de %1$s. El conductor también deja %1$s, y ambas vuelven al terminar el viaje.</string>
 </resources>

@@ -29,7 +29,7 @@
     </plurals>
     <string name="ceremony_plate">اللوحة %1$s</string>
     <string name="ceremony_accept">قبول</string>
-    <string name="ceremony_accepting_agrees_fare">القبول اتفاق على الأجرة — تدفع في نهاية المشوار، عبر شاشة التأكيد المعتادة.</string>
+    <string name="ceremony_accepting_agrees_fare">‏القبول يقفل الأجرة وضمانك في حساب لا يفتحه إلا أنتما معًا.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">تأكّد المشوار</string>
@@ -38,4 +38,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">مشوارك قادم</string>
     <string name="ceremony_eta_in_chat">وقت الوصول وكل ما عداه — في الدردشة.</string>
+    <string name="ceremony_stake_note">‏تضع %2$s: الأجرة مع ضمان %1$s. والسائق يضع %1$s أيضًا، ويعود الضمانان عند انتهاء الرحلة.</string>
 </resources>

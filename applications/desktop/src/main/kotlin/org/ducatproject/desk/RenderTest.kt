@@ -108,6 +108,24 @@ fun main() {
     }
     render("place") { DeskPlaceSetting() }
     // The sentence the whole trust model rests on, as a user meets it.
+    // The moment a rider decides: does the screen tell them the whole cost?
+    render("ride-offer", w = 480, h = 900) {
+        org.ducatproject.ducat.ui.RideOfferScreen(
+            m = org.ducatproject.ducat.StoredMessage(
+                outgoing = false, seq = 3, body = "Corner of Oak and 5th",
+                timestamp = System.currentTimeMillis() / 1000,
+                kind = 6, amountPxmr = 60_000_000_000L, etaSecs = 240L,
+            ),
+            contact = org.ducatproject.ducat.Contact(
+                personaHex = "00".repeat(32),
+                petname = null,
+                assertedName = "Sam",
+                myOutbox = "",
+                theirOutbox = "",
+            ),
+            onAccept = {}, onDecline = {}, onClose = {},
+        )
+    }
     render("onboarding-trust", w = 900, h = 700) {
         org.ducatproject.ducat.ui.OnboardingFlow(
             state = org.ducatproject.ducat.ui.Onboarding(

@@ -25,7 +25,7 @@
     </plurals>
     <string name="ceremony_plate">plaka %1$s</string>
     <string name="ceremony_accept">Kabul et</string>
-    <string name="ceremony_accepting_agrees_fare">Kabul etmek ücrette anlaşmak demek — yolculuğun sonunda, her zamanki onay ekranından ödersin.</string>
+    <string name="ceremony_accepting_agrees_fare">Kabul etmek, ücreti ve teminatını yalnızca ikinizin açabileceği bir emanete kilitler.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Yolculuk onaylandı</string>
@@ -34,4 +34,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Aracın geliyor</string>
     <string name="ceremony_eta_in_chat">Varış süresi ve diğer her şey — sohbette.</string>
+    <string name="ceremony_stake_note">%2$s yatırıyorsun: ücret artı %1$s teminat. Sürücü de %1$s yatırır ve yolculuk bitince ikisi de geri gelir.</string>
 </resources>

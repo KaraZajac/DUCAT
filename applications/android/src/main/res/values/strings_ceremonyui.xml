@@ -25,7 +25,7 @@
     </plurals>
     <string name="ceremony_plate">plate %1$s</string>
     <string name="ceremony_accept">Accept</string>
-    <string name="ceremony_accepting_agrees_fare">Accepting agrees the fare — you pay at the end of the ride, through the usual confirm screen.</string>
+    <string name="ceremony_accepting_agrees_fare">Accepting locks the fare and your stake in an escrow only the two of you can open.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Ride confirmed</string>
@@ -34,4 +34,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Your ride is coming</string>
     <string name="ceremony_eta_in_chat">ETA and anything else — in the chat.</string>
+    <string name="ceremony_stake_note">You put in %2$s: the fare plus a %1$s stake. The driver stakes %1$s too, and both come back when the ride ends.</string>
 </resources>

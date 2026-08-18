@@ -27,7 +27,7 @@
     </plurals>
     <string name="ceremony_plate">номер %1$s</string>
     <string name="ceremony_accept">Принять</string>
-    <string name="ceremony_accepting_agrees_fare">Принятие фиксирует цену — платишь в конце поездки, через обычный экран подтверждения.</string>
+    <string name="ceremony_accepting_agrees_fare">Принятие блокирует стоимость и ваш залог на счёте, который можете открыть только вы вдвоём.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Поездка подтверждена</string>
@@ -36,4 +36,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Машина едет</string>
     <string name="ceremony_eta_in_chat">Время прибытия и всё остальное — в чате.</string>
+    <string name="ceremony_stake_note">Вы вносите %2$s: стоимость плюс залог %1$s. Водитель тоже вносит %1$s, и оба залога вернутся в конце поездки.</string>
 </resources>

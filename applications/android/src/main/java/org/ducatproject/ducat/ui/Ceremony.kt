@@ -292,6 +292,28 @@ fun RideOfferScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+                // What accepting actually costs, before accepting — the
+                // fare is not the whole number, and finding that out on the
+                // next screen is how a good deal starts feeling like a trick.
+                val stake = org.ducatproject.ducat.Stakes.stakeFor(
+                    org.ducatproject.ducat.Stakes.Deal.Ride, m.amountPxmr,
+                )
+                if (stake > 0) {
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        text = stringResource(
+                            R.string.ceremony_stake_note,
+                            Amounts.show(context, stake).primary,
+                            Amounts.show(
+                                context,
+                                org.ducatproject.ducat.Ceremony.rideFundAmount(m.amountPxmr),
+                            ).primary,
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 Spacer(Modifier.weight(1f))
                 Column(Modifier.fillMaxWidth().padding(24.dp)) {
                     Button(

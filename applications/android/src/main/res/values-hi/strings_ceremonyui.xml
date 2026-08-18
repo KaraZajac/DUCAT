@@ -25,7 +25,7 @@
     </plurals>
     <string name="ceremony_plate">प्लेट %1$s</string>
     <string name="ceremony_accept">स्वीकारें</string>
-    <string name="ceremony_accepting_agrees_fare">स्वीकारते ही किराया तय हो जाता है — भुगतान राइड के अंत में, उसी पुष्टि स्क्रीन से।</string>
+    <string name="ceremony_accepting_agrees_fare">स्वीकार करने पर किराया और आपकी जमानत राशि एक ऐसे एस्क्रो में बंद हो जाती है जिसे सिर्फ आप दोनों खोल सकते हैं।</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">राइड पक्की</string>
@@ -34,4 +34,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">आपकी राइड आ रही है</string>
     <string name="ceremony_eta_in_chat">पहुँचने का समय और बाकी सब — चैट में।</string>
+    <string name="ceremony_stake_note">आप %2$s देते हैं: किराया और %1$s जमानत राशि। ड्राइवर भी %1$s रखता है, और सवारी खत्म होने पर दोनों वापस आ जाती हैं।</string>
 </resources>

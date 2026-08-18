@@ -25,7 +25,7 @@
     </plurals>
     <string name="ceremony_plate">targa %1$s</string>
     <string name="ceremony_accept">Accetta</string>
-    <string name="ceremony_accepting_agrees_fare">Accettando concordi la tariffa — paghi a fine corsa, dalla solita schermata di conferma.</string>
+    <string name="ceremony_accepting_agrees_fare">Accettare blocca la tariffa e la tua cauzione in un deposito che solo voi due potete aprire.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Corsa confermata</string>
@@ -34,4 +34,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Il tuo passaggio sta arrivando</string>
     <string name="ceremony_eta_in_chat">Orario di arrivo e tutto il resto — nella chat.</string>
+    <string name="ceremony_stake_note">Metti %2$s: la tariffa più una cauzione di %1$s. Anche l\'autista mette %1$s, e tornano entrambe a fine corsa.</string>
 </resources>

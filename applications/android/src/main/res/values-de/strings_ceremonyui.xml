@@ -25,7 +25,7 @@
     </plurals>
     <string name="ceremony_plate">Kennzeichen %1$s</string>
     <string name="ceremony_accept">Annehmen</string>
-    <string name="ceremony_accepting_agrees_fare">Mit dem Annehmen steht der Fahrpreis fest — du zahlst am Ende der Fahrt, über den üblichen Bestätigungsbildschirm.</string>
+    <string name="ceremony_accepting_agrees_fare">Annehmen sperrt Fahrpreis und Einlage in ein Depot, das nur ihr beide öffnen könnt.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Fahrt bestätigt</string>
@@ -34,4 +34,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Deine Fahrt kommt</string>
     <string name="ceremony_eta_in_chat">Ankunftszeit und alles Weitere — im Chat.</string>
+    <string name="ceremony_stake_note">Du zahlst %2$s ein: den Fahrpreis plus %1$s Einlage. Die Fahrerin legt ebenfalls %1$s hinein, und beide kommen am Ende zurück.</string>
 </resources>

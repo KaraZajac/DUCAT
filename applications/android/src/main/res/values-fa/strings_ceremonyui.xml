@@ -25,7 +25,7 @@
     </plurals>
     <string name="ceremony_plate">پلاک %1$s</string>
     <string name="ceremony_accept">قبول</string>
-    <string name="ceremony_accepting_agrees_fare">قبول کردن یعنی توافق روی کرایه — پایان سفر، از همان صفحهٔ تأیید همیشگی پرداخت می‌کنی.</string>
+    <string name="ceremony_accepting_agrees_fare">‏پذیرش، کرایه و ودیعهٔ شما را در امانتی قفل می‌کند که فقط شما دو نفر می‌توانید بازش کنید.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">سفر قطعی شد</string>
@@ -34,4 +34,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">ماشینت دارد می‌آید</string>
     <string name="ceremony_eta_in_chat">زمان رسیدن و هر چیز دیگر — در گفتگو.</string>
+    <string name="ceremony_stake_note">‏شما %2$s می‌گذارید: کرایه به‌علاوهٔ ودیعهٔ %1$s. راننده هم %1$s می‌گذارد و هر دو در پایان سفر برمی‌گردند.</string>
 </resources>

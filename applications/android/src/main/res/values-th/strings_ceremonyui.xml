@@ -24,7 +24,7 @@
     </plurals>
     <string name="ceremony_plate">ทะเบียน %1$s</string>
     <string name="ceremony_accept">ยอมรับ</string>
-    <string name="ceremony_accepting_agrees_fare">การยอมรับคือการตกลงค่าโดยสาร — คุณจ่ายเมื่อจบการเดินทาง ผ่านหน้ายืนยันตามปกติ</string>
+    <string name="ceremony_accepting_agrees_fare">การตอบรับจะล็อกค่าโดยสารและหลักประกันของคุณไว้ในบัญชีที่มีเพียงคุณสองคนเท่านั้นที่เปิดได้</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">ยืนยันการเดินทางแล้ว</string>
@@ -33,4 +33,5 @@
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">รถของคุณกำลังมา</string>
     <string name="ceremony_eta_in_chat">เวลาที่จะถึงและเรื่องอื่น ๆ — อยู่ในแชท</string>
+    <string name="ceremony_stake_note">คุณวาง %2$s คือค่าโดยสารบวกหลักประกัน %1$s คนขับก็วาง %1$s เช่นกัน และทั้งสองจะคืนเมื่อจบการเดินทาง</string>
 </resources>
