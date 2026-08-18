@@ -87,6 +87,12 @@ def main() -> int:
         for loc in locales:
             path = os.path.join(RES, f"values-{loc}", name)
             if not os.path.isfile(path):
+                # A file no locale has is a whole feature nobody translated,
+                # and skipping quietly is how §16.18's screens shipped in
+                # English to nineteen languages while this script reported
+                # that everything agreed. Absence is the finding.
+                print(f"  ! {loc}/{name}: no translation at all")
+                problems += 1
                 continue
             strings, plurals = read(path)
 

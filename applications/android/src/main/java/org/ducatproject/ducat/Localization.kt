@@ -14,7 +14,19 @@ import java.util.Locale
  */
 object LocaleWrapper {
     fun wrap(base: Context): Context {
-        val locale = LocaleStore(base).locale() ?: return base
+        val locale = LocaleStore(base).locale() ?: run {
+            // "Follow the system" has to *undo* an earlier choice, not merely
+            // decline to make one. Returning here without touching the default
+            // left `Locale.setDefault` wherever the previous language put it,
+            // so switching Arabic → follow the system redrew every screen in
+            // English with Eastern Arabic digits — the balance in numerals the
+            // reader had just chosen to stop using — until the process died.
+            // getSystem() is the device's own configuration, which no app
+            // override can reach, so it is the honest thing to go back to.
+            android.content.res.Resources.getSystem().configuration.locales
+                .takeIf { !it.isEmpty }?.get(0)?.let { Locale.setDefault(it) }
+            return base
+        }
         Locale.setDefault(locale)
         val config = Configuration(base.resources.configuration)
         config.setLocale(locale)
