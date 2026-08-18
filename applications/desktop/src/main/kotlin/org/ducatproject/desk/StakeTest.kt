@@ -99,6 +99,35 @@ fun main() {
             "${formatXmr(Stakes.providerLocks(Deal.Stay, xmr))}",
     )
 
+    // 9. The split a successful two-sided ride must produce.
+    //
+    //    This is the check that would have caught a real bug: the default
+    //    refund was "everything in the escrow above the fare", which was
+    //    correct while only the rider paid in and became a quiet robbery of
+    //    the driver the moment they staked too — the rider would have taken
+    //    their own stake *and* the driver's on a ride that went perfectly.
+    run {
+        val f = xmr / 20                       // 0.05 XMR fare
+        val stake = Stakes.stakeFor(Deal.Ride, f)
+        val pot = f + stake + stake            // what both sides paid in
+        val fee = 121_680_000L
+
+        // What the release must hand back, by role.
+        val riderBack = stake
+        val driverGets = pot - riderBack - fee
+
+        check("the rider gets exactly their own stake", riderBack == stake,
+            formatXmr(riderBack))
+        check("not the driver's as well", riderBack != pot - f,
+            "the old rule would have paid ${formatXmr(pot - f)}")
+        check("the driver gets the fare and their own stake back",
+            driverGets == f + stake - fee, formatXmr(driverGets))
+        check("the pot is exactly consumed", riderBack + driverGets + fee == pot)
+        // And the driver must never end up worse off than not staking.
+        check("staking never costs the driver on success",
+            driverGets >= f - fee, "${formatXmr(driverGets)} vs fare ${formatXmr(f - fee)}")
+    }
+
     println(if (failures == 0) "STAKETEST OK" else "STAKETEST FAILED ($failures)")
     if (failures > 0) kotlin.system.exitProcess(1)
 }

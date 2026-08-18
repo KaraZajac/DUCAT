@@ -215,7 +215,14 @@ object Ceremony {
          */
         driverStakePxmr: Long = 0L,
     ): String =
-        start(context, driver, arbiter, KIND_RIDE, farePxmr, hostDepPxmr = driverStakePxmr)
+        start(
+            context, driver, arbiter, KIND_RIDE, farePxmr,
+            // Named in the frame, not recomputed later: an escrow states its
+            // own arithmetic, and a suggested percentage that changes next
+            // month must not re-price a ride that is already standing.
+            funderDepPxmr = Stakes.stakeFor(Stakes.Deal.Ride, farePxmr),
+            hostDepPxmr = driverStakePxmr,
+        )
 
     /**
      * What the rider locks: the fare plus their own stake.
@@ -258,7 +265,10 @@ object Ceremony {
         // A ride's pot is what the rider locks plus whatever the driver
         // staked beside it — zero on the one-sided ride, which is the same
         // arithmetic it has always been.
-        else -> rideFundAmount(o.optLong("farePxmr")) + o.optLong("hostDepPxmr")
+        else -> o.optLong("farePxmr") +
+            o.optLong("funderDepPxmr").takeIf { it > 0 }
+                .let { it ?: (rideFundAmount(o.optLong("farePxmr")) - o.optLong("farePxmr")) } +
+            o.optLong("hostDepPxmr")
     }
 
     /** What THIS party still owes the escrow: the funder their side, the
@@ -267,7 +277,9 @@ object Ceremony {
         o.optInt("kind") == KIND_RESERVATION && isFunder(o) ->
             o.optLong("farePxmr") + o.optLong("funderDepPxmr")
         o.optInt("kind") == KIND_RESERVATION && !isArbiter(o) -> o.optLong("hostDepPxmr")
-        isFunder(o) -> rideFundAmount(o.optLong("farePxmr"))
+        isFunder(o) -> o.optLong("farePxmr") +
+            o.optLong("funderDepPxmr").takeIf { it > 0 }
+                .let { it ?: (rideFundAmount(o.optLong("farePxmr")) - o.optLong("farePxmr")) }
         // The driver on a two-sided ride owes exactly their stake.
         !isArbiter(o) -> o.optLong("hostDepPxmr")
         else -> 0L
@@ -745,13 +757,25 @@ object Ceremony {
         val total = runCatching {
             uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
         }.getOrDefault(0L)
-        // Ride: everything above the fare is the rider's margin. Reservation:
-        // the guest's deposit comes home; rent and the host's deposit are the
-        // residual, so a host who under-funded shorts only themselves.
-        val back = if (o.optInt("kind") == KIND_RESERVATION) {
-            o.optLong("funderDepPxmr").coerceAtMost(total)
-        } else {
-            (total - o.optLong("farePxmr")).coerceAtLeast(0L)
+        // What comes home to the funder, and only that.
+        //
+        // "Everything above the fare" was right while the rider was the only
+        // one paying in. It stopped being right the day the driver staked
+        // too: the pot then holds fare + rider stake + driver stake, and
+        // handing back everything above the fare would give the rider the
+        // driver's stake as well — a successful ride that quietly robs the
+        // driver. The funder's own stake is the number, recorded in the
+        // ceremony at birth so a later change to the suggested percentage
+        // cannot re-price an escrow that is already standing.
+        val recorded = o.optLong("funderDepPxmr")
+        val back = when {
+            o.optInt("kind") == KIND_RESERVATION -> recorded.coerceAtMost(total)
+            recorded > 0 -> recorded.coerceAtMost(total)
+            // Ceremonies built before the stake was recorded: derive it from
+            // the pot, less the fare and less whatever the driver staked.
+            else -> (total - o.optLong("farePxmr") - o.optLong("hostDepPxmr"))
+                .coerceAtLeast(0L)
+                .coerceAtMost((total - o.optLong("farePxmr")).coerceAtLeast(0L))
         }
         return proposeRideSplit(context, idHex, back)
     }
