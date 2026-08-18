@@ -442,7 +442,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "object.roundtrip", "escrow.ceremony", "escrow.ready", "escrow.release",
         "bond.check", "slash.check",
         "contact.card", "contact.details", "log.head", "log.ring", "stand.shard", "message.chain",
-        "message.payment", "hail.notice",
+        "message.payment", "hail.notice", "rental.listing",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -592,6 +592,27 @@ fn contact_vectors_pass() {
                     }
                     Err(e) => {
                         assert!(!ok, "{name}: refused a notice the vector accepts: {e:?}");
+                        assert_eq!(
+                            format!("{:?}", e.code).to_uppercase(),
+                            c["expect"]["reject"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                }
+            }
+            "rental.listing" => {
+                let got = RentalNotice::from_value(
+                    decode(&unhex(c["listing_hex"].as_str().unwrap())).unwrap());
+                let ok = c["expect"]["ok"].as_bool().unwrap_or(true);
+                match got {
+                    Ok(n) => {
+                        assert!(ok, "{name}: decoded a listing the vector refuses");
+                        assert_eq!(
+                            hexs(&n.to_value().encode()),
+                            c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                    Err(e) => {
+                        assert!(!ok, "{name}: refused a listing the vector accepts: {e:?}");
                         assert_eq!(
                             format!("{:?}", e.code).to_uppercase(),
                             c["expect"]["reject"].as_str().unwrap(), "{name}"

@@ -926,6 +926,72 @@ pub struct HailInfo {
     pub dest_cell: Option<String>,
 }
 
+/// A listing, as the app hands it over (§16.18).
+///
+/// Only the searchable half. What the renter needs in order to *arrive* —
+/// the address, the plate, the door code — never comes near this struct,
+/// because everything in it goes on a board a stranger can read.
+#[derive(uniffi::Record)]
+pub struct RentalInfo {
+    pub card: String,
+    /// 1 = a place to stay, 2 = a vehicle.
+    pub kind: u64,
+    pub title: String,
+    pub area: String,
+    pub cell: Option<String>,
+    pub price_pxmr: u64,
+    pub deposit_pxmr: u64,
+    pub expiry: u64,
+    pub make: Option<String>,
+    pub model: Option<String>,
+    pub year: Option<u64>,
+    pub gearbox: Option<u64>,
+    pub fuel: Option<u64>,
+    pub seats: Option<u64>,
+    pub color: Option<String>,
+    pub rooms: Option<u64>,
+    pub sleeps: Option<u64>,
+    pub subtype: Option<u64>,
+    pub features: Vec<String>,
+}
+
+fn rental_from_core(n: ducat_core::contact::RentalNotice) -> RentalInfo {
+    RentalInfo {
+        card: n.card, kind: n.kind, title: n.title, area: n.area, cell: n.cell,
+        price_pxmr: n.price_pxmr, deposit_pxmr: n.deposit_pxmr, expiry: n.expiry,
+        make: n.make, model: n.model, year: n.year, gearbox: n.gearbox,
+        fuel: n.fuel, seats: n.seats, color: n.color, rooms: n.rooms,
+        sleeps: n.sleeps, subtype: n.subtype, features: n.features,
+    }
+}
+
+#[uniffi::export]
+pub fn rental_encode(info: RentalInfo) -> Result<Vec<u8>, ContactError> {
+    let n = ducat_core::contact::RentalNotice {
+        version: 1,
+        card: info.card, kind: info.kind, title: info.title, area: info.area,
+        cell: info.cell, price_pxmr: info.price_pxmr,
+        deposit_pxmr: info.deposit_pxmr, expiry: info.expiry,
+        make: info.make, model: info.model, year: info.year,
+        gearbox: info.gearbox, fuel: info.fuel, seats: info.seats,
+        color: info.color, rooms: info.rooms, sleeps: info.sleeps,
+        subtype: info.subtype, features: info.features,
+    };
+    // Encode-then-decode, as the hail does: what goes onto a public board is
+    // only ever bytes this implementation would itself accept.
+    let bytes = n.to_value().encode();
+    ducat_core::contact::RentalNotice::from_value(decode(&bytes).map_err(refuse)?)
+        .map_err(refuse)?;
+    Ok(bytes)
+}
+
+#[uniffi::export]
+pub fn rental_decode(bytes: Vec<u8>) -> Result<RentalInfo, ContactError> {
+    let n = ducat_core::contact::RentalNotice::from_value(decode(&bytes).map_err(refuse)?)
+        .map_err(refuse)?;
+    Ok(rental_from_core(n))
+}
+
 #[uniffi::export]
 pub fn hail_encode(info: HailInfo) -> Result<Vec<u8>, ContactError> {
     let n = ducat_core::contact::HailNotice {

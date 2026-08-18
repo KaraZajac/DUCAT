@@ -192,7 +192,8 @@
             "log.ring",
             "stand.shard",
             "message.payment",
-            "hail.notice"
+            "hail.notice",
+            "rental.listing"
           ]
         },
         "name": {

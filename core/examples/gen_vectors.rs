@@ -939,6 +939,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "log.head")
             } else if obj.contains_key("notice_hex") {
                 ("contact", "hail.notice")
+            } else if obj.contains_key("listing_hex") {
+                ("contact", "rental.listing")
             } else if obj.contains_key("subkey_count") {
                 ("contact", "log.ring")
             } else if obj.contains_key("shard") {
@@ -1765,6 +1767,99 @@ fn contact_cases() -> Vec<J> {
             "'a' is not in the geohash alphabet; a cell that cannot name a place is bait for whatever parses it.",
             &HailNotice { dest_cell: Some("dqcja".into()), ..base.clone() },
             Some((RejectCode::Malformed, "not a geohash")));
+    }
+
+    // §16.18: the listing — the other object that lives on a public board,
+    // and the one that stays there for days.
+    {
+        let mut lcase = |name: &str, why: &str, n: &RentalNotice, bad: Option<(RejectCode, &str)>| {
+            let hex_body = hex(&n.to_value().encode());
+            v.push(match bad {
+                None => json!({ "name": name, "why": why, "listing_hex": hex_body,
+                                "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+                Some((code, hint)) => json!({ "name": name, "why": why, "listing_hex": hex_body,
+                                "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+            });
+        };
+        let car = RentalNotice {
+            version: 1,
+            card: "ducat:2m1CQVCAiPjIfW5EX7ja1i8dRAsCLZ3nSCEgKHZBHZY".into(),
+            kind: 2,
+            title: "2019 Corolla, automatic".into(),
+            area: "north side".into(),
+            cell: Some("dqcjq".into()),
+            price_pxmr: 40_000_000_000,
+            deposit_pxmr: 12_000_000_000,
+            expiry: 1_800_000_000,
+            make: Some("Toyota".into()),
+            model: Some("Corolla".into()),
+            year: Some(2019),
+            gearbox: Some(2),
+            fuel: Some(1),
+            seats: Some(5),
+            color: Some("silver".into()),
+            rooms: None, sleeps: None,
+            subtype: Some(1),
+            features: vec!["child seat".into()],
+        };
+        let room = RentalNotice {
+            kind: 1,
+            title: "Sunny room near the park".into(),
+            area: "Kreuzberg".into(),
+            cell: Some("u33db".into()),
+            price_pxmr: 25_000_000_000,
+            deposit_pxmr: 5_000_000_000,
+            make: None, model: None, year: None, gearbox: None, fuel: None,
+            seats: None, color: None,
+            rooms: Some(1), sleeps: Some(2), subtype: Some(2),
+            features: vec!["wifi".into()],
+            ..car.clone()
+        };
+        lcase("listing_vehicle",
+            "A car on a public board: the shape a stranger needs to decide whether to ask, and nothing they would need to arrive. No plate, no address — those pass through the sealed thread after both sides agree.",
+            &car, None);
+        lcase("listing_place",
+            "A room, the same way. Bedrooms and sleeps where the car had a gearbox and a fuel.",
+            &room, None);
+        lcase("listing_place_with_gearbox",
+            "A place with a gearbox is describing two things, and a reader would have to guess which half to believe. Refused rather than reconciled (§18.1).",
+            &RentalNotice { gearbox: Some(2), ..room.clone() },
+            Some((RejectCode::Malformed, "a place has no gearbox")));
+        lcase("listing_vehicle_with_bedrooms",
+            "The mirror of it: a car with bedrooms.",
+            &RentalNotice { rooms: Some(3), ..car.clone() },
+            Some((RejectCode::Malformed, "a vehicle has no bedrooms")));
+        lcase("listing_cell_too_precise",
+            "A hail's precision 6 (~1.2 km) is legal for a person standing at a kerb for ten minutes and wrong for a home that will still be there next week. A listing is capped at precision 5.",
+            &RentalNotice { cell: Some("u33dbc".into()), ..room.clone() },
+            Some((RejectCode::Malformed, "listing cell no finer than precision 5")));
+        lcase("listing_no_price",
+            "A listing with no price is not an offer; it is an invitation to negotiate in the open, which is what the thread is for.",
+            &RentalNotice { price_pxmr: 0, ..car.clone() },
+            Some((RejectCode::Malformed, "a listing needs a price")));
+        lcase("listing_card_wrong_scheme",
+            "The board is hostile input, and the card is the one field with teeth.",
+            &RentalNotice { card: "https://example.com/car".into(), ..car.clone() },
+            Some((RejectCode::Malformed, "card must be a ducat: URI")));
+        lcase("listing_unknown_kind",
+            "Neither a place nor a vehicle: a reader would have no idea which fields it may believe.",
+            &RentalNotice { kind: 7, ..car.clone() },
+            Some((RejectCode::Malformed, "a listing is a place or a vehicle")));
+        lcase("listing_bad_gearbox",
+            "Manual or automatic. A third value is a claim this reader cannot render, so it is refused rather than shown as a number.",
+            &RentalNotice { gearbox: Some(3), ..car.clone() },
+            Some((RejectCode::Malformed, "gearbox is manual or automatic")));
+        lcase("listing_implausible_year",
+            "A car from 1750 is a typo or a joke, and either way not a rental.",
+            &RentalNotice { year: Some(1750), ..car.clone() },
+            Some((RejectCode::Malformed, "implausible year")));
+        lcase("listing_too_many_features",
+            "Features are a summary, not a description — the description belongs in the conversation, where it is not being broadcast to strangers.",
+            &RentalNotice { features: (0..12).map(|i| format!("f{i}")).collect(), ..room.clone() },
+            Some((RejectCode::Malformed, "too many features")));
+        lcase("listing_no_deposit",
+            "A stake of zero is legitimate: the floor rule (§15.12) zeroes a stake worth less than the fee to return it, and an owner may simply not ask for one.",
+            &RentalNotice { deposit_pxmr: 0, ..room.clone() }, None);
     }
 
     v

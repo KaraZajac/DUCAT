@@ -1495,6 +1495,387 @@ impl HailNotice {
     }
 }
 
+/// A listing on a public board (§16.18).
+///
+/// The second object DUCAT puts in the open, and the one that stays there.
+/// A hail lives for minutes and describes a person who is about to move; a
+/// listing lives for days and describes a car or a home that does not. That
+/// difference decides everything about what may be in here.
+///
+/// **What is here** is what a stranger needs to decide whether to ask: the
+/// shape of the thing, roughly where, what it costs, what each side stakes,
+/// and a claim-once card to start a conversation with.
+///
+/// **What is deliberately not here** is everything they would need to
+/// *arrive*: the address, the plate, the door code, photographs of the
+/// inside of someone's home. Those pass through the sealed thread after the
+/// two of them have agreed, because a listing is an advertisement and an
+/// advertisement read by everyone should not double as a burglary brief.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RentalNotice {
+    pub version: u64,
+    /// A `ducat:` card URI, purpose `rental`, claim-once.
+    pub card: String,
+    /// 1 = a place to stay, 2 = a vehicle.
+    pub kind: u64,
+    /// One human line: "Sunny room, 10 min from the station".
+    pub title: String,
+    /// Human words for the area — never coordinates, never an address.
+    pub area: String,
+    /// The board this sits on: a geohash no finer than precision 5 (~5 km).
+    pub cell: Option<String>,
+    /// Per night, or per day, in piconero.
+    pub price_pxmr: u64,
+    /// What *each* side stakes (§15.12), stated so the reader sees the whole
+    /// cost before they ask rather than after.
+    pub deposit_pxmr: u64,
+    /// Unix seconds. A reader MUST drop an expired listing unrendered, and
+    /// an owner who has stopped renting simply stops refreshing it.
+    pub expiry: u64,
+    // A vehicle's searchable shape. MALFORMED on a place.
+    pub make: Option<String>,
+    pub model: Option<String>,
+    pub year: Option<u64>,
+    /// 1 = manual, 2 = automatic.
+    pub gearbox: Option<u64>,
+    /// 1 = petrol, 2 = diesel, 3 = electric, 4 = hybrid.
+    pub fuel: Option<u64>,
+    pub seats: Option<u64>,
+    pub color: Option<String>,
+    // A place's searchable shape. MALFORMED on a vehicle.
+    pub rooms: Option<u64>,
+    pub sleeps: Option<u64>,
+    /// Place: 1 = the whole place, 2 = a private room. Vehicle: 1 = car,
+    /// 2 = van, 3 = motorbike.
+    pub subtype: Option<u64>,
+    /// A few short tags for what no field will ever cover.
+    pub features: Vec<String>,
+}
+
+pub const RENTAL_PLACE: u64 = 1;
+pub const RENTAL_VEHICLE: u64 = 2;
+const MAX_RENTAL_TITLE_CHARS: usize = 60;
+const MAX_RENTAL_AREA_CHARS: usize = 40;
+const MAX_RENTAL_WORD_CHARS: usize = 24;
+const MAX_RENTAL_FEATURES: usize = 8;
+const MAX_RENTAL_FEATURE_CHARS: usize = 16;
+
+impl RentalNotice {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::RN_VERSION, Value::Uint(self.version));
+        m.insert(f::RN_CARD, Value::Text(self.card.clone()));
+        m.insert(f::RN_KIND, Value::Uint(self.kind));
+        m.insert(f::RN_TITLE, Value::Text(self.title.clone()));
+        m.insert(f::RN_AREA, Value::Text(self.area.clone()));
+        if let Some(c) = &self.cell {
+            m.insert(f::RN_CELL, Value::Text(c.clone()));
+        }
+        m.insert(f::RN_PRICE, Value::Uint(self.price_pxmr));
+        m.insert(f::RN_DEPOSIT, Value::Uint(self.deposit_pxmr));
+        m.insert(f::RN_EXPIRY, Value::Uint(self.expiry));
+        for (id, v) in [
+            (f::RN_MAKE, &self.make),
+            (f::RN_MODEL, &self.model),
+            (f::RN_COLOR, &self.color),
+        ] {
+            if let Some(t) = v {
+                m.insert(id, Value::Text(t.clone()));
+            }
+        }
+        for (id, v) in [
+            (f::RN_YEAR, self.year),
+            (f::RN_GEARBOX, self.gearbox),
+            (f::RN_FUEL, self.fuel),
+            (f::RN_SEATS, self.seats),
+            (f::RN_ROOMS, self.rooms),
+            (f::RN_SLEEPS, self.sleeps),
+            (f::RN_SUBTYPE, self.subtype),
+        ] {
+            if let Some(n) = v {
+                m.insert(id, Value::Uint(n));
+            }
+        }
+        if !self.features.is_empty() {
+            m.insert(
+                f::RN_FEATURES,
+                Value::Array(self.features.iter().cloned().map(Value::Text).collect()),
+            );
+        }
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let version = r.uint(f::RN_VERSION)?;
+        if version != 1 {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "unknown rental notice version",
+            ));
+        }
+        let card = r.opt_text(f::RN_CARD, MAX_HAIL_CARD_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a listing needs a card")
+        })?;
+        if !card.starts_with("ducat:") {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a listing card must be a ducat: URI",
+            ));
+        }
+        let kind = r.uint(f::RN_KIND)?;
+        if kind != RENTAL_PLACE && kind != RENTAL_VEHICLE {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a listing is a place or a vehicle",
+            ));
+        }
+        let title = r.opt_text(f::RN_TITLE, MAX_RENTAL_TITLE_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a listing needs a title")
+        })?;
+        if title.is_empty() {
+            return Err(Reject::with_detail(RejectCode::Malformed, "an empty title says nothing"));
+        }
+        let area = r.opt_text(f::RN_AREA, MAX_RENTAL_AREA_CHARS)?.unwrap_or_default();
+        let cell = r.opt_text(f::RN_CELL, crate::geo::MAX_LISTING_GEOHASH_CHARS)?;
+        if let Some(c) = &cell {
+            if !crate::geo::valid_listing_cell(c) {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a listing cell is a geohash no finer than precision 5",
+                ));
+            }
+        }
+        let price_pxmr = r.uint(f::RN_PRICE)?;
+        if price_pxmr == 0 {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a listing with no price is not an offer",
+            ));
+        }
+        let deposit_pxmr = r.opt_uint(f::RN_DEPOSIT)?.unwrap_or(0);
+        let expiry = r.uint(f::RN_EXPIRY)?;
+
+        let make = r.opt_text(f::RN_MAKE, MAX_RENTAL_WORD_CHARS)?;
+        let model = r.opt_text(f::RN_MODEL, MAX_RENTAL_WORD_CHARS)?;
+        let color = r.opt_text(f::RN_COLOR, MAX_RENTAL_WORD_CHARS)?;
+        let year = r.opt_uint(f::RN_YEAR)?;
+        let gearbox = r.opt_uint(f::RN_GEARBOX)?;
+        let fuel = r.opt_uint(f::RN_FUEL)?;
+        let seats = r.opt_uint(f::RN_SEATS)?;
+        let rooms = r.opt_uint(f::RN_ROOMS)?;
+        let sleeps = r.opt_uint(f::RN_SLEEPS)?;
+        let subtype = r.opt_uint(f::RN_SUBTYPE)?;
+
+        // A place has no gearbox and a car has no bedrooms. Refusing the
+        // mismatch keeps a reader from having to guess which fields it is
+        // allowed to believe, and keeps a listing from describing two things.
+        let vehicle_only = make.is_some()
+            || model.is_some()
+            || year.is_some()
+            || gearbox.is_some()
+            || fuel.is_some()
+            || seats.is_some()
+            || color.is_some();
+        let place_only = rooms.is_some() || sleeps.is_some();
+        if kind == RENTAL_PLACE && vehicle_only {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a place does not have a make, a gearbox or a fuel",
+            ));
+        }
+        if kind == RENTAL_VEHICLE && place_only {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a vehicle does not have bedrooms",
+            ));
+        }
+        if let Some(g) = gearbox {
+            if g == 0 || g > 2 {
+                return Err(Reject::with_detail(RejectCode::Malformed, "gearbox is manual or automatic"));
+            }
+        }
+        if let Some(fl) = fuel {
+            if fl == 0 || fl > 4 {
+                return Err(Reject::with_detail(RejectCode::Malformed, "unknown fuel"));
+            }
+        }
+        if let Some(st) = subtype {
+            let top = if kind == RENTAL_PLACE { 2 } else { 3 };
+            if st == 0 || st > top {
+                return Err(Reject::with_detail(RejectCode::Malformed, "unknown subtype"));
+            }
+        }
+        if let Some(y) = year {
+            if !(1900..=2200).contains(&y) {
+                return Err(Reject::with_detail(RejectCode::Malformed, "implausible year"));
+            }
+        }
+
+        let features = match r.opt_array(f::RN_FEATURES)? {
+            None => Vec::new(),
+            Some(items) => {
+                if items.len() > MAX_RENTAL_FEATURES {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        "too many features to be a summary",
+                    ));
+                }
+                let mut out = Vec::with_capacity(items.len());
+                for item in items {
+                    let t = match item {
+                        Value::Text(t) => t,
+                        _ => {
+                            return Err(Reject::with_detail(
+                                RejectCode::Malformed,
+                                "a feature is a short word",
+                            ))
+                        }
+                    };
+                    if t.is_empty() || t.chars().count() > MAX_RENTAL_FEATURE_CHARS {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a feature is a short word",
+                        ));
+                    }
+                    out.push(t);
+                }
+                out
+            }
+        };
+        r.finish()?;
+        Ok(RentalNotice {
+            version, card, kind, title, area, cell, price_pxmr, deposit_pxmr, expiry,
+            make, model, year, gearbox, fuel, seats, color, rooms, sleeps, subtype, features,
+        })
+    }
+}
+
+#[cfg(test)]
+mod rental_tests {
+    use super::*;
+
+    fn a_car() -> RentalNotice {
+        RentalNotice {
+            version: 1,
+            card: "ducat:card/abc".into(),
+            kind: RENTAL_VEHICLE,
+            title: "2019 Corolla, automatic".into(),
+            area: "north side".into(),
+            cell: Some("dqcjq".into()),
+            price_pxmr: 40_000_000_000,
+            deposit_pxmr: 12_000_000_000,
+            expiry: 1_800_000_000,
+            make: Some("Toyota".into()),
+            model: Some("Corolla".into()),
+            year: Some(2019),
+            gearbox: Some(2),
+            fuel: Some(1),
+            seats: Some(5),
+            color: Some("silver".into()),
+            rooms: None,
+            sleeps: None,
+            subtype: Some(1),
+            features: vec!["child seat".into(), "roof box".into()],
+        }
+    }
+
+    fn a_room() -> RentalNotice {
+        RentalNotice {
+            version: 1,
+            card: "ducat:card/xyz".into(),
+            kind: RENTAL_PLACE,
+            title: "Sunny room near the park".into(),
+            area: "Kreuzberg".into(),
+            cell: Some("u33db".into()),
+            price_pxmr: 25_000_000_000,
+            deposit_pxmr: 5_000_000_000,
+            expiry: 1_800_000_000,
+            make: None, model: None, year: None, gearbox: None, fuel: None,
+            seats: None, color: None,
+            rooms: Some(1),
+            sleeps: Some(2),
+            subtype: Some(2),
+            features: vec!["wifi".into()],
+        }
+    }
+
+    fn round_trip(n: &RentalNotice) -> Result<RentalNotice, Reject> {
+        RentalNotice::from_value(crate::cbor::decode(&n.to_value().encode()).unwrap())
+    }
+
+    #[test]
+    fn a_listing_survives_the_wire() {
+        assert_eq!(round_trip(&a_car()).unwrap(), a_car());
+        assert_eq!(round_trip(&a_room()).unwrap(), a_room());
+    }
+
+    /// The rule that keeps a reader from guessing which half to believe.
+    #[test]
+    fn a_place_has_no_gearbox_and_a_car_has_no_bedrooms() {
+        let mut bad = a_room();
+        bad.gearbox = Some(2);
+        assert!(round_trip(&bad).is_err(), "a room with a gearbox");
+        let mut bad = a_room();
+        bad.make = Some("Toyota".into());
+        assert!(round_trip(&bad).is_err(), "a room with a make");
+        let mut bad = a_car();
+        bad.rooms = Some(3);
+        assert!(round_trip(&bad).is_err(), "a car with bedrooms");
+    }
+
+    /// §16.18's whole privacy argument in one assertion: a listing outlives
+    /// the day it was posted, so it may not pin the thing any closer than a
+    /// city. Precision 6 is fine for a person waiting at a kerb and wrong
+    /// for a home that will still be there next week.
+    #[test]
+    fn a_listing_cell_is_coarser_than_a_hail_cell() {
+        let mut n = a_room();
+        n.cell = Some("u33dbc".into()); // precision 6 — legal on a hail
+        assert!(round_trip(&n).is_err(), "precision 6 must be refused on a listing");
+        n.cell = Some("u33db".into());
+        assert!(round_trip(&n).is_ok());
+    }
+
+    #[test]
+    fn a_listing_states_a_price_and_a_card() {
+        let mut n = a_car();
+        n.price_pxmr = 0;
+        assert!(round_trip(&n).is_err(), "a listing with no price");
+        let mut n = a_car();
+        n.card = "https://example.com".into();
+        assert!(round_trip(&n).is_err(), "a card that is not a ducat: URI");
+        let mut n = a_car();
+        n.title = String::new();
+        assert!(round_trip(&n).is_err(), "an empty title");
+    }
+
+    #[test]
+    fn nonsense_enumerations_are_refused() {
+        for (f, v) in [("gearbox", 3u64), ("fuel", 9)] {
+            let mut n = a_car();
+            match f {
+                "gearbox" => n.gearbox = Some(v),
+                _ => n.fuel = Some(v),
+            }
+            assert!(round_trip(&n).is_err(), "{f} = {v}");
+        }
+        let mut n = a_car();
+        n.year = Some(1750);
+        assert!(round_trip(&n).is_err(), "a car from 1750");
+    }
+
+    #[test]
+    fn features_are_a_summary_not_an_essay() {
+        let mut n = a_room();
+        n.features = (0..20).map(|i| format!("f{i}")).collect();
+        assert!(round_trip(&n).is_err(), "twenty features is a description");
+        let mut n = a_room();
+        n.features = vec!["a".repeat(40)];
+        assert!(round_trip(&n).is_err(), "a feature that is a sentence");
+    }
+}
+
 #[cfg(test)]
 mod hail_tests {
     use super::*;

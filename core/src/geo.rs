@@ -214,6 +214,23 @@ pub fn stand_shard_name(base: &str, shard: u32) -> Result<String, Reject> {
 }
 
 /// A board cell is a valid geohash no finer than precision 6 (§16.17).
+/// The coarsest board a listing may name, and the finest it may.
+///
+/// A hail is minutes old and describes a person standing somewhere; a
+/// listing is days old and describes a home or a car that stays put. The
+/// second is a far better tracking target than the first, so the rule is
+/// stricter: precision 5 (~5 km across), not 6. It also matches how people
+/// look for these things — nobody searches one square kilometre for a car
+/// to rent; they search a city and drive to it.
+pub const MAX_LISTING_GEOHASH_CHARS: usize = 5;
+
+/// A cell a listing may be posted to: a geohash, no finer than precision 5.
+pub fn valid_listing_cell(cell: &str) -> bool {
+    !cell.is_empty()
+        && cell.len() <= MAX_LISTING_GEOHASH_CHARS
+        && cell.bytes().all(|c| ALPHABET.contains(&c.to_ascii_lowercase()))
+}
+
 pub fn valid_board_cell(cell: &str) -> bool {
     !cell.is_empty()
         && cell.len() <= MAX_BOARD_GEOHASH_CHARS

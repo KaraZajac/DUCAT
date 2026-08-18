@@ -951,6 +951,29 @@ HEAD_READ, HEAD_RING = 201, 202
 # HAIL_NOTICE (§16.17) — the one object on a public surface.
 HN_VERSION, HN_CARD, HN_DEST, HN_FARE, HN_EXPIRY = 203, 204, 205, 206, 207
 HN_ORIGIN_CELL, HN_DEST_CELL = 208, 209
+# §16.18 RENTAL_NOTICE — the listing. A second public-board object with a
+# tighter rule than the hail's: it outlives the day it was posted, so it may
+# not pin the thing any finer than ~5 km.
+RN_VERSION = 220
+RN_CARD = 221
+RN_KIND = 222
+RN_TITLE = 223
+RN_AREA = 224
+RN_CELL = 225
+RN_PRICE = 226
+RN_DEPOSIT = 227
+RN_EXPIRY = 228
+RN_MAKE = 229
+RN_MODEL = 230
+RN_YEAR = 231
+RN_GEARBOX = 232
+RN_FUEL = 233
+RN_SEATS = 234
+RN_COLOR = 235
+RN_ROOMS = 236
+RN_SLEEPS = 237
+RN_SUBTYPE = 238
+RN_FEATURES = 239
 GEOHASH_ALPHABET = set("0123456789bcdefghjkmnpqrstuvwxyz")
 MAX_ATTACHMENT_BYTES = 1_048_576 - 64
 MAX_MIME_CHARS, MAX_FILENAME_CHARS = 64, 96
@@ -1025,6 +1048,16 @@ def _take(body, key, kind, what):
     k, val = body.pop(key)
     if k != kind:
         raise Reject("Malformed", f"{what} has the wrong major type")
+    return val
+
+
+def _opt(body, key, kind):
+    """An optional field, type-checked when present. Absent is not a value."""
+    if key not in body:
+        return None
+    k, val = body.pop(key)
+    if k != kind:
+        raise Reject("Malformed", f"field {key} has the wrong major type")
     return val
 
 
@@ -1190,6 +1223,125 @@ def parse_hail_notice(buf):
             raise Reject("Malformed", "not a geohash")
     _finish(b)
     return out
+
+
+
+def parse_listing(buf):
+    # §16.18: a listing is an advertisement everyone can read, so the rules
+    # are about what it may *not* say as much as what it must.
+    b = _body(buf)
+    out = {
+        "version": _take(b, RN_VERSION, "uint", "version"),
+        "card": _take(b, RN_CARD, "text", "card"),
+        "kind": _take(b, RN_KIND, "uint", "kind"),
+        "title": _take(b, RN_TITLE, "text", "title"),
+    }
+    if out["version"] != 1:
+        raise Reject("Malformed", "unknown rental notice version")
+    if not out["card"].startswith("ducat:"):
+        raise Reject("Malformed", "a listing card must be a ducat: URI")
+    if out["kind"] not in (1, 2):
+        raise Reject("Malformed", "a listing is a place or a vehicle")
+    if not out["title"] or len(out["title"]) > 60:
+        raise Reject("Malformed", "a listing needs a title")
+    out["area"] = _opt(b, RN_AREA, "text")
+    if out["area"] is None:
+        out["area"] = ""
+    if len(out["area"]) > 40:
+        raise Reject("Malformed", "text too long")
+    out["cell"] = _opt(b, RN_CELL, "text")
+    if out["cell"] is not None:
+        # Coarser than a hail by rule: five characters, not six.
+        if not (1 <= len(out["cell"]) <= 5):
+            raise Reject("Malformed", "a listing cell is 1..=5 characters")
+        if not set(out["cell"].lower()) <= GEOHASH_ALPHABET:
+            raise Reject("Malformed", "not a geohash")
+    out["price"] = _take(b, RN_PRICE, "uint", "price")
+    if out["price"] == 0:
+        raise Reject("Malformed", "a listing with no price is not an offer")
+    out["deposit"] = _opt(b, RN_DEPOSIT, "uint")
+    if out["deposit"] is None:
+        out["deposit"] = 0
+    out["expiry"] = _take(b, RN_EXPIRY, "uint", "expiry")
+
+    for name, fid, typ in [
+        ("make", RN_MAKE, "text"), ("model", RN_MODEL, "text"),
+        ("color", RN_COLOR, "text"), ("year", RN_YEAR, "uint"),
+        ("gearbox", RN_GEARBOX, "uint"), ("fuel", RN_FUEL, "uint"),
+        ("seats", RN_SEATS, "uint"), ("rooms", RN_ROOMS, "uint"),
+        ("sleeps", RN_SLEEPS, "uint"), ("subtype", RN_SUBTYPE, "uint"),
+    ]:
+        out[name] = _opt(b, fid, typ)
+        if typ == "text" and out[name] is not None and len(out[name]) > 24:
+            raise Reject("Malformed", "text too long")
+
+    # A place with a gearbox is describing two things.
+    vehicle_only = any(out[k] is not None for k in
+                       ("make", "model", "year", "gearbox", "fuel", "seats", "color"))
+    place_only = any(out[k] is not None for k in ("rooms", "sleeps"))
+    if out["kind"] == 1 and vehicle_only:
+        raise Reject("Malformed", "a place does not have a make, a gearbox or a fuel")
+    if out["kind"] == 2 and place_only:
+        raise Reject("Malformed", "a vehicle does not have bedrooms")
+    if out["gearbox"] is not None and not (1 <= out["gearbox"] <= 2):
+        raise Reject("Malformed", "gearbox is manual or automatic")
+    if out["fuel"] is not None and not (1 <= out["fuel"] <= 4):
+        raise Reject("Malformed", "unknown fuel")
+    if out["subtype"] is not None:
+        top = 2 if out["kind"] == 1 else 3
+        if not (1 <= out["subtype"] <= top):
+            raise Reject("Malformed", "unknown subtype")
+    if out["year"] is not None and not (1900 <= out["year"] <= 2200):
+        raise Reject("Malformed", "implausible year")
+
+    feats = _opt(b, RN_FEATURES, "array")
+    out["features"] = []
+    if feats is not None:
+        if len(feats) > 8:
+            raise Reject("Malformed", "too many features to be a summary")
+        for item in feats:
+            # Array members arrive typed, as everywhere else in this decoder.
+            kind, val = item if isinstance(item, tuple) else (None, item)
+            if kind != "text" or not isinstance(val, str) or not val or len(val) > 16:
+                raise Reject("Malformed", "a feature is a short word")
+            out["features"].append(val)
+    _finish(b)
+    return out
+
+
+def run_listing(cases, r):
+    for c in cases:
+        def go(c=c):
+            n = parse_listing(unhex(c["listing_hex"]))
+            fields = [
+                (RN_VERSION, ("uint", n["version"])),
+                (RN_CARD, ("text", n["card"])),
+                (RN_KIND, ("uint", n["kind"])),
+                (RN_TITLE, ("text", n["title"])),
+                (RN_AREA, ("text", n["area"])),
+            ]
+            if n["cell"] is not None:
+                fields.append((RN_CELL, ("text", n["cell"])))
+            fields.append((RN_PRICE, ("uint", n["price"])))
+            fields.append((RN_DEPOSIT, ("uint", n["deposit"])))
+            fields.append((RN_EXPIRY, ("uint", n["expiry"])))
+            for name, fid, typ in [
+                ("make", RN_MAKE, "text"), ("model", RN_MODEL, "text"),
+                ("year", RN_YEAR, "uint"), ("gearbox", RN_GEARBOX, "uint"),
+                ("fuel", RN_FUEL, "uint"), ("seats", RN_SEATS, "uint"),
+                ("color", RN_COLOR, "text"), ("rooms", RN_ROOMS, "uint"),
+                ("sleeps", RN_SLEEPS, "uint"), ("subtype", RN_SUBTYPE, "uint"),
+            ]:
+                if n[name] is not None:
+                    fields.append((fid, (typ, n[name])))
+            if n["features"]:
+                fields.append((RN_FEATURES, ("array", [("text", f) for f in n["features"]])))
+            return _reencode_map(fields)
+        out = expect_reject(r, "contact", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, expected {c['expect']['reencodes_to_hex']}")
 
 
 def run_hail_notice(cases, r):
@@ -1635,6 +1787,7 @@ BY_KIND = {
     "log.ring": run_log_ring,
     "stand.shard": run_stand_shard,
     "hail.notice": run_hail_notice,
+    "rental.listing": run_listing,
     "message.payment": run_message_payment,
     "message.chain": run_message_chain,
     "escrow.ceremony": run_escrow_ceremony,

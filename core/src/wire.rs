@@ -207,6 +207,38 @@ pub mod f {
     /// *other* side reveals in reply — see ContactDetails::purpose.
     pub const DET_PURPOSE: u64 = 217;
 
+    // RENTAL_NOTICE (§16.18) — a listing on a public board. The second
+    // object that lives in the open, and the one that stays there for days
+    // rather than minutes, so what it may carry is drawn tighter than a
+    // hail's: everything here is what a stranger needs to decide whether to
+    // ask, and nothing here is what they need to *arrive*.
+    pub const RN_VERSION: u64 = 220;
+    pub const RN_CARD: u64 = 221;
+    pub const RN_KIND: u64 = 222;
+    pub const RN_TITLE: u64 = 223;
+    pub const RN_AREA: u64 = 224;
+    /// Coarser than a hail's by rule: precision 5 (~5 km), because a home
+    /// does not move and a listing outlives the day it was posted.
+    pub const RN_CELL: u64 = 225;
+    pub const RN_PRICE: u64 = 226;
+    pub const RN_DEPOSIT: u64 = 227;
+    pub const RN_EXPIRY: u64 = 228;
+    // A vehicle's searchable shape. Refused on a place.
+    pub const RN_MAKE: u64 = 229;
+    pub const RN_MODEL: u64 = 230;
+    pub const RN_YEAR: u64 = 231;
+    pub const RN_GEARBOX: u64 = 232;
+    pub const RN_FUEL: u64 = 233;
+    pub const RN_SEATS: u64 = 234;
+    pub const RN_COLOR: u64 = 235;
+    // A place's searchable shape. Refused on a vehicle.
+    pub const RN_ROOMS: u64 = 236;
+    pub const RN_SLEEPS: u64 = 237;
+    /// Whole place / private room, or car / van / motorbike.
+    pub const RN_SUBTYPE: u64 = 238;
+    /// A few short tags, for the things no field will ever cover.
+    pub const RN_FEATURES: u64 = 239;
+
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;
     pub const PKB_ONETIME: u64 = 162;
