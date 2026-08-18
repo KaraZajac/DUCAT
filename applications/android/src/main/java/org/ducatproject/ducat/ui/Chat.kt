@@ -1704,9 +1704,15 @@ private fun RideBondBanner(contact: Contact) {
                 // booking anything works: the other side confirms, then you
                 // pay. A provider who never stakes has simply declined, and
                 // nobody's money is sitting in a shared address over it.
+                // Waiting on the other side's stake — measured by this
+                // device's own scan of the escrow, not by their say-so.
+                // `hostFundTxid` is written on *their* device when they pay;
+                // it never reaches here, so waiting on it would wait forever.
+                // The chain is the shared fact, which is the same rule that
+                // makes "secured" a fact rather than a claim (§17.5).
                 stage == "done" && rider && ride.optString("fundTxid").isEmpty() &&
                     ride.optLong("hostDepPxmr") > 0 &&
-                    ride.optString("hostFundTxid").isEmpty() ->
+                    funded < ride.optLong("hostDepPxmr") ->
                     BondLine(spin = true, text = stringResource(R.string.bond_await_their_stake))
 
                 stage == "done" && rider && ride.optString("fundTxid").isEmpty() -> {

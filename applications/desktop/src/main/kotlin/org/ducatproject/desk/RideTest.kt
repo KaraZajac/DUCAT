@@ -272,12 +272,15 @@ fun main() {
     // The exposed side goes second: when a driver stake was asked for, the
     // rider waits until it is in. Whoever funds first stands alone, and the
     // rider is carrying ten times what the driver is.
-    if (ride.optLong("hostDepPxmr") > 0) {
-        await("the driver's stake to land", seconds = 3600) {
-            Ceremony.all(context).firstOrNull { it.optString("id") == id }
-                ?.optString("hostFundTxid")?.takeIf { it.isNotEmpty() }
+    val theirStake = ride.optLong("hostDepPxmr")
+    if (theirStake > 0 && ride.optString("fundTxid").isEmpty()) {
+        // By this side's own scan of the escrow. The driver's `hostFundTxid`
+        // is written on the driver's device and never travels; the chain is
+        // the only fact both sides share.
+        await("the driver's stake to appear on chain", seconds = 3600) {
+            potByOwnScan(id).takeIf { it >= theirStake }
         } ?: return
-        println("RIDE_THEIRS_IN the driver staked first")
+        println("RIDE_THEIRS_IN the driver's stake is on chain")
     }
 
     val owed = Ceremony.mySharePxmr(ride)
