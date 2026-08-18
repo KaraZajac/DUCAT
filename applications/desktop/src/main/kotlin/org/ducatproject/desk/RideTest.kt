@@ -76,10 +76,22 @@ fun main() {
     }
     println("RIDE_WALLET ${WalletStore(context).address()}")
 
-    /** One poll of everything, as the phones' service does it. */
+    /**
+     * One turn of the service loop, as the phones run it: mail *and* the
+     * wallet. Leaving the scan out was the first thing this harness got
+     * wrong — a desk that never scans has no money no matter who paid it.
+     */
     fun tick() {
         runCatching { Mailbox.collectClaims(context) }
         runCatching { Mailbox.poll(context) }
+        runCatching {
+            val node = org.ducatproject.ducat.NodeStore(context).lastGood()
+                ?: uniffi.ducat_mobile.moneroPickNode(
+                    uniffi.ducat_mobile.moneroDefaultNodes(null), "stagenet", 8_000u,
+                ).url.also { org.ducatproject.ducat.NodeStore(context).rememberLastGood(it) }
+            var n = 0
+            while (n < 8 && Wallet.scanStep(context, node)) n++
+        }
     }
 
     /** Wait for a condition, ticking meanwhile. Null on timeout. */
@@ -92,6 +104,40 @@ fun main() {
         }
         println("RIDE_FAIL timed out waiting for $what")
         return null
+    }
+
+    /**
+     * Send this side's share once the wallet can actually spend it.
+     *
+     * A wallet that has just been paid holds nothing spendable for ten
+     * blocks, and on stagenet that is up to forty minutes. Retrying is not
+     * papering over a failure: it is the same wait the app shows as "still
+     * locked", and a harness that gave up here would be testing the clock.
+     */
+    fun fundWhenAble(idHex: String, owed: Long): String? {
+        var said = ""
+        var fatal: String? = null
+        val txid = await("enough unlocked to send ${formatXmr(owed)} XMR", seconds = 3600) {
+            val r = runCatching { Ceremony.fundRide(context, idHex) }
+            val ok = r.getOrNull()
+            if (ok != null) {
+                ok
+            } else {
+                val why = r.exceptionOrNull()?.message.orEmpty()
+                if (why != said) {
+                    said = why
+                    val b = Wallet.balances(context)
+                    println(
+                        "RIDE_WAIT $why (spendable ${formatXmr(b.spendablePxmr)}, " +
+                            "locked ${formatXmr(b.lockedPxmr)}, scanned ${b.scannedTo}/${b.tip})",
+                    )
+                }
+                if (!why.contains("not enough unlocked")) fatal = why
+                fatal
+            }
+        }
+        fatal?.let { println("RIDE_FAIL could not fund: $it"); return null }
+        return txid
     }
 
     /** This side's own scan of the escrow — never the other party's word. */
@@ -120,9 +166,7 @@ fun main() {
         // A two-sided ride: the driver's stake goes in beside the fare.
         val owed = Ceremony.mySharePxmr(ride)
         if (owed > 0) {
-            val tx = runCatching { Ceremony.fundRide(context, id) }.getOrElse {
-                println("RIDE_FAIL driver could not stake: ${it.message}"); return
-            }
+            val tx = fundWhenAble(id, owed) ?: return
             println("RIDE_FUNDED driver staked ${formatXmr(owed)} XMR — ${tx.take(16)}…")
         } else {
             println("RIDE_FUNDED driver stakes nothing (one-sided ride)")
@@ -189,14 +233,26 @@ fun main() {
     val cardUri = System.getenv("DUCAT_RIDE_CARD")?.takeIf { it.isNotEmpty() }
         ?: error("RIDE_FAIL set DUCAT_RIDE_CARD to the driver's card")
     val scanned = uniffi.ducat_mobile.readContactCard(cardUri)
-    val driver = Mailbox.claimCard(context, scanned, null)
-    println("RIDE_PAIRED ${driver.displayName()}")
+    val theirHex = scanned.persona.joinToString("") { "%02x".format(it) }
+    // A card is claim-once (§16.10), so a restart must recognise the
+    // contact it already made rather than asking for a second claim the
+    // protocol is right to refuse.
+    val driver = ContactStore(context).all().firstOrNull { it.personaHex == theirHex }
+        ?.also { println("RIDE_REPAIRED ${it.displayName()} — already a contact") }
+        ?: Mailbox.claimCard(context, scanned, null)
+            .also { println("RIDE_PAIRED ${it.displayName()}") }
     // Let the claim land before inviting them into a ceremony.
     repeat(5) { tick(); Thread.sleep(2_000) }
 
     // 2-of-2: no arbiter, both sides staked. This is the rung that has never
     // run between two real clients.
-    val id = Ceremony.startRide(
+    // Resume rather than build a second escrow: a harness that cannot be
+    // restarted is a harness nobody restarts.
+    val existing = Ceremony.rideWith(context, driver.personaHex)
+        ?.takeIf { it.optString("address").isNotEmpty() }
+    val id = existing?.optString("id")?.also {
+        println("RIDE_RESUMED ${it.take(8)} — the escrow this pair already built")
+    } ?: Ceremony.startRide(
         context,
         driver = ContactStore(context).all().first { it.personaHex == driver.personaHex },
         arbiter = null,
@@ -212,9 +268,7 @@ fun main() {
     println("RIDE_BUILT ${ride.optString("address")}")
 
     val owed = Ceremony.mySharePxmr(ride)
-    val tx = runCatching { Ceremony.fundRide(context, id) }.getOrElse {
-        println("RIDE_FAIL rider could not fund: ${it.message}"); return
-    }
+    val tx = fundWhenAble(id, owed) ?: return
     println("RIDE_FUNDED rider sent ${formatXmr(owed)} XMR — ${tx.take(16)}…")
 
     val want = Ceremony.expectedTotalPxmr(ride)
