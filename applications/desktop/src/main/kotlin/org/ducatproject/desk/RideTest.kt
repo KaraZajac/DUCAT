@@ -165,7 +165,9 @@ fun main() {
 
         // A two-sided ride: the driver's stake goes in beside the fare.
         val owed = Ceremony.mySharePxmr(ride)
-        if (owed > 0) {
+        if (ride.optString("hostFundTxid").isNotEmpty()) {
+            println("RIDE_FUNDED driver already staked — ${ride.optString("hostFundTxid").take(16)}…")
+        } else if (owed > 0) {
             val tx = fundWhenAble(id, owed) ?: return
             println("RIDE_FUNDED driver staked ${formatXmr(owed)} XMR — ${tx.take(16)}…")
         } else {
@@ -279,8 +281,12 @@ fun main() {
     }
 
     val owed = Ceremony.mySharePxmr(ride)
-    val tx = fundWhenAble(id, owed) ?: return
-    println("RIDE_FUNDED rider sent ${formatXmr(owed)} XMR — ${tx.take(16)}…")
+    if (ride.optString("fundTxid").isNotEmpty()) {
+        println("RIDE_FUNDED rider already paid — ${ride.optString("fundTxid").take(16)}…")
+    } else {
+        val tx = fundWhenAble(id, owed) ?: return
+        println("RIDE_FUNDED rider sent ${formatXmr(owed)} XMR — ${tx.take(16)}…")
+    }
 
     val want = Ceremony.expectedTotalPxmr(ride)
     await("the pot to reach ${formatXmr(want)} XMR", seconds = 1800) {

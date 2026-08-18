@@ -707,6 +707,12 @@ object Ceremony {
         val share = mySharePxmr(o)
         check(addr.isNotEmpty()) { "the escrow has no address yet" }
         check(share > 0) { "you owe this escrow nothing" }
+        // Paid already, by this party. The banner hides the button once a
+        // send is recorded, but a second tap on a slow network — or a client
+        // restarted mid-flight — must not pay twice into an escrow that
+        // needs a co-signature to give anything back.
+        val already = if (isFunder(o)) o.optString("fundTxid") else o.optString("hostFundTxid")
+        check(already.isEmpty()) { "you have already paid into this escrow" }
         val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
         // One send for this party's whole share: the deposits come home in
         // the split release, and are what make releasing beat sulking.
