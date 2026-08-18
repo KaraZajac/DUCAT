@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">Gotowe do wydania</string>
-    <string name="balance_change_coming_back">%1$s reszty wróci za %2$s</string>
+    <string name="balance_arriving">%1$s w drodze, dostępne za %2$s</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">Teraz nie możesz zapłacić</string>
     <string name="balance_running_low_title">Kończą się banknoty</string>
-    <string name="balance_all_locked_body">Twoje pieniądze tu są, ale wszystkie utknęły jako reszta. Rozmień banknot, żeby znów płacić.</string>
-    <string name="balance_running_low_body">Rozmień banknot teraz, żeby nie zostać z niczym przy kasie.</string>
-    <string name="balance_break_note_action">Rozmień banknot</string>
+    <string name="balance_all_locked_body">Twoje pieniądze tu są, ale nic jeszcze się nie rozliczyło — staną się dostępne same.</string>
+    <string name="balance_running_low_body">Każda płatność zużywa jeden banknot. Otrzymanie zapłaty lub doładowanie daje ci kolejne.</string>
+    <string name="balance_top_up_action">Doładuj</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

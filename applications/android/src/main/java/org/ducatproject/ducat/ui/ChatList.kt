@@ -102,8 +102,14 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
         } else {
             LazyColumn(Modifier.fillMaxSize()) {
                 items(shown, key = { it.personaHex }) { c ->
+                    // The newest message a person would recognise. Ceremony
+                    // rounds (8, 9) are the last thing in a thread whenever an
+                    // escrow is mid-flight, and as a preview they read as
+                    // "bond: your share" — internal words, about nothing the
+                    // reader can act on. The thread still sorts by its real
+                    // last message; only the line shown skips the machinery.
                     val last = remember(c.personaHex, all) {
-                        store.thread(c.personaHex).lastOrNull()
+                        store.thread(c.personaHex).lastOrNull { it.kind != 8 && it.kind != 9 }
                     }
                     val unread = c.inSeq > store.chatSeen(c.personaHex)
                     ListItem(

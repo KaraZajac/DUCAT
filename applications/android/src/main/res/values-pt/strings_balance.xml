@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">Pronto para gastar</string>
-    <string name="balance_change_coming_back">%1$s em troco, de volta em %2$s</string>
+    <string name="balance_arriving">%1$s a caminho, disponível em %2$s</string>
 
     <!-- Cartão de aviso de baixa capacidade -->
     <string name="balance_all_locked_title">Você não pode pagar agora</string>
     <string name="balance_running_low_title">Poucas notas restando</string>
-    <string name="balance_all_locked_body">Seu dinheiro está aqui, mas está todo preso como troco. Troque uma nota para gastar de novo.</string>
-    <string name="balance_running_low_body">Troque uma nota agora para não ficar na mão na hora de pagar.</string>
-    <string name="balance_break_note_action">Trocar uma nota</string>
+    <string name="balance_all_locked_body">O seu dinheiro está aqui, mas nada foi liquidado ainda — ficará disponível sozinho.</string>
+    <string name="balance_running_low_body">Cada pagamento gasta uma nota. Receber pagamentos, ou carregar, dá-lhe mais.</string>
+    <string name="balance_top_up_action">Carregar</string>
 
     <!-- notesPhrase: a frase mostrada em vez de um saldo cru -->
     <plurals name="balance_notes">

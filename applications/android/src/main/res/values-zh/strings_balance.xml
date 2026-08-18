@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">随时可花</string>
-    <string name="balance_change_coming_back">找零 %1$s，%2$s后回来</string>
+    <string name="balance_arriving">%1$s 正在到账，%2$s后可用</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">你现在没法付款</string>
     <string name="balance_running_low_title">纸币快用完了</string>
-    <string name="balance_all_locked_body">钱还在，只是全被压成了找零。换开一张纸币就能继续花。</string>
-    <string name="balance_running_low_body">现在就换开一张纸币，免得到了柜台前付不了款。</string>
-    <string name="balance_break_note_action">换开一张纸币</string>
+    <string name="balance_all_locked_body">钱已经到了，但还没有结算完成——它会自动变为可用。</string>
+    <string name="balance_running_low_body">每笔付款会用掉一张钞票。收款或充值可以让你有更多。</string>
+    <string name="balance_top_up_action">充值</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">Ready to spend</string>
-    <string name="balance_change_coming_back">%1$s in change, back in %2$s</string>
+    <string name="balance_arriving">%1$s on the way, spendable in %2$s</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">You can\'t pay right now</string>
     <string name="balance_running_low_title">Running low on notes</string>
-    <string name="balance_all_locked_body">Your money is here, but it\'s all tied up as change. Break a note to spend again.</string>
-    <string name="balance_running_low_body">Break a note now so you\'re not caught out at a counter.</string>
-    <string name="balance_break_note_action">Break a note</string>
+    <string name="balance_all_locked_body">Your money is here, but none of it has settled yet — it becomes spendable on its own.</string>
+    <string name="balance_running_low_body">Each payment uses up a note. Being paid, or topping up, gives you more.</string>
+    <string name="balance_top_up_action">Top up</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

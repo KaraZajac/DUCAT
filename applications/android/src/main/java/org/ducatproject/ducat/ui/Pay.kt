@@ -567,18 +567,30 @@ private fun AmountStep(
                     )
                     HorizontalDivider(Modifier.padding(vertical = 8.dp))
                     CostRow(stringResource(R.string.pay_total), Amounts.show(context, q.totalPxmr).primary, bold = true)
-                    CostRow(stringResource(R.string.pay_left_after), Amounts.show(context, q.remainingPxmr).primary)
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        stringResource(R.string.pay_uses_notes, q.notes, q.minutesToConfirm),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        stringResource(R.string.pay_fee_estimate_note),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.outline,
-                    )
+                    // Amount, fee and total explain *why* something is out of
+                    // reach — the fee is usually what tips it over. The rest
+                    // describes a transaction that cannot happen, so it is left
+                    // out rather than invented: "left after" is clamped at zero
+                    // and would claim this send lands you at exactly nothing,
+                    // and the note count and timing price a plan nobody can
+                    // buy. The line above the card says what is wrong.
+                    if (q.affordable) {
+                        CostRow(
+                            stringResource(R.string.pay_left_after),
+                            Amounts.show(context, q.remainingPxmr).primary,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            stringResource(R.string.pay_uses_notes, q.notes, q.minutesToConfirm),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            stringResource(R.string.pay_fee_estimate_note),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                    }
                 }
             }
 

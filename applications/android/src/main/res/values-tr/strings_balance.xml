@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">Harcamaya hazır</string>
-    <string name="balance_change_coming_back">%1$s para üstü — dönmesine kalan: %2$s</string>
+    <string name="balance_arriving">%1$s yolda, %2$s içinde kullanılabilir</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">Şu anda ödeme yapamazsın</string>
     <string name="balance_running_low_title">Banknotların azalıyor</string>
-    <string name="balance_all_locked_body">Paran burada, ama hepsi para üstü olarak bağlı. Yeniden harcayabilmek için bir banknot boz.</string>
-    <string name="balance_running_low_body">Kasa önünde açıkta kalmamak için şimdiden bir banknot boz.</string>
-    <string name="balance_break_note_action">Banknot boz</string>
+    <string name="balance_all_locked_body">Paranız burada ama henüz hiçbiri kesinleşmedi — kendiliğinden kullanılabilir olacak.</string>
+    <string name="balance_running_low_body">Her ödeme bir banknot tüketir. Ödeme almak ya da yükleme yapmak size daha fazlasını verir.</string>
+    <string name="balance_top_up_action">Yükle</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

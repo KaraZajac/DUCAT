@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.RequestQuote
 import androidx.compose.material.icons.filled.Lock
@@ -583,7 +584,14 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     textAlign = TextAlign.Center,
                 )
             }
-            items(messages.filter { it.kind != 4 }) { m ->
+            // 4 is a read receipt. 8 and 9 are ceremony rounds — a DKG share
+            // and a FROST signing round, carried as messages so the thread
+            // stays a complete record, but they are machinery: they have no
+            // amount and nothing a person is meant to do about them. Rendered
+            // as bubbles they came out as "You sent 0.000000 XMR — bond: your
+            // share", which reads like a failed payment. The banner above
+            // narrates the same ceremony in words, with a spinner.
+            items(messages.filter { it.kind != 4 && it.kind != 8 && it.kind != 9 }) { m ->
                 if (m.kind == 5) {
                     // A retraction is a remark about the thread, not a message
                     // in it: one quiet centred line, no bubble and no buttons —
@@ -1016,11 +1024,16 @@ private fun Bubble(
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            when (m.kind) {
-                                1 -> Icons.Filled.RequestQuote
-                                3 -> Icons.Filled.Receipt
-                                6, 7 -> Icons.Filled.DirectionsCar
-                                else -> Icons.Filled.ArrowUpward
+                            when {
+                                m.kind == 1 -> Icons.Filled.RequestQuote
+                                m.kind == 3 -> Icons.Filled.Receipt
+                                m.kind == 6 || m.kind == 7 -> Icons.Filled.DirectionsCar
+                                // A payment points the way the money went, the
+                                // same as the Activity tab draws it. An incoming
+                                // one used to get the outgoing arrow, so the
+                                // picture argued with the words beside it.
+                                m.outgoing -> Icons.Filled.ArrowUpward
+                                else -> Icons.Filled.ArrowDownward
                             },
                             null,
                             Modifier.size(14.dp),

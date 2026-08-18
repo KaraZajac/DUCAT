@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">바로 쓸 수 있는 금액</string>
-    <string name="balance_change_coming_back">거스름돈 %1$s, %2$s 후 돌아와요</string>
+    <string name="balance_arriving">%1$s 들어오는 중, %2$s 후 사용 가능</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">지금은 결제할 수 없어요</string>
     <string name="balance_running_low_title">지폐가 얼마 안 남았어요</string>
-    <string name="balance_all_locked_body">돈은 있는데 전부 거스름돈으로 묶여 있어요. 지폐를 쪼개면 다시 쓸 수 있어요.</string>
-    <string name="balance_running_low_body">계산대에서 당황하지 않게 지금 지폐를 쪼개 두세요.</string>
-    <string name="balance_break_note_action">지폐 쪼개기</string>
+    <string name="balance_all_locked_body">돈은 도착했지만 아직 정산되지 않았습니다. 시간이 지나면 사용할 수 있습니다.</string>
+    <string name="balance_running_low_body">결제할 때마다 지폐를 한 장씩 씁니다. 돈을 받거나 충전하면 더 생깁니다.</string>
+    <string name="balance_top_up_action">충전</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

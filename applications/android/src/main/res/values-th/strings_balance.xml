@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">พร้อมใช้จ่าย</string>
-    <string name="balance_change_coming_back">เงินทอน %1$s จะกลับมาในอีก %2$s</string>
+    <string name="balance_arriving">%1$s กำลังมาถึง พร้อมใช้ใน %2$s</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">ตอนนี้คุณจ่ายไม่ได้</string>
     <string name="balance_running_low_title">ธนบัตรใกล้หมด</string>
-    <string name="balance_all_locked_body">เงินของคุณอยู่ที่นี่ แต่ทั้งหมดติดอยู่ในรูปเงินทอน แตกธนบัตรเพื่อให้ใช้จ่ายได้อีกครั้ง</string>
-    <string name="balance_running_low_body">แตกธนบัตรตอนนี้ จะได้ไม่ติดขัดตอนอยู่หน้าเคาน์เตอร์</string>
-    <string name="balance_break_note_action">แตกธนบัตร</string>
+    <string name="balance_all_locked_body">เงินของคุณมาถึงแล้ว แต่ยังไม่เสร็จสมบูรณ์ — เดี๋ยวจะใช้ได้เอง</string>
+    <string name="balance_running_low_body">การจ่ายแต่ละครั้งใช้ธนบัตรไปหนึ่งใบ การได้รับเงินหรือเติมเงินจะทำให้มีมากขึ้น</string>
+    <string name="balance_top_up_action">เติมเงิน</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

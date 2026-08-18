@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">Pronto da spendere</string>
-    <string name="balance_change_coming_back">%1$s di resto, di ritorno tra %2$s</string>
+    <string name="balance_arriving">%1$s in arrivo, disponibile tra %2$s</string>
 
     <!-- Scheda di avviso capacità bassa -->
     <string name="balance_all_locked_title">Al momento non puoi pagare</string>
     <string name="balance_running_low_title">Banconote quasi finite</string>
-    <string name="balance_all_locked_body">I tuoi soldi sono qui, ma sono tutti bloccati come resto. Spezza una banconota per spendere di nuovo.</string>
-    <string name="balance_running_low_body">Spezza una banconota adesso, così non ti trovi bloccato alla cassa.</string>
-    <string name="balance_break_note_action">Spezza una banconota</string>
+    <string name="balance_all_locked_body">Il tuo denaro è qui, ma nulla è ancora regolato: diventerà disponibile da solo.</string>
+    <string name="balance_running_low_body">Ogni pagamento consuma una banconota. Essere pagati, o ricaricare, te ne dà altre.</string>
+    <string name="balance_top_up_action">Ricarica</string>
 
     <!-- notesPhrase: la frase mostrata al posto di un saldo grezzo -->
     <plurals name="balance_notes">

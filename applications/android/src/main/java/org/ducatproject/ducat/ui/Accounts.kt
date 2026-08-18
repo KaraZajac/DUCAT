@@ -143,6 +143,23 @@ fun AccountsScreen() {
                 } else {
                     val spend = Amounts.show(context, b.spendablePxmr, wallet.stagenet())
                     BalanceRow(stringResource(R.string.accounts_spendable), spend.primary, spend.secondary)
+                    // The card's own subtitle promises that what you can spend
+                    // is not what you own, and then this screen used to show a
+                    // single figure — leaving money that had arrived but not
+                    // settled invisible on the one screen titled "Balances".
+                    // Same sentence the balance card uses, so the two screens
+                    // agree rather than each inventing a word for it.
+                    if (b.lockedPxmr > 0) {
+                        Text(
+                            stringResource(
+                                R.string.balance_arriving,
+                                Amounts.show(context, b.lockedPxmr, wallet.stagenet()).primary,
+                                minutesFor(context, b.blocksToUnlock.toInt()),
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.ducat.changePending,
+                        )
+                    }
                     if (Amounts.canConvert(context)) {
                         Spacer(Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {

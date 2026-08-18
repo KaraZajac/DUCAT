@@ -406,13 +406,48 @@ object Ledger {
 
         // Broadcast but not yet on chain: our own record is the only evidence.
         val onChain = out.map { it.txid }.filter { it.isNotEmpty() }.toSet()
+
         // A spend we can see on chain but cannot attribute already accounts for
-        // the money, so a local record must not add a second row for it.
-        val unattributed = out.count { it.unexplained }
-        var absorbed = 0
-        for (s in sendRecords) {
-            if (s.txidHex.lowercase() in onChain) continue
-            if (absorbed < unattributed) { absorbed++; continue }
+        // the money, so a local record must not add a second row for it. The
+        // two describe one payment: the observed spend has the arithmetic (the
+        // whole note left the spendable pool, change not yet seen) and our
+        // record has the meaning (who, how much, what for). Keep the row that
+        // has the numbers and give it the record's labels — dropping the record
+        // outright is what made a payment you had just sent, by name, read as a
+        // red "Spent, but we cannot say where" until the chain caught up.
+        val pendingRecords = sendRecords
+            .filter { it.txidHex.lowercase() !in onChain }
+            .sortedByDescending { it.timestamp }
+        val unattributedIdx = out.indices
+            .filter { out[it].unexplained }
+            .sortedByDescending { out[it].sortHeight }
+        val paired = minOf(pendingRecords.size, unattributedIdx.size)
+        for (i in 0 until paired) {
+            val s = pendingRecords[i]
+            out[unattributedIdx[i]] = out[unattributedIdx[i]].copy(
+                txid = s.txidHex,
+                timestamp = s.timestamp / 1000,
+                // What was paid, not what left the spendable pool. Monero
+                // spends whole notes, so the observed outflow is the note —
+                // and printing that beside a person's name would say you sent
+                // them the change too. `netPxmr` is left alone, so the running
+                // balance still steps down by what actually moved; the two
+                // reconcile when the change is scanned back in.
+                amountPxmr = s.amountPxmr,
+                feePxmr = s.feePxmr,
+                counterparty = nameOf(s.contactHex),
+                address = s.toAddress,
+                source = Source.OurRecord,
+                note = s.note,
+                contactHex = s.contactHex,
+                // It is ours and in flight, not a mystery: the row says
+                // "sending" rather than accusing the wallet of losing track.
+                unexplained = false,
+                pending = true,
+            )
+        }
+
+        for (s in pendingRecords.drop(paired)) {
             out += Event(
                 txid = s.txidHex,
                 height = 0,

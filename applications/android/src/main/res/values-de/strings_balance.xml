@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">Bereit zum Ausgeben</string>
-    <string name="balance_change_coming_back">%1$s Wechselgeld, zurück in %2$s</string>
+    <string name="balance_arriving">%1$s unterwegs, verfügbar in %2$s</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">Du kannst gerade nicht zahlen</string>
     <string name="balance_running_low_title">Die Scheine werden knapp</string>
-    <string name="balance_all_locked_body">Dein Geld ist da, aber es steckt komplett im Wechselgeld. Wechsle einen Schein, um wieder zahlen zu können.</string>
-    <string name="balance_running_low_body">Wechsle jetzt einen Schein, damit du an der Kasse nicht aufgeschmissen bist.</string>
-    <string name="balance_break_note_action">Schein wechseln</string>
+    <string name="balance_all_locked_body">Dein Geld ist da, aber noch nichts ist bestätigt – es wird von selbst verfügbar.</string>
+    <string name="balance_running_low_body">Jede Zahlung verbraucht einen Schein. Bezahlt werden oder aufladen gibt dir mehr.</string>
+    <string name="balance_top_up_action">Aufladen</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

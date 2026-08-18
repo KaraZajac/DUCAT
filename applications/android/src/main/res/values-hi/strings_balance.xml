@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">खर्च के लिए तैयार</string>
-    <string name="balance_change_coming_back">%1$s छुट्टे में, %2$s में वापस</string>
+    <string name="balance_arriving">%1$s रास्ते में, %2$s में उपलब्ध</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">अभी आप भुगतान नहीं कर सकते</string>
     <string name="balance_running_low_title">नोट कम पड़ रहे हैं</string>
-    <string name="balance_all_locked_body">पैसा यहीं है, पर सारा छुट्टों में अटका है। दोबारा खर्च करने के लिए एक नोट तुड़वाएँ।</string>
-    <string name="balance_running_low_body">अभी एक नोट तुड़वा लें, ताकि काउंटर पर अटक न जाएँ।</string>
-    <string name="balance_break_note_action">नोट तुड़वाएँ</string>
+    <string name="balance_all_locked_body">आपका पैसा यहाँ है, लेकिन अभी कुछ भी निपटा नहीं है — यह अपने आप उपलब्ध हो जाएगा।</string>
+    <string name="balance_running_low_body">हर भुगतान एक नोट खर्च करता है। भुगतान मिलने या पैसे जोड़ने से आपको और मिलते हैं।</string>
+    <string name="balance_top_up_action">पैसे जोड़ें</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

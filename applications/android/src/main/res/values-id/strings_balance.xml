@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">Siap dibelanjakan</string>
-    <string name="balance_change_coming_back">%1$s kembalian, kembali dalam %2$s</string>
+    <string name="balance_arriving">%1$s dalam perjalanan, tersedia dalam %2$s</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">Kamu tidak bisa membayar sekarang</string>
     <string name="balance_running_low_title">Lembaran hampir habis</string>
-    <string name="balance_all_locked_body">Uangmu ada di sini, tapi semuanya masih terikat sebagai kembalian. Pecah satu lembaran agar bisa belanja lagi.</string>
-    <string name="balance_running_low_body">Pecah satu lembaran sekarang supaya tidak kelabakan di kasir.</string>
-    <string name="balance_break_note_action">Pecah lembaran</string>
+    <string name="balance_all_locked_body">Uang Anda sudah ada, tetapi belum ada yang selesai diproses — nanti tersedia dengan sendirinya.</string>
+    <string name="balance_running_low_body">Setiap pembayaran memakai satu lembar. Menerima pembayaran atau mengisi saldo menambah lembarnya.</string>
+    <string name="balance_top_up_action">Isi saldo</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

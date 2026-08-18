@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">すぐ使える額</string>
-    <string name="balance_change_coming_back">お釣り%1$s、%2$sで戻ります</string>
+    <string name="balance_arriving">%1$s 着金処理中、%2$s後に使えます</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">今は支払いできません</string>
     <string name="balance_running_low_title">紙幣が残りわずかです</string>
-    <string name="balance_all_locked_body">お金はここにありますが、すべてお釣りとして拘束されています。再び使うには紙幣を崩してください。</string>
-    <string name="balance_running_low_body">レジ前で困らないよう、今のうちに紙幣を崩しておきましょう。</string>
-    <string name="balance_break_note_action">紙幣を崩す</string>
+    <string name="balance_all_locked_body">お金は届いていますが、まだ確定していません。時間が経てば使えるようになります。</string>
+    <string name="balance_running_low_body">支払いのたびに紙幣を1枚使います。入金や受け取りで枚数が増えます。</string>
+    <string name="balance_top_up_action">入金</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">Sẵn sàng chi tiêu</string>
-    <string name="balance_change_coming_back">%1$s tiền thừa, quay về sau %2$s</string>
+    <string name="balance_arriving">%1$s đang đến, dùng được sau %2$s</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">Lúc này bạn chưa thể trả tiền</string>
     <string name="balance_running_low_title">Sắp hết tờ tiền</string>
-    <string name="balance_all_locked_body">Tiền của bạn vẫn ở đây, nhưng đang kẹt hết dưới dạng tiền thừa. Tách một tờ để chi tiêu tiếp.</string>
-    <string name="balance_running_low_body">Tách một tờ ngay để khỏi lúng túng khi đứng ở quầy.</string>
-    <string name="balance_break_note_action">Tách một tờ</string>
+    <string name="balance_all_locked_body">Tiền của bạn đã ở đây, nhưng chưa khoản nào hoàn tất — nó sẽ tự khả dụng.</string>
+    <string name="balance_running_low_body">Mỗi lần thanh toán dùng hết một tờ. Được trả tiền hoặc nạp thêm sẽ cho bạn nhiều hơn.</string>
+    <string name="balance_top_up_action">Nạp tiền</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

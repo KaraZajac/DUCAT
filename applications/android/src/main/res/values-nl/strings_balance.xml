@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">Klaar om uit te geven</string>
-    <string name="balance_change_coming_back">%1$s aan wisselgeld, terug over %2$s</string>
+    <string name="balance_arriving">%1$s onderweg, beschikbaar over %2$s</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">Je kunt nu niet betalen</string>
     <string name="balance_running_low_title">Bijna geen biljetten meer</string>
-    <string name="balance_all_locked_body">Je geld is er wel, maar het zit allemaal vast als wisselgeld. Breek een biljet om weer te kunnen uitgeven.</string>
-    <string name="balance_running_low_body">Breek nu een biljet, zodat je niet met lege handen aan de kassa staat.</string>
-    <string name="balance_break_note_action">Breek een biljet</string>
+    <string name="balance_all_locked_body">Je geld is er, maar nog niets is verwerkt — het komt vanzelf beschikbaar.</string>
+    <string name="balance_running_low_body">Elke betaling verbruikt een biljet. Betaald worden of bijvullen geeft je er meer.</string>
+    <string name="balance_top_up_action">Bijvullen</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

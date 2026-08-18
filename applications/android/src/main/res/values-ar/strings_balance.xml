@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">جاهز للإنفاق</string>
-    <string name="balance_change_coming_back">%1$s من الباقي، يعود خلال %2$s</string>
+    <string name="balance_arriving">%1$s في الطريق، متاح خلال %2$s</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">لا يمكنك الدفع الآن</string>
     <string name="balance_running_low_title">الأوراق تنفد</string>
-    <string name="balance_all_locked_body">مالك هنا، لكنه كله محجوز كباقٍ. فُكّ ورقة لتستطيع الإنفاق من جديد.</string>
-    <string name="balance_running_low_body">فُكّ ورقة الآن كي لا تتفاجأ عند صندوق الدفع.</string>
-    <string name="balance_break_note_action">فكّ ورقة</string>
+    <string name="balance_all_locked_body">أموالك هنا، لكن لم تتم تسوية أي منها بعد — ستصبح متاحة من تلقاء نفسها.</string>
+    <string name="balance_running_low_body">كل دفعة تستهلك ورقة. تلقّي المدفوعات أو الشحن يمنحك المزيد.</string>
+    <string name="balance_top_up_action">شحن الرصيد</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

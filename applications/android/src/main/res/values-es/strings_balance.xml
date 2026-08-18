@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">Listo para gastar</string>
-    <string name="balance_change_coming_back">%1$s en cambio, vuelve en %2$s</string>
+    <string name="balance_arriving">%1$s en camino, disponible en %2$s</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">No puedes pagar ahora mismo</string>
     <string name="balance_running_low_title">Te quedan pocos billetes</string>
-    <string name="balance_all_locked_body">Tu dinero está aquí, pero todo está atado como cambio. Cambia un billete para volver a gastar.</string>
-    <string name="balance_running_low_body">Cambia un billete ahora para que no te quedes corto frente a un mostrador.</string>
-    <string name="balance_break_note_action">Cambiar un billete</string>
+    <string name="balance_all_locked_body">Tu dinero está aquí, pero nada se ha liquidado todavía; estará disponible por sí solo.</string>
+    <string name="balance_running_low_body">Cada pago consume un billete. Recibir pagos, o recargar, te da más.</string>
+    <string name="balance_top_up_action">Recargar</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

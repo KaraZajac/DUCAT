@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance_ready_to_spend">Prêt à dépenser</string>
-    <string name="balance_change_coming_back">%1$s de monnaie, de retour dans %2$s</string>
+    <string name="balance_arriving">%1$s en route, disponible dans %2$s</string>
 
     <!-- Low-capacity warning card -->
     <string name="balance_all_locked_title">Tu ne peux pas payer pour l\'instant</string>
     <string name="balance_running_low_title">Presque plus de billets</string>
-    <string name="balance_all_locked_body">Ton argent est là, mais tout est immobilisé en monnaie. Casse un billet pour pouvoir dépenser à nouveau.</string>
-    <string name="balance_running_low_body">Casse un billet maintenant pour ne pas être pris de court à une caisse.</string>
-    <string name="balance_break_note_action">Casser un billet</string>
+    <string name="balance_all_locked_body">Votre argent est là, mais rien n\'est encore validé ; il deviendra disponible tout seul.</string>
+    <string name="balance_running_low_body">Chaque paiement consomme une coupure. Être payé, ou recharger, vous en donne d\'autres.</string>
+    <string name="balance_top_up_action">Recharger</string>
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">

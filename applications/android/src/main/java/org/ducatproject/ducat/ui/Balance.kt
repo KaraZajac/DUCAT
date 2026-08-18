@@ -98,18 +98,24 @@ fun BalanceCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         Modifier.size(8.dp)
-                            // Change coming back has its own colour because it
-                            // carries a meaning, not a mood: it is a consequence
-                            // of having spent, and not a warning.
+                            // Money on its way has its own colour because it
+                            // carries a meaning, not a mood: it is arriving,
+                            // not a warning.
                             .background(MaterialTheme.ducat.changePending, RoundedCornerShape(4.dp))
                     )
                     Spacer(Modifier.width(8.dp))
-                    // "Change coming back" rather than "locked": the lock is a
-                    // consequence of having spent, and naming it that way is both
-                    // accurate and not alarming.
+                    // "On the way" rather than "locked" — and rather than "in
+                    // change", which is what this used to say. Every unspent
+                    // output inside the lock window counts here, and a payment
+                    // somebody just made to you is one of them: `balances()`
+                    // sees outputs, not their origin, and telling a person who
+                    // has just been paid that their money is "change" is
+                    // nonsense to them. Wording that is true either way costs
+                    // nothing; separating the two would cost a chain fetch per
+                    // output, which is the Ledger's job and not a balance's.
                     Text(
                         stringResource(
-                            R.string.balance_change_coming_back,
+                            R.string.balance_arriving,
                             locked.toString(),
                             minutesFor(ctx, float.blocksToUnlock),
                         ),
@@ -150,7 +156,7 @@ fun BalanceCard(
                     color = MaterialTheme.colorScheme.onErrorContainer,
                 )
                 Spacer(Modifier.height(12.dp))
-                Button(onClick = onTopUp) { Text(stringResource(R.string.balance_break_note_action)) }
+                Button(onClick = onTopUp) { Text(stringResource(R.string.balance_top_up_action)) }
             }
         }
     }
