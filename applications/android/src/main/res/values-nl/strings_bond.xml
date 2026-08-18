@@ -15,7 +15,7 @@
     <string name="bond_released">Ritprijs vrijgegeven</string>
     <string name="profile_arbiter">Depot-arbiter</string>
     <string name="profile_arbiter_note">Houdt de doorslaggevende sleutel van je rit-depots. Wordt alleen benaderd als er iets misgaat.</string>
-    <string name="bond_margin_back">Je marge (%1$s) komt naar je terug.</string>
+    <string name="bond_margin_back">Jouw borg (%1$s) komt naar je terug.</string>
     <string name="bond_split_stated">Voorstel: %1$s terug naar de passagier, %2$s naar de chauffeur.</string>
     <string name="bond_sign_split">Deze verdeling ondertekenen</string>
     <string name="bond_propose_split">Andere verdeling voorstellen</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">Afrekenen — verblijf beëindigen</string>
     <string name="bond_stake_asked">Er wordt een borg gevraagd</string>
     <string name="bond_post_stake">Borg storten (%1$s)</string>
+    <string name="bond_stake_refunded">%1$s daarvan is jouw borg — die komt terug als dit klaar is.</string>
+    <string name="res_kind_stay">Een plek</string>
+    <string name="res_kind_vehicle">Een voertuig</string>
+    <string name="res_kind_note">stelt %1$d%% per kant voor</string>
 </resources>

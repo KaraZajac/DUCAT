@@ -15,7 +15,7 @@
     <string name="bond_released">運賃をリリースしました</string>
     <string name="profile_arbiter">エスクロー仲裁者</string>
     <string name="profile_arbiter_note">ボンド付き乗車の決定キーを保持します。問題が起きない限り出番はありません。</string>
-    <string name="bond_margin_back">マージン（%1$s）はあなたに戻ります。</string>
+    <string name="bond_margin_back">あなたの預り金（%1$s）は戻ってきます。</string>
     <string name="bond_split_stated">提案：乗客へ %1$s、ドライバーへ %2$s。</string>
     <string name="bond_sign_split">この配分に署名</string>
     <string name="bond_propose_split">別の配分を提案</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">精算 — 滞在を終える</string>
     <string name="bond_stake_asked">保証金を求められています</string>
     <string name="bond_post_stake">保証金を預ける（%1$s）</string>
+    <string name="bond_stake_refunded">そのうち %1$s はあなたの預り金です。終われば戻ります。</string>
+    <string name="res_kind_stay">宿泊</string>
+    <string name="res_kind_vehicle">車両</string>
+    <string name="res_kind_note">双方 %1$d%% を提案</string>
 </resources>

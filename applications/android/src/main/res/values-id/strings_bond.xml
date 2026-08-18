@@ -15,7 +15,7 @@
     <string name="bond_released">Tarif dilepaskan</string>
     <string name="profile_arbiter">Arbiter escrow</string>
     <string name="profile_arbiter_note">Memegang kunci penentu perjalanan ber-escrow Anda. Hanya dihubungi jika ada masalah.</string>
-    <string name="bond_margin_back">Margin Anda (%1$s) kembali kepada Anda.</string>
+    <string name="bond_margin_back">Jaminan Anda (%1$s) kembali kepada Anda.</string>
     <string name="bond_split_stated">Usulan: %1$s kembali ke penumpang, %2$s ke pengemudi.</string>
     <string name="bond_sign_split">Tanda tangani pembagian ini</string>
     <string name="bond_propose_split">Usulkan pembagian lain</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">Selesaikan — akhiri masa inap</string>
     <string name="bond_stake_asked">Anda diminta menaruh jaminan</string>
     <string name="bond_post_stake">Setor jaminan Anda (%1$s)</string>
+    <string name="bond_stake_refunded">Sebesar %1$s dari itu adalah jaminan Anda — kembali saat urusan ini selesai.</string>
+    <string name="res_kind_stay">Sebuah tempat</string>
+    <string name="res_kind_vehicle">Sebuah kendaraan</string>
+    <string name="res_kind_note">menyarankan %1$d%% tiap pihak</string>
 </resources>

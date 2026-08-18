@@ -15,7 +15,7 @@
     <string name="bond_released">Tariffa sbloccata</string>
     <string name="profile_arbiter">Arbitro del deposito</string>
     <string name="profile_arbiter_note">Custodisce la chiave decisiva delle corse con deposito. Interviene solo se qualcosa va storto.</string>
-    <string name="bond_margin_back">Il tuo margine (%1$s) ti torna indietro.</string>
+    <string name="bond_margin_back">La tua cauzione (%1$s) torna a te.</string>
     <string name="bond_split_stated">Proposta: %1$s al passeggero, %2$s all\'autista.</string>
     <string name="bond_sign_split">Firma questa divisione</string>
     <string name="bond_propose_split">Proponi un\'altra divisione</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">Salda — concludi il soggiorno</string>
     <string name="bond_stake_asked">Ti è stata chiesta una cauzione</string>
     <string name="bond_post_stake">Versa la tua cauzione (%1$s)</string>
+    <string name="bond_stake_refunded">%1$s di questo è la tua cauzione: torna indietro quando è finita.</string>
+    <string name="res_kind_stay">Un alloggio</string>
+    <string name="res_kind_vehicle">Un veicolo</string>
+    <string name="res_kind_note">suggerisce %1$d%% per parte</string>
 </resources>

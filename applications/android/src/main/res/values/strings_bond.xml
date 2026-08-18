@@ -15,7 +15,7 @@
     <string name="bond_released">Fare released</string>
     <string name="profile_arbiter">Escrow arbiter</string>
     <string name="profile_arbiter_note">Holds the tie-breaking key in your bonded rides. Never contacted unless something goes wrong.</string>
-    <string name="bond_margin_back">Your margin (%1$s) comes back to you.</string>
+    <string name="bond_margin_back">Your stake (%1$s) comes back to you.</string>
     <string name="bond_split_stated">Proposed: %1$s back to the rider, %2$s to the driver.</string>
     <string name="bond_sign_split">Sign this split</string>
     <string name="bond_propose_split">Propose a different split</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">Settle up — end the stay</string>
     <string name="bond_stake_asked">A stake was asked of you</string>
     <string name="bond_post_stake">Post your stake (%1$s)</string>
+    <string name="bond_stake_refunded">%1$s of that is your stake — it comes back when this is finished.</string>
+    <string name="res_kind_stay">A place</string>
+    <string name="res_kind_vehicle">A vehicle</string>
+    <string name="res_kind_note">suggests %1$d%% each side</string>
 </resources>

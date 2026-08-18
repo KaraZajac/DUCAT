@@ -1721,6 +1721,22 @@ private fun RideBondBanner(contact: Contact) {
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                     ) { Text(stringResource(R.string.bond_secure_fare, fundShown)) }
+                    // The promise, at the moment the money is asked for,
+                    // rather than in a help page nobody opens.
+                    val myStake = org.ducatproject.ducat.Stakes.stakeFor(
+                        if (reservation) org.ducatproject.ducat.Stakes.Deal.Stay
+                        else org.ducatproject.ducat.Stakes.Deal.Ride,
+                        ride.optLong("farePxmr"),
+                    )
+                    if (myStake > 0) {
+                        Spacer(Modifier.height(4.dp))
+                        BondNote(
+                            stringResource(
+                                R.string.bond_stake_refunded,
+                                Amounts.show(context, myStake).primary,
+                            ),
+                        )
+                    }
                 }
                 stage == "done" && rider && funded < need ->
                     BondLine(spin = true, text = stringResource(R.string.bond_fare_sent))
@@ -1792,6 +1808,8 @@ private fun RideBondBanner(contact: Contact) {
                             ),
                         )
                     }
+                    Spacer(Modifier.height(4.dp))
+                    BondNote(stringResource(R.string.bond_stake_refunded, myShown))
                 }
                 stage == "done" && !rider && funded < need ->
                     BondLine(spin = true, text = stringResource(R.string.bond_waiting_funding))
@@ -1970,6 +1988,16 @@ private fun RideBondBanner(contact: Contact) {
     }
 }
 
+/** A plain note under a button — the consequence of pressing it. */
+@Composable
+private fun BondNote(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
+    )
+}
+
 @Composable
 private fun BondLine(spin: Boolean, text: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -2004,6 +2032,11 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     var rent by remember { mutableStateOf("") }
     var myDep by remember { mutableStateOf("") }
     var hostDep by remember { mutableStateOf("") }
+    // What kind of thing is being handed over decides how much each side
+    // stakes: a room is not a car (see Stakes.kt for where the numbers come
+    // from). Picking one fills both deposits, and either can still be typed
+    // over — the suggestion is a starting point, not a rule.
+    var deal by remember { mutableStateOf(org.ducatproject.ducat.Stakes.Deal.Stay) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
@@ -2019,8 +2052,47 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                listOf(
+                    org.ducatproject.ducat.Stakes.Deal.Stay to R.string.res_kind_stay,
+                    org.ducatproject.ducat.Stakes.Deal.Vehicle to R.string.res_kind_vehicle,
+                ).forEach { (d, label) ->
+                    FilterChip(
+                        selected = deal == d,
+                        onClick = {
+                            deal = d
+                            // Re-suggest from whatever rent has been typed.
+                            pxmr(rent)?.let { r ->
+                                val st = org.ducatproject.ducat.Stakes.stakeFor(d, r)
+                                val text = "%.6f".format(java.util.Locale.US, st / 1e12)
+                                myDep = text; hostDep = text
+                            }
+                        },
+                        label = { Text(stringResource(label)) },
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(
+                    stringResource(R.string.res_kind_note, deal.percent),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.height(12.dp))
             OutlinedTextField(
-                value = rent, onValueChange = { rent = it.filter { c -> c.isDigit() || c == '.' } },
+                value = rent,
+                onValueChange = { typed ->
+                    rent = typed.filter { c -> c.isDigit() || c == '.' }
+                    // Suggest both stakes from the rent as it is typed. Either
+                    // field can still be edited; this only saves the person
+                    // doing percentages in their head at a bus stop.
+                    pxmr(rent)?.let { r ->
+                        val st = org.ducatproject.ducat.Stakes.stakeFor(deal, r)
+                        val text = "%.6f".format(java.util.Locale.US, st / 1e12)
+                        myDep = text
+                        hostDep = text
+                    }
+                },
                 label = { Text(stringResource(R.string.res_rent)) },
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
             )

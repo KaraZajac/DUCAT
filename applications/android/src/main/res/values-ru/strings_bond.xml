@@ -15,7 +15,7 @@
     <string name="bond_released">Оплата отпущена</string>
     <string name="profile_arbiter">Арбитр эскроу</string>
     <string name="profile_arbiter_note">Держит решающий ключ ваших поездок с эскроу. Участвует, только если что-то пошло не так.</string>
-    <string name="bond_margin_back">Ваш залог (%1$s) вернётся вам.</string>
+    <string name="bond_margin_back">Ваш залог (%1$s) вернётся к вам.</string>
     <string name="bond_split_stated">Предложение: %1$s пассажиру, %2$s водителю.</string>
     <string name="bond_sign_split">Подписать это разделение</string>
     <string name="bond_propose_split">Предложить другое разделение</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">Рассчитаться — завершить проживание</string>
     <string name="bond_stake_asked">У вас просят залог</string>
     <string name="bond_post_stake">Внести залог (%1$s)</string>
+    <string name="bond_stake_refunded">%1$s из этого — ваш залог: он вернётся, когда всё завершится.</string>
+    <string name="res_kind_stay">Жильё</string>
+    <string name="res_kind_vehicle">Транспорт</string>
+    <string name="res_kind_note">по %1$d%% с каждой стороны</string>
 </resources>

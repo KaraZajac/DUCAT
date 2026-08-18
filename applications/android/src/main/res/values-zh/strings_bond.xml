@@ -15,7 +15,7 @@
     <string name="bond_released">车费已释放</string>
     <string name="profile_arbiter">托管仲裁人</string>
     <string name="profile_arbiter_note">持有你担保行程的决定性密钥。除非出了问题，否则不会参与。</string>
-    <string name="bond_margin_back">你的保证金（%1$s）将退还给你。</string>
+    <string name="bond_margin_back">你的押金（%1$s）会退回给你。</string>
     <string name="bond_split_stated">提议：%1$s 退还乘客，%2$s 给司机。</string>
     <string name="bond_sign_split">签署此分配</string>
     <string name="bond_propose_split">提议不同的分配</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">结算 — 结束入住</string>
     <string name="bond_stake_asked">对方请你缴纳保证金</string>
     <string name="bond_post_stake">缴纳保证金（%1$s）</string>
+    <string name="bond_stake_refunded">其中 %1$s 是你的押金 —— 事情完成后会退回给你。</string>
+    <string name="res_kind_stay">住处</string>
+    <string name="res_kind_vehicle">车辆</string>
+    <string name="res_kind_note">建议双方各 %1$d%%</string>
 </resources>

@@ -15,7 +15,7 @@
     <string name="bond_released">Tarifa libertada</string>
     <string name="profile_arbiter">Árbitro da caução</string>
     <string name="profile_arbiter_note">Guarda a chave de desempate das tuas viagens com caução. Só entra se algo correr mal.</string>
-    <string name="bond_margin_back">A tua margem (%1$s) volta para ti.</string>
+    <string name="bond_margin_back">A sua caução (%1$s) volta para si.</string>
     <string name="bond_split_stated">Proposta: %1$s de volta ao passageiro, %2$s ao motorista.</string>
     <string name="bond_sign_split">Assinar esta divisão</string>
     <string name="bond_propose_split">Propor outra divisão</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">Acertar — terminar a estadia</string>
     <string name="bond_stake_asked">Foi-lhe pedida uma caução</string>
     <string name="bond_post_stake">Depositar a sua caução (%1$s)</string>
+    <string name="bond_stake_refunded">%1$s disso é a sua caução: volta para si quando isto terminar.</string>
+    <string name="res_kind_stay">Um espaço</string>
+    <string name="res_kind_vehicle">Um veículo</string>
+    <string name="res_kind_note">sugere %1$d%% de cada lado</string>
 </resources>

@@ -15,7 +15,7 @@
     <string name="bond_released">किराया जारी किया गया</string>
     <string name="profile_arbiter">एस्क्रो मध्यस्थ</string>
     <string name="profile_arbiter_note">आपकी बॉन्ड सवारियों की निर्णायक कुंजी रखता है। कुछ गड़बड़ होने पर ही संपर्क होता है।</string>
-    <string name="bond_margin_back">आपका मार्जिन (%1$s) आपको वापस मिलता है।</string>
+    <string name="bond_margin_back">आपकी जमानत राशि (%1$s) आपको वापस मिलती है।</string>
     <string name="bond_split_stated">प्रस्ताव: %1$s सवार को वापस, %2$s चालक को।</string>
     <string name="bond_sign_split">इस बंटवारे पर हस्ताक्षर करें</string>
     <string name="bond_propose_split">अलग बंटवारा प्रस्तावित करें</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">हिसाब करें — प्रवास समाप्त</string>
     <string name="bond_stake_asked">आपसे जमानत राशि मांगी गई है</string>
     <string name="bond_post_stake">अपनी जमानत राशि जमा करें (%1$s)</string>
+    <string name="bond_stake_refunded">इसमें से %1$s आपकी जमानत राशि है — काम पूरा होने पर वापस आ जाती है।</string>
+    <string name="res_kind_stay">एक जगह</string>
+    <string name="res_kind_vehicle">एक वाहन</string>
+    <string name="res_kind_note">हर पक्ष के लिए %1$d%% सुझाया गया</string>
 </resources>

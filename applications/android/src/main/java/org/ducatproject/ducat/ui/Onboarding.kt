@@ -198,11 +198,11 @@ private fun Progress(step: Step) {
     // The step you are *on*, not the number completed. "0 of 4" on the first
     // screen reads as though nothing has started and something has gone wrong.
     //
-    // The reachable flow is four steps — Persona → Wallet → Limits → Backup —
-    // then Done. `Step.Profile` exists but is skipped (Persona goes straight to
-    // Wallet), so it is not counted; numbering the shown steps contiguously is
-    // what keeps "Step 2 of 4" from ever jumping to "Step 3".
-    val total = 4
+    // The reachable flow is five steps — Persona → Wallet → Limits → Trust →
+    // Backup — then Done. `Step.Profile` exists but is skipped (Persona goes
+    // straight to Wallet), so it is not counted; numbering the shown steps
+    // contiguously is what keeps "Step 2 of 5" from ever jumping to "Step 3".
+    val total = 5
     val n = when (step) {
         Step.Persona -> 1
         Step.Wallet -> 2

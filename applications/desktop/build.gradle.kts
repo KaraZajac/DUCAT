@@ -52,6 +52,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/ui/Contacts.kt",
     "org/ducatproject/ducat/ui/Pay.kt",
     "org/ducatproject/ducat/ui/Ceremony.kt",
+    "org/ducatproject/ducat/ui/Onboarding.kt",
     "org/ducatproject/ducat/Geo.kt",
     "org/ducatproject/ducat/Stakes.kt",
     "org/ducatproject/ducat/Places.kt",

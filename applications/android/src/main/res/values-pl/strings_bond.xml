@@ -15,7 +15,7 @@
     <string name="bond_released">Opłata zwolniona</string>
     <string name="profile_arbiter">Arbiter depozytu</string>
     <string name="profile_arbiter_note">Trzyma rozstrzygający klucz twoich przejazdów z depozytem. Odzywa się tylko, gdy coś pójdzie źle.</string>
-    <string name="bond_margin_back">Twój depozyt (%1$s) wraca do ciebie.</string>
+    <string name="bond_margin_back">Twoja kaucja (%1$s) wraca do ciebie.</string>
     <string name="bond_split_stated">Propozycja: %1$s dla pasażera, %2$s dla kierowcy.</string>
     <string name="bond_sign_split">Podpisz ten podział</string>
     <string name="bond_propose_split">Zaproponuj inny podział</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">Rozlicz — zakończ pobyt</string>
     <string name="bond_stake_asked">Poproszono cię o kaucję</string>
     <string name="bond_post_stake">Wpłać kaucję (%1$s)</string>
+    <string name="bond_stake_refunded">%1$s z tego to twoja kaucja — wraca, gdy sprawa się zakończy.</string>
+    <string name="res_kind_stay">Miejsce</string>
+    <string name="res_kind_vehicle">Pojazd</string>
+    <string name="res_kind_note">sugeruje %1$d%% z każdej strony</string>
 </resources>

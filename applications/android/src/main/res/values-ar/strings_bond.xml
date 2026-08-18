@@ -15,7 +15,7 @@
     <string name="bond_released">حُررت الأجرة</string>
     <string name="profile_arbiter">حَكَم الضمان</string>
     <string name="profile_arbiter_note">يحمل مفتاح الترجيح في رحلاتك المضمونة. لا يُستدعى إلا إذا ساء شيء.</string>
-    <string name="bond_margin_back">هامشك (%1$s) يعود إليك.</string>
+    <string name="bond_margin_back">‏ضمانك (%1$s) يعود إليك.</string>
     <string name="bond_split_stated">الاقتراح: %1$s للراكب، %2$s للسائق.</string>
     <string name="bond_sign_split">توقيع هذا التقسيم</string>
     <string name="bond_propose_split">اقتراح تقسيم مختلف</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">تسوية — إنهاء الإقامة</string>
     <string name="bond_stake_asked">مطلوب منك تأمين</string>
     <string name="bond_post_stake">أودع تأمينك (%1$s)</string>
+    <string name="bond_stake_refunded">‏%1$s من ذلك ضمانك — يعود إليك عند انتهاء المعاملة.</string>
+    <string name="res_kind_stay">مكان</string>
+    <string name="res_kind_vehicle">مركبة</string>
+    <string name="res_kind_note">يقترح %1$d%% لكل طرف</string>
 </resources>

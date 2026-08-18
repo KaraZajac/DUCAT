@@ -15,7 +15,7 @@
     <string name="bond_released">Tarifa liberada</string>
     <string name="profile_arbiter">Árbitro del depósito</string>
     <string name="profile_arbiter_note">Guarda la llave de desempate de tus viajes con depósito. Solo interviene si algo sale mal.</string>
-    <string name="bond_margin_back">Tu margen (%1$s) vuelve a ti.</string>
+    <string name="bond_margin_back">Tu garantía (%1$s) vuelve a ti.</string>
     <string name="bond_split_stated">Propuesta: %1$s de vuelta al pasajero, %2$s al conductor.</string>
     <string name="bond_sign_split">Firmar este reparto</string>
     <string name="bond_propose_split">Proponer otro reparto</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">Liquidar — terminar la estancia</string>
     <string name="bond_stake_asked">Se te pide una fianza</string>
     <string name="bond_post_stake">Deposita tu fianza (%1$s)</string>
+    <string name="bond_stake_refunded">%1$s de eso es tu garantía: vuelve a ti cuando esto termine.</string>
+    <string name="res_kind_stay">Un lugar</string>
+    <string name="res_kind_vehicle">Un vehículo</string>
+    <string name="res_kind_note">sugiere %1$d%% por cada parte</string>
 </resources>

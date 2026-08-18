@@ -107,6 +107,15 @@ fun main() {
         org.ducatproject.ducat.ui.QrScannerContent("Scan a card", onResult = {})
     }
     render("place") { DeskPlaceSetting() }
+    // The sentence the whole trust model rests on, as a user meets it.
+    render("onboarding-trust", w = 900, h = 700) {
+        org.ducatproject.ducat.ui.OnboardingFlow(
+            state = org.ducatproject.ducat.ui.Onboarding(
+                step = org.ducatproject.ducat.ui.Step.Trust,
+            ),
+            onState = {},
+        )
+    }
     render("firstrun") { FirstRun(onDone = {}) }
     render("protect") { ProtectStep(dir, onSettled = {}) }
     render("unlock") { UnlockScreen(dir, onUnlocked = {}) }

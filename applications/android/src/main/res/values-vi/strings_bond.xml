@@ -15,7 +15,7 @@
     <string name="bond_released">Đã giải phóng cước phí</string>
     <string name="profile_arbiter">Trọng tài ký quỹ</string>
     <string name="profile_arbiter_note">Giữ chìa khóa quyết định cho các chuyến đi ký quỹ. Chỉ được liên hệ khi có sự cố.</string>
-    <string name="bond_margin_back">Khoản ký quỹ (%1$s) sẽ trở về với bạn.</string>
+    <string name="bond_margin_back">Tiền cọc của bạn (%1$s) sẽ quay về.</string>
     <string name="bond_split_stated">Đề xuất: %1$s về hành khách, %2$s cho tài xế.</string>
     <string name="bond_sign_split">Ký chia phần này</string>
     <string name="bond_propose_split">Đề xuất chia khác</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">Tất toán — kết thúc lưu trú</string>
     <string name="bond_stake_asked">Bạn được yêu cầu đặt cọc</string>
     <string name="bond_post_stake">Đặt cọc của bạn (%1$s)</string>
+    <string name="bond_stake_refunded">Trong đó %1$s là tiền cọc của bạn — sẽ quay về khi xong việc.</string>
+    <string name="res_kind_stay">Một chỗ ở</string>
+    <string name="res_kind_vehicle">Một phương tiện</string>
+    <string name="res_kind_note">gợi ý %1$d%% mỗi bên</string>
 </resources>

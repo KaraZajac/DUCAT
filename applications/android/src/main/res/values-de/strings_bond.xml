@@ -15,7 +15,7 @@
     <string name="bond_released">Fahrpreis freigegeben</string>
     <string name="profile_arbiter">Treuhand-Schiedsperson</string>
     <string name="profile_arbiter_note">Hält den entscheidenden Schlüssel deiner Treuhand-Fahrten. Wird nur bei Problemen kontaktiert.</string>
-    <string name="bond_margin_back">Deine Marge (%1$s) kommt zu dir zurück.</string>
+    <string name="bond_margin_back">Deine Einlage (%1$s) kommt zu dir zurück.</string>
     <string name="bond_split_stated">Vorschlag: %1$s zurück an den Fahrgast, %2$s an den Fahrer.</string>
     <string name="bond_sign_split">Diese Aufteilung signieren</string>
     <string name="bond_propose_split">Andere Aufteilung vorschlagen</string>
@@ -36,4 +36,8 @@
     <string name="res_settle">Abrechnen — Aufenthalt beenden</string>
     <string name="bond_stake_asked">Eine Sicherheit wird erbeten</string>
     <string name="bond_post_stake">Sicherheit hinterlegen (%1$s)</string>
+    <string name="bond_stake_refunded">%1$s davon ist deine Einlage — sie kommt zurück, wenn das hier erledigt ist.</string>
+    <string name="res_kind_stay">Eine Unterkunft</string>
+    <string name="res_kind_vehicle">Ein Fahrzeug</string>
+    <string name="res_kind_note">schlägt je %1$d%% vor</string>
 </resources>
