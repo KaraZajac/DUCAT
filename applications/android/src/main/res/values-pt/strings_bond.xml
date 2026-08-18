@@ -40,4 +40,5 @@
     <string name="res_kind_stay">Um espaço</string>
     <string name="res_kind_vehicle">Um veículo</string>
     <string name="res_kind_note">sugere %1$d%% de cada lado</string>
+    <string name="bond_await_their_stake">À espera da caução deles — paga assim que a delas entrar.</string>
 </resources>

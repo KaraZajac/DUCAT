@@ -40,4 +40,5 @@
     <string name="res_kind_stay">Sebuah tempat</string>
     <string name="res_kind_vehicle">Sebuah kendaraan</string>
     <string name="res_kind_note">menyarankan %1$d%% tiap pihak</string>
+    <string name="bond_await_their_stake">Menunggu jaminan mereka — Anda membayar setelah jaminan mereka masuk.</string>
 </resources>

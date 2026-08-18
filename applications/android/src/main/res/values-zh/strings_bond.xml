@@ -40,4 +40,5 @@
     <string name="res_kind_stay">住处</string>
     <string name="res_kind_vehicle">车辆</string>
     <string name="res_kind_note">建议双方各 %1$d%%</string>
+    <string name="bond_await_their_stake">等待对方的押金 —— 对方押上后你再付。</string>
 </resources>

@@ -40,4 +40,5 @@
     <string name="res_kind_stay">Eine Unterkunft</string>
     <string name="res_kind_vehicle">Ein Fahrzeug</string>
     <string name="res_kind_note">schlägt je %1$d%% vor</string>
+    <string name="bond_await_their_stake">Warte auf ihre Einlage — du zahlst, sobald ihre da ist.</string>
 </resources>

@@ -40,4 +40,5 @@
     <string name="res_kind_stay">Bir yer</string>
     <string name="res_kind_vehicle">Bir araç</string>
     <string name="res_kind_note">her taraf için %%%1$d öneriyor</string>
+    <string name="bond_await_their_stake">Onların teminatı bekleniyor — onlarınki girince ödersin.</string>
 </resources>

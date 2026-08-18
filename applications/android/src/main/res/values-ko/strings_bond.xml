@@ -40,4 +40,5 @@
     <string name="res_kind_stay">숙소</string>
     <string name="res_kind_vehicle">차량</string>
     <string name="res_kind_note">양쪽 각 %1$d%% 제안</string>
+    <string name="bond_await_their_stake">상대의 보증금을 기다리는 중 — 들어오면 결제합니다.</string>
 </resources>

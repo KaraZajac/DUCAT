@@ -40,4 +40,5 @@
     <string name="res_kind_stay">एक जगह</string>
     <string name="res_kind_vehicle">एक वाहन</string>
     <string name="res_kind_note">हर पक्ष के लिए %1$d%% सुझाया गया</string>
+    <string name="bond_await_their_stake">उनकी जमानत राशि का इंतज़ार — उनकी आते ही आप भुगतान करेंगे।</string>
 </resources>

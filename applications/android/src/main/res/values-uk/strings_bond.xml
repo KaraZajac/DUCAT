@@ -40,4 +40,5 @@
     <string name="res_kind_stay">Житло</string>
     <string name="res_kind_vehicle">Транспорт</string>
     <string name="res_kind_note">по %1$d%% з кожного боку</string>
+    <string name="bond_await_their_stake">Чекаємо на їхню заставу — ви платите, щойно вона надійде.</string>
 </resources>

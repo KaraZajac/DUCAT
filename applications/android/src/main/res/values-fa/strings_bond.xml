@@ -40,4 +40,5 @@
     <string name="res_kind_stay">محل اقامت</string>
     <string name="res_kind_vehicle">خودرو</string>
     <string name="res_kind_note">‏%1$d%% برای هر طرف پیشنهاد می‌شود</string>
+    <string name="bond_await_their_stake">در انتظار ودیعهٔ آن‌ها — پس از واریز آن‌ها پرداخت می‌کنید.</string>
 </resources>

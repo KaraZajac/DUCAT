@@ -40,4 +40,5 @@
     <string name="res_kind_stay">Een plek</string>
     <string name="res_kind_vehicle">Een voertuig</string>
     <string name="res_kind_note">stelt %1$d%% per kant voor</string>
+    <string name="bond_await_their_stake">Wachten op hun borg — jij betaalt zodra die van hen binnen is.</string>
 </resources>

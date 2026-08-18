@@ -40,4 +40,5 @@
     <string name="res_kind_stay">Жильё</string>
     <string name="res_kind_vehicle">Транспорт</string>
     <string name="res_kind_note">по %1$d%% с каждой стороны</string>
+    <string name="bond_await_their_stake">Ждём их залог — вы платите, когда он внесён.</string>
 </resources>

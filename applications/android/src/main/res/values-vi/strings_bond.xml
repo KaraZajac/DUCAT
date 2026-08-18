@@ -40,4 +40,5 @@
     <string name="res_kind_stay">Một chỗ ở</string>
     <string name="res_kind_vehicle">Một phương tiện</string>
     <string name="res_kind_note">gợi ý %1$d%% mỗi bên</string>
+    <string name="bond_await_their_stake">Đang chờ tiền cọc của họ — bạn trả sau khi họ đặt cọc.</string>
 </resources>

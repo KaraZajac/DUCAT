@@ -40,4 +40,5 @@
     <string name="res_kind_stay">مكان</string>
     <string name="res_kind_vehicle">مركبة</string>
     <string name="res_kind_note">يقترح %1$d%% لكل طرف</string>
+    <string name="bond_await_their_stake">بانتظار ضمانهم — تدفع بعد دخول ضمانهم.</string>
 </resources>

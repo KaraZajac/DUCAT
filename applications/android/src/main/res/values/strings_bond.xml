@@ -40,4 +40,5 @@
     <string name="res_kind_stay">A place</string>
     <string name="res_kind_vehicle">A vehicle</string>
     <string name="res_kind_note">suggests %1$d%% each side</string>
+    <string name="bond_await_their_stake">Waiting for their stake — you pay once theirs is in.</string>
 </resources>

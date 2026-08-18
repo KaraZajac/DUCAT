@@ -267,6 +267,17 @@ fun main() {
     } ?: return
     println("RIDE_BUILT ${ride.optString("address")}")
 
+    // The exposed side goes second: when a driver stake was asked for, the
+    // rider waits until it is in. Whoever funds first stands alone, and the
+    // rider is carrying ten times what the driver is.
+    if (ride.optLong("hostDepPxmr") > 0) {
+        await("the driver's stake to land", seconds = 3600) {
+            Ceremony.all(context).firstOrNull { it.optString("id") == id }
+                ?.optString("hostFundTxid")?.takeIf { it.isNotEmpty() }
+        } ?: return
+        println("RIDE_THEIRS_IN the driver staked first")
+    }
+
     val owed = Ceremony.mySharePxmr(ride)
     val tx = fundWhenAble(id, owed) ?: return
     println("RIDE_FUNDED rider sent ${formatXmr(owed)} XMR — ${tx.take(16)}…")

@@ -40,4 +40,5 @@
     <string name="res_kind_stay">宿泊</string>
     <string name="res_kind_vehicle">車両</string>
     <string name="res_kind_note">双方 %1$d%% を提案</string>
+    <string name="bond_await_their_stake">相手の預り金を待っています。入ったらお支払いです。</string>
 </resources>

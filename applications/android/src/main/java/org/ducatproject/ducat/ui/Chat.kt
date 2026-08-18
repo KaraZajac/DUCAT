@@ -1697,6 +1697,18 @@ private fun RideBondBanner(contact: Contact) {
                 stage == "committed" || stage == "shared" -> {
                     BondLine(spin = true, text = stringResource(R.string.bond_building, fareShown))
                 }
+                // The exposed side goes second. Whoever funds first stands
+                // alone until the other follows, and the payer is carrying
+                // ten times what the provider is — so when a provider stake
+                // was asked for, the payer waits for it. It also matches how
+                // booking anything works: the other side confirms, then you
+                // pay. A provider who never stakes has simply declined, and
+                // nobody's money is sitting in a shared address over it.
+                stage == "done" && rider && ride.optString("fundTxid").isEmpty() &&
+                    ride.optLong("hostDepPxmr") > 0 &&
+                    ride.optString("hostFundTxid").isEmpty() ->
+                    BondLine(spin = true, text = stringResource(R.string.bond_await_their_stake))
+
                 stage == "done" && rider && ride.optString("fundTxid").isEmpty() -> {
                     BondLine(spin = false, text = stringResource(R.string.bond_escrow_ready))
                     Spacer(Modifier.height(6.dp))

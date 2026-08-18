@@ -40,4 +40,5 @@
     <string name="res_kind_stay">Miejsce</string>
     <string name="res_kind_vehicle">Pojazd</string>
     <string name="res_kind_note">sugeruje %1$d%% z każdej strony</string>
+    <string name="bond_await_their_stake">Czekamy na ich kaucję — płacisz, gdy ich wpłynie.</string>
 </resources>

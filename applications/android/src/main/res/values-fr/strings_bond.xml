@@ -40,4 +40,5 @@
     <string name="res_kind_stay">Un logement</string>
     <string name="res_kind_vehicle">Un véhicule</string>
     <string name="res_kind_note">suggère %1$d%% de chaque côté</string>
+    <string name="bond_await_their_stake">En attente de leur dépôt — vous payez une fois le leur versé.</string>
 </resources>
