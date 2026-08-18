@@ -153,21 +153,58 @@ object Listings {
             context, MyProfile(context).name(), TTL_SECONDS.toULong(), purpose = "rental",
         )
         val bytes = uniffi.ducat_mobile.rentalEncode(publicNotice(o, card.uri))
-        val board = boardName(cell)
-        // Eight slots to a board; take the first that is free or ours.
         val now = System.currentTimeMillis() / 1000
-        val taken = runCatching { uniffi.ducat_mobile.standRead(board) }.getOrDefault(emptyList())
-            .mapNotNull { n ->
-                runCatching { uniffi.ducat_mobile.rentalDecode(n.data) }.getOrNull()
-                    ?.takeIf { it.expiry.toLong() > now }?.let { n.subkey }
-            }.toSet()
-        val mine = o.optInt("subkey", -1).takeIf { it >= 0 }?.toUInt()
-        val slot = mine ?: (0u..7u).firstOrNull { it !in taken }
-        if (slot == null) {
-            DucatLog.w(TAG, "board $board is full")
+
+        // §15.12's overflow ladder, which listings need far more than hails
+        // do: a hail is one person for ten minutes, but a five-kilometre
+        // cell in a city holds every car and room in a neighbourhood at
+        // once. Eight slots to a board, sixteen boards to a cell — shard 0
+        // is the bare name so existing boards stay valid, and 1.. are
+        // "<name>-<n>".
+        //
+        // Always from the bottom: writers filling the lowest free slot is
+        // what lets a reader stop climbing, and what keeps the ladder short
+        // enough to read.
+        var placed: Pair<String, UInt>? = null
+        val existing = o.optString("board").takeIf { it.isNotBlank() }
+        val existingSlot = o.optInt("subkey", -1).takeIf { it >= 0 }?.toUInt()
+        if (existing != null && existingSlot != null) {
+            // Refreshing in place: keep the tenancy rather than taking a
+            // second slot and leaving the first to expire as a ghost.
+            if (runCatching { uniffi.ducat_mobile.standPost(existing, existingSlot, bytes) }
+                    .isSuccess
+            ) {
+                placed = existing to existingSlot
+            }
+        }
+        if (placed == null) {
+            ladder@ for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
+                val name = uniffi.ducat_mobile.standShardName(boardName(cell), shard)
+                val taken = runCatching { uniffi.ducat_mobile.standRead(name) }
+                    .getOrDefault(emptyList())
+                    .mapNotNull { n ->
+                        runCatching { uniffi.ducat_mobile.rentalDecode(n.data) }.getOrNull()
+                            ?.takeIf { it.expiry.toLong() > now }?.let { n.subkey }
+                    }.toSet()
+                for (free in 0u..7u) {
+                    if (free in taken) continue
+                    // standPost verifies its own landing, so a slot two
+                    // writers raced for is a throw here rather than a notice
+                    // that quietly vanished under someone else's.
+                    if (runCatching { uniffi.ducat_mobile.standPost(name, free, bytes) }.isSuccess) {
+                        placed = name to free
+                        break@ladder
+                    }
+                }
+            }
+        }
+        val (board, slot) = placed ?: run {
+            DucatLog.w(TAG, "every shard of ${boardName(cell)} is full")
             return false
         }
-        uniffi.ducat_mobile.standPost(board, slot, bytes)
+        // Remember the tenancy, or the notice is on the network and this
+        // device has no idea where: a refresh would post a second copy and
+        // "take it down" would have nothing to clear.
         o.put("card", card.uri)
         o.put("board", board)
         o.put("subkey", slot.toInt())
@@ -228,8 +265,7 @@ object Listings {
         val seen = HashSet<String>()
         val found = mutableListOf<uniffi.ducat_mobile.RentalInfo>()
 
-        fun absorb(cell: String) {
-            val fresh = readBoard(cell, kind)
+        fun absorb(fresh: List<uniffi.ducat_mobile.RentalInfo>) {
             synchronized(found) {
                 // One card, one listing: a notice copied onto two boards is
                 // still one thing being rented.
@@ -238,31 +274,90 @@ object Listings {
             }
         }
 
-        // Where you are, first and alone: the answer people usually want.
-        absorb(home)
+        // Wave one: where you are, shard 0, alone. The answer people usually
+        // want, and the only read that happens before anything is shown.
+        absorb(readCell(home, kind, deep = false))
 
         val ring = runCatching { uniffi.ducat_mobile.geohashNeighbors(home) }
             .getOrDefault(emptyList())
-        if (ring.isEmpty()) return
-        val pool = java.util.concurrent.Executors.newFixedThreadPool(ring.size.coerceAtMost(8))
+        val pool = java.util.concurrent.Executors.newFixedThreadPool(8)
         try {
-            ring.map { cell -> pool.submit { runCatching { absorb(cell) } } }
-                .forEach { runCatching { it.get(120, java.util.concurrent.TimeUnit.SECONDS) } }
+            // Wave two: the ring's shard 0, in parallel — the wait becomes
+            // the slowest board rather than the sum of nine.
+            ring.map { cell -> pool.submit { runCatching { absorb(readCell(cell, kind, false)) } } }
+                .forEach { runCatching { it.get(150, java.util.concurrent.TimeUnit.SECONDS) } }
+
+            // Wave three: climb the ladder, but only where shard 0 came back
+            // full — a board with a free slot is the end of its own ladder,
+            // because every writer fills the lowest free slot first.
+            val crowded = (listOf(home) + ring).filter { looksFull(boardName(it)) }
+            if (crowded.isNotEmpty()) {
+                DucatLog.i(TAG, "climbing the ladder on ${crowded.size} full board(s)")
+                crowded.map { cell -> pool.submit { runCatching { absorb(readCell(cell, kind, true)) } } }
+                    .forEach { runCatching { it.get(240, java.util.concurrent.TimeUnit.SECONDS) } }
+            }
         } finally {
             pool.shutdownNow()
         }
     }
 
-    /** Everything live on one board, already filtered and decoded. */
-    private fun readBoard(cell: String, kind: Int?): List<uniffi.ducat_mobile.RentalInfo> {
+    /**
+     * Everything live on one shard, already filtered and decoded.
+     *
+     * Returns null when the read itself failed, which is not the same as an
+     * empty board: a network that could not answer must not be mistaken for
+     * the end of a ladder.
+     */
+    private fun readShard(name: String, kind: Int?): List<uniffi.ducat_mobile.RentalInfo>? {
         val now = System.currentTimeMillis() / 1000
-        return runCatching { uniffi.ducat_mobile.standRead(boardName(cell)) }
-            .getOrDefault(emptyList())
-            .mapNotNull { runCatching { uniffi.ducat_mobile.rentalDecode(it.data) }.getOrNull() }
+        val raw = runCatching { uniffi.ducat_mobile.standRead(name) }.getOrNull() ?: return null
+        return raw.mapNotNull { runCatching { uniffi.ducat_mobile.rentalDecode(it.data) }.getOrNull() }
             // A reader MUST drop an expired listing unrendered (§16.18).
             .filter { it.expiry.toLong() > now }
             .filter { kind == null || it.kind.toInt() == kind }
     }
+
+    /**
+     * One cell's whole ladder, bottom up.
+     *
+     * The stopping rule is the hail's and for the hail's reason: a shard
+     * that comes back empty is not proof the ladder ended, because expiry
+     * empties low shards first and leaves gaps above them. Two empty shards
+     * in a row is the signal, which costs a quiet cell one extra read and
+     * costs a busy one nothing.
+     *
+     * `deep` is what keeps a search affordable. Reading sixteen shards of
+     * nine cells is 144 board reads, and an empty board costs tens of
+     * seconds — so the first pass reads only shard 0 everywhere, and the
+     * ladder is climbed afterwards, only where shard 0 came back full.
+     */
+    private fun readCell(
+        cell: String,
+        kind: Int?,
+        deep: Boolean,
+    ): List<uniffi.ducat_mobile.RentalInfo> {
+        val base = boardName(cell)
+        val first = readShard(base, kind) ?: return emptyList()
+        if (!deep) return first
+        val out = first.toMutableList()
+        var quiet = 0
+        for (shard in 1u until uniffi.ducat_mobile.maxStandShards()) {
+            val name = runCatching { uniffi.ducat_mobile.standShardName(base, shard) }
+                .getOrNull() ?: break
+            val live = readShard(name, kind) ?: break
+            if (live.isEmpty()) {
+                if (++quiet >= 2) break
+            } else {
+                quiet = 0
+                out += live
+            }
+        }
+        return out
+    }
+
+    /** A board is full when every one of its eight slots holds something live. */
+    private fun looksFull(name: String): Boolean =
+        (runCatching { uniffi.ducat_mobile.standRead(name) }.getOrNull()?.size ?: 0) >= 8
 
     /** Rental boards are their own namespace: a hail must never collide. */
     private fun boardName(cell: String) = "rent:$cell"

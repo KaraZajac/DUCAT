@@ -83,13 +83,42 @@ fun main() {
             },
             privateDetails = secret,
         )
-        for (o in listOf(car, room)) {
+        // §15.12's overflow ladder, which a rental cell reaches far sooner
+        // than a taxi stand does: a five-kilometre cell in a city holds
+        // every car and room in a neighbourhood, and a board is eight slots.
+        // DUCAT_LIST_CROWD asks for that many listings so the ladder is
+        // exercised rather than assumed.
+        val crowd = System.getenv("DUCAT_LIST_CROWD")?.toIntOrNull() ?: 0
+        val extras = (1..crowd).map { i ->
+            Listings.draft(
+                context, Listings.KIND_VEHICLE,
+                title = "Fleet car $i",
+                area = "north side",
+                pricePxmr = 30_000_000_000L + i * 1_000_000_000L,
+                latE7 = lat, lonE7 = lon,
+                specs = JSONObject().apply {
+                    put("make", "Fleet"); put("model", "Number $i"); put("year", 2020L)
+                    put("gearbox", 2L); put("fuel", 1L); put("subtype", 1L)
+                    put("features", JSONArray())
+                },
+                privateDetails = secret,
+            )
+        }
+
+        for (o in listOf(car, room) + extras) {
             Listings.put(context, o)
             val ok = runCatching { Listings.post(context, o.optString("id")) }
                 .onFailure { println("LIST_FAIL post: ${it.message}") }
                 .getOrDefault(false)
-            check("posted ${o.optString("title")}", ok)
+            if (!ok) check("posted ${o.optString("title")}", false)
         }
+        val live = Listings.all(context).filter { it.optString("board").isNotBlank() }
+        check("every listing found a slot", live.size == 2 + crowd,
+            "${live.size} of ${2 + crowd} placed")
+        val shards = live.map { it.optString("board") }.toSet()
+        check("the ladder was used when the first board filled",
+            crowd < 7 || shards.size > 1,
+            shards.sorted().joinToString(", "))
 
         // The claim §16.18 makes about itself: the bytes on the board carry
         // nothing that would get a stranger to the door.
@@ -152,7 +181,16 @@ fun main() {
         }
     }
 
+    val want = System.getenv("DUCAT_LIST_CROWD")?.toIntOrNull() ?: 0
     check("found a car on the boards", cars.isNotEmpty(), cars.firstOrNull()?.title ?: "")
+    if (want > 0) {
+        // The point of the ladder: nothing is invisible because a board was
+        // full when it was posted.
+        check("every car on the ladder was found", cars.size >= want + 1,
+            "${cars.size} of ${want + 1}")
+        val fleet = cars.mapNotNull { it.model }.filter { it.startsWith("Number ") }.toSet()
+        check("no fleet car is missing", fleet.size >= want, "${fleet.size} of $want distinct")
+    }
     check("found a room", rooms.isNotEmpty(), rooms.firstOrNull()?.title ?: "")
     cars.firstOrNull()?.let { c ->
         check("the car's searchable shape arrived",
