@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">Plus około %1$s opłat — razem %2$s.</string>
     <string name="pay_irreversible_warning">Płatności Monero nie da się cofnąć ani anulować. Sprawdź adres — jeśli jest zły, nie ma się do kogo odwołać.</string>
     <string name="pay_cancel">Anuluj</string>
+    <string name="pay_fee_unknown">teraz nieznana</string>
+    <string name="pay_fee_unknown_confirm">Nie udało się teraz oszacować opłaty. Transakcja zapłaci tyle, ile będzie kosztować przy tworzeniu.</string>
 </resources>

@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">手数料約%1$sを加えて、合計%2$s。</string>
     <string name="pay_irreversible_warning">Moneroの支払いは取り消しも撤回もできません。アドレスを確認してください — 間違っていても訴える先はありません。</string>
     <string name="pay_cancel">キャンセル</string>
+    <string name="pay_fee_unknown">いまは分かりません</string>
+    <string name="pay_fee_unknown_confirm">いま手数料を見積もれませんでした。取引は組み立て時にかかる分を支払います。</string>
 </resources>

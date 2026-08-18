@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">另加约 %1$s 手续费 — 共 %2$s。</string>
     <string name="pay_irreversible_warning">Monero 付款无法撤销或取消。仔细核对地址 — 发错了没有任何人可以申诉。</string>
     <string name="pay_cancel">取消</string>
+    <string name="pay_fee_unknown">暂时无法得知</string>
+    <string name="pay_fee_unknown_confirm">暂时无法估算手续费。交易在构建时会按实际费用支付。</string>
 </resources>

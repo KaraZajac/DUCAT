@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">साथ में करीब %1$s शुल्क — कुल %2$s।</string>
     <string name="pay_irreversible_warning">Monero भुगतान न पलटे जा सकते हैं, न रद्द। पता जाँच लें — गलत निकला तो सुनवाई कहीं नहीं।</string>
     <string name="pay_cancel">रद्द करें</string>
+    <string name="pay_fee_unknown">अभी पता नहीं</string>
+    <string name="pay_fee_unknown_confirm">अभी शुल्क का अनुमान नहीं लगाया जा सका। लेनदेन बनते समय जो लगेगा, वही चुकाएगा।</string>
 </resources>

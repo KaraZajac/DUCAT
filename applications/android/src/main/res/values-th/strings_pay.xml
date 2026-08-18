@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">บวกค่าธรรมเนียมราว %1$s — รวมทั้งสิ้น %2$s</string>
     <string name="pay_irreversible_warning">การชำระ Monero ย้อนกลับหรือยกเลิกไม่ได้ ตรวจที่อยู่ให้ดี — ถ้าผิดจะไม่มีใครให้ร้องเรียน</string>
     <string name="pay_cancel">ยกเลิก</string>
+    <string name="pay_fee_unknown">ยังไม่ทราบตอนนี้</string>
+    <string name="pay_fee_unknown_confirm">ยังประเมินค่าธรรมเนียมไม่ได้ในตอนนี้ ธุรกรรมจะจ่ายตามจริงเมื่อสร้างขึ้น</string>
 </resources>

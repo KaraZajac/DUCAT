@@ -139,7 +139,17 @@ data class Quote(
     /** What is left afterwards, unlocked. */
     val remainingPxmr: Long,
     val affordable: Boolean,
-)
+) {
+    /**
+     * Whether [feePxmr] is a fee or an apology.
+     *
+     * `feeFor` returns zero when it cannot reach a node — it says so in its own
+     * comment, calling a zero "a cached failure" — and a Monero transaction
+     * never costs nothing. So a zero here means *not known*, and a screen that
+     * prints it as a fee promises a total it cannot deliver.
+     */
+    val feeKnown: Boolean get() = feePxmr > 0
+}
 
 /** What a send would use and cost, before anything is signed. */
 data class SendPlan(

@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">Mais cerca de %1$s em taxas — %2$s no total.</string>
     <string name="pay_irreversible_warning">Pagamentos em Monero não podem ser revertidos nem cancelados. Confira o endereço — não há a quem recorrer se estiver errado.</string>
     <string name="pay_cancel">Cancelar</string>
+    <string name="pay_fee_unknown">agora não se sabe</string>
+    <string name="pay_fee_unknown_confirm">Não foi possível estimar a taxa agora. A transação pagará o que custar quando for construída.</string>
 </resources>

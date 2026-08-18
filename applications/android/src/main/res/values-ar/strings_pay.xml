@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">زائد نحو %1$s رسومًا — %2$s في المجموع.</string>
     <string name="pay_irreversible_warning">مدفوعات Monero لا يمكن عكسها ولا إلغاؤها. تحقق من العنوان — لا جهة تلجأ إليها إن كان خاطئًا.</string>
     <string name="pay_cancel">إلغاء</string>
+    <string name="pay_fee_unknown">غير معروفة الآن</string>
+    <string name="pay_fee_unknown_confirm">تعذّر تقدير الرسوم الآن. ستدفع المعاملة ما تكلّفه عند بنائها.</string>
 </resources>

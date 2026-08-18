@@ -561,12 +561,23 @@ private fun AmountStep(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                 Column(Modifier.padding(14.dp)) {
                     CostRow(stringResource(R.string.pay_amount), Amounts.show(context, q.amountPxmr).primary)
+                    // A fee of zero is the estimator saying it could not reach a
+                    // node, not Monero being free. Printing it as a number made
+                    // the total below it a promise this screen cannot keep — the
+                    // send that follows costs whatever the transaction costs.
                     CostRow(
                         stringResource(R.string.pay_network_fee_estimated),
-                        Amounts.show(context, q.feePxmr).primary,
+                        if (q.feeKnown) Amounts.show(context, q.feePxmr).primary
+                        else stringResource(R.string.pay_fee_unknown),
                     )
                     HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                    CostRow(stringResource(R.string.pay_total), Amounts.show(context, q.totalPxmr).primary, bold = true)
+                    if (q.feeKnown) {
+                        CostRow(
+                            stringResource(R.string.pay_total),
+                            Amounts.show(context, q.totalPxmr).primary,
+                            bold = true,
+                        )
+                    }
                     // Amount, fee and total explain *why* something is out of
                     // reach — the fee is usually what tips it over. The rest
                     // describes a transaction that cannot happen, so it is left
@@ -574,7 +585,7 @@ private fun AmountStep(
                     // and would claim this send lands you at exactly nothing,
                     // and the note count and timing price a plan nobody can
                     // buy. The line above the card says what is wrong.
-                    if (q.affordable) {
+                    if (q.affordable && q.feeKnown) {
                         CostRow(
                             stringResource(R.string.pay_left_after),
                             Amounts.show(context, q.remainingPxmr).primary,
@@ -890,7 +901,11 @@ private fun ConfirmSend(
                 quote?.let { q ->
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        stringResource(
+                        // The last screen before the money leaves is the worst
+                        // place to state a total built on a fee nobody could
+                        // fetch. Unknown says unknown here too.
+                        if (!q.feeKnown) stringResource(R.string.pay_fee_unknown_confirm)
+                        else stringResource(
                             R.string.pay_plus_fees,
                             Amounts.show(context, q.feePxmr).primary,
                             Amounts.show(context, q.totalPxmr).primary,

@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">Плюс приблизно %1$s комісії — разом %2$s.</string>
     <string name="pay_irreversible_warning">Платежі Monero не можна скасувати чи повернути. Перевір адресу — якщо вона хибна, звертатися нема до кого.</string>
     <string name="pay_cancel">Скасувати</string>
+    <string name="pay_fee_unknown">зараз невідома</string>
+    <string name="pay_fee_unknown_confirm">Зараз не вдалося оцінити комісію. Транзакція заплатить стільки, скільки коштуватиме під час створення.</string>
 </resources>

@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">Ditambah sekitar %1$s biaya — total %2$s.</string>
     <string name="pay_irreversible_warning">Pembayaran Monero tidak bisa dibatalkan atau ditarik kembali. Periksa alamatnya — tidak ada tempat mengadu kalau salah.</string>
     <string name="pay_cancel">Batal</string>
+    <string name="pay_fee_unknown">belum diketahui</string>
+    <string name="pay_fee_unknown_confirm">Biaya belum bisa diperkirakan saat ini. Transaksi membayar sebesar biayanya saat dibuat.</string>
 </resources>

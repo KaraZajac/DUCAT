@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">Plus about %1$s in fees — %2$s in total.</string>
     <string name="pay_irreversible_warning">Monero payments cannot be reversed or cancelled. Check the address — there is nobody to appeal to if it is wrong.</string>
     <string name="pay_cancel">Cancel</string>
+    <string name="pay_fee_unknown">not known right now</string>
+    <string name="pay_fee_unknown_confirm">The fee could not be estimated just now. The transaction pays whatever it costs when it is built.</string>
 </resources>

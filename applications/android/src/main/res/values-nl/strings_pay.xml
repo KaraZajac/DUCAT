@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">Plus ongeveer %1$s aan kosten — %2$s in totaal.</string>
     <string name="pay_irreversible_warning">Monero-betalingen kunnen niet worden teruggedraaid of geannuleerd. Controleer het adres — er is niemand om bij aan te kloppen als het verkeerd is.</string>
     <string name="pay_cancel">Annuleren</string>
+    <string name="pay_fee_unknown">nu niet bekend</string>
+    <string name="pay_fee_unknown_confirm">De kosten konden nu niet worden geschat. De transactie betaalt wat ze kost zodra ze wordt opgebouwd.</string>
 </resources>

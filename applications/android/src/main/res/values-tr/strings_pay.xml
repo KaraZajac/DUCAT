@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">Artı yaklaşık %1$s ücret — toplam %2$s.</string>
     <string name="pay_irreversible_warning">Monero ödemeleri geri alınamaz ve iptal edilemez. Adresi kontrol et — yanlışsa başvuracak kimse yok.</string>
     <string name="pay_cancel">İptal</string>
+    <string name="pay_fee_unknown">şu an bilinmiyor</string>
+    <string name="pay_fee_unknown_confirm">Ücret şu an tahmin edilemedi. İşlem, oluşturulurken ne tutuyorsa onu öder.</string>
 </resources>

@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">Más unos %1$s en comisiones — %2$s en total.</string>
     <string name="pay_irreversible_warning">Los pagos en Monero no se pueden revertir ni cancelar. Revisa la dirección — no hay nadie ante quien apelar si está mal.</string>
     <string name="pay_cancel">Cancelar</string>
+    <string name="pay_fee_unknown">ahora mismo no se sabe</string>
+    <string name="pay_fee_unknown_confirm">Ahora mismo no se ha podido estimar la comisión. La transacción pagará lo que cueste al construirse.</string>
 </resources>

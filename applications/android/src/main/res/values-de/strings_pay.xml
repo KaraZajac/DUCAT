@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">Plus etwa %1$s Gebühren — %2$s insgesamt.</string>
     <string name="pay_irreversible_warning">Monero-Zahlungen lassen sich nicht rückgängig machen oder stornieren. Prüfe die Adresse — wenn sie falsch ist, gibt es niemanden, an den man sich wenden könnte.</string>
     <string name="pay_cancel">Abbrechen</string>
+    <string name="pay_fee_unknown">gerade nicht bekannt</string>
+    <string name="pay_fee_unknown_confirm">Die Gebühr konnte gerade nicht geschätzt werden. Die Transaktion zahlt, was sie beim Bauen kostet.</string>
 </resources>

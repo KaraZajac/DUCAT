@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">Più circa %1$s di commissioni — %2$s in totale.</string>
     <string name="pay_irreversible_warning">I pagamenti Monero non si possono annullare né stornare. Controlla l\'indirizzo — non c\'è nessuno a cui appellarsi se è sbagliato.</string>
     <string name="pay_cancel">Annulla</string>
+    <string name="pay_fee_unknown">al momento sconosciute</string>
+    <string name="pay_fee_unknown_confirm">Al momento non è stato possibile stimare la commissione. La transazione pagherà quello che costa quando viene costruita.</string>
 </resources>

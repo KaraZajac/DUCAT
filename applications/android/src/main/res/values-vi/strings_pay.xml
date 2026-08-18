@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">Cộng khoảng %1$s phí — tổng %2$s.</string>
     <string name="pay_irreversible_warning">Thanh toán Monero không thể đảo ngược hay hủy. Kiểm tra kỹ địa chỉ — sai rồi thì không có ai để kêu.</string>
     <string name="pay_cancel">Hủy</string>
+    <string name="pay_fee_unknown">hiện chưa rõ</string>
+    <string name="pay_fee_unknown_confirm">Hiện chưa ước tính được phí. Giao dịch sẽ trả đúng mức phí khi được tạo.</string>
 </resources>

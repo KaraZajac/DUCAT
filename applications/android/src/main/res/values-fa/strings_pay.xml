@@ -56,4 +56,6 @@
     <string name="pay_plus_fees">به‌علاوهٔ حدود %1$s کارمزد — جمعاً %2$s.</string>
     <string name="pay_irreversible_warning">پرداخت‌های Monero برگشت یا لغو ندارند. نشانی را چک کن — اگر اشتباه باشد، جایی برای شکایت نیست.</string>
     <string name="pay_cancel">لغو</string>
+    <string name="pay_fee_unknown">اکنون نامشخص است</string>
+    <string name="pay_fee_unknown_confirm">هزینه در این لحظه قابل برآورد نبود. تراکنش هر چه هنگام ساخته‌شدن هزینه داشته باشد می‌پردازد.</string>
 </resources>
