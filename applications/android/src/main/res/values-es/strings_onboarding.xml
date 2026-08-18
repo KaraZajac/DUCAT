@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">Cada pago usa una dirección nueva, así que nada en la cadena vincula tus pagos entre sí. Quien quiera pagarte espera a que primero envíes una solicitud.</string>
     <string name="onb_profile_change_later">Puedes cambiar ambas cosas después.</string>
     <string name="onb_profile_continue">Continuar</string>
+    <string name="onb_trust_title">Cómo se fían aquí dos desconocidos</string>
+    <string name="onb_trust_body">No hay empresa en medio que tome partido, así que DUCAT hace algo más simple: los dos ponen dinero. En un viaje, cada uno deja en garantía un %1$d%% de la tarifa. En un alojamiento ronda el %2$d%%, y en un coche el %3$d%%: cuanto más hay que perder, más deja cada parte.
+
+Al terminar, las dos garantías vuelven enteras y la tarifa va al conductor. Nadie puede quedarse con tu garantía: ni la otra persona ni nosotros. Solo está ahí para que terminar sea lo más fácil para ambos.</string>
+    <string name="onb_trust_action">Entendido</string>
 </resources>

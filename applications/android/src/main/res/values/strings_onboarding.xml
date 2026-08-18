@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">Each payment uses a fresh address, so nothing on the chain ties your payments together. Someone paying you waits for you to send a request first.</string>
     <string name="onb_profile_change_later">You can change both later.</string>
     <string name="onb_profile_continue">Continue</string>
+    <string name="onb_trust_title">How strangers trust each other here</string>
+    <string name="onb_trust_body">There is no company in the middle to take sides, so DUCAT does something simpler: both people put money up. On a ride, each of you stakes about %1$d%% of the fare. On a place to stay it is nearer %2$d%%, on a car %3$d%% — the more there is to lose, the more each side puts down.
+
+When the deal finishes, both stakes come straight back and the fare goes to the driver. Nobody can take your stake — not the other person, not us. It only sits there, making finishing the easier choice for both of you.</string>
+    <string name="onb_trust_action">Makes sense</string>
 </resources>

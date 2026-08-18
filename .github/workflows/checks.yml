@@ -95,6 +95,12 @@ jobs:
       - name: build the host Rust library
         run: cargo build --release -p ducat-mobile
 
+      # Placeholders, scripts and plural classes across every language.
+      # Written after Russian words bled into the Japanese onboarding copy
+      # and the build was perfectly happy about it.
+      - name: the translations agree
+        run: python3 applications/check_strings.py
+
       - name: the phone compiles
         run: cd applications && ./gradlew --no-daemon :android:assembleDebug
 

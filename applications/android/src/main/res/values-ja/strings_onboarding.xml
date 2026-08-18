@@ -53,4 +53,7 @@
     <string name="onb_profile_pay_no_detail">支払いごとに新しいアドレスを使うため、チェーン上であなたへの支払い同士は結び付きません。あなたに支払う人は、まずあなたからの請求を待ちます。</string>
     <string name="onb_profile_change_later">どちらも後で変更できます。</string>
     <string name="onb_profile_continue">続ける</string>
+    <string name="onb_trust_title">見知らぬ同士がここで信頼し合う仕組み</string>
+    <string name="onb_trust_body">あいだに立って裁く会社はありません。そこで DUCAT はもっと簡単な方法をとります。双方がお金を預けるのです。乗車なら、それぞれが運賃のおよそ %1$d%% を預けます。宿泊なら %2$d%%、車なら %3$d%% 程度 — 失うものが大きいほど、双方の預け額も大きくなります。\n\n取引が終われば、二つの預り金はそのまま戻り、運賃はドライバーに渡ります。あなたの預り金は誰にも取れません。相手にも、私たちにも。ただそこにあって、最後までやり遂げることをお互いにとって楽な選択にします。</string>
+    <string name="onb_trust_action">わかりました</string>
 </resources>

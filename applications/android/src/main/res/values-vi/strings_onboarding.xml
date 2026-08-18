@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">Mỗi khoản thanh toán dùng một địa chỉ mới, nên trên chuỗi không gì nối các khoản của bạn lại với nhau. Ai muốn trả tiền bạn phải chờ bạn gửi yêu cầu trước.</string>
     <string name="onb_profile_change_later">Cả hai đều đổi được sau.</string>
     <string name="onb_profile_continue">Tiếp tục</string>
+    <string name="onb_trust_title">Người lạ tin nhau ở đây bằng cách nào</string>
+    <string name="onb_trust_body">Không có công ty nào đứng giữa để bênh ai, nên DUCAT làm điều đơn giản hơn: cả hai cùng đặt tiền. Với một chuyến xe, mỗi người đặt khoảng %1$d%% giá cước. Với chỗ ở là gần %2$d%%, với ô tô là %3$d%% — càng có nhiều thứ để mất thì mỗi bên đặt càng nhiều.
+
+Xong việc, cả hai khoản đặt cọc quay về nguyên vẹn và tiền cước thuộc về tài xế. Không ai lấy được cọc của bạn — người kia không, chúng tôi cũng không. Nó chỉ nằm đó, khiến việc hoàn thành trở thành lựa chọn dễ hơn cho cả hai.</string>
+    <string name="onb_trust_action">Đã hiểu</string>
 </resources>

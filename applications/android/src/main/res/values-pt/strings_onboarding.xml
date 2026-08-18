@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">Cada pagamento usa um endereço novo, então nada na cadeia liga seus pagamentos entre si. Quem quer pagar você espera você enviar um pedido primeiro.</string>
     <string name="onb_profile_change_later">Você pode mudar os dois depois.</string>
     <string name="onb_profile_continue">Continuar</string>
+    <string name="onb_trust_title">Como dois desconhecidos confiam um no outro aqui</string>
+    <string name="onb_trust_body">Não há empresa no meio para tomar partido, por isso o DUCAT faz algo mais simples: os dois põem dinheiro. Numa viagem, cada um deixa cerca de %1$d%% do valor. Num alojamento fica perto de %2$d%%, num carro %3$d%% — quanto mais há a perder, mais cada lado deixa.
+
+Quando termina, as duas cauções voltam inteiras e o valor vai para o condutor. Ninguém pode ficar com a sua caução — nem a outra pessoa, nem nós. Está ali só para que terminar seja a escolha mais fácil.</string>
+    <string name="onb_trust_action">Percebi</string>
 </resources>

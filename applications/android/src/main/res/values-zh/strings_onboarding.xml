@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">每笔付款用一个全新地址，链上没有任何东西能把你的收款串在一起。想付钱给你的人要先等你发请求。</string>
     <string name="onb_profile_change_later">两项以后都能改。</string>
     <string name="onb_profile_continue">继续</string>
+    <string name="onb_trust_title">陌生人在这里如何互相信任</string>
+    <string name="onb_trust_body">中间没有公司来评判对错，所以 DUCAT 用了更简单的办法：双方都押钱。一次乘车，你们各押车费的约 %1$d%%。住宿约 %2$d%%，租车 %3$d%% —— 可能损失越大，各方押得越多。
+
+交易完成后，两份押金都原样退回，车费归司机。没有人能拿走你的押金 —— 对方不能，我们也不能。它只是放在那里，让双方都觉得把事情做完更划算。</string>
+    <string name="onb_trust_action">明白了</string>
 </resources>

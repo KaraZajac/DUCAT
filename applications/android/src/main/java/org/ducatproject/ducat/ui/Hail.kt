@@ -441,7 +441,15 @@ fun HailCard() {
                         }
                         runCatchingCancellable {
                             org.ducatproject.ducat.Ceremony
-                                .startRide(context, d, arb, fare)
+                                .startRide(
+                                    context, d, arb, fare,
+                                    // Symmetric by default: the driver
+                                    // posts what the rider does, and both
+                                    // get it back when the ride ends.
+                                    driverStakePxmr =
+                                        org.ducatproject.ducat.Ceremony
+                                            .rideStakeAmount(fare),
+                                )
                         }.onSuccess {
                             DucatLog.i(
                                 TAG,

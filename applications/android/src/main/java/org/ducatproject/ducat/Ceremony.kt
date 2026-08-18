@@ -217,11 +217,21 @@ object Ceremony {
     ): String =
         start(context, driver, arbiter, KIND_RIDE, farePxmr, hostDepPxmr = driverStakePxmr)
 
-    /** What the funder actually locks: the fare plus the margin that makes
-     *  releasing strictly better than walking away. One fifth, floored at
-     *  nothing — a tiny fare's margin is symbolic, and that is fine: the
-     *  fare itself is the driver's stake either way. */
-    fun rideFundAmount(farePxmr: Long): Long = farePxmr + farePxmr / 5
+    /**
+     * What the rider locks: the fare plus their own stake.
+     *
+     * The percentage lives in [Stakes], with the reasoning and the sources
+     * beside it, because this number is the whole trust argument and must
+     * not be three constants in three screens. A ride's stake is symmetric —
+     * the driver posts the same — so the sentence a user has to understand
+     * is one sentence: you both put up a stake, and finishing gives it back.
+     */
+    fun rideFundAmount(farePxmr: Long): Long =
+        Stakes.funderLocks(Stakes.Deal.Ride, farePxmr)
+
+    /** The stake the driver is asked for on a ride: the rider's, mirrored. */
+    fun rideStakeAmount(farePxmr: Long): Long =
+        Stakes.providerLocks(Stakes.Deal.Ride, farePxmr)
 
     /**
      * Start a reservation escrow (§15.12's Airbnb/Turo shape): the caller is

@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">Jede Zahlung nutzt eine frische Adresse, also verbindet nichts auf der Blockchain deine Zahlungen miteinander. Wer dich bezahlen will, wartet erst auf eine Anfrage von dir.</string>
     <string name="onb_profile_change_later">Beides lässt sich später ändern.</string>
     <string name="onb_profile_continue">Weiter</string>
+    <string name="onb_trust_title">Wie sich hier Fremde vertrauen</string>
+    <string name="onb_trust_body">Es gibt keine Firma dazwischen, die Partei ergreift — also macht DUCAT es einfacher: beide legen Geld hin. Bei einer Fahrt hinterlegt jeder etwa %1$d%% des Fahrpreises. Bei einer Unterkunft eher %2$d%%, bei einem Auto %3$d%% — je mehr zu verlieren ist, desto mehr legt jede Seite hin.
+
+Ist es erledigt, kommen beide Einlagen vollständig zurück und der Fahrpreis geht an die Fahrerin. Niemand kann deine Einlage nehmen — weder die andere Person noch wir. Sie liegt nur da und macht das Beenden für beide zur leichteren Wahl.</string>
+    <string name="onb_trust_action">Verstanden</string>
 </resources>

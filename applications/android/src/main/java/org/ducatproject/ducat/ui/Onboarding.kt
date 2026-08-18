@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.Stakes
 import org.ducatproject.ducat.WalletStore
 import uniffi.ducat_mobile.BackupInput
 import uniffi.ducat_mobile.NewWallet
@@ -42,7 +43,7 @@ import uniffi.ducat_mobile.exportBackup
  * it. A user with money in the float has both. The one moment when doing it
  * costs nothing is the moment before there is anything to protect.
  */
-enum class Step { Persona, Profile, Wallet, Limits, Backup, Done }
+enum class Step { Persona, Profile, Wallet, Limits, Trust, Backup, Done }
 
 /**
  * No node has been asked yet, so the backup records genesis.
@@ -158,6 +159,21 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                 title = stringResource(R.string.onb_limits_title),
                 body = stringResource(R.string.onb_limits_body),
                 action = stringResource(R.string.onb_limits_action),
+                onAction = { onState(state.copy(step = Step.Trust)) },
+            )
+
+            // Before the first deal, because it is the answer to the
+            // question every user of a marketplace without a company asks
+            // sooner or later: what stops the other person from cheating me?
+            Step.Trust -> StepCard(
+                title = stringResource(R.string.onb_trust_title),
+                body = stringResource(
+                    R.string.onb_trust_body,
+                    Stakes.Deal.Ride.percent,
+                    Stakes.Deal.Stay.percent,
+                    Stakes.Deal.Vehicle.percent,
+                ),
+                action = stringResource(R.string.onb_trust_action),
                 onAction = { onState(state.copy(step = Step.Backup)) },
             )
 
@@ -192,7 +208,8 @@ private fun Progress(step: Step) {
         Step.Wallet -> 2
         Step.Profile -> 2 // unreachable in the current flow; kept in range
         Step.Limits -> 3
-        Step.Backup -> 4
+        Step.Trust -> 4
+        Step.Backup -> 5
         Step.Done -> total
     }
     Column {

@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">Każda płatność używa świeżego adresu, więc nic w łańcuchu nie wiąże twoich płatności ze sobą. Ktoś, kto chce ci zapłacić, czeka najpierw na twoją prośbę.</string>
     <string name="onb_profile_change_later">Obie rzeczy możesz później zmienić.</string>
     <string name="onb_profile_continue">Dalej</string>
+    <string name="onb_trust_title">Jak obcy ludzie ufają sobie tutaj</string>
+    <string name="onb_trust_body">Nie ma pośrodku firmy, która przyzna komuś rację, więc DUCAT robi prościej: pieniądze wpłacają oboje. Przy przejeździe każde z was blokuje około %1$d%% ceny. Przy noclegu bliżej %2$d%%, przy samochodzie %3$d%% — im więcej można stracić, tym więcej wpłaca każda strona.
+
+Gdy sprawa się kończy, obie kaucje wracają w całości, a opłata trafia do kierowcy. Nikt nie może zabrać twojej kaucji — ani druga osoba, ani my. Leży tylko po to, by dokończenie było dla was obojga łatwiejszym wyborem.</string>
+    <string name="onb_trust_action">Jasne</string>
 </resources>

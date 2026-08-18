@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">Tiap pembayaran memakai alamat baru, jadi tidak ada apa pun di blockchain yang mengaitkan pembayaran-pembayaranmu. Orang yang mau membayarmu menunggu kamu mengirim permintaan dulu.</string>
     <string name="onb_profile_change_later">Keduanya bisa diubah nanti.</string>
     <string name="onb_profile_continue">Lanjut</string>
+    <string name="onb_trust_title">Bagaimana orang asing saling percaya di sini</string>
+    <string name="onb_trust_body">Tidak ada perusahaan di tengah yang memihak, jadi DUCAT melakukan hal yang lebih sederhana: keduanya menaruh uang. Untuk perjalanan, masing-masing menaruh sekitar %1$d%% dari tarif. Untuk penginapan sekitar %2$d%%, untuk mobil %3$d%% — makin besar yang bisa hilang, makin besar yang ditaruh tiap pihak.
+
+Setelah selesai, kedua jaminan kembali utuh dan tarifnya jadi milik pengemudi. Tidak ada yang bisa mengambil jaminan Anda — pihak lain tidak, kami pun tidak. Ia hanya duduk di sana, membuat menyelesaikan urusan jadi pilihan yang lebih mudah bagi kalian berdua.</string>
+    <string name="onb_trust_action">Mengerti</string>
 </resources>

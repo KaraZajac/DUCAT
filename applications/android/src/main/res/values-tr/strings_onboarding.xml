@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">Her ödeme taze bir adres kullanır; böylece zincirde ödemelerini birbirine bağlayan hiçbir şey olmaz. Sana ödeme yapacak biri önce senden bir istek bekler.</string>
     <string name="onb_profile_change_later">İkisini de sonradan değiştirebilirsin.</string>
     <string name="onb_profile_continue">Devam</string>
+    <string name="onb_trust_title">Burada yabancılar birbirine nasıl güvenir</string>
+    <string name="onb_trust_body">Ortada taraf tutacak bir şirket yok; bu yüzden DUCAT daha basitini yapıyor: para iki taraftan da geliyor. Bir yolculukta her biriniz ücretin yaklaşık %%%1$d\'unu teminata koyar. Konaklamada bu %%%2$d\'a, arabada %%%3$d\'a yakındır — kaybedilecek şey arttıkça her taraf daha çok koyar.
+
+İş bitince iki teminat da tam olarak geri döner, ücret sürücüye gider. Teminatını kimse alamaz — ne karşı taraf ne biz. Sadece orada durur ve bitirmeyi ikiniz için de kolay seçenek yapar.</string>
+    <string name="onb_trust_action">Anlaşıldı</string>
 </resources>

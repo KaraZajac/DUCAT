@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">Elke betaling gebruikt een vers adres, dus niets op de keten verbindt je betalingen met elkaar. Wie jou wil betalen, wacht tot jij eerst een verzoek stuurt.</string>
     <string name="onb_profile_change_later">Je kunt beide later wijzigen.</string>
     <string name="onb_profile_continue">Doorgaan</string>
+    <string name="onb_trust_title">Hoe vreemden elkaar hier vertrouwen</string>
+    <string name="onb_trust_body">Er zit geen bedrijf tussen dat partij kiest, dus doet DUCAT iets eenvoudigers: allebei leggen jullie geld in. Bij een rit zet ieder ongeveer %1$d%% van de ritprijs vast. Bij een verblijf eerder %2$d%%, bij een auto %3$d%% — hoe meer er te verliezen valt, hoe meer elke kant inlegt.
+
+Is het klaar, dan komen beide borgen volledig terug en gaat de ritprijs naar de chauffeur. Niemand kan jouw borg pakken — de ander niet en wij niet. Hij ligt er alleen om afmaken voor jullie allebei de makkelijkste keuze te maken.</string>
+    <string name="onb_trust_action">Duidelijk</string>
 </resources>

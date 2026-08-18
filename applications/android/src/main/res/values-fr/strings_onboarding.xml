@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">Chaque paiement utilise une adresse neuve, donc rien sur la chaîne ne relie tes paiements entre eux. Quelqu\'un qui veut te payer attend que tu envoies d\'abord une demande.</string>
     <string name="onb_profile_change_later">Tu peux changer les deux plus tard.</string>
     <string name="onb_profile_continue">Continuer</string>
+    <string name="onb_trust_title">Comment deux inconnus se font confiance ici</string>
+    <string name="onb_trust_body">Aucune entreprise au milieu pour trancher, alors DUCAT fait plus simple : chacun met de l\'argent. Pour une course, vous déposez chacun environ %1$d%% du prix. Pour un logement c\'est plutôt %2$d%%, pour une voiture %3$d%% — plus il y a à perdre, plus chacun dépose.
+
+À la fin, les deux dépôts reviennent intégralement et le prix va au conducteur. Personne ne peut prendre votre dépôt : ni l\'autre, ni nous. Il est seulement là pour que terminer soit le choix le plus simple.</string>
+    <string name="onb_trust_action">C\'est clair</string>
 </resources>

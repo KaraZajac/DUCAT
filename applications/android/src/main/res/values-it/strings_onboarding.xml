@@ -53,4 +53,9 @@
     <string name="onb_profile_pay_no_detail">Ogni pagamento usa un indirizzo nuovo, quindi sulla catena nulla lega i tuoi pagamenti tra loro. Chi vuole pagarti aspetta prima una tua richiesta.</string>
     <string name="onb_profile_change_later">Puoi cambiare entrambe le cose in seguito.</string>
     <string name="onb_profile_continue">Continua</string>
+    <string name="onb_trust_title">Come si fidano qui due sconosciuti</string>
+    <string name="onb_trust_body">Non c\'è un\'azienda in mezzo a dare ragione a qualcuno, quindi DUCAT fa una cosa più semplice: mettono soldi entrambi. Per una corsa, ciascuno lascia circa il %1$d%% della tariffa. Per un alloggio siamo sul %2$d%%, per un\'auto sul %3$d%%: più c\'è da perdere, più lascia ogni parte.
+
+Quando finisce, tutte e due le cauzioni tornano intere e la tariffa va all\'autista. Nessuno può prendersi la tua cauzione — né l\'altra persona né noi. Sta lì soltanto per rendere più facile, a entrambi, arrivare in fondo.</string>
+    <string name="onb_trust_action">Chiaro</string>
 </resources>

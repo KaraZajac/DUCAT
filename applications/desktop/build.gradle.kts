@@ -53,6 +53,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/ui/Pay.kt",
     "org/ducatproject/ducat/ui/Ceremony.kt",
     "org/ducatproject/ducat/Geo.kt",
+    "org/ducatproject/ducat/Stakes.kt",
     "org/ducatproject/ducat/Places.kt",
     "org/ducatproject/ducat/ui/Drawer.kt",
     "org/ducatproject/ducat/ui/Shells.kt",
@@ -349,6 +350,14 @@ tasks.register<JavaExec>("ridetest") {
 tasks.register<JavaExec>("vaultset") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.VaultSetKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The stake arithmetic the whole trust argument rests on.
+// `./gradlew :desktop:staketest`.
+tasks.register<JavaExec>("staketest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.StakeTestKt"
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 

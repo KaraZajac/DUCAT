@@ -128,6 +128,8 @@ Headless gates, all runnable without a window:
 
 ```sh
 cd applications
+python3 check_strings.py         # placeholders, scripts, plural classes
+./gradlew :desktop:staketest     # the stake arithmetic users are promised
 ./gradlew :desktop:smoke         # the stack reaches the live network
 ./gradlew :desktop:backuptest    # backup app-state round-trip
 ./gradlew :desktop:profilescope  # §16.9 profile scoping, offline
