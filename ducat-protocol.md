@@ -1642,6 +1642,21 @@ The mechanics reuse everything already on the table:
 
 **The numbers, and where they come from.** A client SHOULD suggest **10%** each side for a ride, **20%** for a stay, **30%** for a vehicle — the more an asset can be damaged beyond its rental price, the more each side puts down. These are suggestions a client MAY let either party change, not protocol constants; what the protocol carries is whatever the ceremony frame names. Two bounds are worth honouring: a stake below roughly twice the release fee SHOULD be zero rather than decoration, because it deters nothing and costs more to hand back than it is worth; and no stake SHOULD exceed half the price, beyond which a deal stops being takeable. The closest working precedent is Bisq — 2-of-2 with no custodian, deposits from both sides, 15% minimum and 50% cap, chosen expressly so cooperation is likely *without* a reputation system, which is a privacy cost DUCAT also declines to pay. The theory (Asgaonkar & Krishnamachari, ICBC 2019) proves a dual-deposit escrow is cheat-proof at equilibrium with deposits merely positive and safety rising with size, but derives no optimum; the ceiling therefore comes from practice, where large deposits are known to price people out.
 
+What that means at prices people recognise, at a ride's 10% and a rough
+$250/XMR:
+
+| Fare | Each side stakes | Payer locks | Provider locks |
+|---|---|---|---|
+| 0.0005 XMR (~$0.12) | nothing — below the floor | 0.0005 | 0 |
+| 0.004 XMR (~$1) | 0.0004 (the floor) | 0.0044 | 0.0004 |
+| 0.04 XMR (~$10) | 0.004 (~$1) | 0.044 | 0.004 |
+| 0.4 XMR (~$100) | 0.04 (~$10) | 0.44 | 0.04 |
+
+The floor is visible at the small end and that is deliberate: a stake worth
+less than the fee to hand it back deters nothing, so the smallest deals
+carry none and say so, rather than holding a fee-sized token that looks
+like protection.
+
 **The exposed side funds second.** Whoever pays into the escrow first stands alone until the other follows, and the two sides are not equally exposed: the payer is carrying the price *and* a stake, the provider only a stake. So when a provider stake is asked for, a client SHOULD hold the payer's funding until the provider's stake is on chain, and show them why it is waiting. This is also how booking anything works — the other side confirms, then you pay — and it retires the sequencing caveat the reservation shape was published with: a provider who never stakes has simply declined, and nobody's money is sitting in a shared address over it. Where no provider stake is asked for (a ride whose fare is below the floor, or a provider who has nothing to put up), the payer funds first and the exposure is stated rather than hidden.
 
 **Symmetry is a default, not a requirement, and the reason matters.** An earlier draft had the driver stake *nothing* on the argument that their skin is the fare at risk and that a driver-side deposit gatekeeps exactly the people who start with nothing. That argument still holds and is why zero remains a legitimate setting: a client MUST be able to build this ceremony with a provider stake of zero, and the small-fare floor above means the smallest rides carry no stake at all. What changed is the default, for two reasons. It is explainable in one sentence — *you both put up a stake, and finishing gives it back* — and a model a user can hold in their head is itself a security property. And it generalises: the same sentence covers a room and a car, where a provider with nothing at risk is exactly the party a guest cannot safely trust. What 2-of-2 gives up is named plainly: a lost phone with no backup strands the money (§4.3.3's multisig shares in the backup are the recovery), a genuine dispute has no partial ruling — only the split both agree to, or the burn — and at reservation-scale sums that trade gets worse, which is why an arbiter is preferred the moment one exists.
