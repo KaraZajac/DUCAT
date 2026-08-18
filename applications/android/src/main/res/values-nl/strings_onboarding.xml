@@ -58,4 +58,10 @@
 
 Is het klaar, dan komen beide borgen volledig terug en gaat de ritprijs naar de chauffeur. Niemand kan jouw borg pakken — de ander niet en wij niet. Hij ligt er alleen om afmaken voor jullie allebei de makkelijkste keuze te maken.</string>
     <string name="onb_trust_action">Duidelijk</string>
+    <string name="onb_have_backup">Ik heb al een back-up</string>
+    <string name="onb_restore_title">Herstellen vanaf je back-up</string>
+    <string name="onb_restore_body">Kies het bestand dat je bewaard hebt en typ de wachtwoordzin die je hebt ingesteld. Je identiteit, je geld en je mensen komen terug — er wordt niets nieuws aangemaakt.</string>
+    <string name="onb_restore_pick">Bestand kiezen</string>
+    <string name="onb_restore_cancel">Nu niet</string>
+    <string name="onb_restore_continue">Doorgaan</string>
 </resources>

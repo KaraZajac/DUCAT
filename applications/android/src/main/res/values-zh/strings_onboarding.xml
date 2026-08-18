@@ -58,4 +58,10 @@
 
 交易完成后，两份押金都原样退回，车费归司机。没有人能拿走你的押金 —— 对方不能，我们也不能。它只是放在那里，让双方都觉得把事情做完更划算。</string>
     <string name="onb_trust_action">明白了</string>
+    <string name="onb_have_backup">我已经有备份了</string>
+    <string name="onb_restore_title">从你的备份恢复</string>
+    <string name="onb_restore_body">选择你保存的文件，输入你设置的口令。你的身份、你的钱和你的联系人都会回来——不会新建任何东西。</string>
+    <string name="onb_restore_pick">选择文件</string>
+    <string name="onb_restore_cancel">暂不</string>
+    <string name="onb_restore_continue">继续</string>
 </resources>

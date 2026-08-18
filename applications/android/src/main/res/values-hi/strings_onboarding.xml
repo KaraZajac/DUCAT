@@ -58,4 +58,10 @@
 
 काम पूरा होते ही दोनों जमा राशियाँ पूरी लौट आती हैं और किराया ड्राइवर को जाता है। आपकी जमा राशि कोई नहीं ले सकता — न सामने वाला, न हम। वह बस वहाँ रहती है, ताकि काम पूरा करना दोनों के लिए आसान विकल्प बने।</string>
     <string name="onb_trust_action">समझ गया</string>
+    <string name="onb_have_backup">मेरे पास पहले से बैकअप है</string>
+    <string name="onb_restore_title">अपने बैकअप से वापस लाएँ</string>
+    <string name="onb_restore_body">आपने जो फ़ाइल सहेजी थी उसे चुनें और जो पासफ़्रेज़ रखा था वह लिखें। आपकी पहचान, आपका पैसा और आपके लोग वापस आ जाते हैं — कुछ भी नया नहीं बनता।</string>
+    <string name="onb_restore_pick">फ़ाइल चुनें</string>
+    <string name="onb_restore_cancel">अभी नहीं</string>
+    <string name="onb_restore_continue">आगे बढ़ें</string>
 </resources>

@@ -58,4 +58,10 @@
 
 وقتی کار تمام شد، هر دو ودیعه دست‌نخورده برمی‌گردند و کرایه به راننده می‌رسد. هیچ‌کس نمی‌تواند ودیعهٔ شما را بردارد — نه طرف مقابل و نه ما. فقط آنجاست تا تمام‌کردن کار برای هر دوی شما آسان‌ترین انتخاب باشد.</string>
     <string name="onb_trust_action">متوجه شدم</string>
+    <string name="onb_have_backup">از قبل نسخهٔ پشتیبان دارم</string>
+    <string name="onb_restore_title">بازیابی از نسخهٔ پشتیبان شما</string>
+    <string name="onb_restore_body">فایلی را که نگه داشته‌اید انتخاب کنید و عبارت عبوری را که تعیین کرده بودید بنویسید. هویت، پول و آدم‌های شما برمی‌گردند — چیز تازه‌ای ساخته نمی‌شود.</string>
+    <string name="onb_restore_pick">انتخاب فایل</string>
+    <string name="onb_restore_cancel">الان نه</string>
+    <string name="onb_restore_continue">ادامه</string>
 </resources>

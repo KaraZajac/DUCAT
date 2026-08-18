@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.NameStore
+import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.WalletStore
 import uniffi.ducat_mobile.BackupInput
 import uniffi.ducat_mobile.addressForSpendKey
@@ -183,49 +184,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
             runCatching {
                 val bytes = context.contentResolver.openInputStream(uri)!!
                     .use { it.readBytes() }
-                val r = importBackup(bytes, passphrase)
-                // Settings come back too. A restore that keeps the money and
-                // drops the name and the privacy choice has quietly changed
-                // both, and the user has no way to notice — publishing
-                // especially, where the wrong direction is a silent disclosure.
-                r.displayName?.let { NameStore(context).put(it) }
-                ContactStore(context).setPublishAddress(r.publishPayto)
-                // §16.9's profile with it. A persona that comes back with the
-                // right money and no face is not the same person to anyone who
-                // knew them, and nothing else in the app would report the loss.
-                MyProfile(context).let { p ->
-                    p.setAvatar(r.profile.avatar)
-                    p.setEmail(r.profile.email)
-                    p.setPhone(r.profile.phone)
-                    p.setSignal(r.profile.signal)
-                    p.setPronouns(r.profile.pronouns?.toInt())
-                }
-                // The relationships. Threads and tabs from the opaque blob,
-                // then the typed contacts as the authoritative overlay — so a
-                // bundle from another client still restores everyone.
-                ContactStore(context).restoreFromBackup(r)
-                // The money, which is the whole point, and which nothing here
-                // used to write. The bundle carries the spend key and the
-                // height that key was born at, and the import applied the
-                // contacts and dropped the wallet on the floor: the device kept
-                // the empty one it had made minutes earlier, showed 0.000000
-                // XMR under a green "Synced", and printed the *backup's*
-                // address below under "Restored wallet" — so the one check
-                // offered to the user passed against a wallet that was not the
-                // one in use.
-                val address = addressForSpendKey(r.spendKeyHex, stagenet = true)
-                val wallet = WalletStore(context)
-                wallet.save(address, r.spendKeyHex, r.restoreHeight, stagenet = true)
-                // The outputs belong to the key being replaced, and so does the
-                // scan progress. Left alone, `scannedTo` stays at the tip it
-                // reached for the old wallet, so the scanner never looks at the
-                // range where this one's money actually is — a restore that
-                // reports success and then finds nothing, forever.
-                wallet.rescanFrom(r.restoreHeight.toLong())
-                // The address is the check that matters. A bundle that decrypts
-                // has proved the passphrase, not that it holds the wallet you
-                // meant.
-                r to address
+                applyBackup(context, bytes, passphrase)
             }
         }
         message = outcome.fold(
@@ -249,6 +208,70 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
         busy = false
         pendingImport = null
     }
+}
+
+/**
+ * Open a bundle and become what is in it. Returns it, and the address its
+ * wallet controls.
+ *
+ * One implementation for both doors — setup and settings — because a restore
+ * that puts back different things depending on where it was started from is
+ * two features wearing one name, and the parts that were missing here were
+ * missing quietly.
+ *
+ * Blocking and order-sensitive: call it off the main thread, and inside
+ * `NonCancellable`. It writes several stores, and interrupted halfway it
+ * leaves a device that is neither the old identity nor the new one.
+ */
+internal fun applyBackup(
+    context: Context,
+    bytes: ByteArray,
+    passphrase: String,
+): Pair<uniffi.ducat_mobile.RestoredBackup, String> {
+    val r = importBackup(bytes, passphrase)
+    // Who this device *is*. Contacts are keyed by their persona, but what we
+    // send is signed with ours, so a device that recovered the threads and
+    // kept its own keypair is a stranger to everyone in them.
+    PersonaStore(context).restoreSecret(r.personaSecret)
+    // Settings come back too. A restore that keeps the money and drops the name
+    // and the privacy choice has quietly changed both, and the user has no way
+    // to notice — publishing especially, where the wrong direction is a silent
+    // disclosure.
+    r.displayName?.let { NameStore(context).put(it) }
+    ContactStore(context).setPublishAddress(r.publishPayto)
+    // §16.9's profile with it. A persona that comes back with the right money
+    // and no face is not the same person to anyone who knew them, and nothing
+    // else in the app would report the loss.
+    MyProfile(context).let { p ->
+        p.setAvatar(r.profile.avatar)
+        p.setEmail(r.profile.email)
+        p.setPhone(r.profile.phone)
+        p.setSignal(r.profile.signal)
+        p.setPronouns(r.profile.pronouns?.toInt())
+    }
+    // The relationships. Threads and tabs from the opaque blob, then the typed
+    // contacts as the authoritative overlay — so a bundle from another client
+    // still restores everyone.
+    ContactStore(context).restoreFromBackup(r)
+    // The money. The bundle carries the spend key and the height that key was
+    // born at; before this, the import applied the contacts and dropped the
+    // wallet on the floor.
+    val address = addressForSpendKey(r.spendKeyHex, stagenet = true)
+    val wallet = WalletStore(context)
+    wallet.save(address, r.spendKeyHex, r.restoreHeight, stagenet = true)
+    // The outputs belong to the key being replaced, and so does the scan
+    // progress. Left alone, `scannedTo` stays at the tip the old wallet
+    // reached, so the scanner never looks at the range where this one's money
+    // is — a restore that reports success and then finds nothing, forever.
+    wallet.rescanFrom(r.restoreHeight.toLong())
+    // The bundle just opened *is* a current backup of this device, so say so.
+    // Otherwise the first thing a restored phone does is tell the person who
+    // has only ever used a backup that they do not have one — "you have
+    // contacts your last backup does not", over the file they are holding.
+    ContactStore(context).markBackupExported()
+    // The address is the check that matters. A bundle that decrypts has proved
+    // the passphrase, not that it holds the wallet you meant.
+    return r to address
 }
 
 private fun share(context: Context, file: File) {

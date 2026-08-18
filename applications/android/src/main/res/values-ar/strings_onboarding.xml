@@ -58,4 +58,10 @@
 
 وعند انتهاء المعاملة يعود الضمانان كاملين وتذهب الأجرة إلى السائق. لا أحد يستطيع أخذ ضمانك — لا الطرف الآخر ولا نحن. هو موجود فقط ليجعل إتمام المعاملة الخيار الأسهل لكليكما.</string>
     <string name="onb_trust_action">مفهوم</string>
+    <string name="onb_have_backup">لديّ نسخة احتياطية بالفعل</string>
+    <string name="onb_restore_title">استعادة من نسختك الاحتياطية</string>
+    <string name="onb_restore_body">اختر الملف الذي حفظته واكتب عبارة المرور التي وضعتها. تعود هويتك وأموالك وجهات اتصالك — ولا يُنشأ شيء جديد.</string>
+    <string name="onb_restore_pick">اختر الملف</string>
+    <string name="onb_restore_cancel">ليس الآن</string>
+    <string name="onb_restore_continue">متابعة</string>
 </resources>

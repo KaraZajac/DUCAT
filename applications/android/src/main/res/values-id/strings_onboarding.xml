@@ -58,4 +58,10 @@
 
 Setelah selesai, kedua jaminan kembali utuh dan tarifnya jadi milik pengemudi. Tidak ada yang bisa mengambil jaminan Anda — pihak lain tidak, kami pun tidak. Ia hanya duduk di sana, membuat menyelesaikan urusan jadi pilihan yang lebih mudah bagi kalian berdua.</string>
     <string name="onb_trust_action">Mengerti</string>
+    <string name="onb_have_backup">Saya sudah punya cadangan</string>
+    <string name="onb_restore_title">Pulihkan dari cadangan Anda</string>
+    <string name="onb_restore_body">Pilih berkas yang Anda simpan dan ketik frasa sandi yang Anda tetapkan. Identitas, uang, dan orang-orang Anda kembali — tidak ada yang dibuat baru.</string>
+    <string name="onb_restore_pick">Pilih berkas</string>
+    <string name="onb_restore_cancel">Nanti saja</string>
+    <string name="onb_restore_continue">Lanjut</string>
 </resources>

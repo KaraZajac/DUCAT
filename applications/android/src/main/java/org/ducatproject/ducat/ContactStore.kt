@@ -1266,6 +1266,21 @@ class PersonaStore(context: Context) {
         prefs.edit().putString("persona_secret", b64(fresh)).apply()
         return fresh
     }
+
+    /**
+     * Become the identity in a backup.
+     *
+     * The one write that makes a restore a restore rather than a copy of
+     * somebody's address book: contacts are keyed by *their* persona, but every
+     * message this device sends is signed by ours, so a device that recovered
+     * the threads and kept its own keypair is a stranger to everyone in them.
+     * Nothing called this before it existed — `personaSecret` travelled in the
+     * bundle, was read, and was never used.
+     */
+    fun restoreSecret(secret: ByteArray) {
+        if (secret.isEmpty()) return
+        prefs.edit().putString("persona_secret", b64(secret)).apply()
+    }
 }
 
 /**

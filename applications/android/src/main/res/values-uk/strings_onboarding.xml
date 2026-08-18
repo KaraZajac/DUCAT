@@ -58,4 +58,10 @@
 
 Коли все завершено, обидві застави повертаються повністю, а плата йде водієві. Вашу заставу не може забрати ніхто — ні інша людина, ні ми. Вона просто лежить і робить завершення угоди найлегшим вибором для обох.</string>
     <string name="onb_trust_action">Зрозуміло</string>
+    <string name="onb_have_backup">У мене вже є резервна копія</string>
+    <string name="onb_restore_title">Відновити з резервної копії</string>
+    <string name="onb_restore_body">Виберіть збережений файл і введіть задану вами парольну фразу. Повернуться ваша особистість, ваші гроші та ваші контакти — нічого нового не створюється.</string>
+    <string name="onb_restore_pick">Вибрати файл</string>
+    <string name="onb_restore_cancel">Не зараз</string>
+    <string name="onb_restore_continue">Продовжити</string>
 </resources>

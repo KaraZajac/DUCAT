@@ -58,4 +58,10 @@
 
 Quando termina, as duas cauções voltam inteiras e o valor vai para o condutor. Ninguém pode ficar com a sua caução — nem a outra pessoa, nem nós. Está ali só para que terminar seja a escolha mais fácil.</string>
     <string name="onb_trust_action">Percebi</string>
+    <string name="onb_have_backup">Já tenho uma cópia de segurança</string>
+    <string name="onb_restore_title">Restaurar a partir da sua cópia</string>
+    <string name="onb_restore_body">Escolha o ficheiro que guardou e escreva a frase-passe que definiu. A sua identidade, o seu dinheiro e os seus contactos voltam — não se cria nada novo.</string>
+    <string name="onb_restore_pick">Escolher o ficheiro</string>
+    <string name="onb_restore_cancel">Agora não</string>
+    <string name="onb_restore_continue">Continuar</string>
 </resources>

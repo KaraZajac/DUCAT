@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -86,17 +87,43 @@ data class Onboarding(
 @Composable
 fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
     val context = LocalContext.current
+    var restoring by remember { mutableStateOf(false) }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
     ) {
         Progress(state.step)
         Spacer(Modifier.height(24.dp))
 
+        if (restoring) {
+            RestoreStep(
+                onCancel = { restoring = false },
+                onRestored = { r ->
+                    // Straight to the end: the wallet, the identity and the
+                    // people are already back, and the file that brought them
+                    // is the backup — asking for a second one before letting
+                    // this person in would be ceremony, not safety. The name
+                    // and the publish choice ride along so the shell does not
+                    // write setup's defaults over what was just restored.
+                    onState(
+                        state.copy(
+                            step = Step.Done,
+                            backupConfirmed = true,
+                            displayName = r.displayName,
+                            publishPayto = r.publishPayto,
+                        ),
+                    )
+                },
+            )
+            return@Column
+        }
+
         when (state.step) {
             Step.Persona -> StepCard(
                 title = stringResource(R.string.onb_persona_title),
                 body = stringResource(R.string.onb_persona_body),
                 action = stringResource(R.string.onb_persona_action),
+                secondary = stringResource(R.string.onb_have_backup),
+                onSecondary = { restoring = true },
                 onAction = {
                     // Persisted the moment it is created, not held in Compose
                     // state until Done. A rotation used to throw the persona
@@ -229,7 +256,14 @@ private fun Progress(step: Step) {
 }
 
 @Composable
-private fun StepCard(title: String, body: String, action: String, onAction: () -> Unit) {
+private fun StepCard(
+    title: String,
+    body: String,
+    action: String,
+    onAction: () -> Unit,
+    secondary: String? = null,
+    onSecondary: (() -> Unit)? = null,
+) {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(20.dp)) {
             Text(title, style = MaterialTheme.typography.titleLarge)
@@ -237,6 +271,136 @@ private fun StepCard(title: String, body: String, action: String, onAction: () -
             Text(body, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(16.dp))
             Button(onClick = onAction) { Text(action) }
+            if (secondary != null && onSecondary != null) {
+                TextButton(onClick = onSecondary) { Text(secondary) }
+            }
+        }
+    }
+}
+
+/**
+ * The other way in: this phone is not new, the person is.
+ *
+ * Setup used to offer creating an identity and nothing else, so somebody
+ * holding the encrypted file from a lost phone had to make a *fresh* identity
+ * and wallet, back **that** up to get past the last step, and only then find
+ * Settings → Backup → Import. The one moment restoring is the whole reason
+ * they opened the app was the one place it was not offered.
+ *
+ * It restores before anything is minted, so no throwaway keypair is created
+ * and no empty wallet is left behind. The address is shown before the door
+ * opens, for the same reason the settings screen shows it: a bundle that
+ * decrypts has proved the passphrase, not that it holds the wallet you meant.
+ */
+@Composable
+private fun RestoreStep(
+    onCancel: () -> Unit,
+    onRestored: (uniffi.ducat_mobile.RestoredBackup) -> Unit,
+) {
+    val context = LocalContext.current
+    var passphrase by remember { mutableStateOf("") }
+    var pending by remember { mutableStateOf<android.net.Uri?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var done by remember {
+        mutableStateOf<Pair<uniffi.ducat_mobile.RestoredBackup, String>?>(null)
+    }
+
+    val picker = rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+    ) { uri -> pending = uri }
+
+    // `pending` is cleared last and the work is NonCancellable — clearing it
+    // first would change this effect's key and cancel the restore it started.
+    LaunchedEffect(pending) {
+        val uri = pending ?: return@LaunchedEffect
+        busy = true
+        error = null
+        val outcome = withContext(Dispatchers.IO + kotlinx.coroutines.NonCancellable) {
+            runCatching {
+                val bytes = context.contentResolver.openInputStream(uri)!!
+                    .use { it.readBytes() }
+                applyBackup(context, bytes, passphrase)
+            }
+        }
+        outcome.onSuccess { done = it }.onFailure {
+            org.ducatproject.ducat.DucatLog.w(
+                "Backup", "setup restore: ${it.javaClass.simpleName}: ${it.message}",
+            )
+            error = context.getString(R.string.backup_could_not_open)
+        }
+        busy = false
+        pending = null
+    }
+
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
+        Column(Modifier.padding(20.dp)) {
+            Text(
+                stringResource(R.string.onb_restore_title),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.onb_restore_body),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+
+            val restored = done
+            if (restored == null) {
+                Spacer(Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = passphrase,
+                    onValueChange = { passphrase = it; error = null },
+                    label = { Text(stringResource(R.string.backup_passphrase)) },
+                    singleLine = true,
+                    enabled = !busy,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(12.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Button(
+                        enabled = !busy && passphrase.length >= 8,
+                        onClick = { picker.launch(arrayOf("*/*")) },
+                    ) {
+                        if (busy) {
+                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        } else {
+                            Text(stringResource(R.string.onb_restore_pick))
+                        }
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    TextButton(enabled = !busy, onClick = onCancel) {
+                        Text(stringResource(R.string.onb_restore_cancel))
+                    }
+                }
+                error?.let {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            } else {
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    stringResource(R.string.backup_restored_title),
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    stringResource(R.string.backup_restored_check),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    restored.second,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontFamily = FontFamily.Monospace,
+                )
+                Spacer(Modifier.height(16.dp))
+                Button(onClick = { onRestored(restored.first) }) {
+                    Text(stringResource(R.string.onb_restore_continue))
+                }
+            }
         }
     }
 }

@@ -58,4 +58,10 @@
 
 Ist es erledigt, kommen beide Einlagen vollständig zurück und der Fahrpreis geht an die Fahrerin. Niemand kann deine Einlage nehmen — weder die andere Person noch wir. Sie liegt nur da und macht das Beenden für beide zur leichteren Wahl.</string>
     <string name="onb_trust_action">Verstanden</string>
+    <string name="onb_have_backup">Ich habe schon ein Backup</string>
+    <string name="onb_restore_title">Aus deinem Backup wiederherstellen</string>
+    <string name="onb_restore_body">Wähle die Datei, die du aufbewahrt hast, und gib die Passphrase ein, die du gesetzt hast. Deine Identität, dein Geld und deine Leute kommen zurück — es wird nichts Neues angelegt.</string>
+    <string name="onb_restore_pick">Datei wählen</string>
+    <string name="onb_restore_cancel">Jetzt nicht</string>
+    <string name="onb_restore_continue">Weiter</string>
 </resources>

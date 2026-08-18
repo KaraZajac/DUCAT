@@ -58,4 +58,10 @@
 
 Gdy sprawa się kończy, obie kaucje wracają w całości, a opłata trafia do kierowcy. Nikt nie może zabrać twojej kaucji — ani druga osoba, ani my. Leży tylko po to, by dokończenie było dla was obojga łatwiejszym wyborem.</string>
     <string name="onb_trust_action">Jasne</string>
+    <string name="onb_have_backup">Mam już kopię zapasową</string>
+    <string name="onb_restore_title">Przywróć z kopii zapasowej</string>
+    <string name="onb_restore_body">Wybierz zapisany plik i wpisz ustawione hasło. Wracają twoja tożsamość, twoje pieniądze i twoi ludzie — nic nowego nie powstaje.</string>
+    <string name="onb_restore_pick">Wybierz plik</string>
+    <string name="onb_restore_cancel">Nie teraz</string>
+    <string name="onb_restore_continue">Dalej</string>
 </resources>

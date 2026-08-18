@@ -58,4 +58,10 @@
 
 Quando finisce, tutte e due le cauzioni tornano intere e la tariffa va all\'autista. Nessuno può prendersi la tua cauzione — né l\'altra persona né noi. Sta lì soltanto per rendere più facile, a entrambi, arrivare in fondo.</string>
     <string name="onb_trust_action">Chiaro</string>
+    <string name="onb_have_backup">Ho già un backup</string>
+    <string name="onb_restore_title">Ripristina dal tuo backup</string>
+    <string name="onb_restore_body">Scegli il file che hai conservato e digita la passphrase che avevi impostato. Tornano la tua identità, il tuo denaro e i tuoi contatti: non viene creato nulla di nuovo.</string>
+    <string name="onb_restore_pick">Scegli il file</string>
+    <string name="onb_restore_cancel">Non ora</string>
+    <string name="onb_restore_continue">Continua</string>
 </resources>

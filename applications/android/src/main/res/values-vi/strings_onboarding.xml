@@ -58,4 +58,10 @@
 
 Xong việc, cả hai khoản đặt cọc quay về nguyên vẹn và tiền cước thuộc về tài xế. Không ai lấy được cọc của bạn — người kia không, chúng tôi cũng không. Nó chỉ nằm đó, khiến việc hoàn thành trở thành lựa chọn dễ hơn cho cả hai.</string>
     <string name="onb_trust_action">Đã hiểu</string>
+    <string name="onb_have_backup">Tôi đã có bản sao lưu</string>
+    <string name="onb_restore_title">Khôi phục từ bản sao lưu của bạn</string>
+    <string name="onb_restore_body">Chọn tệp bạn đã lưu và nhập cụm mật khẩu bạn đã đặt. Danh tính, tiền và những người của bạn quay trở lại — không có gì mới được tạo ra.</string>
+    <string name="onb_restore_pick">Chọn tệp</string>
+    <string name="onb_restore_cancel">Để sau</string>
+    <string name="onb_restore_continue">Tiếp tục</string>
 </resources>

@@ -58,4 +58,10 @@
 
 À la fin, les deux dépôts reviennent intégralement et le prix va au conducteur. Personne ne peut prendre votre dépôt : ni l\'autre, ni nous. Il est seulement là pour que terminer soit le choix le plus simple.</string>
     <string name="onb_trust_action">C\'est clair</string>
+    <string name="onb_have_backup">J’ai déjà une sauvegarde</string>
+    <string name="onb_restore_title">Restaurer depuis votre sauvegarde</string>
+    <string name="onb_restore_body">Choisissez le fichier que vous avez conservé et saisissez la phrase secrète que vous aviez choisie. Votre identité, votre argent et vos contacts reviennent ; rien de neuf n’est créé.</string>
+    <string name="onb_restore_pick">Choisir le fichier</string>
+    <string name="onb_restore_cancel">Pas maintenant</string>
+    <string name="onb_restore_continue">Continuer</string>
 </resources>

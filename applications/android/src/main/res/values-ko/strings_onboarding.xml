@@ -58,4 +58,10 @@
 
 거래가 끝나면 두 보증금 모두 그대로 돌아오고 요금은 기사에게 갑니다. 당신의 보증금은 아무도 가져갈 수 없습니다. 상대도, 우리도. 그저 놓여 있으면서 끝까지 마치는 쪽이 서로에게 더 쉬운 선택이 되게 합니다.</string>
     <string name="onb_trust_action">알겠습니다</string>
+    <string name="onb_have_backup">이미 백업이 있습니다</string>
+    <string name="onb_restore_title">백업에서 복원</string>
+    <string name="onb_restore_body">저장해 둔 파일을 고르고 설정했던 암호문을 입력하세요. 신원과 돈과 사람들이 그대로 돌아옵니다 — 새로 만들어지는 것은 없습니다.</string>
+    <string name="onb_restore_pick">파일 선택</string>
+    <string name="onb_restore_cancel">나중에</string>
+    <string name="onb_restore_continue">계속</string>
 </resources>

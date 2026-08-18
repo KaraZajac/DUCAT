@@ -58,4 +58,10 @@
 
 Al terminar, las dos garantías vuelven enteras y la tarifa va al conductor. Nadie puede quedarse con tu garantía: ni la otra persona ni nosotros. Solo está ahí para que terminar sea lo más fácil para ambos.</string>
     <string name="onb_trust_action">Entendido</string>
+    <string name="onb_have_backup">Ya tengo una copia de seguridad</string>
+    <string name="onb_restore_title">Restaurar desde tu copia</string>
+    <string name="onb_restore_body">Elige el archivo que guardaste y escribe la contraseña que pusiste. Vuelven tu identidad, tu dinero y tus contactos; no se crea nada nuevo.</string>
+    <string name="onb_restore_pick">Elegir el archivo</string>
+    <string name="onb_restore_cancel">Ahora no</string>
+    <string name="onb_restore_continue">Continuar</string>
 </resources>

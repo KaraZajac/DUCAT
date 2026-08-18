@@ -58,4 +58,10 @@
 
 When the deal finishes, both stakes come straight back and the fare goes to the driver. Nobody can take your stake — not the other person, not us. It only sits there, making finishing the easier choice for both of you.</string>
     <string name="onb_trust_action">Makes sense</string>
+    <string name="onb_have_backup">I already have a backup</string>
+    <string name="onb_restore_title">Restore from your backup</string>
+    <string name="onb_restore_body">Choose the file you saved and type the passphrase you set. Your identity, your money and your people come back — nothing new is created.</string>
+    <string name="onb_restore_pick">Choose the file</string>
+    <string name="onb_restore_cancel">Not now</string>
+    <string name="onb_restore_continue">Continue</string>
 </resources>

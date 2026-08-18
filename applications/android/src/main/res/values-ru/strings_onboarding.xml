@@ -58,4 +58,10 @@
 
 Когда всё завершено, оба залога возвращаются полностью, а плата уходит водителю. Ваш залог не может забрать никто — ни другой человек, ни мы. Он просто лежит и делает завершение сделки самым лёгким выбором для обоих.</string>
     <string name="onb_trust_action">Понятно</string>
+    <string name="onb_have_backup">У меня уже есть резервная копия</string>
+    <string name="onb_restore_title">Восстановить из резервной копии</string>
+    <string name="onb_restore_body">Выберите сохранённый файл и введите заданную вами парольную фразу. Вернутся ваша личность, ваши деньги и ваши контакты — ничего нового не создаётся.</string>
+    <string name="onb_restore_pick">Выбрать файл</string>
+    <string name="onb_restore_cancel">Не сейчас</string>
+    <string name="onb_restore_continue">Продолжить</string>
 </resources>

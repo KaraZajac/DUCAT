@@ -58,4 +58,10 @@
 
 İş bitince iki teminat da tam olarak geri döner, ücret sürücüye gider. Teminatını kimse alamaz — ne karşı taraf ne biz. Sadece orada durur ve bitirmeyi ikiniz için de kolay seçenek yapar.</string>
     <string name="onb_trust_action">Anlaşıldı</string>
+    <string name="onb_have_backup">Zaten bir yedeğim var</string>
+    <string name="onb_restore_title">Yedeğinden geri yükle</string>
+    <string name="onb_restore_body">Sakladığın dosyayı seç ve belirlediğin parolayı yaz. Kimliğin, paran ve kişilerin geri gelir — yeni bir şey oluşturulmaz.</string>
+    <string name="onb_restore_pick">Dosyayı seç</string>
+    <string name="onb_restore_cancel">Şimdi değil</string>
+    <string name="onb_restore_continue">Devam</string>
 </resources>
