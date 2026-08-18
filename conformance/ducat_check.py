@@ -974,6 +974,8 @@ RN_ROOMS = 236
 RN_SLEEPS = 237
 RN_SUBTYPE = 238
 RN_FEATURES = 239
+RN_TRIM = 240
+RN_SIZE_M2 = 241
 GEOHASH_ALPHABET = set("0123456789bcdefghjkmnpqrstuvwxyz")
 MAX_ATTACHMENT_BYTES = 1_048_576 - 64
 MAX_MIME_CHARS, MAX_FILENAME_CHARS = 64, 96
@@ -1270,6 +1272,7 @@ def parse_listing(buf):
         ("gearbox", RN_GEARBOX, "uint"), ("fuel", RN_FUEL, "uint"),
         ("seats", RN_SEATS, "uint"), ("rooms", RN_ROOMS, "uint"),
         ("sleeps", RN_SLEEPS, "uint"), ("subtype", RN_SUBTYPE, "uint"),
+        ("trim", RN_TRIM, "text"), ("size_m2", RN_SIZE_M2, "uint"),
     ]:
         out[name] = _opt(b, fid, typ)
         if typ == "text" and out[name] is not None and len(out[name]) > 24:
@@ -1277,12 +1280,12 @@ def parse_listing(buf):
 
     # A place with a gearbox is describing two things.
     vehicle_only = any(out[k] is not None for k in
-                       ("make", "model", "year", "gearbox", "fuel", "seats", "color"))
-    place_only = any(out[k] is not None for k in ("rooms", "sleeps"))
+                       ("make", "model", "year", "gearbox", "fuel", "seats", "color", "trim"))
+    place_only = any(out[k] is not None for k in ("rooms", "sleeps", "size_m2"))
     if out["kind"] == 1 and vehicle_only:
-        raise Reject("Malformed", "a place does not have a make, a gearbox or a fuel")
+        raise Reject("Malformed", "a place does not have a make, a trim, a gearbox or a fuel")
     if out["kind"] == 2 and place_only:
-        raise Reject("Malformed", "a vehicle does not have bedrooms")
+        raise Reject("Malformed", "a vehicle does not have bedrooms or floor area")
     if out["gearbox"] is not None and not (1 <= out["gearbox"] <= 2):
         raise Reject("Malformed", "gearbox is manual or automatic")
     if out["fuel"] is not None and not (1 <= out["fuel"] <= 4):
@@ -1331,6 +1334,7 @@ def run_listing(cases, r):
                 ("fuel", RN_FUEL, "uint"), ("seats", RN_SEATS, "uint"),
                 ("color", RN_COLOR, "text"), ("rooms", RN_ROOMS, "uint"),
                 ("sleeps", RN_SLEEPS, "uint"), ("subtype", RN_SUBTYPE, "uint"),
+                ("trim", RN_TRIM, "text"), ("size_m2", RN_SIZE_M2, "uint"),
             ]:
                 if n[name] is not None:
                     fields.append((fid, (typ, n[name])))

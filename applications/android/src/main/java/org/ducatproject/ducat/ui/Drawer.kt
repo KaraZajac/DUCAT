@@ -620,6 +620,11 @@ fun ModesScreen() {
             stringResource(R.string.mode_donate),
             stringResource(R.string.mode_donate_desc),
         ),
+        Triple(
+            org.ducatproject.ducat.Mode.Renting,
+            stringResource(R.string.mode_renting),
+            stringResource(R.string.mode_renting_desc),
+        ),
     )
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {

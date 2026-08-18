@@ -619,6 +619,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             onTopUp = { tab = Tab.Accounts },
                             onSeeActivity = { tab = Tab.Activity },
                             onBackup = { overlay = Overlay.Drawer(Section.Settings) },
+                            onOpenChat = { overlay = Overlay.Chat(it) },
                         )
                     }
                     Tab.Accounts -> AccountsScreen()
@@ -635,6 +636,7 @@ private fun HomeScreen(
     onTopUp: () -> Unit,
     onSeeActivity: () -> Unit,
     onBackup: () -> Unit,
+    onOpenChat: (Contact) -> Unit,
 ) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
@@ -664,6 +666,13 @@ private fun HomeScreen(
     // The one job that belongs on the personal screen: hailing is a rider's
     // moment, not an operating mode, and it lives under the balance.
     org.ducatproject.ducat.ui.HailCard()
+
+    // Looking for a car or a place is the same shape of moment as hailing —
+    // a thing a person does occasionally, not a job they run — so it lives
+    // here rather than behind a mode. The mode is for the person who *has*
+    // one to let (§16.18).
+    Spacer(Modifier.height(12.dp))
+    org.ducatproject.ducat.ui.RentSearchCard(onOpenChat = onOpenChat)
 
     // The nudge that keeps §4.3 true: the bundle carries the relationships
     // now, so every contact made after the last export is one a restore will

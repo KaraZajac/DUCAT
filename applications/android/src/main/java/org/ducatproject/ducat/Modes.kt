@@ -17,8 +17,10 @@ import android.content.Context
 // None is Personal — the default, the wallet-and-chat app. Hail is gone from
 // this list on purpose: hailing is a rider's moment, not a job, and it lives
 // as a card on the personal Home screen. Drive folded into Taxi, because a
-// taxi finds fares and runs a meter with the same hands.
-enum class Mode { None, Pos, BarTab, Taxi, Donate }
+// taxi finds fares and runs a meter with the same hands. Renting is the
+// owner's side of §16.18: personal mode is where someone looks for a car or
+// a place, this is where someone has one to let.
+enum class Mode { None, Pos, BarTab, Taxi, Donate, Renting }
 
 class ModeStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")

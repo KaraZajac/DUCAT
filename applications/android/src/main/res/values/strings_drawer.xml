@@ -36,4 +36,6 @@
     <string name="mode_taxi_desc">Fares and a meter: watch a stand for hails, rate in writing when the meter starts, the bill shows the minutes.</string>
     <string name="mode_donate">Donations</string>
     <string name="mode_donate_desc">A standing code any Monero wallet can give to. No app needed on their side.</string>
+    <string name="mode_renting">Renting</string>
+    <string name="mode_renting_desc">Let a room or a car. You post what you have; people nearby find it and ask.</string>
 </resources>

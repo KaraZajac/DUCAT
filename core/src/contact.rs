@@ -1542,9 +1542,13 @@ pub struct RentalNotice {
     pub fuel: Option<u64>,
     pub seats: Option<u64>,
     pub color: Option<String>,
+    /// The variant a renter actually cares about: "Sport", "GLX", "Long bed".
+    pub trim: Option<String>,
     // A place's searchable shape. MALFORMED on a vehicle.
     pub rooms: Option<u64>,
     pub sleeps: Option<u64>,
+    /// Floor area in square metres — the number people search on after price.
+    pub size_m2: Option<u64>,
     /// Place: 1 = the whole place, 2 = a private room. Vehicle: 1 = car,
     /// 2 = van, 3 = motorbike.
     pub subtype: Option<u64>,
@@ -1578,6 +1582,7 @@ impl RentalNotice {
             (f::RN_MAKE, &self.make),
             (f::RN_MODEL, &self.model),
             (f::RN_COLOR, &self.color),
+            (f::RN_TRIM, &self.trim),
         ] {
             if let Some(t) = v {
                 m.insert(id, Value::Text(t.clone()));
@@ -1590,6 +1595,7 @@ impl RentalNotice {
             (f::RN_SEATS, self.seats),
             (f::RN_ROOMS, self.rooms),
             (f::RN_SLEEPS, self.sleeps),
+            (f::RN_SIZE_M2, self.size_m2),
             (f::RN_SUBTYPE, self.subtype),
         ] {
             if let Some(n) = v {
@@ -1659,12 +1665,14 @@ impl RentalNotice {
         let make = r.opt_text(f::RN_MAKE, MAX_RENTAL_WORD_CHARS)?;
         let model = r.opt_text(f::RN_MODEL, MAX_RENTAL_WORD_CHARS)?;
         let color = r.opt_text(f::RN_COLOR, MAX_RENTAL_WORD_CHARS)?;
+        let trim = r.opt_text(f::RN_TRIM, MAX_RENTAL_WORD_CHARS)?;
         let year = r.opt_uint(f::RN_YEAR)?;
         let gearbox = r.opt_uint(f::RN_GEARBOX)?;
         let fuel = r.opt_uint(f::RN_FUEL)?;
         let seats = r.opt_uint(f::RN_SEATS)?;
         let rooms = r.opt_uint(f::RN_ROOMS)?;
         let sleeps = r.opt_uint(f::RN_SLEEPS)?;
+        let size_m2 = r.opt_uint(f::RN_SIZE_M2)?;
         let subtype = r.opt_uint(f::RN_SUBTYPE)?;
 
         // A place has no gearbox and a car has no bedrooms. Refusing the
@@ -1676,18 +1684,19 @@ impl RentalNotice {
             || gearbox.is_some()
             || fuel.is_some()
             || seats.is_some()
-            || color.is_some();
-        let place_only = rooms.is_some() || sleeps.is_some();
+            || color.is_some()
+            || trim.is_some();
+        let place_only = rooms.is_some() || sleeps.is_some() || size_m2.is_some();
         if kind == RENTAL_PLACE && vehicle_only {
             return Err(Reject::with_detail(
                 RejectCode::Malformed,
-                "a place does not have a make, a gearbox or a fuel",
+                "a place does not have a make, a trim, a gearbox or a fuel",
             ));
         }
         if kind == RENTAL_VEHICLE && place_only {
             return Err(Reject::with_detail(
                 RejectCode::Malformed,
-                "a vehicle does not have bedrooms",
+                "a vehicle does not have bedrooms or floor area",
             ));
         }
         if let Some(g) = gearbox {
@@ -1746,7 +1755,8 @@ impl RentalNotice {
         r.finish()?;
         Ok(RentalNotice {
             version, card, kind, title, area, cell, price_pxmr, deposit_pxmr, expiry,
-            make, model, year, gearbox, fuel, seats, color, rooms, sleeps, subtype, features,
+            make, model, year, gearbox, fuel, seats, color, trim,
+            rooms, sleeps, size_m2, subtype, features,
         })
     }
 }
@@ -1773,8 +1783,10 @@ mod rental_tests {
             fuel: Some(1),
             seats: Some(5),
             color: Some("silver".into()),
+            trim: Some("Hybrid LE".into()),
             rooms: None,
             sleeps: None,
+            size_m2: None,
             subtype: Some(1),
             features: vec!["child seat".into(), "roof box".into()],
         }
@@ -1792,9 +1804,10 @@ mod rental_tests {
             deposit_pxmr: 5_000_000_000,
             expiry: 1_800_000_000,
             make: None, model: None, year: None, gearbox: None, fuel: None,
-            seats: None, color: None,
+            seats: None, color: None, trim: None,
             rooms: Some(1),
             sleeps: Some(2),
+            size_m2: Some(28),
             subtype: Some(2),
             features: vec!["wifi".into()],
         }

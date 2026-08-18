@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.House
 import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PointOfSale
@@ -78,6 +79,18 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
             openDrawer = openDrawer,
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_code), Icons.Filled.RadioButtonUnchecked) { DonateScreen() },
+            ),
+        )
+        Mode.Renting -> Shell(
+            title = stringResource(R.string.shells_title_renting),
+            openDrawer = openDrawer,
+            tabs = listOf(
+                ShellTab(stringResource(R.string.shells_tab_listings), Icons.Filled.House) {
+                    RentingScreen()
+                },
+                ShellTab(stringResource(R.string.shells_tab_bookings), Icons.Filled.Receipt) {
+                    SettledList(origin = "rent", emptyTextRes = R.string.shells_no_bookings_yet)
+                },
             ),
         )
         Mode.None -> {} // personal mode renders the full app, not a shell

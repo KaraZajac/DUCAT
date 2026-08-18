@@ -895,6 +895,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1075,6 +1079,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_read_contact_card(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_reconcile_float(`maxExposurePxmr`: Long,`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_rental_decode(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1372,6 +1380,10 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_reconcile_float(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_rental_decode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_rental_encode(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_seal_message(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_sealed_prekey_id(
@@ -1654,6 +1666,12 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_reconcile_float() != 35020.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_rental_decode() != 11946.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 61333.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 2433.toShort()) {
@@ -3538,6 +3556,124 @@ public object FfiConverterTypeReconciliation: FfiConverterRustBuffer<Reconciliat
             FfiConverterBoolean.write(value.`ok`, buf)
             FfiConverterTypeFloatPlan.write(value.`plan`, buf)
             FfiConverterULong.write(value.`shortfallPxmr`, buf)
+    }
+}
+
+
+
+/**
+ * A listing, as the app hands it over (§16.18).
+ *
+ * Only the searchable half. What the renter needs in order to *arrive* —
+ * the address, the plate, the door code — never comes near this struct,
+ * because everything in it goes on a board a stranger can read.
+ */
+data class RentalInfo (
+    var `card`: kotlin.String, 
+    /**
+     * 1 = a place to stay, 2 = a vehicle.
+     */
+    var `kind`: kotlin.ULong, 
+    var `title`: kotlin.String, 
+    var `area`: kotlin.String, 
+    var `cell`: kotlin.String?, 
+    var `pricePxmr`: kotlin.ULong, 
+    var `depositPxmr`: kotlin.ULong, 
+    var `expiry`: kotlin.ULong, 
+    var `make`: kotlin.String?, 
+    var `model`: kotlin.String?, 
+    var `year`: kotlin.ULong?, 
+    var `gearbox`: kotlin.ULong?, 
+    var `fuel`: kotlin.ULong?, 
+    var `seats`: kotlin.ULong?, 
+    var `color`: kotlin.String?, 
+    var `trim`: kotlin.String?, 
+    var `rooms`: kotlin.ULong?, 
+    var `sleeps`: kotlin.ULong?, 
+    var `sizeM2`: kotlin.ULong?, 
+    var `subtype`: kotlin.ULong?, 
+    var `features`: List<kotlin.String>
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
+    override fun read(buf: ByteBuffer): RentalInfo {
+        return RentalInfo(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterSequenceString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: RentalInfo) = (
+            FfiConverterString.allocationSize(value.`card`) +
+            FfiConverterULong.allocationSize(value.`kind`) +
+            FfiConverterString.allocationSize(value.`title`) +
+            FfiConverterString.allocationSize(value.`area`) +
+            FfiConverterOptionalString.allocationSize(value.`cell`) +
+            FfiConverterULong.allocationSize(value.`pricePxmr`) +
+            FfiConverterULong.allocationSize(value.`depositPxmr`) +
+            FfiConverterULong.allocationSize(value.`expiry`) +
+            FfiConverterOptionalString.allocationSize(value.`make`) +
+            FfiConverterOptionalString.allocationSize(value.`model`) +
+            FfiConverterOptionalULong.allocationSize(value.`year`) +
+            FfiConverterOptionalULong.allocationSize(value.`gearbox`) +
+            FfiConverterOptionalULong.allocationSize(value.`fuel`) +
+            FfiConverterOptionalULong.allocationSize(value.`seats`) +
+            FfiConverterOptionalString.allocationSize(value.`color`) +
+            FfiConverterOptionalString.allocationSize(value.`trim`) +
+            FfiConverterOptionalULong.allocationSize(value.`rooms`) +
+            FfiConverterOptionalULong.allocationSize(value.`sleeps`) +
+            FfiConverterOptionalULong.allocationSize(value.`sizeM2`) +
+            FfiConverterOptionalULong.allocationSize(value.`subtype`) +
+            FfiConverterSequenceString.allocationSize(value.`features`)
+    )
+
+    override fun write(value: RentalInfo, buf: ByteBuffer) {
+            FfiConverterString.write(value.`card`, buf)
+            FfiConverterULong.write(value.`kind`, buf)
+            FfiConverterString.write(value.`title`, buf)
+            FfiConverterString.write(value.`area`, buf)
+            FfiConverterOptionalString.write(value.`cell`, buf)
+            FfiConverterULong.write(value.`pricePxmr`, buf)
+            FfiConverterULong.write(value.`depositPxmr`, buf)
+            FfiConverterULong.write(value.`expiry`, buf)
+            FfiConverterOptionalString.write(value.`make`, buf)
+            FfiConverterOptionalString.write(value.`model`, buf)
+            FfiConverterOptionalULong.write(value.`year`, buf)
+            FfiConverterOptionalULong.write(value.`gearbox`, buf)
+            FfiConverterOptionalULong.write(value.`fuel`, buf)
+            FfiConverterOptionalULong.write(value.`seats`, buf)
+            FfiConverterOptionalString.write(value.`color`, buf)
+            FfiConverterOptionalString.write(value.`trim`, buf)
+            FfiConverterOptionalULong.write(value.`rooms`, buf)
+            FfiConverterOptionalULong.write(value.`sleeps`, buf)
+            FfiConverterOptionalULong.write(value.`sizeM2`, buf)
+            FfiConverterOptionalULong.write(value.`subtype`, buf)
+            FfiConverterSequenceString.write(value.`features`, buf)
     }
 }
 
@@ -6432,6 +6568,26 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_reconcile_float(
         FfiConverterULong.lower(`maxExposurePxmr`),FfiConverterUInt.lower(`payments`),FfiConverterULong.lower(`typicalPxmr`),_status)
+}
+    )
+    }
+    
+
+    @Throws(ContactException::class) fun `rentalDecode`(`bytes`: kotlin.ByteArray): RentalInfo {
+            return FfiConverterTypeRentalInfo.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_rental_decode(
+        FfiConverterByteArray.lower(`bytes`),_status)
+}
+    )
+    }
+    
+
+    @Throws(ContactException::class) fun `rentalEncode`(`info`: RentalInfo): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_rental_encode(
+        FfiConverterTypeRentalInfo.lower(`info`),_status)
 }
     )
     }

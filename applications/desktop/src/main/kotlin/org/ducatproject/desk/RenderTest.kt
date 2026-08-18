@@ -107,6 +107,18 @@ fun main() {
         org.ducatproject.ducat.ui.QrScannerContent("Scan a card", onResult = {})
     }
     render("place") { DeskPlaceSetting() }
+    // The owner's side: what someone with a car or a room fills in.
+    render("renting-mode", w = 520, h = 900) { org.ducatproject.ducat.ui.RentingScreen() }
+    // The seeker's side: the two chips on the personal Home screen.
+    render("rent-form-car", w = 520, h = 1400) {
+        org.ducatproject.ducat.ui.ListingFormPreview(kind = 2)
+    }
+    render("rent-form-place", w = 520, h = 1200) {
+        org.ducatproject.ducat.ui.ListingFormPreview(kind = 1)
+    }
+    render("rent-chips", w = 520, h = 260) {
+        org.ducatproject.ducat.ui.RentSearchCard(onOpenChat = {})
+    }
     // The sentence the whole trust model rests on, as a user meets it.
     // The moment a rider decides: does the screen tell them the whole cost?
     render("ride-offer", w = 480, h = 900) {

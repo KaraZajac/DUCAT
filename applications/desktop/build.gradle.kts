@@ -52,8 +52,11 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/ui/Contacts.kt",
     "org/ducatproject/ducat/ui/Pay.kt",
     "org/ducatproject/ducat/ui/Ceremony.kt",
+    "org/ducatproject/ducat/ui/RentSearch.kt",
+    "org/ducatproject/ducat/ui/Renting.kt",
     "org/ducatproject/ducat/ui/Onboarding.kt",
     "org/ducatproject/ducat/Geo.kt",
+    "org/ducatproject/ducat/Listings.kt",
     "org/ducatproject/ducat/Stakes.kt",
     "org/ducatproject/ducat/Places.kt",
     "org/ducatproject/ducat/ui/Drawer.kt",
@@ -351,6 +354,14 @@ tasks.register<JavaExec>("ridetest") {
 tasks.register<JavaExec>("vaultset") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.VaultSetKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// Renting discovery over the live network: one desk posts, another finds.
+// `DUCAT_LIST_ROLE=… DUCAT_DESK_STATE=… ./gradlew :desktop:listtest`.
+tasks.register<JavaExec>("listtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ListTestKt"
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 

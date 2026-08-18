@@ -1798,7 +1798,8 @@ fn contact_cases() -> Vec<J> {
             fuel: Some(1),
             seats: Some(5),
             color: Some("silver".into()),
-            rooms: None, sleeps: None,
+            trim: Some("Hybrid LE".into()),
+            rooms: None, sleeps: None, size_m2: None,
             subtype: Some(1),
             features: vec!["child seat".into()],
         };
@@ -1810,8 +1811,8 @@ fn contact_cases() -> Vec<J> {
             price_pxmr: 25_000_000_000,
             deposit_pxmr: 5_000_000_000,
             make: None, model: None, year: None, gearbox: None, fuel: None,
-            seats: None, color: None,
-            rooms: Some(1), sleeps: Some(2), subtype: Some(2),
+            seats: None, color: None, trim: None,
+            rooms: Some(1), sleeps: Some(2), size_m2: Some(28), subtype: Some(2),
             features: vec!["wifi".into()],
             ..car.clone()
         };
@@ -1829,6 +1830,14 @@ fn contact_cases() -> Vec<J> {
             "The mirror of it: a car with bedrooms.",
             &RentalNotice { rooms: Some(3), ..car.clone() },
             Some((RejectCode::Malformed, "a vehicle has no bedrooms")));
+        lcase("listing_vehicle_with_floor_area",
+            "Floor area is a room's number, and a car quoting it is describing something else.",
+            &RentalNotice { size_m2: Some(90), ..car.clone() },
+            Some((RejectCode::Malformed, "a vehicle has no floor area")));
+        lcase("listing_place_with_trim",
+            "Trim is a car's word. A flat with a trim level is the place/vehicle split failing quietly.",
+            &RentalNotice { trim: Some("Sport".into()), ..room.clone() },
+            Some((RejectCode::Malformed, "a place has no trim")));
         lcase("listing_cell_too_precise",
             "A hail's precision 6 (~1.2 km) is legal for a person standing at a kerb for ten minutes and wrong for a home that will still be there next week. A listing is capped at precision 5.",
             &RentalNotice { cell: Some("u33dbc".into()), ..room.clone() },

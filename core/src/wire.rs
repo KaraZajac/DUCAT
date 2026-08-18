@@ -238,6 +238,10 @@ pub mod f {
     pub const RN_SUBTYPE: u64 = 238;
     /// A few short tags, for the things no field will ever cover.
     pub const RN_FEATURES: u64 = 239;
+    /// The trim or variant — "Sport", "GLX". Refused on a place.
+    pub const RN_TRIM: u64 = 240;
+    /// Floor area in square metres. Refused on a vehicle.
+    pub const RN_SIZE_M2: u64 = 241;
 
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;

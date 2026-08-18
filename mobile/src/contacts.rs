@@ -949,8 +949,10 @@ pub struct RentalInfo {
     pub fuel: Option<u64>,
     pub seats: Option<u64>,
     pub color: Option<String>,
+    pub trim: Option<String>,
     pub rooms: Option<u64>,
     pub sleeps: Option<u64>,
+    pub size_m2: Option<u64>,
     pub subtype: Option<u64>,
     pub features: Vec<String>,
 }
@@ -960,8 +962,9 @@ fn rental_from_core(n: ducat_core::contact::RentalNotice) -> RentalInfo {
         card: n.card, kind: n.kind, title: n.title, area: n.area, cell: n.cell,
         price_pxmr: n.price_pxmr, deposit_pxmr: n.deposit_pxmr, expiry: n.expiry,
         make: n.make, model: n.model, year: n.year, gearbox: n.gearbox,
-        fuel: n.fuel, seats: n.seats, color: n.color, rooms: n.rooms,
-        sleeps: n.sleeps, subtype: n.subtype, features: n.features,
+        fuel: n.fuel, seats: n.seats, color: n.color, trim: n.trim,
+        rooms: n.rooms, sleeps: n.sleeps, size_m2: n.size_m2,
+        subtype: n.subtype, features: n.features,
     }
 }
 
@@ -974,7 +977,8 @@ pub fn rental_encode(info: RentalInfo) -> Result<Vec<u8>, ContactError> {
         deposit_pxmr: info.deposit_pxmr, expiry: info.expiry,
         make: info.make, model: info.model, year: info.year,
         gearbox: info.gearbox, fuel: info.fuel, seats: info.seats,
-        color: info.color, rooms: info.rooms, sleeps: info.sleeps,
+        color: info.color, trim: info.trim, rooms: info.rooms,
+        sleeps: info.sleeps, size_m2: info.size_m2,
         subtype: info.subtype, features: info.features,
     };
     // Encode-then-decode, as the hail does: what goes onto a public board is
