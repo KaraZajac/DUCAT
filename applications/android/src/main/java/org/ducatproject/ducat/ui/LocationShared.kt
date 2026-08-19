@@ -25,7 +25,14 @@ fun askForLocation(
     launch: (String) -> Unit,
 ) {
     val perm = android.Manifest.permission.ACCESS_FINE_LOCATION
-    val activity = context as? android.app.Activity
+    // Compose hands screens whatever context wraps the activity, which is
+    // often not the activity itself; an unwrapped cast quietly comes back
+    // null and this button would never find its way to Settings.
+    var c: android.content.Context? = context
+    while (c != null && c !is android.app.Activity) {
+        c = (c as? android.content.ContextWrapper)?.baseContext
+    }
+    val activity = c as? android.app.Activity
     if (asked && activity?.shouldShowRequestPermissionRationale(perm) == false) {
         context.startActivity(
             android.content.Intent(
