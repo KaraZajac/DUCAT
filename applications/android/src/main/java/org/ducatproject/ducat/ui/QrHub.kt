@@ -158,7 +158,7 @@ fun QrHub(
                                         }
                                         busy = false
                                         r.onSuccess(onOpenChat).onFailure {
-                                            error = it.message ?: context.getString(R.string.qrhub_card_failed)
+                                            error = context.getString(claimFailureRes(it))
                                             DucatLog.w(TAG, "claim: ${it.message}")
                                         }
                                     }

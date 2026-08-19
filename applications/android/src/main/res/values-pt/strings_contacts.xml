@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">Confira estes caracteres com a pessoa por um canal em que você confia, se importa saber quem é.</string>
     <string name="contacts_save_them_as_label">Salvar como</string>
     <string name="contacts_save_them_as_support">Seu nome para a pessoa. Só você o vê.</string>
-    <string name="contacts_error_read_inbox">não foi possível ler a caixa de entrada da pessoa</string>
     <string name="contacts_reading_inbox">Lendo a caixa de entrada…</string>
     <string name="contacts_add_contact_button">Adicionar contato</string>
 

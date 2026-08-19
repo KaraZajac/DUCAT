@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">Se conta sapere chi è, verifica questi caratteri con loro su un canale di cui ti fidi.</string>
     <string name="contacts_save_them_as_label">Salva come</string>
     <string name="contacts_save_them_as_support">Il tuo nome per loro. Lo vedi solo tu.</string>
-    <string name="contacts_error_read_inbox">impossibile leggere la loro casella in arrivo</string>
     <string name="contacts_reading_inbox">Lettura della loro casella in arrivo…</string>
     <string name="contacts_add_contact_button">Aggiungi contatto</string>
 

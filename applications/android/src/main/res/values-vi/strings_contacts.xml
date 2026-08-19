@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">Nếu quan trọng đây là ai, hãy đối chiếu các ký tự này với họ qua một kênh bạn tin.</string>
     <string name="contacts_save_them_as_label">Lưu họ là</string>
     <string name="contacts_save_them_as_support">Tên bạn đặt cho họ. Chỉ mình bạn thấy.</string>
-    <string name="contacts_error_read_inbox">không đọc được hộp thư của họ</string>
     <string name="contacts_reading_inbox">Đang đọc hộp thư của họ…</string>
     <string name="contacts_add_contact_button">Thêm liên hệ</string>
 

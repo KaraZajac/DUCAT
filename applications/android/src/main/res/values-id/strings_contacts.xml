@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">Cocokkan karakter ini dengan mereka lewat saluran yang kamu percaya kalau identitasnya penting.</string>
     <string name="contacts_save_them_as_label">Simpan sebagai</string>
     <string name="contacts_save_them_as_support">Namamu untuk mereka. Hanya kamu yang melihatnya.</string>
-    <string name="contacts_error_read_inbox">tidak bisa membaca kotak masuk mereka</string>
     <string name="contacts_reading_inbox">Membaca kotak masuk mereka…</string>
     <string name="contacts_add_contact_button">Tambah kontak</string>
 

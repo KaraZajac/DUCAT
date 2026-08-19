@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">قارن هذه المحارف معهم عبر قناة تثق بها إن كان يهمّك من يكون هذا.</string>
     <string name="contacts_save_them_as_label">احفظهم باسم</string>
     <string name="contacts_save_them_as_support">اسمك أنت لهم. لا يراه أحد غيرك.</string>
-    <string name="contacts_error_read_inbox">تعذّرت قراءة صندوق واردهم</string>
     <string name="contacts_reading_inbox">جارٍ قراءة صندوق واردهم…</string>
     <string name="contacts_add_contact_button">إضافة جهة الاتصال</string>
 

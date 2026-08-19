@@ -5,7 +5,6 @@
     <string name="qrhub_my_code">Мой код</string>
     <string name="qrhub_scan_prompt">Карточка DUCAT или адрес Monero</string>
     <string name="qrhub_not_a_code">Этот код — не карточка DUCAT и не адрес Monero.</string>
-    <string name="qrhub_card_failed">карточка не сработала</string>
     <string name="qrhub_card_issue_failed">не удалось создать карточку</string>
     <string name="qrhub_no_name_set">имя не задано</string>
     <string name="qrhub_publishing">Публикуем две записи, чтобы с тобой могли связаться, даже когда телефон выключен.</string>

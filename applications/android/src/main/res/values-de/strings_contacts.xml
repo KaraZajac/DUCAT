@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">Gleiche diese Zeichen über einen Kanal ab, dem du vertraust, wenn es darauf ankommt, wer das ist.</string>
     <string name="contacts_save_them_as_label">Speichern als</string>
     <string name="contacts_save_them_as_support">Dein Name für diese Person. Nur du siehst ihn.</string>
-    <string name="contacts_error_read_inbox">das Postfach ließ sich nicht lesen</string>
     <string name="contacts_reading_inbox">Postfach wird gelesen…</string>
     <string name="contacts_add_contact_button">Kontakt hinzufügen</string>
 

@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">اگر مهم است این شخص کیست، این نویسه‌ها را از راهی که به آن اعتماد داری با خودش چک کن.</string>
     <string name="contacts_save_them_as_label">ذخیره با نام</string>
     <string name="contacts_save_them_as_support">نام تو برای او. فقط خودت می‌بینی.</string>
-    <string name="contacts_error_read_inbox">صندوق ورودی‌اش خوانده نشد</string>
     <string name="contacts_reading_inbox">در حال خواندن صندوق ورودی‌اش…</string>
     <string name="contacts_add_contact_button">افزودن مخاطب</string>
 

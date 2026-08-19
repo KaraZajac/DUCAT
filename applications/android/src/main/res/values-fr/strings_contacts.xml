@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">Vérifie ces caractères avec la personne par un canal de confiance si son identité compte.</string>
     <string name="contacts_save_them_as_label">Enregistrer sous</string>
     <string name="contacts_save_them_as_support">Ton nom pour cette personne. Toi seul le vois.</string>
-    <string name="contacts_error_read_inbox">impossible de lire leur boîte de réception</string>
     <string name="contacts_reading_inbox">Lecture de leur boîte de réception…</string>
     <string name="contacts_add_contact_button">Ajouter le contact</string>
 

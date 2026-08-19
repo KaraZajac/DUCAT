@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">相手が誰かが重要な場合は、信頼できる別の経路でこの文字列を本人と照合してください。</string>
     <string name="contacts_save_them_as_label">保存する名前</string>
     <string name="contacts_save_them_as_support">あなたが相手に付ける名前です。見えるのはあなただけです。</string>
-    <string name="contacts_error_read_inbox">相手の受信箱を読み取れませんでした</string>
     <string name="contacts_reading_inbox">相手の受信箱を読み取り中…</string>
     <string name="contacts_add_contact_button">連絡先に追加</string>
 

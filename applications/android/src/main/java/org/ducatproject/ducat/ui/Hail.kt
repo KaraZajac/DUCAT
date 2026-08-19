@@ -733,7 +733,13 @@ fun DriveScreen() {
                     }.onFailure {
                         DucatLog.w(TAG, "claim: ${it.message}")
                         withContext(Dispatchers.Main) {
-                            error = context.getString(R.string.hail_beaten_to_it)
+                            // Being beaten to a fare is only one of the ways
+                            // this fails, and it was the answer given for all
+                            // of them — including a driver whose node had not
+                            // finished connecting, told a rival took the job.
+                            error = context.getString(
+                                claimFailureRes(it, R.string.hail_beaten_to_it),
+                            )
                         }
                     }
                     withContext(Dispatchers.Main) { busy = false }

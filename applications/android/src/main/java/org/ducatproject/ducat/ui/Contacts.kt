@@ -335,7 +335,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                             }
                             adding = false
                             r.onSuccess { onAdded() }
-                                .onFailure { error = it.message ?: context.getString(R.string.contacts_error_read_inbox) }
+                                .onFailure { error = context.getString(claimFailureRes(it)) }
                         }
                     },
                     enabled = petname.isNotBlank() && !adding,

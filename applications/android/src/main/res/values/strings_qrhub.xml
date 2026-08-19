@@ -5,7 +5,6 @@
     <string name="qrhub_my_code">My code</string>
     <string name="qrhub_scan_prompt">A DUCAT card or a Monero address</string>
     <string name="qrhub_not_a_code">That code is neither a DUCAT card nor a Monero address.</string>
-    <string name="qrhub_card_failed">that card did not work</string>
     <string name="qrhub_card_issue_failed">could not make a card</string>
     <string name="qrhub_no_name_set">no name set</string>
     <string name="qrhub_publishing">Publishing two records so people can reach you while this phone is off.</string>

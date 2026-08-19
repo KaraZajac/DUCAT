@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">หากสำคัญว่าคนนี้เป็นใคร ตรวจสอบตัวอักษรเหล่านี้กับเขาผ่านช่องทางที่คุณไว้ใจ</string>
     <string name="contacts_save_them_as_label">บันทึกเขาในชื่อ</string>
     <string name="contacts_save_them_as_support">ชื่อที่คุณตั้งให้เขา คุณเห็นคนเดียว</string>
-    <string name="contacts_error_read_inbox">อ่านกล่องขาเข้าของเขาไม่สำเร็จ</string>
     <string name="contacts_reading_inbox">กำลังอ่านกล่องขาเข้าของเขา…</string>
     <string name="contacts_add_contact_button">เพิ่มผู้ติดต่อ</string>
 

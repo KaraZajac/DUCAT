@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">Controleer deze tekens met ze via een kanaal dat je vertrouwt, als het uitmaakt wie dit is.</string>
     <string name="contacts_save_them_as_label">Opslaan als</string>
     <string name="contacts_save_them_as_support">Jouw naam voor ze. Alleen jij ziet die.</string>
-    <string name="contacts_error_read_inbox">kon hun inbox niet lezen</string>
     <string name="contacts_reading_inbox">Hun inbox lezen…</string>
     <string name="contacts_add_contact_button">Contact toevoegen</string>
 

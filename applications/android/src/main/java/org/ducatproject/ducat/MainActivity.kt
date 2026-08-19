@@ -258,11 +258,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             else cardAsk = uri to card.assertedName.orEmpty()
         }.onFailure {
             DucatLog.w("Main", "card link unreadable: ${it.message}")
-            cardFail = if (Mailbox.isOffline(it)) {
-                R.string.main_card_link_offline
-            } else {
-                R.string.main_card_link_failed_body
-            }
+            cardFail = org.ducatproject.ducat.ui.claimFailureRes(it)
         }
         MainActivity.claimLink.value = null
     }
@@ -317,24 +313,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                                 // that failed offline sends someone back to ask
                                 // for a replacement — burning the good card
                                 // they are holding, since a card is claim-once.
-                                cardFail = when {
-                                    Mailbox.isOffline(it) ->
-                                        R.string.main_card_link_offline
-                                    // The precise reason, in the reader's own
-                                    // language: a claimed card really does need
-                                    // replacing, and saying so beats a list of
-                                    // three maybes.
-                                    it is Mailbox.CardAlreadyUsed ->
-                                        R.string.contacts_reply_replay
-                                    // A till mints a card per sale, and a
-                                    // customer can scan it faster than the DHT
-                                    // publishes it. "Wait and scan again", not
-                                    // "your code is broken" — which would have
-                                    // the merchant cancel a perfectly good sale.
-                                    it is Mailbox.DetailsNotPublished ->
-                                        R.string.main_card_link_not_ready
-                                    else -> R.string.main_card_link_failed_body
-                                }
+                                cardFail = org.ducatproject.ducat.ui
+                                    .claimFailureRes(it)
                             }
                     }
                 }) { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_add)) }

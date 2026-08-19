@@ -5,7 +5,6 @@
     <string name="qrhub_my_code">マイコード</string>
     <string name="qrhub_scan_prompt">DUCATカードまたはMoneroアドレス</string>
     <string name="qrhub_not_a_code">このコードはDUCATカードでもMoneroアドレスでもありません。</string>
-    <string name="qrhub_card_failed">そのカードは使えませんでした</string>
     <string name="qrhub_card_issue_failed">カードを作成できませんでした</string>
     <string name="qrhub_no_name_set">名前未設定</string>
     <string name="qrhub_publishing">この端末の電源が切れていても連絡が届くよう、2件のレコードを公開しています。</string>

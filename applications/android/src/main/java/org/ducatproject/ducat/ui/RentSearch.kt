@@ -175,7 +175,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                                         r.onSuccess { onOpenChat(it); onClose() }
                                             .onFailure {
                                                 DucatLog.w("RentSearch", "claim: ${it.message}")
-                                                error = it.message
+                                                error = context.getString(claimFailureRes(it))
                                             }
                                     }
                                 },

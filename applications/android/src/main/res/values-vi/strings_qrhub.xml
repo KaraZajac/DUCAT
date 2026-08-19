@@ -5,7 +5,6 @@
     <string name="qrhub_my_code">Mã của tôi</string>
     <string name="qrhub_scan_prompt">Một thẻ DUCAT hoặc một địa chỉ Monero</string>
     <string name="qrhub_not_a_code">Mã đó không phải thẻ DUCAT, cũng không phải địa chỉ Monero.</string>
-    <string name="qrhub_card_failed">thẻ đó không dùng được</string>
     <string name="qrhub_card_issue_failed">không tạo được thẻ</string>
     <string name="qrhub_no_name_set">chưa đặt tên</string>
     <string name="qrhub_publishing">Đang công bố hai bản ghi để người khác liên hệ được bạn cả khi điện thoại này tắt.</string>

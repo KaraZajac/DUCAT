@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">如果对方是谁很重要，请通过你信任的渠道与对方核对这些字符。</string>
     <string name="contacts_save_them_as_label">保存为</string>
     <string name="contacts_save_them_as_support">你给对方起的名字。只有你能看到。</string>
-    <string name="contacts_error_read_inbox">无法读取对方的收件箱</string>
     <string name="contacts_reading_inbox">正在读取对方的收件箱…</string>
     <string name="contacts_add_contact_button">添加联系人</string>
 

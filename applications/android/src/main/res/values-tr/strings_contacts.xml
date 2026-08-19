@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">Kim olduğu önemliyse bu karakterleri güvendiğin bir kanaldan onlarla karşılaştır.</string>
     <string name="contacts_save_them_as_label">Şu adla kaydet</string>
     <string name="contacts_save_them_as_support">Onlara senin verdiğin ad. Yalnızca sen görürsün.</string>
-    <string name="contacts_error_read_inbox">gelen kutuları okunamadı</string>
     <string name="contacts_reading_inbox">Gelen kutuları okunuyor…</string>
     <string name="contacts_add_contact_button">Kişi ekle</string>
 

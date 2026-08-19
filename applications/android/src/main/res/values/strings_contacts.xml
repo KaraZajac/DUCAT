@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">Check these characters with them over a channel you trust if it matters who this is.</string>
     <string name="contacts_save_them_as_label">Save them as</string>
     <string name="contacts_save_them_as_support">Your name for them. Only you see it.</string>
-    <string name="contacts_error_read_inbox">could not read their inbox</string>
     <string name="contacts_reading_inbox">Reading their inbox…</string>
     <string name="contacts_add_contact_button">Add contact</string>
 

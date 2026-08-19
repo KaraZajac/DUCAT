@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">Звір ці символи з ними через канал, якому довіряєш, якщо важливо, хто це.</string>
     <string name="contacts_save_them_as_label">Зберегти як</string>
     <string name="contacts_save_them_as_support">Твоє ім\'я для них. Бачиш його лише ти.</string>
-    <string name="contacts_error_read_inbox">не вдалося прочитати їхню скриньку</string>
     <string name="contacts_reading_inbox">Читаємо їхню скриньку…</string>
     <string name="contacts_add_contact_button">Додати контакт</string>
 

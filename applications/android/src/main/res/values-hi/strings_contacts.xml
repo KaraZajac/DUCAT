@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">अगर यह मायने रखता है कि सामने कौन है, तो ये अक्षर किसी भरोसेमंद चैनल पर उनसे मिला लें।</string>
     <string name="contacts_save_them_as_label">इन्हें इस नाम से सहेजें</string>
     <string name="contacts_save_them_as_support">उनके लिए आपका नाम। सिर्फ़ आपको दिखता है।</string>
-    <string name="contacts_error_read_inbox">उनका इनबॉक्स पढ़ा नहीं जा सका</string>
     <string name="contacts_reading_inbox">उनका इनबॉक्स पढ़ा जा रहा है…</string>
     <string name="contacts_add_contact_button">कॉन्टैक्ट जोड़ें</string>
 

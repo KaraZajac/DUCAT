@@ -31,7 +31,6 @@
     <string name="contacts_check_characters">Jeśli ważne jest, kto to, porównaj te znaki z nimi przez kanał, któremu ufasz.</string>
     <string name="contacts_save_them_as_label">Zapisz jako</string>
     <string name="contacts_save_them_as_support">Twoja nazwa dla nich. Widzisz ją tylko ty.</string>
-    <string name="contacts_error_read_inbox">nie udało się odczytać ich skrzynki</string>
     <string name="contacts_reading_inbox">Odczytywanie ich skrzynki…</string>
     <string name="contacts_add_contact_button">Dodaj kontakt</string>
 
