@@ -230,11 +230,22 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
         onDispose { org.ducatproject.ducat.nfc.Tap.offered = null }
     }
 
-    // Claim → contact → bill. Keyed on the order so a screen that already
-    // billed does not bill again.
+    // Claim → contact → bill.
+    //
+    // The loop condition reads the *store*, not the `order` this composable
+    // was handed. An effect keyed on cardInbox does not restart when the order
+    // changes, so it holds whichever copy it captured — and binding makes a
+    // new one. Testing the captured value meant the condition stayed true for
+    // ever after a successful bind, and the loop went round again: another
+    // tab, another bill, and a customer watching their phone fill up with
+    // them. The stored record is the one that knows this sale is done.
     LaunchedEffect(cardInbox) {
         val inbox = cardInbox ?: return@LaunchedEffect
-        while (order.unpaired) {
+        while (true) {
+            val current = withContext(Dispatchers.IO) {
+                Orders.all(context).firstOrNull { it.id == order.id }
+            } ?: return@LaunchedEffect
+            if (!current.unpaired) return@LaunchedEffect
             val who = withContext(Dispatchers.IO) {
                 runCatching {
                     Mailbox.collectClaims(context)
@@ -245,8 +256,14 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
                 kotlinx.coroutines.delay(2_000)
                 continue
             }
-            withContext(Dispatchers.IO) { runCatching { Orders.bind(context, order, who) } }
-                .onFailure { error = it.message }
+            withContext(Dispatchers.IO) { runCatching { Orders.bind(context, current, who) } }
+                .onFailure {
+                    // A claim that has landed stays landed, so without a wait
+                    // here a node that is down turns this into a spin: bind,
+                    // fail, bind again, as fast as the machine allows.
+                    error = it.message
+                    kotlinx.coroutines.delay(5_000)
+                }
         }
     }
 
