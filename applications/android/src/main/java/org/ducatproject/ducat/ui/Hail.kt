@@ -919,13 +919,19 @@ fun DriveScreen() {
             if (now * 1000 - armedAt > WATCH_REARM_MS) {
                 armedAt = now * 1000
                 withContext(Dispatchers.IO) {
-                    cells.forEach { c ->
-                        runCatching {
-                            uniffi.ducat_mobile.nodeDhtWatch(
-                                uniffi.ducat_mobile.standRecordKey(c),
-                            )
-                        }
+                    // standWatch, not nodeDhtWatch: watching needs the record
+                    // open in this process and a board is never open — every
+                    // reader opens it, reads and closes again. Armed the old
+                    // way the network refused it ("record not open"), the
+                    // result was discarded, and nothing said so; a driver's
+                    // fares were found only by the sweep, a lap late, for as
+                    // long as this feature has existed.
+                    val armed = cells.count { c ->
+                        runCatching { uniffi.ducat_mobile.standWatch(c) }.getOrDefault(false)
                     }
+                    // Counted out loud, because the silent version is what
+                    // hid this: a number that stays zero is a broken watch.
+                    DucatLog.i(TAG, "watching $armed of ${cells.size} board(s)")
                 }
             }
             // supervisorScope, and every child swallows its own failure: one

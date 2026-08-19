@@ -899,6 +899,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1096,6 +1098,8 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_stand_record_key(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_stand_watch(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
     fun uniffi_ducat_mobile_fn_func_thread_aad(`mineHex`: RustBuffer.ByValue,`theirsHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_vault_key(`passphrase`: RustBuffer.ByValue,`salt`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1396,6 +1400,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_stand_record_key(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_stand_watch(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_thread_aad(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_vault_key(
@@ -1690,6 +1696,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_stand_record_key() != 60724.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_stand_watch() != 52290.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_thread_aad() != 26627.toShort()) {
@@ -6671,6 +6680,32 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
             return FfiConverterString.lift(
     uniffiRustCallWithError(NodeException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_stand_record_key(
+        FfiConverterString.lower(`cell`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Ask the network to tell us when this *board* changes.
+         *
+         * `node_dht_watch` cannot do this on its own: watching requires the record to
+         * be open in this process, and a board is never open — every reader opens it,
+         * reads, and closes again. Armed through that function, the watch was refused
+         * with "record not open", the caller discarded the result, and nothing said
+         * so. Measured on the live network (`:desktop:watchtest`): a driver watching
+         * a cell, a fare posted onto it, and four minutes of silence. The sweep was
+         * finding every fare, which is why a hail took a lap to appear instead of
+         * seconds.
+         *
+         * So this opens the board the way a reader does — creating it first if nobody
+         * has pinned that corner yet, since a watch on a record that does not exist
+         * is refused too — arms the watch, and deliberately leaves the record open.
+         */
+    @Throws(NodeException::class) fun `standWatch`(`cell`: kotlin.String): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_stand_watch(
         FfiConverterString.lower(`cell`),_status)
 }
     )

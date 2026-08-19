@@ -697,6 +697,84 @@ fn stand_schema() -> DHTSchema {
     DHTSchema::dflt(8).expect("static schema")
 }
 
+/// Boards this process is watching, and must therefore stop closing.
+///
+/// Closing a record cancels its watch, and every board read opens and closes
+/// the record it reads. So a watch armed on a board would be cancelled by the
+/// very next sweep over that board — the two mechanisms undoing each other,
+/// silently, once a lap.
+static WATCHED: OnceLock<Mutex<std::collections::HashSet<String>>> = OnceLock::new();
+
+fn watched() -> &'static Mutex<std::collections::HashSet<String>> {
+    WATCHED.get_or_init(|| Mutex::new(std::collections::HashSet::new()))
+}
+
+fn is_watched(key: &RecordKey) -> bool {
+    watched()
+        .lock()
+        .map(|w| w.contains(&key.to_string()))
+        .unwrap_or(false)
+}
+
+/// Ask the network to tell us when this *board* changes.
+///
+/// `node_dht_watch` cannot do this on its own: watching requires the record to
+/// be open in this process, and a board is never open — every reader opens it,
+/// reads, and closes again. Armed through that function, the watch was refused
+/// with "record not open", the caller discarded the result, and nothing said
+/// so. Measured on the live network (`:desktop:watchtest`): a driver watching
+/// a cell, a fare posted onto it, and four minutes of silence. The sweep was
+/// finding every fare, which is why a hail took a lap to appear instead of
+/// seconds.
+///
+/// So this opens the board the way a reader does — creating it first if nobody
+/// has pinned that corner yet, since a watch on a record that does not exist
+/// is refused too — arms the watch, and deliberately leaves the record open.
+#[uniffi::export]
+pub fn stand_watch(cell: String) -> Result<bool, NodeError> {
+    let (api, rt) = handles()?;
+    let (kp, enc) = stand_material(&cell);
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let key = api
+            .get_dht_record_key(
+                stand_schema(),
+                PublicKey::new(CRYPTO_KIND_VLD0, kp.key()),
+                Some(SharedSecret::new(CRYPTO_KIND_VLD0, enc)),
+            )
+            .await
+            .map_err(|e| NodeError::Failed(format!("record key: {e}")))?;
+        // Same convention as a read: first one to the corner pins the board.
+        if rc.open_dht_record(key.clone(), None).await.is_err() {
+            if let Ok(desc) = rc
+                .create_dht_record(
+                    CRYPTO_KIND_VLD0,
+                    stand_schema(),
+                    Some(KeyPair::new(CRYPTO_KIND_VLD0, kp.clone())),
+                )
+                .await
+            {
+                let _ = rc.close_dht_record(desc.key().clone()).await;
+            }
+            rc.open_dht_record(key.clone(), None)
+                .await
+                .map_err(|e| NodeError::Failed(format!("open: {e}")))?;
+        }
+        let armed = rc
+            .watch_dht_values(key.clone(), None, None, None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("watch: {e}")))?;
+        if armed {
+            if let Ok(mut w) = watched().lock() {
+                w.insert(key.to_string());
+            }
+        }
+        Ok(armed)
+    })
+}
+
 /// The board's record key, computed locally. Costs no network round trip.
 #[uniffi::export]
 pub fn stand_record_key(cell: String) -> Result<String, NodeError> {
@@ -763,7 +841,11 @@ pub fn stand_post(cell: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeEr
             .await
             .map_err(|e| NodeError::Failed(format!("post: {e}")))?;
         if refused.is_some() {
-            let _ = rc.close_dht_record(key).await;
+            // Closing cancels any watch on it; a board this process is
+            // watching stays open (see stand_watch).
+            if !is_watched(&key) {
+                let _ = rc.close_dht_record(key).await;
+            }
             return Err(NodeError::Failed("slot taken by a concurrent writer".into()));
         }
         // Verify against the *local* record store, not the network: seconds
@@ -777,12 +859,20 @@ pub fn stand_post(cell: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeEr
             .map_err(|e| NodeError::Failed(format!("verify: {e}")))?;
         let held = echoed.as_ref().map(|v| v.data()).unwrap_or(&[]);
         if held != data.as_slice() {
-            let _ = rc.close_dht_record(key).await;
+            // Closing cancels any watch on it; a board this process is
+            // watching stays open (see stand_watch).
+            if !is_watched(&key) {
+                let _ = rc.close_dht_record(key).await;
+            }
             return Err(NodeError::Failed(
                 "slot taken by a concurrent writer".into(),
             ));
         }
-        let _ = rc.close_dht_record(key).await;
+        // Closing cancels any watch on it; a board this process is
+        // watching stays open (see stand_watch).
+        if !is_watched(&key) {
+            let _ = rc.close_dht_record(key).await;
+        }
         Ok(())
     })
 }
@@ -852,7 +942,11 @@ pub fn stand_read(cell: String) -> Result<Vec<StandNotice>, NodeError> {
         // Slot order is the board's order, and a caller that fills the lowest
         // free slot first depends on it; finishing order is the network's.
         out.sort_by_key(|n| n.subkey);
-        let _ = rc.close_dht_record(key).await;
+        // Closing cancels any watch on it; a board this process is
+        // watching stays open (see stand_watch).
+        if !is_watched(&key) {
+            let _ = rc.close_dht_record(key).await;
+        }
         Ok(out)
     })
 }

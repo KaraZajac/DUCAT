@@ -405,6 +405,13 @@ tasks.register<JavaExec>("vaulttest") {
 
 // Every hosted screen rendered off-screen, to prove it draws something.
 // `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:rendertest`.
+// Does a watched board actually ring? `./gradlew :desktop:watchtest`
+tasks.register<JavaExec>("watchtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.WatchTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("rendertest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.RenderTestKt"
