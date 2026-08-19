@@ -307,17 +307,35 @@ car, had the listing on screen in under six seconds, tapped Ask about it, and
 had claimed the card and delivered its question 1.2 s later. The bonded ride
 has now been driven to the end on two phones as well — the driver proposing
 the split, the rider signing it on the screen that asks, the bond broadcast
-and both stakes home.
+and both stakes home. And a **booking**, which had never been driven at all:
+two clients, one card, one escrow address each side derived independently,
+the owner accepting by funding their own deposit (0.000600), the guest paying
+rent and theirs (0.002600), the pot confirmed at 0.003200 by the guest's own
+scan rather than anyone's word, and — after the outputs matured — the owner
+proposing the split, the guest signing it, the release broadcast, both sides
+whole. It resumed the escrow rather than starting a second one when a Monero
+node timed out mid-run, which is the behaviour a phone that loses signal
+halfway through a booking needs.
 
 Not proven, and stated here rather than buried: **no external adversarial
 review** (§2.5 is the project's own argument for why that matters), no
 implementer who has never read `core/` (O21), NFC compile-verified but never
 field-tested between two phones, and no measurement of the tap on a handset.
 The latency figures in §8.7.2 are a desktop with an attached node. The
-2-of-2 ride and the reservation banner are code-complete with their
-cryptography proven, but their own two-phone UI passes are still owed; and a
-co-signer today consents to a stated fee, not an itemised destination list —
-honest consent waits on an upstream wallet API making payments readable.
+booking arc above ran between two headless clients; its screens have not yet
+carried one on a handset, and neither has a hail been driven rider-to-driver
+through the actual UI since the discovery work below. A co-signer today
+consents to a stated fee, not an itemised destination list — honest consent
+waits on an upstream wallet API making payments readable.
+
+A driver's watches did not work for the whole life of the feature, which is
+worth stating plainly because it was invisible: arming one requires the DHT
+record to be open in this process, a board is never open, so the network
+refused every watch with "record not open" and the return value was
+discarded. Every fare any driver ever saw was found by the sweep, a lap late.
+It is fixed and measured (`:desktop:watchtest`): a notice posted to a watched
+board rings the watcher 10.7 s after the write lands, and the ring now names
+which board changed, so a driver reads that one instead of all eighteen.
 Searching a quiet neighbourhood is bounded, and the screen says so while it
 happens. Measured against the live network from a node with nothing else to
 do: a board somebody has posted to answers in 1.1 s, and an empty one takes
