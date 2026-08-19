@@ -23,4 +23,10 @@
     <string name="shells_billed_unpaid">請求済み・未払い</string>
     <string name="shells_paid_outside">DUCAT外で支払い ✓</string>
     <string name="shells_paid">支払い済み ✓</string>
+    <string name="shells_booking_waiting">支払い待ち</string>
+    <string name="shells_booking_secured">確保済み</string>
+    <string name="shells_booking_settling">精算中</string>
+    <string name="shells_booking_done">完了</string>
+    <string name="shells_booking_aborted">取り消し</string>
+    <string name="shells_booking_someone">予約</string>
 </resources>

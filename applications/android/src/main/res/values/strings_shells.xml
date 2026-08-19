@@ -27,4 +27,10 @@
     <string name="shells_tab_listings">Listings</string>
     <string name="shells_tab_bookings">Bookings</string>
     <string name="shells_no_bookings_yet">No bookings yet.</string>
+    <string name="shells_booking_waiting">Waiting to be funded</string>
+    <string name="shells_booking_secured">Secured</string>
+    <string name="shells_booking_settling">Settling</string>
+    <string name="shells_booking_done">Finished</string>
+    <string name="shells_booking_aborted">Called off</string>
+    <string name="shells_booking_someone">A booking</string>
 </resources>

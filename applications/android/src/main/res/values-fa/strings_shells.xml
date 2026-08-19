@@ -23,4 +23,10 @@
     <string name="shells_billed_unpaid">صورت‌حساب رفته، پرداخت‌نشده</string>
     <string name="shells_paid_outside">بیرون از DUCAT پرداخت شد ✓</string>
     <string name="shells_paid">پرداخت شد ✓</string>
+    <string name="shells_booking_waiting">در انتظار پرداخت</string>
+    <string name="shells_booking_secured">تأمین‌شده</string>
+    <string name="shells_booking_settling">در حال تسویه</string>
+    <string name="shells_booking_done">پایان‌یافته</string>
+    <string name="shells_booking_aborted">لغو شد</string>
+    <string name="shells_booking_someone">یک رزرو</string>
 </resources>

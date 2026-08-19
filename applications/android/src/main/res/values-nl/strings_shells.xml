@@ -23,4 +23,10 @@
     <string name="shells_billed_unpaid">rekening gestuurd, onbetaald</string>
     <string name="shells_paid_outside">buiten DUCAT betaald ✓</string>
     <string name="shells_paid">betaald ✓</string>
+    <string name="shells_booking_waiting">Wacht op betaling</string>
+    <string name="shells_booking_secured">Vastgezet</string>
+    <string name="shells_booking_settling">Wordt afgerekend</string>
+    <string name="shells_booking_done">Afgerond</string>
+    <string name="shells_booking_aborted">Afgezegd</string>
+    <string name="shells_booking_someone">Een boeking</string>
 </resources>

@@ -23,4 +23,10 @@
     <string name="shells_billed_unpaid">hesap gönderildi, ödenmedi</string>
     <string name="shells_paid_outside">DUCAT dışında ödendi ✓</string>
     <string name="shells_paid">ödendi ✓</string>
+    <string name="shells_booking_waiting">Ödeme bekliyor</string>
+    <string name="shells_booking_secured">Güvenceye alındı</string>
+    <string name="shells_booking_settling">Kapanıyor</string>
+    <string name="shells_booking_done">Tamamlandı</string>
+    <string name="shells_booking_aborted">İptal edildi</string>
+    <string name="shells_booking_someone">Bir rezervasyon</string>
 </resources>

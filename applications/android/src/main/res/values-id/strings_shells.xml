@@ -23,4 +23,10 @@
     <string name="shells_billed_unpaid">ditagih, belum dibayar</string>
     <string name="shells_paid_outside">dibayar di luar DUCAT ✓</string>
     <string name="shells_paid">lunas ✓</string>
+    <string name="shells_booking_waiting">Menunggu pembayaran</string>
+    <string name="shells_booking_secured">Terjamin</string>
+    <string name="shells_booking_settling">Sedang diselesaikan</string>
+    <string name="shells_booking_done">Selesai</string>
+    <string name="shells_booking_aborted">Dibatalkan</string>
+    <string name="shells_booking_someone">Sebuah pemesanan</string>
 </resources>

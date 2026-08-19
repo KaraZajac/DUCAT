@@ -23,4 +23,10 @@
     <string name="shells_billed_unpaid">facturé, impayé</string>
     <string name="shells_paid_outside">payé hors DUCAT ✓</string>
     <string name="shells_paid">payé ✓</string>
+    <string name="shells_booking_waiting">En attente de paiement</string>
+    <string name="shells_booking_secured">Sécurisée</string>
+    <string name="shells_booking_settling">En cours de règlement</string>
+    <string name="shells_booking_done">Terminée</string>
+    <string name="shells_booking_aborted">Annulée</string>
+    <string name="shells_booking_someone">Une réservation</string>
 </resources>

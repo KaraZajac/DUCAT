@@ -23,4 +23,10 @@
     <string name="shells_billed_unpaid">cuenta enviada, sin pagar</string>
     <string name="shells_paid_outside">pagado fuera de DUCAT ✓</string>
     <string name="shells_paid">pagado ✓</string>
+    <string name="shells_booking_waiting">Esperando el pago</string>
+    <string name="shells_booking_secured">Asegurada</string>
+    <string name="shells_booking_settling">Liquidando</string>
+    <string name="shells_booking_done">Terminada</string>
+    <string name="shells_booking_aborted">Cancelada</string>
+    <string name="shells_booking_someone">Una reserva</string>
 </resources>

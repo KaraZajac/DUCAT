@@ -23,4 +23,10 @@
     <string name="shells_billed_unpaid">계산서 발송, 미결제</string>
     <string name="shells_paid_outside">DUCAT 밖에서 결제 ✓</string>
     <string name="shells_paid">결제 완료 ✓</string>
+    <string name="shells_booking_waiting">결제 대기</string>
+    <string name="shells_booking_secured">확보됨</string>
+    <string name="shells_booking_settling">정산 중</string>
+    <string name="shells_booking_done">완료</string>
+    <string name="shells_booking_aborted">취소됨</string>
+    <string name="shells_booking_someone">예약</string>
 </resources>

@@ -1,7 +1,10 @@
 package org.ducatproject.ducat.ui
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -22,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import org.ducatproject.ducat.MainActivity
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Mode
@@ -89,11 +93,95 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
                     RentingScreen()
                 },
                 ShellTab(stringResource(R.string.shells_tab_bookings), Icons.Filled.Receipt) {
-                    SettledList(origin = "rent", emptyTextRes = R.string.shells_no_bookings_yet)
+                    BookingsList()
                 },
             ),
         )
         Mode.None -> {} // personal mode renders the full app, not a shell
+    }
+}
+
+/**
+ * What has been booked, and where each one has got to.
+ *
+ * This tab used to read the till's ledger filtered to `origin = "rent"` —
+ * entries nothing has ever written, because a booking is not a bill somebody
+ * rang up. It was a promise the app could not keep: an owner could take a
+ * booking a day and the tab would say "No bookings yet." forever.
+ *
+ * A booking *is* a reservation escrow (§16.18), so that is what it lists,
+ * newest first, with the listing it came from when the thread remembers one.
+ */
+@Composable
+private fun BookingsList() {
+    val context = LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val rows = remember(version) {
+        org.ducatproject.ducat.Ceremony.all(context)
+            .filter {
+                it.optInt("kind") == org.ducatproject.ducat.Ceremony.KIND_RESERVATION &&
+                    !org.ducatproject.ducat.Ceremony.isArbiter(it)
+            }
+            .sortedByDescending { it.optLong("created") }
+    }
+    if (rows.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                stringResource(R.string.shells_no_bookings_yet),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        return
+    }
+    val contacts = remember(version) { ContactStore(context).all() }
+    LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+        items(rows) { o ->
+            val peerHex = org.ducatproject.ducat.Ceremony.otherPrincipal(o)
+            val peer = contacts.firstOrNull { it.personaHex == peerHex }
+            val about = peerHex?.let { org.ducatproject.ducat.Enquiries.about(context, it) }
+            val need = org.ducatproject.ducat.Ceremony.expectedTotalPxmr(o)
+            val state = when (o.optString("stage")) {
+                "released", "release_cosigned" -> R.string.shells_booking_done
+                "releasing", "release_pending" -> R.string.shells_booking_settling
+                "aborted" -> R.string.shells_booking_aborted
+                else ->
+                    if (o.optLong("fundedPxmr") >= need && need > 0) {
+                        R.string.shells_booking_secured
+                    } else {
+                        R.string.shells_booking_waiting
+                    }
+            }
+            Card(
+                Modifier.fillMaxWidth().padding(vertical = 6.dp).clickable {
+                    peerHex?.let { MainActivity.openChat.value = it }
+                },
+            ) {
+                Column(Modifier.padding(14.dp)) {
+                    Text(
+                        about?.title ?: peer?.displayName()
+                            ?: stringResource(R.string.shells_booking_someone),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        Amounts.show(context, need).primary,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        // Who it is with, when the title above was the listing.
+                        if (about != null && peer != null) {
+                            "${stringResource(state)} · ${peer.displayName()}"
+                        } else {
+                            stringResource(state)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
     }
 }
 
