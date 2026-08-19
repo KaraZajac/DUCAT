@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">راننده سفر را پایان‌یافته علامت زد.</string>
     <string name="bond_release_fare">آزادسازی کرایه (%1$s)</string>
     <string name="bond_released">کرایه آزاد شد</string>
+    <string name="bond_released_amount">%1$s برای شما</string>
     <string name="profile_arbiter">داور امانت</string>
     <string name="profile_arbiter_note">کلید تعیین‌کننده سفرهای امانت‌دار شما را نگه می‌دارد. فقط در صورت بروز مشکل وارد می‌شود.</string>
     <string name="bond_margin_back">‏ودیعهٔ شما (%1$s) به شما برمی‌گردد.</string>

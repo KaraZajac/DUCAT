@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">चालक ने सवारी पूरी होने का चिह्न लगाया।</string>
     <string name="bond_release_fare">किराया जारी करें (%1$s)</string>
     <string name="bond_released">किराया जारी किया गया</string>
+    <string name="bond_released_amount">%1$s आपको</string>
     <string name="profile_arbiter">एस्क्रो मध्यस्थ</string>
     <string name="profile_arbiter_note">आपकी बॉन्ड सवारियों की निर्णायक कुंजी रखता है। कुछ गड़बड़ होने पर ही संपर्क होता है।</string>
     <string name="bond_margin_back">आपकी जमानत राशि (%1$s) आपको वापस मिलती है।</string>

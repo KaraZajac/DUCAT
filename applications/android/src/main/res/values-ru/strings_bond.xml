@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">Водитель отметил поездку завершённой.</string>
     <string name="bond_release_fare">Отпустить оплату (%1$s)</string>
     <string name="bond_released">Оплата отпущена</string>
+    <string name="bond_released_amount">%1$s вам</string>
     <string name="profile_arbiter">Арбитр эскроу</string>
     <string name="profile_arbiter_note">Держит решающий ключ ваших поездок с эскроу. Участвует, только если что-то пошло не так.</string>
     <string name="bond_margin_back">Ваш залог (%1$s) вернётся к вам.</string>

@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">The driver marked the ride complete.</string>
     <string name="bond_release_fare">Release fare (%1$s)</string>
     <string name="bond_released">Fare released</string>
+    <string name="bond_released_amount">%1$s to you</string>
     <string name="profile_arbiter">Escrow arbiter</string>
     <string name="profile_arbiter_note">Holds the tie-breaking key in your bonded rides. Never contacted unless something goes wrong.</string>
     <string name="bond_margin_back">Your stake (%1$s) comes back to you.</string>

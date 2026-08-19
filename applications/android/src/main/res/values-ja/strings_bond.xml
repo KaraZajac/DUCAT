@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">ドライバーが乗車終了としました。</string>
     <string name="bond_release_fare">運賃をリリース (%1$s)</string>
     <string name="bond_released">運賃をリリースしました</string>
+    <string name="bond_released_amount">%1$s があなたへ</string>
     <string name="profile_arbiter">エスクロー仲裁者</string>
     <string name="profile_arbiter_note">ボンド付き乗車の決定キーを保持します。問題が起きない限り出番はありません。</string>
     <string name="bond_margin_back">あなたの預り金（%1$s）は戻ってきます。</string>

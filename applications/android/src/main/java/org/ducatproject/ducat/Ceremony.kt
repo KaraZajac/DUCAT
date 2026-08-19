@@ -631,7 +631,7 @@ object Ceremony {
                         context, c, "bond: co-signed the release",
                         mineHex, kind = 9, round = 1, ceremonyId = id, payload = ans.payload,
                     )
-                    o.put("stage", "release_cosigned"); save(context, idHex, o)
+                    settle(o, "release_cosigned"); save(context, idHex, o)
                     DucatLog.i(TAG, "bond $idHex: co-signed the release (fee ${ans.feePxmr})")
                 }
                 stage == "releasing" && round.toInt() == 1 -> {
@@ -647,7 +647,7 @@ object Ceremony {
                     val txid = uniffi.ducat_mobile.frostComplete(
                         id, i.toUShort(), senderIdx.toUShort(), payload, nodeUrl,
                     )
-                    o.put("stage", "released"); o.put("txid", txid)
+                    settle(o, "released"); o.put("txid", txid)
                     save(context, idHex, o)
                     ContactStore.bump()
                     DucatLog.i(TAG, "bond $idHex released — txid $txid")
@@ -684,14 +684,46 @@ object Ceremony {
     fun isArbiter(o: JSONObject): Boolean =
         o.optInt("arbiterIdx") != 0 && o.optInt("i") == o.optInt("arbiterIdx")
 
-    /** The live ride escrow with this contact, if any — newest first, and a
-     *  released or aborted one is history, not a banner. */
+    /**
+     * How long a settled escrow keeps the banner: long enough that the person
+     * who just finished a ride sees it land, short enough that yesterday's
+     * ride is not still on today's screen.
+     */
+    private const val SETTLED_SHOWN_SECS = 24 * 60 * 60L
+
+    /** The ride escrow with this contact that the banner should be about. */
     fun rideWith(context: Context, peerHex: String): JSONObject? =
         all(context)
             .filter { it.optInt("kind") != KIND_BOND && !isArbiter(it) }
             .filter { otherPrincipal(it) == peerHex }
-            .sortedByDescending { it.optLong("created") }
-            .firstOrNull { it.optString("stage") !in listOf("released", "aborted") }
+            // The newest one, whatever state it is in.
+            //
+            // This used to take the newest escrow that was still *live*, on
+            // the reasoning that a released one is history. The effect was
+            // that the instant a ride settled the banner fell back to
+            // whatever unfinished escrow came before it — so a driver who had
+            // just been paid was told, by the same screen, that they were
+            // "waiting for the rider to secure the fare". An abandoned escrow
+            // never expires, so this got worse the longer two people used the
+            // app. A newer escrow supersedes an older one, full stop.
+            .maxByOrNull { it.optLong("created") }
+            ?.takeIf { bannerWorthy(it) }
+
+    /** Whether this escrow still has something to say to the person. */
+    private fun bannerWorthy(o: JSONObject): Boolean = when (o.optString("stage")) {
+        "aborted" -> false
+        // Settled: shown for a day so both sides get the same confirmation,
+        // then it is history like any other finished thing.
+        "released", "release_cosigned" -> {
+            val at = o.optLong("settledAt")
+            at > 0L && System.currentTimeMillis() / 1000 - at < SETTLED_SHOWN_SECS
+        }
+        else -> true
+    }
+
+    /** Stamp the moment an escrow stopped needing anyone. */
+    private fun settle(o: JSONObject, stage: String): JSONObject =
+        o.put("stage", stage).put("settledAt", System.currentTimeMillis() / 1000)
 
     /** The rider pays the fare into the escrow — an ordinary wallet send to
      *  an address that happens to need two of three keys to leave. */
@@ -934,7 +966,7 @@ object Ceremony {
             PersonaStore(context).personaHex(),
             kind = 9, round = 1, ceremonyId = id, payload = ans.payload,
         )
-        o.put("stage", "release_cosigned")
+        settle(o, "release_cosigned")
         o.remove("pendingPayload")
         save(context, idHex, o)
         ContactStore.bump()

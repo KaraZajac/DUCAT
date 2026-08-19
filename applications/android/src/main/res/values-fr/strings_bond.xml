@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">Le conducteur a marqué la course comme terminée.</string>
     <string name="bond_release_fare">Libérer le prix (%1$s)</string>
     <string name="bond_released">Prix libéré</string>
+    <string name="bond_released_amount">%1$s pour vous</string>
     <string name="profile_arbiter">Arbitre du séquestre</string>
     <string name="profile_arbiter_note">Détient la clé d\'arbitrage de vos courses sous séquestre. Jamais sollicité, sauf problème.</string>
     <string name="bond_margin_back">Votre dépôt (%1$s) vous revient.</string>

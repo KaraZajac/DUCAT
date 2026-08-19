@@ -2167,8 +2167,25 @@ private fun RideBondBanner(contact: Contact) {
                         }
                     }
                 }
-                stage == "release_cosigned" ->
+                // Both ends of the same moment. The side that broadcast the
+                // release ("released") saw nothing at all before this — its
+                // banner fell through to an older escrow — while the side
+                // that co-signed ("release_cosigned") saw a bare "Fare
+                // released" with no idea how much had arrived.
+                stage == "released" || stage == "release_cosigned" -> {
                     BondLine(spin = false, text = stringResource(R.string.bond_released))
+                    val mine = if (stage == "released") ride.optLong("payoutPxmr")
+                    else ride.optLong("pendingRiderBack")
+                    if (mine > 0) {
+                        Spacer(Modifier.height(4.dp))
+                        BondNote(
+                            stringResource(
+                                R.string.bond_released_amount,
+                                Amounts.show(context, mine).primary,
+                            ),
+                        )
+                    }
+                }
                 else -> return@Column
             }
             error?.let {

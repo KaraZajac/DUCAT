@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">O motorista marcou a viagem como concluída.</string>
     <string name="bond_release_fare">Libertar tarifa (%1$s)</string>
     <string name="bond_released">Tarifa libertada</string>
+    <string name="bond_released_amount">%1$s para você</string>
     <string name="profile_arbiter">Árbitro da caução</string>
     <string name="profile_arbiter_note">Guarda a chave de desempate das tuas viagens com caução. Só entra se algo correr mal.</string>
     <string name="bond_margin_back">A sua caução (%1$s) volta para si.</string>

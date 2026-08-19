@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">De chauffeur heeft de rit als afgerond gemarkeerd.</string>
     <string name="bond_release_fare">Ritprijs vrijgeven (%1$s)</string>
     <string name="bond_released">Ritprijs vrijgegeven</string>
+    <string name="bond_released_amount">%1$s naar jou</string>
     <string name="profile_arbiter">Depot-arbiter</string>
     <string name="profile_arbiter_note">Houdt de doorslaggevende sleutel van je rit-depots. Wordt alleen benaderd als er iets misgaat.</string>
     <string name="bond_margin_back">Jouw borg (%1$s) komt naar je terug.</string>

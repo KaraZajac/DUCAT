@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">El conductor marcó el viaje como terminado.</string>
     <string name="bond_release_fare">Liberar tarifa (%1$s)</string>
     <string name="bond_released">Tarifa liberada</string>
+    <string name="bond_released_amount">%1$s para ti</string>
     <string name="profile_arbiter">Árbitro del depósito</string>
     <string name="profile_arbiter_note">Guarda la llave de desempate de tus viajes con depósito. Solo interviene si algo sale mal.</string>
     <string name="bond_margin_back">Tu garantía (%1$s) vuelve a ti.</string>

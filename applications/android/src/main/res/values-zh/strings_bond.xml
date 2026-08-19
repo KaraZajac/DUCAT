@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">司机已将行程标记为完成。</string>
     <string name="bond_release_fare">释放车费（%1$s）</string>
     <string name="bond_released">车费已释放</string>
+    <string name="bond_released_amount">%1$s 归你</string>
     <string name="profile_arbiter">托管仲裁人</string>
     <string name="profile_arbiter_note">持有你担保行程的决定性密钥。除非出了问题，否则不会参与。</string>
     <string name="bond_margin_back">你的押金（%1$s）会退回给你。</string>

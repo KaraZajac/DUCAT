@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">Pengemudi menandai perjalanan selesai.</string>
     <string name="bond_release_fare">Lepaskan tarif (%1$s)</string>
     <string name="bond_released">Tarif dilepaskan</string>
+    <string name="bond_released_amount">%1$s untukmu</string>
     <string name="profile_arbiter">Arbiter escrow</string>
     <string name="profile_arbiter_note">Memegang kunci penentu perjalanan ber-escrow Anda. Hanya dihubungi jika ada masalah.</string>
     <string name="bond_margin_back">Jaminan Anda (%1$s) kembali kepada Anda.</string>

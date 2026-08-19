@@ -13,6 +13,7 @@
     <string name="bond_ride_complete_ask">Водій позначив поїздку завершеною.</string>
     <string name="bond_release_fare">Відпустити оплату (%1$s)</string>
     <string name="bond_released">Оплату відпущено</string>
+    <string name="bond_released_amount">%1$s вам</string>
     <string name="profile_arbiter">Арбітр ескроу</string>
     <string name="profile_arbiter_note">Тримає вирішальний ключ ваших поїздок з ескроу. Долучається, лише якщо щось піде не так.</string>
     <string name="bond_margin_back">Ваша застава (%1$s) повернеться до вас.</string>
