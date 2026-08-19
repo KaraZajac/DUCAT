@@ -698,13 +698,15 @@ class ContactStore(context: Context) {
         outboxOwnerSecret: ByteArray,
         uri: String,
         purpose: String,
+        /** Seconds the network copy lives, so pruning can follow it. */
+        validSecs: Long = 0,
     ) = synchronized(lock) {
         val arr = prefs.getString("issued_cards", null)?.let { JSONArray(it) } ?: JSONArray()
         arr.put(JSONObject().apply {
             put("inbox", inboxKey); put("wpub", b64(writerPublic)); put("wsec", b64(writerSecret))
             put("outbox", outboxKey); put("opub", b64(outboxOwnerPublic)); put("osec", b64(outboxOwnerSecret))
             put("uri", uri); put("purpose", purpose)
-            put("made", System.currentTimeMillis())
+            put("made", System.currentTimeMillis()); put("ttl", validSecs)
             put("answered_by", JSONObject.NULL)
         })
         prefs.edit().putString("issued_cards", arr.toString()).apply()
@@ -760,9 +762,27 @@ class ContactStore(context: Context) {
             val o = arr.getJSONObject(i)
             val made = o.optLong("made", now)
             val answered = !o.isNull("answered_by")
+            // Held exactly as long as the network holds it. A card outlives
+            // its usefulness the moment its published copy expires — nobody
+            // can claim it after that — and the poller re-arms a watch on
+            // every unanswered card still in this registry, on every pass. A
+            // flat day meant a counter taking two hundred orders and losing
+            // thirty of them mid-pair watched thirty dead records for the
+            // next twenty-two hours.
+            //
+            // The TTL varies by what the card is for: two hours at a kiosk or
+            // a till, twelve at a bar or in a taxi, a day for a standing
+            // profile code. So it is read from the card rather than guessed
+            // from its purpose. An hour of grace covers a clock that drifted;
+            // cards written before this recorded a TTL fall back to the day
+            // they always had.
+            val ttlSecs = o.optLong("ttl", 0L)
+            val unansweredLife =
+                if (ttlSecs > 0) ttlSecs * 1000L + 60 * 60 * 1000L
+                else 24 * 60 * 60 * 1000L
             val stale =
                 (answered && now - made > 60 * 60 * 1000L) ||
-                    (!answered && now - made > 24 * 60 * 60 * 1000L)
+                    (!answered && now - made > unansweredLife)
             if (stale) dropped += o.getString("inbox") else keep.put(o)
         }
         if (dropped.isNotEmpty()) {

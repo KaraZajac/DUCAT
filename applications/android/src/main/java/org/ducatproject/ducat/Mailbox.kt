@@ -133,7 +133,7 @@ object Mailbox {
         store.saveIssuedCard(
             inbox.key, writer.public, writer.secret,
             outbox.key, outbox.ownerPublic, outbox.ownerSecret,
-            card.uri, purpose,
+            card.uri, purpose, validSecs.toLong(),
         )
         DucatLog.i(TAG, "issued card: inbox=${inbox.key.take(24)}… outbox=${outbox.key.take(24)}…")
         // The inbox key rides along because it is the card's identity: a flow
