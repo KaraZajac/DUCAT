@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">آنچه می‌فروشید</string>
+    <string name="items_note">قیمت به %1$s. معادل مونروی آن در لحظهٔ فروش حساب می‌شود، پس قیمتی که می‌گذارید همان می‌ماند که منظورتان بود.</string>
+    <string name="items_name">کالا</string>
+    <string name="items_add">افزودن</string>
+    <string name="items_remove">حذف</string>
+    <string name="items_none">هنوز چیزی تنظیم نشده. آنچه می‌فروشید را اضافه کنید تا روی صندوق دکمه شود.</string>
+    <string name="items_no_rate">هنوز نرخ تبدیلی نیست</string>
+    <string name="items_other_currency">با ارز دیگری قیمت‌گذاری شده — دوباره تنظیمش کنید</string>
+    <string name="items_bad_price">این قیمت عدد نیست</string>
+    <string name="items_rate_stale">قیمت‌ها از نرخ %1$s پیش استفاده می‌کنند — این صندوق از آن زمان نتوانسته بررسی کند.</string>
+    <string name="items_tab">کالاها</string>
+</resources>

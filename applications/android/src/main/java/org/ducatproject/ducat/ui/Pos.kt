@@ -168,6 +168,9 @@ fun PosScreen() {
             return@Column
         }
 
+        // Tap what you sell; the typed line below is still there for
+        // whatever is not on the menu.
+        ItemPicker { name, pxmr -> basket = basket + BillItem(name, pxmr) }
         PosAddLine { d, a -> basket = basket + BillItem(d, a) }
 
         if (basket.isNotEmpty()) {

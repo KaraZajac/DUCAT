@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">Wat je verkoopt</string>
+    <string name="items_note">Geprijsd in %1$s. Wat dat in monero is, wordt op het moment van verkoop uitgerekend, zodat de prijs die je zet de prijs blijft die je bedoelde.</string>
+    <string name="items_name">Artikel</string>
+    <string name="items_add">Toevoegen</string>
+    <string name="items_remove">Verwijderen</string>
+    <string name="items_none">Nog niets ingesteld. Voeg toe wat je verkoopt en het wordt een knop op de kassa.</string>
+    <string name="items_no_rate">nog geen wisselkoers</string>
+    <string name="items_other_currency">geprijsd in een andere valuta — zet het opnieuw</string>
+    <string name="items_bad_price">die prijs is geen getal</string>
+    <string name="items_rate_stale">De prijzen gebruiken een koers van %1$s geleden — deze kassa heeft sindsdien niet kunnen kijken.</string>
+    <string name="items_tab">Artikelen</string>
+</resources>

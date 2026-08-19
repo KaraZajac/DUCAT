@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">आप क्या बेचते हैं</string>
+    <string name="items_note">%1$s में क़ीमत। मोनेरो में यह कितना है, यह बिक्री के समय निकाला जाता है, ताकि आपकी तय की क़ीमत वही रहे जो आपका मतलब था।</string>
+    <string name="items_name">चीज़</string>
+    <string name="items_add">जोड़ें</string>
+    <string name="items_remove">हटाएँ</string>
+    <string name="items_none">अभी कुछ नहीं है। जो बेचते हैं वह जोड़ें और वह टिल पर बटन बन जाएगा।</string>
+    <string name="items_no_rate">अभी विनिमय दर नहीं</string>
+    <string name="items_other_currency">किसी और मुद्रा में क़ीमत — फिर से तय करें</string>
+    <string name="items_bad_price">यह क़ीमत संख्या नहीं है</string>
+    <string name="items_rate_stale">क़ीमतें %1$s पुरानी दर से हैं — तब से यह टिल जाँच नहीं कर पाई।</string>
+    <string name="items_tab">चीज़ें</string>
+</resources>

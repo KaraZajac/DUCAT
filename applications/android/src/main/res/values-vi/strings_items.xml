@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">Bạn bán gì</string>
+    <string name="items_note">Định giá bằng %1$s. Quy ra monero được tính ngay lúc bán, nên giá bạn đặt vẫn là giá bạn muốn.</string>
+    <string name="items_name">Mặt hàng</string>
+    <string name="items_add">Thêm</string>
+    <string name="items_remove">Bỏ</string>
+    <string name="items_none">Chưa có gì. Thêm thứ bạn bán và nó thành một nút trên quầy.</string>
+    <string name="items_no_rate">chưa có tỷ giá</string>
+    <string name="items_other_currency">được định giá bằng tiền khác — đặt lại đi</string>
+    <string name="items_bad_price">giá đó không phải là số</string>
+    <string name="items_rate_stale">Giá dùng tỷ giá từ %1$s trước — quầy này chưa kiểm tra lại được từ đó.</string>
+    <string name="items_tab">Mặt hàng</string>
+</resources>

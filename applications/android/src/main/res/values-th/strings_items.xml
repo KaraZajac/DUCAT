@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">สิ่งที่คุณขาย</string>
+    <string name="items_note">ตั้งราคาเป็น %1$s ส่วนจะเป็นมอเนโรเท่าไรคำนวณตอนขาย ราคาที่คุณตั้งจึงยังเป็นราคาที่คุณตั้งใจ</string>
+    <string name="items_name">รายการ</string>
+    <string name="items_add">เพิ่ม</string>
+    <string name="items_remove">เอาออก</string>
+    <string name="items_none">ยังไม่มีอะไร เพิ่มสิ่งที่คุณขาย แล้วมันจะกลายเป็นปุ่มบนเครื่องคิดเงิน</string>
+    <string name="items_no_rate">ยังไม่มีอัตราแลกเปลี่ยน</string>
+    <string name="items_other_currency">ตั้งราคาไว้เป็นสกุลอื่น — ตั้งใหม่อีกครั้ง</string>
+    <string name="items_bad_price">ราคานั้นไม่ใช่ตัวเลข</string>
+    <string name="items_rate_stale">ราคาใช้อัตราแลกเปลี่ยนเมื่อ %1$s ที่แล้ว เครื่องนี้ยังตรวจสอบไม่ได้ตั้งแต่นั้น</string>
+    <string name="items_tab">รายการ</string>
+</resources>

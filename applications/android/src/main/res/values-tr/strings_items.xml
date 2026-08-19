@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">Ne sattığın</string>
+    <string name="items_note">%1$s cinsinden fiyatlandırılır. Bunun monero karşılığı satış anında hesaplanır, böylece koyduğun fiyat kastettiğin fiyat olarak kalır.</string>
+    <string name="items_name">Ürün</string>
+    <string name="items_add">Ekle</string>
+    <string name="items_remove">Kaldır</string>
+    <string name="items_none">Henüz bir şey yok. Sattıklarını ekle, kasada birer düğme olsunlar.</string>
+    <string name="items_no_rate">henüz kur yok</string>
+    <string name="items_other_currency">başka bir para biriminde fiyatlanmış — yeniden ayarla</string>
+    <string name="items_bad_price">bu fiyat bir sayı değil</string>
+    <string name="items_rate_stale">Fiyatlar %1$s önceki kuru kullanıyor — bu kasa o zamandan beri bakamadı.</string>
+    <string name="items_tab">Ürünler</string>
+</resources>

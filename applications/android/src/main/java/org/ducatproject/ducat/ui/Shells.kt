@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.House
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PointOfSale
@@ -57,6 +58,7 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
                 ShellTab(stringResource(R.string.shells_tab_sales), Icons.Filled.Receipt) {
                     SettledList(origin = "pos", emptyTextRes = R.string.shells_no_sales_yet)
                 },
+                ShellTab(stringResource(R.string.items_tab), Icons.Filled.Inventory2) { ItemsScreen() },
             ),
         )
         Mode.BarTab -> Shell(
@@ -65,6 +67,7 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_tabs), Icons.Filled.LocalBar) { BarTabScreen(section = "open") },
                 ShellTab(stringResource(R.string.shells_tab_closed), Icons.Filled.Receipt) { BarTabScreen(section = "closed") },
+                ShellTab(stringResource(R.string.items_tab), Icons.Filled.Inventory2) { ItemsScreen() },
             ),
         )
         Mode.Taxi -> Shell(

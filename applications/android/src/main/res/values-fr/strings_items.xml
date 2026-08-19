@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">Ce que vous vendez</string>
+    <string name="items_note">Prix en %1$s. Sa valeur en monero est calculée au moment de la vente, pour que le prix que vous fixez reste celui que vous vouliez.</string>
+    <string name="items_name">Article</string>
+    <string name="items_add">Ajouter</string>
+    <string name="items_remove">Retirer</string>
+    <string name="items_none">Rien pour l\'instant. Ajoutez ce que vous vendez et cela devient un bouton sur la caisse.</string>
+    <string name="items_no_rate">pas encore de taux de change</string>
+    <string name="items_other_currency">prix fixé dans une autre monnaie — refaites-le</string>
+    <string name="items_bad_price">ce prix n\'est pas un nombre</string>
+    <string name="items_rate_stale">Les prix utilisent un taux vieux de %1$s : cette caisse n\'a pas pu le vérifier depuis.</string>
+    <string name="items_tab">Articles</string>
+</resources>

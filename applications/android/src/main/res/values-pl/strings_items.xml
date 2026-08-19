@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">Co sprzedajesz</string>
+    <string name="items_note">Cena w %1$s. Ile to w monero, liczy się w chwili sprzedaży, więc ustawiona cena zostaje tą, którą miałeś na myśli.</string>
+    <string name="items_name">Pozycja</string>
+    <string name="items_add">Dodaj</string>
+    <string name="items_remove">Usuń</string>
+    <string name="items_none">Jeszcze nic. Dodaj to, co sprzedajesz, a stanie się przyciskiem na kasie.</string>
+    <string name="items_no_rate">brak jeszcze kursu</string>
+    <string name="items_other_currency">cena w innej walucie — ustaw ją ponownie</string>
+    <string name="items_bad_price">ta cena nie jest liczbą</string>
+    <string name="items_rate_stale">Ceny liczone są po kursie sprzed %1$s — kasa nie mogła go od tego czasu sprawdzić.</string>
+    <string name="items_tab">Pozycje</string>
+</resources>

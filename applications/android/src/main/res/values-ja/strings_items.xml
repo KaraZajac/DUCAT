@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">売っているもの</string>
+    <string name="items_note">%1$s で値付けします。モネロでいくらになるかは販売のその瞬間に計算するので、付けた値段は意図したままの値段です。</string>
+    <string name="items_name">品目</string>
+    <string name="items_add">追加</string>
+    <string name="items_remove">削除</string>
+    <string name="items_none">まだ何もありません。売っているものを追加すると、レジのボタンになります。</string>
+    <string name="items_no_rate">為替レートがまだありません</string>
+    <string name="items_other_currency">別の通貨で値付けされています — 付け直してください</string>
+    <string name="items_bad_price">その価格は数値ではありません</string>
+    <string name="items_rate_stale">価格は %1$s前のレートを使っています。このレジはそれ以降確認できていません。</string>
+    <string name="items_tab">品目</string>
+</resources>

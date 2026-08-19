@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">ما تبيعه</string>
+    <string name="items_note">مُسعَّر بـ %1$s. ويُحسب مقابله بالمونيرو لحظة البيع، فيبقى السعر الذي وضعته هو السعر الذي قصدته.</string>
+    <string name="items_name">صنف</string>
+    <string name="items_add">إضافة</string>
+    <string name="items_remove">إزالة</string>
+    <string name="items_none">لا شيء بعد. أضف ما تبيعه فيصير زرًا على الصندوق.</string>
+    <string name="items_no_rate">لا يوجد سعر صرف بعد</string>
+    <string name="items_other_currency">مُسعَّر بعملة أخرى — أعد ضبطه</string>
+    <string name="items_bad_price">هذا السعر ليس رقمًا</string>
+    <string name="items_rate_stale">تستخدم الأسعار سعر صرف عمره %1$s — لم يتمكن هذا الصندوق من التحقق منذ ذلك الحين.</string>
+    <string name="items_tab">الأصناف</string>
+</resources>

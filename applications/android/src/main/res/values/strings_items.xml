@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">What you sell</string>
+    <string name="items_note">Priced in %1$s. What that is in monero is worked out at the moment of the sale, so a price you set stays the price you meant.</string>
+    <string name="items_name">Item</string>
+    <string name="items_add">Add</string>
+    <string name="items_remove">Remove</string>
+    <string name="items_none">Nothing set up yet. Add what you sell and it becomes a button on the till.</string>
+    <string name="items_no_rate">no exchange rate yet</string>
+    <string name="items_other_currency">priced in another currency — set it again</string>
+    <string name="items_bad_price">that price is not a number</string>
+    <string name="items_rate_stale">Prices use an exchange rate from %1$s ago — this till has not been able to check since.</string>
+    <string name="items_tab">Items</string>
+</resources>

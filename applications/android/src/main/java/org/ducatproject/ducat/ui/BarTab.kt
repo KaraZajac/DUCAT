@@ -415,7 +415,10 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
         }
 
         if (tab.state == "open") {
-            PosAddLine { d, a ->
+            // One path for both ways of adding a drink — tapped off the
+            // menu or typed by hand. A tab that told the customer about one
+            // and not the other would be sending them half the evening.
+            fun addLine(d: String, a: Long) {
                 val updated = tab.copy(lines = tab.lines + BillItem(d, a))
                 store.update(updated)
                 // Tell them, so the tab is never a surprise at close. A text
@@ -438,6 +441,8 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                     }.onFailure { DucatLog.w(TAG, "drink notice: ${it.message}") }
                 }
             }
+            ItemPicker { name, pxmr -> addLine(name, pxmr) }
+            PosAddLine { d, a -> addLine(d, a) }
         }
 
         if (tab.lines.isNotEmpty()) {

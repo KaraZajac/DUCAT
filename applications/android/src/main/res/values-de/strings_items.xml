@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">Was du verkaufst</string>
+    <string name="items_note">Preis in %1$s. Was das in Monero ist, wird im Moment des Verkaufs ausgerechnet — so bleibt der Preis, den du setzt, der Preis, den du meintest.</string>
+    <string name="items_name">Artikel</string>
+    <string name="items_add">Hinzufügen</string>
+    <string name="items_remove">Entfernen</string>
+    <string name="items_none">Noch nichts eingerichtet. Trag ein, was du verkaufst, und es wird zu einer Taste auf der Kasse.</string>
+    <string name="items_no_rate">noch kein Wechselkurs</string>
+    <string name="items_other_currency">in einer anderen Währung angelegt — bitte neu setzen</string>
+    <string name="items_bad_price">dieser Preis ist keine Zahl</string>
+    <string name="items_rate_stale">Die Preise nutzen einen Wechselkurs von vor %1$s — diese Kasse konnte seitdem nicht nachsehen.</string>
+    <string name="items_tab">Artikel</string>
+</resources>

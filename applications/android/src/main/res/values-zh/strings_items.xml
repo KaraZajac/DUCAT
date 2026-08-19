@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">你卖什么</string>
+    <string name="items_note">以 %1$s 定价。折算成门罗币是在成交那一刻算的，所以你定的价就是你想要的价。</string>
+    <string name="items_name">商品</string>
+    <string name="items_add">添加</string>
+    <string name="items_remove">移除</string>
+    <string name="items_none">还没有设置。把你卖的东西加进来，收银台上就会出现按钮。</string>
+    <string name="items_no_rate">还没有汇率</string>
+    <string name="items_other_currency">以另一种货币定价 — 请重新设置</string>
+    <string name="items_bad_price">这个价格不是数字</string>
+    <string name="items_rate_stale">价格用的是 %1$s前的汇率 — 这台收银机之后一直没能查到新的。</string>
+    <string name="items_tab">商品</string>
+</resources>

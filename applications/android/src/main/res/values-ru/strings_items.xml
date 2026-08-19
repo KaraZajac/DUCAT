@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">Что вы продаёте</string>
+    <string name="items_note">Цена в %1$s. Сколько это в монеро, считается в момент продажи, так что назначенная цена остаётся той, которую вы имели в виду.</string>
+    <string name="items_name">Позиция</string>
+    <string name="items_add">Добавить</string>
+    <string name="items_remove">Убрать</string>
+    <string name="items_none">Пока ничего. Добавьте то, что продаёте, и это станет кнопкой на кассе.</string>
+    <string name="items_no_rate">курса ещё нет</string>
+    <string name="items_other_currency">цена в другой валюте — задайте заново</string>
+    <string name="items_bad_price">эта цена не число</string>
+    <string name="items_rate_stale">Цены считаны по курсу %1$s назад — с тех пор касса не смогла его проверить.</string>
+    <string name="items_tab">Позиции</string>
+</resources>

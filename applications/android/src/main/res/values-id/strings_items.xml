@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="items_title">Yang kamu jual</string>
+    <string name="items_note">Dihargai dalam %1$s. Nilainya dalam monero dihitung saat penjualan, jadi harga yang kamu pasang tetap harga yang kamu maksud.</string>
+    <string name="items_name">Barang</string>
+    <string name="items_add">Tambah</string>
+    <string name="items_remove">Hapus</string>
+    <string name="items_none">Belum ada apa-apa. Tambahkan yang kamu jual dan itu jadi tombol di kasir.</string>
+    <string name="items_no_rate">belum ada kurs</string>
+    <string name="items_other_currency">dihargai dalam mata uang lain — atur ulang</string>
+    <string name="items_bad_price">harga itu bukan angka</string>
+    <string name="items_rate_stale">Harga memakai kurs dari %1$s lalu — kasir ini belum bisa memeriksa sejak itu.</string>
+    <string name="items_tab">Barang</string>
+</resources>
