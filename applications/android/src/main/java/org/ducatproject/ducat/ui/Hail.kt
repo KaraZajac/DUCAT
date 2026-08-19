@@ -906,6 +906,8 @@ fun DriveScreen() {
         // Board by record key, filled while arming: a ring says which record
         // moved, and this is what turns that back into a cell.
         val keyOf = HashMap<String, String>()
+        // When every board was last read, rings or no rings.
+        var sweptAllAt = 0L
         // Hoisted so a cell that answers can be drawn before its neighbours
         // have finished: the first pin is what tells a driver the map works.
         fun publish() {
@@ -955,11 +957,23 @@ fun DriveScreen() {
             // twenty-one to say it is empty. A ring for something that is not
             // a board of ours — a mailbox, most often — falls back to the full
             // lap, which is what used to happen for every ring.
+            //
+            // And a full lap on the same clock as the re-arming, whatever the
+            // rings say. A watch can die — the network tells us, and that
+            // board stops ringing — and in a busy area rings never stop
+            // arriving, so a sweep that only ever followed them would read the
+            // noisy boards forever and the quiet one never again. The sweep
+            // was always the guarantee; this keeps it one.
             val hot = org.ducatproject.ducat.NetworkRings.drain()
-            val targets = if (hot.isEmpty()) {
+            val fullLapDue = now * 1000 - sweptAllAt > WATCH_REARM_MS
+            val targets = if (hot.isEmpty() || fullLapDue) {
+                sweptAllAt = now * 1000
                 cells
             } else {
-                cells.filter { keyOf[it] in hot }.ifEmpty { cells }
+                cells.filter { keyOf[it] in hot }.ifEmpty {
+                    sweptAllAt = now * 1000
+                    cells
+                }
             }
             kotlinx.coroutines.supervisorScope {
                 targets.map { c ->
