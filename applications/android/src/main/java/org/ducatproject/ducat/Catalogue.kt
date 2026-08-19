@@ -136,10 +136,9 @@ object Catalogue {
         val decimal = runCatching { BigDecimal(item.price.trim().replace(',', '.')) }
             .getOrNull()
             ?: return Result.failure(SnagException(Snag.Unpriceable))
-        val pxmr = runCatching {
-            decimal.divide(BigDecimal(rate), 12, RoundingMode.DOWN)
-                .movePointRight(12).toLong()
-        }.getOrNull()?.takeIf { it > 0 }
+        val pxmr = Amounts
+            .toPxmr(decimal.divide(BigDecimal.valueOf(rate), 12, RoundingMode.DOWN))
+            ?.takeIf { it > 0 }
             ?: return Result.failure(SnagException(Snag.Unpriceable))
         // `at` is epoch **seconds** — monero_rate stamps it with as_secs().
         return Result.success(

@@ -281,9 +281,9 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
         val v = moneyText(amount).toBigDecimalOrNull() ?: return@remember null
         val xmr = if (fiat) {
             if (rate == null || rate <= 0) return@remember null
-            v.divide(BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
+            v.divide(BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
         } else v
-        runCatching { xmr.movePointRight(12).toLong() }.getOrNull()?.takeIf { it > 0 }
+        Amounts.toPxmr(xmr)?.takeIf { it > 0 }
     }
 
     Row(

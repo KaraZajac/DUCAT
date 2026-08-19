@@ -59,4 +59,25 @@ object Amounts {
 
     /** The currency code in use, for labelling a switch. */
     fun currency(context: Context): String = RateStore(context).currency()
+
+    /**
+     * A figure in XMR as piconero, or null if it is not one.
+     *
+     * The one rule, in one place. Five screens had written this out
+     * themselves — the till, the tip field, the taxi meter, the hail offer,
+     * and the catalogue — and all five said `.toLong()`, which on a
+     * [java.math.BigDecimal] is `longValue()`: on overflow it does not throw,
+     * it returns the low sixty-four bits. Typing 18446744073709551617 into a
+     * payment field therefore produced 1000000000000 piconero — exactly one
+     * monero, positive and plausible, sailing past every `> 0` guard the
+     * screens put after it.
+     *
+     * `longValueExact` throws instead, and every caller already treats null as
+     * "that is not an amount". The [setScale] before it keeps the old
+     * tolerance for more than twelve decimal places: those are truncated, as
+     * they always were, rather than being rejected as inexact.
+     */
+    fun toPxmr(xmr: java.math.BigDecimal): Long? = runCatching {
+        xmr.movePointRight(12).setScale(0, java.math.RoundingMode.DOWN).longValueExact()
+    }.getOrNull()
 }

@@ -112,9 +112,9 @@ private fun NewRideScreen(rides: RideStore) {
         val v = moneyText(text).toBigDecimalOrNull() ?: return null
         val xmr = if (fiat) {
             if (rate == null || rate <= 0) return null
-            v.divide(BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
+            v.divide(BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
         } else v
-        return runCatching { xmr.movePointRight(12).toLong() }.getOrNull()?.takeIf { it >= 0 }
+        return Amounts.toPxmr(xmr)?.takeIf { it >= 0 }
     }
 
     val basePxmr = toPxmr(base.ifBlank { "0" })

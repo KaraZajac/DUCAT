@@ -93,11 +93,13 @@ fun main() {
     // The menu behind the till: empty here, which is the state a shop sees
     // before it has typed anything in and the one most likely to draw nothing.
     render("items", w = 900, h = 700) { org.ducatproject.ducat.ui.ItemsScreen() }
+    // The counter, facing the other way. Empty catalogue, which is what a
+    // shop sees before it has set anything up. The stocked counterparts of
+    // these three are rendered at the end, after something has been put on
+    // the menu — keep them there, or these stop being the empty states.
+    render("kiosk", w = 520, h = 900) { org.ducatproject.ducat.ui.KioskScreen() }
     // The gate in front of every payment. Rendered in its set-a-PIN state,
     // which is what a device that has never had one shows.
-    // The counter, facing the other way. Empty catalogue, which is what a
-    // shop sees before it has set anything up.
-    render("kiosk", w = 520, h = 900) { org.ducatproject.ducat.ui.KioskScreen() }
     render("pin", w = 700, h = 700) {
         org.ducatproject.ducat.ui.PinGate(open = true, onDismiss = {}, onPassed = {})
     }
@@ -223,6 +225,35 @@ fun main() {
             coverage = longArrayOf(525000000L, 525800000L, 133800000L, 134600000L),
             modifier = Modifier.fillMaxSize(),
         )
+    }
+
+    // The counter, which had never been drawn anywhere. A saved menu wants
+    // something on it before the picker is worth a picture, so give it two
+    // things and a rate to price them with.
+    run {
+        val ctx = context
+        org.ducatproject.ducat.RateStore(ctx)
+            .store(150.0, System.currentTimeMillis() / 1000, "rendertest")
+        if (org.ducatproject.ducat.Catalogue.live(ctx).isEmpty()) {
+            org.ducatproject.ducat.Catalogue.put(
+                ctx, org.ducatproject.ducat.Catalogue.draft(ctx, "Flat white", "3.20"),
+            )
+            org.ducatproject.ducat.Catalogue.put(
+                ctx, org.ducatproject.ducat.Catalogue.draft(ctx, "Croissant", "2.50"),
+            )
+        }
+    }
+    render("items-stocked", w = 900, h = 700) { org.ducatproject.ducat.ui.ItemsScreen() }
+    render("item-picker", w = 520, h = 300) {
+        org.ducatproject.ducat.ui.ItemPicker(onPick = { _, _ -> })
+    }
+    render("kiosk-stocked", w = 520, h = 900) { org.ducatproject.ducat.ui.KioskScreen() }
+    // The gate's other mood. The one above is a device that has never had a
+    // PIN, which is offered the chance to set one; this is every time after,
+    // which is the one somebody meets while holding a customer.
+    org.ducatproject.ducat.Pin.set(context, "1234")
+    render("pin-ask", w = 700, h = 700) {
+        org.ducatproject.ducat.ui.PinGate(open = true, onDismiss = {}, onPassed = {})
     }
 
     println(

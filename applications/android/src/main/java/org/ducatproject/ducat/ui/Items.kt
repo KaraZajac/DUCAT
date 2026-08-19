@@ -138,24 +138,35 @@ private fun ItemPriceLine(item: Catalogue.Item): String {
 fun ItemPicker(onPick: (String, Long) -> Unit) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    val items = remember(version) { Catalogue.live(context) }
-    if (items.isEmpty()) return
+    // Priced once per change, not once per frame. Every one of these reads the
+    // rate out of an encrypted store; doing it inside the loop below meant a
+    // decrypt per item per recomposition, on the screen a queue is watching.
+    val priced = remember(version) { Catalogue.live(context).map { it to Catalogue.price(context, it) } }
+    if (priced.isEmpty()) return
     // How old the rate behind these prices is, said once rather than on every
     // button: a till with no signal still sells, at the last rate it saw, and
     // the person holding it should know that is what is happening.
-    var stale by remember { mutableStateOf(0L) }
+    //
+    // Derived, not accumulated. This used to be a `var` raised inside the loop
+    // — a state write during composition, which both invites a recomposition
+    // loop and only ever went up: once a bad afternoon had pushed it to four
+    // hours it stayed there, and the screen went on apologising for a rate it
+    // had long since refreshed.
+    val stale = remember(priced) {
+        priced.mapNotNull { (_, p) -> p.getOrNull()?.staleSecs }.maxOrNull() ?: 0L
+    }
     FlowRow(
         Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        items.forEach { item ->
-            val priced = Catalogue.price(context, item)
-            val pxmr = priced.getOrNull()
-            priced.getOrNull()?.let { if (it.staleSecs > stale) stale = it.staleSecs }
+        priced.forEach { (item, result) ->
+            val p = result.getOrNull()
             AssistChip(
-                onClick = { pxmr?.let { onPick(item.name, it.pxmr) } },
-                enabled = pxmr != null,
-                label = { Text("${item.name} · ${item.price}") },
+                onClick = { p?.let { onPick(item.name, it.pxmr) } },
+                enabled = p != null,
+                // With the currency: this is the face a customer reads, and
+                // "Croissant · 2.50" does not say 2.50 of what.
+                label = { Text("${item.name} · ${item.price} ${item.currency}") },
             )
         }
     }

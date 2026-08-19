@@ -410,6 +410,14 @@ tasks.register<JavaExec>("vaulttest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// The counter's logic — saved menu, kiosk orders, the PIN — run rather than
+// rendered. `DUCAT_DESK_STATE=<throwaway> ./gradlew :desktop:countertest`.
+tasks.register<JavaExec>("countertest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.CounterTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Every hosted screen rendered off-screen, to prove it draws something.
 // `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:rendertest`.
 // A hail from the kerb to the driver's map. `./gradlew :desktop:hailtest`

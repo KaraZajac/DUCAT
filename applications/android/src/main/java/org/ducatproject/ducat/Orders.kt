@@ -139,9 +139,16 @@ object Orders {
         return order
     }
 
-    /** What a customer's wallet scans: address and exact amount. */
+    /**
+     * What a customer's wallet scans: address and exact amount.
+     *
+     * [exactXmr], not [formatXmr] — the latter rounds to six places, which is
+     * precisely where this order's identifying noise begins. Asking for
+     * `0.038000` instead of `0.038000235547` means the payment that arrives
+     * matches no order at all.
+     */
     fun payUri(order: Order): String =
-        "monero:${order.address}?tx_amount=${formatXmr(order.totalPxmr)}"
+        "monero:${order.address}?tx_amount=${exactXmr(order.totalPxmr)}"
 
     /**
      * Look for the money in the mempool (§17.5's *seen*, not settled).
@@ -153,7 +160,8 @@ object Orders {
      * which of them have actually settled.
      */
     fun poolSight(context: Context, node: String) {
-        val waiting = all(context).filter { it.state == State.Awaiting }
+        val everything = all(context)
+        val waiting = everything.filter { it.state == State.Awaiting }
         if (waiting.isEmpty()) return
         val spend = WalletStore(context).spendKeyHex() ?: return
         val hits = runCatching {
@@ -162,8 +170,21 @@ object Orders {
             )
         }.getOrElse { return }
         if (hits.isEmpty()) return
+
+        // One payment settles one order. Amounts are what a mempool sighting
+        // can be matched on, and the noise in each total is what keeps two
+        // four-pound coffees apart — but noise collides eventually, and when
+        // it does the same transaction would otherwise mark two orders paid
+        // and hand somebody a free one. So a hash is spent once: not by an
+        // order already sighted on it (it stays in the pool for minutes after,
+        // and a later order could collide with it), and not twice in this
+        // sweep.
+        val claimed = everything.mapNotNull { it.seenTx }.toMutableSet()
         for (order in waiting) {
-            val hit = hits.firstOrNull { it.amountPxmr.toLong() == order.totalPxmr } ?: continue
+            val hit = hits.firstOrNull {
+                it.amountPxmr.toLong() == order.totalPxmr && it.txHashHex !in claimed
+            } ?: continue
+            claimed += hit.txHashHex
             update(context, order.copy(state = State.Seen, seenTx = hit.txHashHex))
             Notify.post(
                 context,
@@ -172,6 +193,29 @@ object Orders {
             )
             DucatLog.i(TAG, "order #${order.number} seen — ${hit.txHashHex.take(16)}…")
         }
+    }
+
+    /**
+     * How long an unpaid order keeps being looked for.
+     *
+     * The customer is standing at the counter; if they were going to pay they
+     * did so within a minute. What this really bounds is the scanning: while
+     * any order is awaiting payment the poller reads the mempool every pass,
+     * at a round trip per transaction in it, and a stall that took forty
+     * orders across a Saturday would otherwise be searching for all the ones
+     * that walked away until somebody force-stopped the app.
+     */
+    private const val ABANDON_AFTER_SECS = 30L * 60
+
+    /** Give up on the ones nobody paid, so the till stops looking for them. */
+    fun expire(context: Context) {
+        val cutoff = System.currentTimeMillis() / 1000 - ABANDON_AFTER_SECS
+        all(context)
+            .filter { it.state == State.Awaiting && it.placedAt in 1 until cutoff }
+            .forEach {
+                update(context, it.copy(state = State.Abandoned))
+                DucatLog.i(TAG, "order #${it.number} abandoned — nobody paid")
+            }
     }
 
     /**

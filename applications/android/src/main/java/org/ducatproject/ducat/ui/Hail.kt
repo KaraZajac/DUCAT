@@ -1344,9 +1344,9 @@ internal fun offerToPxmr(text: String, fiat: Boolean, rate: Double?): Long? {
     val v = moneyText(text).toBigDecimalOrNull() ?: return null
     val xmr = if (fiat) {
         if (rate == null || rate <= 0) return null
-        v.divide(java.math.BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
+        v.divide(java.math.BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
     } else v
-    return runCatching { xmr.movePointRight(12).toLong() }.getOrNull()?.takeIf { it >= 0 }
+    return Amounts.toPxmr(xmr)?.takeIf { it >= 0 }
 }
 
 /** Render picoXMR into a field string in the chosen unit (the inverse used to

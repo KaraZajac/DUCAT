@@ -501,6 +501,23 @@ fun formatXmr(pxmr: Long): String {
     return if (whole == 0L && micro == 0L && pxmr > 0) "<0.000001" else "%d.%06d".format(whole, micro)
 }
 
+/**
+ * The same amount, to the piconero, for something that has to pay it.
+ *
+ * [formatXmr] is for eyes: it rounds to six places and will happily answer
+ * `<0.000001`, neither of which belongs in a payment request. A kiosk order
+ * identifies its own payment by the exact figure it asked for — the few
+ * piconero of noise that tell one four-pound coffee from the next live in the
+ * seventh decimal place and further down — so rounding the request is the same
+ * as not tagging it at all, and every order sits unpaid while its customer
+ * stands there having paid.
+ *
+ * Trailing zeroes are kept. A wallet parses the number, not its width, and
+ * twelve places is what a piconero is.
+ */
+fun exactXmr(pxmr: Long): String =
+    "%d.%012d".format(pxmr / 1_000_000_000_000L, pxmr % 1_000_000_000_000L)
+
 
 /**
  * A balance as a currency figure, and whether it means anything.

@@ -162,6 +162,9 @@ class Poller(private val context: Context) {
                         Orders.poolSight(context, it)
                     }
                     runCatching { Orders.reconcile(context) }
+                    // And stop looking for the ones that walked away, which is
+                    // what keeps the sweep above from running all day.
+                    runCatching { Orders.expire(context) }
                 }.onFailure { DucatLog.w(TAG, "pool: ${it.message}") }
 
                 // Stewardship (§18.7): a good tenant cleans its own unit.

@@ -32,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.*
+import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.R
 import java.math.BigDecimal
@@ -374,15 +375,15 @@ private fun AmountStep(
     val tipPxmr = remember(tipTyped, fiatEntry, rate) {
         val v = moneyText(tipTyped).toBigDecimalOrNull() ?: return@remember 0L
         val xmr = if (fiatEntry && rate != null && rate > 0) {
-            v.divide(BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
+            v.divide(BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
         } else if (fiatEntry) return@remember 0L else v
-        runCatching { xmr.movePointRight(12).toLong() }.getOrNull()?.coerceAtLeast(0) ?: 0L
+        Amounts.toPxmr(xmr)?.coerceAtLeast(0) ?: 0L
     }
     val pxmr = remember(typed, fiatEntry, rate, tipPxmr, billed) {
         if (billed) return@remember prefillAmountPxmr + tipPxmr
         val v = moneyText(typed).toBigDecimalOrNull() ?: return@remember null
         val xmr = if (fiatEntry && rate != null && rate > 0) {
-            v.divide(BigDecimal(rate), 12, java.math.RoundingMode.DOWN)
+            v.divide(BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
         } else v
         xmr.multiply(BigDecimal(1_000_000_000_000L)).toLong().takeIf { it > 0 }
     }
