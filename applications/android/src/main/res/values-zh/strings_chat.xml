@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">联系我的名片</string>
     <string name="chat_card_for_me_desc">一条只能认领一次的链接，对方可以转交给应该联系到你的人。</string>
     <string name="chat_someones_profile">或者分享某人的资料 — 他们的名字和他们选择公开的内容。这不是连接码：连接码只能由本人给出。</string>
+    <string name="chat_their_name_label">他们的名字</string>
+    <string name="chat_their_name_support">只保存在你的手机上——对方不会知道。</string>
 </resources>

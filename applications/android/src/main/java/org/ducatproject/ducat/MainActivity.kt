@@ -98,6 +98,10 @@ class MainActivity : ComponentActivity() {
         // the next one.
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        // Before any screen reads a contact's name. attachBaseContext has
+        // already applied the chosen language, and a language change recreates
+        // this activity, so the placeholder follows it.
+        ContactNaming.unnamed = getString(R.string.contact_unnamed)
         readIntent(intent)
         val prefs = ThemePreference(this)
         setContent {
@@ -251,7 +255,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             runCatching { uniffi.ducat_mobile.readContactCard(uri) }
         }.onSuccess { card ->
             if (card.expired) cardFail = R.string.main_card_link_expired
-            else cardAsk = uri to (card.assertedName ?: "?")
+            else cardAsk = uri to card.assertedName.orEmpty()
         }.onFailure {
             DucatLog.w("Main", "card link unreadable: ${it.message}")
             cardFail = if (Mailbox.isOffline(it)) {
@@ -263,18 +267,46 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         MainActivity.claimLink.value = null
     }
     cardAsk?.let { (uri, who) ->
+        // Their card's claim about itself, which the reader may replace before
+        // adding them. A card cut before its owner set a name carries none, and
+        // that is how a contact ends up called "Unnamed contact" forever: this
+        // is the one moment the person is standing right there to be asked
+        // about. Prefilled with what the card says, so the common case is one
+        // tap and nothing to read.
+        var naming by remember(uri) { mutableStateOf(who) }
         AlertDialog(
             onDismissRequest = { cardAsk = null },
             title = { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_title)) },
-            text = { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_body, who)) },
+            text = {
+                Column {
+                    Text(
+                        androidx.compose.ui.res.stringResource(
+                            if (who.isBlank()) R.string.main_card_link_body_unnamed
+                            else R.string.main_card_link_body,
+                            who,
+                        ),
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = naming,
+                        onValueChange = { if (it.length <= 32) naming = it },
+                        label = {
+                            Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_name))
+                        },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
             confirmButton = {
                 TextButton(onClick = {
+                    val petname = naming.trim().takeIf { it.isNotBlank() && it != who }
                     cardAsk = null
                     scope.launch {
                         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                             runCatching {
                                 val card = uniffi.ducat_mobile.readContactCard(uri)
-                                Mailbox.claimCard(context, card, null)
+                                Mailbox.claimCard(context, card, petname)
                             }
                         }.onSuccess { overlay = Overlay.Chat(it) }
                             .onFailure {

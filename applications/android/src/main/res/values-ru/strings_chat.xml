@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">Карточка для связи со мной</string>
     <string name="chat_card_for_me_desc">Одноразовая ссылка — её можно передать тому, кто должен до тебя достучаться.</string>
     <string name="chat_someones_profile">Или чей-то профиль — имя и то, что человек сам решил опубликовать. Не код для связи: такие коды раздают только они сами.</string>
+    <string name="chat_their_name_label">Их имя</string>
+    <string name="chat_their_name_support">Только на вашем телефоне — им об этом не сообщают.</string>
 </resources>

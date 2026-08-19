@@ -22,4 +22,6 @@
     <string name="main_card_link_ok">OK</string>
     <string name="main_card_link_offline">Nog niet verbonden — deze telefoon is nog niet klaar met verbinden. De kaart is in orde; probeer het zo nog eens.</string>
     <string name="main_card_link_not_ready">Hun kaart is nog niet leesbaar. Zijn ze bij je, wacht dan even en scan opnieuw — anders vraag je ze DUCAT te openen.</string>
+    <string name="main_card_link_body_unnamed">Deze link opent een contactkaart zonder naam. Toevoegen? Daarna kunnen jullie elkaar berichten en betalen.</string>
+    <string name="main_card_link_name">Noem ze</string>
 </resources>

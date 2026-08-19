@@ -22,4 +22,6 @@
     <string name="main_card_link_ok">OK</string>
     <string name="main_card_link_offline">Not connected yet — this phone has not finished joining the network. The card is fine; try again in a moment.</string>
     <string name="main_card_link_not_ready">Their card is not readable yet. If they are with you, wait a moment and scan again — otherwise ask them to open DUCAT.</string>
+    <string name="main_card_link_body_unnamed">This link opens a contact card that carries no name. Add them? You can message and pay each other afterwards.</string>
+    <string name="main_card_link_name">Call them</string>
 </resources>

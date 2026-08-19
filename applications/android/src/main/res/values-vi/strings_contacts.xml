@@ -41,4 +41,5 @@
     <string name="contacts_reply_badsig">Liên kết đó bị hỏng — thử sao chép lại.</string>
     <string name="contacts_reply_own_card">Đó là thẻ của chính bạn.</string>
     <string name="contacts_reply_refused">Họ đã từ chối yêu cầu.</string>
+    <string name="contact_unnamed">Liên hệ chưa có tên</string>
 </resources>

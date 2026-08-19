@@ -41,4 +41,5 @@
     <string name="contacts_reply_badsig">Quel link è danneggiato — prova a copiarlo di nuovo.</string>
     <string name="contacts_reply_own_card">Quello è il tuo stesso biglietto.</string>
     <string name="contacts_reply_refused">Hanno rifiutato la richiesta.</string>
+    <string name="contact_unnamed">Contatto senza nome</string>
 </resources>

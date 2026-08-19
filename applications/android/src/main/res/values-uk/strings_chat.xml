@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">Картка для мене</string>
     <string name="chat_card_for_me_desc">Одноразове посилання, яке можна передати тому, хто має до тебе дістатися.</string>
     <string name="chat_someones_profile">Або чийсь профіль — ім\'я та все, що людина вирішила оприлюднити. Не код з\'єднання: ті роздають лише їхні власники.</string>
+    <string name="chat_their_name_label">Їхнє ім’я</string>
+    <string name="chat_their_name_support">Лише на вашому телефоні — їм про це не повідомляють.</string>
 </resources>

@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">Wizytówka do mnie</string>
     <string name="chat_card_for_me_desc">Link na jedno użycie, który mogą przekazać komuś, kto ma do ciebie dotrzeć.</string>
     <string name="chat_someones_profile">Albo czyjś profil — imię i to, co ta osoba zdecydowała się opublikować. To nie kod połączenia: te są tylko ich.</string>
+    <string name="chat_their_name_label">Ich nazwa</string>
+    <string name="chat_their_name_support">Tylko na twoim telefonie — oni się o tym nie dowiedzą.</string>
 </resources>

@@ -22,4 +22,6 @@
     <string name="main_card_link_ok">OK</string>
     <string name="main_card_link_offline">Chưa kết nối — máy này chưa tham gia xong mạng lưới. Thẻ vẫn tốt; hãy thử lại sau giây lát.</string>
     <string name="main_card_link_not_ready">Chưa đọc được thẻ của họ. Nếu họ đang ở cạnh bạn, hãy đợi một lát rồi quét lại — nếu không, nhờ họ mở DUCAT.</string>
+    <string name="main_card_link_body_unnamed">Liên kết này mở một thẻ liên hệ không có tên. Thêm chứ? Sau đó hai bạn có thể nhắn tin và trả tiền cho nhau.</string>
+    <string name="main_card_link_name">Gọi họ là</string>
 </resources>

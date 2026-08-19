@@ -41,4 +41,5 @@
     <string name="contacts_reply_badsig">Ce lien est abîmé — essaie de le copier à nouveau.</string>
     <string name="contacts_reply_own_card">C\'est ta propre carte.</string>
     <string name="contacts_reply_refused">La demande a été refusée.</string>
+    <string name="contact_unnamed">Contact sans nom</string>
 </resources>

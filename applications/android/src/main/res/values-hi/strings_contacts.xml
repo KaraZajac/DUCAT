@@ -41,4 +41,5 @@
     <string name="contacts_reply_badsig">वह लिंक टूटा हुआ है — दोबारा कॉपी करके देखें।</string>
     <string name="contacts_reply_own_card">यह आपका ही कार्ड है।</string>
     <string name="contacts_reply_refused">उन्होंने अनुरोध ठुकरा दिया।</string>
+    <string name="contact_unnamed">बिना नाम वाला संपर्क</string>
 </resources>

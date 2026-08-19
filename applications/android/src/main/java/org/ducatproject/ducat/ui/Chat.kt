@@ -724,6 +724,11 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     if (settingsOpen) {
         ChatSettingsDialog(
             current = store.disappearAfter(c.personaHex),
+            // The petname only — their card's claim about itself is theirs to
+            // make, and overwriting it with itself would turn a claim into a
+            // choice this person never made.
+            initialName = c.petname.orEmpty(),
+            onRename = { store.add(c.copy(petname = it)) },
             onPick = { store.setDisappearAfter(c.personaHex, it); settingsOpen = false },
             onClearAll = {
                 store.deleteThread(c.personaHex)
@@ -822,6 +827,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
 @Composable
 private fun ChatSettingsDialog(
     current: Long,
+    initialName: String,
+    onRename: (String?) -> Unit,
     onPick: (Long) -> Unit,
     onClearAll: () -> Unit,
     onDismiss: () -> Unit,
@@ -864,6 +871,20 @@ private fun ChatSettingsDialog(
         title = { Text(stringResource(R.string.chat_conversation_title)) },
         text = {
             Column {
+                // Naming someone belongs here, in the conversation where you
+                // notice you cannot tell who they are. It lived only under
+                // drawer → Contacts → the person → Profile, which is a long
+                // way to go to fix a row that says "Unnamed contact".
+                var name by remember { mutableStateOf(initialName) }
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { if (it.length <= 32) { name = it; onRename(it.trim().ifBlank { null }) } },
+                    label = { Text(stringResource(R.string.chat_their_name_label)) },
+                    supportingText = { Text(stringResource(R.string.chat_their_name_support)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(16.dp))
                 Text(
                     stringResource(R.string.chat_delete_after),
                     style = MaterialTheme.typography.labelLarge,

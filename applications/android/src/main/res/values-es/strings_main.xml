@@ -22,4 +22,6 @@
     <string name="main_card_link_ok">OK</string>
     <string name="main_card_link_offline">Todavía sin conexión: este teléfono aún no ha terminado de unirse a la red. La tarjeta está bien; inténtalo dentro de un momento.</string>
     <string name="main_card_link_not_ready">Su tarjeta aún no se puede leer. Si están contigo, espera un momento y vuelve a escanear; si no, pídeles que abran DUCAT.</string>
+    <string name="main_card_link_body_unnamed">Este enlace abre una tarjeta de contacto sin nombre. ¿Añadirla? Después podréis escribiros y pagaros.</string>
+    <string name="main_card_link_name">Llámalos</string>
 </resources>

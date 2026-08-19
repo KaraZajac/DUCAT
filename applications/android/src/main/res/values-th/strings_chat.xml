@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">นามบัตรสำหรับติดต่อฉัน</string>
     <string name="chat_card_for_me_desc">ลิงก์แบบใช้ได้ครั้งเดียว ที่เขาส่งต่อให้คนที่ควรติดต่อคุณได้</string>
     <string name="chat_someones_profile">หรือโปรไฟล์ของใครบางคน — ชื่อและสิ่งที่เขาเลือกเผยแพร่ ไม่ใช่โค้ดเชื่อมต่อ: โค้ดพวกนั้นเป็นของเขาที่จะให้เอง</string>
+    <string name="chat_their_name_label">ชื่อของเขา</string>
+    <string name="chat_their_name_support">อยู่ในเครื่องคุณเท่านั้น — ไม่มีการบอกเขา</string>
 </resources>

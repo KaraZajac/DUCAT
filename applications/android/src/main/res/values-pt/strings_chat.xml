@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">Um cartão para mim</string>
     <string name="chat_card_for_me_desc">Um link de uso único que a pessoa pode passar a alguém que deva conseguir contatar você.</string>
     <string name="chat_someones_profile">Ou o perfil de alguém — o nome e o que a pessoa escolheu publicar. Não é um código de conexão: esses são dela para dar.</string>
+    <string name="chat_their_name_label">O nome deles</string>
+    <string name="chat_their_name_support">Só no seu telefone — nunca lhes é dito.</string>
 </resources>

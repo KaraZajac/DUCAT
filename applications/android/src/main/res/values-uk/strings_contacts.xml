@@ -41,4 +41,5 @@
     <string name="contacts_reply_badsig">Посилання пошкоджене — спробуй скопіювати його ще раз.</string>
     <string name="contacts_reply_own_card">Це твоя власна картка.</string>
     <string name="contacts_reply_refused">Вони відхилили запит.</string>
+    <string name="contact_unnamed">Контакт без імені</string>
 </resources>

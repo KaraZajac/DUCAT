@@ -22,4 +22,6 @@
     <string name="main_card_link_ok">OK</string>
     <string name="main_card_link_offline">まだ接続できていません。この端末はネットワークへの参加が完了していません。カードは問題ありません。少し待ってからもう一度お試しください。</string>
     <string name="main_card_link_not_ready">相手のカードはまだ読み取れません。目の前にいるなら少し待ってもう一度読み取ってください。そうでなければ DUCAT を開いてもらってください。</string>
+    <string name="main_card_link_body_unnamed">このリンクの連絡先カードには名前がありません。追加しますか？追加すればメッセージも支払いもできます。</string>
+    <string name="main_card_link_name">呼び名</string>
 </resources>

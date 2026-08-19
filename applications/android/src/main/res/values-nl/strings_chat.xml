@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">Een kaartje voor mij</string>
     <string name="chat_card_for_me_desc">Een link voor één claim, die ze kunnen doorgeven aan iemand die jou moet kunnen bereiken.</string>
     <string name="chat_someones_profile">Of iemands profiel — de naam en wat diegene zelf heeft gepubliceerd. Geen verbindingscode: die zijn van hen om weg te geven.</string>
+    <string name="chat_their_name_label">Hun naam</string>
+    <string name="chat_their_name_support">Alleen op jouw telefoon — zij horen het nooit.</string>
 </resources>

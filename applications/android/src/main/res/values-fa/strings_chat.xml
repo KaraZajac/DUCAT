@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">کارتی برای من</string>
     <string name="chat_card_for_me_desc">لینکی یک‌بارمصرف که می‌توانند بدهند به کسی که باید به تو برسد.</string>
     <string name="chat_someones_profile">یا پروفایل یک نفر — نامش و هر چه خودش خواسته منتشر شود. کد اتصال نیست: آن‌ها مال خود آدم‌هاست که بدهند.</string>
+    <string name="chat_their_name_label">نام آن‌ها</string>
+    <string name="chat_their_name_support">فقط روی گوشی شما — هرگز به آن‌ها گفته نمی‌شود.</string>
 </resources>

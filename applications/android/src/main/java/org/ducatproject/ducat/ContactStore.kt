@@ -1037,7 +1037,24 @@ data class Contact(
     val chatVisible: Boolean = true,
 ) {
     /** §7.5: the petname wins. A self-asserted name is a fallback, never a name. */
-    fun displayName(): String = petname ?: assertedName ?: "${personaHex.take(8)}…"
+    /**
+     * What to call them, in this order: the name you gave them, the name their
+     * card claimed, and — failing both — words rather than their key.
+     *
+     * A card carries its issuer's name only if they had set one when it was
+     * cut, so contacts with neither are ordinary, and every screen used to
+     * call those people "2e066ce7…". That is their persona, correctly, and it
+     * is also gibberish to read, impossible to say out loud, and impossible to
+     * tell from the next one at a glance. [ContactNaming.unnamed] is a
+     * placeholder that reads as one, which is the honest thing for a name
+     * nobody has supplied — and the app now asks for one when a card arrives
+     * without it.
+     */
+    fun displayName(): String = petname ?: assertedName ?: ContactNaming.unnamed
+
+    /** Whether anyone has actually named them — a prompt worth showing hangs
+     *  off this, and so does anything that wants the key instead. */
+    val named: Boolean get() = petname != null || assertedName != null
 
     fun toJson(): JSONObject = JSONObject().apply {
         put("persona", personaHex)
@@ -1253,6 +1270,21 @@ private fun unb64(s: String): ByteArray = Base64.decode(s, Base64.NO_WRAP)
  * §4.3's backup format exists for this key, and the on-device copy belongs
  * behind the OS keystore.
  */
+/**
+ * The word for a contact nobody has named, in the reader's language.
+ *
+ * A holder rather than a `getString` at each call site because
+ * [Contact.displayName] is a pure function on stored data, reached from
+ * twenty-odd screens, from receipts captured in the background and from the
+ * desktop client, none of which carry a `Context`. MainActivity sets it before
+ * the first screen draws, and Android recreates the activity on a language
+ * change, so it follows the chosen language without anything watching for it.
+ */
+object ContactNaming {
+    @Volatile
+    var unnamed: String = "Unnamed contact"
+}
+
 class PersonaStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")
 

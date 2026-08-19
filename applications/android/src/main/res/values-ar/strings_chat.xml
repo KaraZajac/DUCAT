@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">بطاقة تخصّني</string>
     <string name="chat_card_for_me_desc">رابط يُستخدم مرة واحدة يمكنهم تمريره إلى من ينبغي أن يصل إليك.</string>
     <string name="chat_someones_profile">أو ملف شخص ما — اسمه وما اختار نشره. ليست رمز اتصال: تلك رموز أصحابها وهم من يمنحونها.</string>
+    <string name="chat_their_name_label">اسمهم</string>
+    <string name="chat_their_name_support">على هاتفك فقط — لا يُبلَّغون بذلك أبدًا.</string>
 </resources>

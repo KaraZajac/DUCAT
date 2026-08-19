@@ -41,4 +41,5 @@
     <string name="contacts_reply_badsig">Der Link ist beschädigt — kopiere ihn noch einmal.</string>
     <string name="contacts_reply_own_card">Das ist deine eigene Karte.</string>
     <string name="contacts_reply_refused">Die Anfrage wurde abgelehnt.</string>
+    <string name="contact_unnamed">Kontakt ohne Namen</string>
 </resources>

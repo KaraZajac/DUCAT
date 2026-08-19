@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">私へのカード</string>
     <string name="chat_card_for_me_desc">あなたに連絡すべき人へ渡してもらえる、1回限りのリンクです。</string>
     <string name="chat_someones_profile">または誰かのプロフィール — 名前と、本人が公開を選んだ情報だけです。接続コードではありません: それは本人が渡すものです。</string>
+    <string name="chat_their_name_label">相手の名前</string>
+    <string name="chat_their_name_support">あなたの端末の中だけで、相手には伝わりません。</string>
 </resources>

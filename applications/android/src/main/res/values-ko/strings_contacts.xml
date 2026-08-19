@@ -41,4 +41,5 @@
     <string name="contacts_reply_badsig">링크가 손상됐어요 — 다시 복사해 보세요.</string>
     <string name="contacts_reply_own_card">그건 본인 카드예요.</string>
     <string name="contacts_reply_refused">상대가 요청을 거부했어요.</string>
+    <string name="contact_unnamed">이름 없는 연락처</string>
 </resources>

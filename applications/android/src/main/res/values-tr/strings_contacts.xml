@@ -41,4 +41,5 @@
     <string name="contacts_reply_badsig">O bağlantı bozuk — yeniden kopyalamayı dene.</string>
     <string name="contacts_reply_own_card">Bu senin kendi kartın.</string>
     <string name="contacts_reply_refused">İsteği reddettiler.</string>
+    <string name="contact_unnamed">Adsız kişi</string>
 </resources>

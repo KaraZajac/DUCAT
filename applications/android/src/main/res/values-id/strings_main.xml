@@ -22,4 +22,6 @@
     <string name="main_card_link_ok">Oke</string>
     <string name="main_card_link_offline">Belum tersambung — ponsel ini belum selesai bergabung ke jaringan. Kartunya baik-baik saja; coba lagi sebentar.</string>
     <string name="main_card_link_not_ready">Kartu mereka belum bisa dibaca. Kalau mereka bersama Anda, tunggu sebentar lalu pindai lagi — kalau tidak, minta mereka membuka DUCAT.</string>
+    <string name="main_card_link_body_unnamed">Tautan ini membuka kartu kontak tanpa nama. Tambahkan? Setelah itu kalian bisa saling berkirim pesan dan membayar.</string>
+    <string name="main_card_link_name">Sebut mereka</string>
 </resources>

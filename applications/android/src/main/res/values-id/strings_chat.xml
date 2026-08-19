@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">Kartu untukku</string>
     <string name="chat_card_for_me_desc">Tautan sekali klaim yang bisa mereka teruskan ke orang yang boleh menghubungimu.</string>
     <string name="chat_someones_profile">Atau profil seseorang — nama mereka dan apa pun yang mereka pilih untuk dipublikasikan. Bukan kode koneksi: itu hak mereka untuk memberikannya.</string>
+    <string name="chat_their_name_label">Nama mereka</string>
+    <string name="chat_their_name_support">Hanya di ponsel Anda — mereka tidak pernah diberi tahu.</string>
 </resources>

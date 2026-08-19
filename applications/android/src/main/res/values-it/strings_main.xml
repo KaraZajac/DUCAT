@@ -22,4 +22,6 @@
     <string name="main_card_link_ok">OK</string>
     <string name="main_card_link_offline">Non ancora connesso: questo telefono non ha finito di entrare nella rete. La scheda è valida, riprova tra un momento.</string>
     <string name="main_card_link_not_ready">La loro scheda non è ancora leggibile. Se sono con te, aspetta un momento e riscansiona; altrimenti chiedi loro di aprire DUCAT.</string>
+    <string name="main_card_link_body_unnamed">Questo link apre una scheda contatto senza nome. Aggiungerla? Dopo potrete scrivervi e pagarvi.</string>
+    <string name="main_card_link_name">Chiamali</string>
 </resources>

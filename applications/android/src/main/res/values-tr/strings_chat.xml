@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">Bana ait bir kart</string>
     <string name="chat_card_for_me_desc">Sana ulaşması gereken birine iletebilecekleri tek kullanımlık bir bağlantı.</string>
     <string name="chat_someones_profile">Ya da birinin profili — adı ve yayımlamayı seçtiği ne varsa. Bağlantı kodu değil: o kodları vermek sahiplerine düşer.</string>
+    <string name="chat_their_name_label">Adı</string>
+    <string name="chat_their_name_support">Yalnızca senin telefonunda — onlara söylenmez.</string>
 </resources>

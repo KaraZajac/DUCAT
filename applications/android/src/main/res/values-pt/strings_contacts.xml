@@ -41,4 +41,5 @@
     <string name="contacts_reply_badsig">Esse link está danificado — tente copiá-lo de novo.</string>
     <string name="contacts_reply_own_card">Esse é o seu próprio cartão.</string>
     <string name="contacts_reply_refused">A pessoa recusou o pedido.</string>
+    <string name="contact_unnamed">Contacto sem nome</string>
 </resources>

@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">A card for me</string>
     <string name="chat_card_for_me_desc">A one-claim link they can pass to someone who should reach you.</string>
     <string name="chat_someones_profile">Or someone\'s profile — their name and whatever they chose to publish. Not a connection code: those are theirs to give.</string>
+    <string name="chat_their_name_label">Their name</string>
+    <string name="chat_their_name_support">Only on your phone — they are never told.</string>
 </resources>

@@ -115,4 +115,6 @@
     <string name="chat_card_for_me">Thẻ liên hệ của tôi</string>
     <string name="chat_card_for_me_desc">Một liên kết dùng một lần, họ có thể chuyển cho người cần liên hệ với bạn.</string>
     <string name="chat_someones_profile">Hoặc hồ sơ của ai đó — tên và những gì người đó chọn công khai. Không phải mã kết nối: mã là của họ, họ mới được trao.</string>
+    <string name="chat_their_name_label">Tên của họ</string>
+    <string name="chat_their_name_support">Chỉ nằm trên máy bạn — họ không hề được cho biết.</string>
 </resources>

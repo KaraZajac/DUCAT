@@ -41,4 +41,5 @@
     <string name="contacts_reply_badsig">リンクが壊れています — もう一度コピーしてみてください。</string>
     <string name="contacts_reply_own_card">それはあなた自身のカードです。</string>
     <string name="contacts_reply_refused">相手がリクエストを拒否しました。</string>
+    <string name="contact_unnamed">名前のない連絡先</string>
 </resources>
