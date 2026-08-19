@@ -339,6 +339,47 @@ fun main() {
         Orders.all(context).first { it.id == bound.id }.state != Orders.State.Abandoned,
     )
 
+    // --- two threads, one list --------------------------------------------
+    //
+    // The poller sights payments and abandons walked-away baskets while a
+    // screen begins and binds orders. Every write rewrites the whole array, so
+    // a lost update here is a paid order reverting to awaiting, or an order
+    // vanishing while the tab that bills it survives.
+    run {
+        val before = Orders.all(context).size
+        val n = 40
+        val pool = java.util.concurrent.Executors.newFixedThreadPool(8)
+        val gate = java.util.concurrent.CountDownLatch(1)
+        val done = java.util.concurrent.CountDownLatch(n)
+        repeat(n) { i ->
+            pool.submit {
+                gate.await()
+                runCatching {
+                    Orders.update(
+                        context,
+                        Orders.Order(
+                            id = "race-$i", number = i % 999 + 1,
+                            lines = listOf(BillItem("x", 1_000L)),
+                            totalPxmr = 1_000L, address = "", state = Orders.State.Awaiting,
+                            placedAt = System.currentTimeMillis() / 1000,
+                        ),
+                    )
+                }
+                done.countDown()
+            }
+        }
+        gate.countDown()
+        done.await(60, java.util.concurrent.TimeUnit.SECONDS)
+        pool.shutdown()
+        val after = Orders.all(context)
+        val kept = after.count { it.id.startsWith("race-") }
+        check(
+            "forty concurrent writes all survive",
+            kept == n,
+            "kept $kept of $n (list went $before → ${after.size})",
+        )
+    }
+
     // --- the PIN ----------------------------------------------------------
 
     check("no PIN to begin with", !Pin.isSet(context))

@@ -30,6 +30,9 @@ object Catalogue {
 
     private fun prefs(context: Context) = securePrefs(context, "ducat_catalogue")
 
+    /** Same reason as [Orders]: put and remove rewrite the whole list. */
+    private val lock = Any()
+
     /** One thing that can be sold. */
     data class Item(
         val id: String,
@@ -68,13 +71,13 @@ object Catalogue {
     /** What the till shows: everything not archived. */
     fun live(context: Context): List<Item> = all(context).filter { !it.archived }
 
-    fun put(context: Context, item: Item) {
-        val kept = all(context).filter { it.id != item.id }
-        save(context, kept + item)
+    fun put(context: Context, item: Item) = synchronized(lock) {
+        save(context, all(context).filter { it.id != item.id } + item)
     }
 
-    fun remove(context: Context, id: String) =
+    fun remove(context: Context, id: String) = synchronized(lock) {
         save(context, all(context).filter { it.id != id })
+    }
 
     private fun save(context: Context, items: List<Item>) {
         val arr = JSONArray()

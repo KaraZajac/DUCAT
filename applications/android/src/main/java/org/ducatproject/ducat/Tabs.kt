@@ -91,6 +91,7 @@ data class RunningTab(
 class TabStore(private val context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")
 
+
     fun all(): List<RunningTab> {
         val raw = prefs.getString("tabs_v1", null) ?: return emptyList()
         return runCatching {
@@ -101,7 +102,7 @@ class TabStore(private val context: Context) {
 
     fun get(id: String): RunningTab? = all().firstOrNull { it.id == id }
 
-    fun open(personaHex: String, origin: String): RunningTab {
+    fun open(personaHex: String, origin: String): RunningTab = guarded {
         val t = RunningTab(
             id = java.util.UUID.randomUUID().toString(),
             origin = origin,
@@ -112,12 +113,12 @@ class TabStore(private val context: Context) {
             state = "open",
         )
         save(all() + t)
-        return t
+        t
     }
 
-    fun update(t: RunningTab) = save(all().map { if (it.id == t.id) t else it })
+    fun update(t: RunningTab) = guarded { save(all().map { if (it.id == t.id) t else it }) }
 
-    fun delete(id: String) = save(all().filterNot { it.id == id })
+    fun delete(id: String) = guarded { save(all().filterNot { it.id == id }) }
 
     /**
      * Key images ever matched to a bill, kept apart from the tabs themselves:
@@ -128,8 +129,9 @@ class TabStore(private val context: Context) {
     fun claimedKis(): Set<String> =
         prefs.getStringSet("claimed_kis_v1", emptySet()) ?: emptySet()
 
-    fun addClaimedKi(ki: String) =
+    fun addClaimedKi(ki: String) = guarded {
         prefs.edit().putStringSet("claimed_kis_v1", claimedKis() + ki).apply()
+    }
 
     /**
      * Bill the tab: one itemised request into the thread, then wait for chain.
@@ -224,6 +226,24 @@ class TabStore(private val context: Context) {
     }
 
     companion object {
+        /**
+         * Guards read-modify-write of the tab list.
+         *
+         * The poller reconciles payments and sights the mempool on its own
+         * thread while a screen opens, settles or cancels a tab on another.
+         * Both rewrite the whole array, so without this the loser wrote from a
+         * list read before the winner's change — and the states that get lost
+         * are the expensive ones: a tab marked `paid`, with the key image that
+         * settled it, reverting to `settled` and becoming eligible to match a
+         * second payment.
+         *
+         * Here rather than on the instance, like ContactStore's, because
+         * callers make a fresh TabStore per operation.
+         */
+        private val lock = Any()
+
+        internal fun <T> guarded(f: () -> T): T = synchronized(lock) { f() }
+
         /**
          * Payment seen → receipt sent, for every settled tab (§15.11).
          *

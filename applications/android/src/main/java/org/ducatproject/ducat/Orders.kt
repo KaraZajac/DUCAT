@@ -45,6 +45,27 @@ object Orders {
 
     private fun prefs(context: Context) = securePrefs(context, "ducat_orders")
 
+    /**
+     * Guards read-modify-write of the whole order list.
+     *
+     * Every write here rewrites the entire array, and two threads do it: the
+     * poller sights payments and gives up on abandoned baskets while a screen
+     * is beginning and binding orders. Without this, whichever wrote second
+     * wrote from a list it had read before the other's change — so a payment
+     * already sighted could revert to awaiting, or an order just billed could
+     * vanish along with the tab still pointing at it.
+     *
+     * ContactStore learned this the hard way and says so at its own lock; the
+     * stores added since did not inherit the lesson. On the companion, because
+     * callers make a fresh store per call and a per-instance lock guards
+     * nothing.
+     */
+    private val lock = Any()
+
+    /** Read, change, write — with nobody else in between. */
+    private fun mutate(context: Context, f: (List<Order>) -> List<Order>) =
+        synchronized(lock) { save(context, f(all(context))) }
+
     /** Where an order has got to. */
     enum class State {
         /** Shown to the customer, waiting for their payment. */
@@ -118,7 +139,7 @@ object Orders {
     }
 
     fun update(context: Context, order: Order) =
-        save(context, all(context).filter { it.id != order.id } + order)
+        mutate(context) { it.filter { o -> o.id != order.id } + order }
 
     private fun save(context: Context, orders: List<Order>) {
         val arr = JSONArray()
@@ -174,8 +195,11 @@ object Orders {
         val plain = lines.sumOf { it.amountPxmr }
         val noise = java.security.SecureRandom().nextInt(TAG_RANGE.toInt()).toLong()
         val next = (all(context).maxOfOrNull { it.number } ?: 0) % 999 + 1
-        val slot = prefs(context).getInt("slot_next", 0)
-        prefs(context).edit().putInt("slot_next", (slot + 1) % ADDRESS_SLOTS).apply()
+        val slot = synchronized(lock) {
+            val n = prefs(context).getInt("slot_next", 0)
+            prefs(context).edit().putInt("slot_next", (n + 1) % ADDRESS_SLOTS).apply()
+            n
+        }
         val order = Order(
             id = id,
             number = next,
