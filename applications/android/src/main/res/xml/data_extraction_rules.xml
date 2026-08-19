@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Nothing leaves this device by any route the OS drives.
+
+  android:allowBackup="false" already refuses cloud backup, and from Android
+  12 that attribute is deprecated and covers only half the question: the other
+  half is device-to-device transfer, which runs by *default* when somebody sets
+  up a new phone from an old one. For this app that is not a smaller version of
+  the same risk, it is a different one — the secrets are sealed by a key in the
+  Keystore, and a Keystore key does not travel. The wallet would arrive on the
+  new phone as bytes nobody can open, next to an onboarding flow that sees a
+  wallet already there and does not offer to restore one.
+
+  So both routes are refused, and §4.3's passphrase-protected export stays the
+  one way money moves between devices — a thing the owner does on purpose,
+  knowing they have done it.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>

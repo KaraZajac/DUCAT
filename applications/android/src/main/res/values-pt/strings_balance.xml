@@ -12,7 +12,7 @@
 
     <!-- notesPhrase: a frase mostrada em vez de um saldo cru -->
     <plurals name="balance_notes">
-        <item quantity="one">1 nota</item>
+        <item quantity="one">%1$d nota</item>
         <item quantity="other">%1$d notas</item>
     </plurals>
     <string name="balance_nothing_unlocked">nada desbloqueado ainda</string>

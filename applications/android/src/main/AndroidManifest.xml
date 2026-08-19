@@ -45,11 +45,16 @@
         android:supportsRtl="true"
         android:localeConfig="@xml/locales_config"
         android:theme="@style/Theme.Ducat"
-        android:allowBackup="false">
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules">
 
         <!-- allowBackup is false on purpose: §4.3 makes backup an explicit,
              passphrase-protected export the user performs. Letting the OS sweep
-             wallet keys into cloud backup would defeat the whole design. -->
+             wallet keys into cloud backup would defeat the whole design.
+
+             From Android 12 that attribute covers only cloud backup, and
+             device-to-device transfer runs by default — see
+             res/xml/data_extraction_rules.xml, which refuses both. -->
 
         <!-- adjustResize so the message list shrinks for the keyboard instead of
              being covered by it; Compose's imePadding needs the window to

@@ -12,7 +12,7 @@
 
     <!-- notesPhrase: the sentence shown instead of a raw balance -->
     <plurals name="balance_notes">
-        <item quantity="one">1 اسکناس</item>
+        <item quantity="one">%1$d اسکناس</item>
         <item quantity="other">%1$d اسکناس</item>
     </plurals>
     <string name="balance_nothing_unlocked">هنوز چیزی آزاد نشده</string>

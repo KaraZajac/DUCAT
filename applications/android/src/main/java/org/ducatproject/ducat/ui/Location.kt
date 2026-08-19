@@ -7,7 +7,17 @@ package org.ducatproject.ducat.ui
  */
 private const val FUSED = "fused"
 
-/** One raw fix in 1e-7 degrees — what a geocell (§15.12) is computed from. */
+/**
+ * One raw fix in 1e-7 degrees — what a geocell (§15.12) is computed from.
+ *
+ * The permission is handled, just not in a shape lint recognises: every call
+ * below sits inside a `runCatching`, which catches the SecurityException a
+ * revoked permission throws, and the caller is handed null exactly as it is
+ * when there is no fix to be had. Lint models `checkSelfPermission` and
+ * `try`/`catch` and nothing else, so it reports this as unhandled — and one
+ * standing error is how a lint run stops being read.
+ */
+@android.annotation.SuppressLint("MissingPermission")
 fun grabFix(
     context: android.content.Context,
     done: (Pair<Long, Long>?) -> Unit,
