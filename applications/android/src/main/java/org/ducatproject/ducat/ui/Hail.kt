@@ -624,6 +624,12 @@ fun DriveScreen() {
         )
     }
     var notices by remember { mutableStateOf<List<SeenHail>>(emptyList()) }
+    // Jobs this driver has taken. Clearing the board is a write the network
+    // has to make visible again, and the sweep keeps its last good read of
+    // each cell in the meantime — so filtering the taken job out once, at the
+    // moment of the claim, lasted exactly until the next lap redrew it from
+    // that cached read. A fare you have already taken is not a fare.
+    var takenCards by remember { mutableStateOf(setOf<String>()) }
     var selected by remember { mutableStateOf<SeenHail?>(null) }
     var coverage by remember {
         mutableStateOf(
@@ -721,6 +727,7 @@ fun DriveScreen() {
                         // taken job on it showed the driver a fare still
                         // standing that they had just claimed.
                         withContext(Dispatchers.Main) {
+                            takenCards = takenCards + taken.card
                             notices = notices.filterNot { it.card == taken.card }
                         }
                         // The offer is protocol now (kind 6): the fare and the
@@ -882,7 +889,7 @@ fun DriveScreen() {
         fun publish() {
             val cutoff = System.currentTimeMillis() / 1000
             notices = found.values.flatten()
-                .filter { it.expiry > cutoff }
+                .filter { it.expiry > cutoff && it.card !in takenCards }
                 // A migrating notice can stand in two slots for a moment;
                 // the card is the identity, so one pin, not two.
                 .distinctBy { it.card }
