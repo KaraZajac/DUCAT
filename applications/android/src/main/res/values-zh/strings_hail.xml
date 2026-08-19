@@ -100,4 +100,5 @@
     <string name="hail_osm_privacy">搜索、路线和地图使用 OpenStreetMap 的服务器 — 这是 DUCAT 唯一把位置发离设备的地方。司机只能看到约 %1$s 的区域。</string>
     <string name="hail_post_button">叫车 🚕</string>
     <string name="hail_search">搜索</string>
+    <string name="hail_joining_network">正在加入网络——还没有读取这些板。</string>
 </resources>

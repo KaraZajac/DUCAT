@@ -27,7 +27,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
@@ -50,6 +54,12 @@ private const val TAG = "Hail"
 
 /** How long a posted hail stands before the board should ignore it. */
 private const val HAIL_TTL_SECS = 15L * 60
+
+/** How often the driver re-arms its board watches; they expire. */
+private const val WATCH_REARM_MS = 5L * 60 * 1000
+
+/** The longest a quiet network leaves the map unswept. */
+private const val SWEEP_BACKSTOP_MS = 45_000L
 
 /**
  * Work the DHT will remember even when the screen does not: posts, claims and
@@ -843,15 +853,66 @@ fun DriveScreen() {
 
     LaunchedEffect(watching) {
         val cells = watching ?: return@LaunchedEffect
-        // Round-robin three boards per tick: nine sequential force-refreshed
-        // reads every cycle is a phone doing nothing else.
-        var at = 0
-        val found = HashMap<String, List<SeenHail>>()
+        // Every board at once, and each answer drawn the moment it lands.
+        //
+        // This was three boards per tick, read one after another, four seconds
+        // apart. An empty DHT read is tens of seconds — the network concluding
+        // a record is not there costs more than finding one — so a driver
+        // watching "Nearby" (nine fine cells plus nine wide) waited six ticks
+        // for one lap. Measured on two phones: a hail posted at 10:45 reached
+        // the driver at 10:52. Nobody stares at an empty map for seven minutes
+        // to see whether a fare exists; they put the phone down.
+        //
+        // The reads do not depend on each other, so they should not queue.
+        // Dispatchers.IO carries them concurrently and a lap now costs the
+        // slowest single board rather than the sum of eighteen. The rental
+        // search has read its ring this way all along (Listings.search) — the
+        // hail sweep is the one that never got it.
+        val found = java.util.concurrent.ConcurrentHashMap<String, List<SeenHail>>()
+        // Ask the network to ring when one of these boards changes, instead of
+        // finding out on the next lap. Veilid pushes a change notification to
+        // a watcher, and the mailbox has used it all along — a hail board is
+        // the same kind of record and nothing was watching it. Re-armed every
+        // few minutes because a watch expires: the network promises a wake-up,
+        // not delivery, which is exactly why the sweep below stays.
+        var armedAt = 0L
+        var lastRing = org.ducatproject.ducat.NetworkRings.changed.value
+        // Hoisted so a cell that answers can be drawn before its neighbours
+        // have finished: the first pin is what tells a driver the map works.
+        fun publish() {
+            val cutoff = System.currentTimeMillis() / 1000
+            notices = found.values.flatten()
+                .filter { it.expiry > cutoff }
+                // A migrating notice can stand in two slots for a moment;
+                // the card is the identity, so one pin, not two.
+                .distinctBy { it.card }
+                .sortedByDescending { it.expiry }
+        }
         while (true) {
-            val batch = cells.drop(at).take(3).ifEmpty { cells.take(3) }
-            at = (at + 3) % cells.size
             val now = System.currentTimeMillis() / 1000
-            for (c in batch) {
+            if (now * 1000 - armedAt > WATCH_REARM_MS) {
+                armedAt = now * 1000
+                withContext(Dispatchers.IO) {
+                    cells.forEach { c ->
+                        runCatching {
+                            uniffi.ducat_mobile.nodeDhtWatch(
+                                uniffi.ducat_mobile.standRecordKey(c),
+                            )
+                        }
+                    }
+                }
+            }
+            // supervisorScope, and every child swallows its own failure: one
+            // unreachable board must not cancel its siblings, and a lap that
+            // throws must not end the loop. This is not hypothetical — the
+            // sweep logged two laps and then stopped for good, on a phone
+            // whose node had not finished attaching, leaving a driver on a map
+            // that would never update again and said "No hails standing" while
+            // it did nothing.
+            kotlinx.coroutines.supervisorScope {
+                cells.map { c ->
+                    async {
+                        runCatchingCancellable {
                 // §15.12's overflow ladder: sweep shards from 0. Claims and
                 // expiry empty the low shards first, so one quiet shard is
                 // not the end of the ladder — stop only after two in a row,
@@ -873,28 +934,66 @@ fun DriveScreen() {
                                     } else null
                                 }
                             }
-                            if (live.isEmpty()) {
-                                if (++quiet >= 2) break
-                            } else {
+                            if (live.isNotEmpty()) {
                                 quiet = 0
                                 all += live
+                            } else if (++quiet >= 2) {
+                                break
                             }
+                            // Climb only past a **full** board, which is the
+                            // rule Listings.search already uses and it holds
+                            // here for the same reason: every writer takes the
+                            // lowest free slot, so a board with room is the end
+                            // of its own ladder. Nothing was pushed above it.
+                            //
+                            // The old rule read two shards of every cell before
+                            // it would stop, and three of any cell that had a
+                            // hail — and since an empty board takes ~85s to
+                            // come back empty, that chain *was* the lap: 165s,
+                            // then 154s, measured over eighteen boards. One
+                            // read per quiet cell is the whole point of
+                            // sweeping in parallel.
+                            if (live.size < 8) break
                         }
                         all
                     }.getOrNull()
                 }
-                if (got != null) found[c] = got
+                        // A cell whose read failed keeps its last good sweep
+                        // rather than blinking out; publish() filters by
+                        // expiry again so a stale notice cannot linger.
+                        if (got != null) {
+                            found[c] = got
+                            withContext(Dispatchers.Main) { publish() }
+                        }
+                        }.onFailure { DucatLog.w(TAG, "sweep $c: ${it.message}") }
+                        Unit
+                    }
+                }.awaitAll()
             }
-            // Cells whose reads keep failing hold their last good sweep, so
-            // filter by expiry again here or a stale notice lingers forever.
-            val cutoff = System.currentTimeMillis() / 1000
-            notices = found.values.flatten()
-                .filter { it.expiry > cutoff }
-                // A migrating notice can stand in two slots for a moment;
-                // the card is the identity, so one pin, not two.
-                .distinctBy { it.card }
-                .sortedByDescending { it.expiry }
-            delay(4_000)
+            publish()
+            // How long a lap actually costs, over how many boards. The whole
+            // question for a driver is whether a fare appears in seconds or
+            // minutes, and that is not answerable by reading the code.
+            DucatLog.i(
+                TAG,
+                "sweep lap: ${cells.size} board(s) in " +
+                    "${System.currentTimeMillis() / 1000 - now}s, " +
+                    "${found.values.sumOf { it.size }} notice(s)",
+            )
+            // Sweep again when the network says something changed, or on a
+            // slow backstop if it stays quiet. The ring is what turns "a fare
+            // appears within a lap" into "a fare appears while the rider is
+            // still putting their phone away": the changed board is populated,
+            // and a populated board answers in a fraction of the time an empty
+            // one takes to say it is empty.
+            //
+            // The poller owns the wake-up flag — `node_wait_change` consumes
+            // it — so this listens to the poller rather than calling it and
+            // stealing somebody's messages.
+            withTimeoutOrNull(SWEEP_BACKSTOP_MS) {
+                org.ducatproject.ducat.NetworkRings.changed.first { it != lastRing }
+            }
+            lastRing = org.ducatproject.ducat.NetworkRings.changed.value
         }
     }
 
@@ -944,13 +1043,30 @@ fun DriveScreen() {
                     modifier = Modifier.fillMaxSize(),
                 )
                 if (notices.isEmpty()) {
+                    // "No hails standing" is a claim about the boards, and a
+                    // phone whose node has not attached has not read them: the
+                    // reads fail in milliseconds and the map states, with
+                    // confidence, that nobody wants a ride. Seen on a driver's
+                    // phone sixty seconds after launch, while a rider two
+                    // metres away was standing on the same cell.
+                    val online by produceState(true) {
+                        while (true) {
+                            value = runCatching {
+                                uniffi.ducat_mobile.nodeStatus().publicInternetReady
+                            }.getOrDefault(false)
+                            delay(4_000)
+                        }
+                    }
                     Surface(
                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
                         shape = MaterialTheme.shapes.medium,
                         modifier = Modifier.align(Alignment.TopCenter).padding(12.dp),
                     ) {
                         Text(
-                            stringResource(R.string.hail_no_hails_map),
+                            stringResource(
+                                if (online) R.string.hail_no_hails_map
+                                else R.string.hail_joining_network,
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         )
@@ -1682,6 +1798,9 @@ fun HailSheet(
                                         // just continues the walk.
                                         val base = "geo:$oCell"
                                         var placed: Pair<String, UInt>? = null
+                                        // Who else was on the board we landed
+                                        // on, as the ladder saw it.
+                                        var placedTaken: Set<UInt> = emptySet()
                                         ladder@ for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
                                             val name = uniffi.ducat_mobile.standShardName(base, shard)
                                             val nowS = System.currentTimeMillis() / 1000
@@ -1692,6 +1811,7 @@ fun HailSheet(
                                             }.toSet()
                                             for (free in 0u..7u) {
                                                 if (free in taken) continue
+                                                placedTaken = taken
                                                 // standPost verifies its own
                                                 // landing (a refused or raced
                                                 // set throws); re-reading the
@@ -1708,27 +1828,48 @@ fun HailSheet(
                                         }
                                         val (board, sub) = placed
                                             ?: error(context.getString(R.string.hail_shards_full))
+                                        // Persist before announcing: the Home
+                                        // card rehydrates from this record, so
+                                        // the hail survives even if this sheet
+                                        // is already gone.
+                                        RideStore(context).save(
+                                            RideStore.PostedRide(
+                                                board = board, subkey = sub,
+                                                inboxKey = card.inboxKey,
+                                                cardUri = card.uri, expiry = expiry,
+                                                notice = bytes,
+                                            )
+                                        )
+                                        DucatLog.i(TAG, "hail posted at $board subkey $sub")
+
                                         // §15.12's density rule: a deserted
                                         // corner earns a second copy on the
                                         // containing 5-cell, where a driver
                                         // kilometres away is actually looking.
                                         // Same card — claim-once referees the
                                         // two copies like migration's.
-                                        var second: Pair<String, UInt>? = null
-                                        if (board == base && oCell.length == 6) {
-                                            val alone = runCatching {
-                                                standRead(base).none { n ->
-                                                    runCatching { hailDecode(n.data) }.getOrNull()
-                                                        ?.let {
-                                                            it.card != card.uri &&
-                                                                it.expiry.toLong() >
-                                                                System.currentTimeMillis() / 1000
-                                                        } == true
-                                                }
-                                            }.getOrDefault(false)
-                                            if (alone) {
+                                        //
+                                        // **After** the rider is told they are
+                                        // standing, not before. The copy is two
+                                        // more network round trips, and a hail
+                                        // is live the moment the first board
+                                        // holds it — waiting for reach that
+                                        // may not even be needed is how posting
+                                        // came to take four minutes behind a
+                                        // spinner. It lands seconds later and
+                                        // updates the same record.
+                                        //
+                                        // Whether we are alone comes from the
+                                        // read the ladder already did. Asking
+                                        // the network again would be a third
+                                        // round trip *and* a re-read of a board
+                                        // we just wrote to — the exact race the
+                                        // ladder above refuses to run.
+                                        val aloneHere = board == base && placedTaken.isEmpty()
+                                        if (aloneHere && oCell.length == 6) {
+                                            hailScope.launch {
                                                 val wide = "geo:${oCell.take(5)}"
-                                                second = runCatching {
+                                                val second = runCatching {
                                                     val busy = standRead(wide).mapNotNull { n ->
                                                         runCatching { hailDecode(n.data) }.getOrNull()
                                                             ?.takeIf {
@@ -1741,24 +1882,24 @@ fun HailSheet(
                                                         wide to s2
                                                     }
                                                 }.getOrNull()
+                                                if (second != null) {
+                                                    RideStore(context).save(
+                                                        RideStore.PostedRide(
+                                                            board = board, subkey = sub,
+                                                            inboxKey = card.inboxKey,
+                                                            cardUri = card.uri, expiry = expiry,
+                                                            notice = bytes,
+                                                            board2 = second.first,
+                                                            subkey2 = second.second,
+                                                        )
+                                                    )
+                                                    DucatLog.i(
+                                                        TAG,
+                                                        "hail reach: 5-cell copy at ${second.first}",
+                                                    )
+                                                }
                                             }
                                         }
-                                        // Persist before announcing: the Home
-                                        // card rehydrates from this record, so
-                                        // the hail survives even if this sheet
-                                        // is already gone.
-                                        RideStore(context).save(
-                                            RideStore.PostedRide(
-                                                board = board, subkey = sub,
-                                                inboxKey = card.inboxKey,
-                                                cardUri = card.uri, expiry = expiry,
-                                                notice = bytes,
-                                                board2 = second?.first,
-                                                subkey2 = second?.second ?: 0u,
-                                            )
-                                        )
-                                        DucatLog.i(TAG, "hail posted at $board subkey $sub" +
-                                            (second?.let { " (+5-cell copy at ${it.first})" } ?: ""))
                                     }.onSuccess {
                                         withContext(Dispatchers.Main) {
                                             onPosted()

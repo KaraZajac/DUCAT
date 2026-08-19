@@ -191,7 +191,17 @@ class Poller(private val context: Context) {
                 rang = withContext(Dispatchers.IO) {
                     runCatching { uniffi.ducat_mobile.nodeWaitChange(WAIT_MS) }.getOrDefault(false)
                 }
-                if (rang) DucatLog.i(TAG, "a watched record changed — polling now")
+                if (rang) {
+                    DucatLog.i(TAG, "a watched record changed — polling now")
+                    // Pass the ring on. `node_wait_change` *consumes* the flag
+                    // — whoever wakes first clears it — so there can only be
+                    // one caller of it in the process, and this is it. Anything
+                    // else that wants to know the network rang (the driver's
+                    // stand sweep, which would otherwise poll blind on a timer)
+                    // listens here instead of racing the poller for its
+                    // wake-ups and delaying somebody's messages to do it.
+                    NetworkRings.changed.value = System.currentTimeMillis()
+                }
             }
         }
     }

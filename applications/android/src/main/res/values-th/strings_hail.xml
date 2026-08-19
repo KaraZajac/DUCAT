@@ -100,4 +100,5 @@
     <string name="hail_osm_privacy">การค้นหา เส้นทาง และแผนที่ใช้เซิร์ฟเวอร์ของ OpenStreetMap — จุดเดียวที่ DUCAT ส่งตำแหน่งออกนอกเครื่อง คนขับเห็นเพียงพื้นที่ราว %1$s</string>
     <string name="hail_post_button">เรียกรถ 🚕</string>
     <string name="hail_search">ค้นหา</string>
+    <string name="hail_joining_network">กำลังเข้าร่วมเครือข่าย — ยังไม่ได้อ่านกระดาน</string>
 </resources>

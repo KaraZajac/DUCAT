@@ -100,4 +100,5 @@
     <string name="hail_osm_privacy">البحث والمسار والخريطة تستخدم خوادم OpenStreetMap — المكان الوحيد الذي يرسل فيه DUCAT الموقع خارج الجهاز. لا يرى السائقون سوى مناطق بعرض ~%1$s.</string>
     <string name="hail_post_button">اطلب 🚕</string>
     <string name="hail_search">بحث</string>
+    <string name="hail_joining_network">جارٍ الانضمام إلى الشبكة — لم تُقرأ اللوحات بعد.</string>
 </resources>

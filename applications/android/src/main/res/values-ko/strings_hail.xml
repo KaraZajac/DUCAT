@@ -100,4 +100,5 @@
     <string name="hail_osm_privacy">검색·경로·지도는 OpenStreetMap 서버를 써요 — DUCAT이 위치를 기기 밖으로 보내는 유일한 곳이에요. 기사에게는 약 %1$s 구역만 보여요.</string>
     <string name="hail_post_button">호출 🚕</string>
     <string name="hail_search">검색</string>
+    <string name="hail_joining_network">네트워크에 참여하는 중 — 게시판을 아직 읽지 못했습니다.</string>
 </resources>

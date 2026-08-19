@@ -100,4 +100,5 @@
     <string name="hail_osm_privacy">جستجو، مسیر و نقشه از سرورهای OpenStreetMap استفاده می‌کنند — تنها جایی که DUCAT موقعیت را بیرون از دستگاه می‌فرستد. راننده‌ها فقط محدوده‌هایی حدود %1$s می‌بینند.</string>
     <string name="hail_post_button">تاکسی بگیر 🚕</string>
     <string name="hail_search">جستجو</string>
+    <string name="hail_joining_network">در حال پیوستن به شبکه — هنوز تابلوها خوانده نشده‌اند.</string>
 </resources>

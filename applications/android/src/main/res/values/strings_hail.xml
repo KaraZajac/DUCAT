@@ -100,4 +100,5 @@
     <string name="hail_osm_privacy">Search, route and map use OpenStreetMap\'s servers — the one place DUCAT sends location off-device. Drivers see only ~%1$s areas.</string>
     <string name="hail_post_button">Hail 🚕</string>
     <string name="hail_search">Search</string>
+    <string name="hail_joining_network">Joining the network — the boards have not been read yet.</string>
 </resources>

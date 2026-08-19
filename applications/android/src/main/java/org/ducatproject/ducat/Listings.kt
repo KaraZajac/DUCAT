@@ -274,17 +274,25 @@ object Listings {
             }
         }
 
-        // Wave one: where you are, shard 0, alone. The answer people usually
-        // want, and the only read that happens before anything is shown.
-        absorb(readCell(home, kind, deep = false))
-
         val ring = runCatching { uniffi.ducat_mobile.geohashNeighbors(home) }
             .getOrDefault(emptyList())
-        val pool = java.util.concurrent.Executors.newFixedThreadPool(8)
+        val pool = java.util.concurrent.Executors.newFixedThreadPool(9)
         try {
-            // Wave two: the ring's shard 0, in parallel — the wait becomes
-            // the slowest board rather than the sum of nine.
-            ring.map { cell -> pool.submit { runCatching { absorb(readCell(cell, kind, false)) } } }
+            // Wave one: where you are *and* the ring around it, shard 0, all
+            // at once — each board drawn as it answers.
+            //
+            // The home cell used to be read alone and first, on the reasoning
+            // that it is the answer people usually want. True where somebody
+            // is listing something; false everywhere else, and "everywhere
+            // else" is what a quiet neighbourhood is. An empty board takes 51
+            // to 85 seconds to come back empty — concluding a record is *not*
+            // there costs more than finding one — so a blocking first read
+            // bought nothing and delayed the other eight by a minute and a
+            // half before they had even started. A populated home cell still
+            // arrives first: it answers in 12 to 18 seconds and `absorb`
+            // publishes on arrival, not in order.
+            (listOf(home) + ring)
+                .map { cell -> pool.submit { runCatching { absorb(readCell(cell, kind, false)) } } }
                 .forEach { runCatching { it.get(150, java.util.concurrent.TimeUnit.SECONDS) } }
 
             // Wave three: climb the ladder, but only where shard 0 came back

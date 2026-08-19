@@ -100,4 +100,5 @@
     <string name="hail_osm_privacy">Suche, Route und Karte laufen über die Server von OpenStreetMap — die eine Stelle, an der DUCAT den Standort vom Gerät gibt. Fahrer sehen nur Gebiete von ~%1$s.</string>
     <string name="hail_post_button">Rufen 🚕</string>
     <string name="hail_search">Suchen</string>
+    <string name="hail_joining_network">Verbindet sich mit dem Netz — die Bretter wurden noch nicht gelesen.</string>
 </resources>

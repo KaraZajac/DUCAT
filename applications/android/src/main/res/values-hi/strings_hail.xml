@@ -100,4 +100,5 @@
     <string name="hail_osm_privacy">खोज, रास्ता और नक्शा OpenStreetMap के सर्वर इस्तेमाल करते हैं — बस यही एक जगह है जहाँ DUCAT लोकेशन डिवाइस से बाहर भेजता है। ड्राइवरों को सिर्फ़ ~%1$s के इलाक़े दिखते हैं।</string>
     <string name="hail_post_button">सवारी बुलाएँ 🚕</string>
     <string name="hail_search">खोजें</string>
+    <string name="hail_joining_network">नेटवर्क से जुड़ रहे हैं — बोर्ड अभी पढ़े नहीं गए हैं।</string>
 </resources>
