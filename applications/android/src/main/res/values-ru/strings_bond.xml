@@ -45,4 +45,12 @@
     <string name="res_kind_vehicle">Транспорт</string>
     <string name="res_kind_note">по %1$d%% с каждой стороны</string>
     <string name="bond_await_their_stake">Ждём их залог — вы платите, когда он внесён.</string>
+    <string name="res_escrow_ready">Эскроу готов — аренда и оба залога вносятся до передачи.</string>
+    <string name="res_pay_now">Оплатить аренду и залог (%1$s)</string>
+    <string name="res_paid_sent">Аренда и залог отправлены — подтверждение в сети…</string>
+    <string name="res_waiting_payment">Ожидание оплаты аренды и залога от арендатора…</string>
+    <string name="res_waiting_release">Аренда завершена — ожидание, пока арендатор освободит деньги…</string>
+    <string name="res_complete_ask">Владелец отметил аренду завершённой.</string>
+    <string name="res_split_stated">Предложено: %1$s арендатору, %2$s владельцу.</string>
+    <string name="res_released">Бронирование закрыто</string>
 </resources>

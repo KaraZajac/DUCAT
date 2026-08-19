@@ -45,4 +45,12 @@
     <string name="res_kind_vehicle">Một phương tiện</string>
     <string name="res_kind_note">gợi ý %1$d%% mỗi bên</string>
     <string name="bond_await_their_stake">Đang chờ tiền cọc của họ — bạn trả sau khi họ đặt cọc.</string>
+    <string name="res_escrow_ready">Escrow đã sẵn sàng — tiền thuê và cọc của cả hai bên vào trước khi bàn giao.</string>
+    <string name="res_pay_now">Trả tiền thuê và cọc (%1$s)</string>
+    <string name="res_paid_sent">Đã gửi tiền thuê và cọc — đang xác nhận trên chuỗi…</string>
+    <string name="res_waiting_payment">Đang chờ người thuê trả tiền thuê và tiền cọc…</string>
+    <string name="res_waiting_release">Đã xong kỳ thuê — đang chờ người thuê giải phóng tiền…</string>
+    <string name="res_complete_ask">Chủ tin đã đánh dấu kỳ thuê hoàn tất.</string>
+    <string name="res_split_stated">Đề xuất: %1$s trả lại người thuê, %2$s cho chủ.</string>
+    <string name="res_released">Đã tất toán lượt đặt</string>
 </resources>

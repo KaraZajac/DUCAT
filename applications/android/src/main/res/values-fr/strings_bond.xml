@@ -45,4 +45,12 @@
     <string name="res_kind_vehicle">Un véhicule</string>
     <string name="res_kind_note">suggère %1$d%% de chaque côté</string>
     <string name="bond_await_their_stake">En attente de leur dépôt — vous payez une fois le leur versé.</string>
+    <string name="res_escrow_ready">Séquestre prêt — le loyer et les deux cautions entrent avant la remise.</string>
+    <string name="res_pay_now">Payer le loyer et la caution (%1$s)</string>
+    <string name="res_paid_sent">Loyer et caution envoyés — confirmation sur la chaîne…</string>
+    <string name="res_waiting_payment">En attente du paiement du loyer et de la caution par le locataire…</string>
+    <string name="res_waiting_release">Location terminée — en attente de la libération des fonds par le locataire…</string>
+    <string name="res_complete_ask">Le propriétaire a marqué la location comme terminée.</string>
+    <string name="res_split_stated">Proposition : %1$s au locataire, %2$s au propriétaire.</string>
+    <string name="res_released">Réservation réglée</string>
 </resources>

@@ -45,4 +45,12 @@
     <string name="res_kind_vehicle">A vehicle</string>
     <string name="res_kind_note">suggests %1$d%% each side</string>
     <string name="bond_await_their_stake">Waiting for their stake — you pay once theirs is in.</string>
+    <string name="res_escrow_ready">Escrow ready — rent and both deposits go in before the handover.</string>
+    <string name="res_pay_now">Pay rent and deposit (%1$s)</string>
+    <string name="res_paid_sent">Rent and deposit sent — confirming on chain…</string>
+    <string name="res_waiting_payment">Waiting for the guest to pay the rent and their deposit…</string>
+    <string name="res_waiting_release">Rental complete — waiting for the guest to release the money…</string>
+    <string name="res_complete_ask">The owner marked the rental complete.</string>
+    <string name="res_split_stated">Proposed: %1$s back to the guest, %2$s to the owner.</string>
+    <string name="res_released">Reservation settled</string>
 </resources>

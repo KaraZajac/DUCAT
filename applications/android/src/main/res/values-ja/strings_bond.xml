@@ -45,4 +45,12 @@
     <string name="res_kind_vehicle">車両</string>
     <string name="res_kind_note">双方 %1$d%% を提案</string>
     <string name="bond_await_their_stake">相手の預り金を待っています。入ったらお支払いです。</string>
+    <string name="res_escrow_ready">エスクロー準備完了 — 受け渡しの前に家賃と双方のデポジットが入ります。</string>
+    <string name="res_pay_now">家賃とデポジットを支払う（%1$s）</string>
+    <string name="res_paid_sent">家賃とデポジットを送金しました — チェーンで確認中…</string>
+    <string name="res_waiting_payment">借り手が家賃とデポジットを支払うのを待っています…</string>
+    <string name="res_waiting_release">レンタル終了 — 借り手が資金を解放するのを待っています…</string>
+    <string name="res_complete_ask">貸し手がレンタルを終了と記録しました。</string>
+    <string name="res_split_stated">提案：%1$s を借り手へ、%2$s を貸し手へ。</string>
+    <string name="res_released">予約を精算しました</string>
 </resources>

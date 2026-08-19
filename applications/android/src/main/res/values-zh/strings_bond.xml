@@ -45,4 +45,12 @@
     <string name="res_kind_vehicle">车辆</string>
     <string name="res_kind_note">建议双方各 %1$d%%</string>
     <string name="bond_await_their_stake">等待对方的押金 —— 对方押上后你再付。</string>
+    <string name="res_escrow_ready">托管已就绪 — 租金和双方押金在交接前入账。</string>
+    <string name="res_pay_now">支付租金和押金（%1$s）</string>
+    <string name="res_paid_sent">租金和押金已发送 — 正在链上确认…</string>
+    <string name="res_waiting_payment">等待租客支付租金和押金…</string>
+    <string name="res_waiting_release">租期结束 — 等待租客释放款项…</string>
+    <string name="res_complete_ask">出租方已标记租期结束。</string>
+    <string name="res_split_stated">提议：%1$s 退还租客，%2$s 给出租方。</string>
+    <string name="res_released">预订已结算</string>
 </resources>

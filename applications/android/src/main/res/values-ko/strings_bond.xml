@@ -45,4 +45,12 @@
     <string name="res_kind_vehicle">차량</string>
     <string name="res_kind_note">양쪽 각 %1$d%% 제안</string>
     <string name="bond_await_their_stake">상대의 보증금을 기다리는 중 — 들어오면 결제합니다.</string>
+    <string name="res_escrow_ready">에스크로 준비됨 — 인도 전에 대여료와 양쪽 보증금이 들어갑니다.</string>
+    <string name="res_pay_now">대여료와 보증금 결제 (%1$s)</string>
+    <string name="res_paid_sent">대여료와 보증금을 보냈습니다 — 체인에서 확인 중…</string>
+    <string name="res_waiting_payment">빌리는 쪽이 대여료와 보증금을 내기를 기다리는 중…</string>
+    <string name="res_waiting_release">대여 종료 — 빌리는 쪽이 자금을 풀기를 기다리는 중…</string>
+    <string name="res_complete_ask">소유자가 대여를 종료로 표시했습니다.</string>
+    <string name="res_split_stated">제안: %1$s은 빌리는 쪽에, %2$s은 소유자에게.</string>
+    <string name="res_released">예약 정산 완료</string>
 </resources>

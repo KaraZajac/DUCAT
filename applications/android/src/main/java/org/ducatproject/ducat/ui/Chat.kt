@@ -1882,7 +1882,7 @@ private fun RideBondBanner(contact: Contact) {
                 title = stringResource(R.string.bond_ride_complete_ask),
                 amount = if (rider) riderBack else (funded - riderBack).coerceAtLeast(0L),
                 note = stringResource(
-                    R.string.bond_split_stated,
+                    if (reservation) R.string.res_split_stated else R.string.bond_split_stated,
                     Amounts.show(context, riderBack).primary,
                     Amounts.show(context, (funded - riderBack).coerceAtLeast(0L)).primary,
                 ),
@@ -1943,7 +1943,13 @@ private fun RideBondBanner(contact: Contact) {
                     BondLine(spin = true, text = stringResource(R.string.bond_await_their_stake))
 
                 stage == "done" && rider && ride.optString("fundTxid").isEmpty() -> {
-                    BondLine(spin = false, text = stringResource(R.string.bond_escrow_ready))
+                    BondLine(
+                        spin = false,
+                        text = stringResource(
+                            if (reservation) R.string.res_escrow_ready
+                            else R.string.bond_escrow_ready,
+                        ),
+                    )
                     Spacer(Modifier.height(6.dp))
                     // Fare plus margin: the margin comes home in the release,
                     // and is what makes releasing beat sulking when there is
@@ -1965,7 +1971,15 @@ private fun RideBondBanner(contact: Contact) {
                         },
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
-                    ) { Text(stringResource(R.string.bond_secure_fare, fundShown)) }
+                    ) {
+                        Text(
+                            stringResource(
+                                if (reservation) R.string.res_pay_now
+                                else R.string.bond_secure_fare,
+                                fundShown,
+                            ),
+                        )
+                    }
                     // The promise, at the moment the money is asked for,
                     // rather than in a help page nobody opens.
                     val myStake = org.ducatproject.ducat.Stakes.stakeFor(
@@ -1984,7 +1998,13 @@ private fun RideBondBanner(contact: Contact) {
                     }
                 }
                 stage == "done" && rider && funded < need ->
-                    BondLine(spin = true, text = stringResource(R.string.bond_fare_sent))
+                    BondLine(
+                        spin = true,
+                        text = stringResource(
+                            if (reservation) R.string.res_paid_sent
+                            else R.string.bond_fare_sent,
+                        ),
+                    )
                 stage == "done" && rider -> {
                     BondLine(spin = false, text = stringResource(
                         if (reservation) R.string.res_secured else R.string.bond_fare_secured))
@@ -2057,7 +2077,13 @@ private fun RideBondBanner(contact: Contact) {
                     BondNote(stringResource(R.string.bond_stake_refunded, myShown))
                 }
                 stage == "done" && !rider && funded < need ->
-                    BondLine(spin = true, text = stringResource(R.string.bond_waiting_funding))
+                    BondLine(
+                        spin = true,
+                        text = stringResource(
+                            if (reservation) R.string.res_waiting_payment
+                            else R.string.bond_waiting_funding,
+                        ),
+                    )
                 stage == "done" && !rider -> {
                     BondLine(spin = false, text = stringResource(
                         if (reservation) R.string.res_secured else R.string.bond_fare_secured))
@@ -2081,7 +2107,13 @@ private fun RideBondBanner(contact: Contact) {
                         if (reservation) R.string.res_settle else R.string.bond_complete_ride)) }
                 }
                 stage == "releasing" -> {
-                    BondLine(spin = true, text = stringResource(R.string.bond_waiting_release))
+                    BondLine(
+                        spin = true,
+                        text = stringResource(
+                            if (reservation) R.string.res_waiting_release
+                            else R.string.bond_waiting_release,
+                        ),
+                    )
                     // §9.3: the counterparty gone, the arbiter is the way out.
                     // Same proposal, different signer; their signature is the
                     // ruling.
@@ -2111,7 +2143,7 @@ private fun RideBondBanner(contact: Contact) {
                         Spacer(Modifier.height(2.dp))
                         Text(
                             stringResource(
-                                R.string.bond_split_stated,
+                                if (reservation) R.string.res_split_stated else R.string.bond_split_stated,
                                 Amounts.show(context, mine).primary,
                                 Amounts.show(context, (funded - mine).coerceAtLeast(0L)).primary,
                             ),
@@ -2156,11 +2188,17 @@ private fun RideBondBanner(contact: Contact) {
                     // and offer the only two moves: sign it, or counter.
                     val riderBack = ride.optLong("pendingRiderBack", (funded - fare).coerceAtLeast(0L))
                     val toDriver = (funded - riderBack).coerceAtLeast(0L)
-                    BondLine(spin = false, text = stringResource(R.string.bond_ride_complete_ask))
+                    BondLine(
+                        spin = false,
+                        text = stringResource(
+                            if (reservation) R.string.res_complete_ask
+                            else R.string.bond_ride_complete_ask,
+                        ),
+                    )
                     Spacer(Modifier.height(2.dp))
                     Text(
                         stringResource(
-                            R.string.bond_split_stated,
+                            if (reservation) R.string.res_split_stated else R.string.bond_split_stated,
                             Amounts.show(context, riderBack).primary,
                             Amounts.show(context, toDriver).primary,
                         ),
@@ -2234,7 +2272,12 @@ private fun RideBondBanner(contact: Contact) {
                 // that co-signed ("release_cosigned") saw a bare "Fare
                 // released" with no idea how much had arrived.
                 stage == "released" || stage == "release_cosigned" -> {
-                    BondLine(spin = false, text = stringResource(R.string.bond_released))
+                    BondLine(
+                        spin = false,
+                        text = stringResource(
+                            if (reservation) R.string.res_released else R.string.bond_released,
+                        ),
+                    )
                     val mine = if (stage == "released") ride.optLong("payoutPxmr")
                     else ride.optLong("pendingRiderBack")
                     if (mine > 0) {

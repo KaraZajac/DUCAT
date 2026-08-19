@@ -45,4 +45,12 @@
     <string name="res_kind_vehicle">Een voertuig</string>
     <string name="res_kind_note">stelt %1$d%% per kant voor</string>
     <string name="bond_await_their_stake">Wachten op hun borg — jij betaalt zodra die van hen binnen is.</string>
+    <string name="res_escrow_ready">Escrow klaar — huur en beide borgsommen gaan erin vóór de overdracht.</string>
+    <string name="res_pay_now">Huur en borg betalen (%1$s)</string>
+    <string name="res_paid_sent">Huur en borg verstuurd — bevestigen op de keten…</string>
+    <string name="res_waiting_payment">Wachten tot de huurder de huur en zijn borg betaalt…</string>
+    <string name="res_waiting_release">Verhuur afgerond — wachten tot de huurder het geld vrijgeeft…</string>
+    <string name="res_complete_ask">De aanbieder heeft de verhuur als afgerond gemarkeerd.</string>
+    <string name="res_split_stated">Voorstel: %1$s terug naar de huurder, %2$s naar de aanbieder.</string>
+    <string name="res_released">Boeking afgerekend</string>
 </resources>

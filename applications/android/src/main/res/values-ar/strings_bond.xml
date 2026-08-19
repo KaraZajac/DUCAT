@@ -45,4 +45,12 @@
     <string name="res_kind_vehicle">مركبة</string>
     <string name="res_kind_note">يقترح %1$d%% لكل طرف</string>
     <string name="bond_await_their_stake">بانتظار ضمانهم — تدفع بعد دخول ضمانهم.</string>
+    <string name="res_escrow_ready">الضمان جاهز — يدخل الإيجار وكلا التأمينين قبل التسليم.</string>
+    <string name="res_pay_now">ادفع الإيجار والتأمين (%1$s)</string>
+    <string name="res_paid_sent">أُرسل الإيجار والتأمين — جارٍ التأكيد على السلسلة…</string>
+    <string name="res_waiting_payment">بانتظار أن يدفع النزيل الإيجار وتأمينه…</string>
+    <string name="res_waiting_release">انتهى الإيجار — بانتظار أن يُفرج النزيل عن المال…</string>
+    <string name="res_complete_ask">علّم المالك الإيجار بأنه منتهٍ.</string>
+    <string name="res_split_stated">المقترح: %1$s تعود إلى النزيل، و%2$s إلى المالك.</string>
+    <string name="res_released">تمت تسوية الحجز</string>
 </resources>

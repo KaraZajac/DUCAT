@@ -45,4 +45,12 @@
     <string name="res_kind_vehicle">Un vehículo</string>
     <string name="res_kind_note">sugiere %1$d%% por cada parte</string>
     <string name="bond_await_their_stake">Esperando su garantía: pagas cuando la suya esté puesta.</string>
+    <string name="res_escrow_ready">Depósito en garantía listo: el alquiler y ambas fianzas entran antes de la entrega.</string>
+    <string name="res_pay_now">Pagar alquiler y fianza (%1$s)</string>
+    <string name="res_paid_sent">Alquiler y fianza enviados — confirmando en la cadena…</string>
+    <string name="res_waiting_payment">Esperando a que el huésped pague el alquiler y su fianza…</string>
+    <string name="res_waiting_release">Alquiler terminado — esperando a que el huésped libere el dinero…</string>
+    <string name="res_complete_ask">El propietario marcó el alquiler como terminado.</string>
+    <string name="res_split_stated">Propuesta: %1$s de vuelta al huésped, %2$s al propietario.</string>
+    <string name="res_released">Reserva liquidada</string>
 </resources>
