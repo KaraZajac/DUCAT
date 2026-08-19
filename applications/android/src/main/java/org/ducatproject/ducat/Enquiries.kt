@@ -44,9 +44,14 @@ object Enquiries {
      * Note what this person and I are talking about. First write wins: a
      * second claim cannot repaint an older conversation's subject.
      */
-    fun remember(context: Context, personaHex: String, about: About) {
+    private val lock = Any()
+
+    fun remember(context: Context, personaHex: String, about: About) = synchronized(lock) {
         if (personaHex.isBlank()) return
         val p = prefs(context)
+        // Under the lock, or "first write wins" is only true when nothing
+        // races: two claims arriving together both pass this check and the
+        // later one repaints the subject the earlier one set.
         if (p.contains(key(personaHex))) return
         p.edit().putString(
             key(personaHex),

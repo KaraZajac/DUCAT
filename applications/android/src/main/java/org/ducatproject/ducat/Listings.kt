@@ -58,6 +58,20 @@ object Listings {
 
     private fun prefs(context: Context) = securePrefs(context, "ducat_listings")
 
+    /**
+     * Guards read-change-write of the listing set.
+     *
+     * `linkClaims` runs on the poller — matching answered cards to listings
+     * and minting a replacement card for each — while a screen posts, edits or
+     * deletes a listing. Both rewrite the whole array. The write that loses
+     * takes a card with it, and a listing whose card was dropped is one nobody
+     * can enquire about until it is posted again.
+     *
+     * (The two locks already in this file guard the *search*, which is a
+     * different thing: many boards read in parallel into one result set.)
+     */
+    private val lock = Any()
+
     fun all(context: Context): List<JSONObject> {
         val raw = prefs(context).getString("listings", null) ?: return emptyList()
         val arr = runCatching { JSONArray(raw) }.getOrNull() ?: return emptyList()
@@ -72,13 +86,13 @@ object Listings {
         ContactStore.bump()
     }
 
-    fun put(context: Context, o: JSONObject) {
+    fun put(context: Context, o: JSONObject) = synchronized(lock) {
         val id = o.optString("id")
         save(context, all(context).filter { it.optString("id") != id } + o)
     }
 
     fun remove(context: Context, id: String) {
-        save(context, all(context).filter { it.optString("id") != id })
+        synchronized(lock) { save(context, all(context).filter { it.optString("id") != id }) }
     }
 
     /**

@@ -79,7 +79,15 @@ class RideStore(context: Context) {
 
     data class Tombstone(val board: String, val subkey: UInt, val card: String, val expiry: Long)
 
-    fun addTombstone(t: Tombstone) {
+    /**
+     * Guards the tombstone list, which posting and sweeping both rewrite
+     * whole — a post adds two at once (the fine cell and its wide copy) while
+     * a sweep is removing the ones that expired. A lost tombstone is a board
+     * slot nobody reclaims.
+     */
+    private companion object { val lock = Any() }
+
+    fun addTombstone(t: Tombstone) = synchronized(lock) {
         val arr = org.json.JSONArray(prefs.getString("tombstones", "[]"))
         arr.put(org.json.JSONObject()
             .put("b", t.board).put("s", t.subkey.toInt())
@@ -95,7 +103,7 @@ class RideStore(context: Context) {
         }
     }
 
-    fun removeTombstone(t: Tombstone) {
+    fun removeTombstone(t: Tombstone) = synchronized(lock) {
         val keep = tombstones().filterNot { it == t }
         val arr = org.json.JSONArray()
         keep.forEach {
