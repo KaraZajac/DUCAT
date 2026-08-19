@@ -58,4 +58,5 @@
     <string name="pay_cancel">Скасувати</string>
     <string name="pay_fee_unknown">зараз невідома</string>
     <string name="pay_fee_unknown_confirm">Зараз не вдалося оцінити комісію. Транзакція заплатить стільки, скільки коштуватиме під час створення.</string>
+    <string name="pay_node_no_answer">Вузол Monero не відповів вчасно. Нічого не надіслано. Спробуйте ще раз — застосунок візьме інший вузол.</string>
 </resources>

@@ -1789,6 +1789,19 @@ class NodeStore(context: Context) {
             false
         }
     }
+
+    /**
+     * The node did not answer at all — demote it now rather than on the third
+     * try.
+     *
+     * Three strikes is right for an ambiguous failure, where the node may be
+     * fine and the request wrong. A read that times out is not ambiguous, and
+     * making someone watch the same payment fail three times before the app
+     * quietly tries a different node is three failures too many: it looks like
+     * the wallet is broken, not like one server is slow.
+     */
+    fun nodeUnreachable() =
+        prefs.edit().remove("monero_last_good").putInt("monero_node_fails", 0).apply()
 }
 
 

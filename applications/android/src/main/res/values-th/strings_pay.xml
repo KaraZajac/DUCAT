@@ -58,4 +58,5 @@
     <string name="pay_cancel">ยกเลิก</string>
     <string name="pay_fee_unknown">ยังไม่ทราบตอนนี้</string>
     <string name="pay_fee_unknown_confirm">ยังประเมินค่าธรรมเนียมไม่ได้ในตอนนี้ ธุรกรรมจะจ่ายตามจริงเมื่อสร้างขึ้น</string>
+    <string name="pay_node_no_answer">โหนด Monero ไม่ตอบกลับทันเวลา ยังไม่มีการส่งอะไร ลองอีกครั้ง แอปจะใช้โหนดอื่น</string>
 </resources>

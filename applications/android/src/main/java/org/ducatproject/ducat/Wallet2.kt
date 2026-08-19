@@ -408,6 +408,24 @@ object Wallet {
         )
     }
 
+    /**
+     * Whether a failure is the node's rather than the wallet's.
+     *
+     * The bridge hands these up as the shape it got from the transport, and
+     * they reach a screen as, verbatim: `v1=decoys:
+     * InterfaceError(InterfaceError("timed out reading response"))`. Nobody
+     * can act on that. What it means is that fetching ring members timed out —
+     * `get_outs` is the heaviest call a send makes, so a public node under
+     * load fails there first, having answered every cheaper request fine.
+     */
+    fun isNodeTrouble(t: Throwable): Boolean {
+        val why = (t.message ?: "").lowercase()
+        return listOf(
+            "timed out", "timeout", "interfaceerror", "network error",
+            "connection", "unexpected eof", "decoys",
+        ).any { why.contains(it) }
+    }
+
     /** Build, sign and broadcast. Blocking; call it off the main thread. */
     fun send(
         context: Context,
@@ -442,8 +460,13 @@ object Wallet {
             DucatLog.e(TAG, "send failed: ${e.message ?: e}")
             // A failed send counts against the node like a failed scan does:
             // the retry the user is about to make should not be fed to the
-            // same dying node until it re-earns its place.
-            if (NodeStore(context).nodeFailed()) {
+            // same dying node until it re-earns its place. A read that timed
+            // out is unambiguous, so it costs the node its place at once
+            // instead of on the third identical failure — see nodeUnreachable.
+            if (isNodeTrouble(e)) {
+                NodeStore(context).nodeUnreachable()
+                DucatLog.w(TAG, "node did not answer — demoted, next try re-probes")
+            } else if (NodeStore(context).nodeFailed()) {
                 DucatLog.w(TAG, "node demoted after repeated failures — will re-probe")
             }
             throw e

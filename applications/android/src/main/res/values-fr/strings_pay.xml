@@ -58,4 +58,5 @@
     <string name="pay_cancel">Annuler</string>
     <string name="pay_fee_unknown">inconnus pour l’instant</string>
     <string name="pay_fee_unknown_confirm">Les frais n’ont pas pu être estimés pour l’instant. La transaction paiera ce qu’elle coûte au moment de sa construction.</string>
+    <string name="pay_node_no_answer">Le nœud Monero n’a pas répondu à temps. Rien n’a été envoyé. Réessayez : l’application prendra un autre nœud.</string>
 </resources>

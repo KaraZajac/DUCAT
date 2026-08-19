@@ -58,4 +58,5 @@
     <string name="pay_cancel">لغو</string>
     <string name="pay_fee_unknown">اکنون نامشخص است</string>
     <string name="pay_fee_unknown_confirm">هزینه در این لحظه قابل برآورد نبود. تراکنش هر چه هنگام ساخته‌شدن هزینه داشته باشد می‌پردازد.</string>
+    <string name="pay_node_no_answer">گرهٔ Monero به‌موقع پاسخ نداد. چیزی ارسال نشد. دوباره تلاش کنید — برنامه از گرهٔ دیگری استفاده می‌کند.</string>
 </resources>

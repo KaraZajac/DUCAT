@@ -58,4 +58,5 @@
     <string name="pay_cancel">Cancelar</string>
     <string name="pay_fee_unknown">ahora mismo no se sabe</string>
     <string name="pay_fee_unknown_confirm">Ahora mismo no se ha podido estimar la comisión. La transacción pagará lo que cueste al construirse.</string>
+    <string name="pay_node_no_answer">El nodo de Monero no respondió a tiempo. No se envió nada. Inténtalo otra vez: la app usará otro nodo.</string>
 </resources>

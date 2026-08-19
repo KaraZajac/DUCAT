@@ -687,7 +687,7 @@ private fun AmountStep(
                             }
                             busy = false
                             r.onSuccess { done = context.getString(R.string.pay_request_sent) }
-                                .onFailure { error = it.message ?: context.getString(R.string.pay_could_not_send) }
+                                .onFailure { error = sendFailure(context, it) }
                         }
                     },
                     // Asking for more than you hold is perfectly reasonable, so
@@ -821,7 +821,7 @@ private fun AmountStep(
                     }
                     busy = false
                     r.onSuccess { paidPxmr = pxmr }
-                        .onFailure { error = it.message ?: context.getString(R.string.pay_could_not_send) }
+                        .onFailure { error = sendFailure(context, it) }
                 }
             },
         )
@@ -926,4 +926,19 @@ private fun ConfirmSend(
         confirmButton = { TextButton(onClick = onConfirm, enabled = !busy) { Text(stringResource(R.string.pay_send)) } },
         dismissButton = { TextButton(onClick = onCancel) { Text(stringResource(R.string.pay_cancel)) } },
     )
+}
+
+/**
+ * A send failure, in words instead of in the transport's own vocabulary.
+ *
+ * What a phone showed while trying to pay: `v1=decoys:
+ * InterfaceError(InterfaceError("timed out reading response"))`. That is a
+ * public node failing on `get_outs`, the heaviest call a send makes — nothing
+ * to do with the wallet, the amount, or the address, and nothing a person can
+ * act on as written. The app has already demoted that node by the time this
+ * runs, so the useful thing to say is: try again, it will use another.
+ */
+private fun sendFailure(context: android.content.Context, t: Throwable): String = when {
+    Wallet.isNodeTrouble(t) -> context.getString(R.string.pay_node_no_answer)
+    else -> t.message ?: context.getString(R.string.pay_could_not_send)
 }

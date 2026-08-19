@@ -58,4 +58,5 @@
     <string name="pay_cancel">Hủy</string>
     <string name="pay_fee_unknown">hiện chưa rõ</string>
     <string name="pay_fee_unknown_confirm">Hiện chưa ước tính được phí. Giao dịch sẽ trả đúng mức phí khi được tạo.</string>
+    <string name="pay_node_no_answer">Nút Monero không trả lời kịp. Chưa gửi gì cả. Hãy thử lại — ứng dụng sẽ dùng nút khác.</string>
 </resources>

@@ -58,4 +58,5 @@
     <string name="pay_cancel">إلغاء</string>
     <string name="pay_fee_unknown">غير معروفة الآن</string>
     <string name="pay_fee_unknown_confirm">تعذّر تقدير الرسوم الآن. ستدفع المعاملة ما تكلّفه عند بنائها.</string>
+    <string name="pay_node_no_answer">لم تستجب عقدة Monero في الوقت المحدد. لم يُرسَل شيء. أعد المحاولة — سيستخدم التطبيق عقدة أخرى.</string>
 </resources>

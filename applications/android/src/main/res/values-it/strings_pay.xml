@@ -58,4 +58,5 @@
     <string name="pay_cancel">Annulla</string>
     <string name="pay_fee_unknown">al momento sconosciute</string>
     <string name="pay_fee_unknown_confirm">Al momento non è stato possibile stimare la commissione. La transazione pagherà quello che costa quando viene costruita.</string>
+    <string name="pay_node_no_answer">Il nodo Monero non ha risposto in tempo. Non è stato inviato nulla. Riprova: l’app userà un altro nodo.</string>
 </resources>

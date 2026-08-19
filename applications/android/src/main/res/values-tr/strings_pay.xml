@@ -58,4 +58,5 @@
     <string name="pay_cancel">İptal</string>
     <string name="pay_fee_unknown">şu an bilinmiyor</string>
     <string name="pay_fee_unknown_confirm">Ücret şu an tahmin edilemedi. İşlem, oluşturulurken ne tutuyorsa onu öder.</string>
+    <string name="pay_node_no_answer">Monero düğümü zamanında yanıt vermedi. Hiçbir şey gönderilmedi. Tekrar dene — uygulama başka bir düğüm kullanacak.</string>
 </resources>
