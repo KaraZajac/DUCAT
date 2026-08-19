@@ -26,6 +26,7 @@
     <string name="res_tray">Бронювання</string>
     <string name="res_title">Запропонувати бронювання</string>
     <string name="res_note">Оренда й обидві застави йдуть в одне ескроу. Ви вносите оренду + свою заставу; їхня згода — внести свою. Застави повертаються при випуску.</string>
+    <string name="res_about">Щодо %1$s. Оренда й обидві застави йдуть в один ескроу, а застави повертаються при звільненні.</string>
     <string name="res_rent">Оренда (XMR)</string>
     <string name="res_my_deposit">Ваша застава (XMR)</string>
     <string name="res_host_deposit">Їхня застава (XMR)</string>

@@ -227,6 +227,19 @@ object Listings {
         // device has no idea where: a refresh would post a second copy and
         // "take it down" would have nothing to clear.
         o.put("card", card.uri)
+        // Every card this listing has ever put on a board, not just the one
+        // currently on it. A live notice is re-posted every few hours and each
+        // posting mints a fresh card (a card is claimed once), so somebody who
+        // read the board before the last refresh is holding a card this device
+        // would otherwise have forgotten — and their enquiry would arrive with
+        // no idea what it was about. Caught in exactly that state on 2026-08-19.
+        val minted = o.optJSONArray("cards") ?: org.json.JSONArray()
+        minted.put(card.uri)
+        // A day's TTL over a six-hour refresh is four cards; the slack is for
+        // re-posts after a failure, and anything older cannot still be on a
+        // board to be read.
+        while (minted.length() > 8) minted.remove(0)
+        o.put("cards", minted)
         o.put("board", board)
         o.put("subkey", slot.toInt())
         o.put("postedAt", now)
@@ -248,6 +261,63 @@ object Listings {
         put(context, o)
     }
 
+    /**
+     * Tie each answered rental card back to the listing it was cut for.
+     *
+     * A card is minted per posting and claimed once (see [post]), so the
+     * stranger who answered one is asking about exactly one thing — and the
+     * owner's side is the only side that can work that out, because the
+     * seeker's claim says nothing about which notice they read. Recorded once
+     * per contact and never revised.
+     *
+     * Called after claims are collected rather than from inside the mailbox,
+     * which has no business knowing that renting exists.
+     */
+    fun linkClaims(context: Context) {
+        // Only the ones not already tied to something: this runs on every
+        // poll, and reading back every listing to re-decide a question that
+        // was settled days ago is work with no answer at the end of it.
+        val answered = ContactStore(context).issuedCards()
+            .filter { it.purpose == "rental" && it.answeredBy != null }
+            .filter { Enquiries.about(context, it.answeredBy!!) == null }
+        if (answered.isEmpty()) return
+        val byCard = HashMap<String, JSONObject>()
+        all(context).forEach { o ->
+            o.optString("card").takeIf { it.isNotBlank() }?.let { byCard[it] = o }
+            o.optJSONArray("cards")?.let { arr ->
+                (0 until arr.length()).forEach { i ->
+                    runCatching { byCard[arr.getString(i)] = o }
+                }
+            }
+        }
+        answered.forEach { issued ->
+            val o = byCard[issued.uri] ?: return@forEach
+            // The card on the board has just been used up — they are claimed
+            // once — so put a fresh one out at once. Left alone, the notice
+            // stays readable but unreachable until the next refresh hours
+            // later, and the next person to tap Ask about it is told the card
+            // has already been used and to ask the owner for a new one, which
+            // is both untrue and impossible: asking is the thing they cannot
+            // do. One listing, one enquiry, per six hours was never the deal.
+            if (o.optString("card") == issued.uri && o.optString("board").isNotBlank()) {
+                runCatching { post(context, o.optString("id")) }
+                    .onSuccess {
+                        DucatLog.i(TAG, "${o.optString("title")}: fresh card after an enquiry")
+                    }
+                    .onFailure { DucatLog.w(TAG, "re-post after enquiry: ${it.message}") }
+            }
+            Enquiries.remember(
+                context, issued.answeredBy!!,
+                Enquiries.About(
+                    title = o.optString("title"),
+                    pricePxmr = o.optLong("pricePxmr"),
+                    depositPxmr = o.optLong("depositPxmr"),
+                    kind = o.optInt("kind"),
+                ),
+            )
+        }
+    }
+
     /** Live listings whose notice is old enough to be worth re-posting. */
     fun needRefresh(context: Context): List<JSONObject> {
         val now = System.currentTimeMillis() / 1000
@@ -261,18 +331,16 @@ object Listings {
      * Read every listing on the boards around a place, answering as it goes.
      *
      * Measured on the live network, and the numbers decided the shape: a
-     * board that *has* listings answers in about 18 seconds, and a board
-     * that is empty takes 10 to 80, because the network has to satisfy
-     * itself the record is not there. Nine of those in a row is five minutes
-     * of spinner for a result that was mostly ready in the first twenty
-     * seconds.
+     * board somebody has posted to answers in 1.1 s, and an empty one takes
+     * 21.0 — flat, to the millisecond, across eight different empty boards,
+     * because that is the network giving up rather than searching.
      *
-     * So the home cell is read first and its results handed over
-     * immediately, and the ring around it is read in parallel afterwards —
-     * the wait becomes the slowest single board rather than the sum of nine,
-     * and the common case (what is right here) is on screen while the rest
-     * arrives. `onFound` is called with everything found so far, each time
-     * more is.
+     * So the home cell is read first and alone, and its results handed over
+     * immediately: nearly free when it finds something, bounded when it does
+     * not, and it is where a person is most likely to be renting. The ring is
+     * read afterwards, and `onFound` is called with everything found so far
+     * each time more of it lands, so what is right here is on screen while
+     * the rest arrives.
      */
     fun search(
         latE7: Long,

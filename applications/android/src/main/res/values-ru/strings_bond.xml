@@ -26,6 +26,7 @@
     <string name="res_tray">Бронирование</string>
     <string name="res_title">Предложить бронирование</string>
     <string name="res_note">Аренда и оба залога идут в одно эскроу. Вы вносите аренду + свой залог; их согласие — внести свой. Залоги возвращаются при выпуске.</string>
+    <string name="res_about">По поводу %1$s. Аренда и оба залога уходят в один эскроу, а залоги возвращаются при закрытии сделки.</string>
     <string name="res_rent">Аренда (XMR)</string>
     <string name="res_my_deposit">Ваш залог (XMR)</string>
     <string name="res_host_deposit">Их залог (XMR)</string>

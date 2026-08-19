@@ -81,6 +81,11 @@ class Poller(private val context: Context) {
                     // Answers to a card we handed out land in its inbox, and
                     // that only becomes a contact once somebody looks.
                     Mailbox.collectClaims(context)
+                    // A rental card is cut for one listing, so whoever
+                    // answered one is asking about that listing and no other.
+                    // Here rather than inside the mailbox, which has no
+                    // business knowing that renting exists.
+                    runCatching { Listings.linkClaims(context) }
                     val n = Mailbox.poll(context)
                     if (n > 0) DucatLog.i(TAG, "collected $n message(s)")
                 }.onFailure { DucatLog.w(TAG, "poll: ${it.message}") }

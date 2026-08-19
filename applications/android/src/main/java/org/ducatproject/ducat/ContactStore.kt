@@ -26,6 +26,9 @@ import org.json.JSONObject
 class ContactStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")
 
+    /** Kept so that forgetting a person can forget what they asked about. */
+    private val appContext = context.applicationContext
+
     companion object {
         /**
          * How long a burned one-time secret stays readable (§16.11).
@@ -214,6 +217,9 @@ class ContactStore(context: Context) {
         }
         putContacts(e, all().filterNot { it.personaHex == personaHex })
         e.apply()
+        // The listing they enquired about is part of the conversation, and
+        // "forget this person" has to mean all of it.
+        runCatching { Enquiries.forget(appContext, personaHex) }
         bump()
     } }
 

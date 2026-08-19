@@ -26,6 +26,7 @@
     <string name="res_tray">Reservasi</string>
     <string name="res_title">Usulkan reservasi</string>
     <string name="res_note">Sewa dan kedua deposit masuk satu escrow. Anda menyetor sewa + deposit Anda; penerimaan mereka adalah menyetor milik mereka. Deposit kembali saat rilis.</string>
+    <string name="res_about">Untuk %1$s. Sewa dan kedua deposit masuk ke satu escrow, dan deposit kembali saat dilepas.</string>
     <string name="res_rent">Sewa (XMR)</string>
     <string name="res_my_deposit">Deposit Anda (XMR)</string>
     <string name="res_host_deposit">Deposit mereka (XMR)</string>

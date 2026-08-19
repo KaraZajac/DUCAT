@@ -232,6 +232,18 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                                                 val card = uniffi.ducat_mobile
                                                     .readContactCard(info.card)
                                                 val c = Mailbox.claimCard(context, card, null)
+                                                // This side knows the subject
+                                                // without being told: they
+                                                // tapped it.
+                                                org.ducatproject.ducat.Enquiries.remember(
+                                                    context, c.personaHex,
+                                                    org.ducatproject.ducat.Enquiries.About(
+                                                        title = info.title,
+                                                        pricePxmr = info.pricePxmr.toLong(),
+                                                        depositPxmr = info.depositPxmr.toLong(),
+                                                        kind = info.kind.toInt(),
+                                                    ),
+                                                )
                                                 // Say what this is about.
                                                 //
                                                 // The claim alone opened an
@@ -262,7 +274,19 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                                         r.onSuccess { onOpenChat(it); onClose() }
                                             .onFailure {
                                                 DucatLog.w("RentSearch", "claim: ${it.message}")
-                                                error = context.getString(claimFailureRes(it))
+                                                error = context.getString(
+                                                    // "Ask them for a new one"
+                                                    // is the right thing to say
+                                                    // to someone holding a
+                                                    // scanned card and the
+                                                    // wrong thing entirely
+                                                    // here: asking is what
+                                                    // they were trying to do.
+                                                    claimFailureRes(
+                                                        it,
+                                                        alreadyUsed = R.string.rent_already_asked,
+                                                    ),
+                                                )
                                             }
                                     }
                                 },

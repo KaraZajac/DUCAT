@@ -50,6 +50,7 @@
     <string name="rent_search_retry">Spróbuj ponownie</string>
     <string name="rent_search_progress">Sprawdzono %1$d z %2$d okolic</string>
     <string name="rent_asking_about">Dzień dobry! Czy ogłoszenie %1$s jest jeszcze aktualne?</string>
+    <string name="rent_already_asked">Ktoś zapytał o to tuż przed tobą. Telefon ogłoszeniodawcy wystawi je z powrotem w minutę lub dwie — zajrzyj za chwilę.</string>
     <string name="rent_ask_about_it">Zapytaj o to</string>
     <string name="rent_per_day_short">%1$s / dzień</string>
     <string name="rent_per_night_short">%1$s / noc</string>

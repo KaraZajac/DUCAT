@@ -131,12 +131,58 @@ fun main() {
         check("nor the key handover", !onBoard.contains("keys in the cafe"))
         check("but the searchable shape is", onBoard.contains("Corolla"), "make and model")
 
+        // A live notice is re-posted every few hours, and each posting mints a
+        // fresh card because a card is claimed once. The card it replaces must
+        // not be forgotten: somebody who read the board an hour ago is still
+        // holding it, and their enquiry has to arrive knowing what it is about.
+        Listings.all(context).firstOrNull { it.optString("title").contains("Corolla") }
+            ?.let { before ->
+                val replaced = before.optString("card")
+                runCatching { Listings.post(context, before.optString("id")) }
+                val after = Listings.get(context, before.optString("id"))
+                val arr = after?.optJSONArray("cards")
+                val remembered = (0 until (arr?.length() ?: 0)).map { arr!!.getString(it) }
+                check(
+                    "a re-post keeps the card it replaced", remembered.contains(replaced),
+                    "${remembered.size} card(s) remembered",
+                )
+                check(
+                    "and the notice now carries the new one",
+                    after?.optString("card") == remembered.lastOrNull() &&
+                        after?.optString("card") != replaced,
+                )
+            }
+
         println("LIST_POSTED — leave this running while the seeker looks")
         // Boards are DHT records; stay up so they stay reachable.
+        //
+        // And watch for somebody answering one of the cards. A rental card is
+        // cut per posting and claimed once, so the owner can say which listing
+        // a stranger is asking about without being told — which is the half of
+        // §16.18 that no amount of reading the board proves.
+        val known = mutableSetOf<String>()
+        var refreshedAt = System.currentTimeMillis()
         while (true) {
-            Thread.sleep(30_000)
-            Listings.needRefresh(context).forEach {
-                runCatching { Listings.post(context, it.optString("id")) }
+            Thread.sleep(10_000)
+            runCatching { org.ducatproject.ducat.Mailbox.collectClaims(context) }
+            runCatching { Listings.linkClaims(context) }
+            org.ducatproject.ducat.ContactStore(context).all().forEach { c ->
+                if (!known.add(c.personaHex)) return@forEach
+                val about = org.ducatproject.ducat.Enquiries.about(context, c.personaHex)
+                println(
+                    if (about == null) {
+                        "LIST FAIL a claim arrived with no listing attached — ${c.displayName()}"
+                    } else {
+                        "LIST ok   the owner knows which listing was claimed — " +
+                            "${about.title} at ${formatXmr(about.pricePxmr)}"
+                    },
+                )
+            }
+            if (System.currentTimeMillis() - refreshedAt >= 30_000) {
+                refreshedAt = System.currentTimeMillis()
+                Listings.needRefresh(context).forEach {
+                    runCatching { Listings.post(context, it.optString("id")) }
+                }
             }
         }
     }
@@ -205,6 +251,27 @@ fun main() {
             c.title, c.area, c.make, c.model, c.color, c.trim,
         ).joinToString(" ")
         check("and no address anywhere in it", !everything.contains("Rosenthaler"))
+    }
+    // The last step of the seeker's arc: turn a notice into a conversation.
+    // The owner's side of this (which listing was that?) is asserted in the
+    // owner's own loop above, because only that process can answer it.
+    if (cars.isNotEmpty()) {
+        // Every car, not the first one. A board holds notices for a day, so a
+        // run against a long-lived board meets postings from hours ago whose
+        // one card somebody has already used — which says nothing about
+        // whether claiming works, only that this notice is spent.
+        val claimed = cars.asSequence().mapNotNull { c ->
+            runCatching {
+                val card = uniffi.ducat_mobile.readContactCard(c.card)
+                org.ducatproject.ducat.Mailbox.claimCard(context, card, null)
+            }.getOrNull()
+        }.firstOrNull()
+        if (claimed != null) {
+            check("the card turns into a conversation", claimed.personaHex.isNotEmpty(),
+                claimed.displayName())
+        } else {
+            println("LIST skip  every card on the board was already claimed")
+        }
     }
     rooms.firstOrNull()?.let { p ->
         check("the room's shape arrived",

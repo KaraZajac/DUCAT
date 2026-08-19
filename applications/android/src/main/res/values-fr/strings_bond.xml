@@ -26,6 +26,7 @@
     <string name="res_tray">Réservation</string>
     <string name="res_title">Proposer une réservation</string>
     <string name="res_note">Le loyer et les deux cautions vont dans un même séquestre. Vous versez loyer + votre caution ; leur acceptation est de verser la leur. Les cautions reviennent à la libération.</string>
+    <string name="res_about">Pour %1$s. Le loyer et les deux cautions entrent dans un même séquestre, et les cautions reviennent à la libération.</string>
     <string name="res_rent">Loyer (XMR)</string>
     <string name="res_my_deposit">Votre caution (XMR)</string>
     <string name="res_host_deposit">Leur caution (XMR)</string>

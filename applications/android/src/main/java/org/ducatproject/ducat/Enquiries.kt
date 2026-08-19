@@ -1,0 +1,73 @@
+package org.ducatproject.ducat
+
+import android.content.Context
+import org.json.JSONObject
+
+/**
+ * What a conversation is about, when it began at a board (§16.18).
+ *
+ * A rental card is minted per posting and claimed once, so the card that
+ * opened a thread names exactly one listing — and both ends can know which.
+ * The seeker knows because they tapped it; the owner knows because the card
+ * the stranger answered was cut for that listing and no other.
+ *
+ * Without this the thread is two people and no subject: the owner types the
+ * rent and both deposits back in by hand, from a listing they wrote and the
+ * app already has, while the seeker stares at a chat with a name on it and
+ * has to remember which of the cars they asked about.
+ *
+ * Deliberately a copy, not a pointer. A listing expires off its board after a
+ * day and can be edited or deleted at any time; the conversation about it
+ * outlives all of that, and "the Corolla, 0.040000 XMR a day" is what was
+ * being discussed whatever the listing says next week.
+ */
+object Enquiries {
+    private fun prefs(context: Context) = securePrefs(context, "ducat_enquiries")
+
+    /** The listing a thread is about, as it stood when the thread opened. */
+    data class About(
+        val title: String,
+        val pricePxmr: Long,
+        val depositPxmr: Long,
+        /** [Listings.KIND_VEHICLE] or [Listings.KIND_PLACE]. */
+        val kind: Int,
+    )
+
+    /**
+     * Note what this person and I are talking about. First write wins: a
+     * second claim cannot repaint an older conversation's subject.
+     */
+    fun remember(context: Context, personaHex: String, about: About) {
+        if (personaHex.isBlank()) return
+        val p = prefs(context)
+        if (p.contains(key(personaHex))) return
+        p.edit().putString(
+            key(personaHex),
+            JSONObject()
+                .put("title", about.title)
+                .put("price", about.pricePxmr)
+                .put("deposit", about.depositPxmr)
+                .put("kind", about.kind)
+                .toString(),
+        ).apply()
+    }
+
+    fun about(context: Context, personaHex: String): About? {
+        val raw = prefs(context).getString(key(personaHex), null) ?: return null
+        return runCatching {
+            val o = JSONObject(raw)
+            About(
+                title = o.optString("title"),
+                pricePxmr = o.optLong("price"),
+                depositPxmr = o.optLong("deposit"),
+                kind = o.optInt("kind"),
+            )
+        }.getOrNull()?.takeIf { it.title.isNotBlank() }
+    }
+
+    /** Forgetting a contact forgets what they asked about. */
+    fun forget(context: Context, personaHex: String) =
+        prefs(context).edit().remove(key(personaHex)).apply()
+
+    private fun key(personaHex: String) = "about_$personaHex"
+}

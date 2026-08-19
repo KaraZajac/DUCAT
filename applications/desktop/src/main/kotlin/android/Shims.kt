@@ -22,6 +22,11 @@ abstract class Context {
     }
 
     abstract val filesDir: File
+
+    // A phone keeps a longer-lived context behind the one a screen holds, so
+    // that a store outliving its screen does not pin an activity. A desk has
+    // one context for the whole run; itself is the honest answer.
+    open val applicationContext: Context get() = this
     open val cacheDir: File get() = File(filesDir.parentFile, "cache").apply { mkdirs() }
     abstract fun getSharedPreferences(name: String, mode: Int): SharedPreferences
     open val packageName: String get() = "org.ducatproject.desk"

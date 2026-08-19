@@ -26,6 +26,7 @@
     <string name="res_tray">Rezervasyon</string>
     <string name="res_title">Rezervasyon öner</string>
     <string name="res_note">Kira ve iki depozito tek emanete girer. Sen kira + depozitonu yatırırsın; kabulleri kendi depozitolarını yatırmaktır. Depozitolar serbest bırakmada döner.</string>
+    <string name="res_about">%1$s için. Kira ve iki depozito tek bir emanete girer, depozitolar serbest bırakmada geri gelir.</string>
     <string name="res_rent">Kira (XMR)</string>
     <string name="res_my_deposit">Depoziton (XMR)</string>
     <string name="res_host_deposit">Onların depozitosu (XMR)</string>

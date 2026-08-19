@@ -26,6 +26,7 @@
     <string name="res_tray">Reservierung</string>
     <string name="res_title">Reservierung vorschlagen</string>
     <string name="res_note">Miete und beide Kautionen gehen in eine Treuhand. Du zahlst Miete + deine Kaution; ihre Annahme ist das Einzahlen ihrer. Kautionen kommen bei der Freigabe zurück.</string>
+    <string name="res_about">Für %1$s. Miete und beide Kautionen gehen in ein Treuhandkonto, und die Kautionen kommen bei der Freigabe zurück.</string>
     <string name="res_rent">Miete (XMR)</string>
     <string name="res_my_deposit">Deine Kaution (XMR)</string>
     <string name="res_host_deposit">Ihre Kaution (XMR)</string>

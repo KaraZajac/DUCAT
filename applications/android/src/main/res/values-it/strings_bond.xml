@@ -26,6 +26,7 @@
     <string name="res_tray">Prenotazione</string>
     <string name="res_title">Proponi una prenotazione</string>
     <string name="res_note">Affitto e le due cauzioni vanno in un unico deposito. Tu versi affitto + la tua; la loro accettazione è versare la loro. Le cauzioni tornano allo sblocco.</string>
+    <string name="res_about">Per %1$s. Affitto e le due cauzioni entrano in un unico deposito a garanzia, e le cauzioni tornano al rilascio.</string>
     <string name="res_rent">Affitto (XMR)</string>
     <string name="res_my_deposit">La tua cauzione (XMR)</string>
     <string name="res_host_deposit">La loro cauzione (XMR)</string>

@@ -26,6 +26,7 @@
     <string name="res_tray">예약</string>
     <string name="res_title">예약 제안</string>
     <string name="res_note">임대료와 양쪽 보증금이 하나의 에스크로로. 당신은 임대료+보증금을, 상대의 수락은 그들의 보증금 입금. 해제 시 보증금은 돌아옵니다.</string>
+    <string name="res_about">%1$s 건입니다. 대여료와 양쪽 보증금이 하나의 에스크로에 들어가고, 보증금은 해제될 때 돌아옵니다.</string>
     <string name="res_rent">임대료 (XMR)</string>
     <string name="res_my_deposit">내 보증금 (XMR)</string>
     <string name="res_host_deposit">상대 보증금 (XMR)</string>

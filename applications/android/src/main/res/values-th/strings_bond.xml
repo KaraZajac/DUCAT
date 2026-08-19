@@ -26,6 +26,7 @@
     <string name="res_tray">การจอง</string>
     <string name="res_title">เสนอการจอง</string>
     <string name="res_note">ค่าเช่าและมัดจำทั้งสองเข้าเอสโครว์เดียว คุณจ่ายค่าเช่า+มัดจำของคุณ การยอมรับของเขาคือจ่ายของเขา มัดจำคืนเมื่อปล่อย</string>
+    <string name="res_about">สำหรับ %1$s ค่าเช่าและเงินมัดจำของทั้งสองฝ่ายเข้าสู่เอสโครว์เดียวกัน และเงินมัดจำจะคืนเมื่อปล่อย</string>
     <string name="res_rent">ค่าเช่า (XMR)</string>
     <string name="res_my_deposit">มัดจำของคุณ (XMR)</string>
     <string name="res_host_deposit">มัดจำของเขา (XMR)</string>

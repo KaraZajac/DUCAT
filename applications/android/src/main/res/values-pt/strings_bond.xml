@@ -26,6 +26,7 @@
     <string name="res_tray">Reserva</string>
     <string name="res_title">Propor uma reserva</string>
     <string name="res_note">A renda e ambas as cauções vão para uma só caução. Tu pões renda + a tua; a aceitação deles é porem a deles. As cauções voltam na libertação.</string>
+    <string name="res_about">Para %1$s. O aluguel e os dois depósitos entram num mesmo escrow, e os depósitos voltam na liberação.</string>
     <string name="res_rent">Renda (XMR)</string>
     <string name="res_my_deposit">A tua caução (XMR)</string>
     <string name="res_host_deposit">A caução deles (XMR)</string>

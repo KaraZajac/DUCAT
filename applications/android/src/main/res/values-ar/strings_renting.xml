@@ -50,6 +50,7 @@
     <string name="rent_search_retry">أعد المحاولة</string>
     <string name="rent_search_progress">تم فحص %1$d من %2$d منطقة</string>
     <string name="rent_asking_about">مرحبًا — رأيت إعلانك، %1$s. هل ما زال متاحًا؟</string>
+    <string name="rent_already_asked">سأل أحدهم عن هذا قبلك بقليل. سيعيده هاتف صاحب الإعلان خلال دقيقة أو دقيقتين — انظر مرة أخرى بعد قليل.</string>
     <string name="rent_ask_about_it">اسأل عنه</string>
     <string name="rent_per_day_short">%1$s / يوم</string>
     <string name="rent_per_night_short">%1$s / ليلة</string>

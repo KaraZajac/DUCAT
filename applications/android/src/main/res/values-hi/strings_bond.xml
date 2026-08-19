@@ -26,6 +26,7 @@
     <string name="res_tray">आरक्षण</string>
     <string name="res_title">आरक्षण प्रस्तावित करें</string>
     <string name="res_note">किराया और दोनों जमा एक एस्क्रो में। आप किराया + अपनी जमा डालें; उनकी स्वीकृति उनकी जमा डालना है। रिलीज़ पर जमा वापस।</string>
+    <string name="res_about">%1$s के लिए। किराया और दोनों जमा एक ही एस्क्रो में जाते हैं, और रिलीज़ पर जमा वापस आ जाते हैं।</string>
     <string name="res_rent">किराया (XMR)</string>
     <string name="res_my_deposit">आपकी जमा (XMR)</string>
     <string name="res_host_deposit">उनकी जमा (XMR)</string>

@@ -26,6 +26,7 @@
     <string name="res_tray">رزرو</string>
     <string name="res_title">پیشنهاد رزرو</string>
     <string name="res_note">اجاره و هر دو ودیعه در یک امانت. شما اجاره + ودیعه خود را می‌پردازید؛ پذیرش آن‌ها پرداخت ودیعه خودشان است. ودیعه‌ها هنگام آزادسازی بازمی‌گردند.</string>
+    <string name="res_about">دربارهٔ %1$s. اجاره و هر دو ودیعه در یک امانت قرار می‌گیرند و ودیعه‌ها هنگام آزادسازی برمی‌گردند.</string>
     <string name="res_rent">اجاره (XMR)</string>
     <string name="res_my_deposit">ودیعه شما (XMR)</string>
     <string name="res_host_deposit">ودیعه آن‌ها (XMR)</string>

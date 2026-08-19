@@ -50,6 +50,7 @@
     <string name="rent_search_retry">もう一度</string>
     <string name="rent_search_progress">%2$d 件中 %1$d 件の地域を確認</string>
     <string name="rent_asking_about">こんにちは。%1$s の掲載を見ました。まだ空いていますか？</string>
+    <string name="rent_already_asked">ちょうどあなたの直前に別の人が問い合わせました。出品者の端末が一、二分で出し直します。少ししてからもう一度見てください。</string>
     <string name="rent_ask_about_it">問い合わせる</string>
     <string name="rent_per_day_short">%1$s / 日</string>
     <string name="rent_per_night_short">%1$s / 泊</string>

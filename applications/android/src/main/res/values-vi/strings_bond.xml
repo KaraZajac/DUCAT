@@ -26,6 +26,7 @@
     <string name="res_tray">Đặt chỗ</string>
     <string name="res_title">Đề xuất đặt chỗ</string>
     <string name="res_note">Tiền thuê và cả hai khoản cọc vào một ký quỹ. Bạn nạp tiền thuê + cọc của bạn; họ chấp nhận bằng cách nạp cọc của họ. Cọc về lại khi giải phóng.</string>
+    <string name="res_about">Về %1$s. Tiền thuê và tiền cọc của cả hai bên vào chung một escrow, và tiền cọc quay về khi giải phóng.</string>
     <string name="res_rent">Tiền thuê (XMR)</string>
     <string name="res_my_deposit">Cọc của bạn (XMR)</string>
     <string name="res_host_deposit">Cọc của họ (XMR)</string>

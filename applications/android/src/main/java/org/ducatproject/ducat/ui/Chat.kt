@@ -44,6 +44,7 @@ import java.util.Date
 import java.util.Locale
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.House
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -569,6 +570,11 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         // One banner serves rider and driver — the roles come from the
         // ceremony's own frame, and each stage shows its one next action.
         RideBondBanner(c)
+        // And, when the thread began at a board, what it is about. A name at
+        // the top of a chat is not a subject: the owner of four cars needs to
+        // know which one this stranger read, and the stranger who tapped
+        // three listings needs to know which one this is.
+        EnquiryLine(c)
         LazyColumn(
             Modifier.weight(1f).fillMaxWidth(),
             state = listState,
@@ -1678,6 +1684,53 @@ private fun ContactPickDialog(
  * The stage lives in the ceremony store and every device derives its own
  * view of it — nothing here is authority, the FROST signatures are.
  */
+/**
+ * The listing this conversation began at, if it began at one — the title and
+ * what it costs, in one quiet line.
+ */
+@Composable
+private fun EnquiryLine(contact: Contact) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val about = remember(contact.personaHex) {
+        org.ducatproject.ducat.Enquiries.about(context, contact.personaHex)
+    } ?: return
+    Surface(
+        Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+    ) {
+        Row(
+            Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                if (about.kind == org.ducatproject.ducat.Listings.KIND_VEHICLE) {
+                    Icons.Filled.DirectionsCar
+                } else {
+                    Icons.Filled.House
+                },
+                null,
+                Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                stringResource(
+                    if (about.kind == org.ducatproject.ducat.Listings.KIND_VEHICLE) {
+                        R.string.rent_per_day_short
+                    } else {
+                        R.string.rent_per_night_short
+                    },
+                    Amounts.show(context, about.pricePxmr).primary,
+                ).let { price -> "${about.title} · $price" },
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
 @Composable
 private fun RideBondBanner(contact: Contact) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -2261,14 +2314,30 @@ private fun BondLine(spin: Boolean, text: String) {
 @Composable
 private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    var rent by remember { mutableStateOf("") }
-    var myDep by remember { mutableStateOf("") }
-    var hostDep by remember { mutableStateOf("") }
+    // If this conversation started at a board, it already has a subject and a
+    // price, and both of them are ours. Asking the owner to type back numbers
+    // out of their own listing is asking them to be the database.
+    val about = remember(contact.personaHex) {
+        org.ducatproject.ducat.Enquiries.about(context, contact.personaHex)
+    }
+    fun asXmr(pxmr: Long): String =
+        if (pxmr > 0) "%.6f".format(java.util.Locale.US, pxmr / 1e12) else ""
+    var rent by remember { mutableStateOf(about?.let { asXmr(it.pricePxmr) } ?: "") }
+    var myDep by remember { mutableStateOf(about?.let { asXmr(it.depositPxmr) } ?: "") }
+    var hostDep by remember { mutableStateOf(about?.let { asXmr(it.depositPxmr) } ?: "") }
     // What kind of thing is being handed over decides how much each side
     // stakes: a room is not a car (see Stakes.kt for where the numbers come
     // from). Picking one fills both deposits, and either can still be typed
     // over — the suggestion is a starting point, not a rule.
-    var deal by remember { mutableStateOf(org.ducatproject.ducat.Stakes.Deal.Stay) }
+    var deal by remember {
+        mutableStateOf(
+            if (about?.kind == org.ducatproject.ducat.Listings.KIND_VEHICLE) {
+                org.ducatproject.ducat.Stakes.Deal.Vehicle
+            } else {
+                org.ducatproject.ducat.Stakes.Deal.Stay
+            },
+        )
+    }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
@@ -2279,7 +2348,10 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
             Text(stringResource(R.string.res_title), style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(4.dp))
             Text(
-                stringResource(R.string.res_note),
+                // What is being booked, when we know: proposing money for an
+                // unnamed thing is how the wrong thing gets booked.
+                about?.let { stringResource(R.string.res_about, it.title) }
+                    ?: stringResource(R.string.res_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

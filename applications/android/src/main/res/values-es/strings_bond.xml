@@ -26,6 +26,7 @@
     <string name="res_tray">Reserva</string>
     <string name="res_title">Proponer una reserva</string>
     <string name="res_note">La renta y ambos depósitos van a un mismo depósito en garantía. Tú pones renta + tu depósito; su aceptación es poner el suyo. Los depósitos vuelven al liberar.</string>
+    <string name="res_about">Para %1$s. El alquiler y ambos depósitos entran en un mismo depósito en garantía, y los depósitos vuelven al liberarlo.</string>
     <string name="res_rent">Renta (XMR)</string>
     <string name="res_my_deposit">Tu depósito (XMR)</string>
     <string name="res_host_deposit">Su depósito (XMR)</string>

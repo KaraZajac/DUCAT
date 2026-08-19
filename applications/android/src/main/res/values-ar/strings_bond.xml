@@ -26,6 +26,7 @@
     <string name="res_tray">حجز</string>
     <string name="res_title">اقتراح حجز</string>
     <string name="res_note">الإيجار والوديعتان في ضمان واحد. تدفع الإيجار + وديعتك؛ وقبولهم هو دفع وديعتهم. تعود الودائع عند التحرير.</string>
+    <string name="res_about">بخصوص %1$s. يدخل الإيجار وكلا التأمينين في ضمان واحد، ويعود التأمينان عند الإفراج.</string>
     <string name="res_rent">الإيجار (XMR)</string>
     <string name="res_my_deposit">وديعتك (XMR)</string>
     <string name="res_host_deposit">وديعتهم (XMR)</string>
