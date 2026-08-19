@@ -100,14 +100,14 @@ fun RentingScreen() {
                             error = null
                             withContext(Dispatchers.IO) {
                                 runCatching { Listings.post(context, o.optString("id")) }
-                            }.onFailure { error = it.message }
+                            }.onFailure { error = moneyFailure(context, it) }
                         }
                     },
                     onStop = {
                         scope.launch {
                             withContext(Dispatchers.IO) {
                                 runCatching { Listings.unpost(context, o.optString("id")) }
-                            }.onFailure { error = it.message }
+                            }.onFailure { error = moneyFailure(context, it) }
                         }
                     },
                     onDelete = { Listings.remove(context, o.optString("id")) },

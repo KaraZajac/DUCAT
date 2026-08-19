@@ -726,7 +726,7 @@ fun DriveScreen() {
                     .putLong("drive_lon", fix.second)
                     .putString("drive_box", coverage!!.joinToString(","))
                     .apply()
-            }.onFailure { error = it.message }
+            }.onFailure { error = moneyFailure(context, it) }
         }
     }
 

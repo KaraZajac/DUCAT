@@ -274,7 +274,7 @@ private fun BondSection(
                     org.ducatproject.ducat.Ceremony.startBond(context, c, arbiter)
                 }
             }
-            r.onFailure { error = it.message ?: "?" }
+            r.onFailure { error = moneyFailure(context, it) }
             busy = false
         }
     }
@@ -390,7 +390,7 @@ private fun BondSection(
                                 org.ducatproject.ducat.Ceremony.releaseBond(context, c)
                             }
                         }
-                        r.onFailure { error = it.message ?: "?" }
+                        r.onFailure { error = moneyFailure(context, it) }
                         busy = false
                     }
                 },

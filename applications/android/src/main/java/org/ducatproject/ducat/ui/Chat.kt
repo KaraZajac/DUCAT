@@ -2579,7 +2579,7 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                             }
                         }.onSuccess {
                             busy = false; onDone()
-                        }.onFailure { error = it.message; busy = false }
+                        }.onFailure { error = moneyFailure(context, it); busy = false }
                     }
                 },
                 enabled = !busy && rent.isNotBlank(),

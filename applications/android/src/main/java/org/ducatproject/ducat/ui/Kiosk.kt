@@ -36,9 +36,15 @@ import org.ducatproject.ducat.formatXmr
  *
  * Every other screen in this app belongs to the person holding the phone.
  * This one belongs to a stranger standing in front of it: they tap what they
- * want, they pay with whatever Monero wallet they already have, and they
- * never touch anything else. No contact is made, no card is exchanged, no
- * conversation is opened — a queue for coffee has no time for any of it.
+ * want, they tap or scan once to pay, and they never touch anything else.
+ *
+ * That one gesture is what makes them somebody this shop can talk to, and it
+ * is worth their trouble: the bill arrives on their own phone itemised, the
+ * payment they make is identified by the transaction they name rather than
+ * guessed at, and the receipt lands beside it in their Activity. A bare
+ * `monero:` code — which is what this screen used to show, on the argument
+ * that a queue for coffee has no time for a handshake — buys a payment and
+ * none of the rest. See [org.ducatproject.ducat.Orders].
  *
  * Which makes the way *out* the important part. Left alone, a customer could
  * press Back into somebody's wallet and their chats, so leaving is behind the
@@ -63,9 +69,6 @@ fun KioskScreen() {
     var staffDoor by remember { mutableStateOf(false) }
     var staffOpen by remember { mutableStateOf(false) }
 
-    // While an order is on screen, watch for its payment. The poller does the
-    // same sweep for the shop as a whole; this is the same question asked
-    // often enough that a person standing at a counter sees the answer.
     // Nudge the store while an order is on screen. Reading it is what draws
     // the panel — `placed` is derived above — so this only has to make sure a
     // payment that lands quietly still produces a bump, at a pace a person
@@ -219,7 +222,7 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
             }
         }
         r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure { error = it.message }
+            .onFailure { error = moneyFailure(context, it) }
     }
 
     // The same card over NFC, for as long as it is on screen: tapping and

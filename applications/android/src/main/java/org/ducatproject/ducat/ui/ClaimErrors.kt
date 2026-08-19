@@ -36,7 +36,7 @@ fun claimFailureRes(
 }
 
 /**
- * A failure that happened while money was moving, in words.
+ * A failure from something that needed the network, in words.
  *
  * The escrow screens showed `it.message` verbatim, so a node that did not
  * answer in time reached a person as
@@ -44,6 +44,12 @@ fun claimFailureRes(
  * holding their fare. The wallet already knows that shape of failure
  * (`Wallet.isNodeTrouble`) and the Pay screen already has the sentence for
  * it; only these screens were not using either.
+ *
+ * Named for money once, because escrow is where it was first needed. The
+ * shape has nothing to do with money: posting a listing, sending a message,
+ * publishing a card and taking a hail all reach the same node over the same
+ * transport and fail the same way, and every one of them was printing the
+ * same unreadable line at somebody. Same sentence for all of them.
  */
 fun moneyFailure(context: android.content.Context, t: Throwable): String = when {
     org.ducatproject.ducat.Wallet.isNodeTrouble(t) ->
