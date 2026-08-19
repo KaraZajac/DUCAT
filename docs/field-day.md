@@ -15,10 +15,39 @@ network and stagenet; there is no lab setup to carry.
    `https://github.com/KaraZajac/DUCAT/releases/latest/download/app-arm64-v8a-debug.apk`
 2. Onboard both; **name them differently** (two contacts with the same
    display name has burned us — threads get opened on the wrong person).
-3. Fund phone 1 from the test wallet: Settings → the laptop's
-   `research/monero-rs` tools or any stagenet faucet. It needs roughly
-   0.05 XMR to run every escrow pass with slack. Fund **first** — the
-   ten-block unlock runs while you do passes 1–3.
+3. Fund phone 1 **from the test bank** (below). It needs roughly 0.05 XMR to
+   run every escrow pass with slack. Fund **first** — the ten-block unlock
+   runs while you do passes 1–3.
+
+### The test bank
+
+One standing stagenet wallet, so funding never depends on finding a faucet
+twice. It lives in `~/.ducat-stagenet-bank` — deliberately outside this
+repository, because it holds a spend key and nothing that holds a spend key
+belongs in git.
+
+```sh
+# Its address, to be given to whoever is sending coin. Creates the wallet on
+# first run, at the chain's current tip rather than genesis.
+DUCAT_DESK_STATE=~/.ducat-stagenet-bank ./gradlew :desktop:wallet
+
+# What is actually in it (scans first; an idle wallet knows nothing).
+DUCAT_WALLET_SCAN=1 DUCAT_DESK_STATE=~/.ducat-stagenet-bank \
+  ./gradlew :desktop:wallet
+
+# Top up a phone or a desk from it.
+DUCAT_DESK_STATE=~/.ducat-stagenet-bank DUCAT_PAY_TO=<address> \
+  DUCAT_PAY_XMR=0.02 ./gradlew :desktop:payout
+```
+
+`payout` works on any desk state, which is the other half of the point:
+money left behind in an old role's directory can be swept back to the bank
+instead of being abandoned. Two earlier runs had 0.0015 XMR stranded that
+way before this existed.
+
+It is stagenet, so the state is unencrypted on purpose — a headless top-up
+should not need a passphrase, and the coin is worth nothing. Do not point
+these tasks at a mainnet state.
 4. Start the standing arbiter on the laptop and leave it running all day
    (its DKG machines are in-memory — restarting it mid-ceremony strands
    that ceremony):

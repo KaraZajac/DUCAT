@@ -353,6 +353,15 @@ tasks.register<JavaExec>("ridetest") {
 
 // Lock an existing desk (or sweep one already locked).
 // `DUCAT_DESK_STATE=… DUCAT_DESK_PASSPHRASE=… ./gradlew :desktop:vaultset`.
+// A desk's standing address, and what is in it. Creates the wallet if the
+// state has none, so a fresh directory becomes a fundable test bank.
+// `DUCAT_DESK_STATE=… [DUCAT_WALLET_SCAN=1] ./gradlew :desktop:wallet`
+tasks.register<JavaExec>("wallet") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.DeskWalletKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Sweep a desk wallet somewhere useful: stagenet money left in an old role's
 // state is money a faucet has to be asked for twice.
 // `DUCAT_DESK_STATE=… DUCAT_PAY_TO=… DUCAT_PAY_XMR=all ./gradlew :desktop:payout`
