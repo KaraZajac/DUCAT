@@ -102,6 +102,19 @@ fun main() {
     val took = (System.currentTimeMillis() - started) / 1000
     if (rang) {
         println("WATCH_RANG at ${System.currentTimeMillis()} (${took}s after arming)")
+        // And *which* record. A ring that cannot say which of eighteen boards
+        // moved leaves a driver reading all eighteen, which is the lap the
+        // watch exists to avoid.
+        val moved = runCatching { uniffi.ducat_mobile.nodeChangedKeys() }
+            .getOrDefault(emptyList())
+        println(
+            if (moved.contains(key)) {
+                "WATCH_NAMED the ring named this board (${moved.size} key(s) in it)"
+            } else {
+                "WATCH_UNNAMED the ring did not name this board — ${moved.size} key(s): " +
+                    moved.joinToString(",") { it.take(16) }
+            },
+        )
     } else {
         println("WATCH_SILENT after ${took}s")
     }

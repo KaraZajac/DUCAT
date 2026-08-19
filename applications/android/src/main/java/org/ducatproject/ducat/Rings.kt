@@ -21,4 +21,28 @@ object NetworkRings {
      * tell one ring from the next — nothing reads it as a time.
      */
     val changed = MutableStateFlow(0L)
+
+    /**
+     * The record keys behind the most recent rings, waiting to be claimed.
+     *
+     * A ring alone says "one of the things you watch moved", which leaves a
+     * driver watching eighteen boards to read all eighteen to find out which
+     * — a lap, for a fare sitting on one of them. The keys turn that into one
+     * read. Drained rather than observed, because they are events: whoever
+     * takes them has them, and nobody should act on the same change twice.
+     */
+    private val keys = HashSet<String>()
+
+    /** Record keys from a ring. */
+    fun note(changedKeys: Collection<String>) {
+        synchronized(keys) { keys += changedKeys }
+        changed.value = System.currentTimeMillis()
+    }
+
+    /** Take what has changed since the last taker. */
+    fun drain(): Set<String> = synchronized(keys) {
+        val taken = keys.toSet()
+        keys.clear()
+        taken
+    }
 }

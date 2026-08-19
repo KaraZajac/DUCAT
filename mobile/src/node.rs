@@ -28,6 +28,33 @@ static NODE: OnceLock<Mutex<Option<Node>>> = OnceLock::new();
 /// One bit and a doorbell: "something you watch has changed".
 static CHANGE: OnceLock<(Mutex<bool>, std::sync::Condvar)> = OnceLock::new();
 
+/// *Which* records changed, alongside the bit — so a listener that watches
+/// many records can read the one that moved instead of all of them.
+///
+/// Bounded for the same reason the inbox is: a peer that can reach us can
+/// change a record as fast as it likes, and the drain is on somebody else's
+/// clock. Overflow drops the oldest; the sweep behind it is the guarantee.
+const MAX_CHANGED: usize = 64;
+
+static CHANGED: OnceLock<Mutex<VecDeque<String>>> = OnceLock::new();
+
+fn changed_keys() -> &'static Mutex<VecDeque<String>> {
+    CHANGED.get_or_init(|| Mutex::new(VecDeque::new()))
+}
+
+/// Take the record keys that have changed since the last call.
+///
+/// Draining, because these are events: whoever asks gets them, and asking
+/// twice does not get them twice. Pairs with [`node_wait_change`], which
+/// consumes the flag the same way and for the same reason.
+#[uniffi::export]
+pub fn node_changed_keys() -> Vec<String> {
+    changed_keys()
+        .lock()
+        .map(|mut q| q.drain(..).collect())
+        .unwrap_or_default()
+}
+
 fn change_signal() -> &'static (Mutex<bool>, std::sync::Condvar) {
     CHANGE.get_or_init(|| (Mutex::new(false), std::sync::Condvar::new()))
 }
@@ -183,7 +210,26 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
                 // the poller's read path is the one place values enter the
                 // app, and an event that merely *wakes* it cannot introduce a
                 // second, subtly different way for a message to arrive.
-                VeilidUpdate::ValueChange(..) => {
+                VeilidUpdate::ValueChange(vc) => {
+                    // Which record, not merely that something moved. A driver
+                    // watching eighteen boards used to be told only "one of
+                    // them changed" and had to read all eighteen to find out
+                    // which — a lap, for a fare that arrived on one board.
+                    let key = vc.key.to_string();
+                    // An empty subkey range or a zero count is veilid saying
+                    // the watch itself has died, not that a value changed.
+                    // Forget it, so the next arming pass puts it back and
+                    // reads resume closing the record.
+                    if vc.count == 0 || vc.subkeys.is_empty() {
+                        if let Ok(mut w) = watched().lock() {
+                            w.remove(&key);
+                        }
+                    } else if let Ok(mut q) = changed_keys().lock() {
+                        if q.len() >= MAX_CHANGED {
+                            q.pop_front();
+                        }
+                        q.push_back(key);
+                    }
                     let (flag, cond) = change_signal();
                     *flag.lock().unwrap() = true;
                     cond.notify_all();

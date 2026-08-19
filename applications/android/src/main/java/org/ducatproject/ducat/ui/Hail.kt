@@ -903,6 +903,9 @@ fun DriveScreen() {
         // not delivery, which is exactly why the sweep below stays.
         var armedAt = 0L
         var lastRing = org.ducatproject.ducat.NetworkRings.changed.value
+        // Board by record key, filled while arming: a ring says which record
+        // moved, and this is what turns that back into a cell.
+        val keyOf = HashMap<String, String>()
         // Hoisted so a cell that answers can be drawn before its neighbours
         // have finished: the first pin is what tells a driver the map works.
         fun publish() {
@@ -927,6 +930,10 @@ fun DriveScreen() {
                     // fares were found only by the sweep, a lap late, for as
                     // long as this feature has existed.
                     val armed = cells.count { c ->
+                        // The record key alongside, so a ring naming a record
+                        // can be turned back into the board it belongs to.
+                        // Local arithmetic, no round trip.
+                        runCatching { keyOf[c] = uniffi.ducat_mobile.standRecordKey(c) }
                         runCatching { uniffi.ducat_mobile.standWatch(c) }.getOrDefault(false)
                     }
                     // Counted out loud, because the silent version is what
@@ -941,8 +948,21 @@ fun DriveScreen() {
             // whose node had not finished attaching, leaving a driver on a map
             // that would never update again and said "No hails standing" while
             // it did nothing.
+            // Which boards this lap. A ring names the records that moved, so
+            // when they are ours there is no reason to read the other
+            // seventeen: the fare is on the one that changed, and a populated
+            // board answers in about a second where an empty one takes
+            // twenty-one to say it is empty. A ring for something that is not
+            // a board of ours — a mailbox, most often — falls back to the full
+            // lap, which is what used to happen for every ring.
+            val hot = org.ducatproject.ducat.NetworkRings.drain()
+            val targets = if (hot.isEmpty()) {
+                cells
+            } else {
+                cells.filter { keyOf[it] in hot }.ifEmpty { cells }
+            }
             kotlinx.coroutines.supervisorScope {
-                cells.map { c ->
+                targets.map { c ->
                     async {
                         runCatchingCancellable {
                 // §15.12's overflow ladder: sweep shards from 0. Claims and
@@ -1008,8 +1028,9 @@ fun DriveScreen() {
             // minutes, and that is not answerable by reading the code.
             DucatLog.i(
                 TAG,
-                "sweep lap: ${cells.size} board(s) in " +
-                    "${System.currentTimeMillis() / 1000 - now}s, " +
+                "sweep lap: ${targets.size} board(s)" +
+                    (if (targets.size < cells.size) " (the one that rang)" else "") +
+                    " in ${System.currentTimeMillis() / 1000 - now}s, " +
                     "${found.values.sumOf { it.size }} notice(s)",
             )
             // Sweep again when the network says something changed, or on a

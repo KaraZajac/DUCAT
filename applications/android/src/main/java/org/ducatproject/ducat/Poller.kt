@@ -197,6 +197,13 @@ class Poller(private val context: Context) {
                     runCatching { uniffi.ducat_mobile.nodeWaitChange(WAIT_MS) }.getOrDefault(false)
                 }
                 if (rang) {
+                    // Which records, drained here for the same reason the flag
+                    // is consumed here: these are events, and whoever asks
+                    // gets them. Handed on rather than used — this loop polls
+                    // everything anyway; the stand sweep is the one that can
+                    // save eighteen board reads by knowing which one moved.
+                    val moved = runCatching { uniffi.ducat_mobile.nodeChangedKeys() }
+                        .getOrDefault(emptyList())
                     DucatLog.i(TAG, "a watched record changed — polling now")
                     // Pass the ring on. `node_wait_change` *consumes* the flag
                     // — whoever wakes first clears it — so there can only be
@@ -205,7 +212,7 @@ class Poller(private val context: Context) {
                     // stand sweep, which would otherwise poll blind on a timer)
                     // listens here instead of racing the poller for its
                     // wake-ups and delaying somebody's messages to do it.
-                    NetworkRings.changed.value = System.currentTimeMillis()
+                    NetworkRings.note(moved)
                 }
             }
         }
