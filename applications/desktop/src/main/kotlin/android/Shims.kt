@@ -133,9 +133,22 @@ interface SharedPreferences {
 class FilePreferences(private val file: File) : SharedPreferences {
     private val lock = Any()
     private val map: MutableMap<String, Any> = run {
-        if (!file.exists()) mutableMapOf()
-        else {
-            val o = JSONObject(file.readText())
+        // A store nobody has written yet is empty, and an *empty file* is one
+        // of the shapes that takes: VaultPreferences hands this a scratch file
+        // made by createTempFile, which exists from the moment it is made and
+        // holds nothing until there is something to decrypt into it. Parsing
+        // that threw `A JSONObject text must begin with '{'` — the first thing
+        // a freshly protected desk ever saw, on its wallet, before any screen.
+        //
+        // Blank means empty. Anything else that will not parse is corruption,
+        // and corruption still throws: `securePrefs` refuses to answer "empty"
+        // for a store it cannot read precisely because absent has meanings
+        // that cost money — no wallet means *mint a new one*.
+        val text = if (file.exists()) file.readText() else ""
+        if (text.isBlank()) {
+            mutableMapOf()
+        } else {
+            val o = JSONObject(text)
             o.keys().asSequence().associateWith { o.get(it) }.toMutableMap()
         }
     }

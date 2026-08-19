@@ -148,7 +148,15 @@ class VaultPreferences(private val file: File, private val key: ByteArray) : Sha
     // scratch path and keep the sealed file as the durable one.
     private val scratch: File = File.createTempFile("ducat-vault", ".json").apply {
         deleteOnExit()
-        if (file.isFile) runCatching { writeText(DeskVault.readEncrypted(file, key)) }
+        // An empty document rather than an empty file: createTempFile leaves
+        // zero bytes behind, and zero bytes is not JSON. A store with nothing
+        // sealed for it yet is simply empty, and should read that way.
+        // Note what is *not* caught here: a file that exists and will not
+        // decrypt throws, and must. Answering "{}" for it would be the same
+        // mistake `securePrefs` refuses below — absent has meanings that cost
+        // money, and a wallet that cannot be read is not a wallet that is not
+        // there.
+        writeText(if (file.isFile) DeskVault.readEncrypted(file, key) else "{}")
     }
     private val inner = FilePreferences(scratch)
 
@@ -165,12 +173,36 @@ class VaultPreferences(private val file: File, private val key: ByteArray) : Sha
     override fun contains(k: String) = inner.contains(k)
     override val all: Map<String, *> get() = inner.all
 
-    override fun edit(): SharedPreferences.Editor {
-        val e = inner.edit()
-        return object : SharedPreferences.Editor by e {
-            override fun apply() { e.apply(); seal() }
-            override fun commit(): Boolean = e.commit().also { seal() }
-        }
+    /**
+     * Every put returns **this** wrapper, not the editor underneath.
+     *
+     * This was `by e` — Kotlin interface delegation — and delegation forwards
+     * the return value too: `putString` handed back the *inner* editor, so
+     * `prefs.edit().putString(…).apply()` called apply on the inner one and
+     * the seal below never ran. Sixty-one call sites chain like that,
+     * `WalletStore.save` among them. The effect on a desk with a passphrase
+     * was total: writes landed in a scratch file in /tmp, the sealed store
+     * stayed empty, and every launch found no wallet and minted a fresh one —
+     * so coin sent to yesterday's address belonged to a key nobody had kept.
+     * Only the `val e = prefs.edit(); …; e.apply()` shape happened to work,
+     * which is why the desk looked like it functioned at all.
+     *
+     * Delegation is the wrong tool for any interface that returns itself.
+     */
+    override fun edit(): SharedPreferences.Editor = object : SharedPreferences.Editor {
+        private val e = inner.edit()
+
+        override fun putString(key: String, v: String?) = also { e.putString(key, v) }
+        override fun putStringSet(key: String, v: Set<String>?) = also { e.putStringSet(key, v) }
+        override fun putInt(key: String, v: Int) = also { e.putInt(key, v) }
+        override fun putLong(key: String, v: Long) = also { e.putLong(key, v) }
+        override fun putBoolean(key: String, v: Boolean) = also { e.putBoolean(key, v) }
+        override fun putFloat(key: String, v: kotlin.Float) = also { e.putFloat(key, v) }
+        override fun remove(key: String) = also { e.remove(key) }
+        override fun clear() = also { e.clear() }
+
+        override fun apply() { e.apply(); seal() }
+        override fun commit(): Boolean = e.commit().also { seal() }
     }
 }
 

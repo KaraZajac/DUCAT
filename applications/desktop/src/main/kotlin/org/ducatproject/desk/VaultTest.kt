@@ -66,6 +66,47 @@ fun main() {
         securePrefs(ctx2, "ducat_contacts").getString("vault_probe", null) == "hello-probe")
     check("and does not appear in the clear", !onDisk().contains("hello-probe"))
 
+    // 4b. The same write, read back the way a relaunch reads it.
+    //
+    //     Case 4 above passed for two years while nothing was being sealed at
+    //     all. `securePrefs` caches by name, so it handed back the same
+    //     instance, whose in-memory map had the value regardless of whether a
+    //     byte ever reached the disk — and "not in the clear" is trivially
+    //     true of something never written. It was testing memory.
+    //
+    //     Locking drops every cached store, which is what closing the app
+    //     does. Only after that does reading prove durability.
+    DeskVault.lock()
+    check("relock/unlock for a cold read", DeskVault.unlock(base, "correct horse battery").isSuccess)
+    check("a chained write survives a lock cycle",
+        securePrefs(DeskContext(base), "ducat_contacts").getString("vault_probe", null) == "hello-probe",
+        "the editor's puts must return the sealing wrapper, not the plain one")
+
+    // 4c. A store nobody has written yet is empty, not a parse error. This
+    //     threw `A JSONObject text must begin with '{'` — the scratch file
+    //     exists from the moment it is made and holds nothing until there is
+    //     something to decrypt into it.
+    val virgin = runCatching {
+        securePrefs(DeskContext(base), "ducat_never_written").getString("anything", null)
+    }
+    check("an unwritten store reads as empty", virgin.isSuccess && virgin.getOrNull() == null,
+        virgin.exceptionOrNull()?.message ?: "")
+
+    // 4d. The order a real first launch takes: vault first, wallet after. The
+    //     migration path seals by a different route, so cases 2 and 3 above
+    //     never exercised the editor — this is the one that mints money.
+    val fresh = File(base, "firstrun").apply { mkdirs() }
+    DeskVault.lock()
+    check("a second desk takes a passphrase", DeskVault.create(fresh, "correct horse battery").isSuccess)
+    WalletStore(DeskContext(fresh)).save("5FirstRun", "b".repeat(64), 2_190_001uL, true)
+    DeskVault.lock()
+    DeskVault.unlock(fresh, "correct horse battery")
+    check("a wallet made under the vault is still there next launch",
+        WalletStore(DeskContext(fresh)).address() == "5FirstRun",
+        "otherwise every launch mints a new one and yesterday's coin is unspendable")
+    DeskVault.lock()
+    check("back to the main desk", DeskVault.unlock(base, "correct horse battery").isSuccess)
+
     // 5. A wrong passphrase is refused, and refusing costs nothing.
     DeskVault.lock()
     val wrong = DeskVault.unlock(base, "not the passphrase")
