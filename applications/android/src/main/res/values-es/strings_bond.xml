@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">Tarifa asegurada</string>
     <string name="bond_waiting_funding">Esperando a que el pasajero asegure la tarifa…</string>
     <string name="bond_complete_ride">Terminar viaje — solicitar la tarifa</string>
+    <string name="bond_ask_again">Preguntar otra vez</string>
+    <string name="bond_ask_again_note">Vuelve a enviar la solicitud, por si la primera no les llegó.</string>
     <string name="bond_waiting_release">Viaje terminado — esperando a que el pasajero libere la tarifa…</string>
     <string name="bond_ride_complete_ask">El conductor marcó el viaje como terminado.</string>
     <string name="bond_release_fare">Liberar tarifa (%1$s)</string>

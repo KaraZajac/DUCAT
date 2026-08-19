@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">Ücret güvencede</string>
     <string name="bond_waiting_funding">Yolcunun ücreti güvenceye alması bekleniyor…</string>
     <string name="bond_complete_ride">Yolculuğu tamamla — ücreti iste</string>
+    <string name="bond_ask_again">Tekrar sor</string>
+    <string name="bond_ask_again_note">İsteği yeniden gönderir, ilki ulaşmadıysa diye.</string>
     <string name="bond_waiting_release">Yolculuk tamam — yolcunun ücreti serbest bırakması bekleniyor…</string>
     <string name="bond_ride_complete_ask">Sürücü yolculuğu tamamlandı olarak işaretledi.</string>
     <string name="bond_release_fare">Ücreti serbest bırak (%1$s)</string>

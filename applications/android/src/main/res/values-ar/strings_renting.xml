@@ -47,6 +47,7 @@
     <string name="rent_search_needs_location">تُعرض الإعلانات على لوحات مرتّبة حسب المنطقة، لذلك يحتاج DUCAT إلى معرفة مكانك تقريبًا ليعرف أي لوحة يقرأ. يُستخدم الموقع على هاتفك ولا يُرسل إلى أي جهة.</string>
     <string name="rent_search_allow">السماح بالموقع</string>
     <string name="rent_search_no_fix">لا يوجد تحديد للموقع بعد. قرب نافذة أو في الخارج ينجح عادةً.</string>
+    <string name="rent_search_no_network">تعذّر الوصول إلى الشبكة الآن، فلم تُقرأ أي لوحة. غالبًا يعني هذا أن التطبيق ما زال ينضم — أعد المحاولة بعد قليل.</string>
     <string name="rent_search_retry">أعد المحاولة</string>
     <string name="rent_search_progress">تم فحص %1$d من %2$d منطقة</string>
     <string name="rent_asking_about">مرحبًا — رأيت إعلانك، %1$s. هل ما زال متاحًا؟</string>

@@ -47,6 +47,7 @@
     <string name="rent_search_needs_location">Gli annunci stanno su bacheche divise per zona, quindi DUCAT ha bisogno di sapere più o meno dove sei per leggere quelle giuste. Resta sul tuo telefono e non viene inviato da nessuna parte.</string>
     <string name="rent_search_allow">Consenti posizione</string>
     <string name="rent_search_no_fix">Ancora nessuna posizione. Vicino a una finestra o all\'aperto di solito funziona.</string>
+    <string name="rent_search_no_network">La rete non era raggiungibile in questo momento, quindi nessuna bacheca è stata letta. Di solito vuol dire che l\'app si sta ancora collegando — riprova tra poco.</string>
     <string name="rent_search_retry">Riprova</string>
     <string name="rent_search_progress">%1$d di %2$d zone controllate</string>
     <string name="rent_asking_about">Ciao — ho visto il tuo annuncio, %1$s. È ancora disponibile?</string>

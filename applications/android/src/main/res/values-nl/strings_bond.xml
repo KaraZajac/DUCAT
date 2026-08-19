@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">Ritprijs veiliggesteld</string>
     <string name="bond_waiting_funding">Wachten tot de passagier de ritprijs veiligstelt…</string>
     <string name="bond_complete_ride">Rit afronden — ritprijs opvragen</string>
+    <string name="bond_ask_again">Opnieuw vragen</string>
+    <string name="bond_ask_again_note">Stuurt het verzoek opnieuw, voor het geval het eerste nooit aankwam.</string>
     <string name="bond_waiting_release">Rit afgerond — wachten tot de passagier de ritprijs vrijgeeft…</string>
     <string name="bond_ride_complete_ask">De chauffeur heeft de rit als afgerond gemarkeerd.</string>
     <string name="bond_release_fare">Ritprijs vrijgeven (%1$s)</string>

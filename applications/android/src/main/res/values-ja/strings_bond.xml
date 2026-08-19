@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">運賃を確保しました</string>
     <string name="bond_waiting_funding">乗客が運賃を確保するのを待っています…</string>
     <string name="bond_complete_ride">乗車終了 — 運賃を請求</string>
+    <string name="bond_ask_again">もう一度頼む</string>
+    <string name="bond_ask_again_note">最初の依頼が届かなかった場合に備えて、もう一度送ります。</string>
     <string name="bond_waiting_release">乗車終了 — 乗客の運賃リリースを待っています…</string>
     <string name="bond_ride_complete_ask">ドライバーが乗車終了としました。</string>
     <string name="bond_release_fare">運賃をリリース (%1$s)</string>

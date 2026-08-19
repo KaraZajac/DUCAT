@@ -47,6 +47,7 @@
     <string name="rent_search_needs_location">İlanlar bölgeye göre ayrılmış panolarda durur, bu yüzden DUCAT hangilerini okuyacağını bilmek için kabaca nerede olduğunu bilmeli. Bu bilgi telefonunda kalır, hiçbir yere gönderilmez.</string>
     <string name="rent_search_allow">Konuma izin ver</string>
     <string name="rent_search_no_fix">Henüz konum yok. Pencere kenarı ya da dışarısı genelde işe yarar.</string>
+    <string name="rent_search_no_network">Şu anda ağa ulaşılamadı, bu yüzden hiçbir pano okunmadı. Genelde uygulama hâlâ bağlanıyor demektir — birazdan tekrar dene.</string>
     <string name="rent_search_retry">Tekrar dene</string>
     <string name="rent_search_progress">%2$d bölgeden %1$d tanesi tarandı</string>
     <string name="rent_asking_about">Merhaba — ilanınızı gördüm, %1$s. Hâlâ müsait mi?</string>

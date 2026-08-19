@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">요금 확보됨</string>
     <string name="bond_waiting_funding">승객이 요금을 확보하기를 기다리는 중…</string>
     <string name="bond_complete_ride">운행 완료 — 요금 요청</string>
+    <string name="bond_ask_again">다시 요청</string>
+    <string name="bond_ask_again_note">첫 요청이 닿지 않았을 경우를 대비해 다시 보냅니다.</string>
     <string name="bond_waiting_release">운행 완료 — 승객의 요금 지급을 기다리는 중…</string>
     <string name="bond_ride_complete_ask">기사가 운행 완료로 표시했습니다.</string>
     <string name="bond_release_fare">요금 지급 (%1$s)</string>

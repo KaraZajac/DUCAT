@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">Tarif aman</string>
     <string name="bond_waiting_funding">Menunggu penumpang mengamankan tarif…</string>
     <string name="bond_complete_ride">Selesaikan perjalanan — minta tarif</string>
+    <string name="bond_ask_again">Tanya lagi</string>
+    <string name="bond_ask_again_note">Mengirim permintaannya lagi, kalau-kalau yang pertama tidak sampai.</string>
     <string name="bond_waiting_release">Perjalanan selesai — menunggu penumpang melepaskan tarif…</string>
     <string name="bond_ride_complete_ask">Pengemudi menandai perjalanan selesai.</string>
     <string name="bond_release_fare">Lepaskan tarif (%1$s)</string>

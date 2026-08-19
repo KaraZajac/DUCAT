@@ -357,11 +357,17 @@ object Listings {
          * apps that look hung — so the count is reported as it goes.
          */
         onProgress: (Int, Int) -> Unit = { _, _ -> },
-    ) {
+        /**
+         * How many boards actually answered — which is not how many were
+         * asked. Zero means the network could not be reached, and "nothing
+         * listed around here" would be a confident lie.
+         */
+    ): Int {
         val started = System.currentTimeMillis()
+        val replied = java.util.concurrent.atomic.AtomicInteger()
         val home = runCatching {
             uniffi.ducat_mobile.geohashEncode(latE7, lonE7, CELL_PRECISION)
-        }.getOrNull() ?: return
+        }.getOrNull() ?: return 0
         val seen = HashSet<String>()
         val found = mutableListOf<uniffi.ducat_mobile.RentalInfo>()
 
@@ -403,8 +409,12 @@ object Listings {
             // first pass had already answered.
             val full = java.util.Collections.synchronizedSet(HashSet<String>())
             fun read(cell: String) {
-                runCatching {
-                    absorb(readCell(cell, kind, false) { slots -> if (slots >= 8) full += cell })
+                val got = runCatching {
+                    readCell(cell, kind, false) { slots -> if (slots >= 8) full += cell }
+                }.getOrNull()
+                if (got != null) {
+                    absorb(got)
+                    replied.incrementAndGet()
                 }
                 onProgress(answered.incrementAndGet(), boards.size)
             }
@@ -430,7 +440,10 @@ object Listings {
                 DucatLog.i(TAG, "climbing the ladder on ${crowded.size} full board(s)")
                 waitAll(
                     crowded.map { cell ->
-                        pool.submit { runCatching { absorb(readCell(cell, kind, true)) } }
+                        pool.submit {
+                            runCatching { readCell(cell, kind, true) }.getOrNull()
+                                ?.let { absorb(it) }
+                        }
                     },
                     LADDER_BUDGET_MS,
                 )
@@ -439,10 +452,12 @@ object Listings {
             pool.shutdownNow()
             DucatLog.i(
                 TAG,
-                "search near $home: ${found.size} listing(s) in " +
+                "search near $home: ${found.size} listing(s) from " +
+                    "${replied.get()} board(s) in " +
                     "${(System.currentTimeMillis() - started) / 1000}s",
             )
         }
+        return replied.get()
     }
 
     /**
@@ -487,9 +502,14 @@ object Listings {
         kind: Int?,
         deep: Boolean,
         onSlots: (Int) -> Unit = {},
-    ): List<uniffi.ducat_mobile.RentalInfo> {
+    ): List<uniffi.ducat_mobile.RentalInfo>? {
         val base = boardName(cell)
-        val first = readShard(base, kind, onSlots) ?: return emptyList()
+        // Null, not empty. readShard is careful to tell "nobody has posted
+        // here" from "we could not ask", and this used to flatten the two a
+        // line later — so a search run before the node had finished attaching
+        // read nothing, failed at every board, and told the person with total
+        // confidence that there was nothing listed near them.
+        val first = readShard(base, kind, onSlots) ?: return null
         if (!deep) return first
         val out = first.toMutableList()
         var quiet = 0

@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">Opłata zabezpieczona</string>
     <string name="bond_waiting_funding">Czekamy, aż pasażer zabezpieczy opłatę…</string>
     <string name="bond_complete_ride">Zakończ przejazd — poproś o opłatę</string>
+    <string name="bond_ask_again">Zapytaj ponownie</string>
+    <string name="bond_ask_again_note">Wyśle prośbę jeszcze raz, na wypadek gdyby pierwsza nie dotarła.</string>
     <string name="bond_waiting_release">Przejazd zakończony — czekamy, aż pasażer zwolni opłatę…</string>
     <string name="bond_ride_complete_ask">Kierowca oznaczył przejazd jako zakończony.</string>
     <string name="bond_release_fare">Zwolnij opłatę (%1$s)</string>

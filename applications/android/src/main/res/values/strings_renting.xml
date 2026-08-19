@@ -47,6 +47,7 @@
     <string name="rent_search_needs_location">Listings sit on boards laid out by area, so DUCAT needs a rough idea of where you are to know which ones to read. It is used on your phone and never sent anywhere.</string>
     <string name="rent_search_allow">Allow location</string>
     <string name="rent_search_no_fix">No location fix yet. Near a window or outside usually does it.</string>
+    <string name="rent_search_no_network">Could not reach the network just now, so no board was read. This usually means the app is still joining — try again in a moment.</string>
     <string name="rent_search_retry">Try again</string>
     <string name="rent_search_progress">%1$d of %2$d areas checked</string>
     <string name="rent_asking_about">Hello — I saw your listing, %1$s. Is it available?</string>

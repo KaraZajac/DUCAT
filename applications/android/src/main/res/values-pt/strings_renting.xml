@@ -47,6 +47,7 @@
     <string name="rent_search_needs_location">Os anúncios ficam em quadros organizados por área, então o DUCAT precisa saber mais ou menos onde você está para ler os certos. Fica no seu telefone e não é enviado a lugar nenhum.</string>
     <string name="rent_search_allow">Permitir localização</string>
     <string name="rent_search_no_fix">Ainda sem localização. Perto de uma janela ou ao ar livre costuma resolver.</string>
+    <string name="rent_search_no_network">Não deu para alcançar a rede agora, então nenhum quadro foi lido. Normalmente isso quer dizer que o app ainda está entrando — tente de novo daqui a pouco.</string>
     <string name="rent_search_retry">Tentar de novo</string>
     <string name="rent_search_progress">%1$d de %2$d áreas verificadas</string>
     <string name="rent_asking_about">Olá — vi o seu anúncio, %1$s. Ainda está disponível?</string>

@@ -5,6 +5,7 @@
     <string name="hail_card_standing">叫车已挂出 — 正在等司机</string>
     <string name="hail_card_pitch">把你要去的地方挂到司机盯着的候车点上。</string>
     <string name="hail_standing_at">挂在 %1$s</string>
+    <string name="hail_stands_for">还会挂 %1$s</string>
     <string name="hail_take_it_down">撤下来</string>
     <string name="hail_awaiting_offer">%1$s 接下了你的叫车 — 等待对方报价…</string>
     <string name="hail_cancel">取消</string>

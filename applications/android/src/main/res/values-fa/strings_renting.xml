@@ -47,6 +47,7 @@
     <string name="rent_search_needs_location">آگهی‌ها روی تخته‌هایی هستند که بر اساس منطقه چیده شده‌اند، پس DUCAT باید تقریباً بداند کجا هستید تا بفهمد کدام‌ها را بخواند. این اطلاعات روی گوشی شما می‌ماند و جایی فرستاده نمی‌شود.</string>
     <string name="rent_search_allow">اجازهٔ موقعیت</string>
     <string name="rent_search_no_fix">هنوز موقعیتی پیدا نشده. نزدیک پنجره یا بیرون معمولاً جواب می‌دهد.</string>
+    <string name="rent_search_no_network">الان نشد به شبکه رسید، بنابراین هیچ تخته‌ای خوانده نشد. معمولاً یعنی برنامه هنوز در حال پیوستن است — کمی بعد دوباره تلاش کنید.</string>
     <string name="rent_search_retry">تلاش دوباره</string>
     <string name="rent_search_progress">%1$d از %2$d منطقه بررسی شد</string>
     <string name="rent_asking_about">سلام — آگهی شما را دیدم، %1$s. هنوز موجود است؟</string>

@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">Оплата защищена</string>
     <string name="bond_waiting_funding">Ждём, пока пассажир внесёт оплату…</string>
     <string name="bond_complete_ride">Завершить поездку — запросить оплату</string>
+    <string name="bond_ask_again">Спросить ещё раз</string>
+    <string name="bond_ask_again_note">Отправит запрос ещё раз — на случай, если первый не дошёл.</string>
     <string name="bond_waiting_release">Поездка завершена — ждём, пока пассажир отпустит оплату…</string>
     <string name="bond_ride_complete_ask">Водитель отметил поездку завершённой.</string>
     <string name="bond_release_fare">Отпустить оплату (%1$s)</string>

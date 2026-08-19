@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">Prix sécurisé</string>
     <string name="bond_waiting_funding">En attente que le passager sécurise le prix…</string>
     <string name="bond_complete_ride">Terminer la course — demander le prix</string>
+    <string name="bond_ask_again">Redemander</string>
+    <string name="bond_ask_again_note">Renvoie la demande, au cas où la première ne leur serait pas parvenue.</string>
     <string name="bond_waiting_release">Course terminée — en attente que le passager libère le prix…</string>
     <string name="bond_ride_complete_ask">Le conducteur a marqué la course comme terminée.</string>
     <string name="bond_release_fare">Libérer le prix (%1$s)</string>

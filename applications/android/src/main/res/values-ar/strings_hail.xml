@@ -5,6 +5,7 @@
     <string name="hail_card_standing">النداء قائم — في انتظار سائق</string>
     <string name="hail_card_pitch">انشر وجهتك في موقف يراقبه السائقون.</string>
     <string name="hail_standing_at">قائم عند %1$s</string>
+    <string name="hail_stands_for">يبقى قائمًا %1$s أخرى</string>
     <string name="hail_take_it_down">أنزله</string>
     <string name="hail_awaiting_offer">التقط %1$s نداءك — في انتظار عرضه…</string>
     <string name="hail_cancel">إلغاء</string>

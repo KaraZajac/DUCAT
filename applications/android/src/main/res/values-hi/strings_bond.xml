@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">किराया सुरक्षित</string>
     <string name="bond_waiting_funding">सवार के किराया सुरक्षित करने की प्रतीक्षा…</string>
     <string name="bond_complete_ride">सवारी पूरी करें — किराया माँगें</string>
+    <string name="bond_ask_again">फिर पूछें</string>
+    <string name="bond_ask_again_note">अनुरोध दोबारा भेजता है, अगर पहला उन तक न पहुँचा हो।</string>
     <string name="bond_waiting_release">सवारी पूरी — सवार द्वारा किराया जारी करने की प्रतीक्षा…</string>
     <string name="bond_ride_complete_ask">चालक ने सवारी पूरी होने का चिह्न लगाया।</string>
     <string name="bond_release_fare">किराया जारी करें (%1$s)</string>

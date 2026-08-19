@@ -5,6 +5,7 @@
     <string name="hail_card_standing">Chiamata in piedi — in attesa di un autista</string>
     <string name="hail_card_pitch">Pubblica dove stai andando su un posteggio sorvegliato dagli autisti.</string>
     <string name="hail_standing_at">In piedi su %1$s</string>
+    <string name="hail_stands_for">Resta in piedi ancora %1$s</string>
     <string name="hail_take_it_down">Ritirala</string>
     <string name="hail_awaiting_offer">%1$s ha preso la tua chiamata — in attesa della sua offerta…</string>
     <string name="hail_cancel">Annulla</string>

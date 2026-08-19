@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">Tariffa bloccata</string>
     <string name="bond_waiting_funding">In attesa che il passeggero blocchi la tariffa…</string>
     <string name="bond_complete_ride">Concludi corsa — richiedi la tariffa</string>
+    <string name="bond_ask_again">Chiedi di nuovo</string>
+    <string name="bond_ask_again_note">Invia di nuovo la richiesta, nel caso la prima non sia arrivata.</string>
     <string name="bond_waiting_release">Corsa conclusa — in attesa che il passeggero sblocchi la tariffa…</string>
     <string name="bond_ride_complete_ask">L\'autista ha segnato la corsa come conclusa.</string>
     <string name="bond_release_fare">Sblocca tariffa (%1$s)</string>

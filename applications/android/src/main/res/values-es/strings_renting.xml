@@ -47,6 +47,7 @@
     <string name="rent_search_needs_location">Los anuncios están en tableros organizados por zona, así que DUCAT necesita saber más o menos dónde estás para leer los correctos. Se usa en tu teléfono y no se envía a ninguna parte.</string>
     <string name="rent_search_allow">Permitir ubicación</string>
     <string name="rent_search_no_fix">Todavía no hay ubicación. Cerca de una ventana o al aire libre suele bastar.</string>
+    <string name="rent_search_no_network">No se pudo llegar a la red ahora mismo, así que no se leyó ningún tablero. Suele significar que la app aún se está uniendo: inténtalo de nuevo en un momento.</string>
     <string name="rent_search_retry">Reintentar</string>
     <string name="rent_search_progress">%1$d de %2$d zonas revisadas</string>
     <string name="rent_asking_about">Hola: he visto tu anuncio, %1$s. ¿Sigue disponible?</string>

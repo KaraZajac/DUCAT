@@ -5,6 +5,7 @@
     <string name="hail_card_standing">Ruf steht — wartet auf einen Fahrer</string>
     <string name="hail_card_pitch">Poste dein Ziel an einen Stand, den Fahrer beobachten.</string>
     <string name="hail_standing_at">Steht bei %1$s</string>
+    <string name="hail_stands_for">Steht noch %1$s</string>
     <string name="hail_take_it_down">Zurückziehen</string>
     <string name="hail_awaiting_offer">%1$s hat deinen Ruf angenommen — warte auf das Angebot…</string>
     <string name="hail_cancel">Abbrechen</string>

@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">کرایه ایمن شد</string>
     <string name="bond_waiting_funding">در انتظار ایمن‌سازی کرایه توسط مسافر…</string>
     <string name="bond_complete_ride">پایان سفر — درخواست کرایه</string>
+    <string name="bond_ask_again">دوباره بپرس</string>
+    <string name="bond_ask_again_note">درخواست را دوباره می‌فرستد، اگر اولی به دستشان نرسیده باشد.</string>
     <string name="bond_waiting_release">سفر پایان یافت — در انتظار آزادسازی کرایه توسط مسافر…</string>
     <string name="bond_ride_complete_ask">راننده سفر را پایان‌یافته علامت زد.</string>
     <string name="bond_release_fare">آزادسازی کرایه (%1$s)</string>

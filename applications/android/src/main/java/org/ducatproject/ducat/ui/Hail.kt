@@ -350,6 +350,25 @@ fun HailCard(
                     p.cell.removePrefix("geo:").substringBefore("-")),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // How long it stands. A hail lasts fifteen minutes and then stops
+            // being anybody's problem, which is the right design and was
+            // invisible: the rider got an indeterminate bar and no way to tell
+            // a hail posted thirty seconds ago from one about to lapse. On a
+            // kerb that is the only number they want.
+            var now by remember { mutableLongStateOf(System.currentTimeMillis() / 1000) }
+            LaunchedEffect(p.expiry) {
+                while (true) {
+                    now = System.currentTimeMillis() / 1000
+                    kotlinx.coroutines.delay(5_000)
+                }
+            }
+            val left = (p.expiry - now).coerceAtLeast(0L)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                stringResource(R.string.hail_stands_for, humanDuration(context, left)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(Modifier.height(8.dp))
             LinearProgressIndicator(Modifier.fillMaxWidth())
             Spacer(Modifier.height(10.dp))

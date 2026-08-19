@@ -5,6 +5,7 @@
     <string name="hail_card_standing">Hail standing — waiting for a driver</string>
     <string name="hail_card_pitch">Post where you\'re going to a stand drivers watch.</string>
     <string name="hail_standing_at">Standing at %1$s</string>
+    <string name="hail_stands_for">Stands for another %1$s</string>
     <string name="hail_take_it_down">Take it down</string>
     <string name="hail_awaiting_offer">%1$s took your hail — waiting for their offer…</string>
     <string name="hail_cancel">Cancel</string>

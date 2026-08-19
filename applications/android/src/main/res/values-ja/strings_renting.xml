@@ -47,6 +47,7 @@
     <string name="rent_search_needs_location">掲載は地域ごとの掲示板に並んでいるので、どれを読むかを知るために DUCAT はおおよその現在地が必要です。位置はこの端末の中だけで使われ、どこにも送信されません。</string>
     <string name="rent_search_allow">位置情報を許可</string>
     <string name="rent_search_no_fix">まだ位置が取れていません。窓際や屋外だとたいてい取れます。</string>
+    <string name="rent_search_no_network">いまネットワークに届かなかったため、掲示板をひとつも読めていません。たいていはアプリがまだ参加中です。少ししてからもう一度お試しください。</string>
     <string name="rent_search_retry">もう一度</string>
     <string name="rent_search_progress">%2$d 件中 %1$d 件の地域を確認</string>
     <string name="rent_asking_about">こんにちは。%1$s の掲載を見ました。まだ空いていますか？</string>

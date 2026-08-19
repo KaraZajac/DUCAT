@@ -58,7 +58,7 @@ fun RentSearchCard(
  * Why a search never started. Not an error in the list — the list does not
  * exist yet — so it replaces the spinner rather than sitting above one.
  */
-private enum class Stall { NoPermission, NoFix }
+private enum class Stall { NoPermission, NoFix, NoNetwork }
 
 @Composable
 private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contact) -> Unit) {
@@ -105,7 +105,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                 return@grabFix
             }
             scope.launch {
-                withContext(Dispatchers.IO) {
+                val replied = withContext(Dispatchers.IO) {
                     runCatching {
                         Listings.search(
                             fix.first, fix.second, kind,
@@ -118,9 +118,14 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                             },
                             onProgress = { done, total -> progress = done to total },
                         )
-                    }
+                    }.getOrDefault(0)
                 }
-                // The ring is done; whatever is here is the answer.
+                // The ring is done; whatever is here is the answer — unless
+                // no board answered at all, in which case there is no answer
+                // and saying "nothing listed around here" would be a
+                // confident lie. Opening this a few seconds after the app
+                // starts, before the node has attached, does exactly that.
+                if (replied == 0) stalled = Stall.NoNetwork
                 if (results == null) results = emptyList()
                 searching = false
             }
@@ -163,8 +168,11 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                     stalled != null -> Stalled(
                         stall = stalled!!,
                         onRetry = {
-                            if (stalled == Stall.NoFix) attempt++
-                            else askForLocation(context, asked) { locPerm.launch(it) }
+                            if (stalled == Stall.NoPermission) {
+                                askForLocation(context, asked) { locPerm.launch(it) }
+                            } else {
+                                attempt++
+                            }
                         },
                     )
                     results == null || (results!!.isEmpty() && searching) -> Column {
@@ -308,8 +316,11 @@ private fun Stalled(stall: Stall, onRetry: () -> Unit) {
     Column {
         Text(
             stringResource(
-                if (stall == Stall.NoPermission) R.string.rent_search_needs_location
-                else R.string.rent_search_no_fix,
+                when (stall) {
+                    Stall.NoPermission -> R.string.rent_search_needs_location
+                    Stall.NoFix -> R.string.rent_search_no_fix
+                    Stall.NoNetwork -> R.string.rent_search_no_network
+                },
             ),
             style = MaterialTheme.typography.bodyMedium,
         )

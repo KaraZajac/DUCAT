@@ -5,6 +5,7 @@
     <string name="hail_card_standing">Panggilan terpasang — menunggu sopir</string>
     <string name="hail_card_pitch">Pasang tujuanmu di pangkalan yang dipantau para sopir.</string>
     <string name="hail_standing_at">Terpasang di %1$s</string>
+    <string name="hail_stands_for">Bertahan %1$s lagi</string>
     <string name="hail_take_it_down">Turunkan</string>
     <string name="hail_awaiting_offer">%1$s mengambil panggilanmu — menunggu tawaran mereka…</string>
     <string name="hail_cancel">Batal</string>

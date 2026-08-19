@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">车费已保障</string>
     <string name="bond_waiting_funding">等待乘客保障车费…</string>
     <string name="bond_complete_ride">完成行程 — 请求车费</string>
+    <string name="bond_ask_again">再问一次</string>
+    <string name="bond_ask_again_note">重新发送这个请求，以防对方没有收到第一次的。</string>
     <string name="bond_waiting_release">行程结束 — 等待乘客释放车费…</string>
     <string name="bond_ride_complete_ask">司机已将行程标记为完成。</string>
     <string name="bond_release_fare">释放车费（%1$s）</string>

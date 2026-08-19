@@ -5,6 +5,7 @@
     <string name="hail_card_standing">Çağrı askıda — sürücü bekleniyor</string>
     <string name="hail_card_pitch">Nereye gideceğini sürücülerin izlediği bir durağa as.</string>
     <string name="hail_standing_at">%1$s durağında askıda</string>
+    <string name="hail_stands_for">%1$s daha geçerli</string>
     <string name="hail_take_it_down">Çağrıyı indir</string>
     <string name="hail_awaiting_offer">%1$s çağrını aldı — teklifi bekleniyor…</string>
     <string name="hail_cancel">İptal</string>

@@ -5,6 +5,7 @@
     <string name="hail_card_standing">Chamado ativo — aguardando um motorista</string>
     <string name="hail_card_pitch">Publique para onde você vai em um ponto que os motoristas observam.</string>
     <string name="hail_standing_at">Ativo em %1$s</string>
+    <string name="hail_stands_for">Fica de pé mais %1$s</string>
     <string name="hail_take_it_down">Retirar</string>
     <string name="hail_awaiting_offer">%1$s pegou seu chamado — aguardando a oferta…</string>
     <string name="hail_cancel">Cancelar</string>

@@ -5,6 +5,7 @@
     <string name="hail_card_standing">درخواست سفر فعال است — در انتظار راننده</string>
     <string name="hail_card_pitch">مقصدت را روی ایستگاهی بگذار که راننده‌ها زیر نظر دارند.</string>
     <string name="hail_standing_at">فعال در %1$s</string>
+    <string name="hail_stands_for">%1$s دیگر برقرار است</string>
     <string name="hail_take_it_down">برش دار</string>
     <string name="hail_awaiting_offer">%1$s درخواستت را برداشت — منتظر پیشنهادش…</string>
     <string name="hail_cancel">لغو</string>

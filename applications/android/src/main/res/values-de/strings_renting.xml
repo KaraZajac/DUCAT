@@ -47,6 +47,7 @@
     <string name="rent_search_needs_location">Anzeigen liegen auf Tafeln, die nach Gebiet geordnet sind. DUCAT braucht daher ungefähr deinen Standort, um die richtigen zu lesen. Er bleibt auf deinem Telefon und wird nirgendwohin gesendet.</string>
     <string name="rent_search_allow">Standort erlauben</string>
     <string name="rent_search_no_fix">Noch kein Standort. In Fensternähe oder draußen klappt es meistens.</string>
+    <string name="rent_search_no_network">Das Netzwerk war gerade nicht erreichbar, also wurde keine Tafel gelesen. Meist heißt das, die App verbindet sich noch — versuch es gleich noch einmal.</string>
     <string name="rent_search_retry">Erneut versuchen</string>
     <string name="rent_search_progress">%1$d von %2$d Gebieten geprüft</string>
     <string name="rent_asking_about">Hallo — ich habe deine Anzeige gesehen, %1$s. Ist sie noch frei?</string>

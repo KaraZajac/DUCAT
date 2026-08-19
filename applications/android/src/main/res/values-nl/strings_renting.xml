@@ -47,6 +47,7 @@
     <string name="rent_search_needs_location">Advertenties staan op borden die per gebied zijn ingedeeld, dus DUCAT moet ongeveer weten waar je bent om de juiste te lezen. Dat blijft op je telefoon en wordt nergens naartoe gestuurd.</string>
     <string name="rent_search_allow">Locatie toestaan</string>
     <string name="rent_search_no_fix">Nog geen locatie. Bij een raam of buiten lukt het meestal.</string>
+    <string name="rent_search_no_network">Het netwerk was even niet bereikbaar, dus er is geen bord gelezen. Meestal betekent dat dat de app nog verbinding maakt — probeer het zo nog eens.</string>
     <string name="rent_search_retry">Opnieuw proberen</string>
     <string name="rent_search_progress">%1$d van %2$d gebieden bekeken</string>
     <string name="rent_asking_about">Hallo — ik zag je advertentie, %1$s. Is die nog beschikbaar?</string>

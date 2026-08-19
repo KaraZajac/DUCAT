@@ -5,6 +5,7 @@
     <string name="hail_card_standing">Appel posté — en attente d\'un chauffeur</string>
     <string name="hail_card_pitch">Poste ta destination sur une station que les chauffeurs surveillent.</string>
     <string name="hail_standing_at">Posté à %1$s</string>
+    <string name="hail_stands_for">Tient encore %1$s</string>
     <string name="hail_take_it_down">Le retirer</string>
     <string name="hail_awaiting_offer">%1$s a pris ton appel — en attente de son offre…</string>
     <string name="hail_cancel">Annuler</string>

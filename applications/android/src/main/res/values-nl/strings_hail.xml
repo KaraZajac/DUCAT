@@ -5,6 +5,7 @@
     <string name="hail_card_standing">Oproep staat — wacht op een chauffeur</string>
     <string name="hail_card_pitch">Zet waar je heen wilt op een standplaats die chauffeurs in de gaten houden.</string>
     <string name="hail_standing_at">Staat op %1$s</string>
+    <string name="hail_stands_for">Blijft nog %1$s staan</string>
     <string name="hail_take_it_down">Haal hem weg</string>
     <string name="hail_awaiting_offer">%1$s heeft je oproep aangenomen — wachten op hun bod…</string>
     <string name="hail_cancel">Annuleren</string>

@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">Cước phí đã được bảo đảm</string>
     <string name="bond_waiting_funding">Đang chờ hành khách bảo đảm cước phí…</string>
     <string name="bond_complete_ride">Hoàn tất chuyến đi — yêu cầu cước phí</string>
+    <string name="bond_ask_again">Hỏi lại</string>
+    <string name="bond_ask_again_note">Gửi lại yêu cầu, phòng khi lần đầu chưa tới nơi.</string>
     <string name="bond_waiting_release">Chuyến đi hoàn tất — chờ hành khách giải phóng cước phí…</string>
     <string name="bond_ride_complete_ask">Tài xế đã đánh dấu chuyến đi hoàn tất.</string>
     <string name="bond_release_fare">Giải phóng cước phí (%1$s)</string>

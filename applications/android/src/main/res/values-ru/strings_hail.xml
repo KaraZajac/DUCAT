@@ -5,6 +5,7 @@
     <string name="hail_card_standing">Вызов размещён — ждём водителя</string>
     <string name="hail_card_pitch">Опубликуй, куда едешь, на стоянке, за которой следят водители.</string>
     <string name="hail_standing_at">Висит на стоянке %1$s</string>
+    <string name="hail_stands_for">Стоит ещё %1$s</string>
     <string name="hail_take_it_down">Снять вызов</string>
     <string name="hail_awaiting_offer">%1$s взял(а) твой вызов — ждём предложение…</string>
     <string name="hail_cancel">Отмена</string>

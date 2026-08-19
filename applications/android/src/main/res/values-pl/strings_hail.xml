@@ -5,6 +5,7 @@
     <string name="hail_card_standing">Wezwanie stoi — czekanie na kierowcę</string>
     <string name="hail_card_pitch">Wystaw, dokąd jedziesz, na postój obserwowany przez kierowców.</string>
     <string name="hail_standing_at">Stoi na: %1$s</string>
+    <string name="hail_stands_for">Stoi jeszcze %1$s</string>
     <string name="hail_take_it_down">Zdejmij je</string>
     <string name="hail_awaiting_offer">%1$s bierze twoje wezwanie — czekanie na ofertę…</string>
     <string name="hail_cancel">Anuluj</string>

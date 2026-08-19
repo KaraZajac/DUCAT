@@ -5,6 +5,7 @@
     <string name="hail_card_standing">Đang vẫy — chờ tài xế</string>
     <string name="hail_card_pitch">Đăng nơi bạn muốn đến lên một bến mà tài xế đang canh.</string>
     <string name="hail_standing_at">Đang treo tại %1$s</string>
+    <string name="hail_stands_for">Còn hiệu lực %1$s nữa</string>
     <string name="hail_take_it_down">Gỡ xuống</string>
     <string name="hail_awaiting_offer">%1$s đã nhận lượt vẫy của bạn — chờ họ báo giá…</string>
     <string name="hail_cancel">Hủy</string>

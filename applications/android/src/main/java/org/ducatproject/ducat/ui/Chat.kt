@@ -2122,6 +2122,13 @@ private fun RideBondBanner(contact: Contact) {
                     // The proposer can re-propose: a broadcast can die on the
                     // node, and a fresh proposal (new nonces, same inputs) is
                     // the retry. The rider is simply asked for their yes again.
+                    //
+                    // It used to be labelled "Complete ride — request the
+                    // fare", directly beneath a line saying the ride was
+                    // complete and the fare had been requested. A driver
+                    // reading that cannot tell whether their tap worked, and
+                    // the honest name for this button is what it does: ask
+                    // again.
                     if (!rider) {
                         Spacer(Modifier.height(6.dp))
                         OutlinedButton(
@@ -2139,7 +2146,8 @@ private fun RideBondBanner(contact: Contact) {
                             },
                             enabled = !busy,
                             modifier = Modifier.fillMaxWidth().height(40.dp),
-                        ) { Text(stringResource(R.string.bond_complete_ride)) }
+                        ) { Text(stringResource(R.string.bond_ask_again)) }
+                        BondNote(stringResource(R.string.bond_ask_again_note))
                     }
                 }
                 stage == "release_pending" -> {

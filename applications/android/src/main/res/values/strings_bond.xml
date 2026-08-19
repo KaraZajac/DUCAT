@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">Fare secured</string>
     <string name="bond_waiting_funding">Waiting for the rider to secure the fare…</string>
     <string name="bond_complete_ride">Complete ride — request the fare</string>
+    <string name="bond_ask_again">Ask again</string>
+    <string name="bond_ask_again_note">Sends the request again, in case the first one never reached them.</string>
     <string name="bond_waiting_release">Ride complete — waiting for the rider to release the fare…</string>
     <string name="bond_ride_complete_ask">The driver marked the ride complete.</string>
     <string name="bond_release_fare">Release fare (%1$s)</string>

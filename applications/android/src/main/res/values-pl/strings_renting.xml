@@ -47,6 +47,7 @@
     <string name="rent_search_needs_location">Ogłoszenia wiszą na tablicach podzielonych według okolicy, więc DUCAT musi z grubsza wiedzieć, gdzie jesteś, żeby wiedzieć, które czytać. Zostaje to na twoim telefonie i nigdzie nie jest wysyłane.</string>
     <string name="rent_search_allow">Zezwól na lokalizację</string>
     <string name="rent_search_no_fix">Jeszcze nie ma lokalizacji. Przy oknie albo na zewnątrz zwykle się udaje.</string>
+    <string name="rent_search_no_network">Nie udało się teraz połączyć z siecią, więc żadna tablica nie została odczytana. Zwykle znaczy to, że aplikacja jeszcze się podłącza — spróbuj za chwilę.</string>
     <string name="rent_search_retry">Spróbuj ponownie</string>
     <string name="rent_search_progress">Sprawdzono %1$d z %2$d okolic</string>
     <string name="rent_asking_about">Dzień dobry! Czy ogłoszenie %1$s jest jeszcze aktualne?</string>

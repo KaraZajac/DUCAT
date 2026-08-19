@@ -9,6 +9,8 @@
     <string name="bond_fare_secured">Fahrpreis gesichert</string>
     <string name="bond_waiting_funding">Warten, bis der Fahrgast den Fahrpreis sichert…</string>
     <string name="bond_complete_ride">Fahrt abschließen — Fahrpreis anfordern</string>
+    <string name="bond_ask_again">Erneut fragen</string>
+    <string name="bond_ask_again_note">Schickt die Anfrage noch einmal, falls die erste nie ankam.</string>
     <string name="bond_waiting_release">Fahrt beendet — warten, bis der Fahrgast den Fahrpreis freigibt…</string>
     <string name="bond_ride_complete_ask">Der Fahrer hat die Fahrt als beendet markiert.</string>
     <string name="bond_release_fare">Fahrpreis freigeben (%1$s)</string>
