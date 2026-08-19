@@ -388,13 +388,24 @@ fun main() {
     if (landed == null) { println("RIDE_FAIL no release after consenting $signed time(s)"); return }
     println("RIDE_RELEASED $landed")
 
-    val before = Wallet.balances(context).let { it.spendablePxmr + it.lockedPxmr }
-    await("the margin to come home", seconds = 1800) {
-        val node = org.ducatproject.ducat.NodeStore(context).lastGood() ?: return@await null
-        var steps = 0
-        while (steps < 40 && Wallet.scanStep(context, node)) steps++
-        val b = Wallet.balances(context)
-        (b.spendablePxmr + b.lockedPxmr).takeIf { it > before }
+    // Only if there is a margin to come home. A ride funded at exactly the
+    // fare sends the rider nothing back — `back=0 pXMR`, which the proposal
+    // above prints — so waiting for the balance to rise waits for something
+    // that is never going to happen, and the run hung here for a full hour at
+    // the last step of an escrow that had already completed.
+    val back = Ceremony.all(context).firstOrNull { it.optString("id") == id }
+        ?.optLong("pendingRiderBack") ?: 0L
+    if (back > 0) {
+        val before = Wallet.balances(context).let { it.spendablePxmr + it.lockedPxmr }
+        await("the margin to come home", seconds = 1800) {
+            val node = org.ducatproject.ducat.NodeStore(context).lastGood() ?: return@await null
+            var steps = 0
+            while (steps < 40 && Wallet.scanStep(context, node)) steps++
+            val b = Wallet.balances(context)
+            (b.spendablePxmr + b.lockedPxmr).takeIf { it > before }
+        }
+    } else {
+        println("RIDE_NOTHING_BACK the fare was the whole pot — nothing returns to the rider")
     }
     val rb = Wallet.balances(context)
     println("RIDE_PAID rider holds ${formatXmr(rb.spendablePxmr + rb.lockedPxmr)} XMR")
