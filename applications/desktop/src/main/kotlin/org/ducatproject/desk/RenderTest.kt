@@ -315,6 +315,35 @@ fun main() {
     }
     org.ducatproject.ducat.DeviceLock.backend = null
 
+    // --- right to left ----------------------------------------------------
+    //
+    // Arabic and Persian have shipped for a while and no machine has ever
+    // drawn a screen in either. Two things go wrong here that never show up in
+    // English: a layout that reads `start` as `left` mirrors wrongly or not at
+    // all, and a translation longer than its English source overruns a row
+    // that had exactly enough space for the original.
+    //
+    // The locale and the layout direction are separate switches and both have
+    // to be thrown — words in Arabic inside a left-to-right frame is the bug,
+    // not the test.
+    android.res.DeskRes.setLocale("ar")
+    fun rtl(name: String, w: Int, h: Int, content: @Composable () -> Unit) =
+        render(name, w, h) {
+            CompositionLocalProvider(
+                androidx.compose.ui.platform.LocalLayoutDirection provides
+                    androidx.compose.ui.unit.LayoutDirection.Rtl,
+            ) { content() }
+        }
+
+    rtl("ar-kiosk", 520, 900) { org.ducatproject.ducat.ui.KioskScreen() }
+    rtl("ar-items", 900, 700) { org.ducatproject.ducat.ui.ItemsScreen() }
+    rtl("ar-till", 1100, 800) { org.ducatproject.ducat.ui.PosScreen() }
+    rtl("ar-pin", 700, 700) {
+        org.ducatproject.ducat.ui.PinGate(open = true, onDismiss = {}, onPassed = {})
+    }
+    rtl("ar-activity", 1100, 800) { org.ducatproject.ducat.ui.ActivityScreen() }
+    android.res.DeskRes.setLocale("en")
+
     println(
         if (failures == 0) "RENDERTEST OK — ${out.absolutePath}"
         else "RENDERTEST FAILED ($failures)",
