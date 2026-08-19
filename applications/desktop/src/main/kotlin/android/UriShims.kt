@@ -15,5 +15,11 @@ class Uri private constructor(private val s: String) {
 
         @JvmStatic
         fun fromFile(f: java.io.File): Uri = Uri("file://${f.absolutePath}")
+
+        /** `package:org.ducatproject.ducat` and its kind — a scheme and an
+         *  opaque remainder, which is not a path and never becomes a file. */
+        @JvmStatic
+        fun fromParts(scheme: String, ssp: String, fragment: String?): Uri =
+            Uri("$scheme:$ssp" + (fragment?.let { "#$it" } ?: ""))
     }
 }

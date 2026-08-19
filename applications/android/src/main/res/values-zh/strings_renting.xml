@@ -44,6 +44,11 @@
     <string name="rent_search_title">附近的租赁</string>
     <string name="rent_searching">正在查看你周围的板…</string>
     <string name="rent_none_found">这附近还没有东西。</string>
+    <string name="rent_search_needs_location">房源按区域挂在不同的板上，所以 DUCAT 需要大致知道你在哪里，才知道该读哪些板。位置只在你的手机上使用，不会发送到任何地方。</string>
+    <string name="rent_search_allow">允许定位</string>
+    <string name="rent_search_no_fix">还没有定位。靠近窗边或走到户外通常就好了。</string>
+    <string name="rent_search_retry">重试</string>
+    <string name="rent_search_progress">已查看 %2$d 个区域中的 %1$d 个</string>
     <string name="rent_ask_about_it">问一问</string>
     <string name="rent_per_day_short">%1$s / 天</string>
     <string name="rent_per_night_short">%1$s / 晚</string>

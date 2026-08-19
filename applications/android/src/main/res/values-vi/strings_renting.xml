@@ -44,6 +44,11 @@
     <string name="rent_search_title">Cho thuê gần đây</string>
     <string name="rent_searching">Đang xem các bảng quanh bạn…</string>
     <string name="rent_none_found">Quanh đây chưa có gì.</string>
+    <string name="rent_search_needs_location">Tin đăng nằm trên các bảng chia theo khu vực, nên DUCAT cần biết đại khái bạn đang ở đâu để biết đọc bảng nào. Thông tin này dùng ngay trên máy bạn và không được gửi đi đâu cả.</string>
+    <string name="rent_search_allow">Cho phép vị trí</string>
+    <string name="rent_search_no_fix">Chưa có vị trí. Gần cửa sổ hoặc ra ngoài trời thường là được.</string>
+    <string name="rent_search_retry">Thử lại</string>
+    <string name="rent_search_progress">Đã kiểm tra %1$d trên %2$d khu vực</string>
     <string name="rent_ask_about_it">Hỏi về nó</string>
     <string name="rent_per_day_short">%1$s / ngày</string>
     <string name="rent_per_night_short">%1$s / đêm</string>

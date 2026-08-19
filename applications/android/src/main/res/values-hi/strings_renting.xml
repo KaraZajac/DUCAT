@@ -44,6 +44,11 @@
     <string name="rent_search_title">आस-पास किराये पर</string>
     <string name="rent_searching">आपके आस-पास के बोर्ड देख रहे हैं…</string>
     <string name="rent_none_found">यहाँ अभी कुछ नहीं है।</string>
+    <string name="rent_search_needs_location">लिस्टिंग इलाक़े के हिसाब से बँटे बोर्ड पर होती हैं, इसलिए DUCAT को मोटे तौर पर पता होना चाहिए कि आप कहाँ हैं, ताकि वह सही बोर्ड पढ़ सके। यह आपके फ़ोन पर ही रहता है और कहीं नहीं भेजा जाता।</string>
+    <string name="rent_search_allow">लोकेशन की अनुमति दें</string>
+    <string name="rent_search_no_fix">अभी लोकेशन नहीं मिली। खिड़की के पास या बाहर आमतौर पर मिल जाती है।</string>
+    <string name="rent_search_retry">फिर कोशिश करें</string>
+    <string name="rent_search_progress">%2$d में से %1$d इलाक़े देखे गए</string>
     <string name="rent_ask_about_it">इसके बारे में पूछें</string>
     <string name="rent_per_day_short">%1$s / दिन</string>
     <string name="rent_per_night_short">%1$s / रात</string>

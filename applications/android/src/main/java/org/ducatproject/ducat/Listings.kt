@@ -35,6 +35,27 @@ object Listings {
     /** The board a listing sits on: coarse by rule (§16.18). */
     const val CELL_PRECISION = 5u
 
+    /**
+     * How long a search waits for the ring of boards before it settles for
+     * what has arrived. Nothing is lost by stopping — every board publishes
+     * as it lands — so this is the cap on how long a person can be asked to
+     * watch a spinner, not a cap on how much can be found.
+     */
+    private const val WAVE_BUDGET_MS = 120_000L
+
+    /** The same, for the second pass over boards that came back full. */
+    private const val LADDER_BUDGET_MS = 90_000L
+
+    /** Wait for all of them, but no longer than the budget for all of them. */
+    private fun waitAll(jobs: List<java.util.concurrent.Future<*>>, budgetMs: Long) {
+        val deadline = System.currentTimeMillis() + budgetMs
+        jobs.forEach { job ->
+            val left = deadline - System.currentTimeMillis()
+            if (left <= 0) return@forEach
+            runCatching { job.get(left, java.util.concurrent.TimeUnit.MILLISECONDS) }
+        }
+    }
+
     private fun prefs(context: Context) = securePrefs(context, "ducat_listings")
 
     fun all(context: Context): List<JSONObject> {
@@ -258,7 +279,18 @@ object Listings {
         lonE7: Long,
         kind: Int?,
         onFound: (List<uniffi.ducat_mobile.RentalInfo>) -> Unit,
+        /**
+         * How many of the boards have answered, and how many there are.
+         *
+         * Concluding that a board is empty costs the better part of a minute
+         * (see below), so a search of a quiet area is a minute and a half of
+         * screen with nothing on it. A spinner that cannot say whether it is
+         * halfway or stuck is indistinguishable from a hang, and people close
+         * apps that look hung — so the count is reported as it goes.
+         */
+        onProgress: (Int, Int) -> Unit = { _, _ -> },
     ) {
+        val started = System.currentTimeMillis()
         val home = runCatching {
             uniffi.ducat_mobile.geohashEncode(latE7, lonE7, CELL_PRECISION)
         }.getOrNull() ?: return
@@ -291,21 +323,46 @@ object Listings {
             // half before they had even started. A populated home cell still
             // arrives first: it answers in 12 to 18 seconds and `absorb`
             // publishes on arrival, not in order.
-            (listOf(home) + ring)
-                .map { cell -> pool.submit { runCatching { absorb(readCell(cell, kind, false)) } } }
-                .forEach { runCatching { it.get(150, java.util.concurrent.TimeUnit.SECONDS) } }
+            val boards = listOf(home) + ring
+            val answered = java.util.concurrent.atomic.AtomicInteger()
+            onProgress(0, boards.size)
+            val jobs = boards.map { cell ->
+                pool.submit {
+                    runCatching { absorb(readCell(cell, kind, false)) }
+                    onProgress(answered.incrementAndGet(), boards.size)
+                }
+            }
+            // One deadline for the wave, not one per board.
+            //
+            // Waiting `get(150s)` on each future in turn reads like a 150
+            // second cap and is not: a board that never answers spends the
+            // whole 150 before the next is even looked at, so nine slow
+            // boards could hold the screen for twenty-two minutes. The
+            // deadline is wall-clock, and every board is already publishing
+            // its findings through `absorb` as it lands, so cutting the wait
+            // short loses the waiting, not the results.
+            waitAll(jobs, WAVE_BUDGET_MS)
 
             // Wave three: climb the ladder, but only where shard 0 came back
             // full — a board with a free slot is the end of its own ladder,
             // because every writer fills the lowest free slot first.
-            val crowded = (listOf(home) + ring).filter { looksFull(boardName(it)) }
+            val crowded = boards.filter { looksFull(boardName(it)) }
             if (crowded.isNotEmpty()) {
                 DucatLog.i(TAG, "climbing the ladder on ${crowded.size} full board(s)")
-                crowded.map { cell -> pool.submit { runCatching { absorb(readCell(cell, kind, true)) } } }
-                    .forEach { runCatching { it.get(240, java.util.concurrent.TimeUnit.SECONDS) } }
+                waitAll(
+                    crowded.map { cell ->
+                        pool.submit { runCatching { absorb(readCell(cell, kind, true)) } }
+                    },
+                    LADDER_BUDGET_MS,
+                )
             }
         } finally {
             pool.shutdownNow()
+            DucatLog.i(
+                TAG,
+                "search near $home: ${found.size} listing(s) in " +
+                    "${(System.currentTimeMillis() - started) / 1000}s",
+            )
         }
     }
 

@@ -54,6 +54,12 @@ fun RentSearchCard(
     }
 }
 
+/**
+ * Why a search never started. Not an error in the list — the list does not
+ * exist yet — so it replaces the spinner rather than sitting above one.
+ */
+private enum class Stall { NoPermission, NoFix }
+
 @Composable
 private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contact) -> Unit) {
     val context = LocalContext.current
@@ -61,24 +67,57 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
     var busy by remember { mutableStateOf(false) }
     var searching by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    var stalled by remember { mutableStateOf<Stall?>(null) }
+    var progress by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    // Bumped to start the search over; `asked` remembers that the system
+    // dialog has had its turn, which is how a refusal is told apart from a
+    // permission simply not requested yet.
+    var attempt by remember { mutableIntStateOf(0) }
+    var asked by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val perm = android.Manifest.permission.ACCESS_FINE_LOCATION
+    val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        asked = true
+        if (granted) attempt++ else { stalled = Stall.NoPermission; searching = false }
+    }
 
-    LaunchedEffect(kind) {
+    LaunchedEffect(kind, attempt) {
+        // Boards are laid out by area, so this search cannot begin without a
+        // rough position — and asking is this screen's job. It used to assume
+        // some earlier screen had asked, which meant anyone who came here
+        // before ever hailing watched a spinner that could never finish.
+        if (context.checkSelfPermission(perm) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            locPerm.launch(perm)
+            return@LaunchedEffect
+        }
+        stalled = null
+        searching = true
+        progress = null
+        results = null
         grabFix(context) { fix ->
             if (fix == null) {
-                error = context.getString(R.string.rent_need_location)
-                results = emptyList()
+                stalled = Stall.NoFix
+                searching = false
                 return@grabFix
             }
             scope.launch {
                 withContext(Dispatchers.IO) {
                     runCatching {
-                        Listings.search(fix.first, fix.second, kind) { sofar ->
-                            // Each board that answers updates the list, so
-                            // what is nearby appears while the ring is still
-                            // being read (an empty board can take a minute).
-                            results = sofar.sortedBy { it.pricePxmr }
-                        }
+                        Listings.search(
+                            fix.first, fix.second, kind,
+                            onFound = { sofar ->
+                                // Each board that answers updates the list, so
+                                // what is nearby appears while the ring is
+                                // still being read (an empty board can take a
+                                // minute).
+                                results = sofar.sortedBy { it.pricePxmr }
+                            },
+                            onProgress = { done, total -> progress = done to total },
+                        )
                     }
                 }
                 // The ring is done; whatever is here is the answer.
@@ -117,29 +156,74 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                 }
                 Spacer(Modifier.height(12.dp))
                 when {
-                    results == null -> Row(verticalAlignment = Alignment.CenterVertically) {
-                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            stringResource(R.string.rent_searching),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                    results!!.isEmpty() && searching -> Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            stringResource(R.string.rent_searching),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                    results!!.isEmpty() -> Text(
-                        stringResource(R.string.rent_none_found),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    // A stall replaces the spinner instead of joining it: the
+                    // screen said "looking at the boards around you" and
+                    // "waiting for a location fix" at the same time, forever,
+                    // and both halves of that were untrue.
+                    stalled != null -> Stalled(
+                        stall = stalled!!,
+                        onRetry = {
+                            if (stalled == Stall.NoFix) {
+                                attempt++
+                            } else {
+                                val act = context as? android.app.Activity
+                                // False before the first ask and again once a
+                                // refusal has become permanent — so with
+                                // `asked`, it tells those two apart.
+                                if (asked && act?.shouldShowRequestPermissionRationale(perm)
+                                    == false
+                                ) {
+                                    context.startActivity(
+                                        android.content.Intent(
+                                            android.provider.Settings
+                                                .ACTION_APPLICATION_DETAILS_SETTINGS,
+                                            android.net.Uri.fromParts(
+                                                "package", context.packageName, null,
+                                            ),
+                                        ),
+                                    )
+                                } else {
+                                    locPerm.launch(perm)
+                                }
+                            }
+                        },
                     )
+                    results == null || (results!!.isEmpty() && searching) -> Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.rent_searching),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        // Something that moves. Nine boards, most of a minute
+                        // each when they are empty — without a count this is a
+                        // minute and a half of a screen that looks broken.
+                        progress?.let { (done, total) ->
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                stringResource(R.string.rent_search_progress, done, total),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    // Empty is an answer, not the end of the road: somebody
+                    // may list a car five minutes from now, and a screen whose
+                    // only exit is Cancel makes you start the whole thing over
+                    // to find out.
+                    results!!.isEmpty() -> Column {
+                        Text(
+                            stringResource(R.string.rent_none_found),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        OutlinedButton(onClick = { attempt++ }) {
+                            Text(stringResource(R.string.rent_search_retry))
+                        }
+                    }
                     else -> LazyColumn(Modifier.fillMaxSize()) {
                         if (searching) {
                             item {
@@ -185,6 +269,31 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * The search could not start, said plainly and with the way out attached.
+ */
+@Composable
+private fun Stalled(stall: Stall, onRetry: () -> Unit) {
+    Column {
+        Text(
+            stringResource(
+                if (stall == Stall.NoPermission) R.string.rent_search_needs_location
+                else R.string.rent_search_no_fix,
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Spacer(Modifier.height(12.dp))
+        Button(onClick = onRetry) {
+            Text(
+                stringResource(
+                    if (stall == Stall.NoPermission) R.string.rent_search_allow
+                    else R.string.rent_search_retry,
+                ),
+            )
         }
     }
 }

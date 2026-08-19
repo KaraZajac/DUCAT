@@ -44,6 +44,11 @@
     <string name="rent_search_title">เช่าใกล้ ๆ</string>
     <string name="rent_searching">กำลังดูกระดานรอบตัวคุณ…</string>
     <string name="rent_none_found">แถวนี้ยังไม่มีอะไร</string>
+    <string name="rent_search_needs_location">ประกาศอยู่บนกระดานที่แบ่งตามพื้นที่ DUCAT จึงต้องรู้คร่าว ๆ ว่าคุณอยู่ที่ไหนเพื่อจะรู้ว่าควรอ่านกระดานไหน ข้อมูลนี้ใช้อยู่ในเครื่องของคุณและไม่ถูกส่งไปที่ใด</string>
+    <string name="rent_search_allow">อนุญาตตำแหน่ง</string>
+    <string name="rent_search_no_fix">ยังไม่ได้ตำแหน่ง ใกล้หน้าต่างหรืออยู่กลางแจ้งมักจะได้</string>
+    <string name="rent_search_retry">ลองอีกครั้ง</string>
+    <string name="rent_search_progress">ตรวจแล้ว %1$d จาก %2$d พื้นที่</string>
     <string name="rent_ask_about_it">สอบถาม</string>
     <string name="rent_per_day_short">%1$s / วัน</string>
     <string name="rent_per_night_short">%1$s / คืน</string>

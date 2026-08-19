@@ -44,6 +44,11 @@
     <string name="rent_search_title">Locations à proximité</string>
     <string name="rent_searching">Consultation des tableaux autour de vous…</string>
     <string name="rent_none_found">Rien par ici pour le moment.</string>
+    <string name="rent_search_needs_location">Les annonces sont réparties sur des tableaux par zone : DUCAT a donc besoin de savoir à peu près où vous êtes pour lire les bons. Cela reste sur votre téléphone et n\'est envoyé nulle part.</string>
+    <string name="rent_search_allow">Autoriser la localisation</string>
+    <string name="rent_search_no_fix">Pas encore de position. Près d\'une fenêtre ou dehors, cela marche en général.</string>
+    <string name="rent_search_retry">Réessayer</string>
+    <string name="rent_search_progress">%1$d zones sur %2$d vérifiées</string>
     <string name="rent_ask_about_it">Se renseigner</string>
     <string name="rent_per_day_short">%1$s / jour</string>
     <string name="rent_per_night_short">%1$s / nuit</string>

@@ -44,6 +44,11 @@
     <string name="rent_search_title">Yakında kiralık</string>
     <string name="rent_searching">Çevrendeki panolara bakılıyor…</string>
     <string name="rent_none_found">Buralarda henüz bir şey yok.</string>
+    <string name="rent_search_needs_location">İlanlar bölgeye göre ayrılmış panolarda durur, bu yüzden DUCAT hangilerini okuyacağını bilmek için kabaca nerede olduğunu bilmeli. Bu bilgi telefonunda kalır, hiçbir yere gönderilmez.</string>
+    <string name="rent_search_allow">Konuma izin ver</string>
+    <string name="rent_search_no_fix">Henüz konum yok. Pencere kenarı ya da dışarısı genelde işe yarar.</string>
+    <string name="rent_search_retry">Tekrar dene</string>
+    <string name="rent_search_progress">%2$d bölgeden %1$d tanesi tarandı</string>
     <string name="rent_ask_about_it">Bunu sor</string>
     <string name="rent_per_day_short">%1$s / gün</string>
     <string name="rent_per_night_short">%1$s / gece</string>

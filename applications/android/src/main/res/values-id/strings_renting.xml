@@ -44,6 +44,11 @@
     <string name="rent_search_title">Sewa di dekat sini</string>
     <string name="rent_searching">Melihat papan di sekitar Anda…</string>
     <string name="rent_none_found">Belum ada apa-apa di sekitar sini.</string>
+    <string name="rent_search_needs_location">Iklan ditempel di papan yang dibagi menurut wilayah, jadi DUCAT perlu tahu kira-kira di mana kamu berada untuk tahu papan mana yang dibaca. Ini dipakai di ponselmu dan tidak pernah dikirim ke mana pun.</string>
+    <string name="rent_search_allow">Izinkan lokasi</string>
+    <string name="rent_search_no_fix">Belum ada lokasi. Dekat jendela atau di luar biasanya berhasil.</string>
+    <string name="rent_search_retry">Coba lagi</string>
+    <string name="rent_search_progress">%1$d dari %2$d wilayah diperiksa</string>
     <string name="rent_ask_about_it">Tanyakan</string>
     <string name="rent_per_day_short">%1$s / hari</string>
     <string name="rent_per_night_short">%1$s / malam</string>

@@ -44,6 +44,11 @@
     <string name="rent_search_title">Оренда поруч</string>
     <string name="rent_searching">Дивлюся дошки навколо вас…</string>
     <string name="rent_none_found">Тут поки нічого немає.</string>
+    <string name="rent_search_needs_location">Оголошення висять на дошках, поділених за районами, тож DUCAT потрібно приблизно знати, де ви, щоб зрозуміти, які дошки читати. Це лишається на вашому телефоні й нікуди не надсилається.</string>
+    <string name="rent_search_allow">Дозволити геолокацію</string>
+    <string name="rent_search_no_fix">Місцезнаходження ще не визначено. Зазвичай допомагає вікно або вулиця.</string>
+    <string name="rent_search_retry">Повторити</string>
+    <string name="rent_search_progress">Перевірено %1$d з %2$d районів</string>
     <string name="rent_ask_about_it">Запитати про це</string>
     <string name="rent_per_day_short">%1$s / день</string>
     <string name="rent_per_night_short">%1$s / ніч</string>

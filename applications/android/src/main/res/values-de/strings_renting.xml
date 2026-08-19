@@ -44,6 +44,11 @@
     <string name="rent_search_title">Mieten in der Nähe</string>
     <string name="rent_searching">Sehe die Bretter um dich herum durch…</string>
     <string name="rent_none_found">Hier ist noch nichts eingestellt.</string>
+    <string name="rent_search_needs_location">Anzeigen liegen auf Tafeln, die nach Gebiet geordnet sind. DUCAT braucht daher ungefähr deinen Standort, um die richtigen zu lesen. Er bleibt auf deinem Telefon und wird nirgendwohin gesendet.</string>
+    <string name="rent_search_allow">Standort erlauben</string>
+    <string name="rent_search_no_fix">Noch kein Standort. In Fensternähe oder draußen klappt es meistens.</string>
+    <string name="rent_search_retry">Erneut versuchen</string>
+    <string name="rent_search_progress">%1$d von %2$d Gebieten geprüft</string>
     <string name="rent_ask_about_it">Danach fragen</string>
     <string name="rent_per_day_short">%1$s / Tag</string>
     <string name="rent_per_night_short">%1$s / Nacht</string>

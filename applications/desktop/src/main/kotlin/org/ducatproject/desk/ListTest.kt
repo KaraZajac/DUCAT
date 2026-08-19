@@ -164,21 +164,21 @@ fun main() {
     // the screen uses, so what is timed here is what a person waits for.
     val t0 = System.currentTimeMillis()
     runCatching {
-        Listings.search(lat, lon, Listings.KIND_VEHICLE) { sofar ->
+        Listings.search(lat, lon, Listings.KIND_VEHICLE, onFound = { sofar ->
             if (sofar.size != cars.size) {
                 println("LIST_PARTIAL cars=${sofar.size} after ${System.currentTimeMillis() - t0} ms")
             }
             cars = sofar
-        }
+        })
     }
     val t1 = System.currentTimeMillis()
     runCatching {
-        Listings.search(lat, lon, Listings.KIND_PLACE) { sofar ->
+        Listings.search(lat, lon, Listings.KIND_PLACE, onFound = { sofar ->
             if (sofar.size != rooms.size) {
                 println("LIST_PARTIAL rooms=${sofar.size} after ${System.currentTimeMillis() - t1} ms")
             }
             rooms = sofar
-        }
+        })
     }
 
     val want = System.getenv("DUCAT_LIST_CROWD")?.toIntOrNull() ?: 0

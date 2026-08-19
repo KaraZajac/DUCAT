@@ -44,6 +44,11 @@
     <string name="rent_search_title">Renting nearby</string>
     <string name="rent_searching">Looking at the boards around you…</string>
     <string name="rent_none_found">Nothing listed around here yet.</string>
+    <string name="rent_search_needs_location">Listings sit on boards laid out by area, so DUCAT needs a rough idea of where you are to know which ones to read. It is used on your phone and never sent anywhere.</string>
+    <string name="rent_search_allow">Allow location</string>
+    <string name="rent_search_no_fix">No location fix yet. Near a window or outside usually does it.</string>
+    <string name="rent_search_retry">Try again</string>
+    <string name="rent_search_progress">%1$d of %2$d areas checked</string>
     <string name="rent_ask_about_it">Ask about it</string>
     <string name="rent_per_day_short">%1$s / day</string>
     <string name="rent_per_night_short">%1$s / night</string>
