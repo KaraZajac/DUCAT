@@ -51,4 +51,5 @@
     <string name="bill_note_tab">お会計</string>
     <string name="receipt_note">領収 — ありがとうございました</string>
     <string name="receipt_note_oob">領収 — DUCAT外でのお支払い。ありがとうございました</string>
+    <string name="bill_note_cancelled">%1$s XMR のご請求は取り消しました。お支払いは不要です。</string>
 </resources>

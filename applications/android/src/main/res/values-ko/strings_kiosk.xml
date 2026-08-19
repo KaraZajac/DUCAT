@@ -30,4 +30,5 @@
     <string name="kiosk_bill_sent_note">항목별 청구서가 그쪽에 있습니다. 편하실 때 결제하세요.</string>
     <string name="kiosk_no_ducat">DUCAT이 없나요? Monero 지갑으로 결제하기</string>
     <string name="kiosk_card_failed">코드를 표시하지 못했습니다: %1$s</string>
+    <string name="kiosk_withdraw">청구 취소</string>
 </resources>

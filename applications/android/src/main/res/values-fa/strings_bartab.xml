@@ -52,4 +52,5 @@
     <string name="bill_note_tab">حساب تو</string>
     <string name="receipt_note">رسید — ممنون</string>
     <string name="receipt_note_oob">رسید — بیرون از DUCAT تسویه شد. ممنون</string>
+    <string name="bill_note_cancelled">صورت‌حساب %1$s XMR لغو شد — چیزی برای پرداخت نیست.</string>
 </resources>

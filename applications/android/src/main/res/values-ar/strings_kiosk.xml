@@ -30,4 +30,5 @@
     <string name="kiosk_bill_sent_note">فاتورتك هناك، مفصّلة ببنودها. ادفع متى شئت.</string>
     <string name="kiosk_no_ducat">لا تملك DUCAT؟ ادفع بمحفظة مونيرو</string>
     <string name="kiosk_card_failed">تعذّر عرض الرمز: %1$s</string>
+    <string name="kiosk_withdraw">سحب الفاتورة</string>
 </resources>

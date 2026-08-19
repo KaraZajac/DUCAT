@@ -54,4 +54,5 @@
     <string name="bill_note_tab">Ваш счёт</string>
     <string name="receipt_note">Чек — спасибо</string>
     <string name="receipt_note_oob">Чек — оплачено вне DUCAT. Спасибо</string>
+    <string name="bill_note_cancelled">Счёт на %1$s XMR отменён — платить нечего.</string>
 </resources>

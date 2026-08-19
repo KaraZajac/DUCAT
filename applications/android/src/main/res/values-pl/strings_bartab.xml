@@ -54,4 +54,5 @@
     <string name="bill_note_tab">Twój rachunek</string>
     <string name="receipt_note">Paragon — dziękujemy</string>
     <string name="receipt_note_oob">Paragon — zapłacone poza DUCAT. Dziękujemy</string>
+    <string name="bill_note_cancelled">Rachunek na %1$s XMR został anulowany — nie ma nic do zapłaty.</string>
 </resources>

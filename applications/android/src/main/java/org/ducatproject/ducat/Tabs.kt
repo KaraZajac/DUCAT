@@ -217,8 +217,10 @@ class TabStore(private val context: Context) {
         runCatching {
             Mailbox.send(
                 context, contact,
-                "That bill for ${formatXmr(tab.settledTotal)} XMR is cancelled — " +
-                    "nothing to pay.",
+                // The shop's language, like the bill and the receipt. This
+                // one was missed when those were done — its literal ran past
+                // the length the sweep was looking for.
+                context.getString(R.string.bill_note_cancelled, formatXmr(tab.settledTotal)),
                 PersonaStore(context).personaHex(),
             )
         }.onFailure { DucatLog.w(TAG, "cancel notice: ${it.message}") }

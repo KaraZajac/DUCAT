@@ -52,4 +52,5 @@
     <string name="bill_note_tab">Je rekening</string>
     <string name="receipt_note">Bon — bedankt</string>
     <string name="receipt_note_oob">Bon — buiten DUCAT betaald. Bedankt</string>
+    <string name="bill_note_cancelled">De rekening van %1$s XMR is ingetrokken — niets te betalen.</string>
 </resources>

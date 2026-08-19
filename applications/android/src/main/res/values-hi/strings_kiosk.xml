@@ -30,4 +30,5 @@
     <string name="kiosk_bill_sent_note">आपका बिल वहीं है, हर चीज़ अलग से। जब चाहें तब भुगतान करें।</string>
     <string name="kiosk_no_ducat">DUCAT नहीं है? किसी Monero वॉलेट से भुगतान करें</string>
     <string name="kiosk_card_failed">कोड नहीं दिखा सके: %1$s</string>
+    <string name="kiosk_withdraw">वापस लें</string>
 </resources>

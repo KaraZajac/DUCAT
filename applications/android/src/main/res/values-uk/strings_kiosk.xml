@@ -30,4 +30,5 @@
     <string name="kiosk_bill_sent_note">Рахунок там, по позиціях. Плати коли зручно.</string>
     <string name="kiosk_no_ducat">Немає DUCAT? Заплати гаманцем Monero</string>
     <string name="kiosk_card_failed">Не вдалося показати код: %1$s</string>
+    <string name="kiosk_withdraw">Відкликати</string>
 </resources>

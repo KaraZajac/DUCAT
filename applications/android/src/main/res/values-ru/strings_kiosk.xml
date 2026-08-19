@@ -30,4 +30,5 @@
     <string name="kiosk_bill_sent_note">Счёт там, по позициям. Плати когда удобно.</string>
     <string name="kiosk_no_ducat">Нет DUCAT? Заплати кошельком Monero</string>
     <string name="kiosk_card_failed">Не удалось показать код: %1$s</string>
+    <string name="kiosk_withdraw">Отозвать</string>
 </resources>

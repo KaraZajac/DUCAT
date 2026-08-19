@@ -51,4 +51,5 @@
     <string name="bill_note_tab">您的账单</string>
     <string name="receipt_note">收据 — 谢谢惠顾</string>
     <string name="receipt_note_oob">收据 — 已在 DUCAT 之外结清。谢谢惠顾</string>
+    <string name="bill_note_cancelled">%1$s XMR 的这笔账单已取消，无需付款。</string>
 </resources>

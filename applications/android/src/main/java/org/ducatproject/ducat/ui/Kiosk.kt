@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.BillItem
@@ -29,6 +30,7 @@ import org.ducatproject.ducat.ModeStore
 import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.Orders
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
 
 /**
@@ -487,6 +489,7 @@ private fun PayPanelMonero(order: Orders.Order, onDone: () -> Unit) {
 @Composable
 private fun StaffPanel(onClose: () -> Unit) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val version by ContactStore.changes.collectAsState()
     val orders = remember(version) { Orders.all(context) }
     Column(Modifier.fillMaxSize()) {
@@ -546,6 +549,27 @@ private fun StaffPanel(onClose: () -> Unit) {
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            // Billed by mistake, or the customer changed their
+                            // mind at the counter. Without this the shop could
+                            // send a bill and never take it back, and the
+                            // customer's phone kept a live "Review payment"
+                            // pointing at money nobody was waiting for — which
+                            // is the one way a person ends up paying for
+                            // something that was cancelled out loud.
+                            if (o.tabId != null &&
+                                Orders.stateOf(context, o) == Orders.State.Awaiting
+                            ) {
+                                TextButton(
+                                    onClick = {
+                                        scope.launch(Dispatchers.IO) {
+                                            runCatching {
+                                                val tabs = TabStore(context)
+                                                tabs.get(o.tabId!!)?.let { tabs.cancel(it) }
+                                            }
+                                        }
+                                    },
+                                ) { Text(stringResource(R.string.kiosk_withdraw)) }
+                            }
                         }
                     },
                 )

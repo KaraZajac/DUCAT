@@ -30,4 +30,5 @@
     <string name="kiosk_bill_sent_note">Il conto è lì, voce per voce. Paga quando vuoi.</string>
     <string name="kiosk_no_ducat">Niente DUCAT? Paga con un portafoglio Monero</string>
     <string name="kiosk_card_failed">Impossibile mostrare un codice: %1$s</string>
+    <string name="kiosk_withdraw">Ritira</string>
 </resources>

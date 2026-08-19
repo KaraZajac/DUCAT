@@ -52,4 +52,5 @@
     <string name="bill_note_tab">Deine Rechnung</string>
     <string name="receipt_note">Beleg — danke</string>
     <string name="receipt_note_oob">Beleg — außerhalb von DUCAT bezahlt. Danke</string>
+    <string name="bill_note_cancelled">Die Rechnung über %1$s XMR ist storniert — nichts zu zahlen.</string>
 </resources>

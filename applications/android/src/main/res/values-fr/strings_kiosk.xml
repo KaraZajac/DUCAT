@@ -30,4 +30,5 @@
     <string name="kiosk_bill_sent_note">L\'addition y est, détaillée. Paie quand tu veux.</string>
     <string name="kiosk_no_ducat">Pas de DUCAT ? Paie avec un portefeuille Monero</string>
     <string name="kiosk_card_failed">Impossible d\'afficher un code : %1$s</string>
+    <string name="kiosk_withdraw">Retirer</string>
 </resources>

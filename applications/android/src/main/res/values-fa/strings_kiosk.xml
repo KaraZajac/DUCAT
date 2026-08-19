@@ -30,4 +30,5 @@
     <string name="kiosk_bill_sent_note">صورت‌حسابت آنجاست، قلم به قلم. هر وقت خواستی پرداخت کن.</string>
     <string name="kiosk_no_ducat">DUCAT نداری؟ با کیف پول مونرو پرداخت کن</string>
     <string name="kiosk_card_failed">نمایش کد ممکن نشد: %1$s</string>
+    <string name="kiosk_withdraw">پس‌گرفتن</string>
 </resources>

@@ -52,4 +52,5 @@
     <string name="bill_note_tab">Hesabın</string>
     <string name="receipt_note">Fiş — teşekkürler</string>
     <string name="receipt_note_oob">Fiş — DUCAT dışında ödendi. Teşekkürler</string>
+    <string name="bill_note_cancelled">%1$s XMR tutarındaki hesap iptal edildi — ödenecek bir şey yok.</string>
 </resources>

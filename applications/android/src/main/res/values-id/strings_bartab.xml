@@ -51,4 +51,5 @@
     <string name="bill_note_tab">Tagihanmu</string>
     <string name="receipt_note">Struk — terima kasih</string>
     <string name="receipt_note_oob">Struk — dibayar di luar DUCAT. Terima kasih</string>
+    <string name="bill_note_cancelled">Tagihan %1$s XMR dibatalkan — tidak ada yang perlu dibayar.</string>
 </resources>

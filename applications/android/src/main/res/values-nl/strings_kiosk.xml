@@ -30,4 +30,5 @@
     <string name="kiosk_bill_sent_note">Je rekening staat erop, per post uitgesplitst. Betaal wanneer je wilt.</string>
     <string name="kiosk_no_ducat">Geen DUCAT? Betaal met een Monero-wallet</string>
     <string name="kiosk_card_failed">Kon geen code tonen: %1$s</string>
+    <string name="kiosk_withdraw">Intrekken</string>
 </resources>
