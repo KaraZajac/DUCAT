@@ -857,8 +857,27 @@ object Ceremony {
         // only written after the first had finished — and a transaction takes
         // seconds to build. Writing "sending" here makes the second tap fail
         // the same check the first passed.
+        //
+        // A claim left behind by a process that died mid-send would otherwise
+        // lock this party out of their own escrow for good, so it is checked
+        // against the wallet rather than trusted or timed out. The wallet
+        // records what it sent and where; a claim with no payment to this
+        // address behind it is debris and may be taken again. A claim *with*
+        // one is a payment that landed and was never written down — recorded
+        // now, and refused, because paying twice is the failure that costs.
         mutate(context, idHex) { cur ->
-            check(cur.optString(mine).isEmpty()) { "you have already paid into this escrow" }
+            val held = cur.optString(mine)
+            if (held == SENDING) {
+                val sent = WalletStore(context).sends().firstOrNull { it.toAddress == addr }
+                if (sent != null) {
+                    cur.put(mine, sent.txidHex)
+                    DucatLog.w(TAG, "escrow $idHex: recovered a send nobody recorded")
+                    throw IllegalStateException("you have already paid into this escrow")
+                }
+                DucatLog.i(TAG, "escrow $idHex: retaking a claim left by a send that never went")
+            } else {
+                check(held.isEmpty()) { "you have already paid into this escrow" }
+            }
             cur.put(mine, SENDING)
         }
         // One send for this party's whole share: the deposits come home in
