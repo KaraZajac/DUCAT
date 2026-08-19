@@ -57,7 +57,11 @@ NOTES=$(mktemp)
   echo
   echo "### Since the last release"
   echo
-  LAST=$(git tag --sort=-creatordate | head -1)
+  # for-each-ref --count rather than another `| head`: same trap, and the
+  # only reason this one has not sprung is that the tag list still fits
+  # in a pipe buffer.
+  LAST=$(git for-each-ref --sort=-creatordate --count=1 \
+    --format='%(refname:short)' refs/tags)
   # `-n` rather than `| head`, and the difference is a release that happens.
   # head closes the pipe after its 25th line, git log dies of SIGPIPE, and
   # `set -o pipefail` turns that into an aborted script — so this failed for
