@@ -59,6 +59,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/ui/Renting.kt",
     "org/ducatproject/ducat/ui/Onboarding.kt",
     "org/ducatproject/ducat/Geo.kt",
+    "org/ducatproject/ducat/Hailing.kt",
     "org/ducatproject/ducat/Listings.kt",
     "org/ducatproject/ducat/Enquiries.kt",
     "org/ducatproject/ducat/Stakes.kt",
@@ -405,6 +406,13 @@ tasks.register<JavaExec>("vaulttest") {
 
 // Every hosted screen rendered off-screen, to prove it draws something.
 // `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:rendertest`.
+// A hail from the kerb to the driver's map. `./gradlew :desktop:hailtest`
+tasks.register<JavaExec>("hailtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.HailTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Does a watched board actually ring? `./gradlew :desktop:watchtest`
 tasks.register<JavaExec>("watchtest") {
     classpath = sourceSets["main"].runtimeClasspath
