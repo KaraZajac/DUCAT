@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">ساخت کیف پول</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">سقف خرجت را تعیین کن</string>
-    <string name="onb_limits_body">پرداخت‌های کوچک مستقیم می‌روند. بزرگ‌ترها PIN می‌خواهند. جای این خط‌ها را هر وقت بخواهی می‌توانی عوض کنی — پیش‌فرض‌ها همین حالا هم محتاطند.</string>
-    <string name="onb_limits_action">پیش‌فرض‌ها بمانند</string>
 
     <!-- Done step -->
     <string name="onb_done_title">آماده</string>

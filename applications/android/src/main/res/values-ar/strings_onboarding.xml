@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">إنشاء المحفظة</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">حدد سقوف إنفاقك</string>
-    <string name="onb_limits_body">الدفعات الصغيرة تمر مباشرة. والأكبر منها تطلب رمز PIN. يمكنك تغيير موضع هذه الحدود في أي وقت — والإعدادات الافتراضية حذرة أصلًا.</string>
-    <string name="onb_limits_action">الإبقاء على الافتراضيات</string>
 
     <!-- Done step -->
     <string name="onb_done_title">جاهز</string>

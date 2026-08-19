@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">Chọn một mã PIN</string>
+    <string name="pin_set_body">Được hỏi trước khi tiền rời khỏi máy này. Không chỗ nào khác cần nó, nên hãy chọn thứ bạn gõ được ngay tại quầy.</string>
+    <string name="pin_ask_title">Nhập mã PIN</string>
+    <string name="pin_ask_body">Tiền sắp rời khỏi máy này.</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">Gõ lại lần nữa</string>
+    <string name="pin_save">Lưu PIN</string>
+    <string name="pin_confirm">Duyệt</string>
+    <string name="pin_cancel">Hủy</string>
+    <string name="pin_no_reset">Không có cách nào đặt lại từ trong ứng dụng — bất cứ thứ gì đặt lại được cũng là đường đi vòng qua nó. Nếu quên, hãy khôi phục ví này từ bản sao lưu.</string>
+    <string name="pin_locked">Sai quá nhiều lần. Không nhận gì thêm trong %1$s nữa.</string>
+    <string name="pin_gone">Máy này chưa có PIN. Hãy đặt một cái trước khi gửi.</string>
+    <plurals name="pin_wrong">
+        <item quantity="other">Đó không phải PIN. Còn %1$d lần trước khi phải chờ.</item>
+    </plurals>
+</resources>

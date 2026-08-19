@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">创建钱包</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">设定你的消费限额</string>
-    <string name="onb_limits_body">小额付款直接通过。大额付款会要求输入 PIN。这两条线随时可以调整 — 默认值已经足够谨慎。</string>
-    <string name="onb_limits_action">保留默认</string>
 
     <!-- Done step -->
     <string name="onb_done_title">就绪</string>

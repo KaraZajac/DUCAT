@@ -44,7 +44,7 @@ import uniffi.ducat_mobile.exportBackup
  * it. A user with money in the float has both. The one moment when doing it
  * costs nothing is the moment before there is anything to protect.
  */
-enum class Step { Persona, Profile, Wallet, Limits, Trust, Backup, Done }
+enum class Step { Persona, Profile, Wallet, Pin, Trust, Backup, Done }
 
 /**
  * No node has been asked yet, so the backup records genesis.
@@ -164,7 +164,7 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                         address = w.address, spendKeyHex = w.spendKeyHex,
                         restoreHeight = w.restoreHeight, stagenet = true,
                     )
-                    onState(state.copy(step = Step.Limits))
+                    onState(state.copy(step = Step.Pin))
                 },
             )
 
@@ -182,12 +182,12 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                 },
             )
 
-            Step.Limits -> StepCard(
-                title = stringResource(R.string.onb_limits_title),
-                body = stringResource(R.string.onb_limits_body),
-                action = stringResource(R.string.onb_limits_action),
-                onAction = { onState(state.copy(step = Step.Trust)) },
-            )
+            // This step used to describe a PIN the app did not have —
+            // "larger payments ask for your PIN", with nothing behind it.
+            // Now it is where the PIN is actually chosen, before there is any
+            // money to lose and while a person is still paying attention to
+            // set-up rather than to a customer.
+            Step.Pin -> PinStep(onDone = { onState(state.copy(step = Step.Trust)) })
 
             // Before the first deal, because it is the answer to the
             // question every user of a marketplace without a company asks
@@ -225,7 +225,7 @@ private fun Progress(step: Step) {
     // The step you are *on*, not the number completed. "0 of 4" on the first
     // screen reads as though nothing has started and something has gone wrong.
     //
-    // The reachable flow is five steps — Persona → Wallet → Limits → Trust →
+    // The reachable flow is five steps — Persona → Wallet → PIN → Trust →
     // Backup — then Done. `Step.Profile` exists but is skipped (Persona goes
     // straight to Wallet), so it is not counted; numbering the shown steps
     // contiguously is what keeps "Step 2 of 5" from ever jumping to "Step 3".
@@ -234,7 +234,7 @@ private fun Progress(step: Step) {
         Step.Persona -> 1
         Step.Wallet -> 2
         Step.Profile -> 2 // unreachable in the current flow; kept in range
-        Step.Limits -> 3
+        Step.Pin -> 3
         Step.Trust -> 4
         Step.Backup -> 5
         Step.Done -> total
@@ -253,6 +253,33 @@ private fun Progress(step: Step) {
             style = MaterialTheme.typography.bodySmall,
         )
     }
+}
+
+/**
+ * Choose the PIN, at the one moment a person is set up to think about it.
+ *
+ * Not skippable, and deliberately so: every other step here builds something
+ * that can be rebuilt — a name, a profile, a wallet that a backup restores.
+ * This is the only one that stands between somebody who picks up an unlocked
+ * phone and the money on it, and asking for it later means asking somebody
+ * who is holding a customer.
+ */
+@Composable
+private fun PinStep(onDone: () -> Unit) {
+    var asking by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var done by remember { mutableStateOf(org.ducatproject.ducat.Pin.isSet(context)) }
+    StepCard(
+        title = stringResource(R.string.onb_pin_title),
+        body = stringResource(if (done) R.string.onb_pin_done else R.string.onb_pin_body),
+        action = stringResource(if (done) R.string.onb_pin_next else R.string.onb_pin_action),
+        onAction = { if (done) onDone() else asking = true },
+    )
+    PinGate(
+        open = asking,
+        onDismiss = { asking = false },
+        onPassed = { asking = false; done = true },
+    )
 }
 
 @Composable

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">Scegli un PIN</string>
+    <string name="pin_set_body">Viene chiesto prima che del denaro lasci questo telefono. Nient\'altro lo usa, quindi scegline uno che riesci a digitare a un bancone.</string>
+    <string name="pin_ask_title">Inserisci il PIN</string>
+    <string name="pin_ask_body">Sta per uscire del denaro da questo telefono.</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">Scrivilo di nuovo</string>
+    <string name="pin_save">Salva PIN</string>
+    <string name="pin_confirm">Approva</string>
+    <string name="pin_cancel">Annulla</string>
+    <string name="pin_no_reset">Non c\'è modo di reimpostarlo dall\'app: qualsiasi cosa potesse farlo sarebbe un modo per aggirarlo. Se lo dimentichi, ripristina questo portafoglio dal tuo backup.</string>
+    <string name="pin_locked">Troppi tentativi sbagliati. Non si accetta nulla per altri %1$s.</string>
+    <string name="pin_gone">Su questo dispositivo non c\'è un PIN. Impostane uno prima di inviare.</string>
+    <plurals name="pin_wrong">
+        <item quantity="one">Non è il PIN. Resta %1$d tentativo prima dell\'attesa.</item>
+        <item quantity="other">Non è il PIN. Restano %1$d tentativi prima dell\'attesa.</item>
+    </plurals>
+</resources>

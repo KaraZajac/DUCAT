@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Utwórz portfel</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">Ustaw limity wydatków</string>
-    <string name="onb_limits_body">Małe płatności przechodzą od razu. Większe pytają o PIN. Te granice możesz przesunąć w każdej chwili — domyślne są już ostrożne.</string>
-    <string name="onb_limits_action">Zostaw domyślne</string>
 
     <!-- Done step -->
     <string name="onb_done_title">Gotowe</string>

@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Criar carteira</string>
 
     <!-- Etapa dos limites -->
-    <string name="onb_limits_title">Defina seus limites de gasto</string>
-    <string name="onb_limits_body">Pagamentos pequenos passam direto. Os maiores pedem seu PIN. Você pode mudar onde essas linhas ficam a qualquer momento — os padrões já são cautelosos.</string>
-    <string name="onb_limits_action">Manter os padrões</string>
 
     <!-- Etapa final -->
     <string name="onb_done_title">Pronto</string>

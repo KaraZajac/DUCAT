@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">设置一个 PIN</string>
+    <string name="pin_set_body">任何款项离开这台手机之前都会问它。别的地方都不用，所以挑一个在柜台前打得出来的。</string>
+    <string name="pin_ask_title">输入你的 PIN</string>
+    <string name="pin_ask_body">马上就有钱要离开这台手机。</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">再输入一次</string>
+    <string name="pin_save">保存 PIN</string>
+    <string name="pin_confirm">批准</string>
+    <string name="pin_cancel">取消</string>
+    <string name="pin_no_reset">应用内无法重置它 —— 任何能重置它的东西都会成为绕过它的路。如果忘了，请用你的备份恢复这个钱包。</string>
+    <string name="pin_locked">错误次数太多。还要等 %1$s 才会再接受输入。</string>
+    <string name="pin_gone">这台设备还没有 PIN。发送前先设一个。</string>
+    <plurals name="pin_wrong">
+        <item quantity="other">这不是 PIN。还有 %1$d 次机会，之后要等待。</item>
+    </plurals>
+</resources>

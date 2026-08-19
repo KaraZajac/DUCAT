@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">PIN wählen</string>
+    <string name="pin_set_body">Sie wird abgefragt, bevor Geld dieses Telefon verlässt. Sonst braucht sie niemand — nimm etwas, das du an einer Theke tippen kannst.</string>
+    <string name="pin_ask_title">PIN eingeben</string>
+    <string name="pin_ask_body">Gleich verlässt Geld dieses Telefon.</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">Noch einmal eingeben</string>
+    <string name="pin_save">PIN setzen</string>
+    <string name="pin_confirm">Freigeben</string>
+    <string name="pin_cancel">Abbrechen</string>
+    <string name="pin_no_reset">Sie lässt sich in der App nicht zurücksetzen — alles, was sie zurücksetzen könnte, wäre ein Weg an ihr vorbei. Wenn du sie vergisst, stelle diese Brieftasche aus deiner Sicherung wieder her.</string>
+    <string name="pin_locked">Zu viele Fehlversuche. Für weitere %1$s wird nichts angenommen.</string>
+    <string name="pin_gone">Auf diesem Gerät ist keine PIN gesetzt. Setz eine, bevor du sendest.</string>
+    <plurals name="pin_wrong">
+        <item quantity="one">Das ist nicht die PIN. Noch %1$d Versuch, dann wird gewartet.</item>
+        <item quantity="other">Das ist nicht die PIN. Noch %1$d Versuche, dann wird gewartet.</item>
+    </plurals>
+</resources>

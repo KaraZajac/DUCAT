@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">Wybierz PIN</string>
+    <string name="pin_set_body">Jest pytany, zanim pieniądze opuszczą ten telefon. Nic innego go nie potrzebuje, więc wybierz taki, który wystukasz przy ladzie.</string>
+    <string name="pin_ask_title">Wpisz PIN</string>
+    <string name="pin_ask_body">Zaraz z tego telefonu wyjdą pieniądze.</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">Wpisz go jeszcze raz</string>
+    <string name="pin_save">Zapisz PIN</string>
+    <string name="pin_confirm">Zatwierdź</string>
+    <string name="pin_cancel">Anuluj</string>
+    <string name="pin_no_reset">Nie da się go zresetować z aplikacji — cokolwiek mogłoby to zrobić, byłoby drogą naokoło. Jeśli go zapomnisz, odtwórz ten portfel z kopii zapasowej.</string>
+    <string name="pin_locked">Za dużo błędnych prób. Przez %1$s nic nie zostanie przyjęte.</string>
+    <string name="pin_gone">To urządzenie nie ma PIN-u. Ustaw go przed wysłaniem.</string>
+    <plurals name="pin_wrong">
+        <item quantity="one">To nie ten PIN. Została %1$d próba przed czekaniem.</item>
+        <item quantity="few">To nie ten PIN. Zostały %1$d próby przed czekaniem.</item>
+        <item quantity="many">To nie ten PIN. Zostało %1$d prób przed czekaniem.</item>
+        <item quantity="other">To nie ten PIN. Zostało %1$d próby przed czekaniem.</item>
+    </plurals>
+</resources>

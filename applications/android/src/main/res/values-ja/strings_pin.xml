@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">PIN を決めます</string>
+    <string name="pin_set_body">この端末からお金が出ていく前に必ず聞かれます。ほかでは使わないので、カウンターで打てるものにしてください。</string>
+    <string name="pin_ask_title">PIN を入力</string>
+    <string name="pin_ask_body">この端末からお金が出ていきます。</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">もう一度入力</string>
+    <string name="pin_save">PIN を保存</string>
+    <string name="pin_confirm">承認</string>
+    <string name="pin_cancel">キャンセル</string>
+    <string name="pin_no_reset">アプリの中から再設定する方法はありません。再設定できる何かがあれば、それが迂回路になってしまうからです。忘れた場合は、バックアップからこのウォレットを復元してください。</string>
+    <string name="pin_locked">失敗が多すぎます。あと %1$s は受け付けません。</string>
+    <string name="pin_gone">この端末に PIN がありません。送る前に設定してください。</string>
+    <plurals name="pin_wrong">
+        <item quantity="other">PIN が違います。待機まであと %1$d 回です。</item>
+    </plurals>
+</resources>

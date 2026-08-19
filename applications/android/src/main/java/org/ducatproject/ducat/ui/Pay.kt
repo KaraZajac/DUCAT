@@ -322,6 +322,8 @@ private fun AmountStep(
     // Asking needs a thread to ask in. A bare address has no way back.
     val canAsk = target is PayTarget.ToContact
     var confirming by remember { mutableStateOf(false) }
+    // Between agreeing and spending: see the gate below.
+    var askPin by remember { mutableStateOf(false) }
     val amountFocus = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
@@ -743,26 +745,18 @@ private fun AmountStep(
         }
     }
 
-    if (confirming && pxmr != null) {
+        // Where it is going, worked out once so both the confirmation and
+        // the send agree about it.
         val dest = when (target) {
             is PayTarget.ToContact -> target.contact.theirAddress
             is PayTarget.ToAddress -> target.address
         }
-        ConfirmSend(
-            pxmr = pxmr,
-            quote = quote,
-            destination = dest,
-            contactName = (target as? PayTarget.ToContact)?.contact?.displayName(),
-            busy = busy,
-            onCancel = { confirming = false },
-            onConfirm = latch@{
-                // Latched before anything else, synchronously: a second tap in
-                // the frame before this dialog leaves would build and broadcast
-                // a second transaction, and nothing downstream can take one
-                // back.
-                if (busy) return@latch
+        // The PIN sits between agreeing to a payment and making it, not in
+        // front of the app: what needs proving is that the person spending
+        // is the owner, and this is the moment that is true.
+        val doSend: () -> Unit = doSend@{
+            val amount = pxmr ?: return@doSend
                 busy = true; error = null
-                confirming = false
                 scope.launch {
                     val r = withContext(Dispatchers.IO) {
                         runCatching {
@@ -787,7 +781,7 @@ private fun AmountStep(
                                 )
                             val contact = (target as? PayTarget.ToContact)?.contact
                             val res = Wallet.send(
-                                context, node, to, pxmr,
+                                context, node, to, amount,
                                 contactHex = contact?.personaHex,
                                 note = note.ifBlank { null },
                                 priority = priority,
@@ -802,7 +796,7 @@ private fun AmountStep(
                                         context, c,
                                         note.ifBlank { context.getString(R.string.pay_payment) },
                                         PersonaStore(context).personaHex(),
-                                        kind = 2, amountPxmr = pxmr,
+                                        kind = 2, amountPxmr = amount,
                                         // Names the transaction, which is what
                                         // lets their wallet put our name on the
                                         // output when it arrives. Monero carries
@@ -820,9 +814,31 @@ private fun AmountStep(
                         }
                     }
                     busy = false
-                    r.onSuccess { paidPxmr = pxmr }
+                    r.onSuccess { paidPxmr = amount }
                         .onFailure { error = sendFailure(context, it) }
                 }
+        }
+    if (confirming && pxmr != null) {
+        PinGate(
+            open = askPin,
+            onDismiss = { askPin = false },
+            onPassed = { askPin = false; doSend() },
+        )
+        ConfirmSend(
+            pxmr = pxmr,
+            quote = quote,
+            destination = dest,
+            contactName = (target as? PayTarget.ToContact)?.contact?.displayName(),
+            busy = busy,
+            onCancel = { confirming = false },
+            onConfirm = latch@{
+                // Latched before anything else, synchronously: a second tap in
+                // the frame before this dialog leaves would build and broadcast
+                // a second transaction, and nothing downstream can take one
+                // back.
+                if (busy) return@latch
+                confirming = false
+                askPin = true
             },
         )
     }

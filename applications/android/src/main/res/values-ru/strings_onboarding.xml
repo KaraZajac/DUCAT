@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Создать кошелёк</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">Задай лимиты трат</string>
-    <string name="onb_limits_body">Небольшие платежи проходят сразу. Крупные спрашивают PIN. Где проходят эти границы, можно поменять в любой момент — значения по умолчанию уже осторожные.</string>
-    <string name="onb_limits_action">Оставить по умолчанию</string>
 
     <!-- Done step -->
     <string name="onb_done_title">Готово</string>

@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Створити гаманець</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">Задай ліміти витрат</string>
-    <string name="onb_limits_body">Малі платежі проходять одразу. Більші питають твій PIN. Де провести ці межі, можна змінити будь-коли — типові значення вже обережні.</string>
-    <string name="onb_limits_action">Лишити типові</string>
 
     <!-- Done step -->
     <string name="onb_done_title">Готово</string>

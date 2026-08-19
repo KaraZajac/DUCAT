@@ -16,9 +16,11 @@
     <string name="onb_wallet_action">Create wallet</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">Set your spending limits</string>
-    <string name="onb_limits_body">Small payments go straight through. Larger ones ask for your PIN. You can change where those lines sit at any time — the defaults are already cautious.</string>
-    <string name="onb_limits_action">Keep the defaults</string>
+    <string name="onb_pin_title">Choose a PIN</string>
+    <string name="onb_pin_body">One number, asked for every time money leaves this phone. It is what stands between someone who picks up your unlocked phone and your wallet.</string>
+    <string name="onb_pin_done">Your PIN is set. It will be asked for before any payment.</string>
+    <string name="onb_pin_action">Choose a PIN</string>
+    <string name="onb_pin_next">Next</string>
 
     <!-- Done step -->
     <string name="onb_done_title">Ready</string>

@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Tạo ví</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">Đặt hạn mức chi tiêu</string>
-    <string name="onb_limits_body">Khoản nhỏ đi thẳng. Khoản lớn hơn sẽ hỏi PIN của bạn. Bạn có thể dời các ngưỡng này bất cứ lúc nào — mặc định vốn đã thận trọng.</string>
-    <string name="onb_limits_action">Giữ mặc định</string>
 
     <!-- Done step -->
     <string name="onb_done_title">Sẵn sàng</string>

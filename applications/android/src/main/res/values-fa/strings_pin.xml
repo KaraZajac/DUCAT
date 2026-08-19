@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">یک رمز انتخاب کنید</string>
+    <string name="pin_set_body">پیش از آنکه پولی این گوشی را ترک کند پرسیده می‌شود. جای دیگری لازمش نیست، پس چیزی بگذارید که پای پیشخوان بتوانید تایپ کنید.</string>
+    <string name="pin_ask_title">رمزتان را وارد کنید</string>
+    <string name="pin_ask_body">همین حالا پول از این گوشی خارج می‌شود.</string>
+    <string name="pin_label">رمز</string>
+    <string name="pin_again">دوباره بنویسید</string>
+    <string name="pin_save">ذخیرهٔ رمز</string>
+    <string name="pin_confirm">تأیید</string>
+    <string name="pin_cancel">انصراف</string>
+    <string name="pin_no_reset">از داخل برنامه راهی برای بازنشانی‌اش نیست — هر چیزی که بتواند بازنشانی کند، راه دور زدنش هم هست. اگر فراموشش کردید، این کیف پول را از نسخهٔ پشتیبان بازیابی کنید.</string>
+    <string name="pin_locked">تلاش‌های نادرست زیاد بود. تا %1$s دیگر چیزی پذیرفته نمی‌شود.</string>
+    <string name="pin_gone">روی این دستگاه رمزی تنظیم نشده. پیش از ارسال یکی بگذارید.</string>
+    <plurals name="pin_wrong">
+        <item quantity="one">این رمز نیست. %1$d تلاش تا شروع انتظار مانده.</item>
+        <item quantity="other">این رمز نیست. %1$d تلاش تا شروع انتظار مانده.</item>
+    </plurals>
+</resources>

@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Crear billetera</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">Define tus límites de gasto</string>
-    <string name="onb_limits_body">Los pagos pequeños pasan directo. Los más grandes piden tu PIN. Puedes mover esas líneas cuando quieras — los valores por defecto ya son prudentes.</string>
-    <string name="onb_limits_action">Mantener los valores por defecto</string>
 
     <!-- Done step -->
     <string name="onb_done_title">Listo</string>

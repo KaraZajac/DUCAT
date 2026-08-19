@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">Bir PIN seç</string>
+    <string name="pin_set_body">Bu telefondan para çıkmadan önce sorulur. Başka hiçbir şey onu istemez, o yüzden tezgâhta yazabileceğin bir şey seç.</string>
+    <string name="pin_ask_title">PIN\'ini gir</string>
+    <string name="pin_ask_body">Bu telefondan az sonra para çıkacak.</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">Bir daha yaz</string>
+    <string name="pin_save">PIN\'i kaydet</string>
+    <string name="pin_confirm">Onayla</string>
+    <string name="pin_cancel">Vazgeç</string>
+    <string name="pin_no_reset">Uygulama içinden sıfırlanamaz — sıfırlayabilecek herhangi bir şey, onu aşmanın yolu olurdu. Unutursan bu cüzdanı yedeğinden geri yükle.</string>
+    <string name="pin_locked">Çok fazla yanlış deneme. %1$s boyunca hiçbir şey kabul edilmiyor.</string>
+    <string name="pin_gone">Bu cihazda PIN yok. Göndermeden önce bir tane belirle.</string>
+    <plurals name="pin_wrong">
+        <item quantity="one">PIN bu değil. Bekleme başlamadan %1$d deneme kaldı.</item>
+        <item quantity="other">PIN bu değil. Bekleme başlamadan %1$d deneme kaldı.</item>
+    </plurals>
+</resources>

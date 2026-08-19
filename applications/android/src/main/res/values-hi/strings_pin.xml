@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">एक PIN चुनें</string>
+    <string name="pin_set_body">इस फ़ोन से पैसा जाने से पहले यह पूछा जाता है। और कहीं इसकी ज़रूरत नहीं, तो ऐसा चुनें जो काउंटर पर टाइप कर सकें।</string>
+    <string name="pin_ask_title">अपना PIN डालें</string>
+    <string name="pin_ask_body">इस फ़ोन से अभी पैसा जाने वाला है।</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">फिर से लिखें</string>
+    <string name="pin_save">PIN सहेजें</string>
+    <string name="pin_confirm">मंज़ूरी दें</string>
+    <string name="pin_cancel">रद्द करें</string>
+    <string name="pin_no_reset">ऐप के भीतर से इसे रीसेट करने का कोई तरीक़ा नहीं — जो कुछ भी इसे रीसेट कर सकता, वही इसे लाँघने का रास्ता होता। भूल जाएँ तो इस बटुए को अपने बैकअप से वापस लाएँ।</string>
+    <string name="pin_locked">बहुत बार ग़लत। अगले %1$s तक कुछ भी स्वीकार नहीं होगा।</string>
+    <string name="pin_gone">इस डिवाइस पर कोई PIN नहीं है। भेजने से पहले एक रखें।</string>
+    <plurals name="pin_wrong">
+        <item quantity="one">यह PIN नहीं है। इंतज़ार शुरू होने से पहले %1$d कोशिश बची।</item>
+        <item quantity="other">यह PIN नहीं है। इंतज़ार शुरू होने से पहले %1$d कोशिशें बचीं।</item>
+    </plurals>
+</resources>

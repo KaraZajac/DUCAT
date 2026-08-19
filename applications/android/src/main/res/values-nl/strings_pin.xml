@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">Kies een pincode</string>
+    <string name="pin_set_body">Hij wordt gevraagd voordat er geld van deze telefoon af gaat. Verder heeft niets hem nodig, dus kies iets dat je aan een balie kunt typen.</string>
+    <string name="pin_ask_title">Voer je pincode in</string>
+    <string name="pin_ask_body">Er gaat zo geld van deze telefoon af.</string>
+    <string name="pin_label">Pincode</string>
+    <string name="pin_again">Typ hem nog eens</string>
+    <string name="pin_save">Pincode instellen</string>
+    <string name="pin_confirm">Goedkeuren</string>
+    <string name="pin_cancel">Annuleren</string>
+    <string name="pin_no_reset">Er is geen manier om hem in de app te herstellen — alles wat dat zou kunnen, zou een weg eromheen zijn. Vergeet je hem, herstel deze portemonnee dan uit je back-up.</string>
+    <string name="pin_locked">Te vaak fout. Er wordt nog %1$s niets aangenomen.</string>
+    <string name="pin_gone">Op dit apparaat staat geen pincode. Stel er een in voordat je verstuurt.</string>
+    <plurals name="pin_wrong">
+        <item quantity="one">Dat is de pincode niet. Nog %1$d poging voordat het wachten begint.</item>
+        <item quantity="other">Dat is de pincode niet. Nog %1$d pogingen voordat het wachten begint.</item>
+    </plurals>
+</resources>

@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">वॉलेट बनाएँ</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">अपनी खर्च सीमाएँ तय करें</string>
-    <string name="onb_limits_body">छोटे भुगतान सीधे निकल जाते हैं। बड़े आपका PIN माँगते हैं। ये रेखाएँ कहाँ हों, आप कभी भी बदल सकते हैं — डिफ़ॉल्ट पहले से ही सतर्क हैं।</string>
-    <string name="onb_limits_action">डिफ़ॉल्ट रहने दें</string>
 
     <!-- Done step -->
     <string name="onb_done_title">तैयार</string>

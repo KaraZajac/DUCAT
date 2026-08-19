@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">ウォレットを作成</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">支払い限度額を設定</string>
-    <string name="onb_limits_body">少額の支払いはそのまま通ります。大きい支払いはPINを求めます。この境界はいつでも変更できます — 初期設定はすでに慎重めです。</string>
-    <string name="onb_limits_action">初期設定のまま進む</string>
 
     <!-- Done step -->
     <string name="onb_done_title">準備完了</string>

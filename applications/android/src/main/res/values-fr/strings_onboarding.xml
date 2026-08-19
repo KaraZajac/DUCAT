@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Créer le portefeuille</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">Fixe tes limites de dépense</string>
-    <string name="onb_limits_body">Les petits paiements passent directement. Les plus gros demandent ton PIN. Tu peux déplacer ces seuils à tout moment — les valeurs par défaut sont déjà prudentes.</string>
-    <string name="onb_limits_action">Garder les valeurs par défaut</string>
 
     <!-- Done step -->
     <string name="onb_done_title">Prêt</string>

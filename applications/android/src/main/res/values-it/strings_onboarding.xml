@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Crea il portafoglio</string>
 
     <!-- Passo limiti -->
-    <string name="onb_limits_title">Imposta i tuoi limiti di spesa</string>
-    <string name="onb_limits_body">I pagamenti piccoli passano subito. Quelli più grandi chiedono il tuo PIN. Puoi spostare quelle soglie in qualsiasi momento — i valori predefiniti sono già prudenti.</string>
-    <string name="onb_limits_action">Tieni i valori predefiniti</string>
 
     <!-- Passo finale -->
     <string name="onb_done_title">Pronto</string>

@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">สร้างกระเป๋าเงิน</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">ตั้งวงเงินใช้จ่ายของคุณ</string>
-    <string name="onb_limits_body">การจ่ายเล็ก ๆ ผ่านได้ทันที ก้อนใหญ่กว่านั้นจะถาม PIN ของคุณ เส้นแบ่งพวกนี้เปลี่ยนได้ทุกเมื่อ — ค่าเริ่มต้นระมัดระวังอยู่แล้ว</string>
-    <string name="onb_limits_action">ใช้ค่าเริ่มต้น</string>
 
     <!-- Done step -->
     <string name="onb_done_title">พร้อมแล้ว</string>

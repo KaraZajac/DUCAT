@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Cüzdan oluştur</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">Harcama limitlerini belirle</string>
-    <string name="onb_limits_body">Küçük ödemeler doğrudan geçer. Büyükleri PIN\'ini sorar. Bu çizgilerin yerini istediğin zaman değiştirebilirsin — varsayılanlar zaten temkinli.</string>
-    <string name="onb_limits_action">Varsayılanları koru</string>
 
     <!-- Done step -->
     <string name="onb_done_title">Hazır</string>

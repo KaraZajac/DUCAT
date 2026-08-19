@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">Придумайте PIN</string>
+    <string name="pin_set_body">Его спрашивают перед тем, как деньги уйдут с этого телефона. Больше он нигде не нужен, так что выберите такой, который наберёте у прилавка.</string>
+    <string name="pin_ask_title">Введите PIN</string>
+    <string name="pin_ask_body">Сейчас с этого телефона уйдут деньги.</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">Введите ещё раз</string>
+    <string name="pin_save">Сохранить PIN</string>
+    <string name="pin_confirm">Подтвердить</string>
+    <string name="pin_cancel">Отмена</string>
+    <string name="pin_no_reset">Сбросить его из приложения нельзя — всё, что могло бы сбросить, было бы способом его обойти. Если забудете, восстановите этот кошелёк из резервной копии.</string>
+    <string name="pin_locked">Слишком много неверных попыток. Ещё %1$s ничего не принимается.</string>
+    <string name="pin_gone">На этом устройстве нет PIN. Задайте его перед отправкой.</string>
+    <plurals name="pin_wrong">
+        <item quantity="one">Это не тот PIN. Осталась %1$d попытка до ожидания.</item>
+        <item quantity="few">Это не тот PIN. Осталось %1$d попытки до ожидания.</item>
+        <item quantity="many">Это не тот PIN. Осталось %1$d попыток до ожидания.</item>
+        <item quantity="other">Это не тот PIN. Осталось %1$d попытки до ожидания.</item>
+    </plurals>
+</resources>

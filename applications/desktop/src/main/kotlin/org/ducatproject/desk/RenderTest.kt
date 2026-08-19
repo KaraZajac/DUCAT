@@ -93,6 +93,11 @@ fun main() {
     // The menu behind the till: empty here, which is the state a shop sees
     // before it has typed anything in and the one most likely to draw nothing.
     render("items", w = 900, h = 700) { org.ducatproject.ducat.ui.ItemsScreen() }
+    // The gate in front of every payment. Rendered in its set-a-PIN state,
+    // which is what a device that has never had one shows.
+    render("pin", w = 700, h = 700) {
+        org.ducatproject.ducat.ui.PinGate(open = true, onDismiss = {}, onPassed = {})
+    }
     render("bartab") { org.ducatproject.ducat.ui.BarTabScreen() }
     render("donate") { org.ducatproject.ducat.ui.DonateScreen() }
     render("wallet") { WalletRoom(onTopUp = {}) }

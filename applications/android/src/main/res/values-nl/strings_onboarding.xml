@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Wallet maken</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">Stel je bestedingslimieten in</string>
-    <string name="onb_limits_body">Kleine betalingen gaan er direct doorheen. Grotere vragen om je PIN. Je kunt die grenzen op elk moment verleggen — de standaardwaarden zijn al voorzichtig.</string>
-    <string name="onb_limits_action">Houd de standaard</string>
 
     <!-- Done step -->
     <string name="onb_done_title">Klaar</string>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">Choose a PIN</string>
+    <string name="pin_set_body">It is asked for before any money leaves this phone. Nothing else needs it, so pick something you can type at a counter.</string>
+    <string name="pin_ask_title">Enter your PIN</string>
+    <string name="pin_ask_body">Money is about to leave this phone.</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">Type it again</string>
+    <string name="pin_save">Set PIN</string>
+    <string name="pin_confirm">Approve</string>
+    <string name="pin_cancel">Cancel</string>
+    <string name="pin_no_reset">There is no way to reset this from inside the app — anything that could reset it would be a way past it. If you forget it, restore this wallet from your backup.</string>
+    <string name="pin_locked">Too many wrong tries. Nothing is accepted for another %1$s.</string>
+    <string name="pin_gone">No PIN is set on this device. Set one before sending.</string>
+    <plurals name="pin_wrong">
+        <item quantity="one">That is not the PIN. %1$d try before the waiting starts.</item>
+        <item quantity="other">That is not the PIN. %1$d tries before the waiting starts.</item>
+    </plurals>
+</resources>

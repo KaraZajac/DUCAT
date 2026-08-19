@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">ตั้ง PIN</string>
+    <string name="pin_set_body">จะถูกถามก่อนที่เงินจะออกจากเครื่องนี้ ไม่มีที่อื่นต้องใช้ เลือกอันที่พิมพ์ได้หน้าเคาน์เตอร์</string>
+    <string name="pin_ask_title">ใส่ PIN ของคุณ</string>
+    <string name="pin_ask_body">เงินกำลังจะออกจากเครื่องนี้</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">พิมพ์อีกครั้ง</string>
+    <string name="pin_save">บันทึก PIN</string>
+    <string name="pin_confirm">อนุมัติ</string>
+    <string name="pin_cancel">ยกเลิก</string>
+    <string name="pin_no_reset">ไม่มีทางรีเซ็ตจากในแอป เพราะอะไรก็ตามที่รีเซ็ตได้ก็คือทางลัดข้ามมันไป ถ้าลืม ให้กู้คืนกระเป๋านี้จากข้อมูลสำรองของคุณ</string>
+    <string name="pin_locked">ผิดหลายครั้งเกินไป จะไม่รับอะไรอีก %1$s</string>
+    <string name="pin_gone">เครื่องนี้ยังไม่มี PIN ตั้งก่อนส่ง</string>
+    <plurals name="pin_wrong">
+        <item quantity="other">ไม่ใช่ PIN เหลืออีก %1$d ครั้งก่อนต้องรอ</item>
+    </plurals>
+</resources>

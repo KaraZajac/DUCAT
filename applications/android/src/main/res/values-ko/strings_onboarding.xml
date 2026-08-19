@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">지갑 만들기</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">지출 한도 설정</string>
-    <string name="onb_limits_body">작은 결제는 바로 통과돼요. 큰 결제는 PIN을 물어요. 그 경계는 언제든 옮길 수 있어요 — 기본값도 이미 조심스러운 편이에요.</string>
-    <string name="onb_limits_action">기본값 유지</string>
 
     <!-- Done step -->
     <string name="onb_done_title">준비 완료</string>

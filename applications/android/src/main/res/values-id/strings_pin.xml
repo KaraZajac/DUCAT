@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_set_title">Pilih PIN</string>
+    <string name="pin_set_body">Ditanyakan sebelum uang keluar dari ponsel ini. Tidak ada lagi yang membutuhkannya, jadi pilih yang bisa kamu ketik di depan konter.</string>
+    <string name="pin_ask_title">Masukkan PIN</string>
+    <string name="pin_ask_body">Uang sebentar lagi keluar dari ponsel ini.</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_again">Ketik lagi</string>
+    <string name="pin_save">Simpan PIN</string>
+    <string name="pin_confirm">Setujui</string>
+    <string name="pin_cancel">Batal</string>
+    <string name="pin_no_reset">Tidak ada cara mengatur ulangnya dari dalam aplikasi — apa pun yang bisa mengatur ulang akan jadi jalan pintas melewatinya. Kalau lupa, pulihkan dompet ini dari cadanganmu.</string>
+    <string name="pin_locked">Terlalu banyak salah. Tidak ada yang diterima selama %1$s lagi.</string>
+    <string name="pin_gone">Perangkat ini belum punya PIN. Buat dulu sebelum mengirim.</string>
+    <plurals name="pin_wrong">
+        <item quantity="other">Itu bukan PIN-nya. Tersisa %1$d percobaan sebelum menunggu.</item>
+    </plurals>
+</resources>

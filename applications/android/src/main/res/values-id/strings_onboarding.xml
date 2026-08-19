@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Buat dompet</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">Atur batas belanjamu</string>
-    <string name="onb_limits_body">Pembayaran kecil langsung lewat. Yang lebih besar meminta PIN-mu. Garisnya bisa kamu geser kapan saja — bawaannya sudah hati-hati.</string>
-    <string name="onb_limits_action">Pakai bawaan</string>
 
     <!-- Done step -->
     <string name="onb_done_title">Siap</string>

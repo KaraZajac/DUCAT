@@ -16,9 +16,6 @@
     <string name="onb_wallet_action">Wallet erstellen</string>
 
     <!-- Limits step -->
-    <string name="onb_limits_title">Lege deine Ausgabelimits fest</string>
-    <string name="onb_limits_body">Kleine Zahlungen gehen direkt durch. Größere fragen nach deiner PIN. Wo diese Grenzen liegen, kannst du jederzeit ändern — die Voreinstellungen sind schon vorsichtig.</string>
-    <string name="onb_limits_action">Voreinstellungen behalten</string>
 
     <!-- Done step -->
     <string name="onb_done_title">Bereit</string>

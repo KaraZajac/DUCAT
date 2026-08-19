@@ -1784,6 +1784,18 @@ private fun RideBondBanner(contact: Contact) {
     var countering by remember { mutableStateOf(false) }
     var counterXmr by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+    // Whatever is waiting on the PIN. Held rather than run, so that the only
+    // path from tapping to spending goes through the gate below.
+    var pinAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    PinGate(
+        open = pinAction != null,
+        onDismiss = { pinAction = null },
+        onPassed = {
+            val go = pinAction
+            pinAction = null
+            go?.invoke()
+        },
+    )
 
     // Nudge the mail and, while the escrow waits for its money, ask the
     // chain. The global poller would get there; a ride at a curb wants
@@ -1810,7 +1822,9 @@ private fun RideBondBanner(contact: Contact) {
     // banner and must keep mirroring it; if one drifts the screen simply does
     // not appear and the banner still works, which is the safe direction.
     val myShare = org.ducatproject.ducat.Ceremony.mySharePxmr(ride)
-    val fundNow: () -> Unit = {
+    // Money leaving, so it goes behind the PIN; `proposeNow` does not,
+    // because proposing a split spends nothing — the signature does.
+    val fundReally: () -> Unit = {
         busy = true; error = null
         scope.launch {
             withContext(Dispatchers.IO) {
@@ -1819,6 +1833,7 @@ private fun RideBondBanner(contact: Contact) {
             busy = false
         }
     }
+    val fundNow: () -> Unit = { pinAction = fundReally }
     val proposeNow: () -> Unit = {
         busy = true; error = null
         scope.launch {
@@ -1830,7 +1845,7 @@ private fun RideBondBanner(contact: Contact) {
             busy = false
         }
     }
-    val signNow: () -> Unit = {
+    val signReally: () -> Unit = {
         busy = true; error = null
         scope.launch {
             withContext(Dispatchers.IO) {
@@ -1841,6 +1856,7 @@ private fun RideBondBanner(contact: Contact) {
             busy = false
         }
     }
+    val signNow: () -> Unit = { pinAction = signReally }
     // The same figure the banner quotes, from the same place.
     val myStakeShown = org.ducatproject.ducat.Stakes.stakeFor(
         if (reservation) org.ducatproject.ducat.Stakes.Deal.Stay
@@ -1989,15 +2005,19 @@ private fun RideBondBanner(contact: Contact) {
                         context, org.ducatproject.ducat.Ceremony.mySharePxmr(ride),
                     ).primary
                     Button(
+                        // Behind the PIN: this is money leaving.
                         onClick = {
-                            busy = true; error = null
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    runCatching {
-                                        org.ducatproject.ducat.Ceremony.fundRide(context, idHex)
-                                    }
-                                }.onFailure { error = moneyFailure(context, it) }
-                                busy = false
+                            pinAction = {
+                                busy = true; error = null
+                                scope.launch {
+                                    withContext(Dispatchers.IO) {
+                                        runCatching {
+                                            org.ducatproject.ducat.Ceremony
+                                                .fundRide(context, idHex)
+                                        }
+                                    }.onFailure { error = moneyFailure(context, it) }
+                                    busy = false
+                                }
                             }
                         },
                         enabled = !busy,
@@ -2082,15 +2102,19 @@ private fun RideBondBanner(contact: Contact) {
                         context, org.ducatproject.ducat.Ceremony.mySharePxmr(ride),
                     ).primary
                     Button(
+                        // Behind the PIN: this is money leaving.
                         onClick = {
-                            busy = true; error = null
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    runCatching {
-                                        org.ducatproject.ducat.Ceremony.fundRide(context, idHex)
-                                    }
-                                }.onFailure { error = moneyFailure(context, it) }
-                                busy = false
+                            pinAction = {
+                                busy = true; error = null
+                                scope.launch {
+                                    withContext(Dispatchers.IO) {
+                                        runCatching {
+                                            org.ducatproject.ducat.Ceremony
+                                                .fundRide(context, idHex)
+                                        }
+                                    }.onFailure { error = moneyFailure(context, it) }
+                                    busy = false
+                                }
                             }
                         },
                         enabled = !busy,
