@@ -56,6 +56,13 @@ fun main() {
             println("PAY_SCAN ${b.scannedTo}/${b.tip} — ${formatXmr(b.spendablePxmr)} XMR so far")
         }
     }
+    // Scanning finds outputs; it does not notice that they are gone. A note
+    // this wallet already spent still reads as spendable until the key images
+    // are checked against the chain, which is how this printed "spendable
+    // 0.125027, 1 note(s)" and then failed with "0.000000 XMR available" —
+    // the builder had asked the question this had not.
+    runCatching { Wallet.refreshSpent(context, node) }
+        .onFailure { println("PAY_WARN could not refresh spent state: ${it.message}") }
     val b = Wallet.balances(context)
     println(
         "PAY_BALANCE spendable ${formatXmr(b.spendablePxmr)}, " +

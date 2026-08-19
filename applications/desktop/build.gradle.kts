@@ -354,6 +354,16 @@ tasks.register<JavaExec>("tilltest") {
 // The bonded ride end to end between two headless desks, over the live
 // network and live stagenet. Two processes, two roles — see RideTest.kt.
 // `DUCAT_RIDE_ROLE=… DUCAT_DESK_STATE=… ./gradlew :desktop:ridetest`.
+// The counter, both sides, over the live network: card → claim → itemised
+// bill → stagenet payment → notice → chain → receipt.
+//   DUCAT_KIOSK_ROLE=shop     ./gradlew :desktop:kiosktest
+//   DUCAT_KIOSK_ROLE=customer DUCAT_KIOSK_CARD=<uri> ./gradlew :desktop:kiosktest
+tasks.register<JavaExec>("kiosktest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.KioskTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("ridetest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.RideTestKt"
