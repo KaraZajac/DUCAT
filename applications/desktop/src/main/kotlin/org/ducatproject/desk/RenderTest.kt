@@ -143,6 +143,25 @@ fun main() {
             onAccept = {}, onDecline = {}, onClose = {},
         )
     }
+    // The escrow moments, which used to be three lines in a banner strip. A
+    // screen that asks for money it cannot unsend should look like one.
+    render("escrow-step", w = 480, h = 900) {
+        org.ducatproject.ducat.ui.EscrowStep(
+            contact = org.ducatproject.ducat.Contact(
+                personaHex = "11".repeat(32),
+                petname = null,
+                assertedName = "Sam",
+                myOutbox = "",
+                theirOutbox = "",
+            ),
+            title = "Escrow ready — the fare goes in before the ride.",
+            amountPxmr = 1_200_000_000L,
+            note = "0.000400 XMR of that is your stake — it comes back when this is finished.",
+            action = "Secure fare (0.001200 XMR)",
+            onAction = {},
+            onClose = {},
+        )
+    }
     render("onboarding-trust", w = 900, h = 700) {
         org.ducatproject.ducat.ui.OnboardingFlow(
             state = org.ducatproject.ducat.ui.Onboarding(

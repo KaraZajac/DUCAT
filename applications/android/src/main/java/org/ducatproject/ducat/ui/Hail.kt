@@ -705,6 +705,14 @@ fun DriveScreen() {
                         // The notice is spent — clear the slot, but only if it
                         // still holds the notice we claimed.
                         clearOwnSlot(taken.cell, taken.subkey, taken.card)
+                        // And take it off our own map at once. Clearing the
+                        // board is a write someone else has to read back; this
+                        // list is what draws the pins here, and leaving the
+                        // taken job on it showed the driver a fare still
+                        // standing that they had just claimed.
+                        withContext(Dispatchers.Main) {
+                            notices = notices.filterNot { it.card == taken.card }
+                        }
                         // The offer is protocol now (kind 6): the fare and the
                         // ETA ride typed fields the rider's accept must echo,
                         // and the body stays what a person reads — the car to

@@ -1721,6 +1721,146 @@ private fun RideBondBanner(contact: Contact) {
         }
     }
 
+    // The moments that ask for money or a signature, given a screen instead of
+    // a line in a strip. The conditions below mirror the `when` inside the
+    // banner and must keep mirroring it; if one drifts the screen simply does
+    // not appear and the banner still works, which is the safe direction.
+    val myShare = org.ducatproject.ducat.Ceremony.mySharePxmr(ride)
+    val fundNow: () -> Unit = {
+        busy = true; error = null
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                runCatching { org.ducatproject.ducat.Ceremony.fundRide(context, idHex) }
+            }.onFailure { error = it.message }
+            busy = false
+        }
+    }
+    val proposeNow: () -> Unit = {
+        busy = true; error = null
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    org.ducatproject.ducat.Ceremony.proposeRideRelease(context, idHex)
+                }
+            }.onFailure { error = it.message }
+            busy = false
+        }
+    }
+    val signNow: () -> Unit = {
+        busy = true; error = null
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    org.ducatproject.ducat.Ceremony.approveRideRelease(context, idHex)
+                }
+            }.onFailure { error = it.message }
+            busy = false
+        }
+    }
+    // The same figure the banner quotes, from the same place.
+    val myStakeShown = org.ducatproject.ducat.Stakes.stakeFor(
+        if (reservation) org.ducatproject.ducat.Stakes.Deal.Stay
+        else org.ducatproject.ducat.Stakes.Deal.Ride,
+        ride.optLong("farePxmr"),
+    )
+    val stakeNote = if (myStakeShown > 0) {
+        stringResource(
+            R.string.bond_stake_refunded,
+            Amounts.show(context, myStakeShown).primary,
+        )
+    } else null
+
+    data class Step(
+        val title: String,
+        val amount: Long,
+        val note: String?,
+        val action: String,
+        val onAction: () -> Unit,
+        val secondary: String? = null,
+        val onSecondary: (() -> Unit)? = null,
+    )
+
+    val step: Step? = when {
+        // The driver being asked for their stake.
+        stage == "done" && !rider && myShare > 0 &&
+            ride.optString("hostFundTxid").isEmpty() -> Step(
+            title = stringResource(
+                if (reservation) R.string.res_proposed else R.string.bond_stake_asked,
+            ),
+            amount = myShare,
+            note = stakeNote,
+            action = stringResource(
+                if (reservation) R.string.res_accept_fund else R.string.bond_post_stake,
+                Amounts.show(context, myShare).primary,
+            ),
+            onAction = fundNow,
+        )
+        // The rider putting the fare and their stake in — but not while still
+        // waiting on the other side's, which is a wait, not a decision.
+        stage == "done" && rider && ride.optString("fundTxid").isEmpty() &&
+            !(ride.optLong("hostDepPxmr") > 0 && funded < ride.optLong("hostDepPxmr")) -> Step(
+            title = stringResource(R.string.bond_escrow_ready),
+            amount = myShare,
+            note = stakeNote,
+            action = stringResource(
+                if (reservation) R.string.res_accept_fund else R.string.bond_secure_fare,
+                Amounts.show(context, myShare).primary,
+            ),
+            onAction = fundNow,
+        )
+        // The driver ending the ride and asking for the fare.
+        stage == "done" && !rider && funded >= need -> Step(
+            title = stringResource(
+                if (reservation) R.string.res_secured else R.string.bond_fare_secured,
+            ),
+            amount = fare,
+            note = null,
+            action = stringResource(
+                if (reservation) R.string.res_settle else R.string.bond_complete_ride,
+            ),
+            onAction = proposeNow,
+        )
+        // A split on the table, from either side.
+        stage == "release_pending" -> {
+            val riderBack = ride.optLong(
+                "pendingRiderBack", (funded - fare).coerceAtLeast(0L),
+            )
+            Step(
+                title = stringResource(R.string.bond_ride_complete_ask),
+                amount = if (rider) riderBack else (funded - riderBack).coerceAtLeast(0L),
+                note = stringResource(
+                    R.string.bond_split_stated,
+                    Amounts.show(context, riderBack).primary,
+                    Amounts.show(context, (funded - riderBack).coerceAtLeast(0L)).primary,
+                ),
+                action = stringResource(R.string.bond_sign_split),
+                onAction = signNow,
+                secondary = stringResource(R.string.bond_counter),
+                onSecondary = { countering = true },
+            )
+        }
+        else -> null
+    }
+    // Shown once per stage: it opens when the stage arrives and closing it
+    // leaves the banner, which reopens it. A prompt that cannot be put down is
+    // a prompt that traps someone mid-conversation.
+    var stepOpen by remember(stage) { mutableStateOf(true) }
+    if (step != null && stepOpen && !countering) {
+        org.ducatproject.ducat.ui.EscrowStep(
+            contact = contact,
+            title = step.title,
+            amountPxmr = step.amount,
+            note = step.note,
+            action = step.action,
+            onAction = step.onAction,
+            onClose = { stepOpen = false },
+            busy = busy,
+            error = error,
+            secondaryLabel = step.secondary,
+            onSecondary = step.onSecondary,
+        )
+    }
+
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
         modifier = Modifier.fillMaxWidth(),

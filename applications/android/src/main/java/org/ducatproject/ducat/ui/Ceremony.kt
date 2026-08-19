@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +25,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -460,6 +462,134 @@ fun DriverFound(contact: Contact, onOpenChat: () -> Unit, onDismiss: () -> Unit)
                     onClick = onOpenChat,
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                 ) { Text(stringResource(R.string.ceremony_open_chat)) }
+            }
+        }
+    }
+}
+
+
+/**
+ * An escrow moment that asks for money or a signature, given the room it
+ * deserves.
+ *
+ * These lived as three lines and a button in the banner above a conversation —
+ * the same strip that carries "building a shared deposit" and other passive
+ * status. But posting a stake, securing a fare and signing a split are the
+ * points where a person commits money they cannot unsend, and they were the
+ * smallest things on the screen. This is the shape the ride screens already
+ * use, which is the shape someone recognises as *a decision*: their face, the
+ * number large enough to read across a car, the sentence about what happens to
+ * it, and nothing else competing.
+ *
+ * The banner stays. Closing this returns to it, and tapping it opens this
+ * again — dismissing a prompt should not hide the thing it was prompting for.
+ */
+@Composable
+fun EscrowStep(
+    contact: Contact,
+    title: String,
+    amountPxmr: Long,
+    note: String?,
+    action: String,
+    onAction: () -> Unit,
+    onClose: () -> Unit,
+    busy: Boolean = false,
+    error: String? = null,
+    secondaryLabel: String? = null,
+    onSecondary: (() -> Unit)? = null,
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    Dialog(
+        onDismissRequest = onClose,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Column(
+                Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Row(Modifier.fillMaxWidth().padding(8.dp)) {
+                    IconButton(onClick = onClose) {
+                        Icon(Icons.Filled.Close, stringResource(R.string.ceremony_close))
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                Icon(
+                    Icons.Filled.Lock,
+                    null,
+                    Modifier.size(28.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.height(12.dp))
+                Avatar(contact.displayName(), contact.avatar, size = 72)
+                Spacer(Modifier.height(10.dp))
+                Text(contact.displayName(), style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 28.dp),
+                )
+                if (amountPxmr > 0) {
+                    Spacer(Modifier.height(12.dp))
+                    val shown = Amounts.show(context, amountPxmr)
+                    Text(shown.primary, style = MaterialTheme.typography.displaySmall)
+                    shown.secondary?.let {
+                        Text(
+                            it,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                note?.let {
+                    Spacer(Modifier.height(14.dp))
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 28.dp),
+                    )
+                }
+                error?.let {
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        bridgeMessage(it),
+                        color = if (it.contains("confirmation", ignoreCase = true)) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 28.dp),
+                    )
+                }
+                Spacer(Modifier.height(28.dp))
+                Button(
+                    onClick = onAction,
+                    enabled = !busy,
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 24.dp).height(52.dp),
+                ) {
+                    if (busy) {
+                        CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text(action, style = MaterialTheme.typography.titleMedium)
+                    }
+                }
+                if (secondaryLabel != null && onSecondary != null) {
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = onSecondary,
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = 24.dp).height(48.dp),
+                    ) { Text(secondaryLabel) }
+                }
+                Spacer(Modifier.height(24.dp))
             }
         }
     }
