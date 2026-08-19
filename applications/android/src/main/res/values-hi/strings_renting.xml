@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">अभी लोकेशन नहीं मिली। खिड़की के पास या बाहर आमतौर पर मिल जाती है।</string>
     <string name="rent_search_retry">फिर कोशिश करें</string>
     <string name="rent_search_progress">%2$d में से %1$d इलाक़े देखे गए</string>
+    <string name="rent_asking_about">नमस्ते — मैंने आपकी लिस्टिंग देखी, %1$s। क्या यह अभी उपलब्ध है?</string>
     <string name="rent_ask_about_it">इसके बारे में पूछें</string>
     <string name="rent_per_day_short">%1$s / दिन</string>
     <string name="rent_per_night_short">%1$s / रात</string>

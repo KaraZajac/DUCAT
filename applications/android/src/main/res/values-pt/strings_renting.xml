@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">Ainda sem localização. Perto de uma janela ou ao ar livre costuma resolver.</string>
     <string name="rent_search_retry">Tentar de novo</string>
     <string name="rent_search_progress">%1$d de %2$d áreas verificadas</string>
+    <string name="rent_asking_about">Olá — vi o seu anúncio, %1$s. Ainda está disponível?</string>
     <string name="rent_ask_about_it">Perguntar sobre isto</string>
     <string name="rent_per_day_short">%1$s / dia</string>
     <string name="rent_per_night_short">%1$s / noite</string>

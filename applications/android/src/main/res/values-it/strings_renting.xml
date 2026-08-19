@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">Ancora nessuna posizione. Vicino a una finestra o all\'aperto di solito funziona.</string>
     <string name="rent_search_retry">Riprova</string>
     <string name="rent_search_progress">%1$d di %2$d zone controllate</string>
+    <string name="rent_asking_about">Ciao — ho visto il tuo annuncio, %1$s. È ancora disponibile?</string>
     <string name="rent_ask_about_it">Chiedi informazioni</string>
     <string name="rent_per_day_short">%1$s / giorno</string>
     <string name="rent_per_night_short">%1$s / notte</string>

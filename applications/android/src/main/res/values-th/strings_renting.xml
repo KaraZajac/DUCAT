@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">ยังไม่ได้ตำแหน่ง ใกล้หน้าต่างหรืออยู่กลางแจ้งมักจะได้</string>
     <string name="rent_search_retry">ลองอีกครั้ง</string>
     <string name="rent_search_progress">ตรวจแล้ว %1$d จาก %2$d พื้นที่</string>
+    <string name="rent_asking_about">สวัสดี — เห็นประกาศ %1$s ของคุณ ยังว่างอยู่ไหม</string>
     <string name="rent_ask_about_it">สอบถาม</string>
     <string name="rent_per_day_short">%1$s / วัน</string>
     <string name="rent_per_night_short">%1$s / คืน</string>

@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">아직 위치를 못 잡았습니다. 창가나 실외면 대개 잡힙니다.</string>
     <string name="rent_search_retry">다시 시도</string>
     <string name="rent_search_progress">%2$d개 지역 중 %1$d개 확인</string>
+    <string name="rent_asking_about">안녕하세요 — %1$s 게시글을 봤습니다. 아직 가능할까요?</string>
     <string name="rent_ask_about_it">문의하기</string>
     <string name="rent_per_day_short">%1$s / 일</string>
     <string name="rent_per_night_short">%1$s / 박</string>

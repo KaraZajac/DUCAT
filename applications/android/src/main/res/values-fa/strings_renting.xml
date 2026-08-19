@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">هنوز موقعیتی پیدا نشده. نزدیک پنجره یا بیرون معمولاً جواب می‌دهد.</string>
     <string name="rent_search_retry">تلاش دوباره</string>
     <string name="rent_search_progress">%1$d از %2$d منطقه بررسی شد</string>
+    <string name="rent_asking_about">سلام — آگهی شما را دیدم، %1$s. هنوز موجود است؟</string>
     <string name="rent_ask_about_it">درباره‌اش بپرسید</string>
     <string name="rent_per_day_short">%1$s / روز</string>
     <string name="rent_per_night_short">%1$s / شب</string>

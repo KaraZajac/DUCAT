@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">Henüz konum yok. Pencere kenarı ya da dışarısı genelde işe yarar.</string>
     <string name="rent_search_retry">Tekrar dene</string>
     <string name="rent_search_progress">%2$d bölgeden %1$d tanesi tarandı</string>
+    <string name="rent_asking_about">Merhaba — ilanınızı gördüm, %1$s. Hâlâ müsait mi?</string>
     <string name="rent_ask_about_it">Bunu sor</string>
     <string name="rent_per_day_short">%1$s / gün</string>
     <string name="rent_per_night_short">%1$s / gece</string>

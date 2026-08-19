@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">No location fix yet. Near a window or outside usually does it.</string>
     <string name="rent_search_retry">Try again</string>
     <string name="rent_search_progress">%1$d of %2$d areas checked</string>
+    <string name="rent_asking_about">Hello — I saw your listing, %1$s. Is it available?</string>
     <string name="rent_ask_about_it">Ask about it</string>
     <string name="rent_per_day_short">%1$s / day</string>
     <string name="rent_per_night_short">%1$s / night</string>

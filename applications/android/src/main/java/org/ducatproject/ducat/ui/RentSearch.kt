@@ -163,29 +163,8 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                     stalled != null -> Stalled(
                         stall = stalled!!,
                         onRetry = {
-                            if (stalled == Stall.NoFix) {
-                                attempt++
-                            } else {
-                                val act = context as? android.app.Activity
-                                // False before the first ask and again once a
-                                // refusal has become permanent — so with
-                                // `asked`, it tells those two apart.
-                                if (asked && act?.shouldShowRequestPermissionRationale(perm)
-                                    == false
-                                ) {
-                                    context.startActivity(
-                                        android.content.Intent(
-                                            android.provider.Settings
-                                                .ACTION_APPLICATION_DETAILS_SETTINGS,
-                                            android.net.Uri.fromParts(
-                                                "package", context.packageName, null,
-                                            ),
-                                        ),
-                                    )
-                                } else {
-                                    locPerm.launch(perm)
-                                }
-                            }
+                            if (stalled == Stall.NoFix) attempt++
+                            else askForLocation(context, asked) { locPerm.launch(it) }
                         },
                     )
                     results == null || (results!!.isEmpty() && searching) -> Column {
@@ -252,7 +231,31 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                                             runCatching {
                                                 val card = uniffi.ducat_mobile
                                                     .readContactCard(info.card)
-                                                Mailbox.claimCard(context, card, null)
+                                                val c = Mailbox.claimCard(context, card, null)
+                                                // Say what this is about.
+                                                //
+                                                // The claim alone opened an
+                                                // empty thread with a stranger:
+                                                // the owner got somebody
+                                                // arriving with nothing said,
+                                                // and the asker got a blank
+                                                // screen and had to remember
+                                                // which of the cars they had
+                                                // tapped. "Ask about it" is a
+                                                // question; this is the
+                                                // question.
+                                                runCatching {
+                                                    Mailbox.send(
+                                                        context, c,
+                                                        context.getString(
+                                                            R.string.rent_asking_about,
+                                                            info.title,
+                                                        ),
+                                                        org.ducatproject.ducat
+                                                            .PersonaStore(context).personaHex(),
+                                                    )
+                                                }
+                                                c
                                             }
                                         }
                                         busy = false

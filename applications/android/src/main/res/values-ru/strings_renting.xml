@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">Местоположение ещё не определено. Обычно помогает окно или улица.</string>
     <string name="rent_search_retry">Повторить</string>
     <string name="rent_search_progress">Проверено %1$d из %2$d районов</string>
+    <string name="rent_asking_about">Здравствуйте! Ваше объявление, %1$s, ещё актуально?</string>
     <string name="rent_ask_about_it">Спросить об этом</string>
     <string name="rent_per_day_short">%1$s / день</string>
     <string name="rent_per_night_short">%1$s / ночь</string>

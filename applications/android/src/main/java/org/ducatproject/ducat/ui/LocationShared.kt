@@ -4,6 +4,40 @@ package org.ducatproject.ducat.ui
 // *getting* the fix is not. The phone reads its GPS (Location.kt); a desk
 // does not move, so it is told where it is once (the desk's LocationDesk.kt).
 
+/** Whether this device may be asked where it is. */
+fun locationAllowed(context: android.content.Context): Boolean =
+    context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+        android.content.pm.PackageManager.PERMISSION_GRANTED
+
+/**
+ * Ask for location again, by whichever route is still open.
+ *
+ * Android shows its dialog once, allows one more ask, and then stops showing
+ * anything at all — a second refusal is permanent, and `launch` after that is
+ * a button that visibly does nothing. `shouldShowRequestPermissionRationale`
+ * is false both before the first ask and after the last one, so `asked` is
+ * what tells those two apart; past the end of the road, the only way back is
+ * the app's own page in Settings.
+ */
+fun askForLocation(
+    context: android.content.Context,
+    asked: Boolean,
+    launch: (String) -> Unit,
+) {
+    val perm = android.Manifest.permission.ACCESS_FINE_LOCATION
+    val activity = context as? android.app.Activity
+    if (asked && activity?.shouldShowRequestPermissionRationale(perm) == false) {
+        context.startActivity(
+            android.content.Intent(
+                android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                android.net.Uri.fromParts("package", context.packageName, null),
+            ),
+        )
+    } else {
+        launch(perm)
+    }
+}
+
 /**
  * One location fix, sent as a link anyone's map can open.
  *

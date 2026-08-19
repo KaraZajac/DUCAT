@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">Pas encore de position. Près d\'une fenêtre ou dehors, cela marche en général.</string>
     <string name="rent_search_retry">Réessayer</string>
     <string name="rent_search_progress">%1$d zones sur %2$d vérifiées</string>
+    <string name="rent_asking_about">Bonjour — j\'ai vu votre annonce, %1$s. Est-elle toujours disponible ?</string>
     <string name="rent_ask_about_it">Se renseigner</string>
     <string name="rent_per_day_short">%1$s / jour</string>
     <string name="rent_per_night_short">%1$s / nuit</string>

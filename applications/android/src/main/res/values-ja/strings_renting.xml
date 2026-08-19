@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">まだ位置が取れていません。窓際や屋外だとたいてい取れます。</string>
     <string name="rent_search_retry">もう一度</string>
     <string name="rent_search_progress">%2$d 件中 %1$d 件の地域を確認</string>
+    <string name="rent_asking_about">こんにちは。%1$s の掲載を見ました。まだ空いていますか？</string>
     <string name="rent_ask_about_it">問い合わせる</string>
     <string name="rent_per_day_short">%1$s / 日</string>
     <string name="rent_per_night_short">%1$s / 泊</string>

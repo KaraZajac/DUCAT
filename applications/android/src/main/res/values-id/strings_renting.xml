@@ -49,6 +49,7 @@
     <string name="rent_search_no_fix">Belum ada lokasi. Dekat jendela atau di luar biasanya berhasil.</string>
     <string name="rent_search_retry">Coba lagi</string>
     <string name="rent_search_progress">%1$d dari %2$d wilayah diperiksa</string>
+    <string name="rent_asking_about">Halo — saya lihat iklanmu, %1$s. Masih tersedia?</string>
     <string name="rent_ask_about_it">Tanyakan</string>
     <string name="rent_per_day_short">%1$s / hari</string>
     <string name="rent_per_night_short">%1$s / malam</string>

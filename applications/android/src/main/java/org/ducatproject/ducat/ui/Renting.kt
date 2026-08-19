@@ -212,7 +212,27 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) { grabFix(context) { fix = it } }
+    // The Post button is dead without a fix — a listing has to sit on some
+    // board, and which board is the question a position answers. So this
+    // screen asks for the permission itself. It used to assume the answer was
+    // already yes, and somebody who had never hailed a ride could fill in the
+    // whole form and find the button greyed out under a sentence about
+    // waiting for a fix that was never going to come.
+    var asked by remember { mutableStateOf(false) }
+    var attempt by remember { mutableIntStateOf(0) }
+    val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        asked = true
+        if (granted) attempt++
+    }
+    LaunchedEffect(attempt) {
+        if (!locationAllowed(context)) {
+            locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            return@LaunchedEffect
+        }
+        grabFix(context) { fix = it }
+    }
 
     val pricePxmr = price.toDoubleOrNull()?.let { (it * 1e12).toLong() } ?: 0L
     val stake = Stakes.stakeFor(
@@ -439,12 +459,28 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
             TextButton(onClick = onDone) { Text(stringResource(R.string.rent_cancel)) }
         }
         if (fix == null) {
+            val allowed = locationAllowed(context)
             Spacer(Modifier.height(6.dp))
             Text(
-                stringResource(R.string.rent_need_location),
+                stringResource(
+                    if (allowed) R.string.rent_search_no_fix else R.string.rent_need_location,
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = {
+                    if (allowed) attempt++
+                    else askForLocation(context, asked) { locPerm.launch(it) }
+                },
+            ) {
+                Text(
+                    stringResource(
+                        if (allowed) R.string.rent_search_retry else R.string.rent_search_allow,
+                    ),
+                )
+            }
         }
         Spacer(Modifier.height(24.dp))
     }
