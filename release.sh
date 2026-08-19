@@ -58,10 +58,15 @@ NOTES=$(mktemp)
   echo "### Since the last release"
   echo
   LAST=$(git tag --sort=-creatordate | head -1)
+  # `-n` rather than `| head`, and the difference is a release that happens.
+  # head closes the pipe after its 25th line, git log dies of SIGPIPE, and
+  # `set -o pipefail` turns that into an aborted script — so this failed for
+  # the first time on the first release with more than 25 commits behind it,
+  # having worked on every smaller one.
   if [ -n "$LAST" ]; then
-    git log --pretty='- %s' "${LAST}..HEAD" | head -25
+    git log --pretty='- %s' -n 25 "${LAST}..HEAD"
   else
-    git log --pretty='- %s' -12
+    git log --pretty='- %s' -n 12
   fi
 } > "$NOTES"
 
