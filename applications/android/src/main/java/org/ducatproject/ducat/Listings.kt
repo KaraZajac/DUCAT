@@ -310,28 +310,39 @@ object Listings {
             .getOrDefault(emptyList())
         val pool = java.util.concurrent.Executors.newFixedThreadPool(9)
         try {
-            // Wave one: where you are *and* the ring around it, shard 0, all
-            // at once — each board drawn as it answers.
+            // Where you are, alone and first. Then the ring.
             //
-            // The home cell used to be read alone and first, on the reasoning
-            // that it is the answer people usually want. True where somebody
-            // is listing something; false everywhere else, and "everywhere
-            // else" is what a quiet neighbourhood is. An empty board takes 51
-            // to 85 seconds to come back empty — concluding a record is *not*
-            // there costs more than finding one — so a blocking first read
-            // bought nothing and delayed the other eight by a minute and a
-            // half before they had even started. A populated home cell still
-            // arrives first: it answers in 12 to 18 seconds and `absorb`
-            // publishes on arrival, not in order.
+            // This order has now been both ways round, because the cost of a
+            // board read changed underneath it. Measured against the live
+            // network: a board somebody has posted to answers in about a
+            // second, and an empty one takes twenty-one — flat, every time,
+            // because that is Veilid giving up rather than searching. And
+            // nine reads issued at once still take about as long as nine
+            // issued in turn, so whatever serialises them is below us and
+            // more threads do not move it.
+            //
+            // Under those two facts the first read is nearly free when it
+            // finds something and bounded when it does not, while queueing it
+            // behind eight empty neighbours cost twenty to thirty seconds of
+            // staring at a spinner with the answer already sitting on the
+            // board underfoot. Your own neighbourhood is also where you are
+            // most likely to be renting something. So: home, then the rest.
             val boards = listOf(home) + ring
             val answered = java.util.concurrent.atomic.AtomicInteger()
-            onProgress(0, boards.size)
-            val jobs = boards.map { cell ->
-                pool.submit {
-                    runCatching { absorb(readCell(cell, kind, false)) }
-                    onProgress(answered.incrementAndGet(), boards.size)
+            // Which boards came back with every slot taken, noted while
+            // reading them. This used to be a second read of all nine
+            // afterwards (`looksFull`), asking the network a question the
+            // first pass had already answered.
+            val full = java.util.Collections.synchronizedSet(HashSet<String>())
+            fun read(cell: String) {
+                runCatching {
+                    absorb(readCell(cell, kind, false) { slots -> if (slots >= 8) full += cell })
                 }
+                onProgress(answered.incrementAndGet(), boards.size)
             }
+            onProgress(0, boards.size)
+            read(home)
+            val jobs = ring.map { cell -> pool.submit { read(cell) } }
             // One deadline for the wave, not one per board.
             //
             // Waiting `get(150s)` on each future in turn reads like a 150
@@ -346,7 +357,7 @@ object Listings {
             // Wave three: climb the ladder, but only where shard 0 came back
             // full — a board with a free slot is the end of its own ladder,
             // because every writer fills the lowest free slot first.
-            val crowded = boards.filter { looksFull(boardName(it)) }
+            val crowded = boards.filter { it in full }
             if (crowded.isNotEmpty()) {
                 DucatLog.i(TAG, "climbing the ladder on ${crowded.size} full board(s)")
                 waitAll(
@@ -373,9 +384,16 @@ object Listings {
      * empty board: a network that could not answer must not be mistaken for
      * the end of a ladder.
      */
-    private fun readShard(name: String, kind: Int?): List<uniffi.ducat_mobile.RentalInfo>? {
+    private fun readShard(
+        name: String,
+        kind: Int?,
+        /** How many slots the board held, before expiry and kind filtered
+         *  them — which is what says whether the ladder needs climbing. */
+        onSlots: (Int) -> Unit = {},
+    ): List<uniffi.ducat_mobile.RentalInfo>? {
         val now = System.currentTimeMillis() / 1000
         val raw = runCatching { uniffi.ducat_mobile.standRead(name) }.getOrNull() ?: return null
+        onSlots(raw.size)
         return raw.mapNotNull { runCatching { uniffi.ducat_mobile.rentalDecode(it.data) }.getOrNull() }
             // A reader MUST drop an expired listing unrendered (§16.18).
             .filter { it.expiry.toLong() > now }
@@ -400,9 +418,10 @@ object Listings {
         cell: String,
         kind: Int?,
         deep: Boolean,
+        onSlots: (Int) -> Unit = {},
     ): List<uniffi.ducat_mobile.RentalInfo> {
         val base = boardName(cell)
-        val first = readShard(base, kind) ?: return emptyList()
+        val first = readShard(base, kind, onSlots) ?: return emptyList()
         if (!deep) return first
         val out = first.toMutableList()
         var quiet = 0
@@ -419,10 +438,6 @@ object Listings {
         }
         return out
     }
-
-    /** A board is full when every one of its eight slots holds something live. */
-    private fun looksFull(name: String): Boolean =
-        (runCatching { uniffi.ducat_mobile.standRead(name) }.getOrNull()?.size ?: 0) >= 8
 
     /** Rental boards are their own namespace: a hail must never collide. */
     private fun boardName(cell: String) = "rent:$cell"
