@@ -53,6 +53,17 @@ fun main() {
     // is a test nobody runs twice.
     val fare = System.getenv("DUCAT_RIDE_FARE")?.toLongOrNull() ?: 500_000_000L
     val stake = System.getenv("DUCAT_RIDE_STAKE")?.toLongOrNull() ?: 200_000_000L
+    // A reservation is the same escrow with a third number in it: rent, the
+    // guest's deposit and the host's, all in one pot (§16.18). Everything
+    // downstream — who owes what, what the pot should hold, who proposes the
+    // release and who signs it — already asks `Ceremony` rather than assuming
+    // a ride, so only the opening move differs. `driver` plays the host, whose
+    // funding of their own deposit *is* their acceptance.
+    //
+    //   DUCAT_RIDE_KIND=reservation DUCAT_RIDE_FARE=2000000000 \
+    //   DUCAT_RIDE_GUESTDEP=600000000 DUCAT_RIDE_STAKE=600000000 …
+    val reservation = System.getenv("DUCAT_RIDE_KIND") == "reservation"
+    val guestDep = System.getenv("DUCAT_RIDE_GUESTDEP")?.toLongOrNull() ?: 600_000_000L
 
     Unlock.orExit(dir)
     val context = DeskContext(dir)
@@ -288,14 +299,27 @@ fun main() {
         ?.takeIf { it.optString("address").isNotEmpty() }
     val id = existing?.optString("id")?.also {
         println("RIDE_RESUMED ${it.take(8)} — the escrow this pair already built")
-    } ?: Ceremony.startRide(
-        context,
-        driver = ContactStore(context).all().first { it.personaHex == driver.personaHex },
-        arbiter = null,
-        farePxmr = fare,
-        driverStakePxmr = stake,
+    } ?: ContactStore(context).all().first { it.personaHex == driver.personaHex }.let { peer ->
+        if (reservation) {
+            Ceremony.startReservation(
+                context, host = peer, arbiter = null,
+                rentPxmr = fare, guestDepPxmr = guestDep, hostDepPxmr = stake,
+            )
+        } else {
+            Ceremony.startRide(
+                context, driver = peer, arbiter = null,
+                farePxmr = fare, driverStakePxmr = stake,
+            )
+        }
+    }
+    println(
+        if (reservation) {
+            "RIDE_STARTED ${id.take(8)} rent=${formatXmr(fare)} " +
+                "deposits=${formatXmr(guestDep)}/${formatXmr(stake)}"
+        } else {
+            "RIDE_STARTED ${id.take(8)} fare=${formatXmr(fare)} stake=${formatXmr(stake)}"
+        },
     )
-    println("RIDE_STARTED ${id.take(8)} fare=${formatXmr(fare)} stake=${formatXmr(stake)}")
 
     val ride = await("both sides to derive the escrow", seconds = 900) {
         Ceremony.all(context).firstOrNull {
