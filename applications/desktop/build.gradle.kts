@@ -62,6 +62,9 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Orders.kt",
     "org/ducatproject/ducat/ui/Kiosk.kt",
     "org/ducatproject/ducat/Pin.kt",
+    // The tap on the wire. The phone's Tap.kt, which holds the antenna, is
+    // replaced by TapDesk.kt below.
+    "org/ducatproject/ducat/nfc/TapWire.kt",
     // The platform-free half only; DeviceLockAndroid is BiometricPrompt
     // and fragments, and stays on the phone.
     "org/ducatproject/ducat/DeviceLock.kt",
@@ -362,6 +365,14 @@ tasks.register<JavaExec>("tilltest") {
 //   DUCAT_KIOSK_ROLE=shop     ./gradlew :desktop:kiosktest
 //   DUCAT_KIOSK_ROLE=customer DUCAT_KIOSK_CARD=<uri> ./gradlew :desktop:kiosktest
 // Two writers, one ceremony record. `./gradlew :desktop:escrowracetest`
+// The tap's two halves against each other, without a radio.
+// `./gradlew :desktop:taptest`
+tasks.register<JavaExec>("taptest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.TapTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("escrowracetest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.EscrowRaceTestKt"

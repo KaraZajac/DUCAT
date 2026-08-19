@@ -22,42 +22,25 @@ import org.ducatproject.ducat.DucatLog
  */
 class DucatHostApduService : HostApduService() {
 
-    private var payload: ByteArray? = null
+    // The exchange itself lives in Tap.Session, which knows nothing about
+    // Android and can therefore be driven by a test against the same reader
+    // that will meet it on a real antenna.
+    private val session = TapWire.Session()
 
     override fun processCommandApdu(commandApdu: ByteArray?, extras: Bundle?): ByteArray {
-        val apdu = commandApdu ?: return Tap.SW_UNKNOWN_INS
-
-        if (Tap.isSelect(apdu)) {
-            // Snapshotted at SELECT and held for the session: the reader walks
-            // offsets into one consistent value, not into whatever the screen
-            // swaps to mid-tap.
-            val uri = Tap.offered ?: ContactStore(this).currentCardUri()
-            if (uri == null) {
-                DucatLog.i(TAG, "tap arrived with nothing to offer")
-                return Tap.SW_NOTHING_OFFERED
-            }
-            val bytes = uri.toByteArray(Charsets.UTF_8)
-            payload = bytes
-            DucatLog.i(TAG, "tap: offering ${bytes.size} bytes")
-            return byteArrayOf(
-                (bytes.size shr 8).toByte(), (bytes.size and 0xFF).toByte(),
-            ) + Tap.SW_OK
+        val apdu = commandApdu ?: return TapWire.SW_UNKNOWN_INS
+        return session.respond(apdu) {
+            (Tap.offered ?: ContactStore(this).currentCardUri())
+                .also {
+                    if (it == null) DucatLog.i(TAG, "tap arrived with nothing to offer")
+                    else if (TapWire.isSelect(apdu)) DucatLog.i(TAG, "tap: offering ${it.length} chars")
+                }
         }
-
-        if (Tap.isRead(apdu)) {
-            val bytes = payload ?: return Tap.SW_NOTHING_OFFERED
-            val off = Tap.readOffset(apdu)
-            if (off >= bytes.size) return Tap.SW_BAD_OFFSET
-            val end = minOf(off + Tap.CHUNK, bytes.size)
-            return bytes.copyOfRange(off, end) + Tap.SW_OK
-        }
-
-        return Tap.SW_UNKNOWN_INS
     }
 
     override fun onDeactivated(reason: Int) {
         // The field dropped; the session's snapshot goes with it.
-        payload = null
+        session.ended()
     }
 
     private companion object {
