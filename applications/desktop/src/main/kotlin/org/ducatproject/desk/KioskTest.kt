@@ -153,6 +153,18 @@ private fun shop(context: android.content.Context, node: () -> String?) {
     kotlin.system.exitProcess(1)
 }
 
+/**
+ * A node picked afresh, ignoring the cached one — which, when this is
+ * called, is the node that just timed out.
+ */
+private fun pickFresh(context: android.content.Context): String? = runCatching {
+    val s = uniffi.ducat_mobile.moneroPickNode(
+        uniffi.ducat_mobile.moneroDefaultNodes(null), "stagenet", 8_000u,
+    )
+    NodeStore(context).rememberLastGood(s.url)
+    s.url
+}.getOrNull()
+
 /** Claim the card, read the bill, pay it, name the transaction, keep the receipt. */
 private fun customer(context: android.content.Context, node: () -> String?) {
     val uri = System.getenv("DUCAT_KIOSK_CARD")?.takeIf { it.isNotEmpty() }
@@ -190,7 +202,12 @@ private fun customer(context: android.content.Context, node: () -> String?) {
         ?: Mailbox.claimCard(context, scanned, null)
     println("KIOSK_CLAIMED ${shop.displayName()}")
 
-    var paid = false
+    // Already paid on an earlier run? Then do not pay again. A card is
+    // claim-once but a bill is not, and a harness that re-sends money every
+    // time it is restarted is a harness nobody can safely re-run.
+    var paid = ContactStore(context).thread(shop.personaHex)
+        .any { it.outgoing && it.kind == 2 }
+    if (paid) println("KIOSK_ALREADY_PAID picking up where the last run left off")
     val start = System.currentTimeMillis()
     while (System.currentTimeMillis() - start < 20 * 60_000L) {
         runCatching { Mailbox.poll(context) }
@@ -212,17 +229,35 @@ private fun customer(context: android.content.Context, node: () -> String?) {
                 }
                 println("KIOSK_BILL_OK itemised, sums, and names an address")
                 if (!canPay) { println("KIOSK_DONE customer (unfunded)"); return }
-                val url = node() ?: error("KIOSK_FAIL no monero node")
-                val res = Wallet.send(
-                    context, url, to, bill.amountPxmr!!,
-                    contactHex = shop.personaHex, note = "Order",
-                )
-                println("KIOSK_SENT ${res.txidHex.take(16)}…")
+                // Building a transaction fetches decoys, which is a dozen
+                // round trips to a stranger's node — and stagenet nodes drop
+                // them. That is transient, not a refusal, so try another node
+                // rather than failing the run on somebody else's timeout.
+                var res: uniffi.ducat_mobile.SendResult? = null
+                var lastWhy = ""
+                for (attempt in 1..5) {
+                    val url = pickFresh(context) ?: error("KIOSK_FAIL no monero node")
+                    val r = runCatching {
+                        Wallet.send(
+                            context, url, to, bill.amountPxmr!!,
+                            contactHex = shop.personaHex, note = "Order",
+                        )
+                    }
+                    r.getOrNull()?.let { res = it }
+                    if (res != null) break
+                    val why = r.exceptionOrNull()!!
+                    lastWhy = why.message.orEmpty()
+                    if (!Wallet.isNodeTrouble(why)) throw why
+                    println("KIOSK_RETRY $url — $lastWhy")
+                    Thread.sleep(5_000)
+                }
+                val sentRes = res ?: error("KIOSK_FAIL could not build a payment — $lastWhy")
+                println("KIOSK_SENT ${sentRes.txidHex.take(16)}…")
                 // §16.13: name the transaction, or they are back to guessing.
                 Mailbox.send(
                     context, ContactStore(context).all().first { it.personaHex == shop.personaHex },
                     "Order", PersonaStore(context).personaHex(),
-                    kind = 2, amountPxmr = bill.amountPxmr, txidHex = res.txidHex,
+                    kind = 2, amountPxmr = bill.amountPxmr, txidHex = sentRes.txidHex,
                 )
                 paid = true
             }
@@ -231,6 +266,26 @@ private fun customer(context: android.content.Context, node: () -> String?) {
         if (paid) {
             thread.firstOrNull { !it.outgoing && it.kind == 3 }?.let {
                 println("KIOSK_RECEIPT ${formatXmr(it.amountPxmr ?: 0)} XMR — ${it.body.take(60)}")
+                // The last claim, and the one the whole change was for: on
+                // the customer's own Activity, this receipt is *attached to
+                // the payment* rather than sitting in a thread beside it —
+                // with the lines it paid for, which is the thing a bare
+                // address could never have given them.
+                val paperwork = org.ducatproject.ducat.Ledger.build(context)
+                    .firstOrNull { e -> e.txid.equals(it.txidHex ?: "", ignoreCase = true) }
+                if (paperwork == null) {
+                    println("KIOSK_FAIL the receipt names a payment Activity does not show")
+                    kotlin.system.exitProcess(1)
+                }
+                println(
+                    "KIOSK_ACTIVITY receipted=${paperwork.receipted} " +
+                        "lines=${paperwork.items.size} " +
+                        "from=${paperwork.receiptBy ?: "?"}",
+                )
+                check(paperwork.receipted) { "KIOSK_FAIL the payment shows no receipt" }
+                check(paperwork.items.isNotEmpty()) {
+                    "KIOSK_FAIL the payment shows no lines"
+                }
                 println("KIOSK_DONE customer")
                 return
             }
