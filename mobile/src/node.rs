@@ -129,8 +129,15 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         return Ok(()); // already running; starting twice would fight over the store
     }
 
+    // Four, because discovery is nine boards at once.
+    //
+    // Two workers was sized for a node that mostly waits. Reading a ring of
+    // boards asks the runtime for seventy-two concurrent lookups, and with two
+    // workers those queue behind each other — nine boards took nine boards'
+    // worth of time however many threads called in. This is still small enough
+    // to be polite on a phone.
     let runtime = tokio::runtime::Builder::new_multi_thread()
-        .worker_threads(2)
+        .worker_threads(4)
         .enable_all()
         .build()
         .map_err(|e| NodeError::Failed(format!("runtime: {e}")))?;
@@ -816,14 +823,35 @@ pub fn stand_read(cell: String) -> Result<Vec<StandNotice>, NodeError> {
                 .await
                 .map_err(|e| NodeError::Failed(format!("open: {e}")))?;
         }
-        let mut out = Vec::new();
+        // All eight slots at once.
+        //
+        // A force-refreshed get is a network round trip, and proving a slot is
+        // *empty* is the slow kind: the node has to hear back from the peers
+        // that would hold it rather than stopping at the first copy. Asked one
+        // after another, a board that nobody has posted to cost about fifty
+        // seconds to come back empty — and a search reads nine boards, which
+        // is where "looking for a car near you" turned into seven minutes of
+        // spinner. The eight slots have nothing to do with each other, so the
+        // wait is one round trip's worth, not eight.
+        let mut tasks = Vec::with_capacity(8);
         for subkey in 0..8u32 {
-            if let Ok(Some(v)) = rc.get_dht_value(key.clone(), subkey, true).await {
+            let rc = rc.clone();
+            let key = key.clone();
+            tasks.push(tokio::spawn(async move {
+                (subkey, rc.get_dht_value(key, subkey, true).await)
+            }));
+        }
+        let mut out = Vec::new();
+        for t in tasks {
+            if let Ok((subkey, Ok(Some(v)))) = t.await {
                 if !v.data().is_empty() {
                     out.push(StandNotice { subkey, data: v.data().to_vec() });
                 }
             }
         }
+        // Slot order is the board's order, and a caller that fills the lowest
+        // free slot first depends on it; finishing order is the network's.
+        out.sort_by_key(|n| n.subkey);
         let _ = rc.close_dht_record(key).await;
         Ok(out)
     })
