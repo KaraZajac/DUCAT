@@ -78,10 +78,13 @@ fun main() {
         // the quote says the whole thing fits.
         var amt = b.spendablePxmr
         var fits = 0L
-        repeat(12) {
+        // `for`, not `repeat`, for the same reason as the send loop below:
+        // `return@repeat` continues rather than breaks, so the first amount
+        // that fitted was re-quoted eleven more times against the network.
+        for (round in 0 until 12) {
             val q = Wallet.quote(context, amt, 1)
             if (q.feePxmr <= 0) error("PAY_FAIL no fee estimate — is the node reachable?")
-            if (q.affordable) { fits = amt; return@repeat }
+            if (q.affordable) { fits = amt; break }
             amt = b.spendablePxmr - q.feePxmr - q.feePxmr / 4
             if (amt <= 0) error("PAY_FAIL nothing to send once the fee is counted")
         }
@@ -102,9 +105,17 @@ fun main() {
     var attempt = amount
     var sent: uniffi.ducat_mobile.SendResult? = null
     var lastWhy = ""
-    repeat(6) {
+    // A real loop, because `repeat` cannot be broken out of. This was
+    // `repeat(6) { … return@repeat }`, and `return@repeat` returns from the
+    // *lambda* — which is `continue`, not `break`. So a send that worked set
+    // `sent`, went round again, and sent the money a second time; the wallet
+    // then had nothing unlocked (its own change is locked for ten blocks) and
+    // the whole thing reported failure. Money left twice and the tool said it
+    // had not left at all.
+    for (round in 0 until 6) {
         val r = runCatching { Wallet.send(context, node, to, attempt, note = "desk payout") }
-        r.getOrNull()?.let { sent = it; return@repeat }
+        r.getOrNull()?.let { sent = it }
+        if (sent != null) break
         lastWhy = r.exceptionOrNull()?.message.orEmpty()
         if (!lastWhy.contains("not enough")) error("PAY_FAIL $lastWhy")
         // Nothing unlocked at all is not an amount problem, and backing off
@@ -114,6 +125,16 @@ fun main() {
         if (lastWhy.contains("0.000000 XMR available")) {
             val w = Wallet.balances(context)
             val mins = (w.blocksToUnlock * 2).coerceAtLeast(1)
+            // What the builder said, verbatim, and what the wallet thinks at
+            // the same moment. This message used to assert a cause instead of
+            // reporting one, which sent a morning down the wrong hole when
+            // the two disagreed.
+            println(
+                "PAY_DIAG builder: $lastWhy | wallet now: " +
+                    "spendable ${formatXmr(w.spendablePxmr)}, " +
+                    "locked ${formatXmr(w.lockedPxmr)}, " +
+                    "${w.spendableOutputs} note(s), scanned ${w.scannedTo}/${w.tip}",
+            )
             error(
                 "PAY_FAIL nothing unlocked yet — ${formatXmr(w.lockedPxmr)} XMR is still " +
                     "locked, about $mins minute(s) out. A wallet with one note has nothing " +
