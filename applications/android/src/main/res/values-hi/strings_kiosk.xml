@@ -23,5 +23,11 @@
     <string name="kiosk_notify_title">ऑर्डर #%1$d</string>
     <string name="kiosk_notify_body">%1$s XMR दिखा — ऑर्डर चुका दिया गया</string>
     <string name="kiosk_mode_title">कियोस्क</string>
-    <string name="kiosk_mode_body">ग्राहक की ओर मुँह किया स्क्रीन: वे जो चाहें टैप करें और किसी भी मोनेरो वॉलेट से चुकाएँ। बाहर निकलने के लिए आपका PIN चाहिए।</string>
+    <string name="kiosk_mode_body">ग्राहक की तरफ़ मुड़ी एक स्क्रीन: वे जो चाहें टैप करें, फिर फ़ोन पास लाएँ या स्कैन करें — बिल उनके अपने फ़ोन पर आ जाता है। बाहर निकलने के लिए आपका पिन चाहिए।</string>
+    <!-- Pair, then bill: the counter speaks DUCAT -->
+    <string name="kiosk_tap_or_scan">अपना फ़ोन यहाँ टच करें, या इसे स्कैन करें।</string>
+    <string name="kiosk_bill_sent">आपके फ़ोन पर भेज दिया</string>
+    <string name="kiosk_bill_sent_note">आपका बिल वहीं है, हर चीज़ अलग से। जब चाहें तब भुगतान करें।</string>
+    <string name="kiosk_no_ducat">DUCAT नहीं है? किसी Monero वॉलेट से भुगतान करें</string>
+    <string name="kiosk_card_failed">कोड नहीं दिखा सके: %1$s</string>
 </resources>

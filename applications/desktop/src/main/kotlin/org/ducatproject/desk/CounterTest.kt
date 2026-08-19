@@ -242,6 +242,66 @@ fun main() {
         "grew by ${after - before}",
     )
 
+    // --- an order that rides the protocol ---------------------------------
+
+    // What the Order button reaches for now. No address and no noise: this
+    // basket does not know whose it is yet, and guessing is what the bare
+    // `monero:` code did.
+    val pending = Orders.begin(context, basket)
+    check("a begun order is unpaired", pending.unpaired)
+    check("with nothing to pay to yet", pending.address.isEmpty())
+    check("and no tab yet", pending.tabId == null)
+    check(
+        "its total is the bill, untagged",
+        pending.totalPxmr == plain,
+        "asked ${pending.totalPxmr} for a $plain bill",
+    )
+
+    // The anonymous machinery must not touch it. Amount-matching an order
+    // with no noise in its total against a mempool full of round numbers is
+    // exactly how somebody else's coffee gets marked paid.
+    Orders.poolSight(context, "http://127.0.0.1:1")
+    check(
+        "the pool scan leaves an unpaired order alone",
+        Orders.all(context).first { it.id == pending.id }.state == Orders.State.Awaiting,
+    )
+
+    // Once bound, the tab is the record. Bound by hand here — settling needs
+    // a contact and a live node — but the mapping is what a kiosk screen
+    // reads on every frame, so it is worth pinning.
+    val tabs = org.ducatproject.ducat.TabStore(context)
+    val tab = tabs.open("ab".repeat(16), Orders.ORIGIN)
+    val bound = pending.copy(tabId = tab.id, personaHex = "ab".repeat(16))
+    Orders.update(context, bound)
+
+    check("a billed tab reads as awaiting", Orders.stateOf(context, bound) == Orders.State.Awaiting)
+    tabs.update(tabs.get(tab.id)!!.copy(state = "settled", seenTx = "cd".repeat(32)))
+    check("sighted in the pool reads as seen", Orders.stateOf(context, bound) == Orders.State.Seen)
+    tabs.update(tabs.get(tab.id)!!.copy(state = "paid"))
+    check("paid reads as confirmed", Orders.stateOf(context, bound) == Orders.State.Confirmed)
+    tabs.update(tabs.get(tab.id)!!.copy(state = "paid_oob"))
+    check(
+        "settled outside DUCAT is still settled",
+        Orders.stateOf(context, bound) == Orders.State.Confirmed,
+    )
+    tabs.update(tabs.get(tab.id)!!.copy(state = "cancelled"))
+    check(
+        "a withdrawn bill reads as walked away",
+        Orders.stateOf(context, bound) == Orders.State.Abandoned,
+    )
+
+    // Giving up is the tab's call once there is a tab: the customer may be
+    // paying right now, and the bill is already in their conversation.
+    Orders.update(
+        context,
+        bound.copy(placedAt = System.currentTimeMillis() / 1000 - 7_200),
+    )
+    Orders.expire(context)
+    check(
+        "an old bound order is not abandoned behind the tab's back",
+        Orders.all(context).first { it.id == bound.id }.state != Orders.State.Abandoned,
+    )
+
     // --- the PIN ----------------------------------------------------------
 
     check("no PIN to begin with", !Pin.isSet(context))

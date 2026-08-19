@@ -248,6 +248,47 @@ fun main() {
         org.ducatproject.ducat.ui.ItemPicker(onPick = { _, _ -> })
     }
     render("kiosk-stocked", w = 520, h = 900) { org.ducatproject.ducat.ui.KioskScreen() }
+    // The counter mid-sale. Both panels take their whole state as parameters,
+    // so they draw here without a node behind them — which is the only way to
+    // see the two screens a customer actually stands in front of.
+    run {
+        val ctx = context
+        val basket = org.ducatproject.ducat.Catalogue.live(ctx).mapNotNull { item ->
+            org.ducatproject.ducat.Catalogue.price(ctx, item).getOrNull()?.let {
+                org.ducatproject.ducat.BillItem(item.name, it.pxmr)
+            }
+        }
+        val order = org.ducatproject.ducat.Orders.begin(ctx, basket)
+        // Waiting to be tapped or scanned. A real card URI, so the QR is the
+        // size and density a phone will actually meet.
+        render("kiosk-pairing", w = 520, h = 900) {
+            org.ducatproject.ducat.ui.PairPanel(
+                order = order,
+                cardUri = "ducat:card/v1?k=" + "a".repeat(52) + "&n=Corner%20Caf%C3%A9",
+                error = null,
+                onCancel = {},
+                onFallback = {},
+            )
+        }
+        // The card could not be published — no node, a dead radio. The person
+        // standing there still has to be told something.
+        render("kiosk-pairing-failed", w = 520, h = 900) {
+            org.ducatproject.ducat.ui.PairPanel(
+                order = order,
+                cardUri = null,
+                error = "the node is not attached",
+                onCancel = {},
+                onFallback = {},
+            )
+        }
+        // Billed into their conversation; the rest happens on their phone.
+        render("kiosk-billed", w = 520, h = 900) {
+            org.ducatproject.ducat.ui.BilledPanel(
+                order = order.copy(tabId = "t-1", personaHex = "ab".repeat(16)),
+                onDone = {},
+            )
+        }
+    }
     // The gate's other mood. The one above is a device that has never had a
     // PIN, which is offered the chance to set one; this is every time after,
     // which is the one somebody meets while holding a customer.

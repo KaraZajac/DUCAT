@@ -23,5 +23,11 @@
     <string name="kiosk_notify_title">주문 %1$d번</string>
     <string name="kiosk_notify_body">%1$s XMR 확인 — 주문이 결제되었습니다</string>
     <string name="kiosk_mode_title">키오스크</string>
-    <string name="kiosk_mode_body">손님을 향한 화면: 원하는 것을 누르고 아무 모네로 지갑으로 결제합니다. 나가려면 PIN이 필요합니다.</string>
+    <string name="kiosk_mode_body">손님을 향한 화면입니다. 원하는 것을 누르고 휴대폰을 대거나 스캔하면 항목별 청구서가 손님 휴대폰으로 갑니다. 나가려면 PIN이 필요합니다.</string>
+    <!-- Pair, then bill: the counter speaks DUCAT -->
+    <string name="kiosk_tap_or_scan">여기에 휴대폰을 대거나, 이것을 스캔하세요.</string>
+    <string name="kiosk_bill_sent">휴대폰으로 보냈습니다</string>
+    <string name="kiosk_bill_sent_note">항목별 청구서가 그쪽에 있습니다. 편하실 때 결제하세요.</string>
+    <string name="kiosk_no_ducat">DUCAT이 없나요? Monero 지갑으로 결제하기</string>
+    <string name="kiosk_card_failed">코드를 표시하지 못했습니다: %1$s</string>
 </resources>

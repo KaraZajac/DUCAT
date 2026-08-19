@@ -143,7 +143,11 @@ class TabStore(private val context: Context) {
         val total = tab.lines.sumOf { it.amountPxmr } + (tab.taxPxmr ?: 0L)
         Mailbox.send(
             context, contact,
-            if (tab.origin == "taxi") "Your fare" else "Your tab",
+            when (tab.origin) {
+                "taxi" -> "Your fare"
+                Orders.ORIGIN -> "Your order"
+                else -> "Your tab"
+            },
             PersonaStore(context).personaHex(),
             kind = 1, amountPxmr = total,
             payto = WalletStore(context).addressFor(tab.personaHex),

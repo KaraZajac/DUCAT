@@ -23,5 +23,11 @@
     <string name="kiosk_notify_title">طلب رقم %1$d</string>
     <string name="kiosk_notify_body">شوهد %1$s XMR — الطلب مدفوع</string>
     <string name="kiosk_mode_title">كشك</string>
-    <string name="kiosk_mode_body">شاشة تواجه الزبون: يلمس ما يريد ويدفع بأي محفظة مونيرو. الخروج يحتاج رمزك.</string>
+    <string name="kiosk_mode_body">شاشة تواجه الزبون: يضغط على ما يريد، ثم يقرّب هاتفه أو يمسح الرمز فتصله الفاتورة على هاتفه. الخروج يحتاج رمزك السري.</string>
+    <!-- Pair, then bill: the counter speaks DUCAT -->
+    <string name="kiosk_tap_or_scan">قرّب هاتفك من هنا، أو امسح هذا الرمز.</string>
+    <string name="kiosk_bill_sent">أُرسلت إلى هاتفك</string>
+    <string name="kiosk_bill_sent_note">فاتورتك هناك، مفصّلة ببنودها. ادفع متى شئت.</string>
+    <string name="kiosk_no_ducat">لا تملك DUCAT؟ ادفع بمحفظة مونيرو</string>
+    <string name="kiosk_card_failed">تعذّر عرض الرمز: %1$s</string>
 </resources>

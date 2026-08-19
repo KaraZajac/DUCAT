@@ -23,5 +23,11 @@
     <string name="kiosk_notify_title">Đơn số %1$d</string>
     <string name="kiosk_notify_body">Đã thấy %1$s XMR — đơn đã được thanh toán</string>
     <string name="kiosk_mode_title">Kiosk</string>
-    <string name="kiosk_mode_body">Màn hình quay về phía khách: khách chạm vào thứ mình muốn và trả bằng ví Monero bất kỳ. Muốn thoát phải có mã PIN của bạn.</string>
+    <string name="kiosk_mode_body">Một màn hình hướng về phía khách: họ chạm chọn thứ mình muốn, rồi chạm điện thoại hoặc quét mã, và hoá đơn về thẳng điện thoại của họ. Muốn thoát thì cần mã PIN của bạn.</string>
+    <!-- Pair, then bill: the counter speaks DUCAT -->
+    <string name="kiosk_tap_or_scan">Chạm điện thoại vào đây, hoặc quét mã này.</string>
+    <string name="kiosk_bill_sent">Đã gửi tới điện thoại của bạn</string>
+    <string name="kiosk_bill_sent_note">Hoá đơn nằm ở đó, ghi rõ từng khoản. Trả khi nào bạn sẵn sàng.</string>
+    <string name="kiosk_no_ducat">Không có DUCAT? Trả bằng ví Monero</string>
+    <string name="kiosk_card_failed">Không hiện được mã: %1$s</string>
 </resources>

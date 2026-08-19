@@ -11,17 +11,22 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.BillItem
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.Mode
 import org.ducatproject.ducat.ModeStore
+import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.Orders
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.formatXmr
@@ -45,29 +50,30 @@ fun KioskScreen() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     var basket by remember { mutableStateOf(listOf<BillItem>()) }
-    var placed by remember { mutableStateOf<Orders.Order?>(null) }
+    // The order id rather than the order, and saveable rather than
+    // remembered: a customer fumbling for their phone while the card is up is
+    // exactly when Android decides to rotate the screen or rebuild the
+    // activity, and losing the order there dumps them back at an empty basket
+    // with a bill already sent. The order itself is re-read from the store, so
+    // there is one copy of its state and it is the stored one.
+    var placedId by rememberSaveable { mutableStateOf<String?>(null) }
+    val placed = remember(placedId, version) {
+        placedId?.let { id -> Orders.all(context).firstOrNull { it.id == id } }
+    }
     var staffDoor by remember { mutableStateOf(false) }
     var staffOpen by remember { mutableStateOf(false) }
 
     // While an order is on screen, watch for its payment. The poller does the
     // same sweep for the shop as a whole; this is the same question asked
     // often enough that a person standing at a counter sees the answer.
-    LaunchedEffect(placed?.id, version) {
-        val waiting = placed ?: return@LaunchedEffect
-        if (waiting.state != Orders.State.Awaiting) return@LaunchedEffect
-        // Look first, then wait. `version` is a key, so any store bump
-        // anywhere in the app restarts this effect — and restarting it in the
-        // middle of the delay used to throw the wait away and start it over,
-        // so a busy device could keep resetting the clock and the customer
-        // would stand in front of a spinner whose payment had already landed.
-        // Checking before sleeping turns every bump into an immediate look.
-        while (true) {
-            val now = Orders.all(context).firstOrNull { it.id == waiting.id } ?: return@LaunchedEffect
-            if (now.state != Orders.State.Awaiting) {
-                placed = now
-                return@LaunchedEffect
-            }
+    // Nudge the store while an order is on screen. Reading it is what draws
+    // the panel — `placed` is derived above — so this only has to make sure a
+    // payment that lands quietly still produces a bump, at a pace a person
+    // standing at a counter reads as immediate.
+    LaunchedEffect(placedId) {
+        while (placedId != null) {
             kotlinx.coroutines.delay(3_000)
+            withContext(Dispatchers.IO) { runCatching { ContactStore.bump() } }
         }
     }
 
@@ -95,14 +101,18 @@ fun KioskScreen() {
             when {
                 staffOpen -> StaffPanel(onClose = { staffOpen = false })
                 placed != null -> PayPanel(
-                    order = placed!!,
-                    onDone = { placed = null; basket = emptyList() },
+                    order = placed,
+                    onDone = { placedId = null; basket = emptyList() },
                 )
                 else -> Ordering(
                     basket = basket,
                     onAdd = { name, pxmr -> basket = basket + BillItem(name, pxmr) },
                     onClear = { basket = emptyList() },
-                    onOrder = { placed = Orders.place(context, basket) },
+                    // Unpaired: nobody owns this order yet. The panel that
+                    // follows shows a card, and whoever claims it gets the
+                    // bill — which is the difference between a payment and a
+                    // purchase somebody has a record of.
+                    onOrder = { placedId = Orders.begin(context, basket).id },
                 )
             }
         }
@@ -176,11 +186,222 @@ private fun Ordering(
     }
 }
 
-/** The code to pay, and then the word that the money arrived. */
+/**
+ * Tap or scan, then the bill, then the word that the money arrived.
+ *
+ * The card is the whole point of this screen. A `monero:` code would have
+ * been three lines and would have worked — and would have left the customer
+ * with a payment nobody itemised, no way to be told the order was ready, and
+ * an Activity entry that records money leaving and not what for. The card
+ * costs them one gesture and buys all of it.
+ */
 @Composable
 private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
     val context = LocalContext.current
-    val paid = order.state != Orders.State.Awaiting
+    // No local copy of the order: the caller re-reads it from the store, so
+    // there is one record of where this sale has got to and everybody reads
+    // the same one.
+    var cardUri by remember(order.id) { mutableStateOf<String?>(null) }
+    var cardInbox by remember(order.id) { mutableStateOf<String?>(null) }
+    var error by remember(order.id) { mutableStateOf<String?>(null) }
+    var fallback by remember(order.id) { mutableStateOf(false) }
+
+    // Issued once per order. A "sale" card never auto-reissues and this flow
+    // waits for *its* claimant, so somebody scanning a profile code across the
+    // room is not handed the queue's coffee.
+    LaunchedEffect(order.id, fallback) {
+        if (cardUri != null || fallback || !order.unpaired) return@LaunchedEffect
+        val r = withContext(Dispatchers.IO) {
+            runCatching {
+                Mailbox.issueCard(
+                    context, MyProfile(context).name(), CARD_TTL_SECS, purpose = "sale",
+                )
+            }
+        }
+        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
+            .onFailure { error = it.message }
+    }
+
+    // The same card over NFC, for as long as it is on screen: tapping and
+    // scanning are the same gesture to a customer and should be the same
+    // gesture to us.
+    DisposableEffect(cardUri) {
+        org.ducatproject.ducat.nfc.Tap.offered = cardUri
+        onDispose { org.ducatproject.ducat.nfc.Tap.offered = null }
+    }
+
+    // Claim → contact → bill. Keyed on the order so a screen that already
+    // billed does not bill again.
+    LaunchedEffect(cardInbox) {
+        val inbox = cardInbox ?: return@LaunchedEffect
+        while (order.unpaired) {
+            val who = withContext(Dispatchers.IO) {
+                runCatching {
+                    Mailbox.collectClaims(context)
+                    ContactStore(context).claimantOf(inbox)
+                }.getOrNull()
+            }
+            if (who == null) {
+                kotlinx.coroutines.delay(2_000)
+                continue
+            }
+            withContext(Dispatchers.IO) { runCatching { Orders.bind(context, order, who) } }
+                .onFailure { error = it.message }
+        }
+    }
+
+    if (fallback) return MoneroFallback(order, onDone)
+    if (order.unpaired) {
+        return PairPanel(
+            order = order,
+            cardUri = cardUri,
+            error = error,
+            onCancel = onDone,
+            onFallback = { fallback = true },
+        )
+    }
+    BilledPanel(order = order, onDone = onDone)
+}
+
+/** How long a sale card stays claimable. Two hours outlasts any queue. */
+private const val CARD_TTL_SECS: ULong = 7_200uL
+
+/** The card, waiting to be tapped or scanned. */
+@Composable
+internal fun PairPanel(
+    order: Orders.Order,
+    cardUri: String?,
+    error: String?,
+    onCancel: () -> Unit,
+    onFallback: () -> Unit,
+) {
+    val context = LocalContext.current
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            Amounts.show(context, order.totalPxmr).primary,
+            style = MaterialTheme.typography.headlineMedium,
+        )
+        Spacer(Modifier.height(12.dp))
+        when {
+            error != null -> Text(
+                stringResource(R.string.kiosk_card_failed, error),
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+            )
+            cardUri == null -> CircularProgressIndicator()
+            else -> QrBlock(cardUri)
+        }
+        Spacer(Modifier.height(12.dp))
+        Text(
+            stringResource(R.string.kiosk_tap_or_scan),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(24.dp))
+        TextButton(onClick = onFallback) { Text(stringResource(R.string.kiosk_no_ducat)) }
+        TextButton(onClick = onCancel) { Text(stringResource(R.string.kiosk_cancel_order)) }
+    }
+}
+
+/** Billed into their conversation; the rest happens on their phone. */
+@Composable
+internal fun BilledPanel(order: Orders.Order, onDone: () -> Unit) {
+    val context = LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val state = remember(order.id, version) { Orders.stateOf(context, order) }
+    if (state != Orders.State.Awaiting) return PaidPanel(order, onDone)
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            Icons.Filled.Check, null, Modifier.size(48.dp),
+            tint = MaterialTheme.ducat.settled,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            stringResource(R.string.kiosk_bill_sent),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(R.string.kiosk_bill_sent_note),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            Amounts.show(context, order.totalPxmr).primary,
+            style = MaterialTheme.typography.headlineMedium,
+        )
+        Spacer(Modifier.height(16.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+            Spacer(Modifier.width(8.dp))
+            Text(
+                stringResource(R.string.kiosk_waiting),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        Spacer(Modifier.height(16.dp))
+        TextButton(onClick = onDone) { Text(stringResource(R.string.kiosk_next_customer)) }
+    }
+}
+
+/** Paid, whichever way they paid. */
+@Composable
+private fun PaidPanel(order: Orders.Order, onDone: () -> Unit) {
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            Icons.Filled.Check, null, Modifier.size(64.dp),
+            tint = MaterialTheme.ducat.settled,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            stringResource(R.string.kiosk_paid_title),
+            style = MaterialTheme.typography.headlineSmall,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(R.string.kiosk_paid_number, order.number),
+            style = MaterialTheme.typography.displaySmall,
+        )
+        Spacer(Modifier.height(16.dp))
+        Button(
+            onClick = onDone,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+        ) { Text(stringResource(R.string.kiosk_next_customer)) }
+    }
+}
+
+/** The old way, for a wallet with no DUCAT behind it. */
+@Composable
+private fun MoneroFallback(order: Orders.Order, onDone: () -> Unit) {
+    val context = LocalContext.current
+    // A bare address needs its own order: the noise in the total is how a
+    // mempool sighting is told from the next customer's identical coffee, and
+    // an unpaired order has none.
+    val anon = remember(order.id) { Orders.place(context, order.lines) }
+    PayPanelMonero(anon, onDone)
+}
+
+/** The code to pay, and then the word that the money arrived. */
+@Composable
+private fun PayPanelMonero(order: Orders.Order, onDone: () -> Unit) {
+    val context = LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val live = remember(order.id, version) {
+        Orders.all(context).firstOrNull { it.id == order.id } ?: order
+    }
+    val paid = live.state != Orders.State.Awaiting
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -197,7 +418,7 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                stringResource(R.string.kiosk_paid_number, order.number),
+                stringResource(R.string.kiosk_paid_number, live.number),
                 style = MaterialTheme.typography.displaySmall,
             )
             Spacer(Modifier.height(16.dp))
@@ -208,16 +429,16 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
             return@Column
         }
         Text(
-            Amounts.show(context, order.totalPxmr).primary,
+            Amounts.show(context, live.totalPxmr).primary,
             style = MaterialTheme.typography.headlineMedium,
         )
         Text(
-            "${formatXmr(order.totalPxmr)} XMR",
+            "${formatXmr(live.totalPxmr)} XMR",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(12.dp))
-        QrBlock(Orders.payUri(order))
+        QrBlock(Orders.payUri(live))
         Spacer(Modifier.height(12.dp))
         Text(
             stringResource(R.string.kiosk_scan_note),
@@ -292,7 +513,7 @@ private fun StaffPanel(onClose: () -> Unit) {
                             Text(Amounts.show(context, o.totalPxmr).primary)
                             Text(
                                 stringResource(
-                                    when (o.state) {
+                                    when (Orders.stateOf(context, o)) {
                                         // Seen and settled are different
                                         // words on purpose: one is a claim,
                                         // the other is the chain.

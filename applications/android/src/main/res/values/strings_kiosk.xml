@@ -23,5 +23,11 @@
     <string name="kiosk_notify_title">Order #%1$d</string>
     <string name="kiosk_notify_body">%1$s XMR seen — the order is paid</string>
     <string name="kiosk_mode_title">Kiosk</string>
-    <string name="kiosk_mode_body">A screen facing the customer: they tap what they want and pay with any Monero wallet. Leaving needs your PIN.</string>
+    <string name="kiosk_mode_body">A screen facing the customer: they tap what they want, then tap or scan to get the bill on their own phone. Leaving needs your PIN.</string>
+    <!-- Pair, then bill: the counter speaks DUCAT -->
+    <string name="kiosk_tap_or_scan">Tap your phone here, or scan this.</string>
+    <string name="kiosk_bill_sent">Sent to your phone</string>
+    <string name="kiosk_bill_sent_note">Your bill is there, itemised. Pay whenever you are ready.</string>
+    <string name="kiosk_no_ducat">No DUCAT? Pay with a Monero wallet</string>
+    <string name="kiosk_card_failed">Could not show a code: %1$s</string>
 </resources>

@@ -23,5 +23,11 @@
     <string name="kiosk_notify_title">سفارش شمارهٔ %1$d</string>
     <string name="kiosk_notify_body">%1$s XMR دیده شد — سفارش پرداخت شده است</string>
     <string name="kiosk_mode_title">کیوسک</string>
-    <string name="kiosk_mode_body">صفحه‌ای رو به مشتری: آنچه می‌خواهد را لمس می‌کند و با هر کیف پول مونرو می‌پردازد. خروج رمز شما را می‌خواهد.</string>
+    <string name="kiosk_mode_body">صفحه‌ای رو به مشتری: آنچه می‌خواهد را می‌زند، بعد گوشی‌اش را نزدیک می‌کند یا اسکن می‌کند و صورت‌حساب روی گوشی خودش می‌آید. برای خروج پین لازم است.</string>
+    <!-- Pair, then bill: the counter speaks DUCAT -->
+    <string name="kiosk_tap_or_scan">گوشی‌ات را اینجا بگیر، یا این را اسکن کن.</string>
+    <string name="kiosk_bill_sent">به گوشی‌ات فرستاده شد</string>
+    <string name="kiosk_bill_sent_note">صورت‌حسابت آنجاست، قلم به قلم. هر وقت خواستی پرداخت کن.</string>
+    <string name="kiosk_no_ducat">DUCAT نداری؟ با کیف پول مونرو پرداخت کن</string>
+    <string name="kiosk_card_failed">نمایش کد ممکن نشد: %1$s</string>
 </resources>

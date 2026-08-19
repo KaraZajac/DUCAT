@@ -23,5 +23,11 @@
     <string name="kiosk_notify_title">Zamówienie nr %1$d</string>
     <string name="kiosk_notify_body">Widać %1$s XMR — zamówienie opłacone</string>
     <string name="kiosk_mode_title">Kiosk</string>
-    <string name="kiosk_mode_body">Ekran zwrócony do klienta: dotyka, czego chce, i płaci dowolnym portfelem Monero. Wyjście wymaga twojego PIN-u.</string>
+    <string name="kiosk_mode_body">Ekran zwrócony do klienta: dotyka tego, co chce, potem przykłada telefon albo skanuje, a rachunek trafia na jego własny telefon. Wyjście wymaga twojego PIN-u.</string>
+    <!-- Pair, then bill: the counter speaks DUCAT -->
+    <string name="kiosk_tap_or_scan">Przyłóż telefon tutaj albo zeskanuj to.</string>
+    <string name="kiosk_bill_sent">Wysłano na twój telefon</string>
+    <string name="kiosk_bill_sent_note">Rachunek tam jest, z rozpisanymi pozycjami. Zapłać, kiedy chcesz.</string>
+    <string name="kiosk_no_ducat">Nie masz DUCAT? Zapłać portfelem Monero</string>
+    <string name="kiosk_card_failed">Nie udało się pokazać kodu: %1$s</string>
 </resources>

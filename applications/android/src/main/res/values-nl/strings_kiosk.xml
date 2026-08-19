@@ -23,5 +23,11 @@
     <string name="kiosk_notify_title">Bestelling nr. %1$d</string>
     <string name="kiosk_notify_body">%1$s XMR gezien — de bestelling is betaald</string>
     <string name="kiosk_mode_title">Kiosk</string>
-    <string name="kiosk_mode_body">Een scherm naar de klant toe: die tikt aan wat hij wil en betaalt met een willekeurige Monero-portemonnee. Eruit komen vraagt je pincode.</string>
+    <string name="kiosk_mode_body">Een scherm dat naar de klant wijst: hij tikt aan wat hij wil, houdt dan zijn telefoon ertegenaan of scant, en de rekening komt op zijn eigen telefoon. Om te stoppen is je pincode nodig.</string>
+    <!-- Pair, then bill: the counter speaks DUCAT -->
+    <string name="kiosk_tap_or_scan">Houd je telefoon hier tegenaan, of scan dit.</string>
+    <string name="kiosk_bill_sent">Naar je telefoon gestuurd</string>
+    <string name="kiosk_bill_sent_note">Je rekening staat erop, per post uitgesplitst. Betaal wanneer je wilt.</string>
+    <string name="kiosk_no_ducat">Geen DUCAT? Betaal met een Monero-wallet</string>
+    <string name="kiosk_card_failed">Kon geen code tonen: %1$s</string>
 </resources>

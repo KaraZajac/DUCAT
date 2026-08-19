@@ -5,24 +5,33 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Orders placed at a kiosk: somebody who walked up, tapped what they wanted,
- * and paid — without ever having met this shop or installed anything.
+ * Orders placed at a kiosk: somebody who walked up and tapped what they
+ * wanted, and the number the shop calls out when it is ready.
  *
- * A kiosk customer is not a contact. There is no thread, no card, no
- * handshake: they scan a code with whatever Monero wallet they already have
- * and walk away. So an order cannot be a [RunningTab], which is a
- * conversation with somebody, and it cannot be settled by a receipt travelling
- * a thread that does not exist. What identifies the payment instead is the
- * money itself.
+ * **A kiosk customer becomes a contact, briefly.** This began the other way
+ * round — a bare `monero:` code and an anonymous stranger — on the reasoning
+ * that a queue for coffee has no time for a handshake. That reasoning was
+ * wrong, and it cost the customer everything the protocol is for: a bare
+ * address buys a payment and nothing else. No itemised bill, so they pay a
+ * number with no idea what it is made of. No conversation, so the shop cannot
+ * tell them the order is ready. No transaction named by the payer, so the
+ * till has to *guess* which payment was whose from the amount. And no
+ * receipt, so their Activity records money leaving and never what for.
  *
- * **How an order knows its own payment.** Each one gets its own subaddress,
- * so two customers never pay the same address. But the pool scanner reports a
- * sighting as an amount and a hash — it cannot say which subaddress an
- * unconfirmed output landed on — so an amount is what a sighting can be
- * matched against, and two people ordering the same coffee would otherwise be
- * indistinguishable. Every order therefore carries a few piconero of noise in
- * its total: invisible to a customer (a millionth of a monero at the outside)
- * and enough to tell one £4 order from the next.
+ * So the counter shows a card. They tap it or scan it, which is one gesture
+ * either way, and from that moment this is an ordinary [RunningTab] — the
+ * same bill, chain-watch and receipt the till and the bar tab have always
+ * used, with `origin` of [ORIGIN]. See [begin] and [bind].
+ *
+ * **The old path is still here**, as the fallback it should always have been:
+ * [place] and [payUri] serve somebody standing at the counter with a Monero
+ * wallet and no DUCAT. Those orders carry their own subaddress and a few
+ * piconero of noise in the total, because a mempool sighting reports an
+ * amount and a hash and cannot say which subaddress an unconfirmed output
+ * landed on — so with nobody to name the transaction, the amount is all there
+ * is to match on, and two people ordering the same coffee would otherwise be
+ * indistinguishable. That is the shape of the compromise, and the reason it
+ * is not the default.
  */
 object Orders {
     private const val TAG = "DucatOrders"
@@ -62,7 +71,24 @@ object Orders {
         val state: State,
         val placedAt: Long,
         val seenTx: String? = null,
-    )
+        /**
+         * The tab this order was billed through, once a customer has paired.
+         *
+         * Present means this order went the way the protocol intends: they
+         * tapped or scanned, they became somebody this till can talk to, and
+         * the bill went into that conversation itemised — so the payment is
+         * identified by the transaction they name in their notice, not
+         * guessed at from an amount, and they get a receipt in their Activity
+         * rather than a line in a wallet that says nothing about what they
+         * bought. [TabStore] owns everything after this point; the order keeps
+         * only the number the shop calls out.
+         */
+        val tabId: String? = null,
+        val personaHex: String? = null,
+    ) {
+        /** True while this order is still waiting for somebody to pair. */
+        val unpaired: Boolean get() = tabId == null && address.isEmpty()
+    }
 
     fun all(context: Context): List<Order> {
         val raw = prefs(context).getString("orders", null) ?: return emptyList()
@@ -84,6 +110,8 @@ object Orders {
                         .getOrDefault(State.Awaiting),
                     placedAt = o.optLong("at"),
                     seenTx = o.optString("seen").takeIf { it.isNotBlank() },
+                    tabId = o.optString("tab").takeIf { it.isNotBlank() },
+                    personaHex = o.optString("who").takeIf { it.isNotBlank() },
                 )
             }.getOrNull()?.takeIf { it.id.isNotBlank() }
         }.sortedByDescending { it.placedAt }
@@ -106,20 +134,14 @@ object Orders {
                     .put("id", o.id).put("number", o.number).put("lines", lines)
                     .put("total", o.totalPxmr).put("address", o.address)
                     .put("state", o.state.name).put("at", o.placedAt)
-                    .put("seen", o.seenTx ?: ""),
+                    .put("seen", o.seenTx ?: "")
+                    .put("tab", o.tabId ?: "").put("who", o.personaHex ?: ""),
             )
         }
         prefs(context).edit().putString("orders", arr.toString()).apply()
         ContactStore.bump()
     }
 
-    /**
-     * Turn a basket into something a stranger can pay.
-     *
-     * The address is this order's alone, and the total carries its noise, so
-     * that when a payment appears there is no question which order it was
-     * for.
-     */
     /**
      * How many addresses the counter rotates through.
      *
@@ -139,6 +161,14 @@ object Orders {
      */
     private const val ADDRESS_SLOTS = 64
 
+    /**
+     * Turn a basket into something a stranger with any Monero wallet can pay.
+     *
+     * The fallback, not the path: see [begin] for the one that gets them a
+     * bill and a receipt. The address is this order's alone and the total
+     * carries its noise, so that when a payment appears there is no question
+     * which order it was for.
+     */
     fun place(context: Context, lines: List<BillItem>): Order {
         val id = java.util.UUID.randomUUID().toString()
         val plain = lines.sumOf { it.amountPxmr }
@@ -160,8 +190,80 @@ object Orders {
         return order
     }
 
+    /** The origin every kiosk tab carries, so a shop can tell them apart. */
+    const val ORIGIN = "kiosk"
+
+    /**
+     * A basket, waiting for whoever is about to tap or scan.
+     *
+     * No address and no noise: this order does not know yet who it belongs
+     * to, and it is not supposed to guess. The screen shows a card, somebody
+     * claims it, and [bind] turns that into a conversation with a bill in it.
+     */
+    fun begin(context: Context, lines: List<BillItem>): Order {
+        val order = Order(
+            id = java.util.UUID.randomUUID().toString(),
+            number = (all(context).maxOfOrNull { it.number } ?: 0) % 999 + 1,
+            lines = lines,
+            totalPxmr = lines.sumOf { it.amountPxmr },
+            address = "",
+            state = State.Awaiting,
+            placedAt = System.currentTimeMillis() / 1000,
+        )
+        update(context, order)
+        DucatLog.i(TAG, "order #${order.number} waiting for a customer to pair")
+        return order
+    }
+
+    /**
+     * Somebody claimed the card. Bill them.
+     *
+     * From here the order is a tab like any other, which is the whole point:
+     * the bill is itemised inside a conversation, the address is theirs
+     * alone, the payment is identified by the transaction their notice names
+     * rather than guessed at from an amount, and the receipt the poller sends
+     * lands in their Activity beside the payment it is for. None of that is
+     * available to a bare address in a QR code.
+     */
+    fun bind(context: Context, order: Order, personaHex: String): Order {
+        val tabs = TabStore(context)
+        val opened = tabs.open(personaHex, ORIGIN)
+        tabs.update(tabs.get(opened.id)!!.copy(lines = order.lines))
+        val settled = tabs.settle(tabs.get(opened.id)!!)
+        val bound = order.copy(
+            tabId = opened.id,
+            personaHex = personaHex,
+            totalPxmr = settled.settledTotal,
+            state = State.Awaiting,
+        )
+        update(context, bound)
+        DucatLog.i(TAG, "order #${order.number} billed to ${personaHex.take(8)}…")
+        return bound
+    }
+
+    /**
+     * Where a bound order has got to, read from the tab that owns it.
+     *
+     * Derived rather than copied, deliberately: two records of one fact
+     * drift, and the one the customer's receipt depends on is the tab's.
+     */
+    fun stateOf(context: Context, order: Order): State {
+        val tab = order.tabId?.let { TabStore(context).get(it) } ?: return order.state
+        return when {
+            tab.state == "paid" || tab.state == "paid_oob" -> State.Confirmed
+            tab.state == "cancelled" -> State.Abandoned
+            tab.seenTx != null -> State.Seen
+            else -> State.Awaiting
+        }
+    }
+
     /**
      * What a customer's wallet scans: address and exact amount.
+     *
+     * The fallback path, for somebody at the counter with a Monero wallet and
+     * no DUCAT. It buys them a payment and nothing else — no itemised bill, no
+     * receipt, no record of what they bought — which is why [begin] and [bind]
+     * are what the Order button reaches for first.
      *
      * [exactXmr], not [formatXmr] — the latter rounds to six places, which is
      * precisely where this order's identifying noise begins. Asking for
@@ -182,7 +284,13 @@ object Orders {
      */
     fun poolSight(context: Context, node: String) {
         val everything = all(context)
-        val waiting = everything.filter { it.state == State.Awaiting }
+        // Only the ones paying a bare address. A bound order's money is the
+        // tab's business — it is identified by the transaction the customer's
+        // notice names, which is exact, rather than by an amount that has to
+        // be tagged with noise to be told apart at all.
+        val waiting = everything.filter {
+            it.state == State.Awaiting && it.tabId == null && it.address.isNotEmpty()
+        }
         if (waiting.isEmpty()) return
         val spend = WalletStore(context).spendKeyHex() ?: return
         val hits = runCatching {
@@ -232,7 +340,12 @@ object Orders {
     fun expire(context: Context) {
         val cutoff = System.currentTimeMillis() / 1000 - ABANDON_AFTER_SECS
         all(context)
-            .filter { it.state == State.Awaiting && it.placedAt in 1 until cutoff }
+            .filter {
+                // A bound order is the tab's to finish or cancel; an unpaired
+                // one is a basket somebody walked away from mid-tap.
+                it.state == State.Awaiting && it.tabId == null &&
+                    it.placedAt in 1 until cutoff
+            }
             .forEach {
                 update(context, it.copy(state = State.Abandoned))
                 DucatLog.i(TAG, "order #${it.number} abandoned — nobody paid")

@@ -23,5 +23,11 @@
     <string name="kiosk_notify_title">Sipariş no %1$d</string>
     <string name="kiosk_notify_body">%1$s XMR görüldü — sipariş ödendi</string>
     <string name="kiosk_mode_title">Kiosk</string>
-    <string name="kiosk_mode_body">Müşteriye dönük bir ekran: istediğine dokunur ve herhangi bir Monero cüzdanıyla öder. Çıkmak PIN\'ini ister.</string>
+    <string name="kiosk_mode_body">Müşteriye dönük bir ekran: istediğine dokunur, sonra telefonunu yaklaştırır ya da tarar; hesap kendi telefonuna gelir. Çıkmak için PIN\'in gerekir.</string>
+    <!-- Pair, then bill: the counter speaks DUCAT -->
+    <string name="kiosk_tap_or_scan">Telefonunu buraya yaklaştır ya da bunu tara.</string>
+    <string name="kiosk_bill_sent">Telefonuna gönderildi</string>
+    <string name="kiosk_bill_sent_note">Hesabın orada, kalem kalem. İstediğin zaman öde.</string>
+    <string name="kiosk_no_ducat">DUCAT yok mu? Bir Monero cüzdanıyla öde</string>
+    <string name="kiosk_card_failed">Kod gösterilemedi: %1$s</string>
 </resources>

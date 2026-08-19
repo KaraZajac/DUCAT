@@ -23,5 +23,11 @@
     <string name="kiosk_notify_title">Commande n° %1$d</string>
     <string name="kiosk_notify_body">%1$s XMR vus — la commande est payée</string>
     <string name="kiosk_mode_title">Borne</string>
-    <string name="kiosk_mode_body">Un écran tourné vers le client : il touche ce qu\'il veut et paie avec n\'importe quel portefeuille Monero. En sortir demande votre code.</string>
+    <string name="kiosk_mode_body">Un écran tourné vers le client : il touche ce qu\'il veut, puis approche son téléphone ou scanne, et l\'addition arrive sur son propre téléphone. Il faut ton code pour sortir.</string>
+    <!-- Pair, then bill: the counter speaks DUCAT -->
+    <string name="kiosk_tap_or_scan">Approche ton téléphone ici, ou scanne ceci.</string>
+    <string name="kiosk_bill_sent">Envoyé sur ton téléphone</string>
+    <string name="kiosk_bill_sent_note">L\'addition y est, détaillée. Paie quand tu veux.</string>
+    <string name="kiosk_no_ducat">Pas de DUCAT ? Paie avec un portefeuille Monero</string>
+    <string name="kiosk_card_failed">Impossible d\'afficher un code : %1$s</string>
 </resources>
