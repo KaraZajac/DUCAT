@@ -353,6 +353,15 @@ tasks.register<JavaExec>("ridetest") {
 
 // Lock an existing desk (or sweep one already locked).
 // `DUCAT_DESK_STATE=… DUCAT_DESK_PASSPHRASE=… ./gradlew :desktop:vaultset`.
+// Sweep a desk wallet somewhere useful: stagenet money left in an old role's
+// state is money a faucet has to be asked for twice.
+// `DUCAT_DESK_STATE=… DUCAT_PAY_TO=… DUCAT_PAY_XMR=all ./gradlew :desktop:payout`
+tasks.register<JavaExec>("payout") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PayOutKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("vaultset") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.VaultSetKt"

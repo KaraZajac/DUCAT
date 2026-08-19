@@ -251,7 +251,15 @@ object Wallet {
     fun balances(context: Context): Balances {
         val store = WalletStore(context)
         val tip = store.tip()
-        val unspent = store.entries().filter { !it.spent }
+        // The same usability test `plan` applies, for the same reason: an
+        // entry with no blob is an output this wallet cannot build a spend
+        // from, and counting it makes "Ready to spend" a number §17.2 forbids
+        // — one the wallet cannot honour. Found sweeping an old desk state,
+        // where balances() said 0.000578 XMR and plan() could reach 0.000100
+        // of it, so every send failed with "not enough unlocked" against a
+        // balance that plainly said otherwise. Understating is the safe
+        // direction; promising is not.
+        val unspent = store.entries().filter { !it.spent && it.blob.isNotEmpty() }
         val unlocked = unspent.filter { tip > 0 && it.height + LOCK_BLOCKS <= tip }
         val locked = unspent - unlocked.toSet()
         // The nearest unlock, because "in about N minutes" needs the soonest
