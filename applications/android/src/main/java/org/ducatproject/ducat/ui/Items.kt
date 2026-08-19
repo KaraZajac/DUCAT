@@ -64,7 +64,7 @@ fun ItemsScreen() {
             Spacer(Modifier.width(8.dp))
             OutlinedTextField(
                 value = price,
-                onValueChange = { price = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
+                onValueChange = { price = it.filter { c -> Amounts.isNumberChar(c) } },
                 label = { Text(currency) },
                 singleLine = true,
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(

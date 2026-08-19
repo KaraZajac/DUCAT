@@ -234,7 +234,9 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
         grabFix(context) { fix = it }
     }
 
-    val pricePxmr = price.toDoubleOrNull()?.let { (it * 1e12).toLong() } ?: 0L
+    // BigDecimal, like every other price in the app: a Double loses the
+    // last piconero of a long figure and wraps silently on a huge one.
+    val pricePxmr = Amounts.parse(price)?.let { Amounts.toPxmr(it) } ?: 0L
     val stake = Stakes.stakeFor(
         if (vehicle) Stakes.Deal.Vehicle else Stakes.Deal.Stay, pricePxmr,
     )
@@ -266,7 +268,7 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
             value = price,
-            onValueChange = { price = it.filter { c -> c.isDigit() || c == '.' } },
+            onValueChange = { price = it.filter { c -> Amounts.isNumberChar(c) } },
             label = {
                 Text(stringResource(if (vehicle) R.string.rent_per_day else R.string.rent_per_night))
             },
@@ -303,7 +305,7 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
             Spacer(Modifier.height(8.dp))
             Row {
                 OutlinedTextField(
-                    value = year, onValueChange = { year = it.filter { c -> c.isDigit() }.take(4) },
+                    value = year, onValueChange = { year = Amounts.typedNumber(it).filter { c -> c in '0'..'9' }.take(4) },
                     label = { Text(stringResource(R.string.rent_year)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true, modifier = Modifier.weight(1f),
@@ -316,7 +318,7 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
                 )
                 Spacer(Modifier.width(8.dp))
                 OutlinedTextField(
-                    value = seats, onValueChange = { seats = it.filter { c -> c.isDigit() }.take(2) },
+                    value = seats, onValueChange = { seats = Amounts.typedNumber(it).filter { c -> c in '0'..'9' }.take(2) },
                     label = { Text(stringResource(R.string.rent_seats)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true, modifier = Modifier.weight(1f),
@@ -357,21 +359,21 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
         } else {
             Row {
                 OutlinedTextField(
-                    value = rooms, onValueChange = { rooms = it.filter { c -> c.isDigit() }.take(2) },
+                    value = rooms, onValueChange = { rooms = Amounts.typedNumber(it).filter { c -> c in '0'..'9' }.take(2) },
                     label = { Text(stringResource(R.string.rent_rooms)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true, modifier = Modifier.weight(1f),
                 )
                 Spacer(Modifier.width(8.dp))
                 OutlinedTextField(
-                    value = sleeps, onValueChange = { sleeps = it.filter { c -> c.isDigit() }.take(2) },
+                    value = sleeps, onValueChange = { sleeps = Amounts.typedNumber(it).filter { c -> c in '0'..'9' }.take(2) },
                     label = { Text(stringResource(R.string.rent_sleeps)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true, modifier = Modifier.weight(1f),
                 )
                 Spacer(Modifier.width(8.dp))
                 OutlinedTextField(
-                    value = sizeM2, onValueChange = { sizeM2 = it.filter { c -> c.isDigit() }.take(4) },
+                    value = sizeM2, onValueChange = { sizeM2 = Amounts.typedNumber(it).filter { c -> c in '0'..'9' }.take(4) },
                     label = { Text(stringResource(R.string.rent_size)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true, modifier = Modifier.weight(1f),

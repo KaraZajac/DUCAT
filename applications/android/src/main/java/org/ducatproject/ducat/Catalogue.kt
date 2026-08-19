@@ -133,8 +133,10 @@ object Catalogue {
         val (rate, at) = RateStore(context).cached()
             ?: return Result.failure(SnagException(Snag.NoRate))
         if (rate <= 0) return Result.failure(SnagException(Snag.NoRate))
-        val decimal = runCatching { BigDecimal(item.price.trim().replace(',', '.')) }
-            .getOrNull()
+        // Through the one reader, so a price typed on an Arabic keyboard means
+        // what its author meant. `replace(',', '.')` handled exactly one of
+        // the world's decimal separators.
+        val decimal = Amounts.parse(item.price)
             ?: return Result.failure(SnagException(Snag.Unpriceable))
         val pxmr = Amounts
             .toPxmr(decimal.divide(BigDecimal.valueOf(rate), 12, RoundingMode.DOWN))

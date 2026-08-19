@@ -2326,7 +2326,7 @@ private fun RideBondBanner(contact: Contact) {
                             OutlinedTextField(
                                 value = counterXmr,
                                 onValueChange = {
-                                    counterXmr = it.filter { c -> c.isDigit() || c == '.' }
+                                    counterXmr = it.filter { c -> Amounts.isNumberChar(c) }
                                 },
                                 label = { Text(stringResource(R.string.bond_back_to_rider)) },
                                 singleLine = true,
@@ -2335,7 +2335,7 @@ private fun RideBondBanner(contact: Contact) {
                             Spacer(Modifier.width(6.dp))
                             Button(
                                 onClick = {
-                                    val pxmr = counterXmr.toDoubleOrNull()
+                                    val pxmr = Amounts.parse(counterXmr)?.toDouble()
                                         ?.let { (it * 1e12).toLong() }
                                     if (pxmr != null) {
                                         busy = true; error = null
@@ -2527,7 +2527,7 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
             OutlinedTextField(
                 value = rent,
                 onValueChange = { typed ->
-                    rent = typed.filter { c -> c.isDigit() || c == '.' }
+                    rent = typed.filter { c -> Amounts.isNumberChar(c) }
                     // Suggest both stakes from the rent as it is typed. Either
                     // field can still be edited; this only saves the person
                     // doing percentages in their head at a bus stop.
@@ -2543,13 +2543,13 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
-                value = myDep, onValueChange = { myDep = it.filter { c -> c.isDigit() || c == '.' } },
+                value = myDep, onValueChange = { myDep = it.filter { c -> Amounts.isNumberChar(c) } },
                 label = { Text(stringResource(R.string.res_my_deposit)) },
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
-                value = hostDep, onValueChange = { hostDep = it.filter { c -> c.isDigit() || c == '.' } },
+                value = hostDep, onValueChange = { hostDep = it.filter { c -> Amounts.isNumberChar(c) } },
                 label = { Text(stringResource(R.string.res_host_deposit)) },
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
             )

@@ -97,6 +97,43 @@ fun main() {
         Catalogue.price(context, coffee.copy(price = "3,20")).getOrNull()?.pxmr == 21_333_333_333L,
     )
 
+    // --- what people actually type ---------------------------------------
+    //
+    // Every money field used to filter on `isDigit() || '.' || ','`, which
+    // keeps Arabic digits and deletes the Arabic decimal separator beside
+    // them. Each of these is a price of 3.20 as its own keyboard writes it.
+    val threeTwenty = 21_333_333_333L
+    listOf(
+        "ASCII" to "3.20",
+        "comma decimal (de, fr, ru…)" to "3,20",
+        "Arabic-Indic" to "٣٫٢٠",
+        "Persian" to "۳٫۲۰",
+        "Persian with a full stop" to "۳.۲۰",
+        "Devanagari" to "३.२०",
+        "Thai" to "๓.๒๐",
+        "fullwidth" to "３．２０",
+        "grouped, Arabic" to "٣٫٢٠",
+        "padded" to "  3.20  ",
+    ).forEach { (name, typed) ->
+        val kept = typed.filter { org.ducatproject.ducat.Amounts.isNumberChar(it) }
+        val got = Catalogue.price(context, coffee.copy(price = kept)).getOrNull()?.pxmr
+        check(
+            "a price typed in $name survives the field",
+            got == threeTwenty,
+            "typed '$typed' kept '$kept' got $got, wanted $threeTwenty",
+        )
+    }
+    check(
+        "and a thousands mark is not a decimal point",
+        Catalogue.price(context, coffee.copy(price = "1٬234")).getOrNull()?.pxmr ==
+            Catalogue.price(context, coffee.copy(price = "1234")).getOrNull()?.pxmr,
+    )
+    check(
+        "letters are still not an amount",
+        org.ducatproject.ducat.Amounts.parse("12abc") == null,
+    )
+    check("and neither is nothing", org.ducatproject.ducat.Amounts.parse("   ") == null)
+
     Catalogue.put(context, coffee)
     Catalogue.put(context, Catalogue.draft(context, "Croissant", "2.50"))
     check("two things on the menu", Catalogue.live(context).size == 2)
@@ -314,6 +351,19 @@ fun main() {
     check("a PIN is set", Pin.isSet(context))
     check("the right one passes", Pin.verify(context, "1234") == Pin.Verdict.Ok)
     check("the wrong one does not", Pin.verify(context, "9999") is Pin.Verdict.Wrong)
+
+    // A PIN is a number, not a glyph. The gate folds whatever the keypad
+    // produced to ASCII before hashing, so somebody who set theirs on a
+    // Persian keyboard and later typed it on an English one is not locked out
+    // of their own wallet by a font.
+    check(
+        "a PIN is the same number in any script",
+        org.ducatproject.ducat.Amounts.typedNumber("۱۲۳۴").filter { it in '0'..'9' } == "1234",
+    )
+    check(
+        "and so are Arabic-Indic digits",
+        org.ducatproject.ducat.Amounts.typedNumber("١٢٣٤").filter { it in '0'..'9' } == "1234",
+    )
 
     // The verifier is a hash over a salt: the digits must not be on disk.
     val onDisk = base.walkTopDown().filter { it.isFile }

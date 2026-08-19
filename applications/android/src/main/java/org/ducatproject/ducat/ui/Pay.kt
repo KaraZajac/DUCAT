@@ -463,7 +463,7 @@ private fun AmountStep(
             Spacer(Modifier.height(14.dp))
             OutlinedTextField(
                 value = tipTyped,
-                onValueChange = { tipTyped = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
+                onValueChange = { tipTyped = it.filter { c -> Amounts.isNumberChar(c) } },
                 label = { Text(stringResource(R.string.pay_add_tip, if (fiatEntry) cur else "XMR")) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -484,7 +484,7 @@ private fun AmountStep(
             OutlinedTextField(
                 value = typed,
                 onValueChange = {
-                    typed = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
+                    typed = it.filter { c -> Amounts.isNumberChar(c) }
                     maxLocked = false
                 },
                 placeholder = { Text(stringResource(R.string.pay_amount_placeholder)) },
@@ -853,7 +853,9 @@ private fun AmountStep(
  * untypeable. The fields accept both marks; this is the one place a comma
  * becomes a dot, so every parse sees the same shape.
  */
-internal fun moneyText(s: String): String = s.trim().replace(',', '.')
+// One reader for every amount anyone types. `replace(',', '.')` handled
+// exactly one of the world's decimal separators; see Amounts.typedNumber.
+internal fun moneyText(s: String): String = Amounts.typedNumber(s)
 
 /** An amount in whichever unit the entry field is currently using. */
 private fun inUnit(

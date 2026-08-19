@@ -183,7 +183,7 @@ private fun NewRideScreen(rides: RideStore) {
         Row {
             OutlinedTextField(
                 value = base,
-                onValueChange = { base = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
+                onValueChange = { base = it.filter { c -> Amounts.isNumberChar(c) } },
                 label = { Text(stringResource(R.string.taxi_base_label, if (fiat) cur else "XMR")) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
@@ -191,7 +191,7 @@ private fun NewRideScreen(rides: RideStore) {
             Spacer(Modifier.width(8.dp))
             OutlinedTextField(
                 value = perMin,
-                onValueChange = { perMin = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
+                onValueChange = { perMin = it.filter { c -> Amounts.isNumberChar(c) } },
                 label = { Text(stringResource(R.string.taxi_per_min_label, if (fiat) cur else "XMR")) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),

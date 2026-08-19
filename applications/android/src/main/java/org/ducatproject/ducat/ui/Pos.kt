@@ -121,7 +121,7 @@ fun PosScreen() {
                     OutlinedTextField(
                         value = quickAmount,
                         onValueChange = {
-                            quickAmount = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
+                            quickAmount = it.filter { c -> Amounts.isNumberChar(c) }
                         },
                         label = {
                             Text(stringResource(R.string.pos_total_in, if (quickFiat) cur else "XMR"))
@@ -141,10 +141,20 @@ fun PosScreen() {
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                val pxmr = moneyText(quickAmount).toDoubleOrNull()?.let { v ->
-                    if (quickFiat && rate != null) ((v / rate) * 1e12).toLong()
-                    else if (!quickFiat) (v * 1e12).toLong()
-                    else null
+                // BigDecimal, like the itemised path a few lines down. A
+                // Double here rounded the last piconero off a long figure and
+                // wrapped a huge one into a plausible small one.
+                val pxmr = Amounts.parse(quickAmount)?.let { v ->
+                    val xmr = when {
+                        quickFiat && rate != null && rate > 0 ->
+                            v.divide(
+                                java.math.BigDecimal.valueOf(rate), 12,
+                                java.math.RoundingMode.DOWN,
+                            )
+                        quickFiat -> null
+                        else -> v
+                    }
+                    xmr?.let { Amounts.toPxmr(it) }
                 }?.takeIf { it > 0 }
                 Button(
                     onClick = {
@@ -300,7 +310,7 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
         Spacer(Modifier.width(8.dp))
         OutlinedTextField(
             value = amount,
-            onValueChange = { amount = it.filter { c -> c.isDigit() || c == '.' || c == ',' } },
+            onValueChange = { amount = it.filter { c -> Amounts.isNumberChar(c) } },
             label = { Text(if (fiat) cur else "XMR") },
             singleLine = true,
             modifier = Modifier.weight(1f),
@@ -343,7 +353,7 @@ private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
         OutlinedTextField(
             value = text,
             onValueChange = {
-                text = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
+                text = it.filter { c -> Amounts.isNumberChar(c) }
                 onSet(moneyText(text).toDoubleOrNull()?.let { v -> (v * 1e12).toLong() } ?: 0L)
             },
             label = { Text("XMR") },

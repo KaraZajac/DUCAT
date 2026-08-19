@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.DeviceLock
 import org.ducatproject.ducat.Pin
 import org.ducatproject.ducat.R
@@ -106,7 +107,8 @@ fun PinGate(
                     value = entered,
                     onValueChange = {
                         problem = null
-                        entered = it.filter { c -> c.isDigit() }.take(Pin.MAX_DIGITS)
+                        entered = Amounts.typedNumber(it)
+                            .filter { c -> c in '0'..'9' }.take(Pin.MAX_DIGITS)
                     },
                     label = { Text(stringResource(R.string.pin_label)) },
                     singleLine = true,
@@ -122,7 +124,8 @@ fun PinGate(
                         value = again,
                         onValueChange = {
                             problem = null
-                            again = it.filter { c -> c.isDigit() }.take(Pin.MAX_DIGITS)
+                            again = Amounts.typedNumber(it)
+                            .filter { c -> c in '0'..'9' }.take(Pin.MAX_DIGITS)
                         },
                         label = { Text(stringResource(R.string.pin_again)) },
                         singleLine = true,

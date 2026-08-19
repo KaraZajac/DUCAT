@@ -297,7 +297,7 @@ internal fun SkipAheadDialog(tip: Long, onPick: (Long) -> Unit, onDismiss: () ->
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = custom,
-                    onValueChange = { custom = it.filter { c -> c.isDigit() } },
+                    onValueChange = { custom = Amounts.typedNumber(it).filter { c -> c in '0'..'9' } },
                     label = { Text(stringResource(R.string.accounts_block_height_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
