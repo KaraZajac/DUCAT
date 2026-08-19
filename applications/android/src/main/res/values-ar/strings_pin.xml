@@ -20,4 +20,8 @@
         <item quantity="many">ليس هذا الرمز. بقيت %1$d محاولة قبل الانتظار.</item>
         <item quantity="other">ليس هذا الرمز. بقيت %1$d محاولة قبل الانتظار.</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">استخدم قفل الهاتف</string>
+    <string name="pin_device_title">افتح القفل للموافقة</string>
+    <string name="pin_device_subtitle">أكِّد أنك أنت قبل أن يخرج هذا المبلغ.</string>
 </resources>

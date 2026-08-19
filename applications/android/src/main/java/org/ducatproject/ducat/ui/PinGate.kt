@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.ducatproject.ducat.DeviceLock
 import org.ducatproject.ducat.Pin
 import org.ducatproject.ducat.R
 
@@ -40,6 +41,16 @@ fun PinGate(
     if (!open) return
     val context = LocalContext.current
     val setting = remember { !Pin.isSet(context) }
+    // The phone's own lock, where there is one. Never offered while *setting*
+    // a PIN — the point of that step is that this app has a secret of its own,
+    // and a fingerprint cannot stand in for choosing one.
+    val deviceLock = remember { !setting && DeviceLock.available(context) }
+    var asking by remember { mutableStateOf(false) }
+    // Raise it without being asked once they have used it once. The PIN stays
+    // on screen underneath, so declining the prompt is not a dead end.
+    LaunchedEffect(deviceLock) {
+        if (deviceLock && DeviceLock.preferred(context)) asking = true
+    }
     var entered by remember { mutableStateOf("") }
     var again by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
@@ -52,6 +63,23 @@ fun PinGate(
             lockedFor = Pin.lockedFor(context)
             delay(1_000)
         }
+    }
+
+    // The system prompt is modal and owns the screen while it is up; this
+    // just starts it and waits for the one answer that opens the gate.
+    LaunchedEffect(asking) {
+        if (!asking) return@LaunchedEffect
+        DeviceLock.backend?.prompt(
+            context,
+            context.getString(R.string.pin_device_title),
+            context.getString(R.string.pin_device_subtitle),
+        ) { ok ->
+            asking = false
+            if (ok) {
+                DeviceLock.remember(context, true)
+                onPassed()
+            }
+        } ?: run { asking = false }
     }
 
     val digitsOk = entered.length in Pin.MIN_DIGITS..Pin.MAX_DIGITS
@@ -114,6 +142,18 @@ fun PinGate(
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                }
+                if (deviceLock && !asking) {
+                    Spacer(Modifier.height(12.dp))
+                    // A button rather than a setting. Somebody who wants this
+                    // presses it once and is never asked again; somebody who
+                    // does not never goes looking through a settings screen to
+                    // turn it off.
+                    TextButton(
+                        enabled = !busy && lockedFor == 0L,
+                        onClick = { problem = null; asking = true },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text(stringResource(R.string.pin_use_device_lock)) }
                 }
                 if (lockedFor > 0) {
                     Spacer(Modifier.height(8.dp))

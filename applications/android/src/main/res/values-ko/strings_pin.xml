@@ -15,4 +15,8 @@
     <plurals name="pin_wrong">
         <item quantity="other">PIN이 아닙니다. 대기까지 %1$d번 남았습니다.</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">휴대폰 잠금 해제 사용</string>
+    <string name="pin_device_title">승인하려면 잠금 해제</string>
+    <string name="pin_device_subtitle">이 결제가 나가기 전에 본인인지 확인합니다.</string>
 </resources>

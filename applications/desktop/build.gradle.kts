@@ -62,6 +62,9 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Orders.kt",
     "org/ducatproject/ducat/ui/Kiosk.kt",
     "org/ducatproject/ducat/Pin.kt",
+    // The platform-free half only; DeviceLockAndroid is BiometricPrompt
+    // and fragments, and stays on the phone.
+    "org/ducatproject/ducat/DeviceLock.kt",
     "org/ducatproject/ducat/ui/PinGate.kt",
     "org/ducatproject/ducat/Catalogue.kt",
     "org/ducatproject/ducat/ui/Items.kt",

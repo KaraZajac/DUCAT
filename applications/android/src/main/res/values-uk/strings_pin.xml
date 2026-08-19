@@ -18,4 +18,8 @@
         <item quantity="many">Це не той PIN. Лишилося %1$d спроб до очікування.</item>
         <item quantity="other">Це не той PIN. Лишилося %1$d спроби до очікування.</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">Використати розблокування телефона</string>
+    <string name="pin_device_title">Розблокуй, щоб підтвердити</string>
+    <string name="pin_device_subtitle">Підтверди, що це ти, перш ніж платіж піде.</string>
 </resources>

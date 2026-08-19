@@ -16,4 +16,8 @@
         <item quantity="one">यह PIN नहीं है। इंतज़ार शुरू होने से पहले %1$d कोशिश बची।</item>
         <item quantity="other">यह PIN नहीं है। इंतज़ार शुरू होने से पहले %1$d कोशिशें बचीं।</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">फ़ोन का अनलॉक इस्तेमाल करें</string>
+    <string name="pin_device_title">मंज़ूरी के लिए अनलॉक करें</string>
+    <string name="pin_device_subtitle">यह भुगतान जाने से पहले पुष्टि करें कि यह आप ही हैं।</string>
 </resources>

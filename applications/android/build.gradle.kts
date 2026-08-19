@@ -64,6 +64,10 @@ dependencies {
     implementation("org.osmdroid:osmdroid-android:6.1.20")
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.activity:activity-compose:1.9.3")
+    // The system unlock prompt: fingerprint, face, or the device's own
+    // PIN. Brings androidx.fragment with it, which is why MainActivity
+    // is a FragmentActivity — BiometricPrompt hosts itself in one.
+    implementation("androidx.biometric:biometric:1.1.0")
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")

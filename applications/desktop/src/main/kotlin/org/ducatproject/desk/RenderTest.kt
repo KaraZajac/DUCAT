@@ -296,6 +296,24 @@ fun main() {
     render("pin-ask", w = 700, h = 700) {
         org.ducatproject.ducat.ui.PinGate(open = true, onDismiss = {}, onPassed = {})
     }
+    // And the same gate on a phone that has a lock of its own to offer. The
+    // desk has no backend — that is the whole reason DeviceLock is a hook —
+    // so stand one up that says yes to `enrolled` and never prompts, which is
+    // exactly the state the button is drawn in.
+    org.ducatproject.ducat.DeviceLock.backend =
+        object : org.ducatproject.ducat.DeviceLock.Backend {
+            override fun enrolled(context: android.content.Context) = true
+            override fun prompt(
+                context: android.content.Context,
+                title: String,
+                subtitle: String,
+                onResult: (Boolean) -> Unit,
+            ) = Unit
+        }
+    render("pin-ask-device", w = 700, h = 700) {
+        org.ducatproject.ducat.ui.PinGate(open = true, onDismiss = {}, onPassed = {})
+    }
+    org.ducatproject.ducat.DeviceLock.backend = null
 
     println(
         if (failures == 0) "RENDERTEST OK — ${out.absolutePath}"

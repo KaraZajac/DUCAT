@@ -58,7 +58,11 @@ import uniffi.ducat_mobile.protocolVersion
  * **not symmetric** — the presenter supplies reachability, so the reader drives
  * every round trip. A screen written against one and reused for the other hangs.
  */
-class MainActivity : ComponentActivity() {
+// A FragmentActivity rather than a ComponentActivity, which it extends:
+// BiometricPrompt hosts itself in a fragment, and the system unlock prompt is
+// worth the base class. Nothing else changes — setContent and the rest are
+// ComponentActivity's and still apply.
+class MainActivity : androidx.fragment.app.FragmentActivity() {
     companion object {
         /**
          * The thread a notification asked for. A flow rather than intent
@@ -102,6 +106,9 @@ class MainActivity : ComponentActivity() {
         // already applied the chosen language, and a language change recreates
         // this activity, so the placeholder follows it.
         ContactNaming.unnamed = getString(R.string.contact_unnamed)
+        // The half of DeviceLock that knows what an Activity is. Installed
+        // here because the shared sources cannot name it — see DeviceLock.
+        DeviceLock.backend = org.ducatproject.ducat.platform.DeviceLockAndroid
         readIntent(intent)
         val prefs = ThemePreference(this)
         setContent {

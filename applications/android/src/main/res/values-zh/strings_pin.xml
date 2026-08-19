@@ -15,4 +15,8 @@
     <plurals name="pin_wrong">
         <item quantity="other">这不是 PIN。还有 %1$d 次机会，之后要等待。</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">使用手机解锁</string>
+    <string name="pin_device_title">解锁以确认</string>
+    <string name="pin_device_subtitle">在这笔付款发出前，确认是你本人。</string>
 </resources>

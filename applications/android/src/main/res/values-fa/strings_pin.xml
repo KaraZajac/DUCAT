@@ -16,4 +16,8 @@
         <item quantity="one">این رمز نیست. %1$d تلاش تا شروع انتظار مانده.</item>
         <item quantity="other">این رمز نیست. %1$d تلاش تا شروع انتظار مانده.</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">از قفل گوشی استفاده کن</string>
+    <string name="pin_device_title">برای تأیید قفل را باز کن</string>
+    <string name="pin_device_subtitle">پیش از خارج شدن این پرداخت تأیید کن که خودت هستی.</string>
 </resources>

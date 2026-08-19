@@ -16,4 +16,8 @@
         <item quantity="one">Das ist nicht die PIN. Noch %1$d Versuch, dann wird gewartet.</item>
         <item quantity="other">Das ist nicht die PIN. Noch %1$d Versuche, dann wird gewartet.</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">Telefonsperre benutzen</string>
+    <string name="pin_device_title">Zum Bestätigen entsperren</string>
+    <string name="pin_device_subtitle">Bestätige, dass du es bist, bevor diese Zahlung rausgeht.</string>
 </resources>

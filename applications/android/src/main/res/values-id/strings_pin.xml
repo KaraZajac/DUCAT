@@ -15,4 +15,8 @@
     <plurals name="pin_wrong">
         <item quantity="other">Itu bukan PIN-nya. Tersisa %1$d percobaan sebelum menunggu.</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">Pakai kunci layar ponsel</string>
+    <string name="pin_device_title">Buka kunci untuk menyetujui</string>
+    <string name="pin_device_subtitle">Pastikan ini kamu sebelum pembayaran ini keluar.</string>
 </resources>

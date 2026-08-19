@@ -16,4 +16,8 @@
         <item quantity="one">PIN bu değil. Bekleme başlamadan %1$d deneme kaldı.</item>
         <item quantity="other">PIN bu değil. Bekleme başlamadan %1$d deneme kaldı.</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">Telefon kilidini kullan</string>
+    <string name="pin_device_title">Onaylamak için kilidi aç</string>
+    <string name="pin_device_subtitle">Bu ödeme çıkmadan önce sen olduğunu doğrula.</string>
 </resources>

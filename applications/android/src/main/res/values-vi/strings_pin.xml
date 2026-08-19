@@ -15,4 +15,8 @@
     <plurals name="pin_wrong">
         <item quantity="other">Đó không phải PIN. Còn %1$d lần trước khi phải chờ.</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">Dùng khoá màn hình điện thoại</string>
+    <string name="pin_device_title">Mở khoá để duyệt</string>
+    <string name="pin_device_subtitle">Xác nhận đúng là bạn trước khi khoản này rời đi.</string>
 </resources>

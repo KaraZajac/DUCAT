@@ -18,4 +18,8 @@
         <item quantity="many">To nie ten PIN. Zostało %1$d prób przed czekaniem.</item>
         <item quantity="other">To nie ten PIN. Zostało %1$d próby przed czekaniem.</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">Użyj blokady telefonu</string>
+    <string name="pin_device_title">Odblokuj, aby zatwierdzić</string>
+    <string name="pin_device_subtitle">Potwierdź, że to ty, zanim ta płatność wyjdzie.</string>
 </resources>

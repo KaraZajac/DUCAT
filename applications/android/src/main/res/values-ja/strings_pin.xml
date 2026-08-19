@@ -15,4 +15,8 @@
     <plurals name="pin_wrong">
         <item quantity="other">PIN が違います。待機まであと %1$d 回です。</item>
     </plurals>
+    <!-- The phone's own lock, offered instead of typing this again -->
+    <string name="pin_use_device_lock">スマホのロック解除を使う</string>
+    <string name="pin_device_title">承認のためロック解除</string>
+    <string name="pin_device_subtitle">この支払いを送る前に、本人であることを確認します。</string>
 </resources>
