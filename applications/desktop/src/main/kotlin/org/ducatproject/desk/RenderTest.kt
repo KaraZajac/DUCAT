@@ -116,8 +116,13 @@ fun main() {
     render("rent-form-place", w = 520, h = 1200) {
         org.ducatproject.ducat.ui.ListingFormPreview(kind = 1)
     }
-    render("rent-chips", w = 520, h = 260) {
-        org.ducatproject.ducat.ui.RentSearchCard(onOpenChat = {})
+    // The three ways into the personal screen's occasional jobs. This used to
+    // render RentSearchCard's pair of chips; when those became tiles the card
+    // was left drawing nothing at all, and this test said so — one colour.
+    render("home-tiles", w = 520, h = 220) {
+        org.ducatproject.ducat.ui.HomeTiles(
+            onHail = {}, onRentCar = {}, onRentPlace = {},
+        )
     }
     // The sentence the whole trust model rests on, as a user meets it.
     // The moment a rider decides: does the screen tell them the whole cost?

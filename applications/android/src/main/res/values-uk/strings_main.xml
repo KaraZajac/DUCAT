@@ -24,4 +24,6 @@
     <string name="main_card_link_not_ready">Їхня картка ще не читається. Якщо вони поруч, зачекайте трохи й відскануйте ще раз — інакше попросіть їх відкрити DUCAT.</string>
     <string name="main_card_link_body_unnamed">Це посилання відкриває картку контакту без імені. Додати? Потім зможете писати й платити одне одному.</string>
     <string name="main_card_link_name">Як назвати</string>
+    <string name="home_tile_rent_car">Орендувати авто</string>
+    <string name="home_tile_rent_place">Орендувати житло</string>
 </resources>

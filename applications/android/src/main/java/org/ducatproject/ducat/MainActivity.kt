@@ -735,16 +735,23 @@ private fun HomeScreen(
         sync = b,
     )
 
-    // The one job that belongs on the personal screen: hailing is a rider's
-    // moment, not an operating mode, and it lives under the balance.
-    org.ducatproject.ducat.ui.HailCard()
-
-    // Looking for a car or a place is the same shape of moment as hailing —
-    // a thing a person does occasionally, not a job they run — so it lives
-    // here rather than behind a mode. The mode is for the person who *has*
-    // one to let (§16.18).
+    // The three jobs that belong on the personal screen, as one row of
+    // squares. Hailing is a rider's moment rather than an operating mode, and
+    // looking for a car or a place is the same shape of moment — things a
+    // person does occasionally, not jobs they run. The modes are for whoever
+    // *has* a car or a room to let (§16.18).
+    val hailSheet = remember { mutableStateOf(false) }
+    val rentKind = remember { mutableStateOf<Int?>(null) }
     Spacer(Modifier.height(12.dp))
-    org.ducatproject.ducat.ui.RentSearchCard(onOpenChat = onOpenChat)
+    org.ducatproject.ducat.ui.HomeTiles(
+        onHail = { hailSheet.value = true },
+        onRentCar = { rentKind.value = org.ducatproject.ducat.Listings.KIND_VEHICLE },
+        onRentPlace = { rentKind.value = org.ducatproject.ducat.Listings.KIND_PLACE },
+    )
+    // Both flows live on, tiles or not: the hail keeps its card for a hail
+    // that is actually standing, and each owns its own screens.
+    org.ducatproject.ducat.ui.HailCard(sheetState = hailSheet)
+    org.ducatproject.ducat.ui.RentSearchCard(onOpenChat = onOpenChat, kindState = rentKind)
 
     // The nudge that keeps §4.3 true: the bundle carries the relationships
     // now, so every contact made after the last export is one a restore will

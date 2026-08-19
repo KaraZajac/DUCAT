@@ -39,30 +39,16 @@ import uniffi.ducat_mobile.RentalInfo
  * chosen because people travel to collect a car or a set of keys.
  */
 @Composable
-fun RentSearchCard(onOpenChat: (Contact) -> Unit) {
-    var kind by remember { mutableStateOf<Int?>(null) }
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(14.dp)) {
-            Text(
-                stringResource(R.string.rent_search_title),
-                style = MaterialTheme.typography.titleSmall,
-            )
-            Spacer(Modifier.height(8.dp))
-            Row {
-                AssistChip(
-                    onClick = { kind = Listings.KIND_PLACE },
-                    label = { Text(stringResource(R.string.rent_find_a_place)) },
-                    leadingIcon = { Icon(Icons.Filled.House, null, Modifier.size(16.dp)) },
-                )
-                Spacer(Modifier.width(8.dp))
-                AssistChip(
-                    onClick = { kind = Listings.KIND_VEHICLE },
-                    label = { Text(stringResource(R.string.rent_find_a_car)) },
-                    leadingIcon = { Icon(Icons.Filled.DirectionsCar, null, Modifier.size(16.dp)) },
-                )
-            }
-        }
-    }
+fun RentSearchCard(
+    onOpenChat: (Contact) -> Unit,
+    /**
+     * Which search is open, or none — hoisted so the home screen's two tiles
+     * can start it. The card of chips this used to draw is gone: the tiles are
+     * the way in, and a second one underneath was the same button twice.
+     */
+    kindState: MutableState<Int?> = remember { mutableStateOf(null) },
+) {
+    var kind by kindState
     kind?.let {
         RentSearchScreen(kind = it, onClose = { kind = null }, onOpenChat = onOpenChat)
     }

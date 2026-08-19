@@ -24,4 +24,6 @@
     <string name="main_card_link_not_ready">کارت آن‌ها هنوز خوانده نمی‌شود. اگر کنار شما هستند، کمی صبر کنید و دوباره اسکن کنید — وگرنه از آن‌ها بخواهید DUCAT را باز کنند.</string>
     <string name="main_card_link_body_unnamed">این پیوند کارت تماسی بدون نام باز می‌کند. اضافه شود؟ پس از آن می‌توانید به هم پیام دهید و پرداخت کنید.</string>
     <string name="main_card_link_name">نامشان</string>
+    <string name="home_tile_rent_car">اجارهٔ خودرو</string>
+    <string name="home_tile_rent_place">اجارهٔ جا</string>
 </resources>

@@ -24,4 +24,6 @@
     <string name="main_card_link_not_ready">Leur carte n’est pas encore lisible. S’ils sont avec vous, attendez un instant et rescannez ; sinon, demandez-leur d’ouvrir DUCAT.</string>
     <string name="main_card_link_body_unnamed">Ce lien ouvre une carte de contact sans nom. L’ajouter ? Vous pourrez ensuite vous écrire et vous payer.</string>
     <string name="main_card_link_name">Les appeler</string>
+    <string name="home_tile_rent_car">Louer une voiture</string>
+    <string name="home_tile_rent_place">Louer un logement</string>
 </resources>

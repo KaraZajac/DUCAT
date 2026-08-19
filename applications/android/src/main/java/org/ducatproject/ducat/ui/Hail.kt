@@ -163,8 +163,16 @@ private fun migrateDown(p: PostedHail): PostedHail? {
  * cab — the card says so rather than implying a dispatcher stands behind it.
  */
 @Composable
-fun HailCard() {
-    var sheetOpen by remember { mutableStateOf(false) }
+fun HailCard(
+    /**
+     * Opened from the home screen's tile rather than from a card of its own.
+     * Hoisted so the trigger and the flow can live apart: the tile is one of
+     * three identical squares, and everything below — the sheet, the wait for
+     * a driver, the offer, the ride — is this composable's business.
+     */
+    sheetState: MutableState<Boolean> = remember { mutableStateOf(false) },
+) {
+    var sheetOpen by sheetState
     var driverFound by remember { mutableStateOf<org.ducatproject.ducat.Contact?>(null) }
     // Between the claim and the yes: the driver who took the hail, while
     // their kind-6 offer is still in flight; then the offer itself, on the
@@ -299,11 +307,17 @@ fun HailCard() {
         }
     }
 
+    // Only while something is happening. The way *in* is the tile above; a
+    // card that said "Hail a ride — post where you're going" while doing
+    // nothing was the entry point, and it is not needed twice.
+    if (posted != null || awaitingOffer != null || parkedOffer != null ||
+        status != null || error != null
+    ) {
     Spacer(Modifier.height(12.dp))
     Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
     Column(Modifier.fillMaxWidth().padding(16.dp)) {
         Row(
-            Modifier.fillMaxWidth().clickable { if (posted == null) sheetOpen = true },
+            Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text("🚕", style = MaterialTheme.typography.headlineSmall)
@@ -311,8 +325,7 @@ fun HailCard() {
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.hail_card_title), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    if (posted != null) stringResource(R.string.hail_card_standing)
-                    else stringResource(R.string.hail_card_pitch),
+                    stringResource(R.string.hail_card_standing),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -393,6 +406,7 @@ fun HailCard() {
             Text(it, color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall)
         }
+    }
     }
     }
     driverFound?.let { d ->
