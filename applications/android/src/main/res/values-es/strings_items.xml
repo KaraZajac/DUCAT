@@ -11,4 +11,5 @@
     <string name="items_bad_price">ese precio no es un número</string>
     <string name="items_rate_stale">Los precios usan un tipo de cambio de hace %1$s: esta caja no ha podido consultarlo desde entonces.</string>
     <string name="items_tab">Artículos</string>
+    <string name="items_picker_no_rate">Todavía no hay tipo de cambio: no se pueden cobrar estos precios hasta que la caja llegue a la red.</string>
 </resources>

@@ -248,6 +248,18 @@ fun main() {
         org.ducatproject.ducat.ui.ItemPicker(onPick = { _, _ -> })
     }
     render("kiosk-stocked", w = 520, h = 900) { org.ducatproject.ducat.ui.KioskScreen() }
+    // The first morning: a menu typed in, and a phone that has not reached
+    // the network, so nothing can be converted into monero yet. Every chip
+    // disables itself correctly; the line under them is what stops the seller
+    // tapping at a dead till wondering what they did wrong.
+    run {
+        val ctx = context
+        val rates = org.ducatproject.ducat.RateStore(ctx)
+        val had = rates.cached()
+        rates.store(0.0, 0L, "")
+        render("kiosk-no-rate", w = 520, h = 900) { org.ducatproject.ducat.ui.KioskScreen() }
+        had?.let { (v, at) -> rates.store(v, at, "rendertest") }
+    }
     // The counter mid-sale. Both panels take their whole state as parameters,
     // so they draw here without a node behind them — which is the only way to
     // see the two screens a customer actually stands in front of.

@@ -11,4 +11,5 @@
     <string name="items_bad_price">dieser Preis ist keine Zahl</string>
     <string name="items_rate_stale">Die Preise nutzen einen Wechselkurs von vor %1$s — diese Kasse konnte seitdem nicht nachsehen.</string>
     <string name="items_tab">Artikel</string>
+    <string name="items_picker_no_rate">Noch kein Wechselkurs — diese Preise lassen sich nicht kassieren, bis die Kasse ins Netz kommt.</string>
 </resources>

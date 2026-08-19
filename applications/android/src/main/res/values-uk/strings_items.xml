@@ -11,4 +11,5 @@
     <string name="items_bad_price">ця ціна не число</string>
     <string name="items_rate_stale">Ціни рахуються за курсом %1$s тому — відтоді каса не змогла його перевірити.</string>
     <string name="items_tab">Позиції</string>
+    <string name="items_picker_no_rate">Курсу обміну ще немає — ці ціни не вдасться прийняти, доки каса не вийде в мережу.</string>
 </resources>

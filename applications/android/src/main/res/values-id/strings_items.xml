@@ -11,4 +11,5 @@
     <string name="items_bad_price">harga itu bukan angka</string>
     <string name="items_rate_stale">Harga memakai kurs dari %1$s lalu — kasir ini belum bisa memeriksa sejak itu.</string>
     <string name="items_tab">Barang</string>
+    <string name="items_picker_no_rate">Belum ada kurs — harga ini belum bisa ditagih sampai mesin kasir terhubung ke jaringan.</string>
 </resources>

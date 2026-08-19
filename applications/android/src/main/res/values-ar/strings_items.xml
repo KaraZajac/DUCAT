@@ -11,4 +11,5 @@
     <string name="items_bad_price">هذا السعر ليس رقمًا</string>
     <string name="items_rate_stale">تستخدم الأسعار سعر صرف عمره %1$s — لم يتمكن هذا الصندوق من التحقق منذ ذلك الحين.</string>
     <string name="items_tab">الأصناف</string>
+    <string name="items_picker_no_rate">لا يوجد سعر صرف بعد — لا يمكن تحصيل هذه الأسعار حتى تتصل نقطة البيع بالشبكة.</string>
 </resources>

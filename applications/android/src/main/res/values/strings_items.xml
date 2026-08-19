@@ -11,4 +11,5 @@
     <string name="items_bad_price">that price is not a number</string>
     <string name="items_rate_stale">Prices use an exchange rate from %1$s ago — this till has not been able to check since.</string>
     <string name="items_tab">Items</string>
+    <string name="items_picker_no_rate">No exchange rate yet — these prices cannot be rung up until this till reaches the network.</string>
 </resources>

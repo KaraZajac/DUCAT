@@ -11,4 +11,5 @@
     <string name="items_bad_price">その価格は数値ではありません</string>
     <string name="items_rate_stale">価格は %1$s前のレートを使っています。このレジはそれ以降確認できていません。</string>
     <string name="items_tab">品目</string>
+    <string name="items_picker_no_rate">まだ為替レートがありません。ネットワークにつながるまで、この価格では会計できません。</string>
 </resources>

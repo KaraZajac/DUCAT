@@ -11,4 +11,5 @@
     <string name="items_bad_price">그 가격은 숫자가 아닙니다</string>
     <string name="items_rate_stale">가격은 %1$s 전 환율을 씁니다 — 그 뒤로 이 계산대가 확인하지 못했습니다.</string>
     <string name="items_tab">품목</string>
+    <string name="items_picker_no_rate">아직 환율이 없습니다 — 네트워크에 연결되기 전까지 이 가격으로 결제할 수 없습니다.</string>
 </resources>

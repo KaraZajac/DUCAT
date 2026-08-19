@@ -11,4 +11,5 @@
     <string name="items_bad_price">这个价格不是数字</string>
     <string name="items_rate_stale">价格用的是 %1$s前的汇率 — 这台收银机之后一直没能查到新的。</string>
     <string name="items_tab">商品</string>
+    <string name="items_picker_no_rate">还没有汇率——在收银机连上网络之前，这些价格无法结账。</string>
 </resources>

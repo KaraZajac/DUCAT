@@ -11,4 +11,5 @@
     <string name="items_bad_price">questo prezzo non è un numero</string>
     <string name="items_rate_stale">I prezzi usano un tasso di %1$s fa: questa cassa non è più riuscita a controllare.</string>
     <string name="items_tab">Articoli</string>
+    <string name="items_picker_no_rate">Ancora nessun tasso di cambio: questi prezzi non si possono incassare finché la cassa non raggiunge la rete.</string>
 </resources>

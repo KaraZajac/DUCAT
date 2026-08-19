@@ -170,6 +170,19 @@ fun ItemPicker(onPick: (String, Long) -> Unit) {
             )
         }
     }
+    // Every button dead and nothing saying why is the worst version of this
+    // screen, and it is the one a stall meets on its first morning: prices are
+    // in pounds, converting them needs a rate, and a phone that has not
+    // reached the network yet has none. The chips disable themselves
+    // correctly; without this the seller is left tapping them.
+    if (priced.all { (_, p) -> (p.exceptionOrNull() as? Catalogue.SnagException)?.snag == Catalogue.Snag.NoRate }) {
+        Text(
+            stringResource(R.string.items_picker_no_rate),
+            Modifier.padding(horizontal = 16.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.error,
+        )
+    }
     if (stale > STALE_RATE_SECS) {
         Text(
             stringResource(R.string.items_rate_stale, humanDuration(context, stale)),

@@ -11,4 +11,5 @@
     <string name="items_bad_price">эта цена не число</string>
     <string name="items_rate_stale">Цены считаны по курсу %1$s назад — с тех пор касса не смогла его проверить.</string>
     <string name="items_tab">Позиции</string>
+    <string name="items_picker_no_rate">Курса обмена пока нет — эти цены не получится принять, пока касса не выйдет в сеть.</string>
 </resources>

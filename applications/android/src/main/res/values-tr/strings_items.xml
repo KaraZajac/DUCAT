@@ -11,4 +11,5 @@
     <string name="items_bad_price">bu fiyat bir sayı değil</string>
     <string name="items_rate_stale">Fiyatlar %1$s önceki kuru kullanıyor — bu kasa o zamandan beri bakamadı.</string>
     <string name="items_tab">Ürünler</string>
+    <string name="items_picker_no_rate">Henüz kur yok — kasa ağa ulaşana kadar bu fiyatlar tahsil edilemez.</string>
 </resources>
