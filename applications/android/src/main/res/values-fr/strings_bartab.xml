@@ -42,4 +42,14 @@
     <string name="bartab_paid_note">Payée ✓ — reçu envoyé.</string>
     <string name="bartab_remove_from_book">Retirer du carnet d\'ardoises</string>
     <string name="bartab_back_to_tabs">Retour aux ardoises</string>
+    <!-- What the payer reads on the bill and the receipt. Written in
+         the shop's language, not the reader's: this is the shop
+         speaking, the way a paper receipt from a Berlin cafe is in
+         German. The labels around it are already localised for
+         whoever is reading. -->
+    <string name="bill_note_order">Ta commande</string>
+    <string name="bill_note_fare">Ta course</string>
+    <string name="bill_note_tab">Ton addition</string>
+    <string name="receipt_note">Reçu — merci</string>
+    <string name="receipt_note_oob">Reçu — réglé hors DUCAT. Merci</string>
 </resources>

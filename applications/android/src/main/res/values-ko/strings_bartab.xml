@@ -41,4 +41,14 @@
     <string name="bartab_paid_note">결제 완료 ✓ — 영수증을 보냈어요.</string>
     <string name="bartab_remove_from_book">탭 장부에서 삭제</string>
     <string name="bartab_back_to_tabs">탭 목록으로</string>
+    <!-- What the payer reads on the bill and the receipt. Written in
+         the shop's language, not the reader's: this is the shop
+         speaking, the way a paper receipt from a Berlin cafe is in
+         German. The labels around it are already localised for
+         whoever is reading. -->
+    <string name="bill_note_order">주문 내역</string>
+    <string name="bill_note_fare">요금</string>
+    <string name="bill_note_tab">계산서</string>
+    <string name="receipt_note">영수증 — 감사합니다</string>
+    <string name="receipt_note_oob">영수증 — DUCAT 외부에서 결제됨. 감사합니다</string>
 </resources>

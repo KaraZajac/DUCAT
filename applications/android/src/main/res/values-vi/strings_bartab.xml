@@ -41,4 +41,14 @@
     <string name="bartab_paid_note">Đã trả ✓ — đã gửi biên nhận.</string>
     <string name="bartab_remove_from_book">Xóa khỏi sổ tab</string>
     <string name="bartab_back_to_tabs">Về danh sách tab</string>
+    <!-- What the payer reads on the bill and the receipt. Written in
+         the shop's language, not the reader's: this is the shop
+         speaking, the way a paper receipt from a Berlin cafe is in
+         German. The labels around it are already localised for
+         whoever is reading. -->
+    <string name="bill_note_order">Đơn của bạn</string>
+    <string name="bill_note_fare">Cước xe của bạn</string>
+    <string name="bill_note_tab">Hoá đơn của bạn</string>
+    <string name="receipt_note">Biên nhận — cảm ơn bạn</string>
+    <string name="receipt_note_oob">Biên nhận — đã thanh toán ngoài DUCAT. Cảm ơn bạn</string>
 </resources>

@@ -42,4 +42,14 @@
     <string name="bartab_paid_note">Pagada ✓ — recibo enviado.</string>
     <string name="bartab_remove_from_book">Quitar del libro de cuentas</string>
     <string name="bartab_back_to_tabs">Volver a las cuentas</string>
+    <!-- What the payer reads on the bill and the receipt. Written in
+         the shop's language, not the reader's: this is the shop
+         speaking, the way a paper receipt from a Berlin cafe is in
+         German. The labels around it are already localised for
+         whoever is reading. -->
+    <string name="bill_note_order">Tu pedido</string>
+    <string name="bill_note_fare">Tu carrera</string>
+    <string name="bill_note_tab">Tu cuenta</string>
+    <string name="receipt_note">Recibo — gracias</string>
+    <string name="receipt_note_oob">Recibo — pagado fuera de DUCAT. Gracias</string>
 </resources>

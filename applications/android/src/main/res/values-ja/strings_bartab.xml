@@ -41,4 +41,14 @@
     <string name="bartab_paid_note">支払い済み ✓ — レシート送信済み。</string>
     <string name="bartab_remove_from_book">ツケ帳から削除</string>
     <string name="bartab_back_to_tabs">ツケ一覧に戻る</string>
+    <!-- What the payer reads on the bill and the receipt. Written in
+         the shop's language, not the reader's: this is the shop
+         speaking, the way a paper receipt from a Berlin cafe is in
+         German. The labels around it are already localised for
+         whoever is reading. -->
+    <string name="bill_note_order">ご注文</string>
+    <string name="bill_note_fare">ご乗車料金</string>
+    <string name="bill_note_tab">お会計</string>
+    <string name="receipt_note">領収 — ありがとうございました</string>
+    <string name="receipt_note_oob">領収 — DUCAT外でのお支払い。ありがとうございました</string>
 </resources>

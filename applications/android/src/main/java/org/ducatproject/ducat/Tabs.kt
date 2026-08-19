@@ -143,11 +143,17 @@ class TabStore(private val context: Context) {
         val total = tab.lines.sumOf { it.amountPxmr } + (tab.taxPxmr ?: 0L)
         Mailbox.send(
             context, contact,
-            when (tab.origin) {
-                "taxi" -> "Your fare"
-                Orders.ORIGIN -> "Your order"
-                else -> "Your tab"
-            },
+            // The shop's own language, not the reader's. This line is the
+            // shop speaking — a paper receipt from a Berlin cafe is in
+            // German — and the sender cannot know what the payer reads
+            // anyway. Every label around it is already localised for them.
+            context.getString(
+                when (tab.origin) {
+                    "taxi" -> R.string.bill_note_fare
+                    Orders.ORIGIN -> R.string.bill_note_order
+                    else -> R.string.bill_note_tab
+                },
+            ),
             PersonaStore(context).personaHex(),
             kind = 1, amountPxmr = total,
             payto = WalletStore(context).addressFor(tab.personaHex),
@@ -181,7 +187,7 @@ class TabStore(private val context: Context) {
             .firstOrNull { it.personaHex == tab.personaHex } ?: return
         runCatching {
             Mailbox.send(
-                context, contact, "Receipt — settled outside DUCAT. Thank you",
+                context, contact, context.getString(R.string.receipt_note_oob),
                 PersonaStore(context).personaHex(),
                 kind = 3, amountPxmr = tab.settledTotal,
                 items = tab.lines, taxPxmr = tab.taxPxmr,
@@ -326,7 +332,7 @@ class TabStore(private val context: Context) {
                     if (tip > 0) tab.lines + BillItem("Tip — thank you", tip) else tab.lines
                 runCatching {
                     Mailbox.send(
-                        context, contact, "Receipt — thank you",
+                        context, contact, context.getString(R.string.receipt_note),
                         PersonaStore(context).personaHex(),
                         kind = 3, amountPxmr = hit.amountPxmr,
                         items = receiptLines, taxPxmr = tab.taxPxmr,

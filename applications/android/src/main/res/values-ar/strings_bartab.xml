@@ -46,4 +46,14 @@
     <string name="bartab_paid_note">مدفوع ✓ — أُرسل الإيصال.</string>
     <string name="bartab_remove_from_book">إزالة من دفتر الحسابات</string>
     <string name="bartab_back_to_tabs">العودة إلى الحسابات</string>
+    <!-- What the payer reads on the bill and the receipt. Written in
+         the shop's language, not the reader's: this is the shop
+         speaking, the way a paper receipt from a Berlin cafe is in
+         German. The labels around it are already localised for
+         whoever is reading. -->
+    <string name="bill_note_order">طلبك</string>
+    <string name="bill_note_fare">أجرتك</string>
+    <string name="bill_note_tab">حسابك</string>
+    <string name="receipt_note">إيصال — شكرًا لك</string>
+    <string name="receipt_note_oob">إيصال — سُدّد خارج DUCAT. شكرًا لك</string>
 </resources>
