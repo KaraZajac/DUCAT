@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">요금과 미터기예요: 승강장의 호출을 지켜보고, 미터가 시작될 때 요율을 글로 남기고, 계산서에 시간이 표시돼요.</string>
     <string name="mode_donate">후원</string>
     <string name="mode_donate_desc">어떤 Monero 지갑이든 보낼 수 있는 상시 코드예요. 상대 쪽엔 앱이 필요 없어요.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">대여</string>
+    <string name="mode_renting_desc">방이나 차를 빌려주세요. 가진 것을 올려두면 근처 사람들이 찾아 문의합니다.</string>
 </resources>

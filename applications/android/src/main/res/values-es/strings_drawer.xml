@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">Tarifas y taxímetro: vigila una parada en busca de pedidos, la tarifa queda por escrito cuando arranca el taxímetro, la cuenta muestra los minutos.</string>
     <string name="mode_donate">Donaciones</string>
     <string name="mode_donate_desc">Un código fijo al que cualquier billetera Monero puede donar. Sin app del otro lado.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">Alquiler</string>
+    <string name="mode_renting_desc">Alquila una habitación o un coche. Publicas lo que tienes; la gente de cerca lo encuentra y pregunta.</string>
 </resources>

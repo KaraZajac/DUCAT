@@ -5,7 +5,14 @@
       is the same class of mistake as the missing Surface: nothing is wrong with
       the theme, it just is not being applied to everything.
     -->
-    <style name="Theme.Ducat" parent="android:Theme.DeviceDefault.DayNight">
+    <!--
+      DeviceDefault, not DeviceDefault.DayNight: the DayNight variant arrived
+      in API 29 and this app runs from 26, where asking for it fails to inflate
+      the theme and the app dies on launch. Nothing is lost below 29 — that is
+      the release where a system-wide dark setting exists to follow at all. The
+      DayNight parent is in values-v29, where it means something.
+    -->
+    <style name="Theme.Ducat" parent="android:Theme.DeviceDefault">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>

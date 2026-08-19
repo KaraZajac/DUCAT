@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">Kursy i taksometr: obserwuj postój i czekaj na wezwania, stawka na piśmie przy starcie taksometru, rozliczenie pokazuje minuty.</string>
     <string name="mode_donate">Darowizny</string>
     <string name="mode_donate_desc">Stały kod, na który wpłaci każdy portfel Monero. Po ich stronie nie trzeba żadnej aplikacji.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">Wynajem</string>
+    <string name="mode_renting_desc">Wynajmij pokój albo samochód. Wystawiasz to, co masz; ludzie w pobliżu znajdują i pytają.</string>
 </resources>

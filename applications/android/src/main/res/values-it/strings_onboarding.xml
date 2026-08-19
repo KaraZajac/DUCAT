@@ -61,4 +61,10 @@ Quando finisce, tutte e due le cauzioni tornano intere e la tariffa va all\'auti
     <string name="onb_restore_pick">Scegli il file</string>
     <string name="onb_restore_cancel">Non ora</string>
     <string name="onb_restore_continue">Continua</string>
+    <!-- PIN step -->
+    <string name="onb_pin_title">Scegli un PIN</string>
+    <string name="onb_pin_body">Un numero, chiesto ogni volta che del denaro lascia questo telefono. È ciò che sta tra il tuo portafoglio e chiunque raccolga il tuo telefono sbloccato.</string>
+    <string name="onb_pin_done">Il tuo PIN è impostato. Verrà chiesto prima di ogni pagamento.</string>
+    <string name="onb_pin_action">Scegli un PIN</string>
+    <string name="onb_pin_next">Avanti</string>
 </resources>

@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">ค่าโดยสารและมิเตอร์: เฝ้าจุดจอดรอคนเรียกรถ ตกลงอัตราเป็นลายลักษณ์อักษรเมื่อมิเตอร์เริ่ม บิลแสดงจำนวนนาที</string>
     <string name="mode_donate">รับบริจาค</string>
     <string name="mode_donate_desc">โค้ดถาวรที่กระเป๋า Monero ใดก็บริจาคได้ ฝั่งผู้ให้ไม่ต้องมีแอป</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">ให้เช่า</string>
+    <string name="mode_renting_desc">ปล่อยเช่าห้องหรือรถ คุณลงสิ่งที่มีไว้ แล้วคนแถวนั้นจะเจอและติดต่อมา</string>
 </resources>

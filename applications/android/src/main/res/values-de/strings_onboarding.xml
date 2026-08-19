@@ -61,4 +61,10 @@ Ist es erledigt, kommen beide Einlagen vollständig zurück und der Fahrpreis ge
     <string name="onb_restore_pick">Datei wählen</string>
     <string name="onb_restore_cancel">Jetzt nicht</string>
     <string name="onb_restore_continue">Weiter</string>
+    <!-- PIN step -->
+    <string name="onb_pin_title">Wähle eine PIN</string>
+    <string name="onb_pin_body">Eine Zahl, die jedes Mal abgefragt wird, wenn Geld dieses Telefon verlässt. Sie steht zwischen deiner Wallet und jedem, der dein entsperrtes Telefon in die Hand nimmt.</string>
+    <string name="onb_pin_done">Deine PIN steht. Sie wird vor jeder Zahlung abgefragt.</string>
+    <string name="onb_pin_action">PIN wählen</string>
+    <string name="onb_pin_next">Weiter</string>
 </resources>

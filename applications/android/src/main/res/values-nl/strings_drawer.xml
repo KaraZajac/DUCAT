@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">Ritten en een meter: volg een standplaats voor oproepen, het tarief op schrift als de meter start, de rekening toont de minuten.</string>
     <string name="mode_donate">Donaties</string>
     <string name="mode_donate_desc">Een vaste code waaraan elke Monero-wallet kan geven. Geen app nodig aan hun kant.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">Verhuren</string>
+    <string name="mode_renting_desc">Verhuur een kamer of een auto. Je zet neer wat je hebt; mensen in de buurt vinden het en vragen ernaar.</string>
 </resources>

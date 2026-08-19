@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">Courses et compteur : surveille une station pour les appels, tarif par écrit au départ du compteur, l\'addition affiche les minutes.</string>
     <string name="mode_donate">Dons</string>
     <string name="mode_donate_desc">Un code permanent auquel n\'importe quel portefeuille Monero peut donner. Aucune app nécessaire de leur côté.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">Location</string>
+    <string name="mode_renting_desc">Loue une chambre ou une voiture. Tu publies ce que tu as ; les gens du coin le trouvent et te contactent.</string>
 </resources>

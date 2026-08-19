@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">Corridas e um taxímetro: observe um ponto por chamados, tarifa por escrito quando o taxímetro liga, a conta mostra os minutos.</string>
     <string name="mode_donate">Doações</string>
     <string name="mode_donate_desc">Um código permanente para o qual qualquer carteira Monero pode doar. Sem app do outro lado.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">Aluguel</string>
+    <string name="mode_renting_desc">Alugue um quarto ou um carro. Você publica o que tem; quem está por perto encontra e pergunta.</string>
 </resources>

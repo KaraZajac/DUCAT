@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">Cước và đồng hồ: canh một bến để nhận vẫy xe, chốt giá bằng chữ khi đồng hồ chạy, hóa đơn hiện số phút.</string>
     <string name="mode_donate">Quyên góp</string>
     <string name="mode_donate_desc">Một mã cố định mà ví Monero nào cũng gửi vào được. Phía họ không cần ứng dụng.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">Cho thuê</string>
+    <string name="mode_renting_desc">Cho thuê một phòng hoặc một chiếc xe. Bạn đăng thứ mình có; người ở gần tìm thấy và hỏi.</string>
 </resources>

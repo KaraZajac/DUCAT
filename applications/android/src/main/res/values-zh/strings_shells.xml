@@ -29,4 +29,9 @@
     <string name="shells_booking_done">已完成</string>
     <string name="shells_booking_aborted">已取消</string>
     <string name="shells_booking_someone">一笔预订</string>
+    <!-- Renting shell -->
+    <string name="shells_title_renting">出租</string>
+    <string name="shells_tab_listings">房源</string>
+    <string name="shells_tab_bookings">预订</string>
+    <string name="shells_no_bookings_yet">还没有预订。</string>
 </resources>

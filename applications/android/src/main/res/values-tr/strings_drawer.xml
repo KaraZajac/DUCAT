@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">Ücretler ve bir taksimetre: durakta çağrıları izle, taksimetre başlarken tarifeyi yazılı ver, hesap dakikaları gösterir.</string>
     <string name="mode_donate">Bağışlar</string>
     <string name="mode_donate_desc">Her Monero cüzdanının bağış yapabildiği sabit bir kod. Karşı tarafta uygulama gerekmez.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">Kiralama</string>
+    <string name="mode_renting_desc">Bir oda ya da araba kirala. Elindekini yayınlarsın; yakındakiler bulur ve sorar.</string>
 </resources>

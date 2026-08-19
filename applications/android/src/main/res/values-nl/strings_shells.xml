@@ -29,4 +29,9 @@
     <string name="shells_booking_done">Afgerond</string>
     <string name="shells_booking_aborted">Afgezegd</string>
     <string name="shells_booking_someone">Een boeking</string>
+    <!-- Renting shell -->
+    <string name="shells_title_renting">Verhuren</string>
+    <string name="shells_tab_listings">Aanbod</string>
+    <string name="shells_tab_bookings">Boekingen</string>
+    <string name="shells_no_bookings_yet">Nog geen boekingen.</string>
 </resources>

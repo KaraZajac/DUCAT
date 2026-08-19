@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">Fahrpreise und ein Taxameter: einen Stand auf Rufe beobachten, der Tarif schriftlich beim Start, die Rechnung zeigt die Minuten.</string>
     <string name="mode_donate">Spenden</string>
     <string name="mode_donate_desc">Ein fester Code, an den jede Monero-Wallet geben kann. Keine App auf der anderen Seite nötig.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">Vermieten</string>
+    <string name="mode_renting_desc">Vermiete ein Zimmer oder ein Auto. Du stellst ein, was du hast; Leute in der Nähe finden es und fragen an.</string>
 </resources>

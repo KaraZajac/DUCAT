@@ -61,4 +61,10 @@
     <string name="onb_restore_pick">Choisir le fichier</string>
     <string name="onb_restore_cancel">Pas maintenant</string>
     <string name="onb_restore_continue">Continuer</string>
+    <!-- PIN step -->
+    <string name="onb_pin_title">Choisis un code</string>
+    <string name="onb_pin_body">Un nombre, demandé chaque fois que de l\'argent quitte ce téléphone. C\'est ce qui sépare ton portefeuille de quiconque ramasse ton téléphone déverrouillé.</string>
+    <string name="onb_pin_done">Ton code est en place. Il sera demandé avant chaque paiement.</string>
+    <string name="onb_pin_action">Choisir un code</string>
+    <string name="onb_pin_next">Suivant</string>
 </resources>

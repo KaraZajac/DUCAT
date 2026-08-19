@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">Tarif dan argo: pantau pangkalan untuk panggilan, tarif tertulis saat argo jalan, tagihan menunjukkan menitnya.</string>
     <string name="mode_donate">Donasi</string>
     <string name="mode_donate_desc">Kode tetap yang bisa diberi oleh dompet Monero mana pun. Tanpa aplikasi di sisi mereka.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">Sewa</string>
+    <string name="mode_renting_desc">Sewakan kamar atau mobil. Kamu pasang apa yang kamu punya; orang di sekitar menemukannya dan bertanya.</string>
 </resources>

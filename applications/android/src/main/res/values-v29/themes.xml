@@ -1,0 +1,11 @@
+<resources>
+    <!--
+      From API 29 there is a system dark setting to follow, so follow it. Only
+      the parent changes; everything else about the theme lives in values/.
+      See the note there for why the floor cannot say this.
+    -->
+    <style name="Theme.Ducat" parent="android:Theme.DeviceDefault.DayNight">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

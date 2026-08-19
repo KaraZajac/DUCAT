@@ -29,4 +29,9 @@
     <string name="shells_booking_done">완료</string>
     <string name="shells_booking_aborted">취소됨</string>
     <string name="shells_booking_someone">예약</string>
+    <!-- Renting shell -->
+    <string name="shells_title_renting">대여</string>
+    <string name="shells_tab_listings">등록</string>
+    <string name="shells_tab_bookings">예약</string>
+    <string name="shells_no_bookings_yet">아직 예약이 없습니다.</string>
 </resources>

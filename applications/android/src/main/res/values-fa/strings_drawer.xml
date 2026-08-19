@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">کرایه و تاکسی‌متر: ایستگاهی را برای درخواست‌ها زیر نظر بگیر، نرخ موقع شروعِ تاکسی‌متر کتبی ثبت می‌شود، صورت‌حساب دقیقه‌ها را نشان می‌دهد.</string>
     <string name="mode_donate">کمک‌های مالی</string>
     <string name="mode_donate_desc">یک کد ثابت که هر کیف پول Monero می‌تواند به آن کمک کند. آن طرف به هیچ برنامه‌ای نیاز نیست.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">اجاره</string>
+    <string name="mode_renting_desc">اتاق یا خودرویت را اجاره بده. آنچه داری را منتشر می‌کنی؛ کسانی که نزدیک‌اند پیدایش می‌کنند و می‌پرسند.</string>
 </resources>

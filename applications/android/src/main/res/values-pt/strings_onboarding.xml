@@ -61,4 +61,10 @@ Quando termina, as duas cauções voltam inteiras e o valor vai para o condutor.
     <string name="onb_restore_pick">Escolher o ficheiro</string>
     <string name="onb_restore_cancel">Agora não</string>
     <string name="onb_restore_continue">Continuar</string>
+    <!-- PIN step -->
+    <string name="onb_pin_title">Escolha um PIN</string>
+    <string name="onb_pin_body">Um número, pedido toda vez que sai dinheiro deste telefone. É o que fica entre a sua carteira e qualquer um que pegue o seu telefone desbloqueado.</string>
+    <string name="onb_pin_done">Seu PIN está pronto. Será pedido antes de qualquer pagamento.</string>
+    <string name="onb_pin_action">Escolher um PIN</string>
+    <string name="onb_pin_next">Avançar</string>
 </resources>

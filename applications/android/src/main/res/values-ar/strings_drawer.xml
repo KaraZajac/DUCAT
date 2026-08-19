@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">أجرة وعدّاد: راقب موقفًا للنداءات، وثبّت السعر كتابةً عند بدء العدّاد، والفاتورة تعرض الدقائق.</string>
     <string name="mode_donate">تبرعات</string>
     <string name="mode_donate_desc">رمز دائم يمكن لأي محفظة Monero التبرع من خلاله. لا حاجة إلى تطبيق عندهم.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">التأجير</string>
+    <string name="mode_renting_desc">أجّر غرفة أو سيارة. تنشر ما لديك، فيجده من حولك ويسأل عنه.</string>
 </resources>

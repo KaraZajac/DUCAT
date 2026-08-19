@@ -64,7 +64,10 @@ def read(path):
     out, plurals = {}, {}
     root = ET.parse(path).getroot()
     for s in root.iter("string"):
-        if s.get("name"):
+        # translatable="false" is the author saying this one is a brand name
+        # or a bare format string. Comparing those to a translation that will
+        # never exist is how a checker earns the right to be ignored.
+        if s.get("name") and s.get("translatable") != "false":
             out[s.get("name")] = text_of(s)
     for p in root.iter("plurals"):
         for item in p.iter("item"):
@@ -75,10 +78,13 @@ def read(path):
 def main() -> int:
     problems = 0
     base_files = sorted(glob.glob(os.path.join(RES, "values/strings_*.xml")))
+    # Language folders only. `values-v29` and friends are API qualifiers, not
+    # locales — counting one as a language makes this report every string in
+    # the app as missing from it, which is a lot of noise for a themes file.
     locales = sorted(
         d.split("values-")[1]
         for d in glob.glob(os.path.join(RES, "values-*"))
-        if os.path.isdir(d)
+        if os.path.isdir(d) and not re.fullmatch(r"v\d+", d.split("values-")[1])
     )
 
     for base_path in base_files:
@@ -95,6 +101,20 @@ def main() -> int:
                 problems += 1
                 continue
             strings, plurals = read(path)
+
+            # 0. Every translatable string the base has, this locale has.
+            #
+            #    The file existing is not the same as the file being current.
+            #    Eleven strings — the whole PIN step and the renting shell —
+            #    were added to values/ alone and shipped in English to every
+            #    one of these languages, while this script compared the keys
+            #    the two files had in common and reported that they agreed.
+            absent = [k for k in base if k not in strings]
+            if absent:
+                shown = ", ".join(sorted(absent)[:4])
+                more = f" (+{len(absent) - 4} more)" if len(absent) > 4 else ""
+                print(f"  ! {loc}/{name}: untranslated: {shown}{more}")
+                problems += len(absent)
 
             # 1. Placeholders must match the base exactly, as a multiset.
             for key, value in strings.items():

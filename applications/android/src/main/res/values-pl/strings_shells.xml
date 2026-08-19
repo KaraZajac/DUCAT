@@ -29,4 +29,9 @@
     <string name="shells_booking_done">Zakończona</string>
     <string name="shells_booking_aborted">Odwołana</string>
     <string name="shells_booking_someone">Rezerwacja</string>
+    <!-- Renting shell -->
+    <string name="shells_title_renting">Wynajem</string>
+    <string name="shells_tab_listings">Ogłoszenia</string>
+    <string name="shells_tab_bookings">Rezerwacje</string>
+    <string name="shells_no_bookings_yet">Nie ma jeszcze rezerwacji.</string>
 </resources>

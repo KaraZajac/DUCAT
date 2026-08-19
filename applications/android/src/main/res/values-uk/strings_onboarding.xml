@@ -61,4 +61,10 @@
     <string name="onb_restore_pick">Вибрати файл</string>
     <string name="onb_restore_cancel">Не зараз</string>
     <string name="onb_restore_continue">Продовжити</string>
+    <!-- PIN step -->
+    <string name="onb_pin_title">Обери PIN</string>
+    <string name="onb_pin_body">Одне число, яке запитують щоразу, коли гроші йдуть із цього телефона. Саме воно стоїть між твоїм гаманцем і будь-ким, хто підніме розблокований телефон.</string>
+    <string name="onb_pin_done">PIN задано. Його запитають перед кожним платежем.</string>
+    <string name="onb_pin_action">Обрати PIN</string>
+    <string name="onb_pin_next">Далі</string>
 </resources>

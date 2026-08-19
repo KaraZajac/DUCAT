@@ -29,4 +29,9 @@
     <string name="shells_booking_done">پایان‌یافته</string>
     <string name="shells_booking_aborted">لغو شد</string>
     <string name="shells_booking_someone">یک رزرو</string>
+    <!-- Renting shell -->
+    <string name="shells_title_renting">اجاره</string>
+    <string name="shells_tab_listings">آگهی‌ها</string>
+    <string name="shells_tab_bookings">رزروها</string>
+    <string name="shells_no_bookings_yet">هنوز رزروی نیست.</string>
 </resources>

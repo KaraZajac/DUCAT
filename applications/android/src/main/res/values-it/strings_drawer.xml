@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">Corse e tassametro: sorvegli un posteggio per le chiamate, tariffa messa per iscritto quando parte il tassametro, il conto mostra i minuti.</string>
     <string name="mode_donate">Donazioni</string>
     <string name="mode_donate_desc">Un codice fisso a cui può donare qualsiasi portafoglio Monero. Dall\'altra parte non serve nessuna app.</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">Affitto</string>
+    <string name="mode_renting_desc">Affitta una stanza o un\'auto. Pubblichi quello che hai; chi è nei paraggi lo trova e ti scrive.</string>
 </resources>

@@ -92,6 +92,25 @@ fun main() {
     check("an unwritten store reads as empty", virgin.isSuccess && virgin.getOrNull() == null,
         virgin.exceptionOrNull()?.message ?: "")
 
+    // 4e. Every store this app has, opened cold on a protected desk.
+    //
+    //     This is the shape of the bug a released macOS build actually shipped
+    //     with: set a passphrase, launch, and the first store nobody had
+    //     written yet threw a JSONException before any screen drew. It was not
+    //     particular to the store that happened to be new — every one of them
+    //     was one launch away from it. So name them all, and open them all.
+    val stores = listOf(
+        "ducat_catalogue", "ducat_ceremonies", "ducat_contacts", "ducat_desk_place",
+        "ducat_enquiries", "ducat_listings", "ducat_locale", "ducat_orders",
+        "ducat_pin", "ducat_rides", "ducat_units",
+    )
+    val cold = DeskContext(base)
+    val broke = stores.mapNotNull { name ->
+        runCatching { securePrefs(cold, name).getString("nothing_is_here", null) }
+            .exceptionOrNull()?.let { "$name: ${it.message}" }
+    }
+    check("every store opens cold on a protected desk", broke.isEmpty(), broke.joinToString("; "))
+
     // 4d. The order a real first launch takes: vault first, wallet after. The
     //     migration path seals by a different route, so cases 2 and 3 above
     //     never exercised the editor — this is the one that mints money.

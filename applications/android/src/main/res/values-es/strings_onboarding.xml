@@ -61,4 +61,10 @@ Al terminar, las dos garantías vuelven enteras y la tarifa va al conductor. Nad
     <string name="onb_restore_pick">Elegir el archivo</string>
     <string name="onb_restore_cancel">Ahora no</string>
     <string name="onb_restore_continue">Continuar</string>
+    <!-- PIN step -->
+    <string name="onb_pin_title">Elige un PIN</string>
+    <string name="onb_pin_body">Un número, que se pide cada vez que sale dinero de este teléfono. Es lo que separa tu monedero de quien coja tu teléfono desbloqueado.</string>
+    <string name="onb_pin_done">Tu PIN ya está. Se pedirá antes de cualquier pago.</string>
+    <string name="onb_pin_action">Elegir un PIN</string>
+    <string name="onb_pin_next">Siguiente</string>
 </resources>

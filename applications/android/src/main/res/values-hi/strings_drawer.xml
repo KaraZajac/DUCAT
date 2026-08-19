@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">किराया और मीटर: स्टैंड पर पुकारों की नज़र रखें, मीटर शुरू होते ही दर लिखित में, बिल में मिनट दिखते हैं।</string>
     <string name="mode_donate">दान</string>
     <string name="mode_donate_desc">एक स्थायी कोड, जिस पर कोई भी Monero वॉलेट दे सकता है। उनकी तरफ़ किसी ऐप की ज़रूरत नहीं।</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">किराया</string>
+    <string name="mode_renting_desc">कमरा या गाड़ी किराए पर दें। आप जो है वह पोस्ट करते हैं; आस-पास के लोग उसे ढूँढ़कर पूछते हैं।</string>
 </resources>

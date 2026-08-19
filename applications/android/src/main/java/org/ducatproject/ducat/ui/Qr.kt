@@ -50,7 +50,13 @@ import kotlinx.coroutines.withContext
 @Composable
 fun QrBlock(text: String) {
     val bitmap by produceState<Result<ImageBitmap>?>(null, text) {
-        value = withContext(Dispatchers.Default) { encodeQr(text) }
+        // Through a local rather than assigning the withContext directly.
+        // Identical either way at runtime, but the Compose lint cannot follow
+        // an assignment whose right-hand side is a suspend call and reports
+        // the producer as never assigning — and a build that always has one
+        // error in it is a build nobody reads the errors of.
+        val encoded = withContext(Dispatchers.Default) { encodeQr(text) }
+        value = encoded
     }
 
     Box(

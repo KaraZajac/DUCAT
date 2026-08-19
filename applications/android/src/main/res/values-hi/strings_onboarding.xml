@@ -61,4 +61,10 @@
     <string name="onb_restore_pick">फ़ाइल चुनें</string>
     <string name="onb_restore_cancel">अभी नहीं</string>
     <string name="onb_restore_continue">आगे बढ़ें</string>
+    <!-- PIN step -->
+    <string name="onb_pin_title">एक पिन चुनें</string>
+    <string name="onb_pin_body">एक नंबर, जो हर बार पूछा जाएगा जब इस फ़ोन से पैसा जाएगा। यही आपके बटुए और आपका खुला फ़ोन उठाने वाले के बीच खड़ा होता है।</string>
+    <string name="onb_pin_done">आपका पिन सेट हो गया। हर भुगतान से पहले यह पूछा जाएगा।</string>
+    <string name="onb_pin_action">पिन चुनें</string>
+    <string name="onb_pin_next">आगे</string>
 </resources>

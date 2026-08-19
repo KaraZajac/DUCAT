@@ -36,4 +36,7 @@
     <string name="mode_taxi_desc">车费和计价器：盯一个候车点等人叫车，计价器一启动费率就白纸黑字写下，账单列明分钟数。</string>
     <string name="mode_donate">捐赠</string>
     <string name="mode_donate_desc">一个常设收款码，任何 Monero 钱包都能捐。对方无需安装应用。</string>
+    <!-- Renting mode -->
+    <string name="mode_renting">出租</string>
+    <string name="mode_renting_desc">出租房间或车。你把有的东西发出去，附近的人看到就来问。</string>
 </resources>

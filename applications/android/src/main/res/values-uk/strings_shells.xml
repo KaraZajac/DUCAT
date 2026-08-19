@@ -29,4 +29,9 @@
     <string name="shells_booking_done">Завершено</string>
     <string name="shells_booking_aborted">Скасовано</string>
     <string name="shells_booking_someone">Бронювання</string>
+    <!-- Renting shell -->
+    <string name="shells_title_renting">Оренда</string>
+    <string name="shells_tab_listings">Оголошення</string>
+    <string name="shells_tab_bookings">Бронювання</string>
+    <string name="shells_no_bookings_yet">Бронювань поки немає.</string>
 </resources>
