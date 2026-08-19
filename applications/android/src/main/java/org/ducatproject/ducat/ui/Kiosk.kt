@@ -55,13 +55,19 @@ fun KioskScreen() {
     LaunchedEffect(placed?.id, version) {
         val waiting = placed ?: return@LaunchedEffect
         if (waiting.state != Orders.State.Awaiting) return@LaunchedEffect
+        // Look first, then wait. `version` is a key, so any store bump
+        // anywhere in the app restarts this effect — and restarting it in the
+        // middle of the delay used to throw the wait away and start it over,
+        // so a busy device could keep resetting the clock and the customer
+        // would stand in front of a spinner whose payment had already landed.
+        // Checking before sleeping turns every bump into an immediate look.
         while (true) {
-            kotlinx.coroutines.delay(3_000)
             val now = Orders.all(context).firstOrNull { it.id == waiting.id } ?: return@LaunchedEffect
             if (now.state != Orders.State.Awaiting) {
                 placed = now
                 return@LaunchedEffect
             }
+            kotlinx.coroutines.delay(3_000)
         }
     }
 

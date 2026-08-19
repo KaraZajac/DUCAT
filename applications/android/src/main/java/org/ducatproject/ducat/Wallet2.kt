@@ -514,9 +514,17 @@ fun formatXmr(pxmr: Long): String {
  *
  * Trailing zeroes are kept. A wallet parses the number, not its width, and
  * twelve places is what a piconero is.
+ *
+ * [java.util.Locale.ROOT], non-negotiably. `%d` is one of the conversions
+ * Java localizes, and this app ships Persian and Arabic: on those devices the
+ * default locale renders 38000235547 as ۳۸۰۰۰۲۳۵۵۴۷, and a payment request
+ * carrying Persian digits is one no wallet on earth can read. (`%02x` is not
+ * localized, which is why every persona and ceremony id in this codebase has
+ * been safe all along.)
  */
-fun exactXmr(pxmr: Long): String =
-    "%d.%012d".format(pxmr / 1_000_000_000_000L, pxmr % 1_000_000_000_000L)
+fun exactXmr(pxmr: Long): String = "%d.%012d".format(
+    java.util.Locale.ROOT, pxmr / 1_000_000_000_000L, pxmr % 1_000_000_000_000L,
+)
 
 
 /**

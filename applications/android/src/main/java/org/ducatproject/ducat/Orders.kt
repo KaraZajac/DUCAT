@@ -120,17 +120,38 @@ object Orders {
      * that when a payment appears there is no question which order it was
      * for.
      */
+    /**
+     * How many addresses the counter rotates through.
+     *
+     * Not one per order. A subaddress here is allocated a permanent minor
+     * index, and that index is what the wallet scanner and the pool scan have
+     * to check every output against — so a stall doing two hundred orders a
+     * day was signing the wallet up to seventy thousand subaddress checks per
+     * output within the year, plus a preference key per order in a document
+     * rewritten whole on every write. Both grow for ever and neither ever
+     * shrinks.
+     *
+     * A ring gets what the addresses were for: no two customers in a queue
+     * are shown the same one, which is the privacy that matters at a counter.
+     * An address comes round again after sixty-four orders, by which time the
+     * customer who used it is long gone — and attribution never depended on
+     * the address anyway, only on the amount.
+     */
+    private const val ADDRESS_SLOTS = 64
+
     fun place(context: Context, lines: List<BillItem>): Order {
         val id = java.util.UUID.randomUUID().toString()
         val plain = lines.sumOf { it.amountPxmr }
         val noise = java.security.SecureRandom().nextInt(TAG_RANGE.toInt()).toLong()
         val next = (all(context).maxOfOrNull { it.number } ?: 0) % 999 + 1
+        val slot = prefs(context).getInt("slot_next", 0)
+        prefs(context).edit().putInt("slot_next", (slot + 1) % ADDRESS_SLOTS).apply()
         val order = Order(
             id = id,
             number = next,
             lines = lines,
             totalPxmr = plain + noise,
-            address = WalletStore(context).addressFor("order_$id") ?: "",
+            address = WalletStore(context).addressFor("order_slot_$slot") ?: "",
             state = State.Awaiting,
             placedAt = System.currentTimeMillis() / 1000,
         )

@@ -42,6 +42,7 @@ import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RideStore
 import org.ducatproject.ducat.StoredMessage
+import org.ducatproject.ducat.exactXmr
 import org.ducatproject.ducat.formatXmr
 import uniffi.ducat_mobile.HailInfo
 import uniffi.ducat_mobile.hailDecode
@@ -1352,9 +1353,19 @@ internal fun offerToPxmr(text: String, fiat: Boolean, rate: Double?): Long? {
 /** Render picoXMR into a field string in the chosen unit (the inverse used to
  *  seed and to convert a field when the unit toggle is flipped). */
 internal fun pxmrToField(pxmr: Long, fiat: Boolean, rate: Double?): String =
-    if (fiat && rate != null && rate > 0)
+    if (fiat && rate != null && rate > 0) {
         "%.2f".format(java.util.Locale.US, pxmr / 1e12 * rate)
-    else formatXmr(pxmr)
+    } else {
+        // Not formatXmr. Whatever goes in here comes back out through
+        // `moneyText(…).toBigDecimalOrNull()` when the offer is read, and
+        // formatXmr is written for eyes: it localizes its digits, so flipping
+        // the unit toggle on a Persian phone seeded the field with ۰.۰۳۸۰۰۰
+        // and the offer could no longer be read at all — and for a small
+        // enough amount it answers the literal "<0.000001", which parses to
+        // nothing anywhere. Exact, ASCII, and no trailing noise, so flipping
+        // the toggle back and forth does not drift the number.
+        exactXmr(pxmr).trimEnd('0').trimEnd('.')
+    }
 
 /**
  * The job, before the yes: the whole trip on one map — me to the pickup, the

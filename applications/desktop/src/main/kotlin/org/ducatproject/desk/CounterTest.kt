@@ -122,7 +122,10 @@ fun main() {
     // --- orders -----------------------------------------------------------
 
     // An order needs somewhere to be paid, which needs a wallet.
-    WalletStore(context).save("5TillTest", "c".repeat(64), 2_190_000uL, true)
+    // A valid ed25519 scalar (0x0a0a… little-endian is below the group
+    // order), so addressFor really derives subaddresses rather than
+    // silently falling back to the main address for every order.
+    WalletStore(context).save("5TillTest", "0a".repeat(32), 2_190_000uL, true)
 
     check("no orders yet", Orders.all(context).isEmpty())
 
@@ -155,6 +158,24 @@ fun main() {
         "asked $asked for ${first.totalPxmr} pXMR",
     )
 
+    // The same code on a Persian phone. `%d` is one of the conversions Java
+    // localizes, so a payment request built with the default locale came out
+    // as ۰.۰۳۸۰۰۰۲۳۵۵۴۷ — digits no wallet can parse, on a build that ships
+    // Persian and Arabic. Nothing about this is visible from an English desk.
+    val wasDefault = java.util.Locale.getDefault()
+    try {
+        java.util.Locale.setDefault(java.util.Locale.forLanguageTag("fa-IR"))
+        val farsi = Orders.payUri(first)
+        check(
+            "the pay code stays ASCII wherever the phone is",
+            farsi.all { it.code < 128 },
+            farsi,
+        )
+        check("and is still the same amount", farsi == uri, farsi)
+    } finally {
+        java.util.Locale.setDefault(wasDefault)
+    }
+
     val second = Orders.place(context, basket)
     check("a second order of the same basket", Orders.all(context).size == 2)
     check(
@@ -163,6 +184,11 @@ fun main() {
         "both ${first.totalPxmr}",
     )
     check("and is called by a different number", second.number != first.number)
+    check(
+        "and shown a different address, so a queue does not share one",
+        second.address != first.address,
+    )
+
 
     // Numbers wrap rather than growing forever, and must not collide with a
     // number still on the board.
@@ -201,6 +227,19 @@ fun main() {
     check(
         "and giving up does not disturb a sighted order",
         Orders.all(context).first { it.id == first.id }.state == Orders.State.Seen,
+    )
+
+    // The addresses rotate rather than accumulating. Every one allocated takes
+    // a permanent subaddress index that the wallet scanner checks against
+    // every output it ever sees, so "a fresh one per order" is a bill that
+    // arrives months later as a wallet that will not sync.
+    val before = org.ducatproject.ducat.WalletStore(context).subaddressCount()
+    repeat(80) { Orders.place(context, listOf(BillItem("x", 1_000_000_000L))) }
+    val after = org.ducatproject.ducat.WalletStore(context).subaddressCount()
+    check(
+        "eighty more orders do not mean eighty more subaddresses",
+        after - before <= 64,
+        "grew by ${after - before}",
     )
 
     // --- the PIN ----------------------------------------------------------
