@@ -356,6 +356,19 @@ fun main() {
     rtl("ar-activity", 1100, 800) { org.ducatproject.ducat.ui.ActivityScreen() }
     android.res.DeskRes.setLocale("en")
 
+    // --- a small phone ----------------------------------------------------
+    //
+    // 320 by 640 is the floor Android still ships — a Go device, an old
+    // handset, the phone somebody running a market stall actually owns rather
+    // than the one this was written on. Rows that fit at 520 wrap or clip
+    // here, and a till whose total is cut off is a till nobody can use.
+    render("small-till", 320, 640) { org.ducatproject.ducat.ui.PosScreen() }
+    render("small-kiosk", 320, 640) { org.ducatproject.ducat.ui.KioskScreen() }
+    render("small-items", 320, 640) { org.ducatproject.ducat.ui.ItemsScreen() }
+    render("small-pin", 320, 640) {
+        org.ducatproject.ducat.ui.PinGate(open = true, onDismiss = {}, onPassed = {})
+    }
+
     println(
         if (failures == 0) "RENDERTEST OK — ${out.absolutePath}"
         else "RENDERTEST FAILED ($failures)",
