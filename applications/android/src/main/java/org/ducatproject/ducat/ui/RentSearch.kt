@@ -105,6 +105,20 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                 return@grabFix
             }
             scope.launch {
+                // Whether this device is on the network at all, asked before
+                // and after. A read of a board nobody can reach does not fail
+                // — it succeeds, finds nothing, and takes its twenty-one
+                // seconds doing it — so counting failures never catches this;
+                // only the node's own view of itself does. The driver's map
+                // has always asked this question and the search never did.
+                fun attached() = runCatching {
+                    uniffi.ducat_mobile.nodeStatus().publicInternetReady
+                }.getOrDefault(false)
+                if (!attached()) {
+                    stalled = Stall.NoNetwork
+                    searching = false
+                    return@launch
+                }
                 val replied = withContext(Dispatchers.IO) {
                     runCatching {
                         Listings.search(
@@ -125,7 +139,9 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                 // and saying "nothing listed around here" would be a
                 // confident lie. Opening this a few seconds after the app
                 // starts, before the node has attached, does exactly that.
-                if (replied == 0) stalled = Stall.NoNetwork
+                if (replied == 0 || (results.isNullOrEmpty() && !attached())) {
+                    stalled = Stall.NoNetwork
+                }
                 if (results == null) results = emptyList()
                 searching = false
             }
