@@ -301,7 +301,13 @@ the funder absent, and a reservation's two-input release spending both
 parties' stakes at once. Renting was proven the same way: two unrelated desks,
 one posting and one searching, converging on a board addressed by the
 neighbourhood — including the overflow ladder, where thirteen cars spread
-across two shards of a full board and a stranger found every one of them.
+across two shards of a full board and a stranger found every one of them. And
+then from a phone: a handset that had never heard of the seller opened Rent a
+car, had the listing on screen in under six seconds, tapped Ask about it, and
+had claimed the card and delivered its question 1.2 s later. The bonded ride
+has now been driven to the end on two phones as well — the driver proposing
+the split, the rider signing it on the screen that asks, the bond broadcast
+and both stakes home.
 
 Not proven, and stated here rather than buried: **no external adversarial
 review** (§2.5 is the project's own argument for why that matters), no
@@ -312,9 +318,15 @@ The latency figures in §8.7.2 are a desktop with an attached node. The
 cryptography proven, but their own two-phone UI passes are still owed; and a
 co-signer today consents to a stated fee, not an itemised destination list —
 honest consent waits on an upstream wallet API making payments readable.
-Searching a quiet neighbourhood is slow and honest about it: a populated board
-answers in seconds but an empty one has taken up to 85 s to conclude it is
-empty, so results appear as each board answers rather than all at the end.
+Searching a quiet neighbourhood is bounded, and the screen says so while it
+happens. Measured against the live network from a node with nothing else to
+do: a board somebody has posted to answers in 1.1 s, and an empty one takes
+21.0 s — flat, to the millisecond, across eight different empty boards,
+because that number is the DHT giving up rather than searching. A search
+reads your own cell first and then the ring of eight around it, drawing each
+as it lands, so a car parked near you is on screen in under six seconds while
+"nothing listed around here" takes about forty and counts the areas off as it
+goes.
 
 ## License
 
