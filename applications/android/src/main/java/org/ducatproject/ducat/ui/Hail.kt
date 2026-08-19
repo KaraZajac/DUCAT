@@ -592,11 +592,36 @@ fun DriveScreen() {
     // The watch set: one named stand, or a geocell and its 8 neighbours —
     // §15.12's 3×3, because a rider fifty metres over a border is otherwise
     // invisible.
-    var watching by remember { mutableStateOf<List<String>?>(null) }
-    var myFix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
+    // On duty across a trip to the drawer and back.
+    //
+    // These were screen state, so a driver who opened Settings — or Status, to
+    // see whether their node was up — came back off duty, with no hails
+    // arriving and nothing saying why. A shift is not a screen. The rider's
+    // side already knew this: a posted hail is rehydrated from RideStore
+    // precisely so a restart resumes watching the same slot.
+    val dutyPrefs = remember { securePrefs(context, "ducat_contacts") }
+    var watching by remember {
+        mutableStateOf(
+            dutyPrefs.getString("drive_watching", null)
+                ?.split(",")?.filter { it.isNotBlank() }?.takeIf { it.isNotEmpty() },
+        )
+    }
+    var myFix by remember {
+        mutableStateOf(
+            dutyPrefs.getLong("drive_lat", Long.MIN_VALUE)
+                .takeIf { it != Long.MIN_VALUE }
+                ?.let { it to dutyPrefs.getLong("drive_lon", 0L) },
+        )
+    }
     var notices by remember { mutableStateOf<List<SeenHail>>(emptyList()) }
     var selected by remember { mutableStateOf<SeenHail?>(null) }
-    var coverage by remember { mutableStateOf<LongArray?>(null) }
+    var coverage by remember {
+        mutableStateOf(
+            dutyPrefs.getString("drive_box", null)
+                ?.split(",")?.mapNotNull { it.toLongOrNull() }
+                ?.takeIf { it.size == 4 }?.toLongArray(),
+        )
+    }
     // The net's size is the driver's call: one cell where hails are thick,
     // 5×5 where a fare is worth chasing across a rural county.
     val rangePrefs = remember {
@@ -658,6 +683,13 @@ fun DriveScreen() {
                 coverage = longArrayOf(latLo, latHi, lonLo, lonHi)
                 cell = "geo:$home"
                 watching = cells.map { "geo:$it" }
+                // Remembered, so leaving this screen does not end the shift.
+                dutyPrefs.edit()
+                    .putString("drive_watching", watching!!.joinToString(","))
+                    .putLong("drive_lat", fix.first)
+                    .putLong("drive_lon", fix.second)
+                    .putString("drive_box", coverage!!.joinToString(","))
+                    .apply()
             }.onFailure { error = it.message }
         }
     }
@@ -883,7 +915,7 @@ fun DriveScreen() {
                         color = MaterialTheme.colorScheme.outline,
                     )
                 }
-                OutlinedButton(onClick = { watching = null; notices = emptyList() }) {
+                OutlinedButton(onClick = { watching = null; notices = emptyList(); forgetDuty(dutyPrefs) }) {
                     Text(stringResource(R.string.hail_stop))
                 }
             }
@@ -1025,7 +1057,7 @@ fun DriveScreen() {
                     enabled = cell.isNotBlank()) { Text(stringResource(R.string.hail_watch)) }
             } else {
                 OutlinedButton(onClick = {
-                    watching = null; notices = emptyList()
+                    watching = null; notices = emptyList(); forgetDuty(dutyPrefs)
                 }) { Text(stringResource(R.string.hail_stop)) }
             }
         }
@@ -1819,4 +1851,12 @@ private fun AddressField(
                 .padding(vertical = 8.dp, horizontal = 4.dp),
         )
     }
+}
+
+/** Off duty: forget where this driver was watching. */
+private fun forgetDuty(prefs: android.content.SharedPreferences) {
+    prefs.edit()
+        .remove("drive_watching").remove("drive_lat")
+        .remove("drive_lon").remove("drive_box")
+        .apply()
 }

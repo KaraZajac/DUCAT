@@ -205,7 +205,17 @@ object Mailbox {
         nodeDhtSet(
             scanned.inboxKey, 1u,
             buildContactDetails(
-                persona, outbox.key, prekeys.bundle, petname,
+                persona, outbox.key, prekeys.bundle,
+                // **Our** name, not the one we just chose for them. This
+                // argument is `display_name` — what the reply asserts about
+                // its sender — and it was being handed `petname`, the private
+                // label this device picked for the other party. Wrong twice:
+                // with a petname it published "what I call you" *as* my name,
+                // and without one (every hail, every scan, every ducat: link —
+                // they all pass null) nothing travelled, so the other side
+                // stored no name at all. A rider watching the curb was shown
+                // "Unnamed contact" beside the plate they were looking for.
+                NameStore(context).get(),
                 // Their address, for them alone (§15.10): the counterparty is
                 // known here, so the published address is their subaddress.
                 if (store.publishAddress()) {

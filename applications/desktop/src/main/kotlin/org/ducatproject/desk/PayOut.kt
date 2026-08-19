@@ -100,6 +100,19 @@ fun main() {
         r.getOrNull()?.let { sent = it; return@repeat }
         lastWhy = r.exceptionOrNull()?.message.orEmpty()
         if (!lastWhy.contains("not enough")) error("PAY_FAIL $lastWhy")
+        // Nothing unlocked at all is not an amount problem, and backing off
+        // by a fee at a time will never reach zero-available. Monero spends
+        // whole notes: a wallet holding one note has none left the moment it
+        // pays anybody, until its own change clears the ten-block lock.
+        if (lastWhy.contains("0.000000 XMR available")) {
+            val w = Wallet.balances(context)
+            val mins = (w.blocksToUnlock * 2).coerceAtLeast(1)
+            error(
+                "PAY_FAIL nothing unlocked yet — ${formatXmr(w.lockedPxmr)} XMR is still " +
+                    "locked, about $mins minute(s) out. A wallet with one note has nothing " +
+                    "spendable until its change clears.",
+            )
+        }
         val back = Wallet.feeFor(context, b.spendableOutputs.coerceAtLeast(1), 1) / 2
         attempt -= back.coerceAtLeast(1_000_000L)
         if (attempt <= 0) error("PAY_FAIL nothing left once the fee is counted")

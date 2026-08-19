@@ -2033,12 +2033,35 @@ private fun RideBondBanner(contact: Contact) {
             }
             error?.let {
                 Spacer(Modifier.height(4.dp))
-                Text(it, color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.labelSmall)
+                // Escrow outputs need their ten confirmations like any other,
+                // so "not yet" is the ordinary answer to completing a ride
+                // promptly — not a failure. It arrived here as red text
+                // reading "v1=the fare needs 2 more confirmation(s) before it
+                // can move", which tells a driver their money is stuck.
+                val waiting = it.contains("confirmation", ignoreCase = true)
+                Text(
+                    bridgeMessage(it),
+                    color = if (waiting) MaterialTheme.colorScheme.onSurfaceVariant
+                    else MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                )
             }
         }
     }
 }
+
+/**
+ * A message from the bridge, without the bridge showing through.
+ *
+ * UniFFI generates `message` for its error types as `"v1=" + the payload`,
+ * the tuple field's own name, so every failure that crosses the boundary
+ * reaches a screen wearing it: `v1=decoys: InterfaceError(…)`, `v1=not enough
+ * in the notes you picked`, `v1=the fare needs 2 more confirmation(s)`. The
+ * sentences after the prefix are often perfectly good; the prefix is never
+ * anything but noise to the person reading it.
+ */
+internal fun bridgeMessage(raw: String): String =
+    raw.removePrefix("v1=").trim()
 
 /** A plain note under a button — the consequence of pressing it. */
 @Composable
