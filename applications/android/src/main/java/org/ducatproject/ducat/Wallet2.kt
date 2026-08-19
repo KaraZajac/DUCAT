@@ -242,7 +242,24 @@ object Wallet {
         if (entries.isEmpty()) return
         try {
             val spent = moneroSpent(nodeUrl, entries.map { it.keyImage })
-            store.recordSpent(entries.map { it.keyImage }.zip(spent).toMap())
+            // Spent is a one-way door, and this may only ever push it shut.
+            //
+            // `send` marks its inputs spent the moment it broadcasts, because
+            // a second payment must not be offered notes already committed to
+            // a first. But the chain does not know about that transaction
+            // until it is mined — a couple of minutes — and this asks the
+            // chain. Writing the answer back for every key image therefore
+            // resurrected the notes the wallet had just spent: the balance
+            // jumped back up seconds after a payment, and the next payment
+            // picked the same notes and built a double spend the network
+            // refused with "signed, but no node accepted it", which tells the
+            // person holding the phone nothing at all.
+            //
+            // recordSpent leaves out whatever it is not told about, so telling
+            // it only about the ones the chain confirms is the whole fix.
+            store.recordSpent(
+                entries.map { it.keyImage }.zip(spent).filter { (_, gone) -> gone }.toMap(),
+            )
         } catch (e: Exception) {
             DucatLog.w(TAG, "spent check: ${e.message}")
         }
