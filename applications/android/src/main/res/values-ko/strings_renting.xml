@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">세부 사양 — Sport, GLX, 롱 베드</string>
     <string name="rent_size">면적 (m²)</string>
     <string name="rent_still_looking">더 멀리까지 찾는 중…</string>
+    <string name="rent_no_reply_yet">아직 답이 없습니다. 매물은 하루 동안 걸려 있을 수 있어서 게시자가 휴대폰 곁에 없을 수도 있습니다 — 다른 것도 보는 편이 좋습니다.</string>
 </resources>

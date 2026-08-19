@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">Varyant — Sport, GLX, uzun kasa</string>
     <string name="rent_size">Büyüklük (m²)</string>
     <string name="rent_still_looking">Daha uzağa bakılıyor…</string>
+    <string name="rent_no_reply_yet">Henüz yanıt yok. Bir ilan bir gün boyunca durabilir, yani ilan sahibi telefonunun başında olmayabilir — diğerlerine de bakmaya değer.</string>
 </resources>

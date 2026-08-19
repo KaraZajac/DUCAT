@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">किस्म — Sport, GLX, लंबी बॉडी</string>
     <string name="rent_size">आकार (m²)</string>
     <string name="rent_still_looking">और दूर तक ढूँढ रहे हैं…</string>
+    <string name="rent_no_reply_yet">अभी कोई जवाब नहीं। लिस्टिंग एक दिन तक रह सकती है, इसलिए हो सकता है मालिक फ़ोन के पास न हो — बाकी भी देख लेना ठीक रहेगा।</string>
 </resources>

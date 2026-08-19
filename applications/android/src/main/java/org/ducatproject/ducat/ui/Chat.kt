@@ -574,7 +574,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         // the top of a chat is not a subject: the owner of four cars needs to
         // know which one this stranger read, and the stranger who tapped
         // three listings needs to know which one this is.
-        EnquiryLine(c)
+        EnquiryLine(c, messages)
         LazyColumn(
             Modifier.weight(1f).fillMaxWidth(),
             state = listState,
@@ -1689,47 +1689,78 @@ private fun ContactPickDialog(
  * what it costs, in one quiet line.
  */
 @Composable
-private fun EnquiryLine(contact: Contact) {
+private fun EnquiryLine(
+    contact: Contact,
+    messages: List<org.ducatproject.ducat.StoredMessage>,
+) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val about = remember(contact.personaHex) {
         org.ducatproject.ducat.Enquiries.about(context, contact.personaHex)
     } ?: return
+    // A board keeps a notice for a day, and nothing on it can say whether the
+    // person who wrote it is still around. So an enquiry to somebody who has
+    // stopped renting — or simply put their phone in a drawer — looks exactly
+    // like an enquiry to somebody who is about to answer: an empty thread.
+    // After a while of nothing, say so; it is the difference between "wait"
+    // and "look for another one".
+    var now by remember { mutableLongStateOf(System.currentTimeMillis() / 1000) }
+    LaunchedEffect(contact.personaHex) {
+        while (true) {
+            kotlinx.coroutines.delay(30_000)
+            now = System.currentTimeMillis() / 1000
+        }
+    }
+    val asked = messages.filter { it.outgoing }.maxOfOrNull { it.timestamp }
+    val quiet = asked != null &&
+        messages.none { !it.outgoing } &&
+        now - asked > QUIET_ENQUIRY_SECS
+
     Surface(
         Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
-        Row(
-            Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                if (about.kind == org.ducatproject.ducat.Listings.KIND_VEHICLE) {
-                    Icons.Filled.DirectionsCar
-                } else {
-                    Icons.Filled.House
-                },
-                null,
-                Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                stringResource(
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
                     if (about.kind == org.ducatproject.ducat.Listings.KIND_VEHICLE) {
-                        R.string.rent_per_day_short
+                        Icons.Filled.DirectionsCar
                     } else {
-                        R.string.rent_per_night_short
+                        Icons.Filled.House
                     },
-                    Amounts.show(context, about.pricePxmr).primary,
-                ).let { price -> "${about.title} · $price" },
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-            )
+                    null,
+                    Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    stringResource(
+                        if (about.kind == org.ducatproject.ducat.Listings.KIND_VEHICLE) {
+                            R.string.rent_per_day_short
+                        } else {
+                            R.string.rent_per_night_short
+                        },
+                        Amounts.show(context, about.pricePxmr).primary,
+                    ).let { price -> "${about.title} · $price" },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
+            }
+            if (quiet) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.rent_no_reply_yet),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
+
+/** How long an unanswered enquiry stays "probably just slow". */
+private const val QUIET_ENQUIRY_SECS = 10L * 60
 
 @Composable
 private fun RideBondBanner(contact: Contact) {

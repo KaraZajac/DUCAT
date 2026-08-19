@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">Tipe — Sport, GLX, bak panjang</string>
     <string name="rent_size">Luas (m²)</string>
     <string name="rent_still_looking">Masih mencari lebih jauh…</string>
+    <string name="rent_no_reply_yet">Belum ada balasan. Sebuah iklan bisa bertahan sehari, jadi pemiliknya mungkin sedang tidak memegang ponsel — ada baiknya melihat yang lain.</string>
 </resources>

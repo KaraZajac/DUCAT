@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">款型——Sport、GLX、长货厢</string>
     <string name="rent_size">面积（m²）</string>
     <string name="rent_still_looking">还在往外找…</string>
+    <string name="rent_no_reply_yet">还没有回复。房源可以挂一整天，发布者可能不在手机旁，不妨看看其他的。</string>
 </resources>

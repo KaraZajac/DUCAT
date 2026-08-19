@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">نسخه — Sport، GLX، اتاق بلند</string>
     <string name="rent_size">مساحت (م²)</string>
     <string name="rent_still_looking">هنوز دورتر را می‌گردم…</string>
+    <string name="rent_no_reply_yet">هنوز پاسخی نیامده. یک آگهی می‌تواند یک روز بماند، پس شاید صاحبش کنار گوشی نباشد — بد نیست بقیه را هم ببینید.</string>
 </resources>

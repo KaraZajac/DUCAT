@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">De variant — Sport, GLX, lange laadbak</string>
     <string name="rent_size">Oppervlakte (m²)</string>
     <string name="rent_still_looking">Nog verder aan het zoeken…</string>
+    <string name="rent_no_reply_yet">Nog geen antwoord. Een advertentie kan een dag blijven staan, dus de aanbieder is misschien niet bij zijn telefoon — kijk gerust naar de andere.</string>
 </resources>

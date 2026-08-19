@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">الطراز الفرعي — Sport أو GLX أو صندوق طويل</string>
     <string name="rent_size">المساحة (م²)</string>
     <string name="rent_still_looking">ما زال البحث يتوسع…</string>
+    <string name="rent_no_reply_yet">لا رد بعد. قد يبقى الإعلان يومًا كاملًا، فربما لا يكون صاحبه قرب هاتفه — يستحق الأمر النظر في غيره.</string>
 </resources>

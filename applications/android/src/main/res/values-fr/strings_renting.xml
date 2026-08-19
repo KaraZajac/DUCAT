@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">La variante : Sport, GLX, benne longue</string>
     <string name="rent_size">Surface (m²)</string>
     <string name="rent_still_looking">Recherche plus loin…</string>
+    <string name="rent_no_reply_yet">Toujours pas de réponse. Une annonce peut rester en ligne une journée, donc son propriétaire n\'est peut-être pas devant son téléphone — cela vaut la peine de regarder les autres.</string>
 </resources>

@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">Варіант — Sport, GLX, довгий кузов</string>
     <string name="rent_size">Площа (м²)</string>
     <string name="rent_still_looking">Шукаю далі…</string>
+    <string name="rent_no_reply_yet">Відповіді поки немає. Оголошення може висіти добу, тож власника може не бути біля телефона — варто подивитися інші.</string>
 </resources>

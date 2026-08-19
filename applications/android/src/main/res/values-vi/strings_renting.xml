@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">Biến thể — Sport, GLX, thùng dài</string>
     <string name="rent_size">Diện tích (m²)</string>
     <string name="rent_still_looking">Vẫn đang tìm xa hơn…</string>
+    <string name="rent_no_reply_yet">Vẫn chưa có hồi âm. Một tin đăng có thể để cả ngày, nên chủ tin có thể không ở gần máy — xem thêm các tin khác cũng đáng.</string>
 </resources>

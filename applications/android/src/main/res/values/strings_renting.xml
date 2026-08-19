@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">The variant — Sport, GLX, Long bed</string>
     <string name="rent_size">Size (m²)</string>
     <string name="rent_still_looking">Still looking further out…</string>
+    <string name="rent_no_reply_yet">No reply yet. A listing can stand for a day, so its owner may not be at their phone — it is worth looking at the others.</string>
 </resources>

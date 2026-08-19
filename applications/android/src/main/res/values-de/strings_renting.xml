@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">Die Variante — Sport, GLX, Langpritsche</string>
     <string name="rent_size">Größe (m²)</string>
     <string name="rent_still_looking">Suche weiter außen…</string>
+    <string name="rent_no_reply_yet">Noch keine Antwort. Eine Anzeige kann einen Tag lang stehen, die anbietende Person ist also vielleicht gerade nicht am Telefon — schau ruhig auch die anderen an.</string>
 </resources>

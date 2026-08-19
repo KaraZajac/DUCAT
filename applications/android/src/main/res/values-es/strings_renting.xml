@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">La variante: Sport, GLX, caja larga</string>
     <string name="rent_size">Tamaño (m²)</string>
     <string name="rent_still_looking">Sigue buscando más lejos…</string>
+    <string name="rent_no_reply_yet">Aún sin respuesta. Un anuncio puede estar publicado un día entero, así que puede que el propietario no esté con el teléfono; merece la pena mirar los demás.</string>
 </resources>

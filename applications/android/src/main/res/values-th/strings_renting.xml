@@ -61,4 +61,5 @@
     <string name="rent_trim_hint">เวอร์ชัน — Sport, GLX, กระบะยาว</string>
     <string name="rent_size">ขนาด (ตร.ม.)</string>
     <string name="rent_still_looking">ยังหาไกลออกไปอีก…</string>
+    <string name="rent_no_reply_yet">ยังไม่มีการตอบกลับ ประกาศอาจอยู่ได้ทั้งวัน เจ้าของอาจไม่ได้อยู่กับเครื่อง ลองดูรายการอื่นด้วยก็ดี</string>
 </resources>
