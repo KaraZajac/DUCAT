@@ -53,4 +53,5 @@
     <string name="res_complete_ask">Chi lo offre ha segnato il noleggio come concluso.</string>
     <string name="res_split_stated">Proposta: %1$s all\'ospite, %2$s a chi lo offre.</string>
     <string name="res_released">Prenotazione liquidata</string>
+    <string name="res_send_details">Invia l\'indirizzo e i dettagli della consegna</string>
 </resources>

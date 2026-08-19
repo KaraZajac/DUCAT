@@ -53,4 +53,5 @@
     <string name="res_complete_ask">貸し手がレンタルを終了と記録しました。</string>
     <string name="res_split_stated">提案：%1$s を借り手へ、%2$s を貸し手へ。</string>
     <string name="res_released">予約を精算しました</string>
+    <string name="res_send_details">住所と受け渡しの詳細を送る</string>
 </resources>

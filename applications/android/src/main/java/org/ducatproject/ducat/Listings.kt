@@ -313,6 +313,7 @@ object Listings {
                     pricePxmr = o.optLong("pricePxmr"),
                     depositPxmr = o.optLong("depositPxmr"),
                     kind = o.optInt("kind"),
+                    listingId = o.optString("id"),
                 ),
             )
         }

@@ -53,4 +53,5 @@
     <string name="res_complete_ask">El propietario marcó el alquiler como terminado.</string>
     <string name="res_split_stated">Propuesta: %1$s de vuelta al huésped, %2$s al propietario.</string>
     <string name="res_released">Reserva liquidada</string>
+    <string name="res_send_details">Enviar la dirección y los detalles de entrega</string>
 </resources>

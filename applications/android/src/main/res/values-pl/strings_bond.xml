@@ -53,4 +53,5 @@
     <string name="res_complete_ask">Wynajmujący oznaczył najem jako zakończony.</string>
     <string name="res_split_stated">Propozycja: %1$s dla najemcy, %2$s dla wynajmującego.</string>
     <string name="res_released">Rezerwacja rozliczona</string>
+    <string name="res_send_details">Wyślij adres i szczegóły przekazania</string>
 </resources>

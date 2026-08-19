@@ -53,4 +53,5 @@
     <string name="res_complete_ask">Le propriétaire a marqué la location comme terminée.</string>
     <string name="res_split_stated">Proposition : %1$s au locataire, %2$s au propriétaire.</string>
     <string name="res_released">Réservation réglée</string>
+    <string name="res_send_details">Envoyer l\'adresse et les détails de remise</string>
 </resources>

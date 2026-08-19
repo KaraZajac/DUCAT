@@ -53,4 +53,5 @@
     <string name="res_complete_ask">Chủ tin đã đánh dấu kỳ thuê hoàn tất.</string>
     <string name="res_split_stated">Đề xuất: %1$s trả lại người thuê, %2$s cho chủ.</string>
     <string name="res_released">Đã tất toán lượt đặt</string>
+    <string name="res_send_details">Gửi địa chỉ và chi tiết bàn giao</string>
 </resources>

@@ -2105,6 +2105,41 @@ private fun RideBondBanner(contact: Contact) {
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                     ) { Text(stringResource(
                         if (reservation) R.string.res_settle else R.string.bond_complete_ride)) }
+                    // The address, the door code, where the keys are. It has
+                    // been sitting on the listing since it was written, never
+                    // on a board, waiting for exactly this moment — and until
+                    // now the owner had to remember it and type it again.
+                    // Offered, not sent: what leaves is still their decision.
+                    if (reservation) {
+                        val details = remember(contact.personaHex, version) {
+                            org.ducatproject.ducat.Enquiries.about(context, contact.personaHex)
+                                ?.listingId?.takeIf { it.isNotBlank() }
+                                ?.let { org.ducatproject.ducat.Listings.get(context, it) }
+                                ?.optString("private")?.takeIf { it.isNotBlank() }
+                        }
+                        if (details != null) {
+                            Spacer(Modifier.height(6.dp))
+                            OutlinedButton(
+                                onClick = {
+                                    busy = true; error = null
+                                    scope.launch {
+                                        withContext(Dispatchers.IO) {
+                                            runCatching {
+                                                Mailbox.send(
+                                                    context, contact, details,
+                                                    org.ducatproject.ducat
+                                                        .PersonaStore(context).personaHex(),
+                                                )
+                                            }
+                                        }.onFailure { error = it.message }
+                                        busy = false
+                                    }
+                                },
+                                enabled = !busy,
+                                modifier = Modifier.fillMaxWidth().height(40.dp),
+                            ) { Text(stringResource(R.string.res_send_details)) }
+                        }
+                    }
                 }
                 stage == "releasing" -> {
                     BondLine(

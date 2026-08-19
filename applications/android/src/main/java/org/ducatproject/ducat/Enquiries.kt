@@ -31,6 +31,13 @@ object Enquiries {
         val depositPxmr: Long,
         /** [Listings.KIND_VEHICLE] or [Listings.KIND_PLACE]. */
         val kind: Int,
+        /**
+         * Which listing, on the side that owns it — so the address and the
+         * key handover, which live on the listing and never on a board, can
+         * be offered once there is a booking to give them to. Empty on the
+         * seeker's side, which knows the notice but not the record behind it.
+         */
+        val listingId: String = "",
     )
 
     /**
@@ -48,6 +55,7 @@ object Enquiries {
                 .put("price", about.pricePxmr)
                 .put("deposit", about.depositPxmr)
                 .put("kind", about.kind)
+                .put("listing", about.listingId)
                 .toString(),
         ).apply()
     }
@@ -61,6 +69,7 @@ object Enquiries {
                 pricePxmr = o.optLong("price"),
                 depositPxmr = o.optLong("deposit"),
                 kind = o.optInt("kind"),
+                listingId = o.optString("listing"),
             )
         }.getOrNull()?.takeIf { it.title.isNotBlank() }
     }

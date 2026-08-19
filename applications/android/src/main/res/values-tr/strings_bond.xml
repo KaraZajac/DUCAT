@@ -53,4 +53,5 @@
     <string name="res_complete_ask">İlan sahibi kiralamayı tamamlandı olarak işaretledi.</string>
     <string name="res_split_stated">Öneri: %1$s kiracıya, %2$s ilan sahibine.</string>
     <string name="res_released">Rezervasyon kapatıldı</string>
+    <string name="res_send_details">Adresi ve teslim bilgilerini gönder</string>
 </resources>

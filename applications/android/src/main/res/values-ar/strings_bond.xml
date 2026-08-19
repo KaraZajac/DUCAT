@@ -53,4 +53,5 @@
     <string name="res_complete_ask">علّم المالك الإيجار بأنه منتهٍ.</string>
     <string name="res_split_stated">المقترح: %1$s تعود إلى النزيل، و%2$s إلى المالك.</string>
     <string name="res_released">تمت تسوية الحجز</string>
+    <string name="res_send_details">إرسال العنوان وتفاصيل التسليم</string>
 </resources>

@@ -53,4 +53,5 @@
     <string name="res_complete_ask">เจ้าของทำเครื่องหมายว่าการเช่าสิ้นสุดแล้ว</string>
     <string name="res_split_stated">ข้อเสนอ: %1$s คืนผู้เช่า, %2$s ให้เจ้าของ</string>
     <string name="res_released">ปิดการจองแล้ว</string>
+    <string name="res_send_details">ส่งที่อยู่และรายละเอียดการส่งมอบ</string>
 </resources>

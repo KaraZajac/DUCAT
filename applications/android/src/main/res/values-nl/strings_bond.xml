@@ -53,4 +53,5 @@
     <string name="res_complete_ask">De aanbieder heeft de verhuur als afgerond gemarkeerd.</string>
     <string name="res_split_stated">Voorstel: %1$s terug naar de huurder, %2$s naar de aanbieder.</string>
     <string name="res_released">Boeking afgerekend</string>
+    <string name="res_send_details">Adres en overdrachtsgegevens sturen</string>
 </resources>

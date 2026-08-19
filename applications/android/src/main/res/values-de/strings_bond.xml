@@ -53,4 +53,5 @@
     <string name="res_complete_ask">Die anbietende Person hat die Miete als beendet markiert.</string>
     <string name="res_split_stated">Vorschlag: %1$s zurück an den Gast, %2$s an die anbietende Person.</string>
     <string name="res_released">Buchung abgerechnet</string>
+    <string name="res_send_details">Adresse und Übergabedetails senden</string>
 </resources>

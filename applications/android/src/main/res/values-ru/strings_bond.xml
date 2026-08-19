@@ -53,4 +53,5 @@
     <string name="res_complete_ask">Владелец отметил аренду завершённой.</string>
     <string name="res_split_stated">Предложено: %1$s арендатору, %2$s владельцу.</string>
     <string name="res_released">Бронирование закрыто</string>
+    <string name="res_send_details">Отправить адрес и детали передачи</string>
 </resources>

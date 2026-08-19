@@ -53,4 +53,5 @@
     <string name="res_complete_ask">مالک اجاره را تمام‌شده علامت زد.</string>
     <string name="res_split_stated">پیشنهاد: %1$s به مستأجر، %2$s به مالک.</string>
     <string name="res_released">رزرو تسویه شد</string>
+    <string name="res_send_details">ارسال آدرس و جزئیات تحویل</string>
 </resources>

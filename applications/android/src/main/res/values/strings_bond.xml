@@ -53,4 +53,5 @@
     <string name="res_complete_ask">The owner marked the rental complete.</string>
     <string name="res_split_stated">Proposed: %1$s back to the guest, %2$s to the owner.</string>
     <string name="res_released">Reservation settled</string>
+    <string name="res_send_details">Send the address and handover details</string>
 </resources>

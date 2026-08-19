@@ -53,4 +53,5 @@
     <string name="res_complete_ask">소유자가 대여를 종료로 표시했습니다.</string>
     <string name="res_split_stated">제안: %1$s은 빌리는 쪽에, %2$s은 소유자에게.</string>
     <string name="res_released">예약 정산 완료</string>
+    <string name="res_send_details">주소와 인수인계 정보 보내기</string>
 </resources>
