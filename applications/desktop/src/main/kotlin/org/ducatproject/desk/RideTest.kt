@@ -143,7 +143,17 @@ fun main() {
                             "locked ${formatXmr(b.lockedPxmr)}, scanned ${b.scannedTo}/${b.tip})",
                     )
                 }
-                if (!why.contains("not enough unlocked")) fatal = why
+                // Waiting for coin to unlock is not a failure, and neither is
+                // a Monero node that did not answer — that one killed a run
+                // mid-escrow with `decoys: InterfaceError("timed out")`, which
+                // is the network having a moment, not the escrow being wrong.
+                // The wallet picks a different node on the next attempt, which
+                // is exactly what the app's own retry does.
+                val transient = why.contains("not enough unlocked") ||
+                    org.ducatproject.ducat.Wallet.isNodeTrouble(
+                        r.exceptionOrNull() ?: IllegalStateException(why),
+                    )
+                if (!transient) fatal = why
                 fatal
             }
         }

@@ -1784,7 +1784,7 @@ private fun RideBondBanner(contact: Contact) {
         scope.launch {
             withContext(Dispatchers.IO) {
                 runCatching { org.ducatproject.ducat.Ceremony.fundRide(context, idHex) }
-            }.onFailure { error = it.message }
+            }.onFailure { error = moneyFailure(context, it) }
             busy = false
         }
     }
@@ -1795,7 +1795,7 @@ private fun RideBondBanner(contact: Contact) {
                 runCatching {
                     org.ducatproject.ducat.Ceremony.proposeRideRelease(context, idHex)
                 }
-            }.onFailure { error = it.message }
+            }.onFailure { error = moneyFailure(context, it) }
             busy = false
         }
     }
@@ -1806,7 +1806,7 @@ private fun RideBondBanner(contact: Contact) {
                 runCatching {
                     org.ducatproject.ducat.Ceremony.approveRideRelease(context, idHex)
                 }
-            }.onFailure { error = it.message }
+            }.onFailure { error = moneyFailure(context, it) }
             busy = false
         }
     }
@@ -1965,7 +1965,7 @@ private fun RideBondBanner(contact: Contact) {
                                     runCatching {
                                         org.ducatproject.ducat.Ceremony.fundRide(context, idHex)
                                     }
-                                }.onFailure { error = it.message }
+                                }.onFailure { error = moneyFailure(context, it) }
                                 busy = false
                             }
                         },
@@ -2023,7 +2023,7 @@ private fun RideBondBanner(contact: Contact) {
                                             org.ducatproject.ducat.Ceremony.proposeRideSplit(
                                                 context, idHex, funded, toArbiter = true)
                                         }
-                                    }.onFailure { error = it.message }
+                                    }.onFailure { error = moneyFailure(context, it) }
                                     busy = false
                                 }
                             },
@@ -2058,7 +2058,7 @@ private fun RideBondBanner(contact: Contact) {
                                     runCatching {
                                         org.ducatproject.ducat.Ceremony.fundRide(context, idHex)
                                     }
-                                }.onFailure { error = it.message }
+                                }.onFailure { error = moneyFailure(context, it) }
                                 busy = false
                             }
                         },
@@ -2097,7 +2097,7 @@ private fun RideBondBanner(contact: Contact) {
                                         org.ducatproject.ducat.Ceremony
                                             .proposeRideRelease(context, idHex)
                                     }
-                                }.onFailure { error = it.message }
+                                }.onFailure { error = moneyFailure(context, it) }
                                 busy = false
                             }
                         },
@@ -2131,7 +2131,7 @@ private fun RideBondBanner(contact: Contact) {
                                                         .PersonaStore(context).personaHex(),
                                                 )
                                             }
-                                        }.onFailure { error = it.message }
+                                        }.onFailure { error = moneyFailure(context, it) }
                                         busy = false
                                     }
                                 },
@@ -2165,7 +2165,7 @@ private fun RideBondBanner(contact: Contact) {
                                             org.ducatproject.ducat.Ceremony.proposeRideSplit(
                                                 context, idHex, back, toArbiter = true)
                                         }
-                                    }.onFailure { error = it.message }
+                                    }.onFailure { error = moneyFailure(context, it) }
                                     busy = false
                                 }
                             },
@@ -2207,7 +2207,7 @@ private fun RideBondBanner(contact: Contact) {
                                             org.ducatproject.ducat.Ceremony
                                                 .proposeRideRelease(context, idHex)
                                         }
-                                    }.onFailure { error = it.message }
+                                    }.onFailure { error = moneyFailure(context, it) }
                                     busy = false
                                 }
                             },
@@ -2250,7 +2250,7 @@ private fun RideBondBanner(contact: Contact) {
                                         org.ducatproject.ducat.Ceremony
                                             .approveRideRelease(context, idHex)
                                     }
-                                }.onFailure { error = it.message }
+                                }.onFailure { error = moneyFailure(context, it) }
                                 busy = false
                             }
                         },
@@ -2290,7 +2290,7 @@ private fun RideBondBanner(contact: Contact) {
                                                     org.ducatproject.ducat.Ceremony
                                                         .proposeRideSplit(context, idHex, pxmr)
                                                 }
-                                            }.onFailure { error = it.message }
+                                            }.onFailure { error = moneyFailure(context, it) }
                                             busy = false
                                             countering = false
                                         }

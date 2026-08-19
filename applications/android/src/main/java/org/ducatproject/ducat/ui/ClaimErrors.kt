@@ -34,3 +34,21 @@ fun claimFailureRes(
     t is Mailbox.DetailsNotPublished -> R.string.main_card_link_not_ready
     else -> R.string.main_card_link_failed_body
 }
+
+/**
+ * A failure that happened while money was moving, in words.
+ *
+ * The escrow screens showed `it.message` verbatim, so a node that did not
+ * answer in time reached a person as
+ * `v1=decoys: InterfaceError(InterfaceError("timed out"))` — on the screen
+ * holding their fare. The wallet already knows that shape of failure
+ * (`Wallet.isNodeTrouble`) and the Pay screen already has the sentence for
+ * it; only these screens were not using either.
+ */
+fun moneyFailure(context: android.content.Context, t: Throwable): String = when {
+    org.ducatproject.ducat.Wallet.isNodeTrouble(t) ->
+        context.getString(org.ducatproject.ducat.R.string.pay_node_no_answer)
+    else -> bridgeMessage(t.message ?: context.getString(
+        org.ducatproject.ducat.R.string.main_card_link_failed_body,
+    ))
+}
