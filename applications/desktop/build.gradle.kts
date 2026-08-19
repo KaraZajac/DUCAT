@@ -361,6 +361,13 @@ tasks.register<JavaExec>("tilltest") {
 // bill → stagenet payment → notice → chain → receipt.
 //   DUCAT_KIOSK_ROLE=shop     ./gradlew :desktop:kiosktest
 //   DUCAT_KIOSK_ROLE=customer DUCAT_KIOSK_CARD=<uri> ./gradlew :desktop:kiosktest
+// Two writers, one ceremony record. `./gradlew :desktop:escrowracetest`
+tasks.register<JavaExec>("escrowracetest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.EscrowRaceTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("kiosktest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.KioskTestKt"

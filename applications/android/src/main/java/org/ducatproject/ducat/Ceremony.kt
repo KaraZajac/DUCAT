@@ -36,11 +36,115 @@ object Ceremony {
     private fun prefs(context: Context) =
         securePrefs(context, "ducat_ceremonies")
 
-    private fun load(context: Context, id: String): JSONObject? =
-        prefs(context).getString("c_$id", null)?.let { JSONObject(it) }
+    /**
+     * What each in-flight record looked like when it was read.
+     *
+     * Weak and keyed by identity — JSONObject does not override equals — so a
+     * ceremony nobody is holding falls out on its own. See [save] for what
+     * this is for.
+     */
+    private val loadedAs = java.util.WeakHashMap<JSONObject, String>()
 
-    private fun save(context: Context, id: String, o: JSONObject) =
-        prefs(context).edit().putString("c_$id", o.toString()).apply()
+    private fun load(context: Context, id: String): JSONObject? =
+        prefs(context).getString("c_$id", null)?.let { raw ->
+            JSONObject(raw).also { synchronized(lock) { loadedAs[it] = raw } }
+        }
+
+    /**
+     * Write our changes without discarding somebody else's.
+     *
+     * Six functions here read a ceremony, do something slow — build a
+     * transaction, run a FROST round, send a message — and write the record
+     * back afterwards. Meanwhile the poller is landing protocol rounds into
+     * the same record on its own thread. A plain write puts back a snapshot
+     * taken before all of that, so whichever finished last silently undid the
+     * other: a DKG round overwritten is a ceremony that stalls with nothing
+     * to restart it, and a funding mark overwritten is a second tap paying a
+     * second time into an escrow that needs a co-signature to give anything
+     * back.
+     *
+     * So this compares the record against the version it was read from, and
+     * lays only the fields that *this* caller actually changed over whatever
+     * is on disk now. Restructuring six protocol functions to re-read after
+     * their slow part would be the other way to fix it, one function at a
+     * time and one mistake at a time; this fixes the shape.
+     *
+     * Fields are added and changed here, never removed — which is all this
+     * code does to a ceremony, and worth knowing before the first caller
+     * tries to.
+     */
+    private fun save(context: Context, id: String, o: JSONObject) = synchronized(lock) {
+        val merged = mergeOnto(loadedAs[o], prefs(context).getString("c_$id", null), o)
+        if (merged !== o) DucatLog.i(TAG, "ceremony $id: merged onto a record that moved")
+        val text = merged.toString()
+        prefs(context).edit().putString("c_$id", text).apply()
+        loadedAs[o] = text
+    }
+
+    /**
+     * Guards load-change-save on one ceremony.
+     *
+     * Two threads write these. Protocol rounds arrive on the poller and land
+     * through [onDkgRound] and [onFrostRound]; funding, signing and releasing
+     * run from a screen. Both read the whole record, change a field and write
+     * the whole record back, so without this the loser's write is silently
+     * undone — and here that is not a cosmetic loss. A DKG round overwritten
+     * is a ceremony that stalls with no way to restart it; a `fundTxid`
+     * overwritten is the only thing standing between a second tap and a
+     * second payment into an escrow that needs a co-signature to give
+     * anything back.
+     */
+    private val lock = Any()
+
+    /**
+     * Held in a party's txid slot while their transaction is being built.
+     *
+     * Not a transaction id and never mistaken for one: everything that reads
+     * these fields asks whether they are empty, and this is not empty. It
+     * marks the slot taken so a second tap cannot start a second payment
+     * during the seconds the first one spends talking to a node.
+     */
+    private const val SENDING = "sending"
+
+    /**
+     * Change a ceremony under the lock, on a record read *inside* it.
+     *
+     * The reading matters as much as the locking. Every caller that mutated
+     * one of these held a JSONObject loaded before it did its slow work — a
+     * transaction build, a FROST round, a message send — and wrote that
+     * snapshot back afterwards, discarding whatever had arrived in between.
+     * Do the slow part first, then come in here and change what is actually
+     * on disk.
+     */
+    private fun <T> mutate(context: Context, id: String, f: (JSONObject) -> T): T =
+        synchronized(lock) {
+            val o = load(context, id) ?: throw IllegalStateException("no such ceremony")
+            val r = f(o)
+            save(context, id, o)
+            r
+        }
+
+    /**
+     * The rule [save] applies: our changes, laid over theirs.
+     *
+     * [readFrom] is the text this record was read from, [onDisk] what is there
+     * now, [now] the record as this caller has changed it. When the two agree
+     * there was no other writer and [now] is returned unchanged. When they do
+     * not, only the fields this caller actually touched — the ones that differ
+     * from what it read — go onto the newer record.
+     *
+     * Separate and pure so it can be checked directly; the interesting cases
+     * are all about what two writers each did, and none of them need a disk.
+     */
+    internal fun mergeOnto(readFrom: String?, onDisk: String?, now: JSONObject): JSONObject {
+        if (readFrom == null || onDisk == null || onDisk == readFrom) return now
+        val theirs = JSONObject(onDisk)
+        val was = JSONObject(readFrom)
+        now.keys().forEach { k ->
+            if (was.opt(k)?.toString() != now.opt(k)?.toString()) theirs.put(k, now.get(k))
+        }
+        return theirs
+    }
 
     /** Every ceremony this device knows, for the UI to show. */
     fun all(context: Context): List<JSONObject> =
@@ -746,13 +850,33 @@ object Ceremony {
         val already = if (isFunder(o)) o.optString("fundTxid") else o.optString("hostFundTxid")
         check(already.isEmpty()) { "you have already paid into this escrow" }
         val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
+        val mine = if (isFunder(o)) "fundTxid" else "hostFundTxid"
+        // Claim the slot *before* the money moves, on the record as it stands
+        // now. Two taps a second apart both passed the check above and both
+        // reached the send, because the mark that stops the second one was
+        // only written after the first had finished — and a transaction takes
+        // seconds to build. Writing "sending" here makes the second tap fail
+        // the same check the first passed.
+        mutate(context, idHex) { cur ->
+            check(cur.optString(mine).isEmpty()) { "you have already paid into this escrow" }
+            cur.put(mine, SENDING)
+        }
         // One send for this party's whole share: the deposits come home in
         // the split release, and are what make releasing beat sulking.
-        val r = Wallet.send(context, nodeUrl, addr, share)
+        val r = runCatching { Wallet.send(context, nodeUrl, addr, share) }
+            .onFailure {
+                // Nothing left, so nothing is owed to the mark. Release it, or
+                // a node that timed out locks this party out of their own
+                // escrow for good.
+                runCatching { mutate(context, idHex) { cur -> cur.put(mine, "") } }
+            }
+            .getOrThrow()
         // Per-party mark: for reservations both sides fund, each records
-        // their own send.
-        o.put(if (isFunder(o)) "fundTxid" else "hostFundTxid", r.txidHex)
-        save(context, idHex, o)
+        // their own send. On a record loaded *now*, not on the snapshot this
+        // function started with — rounds arrive on the poller while a
+        // transaction is being built, and writing the old object back put the
+        // ceremony into a state the protocol had already left.
+        mutate(context, idHex) { cur -> cur.put(mine, r.txidHex) }
         ContactStore.bump()
         DucatLog.i(TAG, "escrow $idHex: ${formatXmr(share)} XMR sent — ${r.txidHex.take(16)}…")
         return r.txidHex
