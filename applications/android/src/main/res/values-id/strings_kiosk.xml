@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">Pesan di sini</string>
+    <string name="kiosk_staff">Staf</string>
+    <string name="kiosk_empty">Ketuk yang kamu mau.</string>
+    <string name="kiosk_total">Total</string>
+    <string name="kiosk_start_over">Mulai lagi</string>
+    <string name="kiosk_order">Pesan</string>
+    <string name="kiosk_scan_note">Pindai dengan dompet Monero apa pun. Jumlahnya sudah terisi.</string>
+    <string name="kiosk_waiting">Menunggu pembayaranmu…</string>
+    <string name="kiosk_cancel_order">Batal</string>
+    <string name="kiosk_paid_title">Terima kasih</string>
+    <string name="kiosk_paid_number">Pesanan #%1$d</string>
+    <string name="kiosk_next_customer">Pelanggan berikutnya</string>
+    <string name="kiosk_orders">Pesanan</string>
+    <string name="kiosk_no_orders">Belum ada pesanan hari ini.</string>
+    <string name="kiosk_back_to_counter">Kembali ke konter</string>
+    <string name="kiosk_leave">Keluar dari mode kios</string>
+    <string name="kiosk_state_awaiting">menunggu dibayar</string>
+    <string name="kiosk_state_seen">dibayar — terlihat, belum di rantai</string>
+    <string name="kiosk_state_confirmed">selesai</string>
+    <string name="kiosk_state_abandoned">pergi</string>
+    <string name="kiosk_notify_title">Pesanan #%1$d</string>
+    <string name="kiosk_notify_body">%1$s XMR terlihat — pesanan sudah dibayar</string>
+    <string name="kiosk_mode_title">Kios</string>
+    <string name="kiosk_mode_body">Layar yang menghadap pelanggan: mereka ketuk yang diinginkan dan bayar dengan dompet Monero apa pun. Keluar butuh PIN-mu.</string>
+</resources>

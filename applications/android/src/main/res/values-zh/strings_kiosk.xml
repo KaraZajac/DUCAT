@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">在此点单</string>
+    <string name="kiosk_staff">店员</string>
+    <string name="kiosk_empty">点一下你想要的。</string>
+    <string name="kiosk_total">合计</string>
+    <string name="kiosk_start_over">重新开始</string>
+    <string name="kiosk_order">下单</string>
+    <string name="kiosk_scan_note">用任意门罗钱包扫码，金额已经填好。</string>
+    <string name="kiosk_waiting">正在等待你的付款…</string>
+    <string name="kiosk_cancel_order">取消</string>
+    <string name="kiosk_paid_title">谢谢</string>
+    <string name="kiosk_paid_number">第 %1$d 号</string>
+    <string name="kiosk_next_customer">下一位</string>
+    <string name="kiosk_orders">订单</string>
+    <string name="kiosk_no_orders">今天还没有订单。</string>
+    <string name="kiosk_back_to_counter">回到点单台</string>
+    <string name="kiosk_leave">退出自助模式</string>
+    <string name="kiosk_state_awaiting">等待付款</string>
+    <string name="kiosk_state_seen">已付 — 已看到，尚未上链</string>
+    <string name="kiosk_state_confirmed">已结算</string>
+    <string name="kiosk_state_abandoned">离开了</string>
+    <string name="kiosk_notify_title">第 %1$d 号</string>
+    <string name="kiosk_notify_body">已看到 %1$s XMR — 订单已付款</string>
+    <string name="kiosk_mode_title">自助点单</string>
+    <string name="kiosk_mode_body">面向顾客的屏幕：他们点选想要的，用任意门罗钱包付款。退出需要你的 PIN。</string>
+</resources>

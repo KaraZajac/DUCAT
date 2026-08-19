@@ -20,7 +20,7 @@ import android.content.Context
 // taxi finds fares and runs a meter with the same hands. Renting is the
 // owner's side of §16.18: personal mode is where someone looks for a car or
 // a place, this is where someone has one to let.
-enum class Mode { None, Pos, BarTab, Taxi, Donate, Renting }
+enum class Mode { None, Pos, BarTab, Taxi, Donate, Renting, Kiosk }
 
 class ModeStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")

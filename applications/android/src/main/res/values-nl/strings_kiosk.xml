@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">Bestel hier</string>
+    <string name="kiosk_staff">Personeel</string>
+    <string name="kiosk_empty">Tik aan wat je wilt.</string>
+    <string name="kiosk_total">Totaal</string>
+    <string name="kiosk_start_over">Opnieuw beginnen</string>
+    <string name="kiosk_order">Bestellen</string>
+    <string name="kiosk_scan_note">Scan dit met een willekeurige Monero-portemonnee. Het bedrag staat er al in.</string>
+    <string name="kiosk_waiting">Wachten op je betaling…</string>
+    <string name="kiosk_cancel_order">Annuleren</string>
+    <string name="kiosk_paid_title">Bedankt</string>
+    <string name="kiosk_paid_number">Bestelling nr. %1$d</string>
+    <string name="kiosk_next_customer">Volgende klant</string>
+    <string name="kiosk_orders">Bestellingen</string>
+    <string name="kiosk_no_orders">Vandaag nog geen bestellingen.</string>
+    <string name="kiosk_back_to_counter">Terug naar de balie</string>
+    <string name="kiosk_leave">Kioskmodus verlaten</string>
+    <string name="kiosk_state_awaiting">wacht op betaling</string>
+    <string name="kiosk_state_seen">betaald — gezien, nog niet op de keten</string>
+    <string name="kiosk_state_confirmed">afgerekend</string>
+    <string name="kiosk_state_abandoned">weggelopen</string>
+    <string name="kiosk_notify_title">Bestelling nr. %1$d</string>
+    <string name="kiosk_notify_body">%1$s XMR gezien — de bestelling is betaald</string>
+    <string name="kiosk_mode_title">Kiosk</string>
+    <string name="kiosk_mode_body">Een scherm naar de klant toe: die tikt aan wat hij wil en betaalt met een willekeurige Monero-portemonnee. Eruit komen vraagt je pincode.</string>
+</resources>

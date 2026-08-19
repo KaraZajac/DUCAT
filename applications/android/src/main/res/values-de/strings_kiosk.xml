@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">Hier bestellen</string>
+    <string name="kiosk_staff">Personal</string>
+    <string name="kiosk_empty">Tipp an, was du möchtest.</string>
+    <string name="kiosk_total">Summe</string>
+    <string name="kiosk_start_over">Neu anfangen</string>
+    <string name="kiosk_order">Bestellen</string>
+    <string name="kiosk_scan_note">Mit einer beliebigen Monero-Wallet scannen. Der Betrag steht schon drin.</string>
+    <string name="kiosk_waiting">Warte auf deine Zahlung…</string>
+    <string name="kiosk_cancel_order">Abbrechen</string>
+    <string name="kiosk_paid_title">Danke</string>
+    <string name="kiosk_paid_number">Bestellung Nr. %1$d</string>
+    <string name="kiosk_next_customer">Nächster Kunde</string>
+    <string name="kiosk_orders">Bestellungen</string>
+    <string name="kiosk_no_orders">Heute noch keine Bestellungen.</string>
+    <string name="kiosk_back_to_counter">Zurück zur Theke</string>
+    <string name="kiosk_leave">Kioskmodus verlassen</string>
+    <string name="kiosk_state_awaiting">wartet auf Zahlung</string>
+    <string name="kiosk_state_seen">bezahlt — gesehen, noch nicht auf der Kette</string>
+    <string name="kiosk_state_confirmed">abgerechnet</string>
+    <string name="kiosk_state_abandoned">ist gegangen</string>
+    <string name="kiosk_notify_title">Bestellung Nr. %1$d</string>
+    <string name="kiosk_notify_body">%1$s XMR gesehen — die Bestellung ist bezahlt</string>
+    <string name="kiosk_mode_title">Kiosk</string>
+    <string name="kiosk_mode_body">Ein Bildschirm, der zur Kundschaft zeigt: sie tippt an, was sie will, und zahlt mit einer beliebigen Monero-Wallet. Hinaus kommt man nur mit deiner PIN.</string>
+</resources>

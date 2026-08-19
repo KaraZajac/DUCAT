@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">Order here</string>
+    <string name="kiosk_staff">Staff</string>
+    <string name="kiosk_empty">Tap what you would like.</string>
+    <string name="kiosk_total">Total</string>
+    <string name="kiosk_start_over">Start over</string>
+    <string name="kiosk_order">Order</string>
+    <string name="kiosk_scan_note">Scan this with any Monero wallet. The amount is already filled in.</string>
+    <string name="kiosk_waiting">Waiting for your payment…</string>
+    <string name="kiosk_cancel_order">Cancel</string>
+    <string name="kiosk_paid_title">Thank you</string>
+    <string name="kiosk_paid_number">Order #%1$d</string>
+    <string name="kiosk_next_customer">Next customer</string>
+    <string name="kiosk_orders">Orders</string>
+    <string name="kiosk_no_orders">No orders yet today.</string>
+    <string name="kiosk_back_to_counter">Back to the counter</string>
+    <string name="kiosk_leave">Leave kiosk mode</string>
+    <string name="kiosk_state_awaiting">waiting to be paid</string>
+    <string name="kiosk_state_seen">paid — seen, not yet on the chain</string>
+    <string name="kiosk_state_confirmed">settled</string>
+    <string name="kiosk_state_abandoned">walked away</string>
+    <string name="kiosk_notify_title">Order #%1$d</string>
+    <string name="kiosk_notify_body">%1$s XMR seen — the order is paid</string>
+    <string name="kiosk_mode_title">Kiosk</string>
+    <string name="kiosk_mode_body">A screen facing the customer: they tap what they want and pay with any Monero wallet. Leaving needs your PIN.</string>
+</resources>

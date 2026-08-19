@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">Замовляйте тут</string>
+    <string name="kiosk_staff">Персонал</string>
+    <string name="kiosk_empty">Торкніться того, що хочете.</string>
+    <string name="kiosk_total">Разом</string>
+    <string name="kiosk_start_over">Почати заново</string>
+    <string name="kiosk_order">Замовити</string>
+    <string name="kiosk_scan_note">Відскануйте будь-яким гаманцем Monero. Суму вже підставлено.</string>
+    <string name="kiosk_waiting">Чекаємо на вашу оплату…</string>
+    <string name="kiosk_cancel_order">Скасувати</string>
+    <string name="kiosk_paid_title">Дякуємо</string>
+    <string name="kiosk_paid_number">Замовлення № %1$d</string>
+    <string name="kiosk_next_customer">Наступний</string>
+    <string name="kiosk_orders">Замовлення</string>
+    <string name="kiosk_no_orders">Сьогодні замовлень ще немає.</string>
+    <string name="kiosk_back_to_counter">Назад до прилавка</string>
+    <string name="kiosk_leave">Вийти з режиму кіоска</string>
+    <string name="kiosk_state_awaiting">чекає на оплату</string>
+    <string name="kiosk_state_seen">оплачено — видно, ще не в ланцюжку</string>
+    <string name="kiosk_state_confirmed">розраховано</string>
+    <string name="kiosk_state_abandoned">пішов</string>
+    <string name="kiosk_notify_title">Замовлення № %1$d</string>
+    <string name="kiosk_notify_body">Видно %1$s XMR — замовлення оплачено</string>
+    <string name="kiosk_mode_title">Кіоск</string>
+    <string name="kiosk_mode_body">Екран обличчям до покупця: він торкається того, що хоче, і платить будь-яким гаманцем Monero. Вихід — за вашим PIN.</string>
+</resources>

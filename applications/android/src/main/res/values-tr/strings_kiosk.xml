@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">Buradan sipariş ver</string>
+    <string name="kiosk_staff">Personel</string>
+    <string name="kiosk_empty">İstediğine dokun.</string>
+    <string name="kiosk_total">Toplam</string>
+    <string name="kiosk_start_over">Baştan başla</string>
+    <string name="kiosk_order">Sipariş ver</string>
+    <string name="kiosk_scan_note">Herhangi bir Monero cüzdanıyla okut. Tutar zaten yazılı.</string>
+    <string name="kiosk_waiting">Ödemen bekleniyor…</string>
+    <string name="kiosk_cancel_order">Vazgeç</string>
+    <string name="kiosk_paid_title">Teşekkürler</string>
+    <string name="kiosk_paid_number">Sipariş no %1$d</string>
+    <string name="kiosk_next_customer">Sıradaki müşteri</string>
+    <string name="kiosk_orders">Siparişler</string>
+    <string name="kiosk_no_orders">Bugün henüz sipariş yok.</string>
+    <string name="kiosk_back_to_counter">Tezgâha dön</string>
+    <string name="kiosk_leave">Kiosk modundan çık</string>
+    <string name="kiosk_state_awaiting">ödeme bekliyor</string>
+    <string name="kiosk_state_seen">ödendi — görüldü, henüz zincirde değil</string>
+    <string name="kiosk_state_confirmed">kapandı</string>
+    <string name="kiosk_state_abandoned">gitti</string>
+    <string name="kiosk_notify_title">Sipariş no %1$d</string>
+    <string name="kiosk_notify_body">%1$s XMR görüldü — sipariş ödendi</string>
+    <string name="kiosk_mode_title">Kiosk</string>
+    <string name="kiosk_mode_body">Müşteriye dönük bir ekran: istediğine dokunur ve herhangi bir Monero cüzdanıyla öder. Çıkmak PIN\'ini ister.</string>
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">यहाँ ऑर्डर करें</string>
+    <string name="kiosk_staff">स्टाफ़</string>
+    <string name="kiosk_empty">जो चाहिए उस पर टैप करें।</string>
+    <string name="kiosk_total">कुल</string>
+    <string name="kiosk_start_over">फिर से शुरू करें</string>
+    <string name="kiosk_order">ऑर्डर करें</string>
+    <string name="kiosk_scan_note">किसी भी मोनेरो वॉलेट से स्कैन करें। रक़म पहले से भरी है।</string>
+    <string name="kiosk_waiting">आपके भुगतान का इंतज़ार…</string>
+    <string name="kiosk_cancel_order">रद्द करें</string>
+    <string name="kiosk_paid_title">धन्यवाद</string>
+    <string name="kiosk_paid_number">ऑर्डर #%1$d</string>
+    <string name="kiosk_next_customer">अगला ग्राहक</string>
+    <string name="kiosk_orders">ऑर्डर</string>
+    <string name="kiosk_no_orders">आज अभी कोई ऑर्डर नहीं।</string>
+    <string name="kiosk_back_to_counter">काउंटर पर वापस</string>
+    <string name="kiosk_leave">कियोस्क मोड से बाहर</string>
+    <string name="kiosk_state_awaiting">भुगतान का इंतज़ार</string>
+    <string name="kiosk_state_seen">चुकाया — दिखा, अभी चेन पर नहीं</string>
+    <string name="kiosk_state_confirmed">निपट गया</string>
+    <string name="kiosk_state_abandoned">चला गया</string>
+    <string name="kiosk_notify_title">ऑर्डर #%1$d</string>
+    <string name="kiosk_notify_body">%1$s XMR दिखा — ऑर्डर चुका दिया गया</string>
+    <string name="kiosk_mode_title">कियोस्क</string>
+    <string name="kiosk_mode_body">ग्राहक की ओर मुँह किया स्क्रीन: वे जो चाहें टैप करें और किसी भी मोनेरो वॉलेट से चुकाएँ। बाहर निकलने के लिए आपका PIN चाहिए।</string>
+</resources>

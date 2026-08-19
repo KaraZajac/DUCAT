@@ -153,7 +153,15 @@ class Poller(private val context: Context) {
                 // scan costs a round trip per pool transaction, and a till
                 // with nothing billed has nothing to look for.
                 runCatching {
-                    NodeStore(context).lastGood()?.let { TabStore.poolSight(context, it) }
+                    NodeStore(context).lastGood()?.let {
+                        TabStore.poolSight(context, it)
+                        // A kiosk customer is nobody's contact, so their
+                        // payment arrives with no thread to announce it in;
+                        // the mempool is the only place it shows up before a
+                        // block does.
+                        Orders.poolSight(context, it)
+                    }
+                    runCatching { Orders.reconcile(context) }
                 }.onFailure { DucatLog.w(TAG, "pool: ${it.message}") }
 
                 // Stewardship (§18.7): a good tenant cleans its own unit.

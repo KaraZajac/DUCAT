@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">여기서 주문하세요</string>
+    <string name="kiosk_staff">직원</string>
+    <string name="kiosk_empty">원하시는 것을 누르세요.</string>
+    <string name="kiosk_total">합계</string>
+    <string name="kiosk_start_over">다시 시작</string>
+    <string name="kiosk_order">주문하기</string>
+    <string name="kiosk_scan_note">아무 모네로 지갑으로나 스캔하세요. 금액은 이미 채워져 있습니다.</string>
+    <string name="kiosk_waiting">결제를 기다리는 중…</string>
+    <string name="kiosk_cancel_order">취소</string>
+    <string name="kiosk_paid_title">감사합니다</string>
+    <string name="kiosk_paid_number">주문 %1$d번</string>
+    <string name="kiosk_next_customer">다음 손님</string>
+    <string name="kiosk_orders">주문</string>
+    <string name="kiosk_no_orders">오늘은 아직 주문이 없습니다.</string>
+    <string name="kiosk_back_to_counter">카운터로 돌아가기</string>
+    <string name="kiosk_leave">키오스크 모드 나가기</string>
+    <string name="kiosk_state_awaiting">결제 대기</string>
+    <string name="kiosk_state_seen">결제됨 — 확인됨, 아직 체인에는 없음</string>
+    <string name="kiosk_state_confirmed">정산됨</string>
+    <string name="kiosk_state_abandoned">그냥 감</string>
+    <string name="kiosk_notify_title">주문 %1$d번</string>
+    <string name="kiosk_notify_body">%1$s XMR 확인 — 주문이 결제되었습니다</string>
+    <string name="kiosk_mode_title">키오스크</string>
+    <string name="kiosk_mode_body">손님을 향한 화면: 원하는 것을 누르고 아무 모네로 지갑으로 결제합니다. 나가려면 PIN이 필요합니다.</string>
+</resources>

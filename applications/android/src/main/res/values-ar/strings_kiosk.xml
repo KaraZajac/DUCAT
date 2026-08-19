@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">اطلب من هنا</string>
+    <string name="kiosk_staff">الموظفون</string>
+    <string name="kiosk_empty">المس ما تريد.</string>
+    <string name="kiosk_total">الإجمالي</string>
+    <string name="kiosk_start_over">ابدأ من جديد</string>
+    <string name="kiosk_order">اطلب</string>
+    <string name="kiosk_scan_note">امسح هذا بأي محفظة مونيرو. المبلغ مملوء بالفعل.</string>
+    <string name="kiosk_waiting">بانتظار دفعتك…</string>
+    <string name="kiosk_cancel_order">إلغاء</string>
+    <string name="kiosk_paid_title">شكرًا</string>
+    <string name="kiosk_paid_number">طلب رقم %1$d</string>
+    <string name="kiosk_next_customer">الزبون التالي</string>
+    <string name="kiosk_orders">الطلبات</string>
+    <string name="kiosk_no_orders">لا طلبات اليوم بعد.</string>
+    <string name="kiosk_back_to_counter">العودة إلى المنضدة</string>
+    <string name="kiosk_leave">الخروج من وضع الكشك</string>
+    <string name="kiosk_state_awaiting">بانتظار الدفع</string>
+    <string name="kiosk_state_seen">مدفوع — شوهد، ولم يصل السلسلة بعد</string>
+    <string name="kiosk_state_confirmed">تمت التسوية</string>
+    <string name="kiosk_state_abandoned">غادر</string>
+    <string name="kiosk_notify_title">طلب رقم %1$d</string>
+    <string name="kiosk_notify_body">شوهد %1$s XMR — الطلب مدفوع</string>
+    <string name="kiosk_mode_title">كشك</string>
+    <string name="kiosk_mode_body">شاشة تواجه الزبون: يلمس ما يريد ويدفع بأي محفظة مونيرو. الخروج يحتاج رمزك.</string>
+</resources>

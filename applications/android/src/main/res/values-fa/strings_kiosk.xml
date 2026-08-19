@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">اینجا سفارش دهید</string>
+    <string name="kiosk_staff">کارکنان</string>
+    <string name="kiosk_empty">آنچه می‌خواهید را لمس کنید.</string>
+    <string name="kiosk_total">جمع</string>
+    <string name="kiosk_start_over">از نو</string>
+    <string name="kiosk_order">سفارش</string>
+    <string name="kiosk_scan_note">با هر کیف پول مونرو اسکن کنید. مبلغ از پیش پر شده است.</string>
+    <string name="kiosk_waiting">در انتظار پرداخت شما…</string>
+    <string name="kiosk_cancel_order">انصراف</string>
+    <string name="kiosk_paid_title">سپاسگزاریم</string>
+    <string name="kiosk_paid_number">سفارش شمارهٔ %1$d</string>
+    <string name="kiosk_next_customer">مشتری بعدی</string>
+    <string name="kiosk_orders">سفارش‌ها</string>
+    <string name="kiosk_no_orders">امروز هنوز سفارشی نیست.</string>
+    <string name="kiosk_back_to_counter">بازگشت به پیشخوان</string>
+    <string name="kiosk_leave">خروج از حالت کیوسک</string>
+    <string name="kiosk_state_awaiting">در انتظار پرداخت</string>
+    <string name="kiosk_state_seen">پرداخت‌شده — دیده شد، هنوز روی زنجیره نیست</string>
+    <string name="kiosk_state_confirmed">تسویه‌شده</string>
+    <string name="kiosk_state_abandoned">رفت</string>
+    <string name="kiosk_notify_title">سفارش شمارهٔ %1$d</string>
+    <string name="kiosk_notify_body">%1$s XMR دیده شد — سفارش پرداخت شده است</string>
+    <string name="kiosk_mode_title">کیوسک</string>
+    <string name="kiosk_mode_body">صفحه‌ای رو به مشتری: آنچه می‌خواهد را لمس می‌کند و با هر کیف پول مونرو می‌پردازد. خروج رمز شما را می‌خواهد.</string>
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">Commandez ici</string>
+    <string name="kiosk_staff">Personnel</string>
+    <string name="kiosk_empty">Touchez ce que vous voulez.</string>
+    <string name="kiosk_total">Total</string>
+    <string name="kiosk_start_over">Recommencer</string>
+    <string name="kiosk_order">Commander</string>
+    <string name="kiosk_scan_note">Scannez avec n\'importe quel portefeuille Monero. Le montant est déjà rempli.</string>
+    <string name="kiosk_waiting">En attente de votre paiement…</string>
+    <string name="kiosk_cancel_order">Annuler</string>
+    <string name="kiosk_paid_title">Merci</string>
+    <string name="kiosk_paid_number">Commande n° %1$d</string>
+    <string name="kiosk_next_customer">Client suivant</string>
+    <string name="kiosk_orders">Commandes</string>
+    <string name="kiosk_no_orders">Aucune commande aujourd\'hui.</string>
+    <string name="kiosk_back_to_counter">Retour au comptoir</string>
+    <string name="kiosk_leave">Quitter le mode borne</string>
+    <string name="kiosk_state_awaiting">en attente de paiement</string>
+    <string name="kiosk_state_seen">payé — vu, pas encore sur la chaîne</string>
+    <string name="kiosk_state_confirmed">réglé</string>
+    <string name="kiosk_state_abandoned">reparti</string>
+    <string name="kiosk_notify_title">Commande n° %1$d</string>
+    <string name="kiosk_notify_body">%1$s XMR vus — la commande est payée</string>
+    <string name="kiosk_mode_title">Borne</string>
+    <string name="kiosk_mode_body">Un écran tourné vers le client : il touche ce qu\'il veut et paie avec n\'importe quel portefeuille Monero. En sortir demande votre code.</string>
+</resources>

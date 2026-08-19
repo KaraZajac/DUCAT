@@ -100,6 +100,10 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
                 },
             ),
         )
+        // Deliberately not a Shell: a shell has a hamburger, and a hamburger
+        // is a way for a customer to walk into somebody's wallet. The kiosk
+        // draws its own bar and its only exit is the PIN.
+        Mode.Kiosk -> KioskScreen()
         Mode.None -> {} // personal mode renders the full app, not a shell
     }
 }

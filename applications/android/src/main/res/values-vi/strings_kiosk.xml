@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kiosk_title">Đặt món ở đây</string>
+    <string name="kiosk_staff">Nhân viên</string>
+    <string name="kiosk_empty">Chạm vào thứ bạn muốn.</string>
+    <string name="kiosk_total">Tổng</string>
+    <string name="kiosk_start_over">Làm lại</string>
+    <string name="kiosk_order">Đặt món</string>
+    <string name="kiosk_scan_note">Quét bằng bất kỳ ví Monero nào. Số tiền đã điền sẵn.</string>
+    <string name="kiosk_waiting">Đang chờ bạn thanh toán…</string>
+    <string name="kiosk_cancel_order">Hủy</string>
+    <string name="kiosk_paid_title">Cảm ơn</string>
+    <string name="kiosk_paid_number">Đơn số %1$d</string>
+    <string name="kiosk_next_customer">Khách tiếp theo</string>
+    <string name="kiosk_orders">Đơn hàng</string>
+    <string name="kiosk_no_orders">Hôm nay chưa có đơn nào.</string>
+    <string name="kiosk_back_to_counter">Về lại quầy</string>
+    <string name="kiosk_leave">Thoát chế độ kiosk</string>
+    <string name="kiosk_state_awaiting">đang chờ thanh toán</string>
+    <string name="kiosk_state_seen">đã trả — đã thấy, chưa lên chuỗi</string>
+    <string name="kiosk_state_confirmed">đã tất toán</string>
+    <string name="kiosk_state_abandoned">bỏ đi</string>
+    <string name="kiosk_notify_title">Đơn số %1$d</string>
+    <string name="kiosk_notify_body">Đã thấy %1$s XMR — đơn đã được thanh toán</string>
+    <string name="kiosk_mode_title">Kiosk</string>
+    <string name="kiosk_mode_body">Màn hình quay về phía khách: khách chạm vào thứ mình muốn và trả bằng ví Monero bất kỳ. Muốn thoát phải có mã PIN của bạn.</string>
+</resources>

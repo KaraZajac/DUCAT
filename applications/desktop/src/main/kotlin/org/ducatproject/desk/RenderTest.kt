@@ -95,6 +95,9 @@ fun main() {
     render("items", w = 900, h = 700) { org.ducatproject.ducat.ui.ItemsScreen() }
     // The gate in front of every payment. Rendered in its set-a-PIN state,
     // which is what a device that has never had one shows.
+    // The counter, facing the other way. Empty catalogue, which is what a
+    // shop sees before it has set anything up.
+    render("kiosk", w = 520, h = 900) { org.ducatproject.ducat.ui.KioskScreen() }
     render("pin", w = 700, h = 700) {
         org.ducatproject.ducat.ui.PinGate(open = true, onDismiss = {}, onPassed = {})
     }

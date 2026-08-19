@@ -644,6 +644,11 @@ fun ModesScreen() {
             stringResource(R.string.mode_renting),
             stringResource(R.string.mode_renting_desc),
         ),
+        Triple(
+            org.ducatproject.ducat.Mode.Kiosk,
+            stringResource(R.string.kiosk_mode_title),
+            stringResource(R.string.kiosk_mode_body),
+        ),
     )
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
