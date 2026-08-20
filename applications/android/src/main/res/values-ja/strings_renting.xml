@@ -101,4 +101,7 @@
     <string name="board_chip_sale">売ります</string>
     <string name="board_chip_skills">腕</string>
     <string name="rent_per_hour_short">%1$s / 時間</string>
+    <string name="rent_find_gear">道具を探す</string>
+    <string name="rent_find_sale">買えるものを探す</string>
+    <string name="rent_find_skill">手を借りる</string>
 </resources>

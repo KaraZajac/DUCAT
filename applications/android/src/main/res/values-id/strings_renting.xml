@@ -101,4 +101,7 @@
     <string name="board_chip_sale">Dijual</string>
     <string name="board_chip_skills">Keahlian</string>
     <string name="rent_per_hour_short">%1$s / jam</string>
+    <string name="rent_find_gear">Cari perlengkapan</string>
+    <string name="rent_find_sale">Cari barang untuk dibeli</string>
+    <string name="rent_find_skill">Cari bantuan</string>
 </resources>

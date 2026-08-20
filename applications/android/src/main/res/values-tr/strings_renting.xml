@@ -101,4 +101,7 @@
     <string name="board_chip_sale">Satılık</string>
     <string name="board_chip_skills">Ustalık</string>
     <string name="rent_per_hour_short">%1$s / saat</string>
+    <string name="rent_find_gear">Ekipman bul</string>
+    <string name="rent_find_sale">Alacak bir şey bul</string>
+    <string name="rent_find_skill">Yardım bul</string>
 </resources>

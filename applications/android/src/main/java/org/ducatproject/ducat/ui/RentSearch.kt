@@ -40,6 +40,15 @@ import uniffi.ducat_mobile.RentalInfo
  * chosen because people travel to collect a car or a set of keys.
  */
 /** The chip a noun wears on the board. Short: five of them share a row. */
+/** "Find a car", "Find help" — the heading, per noun. */
+private fun boardFindTitle(kind: Int): Int = when (kind) {
+    Listings.KIND_VEHICLE -> R.string.rent_find_a_car
+    Listings.KIND_GEAR -> R.string.rent_find_gear
+    Listings.KIND_SALE -> R.string.rent_find_sale
+    Listings.KIND_SKILL -> R.string.rent_find_skill
+    else -> R.string.rent_find_a_place
+}
+
 internal fun boardChipLabel(kind: Int): Int = when (kind) {
     Listings.KIND_VEHICLE -> R.string.board_chip_cars
     Listings.KIND_GEAR -> R.string.board_chip_gear
@@ -173,10 +182,15 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
             Column(Modifier.fillMaxSize().padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        stringResource(
-                            if (kind == Listings.KIND_VEHICLE) R.string.rent_find_a_car
-                            else R.string.rent_find_a_place,
-                        ),
+                        // Per noun, and from what is *showing* rather than
+                        // from what this sheet was opened on. It read "a
+                        // vehicle, or else a place", which is the sixth time
+                        // that assumption has turned up since the board grew
+                        // to five nouns — so somebody looking for an
+                        // electrician was told they were finding a place.
+                        // And it was pinned to the opening kind, so tapping a
+                        // chip left the heading describing the last screen.
+                        stringResource(boardFindTitle(showing)),
                         style = MaterialTheme.typography.titleLarge,
                     )
                     Spacer(Modifier.weight(1f))

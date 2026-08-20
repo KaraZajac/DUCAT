@@ -101,4 +101,7 @@
     <string name="board_chip_sale">판매</string>
     <string name="board_chip_skills">재능</string>
     <string name="rent_per_hour_short">%1$s / 시간</string>
+    <string name="rent_find_gear">장비 찾기</string>
+    <string name="rent_find_sale">살 물건 찾기</string>
+    <string name="rent_find_skill">도움 찾기</string>
 </resources>

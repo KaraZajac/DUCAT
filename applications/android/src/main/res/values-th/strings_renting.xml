@@ -101,4 +101,7 @@
     <string name="board_chip_sale">ขาย</string>
     <string name="board_chip_skills">งานฝีมือ</string>
     <string name="rent_per_hour_short">%1$s / ชม.</string>
+    <string name="rent_find_gear">หาอุปกรณ์</string>
+    <string name="rent_find_sale">หาของที่จะซื้อ</string>
+    <string name="rent_find_skill">หาคนช่วย</string>
 </resources>

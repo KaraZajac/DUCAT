@@ -101,4 +101,7 @@
     <string name="board_chip_sale">Na sprzedaż</string>
     <string name="board_chip_skills">Fachy</string>
     <string name="rent_per_hour_short">%1$s / godz.</string>
+    <string name="rent_find_gear">Znajdź sprzęt</string>
+    <string name="rent_find_sale">Znajdź coś do kupienia</string>
+    <string name="rent_find_skill">Znajdź pomoc</string>
 </resources>

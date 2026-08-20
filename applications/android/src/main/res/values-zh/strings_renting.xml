@@ -101,4 +101,7 @@
     <string name="board_chip_sale">出售</string>
     <string name="board_chip_skills">手艺</string>
     <string name="rent_per_hour_short">%1$s / 小时</string>
+    <string name="rent_find_gear">找装备</string>
+    <string name="rent_find_sale">找东西买</string>
+    <string name="rent_find_skill">找人帮忙</string>
 </resources>

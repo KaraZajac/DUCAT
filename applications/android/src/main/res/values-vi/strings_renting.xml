@@ -101,4 +101,7 @@
     <string name="board_chip_sale">Cần bán</string>
     <string name="board_chip_skills">Tay nghề</string>
     <string name="rent_per_hour_short">%1$s / giờ</string>
+    <string name="rent_find_gear">Tìm đồ dùng</string>
+    <string name="rent_find_sale">Tìm thứ để mua</string>
+    <string name="rent_find_skill">Tìm người giúp</string>
 </resources>

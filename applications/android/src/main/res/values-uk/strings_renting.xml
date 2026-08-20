@@ -101,4 +101,7 @@
     <string name="board_chip_sale">Продаж</string>
     <string name="board_chip_skills">Уміння</string>
     <string name="rent_per_hour_short">%1$s / год</string>
+    <string name="rent_find_gear">Знайти спорядження</string>
+    <string name="rent_find_sale">Знайти що купити</string>
+    <string name="rent_find_skill">Знайти допомогу</string>
 </resources>

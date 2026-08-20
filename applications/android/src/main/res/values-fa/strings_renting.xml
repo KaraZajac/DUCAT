@@ -101,4 +101,7 @@
     <string name="board_chip_sale">برای فروش</string>
     <string name="board_chip_skills">مهارت‌ها</string>
     <string name="rent_per_hour_short">%1$s / ساعت</string>
+    <string name="rent_find_gear">دنبال وسیله بگرد</string>
+    <string name="rent_find_sale">دنبال چیزی برای خرید بگرد</string>
+    <string name="rent_find_skill">دنبال کمک بگرد</string>
 </resources>

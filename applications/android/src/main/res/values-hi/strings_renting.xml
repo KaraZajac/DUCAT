@@ -101,4 +101,7 @@
     <string name="board_chip_sale">बिक्री</string>
     <string name="board_chip_skills">हुनर</string>
     <string name="rent_per_hour_short">%1$s / घंटा</string>
+    <string name="rent_find_gear">सामान ढूँढ़ें</string>
+    <string name="rent_find_sale">खरीदने को कुछ ढूँढ़ें</string>
+    <string name="rent_find_skill">मदद ढूँढ़ें</string>
 </resources>
