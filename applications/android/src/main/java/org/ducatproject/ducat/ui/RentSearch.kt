@@ -434,32 +434,47 @@ internal fun ListingCardsPreview() {
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            listOf(2, 1, 3, 5, 0).forEachIndexed { i, n ->
-                val k = Listings.KINDS[i]
+            // One of each, which is what the cards below are — a count that
+            // disagrees with the list under it is a picture nobody can check
+            // anything against.
+            Listings.KINDS.forEach { k ->
                 FilterChip(
-                    selected = k == Listings.KIND_SALE,
+                    selected = false,
                     onClick = {},
-                    label = { Text("${stringResource(boardChipLabel(k))} $n") },
+                    label = { Text("${stringResource(boardChipLabel(k))} 1") },
                 )
             }
         }
         listOf(
-            Listings.KIND_PLACE to Triple("Sunny room near the park", 25_000_000_000uL, 2uL),
-            Listings.KIND_VEHICLE to Triple("2019 Corolla, automatic", 40_000_000_000uL, 1uL),
-            Listings.KIND_GEAR to Triple("Sea kayak, paddle included", 15_000_000_000uL, 3uL),
-            Listings.KIND_SALE to Triple("Bicycle, barely ridden", 90_000_000_000uL, 4uL),
-            Listings.KIND_SKILL to Triple("Electrician, 20 years", 30_000_000_000uL, 1uL),
-        ).forEach { (kind, d) ->
-            val (title, price, subtype) = d
+            Triple(Listings.KIND_PLACE, "Sunny room near the park", 25_000_000_000L)
+                to (2uL to listOf("wifi", "own bathroom")),
+            Triple(Listings.KIND_VEHICLE, "2019 Corolla, automatic", 40_000_000_000L)
+                to (1uL to listOf("child seat")),
+            Triple(Listings.KIND_GEAR, "Sea kayak, paddle included", 15_000_000_000L)
+                to (3uL to listOf("two seats")),
+            Triple(Listings.KIND_SALE, "Bicycle, barely ridden", 90_000_000_000L)
+                to (4uL to listOf("54cm frame", "new tyres")),
+            Triple(Listings.KIND_SKILL, "Electrician, 20 years", 30_000_000_000L)
+                to (1uL to listOf("rewiring", "certificates")),
+        ).forEach { (spec, extra) ->
+            val (kind, title, price) = spec
+            val (subtype, features) = extra
             ListingCard(
                 info = RentalInfo(
                     card = "ducat:card/x", kind = kind.toULong(), title = title,
-                    area = "north side", cell = "u33dc", pricePxmr = price,
-                    depositPxmr = 4_000_000_000uL, expiry = 1_800_000_000uL,
+                    area = "north side", cell = "u33dc", pricePxmr = price.toULong(),
+                    // From the kind's own deal, like a real notice. Every card
+                    // used to carry the same flat figure, so five prices from
+                    // 15 to 90 all claimed an identical stake — which is the
+                    // one thing on these cards a reader might check, and it
+                    // was checkable only against itself.
+                    depositPxmr = org.ducatproject.ducat.Stakes
+                        .stakeFor(Listings.dealFor(kind), price).toULong(),
+                    expiry = 1_800_000_000uL,
                     make = null, model = null, year = null, gearbox = null, fuel = null,
                     seats = null, color = null, trim = null,
                     rooms = null, sleeps = null, sizeM2 = null,
-                    subtype = subtype, features = listOf("good condition"),
+                    subtype = subtype, features = features,
                 ),
                 busy = false, onAsk = {},
             )
