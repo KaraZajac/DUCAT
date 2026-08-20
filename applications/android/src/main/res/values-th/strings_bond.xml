@@ -31,11 +31,11 @@
     <string name="res_my_deposit">มัดจำของคุณ (%1$s)</string>
     <string name="res_host_deposit">มัดจำของเขา (%1$s)</string>
     <string name="res_need_rent">ต้องระบุค่าเช่า</string>
-    <string name="res_send">เสนอการจอง</string>
+    <string name="res_send">ส่งข้อเสนอ</string>
     <string name="res_proposed">เขาจ่าย %1$s — การวางมัดจำของคุณคือการตอบรับ</string>
     <string name="res_accept_fund">ยอมรับ — จ่ายมัดจำ (%1$s)</string>
-    <string name="res_secured">การจองได้รับการคุ้มครอง</string>
-    <string name="res_settle">ชำระ — จบการเข้าพัก</string>
+    <string name="res_secured">ทั้งสองฝ่ายวางแล้ว</string>
+    <string name="res_settle">เคลียร์ — ปล่อยเงิน</string>
     <string name="bond_stake_asked">คุณถูกขอให้วางหลักประกัน</string>
     <string name="bond_post_stake">วางหลักประกันของคุณ (%1$s)</string>
     <string name="bond_stake_refunded">ในจำนวนนั้น %1$s เป็นหลักประกันของคุณ — จะคืนเมื่อเรื่องนี้เสร็จสิ้น</string>
@@ -48,7 +48,7 @@
     <string name="res_paid_sent">ส่งค่าเช่าและมัดจำแล้ว — กำลังยืนยันบนเชน…</string>
     <string name="res_waiting_payment">รอให้เขาจ่ายราคาและมัดจำ…</string>
     <string name="res_waiting_release">สิ้นสุดการเช่า — รอให้ผู้เช่าปล่อยเงิน…</string>
-    <string name="res_complete_ask">เจ้าของทำเครื่องหมายว่าการเช่าสิ้นสุดแล้ว</string>
+    <string name="res_complete_ask">เขาขอเคลียร์ยอด</string>
     <string name="res_split_stated">ข้อเสนอ: %1$s คืนผู้เช่า, %2$s ให้เจ้าของ</string>
     <string name="res_released">ปิดการจองแล้ว</string>
     <string name="res_send_details">ส่งที่อยู่และรายละเอียดการส่งมอบ</string>

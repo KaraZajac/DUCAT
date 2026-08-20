@@ -1955,7 +1955,13 @@ private fun RideBondBanner(contact: Contact) {
                 "pendingRiderBack", (funded - fare).coerceAtLeast(0L),
             )
             Step(
-                title = stringResource(R.string.bond_ride_complete_ask),
+                // Branched, like the note underneath it always was: this step
+                // is shared by a ride and a booking, and a guest settling up
+                // for a room was told "the driver marked the ride complete".
+                title = stringResource(
+                    if (reservation) R.string.res_complete_ask
+                    else R.string.bond_ride_complete_ask,
+                ),
                 amount = if (rider) riderBack else (funded - riderBack).coerceAtLeast(0L),
                 note = stringResource(
                     if (reservation) R.string.res_split_stated else R.string.bond_split_stated,
@@ -2061,12 +2067,10 @@ private fun RideBondBanner(contact: Contact) {
                         )
                     }
                     // The promise, at the moment the money is asked for,
-                    // rather than in a help page nobody opens.
-                    val myStake = org.ducatproject.ducat.Stakes.stakeFor(
-                        if (reservation) org.ducatproject.ducat.Stakes.Deal.Stay
-                        else org.ducatproject.ducat.Stakes.Deal.Ride,
-                        ride.optLong("farePxmr"),
-                    )
+                    // rather than in a help page nobody opens — and read from
+                    // the escrow, not worked out again with a room's twenty
+                    // percent for every kind of deal there is.
+                    val myStake = org.ducatproject.ducat.Ceremony.myStakePxmr(ride)
                     if (myStake > 0) {
                         Spacer(Modifier.height(4.dp))
                         BondNote(

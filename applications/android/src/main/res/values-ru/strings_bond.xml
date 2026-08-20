@@ -31,11 +31,11 @@
     <string name="res_my_deposit">Ваш залог (%1$s)</string>
     <string name="res_host_deposit">Их залог (%1$s)</string>
     <string name="res_need_rent">Укажите аренду.</string>
-    <string name="res_send">Предложить бронирование</string>
+    <string name="res_send">Отправить предложение</string>
     <string name="res_proposed">Они платят %1$s — внести свой залог значит согласиться.</string>
     <string name="res_accept_fund">Принять — внести залог (%1$s)</string>
-    <string name="res_secured">Бронирование обеспечено</string>
-    <string name="res_settle">Рассчитаться — завершить проживание</string>
+    <string name="res_secured">Обе стороны внесли.</string>
+    <string name="res_settle">Рассчитаться — выпустить деньги</string>
     <string name="bond_stake_asked">У вас просят залог</string>
     <string name="bond_post_stake">Внести залог (%1$s)</string>
     <string name="bond_stake_refunded">%1$s из этого — ваш залог: он вернётся, когда всё завершится.</string>
@@ -48,7 +48,7 @@
     <string name="res_paid_sent">Аренда и залог отправлены — подтверждение в сети…</string>
     <string name="res_waiting_payment">Ждём, пока они внесут сумму и свой залог…</string>
     <string name="res_waiting_release">Аренда завершена — ожидание, пока арендатор освободит деньги…</string>
-    <string name="res_complete_ask">Владелец отметил аренду завершённой.</string>
+    <string name="res_complete_ask">Они предложили рассчитаться.</string>
     <string name="res_split_stated">Предложено: %1$s арендатору, %2$s владельцу.</string>
     <string name="res_released">Бронирование закрыто</string>
     <string name="res_send_details">Отправить адрес и детали передачи</string>

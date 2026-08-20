@@ -31,11 +31,11 @@
     <string name="res_my_deposit">Ваша застава (%1$s)</string>
     <string name="res_host_deposit">Їхня застава (%1$s)</string>
     <string name="res_need_rent">Вкажіть оренду.</string>
-    <string name="res_send">Запропонувати бронювання</string>
+    <string name="res_send">Надіслати пропозицію</string>
     <string name="res_proposed">Вони платять %1$s — внести свою заставу означає погодитись.</string>
     <string name="res_accept_fund">Прийняти — внести заставу (%1$s)</string>
-    <string name="res_secured">Бронювання забезпечено</string>
-    <string name="res_settle">Розрахуватися — завершити перебування</string>
+    <string name="res_secured">Обидві сторони внесли.</string>
+    <string name="res_settle">Розрахуватися — звільнити гроші</string>
     <string name="bond_stake_asked">У вас просять заставу</string>
     <string name="bond_post_stake">Внести заставу (%1$s)</string>
     <string name="bond_stake_refunded">%1$s з цього — ваша застава: вона повернеться, коли все завершиться.</string>
@@ -48,7 +48,7 @@
     <string name="res_paid_sent">Оренду й заставу надіслано — підтвердження в мережі…</string>
     <string name="res_waiting_payment">Чекаємо, поки вони внесуть суму й свою заставу…</string>
     <string name="res_waiting_release">Оренду завершено — очікування, доки орендар звільнить кошти…</string>
-    <string name="res_complete_ask">Власник позначив оренду завершеною.</string>
+    <string name="res_complete_ask">Вони запропонували розрахуватися.</string>
     <string name="res_split_stated">Запропоновано: %1$s орендарю, %2$s власнику.</string>
     <string name="res_released">Бронювання закрито</string>
     <string name="res_send_details">Надіслати адресу та деталі передачі</string>

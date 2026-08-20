@@ -31,11 +31,11 @@
     <string name="res_my_deposit">Twój depozyt (%1$s)</string>
     <string name="res_host_deposit">Ich depozyt (%1$s)</string>
     <string name="res_need_rent">Podaj czynsz.</string>
-    <string name="res_send">Zaproponuj rezerwację</string>
+    <string name="res_send">Wyślij propozycję</string>
     <string name="res_proposed">Zapłacą %1$s — wpłata twojego depozytu to akceptacja.</string>
     <string name="res_accept_fund">Akceptuj — wpłać depozyt (%1$s)</string>
-    <string name="res_secured">Rezerwacja zabezpieczona</string>
-    <string name="res_settle">Rozlicz — zakończ pobyt</string>
+    <string name="res_secured">Obie strony wpłaciły.</string>
+    <string name="res_settle">Rozlicz — zwolnij pieniądze</string>
     <string name="bond_stake_asked">Poproszono cię o kaucję</string>
     <string name="bond_post_stake">Wpłać kaucję (%1$s)</string>
     <string name="bond_stake_refunded">%1$s z tego to twoja kaucja — wraca, gdy sprawa się zakończy.</string>
@@ -48,7 +48,7 @@
     <string name="res_paid_sent">Czynsz i kaucja wysłane — potwierdzanie w łańcuchu…</string>
     <string name="res_waiting_payment">Czekam, aż wpłacą kwotę i swój depozyt…</string>
     <string name="res_waiting_release">Najem zakończony — czekam, aż najemca zwolni pieniądze…</string>
-    <string name="res_complete_ask">Wynajmujący oznaczył najem jako zakończony.</string>
+    <string name="res_complete_ask">Poprosili o rozliczenie.</string>
     <string name="res_split_stated">Propozycja: %1$s dla najemcy, %2$s dla wynajmującego.</string>
     <string name="res_released">Rezerwacja rozliczona</string>
     <string name="res_send_details">Wyślij adres i szczegóły przekazania</string>

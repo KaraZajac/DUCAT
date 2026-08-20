@@ -31,11 +31,11 @@
     <string name="res_my_deposit">Tu depósito (%1$s)</string>
     <string name="res_host_deposit">Su depósito (%1$s)</string>
     <string name="res_need_rent">Falta la renta.</string>
-    <string name="res_send">Proponer reserva</string>
+    <string name="res_send">Enviar la propuesta</string>
     <string name="res_proposed">Pagan %1$s — poner tu depósito lo acepta.</string>
     <string name="res_accept_fund">Aceptar — poner tu depósito (%1$s)</string>
-    <string name="res_secured">Reserva asegurada</string>
-    <string name="res_settle">Liquidar — terminar la estancia</string>
+    <string name="res_secured">Ambas partes han puesto.</string>
+    <string name="res_settle">Liquidar — liberar el dinero</string>
     <string name="bond_stake_asked">Se te pide una fianza</string>
     <string name="bond_post_stake">Deposita tu fianza (%1$s)</string>
     <string name="bond_stake_refunded">%1$s de eso es tu garantía: vuelve a ti cuando esto termine.</string>
@@ -48,7 +48,7 @@
     <string name="res_paid_sent">Alquiler y fianza enviados — confirmando en la cadena…</string>
     <string name="res_waiting_payment">Esperando a que paguen el precio y su depósito…</string>
     <string name="res_waiting_release">Alquiler terminado — esperando a que el huésped libere el dinero…</string>
-    <string name="res_complete_ask">El propietario marcó el alquiler como terminado.</string>
+    <string name="res_complete_ask">Han pedido liquidar.</string>
     <string name="res_split_stated">Propuesta: %1$s de vuelta al huésped, %2$s al propietario.</string>
     <string name="res_released">Reserva liquidada</string>
     <string name="res_send_details">Enviar la dirección y los detalles de entrega</string>

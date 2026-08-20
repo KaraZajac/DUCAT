@@ -31,11 +31,11 @@
     <string name="res_my_deposit">La tua cauzione (%1$s)</string>
     <string name="res_host_deposit">La loro cauzione (%1$s)</string>
     <string name="res_need_rent">Manca l\'affitto.</string>
-    <string name="res_send">Proponi prenotazione</string>
+    <string name="res_send">Invia la proposta</string>
     <string name="res_proposed">Pagano %1$s — versare la tua cauzione è accettare.</string>
     <string name="res_accept_fund">Accetta — versa la cauzione (%1$s)</string>
-    <string name="res_secured">Prenotazione garantita</string>
-    <string name="res_settle">Salda — concludi il soggiorno</string>
+    <string name="res_secured">Entrambe le parti hanno versato.</string>
+    <string name="res_settle">Chiudi — libera il denaro</string>
     <string name="bond_stake_asked">Ti è stata chiesta una cauzione</string>
     <string name="bond_post_stake">Versa la tua cauzione (%1$s)</string>
     <string name="bond_stake_refunded">%1$s di questo è la tua cauzione: torna indietro quando è finita.</string>
@@ -48,7 +48,7 @@
     <string name="res_paid_sent">Affitto e cauzione inviati — conferma sulla catena…</string>
     <string name="res_waiting_payment">In attesa che paghino il prezzo e la loro cauzione…</string>
     <string name="res_waiting_release">Noleggio concluso — in attesa che l\'ospite sblocchi il denaro…</string>
-    <string name="res_complete_ask">Chi lo offre ha segnato il noleggio come concluso.</string>
+    <string name="res_complete_ask">Hanno chiesto di chiudere.</string>
     <string name="res_split_stated">Proposta: %1$s all\'ospite, %2$s a chi lo offre.</string>
     <string name="res_released">Prenotazione liquidata</string>
     <string name="res_send_details">Invia l\'indirizzo e i dettagli della consegna</string>

@@ -31,11 +31,11 @@
     <string name="res_my_deposit">Depoziton (%1$s)</string>
     <string name="res_host_deposit">Onların depozitosu (%1$s)</string>
     <string name="res_need_rent">Kira gerekli.</string>
-    <string name="res_send">Rezervasyonu öner</string>
+    <string name="res_send">Teklifi gönder</string>
     <string name="res_proposed">%1$s ödeyecekler — depozitonu yatırmak kabul demektir.</string>
     <string name="res_accept_fund">Kabul et — depozito yatır (%1$s)</string>
-    <string name="res_secured">Rezervasyon güvencede</string>
-    <string name="res_settle">Hesabı kapat — konaklamayı bitir</string>
+    <string name="res_secured">İki taraf da yatırdı.</string>
+    <string name="res_settle">Hesabı kapat — parayı serbest bırak</string>
     <string name="bond_stake_asked">Sizden teminat isteniyor</string>
     <string name="bond_post_stake">Teminatı yatır (%1$s)</string>
     <string name="bond_stake_refunded">Bunun %1$s kadarı senin teminatın — iş bitince geri gelir.</string>
@@ -48,7 +48,7 @@
     <string name="res_paid_sent">Kira ve depozito gönderildi — zincirde onaylanıyor…</string>
     <string name="res_waiting_payment">Tutarı ve depozitolarını yatırmalarını bekliyoruz…</string>
     <string name="res_waiting_release">Kiralama bitti — kiracının parayı serbest bırakması bekleniyor…</string>
-    <string name="res_complete_ask">İlan sahibi kiralamayı tamamlandı olarak işaretledi.</string>
+    <string name="res_complete_ask">Hesabı kapatmak istiyorlar.</string>
     <string name="res_split_stated">Öneri: %1$s kiracıya, %2$s ilan sahibine.</string>
     <string name="res_released">Rezervasyon kapatıldı</string>
     <string name="res_send_details">Adresi ve teslim bilgilerini gönder</string>

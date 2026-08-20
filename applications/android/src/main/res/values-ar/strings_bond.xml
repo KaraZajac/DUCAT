@@ -31,11 +31,11 @@
     <string name="res_my_deposit">وديعتك (%1$s)</string>
     <string name="res_host_deposit">وديعتهم (%1$s)</string>
     <string name="res_need_rent">الإيجار مطلوب.</string>
-    <string name="res_send">اقتراح الحجز</string>
+    <string name="res_send">أرسل العرض</string>
     <string name="res_proposed">سيدفعون %1$s — دفع وديعتك هو القبول.</string>
     <string name="res_accept_fund">قبول — دفع الوديعة (%1$s)</string>
-    <string name="res_secured">الحجز مؤمَّن</string>
-    <string name="res_settle">تسوية — إنهاء الإقامة</string>
+    <string name="res_secured">الطرفان أودعا.</string>
+    <string name="res_settle">التسوية — أطلق المال</string>
     <string name="bond_stake_asked">مطلوب منك تأمين</string>
     <string name="bond_post_stake">أودع تأمينك (%1$s)</string>
     <string name="bond_stake_refunded">‏%1$s من ذلك ضمانك — يعود إليك عند انتهاء المعاملة.</string>
@@ -48,7 +48,7 @@
     <string name="res_paid_sent">أُرسل الإيجار والتأمين — جارٍ التأكيد على السلسلة…</string>
     <string name="res_waiting_payment">في انتظار أن يدفعوا المبلغ ووديعتهم…</string>
     <string name="res_waiting_release">انتهى الإيجار — بانتظار أن يُفرج النزيل عن المال…</string>
-    <string name="res_complete_ask">علّم المالك الإيجار بأنه منتهٍ.</string>
+    <string name="res_complete_ask">طلبوا التسوية.</string>
     <string name="res_split_stated">المقترح: %1$s تعود إلى النزيل، و%2$s إلى المالك.</string>
     <string name="res_released">تمت تسوية الحجز</string>
     <string name="res_send_details">إرسال العنوان وتفاصيل التسليم</string>

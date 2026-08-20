@@ -31,11 +31,11 @@
     <string name="res_my_deposit">Deposit Anda (%1$s)</string>
     <string name="res_host_deposit">Deposit mereka (%1$s)</string>
     <string name="res_need_rent">Sewa wajib diisi.</string>
-    <string name="res_send">Usulkan reservasi</string>
+    <string name="res_send">Kirim usulan</string>
     <string name="res_proposed">Mereka membayar %1$s — menyetor deposit Anda berarti menerima.</string>
     <string name="res_accept_fund">Terima — setor deposit (%1$s)</string>
-    <string name="res_secured">Reservasi aman</string>
-    <string name="res_settle">Selesaikan — akhiri masa inap</string>
+    <string name="res_secured">Kedua pihak sudah masuk.</string>
+    <string name="res_settle">Selesaikan — lepas dananya</string>
     <string name="bond_stake_asked">Anda diminta menaruh jaminan</string>
     <string name="bond_post_stake">Setor jaminan Anda (%1$s)</string>
     <string name="bond_stake_refunded">Sebesar %1$s dari itu adalah jaminan Anda — kembali saat urusan ini selesai.</string>
@@ -48,7 +48,7 @@
     <string name="res_paid_sent">Sewa dan deposit terkirim — dikonfirmasi di rantai…</string>
     <string name="res_waiting_payment">Menunggu mereka membayar harga dan deposit…</string>
     <string name="res_waiting_release">Sewa selesai — menunggu penyewa melepas dananya…</string>
-    <string name="res_complete_ask">Pemilik menandai sewa sebagai selesai.</string>
+    <string name="res_complete_ask">Mereka minta diselesaikan.</string>
     <string name="res_split_stated">Usulan: %1$s kembali ke penyewa, %2$s ke pemilik.</string>
     <string name="res_released">Pemesanan diselesaikan</string>
     <string name="res_send_details">Kirim alamat dan detail serah terima</string>
