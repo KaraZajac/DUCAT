@@ -92,6 +92,16 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
     var busy by remember { mutableStateOf(false) }
     var searching by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    // Nothing to introduce ourselves with, and about to introduce ourselves.
+    // See NameGate: the name travels on the handshake, so a blank one arrives
+    // as "Unnamed contact" and neither end is told.
+    var intro by remember { mutableStateOf<(() -> Unit)?>(null) }
+    NameGate(
+        open = intro != null,
+        onDismiss = { intro = null },
+        onNamed = { val go = intro; intro = null; go?.invoke() },
+    )
+
     var stalled by remember { mutableStateOf<Stall?>(null) }
     var progress by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     // Bumped to start the search over; `asked` remembers that the system
@@ -303,6 +313,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                                 info = info,
                                 busy = busy,
                                 onAsk = {
+                                  val go: () -> Unit = {
                                     busy = true; error = null
                                     scope.launch {
                                         val r = withContext(Dispatchers.IO) {
@@ -367,6 +378,8 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                                                 )
                                             }
                                     }
+                                  }
+                                  if (nameGateNeeded(context)) intro = go else go()
                                 },
                             )
                             Spacer(Modifier.height(10.dp))

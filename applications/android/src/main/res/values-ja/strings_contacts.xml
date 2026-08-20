@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">それはあなた自身のカードです。</string>
     <string name="contacts_reply_refused">相手がリクエストを拒否しました。</string>
     <string name="contact_unnamed">名前のない連絡先</string>
+    <string name="name_gate_title">何と呼んでもらいますか？</string>
+    <string name="name_gate_body">これから初めての相手に連絡します。この名前がメッセージの横に表示されます。設定しないと、名前のない連絡先として表示されます。</string>
+    <string name="name_gate_label">あなたの名前</string>
+    <string name="name_gate_later">あとでプロフィールから変更・削除できます。</string>
+    <string name="name_gate_use">この名前を使う</string>
+    <string name="name_gate_skip">匿名のままにする</string>
 </resources>

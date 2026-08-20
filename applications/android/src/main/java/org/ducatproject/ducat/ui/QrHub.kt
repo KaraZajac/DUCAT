@@ -54,6 +54,16 @@ fun QrHub(
     var uri by remember { mutableStateOf(ContactStore(context).currentCardUri()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    // Nothing to introduce ourselves with, and about to introduce ourselves.
+    // See NameGate: the name travels on the handshake, so a blank one arrives
+    // as "Unnamed contact" and neither end is told.
+    var intro by remember { mutableStateOf<(() -> Unit)?>(null) }
+    NameGate(
+        open = intro != null,
+        onDismiss = { intro = null },
+        onNamed = { val go = intro; intro = null; go?.invoke() },
+    )
+
 
     BackHandler(onBack = onClose)
 
@@ -148,6 +158,7 @@ fun QrHub(
                                     if (addr.length in 90..110) onScanAddress(addr)
                                     else error = context.getString(R.string.qrhub_not_a_code)
                                 } else {
+                                    val go: () -> Unit = {
                                     busy = true; error = null
                                     scope.launch {
                                         val r = withContext(Dispatchers.IO) {
@@ -162,6 +173,8 @@ fun QrHub(
                                             DucatLog.w(TAG, "claim: ${it.message}")
                                         }
                                     }
+                                    }
+                                    if (nameGateNeeded(context)) intro = go else go()
                                 }
                             },
                         )

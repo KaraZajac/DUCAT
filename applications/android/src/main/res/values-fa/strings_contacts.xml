@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">این کارت خودت است.</string>
     <string name="contacts_reply_refused">درخواست را رد کرد.</string>
     <string name="contact_unnamed">مخاطب بی‌نام</string>
+    <string name="name_gate_title">شما را چه صدا کنند؟</string>
+    <string name="name_gate_body">می‌خواهید با فرد تازه‌ای تماس بگیرید. این نامی است که کنار پیام‌های شما می‌بیند — بدون آن به‌صورت مخاطب بی‌نام دیده می‌شوید.</string>
+    <string name="name_gate_label">نام شما</string>
+    <string name="name_gate_later">بعداً می‌توانید آن را در پروفایل تغییر دهید یا بردارید.</string>
+    <string name="name_gate_use">استفاده از این نام</string>
+    <string name="name_gate_skip">ناشناس بمانم</string>
 </resources>

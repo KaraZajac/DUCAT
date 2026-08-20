@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">Itu kartumu sendiri.</string>
     <string name="contacts_reply_refused">Mereka menolak permintaannya.</string>
     <string name="contact_unnamed">Kontak tanpa nama</string>
+    <string name="name_gate_title">Mereka harus memanggilmu apa?</string>
+    <string name="name_gate_body">Kamu akan menghubungi orang baru. Ini nama yang akan dia lihat di samping pesanmu — tanpa itu, kamu muncul sebagai kontak tanpa nama.</string>
+    <string name="name_gate_label">Namamu</string>
+    <string name="name_gate_later">Bisa kamu ubah atau hapus nanti di Profil.</string>
+    <string name="name_gate_use">Pakai nama ini</string>
+    <string name="name_gate_skip">Tetap anonim</string>
 </resources>

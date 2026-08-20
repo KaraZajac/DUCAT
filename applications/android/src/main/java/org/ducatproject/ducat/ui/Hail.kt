@@ -708,7 +708,26 @@ fun DriveScreen() {
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { }
     var locating by remember { mutableStateOf(false) }
+
+    // Asked before the shift, never during it.
+    //
+    // A driver with no name reaches a rider as "Unnamed contact" beside the
+    // plate they are scanning the curb for — the exact thing claimCard's own
+    // comment describes. The moment to fix that is not while accepting a
+    // hail: drivers race each other for those, and a dialog in the middle of
+    // one costs somebody a fare. Going on duty is the same person, a minute
+    // earlier, with nothing at stake.
+    var intro by remember { mutableStateOf<(() -> Unit)?>(null) }
+    NameGate(
+        open = intro != null,
+        onDismiss = { intro = null },
+        onNamed = { val go = intro; intro = null; go?.invoke() },
+    )
+
     fun driveHere() {
+        // Terminates: the gate marks itself asked before calling back, so the
+        // second pass through here always falls straight past this.
+        if (nameGateNeeded(context)) { intro = { driveHere() }; return }
         if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) !=
             android.content.pm.PackageManager.PERMISSION_GRANTED
         ) {

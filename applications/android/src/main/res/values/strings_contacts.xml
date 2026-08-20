@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">That is your own card.</string>
     <string name="contacts_reply_refused">They refused the request.</string>
     <string name="contact_unnamed">Unnamed contact</string>
+    <string name="name_gate_title">What should they call you?</string>
+    <string name="name_gate_body">You are about to reach somebody new. This is the name they will see beside your messages — without one, you show up as an unnamed contact.</string>
+    <string name="name_gate_label">Your name</string>
+    <string name="name_gate_later">You can change or remove it later, in Profile.</string>
+    <string name="name_gate_use">Use this name</string>
+    <string name="name_gate_skip">Stay anonymous</string>
 </resources>

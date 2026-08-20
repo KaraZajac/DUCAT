@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">นั่นคือนามบัตรของคุณเอง</string>
     <string name="contacts_reply_refused">เขาปฏิเสธคำขอ</string>
     <string name="contact_unnamed">ผู้ติดต่อที่ยังไม่มีชื่อ</string>
+    <string name="name_gate_title">ให้เขาเรียกคุณว่าอะไร</string>
+    <string name="name_gate_body">คุณกำลังจะติดต่อคนใหม่ ชื่อนี้จะแสดงข้างข้อความของคุณ — ถ้าไม่ใส่ คุณจะปรากฏเป็นผู้ติดต่อที่ไม่มีชื่อ</string>
+    <string name="name_gate_label">ชื่อของคุณ</string>
+    <string name="name_gate_later">เปลี่ยนหรือลบภายหลังได้ในโปรไฟล์</string>
+    <string name="name_gate_use">ใช้ชื่อนี้</string>
+    <string name="name_gate_skip">ไม่ระบุชื่อ</string>
 </resources>

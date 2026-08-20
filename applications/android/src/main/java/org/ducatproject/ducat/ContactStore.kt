@@ -1256,6 +1256,26 @@ class NameStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")
     fun get(): String? = prefs.getString("my_name", null)
     fun put(v: String) = prefs.edit().putString("my_name", v).apply()
+
+    /**
+     * Nothing to introduce ourselves with.
+     *
+     * The name is optional by design and travels on every handshake, so a
+     * phone that left onboarding without one asserts nothing and lands on the
+     * far side as "Unnamed contact" — for ever, to everybody, including the
+     * person about to do a job for them. Blank counts, not just missing: a
+     * field somebody typed a space into is not a name.
+     */
+    fun needed(): Boolean = get().isNullOrBlank()
+
+    /**
+     * Whether we have already asked, so a decline is not re-asked at every
+     * introduction. Staying anonymous is a legitimate answer and nagging is
+     * not how the rest of this app treats one.
+     */
+    fun asked(): Boolean = prefs.getBoolean("my_name_asked", false)
+
+    fun markAsked() = prefs.edit().putBoolean("my_name_asked", true).apply()
 }
 
 /** The inbox and outbox behind a card we have handed out. */

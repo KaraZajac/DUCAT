@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">Esse é o seu próprio cartão.</string>
     <string name="contacts_reply_refused">A pessoa recusou o pedido.</string>
     <string name="contact_unnamed">Contacto sem nome</string>
+    <string name="name_gate_title">Como querem que te chamem?</string>
+    <string name="name_gate_body">Está prestes a contactar alguém novo. Este é o nome que essa pessoa verá ao lado das suas mensagens; sem ele, aparece como um contacto sem nome.</string>
+    <string name="name_gate_label">O seu nome</string>
+    <string name="name_gate_later">Pode alterá-lo ou removê-lo mais tarde, no Perfil.</string>
+    <string name="name_gate_use">Usar este nome</string>
+    <string name="name_gate_skip">Ficar anónimo</string>
 </resources>

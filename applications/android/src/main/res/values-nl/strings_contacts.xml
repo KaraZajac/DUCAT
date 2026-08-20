@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">Dat is je eigen kaartje.</string>
     <string name="contacts_reply_refused">Ze hebben het verzoek geweigerd.</string>
     <string name="contact_unnamed">Naamloos contact</string>
+    <string name="name_gate_title">Hoe moeten ze je noemen?</string>
+    <string name="name_gate_body">Je gaat zo iemand nieuws benaderen. Dit is de naam die diegene naast je berichten ziet — zonder naam verschijn je als naamloos contact.</string>
+    <string name="name_gate_label">Je naam</string>
+    <string name="name_gate_later">Je kunt hem later wijzigen of verwijderen, bij Profiel.</string>
+    <string name="name_gate_use">Deze naam gebruiken</string>
+    <string name="name_gate_skip">Anoniem blijven</string>
 </resources>

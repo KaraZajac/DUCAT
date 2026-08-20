@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">Đó là thẻ của chính bạn.</string>
     <string name="contacts_reply_refused">Họ đã từ chối yêu cầu.</string>
     <string name="contact_unnamed">Liên hệ chưa có tên</string>
+    <string name="name_gate_title">Họ nên gọi bạn là gì?</string>
+    <string name="name_gate_body">Bạn sắp liên hệ với một người mới. Đây là tên họ sẽ thấy bên cạnh tin nhắn của bạn — không có thì bạn hiện ra là liên hệ không tên.</string>
+    <string name="name_gate_label">Tên của bạn</string>
+    <string name="name_gate_later">Bạn có thể đổi hoặc bỏ sau, trong Hồ sơ.</string>
+    <string name="name_gate_use">Dùng tên này</string>
+    <string name="name_gate_skip">Ẩn danh</string>
 </resources>

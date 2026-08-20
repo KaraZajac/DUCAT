@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">To twoja własna wizytówka.</string>
     <string name="contacts_reply_refused">Odmówili przyjęcia prośby.</string>
     <string name="contact_unnamed">Kontakt bez nazwy</string>
+    <string name="name_gate_title">Jak mają cię nazywać?</string>
+    <string name="name_gate_body">Zaraz skontaktujesz się z kimś nowym. To imię zobaczy obok twoich wiadomości — bez niego wyświetlasz się jako kontakt bez nazwy.</string>
+    <string name="name_gate_label">Twoje imię</string>
+    <string name="name_gate_later">Możesz je później zmienić lub usunąć w Profilu.</string>
+    <string name="name_gate_use">Użyj tego imienia</string>
+    <string name="name_gate_skip">Pozostań anonimowy</string>
 </resources>

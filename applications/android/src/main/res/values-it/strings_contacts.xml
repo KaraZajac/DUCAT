@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">Quello è il tuo stesso biglietto.</string>
     <string name="contacts_reply_refused">Hanno rifiutato la richiesta.</string>
     <string name="contact_unnamed">Contatto senza nome</string>
+    <string name="name_gate_title">Come devono chiamarti?</string>
+    <string name="name_gate_body">Stai per contattare qualcuno di nuovo. Questo è il nome che vedrà accanto ai tuoi messaggi; senza, compari come contatto senza nome.</string>
+    <string name="name_gate_label">Il tuo nome</string>
+    <string name="name_gate_later">Puoi cambiarlo o toglierlo più tardi, in Profilo.</string>
+    <string name="name_gate_use">Usa questo nome</string>
+    <string name="name_gate_skip">Resta anonimo</string>
 </resources>

@@ -207,6 +207,16 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
     var scanned by remember { mutableStateOf<uniffi.ducat_mobile.ScannedCard?>(null) }
     var petname by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
+
+    // Nothing to introduce ourselves with, and about to introduce ourselves.
+    // See NameGate: the name travels on the handshake, so a blank one arrives
+    // as "Unnamed contact" and neither end is told.
+    var intro by remember { mutableStateOf<(() -> Unit)?>(null) }
+    NameGate(
+        open = intro != null,
+        onDismiss = { intro = null },
+        onNamed = { val go = intro; intro = null; go?.invoke() },
+    )
     var adding by remember { mutableStateOf(false) }
     var scanning by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -321,6 +331,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                 Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = {
+                      val go: () -> Unit = {
                         adding = true
                         error = null
                         scope.launch {
@@ -337,6 +348,8 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                             r.onSuccess { onAdded() }
                                 .onFailure { error = context.getString(claimFailureRes(it)) }
                         }
+                      }
+                      if (nameGateNeeded(context)) intro = go else go()
                     },
                     enabled = petname.isNotBlank() && !adding,
                     modifier = Modifier.fillMaxWidth(),

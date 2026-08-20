@@ -284,6 +284,17 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         // about. Prefilled with what the card says, so the common case is one
         // tap and nothing to read.
         var naming by remember(uri) { mutableStateOf(who) }
+        // The other half of the same question, asked in the same breath.
+        //
+        // This dialog exists because claiming a card is the one moment the
+        // other person is standing right there to be named. They are equally
+        // there to be *introduced to*, and a phone with no display name
+        // asserts none on the handshake — so without this the reader labels
+        // their new contact carefully and lands on that contact's screen as
+        // "Unnamed contact". A second modal stacked on this one would be a
+        // worse way to ask than a second field.
+        val needMine = remember(uri) { org.ducatproject.ducat.ui.nameGateNeeded(context) }
+        var mine by remember(uri) { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = { cardAsk = null },
             title = { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_title)) },
@@ -306,11 +317,40 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
+                    if (needMine) {
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            androidx.compose.ui.res.stringResource(R.string.name_gate_body),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = mine,
+                            onValueChange = { if (it.length <= 32) mine = it },
+                            label = {
+                                Text(
+                                    androidx.compose.ui.res
+                                        .stringResource(R.string.name_gate_label),
+                                )
+                            },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
                     val petname = naming.trim().takeIf { it.isNotBlank() && it != who }
+                    // Before the claim, not after: claimCard reads the name
+                    // store to decide what to assert about us, and a write
+                    // that landed afterwards would miss this very handshake.
+                    if (needMine) {
+                        val store = NameStore(context)
+                        mine.trim().takeIf { it.isNotBlank() }?.let { store.put(it) }
+                        store.markAsked()
+                    }
                     cardAsk = null
                     scope.launch {
                         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {

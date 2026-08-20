@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">그건 본인 카드예요.</string>
     <string name="contacts_reply_refused">상대가 요청을 거부했어요.</string>
     <string name="contact_unnamed">이름 없는 연락처</string>
+    <string name="name_gate_title">상대가 뭐라고 부르면 될까요?</string>
+    <string name="name_gate_body">처음 연락하는 상대입니다. 이 이름이 메시지 옆에 표시됩니다. 없으면 이름 없는 연락처로 보입니다.</string>
+    <string name="name_gate_label">이름</string>
+    <string name="name_gate_later">나중에 프로필에서 바꾸거나 지울 수 있습니다.</string>
+    <string name="name_gate_use">이 이름 사용</string>
+    <string name="name_gate_skip">익명으로 두기</string>
 </resources>

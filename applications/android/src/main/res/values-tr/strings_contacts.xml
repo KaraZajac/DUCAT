@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">Bu senin kendi kartın.</string>
     <string name="contacts_reply_refused">İsteği reddettiler.</string>
     <string name="contact_unnamed">Adsız kişi</string>
+    <string name="name_gate_title">Sana nasıl seslensinler?</string>
+    <string name="name_gate_body">Yeni biriyle iletişime geçmek üzeresin. Bu, mesajlarının yanında göreceği isim — olmadan isimsiz bir kişi olarak görünürsün.</string>
+    <string name="name_gate_label">Adın</string>
+    <string name="name_gate_later">Sonradan Profil\'den değiştirebilir veya kaldırabilirsin.</string>
+    <string name="name_gate_use">Bu ismi kullan</string>
+    <string name="name_gate_skip">Anonim kal</string>
 </resources>

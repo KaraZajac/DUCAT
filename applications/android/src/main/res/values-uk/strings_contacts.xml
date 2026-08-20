@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">Це твоя власна картка.</string>
     <string name="contacts_reply_refused">Вони відхилили запит.</string>
     <string name="contact_unnamed">Контакт без імені</string>
+    <string name="name_gate_title">Як до вас звертатися?</string>
+    <string name="name_gate_body">Ви збираєтеся звʼязатися з новою людиною. Це імʼя вона побачить поряд із вашими повідомленнями — без нього ви показуєтеся як безіменний контакт.</string>
+    <string name="name_gate_label">Ваше імʼя</string>
+    <string name="name_gate_later">Пізніше його можна змінити або прибрати в профілі.</string>
+    <string name="name_gate_use">Використати це імʼя</string>
+    <string name="name_gate_skip">Лишитися анонімним</string>
 </resources>

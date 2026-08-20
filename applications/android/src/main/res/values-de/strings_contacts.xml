@@ -41,4 +41,10 @@
     <string name="contacts_reply_own_card">Das ist deine eigene Karte.</string>
     <string name="contacts_reply_refused">Die Anfrage wurde abgelehnt.</string>
     <string name="contact_unnamed">Kontakt ohne Namen</string>
+    <string name="name_gate_title">Wie sollen sie dich nennen?</string>
+    <string name="name_gate_body">Du nimmst gleich Kontakt zu jemandem Neuen auf. Diesen Namen sieht die Person neben deinen Nachrichten – ohne ihn erscheinst du als namenloser Kontakt.</string>
+    <string name="name_gate_label">Dein Name</string>
+    <string name="name_gate_later">Du kannst ihn später im Profil ändern oder entfernen.</string>
+    <string name="name_gate_use">Diesen Namen verwenden</string>
+    <string name="name_gate_skip">Anonym bleiben</string>
 </resources>
