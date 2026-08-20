@@ -33,4 +33,7 @@
     <string name="scanner_torch_off">Ліхтарик вимкнено</string>
     <string name="scanner_torch_on">Ліхтарик увімкнено</string>
     <string name="scanner_no_camera_tap">Для сканування потрібна. Можеш прикласти цей телефон до їхнього — дотик несе ту саму картку — або вставити картку посиланням.</string>
+    <string name="settings_fares_title">Тарифи</string>
+    <string name="settings_fares_note">Підказки рахуються з того, скільки бере таксі тут.</string>
+    <string name="settings_fares_unsurveyed">Для цієї країни немає даних — береться середня величина. Впишіть свій тариф на лічильнику.</string>
 </resources>

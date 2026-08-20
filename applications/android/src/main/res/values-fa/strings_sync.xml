@@ -27,4 +27,7 @@
     <string name="scanner_torch_off">چراغ خاموش</string>
     <string name="scanner_torch_on">چراغ روشن</string>
     <string name="scanner_no_camera_tap">برای اسکن لازم است. هنوز می‌توانی این گوشی را به گوشی آن‌ها نزدیک کنی — یک تماس همان کارت را می‌برد — یا کارت را به‌صورت لینک بچسبانی.</string>
+    <string name="settings_fares_title">کرایه‌ها</string>
+    <string name="settings_fares_note">پیشنهاد کرایه بر پایهٔ چیزی است که تاکسی اینجا می‌گیرد.</string>
+    <string name="settings_fares_unsurveyed">برای این کشور آماری نیست — از مقداری میانه استفاده می‌شود. نرخ خودت را در کنتور بنویس.</string>
 </resources>

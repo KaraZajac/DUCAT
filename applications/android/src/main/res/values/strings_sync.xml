@@ -27,4 +27,7 @@
     <string name="scanner_torch_off">Torch off</string>
     <string name="scanner_torch_on">Torch on</string>
     <string name="scanner_no_camera_tap">Scanning needs it. You can still hold this phone against theirs — a tap carries the same card — or paste the card as a link.</string>
+    <string name="settings_fares_title">Fares</string>
+    <string name="settings_fares_note">Ride suggestions are priced from what a taxi charges here.</string>
+    <string name="settings_fares_unsurveyed">No survey for this country — suggestions use a middling one. Type your own rate at the meter.</string>
 </resources>

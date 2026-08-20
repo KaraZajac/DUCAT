@@ -24,4 +24,7 @@
     <string name="scanner_torch_off">플래시 끄기</string>
     <string name="scanner_torch_on">플래시 켜기</string>
     <string name="scanner_no_camera_tap">스캔에는 필요합니다. 이 기기를 상대 기기에 대도 같은 카드가 전달되고, 카드를 링크로 붙여넣어도 됩니다.</string>
+    <string name="settings_fares_title">요금</string>
+    <string name="settings_fares_note">제안 요금은 이곳 택시 요금을 기준으로 계산합니다.</string>
+    <string name="settings_fares_unsurveyed">이 나라의 조사 자료가 없어 중간값을 씁니다. 미터기에서 직접 요금을 입력하세요.</string>
 </resources>

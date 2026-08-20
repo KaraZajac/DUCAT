@@ -23,4 +23,7 @@
     <string name="scanner_torch_off">Apagar linterna</string>
     <string name="scanner_torch_on">Encender linterna</string>
     <string name="scanner_no_camera_tap">Escanear la necesita. Aún puedes acercar este teléfono al suyo: un toque lleva la misma tarjeta, o pega la tarjeta como enlace.</string>
+    <string name="settings_fares_title">Tarifas</string>
+    <string name="settings_fares_note">Las sugerencias se calculan a partir de lo que cobra un taxi aquí.</string>
+    <string name="settings_fares_unsurveyed">No hay datos de este país: se usa un valor intermedio. Pon tu propia tarifa en el taxímetro.</string>
 </resources>

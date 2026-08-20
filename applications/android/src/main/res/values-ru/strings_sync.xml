@@ -33,4 +33,7 @@
     <string name="scanner_torch_off">Фонарик: выкл</string>
     <string name="scanner_torch_on">Фонарик: вкл</string>
     <string name="scanner_no_camera_tap">Для сканирования нужна. Можно приложить этот телефон к их телефону — касание несёт ту же карту — или вставить карту ссылкой.</string>
+    <string name="settings_fares_title">Тарифы</string>
+    <string name="settings_fares_note">Подсказки считаются из того, сколько берёт такси здесь.</string>
+    <string name="settings_fares_unsurveyed">Для этой страны нет данных — берётся средняя величина. Впишите свой тариф на счётчике.</string>
 </resources>

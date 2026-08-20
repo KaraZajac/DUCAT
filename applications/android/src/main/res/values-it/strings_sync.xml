@@ -27,4 +27,7 @@
     <string name="scanner_torch_off">Torcia spenta</string>
     <string name="scanner_torch_on">Torcia accesa</string>
     <string name="scanner_no_camera_tap">Serve per scansionare. Puoi comunque avvicinare questo telefono al loro — un tocco porta la stessa tessera — o incollare la tessera come link.</string>
+    <string name="settings_fares_title">Tariffe</string>
+    <string name="settings_fares_note">I suggerimenti partono da quanto chiede un taxi qui.</string>
+    <string name="settings_fares_unsurveyed">Nessun rilevamento per questo paese: si usa un valore intermedio. Metti la tua tariffa al tassametro.</string>
 </resources>

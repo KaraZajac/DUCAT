@@ -24,4 +24,7 @@
     <string name="scanner_torch_off">ライトをオフ</string>
     <string name="scanner_torch_on">ライトをオン</string>
     <string name="scanner_no_camera_tap">読み取りには必要です。この端末を相手の端末に近づければ同じカードが渡せますし、カードをリンクとして貼り付けることもできます。</string>
+    <string name="settings_fares_title">運賃</string>
+    <string name="settings_fares_note">目安は、ここのタクシー料金から計算します。</string>
+    <string name="settings_fares_unsurveyed">この国の調査がありません。中位の値を使います。メーターでご自分の料金を入力してください。</string>
 </resources>

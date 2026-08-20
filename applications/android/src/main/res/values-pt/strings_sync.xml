@@ -23,4 +23,7 @@
     <string name="scanner_torch_off">Desligar lanterna</string>
     <string name="scanner_torch_on">Ligar lanterna</string>
     <string name="scanner_no_camera_tap">Digitalizar precisa dela. Ainda pode encostar este telefone no deles — um toque leva o mesmo cartão — ou colar o cartão como ligação.</string>
+    <string name="settings_fares_title">Tarifas</string>
+    <string name="settings_fares_note">As sugestões partem do que um táxi cobra aqui.</string>
+    <string name="settings_fares_unsurveyed">Sem levantamento para este país — usa-se um valor intermédio. Escreva a sua tarifa no taxímetro.</string>
 </resources>

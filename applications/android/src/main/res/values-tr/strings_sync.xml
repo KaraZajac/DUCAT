@@ -27,4 +27,7 @@
     <string name="scanner_torch_off">Fener kapalı</string>
     <string name="scanner_torch_on">Fener açık</string>
     <string name="scanner_no_camera_tap">Taramak için gerekli. Yine de bu telefonu onlarınkine yaklaştırabilirsin — bir dokunuş aynı kartı taşır — ya da kartı bağlantı olarak yapıştır.</string>
+    <string name="settings_fares_title">Ücretler</string>
+    <string name="settings_fares_note">Öneriler, buradaki taksi ücretinden hesaplanır.</string>
+    <string name="settings_fares_unsurveyed">Bu ülke için veri yok — orta bir değer kullanılıyor. Taksimetrede kendi ücretini yaz.</string>
 </resources>

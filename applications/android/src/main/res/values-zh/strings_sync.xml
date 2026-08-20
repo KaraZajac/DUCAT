@@ -20,4 +20,7 @@
     <string name="scanner_torch_off">关闭手电筒</string>
     <string name="scanner_torch_on">打开手电筒</string>
     <string name="scanner_no_camera_tap">扫码需要它。你仍然可以把这台手机贴到对方手机上——碰一下带的是同一张名片——或者把名片作为链接粘贴进来。</string>
+    <string name="settings_fares_title">车费</string>
+    <string name="settings_fares_note">建议价格按这里出租车的收费推算。</string>
+    <string name="settings_fares_unsurveyed">这个国家没有调查数据，使用了中间值。请在计价器上填写你自己的费率。</string>
 </resources>

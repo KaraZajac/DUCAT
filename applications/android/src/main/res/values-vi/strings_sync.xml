@@ -24,4 +24,7 @@
     <string name="scanner_torch_off">Tắt đèn</string>
     <string name="scanner_torch_on">Bật đèn</string>
     <string name="scanner_no_camera_tap">Quét thì cần. Bạn vẫn có thể chạm máy này vào máy họ — một cú chạm mang đúng tấm thẻ đó — hoặc dán thẻ dưới dạng liên kết.</string>
+    <string name="settings_fares_title">Giá cước</string>
+    <string name="settings_fares_note">Mức gợi ý được tính từ giá taxi ở đây.</string>
+    <string name="settings_fares_unsurveyed">Chưa có khảo sát cho nước này — dùng mức trung bình. Hãy tự nhập giá của bạn ở đồng hồ.</string>
 </resources>

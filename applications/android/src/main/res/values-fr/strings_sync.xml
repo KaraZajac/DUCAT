@@ -23,4 +23,7 @@
     <string name="scanner_torch_off">Éteindre la lampe</string>
     <string name="scanner_torch_on">Allumer la lampe</string>
     <string name="scanner_no_camera_tap">Le scan en a besoin. Tu peux quand même approcher ce téléphone du leur — un contact porte la même carte — ou coller la carte en lien.</string>
+    <string name="settings_fares_title">Tarifs</string>
+    <string name="settings_fares_note">Les suggestions partent de ce que demande un taxi ici.</string>
+    <string name="settings_fares_unsurveyed">Pas de relevé pour ce pays — une valeur moyenne est utilisée. Saisis ton propre tarif au compteur.</string>
 </resources>

@@ -23,4 +23,7 @@
     <string name="scanner_torch_off">Licht aus</string>
     <string name="scanner_torch_on">Licht an</string>
     <string name="scanner_no_camera_tap">Zum Scannen schon. Du kannst dieses Telefon aber weiter an ihres halten — ein Tippen trägt dieselbe Karte — oder die Karte als Link einfügen.</string>
+    <string name="settings_fares_title">Fahrpreise</string>
+    <string name="settings_fares_note">Vorschläge richten sich danach, was ein Taxi hier verlangt.</string>
+    <string name="settings_fares_unsurveyed">Für dieses Land gibt es keine Erhebung — es wird ein mittlerer Wert benutzt. Gib am Taxameter deinen eigenen Preis ein.</string>
 </resources>

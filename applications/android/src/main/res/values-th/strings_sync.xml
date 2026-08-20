@@ -24,4 +24,7 @@
     <string name="scanner_torch_off">ปิดไฟฉาย</string>
     <string name="scanner_torch_on">เปิดไฟฉาย</string>
     <string name="scanner_no_camera_tap">การสแกนต้องใช้กล้อง คุณยังแตะเครื่องนี้กับเครื่องของเขาได้ การแตะพาการ์ดใบเดียวกันไป หรือจะวางการ์ดเป็นลิงก์ก็ได้</string>
+    <string name="settings_fares_title">ค่าโดยสาร</string>
+    <string name="settings_fares_note">ราคาที่แนะนำคิดจากค่าแท็กซี่ในพื้นที่นี้</string>
+    <string name="settings_fares_unsurveyed">ไม่มีข้อมูลสำรวจของประเทศนี้ จึงใช้ค่ากลาง พิมพ์อัตราของคุณเองที่มิเตอร์</string>
 </resources>

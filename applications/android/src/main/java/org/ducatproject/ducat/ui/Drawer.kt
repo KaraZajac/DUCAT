@@ -189,6 +189,9 @@ fun SettingsScreen(
         RateSettings()
         Spacer(Modifier.height(24.dp))
 
+        FareRegion()
+        Spacer(Modifier.height(24.dp))
+
         // §16.16, and the default is the privacy stance: when a message was
         // read is behavioural data, and it leaves this device by choice, not by
         // installing a chat app.
@@ -334,6 +337,92 @@ private fun DistanceSetting() {
  * already tells a public node, but not nothing, and not something to do on a
  * user's behalf without a way to decline.
  */
+/**
+ * Where fares are priced for.
+ *
+ * §15.12's suggestion is built from what a taxi charges locally, and "locally"
+ * is a country — the table has a hundred and one of them. The phone's own
+ * region is right for nearly everybody, because drivers work where they live;
+ * it is wrong for the tourist whose phone still says home, and for anybody
+ * working across a border, and until now there was no way for either of them
+ * to say so.
+ *
+ * The names come from the platform, so a hundred countries cost no strings
+ * and each reader sees them in their own language.
+ */
+@Composable
+private fun FareRegion() {
+    val context = LocalContext.current
+    var iso by remember { mutableStateOf(org.ducatproject.ducat.Fare.country(context)) }
+    var open by remember { mutableStateOf(false) }
+    val phone = remember { java.util.Locale.getDefault().country }
+    fun name(code: String): String =
+        java.util.Locale("", code).getDisplayCountry(java.util.Locale.getDefault())
+            .ifBlank { code }
+
+    Column {
+        Text(
+            stringResource(R.string.settings_fares_title),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(R.string.settings_fares_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        Box {
+            OutlinedButton(onClick = { open = true }) {
+                Text(name(iso))
+                Spacer(Modifier.width(6.dp))
+                Icon(Icons.Filled.ArrowDropDown, null, Modifier.size(18.dp))
+            }
+            DropdownMenu(
+                expanded = open,
+                onDismissRequest = { open = false },
+                modifier = Modifier.heightIn(max = 420.dp),
+            ) {
+                // Only the surveyed ones: offering a country the table cannot
+                // price would be a setting that changes nothing.
+                java.util.Locale.getISOCountries()
+                    .filter { org.ducatproject.ducat.FareRates.known(it) }
+                    .sortedBy { name(it).lowercase() }
+                    .forEach { c ->
+                        DropdownMenuItem(
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(name(c))
+                                    if (c == phone) {
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            stringResource(R.string.prices_this_phone),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+                            },
+                            onClick = {
+                                iso = c
+                                org.ducatproject.ducat.Fare.setCountry(context, c)
+                                open = false
+                            },
+                        )
+                    }
+            }
+        }
+        if (!org.ducatproject.ducat.FareRates.known(iso)) {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                stringResource(R.string.settings_fares_unsurveyed),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
 @Composable
 private fun RateSettings() {
     val context = LocalContext.current

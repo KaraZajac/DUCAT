@@ -77,6 +77,49 @@ fun main() {
         }
     println()
 
+    // --- what a rider in India actually reads --------------------------
+    //
+    // The whole point, checked end to end rather than reasoned about: the
+    // table is dollars, the settlement is monero, and the number on the
+    // screen is rupees. Each step is a different unit and the old code
+    // skipped the middle one.
+    run {
+        val inr = DeskContext(File(base, "india").apply { mkdirs() })
+        val rs = RateStore(inr)
+        rs.setCurrency("INR")
+        rs.store(16_700.0, System.currentTimeMillis() / 1000, "faretest")  // ₹16,700 / XMR
+        rs.storeUsd(200.0)                                                 // $200 / XMR
+        Fare.setCountry(inr, "IN")
+
+        val (shown, pxmr) = Fare.estimateExact(inr, 8_000, 960)!!
+        val xmr = pxmr / 1e12
+
+        println()
+        println("FARE_INR  an 8 km ride in India, at \$200 and ₹16,700 to the monero")
+        println("FARE_INR    priced from the table   \$%.2f".format(xmr * 200.0))
+        println("FARE_INR    settled in monero        %.6f XMR".format(xmr))
+        println("FARE_INR    read by the rider       ₹%.2f".format(shown))
+        println()
+
+        // ₹158-ish: an Indian fare, not the ₹11.20 the old code offered.
+        check("the rider reads rupees, not relabelled dollars", shown in 140.0..180.0,
+            "₹%.2f".format(shown))
+        check("and the monero settles the same amount", xmr in 0.008..0.011,
+            "%.6f XMR".format(xmr))
+        check("which is the dollar figure the table holds",
+            "%.2f".format(xmr * 200.0) == "%.2f".format(Fare.local(inr).let {
+                (it.start * 0.571 + it.perKm * 0.382 * 8 +
+                    it.perKm * 0.0588 * 2.5 * 16).coerceAtLeast(it.start * 1.714)
+            }),
+            "\$%.2f".format(xmr * 200.0))
+
+        // The comparison line travels with it.
+        val (u, _, _) = Fare.competitors(inr, 8_000, 960)
+        val uHere = Fare.usdToReader(inr, u)!!
+        check("and the rideshare it undercuts is in rupees too", uHere > shown && uHere in 180.0..280.0,
+            "₹%.2f vs ₹%.2f".format(uHere, shown))
+    }
+
     // A country nobody surveyed gets the median rather than the richest.
     Fare.setCountry(context, "ZZ")
     val unknown = Fare.base(context)

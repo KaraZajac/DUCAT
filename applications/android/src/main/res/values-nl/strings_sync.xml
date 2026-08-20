@@ -27,4 +27,7 @@
     <string name="scanner_torch_off">Zaklamp uit</string>
     <string name="scanner_torch_on">Zaklamp aan</string>
     <string name="scanner_no_camera_tap">Scannen heeft hem nodig. Je kunt deze telefoon nog steeds tegen die van hen houden — een tik draagt dezelfde kaart — of de kaart als link plakken.</string>
+    <string name="settings_fares_title">Tarieven</string>
+    <string name="settings_fares_note">Voorstellen worden berekend uit wat een taxi hier vraagt.</string>
+    <string name="settings_fares_unsurveyed">Geen meting voor dit land — er wordt een middenwaarde gebruikt. Vul je eigen tarief in op de meter.</string>
 </resources>

@@ -24,4 +24,7 @@
     <string name="scanner_torch_off">Senter mati</string>
     <string name="scanner_torch_on">Senter nyala</string>
     <string name="scanner_no_camera_tap">Memindai butuh itu. Kamu tetap bisa menempelkan ponsel ini ke ponsel mereka — satu sentuhan membawa kartu yang sama — atau menempel kartunya sebagai tautan.</string>
+    <string name="settings_fares_title">Tarif</string>
+    <string name="settings_fares_note">Saran tarif dihitung dari ongkos taksi di sini.</string>
+    <string name="settings_fares_unsurveyed">Tidak ada survei untuk negara ini — dipakai nilai menengah. Isi tarifmu sendiri di argo.</string>
 </resources>

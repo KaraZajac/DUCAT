@@ -93,15 +93,38 @@ private fun NewRideScreen(rides: RideStore) {
     // invent a rate at the curb. Locale-pinned to the dot, because these
     // strings are parsed by toPxmr below — a locale's decimal comma would
     // leave the defaults unparseable.
+    var fiat by remember { mutableStateOf(Amounts.preferFiat(context)) }
+
+    /**
+     * A suggested rate in the unit this field is read in.
+     *
+     * Fare's numbers are US dollars — one unit for a hundred countries — and
+     * `toPxmr` below reads this field as the driver's *own* currency, or as
+     * monero when the toggle says so. Seeding it with the dollar figure put a
+     * table value into a field that meant something else: on an Indian phone
+     * India's six-cent minute was read as six paise. Converted, so what is
+     * seeded is what the field means.
+     */
+    fun suggest(dollars: Double): String {
+        val xmr = org.ducatproject.ducat.RateStore(context).usdPerXmr()
+            ?.let { dollars / it }
+        val v = when {
+            !fiat -> xmr
+            else -> org.ducatproject.ducat.Fare.usdToReader(context, dollars)
+        }
+        // Locale-pinned to the dot, because this string is parsed by toPxmr —
+        // a locale's decimal comma would leave the default unparseable.
+        return v?.let { "%.${if (fiat) 2 else 6}f".format(java.util.Locale.US, it) } ?: ""
+    }
+
     var base by remember { mutableStateOf(
         prefs.getString("taxi_base_text", null)
-            ?: "%.2f".format(java.util.Locale.US, org.ducatproject.ducat.Fare.base(context))
+            ?: suggest(org.ducatproject.ducat.Fare.base(context))
     ) }
     var perMin by remember { mutableStateOf(
         prefs.getString("taxi_permin_text", null)
-            ?: "%.2f".format(java.util.Locale.US, org.ducatproject.ducat.Fare.perMin(context))
+            ?: suggest(org.ducatproject.ducat.Fare.perMin(context))
     ) }
-    var fiat by remember { mutableStateOf(Amounts.preferFiat(context)) }
     val rate = remember { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
     var cardUri by remember { mutableStateOf<String?>(null) }

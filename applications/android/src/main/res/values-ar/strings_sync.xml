@@ -35,4 +35,7 @@
     <string name="scanner_torch_off">إطفاء المصباح</string>
     <string name="scanner_torch_on">تشغيل المصباح</string>
     <string name="scanner_no_camera_tap">المسح يحتاجها. لا يزال بإمكانك تقريب هذا الهاتف من هاتفهم — اللمسة تحمل البطاقة نفسها — أو لصق البطاقة كرابط.</string>
+    <string name="settings_fares_title">الأجرة</string>
+    <string name="settings_fares_note">تُحسب اقتراحات الرحلات مما تتقاضاه سيارة أجرة هنا.</string>
+    <string name="settings_fares_unsurveyed">لا يوجد مسح لهذا البلد — تُستخدم قيمة متوسطة. اكتب سعرك في العدّاد.</string>
 </resources>

@@ -33,4 +33,7 @@
     <string name="scanner_torch_off">Latarka wyłączona</string>
     <string name="scanner_torch_on">Latarka włączona</string>
     <string name="scanner_no_camera_tap">Skanowanie go wymaga. Nadal możesz przyłożyć ten telefon do ich telefonu — dotknięcie przenosi tę samą kartę — albo wkleić kartę jako link.</string>
+    <string name="settings_fares_title">Stawki</string>
+    <string name="settings_fares_note">Podpowiedzi liczone są z tego, ile bierze tu taksówka.</string>
+    <string name="settings_fares_unsurveyed">Brak danych dla tego kraju — używana jest wartość średnia. Wpisz własną stawkę na taksometrze.</string>
 </resources>

@@ -27,4 +27,7 @@
     <string name="scanner_torch_off">टॉर्च बंद</string>
     <string name="scanner_torch_on">टॉर्च चालू</string>
     <string name="scanner_no_camera_tap">स्कैन करने के लिए ज़रूरी है। आप फिर भी इस फ़ोन को उनके फ़ोन से सटा सकते हैं — टैप वही कार्ड ले जाता है — या कार्ड को लिंक की तरह चिपका सकते हैं।</string>
+    <string name="settings_fares_title">किराया</string>
+    <string name="settings_fares_note">सुझाव यहाँ के टैक्सी किराए से बनते हैं।</string>
+    <string name="settings_fares_unsurveyed">इस देश का सर्वे नहीं है — बीच का मान लिया गया है। मीटर पर अपना रेट डालें।</string>
 </resources>
