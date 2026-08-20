@@ -80,6 +80,11 @@ fun isChainWait(t: Throwable): Boolean =
     NEEDS_CONFIRMATIONS.containsMatchIn(t.message.orEmpty())
 
 fun moneyFailure(context: android.content.Context, t: Throwable): String = when {
+    // Our own node, not the Monero one. `claimFailureRes` has said this since
+    // the first card that would not claim; the money screens never did, so a
+    // release proposed before the routing table was ready reached the person
+    // waiting to be paid as the word "TryAgain".
+    Mailbox.isOffline(t) -> context.getString(org.ducatproject.ducat.R.string.pay_offline)
     org.ducatproject.ducat.Wallet.isNodeTrouble(t) ->
         context.getString(org.ducatproject.ducat.R.string.pay_node_no_answer)
     // Short, with both numbers. Typed rather than matched on wording, because

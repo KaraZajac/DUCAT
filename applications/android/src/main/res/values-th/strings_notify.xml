@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (ทิป %2$s) — ส่งใบเสร็จแล้ว</string>
     <string name="notify_arrived_title">เงินเข้าแล้ว</string>
     <string name="notify_arrived_body">%1$s — ปลดล็อกหลังสิบบล็อก</string>
+    <string name="notify_escrow_setup">%1$s กำลังตั้งค่าเอสโครว์</string>
+    <string name="notify_escrow_settle">%1$s ต้องการชำระบัญชี</string>
 </resources>

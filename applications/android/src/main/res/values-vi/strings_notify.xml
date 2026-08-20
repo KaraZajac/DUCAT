@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (tiền tip %2$s) — đã gửi biên nhận</string>
     <string name="notify_arrived_title">Tiền đã về</string>
     <string name="notify_arrived_body">%1$s — mở khoá sau mười khối</string>
+    <string name="notify_escrow_setup">%1$s đang thiết lập ký quỹ.</string>
+    <string name="notify_escrow_settle">%1$s muốn thanh toán xong.</string>
 </resources>

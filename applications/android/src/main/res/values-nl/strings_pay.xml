@@ -60,4 +60,5 @@
     <string name="pay_fee_unknown_confirm">De kosten konden nu niet worden geschat. De transactie betaalt wat ze kost zodra ze wordt opgebouwd.</string>
     <string name="pay_node_no_answer">De Monero-node antwoordde niet op tijd. Er is niets verstuurd. Probeer opnieuw — de app pakt een andere node.</string>
     <string name="pay_not_enough">Niet genoeg beschikbaar — je hebt %1$s en dit vereist %2$s inclusief netwerkkosten.</string>
+    <string name="pay_offline">Nog niet verbonden — deze telefoon is nog niet klaar met verbinden. Er is niets verzonden; probeer het zo opnieuw.</string>
 </resources>

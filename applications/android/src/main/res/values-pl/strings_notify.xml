@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (napiwek %2$s) — paragon wysłany</string>
     <string name="notify_arrived_title">Wpłynęły pieniądze</string>
     <string name="notify_arrived_body">%1$s — odblokuje się po dziesięciu blokach</string>
+    <string name="notify_escrow_setup">%1$s przygotowuje depozyt.</string>
+    <string name="notify_escrow_settle">%1$s chce się rozliczyć.</string>
 </resources>

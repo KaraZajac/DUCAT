@@ -60,4 +60,5 @@
     <string name="pay_fee_unknown_confirm">Al momento non è stato possibile stimare la commissione. La transazione pagherà quello che costa quando viene costruita.</string>
     <string name="pay_node_no_answer">Il nodo Monero non ha risposto in tempo. Non è stato inviato nulla. Riprova: l’app userà un altro nodo.</string>
     <string name="pay_not_enough">Fondi sbloccati insufficienti: hai %1$s e ne servono %2$s con la commissione di rete.</string>
+    <string name="pay_offline">Non ancora connesso — questo telefono non ha finito di entrare nella rete. Non è stato inviato nulla; riprova tra poco.</string>
 </resources>

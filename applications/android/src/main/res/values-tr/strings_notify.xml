@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (bahşiş %2$s) — fiş gönderildi</string>
     <string name="notify_arrived_title">Para geldi</string>
     <string name="notify_arrived_body">%1$s — on blok sonra çözülür</string>
+    <string name="notify_escrow_setup">%1$s emaneti hazırlıyor.</string>
+    <string name="notify_escrow_settle">%1$s hesabı kapatmak istiyor.</string>
 </resources>

@@ -92,6 +92,15 @@ object Notify {
             }
             2 -> context.getString(R.string.notify_sent, from, xmr(context, m.amountPxmr))
             3 -> context.getString(R.string.notify_receipt, from, xmr(context, m.amountPxmr))
+            // §17.9's ceremony traffic. The body of one of these is a note the
+            // *sender's* phone wrote for the protocol — "ride: proposed a
+            // split" — and falling through to it put that on a lock screen, in
+            // English, above a bike repair, at the exact moment the reader was
+            // being asked to release their money. Every other kind here has
+            // been rendered by the reader for a while; these two were the ones
+            // nobody had met yet.
+            8 -> context.getString(R.string.notify_escrow_setup, from)
+            9 -> context.getString(R.string.notify_escrow_settle, from)
             else -> m.body
         }
         post(context, from, what, openChat = personaHex)

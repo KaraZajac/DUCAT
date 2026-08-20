@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (टिप %2$s) — रसीद भेजी गई</string>
     <string name="notify_arrived_title">पैसा आया</string>
     <string name="notify_arrived_body">%1$s — दस ब्लॉक बाद खुलेगा</string>
+    <string name="notify_escrow_setup">%1$s एस्क्रो सेट कर रहे हैं।</string>
+    <string name="notify_escrow_settle">%1$s हिसाब पूरा करना चाहते हैं।</string>
 </resources>

@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (بقشيش %2$s) — أُرسل الإيصال</string>
     <string name="notify_arrived_title">وصل المال</string>
     <string name="notify_arrived_body">%1$s — يُفتح بعد عشرة كتل</string>
+    <string name="notify_escrow_setup">%1$s يجهّز الضمان.</string>
+    <string name="notify_escrow_settle">%1$s يريد التسوية.</string>
 </resources>

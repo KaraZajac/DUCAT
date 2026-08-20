@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (pourboire %2$s) — reçu envoyé</string>
     <string name="notify_arrived_title">Argent reçu</string>
     <string name="notify_arrived_body">%1$s — débloqué après dix blocs</string>
+    <string name="notify_escrow_setup">%1$s prépare le séquestre.</string>
+    <string name="notify_escrow_settle">%1$s veut solder.</string>
 </resources>

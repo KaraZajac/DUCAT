@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s（小费 %2$s）— 收据已发送</string>
     <string name="notify_arrived_title">收到款项</string>
     <string name="notify_arrived_body">%1$s — 十个区块后解锁</string>
+    <string name="notify_escrow_setup">%1$s 正在设置托管。</string>
+    <string name="notify_escrow_settle">%1$s 想要结算。</string>
 </resources>

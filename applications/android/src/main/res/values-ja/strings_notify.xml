@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s（チップ %2$s）— 領収書を送信</string>
     <string name="notify_arrived_title">入金がありました</string>
     <string name="notify_arrived_body">%1$s — 10 ブロック後に使えます</string>
+    <string name="notify_escrow_setup">%1$s がエスクローを準備しています。</string>
+    <string name="notify_escrow_settle">%1$s が精算を希望しています。</string>
 </resources>

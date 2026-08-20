@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (انعام %2$s) — رسید ارسال شد</string>
     <string name="notify_arrived_title">پول رسید</string>
     <string name="notify_arrived_body">%1$s — پس از ده بلاک آزاد می‌شود</string>
+    <string name="notify_escrow_setup">%1$s در حال آماده‌سازی امانی است.</string>
+    <string name="notify_escrow_settle">%1$s می‌خواهد تسویه کند.</string>
 </resources>

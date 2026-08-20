@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (fooi %2$s) — bon verstuurd</string>
     <string name="notify_arrived_title">Geld binnen</string>
     <string name="notify_arrived_body">%1$s — vrij na tien blokken</string>
+    <string name="notify_escrow_setup">%1$s stelt de escrow in.</string>
+    <string name="notify_escrow_settle">%1$s wil afrekenen.</string>
 </resources>

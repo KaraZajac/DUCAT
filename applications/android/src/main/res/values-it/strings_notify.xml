@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (mancia %2$s) — ricevuta inviata</string>
     <string name="notify_arrived_title">Denaro arrivato</string>
     <string name="notify_arrived_body">%1$s — sbloccato dopo dieci blocchi</string>
+    <string name="notify_escrow_setup">%1$s sta preparando il deposito a garanzia.</string>
+    <string name="notify_escrow_settle">%1$s vuole chiudere il conto.</string>
 </resources>

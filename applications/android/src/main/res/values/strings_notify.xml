@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (tip %2$s) — receipt sent</string>
     <string name="notify_arrived_title">Money arrived</string>
     <string name="notify_arrived_body">%1$s — unlocks after ten blocks</string>
+    <string name="notify_escrow_setup">%1$s is setting up the escrow.</string>
+    <string name="notify_escrow_settle">%1$s wants to settle up.</string>
 </resources>

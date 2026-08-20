@@ -24,6 +24,9 @@ private const val TAG = "DucatPoller"
  */
 class Poller(private val context: Context) {
 
+    /** The last transport state narrated, so only changes are. */
+    private var lastAttach: String? = null
+
     /** Probe the candidates and remember the first usable one. */
     private fun pickNode(context: Context): String? = try {
         val store = NodeStore(context)
@@ -75,6 +78,25 @@ class Poller(private val context: Context) {
                 // failures), which otherwise has nowhere to go on a phone.
                 runCatching {
                     uniffi.ducat_mobile.nodeLogs().forEach { DucatLog.i("veilid", it) }
+                }
+
+                // Where the transport has got to, each time that changes.
+                //
+                // The ring above stays empty on veilid-core 0.5.7 — api-level
+                // logging goes through a tracing layer nobody has installed
+                // (see node.rs) — so a node still finding its first peer and a
+                // node that failed to start read identically from the log:
+                // both just say the mailbox is offline, once a pass, forever.
+                // Ten minutes of that during a two-phone run was
+                // indistinguishable from broken, and the answer was sitting in
+                // node_status the whole time.
+                runCatching {
+                    val s = uniffi.ducat_mobile.nodeStatus()
+                    val now = if (s.running) s.state else "not started"
+                    if (now != lastAttach) {
+                        lastAttach = now
+                        DucatLog.i(TAG, "transport $now — ${s.peers} peer(s)")
+                    }
                 }
 
                 runCatching {

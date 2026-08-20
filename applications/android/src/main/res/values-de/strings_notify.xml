@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (Trinkgeld %2$s) — Beleg gesendet</string>
     <string name="notify_arrived_title">Geld angekommen</string>
     <string name="notify_arrived_body">%1$s — nach zehn Blöcken verfügbar</string>
+    <string name="notify_escrow_setup">%1$s richtet die Treuhand ein.</string>
+    <string name="notify_escrow_settle">%1$s möchte abrechnen.</string>
 </resources>

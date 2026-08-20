@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (gorjeta %2$s) — recibo enviado</string>
     <string name="notify_arrived_title">Dinheiro chegou</string>
     <string name="notify_arrived_body">%1$s — desbloqueia após dez blocos</string>
+    <string name="notify_escrow_setup">%1$s está a preparar o depósito em garantia.</string>
+    <string name="notify_escrow_settle">%1$s quer acertar contas.</string>
 </resources>

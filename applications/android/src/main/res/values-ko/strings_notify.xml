@@ -19,4 +19,6 @@
     <string name="notify_paid_body_tip">%1$s (팁 %2$s) — 영수증 발송</string>
     <string name="notify_arrived_title">돈이 들어왔습니다</string>
     <string name="notify_arrived_body">%1$s — 열 블록 뒤 사용 가능</string>
+    <string name="notify_escrow_setup">%1$s 님이 에스크로를 설정하고 있습니다.</string>
+    <string name="notify_escrow_settle">%1$s 님이 정산을 원합니다.</string>
 </resources>
