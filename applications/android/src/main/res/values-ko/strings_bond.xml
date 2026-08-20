@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">상대가 금액과 보증금을 넣기를 기다리는 중…</string>
     <string name="res_waiting_release">대여 종료 — 빌리는 쪽이 자금을 풀기를 기다리는 중…</string>
     <string name="res_complete_ask">상대가 정산을 요청했습니다.</string>
-    <string name="res_split_stated">제안: %1$s은 빌리는 쪽에, %2$s은 소유자에게.</string>
-    <string name="res_released">예약 정산 완료</string>
+    <string name="res_split_stated">제안: %1$s 는 지불한 쪽에게, %2$s 는 상대에게.</string>
+    <string name="res_released">정산 완료</string>
     <string name="res_send_details">주소와 인수인계 정보 보내기</string>
     <string name="res_kind_sale">판매</string>
     <string name="res_kind_labour">누군가의 시간</string>
@@ -64,4 +64,5 @@
     <plurals name="bond_needs_confirmations">
         <item quantity="other">에스크로가 움직이려면 확인 %1$d 회가 더 필요합니다.</item>
     </plurals>
+    <string name="res_too_small">에스크로에 넣기엔 너무 작습니다 — 푸는 네트워크 수수료가 물건보다 비쌉니다. %1$s 이상으로 해보세요.</string>
 </resources>

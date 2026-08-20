@@ -2817,6 +2817,21 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                     val r = totalPxmr.takeIf { it > 0 }
                     val g = pxmr(myDep); val h = pxmr(hostDep)
                     if (r == null) { error = context.getString(R.string.res_need_rent); return@Button }
+                    // Refuse here rather than at the end. An escrow smaller
+                    // than the fee to release it cannot be released — and the
+                    // only place that was discovered was after the ceremony
+                    // had run and the money was already inside it. The last
+                    // step is the worst possible time to learn a deal was
+                    // never viable.
+                    if (r < org.ducatproject.ducat.Ceremony.MIN_ESCROW_PXMR) {
+                        error = context.getString(
+                            R.string.res_too_small,
+                            Amounts.show(
+                                context, org.ducatproject.ducat.Ceremony.MIN_ESCROW_PXMR,
+                            ).primary,
+                        )
+                        return@Button
+                    }
                     busy = true; error = null
                     scope.launch {
                         withContext(Dispatchers.IO) {

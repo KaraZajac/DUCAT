@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">等待对方支付价款和押金…</string>
     <string name="res_waiting_release">租期结束 — 等待租客释放款项…</string>
     <string name="res_complete_ask">对方提出结清。</string>
-    <string name="res_split_stated">提议：%1$s 退还租客，%2$s 给出租方。</string>
-    <string name="res_released">预订已结算</string>
+    <string name="res_split_stated">提议：%1$s 退回付款方，%2$s 给对方。</string>
+    <string name="res_released">已结清</string>
     <string name="res_send_details">发送地址和交接说明</string>
     <string name="res_kind_sale">一笔买卖</string>
     <string name="res_kind_labour">某人的时间</string>
@@ -64,4 +64,5 @@
     <plurals name="bond_needs_confirmations">
         <item quantity="other">托管还需要 %1$d 次确认才能动。</item>
     </plurals>
+    <string name="res_too_small">太小，无法托管 — 放款的网络手续费比东西本身还贵。试试 %1$s 或更多。</string>
 </resources>

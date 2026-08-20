@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">Waiting for them to pay the price and their deposit…</string>
     <string name="res_waiting_release">Rental complete — waiting for the guest to release the money…</string>
     <string name="res_complete_ask">They asked to settle up.</string>
-    <string name="res_split_stated">Proposed: %1$s back to the guest, %2$s to the owner.</string>
-    <string name="res_released">Reservation settled</string>
+    <string name="res_split_stated">Proposed: %1$s back to the payer, %2$s to the other side.</string>
+    <string name="res_released">Settled</string>
     <string name="res_send_details">Send the address and handover details</string>
     <string name="res_kind_sale">Something sold</string>
     <string name="res_kind_labour">Somebody\'s time</string>
@@ -65,4 +65,5 @@
         <item quantity="one">The escrow needs %1$d more confirmation before it can move.</item>
         <item quantity="other">The escrow needs %1$d more confirmations before it can move.</item>
     </plurals>
+    <string name="res_too_small">Too small for an escrow — releasing it would cost more in network fees than the thing itself. Try %1$s or more.</string>
 </resources>

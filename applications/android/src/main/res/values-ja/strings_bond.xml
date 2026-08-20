@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">相手が代金とデポジットを支払うのを待っています…</string>
     <string name="res_waiting_release">レンタル終了 — 借り手が資金を解放するのを待っています…</string>
     <string name="res_complete_ask">相手が精算を申し出ました。</string>
-    <string name="res_split_stated">提案：%1$s を借り手へ、%2$s を貸し手へ。</string>
-    <string name="res_released">予約を精算しました</string>
+    <string name="res_split_stated">提案：%1$s は支払った側へ、%2$s は相手へ。</string>
+    <string name="res_released">精算済み</string>
     <string name="res_send_details">住所と受け渡しの詳細を送る</string>
     <string name="res_kind_sale">売買</string>
     <string name="res_kind_labour">人の時間</string>
@@ -64,4 +64,5 @@
     <plurals name="bond_needs_confirmations">
         <item quantity="other">エスクローが動くには、あと %1$d 回の承認が必要です。</item>
     </plurals>
+    <string name="res_too_small">エスクローには小さすぎます — 解放のネットワーク手数料が品物より高くつきます。%1$s 以上でお試しください。</string>
 </resources>

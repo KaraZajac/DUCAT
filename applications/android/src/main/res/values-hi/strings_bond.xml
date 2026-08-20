@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">उनके रकम और जमा भरने की प्रतीक्षा…</string>
     <string name="res_waiting_release">किराया पूरा — किरायेदार द्वारा पैसे छोड़ने का इंतज़ार…</string>
     <string name="res_complete_ask">उन्होंने हिसाब पूरा करने को कहा।</string>
-    <string name="res_split_stated">प्रस्ताव: %1$s किरायेदार को वापस, %2$s मालिक को।</string>
-    <string name="res_released">बुकिंग निपट गई</string>
+    <string name="res_split_stated">प्रस्ताव: %1$s भुगतानकर्ता को वापस, %2$s दूसरे पक्ष को।</string>
+    <string name="res_released">निपट गया</string>
     <string name="res_send_details">पता और सौंपने का विवरण भेजें</string>
     <string name="res_kind_sale">कोई बिक्री</string>
     <string name="res_kind_labour">किसी का समय</string>
@@ -65,4 +65,5 @@
         <item quantity="one">हिलने से पहले एस्क्रो को %1$d और पुष्टि चाहिए।</item>
         <item quantity="other">हिलने से पहले एस्क्रो को %1$d और पुष्टियाँ चाहिए।</item>
     </plurals>
+    <string name="res_too_small">एस्क्रो के लिए बहुत छोटा — छोड़ने का नेटवर्क शुल्क चीज़ से ज़्यादा होगा। %1$s या उससे ऊपर आज़माएँ।</string>
 </resources>

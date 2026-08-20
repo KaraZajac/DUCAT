@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">Tutarı ve depozitolarını yatırmalarını bekliyoruz…</string>
     <string name="res_waiting_release">Kiralama bitti — kiracının parayı serbest bırakması bekleniyor…</string>
     <string name="res_complete_ask">Hesabı kapatmak istiyorlar.</string>
-    <string name="res_split_stated">Öneri: %1$s kiracıya, %2$s ilan sahibine.</string>
-    <string name="res_released">Rezervasyon kapatıldı</string>
+    <string name="res_split_stated">Öneri: %1$s ödeyene geri, %2$s karşı tarafa.</string>
+    <string name="res_released">Kapatıldı</string>
     <string name="res_send_details">Adresi ve teslim bilgilerini gönder</string>
     <string name="res_kind_sale">Bir satış</string>
     <string name="res_kind_labour">Birinin zamanı</string>
@@ -65,4 +65,5 @@
         <item quantity="one">Emanetin hareket edebilmesi için %1$d onay daha gerekiyor.</item>
         <item quantity="other">Emanetin hareket edebilmesi için %1$d onay daha gerekiyor.</item>
     </plurals>
+    <string name="res_too_small">Emanet için fazla küçük — serbest bırakmanın ağ ücreti eşyanın kendisinden pahalı. %1$s ya da üstünü dene.</string>
 </resources>

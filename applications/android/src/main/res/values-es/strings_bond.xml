@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">Esperando a que paguen el precio y su depósito…</string>
     <string name="res_waiting_release">Alquiler terminado — esperando a que el huésped libere el dinero…</string>
     <string name="res_complete_ask">Han pedido liquidar.</string>
-    <string name="res_split_stated">Propuesta: %1$s de vuelta al huésped, %2$s al propietario.</string>
-    <string name="res_released">Reserva liquidada</string>
+    <string name="res_split_stated">Propuesto: %1$s de vuelta al pagador, %2$s a la otra parte.</string>
+    <string name="res_released">Liquidado</string>
     <string name="res_send_details">Enviar la dirección y los detalles de entrega</string>
     <string name="res_kind_sale">Una venta</string>
     <string name="res_kind_labour">El tiempo de alguien</string>
@@ -65,4 +65,5 @@
         <item quantity="one">El depósito necesita %1$d confirmación más antes de poder moverse.</item>
         <item quantity="other">El depósito necesita %1$d confirmaciones más antes de poder moverse.</item>
     </plurals>
+    <string name="res_too_small">Demasiado pequeño para un depósito — liberarlo costaría más en comisiones de red que la cosa misma. Prueba %1$s o más.</string>
 </resources>

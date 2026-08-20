@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">Czekam, aż wpłacą kwotę i swój depozyt…</string>
     <string name="res_waiting_release">Najem zakończony — czekam, aż najemca zwolni pieniądze…</string>
     <string name="res_complete_ask">Poprosili o rozliczenie.</string>
-    <string name="res_split_stated">Propozycja: %1$s dla najemcy, %2$s dla wynajmującego.</string>
-    <string name="res_released">Rezerwacja rozliczona</string>
+    <string name="res_split_stated">Propozycja: %1$s z powrotem do płacącego, %2$s dla drugiej strony.</string>
+    <string name="res_released">Rozliczone</string>
     <string name="res_send_details">Wyślij adres i szczegóły przekazania</string>
     <string name="res_kind_sale">Sprzedaż</string>
     <string name="res_kind_labour">Czyjś czas</string>
@@ -67,4 +67,5 @@
         <item quantity="many">Escrow potrzebuje jeszcze %1$d potwierdzeń, zanim się ruszy.</item>
         <item quantity="other">Escrow potrzebuje jeszcze %1$d potwierdzeń, zanim się ruszy.</item>
     </plurals>
+    <string name="res_too_small">Za mało na escrow — zwolnienie kosztowałoby więcej opłat sieciowych niż sama rzecz. Spróbuj %1$s lub więcej.</string>
 </resources>

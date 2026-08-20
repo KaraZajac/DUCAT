@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">À espera de que paguem o preço e a caução…</string>
     <string name="res_waiting_release">Aluguel concluído — aguardando o hóspede liberar o dinheiro…</string>
     <string name="res_complete_ask">Pediram para acertar.</string>
-    <string name="res_split_stated">Proposta: %1$s de volta ao hóspede, %2$s ao anunciante.</string>
-    <string name="res_released">Reserva liquidada</string>
+    <string name="res_split_stated">Proposta: %1$s de volta a quem pagou, %2$s para a outra parte.</string>
+    <string name="res_released">Acertado</string>
     <string name="res_send_details">Enviar o endereço e os detalhes da entrega</string>
     <string name="res_kind_sale">Uma venda</string>
     <string name="res_kind_labour">O tempo de alguém</string>
@@ -65,4 +65,5 @@
         <item quantity="one">O escrow precisa de mais %1$d confirmação antes de poder mover-se.</item>
         <item quantity="other">O escrow precisa de mais %1$d confirmações antes de poder mover-se.</item>
     </plurals>
+    <string name="res_too_small">Pequeno demais para um escrow — libertá-lo custaria mais em taxas de rede do que a própria coisa. Tente %1$s ou mais.</string>
 </resources>

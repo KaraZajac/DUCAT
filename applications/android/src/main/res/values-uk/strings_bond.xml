@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">Чекаємо, поки вони внесуть суму й свою заставу…</string>
     <string name="res_waiting_release">Оренду завершено — очікування, доки орендар звільнить кошти…</string>
     <string name="res_complete_ask">Вони запропонували розрахуватися.</string>
-    <string name="res_split_stated">Запропоновано: %1$s орендарю, %2$s власнику.</string>
-    <string name="res_released">Бронювання закрито</string>
+    <string name="res_split_stated">Пропозиція: %1$s назад платнику, %2$s іншій стороні.</string>
+    <string name="res_released">Розраховано</string>
     <string name="res_send_details">Надіслати адресу та деталі передачі</string>
     <string name="res_kind_sale">Продаж</string>
     <string name="res_kind_labour">Чийсь час</string>
@@ -67,4 +67,5 @@
         <item quantity="many">Ескроу потрібно ще %1$d підтверджень, перш ніж кошти зрушать.</item>
         <item quantity="other">Ескроу потрібно ще %1$d підтверджень, перш ніж кошти зрушать.</item>
     </plurals>
+    <string name="res_too_small">Замало для ескроу — випуск коштуватиме більше мережевої комісії, ніж сама річ. Спробуйте %1$s або більше.</string>
 </resources>

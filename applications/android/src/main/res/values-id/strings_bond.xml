@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">Menunggu mereka membayar harga dan deposit…</string>
     <string name="res_waiting_release">Sewa selesai — menunggu penyewa melepas dananya…</string>
     <string name="res_complete_ask">Mereka minta diselesaikan.</string>
-    <string name="res_split_stated">Usulan: %1$s kembali ke penyewa, %2$s ke pemilik.</string>
-    <string name="res_released">Pemesanan diselesaikan</string>
+    <string name="res_split_stated">Usulan: %1$s kembali ke pembayar, %2$s ke pihak lain.</string>
+    <string name="res_released">Selesai</string>
     <string name="res_send_details">Kirim alamat dan detail serah terima</string>
     <string name="res_kind_sale">Sebuah penjualan</string>
     <string name="res_kind_labour">Waktu seseorang</string>
@@ -64,4 +64,5 @@
     <plurals name="bond_needs_confirmations">
         <item quantity="other">Escrow butuh %1$d konfirmasi lagi sebelum bisa dipindahkan.</item>
     </plurals>
+    <string name="res_too_small">Terlalu kecil untuk escrow — biaya jaringan untuk melepasnya lebih besar dari barangnya. Coba %1$s atau lebih.</string>
 </resources>

@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">En attente du prix et de leur caution…</string>
     <string name="res_waiting_release">Location terminée — en attente de la libération des fonds par le locataire…</string>
     <string name="res_complete_ask">Ils demandent à solder.</string>
-    <string name="res_split_stated">Proposition : %1$s au locataire, %2$s au propriétaire.</string>
-    <string name="res_released">Réservation réglée</string>
+    <string name="res_split_stated">Proposition : %1$s rendus au payeur, %2$s à l\'autre partie.</string>
+    <string name="res_released">Soldé</string>
     <string name="res_send_details">Envoyer l\'adresse et les détails de remise</string>
     <string name="res_kind_sale">Une vente</string>
     <string name="res_kind_labour">Le temps de quelqu\'un</string>
@@ -65,4 +65,5 @@
         <item quantity="one">Le séquestre a besoin de %1$d confirmation de plus avant de bouger.</item>
         <item quantity="other">Le séquestre a besoin de %1$d confirmations de plus avant de bouger.</item>
     </plurals>
+    <string name="res_too_small">Trop petit pour un séquestre — la libération coûterait plus en frais de réseau que la chose elle-même. Essayez %1$s ou plus.</string>
 </resources>

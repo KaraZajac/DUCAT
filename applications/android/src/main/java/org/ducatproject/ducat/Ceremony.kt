@@ -337,6 +337,26 @@ object Ceremony {
      * the driver posts the same — so the sentence a user has to understand
      * is one sentence: you both put up a stake, and finishing gives it back.
      */
+    /**
+     * What the core holds back to pay for the release transaction.
+     *
+     * Mirrors `FEE_RESERVE` in mobile/src/ceremony.rs. Whichever side is paid
+     * the *residual* of a split pays the fee out of its own share, so an
+     * escrow whose residual side is smaller than this cannot be released at
+     * all — and by then the money is already in it.
+     */
+    const val FEE_RESERVE_PXMR: Long = 200_000_000L
+
+    /**
+     * The smallest price worth putting in an escrow.
+     *
+     * Twice the reserve, so the side taking the residual is left with
+     * something after the fee rather than exactly nothing. Below this the
+     * release costs more than the thing being sold, which is not a deal the
+     * app should let anybody fund.
+     */
+    const val MIN_ESCROW_PXMR: Long = FEE_RESERVE_PXMR * 2
+
     fun rideFundAmount(farePxmr: Long): Long =
         Stakes.funderLocks(Stakes.Deal.Ride, farePxmr)
 
@@ -1063,7 +1083,17 @@ object Ceremony {
         // the driver is residual; when the driver's remainder could not
         // cover the fee, the driver's slice is fixed (possibly zero) and
         // the rider is residual.
-        val flip = total - back < 400_000_000L // 2× the fee reserve
+        // ...and flipping only helps if the side that *becomes* residual has
+        // a share to take the fee from. It did not check that. On an ordinary
+        // sale nothing goes back to the buyer, so the whole escrow is the
+        // seller's — `total - back` is everything, which is nevertheless
+        // "under two fee reserves" on a small item, so it flipped: every
+        // piconero into a fixed output, and a residual side holding zero to
+        // pay a fee out of. The core then refused the release with "the
+        // escrow cannot cover the split and the fee", with the money already
+        // locked in it. Found by selling a coffee grinder for twelve cents.
+        val margin = MIN_ESCROW_PXMR
+        val flip = total - back < margin && back >= margin
         val prop = if (!flip) {
             uniffi.ducat_mobile.frostProposeSplit(
                 id, i.toUShort(), keys,

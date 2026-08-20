@@ -49,8 +49,8 @@
     <string name="res_waiting_payment">في انتظار أن يدفعوا المبلغ ووديعتهم…</string>
     <string name="res_waiting_release">انتهى الإيجار — بانتظار أن يُفرج النزيل عن المال…</string>
     <string name="res_complete_ask">طلبوا التسوية.</string>
-    <string name="res_split_stated">المقترح: %1$s تعود إلى النزيل، و%2$s إلى المالك.</string>
-    <string name="res_released">تمت تسوية الحجز</string>
+    <string name="res_split_stated">المقترح: %1$s تعود للدافع، و%2$s للطرف الآخر.</string>
+    <string name="res_released">تمت التسوية</string>
     <string name="res_send_details">إرسال العنوان وتفاصيل التسليم</string>
     <string name="res_kind_sale">بيع شيء</string>
     <string name="res_kind_labour">وقت شخص</string>
@@ -69,4 +69,5 @@
         <item quantity="many">يحتاج الضمان %1$d تأكيدًا آخر قبل أن يتحرك.</item>
         <item quantity="other">يحتاج الضمان %1$d تأكيد آخر قبل أن يتحرك.</item>
     </plurals>
+    <string name="res_too_small">أصغر من أن يوضع في ضمان — سيكلف الإفراج رسوم شبكة أكثر من الشيء نفسه. جرّب %1$s أو أكثر.</string>
 </resources>
