@@ -46,4 +46,7 @@
     <string name="settings_read_receipts">Надсилати сповіщення про прочитання</string>
     <string name="settings_read_receipts_on">Контакти бачать, коли ти прочитаєш їхні повідомлення. Їхні тобі видно в будь-якому разі, якщо вони їх надсилають.</string>
     <string name="settings_read_receipts_off">Вимкнено — коли ти читаєш, це твоя справа. Їхні сповіщення ти все одно бачиш, якщо вони їх надсилають.</string>
+    <string name="prices_menu_warn_title">Твоє меню в %1$s</string>
+    <string name="prices_menu_warn_body">Перехід на %2$s зробить ці ціни непродажними, доки не виставиш їх заново. Нічого не видаляється.</string>
+    <string name="prices_menu_warn_go">Усе одно змінити</string>
 </resources>

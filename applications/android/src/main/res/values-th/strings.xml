@@ -47,4 +47,7 @@
     <string name="settings_read_receipts">ส่งการแจ้งว่าอ่านแล้ว</string>
     <string name="settings_read_receipts_on">ผู้ติดต่อจะเห็นเมื่อคุณอ่านข้อความของเขา ส่วนของเขา คุณเห็นเสมออยู่แล้วหากเขาส่งมา</string>
     <string name="settings_read_receipts_off">ปิด — คุณอ่านเมื่อไรเป็นเรื่องของคุณ คุณยังเห็นของเขาหากเขาส่งมา</string>
+    <string name="prices_menu_warn_title">เมนูของคุณตั้งราคาเป็น %1$s</string>
+    <string name="prices_menu_warn_body">การเปลี่ยนไป %2$s จะทำให้ราคาเหล่านั้นขายไม่ได้จนกว่าคุณจะตั้งใหม่ ไม่มีอะไรถูกลบ</string>
+    <string name="prices_menu_warn_go">เปลี่ยนต่อไป</string>
 </resources>

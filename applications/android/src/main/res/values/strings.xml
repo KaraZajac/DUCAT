@@ -51,4 +51,7 @@
     <string name="settings_read_receipts">Send read receipts</string>
     <string name="settings_read_receipts_on">Contacts see when you have read their messages. Yours show regardless, if they send them.</string>
     <string name="settings_read_receipts_off">Off — when you read is your business. You still see theirs if they send them.</string>
+    <string name="prices_menu_warn_title">Your menu is priced in %1$s</string>
+    <string name="prices_menu_warn_body">Switching to %2$s stops those prices being sellable until you set them again. Nothing is deleted.</string>
+    <string name="prices_menu_warn_go">Switch anyway</string>
 </resources>

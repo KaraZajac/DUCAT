@@ -46,4 +46,7 @@
     <string name="settings_read_receipts">Leesbevestigingen versturen</string>
     <string name="settings_read_receipts_on">Contacten zien wanneer je hun berichten hebt gelezen. Die van hen zie je sowieso, als zij ze versturen.</string>
     <string name="settings_read_receipts_off">Uit — wanneer jij iets leest, gaat niemand iets aan. Je ziet die van hen nog steeds, als zij ze versturen.</string>
+    <string name="prices_menu_warn_title">Je kaart staat in %1$s</string>
+    <string name="prices_menu_warn_body">Overstappen naar %2$s maakt die prijzen onverkoopbaar tot je ze opnieuw zet. Er wordt niets gewist.</string>
+    <string name="prices_menu_warn_go">Toch wisselen</string>
 </resources>

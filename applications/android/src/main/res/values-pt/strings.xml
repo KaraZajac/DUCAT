@@ -47,4 +47,7 @@
     <string name="settings_read_receipts">Enviar confirmações de leitura</string>
     <string name="settings_read_receipts_on">Os contatos veem quando você leu as mensagens deles. As confirmações das suas mensagens continuam aparecendo, se eles as enviarem.</string>
     <string name="settings_read_receipts_off">Desligado — quando você lê é assunto seu. Você ainda vê as confirmações deles, se eles as enviarem.</string>
+    <string name="prices_menu_warn_title">Seu cardápio está em %1$s</string>
+    <string name="prices_menu_warn_body">Mudar para %2$s deixa esses preços sem poder vender até você defini-los de novo. Nada é apagado.</string>
+    <string name="prices_menu_warn_go">Mudar mesmo assim</string>
 </resources>

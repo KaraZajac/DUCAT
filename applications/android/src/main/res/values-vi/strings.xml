@@ -47,4 +47,7 @@
     <string name="settings_read_receipts">Gửi xác nhận đã đọc</string>
     <string name="settings_read_receipts_on">Liên hệ thấy được khi bạn đã đọc tin nhắn của họ. Xác nhận cho tin của bạn vẫn hiện như thường, nếu họ có gửi.</string>
     <string name="settings_read_receipts_off">Tắt — bạn đọc lúc nào là chuyện của bạn. Bạn vẫn thấy của họ nếu họ có gửi.</string>
+    <string name="prices_menu_warn_title">Thực đơn của bạn định giá bằng %1$s</string>
+    <string name="prices_menu_warn_body">Chuyển sang %2$s khiến những giá đó không bán được cho tới khi bạn đặt lại. Không có gì bị xoá.</string>
+    <string name="prices_menu_warn_go">Vẫn chuyển</string>
 </resources>

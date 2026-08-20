@@ -46,4 +46,7 @@
     <string name="settings_read_receipts">إرسال إشعارات القراءة</string>
     <string name="settings_read_receipts_on">ترى جهات اتصالك متى قرأت رسائلها. أما إشعاراتها فتظهر لك على أي حال إن أرسلتها.</string>
     <string name="settings_read_receipts_off">متوقف — وقت قراءتك شأنك وحدك. وما زلت ترى إشعاراتهم إن أرسلوها.</string>
+    <string name="prices_menu_warn_title">قائمتك مسعّرة بـ %1$s</string>
+    <string name="prices_menu_warn_body">التحويل إلى %2$s يوقف بيع تلك الأسعار حتى تضبطها من جديد. لا يُحذف شيء.</string>
+    <string name="prices_menu_warn_go">حوّل على أي حال</string>
 </resources>

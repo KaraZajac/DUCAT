@@ -46,4 +46,7 @@
     <string name="settings_read_receipts">रीड रिसीट भेजें</string>
     <string name="settings_read_receipts_on">कॉन्टैक्ट देख पाते हैं कि आपने उनके मैसेज कब पढ़े। वे भेजें तो उनकी आपको वैसे भी दिखती हैं।</string>
     <string name="settings_read_receipts_off">बंद — आपने कब पढ़ा, यह आपकी बात है। वे भेजें तो उनकी आपको फिर भी दिखती हैं।</string>
+    <string name="prices_menu_warn_title">आपका मेन्यू %1$s में है</string>
+    <string name="prices_menu_warn_body">%2$s पर जाने से वे दाम तब तक नहीं बिकेंगे जब तक आप उन्हें दोबारा न रखें। कुछ मिटता नहीं।</string>
+    <string name="prices_menu_warn_go">फिर भी बदलें</string>
 </resources>

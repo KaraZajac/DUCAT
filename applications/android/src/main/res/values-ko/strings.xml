@@ -47,4 +47,7 @@
     <string name="settings_read_receipts">읽음 확인 보내기</string>
     <string name="settings_read_receipts_on">내가 메시지를 읽으면 연락처가 알 수 있어요. 상대가 보내는 읽음 확인은 이 설정과 상관없이 표시돼요.</string>
     <string name="settings_read_receipts_off">꺼짐 — 언제 읽었는지는 내 사정이에요. 상대가 보내면 그쪽 읽음 확인은 계속 보여요.</string>
+    <string name="prices_menu_warn_title">메뉴가 %1$s로 매겨져 있습니다</string>
+    <string name="prices_menu_warn_body">%2$s로 바꾸면 다시 매기기 전까지 그 가격으로 팔 수 없습니다. 지워지는 것은 없습니다.</string>
+    <string name="prices_menu_warn_go">그래도 바꾸기</string>
 </resources>

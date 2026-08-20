@@ -46,4 +46,7 @@
     <string name="settings_read_receipts">ارسال رسید خواندن</string>
     <string name="settings_read_receipts_on">مخاطبین می‌بینند که پیام‌هایشان را کی خوانده‌ای. رسیدهای آن‌ها هم، اگر بفرستند، در هر حال نشان داده می‌شود.</string>
     <string name="settings_read_receipts_off">خاموش — اینکه کی می‌خوانی به خودت مربوط است. رسیدهای آن‌ها را همچنان می‌بینی، اگر بفرستند.</string>
+    <string name="prices_menu_warn_title">فهرست تو به %1$s قیمت خورده</string>
+    <string name="prices_menu_warn_body">تغییر به %2$s این قیمت‌ها را تا وقتی دوباره تنظیمشان نکنی غیرقابل فروش می‌کند. چیزی پاک نمی‌شود.</string>
+    <string name="prices_menu_warn_go">با این حال تغییر بده</string>
 </resources>

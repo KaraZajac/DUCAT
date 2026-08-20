@@ -47,4 +47,7 @@
     <string name="settings_read_receipts">发送已读回执</string>
     <string name="settings_read_receipts_on">联系人能看到你什么时候读了他们的消息。只要对方发送回执，他们的你也照样能看到。</string>
     <string name="settings_read_receipts_off">已关闭 — 你什么时候读消息是你自己的事。对方若发送回执，你仍能看到他们的。</string>
+    <string name="prices_menu_warn_title">你的菜单以 %1$s 计价</string>
+    <string name="prices_menu_warn_body">切换到 %2$s 后，这些价格在你重新设定之前无法售出。不会删除任何东西。</string>
+    <string name="prices_menu_warn_go">仍然切换</string>
 </resources>

@@ -47,4 +47,7 @@
     <string name="settings_read_receipts">Lesebestätigungen senden</string>
     <string name="settings_read_receipts_on">Kontakte sehen, wann du ihre Nachrichten gelesen hast. Ihre siehst du so oder so, wenn sie welche senden.</string>
     <string name="settings_read_receipts_off">Aus — wann du liest, geht nur dich etwas an. Ihre siehst du trotzdem, wenn sie welche senden.</string>
+    <string name="prices_menu_warn_title">Deine Karte ist in %1$s ausgezeichnet</string>
+    <string name="prices_menu_warn_body">Ein Wechsel zu %2$s macht diese Preise unverkäuflich, bis du sie neu setzt. Gelöscht wird nichts.</string>
+    <string name="prices_menu_warn_go">Trotzdem wechseln</string>
 </resources>

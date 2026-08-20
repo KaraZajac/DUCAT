@@ -46,4 +46,7 @@
     <string name="settings_read_receipts">Enviar confirmaciones de lectura</string>
     <string name="settings_read_receipts_on">Tus contactos ven cuándo has leído sus mensajes. Los tuyos se muestran igualmente, si los envían.</string>
     <string name="settings_read_receipts_off">Desactivado: cuándo lees es asunto tuyo. Sigues viendo las suyas si las envían.</string>
+    <string name="prices_menu_warn_title">Tu carta está en %1$s</string>
+    <string name="prices_menu_warn_body">Cambiar a %2$s deja esos precios sin poder cobrarse hasta que los vuelvas a poner. No se borra nada.</string>
+    <string name="prices_menu_warn_go">Cambiar igual</string>
 </resources>

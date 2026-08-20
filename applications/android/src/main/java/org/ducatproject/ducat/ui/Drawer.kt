@@ -429,6 +429,28 @@ private fun RateSettings() {
     val store = remember { RateStore(context) }
     var on by remember { mutableStateOf(store.enabled()) }
     var cur by remember { mutableStateOf(store.currency()) }
+    // A currency change that would strand priced items waits for a yes.
+    var pendingCurrency by remember { mutableStateOf<String?>(null) }
+    var menuWarnCount by remember { mutableStateOf(0) }
+
+    pendingCurrency?.takeIf { menuWarnCount > 0 }?.let { next ->
+        AlertDialog(
+            onDismissRequest = { pendingCurrency = null; menuWarnCount = 0 },
+            title = { Text(stringResource(R.string.prices_menu_warn_title, cur)) },
+            text = { Text(stringResource(R.string.prices_menu_warn_body, cur, next)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    cur = next; store.setCurrency(next)
+                    pendingCurrency = null; menuWarnCount = 0
+                }) { Text(stringResource(R.string.prices_menu_warn_go)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingCurrency = null; menuWarnCount = 0 }) {
+                    Text(stringResource(R.string.rent_cancel))
+                }
+            },
+        )
+    }
 
     Column {
         Text(stringResource(R.string.settings_prices_title),
@@ -470,7 +492,31 @@ private fun RateSettings() {
                                     }
                                 }
                             },
-                            onClick = { cur = c; store.setCurrency(c); open = false },
+                            onClick = {
+                                // A catalogue price is stored as text plus the
+                                // currency it was typed in, and there is only
+                                // ever a rate for the one currency the store is
+                                // set to — so items priced in the old one stop
+                                // being sellable the moment this changes. That
+                                // is the right behaviour (converting a shop's
+                                // prices behind its back would be worse) but it
+                                // used to happen in silence, and the first sign
+                                // was a till full of dead buttons with a queue
+                                // in front of it. Said here, before, with a
+                                // count, so it is a decision rather than a
+                                // discovery.
+                                val orphaned = org.ducatproject.ducat.Catalogue
+                                    .live(context)
+                                    .count { it.currency.isNotBlank() && it.currency != c }
+                                if (orphaned == 0) {
+                                    cur = c
+                                    store.setCurrency(c)
+                                } else {
+                                    pendingCurrency = c
+                                    menuWarnCount = orphaned
+                                }
+                                open = false
+                            },
                             trailingIcon = if (cur == c) {
                                 { Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }
                             } else null,

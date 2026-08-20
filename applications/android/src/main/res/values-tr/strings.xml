@@ -47,4 +47,7 @@
     <string name="settings_read_receipts">Okundu bilgisi gönder</string>
     <string name="settings_read_receipts_on">Kişiler, mesajlarını ne zaman okuduğunu görür. Onlar gönderdiği sürece sen de onlarınkini her halükârda görürsün.</string>
     <string name="settings_read_receipts_off">Kapalı — ne zaman okuduğun senin bileceğin iş. Onlar gönderiyorsa sen yine de görürsün.</string>
+    <string name="prices_menu_warn_title">Menün %1$s cinsinden</string>
+    <string name="prices_menu_warn_body">%2$s\'ye geçmek, yeniden ayarlayana kadar o fiyatların satılmasını durdurur. Hiçbir şey silinmez.</string>
+    <string name="prices_menu_warn_go">Yine de değiştir</string>
 </resources>

@@ -47,4 +47,7 @@
     <string name="settings_read_receipts">Envoyer les accusés de lecture</string>
     <string name="settings_read_receipts_on">Tes contacts voient quand tu as lu leurs messages. Les leurs s\'affichent de toute façon, s\'ils les envoient.</string>
     <string name="settings_read_receipts_off">Désactivé — quand tu lis, ça ne regarde que toi. Tu vois toujours les leurs s\'ils les envoient.</string>
+    <string name="prices_menu_warn_title">Ta carte est en %1$s</string>
+    <string name="prices_menu_warn_body">Passer en %2$s rend ces prix invendables tant que tu ne les refais pas. Rien n\'est supprimé.</string>
+    <string name="prices_menu_warn_go">Changer quand même</string>
 </resources>

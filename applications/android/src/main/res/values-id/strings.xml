@@ -47,4 +47,7 @@
     <string name="settings_read_receipts">Kirim laporan dibaca</string>
     <string name="settings_read_receipts_on">Kontak melihat kapan kamu membaca pesan mereka. Laporan mereka tetap tampil untukmu, kalau mereka mengirimnya.</string>
     <string name="settings_read_receipts_off">Mati — kapan kamu membaca adalah urusanmu. Laporan mereka tetap terlihat kalau mereka mengirimnya.</string>
+    <string name="prices_menu_warn_title">Menumu dihargai dalam %1$s</string>
+    <string name="prices_menu_warn_body">Pindah ke %2$s membuat harga itu tak bisa dijual sampai kamu setel ulang. Tidak ada yang dihapus.</string>
+    <string name="prices_menu_warn_go">Tetap pindah</string>
 </resources>

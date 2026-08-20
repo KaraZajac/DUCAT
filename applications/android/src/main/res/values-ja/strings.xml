@@ -47,4 +47,7 @@
     <string name="settings_read_receipts">既読通知を送る</string>
     <string name="settings_read_receipts_on">連絡先には、あなたがメッセージを読んだことが伝わります。相手が送ってくれば、相手の既読はどちらにしても表示されます。</string>
     <string name="settings_read_receipts_off">オフ — いつ読んだかはあなたの自由です。相手が送ってくれば、相手の既読は引き続き表示されます。</string>
+    <string name="prices_menu_warn_title">メニューは%1$sで値付けされています</string>
+    <string name="prices_menu_warn_body">%2$sに切り替えると、付け直すまでその値段では売れなくなります。消えるものはありません。</string>
+    <string name="prices_menu_warn_go">それでも切り替える</string>
 </resources>

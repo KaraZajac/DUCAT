@@ -46,4 +46,7 @@
     <string name="settings_read_receipts">Wysyłaj potwierdzenia przeczytania</string>
     <string name="settings_read_receipts_on">Kontakty widzą, kiedy przeczytasz ich wiadomości. Ich potwierdzenia i tak zobaczysz, jeśli je wysyłają.</string>
     <string name="settings_read_receipts_off">Wyłączone — to twoja sprawa, kiedy czytasz. Ich potwierdzenia nadal widzisz, jeśli je wysyłają.</string>
+    <string name="prices_menu_warn_title">Twoje menu jest w %1$s</string>
+    <string name="prices_menu_warn_body">Przejście na %2$s sprawi, że tych cen nie sprzedasz, dopóki nie ustawisz ich na nowo. Nic nie znika.</string>
+    <string name="prices_menu_warn_go">Zmień mimo to</string>
 </resources>
