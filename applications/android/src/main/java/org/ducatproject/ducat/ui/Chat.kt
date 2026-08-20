@@ -2460,11 +2460,31 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     val about = remember(contact.personaHex) {
         org.ducatproject.ducat.Enquiries.about(context, contact.personaHex)
     }
-    fun asXmr(pxmr: Long): String =
-        if (pxmr > 0) "%.6f".format(java.util.Locale.US, pxmr / 1e12) else ""
-    var rent by remember { mutableStateOf(about?.let { asXmr(it.pricePxmr) } ?: "") }
-    var myDep by remember { mutableStateOf(about?.let { asXmr(it.depositPxmr) } ?: "") }
-    var hostDep by remember { mutableStateOf(about?.let { asXmr(it.depositPxmr) } ?: "") }
+    // Priced in the reader's own money by default, like the rest of the app —
+    // agreeing what a room costs is exactly the moment nobody wants to be
+    // doing an exchange rate in their head.
+    val rateVersion by ContactStore.changes.collectAsState()
+    val rate = remember(rateVersion) {
+        org.ducatproject.ducat.RateStore(context).cached()?.first
+    }
+    val cur = remember(rateVersion) { Amounts.currency(context) }
+    var fiat by remember { mutableStateOf(Amounts.enterFiat(context)) }
+
+    /**
+     * A piconero figure as text, in whichever unit this sheet is showing.
+     *
+     * Declared above the fields, not below them, because the fields are seeded
+     * from it. Seeding in XMR while the field says USD is not a rounding
+     * error: a listing at 0.107668 XMR reads as a hundred and seven
+     * thousandths of a dollar, and the owner is offered a fraction of a cent
+     * for their room.
+     */
+    fun asUnit(pxmr: Long): String =
+        if (pxmr > 0) pxmrToField(pxmr, fiat, rate) else ""
+
+    var rent by remember { mutableStateOf(about?.let { asUnit(it.pricePxmr) } ?: "") }
+    var myDep by remember { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
+    var hostDep by remember { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
     // What kind of thing is being handed over decides how much each side
     // stakes: a room is not a car (see Stakes.kt for where the numbers come
     // from). Picking one fills both deposits, and either can still be typed
@@ -2483,16 +2503,6 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    // Priced in the reader's own money by default, like the rest of the app —
-    // agreeing what a room costs is exactly the moment nobody wants to be
-    // doing an exchange rate in their head.
-    val rateVersion by ContactStore.changes.collectAsState()
-    val rate = remember(rateVersion) {
-        org.ducatproject.ducat.RateStore(context).cached()?.first
-    }
-    val cur = remember(rateVersion) { Amounts.currency(context) }
-    var fiat by remember { mutableStateOf(Amounts.enterFiat(context)) }
-
     // Through the shared parser, like every other money field. These three
     // accept whatever `isNumberChar` allows — which is deliberately more than
     // ASCII, because a keyboard set to Persian or Hindi types its own digits —
@@ -2512,12 +2522,6 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
         return Amounts.toPxmr(xmr)?.takeIf { it > 0 }
     }
 
-    /** A stake, written back into a field in whatever unit that field shows. */
-    fun unitText(p: Long): String = if (fiat && rate != null) {
-        "%.2f".format(java.util.Locale.US, p / 1e12 * rate)
-    } else {
-        "%.6f".format(java.util.Locale.US, p / 1e12)
-    }
 
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDone) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
@@ -2548,7 +2552,7 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                             // Re-suggest from whatever rent has been typed.
                             pxmr(rent)?.let { r ->
                                 val st = org.ducatproject.ducat.Stakes.stakeFor(d, r)
-                                val text = unitText(st)
+                                val text = asUnit(st)
                                 myDep = text; hostDep = text
                             }
                         },
@@ -2573,7 +2577,7 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                     // doing percentages in their head at a bus stop.
                     pxmr(rent)?.let { r ->
                         val st = org.ducatproject.ducat.Stakes.stakeFor(deal, r)
-                        val text = unitText(st)
+                        val text = asUnit(st)
                         myDep = text
                         hostDep = text
                     }
@@ -2584,10 +2588,19 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
             if (rate != null) {
                 TextButton(
                     onClick = {
-                        // Clear all three: half a proposal in one unit and half
-                        // in another is how somebody stakes a hundred times
-                        // what they meant to.
-                        fiat = !fiat; rent = ""; myDep = ""; hostDep = ""
+                        // All three together: half a proposal in one unit and
+                        // half in another is how somebody stakes a hundred
+                        // times what they meant to. Converted, not emptied —
+                        // and a rent typed over the listing's own figure is
+                        // the number that survives, because it is the one
+                        // somebody chose.
+                        val r = pxmr(rent)
+                        val m = pxmr(myDep)
+                        val h = pxmr(hostDep)
+                        fiat = !fiat
+                        rent = r?.let { asUnit(it) } ?: about?.let { asUnit(it.pricePxmr) } ?: ""
+                        myDep = m?.let { asUnit(it) } ?: ""
+                        hostDep = h?.let { asUnit(it) } ?: ""
                     },
                     contentPadding = PaddingValues(horizontal = 6.dp),
                 ) {

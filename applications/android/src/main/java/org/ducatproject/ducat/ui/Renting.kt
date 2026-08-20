@@ -420,7 +420,11 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
             )
             if (rate != null) {
                 TextButton(
-                    onClick = { fiat = !fiat; price = "" },
+                    onClick = {
+                        val p = pricePxmr
+                        fiat = !fiat
+                        price = if (p > 0) pxmrToField(p, fiat, rate) else ""
+                    },
                     contentPadding = PaddingValues(horizontal = 6.dp),
                 ) {
                     Text(

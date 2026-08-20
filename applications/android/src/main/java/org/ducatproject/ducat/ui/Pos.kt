@@ -330,7 +330,14 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
         )
         if (rate != null) {
             TextButton(
-                onClick = { fiat = !fiat; amount = "" },
+                // Convert what is typed rather than throwing it away, the way
+                // the hail sheet already does. Tapping the unit is a question
+                // about the same amount, not a decision to start again.
+                onClick = {
+                    val p = pxmr
+                    fiat = !fiat
+                    amount = p?.let { pxmrToField(it, fiat, rate) } ?: ""
+                },
                 contentPadding = PaddingValues(horizontal = 6.dp),
             ) {
                 Text(if (fiat) "→XMR" else "→$cur", style = MaterialTheme.typography.labelMedium)
@@ -350,7 +357,14 @@ private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
     val rate = remember(rateVersion) { RateStore(context).cached()?.first }
     val cur = remember(rateVersion) { Amounts.currency(context) }
     var fiat by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
-    var text by rememberSaveable { mutableStateOf(if (taxPxmr > 0) formatXmr(taxPxmr) else "") }
+    // In the unit the field is showing, and never through `formatXmr`, which
+    // localises its digits: a tax set, then reached again by switching tabs,
+    // re-seeded this field from the stored piconero — as XMR under a label
+    // reading USD, in Persian numerals on a Persian phone. Both halves of that
+    // then came back out through the parser as the wrong number.
+    var text by rememberSaveable {
+        mutableStateOf(if (taxPxmr > 0) pxmrToField(taxPxmr, fiat, rate) else "")
+    }
 
     /** Whatever unit the field is showing, as piconero. */
     fun toPxmr(s: String): Long {
@@ -396,7 +410,12 @@ private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
         )
         if (rate != null) {
             TextButton(
-                onClick = { fiat = !fiat; text = ""; onSet(0L) },
+                onClick = {
+                    val p = toPxmr(text)
+                    fiat = !fiat
+                    text = if (p > 0) pxmrToField(p, fiat, rate) else ""
+                    onSet(p)
+                },
                 contentPadding = PaddingValues(horizontal = 6.dp),
             ) {
                 Text(
