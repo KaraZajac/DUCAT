@@ -463,3 +463,35 @@ reasons the 1.0 primitives are worth getting right.
 - Offline OSM routing (fare estimates without the one stated leak).
 - Multi-hail per rider; fleets; anything dispatcher-shaped.
 - Reputation systems beyond the receipts a relationship accretes.
+- **A second settlement chain. Considered and declined, 2026-08-19.**
+  Bitcoin and Ethereum alongside Monero, three wallets from first launch —
+  weighed for reach and turned down. The engineering was the small part:
+  only twelve functions cross into the Monero bridge, so the seam is
+  narrow. Four things decided it, none of them the code.
+
+  Privacy is not an implementation detail in this design, it is the
+  product. §15.10's subaddress-per-contact gives attribution *by
+  construction*; on a transparent ledger that inverts and everyone can
+  attribute — a shop's takings and a rider's fare history become public,
+  and the receipt stops being the record of a payment and becomes a
+  private annotation on a public one. Worse, the app's privacy story would
+  become "depends which button you pressed", which is the hardest kind to
+  tell honestly and the kind people get wrong exactly when it costs them.
+
+  Fees kill the counter modes structurally: a £3.20 coffee on either L1
+  can cost more in fee than the coffee. Lightning and L2s answer that and
+  each is a different protocol with different escrow primitives —
+  Lightning in particular wants both parties online with funded channels,
+  which is the opposite of the mailbox's whole reason to exist (§16.12).
+
+  Escrow would triple in the part where mistakes are unrecoverable. And
+  node access reintroduces an operator: Monero light scanning through a
+  public node leaks comparatively little, where an Ethereum RPC is asked
+  "what is the balance of 0xabc" and in practice is a company.
+
+  If this is ever revisited: Bitcoin, not Ethereum — it shares the UTXO
+  model and has native multisig, where Ethereum is account-shaped (no
+  outputs, no notes, no `SendPlan`) and drags a contract platform behind
+  it. And chains should be created lazily, never three at first launch:
+  §4.3's backup is already the most frightening part of onboarding and
+  nobody should be asked to keep a seed for a chain they never used.
