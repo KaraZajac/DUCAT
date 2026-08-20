@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Wypożyczanie sprzętu</string>
     <string name="rent_form_sale">Sprzedaż</string>
     <string name="rent_form_skill">Propozycja fachu</string>
-    <string name="rent_per_hour">Za godzinę</string>
-    <string name="rent_price_once">Cena</string>
+    <string name="rent_per_hour">Cena za godzinę (XMR)</string>
+    <string name="rent_price_once">Cena (XMR)</string>
     <string name="rent_category">Kategoria</string>
     <string name="rent_tags">Tagi</string>
     <string name="rent_tags_hint">Kilka słów, po przecinku</string>

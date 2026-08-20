@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -173,6 +174,22 @@ private fun migrateDown(p: PostedHail): PostedHail? {
  * conversation, and an unbonded hail is a mutual promise, like flagging a
  * cab — the card says so rather than implying a dispatcher stands behind it.
  */
+/**
+ * A geocoded endpoint, across an activity recreation.
+ *
+ * Only the endpoints: the route is recomputed from them by the effect that
+ * watches the pair, and its geometry is a polyline that has no business
+ * riding in a Binder transaction.
+ */
+private val HitSaver = androidx.compose.runtime.saveable.listSaver<
+    org.ducatproject.ducat.Geo.Hit?, Any>(
+    save = { h -> h?.let { listOf(it.label, it.latE7, it.lonE7) } ?: emptyList() },
+    restore = { f ->
+        if (f.isEmpty()) null
+        else org.ducatproject.ducat.Geo.Hit(f[0] as String, f[1] as Long, f[2] as Long)
+    },
+)
+
 @Composable
 fun HailCard(
     /**
@@ -1611,16 +1628,23 @@ fun HailSheet(
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
-    var from by remember { mutableStateOf<org.ducatproject.ducat.Geo.Hit?>(null) }
-    var to by remember { mutableStateOf<org.ducatproject.ducat.Geo.Hit?>(null) }
+    // Both ends survive a recreation. Each one cost a typed search and a
+    // geocoder round-trip, and a rotation or a sunset theme switch used to
+    // throw away the pair and the route with them.
+    var from by rememberSaveable(stateSaver = HitSaver) {
+        mutableStateOf<org.ducatproject.ducat.Geo.Hit?>(null)
+    }
+    var to by rememberSaveable(stateSaver = HitSaver) {
+        mutableStateOf<org.ducatproject.ducat.Geo.Hit?>(null)
+    }
     var route by remember { mutableStateOf<org.ducatproject.ducat.Geo.Route?>(null) }
     var routing by remember { mutableStateOf(false) }
     // The offer can be typed in the local currency, like the rest of the app.
     // Only defaults to fiat when a rate is cached to convert it.
     val rate = remember { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
-    var fiat by remember { mutableStateOf(Amounts.preferFiat(context) && rate != null) }
-    var fareXmr by remember { mutableStateOf("") }
+    var fiat by rememberSaveable { mutableStateOf(Amounts.preferFiat(context) && rate != null) }
+    var fareXmr by rememberSaveable { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
@@ -1650,7 +1674,10 @@ fun HailSheet(
             }
         } else locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
     }
-    LaunchedEffect(Unit) { useMyLocation() }
+    // Only when there is nothing to restore: after a recreation this would
+    // otherwise overwrite the pickup somebody had chosen with wherever the
+    // phone happens to be.
+    LaunchedEffect(Unit) { if (from == null) useMyLocation() }
 
     // Addresses first; the route (and the map that draws it) only once both
     // ends exist. The map is a preview of a decision, not a picker.

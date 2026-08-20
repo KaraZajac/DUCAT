@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,16 +46,19 @@ fun MyProfileEditor() {
     val context = LocalContext.current
     val p = remember { MyProfile(context) }
 
-    var name by remember { mutableStateOf(p.name() ?: "") }
-    var email by remember { mutableStateOf(p.email() ?: "") }
-    var phone by remember { mutableStateOf(p.phone() ?: "") }
-    var signal by remember { mutableStateOf(p.signal() ?: "") }
-    var carModel by remember { mutableStateOf(p.carModel() ?: "") }
-    var carColor by remember { mutableStateOf(p.carColor() ?: "") }
-    var plate by remember { mutableStateOf(p.plate() ?: "") }
-    var pronouns by remember { mutableStateOf(p.pronouns()) }
+    // Saveable, so a rotation loses nothing typed but not yet saved. The
+    // avatar stays out of it deliberately: it is image bytes, and saved
+    // instance state is a Binder transaction with a hard size limit.
+    var name by rememberSaveable { mutableStateOf(p.name() ?: "") }
+    var email by rememberSaveable { mutableStateOf(p.email() ?: "") }
+    var phone by rememberSaveable { mutableStateOf(p.phone() ?: "") }
+    var signal by rememberSaveable { mutableStateOf(p.signal() ?: "") }
+    var carModel by rememberSaveable { mutableStateOf(p.carModel() ?: "") }
+    var carColor by rememberSaveable { mutableStateOf(p.carColor() ?: "") }
+    var plate by rememberSaveable { mutableStateOf(p.plate() ?: "") }
+    var pronouns by rememberSaveable { mutableStateOf(p.pronouns()) }
     var avatar by remember { mutableStateOf(p.avatar()) }
-    var share by remember { mutableStateOf(p.shareProfile()) }
+    var share by rememberSaveable { mutableStateOf(p.shareProfile()) }
     var saved by remember { mutableStateOf(false) }
     var avatarError by remember { mutableStateOf<String?>(null) }
 
@@ -139,7 +143,10 @@ fun MyProfileEditor() {
         Spacer(Modifier.height(12.dp))
         Text(stringResource(R.string.myprofile_pronouns), style = MaterialTheme.typography.labelLarge)
         Spacer(Modifier.height(6.dp))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
             labels.forEachIndexed { i, label ->
                 val code = i + 1
                 FilterChip(

@@ -69,8 +69,8 @@
     <string name="rent_form_gear">सामान किराए पर देना</string>
     <string name="rent_form_sale">कुछ बेचना</string>
     <string name="rent_form_skill">हुनर देना</string>
-    <string name="rent_per_hour">प्रति घंटा</string>
-    <string name="rent_price_once">दाम</string>
+    <string name="rent_per_hour">प्रति घंटा कीमत (XMR)</string>
+    <string name="rent_price_once">कीमत (XMR)</string>
     <string name="rent_category">श्रेणी</string>
     <string name="rent_tags">टैग</string>
     <string name="rent_tags_hint">कुछ शब्द, अल्पविराम से अलग</string>

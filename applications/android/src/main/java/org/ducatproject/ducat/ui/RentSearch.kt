@@ -208,6 +208,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                     FlowRow(
                         Modifier.fillMaxWidth().padding(bottom = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         Listings.KINDS.forEach { k ->
                             val n = results!!.count { it.kind.toInt() == k }
@@ -415,7 +416,10 @@ internal fun ListingCardsPreview() {
         // noun, so this row is how somebody moves between them — and five
         // labels plus five numbers is exactly the width that wraps badly if
         // nobody looks.
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
             listOf(2, 1, 3, 5, 0).forEachIndexed { i, n ->
                 val k = Listings.KINDS[i]
                 FilterChip(

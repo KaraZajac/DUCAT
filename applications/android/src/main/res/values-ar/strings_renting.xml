@@ -69,8 +69,8 @@
     <string name="rent_form_gear">إعارة معدات</string>
     <string name="rent_form_sale">بيع شيء</string>
     <string name="rent_form_skill">تقديم مهارة</string>
-    <string name="rent_per_hour">بالساعة</string>
-    <string name="rent_price_once">السعر</string>
+    <string name="rent_per_hour">السعر للساعة (XMR)</string>
+    <string name="rent_price_once">السعر (XMR)</string>
     <string name="rent_category">الفئة</string>
     <string name="rent_tags">وسوم</string>
     <string name="rent_tags_hint">بضع كلمات، مفصولة بفواصل</string>

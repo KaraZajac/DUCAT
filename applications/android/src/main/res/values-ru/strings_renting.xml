@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Сдать снаряжение</string>
     <string name="rent_form_sale">Продать вещь</string>
     <string name="rent_form_skill">Предложить умение</string>
-    <string name="rent_per_hour">За час</string>
-    <string name="rent_price_once">Цена</string>
+    <string name="rent_per_hour">Цена за час (XMR)</string>
+    <string name="rent_price_once">Цена (XMR)</string>
     <string name="rent_category">Категория</string>
     <string name="rent_tags">Метки</string>
     <string name="rent_tags_hint">Пара слов, через запятую</string>

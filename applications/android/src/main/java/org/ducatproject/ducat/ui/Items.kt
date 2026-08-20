@@ -186,6 +186,7 @@ fun ItemPicker(onPick: (String, Long) -> Unit) {
     FlowRow(
         Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         priced.forEach { (item, result) ->
             val p = result.getOrNull()

@@ -94,7 +94,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         messages.filter { it.kind == 4 && it.reSeq != null }
             .associateBy { r -> Triple(r.outgoing == r.reOwn, r.reSeq!!, r.outgoing) }
     }
-    var draft by remember { mutableStateOf("") }
+    // A half-typed message survives a rotation. It is the single most
+    // common thing to lose, and the least excusable.
+    var draft by rememberSaveable { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()

@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Spullen uitlenen</string>
     <string name="rent_form_sale">Iets verkopen</string>
     <string name="rent_form_skill">Vakwerk aanbieden</string>
-    <string name="rent_per_hour">Per uur</string>
-    <string name="rent_price_once">Prijs</string>
+    <string name="rent_per_hour">Prijs per uur (XMR)</string>
+    <string name="rent_price_once">Prijs (XMR)</string>
     <string name="rent_category">Categorie</string>
     <string name="rent_tags">Labels</string>
     <string name="rent_tags_hint">Een paar woorden, met komma\'s</string>

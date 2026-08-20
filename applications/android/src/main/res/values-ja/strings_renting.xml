@@ -69,8 +69,8 @@
     <string name="rent_form_gear">道具を貸す</string>
     <string name="rent_form_sale">何かを売る</string>
     <string name="rent_form_skill">腕を貸す</string>
-    <string name="rent_per_hour">1時間あたり</string>
-    <string name="rent_price_once">価格</string>
+    <string name="rent_per_hour">1時間あたりの価格（XMR）</string>
+    <string name="rent_price_once">価格（XMR）</string>
     <string name="rent_category">カテゴリ</string>
     <string name="rent_tags">タグ</string>
     <string name="rent_tags_hint">短い言葉を、読点で区切って</string>

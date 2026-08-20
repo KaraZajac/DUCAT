@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Prêter du matériel</string>
     <string name="rent_form_sale">Vendre quelque chose</string>
     <string name="rent_form_skill">Proposer un savoir-faire</string>
-    <string name="rent_per_hour">Par heure</string>
-    <string name="rent_price_once">Prix</string>
+    <string name="rent_per_hour">Prix par heure (XMR)</string>
+    <string name="rent_price_once">Prix (XMR)</string>
     <string name="rent_category">Catégorie</string>
     <string name="rent_tags">Mots-clés</string>
     <string name="rent_tags_hint">Quelques mots, séparés par des virgules</string>

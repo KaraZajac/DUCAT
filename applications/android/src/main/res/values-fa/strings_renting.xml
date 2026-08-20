@@ -69,8 +69,8 @@
     <string name="rent_form_gear">کرایه دادن وسایل</string>
     <string name="rent_form_sale">فروش چیزی</string>
     <string name="rent_form_skill">ارائهٔ مهارت</string>
-    <string name="rent_per_hour">ساعتی</string>
-    <string name="rent_price_once">قیمت</string>
+    <string name="rent_per_hour">قیمت هر ساعت (XMR)</string>
+    <string name="rent_price_once">قیمت (XMR)</string>
     <string name="rent_category">دسته</string>
     <string name="rent_tags">برچسب‌ها</string>
     <string name="rent_tags_hint">چند کلمه، جدا شده با ویرگول</string>

@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Menyewakan peralatan</string>
     <string name="rent_form_sale">Menjual sesuatu</string>
     <string name="rent_form_skill">Menawarkan keahlian</string>
-    <string name="rent_per_hour">Per jam</string>
-    <string name="rent_price_once">Harga</string>
+    <string name="rent_per_hour">Harga per jam (XMR)</string>
+    <string name="rent_price_once">Harga (XMR)</string>
     <string name="rent_category">Kategori</string>
     <string name="rent_tags">Tagar</string>
     <string name="rent_tags_hint">Beberapa kata, dipisah koma</string>

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -139,7 +140,9 @@ fun RentingScreen() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val listings = remember(version) { Listings.all(context) }
-    var composing by remember { mutableStateOf<Int?>(null) }
+    // Saveable: this is which form is open, and losing it on a rotation
+    // threw somebody out of a half-filled listing back to the list.
+    var composing by rememberSaveable { mutableStateOf<Int?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
@@ -154,6 +157,7 @@ fun RentingScreen() {
         FlowRow(
             Modifier.fillMaxWidth().padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Listings.KINDS.forEach { k ->
                 Button(
@@ -288,28 +292,33 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
     // a price, an area, a category and a few tags. Everything below that is
     // about a gearbox or a bedroom is theirs to skip.
     val plain = Listings.isPlain(kind)
-    var title by remember { mutableStateOf("") }
-    var area by remember { mutableStateOf("") }
-    var price by remember { mutableStateOf("") }
+    // Every field somebody types is saveable, because the activity is
+    // recreated by a rotation, a theme switch at sunset, or a language
+    // change — and an eighteen-field listing that empties itself when the
+    // phone turns sideways is one nobody fills in twice. The till already
+    // does this for a basket; the form it inspired did not inherit it.
+    var title by rememberSaveable { mutableStateOf("") }
+    var area by rememberSaveable { mutableStateOf("") }
+    var price by rememberSaveable { mutableStateOf("") }
     // Vehicle
-    var make by remember { mutableStateOf("") }
-    var model by remember { mutableStateOf("") }
-    var year by remember { mutableStateOf("") }
-    var color by remember { mutableStateOf("") }
-    var seats by remember { mutableStateOf("") }
-    var trim by remember { mutableStateOf("") }
-    var gearbox by remember { mutableStateOf(2L) }
-    var fuel by remember { mutableStateOf(1L) }
+    var make by rememberSaveable { mutableStateOf("") }
+    var model by rememberSaveable { mutableStateOf("") }
+    var year by rememberSaveable { mutableStateOf("") }
+    var color by rememberSaveable { mutableStateOf("") }
+    var seats by rememberSaveable { mutableStateOf("") }
+    var trim by rememberSaveable { mutableStateOf("") }
+    var gearbox by rememberSaveable { mutableStateOf(2L) }
+    var fuel by rememberSaveable { mutableStateOf(1L) }
     // Place
-    var rooms by remember { mutableStateOf("") }
-    var sleeps by remember { mutableStateOf("") }
-    var sizeM2 by remember { mutableStateOf("") }
-    var whole by remember { mutableStateOf(true) }
+    var rooms by rememberSaveable { mutableStateOf("") }
+    var sleeps by rememberSaveable { mutableStateOf("") }
+    var sizeM2 by rememberSaveable { mutableStateOf("") }
+    var whole by rememberSaveable { mutableStateOf(true) }
     // Plain kinds: a category, and free words for what it actually is.
-    var category by remember { mutableStateOf(1) }
-    var tags by remember { mutableStateOf("") }
+    var category by rememberSaveable { mutableStateOf(1) }
+    var tags by rememberSaveable { mutableStateOf("") }
     // Private
-    var details by remember { mutableStateOf("") }
+    var details by rememberSaveable { mutableStateOf("") }
     var fix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
@@ -392,7 +401,10 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
                 style = MaterialTheme.typography.titleSmall,
             )
             Spacer(Modifier.height(8.dp))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
                 (1..Listings.subtypeTop(kind)).forEach { n ->
                     FilterChip(
                         selected = category == n,

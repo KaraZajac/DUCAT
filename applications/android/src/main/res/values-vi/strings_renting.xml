@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Cho thuê đồ</string>
     <string name="rent_form_sale">Bán một món</string>
     <string name="rent_form_skill">Nhận việc theo nghề</string>
-    <string name="rent_per_hour">Mỗi giờ</string>
-    <string name="rent_price_once">Giá</string>
+    <string name="rent_per_hour">Giá mỗi giờ (XMR)</string>
+    <string name="rent_price_once">Giá (XMR)</string>
     <string name="rent_category">Danh mục</string>
     <string name="rent_tags">Thẻ</string>
     <string name="rent_tags_hint">Vài từ, cách nhau bằng dấu phẩy</string>

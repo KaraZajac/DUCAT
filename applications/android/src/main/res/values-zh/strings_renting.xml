@@ -69,8 +69,8 @@
     <string name="rent_form_gear">出借装备</string>
     <string name="rent_form_sale">卖点东西</string>
     <string name="rent_form_skill">接活儿</string>
-    <string name="rent_per_hour">每小时</string>
-    <string name="rent_price_once">价格</string>
+    <string name="rent_per_hour">每小时价格（XMR）</string>
+    <string name="rent_price_once">价格（XMR）</string>
     <string name="rent_category">分类</string>
     <string name="rent_tags">标签</string>
     <string name="rent_tags_hint">几个词，用逗号隔开</string>

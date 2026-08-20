@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Ekipman kiralama</string>
     <string name="rent_form_sale">Bir şey satmak</string>
     <string name="rent_form_skill">Ustalık sunmak</string>
-    <string name="rent_per_hour">Saatlik</string>
-    <string name="rent_price_once">Fiyat</string>
+    <string name="rent_per_hour">Saatlik fiyat (XMR)</string>
+    <string name="rent_price_once">Fiyat (XMR)</string>
     <string name="rent_category">Kategori</string>
     <string name="rent_tags">Etiketler</string>
     <string name="rent_tags_hint">Virgülle ayrılmış birkaç kelime</string>

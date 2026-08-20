@@ -69,8 +69,8 @@
     <string name="rent_form_gear">장비 대여하기</string>
     <string name="rent_form_sale">물건 팔기</string>
     <string name="rent_form_skill">재능 제공하기</string>
-    <string name="rent_per_hour">시간당</string>
-    <string name="rent_price_once">가격</string>
+    <string name="rent_per_hour">시간당 요금 (XMR)</string>
+    <string name="rent_price_once">가격 (XMR)</string>
     <string name="rent_category">분류</string>
     <string name="rent_tags">태그</string>
     <string name="rent_tags_hint">쉼표로 구분한 몇 단어</string>

@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Здати спорядження</string>
     <string name="rent_form_sale">Продати річ</string>
     <string name="rent_form_skill">Запропонувати вміння</string>
-    <string name="rent_per_hour">За годину</string>
-    <string name="rent_price_once">Ціна</string>
+    <string name="rent_per_hour">Ціна за годину (XMR)</string>
+    <string name="rent_price_once">Ціна (XMR)</string>
     <string name="rent_category">Категорія</string>
     <string name="rent_tags">Мітки</string>
     <string name="rent_tags_hint">Кілька слів, через кому</string>
