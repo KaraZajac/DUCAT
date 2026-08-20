@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">rideshare ~%1$s %2$.0f · taxi ~%1$s %3$.0f — jouw chauffeur houdt alles zelf (een rideshare betaalt de zijne ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Jouw bod (%1$s)</string>
     <string name="hail_offer_invalid">Het bod moet een getal boven nul zijn — of laat het leeg om een prijsvoorstel te vragen.</string>
-    <string name="hail_post_failed">kon de oproep niet plaatsen</string>
     <string name="hail_osm_privacy">Zoeken, route en kaart gebruiken de servers van OpenStreetMap — de enige plek waar DUCAT locatie van het apparaat af stuurt. Chauffeurs zien alleen gebieden van ~%1$s.</string>
     <string name="hail_post_button">Roep op 🚕</string>
     <string name="hail_search">Zoeken</string>

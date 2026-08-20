@@ -1879,7 +1879,7 @@ fun HailSheet(
                                         }
                                     }.onFailure { e ->
                                         withContext(Dispatchers.Main) {
-                                            error = e.message ?: context.getString(R.string.hail_post_failed)
+                                            error = moneyFailure(context, e)
                                         }
                                     }
                                     withContext(Dispatchers.Main) { busy = false }

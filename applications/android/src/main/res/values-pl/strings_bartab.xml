@@ -22,13 +22,11 @@
     <string name="bartab_state_paid">zapłacone ✓</string>
     <string name="bartab_new_customer">Nowy klient</string>
     <string name="bartab_scan_hint">Klient skanuje albo przykłada telefon — rachunek otwiera się sam.</string>
-    <string name="bartab_err_publish_code">nie udało się opublikować kodu</string>
     <string name="bartab_or_regular">Albo stały klient</string>
     <string name="bartab_back">Wstecz</string>
     <string name="bartab_bill_cancelled_msg">To rozliczenie na %1$s jest anulowane — nie ma nic do zapłaty.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · rachunek: %3$s</string>
     <string name="bartab_remove_line">Usuń</string>
-    <string name="bartab_err_send_bill">nie udało się wysłać rozliczenia</string>
     <string name="bartab_settle_bill">Zamknij — rozliczenie na %1$s</string>
     <string name="bartab_settle_hint">Jedno rozliczenie z listą pozycji trafia do rozmowy z %1$s. Mogą zapłacić skądkolwiek — wątek nie zamyka się, gdy wyjdą.</string>
     <string name="bartab_discard_tab">Odrzuć rachunek</string>

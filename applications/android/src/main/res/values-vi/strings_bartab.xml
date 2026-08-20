@@ -19,13 +19,11 @@
     <string name="bartab_state_paid">đã trả ✓</string>
     <string name="bartab_new_customer">Khách mới</string>
     <string name="bartab_scan_hint">Khách quét hoặc chạm — tab tự mở.</string>
-    <string name="bartab_err_publish_code">không phát hành được mã</string>
     <string name="bartab_or_regular">Hoặc khách quen</string>
     <string name="bartab_back">Quay lại</string>
     <string name="bartab_bill_cancelled_msg">Hóa đơn %1$s đó đã hủy — không cần trả gì.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · tab hiện %3$s</string>
     <string name="bartab_remove_line">Xóa</string>
-    <string name="bartab_err_send_bill">không gửi được hóa đơn</string>
     <string name="bartab_settle_bill">Tất toán — hóa đơn %1$s</string>
     <string name="bartab_settle_hint">Một hóa đơn liệt kê từng món gửi vào cuộc trò chuyện với %1$s. Họ có thể trả từ bất cứ đâu — luồng trò chuyện không đóng khi họ rời đi.</string>
     <string name="bartab_discard_tab">Bỏ tab</string>

@@ -1272,12 +1272,6 @@ data class IssuedCardState(
     val answeredBy: String? = null,
 )
 
-class CardStore(context: Context) {
-    private val prefs = securePrefs(context, "ducat_contacts")
-
-    fun cardBytes(): ByteArray? = prefs.getString("my_card", null)?.let { unb64(it) }
-}
-
 private fun JSONObject.optStringOrNull(k: String): String? =
     if (isNull(k)) null else optString(k, "").ifBlank { null }
 

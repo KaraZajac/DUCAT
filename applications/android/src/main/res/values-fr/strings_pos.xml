@@ -15,7 +15,6 @@
     <string name="pos_item">Article</string>
     <string name="pos_add_line">Ajouter une ligne</string>
     <string name="pos_tax">Taxes</string>
-    <string name="pos_error_publish_code">impossible de publier le code</string>
     <string name="pos_error_bill_not_sent">Il y a eu connexion, mais la facture n\'est pas partie : %1$s</string>
     <string name="pos_getting_code_ready">Préparation du code…</string>
     <string name="pos_scan_hint">Le client le scanne dans DUCAT. La facture ci-dessus arrive sur son téléphone à l\'instant même.</string>

@@ -20,13 +20,11 @@
     <string name="bartab_state_paid">payée ✓</string>
     <string name="bartab_new_customer">Nouveau client</string>
     <string name="bartab_scan_hint">Il scanne ou approche son téléphone — l\'ardoise s\'ouvre toute seule.</string>
-    <string name="bartab_err_publish_code">impossible de publier un code</string>
     <string name="bartab_or_regular">Ou un habitué</string>
     <string name="bartab_back">Retour</string>
     <string name="bartab_bill_cancelled_msg">Cette addition de %1$s est annulée — rien à payer.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · ardoise à %3$s</string>
     <string name="bartab_remove_line">Retirer</string>
-    <string name="bartab_err_send_bill">impossible d\'envoyer l\'addition</string>
     <string name="bartab_settle_bill">Clôturer — addition %1$s</string>
     <string name="bartab_settle_hint">Une addition détaillée dans ta conversation avec %1$s. Le paiement peut se faire de n\'importe où — le fil ne se ferme pas quand la personne s\'en va.</string>
     <string name="bartab_discard_tab">Jeter l\'ardoise</string>

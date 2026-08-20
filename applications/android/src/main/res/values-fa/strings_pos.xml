@@ -15,7 +15,6 @@
     <string name="pos_item">قلم</string>
     <string name="pos_add_line">افزودن ردیف</string>
     <string name="pos_tax">مالیات</string>
-    <string name="pos_error_publish_code">انتشار کد ممکن نشد</string>
     <string name="pos_error_bill_not_sent">وصل شدند، اما صورت‌حساب نرفت: %1$s</string>
     <string name="pos_getting_code_ready">در حال آماده کردن کد…</string>
     <string name="pos_scan_hint">این را در DUCAT اسکن می‌کنند. همان لحظه صورت‌حساب بالا روی گوشی‌شان می‌رسد.</string>

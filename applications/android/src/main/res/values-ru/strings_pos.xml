@@ -15,7 +15,6 @@
     <string name="pos_item">Позиция</string>
     <string name="pos_add_line">Добавить строку</string>
     <string name="pos_tax">Налог</string>
-    <string name="pos_error_publish_code">не удалось опубликовать код</string>
     <string name="pos_error_bill_not_sent">Подключение было, но счёт не отправился: %1$s</string>
     <string name="pos_getting_code_ready">Готовим код…</string>
     <string name="pos_scan_hint">Покупатель сканирует это в DUCAT. Счёт выше приходит на его телефон в ту же секунду.</string>

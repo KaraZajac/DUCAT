@@ -20,13 +20,11 @@
     <string name="bartab_state_paid">betaald ✓</string>
     <string name="bartab_new_customer">Nieuwe klant</string>
     <string name="bartab_scan_hint">Zij scannen of tikken — de tab opent vanzelf.</string>
-    <string name="bartab_err_publish_code">kon geen code publiceren</string>
     <string name="bartab_or_regular">Of een vaste klant</string>
     <string name="bartab_back">Terug</string>
     <string name="bartab_bill_cancelled_msg">Die rekening van %1$s is geannuleerd — er hoeft niets betaald te worden.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · tab nu %3$s</string>
     <string name="bartab_remove_line">Verwijderen</string>
-    <string name="bartab_err_send_bill">kon de rekening niet versturen</string>
     <string name="bartab_settle_bill">Afrekenen — rekening %1$s</string>
     <string name="bartab_settle_hint">Eén gespecificeerde rekening in je gesprek met %1$s. Ze kunnen overal vandaan betalen — het gesprek sluit niet als ze weggaan.</string>
     <string name="bartab_discard_tab">Tab weggooien</string>

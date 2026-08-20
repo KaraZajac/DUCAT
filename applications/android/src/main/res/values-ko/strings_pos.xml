@@ -15,7 +15,6 @@
     <string name="pos_item">품목</string>
     <string name="pos_add_line">줄 추가</string>
     <string name="pos_tax">세금</string>
-    <string name="pos_error_publish_code">코드를 게시하지 못했어요</string>
     <string name="pos_error_bill_not_sent">연결은 됐는데 계산서가 가지 않았어요: %1$s</string>
     <string name="pos_getting_code_ready">코드를 준비하는 중…</string>
     <string name="pos_scan_hint">손님이 DUCAT에서 이걸 스캔해요. 스캔하는 순간 위 계산서가 손님 휴대폰에 도착해요.</string>

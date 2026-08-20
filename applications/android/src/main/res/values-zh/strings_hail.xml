@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">网约车约 %1$s %2$.0f · 出租车约 %1$s %3$.0f — 你的司机全额拿到（网约车付给司机约 %1$s %4$.0f）</string>
     <string name="hail_your_offer">你的出价（%1$s）</string>
     <string name="hail_offer_invalid">出价必须是大于零的数字 — 或留空请对方报价。</string>
-    <string name="hail_post_failed">叫车挂不出去</string>
     <string name="hail_osm_privacy">搜索、路线和地图使用 OpenStreetMap 的服务器 — 这是 DUCAT 唯一把位置发离设备的地方。司机只能看到约 %1$s 的区域。</string>
     <string name="hail_post_button">叫车 🚕</string>
     <string name="hail_search">搜索</string>

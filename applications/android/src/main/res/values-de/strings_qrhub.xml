@@ -5,7 +5,6 @@
     <string name="qrhub_my_code">Mein Code</string>
     <string name="qrhub_scan_prompt">Eine DUCAT-Karte oder eine Monero-Adresse</string>
     <string name="qrhub_not_a_code">Dieser Code ist weder eine DUCAT-Karte noch eine Monero-Adresse.</string>
-    <string name="qrhub_card_issue_failed">Karte ließ sich nicht erstellen</string>
     <string name="qrhub_no_name_set">kein Name festgelegt</string>
     <string name="qrhub_publishing">Zwei Einträge werden veröffentlicht, damit dich Leute erreichen, während dieses Telefon aus ist.</string>
     <string name="qrhub_copy_link">Link kopieren</string>

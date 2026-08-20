@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">araç çağırma ~%1$s %2$.0f · taksi ~%1$s %3$.0f — sürücün hepsini alır (araç çağırma uygulaması sürücüsüne ~%1$s %4$.0f öder)</string>
     <string name="hail_your_offer">Teklifin (%1$s)</string>
     <string name="hail_offer_invalid">Teklif sıfırdan büyük bir sayı olmalı — ya da fiyat sormak için boş bırak.</string>
-    <string name="hail_post_failed">çağrı asılamadı</string>
     <string name="hail_osm_privacy">Arama, rota ve harita OpenStreetMap\'in sunucularını kullanır — DUCAT\'ın konumu cihaz dışına gönderdiği tek yer. Sürücüler yalnızca ~%1$s büyüklüğünde bölgeler görür.</string>
     <string name="hail_post_button">Çağır 🚕</string>
     <string name="hail_search">Ara</string>

@@ -15,7 +15,6 @@
     <string name="pos_item">चीज़</string>
     <string name="pos_add_line">लाइन जोड़ें</string>
     <string name="pos_tax">टैक्स</string>
-    <string name="pos_error_publish_code">कोड जारी नहीं हो पाया</string>
     <string name="pos_error_bill_not_sent">वे जुड़ गए, पर बिल नहीं गया: %1$s</string>
     <string name="pos_getting_code_ready">कोड तैयार हो रहा है…</string>
     <string name="pos_scan_hint">वे इसे DUCAT में स्कैन करते हैं। स्कैन होते ही ऊपर वाला बिल उनके फ़ोन पर पहुँच जाता है।</string>

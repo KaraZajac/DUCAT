@@ -503,7 +503,7 @@ private fun PresentScreen(
         }
         r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
             .onFailure {
-                error = it.message ?: context.getString(R.string.pos_error_publish_code)
+                error = moneyFailure(context, it)
                 DucatLog.e(TAG, "card: ${it.message}")
             }
     }

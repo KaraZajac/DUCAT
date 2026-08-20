@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">राइडशेयर ~%1$s %2$.0f · टैक्सी ~%1$s %3$.0f — आपका ड्राइवर पूरा रखता है (राइडशेयर अपने ड्राइवर को ~%1$s %4$.0f देता है)</string>
     <string name="hail_your_offer">आपकी पेशकश (%1$s)</string>
     <string name="hail_offer_invalid">पेशकश शून्य से ऊपर की संख्या हो — या भाव पूछने के लिए खाली छोड़ दें।</string>
-    <string name="hail_post_failed">पुकार लग नहीं पाई</string>
     <string name="hail_osm_privacy">खोज, रास्ता और नक्शा OpenStreetMap के सर्वर इस्तेमाल करते हैं — बस यही एक जगह है जहाँ DUCAT लोकेशन डिवाइस से बाहर भेजता है। ड्राइवरों को सिर्फ़ ~%1$s के इलाक़े दिखते हैं।</string>
     <string name="hail_post_button">सवारी बुलाएँ 🚕</string>
     <string name="hail_search">खोजें</string>

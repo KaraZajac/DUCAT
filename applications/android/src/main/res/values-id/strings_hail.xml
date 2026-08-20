@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">rideshare ~%1$s %2$.0f · taksi ~%1$s %3$.0f — sopirmu menyimpan semuanya (rideshare membayar sopirnya ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Tawaranmu (%1$s)</string>
     <string name="hail_offer_invalid">Tawaran harus berupa angka di atas nol — atau kosongkan untuk minta penawaran harga.</string>
-    <string name="hail_post_failed">tidak bisa memasang panggilan</string>
     <string name="hail_osm_privacy">Pencarian, rute, dan peta memakai server OpenStreetMap — satu-satunya tempat DUCAT mengirim lokasi ke luar perangkat. Sopir hanya melihat area ~%1$s.</string>
     <string name="hail_post_button">Panggil 🚕</string>
     <string name="hail_search">Cari</string>

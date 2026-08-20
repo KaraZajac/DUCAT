@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">VTC ~%1$s %2$.0f · taxi ~%1$s %3$.0f — ton chauffeur garde tout (un VTC paie le sien ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Ton offre (%1$s)</string>
     <string name="hail_offer_invalid">L\'offre doit être un nombre supérieur à zéro — ou laisse vide pour demander un prix.</string>
-    <string name="hail_post_failed">impossible de poster l\'appel</string>
     <string name="hail_osm_privacy">La recherche, l\'itinéraire et la carte passent par les serveurs d\'OpenStreetMap — le seul endroit où DUCAT envoie une position hors de l\'appareil. Les chauffeurs ne voient que des zones d\'environ %1$s.</string>
     <string name="hail_post_button">Héler 🚕</string>
     <string name="hail_search">Rechercher</string>

@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">apka przewozowa ~%1$s %2$.0f · taksówka ~%1$s %3$.0f — twój kierowca dostaje całość (apka płaci swojemu ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Twoja oferta (%1$s)</string>
     <string name="hail_offer_invalid">Oferta musi być liczbą większą od zera — albo zostaw puste, żeby poprosić o wycenę.</string>
-    <string name="hail_post_failed">nie udało się wystawić wezwania</string>
     <string name="hail_osm_privacy">Wyszukiwanie, trasa i mapa korzystają z serwerów OpenStreetMap — to jedyne miejsce, gdzie DUCAT wysyła lokalizację poza urządzenie. Kierowcy widzą tylko obszary ~%1$s.</string>
     <string name="hail_post_button">Wezwij 🚕</string>
     <string name="hail_search">Szukaj</string>

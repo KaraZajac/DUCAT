@@ -15,7 +15,6 @@
     <string name="pos_item">สินค้า</string>
     <string name="pos_add_line">เพิ่มรายการ</string>
     <string name="pos_tax">ภาษี</string>
-    <string name="pos_error_publish_code">เผยแพร่โค้ดไม่สำเร็จ</string>
     <string name="pos_error_bill_not_sent">เขาเชื่อมต่อแล้ว แต่ส่งบิลไม่สำเร็จ: %1$s</string>
     <string name="pos_getting_code_ready">กำลังเตรียมโค้ด…</string>
     <string name="pos_scan_hint">ให้ลูกค้าสแกนโค้ดนี้ใน DUCAT บิลด้านบนจะถึงโทรศัพท์ของเขาทันทีที่สแกน</string>

@@ -20,13 +20,11 @@
     <string name="bartab_state_paid">चुकाया ✓</string>
     <string name="bartab_new_customer">नया ग्राहक</string>
     <string name="bartab_scan_hint">वे स्कैन करें या टैप — टैब अपने-आप खुल जाता है।</string>
-    <string name="bartab_err_publish_code">कोड जारी नहीं हो पाया</string>
     <string name="bartab_or_regular">या कोई जाना-पहचाना ग्राहक</string>
     <string name="bartab_back">वापस</string>
     <string name="bartab_bill_cancelled_msg">%1$s का वह बिल रद्द है — कुछ नहीं चुकाना।</string>
     <string name="bartab_drink_notice">%1$s — %2$s · टैब अब %3$s</string>
     <string name="bartab_remove_line">हटाएँ</string>
-    <string name="bartab_err_send_bill">बिल भेजा नहीं जा सका</string>
     <string name="bartab_settle_bill">चुकता करें — बिल %1$s</string>
     <string name="bartab_settle_hint">%1$s के साथ आपकी बातचीत में एक ब्योरेवार बिल। वे कहीं से भी चुका सकते हैं — उनके जाने पर थ्रेड बंद नहीं होता।</string>
     <string name="bartab_discard_tab">टैब मिटाएँ</string>

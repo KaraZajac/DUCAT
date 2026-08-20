@@ -5,7 +5,6 @@
     <string name="qrhub_my_code">رمزي</string>
     <string name="qrhub_scan_prompt">بطاقة DUCAT أو عنوان Monero</string>
     <string name="qrhub_not_a_code">هذا الرمز ليس بطاقة DUCAT ولا عنوان Monero.</string>
-    <string name="qrhub_card_issue_failed">تعذّر إنشاء بطاقة</string>
     <string name="qrhub_no_name_set">لا اسم معيَّن</string>
     <string name="qrhub_publishing">جارٍ نشر سجلّين ليستطيع الناس الوصول إليك حتى وهذا الهاتف مطفأ.</string>
     <string name="qrhub_copy_link">نسخ الرابط</string>

@@ -15,7 +15,6 @@
     <string name="pos_item">商品</string>
     <string name="pos_add_line">加一行</string>
     <string name="pos_tax">税</string>
-    <string name="pos_error_publish_code">无法发布收款码</string>
     <string name="pos_error_bill_not_sent">对方已连接，但账单没发出去：%1$s</string>
     <string name="pos_getting_code_ready">正在准备收款码…</string>
     <string name="pos_scan_hint">顾客在 DUCAT 里扫这个码。一扫，上面的账单立刻出现在对方手机上。</string>

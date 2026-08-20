@@ -19,13 +19,11 @@
     <string name="bartab_state_paid">ชำระแล้ว ✓</string>
     <string name="bartab_new_customer">ลูกค้าใหม่</string>
     <string name="bartab_scan_hint">ให้เขาสแกนหรือแตะ — บิลจะเปิดขึ้นเอง</string>
-    <string name="bartab_err_publish_code">เผยแพร่โค้ดไม่สำเร็จ</string>
     <string name="bartab_or_regular">หรือลูกค้าประจำ</string>
     <string name="bartab_back">กลับ</string>
     <string name="bartab_bill_cancelled_msg">บิล %1$s นั้นถูกยกเลิกแล้ว — ไม่ต้องชำระ</string>
     <string name="bartab_drink_notice">%1$s — %2$s · ยอดบิลตอนนี้ %3$s</string>
     <string name="bartab_remove_line">ลบออก</string>
-    <string name="bartab_err_send_bill">ส่งบิลเรียกเก็บไม่สำเร็จ</string>
     <string name="bartab_settle_bill">เช็คบิล — เรียกเก็บ %1$s</string>
     <string name="bartab_settle_hint">บิลแยกรายการหนึ่งใบส่งเข้าบทสนทนากับ %1$s เขาจ่ายจากที่ไหนก็ได้ — บทสนทนาไม่ปิดแม้เขาจะกลับไปแล้ว</string>
     <string name="bartab_discard_tab">ทิ้งบิล</string>

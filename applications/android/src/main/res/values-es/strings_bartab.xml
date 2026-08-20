@@ -20,13 +20,11 @@
     <string name="bartab_state_paid">pagada ✓</string>
     <string name="bartab_new_customer">Cliente nuevo</string>
     <string name="bartab_scan_hint">Escanean o acercan el teléfono — la cuenta se abre sola.</string>
-    <string name="bartab_err_publish_code">no se pudo publicar un código</string>
     <string name="bartab_or_regular">O un cliente habitual</string>
     <string name="bartab_back">Atrás</string>
     <string name="bartab_bill_cancelled_msg">Esa cuenta de %1$s está cancelada — no hay nada que pagar.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · la cuenta va en %3$s</string>
     <string name="bartab_remove_line">Quitar</string>
-    <string name="bartab_err_send_bill">no se pudo enviar la cuenta</string>
     <string name="bartab_settle_bill">Cerrar — cobrar %1$s</string>
     <string name="bartab_settle_hint">Una cuenta detallada en tu conversación con %1$s. Puede pagar desde cualquier parte — el hilo no se cierra cuando se va.</string>
     <string name="bartab_discard_tab">Descartar cuenta</string>

@@ -20,13 +20,11 @@
     <string name="bartab_state_paid">pago ✓</string>
     <string name="bartab_new_customer">Novo cliente</string>
     <string name="bartab_scan_hint">A pessoa escaneia ou encosta o telefone — a comanda abre sozinha.</string>
-    <string name="bartab_err_publish_code">não foi possível publicar um código</string>
     <string name="bartab_or_regular">Ou um cliente habitual</string>
     <string name="bartab_back">Voltar</string>
     <string name="bartab_bill_cancelled_msg">Aquela conta de %1$s foi cancelada — nada a pagar.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · comanda agora em %3$s</string>
     <string name="bartab_remove_line">Remover</string>
-    <string name="bartab_err_send_bill">não foi possível enviar a conta</string>
     <string name="bartab_settle_bill">Fechar — conta %1$s</string>
     <string name="bartab_settle_hint">Uma conta detalhada na sua conversa com %1$s. A pessoa pode pagar de onde estiver — a conversa não fecha quando ela vai embora.</string>
     <string name="bartab_discard_tab">Descartar comanda</string>

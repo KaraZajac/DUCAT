@@ -20,13 +20,11 @@
     <string name="bartab_state_paid">ödendi ✓</string>
     <string name="bartab_new_customer">Yeni müşteri</string>
     <string name="bartab_scan_hint">Onlar tarar ya da telefon dokundurur — adisyon kendiliğinden açılır.</string>
-    <string name="bartab_err_publish_code">kod yayımlanamadı</string>
     <string name="bartab_or_regular">Ya da bir müdavim</string>
     <string name="bartab_back">Geri</string>
     <string name="bartab_bill_cancelled_msg">%1$s tutarındaki o hesap iptal edildi — ödenecek bir şey yok.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · adisyon şimdi %3$s</string>
     <string name="bartab_remove_line">Kaldır</string>
-    <string name="bartab_err_send_bill">hesap gönderilemedi</string>
     <string name="bartab_settle_bill">Kapat — hesap %1$s</string>
     <string name="bartab_settle_hint">%1$s ile sohbetine tek bir dökümlü hesap düşer. İstedikleri yerden ödeyebilirler — onlar çıkınca konuşma kapanmaz.</string>
     <string name="bartab_discard_tab">Adisyonu sil</string>

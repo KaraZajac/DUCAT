@@ -5,7 +5,6 @@
     <string name="qrhub_my_code">내 코드</string>
     <string name="qrhub_scan_prompt">DUCAT 카드 또는 Monero 주소</string>
     <string name="qrhub_not_a_code">이 코드는 DUCAT 카드도 Monero 주소도 아니에요.</string>
-    <string name="qrhub_card_issue_failed">카드를 만들지 못했어요</string>
     <string name="qrhub_no_name_set">이름 미설정</string>
     <string name="qrhub_publishing">이 휴대폰이 꺼져 있어도 닿을 수 있게 레코드 두 개를 게시하는 중이에요.</string>
     <string name="qrhub_copy_link">링크 복사</string>

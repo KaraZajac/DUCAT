@@ -22,13 +22,11 @@
     <string name="bartab_state_paid">сплачено ✓</string>
     <string name="bartab_new_customer">Новий клієнт</string>
     <string name="bartab_scan_hint">Вони сканують або прикладають телефон — рахунок відкривається сам.</string>
-    <string name="bartab_err_publish_code">не вдалося опублікувати код</string>
     <string name="bartab_or_regular">Або постійний клієнт</string>
     <string name="bartab_back">Назад</string>
     <string name="bartab_bill_cancelled_msg">Той рахунок на %1$s скасовано — платити нічого.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · на рахунку вже %3$s</string>
     <string name="bartab_remove_line">Прибрати</string>
-    <string name="bartab_err_send_bill">не вдалося надіслати рахунок</string>
     <string name="bartab_settle_bill">Розрахувати — рахунок %1$s</string>
     <string name="bartab_settle_hint">Один рахунок із переліком позицій у твою розмову з %1$s. Сплатити можна звідки завгодно — розмова не закривається, коли вони йдуть.</string>
     <string name="bartab_discard_tab">Викинути рахунок</string>

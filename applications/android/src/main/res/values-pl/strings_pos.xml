@@ -15,7 +15,6 @@
     <string name="pos_item">Pozycja</string>
     <string name="pos_add_line">Dodaj pozycję</string>
     <string name="pos_tax">Podatek</string>
-    <string name="pos_error_publish_code">nie udało się opublikować kodu</string>
     <string name="pos_error_bill_not_sent">Połączyli się, ale rachunek nie doszedł: %1$s</string>
     <string name="pos_getting_code_ready">Przygotowywanie kodu…</string>
     <string name="pos_scan_hint">Klient skanuje to w DUCAT. Rachunek powyżej trafia na jego telefon w tej samej chwili.</string>

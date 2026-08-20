@@ -5,7 +5,6 @@
     <string name="qrhub_my_code">کد من</string>
     <string name="qrhub_scan_prompt">یک کارت DUCAT یا یک نشانی Monero</string>
     <string name="qrhub_not_a_code">این کد نه کارت DUCAT است و نه نشانی Monero.</string>
-    <string name="qrhub_card_issue_failed">ساخت کارت ممکن نشد</string>
     <string name="qrhub_no_name_set">نامی تعیین نشده</string>
     <string name="qrhub_publishing">دو رکورد منتشر می‌شود تا حتی وقتی این گوشی خاموش است بتوانند به تو برسند.</string>
     <string name="qrhub_copy_link">کپی لینک</string>

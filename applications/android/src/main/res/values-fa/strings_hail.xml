@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">تاکسی اینترنتی حدود %1$s %2$.0f · تاکسی حدود %1$s %3$.0f — راننده‌ات همه‌اش را برمی‌دارد (تاکسی اینترنتی به راننده‌اش حدود %1$s %4$.0f می‌دهد)</string>
     <string name="hail_your_offer">پیشنهاد تو (%1$s)</string>
     <string name="hail_offer_invalid">پیشنهاد باید عددی بزرگ‌تر از صفر باشد — یا خالی بگذار تا قیمت بخواهی.</string>
-    <string name="hail_post_failed">گذاشتن درخواست ممکن نشد</string>
     <string name="hail_osm_privacy">جستجو، مسیر و نقشه از سرورهای OpenStreetMap استفاده می‌کنند — تنها جایی که DUCAT موقعیت را بیرون از دستگاه می‌فرستد. راننده‌ها فقط محدوده‌هایی حدود %1$s می‌بینند.</string>
     <string name="hail_post_button">تاکسی بگیر 🚕</string>
     <string name="hail_search">جستجو</string>

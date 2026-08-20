@@ -20,13 +20,11 @@
     <string name="bartab_state_paid">پرداخت شد ✓</string>
     <string name="bartab_new_customer">مشتری جدید</string>
     <string name="bartab_scan_hint">اسکن می‌کنند یا گوشی را نزدیک می‌کنند — حساب خودش باز می‌شود.</string>
-    <string name="bartab_err_publish_code">انتشار کد ممکن نشد</string>
     <string name="bartab_or_regular">یا یک مشتری همیشگی</string>
     <string name="bartab_back">بازگشت</string>
     <string name="bartab_bill_cancelled_msg">آن صورت‌حساب %1$s لغو شد — چیزی برای پرداخت نیست.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · حساب الان %3$s</string>
     <string name="bartab_remove_line">حذف</string>
-    <string name="bartab_err_send_bill">ارسال صورت‌حساب ممکن نشد</string>
     <string name="bartab_settle_bill">تسویه — صورت‌حساب %1$s</string>
     <string name="bartab_settle_hint">یک صورت‌حساب ریز به گفتگویت با %1$s می‌رود. از هر جایی می‌توانند پرداخت کنند — با رفتن‌شان گفتگو بسته نمی‌شود.</string>
     <string name="bartab_discard_tab">دور انداختن حساب</string>

@@ -72,7 +72,7 @@ fun QrHub(
         busy = false
         r.onSuccess { uri = it.uri }
             .onFailure {
-                error = it.message ?: context.getString(R.string.qrhub_card_issue_failed)
+                error = moneyFailure(context, it)
                 DucatLog.w(TAG, "issue: ${it.message}")
             }
     }

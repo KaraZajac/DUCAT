@@ -22,13 +22,11 @@
     <string name="bartab_state_paid">оплачен ✓</string>
     <string name="bartab_new_customer">Новый гость</string>
     <string name="bartab_scan_hint">Гость сканирует или прикладывает телефон — счёт открывается сам.</string>
-    <string name="bartab_err_publish_code">не удалось опубликовать код</string>
     <string name="bartab_or_regular">Или постоянный гость</string>
     <string name="bartab_back">Назад</string>
     <string name="bartab_bill_cancelled_msg">Счёт на %1$s отменён — платить нечего.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · на счету уже %3$s</string>
     <string name="bartab_remove_line">Убрать</string>
-    <string name="bartab_err_send_bill">не удалось отправить счёт</string>
     <string name="bartab_settle_bill">Рассчитать — счёт %1$s</string>
     <string name="bartab_settle_hint">Один детализированный счёт в переписку с %1$s. Оплатить можно откуда угодно — переписка не закрывается, когда гость уходит.</string>
     <string name="bartab_discard_tab">Выбросить счёт</string>

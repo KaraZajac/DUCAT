@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">rideshare ~%1$s %2$.0f · taxi ~%1$s %3$.0f — your driver keeps all of it (a rideshare pays theirs ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Your offer (%1$s)</string>
     <string name="hail_offer_invalid">The offer must be a number above zero — or leave it blank to ask for a quote.</string>
-    <string name="hail_post_failed">could not post the hail</string>
     <string name="hail_osm_privacy">Search, route and map use OpenStreetMap\'s servers — the one place DUCAT sends location off-device. Drivers see only ~%1$s areas.</string>
     <string name="hail_post_button">Hail 🚕</string>
     <string name="hail_search">Search</string>

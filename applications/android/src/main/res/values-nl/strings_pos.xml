@@ -15,7 +15,6 @@
     <string name="pos_item">Artikel</string>
     <string name="pos_add_line">Regel toevoegen</string>
     <string name="pos_tax">Btw</string>
-    <string name="pos_error_publish_code">kon de code niet publiceren</string>
     <string name="pos_error_bill_not_sent">Ze hebben verbinding gemaakt, maar de rekening is niet verstuurd: %1$s</string>
     <string name="pos_getting_code_ready">Code klaarzetten…</string>
     <string name="pos_scan_hint">Zij scannen dit in DUCAT. De rekening hierboven komt op hun telefoon aan zodra ze dat doen.</string>

@@ -5,7 +5,6 @@
     <string name="qrhub_my_code">Mijn code</string>
     <string name="qrhub_scan_prompt">Een DUCAT-kaartje of een Monero-adres</string>
     <string name="qrhub_not_a_code">Die code is geen DUCAT-kaartje en geen Monero-adres.</string>
-    <string name="qrhub_card_issue_failed">kon geen kaartje maken</string>
     <string name="qrhub_no_name_set">geen naam ingesteld</string>
     <string name="qrhub_publishing">Twee records publiceren, zodat mensen je kunnen bereiken terwijl deze telefoon uitstaat.</string>
     <string name="qrhub_copy_link">Link kopiëren</string>

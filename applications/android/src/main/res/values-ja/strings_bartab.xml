@@ -19,13 +19,11 @@
     <string name="bartab_state_paid">支払い済み ✓</string>
     <string name="bartab_new_customer">新規のお客</string>
     <string name="bartab_scan_hint">お客がスキャンまたはタップすると、ツケが自動で開きます。</string>
-    <string name="bartab_err_publish_code">コードを公開できませんでした</string>
     <string name="bartab_or_regular">または常連から</string>
     <string name="bartab_back">戻る</string>
     <string name="bartab_bill_cancelled_msg">%1$sの請求はキャンセルされました — 支払いは不要です。</string>
     <string name="bartab_drink_notice">%1$s — %2$s · ツケ合計 %3$s</string>
     <string name="bartab_remove_line">削除</string>
-    <string name="bartab_err_send_bill">請求を送れませんでした</string>
     <string name="bartab_settle_bill">精算 — 請求 %1$s</string>
     <string name="bartab_settle_hint">明細付きの請求を1通、%1$sとの会話へ送ります。相手はどこからでも支払えます — 店を出てもスレッドは閉じません。</string>
     <string name="bartab_discard_tab">ツケを破棄</string>

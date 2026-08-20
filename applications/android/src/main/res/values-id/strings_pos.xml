@@ -15,7 +15,6 @@
     <string name="pos_item">Item</string>
     <string name="pos_add_line">Tambah baris</string>
     <string name="pos_tax">Pajak</string>
-    <string name="pos_error_publish_code">tidak bisa menerbitkan kode</string>
     <string name="pos_error_bill_not_sent">Mereka terhubung, tapi tagihannya tidak terkirim: %1$s</string>
     <string name="pos_getting_code_ready">Menyiapkan kode…</string>
     <string name="pos_scan_hint">Mereka memindai ini di DUCAT. Tagihan di atas tiba di ponsel mereka begitu mereka memindai.</string>

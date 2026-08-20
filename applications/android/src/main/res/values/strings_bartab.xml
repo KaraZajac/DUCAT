@@ -20,13 +20,11 @@
     <string name="bartab_state_paid">paid ✓</string>
     <string name="bartab_new_customer">New customer</string>
     <string name="bartab_scan_hint">They scan or tap — the tab opens by itself.</string>
-    <string name="bartab_err_publish_code">could not publish a code</string>
     <string name="bartab_or_regular">Or a regular</string>
     <string name="bartab_back">Back</string>
     <string name="bartab_bill_cancelled_msg">That bill for %1$s is cancelled — nothing to pay.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · tab now %3$s</string>
     <string name="bartab_remove_line">Remove</string>
-    <string name="bartab_err_send_bill">could not send the bill</string>
     <string name="bartab_settle_bill">Settle — bill %1$s</string>
     <string name="bartab_settle_hint">One itemised bill into your conversation with %1$s. They can pay from anywhere — the thread does not close when they leave.</string>
     <string name="bartab_discard_tab">Discard tab</string>

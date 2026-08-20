@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">차량공유 약 %1$s %2$.0f · 택시 약 %1$s %3$.0f — 기사가 전부 가져가요 (차량공유는 기사에게 약 %1$s %4$.0f를 줘요)</string>
     <string name="hail_your_offer">내 제안 (%1$s)</string>
     <string name="hail_offer_invalid">제안은 0보다 큰 숫자여야 해요 — 비워 두면 견적을 요청해요.</string>
-    <string name="hail_post_failed">호출을 올리지 못했어요</string>
     <string name="hail_osm_privacy">검색·경로·지도는 OpenStreetMap 서버를 써요 — DUCAT이 위치를 기기 밖으로 보내는 유일한 곳이에요. 기사에게는 약 %1$s 구역만 보여요.</string>
     <string name="hail_post_button">호출 🚕</string>
     <string name="hail_search">검색</string>

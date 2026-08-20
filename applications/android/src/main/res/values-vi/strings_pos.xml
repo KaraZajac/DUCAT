@@ -15,7 +15,6 @@
     <string name="pos_item">Món</string>
     <string name="pos_add_line">Thêm dòng</string>
     <string name="pos_tax">Thuế</string>
-    <string name="pos_error_publish_code">không phát hành được mã</string>
     <string name="pos_error_bill_not_sent">Họ đã kết nối, nhưng hóa đơn không gửi được: %1$s</string>
     <string name="pos_getting_code_ready">Đang chuẩn bị mã…</string>
     <string name="pos_scan_hint">Khách quét mã này trong DUCAT. Hóa đơn bên trên tới điện thoại họ ngay lúc đó.</string>

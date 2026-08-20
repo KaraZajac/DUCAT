@@ -19,13 +19,11 @@
     <string name="bartab_state_paid">결제 완료 ✓</string>
     <string name="bartab_new_customer">새 손님</string>
     <string name="bartab_scan_hint">손님이 스캔하거나 폰을 맞대면 — 탭이 저절로 열려요.</string>
-    <string name="bartab_err_publish_code">코드를 게시하지 못했어요</string>
     <string name="bartab_or_regular">또는 단골손님</string>
     <string name="bartab_back">뒤로</string>
     <string name="bartab_bill_cancelled_msg">%1$s 계산서는 취소됐어요 — 결제할 것 없어요.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · 현재 탭 %3$s</string>
     <string name="bartab_remove_line">삭제</string>
-    <string name="bartab_err_send_bill">계산서를 보내지 못했어요</string>
     <string name="bartab_settle_bill">정산 — 계산서 %1$s</string>
     <string name="bartab_settle_hint">%1$s님과의 대화로 항목별 계산서 하나가 들어가요. 어디서든 결제할 수 있고, 손님이 떠나도 대화는 닫히지 않아요.</string>
     <string name="bartab_discard_tab">탭 버리기</string>

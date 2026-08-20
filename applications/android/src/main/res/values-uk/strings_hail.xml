@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">райдшеринг ~%1$s %2$.0f · таксі ~%1$s %3$.0f — твій водій забирає все (райдшеринг платить своєму ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Твоя пропозиція (%1$s)</string>
     <string name="hail_offer_invalid">Пропозиція має бути числом більше нуля — або залиш поле порожнім, щоб попросити ціну.</string>
-    <string name="hail_post_failed">не вдалося опублікувати виклик</string>
     <string name="hail_osm_privacy">Пошук, маршрут і мапа використовують сервери OpenStreetMap — єдине місце, куди DUCAT відправляє локацію з пристрою. Водії бачать лише області ~%1$s.</string>
     <string name="hail_post_button">Викликати 🚕</string>
     <string name="hail_search">Пошук</string>

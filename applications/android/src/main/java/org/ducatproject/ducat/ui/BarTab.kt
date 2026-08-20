@@ -258,7 +258,7 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
             }
         }
         r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure { error = it.message ?: context.getString(R.string.bartab_err_publish_code) }
+            .onFailure { error = moneyFailure(context, it) }
     }
 
     // A scan opens the tab by itself — the bartender should not need a second
@@ -502,7 +502,7 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                                 runCatching { store.settle(tab) }
                             }
                             busy = false
-                            r.onFailure { error = it.message ?: context.getString(R.string.bartab_err_send_bill) }
+                            r.onFailure { error = moneyFailure(context, it) }
                         }
                     },
                     enabled = !busy && tab.lines.isNotEmpty(),

@@ -15,7 +15,6 @@
     <string name="pos_item">Item</string>
     <string name="pos_add_line">Adicionar linha</string>
     <string name="pos_tax">Imposto</string>
-    <string name="pos_error_publish_code">não foi possível publicar o código</string>
     <string name="pos_error_bill_not_sent">A pessoa conectou, mas a conta não foi enviada: %1$s</string>
     <string name="pos_getting_code_ready">Preparando o código…</string>
     <string name="pos_scan_hint">O cliente escaneia isto no DUCAT. A conta acima chega no telefone dele no mesmo instante.</string>

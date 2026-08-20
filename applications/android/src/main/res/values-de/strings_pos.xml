@@ -15,7 +15,6 @@
     <string name="pos_item">Posten</string>
     <string name="pos_add_line">Posten hinzufügen</string>
     <string name="pos_tax">Steuer</string>
-    <string name="pos_error_publish_code">Code ließ sich nicht veröffentlichen</string>
     <string name="pos_error_bill_not_sent">Verbunden, aber die Rechnung ging nicht raus: %1$s</string>
     <string name="pos_getting_code_ready">Code wird vorbereitet…</string>
     <string name="pos_scan_hint">Das wird in DUCAT gescannt. Die Rechnung oben landet in dem Moment auf dem anderen Telefon.</string>

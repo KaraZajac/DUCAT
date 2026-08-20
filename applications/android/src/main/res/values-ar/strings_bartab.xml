@@ -24,13 +24,11 @@
     <string name="bartab_state_paid">مدفوع ✓</string>
     <string name="bartab_new_customer">زبون جديد</string>
     <string name="bartab_scan_hint">يمسحون الرمز أو يقرّبون الهاتف — فيُفتح الحساب من تلقاء نفسه.</string>
-    <string name="bartab_err_publish_code">تعذّر نشر رمز</string>
     <string name="bartab_or_regular">أو زبون دائم</string>
     <string name="bartab_back">رجوع</string>
     <string name="bartab_bill_cancelled_msg">أُلغيت تلك الفاتورة البالغة %1$s — لا شيء للدفع.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · الحساب الآن %3$s</string>
     <string name="bartab_remove_line">إزالة</string>
-    <string name="bartab_err_send_bill">تعذّر إرسال الفاتورة</string>
     <string name="bartab_settle_bill">تسوية — فاتورة بـ %1$s</string>
     <string name="bartab_settle_hint">فاتورة مفصّلة واحدة تصل إلى محادثتك مع %1$s. يمكنهم الدفع من أي مكان — المحادثة لا تُغلق عند مغادرتهم.</string>
     <string name="bartab_discard_tab">حذف الحساب</string>

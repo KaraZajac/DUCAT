@@ -15,7 +15,6 @@
     <string name="pos_item">商品</string>
     <string name="pos_add_line">行を追加</string>
     <string name="pos_tax">税</string>
-    <string name="pos_error_publish_code">コードを公開できませんでした</string>
     <string name="pos_error_bill_not_sent">接続はされましたが、請求を送れませんでした: %1$s</string>
     <string name="pos_getting_code_ready">コードを準備中…</string>
     <string name="pos_scan_hint">お客がDUCATでこれをスキャンすると、その瞬間に上の請求が相手の端末に届きます。</string>

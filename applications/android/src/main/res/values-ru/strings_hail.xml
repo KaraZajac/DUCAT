@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">агрегатор ~%1$s %2$.0f · такси ~%1$s %3$.0f — твой водитель получает всё (агрегатор платит своему ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Твоё предложение (%1$s)</string>
     <string name="hail_offer_invalid">Предложение должно быть числом больше нуля — или оставь поле пустым, чтобы попросить цену.</string>
-    <string name="hail_post_failed">не удалось разместить вызов</string>
     <string name="hail_osm_privacy">Поиск, маршрут и карта работают через серверы OpenStreetMap — единственное место, куда DUCAT отправляет геопозицию наружу. Водители видят только районы ~%1$s.</string>
     <string name="hail_post_button">Поймать 🚕</string>
     <string name="hail_search">Поиск</string>

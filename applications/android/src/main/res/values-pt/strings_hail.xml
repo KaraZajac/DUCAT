@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">app de corridas ~%1$s %2$.0f · táxi ~%1$s %3$.0f — seu motorista fica com tudo (um app paga ao motorista ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Sua oferta (%1$s)</string>
     <string name="hail_offer_invalid">A oferta precisa ser um número acima de zero — ou deixe em branco para pedir um preço.</string>
-    <string name="hail_post_failed">não foi possível publicar o chamado</string>
     <string name="hail_osm_privacy">Busca, rota e mapa usam os servidores do OpenStreetMap — o único lugar para onde o DUCAT envia localização para fora do aparelho. Motoristas veem apenas áreas de ~%1$s.</string>
     <string name="hail_post_button">Chamar 🚕</string>
     <string name="hail_search">Buscar</string>

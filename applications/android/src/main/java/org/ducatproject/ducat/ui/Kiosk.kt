@@ -357,7 +357,13 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
                     // A claim that has landed stays landed, so without a wait
                     // here a node that is down turns this into a spin: bind,
                     // fail, bind again, as fast as the machine allows.
-                    error = it.message
+                    // Through the same funnel every other money screen
+                    // uses. A bare `it.message` on an unattended shop
+                    // display is how "v1=decoys: InterfaceError(…)" gets
+                    // shown to a customer; moneyFailure knows the offline
+                    // and node cases by name and strips the bridge prefix
+                    // off whatever it does not.
+                    error = moneyFailure(context, it)
                     kotlinx.coroutines.delay(5_000)
                 }
         }

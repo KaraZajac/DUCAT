@@ -19,13 +19,11 @@
     <string name="bartab_state_paid">已付 ✓</string>
     <string name="bartab_new_customer">新顾客</string>
     <string name="bartab_scan_hint">对方扫码或手机碰一下 — 挂账自动开好。</string>
-    <string name="bartab_err_publish_code">无法发布连接码</string>
     <string name="bartab_or_regular">或选一位常客</string>
     <string name="bartab_back">返回</string>
     <string name="bartab_bill_cancelled_msg">那张 %1$s 的账单已取消 — 不用付了。</string>
     <string name="bartab_drink_notice">%1$s — %2$s · 挂账现共 %3$s</string>
     <string name="bartab_remove_line">移除</string>
-    <string name="bartab_err_send_bill">账单发不出去</string>
     <string name="bartab_settle_bill">结账 — 账单 %1$s</string>
     <string name="bartab_settle_hint">一张逐项列明的账单会发进你和 %1$s 的对话。对方在哪儿都能付 — 人走了，对话也不会关。</string>
     <string name="bartab_discard_tab">丢弃挂账</string>

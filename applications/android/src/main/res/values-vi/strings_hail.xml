@@ -95,7 +95,6 @@
     <string name="hail_vs_competitors">app gọi xe ~%1$s %2$.0f · taxi ~%1$s %3$.0f — tài xế của bạn giữ trọn (app gọi xe chỉ trả tài xế của họ ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Mức bạn trả (%1$s)</string>
     <string name="hail_offer_invalid">Mức trả phải là một số lớn hơn 0 — hoặc để trống để nhờ báo giá.</string>
-    <string name="hail_post_failed">không đăng được lượt vẫy</string>
     <string name="hail_osm_privacy">Tìm kiếm, lộ trình và bản đồ dùng máy chủ của OpenStreetMap — nơi duy nhất DUCAT gửi vị trí ra khỏi thiết bị. Tài xế chỉ thấy vùng cỡ ~%1$s.</string>
     <string name="hail_post_button">Vẫy xe 🚕</string>
     <string name="hail_search">Tìm</string>

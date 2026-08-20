@@ -15,7 +15,6 @@
     <string name="pos_item">صنف</string>
     <string name="pos_add_line">أضف سطرًا</string>
     <string name="pos_tax">الضريبة</string>
-    <string name="pos_error_publish_code">تعذّر نشر الرمز</string>
     <string name="pos_error_bill_not_sent">اتصلوا، لكن الفاتورة لم تُرسل: %1$s</string>
     <string name="pos_getting_code_ready">جارٍ تجهيز الرمز…</string>
     <string name="pos_scan_hint">يمسحونه في DUCAT. والفاتورة أعلاه تصل إلى هاتفهم لحظة المسح.</string>

@@ -15,7 +15,6 @@
     <string name="pos_item">Kalem</string>
     <string name="pos_add_line">Satır ekle</string>
     <string name="pos_tax">Vergi</string>
-    <string name="pos_error_publish_code">kod yayımlanamadı</string>
     <string name="pos_error_bill_not_sent">Bağlandılar ama hesap gönderilemedi: %1$s</string>
     <string name="pos_getting_code_ready">Kod hazırlanıyor…</string>
     <string name="pos_scan_hint">Bunu DUCAT\'ta tararlar. Taradıkları anda yukarıdaki hesap telefonlarına düşer.</string>

@@ -15,7 +15,6 @@
     <string name="pos_item">Item</string>
     <string name="pos_add_line">Add line</string>
     <string name="pos_tax">Tax</string>
-    <string name="pos_error_publish_code">could not publish the code</string>
     <string name="pos_error_bill_not_sent">They connected, but the bill did not send: %1$s</string>
     <string name="pos_getting_code_ready">Getting the code ready…</string>
     <string name="pos_scan_hint">They scan this in DUCAT. The bill above arrives on their phone the moment they do.</string>

@@ -5,7 +5,6 @@
     <string name="qrhub_my_code">我的码</string>
     <string name="qrhub_scan_prompt">DUCAT 名片或 Monero 地址</string>
     <string name="qrhub_not_a_code">这个码既不是 DUCAT 名片，也不是 Monero 地址。</string>
-    <string name="qrhub_card_issue_failed">无法生成名片</string>
     <string name="qrhub_no_name_set">没有设置名字</string>
     <string name="qrhub_publishing">正在发布两条记录，这样手机关机时别人也能联系到你。</string>
     <string name="qrhub_copy_link">复制链接</string>
