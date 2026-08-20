@@ -31,4 +31,11 @@
     <string name="kiosk_no_ducat">DUCAT이 없나요? Monero 지갑으로 결제하기</string>
     <string name="kiosk_card_failed">코드를 표시하지 못했습니다: %1$s</string>
     <string name="kiosk_withdraw">청구 취소</string>
+    <!-- Calling an order out, to somebody who stepped outside -->
+    <string name="kiosk_say_ready">준비 완료</string>
+    <string name="kiosk_told_ready">알림 보냄</string>
+    <string name="kiosk_ready_message">%1$d번 주문이 준비되었습니다.</string>
+    <string name="kiosk_tip">팁</string>
+    <string name="kiosk_tip_none">없음</string>
+    <string name="kiosk_tip_line">팁</string>
 </resources>

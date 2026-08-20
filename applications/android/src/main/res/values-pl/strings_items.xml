@@ -12,4 +12,6 @@
     <string name="items_rate_stale">Ceny liczone są po kursie sprzed %1$s — kasa nie mogła go od tego czasu sprawdzić.</string>
     <string name="items_tab">Pozycje</string>
     <string name="items_picker_no_rate">Brak kursu wymiany — tych cen nie da się rozliczyć, dopóki kasa nie połączy się z siecią.</string>
+    <string name="items_sold_out">Nie ma</string>
+    <string name="items_back_on">Z powrotem</string>
 </resources>

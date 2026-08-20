@@ -31,4 +31,11 @@
     <string name="kiosk_no_ducat">Không có DUCAT? Trả bằng ví Monero</string>
     <string name="kiosk_card_failed">Không hiện được mã: %1$s</string>
     <string name="kiosk_withdraw">Thu hồi</string>
+    <!-- Calling an order out, to somebody who stepped outside -->
+    <string name="kiosk_say_ready">Đã xong</string>
+    <string name="kiosk_told_ready">đã báo</string>
+    <string name="kiosk_ready_message">Đơn #%1$d đã xong.</string>
+    <string name="kiosk_tip">Tiền boa</string>
+    <string name="kiosk_tip_none">Không boa</string>
+    <string name="kiosk_tip_line">Tiền boa</string>
 </resources>

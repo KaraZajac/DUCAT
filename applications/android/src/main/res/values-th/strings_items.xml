@@ -12,4 +12,6 @@
     <string name="items_rate_stale">ราคาใช้อัตราแลกเปลี่ยนเมื่อ %1$s ที่แล้ว เครื่องนี้ยังตรวจสอบไม่ได้ตั้งแต่นั้น</string>
     <string name="items_tab">รายการ</string>
     <string name="items_picker_no_rate">ยังไม่มีอัตราแลกเปลี่ยน — ยังคิดเงินตามราคานี้ไม่ได้จนกว่าเครื่องจะต่อเครือข่ายได้</string>
+    <string name="items_sold_out">หมด</string>
+    <string name="items_back_on">กลับมาขาย</string>
 </resources>

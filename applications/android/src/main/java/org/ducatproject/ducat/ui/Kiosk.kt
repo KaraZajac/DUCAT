@@ -58,6 +58,7 @@ fun KioskScreen() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     var basket by remember { mutableStateOf(listOf<BillItem>()) }
+    var tipPct by rememberSaveable { mutableStateOf(0) }
     // The order id rather than the order, and saveable rather than
     // remembered: a customer fumbling for their phone while the card is up is
     // exactly when Android decides to rotate the screen or rebuild the
@@ -107,7 +108,7 @@ fun KioskScreen() {
                 staffOpen -> StaffPanel(onClose = { staffOpen = false })
                 placed != null -> PayPanel(
                     order = placed,
-                    onDone = { placedId = null; basket = emptyList() },
+                    onDone = { placedId = null; basket = emptyList(); tipPct = 0 },
                 )
                 else -> Ordering(
                     basket = basket,
@@ -117,7 +118,23 @@ fun KioskScreen() {
                     // follows shows a card, and whoever claims it gets the
                     // bill — which is the difference between a payment and a
                     // purchase somebody has a record of.
-                    onOrder = { placedId = Orders.begin(context, basket).id },
+                    tipPct = tipPct,
+                    onTip = { tipPct = it },
+                    // The tip rides as a line, because core refuses a bill
+                    // whose lines do not add up to its total — and because a
+                    // customer reading the bill on their own phone should see
+                    // what they agreed to, not a number that is larger than
+                    // the things they picked.
+                    onOrder = {
+                        val tip = basket.sumOf { it.amountPxmr } * tipPct / 100
+                        val lines =
+                            if (tip > 0) {
+                                basket + BillItem(context.getString(R.string.kiosk_tip_line), tip)
+                            } else {
+                                basket
+                            }
+                        placedId = Orders.begin(context, lines).id
+                    },
                 )
             }
         }
@@ -134,12 +151,16 @@ fun KioskScreen() {
 @Composable
 private fun Ordering(
     basket: List<BillItem>,
+    tipPct: Int,
     onAdd: (String, Long) -> Unit,
+    onTip: (Int) -> Unit,
     onClear: () -> Unit,
     onOrder: () -> Unit,
 ) {
     val context = LocalContext.current
-    val total = basket.sumOf { it.amountPxmr }
+    val lines = basket.sumOf { it.amountPxmr }
+    val tip = lines * tipPct / 100
+    val total = lines + tip
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Spacer(Modifier.height(8.dp))
         ItemPicker(onPick = onAdd)
@@ -162,6 +183,12 @@ private fun Ordering(
                         Text(Amounts.show(context, line.amountPxmr).primary)
                     }
                 }
+                if (tip > 0) {
+                    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                        Text(stringResource(R.string.kiosk_tip_line), Modifier.weight(1f))
+                        Text(Amounts.show(context, tip).primary)
+                    }
+                }
                 HorizontalDivider(Modifier.padding(vertical = 8.dp))
                 Row(Modifier.fillMaxWidth()) {
                     Text(
@@ -174,6 +201,33 @@ private fun Ordering(
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        // Percentages, not a keypad. Nobody standing at a counter with a queue
+        // behind them types an amount, and a tip nobody leaves is a tip the
+        // shop may as well not have offered.
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                stringResource(R.string.kiosk_tip),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            listOf(0, 5, 10, 15).forEach { pct ->
+                FilterChip(
+                    selected = tipPct == pct,
+                    onClick = { onTip(pct) },
+                    label = {
+                        Text(
+                            if (pct == 0) stringResource(R.string.kiosk_tip_none)
+                            else "$pct%",
+                        )
+                    },
+                )
             }
         }
         Spacer(Modifier.height(16.dp))
@@ -583,6 +637,27 @@ private fun StaffOrders() {
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            // Paid and waiting: the one message the counter
+                            // owes somebody who stepped outside to wait.
+                            if (o.personaHex != null && o.readyAt == 0L &&
+                                Orders.stateOf(context, o) in
+                                setOf(Orders.State.Seen, Orders.State.Confirmed)
+                            ) {
+                                TextButton(
+                                    onClick = {
+                                        scope.launch(Dispatchers.IO) {
+                                            runCatching { Orders.sayReady(context, o) }
+                                        }
+                                    },
+                                ) { Text(stringResource(R.string.kiosk_say_ready)) }
+                            }
+                            if (o.readyAt > 0L) {
+                                Text(
+                                    stringResource(R.string.kiosk_told_ready),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.ducat.settled,
+                                )
+                            }
                             // Billed by mistake, or the customer changed their
                             // mind at the counter. Without this the shop could
                             // send a bill and never take it back, and the

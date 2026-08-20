@@ -12,4 +12,6 @@
     <string name="items_rate_stale">Giá dùng tỷ giá từ %1$s trước — quầy này chưa kiểm tra lại được từ đó.</string>
     <string name="items_tab">Mặt hàng</string>
     <string name="items_picker_no_rate">Chưa có tỷ giá — chưa thể thu theo các mức giá này cho tới khi máy kết nối được mạng.</string>
+    <string name="items_sold_out">Hết</string>
+    <string name="items_back_on">Bán lại</string>
 </resources>

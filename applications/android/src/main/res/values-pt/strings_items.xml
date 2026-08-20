@@ -12,4 +12,6 @@
     <string name="items_rate_stale">Os preços usam uma taxa de %1$s atrás — este caixa não conseguiu consultar desde então.</string>
     <string name="items_tab">Itens</string>
     <string name="items_picker_no_rate">Ainda sem taxa de câmbio — não é possível cobrar estes preços até a caixa alcançar a rede.</string>
+    <string name="items_sold_out">Esgotado</string>
+    <string name="items_back_on">Repor</string>
 </resources>

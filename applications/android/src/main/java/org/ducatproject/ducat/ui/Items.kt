@@ -94,11 +94,37 @@ fun ItemsScreen() {
         LazyColumn(Modifier.fillMaxSize()) {
             items(items) { item ->
                 ListItem(
-                    headlineContent = { Text(item.name) },
+                    headlineContent = {
+                        Text(
+                            item.name,
+                            color = if (item.soldOut) {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
+                        )
+                    },
                     supportingContent = { Text(ItemPriceLine(item)) },
                     trailingContent = {
-                        IconButton(onClick = { Catalogue.remove(context, item.id) }) {
-                            Icon(Icons.Filled.Delete, stringResource(R.string.items_remove))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            // Off today, back tomorrow — which is not the same
+                            // as deleting it and typing the price again in the
+                            // morning.
+                            TextButton(
+                                onClick = {
+                                    Catalogue.put(context, item.copy(soldOut = !item.soldOut))
+                                },
+                            ) {
+                                Text(
+                                    stringResource(
+                                        if (item.soldOut) R.string.items_back_on
+                                        else R.string.items_sold_out,
+                                    ),
+                                )
+                            }
+                            IconButton(onClick = { Catalogue.remove(context, item.id) }) {
+                                Icon(Icons.Filled.Delete, stringResource(R.string.items_remove))
+                            }
                         }
                     },
                 )
@@ -141,7 +167,9 @@ fun ItemPicker(onPick: (String, Long) -> Unit) {
     // Priced once per change, not once per frame. Every one of these reads the
     // rate out of an encrypted store; doing it inside the loop below meant a
     // decrypt per item per recomposition, on the screen a queue is watching.
-    val priced = remember(version) { Catalogue.live(context).map { it to Catalogue.price(context, it) } }
+    val priced = remember(version) {
+        Catalogue.sellable(context).map { it to Catalogue.price(context, it) }
+    }
     if (priced.isEmpty()) return
     // How old the rate behind these prices is, said once rather than on every
     // button: a till with no signal still sells, at the last rate it saw, and

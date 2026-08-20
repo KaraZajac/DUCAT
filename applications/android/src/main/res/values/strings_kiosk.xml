@@ -31,4 +31,11 @@
     <string name="kiosk_no_ducat">No DUCAT? Pay with a Monero wallet</string>
     <string name="kiosk_card_failed">Could not show a code: %1$s</string>
     <string name="kiosk_withdraw">Withdraw</string>
+    <!-- Calling an order out, to somebody who stepped outside -->
+    <string name="kiosk_say_ready">Ready</string>
+    <string name="kiosk_told_ready">told them</string>
+    <string name="kiosk_ready_message">Order #%1$d is ready.</string>
+    <string name="kiosk_tip">Tip</string>
+    <string name="kiosk_tip_none">No tip</string>
+    <string name="kiosk_tip_line">Tip</string>
 </resources>

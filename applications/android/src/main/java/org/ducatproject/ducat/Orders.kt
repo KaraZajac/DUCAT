@@ -106,6 +106,14 @@ object Orders {
          */
         val tabId: String? = null,
         val personaHex: String? = null,
+        /**
+         * When the shop said it was ready, or 0.
+         *
+         * The whole argument for making a kiosk customer pair is that the
+         * counter can then talk to them. Calling a number across a room is
+         * what a counter did before it could.
+         */
+        val readyAt: Long = 0,
     ) {
         /** True while this order is still waiting for somebody to pair. */
         val unpaired: Boolean get() = tabId == null && address.isEmpty()
@@ -133,6 +141,7 @@ object Orders {
                     seenTx = o.optString("seen").takeIf { it.isNotBlank() },
                     tabId = o.optString("tab").takeIf { it.isNotBlank() },
                     personaHex = o.optString("who").takeIf { it.isNotBlank() },
+                    readyAt = o.optLong("ready"),
                 )
             }.getOrNull()?.takeIf { it.id.isNotBlank() }
         }.sortedByDescending { it.placedAt }
@@ -156,7 +165,8 @@ object Orders {
                     .put("total", o.totalPxmr).put("address", o.address)
                     .put("state", o.state.name).put("at", o.placedAt)
                     .put("seen", o.seenTx ?: "")
-                    .put("tab", o.tabId ?: "").put("who", o.personaHex ?: ""),
+                    .put("tab", o.tabId ?: "").put("who", o.personaHex ?: "")
+                    .put("ready", o.readyAt),
             )
         }
         prefs(context).edit().putString("orders", arr.toString()).apply()
@@ -263,6 +273,35 @@ object Orders {
         update(context, bound)
         DucatLog.i(TAG, "order #${order.number} billed to ${personaHex.take(8)}…")
         return bound
+    }
+
+    /**
+     * Tell them it is ready.
+     *
+     * The counter has a conversation with this customer — that is what the
+     * card bought, and until now the only thing it carried was the bill. A
+     * number called across a room only reaches whoever is still standing in
+     * it; this reaches somebody who stepped outside.
+     *
+     * Written in the shop's language, like the bill and the receipt: the shop
+     * is the one speaking, and it cannot know what its customer reads.
+     */
+    fun sayReady(context: Context, order: Order) {
+        // Both refusals, not one. An order nobody paired to has nobody to
+        // tell, and returning quietly there would have the shop press Ready
+        // and watch nothing happen — the same non-answer the line below
+        // already declines to give.
+        val hex = order.personaHex
+            ?: throw IllegalStateException("nobody claimed this order")
+        val contact = ContactStore(context).all().firstOrNull { it.personaHex == hex }
+            ?: throw IllegalStateException("that customer is gone")
+        Mailbox.send(
+            context, contact,
+            context.getString(R.string.kiosk_ready_message, order.number),
+            PersonaStore(context).personaHex(),
+        )
+        update(context, order.copy(readyAt = System.currentTimeMillis() / 1000))
+        DucatLog.i(TAG, "order #${order.number} called as ready")
     }
 
     /**

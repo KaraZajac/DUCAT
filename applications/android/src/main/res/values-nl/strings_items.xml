@@ -12,4 +12,6 @@
     <string name="items_rate_stale">De prijzen gebruiken een koers van %1$s geleden — deze kassa heeft sindsdien niet kunnen kijken.</string>
     <string name="items_tab">Artikelen</string>
     <string name="items_picker_no_rate">Nog geen wisselkoers — deze prijzen kunnen niet worden afgerekend tot de kassa het netwerk bereikt.</string>
+    <string name="items_sold_out">Op</string>
+    <string name="items_back_on">Weer erop</string>
 </resources>

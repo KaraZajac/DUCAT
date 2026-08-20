@@ -31,4 +31,11 @@
     <string name="kiosk_no_ducat">لا تملك DUCAT؟ ادفع بمحفظة مونيرو</string>
     <string name="kiosk_card_failed">تعذّر عرض الرمز: %1$s</string>
     <string name="kiosk_withdraw">سحب الفاتورة</string>
+    <!-- Calling an order out, to somebody who stepped outside -->
+    <string name="kiosk_say_ready">جاهز</string>
+    <string name="kiosk_told_ready">أُبلغوا</string>
+    <string name="kiosk_ready_message">الطلب رقم %1$d جاهز.</string>
+    <string name="kiosk_tip">إكرامية</string>
+    <string name="kiosk_tip_none">بدون</string>
+    <string name="kiosk_tip_line">إكرامية</string>
 </resources>

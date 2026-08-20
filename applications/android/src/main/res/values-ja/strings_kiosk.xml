@@ -31,4 +31,11 @@
     <string name="kiosk_no_ducat">DUCATがない場合はMoneroウォレットで支払う</string>
     <string name="kiosk_card_failed">コードを表示できませんでした：%1$s</string>
     <string name="kiosk_withdraw">取り消す</string>
+    <!-- Calling an order out, to somebody who stepped outside -->
+    <string name="kiosk_say_ready">できました</string>
+    <string name="kiosk_told_ready">お知らせ済み</string>
+    <string name="kiosk_ready_message">ご注文 #%1$d ができあがりました。</string>
+    <string name="kiosk_tip">チップ</string>
+    <string name="kiosk_tip_none">なし</string>
+    <string name="kiosk_tip_line">チップ</string>
 </resources>

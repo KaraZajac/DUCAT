@@ -31,4 +31,11 @@
     <string name="kiosk_no_ducat">DUCAT नहीं है? किसी Monero वॉलेट से भुगतान करें</string>
     <string name="kiosk_card_failed">कोड नहीं दिखा सके: %1$s</string>
     <string name="kiosk_withdraw">वापस लें</string>
+    <!-- Calling an order out, to somebody who stepped outside -->
+    <string name="kiosk_say_ready">तैयार</string>
+    <string name="kiosk_told_ready">बता दिया</string>
+    <string name="kiosk_ready_message">ऑर्डर #%1$d तैयार है।</string>
+    <string name="kiosk_tip">टिप</string>
+    <string name="kiosk_tip_none">नहीं</string>
+    <string name="kiosk_tip_line">टिप</string>
 </resources>

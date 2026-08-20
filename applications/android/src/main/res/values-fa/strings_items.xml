@@ -12,4 +12,6 @@
     <string name="items_rate_stale">قیمت‌ها از نرخ %1$s پیش استفاده می‌کنند — این صندوق از آن زمان نتوانسته بررسی کند.</string>
     <string name="items_tab">کالاها</string>
     <string name="items_picker_no_rate">هنوز نرخ تبدیلی نیست — تا وقتی این صندوق به شبکه نرسد نمی‌توان این قیمت‌ها را دریافت کرد.</string>
+    <string name="items_sold_out">تمام شد</string>
+    <string name="items_back_on">دوباره موجود</string>
 </resources>

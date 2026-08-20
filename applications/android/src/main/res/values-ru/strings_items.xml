@@ -12,4 +12,6 @@
     <string name="items_rate_stale">Цены считаны по курсу %1$s назад — с тех пор касса не смогла его проверить.</string>
     <string name="items_tab">Позиции</string>
     <string name="items_picker_no_rate">Курса обмена пока нет — эти цены не получится принять, пока касса не выйдет в сеть.</string>
+    <string name="items_sold_out">Закончилось</string>
+    <string name="items_back_on">Вернуть</string>
 </resources>

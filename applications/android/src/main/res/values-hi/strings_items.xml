@@ -12,4 +12,6 @@
     <string name="items_rate_stale">क़ीमतें %1$s पुरानी दर से हैं — तब से यह टिल जाँच नहीं कर पाई।</string>
     <string name="items_tab">चीज़ें</string>
     <string name="items_picker_no_rate">अभी कोई विनिमय दर नहीं — जब तक यह मशीन नेटवर्क तक नहीं पहुँचती, ये दाम वसूले नहीं जा सकते।</string>
+    <string name="items_sold_out">खत्म</string>
+    <string name="items_back_on">फिर से</string>
 </resources>

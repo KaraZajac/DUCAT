@@ -31,4 +31,11 @@
     <string name="kiosk_no_ducat">没有 DUCAT？用 Monero 钱包付款</string>
     <string name="kiosk_card_failed">无法显示码：%1$s</string>
     <string name="kiosk_withdraw">撤回账单</string>
+    <!-- Calling an order out, to somebody who stepped outside -->
+    <string name="kiosk_say_ready">已做好</string>
+    <string name="kiosk_told_ready">已通知</string>
+    <string name="kiosk_ready_message">%1$d 号订单已做好。</string>
+    <string name="kiosk_tip">小费</string>
+    <string name="kiosk_tip_none">不给</string>
+    <string name="kiosk_tip_line">小费</string>
 </resources>

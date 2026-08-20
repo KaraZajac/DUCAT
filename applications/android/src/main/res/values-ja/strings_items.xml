@@ -12,4 +12,6 @@
     <string name="items_rate_stale">価格は %1$s前のレートを使っています。このレジはそれ以降確認できていません。</string>
     <string name="items_tab">品目</string>
     <string name="items_picker_no_rate">まだ為替レートがありません。ネットワークにつながるまで、この価格では会計できません。</string>
+    <string name="items_sold_out">売り切れ</string>
+    <string name="items_back_on">再開</string>
 </resources>

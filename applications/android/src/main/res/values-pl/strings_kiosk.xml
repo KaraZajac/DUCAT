@@ -31,4 +31,11 @@
     <string name="kiosk_no_ducat">Nie masz DUCAT? Zapłać portfelem Monero</string>
     <string name="kiosk_card_failed">Nie udało się pokazać kodu: %1$s</string>
     <string name="kiosk_withdraw">Wycofaj</string>
+    <!-- Calling an order out, to somebody who stepped outside -->
+    <string name="kiosk_say_ready">Gotowe</string>
+    <string name="kiosk_told_ready">powiadomiono</string>
+    <string name="kiosk_ready_message">Zamówienie #%1$d jest gotowe.</string>
+    <string name="kiosk_tip">Napiwek</string>
+    <string name="kiosk_tip_none">Bez</string>
+    <string name="kiosk_tip_line">Napiwek</string>
 </resources>

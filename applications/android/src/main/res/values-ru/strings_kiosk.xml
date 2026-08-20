@@ -31,4 +31,11 @@
     <string name="kiosk_no_ducat">Нет DUCAT? Заплати кошельком Monero</string>
     <string name="kiosk_card_failed">Не удалось показать код: %1$s</string>
     <string name="kiosk_withdraw">Отозвать</string>
+    <!-- Calling an order out, to somebody who stepped outside -->
+    <string name="kiosk_say_ready">Готово</string>
+    <string name="kiosk_told_ready">сообщили</string>
+    <string name="kiosk_ready_message">Заказ №%1$d готов.</string>
+    <string name="kiosk_tip">Чаевые</string>
+    <string name="kiosk_tip_none">Без чаевых</string>
+    <string name="kiosk_tip_line">Чаевые</string>
 </resources>

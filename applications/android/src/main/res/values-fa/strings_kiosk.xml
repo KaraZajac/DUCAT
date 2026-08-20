@@ -31,4 +31,11 @@
     <string name="kiosk_no_ducat">DUCAT نداری؟ با کیف پول مونرو پرداخت کن</string>
     <string name="kiosk_card_failed">نمایش کد ممکن نشد: %1$s</string>
     <string name="kiosk_withdraw">پس‌گرفتن</string>
+    <!-- Calling an order out, to somebody who stepped outside -->
+    <string name="kiosk_say_ready">آماده</string>
+    <string name="kiosk_told_ready">خبر داده شد</string>
+    <string name="kiosk_ready_message">سفارش شمارهٔ %1$d آماده است.</string>
+    <string name="kiosk_tip">انعام</string>
+    <string name="kiosk_tip_none">بدون انعام</string>
+    <string name="kiosk_tip_line">انعام</string>
 </resources>

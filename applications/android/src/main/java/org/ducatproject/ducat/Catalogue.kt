@@ -46,6 +46,14 @@ object Catalogue {
         val category: String = "",
         /** Kept for its history but off the till. */
         val archived: Boolean = false,
+        /**
+         * Off the menu today, back tomorrow.
+         *
+         * Distinct from [archived], which is for good: a stall that has run
+         * out of croissants at eleven wants them back on at nine, and
+         * deleting the item to get there loses its price and its history.
+         */
+        val soldOut: Boolean = false,
         val sort: Long = 0,
     )
 
@@ -62,6 +70,7 @@ object Catalogue {
                     currency = o.optString("currency"),
                     category = o.optString("category"),
                     archived = o.optBoolean("archived"),
+                    soldOut = o.optBoolean("soldout"),
                     sort = o.optLong("sort"),
                 )
             }.getOrNull()?.takeIf { it.id.isNotBlank() && it.name.isNotBlank() }
@@ -70,6 +79,9 @@ object Catalogue {
 
     /** What the till shows: everything not archived. */
     fun live(context: Context): List<Item> = all(context).filter { !it.archived }
+
+    /** What a customer may actually order right now. */
+    fun sellable(context: Context): List<Item> = live(context).filter { !it.soldOut }
 
     fun put(context: Context, item: Item) = synchronized(lock) {
         save(context, all(context).filter { it.id != item.id } + item)
@@ -90,6 +102,7 @@ object Catalogue {
                     .put("currency", it.currency)
                     .put("category", it.category)
                     .put("archived", it.archived)
+                    .put("soldout", it.soldOut)
                     .put("sort", it.sort),
             )
         }

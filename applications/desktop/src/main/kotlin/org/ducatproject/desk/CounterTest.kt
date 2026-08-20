@@ -339,6 +339,48 @@ fun main() {
         Orders.all(context).first { it.id == bound.id }.state != Orders.State.Abandoned,
     )
 
+    // --- sold out, and calling an order ready ------------------------------
+
+    check(
+        "an item can be taken off today without being deleted",
+        run {
+            val croissant = Catalogue.live(context).first { it.name == "Croissant" }
+            Catalogue.put(context, croissant.copy(soldOut = true))
+            Catalogue.sellable(context).none { it.name == "Croissant" } &&
+                Catalogue.live(context).any { it.name == "Croissant" }
+        },
+    )
+    check(
+        "and put back on with its price intact",
+        run {
+            val c = Catalogue.all(context).first { it.name == "Croissant" }
+            Catalogue.put(context, c.copy(soldOut = false))
+            Catalogue.sellable(context).first { it.name == "Croissant" }.price == "2.50"
+        },
+    )
+
+    // A tip is a line, because core refuses a bill whose lines do not add up
+    // to its total — and because the customer reads the bill on their phone.
+    run {
+        val tipped = basket + BillItem("Tip", 3_799_999_999L)
+        val o = Orders.begin(context, tipped)
+        check(
+            "a tipped order's lines still sum to its total",
+            o.lines.sumOf { it.amountPxmr } == o.totalPxmr,
+            "${o.lines.sumOf { it.amountPxmr }} vs ${o.totalPxmr}",
+        )
+    }
+
+    check(
+        "an order has not been called ready until it is",
+        Orders.all(context).all { it.readyAt == 0L },
+    )
+    check(
+        "and calling one needs somebody to call",
+        runCatching { Orders.sayReady(context, pending) }.isFailure,
+        "an unpaired order has no customer to tell",
+    )
+
     // --- two threads, one list --------------------------------------------
     //
     // The poller sights payments and abandons walked-away baskets while a

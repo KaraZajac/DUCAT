@@ -31,4 +31,11 @@
     <string name="kiosk_no_ducat">Geen DUCAT? Betaal met een Monero-wallet</string>
     <string name="kiosk_card_failed">Kon geen code tonen: %1$s</string>
     <string name="kiosk_withdraw">Intrekken</string>
+    <!-- Calling an order out, to somebody who stepped outside -->
+    <string name="kiosk_say_ready">Klaar</string>
+    <string name="kiosk_told_ready">laten weten</string>
+    <string name="kiosk_ready_message">Bestelling #%1$d is klaar.</string>
+    <string name="kiosk_tip">Fooi</string>
+    <string name="kiosk_tip_none">Geen</string>
+    <string name="kiosk_tip_line">Fooi</string>
 </resources>
