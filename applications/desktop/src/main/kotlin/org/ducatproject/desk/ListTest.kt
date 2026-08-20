@@ -83,6 +83,47 @@ fun main() {
             },
             privateDetails = secret,
         )
+        // The three nouns added in 0.89, on the same board. They carry no
+        // typed extras — a category and a few tags is everything — so what
+        // this proves is that the board takes them and a stranger reads them
+        // back, which is the half a unit test cannot reach.
+        val bike = Listings.draft(
+            context, Listings.KIND_SALE,
+            title = "Bicycle, barely ridden",
+            area = "north side",
+            pricePxmr = 90_000_000_000L,
+            latE7 = lat, lonE7 = lon,
+            specs = JSONObject().apply {
+                put("subtype", 4L) // sport
+                put("features", JSONArray(listOf("54cm frame", "new tyres")))
+            },
+            privateDetails = secret,
+        )
+        val kayak = Listings.draft(
+            context, Listings.KIND_GEAR,
+            title = "Sea kayak, paddle included",
+            area = "by the lake",
+            pricePxmr = 15_000_000_000L,
+            latE7 = lat, lonE7 = lon,
+            specs = JSONObject().apply {
+                put("subtype", 3L) // outdoor
+                put("features", JSONArray(listOf("two seats")))
+            },
+            privateDetails = secret,
+        )
+        val sparks = Listings.draft(
+            context, Listings.KIND_SKILL,
+            title = "Electrician, 20 years",
+            area = "Kreuzberg",
+            pricePxmr = 30_000_000_000L,
+            latE7 = lat, lonE7 = lon,
+            specs = JSONObject().apply {
+                put("subtype", 1L) // electrical
+                put("features", JSONArray(listOf("rewiring", "certificates")))
+            },
+            privateDetails = secret,
+        )
+
         // §15.12's overflow ladder, which a rental cell reaches far sooner
         // than a taxi stand does: a five-kilometre cell in a city holds
         // every car and room in a neighbourhood, and a board is eight slots.
@@ -105,7 +146,7 @@ fun main() {
             )
         }
 
-        for (o in listOf(car, room) + extras) {
+        for (o in listOf(car, room, bike, kayak, sparks) + extras) {
             Listings.put(context, o)
             val ok = runCatching { Listings.post(context, o.optString("id")) }
                 .onFailure { println("LIST_FAIL post: ${it.message}") }
@@ -113,7 +154,9 @@ fun main() {
             if (!ok) check("posted ${o.optString("title")}", false)
         }
         val live = Listings.all(context).filter { it.optString("board").isNotBlank() }
-        check("every listing found a slot", live.size == 2 + crowd,
+        // Five nouns now, not two: a car, a room, a bicycle, a kayak and an
+        // electrician, all on one board.
+        check("every listing found a slot", live.size == 5 + crowd,
             "${live.size} of ${2 + crowd} placed")
         val shards = live.map { it.optString("board") }.toSet()
         check("the ladder was used when the first board filled",
@@ -204,27 +247,45 @@ fun main() {
         }
     }
 
-    var cars: List<uniffi.ducat_mobile.RentalInfo> = emptyList()
-    var rooms: List<uniffi.ducat_mobile.RentalInfo> = emptyList()
-    // One search per kind, each reporting as boards answer — the same path
-    // the screen uses, so what is timed here is what a person waits for.
+    // One search for the whole board, which is what the screen does now: five
+    // nouns share a board, so asking per noun would pay the read five times
+    // and an empty board is a flat twenty-one seconds each.
+    var found: List<uniffi.ducat_mobile.RentalInfo> = emptyList()
     val t0 = System.currentTimeMillis()
     runCatching {
-        Listings.search(lat, lon, Listings.KIND_VEHICLE, onFound = { sofar ->
-            if (sofar.size != cars.size) {
-                println("LIST_PARTIAL cars=${sofar.size} after ${System.currentTimeMillis() - t0} ms")
+        Listings.search(lat, lon, null, onFound = { sofar ->
+            if (sofar.size != found.size) {
+                println("LIST_PARTIAL found=${sofar.size} after ${System.currentTimeMillis() - t0} ms")
             }
-            cars = sofar
+            found = sofar
         })
     }
-    val t1 = System.currentTimeMillis()
-    runCatching {
-        Listings.search(lat, lon, Listings.KIND_PLACE, onFound = { sofar ->
-            if (sofar.size != rooms.size) {
-                println("LIST_PARTIAL rooms=${sofar.size} after ${System.currentTimeMillis() - t1} ms")
-            }
-            rooms = sofar
-        })
+    fun of(kind: Int) = found.filter { it.kind.toInt() == kind }
+    val cars = of(Listings.KIND_VEHICLE)
+    val rooms = of(Listings.KIND_PLACE)
+
+    // The three nouns added in 0.89, off a real board rather than a unit
+    // test: posted by one client, read back by another that never saw the
+    // draft.
+    listOf(
+        Triple(Listings.KIND_SALE, "for sale", 4),
+        Triple(Listings.KIND_GEAR, "gear", 3),
+        Triple(Listings.KIND_SKILL, "a skill", 1),
+    ).forEach { (kind, what, subtype) ->
+        val hit = of(kind).firstOrNull()
+        check("found $what on the board", hit != null, of(kind).size.toString())
+        hit?.let {
+            check(
+                "  and $what kept its category and tags",
+                it.subtype?.toInt() == subtype && it.features.isNotEmpty(),
+                "subtype=${it.subtype} features=${it.features}",
+            )
+            check(
+                "  and $what carries no typed extras",
+                it.rooms == null && it.make == null && it.gearbox == null,
+            )
+            check("  and $what never carried the address", "Rosenthaler" !in it.toString())
+        }
     }
 
     val want = System.getenv("DUCAT_LIST_CROWD")?.toIntOrNull() ?: 0
