@@ -153,9 +153,16 @@ fun main() {
     }
     // The three kinds added in 0.89: no typed extras, a category and tags.
     // Every noun as a seeker meets it.
-    render("board-cards", w = 520, h = 980) {
+    render("board-cards", w = 520, h = 1060) {
         org.ducatproject.ducat.ui.ListingCardsPreview()
     }
+    // The chips in a long language on a small phone: German plus a count on
+    // each is the widest this row gets, and 320 is the narrowest it gets.
+    android.res.DeskRes.setLocale("de")
+    render("board-cards-de-small", w = 320, h = 700) {
+        org.ducatproject.ducat.ui.ListingCardsPreview()
+    }
+    android.res.DeskRes.setLocale("en")
     render("list-sale", w = 520, h = 1100) {
         org.ducatproject.ducat.ui.ListingFormPreview(kind = 3)
     }

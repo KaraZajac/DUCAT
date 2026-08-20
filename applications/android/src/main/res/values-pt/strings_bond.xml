@@ -54,4 +54,6 @@
     <string name="res_split_stated">Proposta: %1$s de volta ao hóspede, %2$s ao anunciante.</string>
     <string name="res_released">Reserva liquidada</string>
     <string name="res_send_details">Enviar o endereço e os detalhes da entrega</string>
+    <string name="res_kind_sale">Uma venda</string>
+    <string name="res_kind_labour">O tempo de alguém</string>
 </resources>

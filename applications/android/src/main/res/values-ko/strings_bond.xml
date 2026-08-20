@@ -54,4 +54,6 @@
     <string name="res_split_stated">제안: %1$s은 빌리는 쪽에, %2$s은 소유자에게.</string>
     <string name="res_released">예약 정산 완료</string>
     <string name="res_send_details">주소와 인수인계 정보 보내기</string>
+    <string name="res_kind_sale">판매</string>
+    <string name="res_kind_labour">누군가의 시간</string>
 </resources>

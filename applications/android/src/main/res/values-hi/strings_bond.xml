@@ -54,4 +54,6 @@
     <string name="res_split_stated">प्रस्ताव: %1$s किरायेदार को वापस, %2$s मालिक को।</string>
     <string name="res_released">बुकिंग निपट गई</string>
     <string name="res_send_details">पता और सौंपने का विवरण भेजें</string>
+    <string name="res_kind_sale">कोई बिक्री</string>
+    <string name="res_kind_labour">किसी का समय</string>
 </resources>

@@ -2467,13 +2467,15 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     // stakes: a room is not a car (see Stakes.kt for where the numbers come
     // from). Picking one fills both deposits, and either can still be typed
     // over — the suggestion is a starting point, not a rule.
+    // From the listing's own kind, through the one table (§16.18). This read
+    // "a vehicle or else a room", so with five kinds on a board a bicycle for
+    // sale and an electrician's afternoon both defaulted to a room's twenty
+    // percent — against a suggestion of ten — and the chips below offered no
+    // way to say otherwise.
     var deal by remember {
         mutableStateOf(
-            if (about?.kind == org.ducatproject.ducat.Listings.KIND_VEHICLE) {
-                org.ducatproject.ducat.Stakes.Deal.Vehicle
-            } else {
-                org.ducatproject.ducat.Stakes.Deal.Stay
-            },
+            about?.kind?.let { org.ducatproject.ducat.Listings.dealFor(it) }
+                ?: org.ducatproject.ducat.Stakes.Deal.Stay,
         )
     }
     var busy by remember { mutableStateOf(false) }
@@ -2495,9 +2497,13 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
             )
             Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // Every deal a listing can be, not two. The suggestion is
+                // still a starting point either side can type over.
                 listOf(
                     org.ducatproject.ducat.Stakes.Deal.Stay to R.string.res_kind_stay,
                     org.ducatproject.ducat.Stakes.Deal.Vehicle to R.string.res_kind_vehicle,
+                    org.ducatproject.ducat.Stakes.Deal.Sale to R.string.res_kind_sale,
+                    org.ducatproject.ducat.Stakes.Deal.Labour to R.string.res_kind_labour,
                 ).forEach { (d, label) ->
                     FilterChip(
                         selected = deal == d,

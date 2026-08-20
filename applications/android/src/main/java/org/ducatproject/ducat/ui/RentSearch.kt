@@ -405,11 +405,26 @@ private fun Stalled(stall: Stall, onRetry: () -> Unit) {
  * category. Three separate wrong answers from one assumption.
  */
 @Composable
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 internal fun ListingCardsPreview() {
     androidx.compose.foundation.layout.Column(
         Modifier.padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        // Five chips with a count each, on a phone. One read holds every
+        // noun, so this row is how somebody moves between them — and five
+        // labels plus five numbers is exactly the width that wraps badly if
+        // nobody looks.
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf(2, 1, 3, 5, 0).forEachIndexed { i, n ->
+                val k = Listings.KINDS[i]
+                FilterChip(
+                    selected = k == Listings.KIND_SALE,
+                    onClick = {},
+                    label = { Text("${stringResource(boardChip(k))} $n") },
+                )
+            }
+        }
         listOf(
             Listings.KIND_PLACE to Triple("Sunny room near the park", 25_000_000_000uL, 2uL),
             Listings.KIND_VEHICLE to Triple("2019 Corolla, automatic", 40_000_000_000uL, 1uL),

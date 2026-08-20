@@ -54,4 +54,6 @@
     <string name="res_split_stated">Vorschlag: %1$s zurück an den Gast, %2$s an die anbietende Person.</string>
     <string name="res_released">Buchung abgerechnet</string>
     <string name="res_send_details">Adresse und Übergabedetails senden</string>
+    <string name="res_kind_sale">Ein Verkauf</string>
+    <string name="res_kind_labour">Jemandes Zeit</string>
 </resources>

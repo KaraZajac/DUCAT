@@ -483,6 +483,25 @@ fun main() {
             }
     }
 
+    // The stake a listing suggests is the one its kind suggests. The
+    // reservation dialog used to read "a vehicle, or else a room", so with
+    // five kinds on a board a bicycle and an electrician both defaulted to a
+    // room's twenty percent against a suggestion of ten — money, not copy.
+    run {
+        val L = org.ducatproject.ducat.Listings
+        val price = 100_000_000_000L
+        listOf(
+            L.KIND_PLACE to 20, L.KIND_VEHICLE to 30, L.KIND_GEAR to 30,
+            L.KIND_SALE to 10, L.KIND_SKILL to 10,
+        ).forEach { (kind, pct) ->
+            check(
+                "kind $kind stakes $pct%",
+                Stakes.stakeFor(L.dealFor(kind), price) == price / 100 * pct,
+                "got ${Stakes.stakeFor(L.dealFor(kind), price)}",
+            )
+        }
+    }
+
     // --- the PIN ----------------------------------------------------------
 
     check("no PIN to begin with", !Pin.isSet(context))

@@ -54,4 +54,6 @@
     <string name="res_split_stated">پیشنهاد: %1$s به مستأجر، %2$s به مالک.</string>
     <string name="res_released">رزرو تسویه شد</string>
     <string name="res_send_details">ارسال آدرس و جزئیات تحویل</string>
+    <string name="res_kind_sale">یک فروش</string>
+    <string name="res_kind_labour">وقت کسی</string>
 </resources>

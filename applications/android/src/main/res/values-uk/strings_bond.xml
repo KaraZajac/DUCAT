@@ -54,4 +54,6 @@
     <string name="res_split_stated">Запропоновано: %1$s орендарю, %2$s власнику.</string>
     <string name="res_released">Бронювання закрито</string>
     <string name="res_send_details">Надіслати адресу та деталі передачі</string>
+    <string name="res_kind_sale">Продаж</string>
+    <string name="res_kind_labour">Чийсь час</string>
 </resources>

@@ -54,4 +54,6 @@
     <string name="res_split_stated">المقترح: %1$s تعود إلى النزيل، و%2$s إلى المالك.</string>
     <string name="res_released">تمت تسوية الحجز</string>
     <string name="res_send_details">إرسال العنوان وتفاصيل التسليم</string>
+    <string name="res_kind_sale">بيع شيء</string>
+    <string name="res_kind_labour">وقت شخص</string>
 </resources>

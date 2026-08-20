@@ -54,4 +54,6 @@
     <string name="res_split_stated">Usulan: %1$s kembali ke penyewa, %2$s ke pemilik.</string>
     <string name="res_released">Pemesanan diselesaikan</string>
     <string name="res_send_details">Kirim alamat dan detail serah terima</string>
+    <string name="res_kind_sale">Sebuah penjualan</string>
+    <string name="res_kind_labour">Waktu seseorang</string>
 </resources>
