@@ -32,7 +32,7 @@
     <string name="res_host_deposit">उनकी जमा (%1$s)</string>
     <string name="res_need_rent">किराया आवश्यक है।</string>
     <string name="res_send">आरक्षण प्रस्तावित करें</string>
-    <string name="res_proposed">आरक्षण प्रस्तावित — जमा डालना ही स्वीकृति है।</string>
+    <string name="res_proposed">वे %1$s देंगे — अपनी जमा डालना ही स्वीकृति है।</string>
     <string name="res_accept_fund">स्वीकारें — जमा डालें (%1$s)</string>
     <string name="res_secured">आरक्षण सुरक्षित</string>
     <string name="res_settle">हिसाब करें — प्रवास समाप्त</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">एस्क्रो तैयार — किराया और दोनों जमा सौंपने से पहले जाते हैं।</string>
     <string name="res_pay_now">किराया और जमा चुकाएँ (%1$s)</string>
     <string name="res_paid_sent">किराया और जमा भेजे गए — चेन पर पुष्टि हो रही है…</string>
-    <string name="res_waiting_payment">किरायेदार के किराया और जमा चुकाने का इंतज़ार…</string>
+    <string name="res_waiting_payment">उनके रकम और जमा भरने की प्रतीक्षा…</string>
     <string name="res_waiting_release">किराया पूरा — किरायेदार द्वारा पैसे छोड़ने का इंतज़ार…</string>
     <string name="res_complete_ask">मालिक ने किराया पूरा हुआ चिह्नित किया।</string>
     <string name="res_split_stated">प्रस्ताव: %1$s किरायेदार को वापस, %2$s मालिक को।</string>

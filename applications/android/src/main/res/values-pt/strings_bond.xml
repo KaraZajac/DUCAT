@@ -32,7 +32,7 @@
     <string name="res_host_deposit">A caução deles (%1$s)</string>
     <string name="res_need_rent">Falta a renda.</string>
     <string name="res_send">Propor reserva</string>
-    <string name="res_proposed">Reserva proposta — pôr a tua caução aceita-a.</string>
+    <string name="res_proposed">Eles pagam %1$s — pôr a tua caução é aceitar.</string>
     <string name="res_accept_fund">Aceitar — pôr a tua caução (%1$s)</string>
     <string name="res_secured">Reserva garantida</string>
     <string name="res_settle">Acertar — terminar a estadia</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">Escrow pronto — o aluguel e os dois depósitos entram antes da entrega.</string>
     <string name="res_pay_now">Pagar aluguel e depósito (%1$s)</string>
     <string name="res_paid_sent">Aluguel e depósito enviados — confirmando na rede…</string>
-    <string name="res_waiting_payment">Aguardando o hóspede pagar o aluguel e o depósito dele…</string>
+    <string name="res_waiting_payment">À espera de que paguem o preço e a caução…</string>
     <string name="res_waiting_release">Aluguel concluído — aguardando o hóspede liberar o dinheiro…</string>
     <string name="res_complete_ask">O anunciante marcou o aluguel como concluído.</string>
     <string name="res_split_stated">Proposta: %1$s de volta ao hóspede, %2$s ao anunciante.</string>

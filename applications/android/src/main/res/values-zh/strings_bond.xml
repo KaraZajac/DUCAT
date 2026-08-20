@@ -32,7 +32,7 @@
     <string name="res_host_deposit">对方押金 (%1$s)</string>
     <string name="res_need_rent">必须填写租金。</string>
     <string name="res_send">提议预订</string>
-    <string name="res_proposed">已提议预订 — 存入押金即为接受。</string>
+    <string name="res_proposed">对方支付 %1$s — 存入你的押金即为接受。</string>
     <string name="res_accept_fund">接受 — 存入押金（%1$s）</string>
     <string name="res_secured">预订已保障</string>
     <string name="res_settle">结算 — 结束入住</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">托管已就绪 — 租金和双方押金在交接前入账。</string>
     <string name="res_pay_now">支付租金和押金（%1$s）</string>
     <string name="res_paid_sent">租金和押金已发送 — 正在链上确认…</string>
-    <string name="res_waiting_payment">等待租客支付租金和押金…</string>
+    <string name="res_waiting_payment">等待对方支付价款和押金…</string>
     <string name="res_waiting_release">租期结束 — 等待租客释放款项…</string>
     <string name="res_complete_ask">出租方已标记租期结束。</string>
     <string name="res_split_stated">提议：%1$s 退还租客，%2$s 给出租方。</string>

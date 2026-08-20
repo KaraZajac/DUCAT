@@ -32,7 +32,7 @@
     <string name="res_host_deposit">มัดจำของเขา (%1$s)</string>
     <string name="res_need_rent">ต้องระบุค่าเช่า</string>
     <string name="res_send">เสนอการจอง</string>
-    <string name="res_proposed">เสนอการจองแล้ว — จ่ายมัดจำคือการยอมรับ</string>
+    <string name="res_proposed">เขาจ่าย %1$s — การวางมัดจำของคุณคือการตอบรับ</string>
     <string name="res_accept_fund">ยอมรับ — จ่ายมัดจำ (%1$s)</string>
     <string name="res_secured">การจองได้รับการคุ้มครอง</string>
     <string name="res_settle">ชำระ — จบการเข้าพัก</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">เอสโครว์พร้อมแล้ว — ค่าเช่าและเงินมัดจำทั้งสองฝ่ายเข้าก่อนส่งมอบ</string>
     <string name="res_pay_now">จ่ายค่าเช่าและมัดจำ (%1$s)</string>
     <string name="res_paid_sent">ส่งค่าเช่าและมัดจำแล้ว — กำลังยืนยันบนเชน…</string>
-    <string name="res_waiting_payment">รอให้ผู้เช่าจ่ายค่าเช่าและมัดจำ…</string>
+    <string name="res_waiting_payment">รอให้เขาจ่ายราคาและมัดจำ…</string>
     <string name="res_waiting_release">สิ้นสุดการเช่า — รอให้ผู้เช่าปล่อยเงิน…</string>
     <string name="res_complete_ask">เจ้าของทำเครื่องหมายว่าการเช่าสิ้นสุดแล้ว</string>
     <string name="res_split_stated">ข้อเสนอ: %1$s คืนผู้เช่า, %2$s ให้เจ้าของ</string>

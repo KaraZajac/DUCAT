@@ -32,7 +32,7 @@
     <string name="res_host_deposit">Ihre Kaution (%1$s)</string>
     <string name="res_need_rent">Miete fehlt.</string>
     <string name="res_send">Reservierung vorschlagen</string>
-    <string name="res_proposed">Reservierung vorgeschlagen — deine Kaution einzahlen heißt annehmen.</string>
+    <string name="res_proposed">Sie zahlen %1$s — mit deiner Kaution nimmst du an.</string>
     <string name="res_accept_fund">Annehmen — Kaution einzahlen (%1$s)</string>
     <string name="res_secured">Reservierung gesichert</string>
     <string name="res_settle">Abrechnen — Aufenthalt beenden</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">Treuhand bereit — Miete und beide Kautionen gehen vor der Übergabe hinein.</string>
     <string name="res_pay_now">Miete und Kaution zahlen (%1$s)</string>
     <string name="res_paid_sent">Miete und Kaution gesendet — wird auf der Kette bestätigt…</string>
-    <string name="res_waiting_payment">Warte darauf, dass der Gast Miete und Kaution zahlt…</string>
+    <string name="res_waiting_payment">Warte darauf, dass sie den Preis und ihre Kaution zahlen…</string>
     <string name="res_waiting_release">Miete beendet — warte darauf, dass der Gast das Geld freigibt…</string>
     <string name="res_complete_ask">Die anbietende Person hat die Miete als beendet markiert.</string>
     <string name="res_split_stated">Vorschlag: %1$s zurück an den Gast, %2$s an die anbietende Person.</string>

@@ -32,7 +32,7 @@
     <string name="res_host_deposit">وديعتهم (%1$s)</string>
     <string name="res_need_rent">الإيجار مطلوب.</string>
     <string name="res_send">اقتراح الحجز</string>
-    <string name="res_proposed">اقتُرح الحجز — دفع وديعتك يعني قبوله.</string>
+    <string name="res_proposed">سيدفعون %1$s — دفع وديعتك هو القبول.</string>
     <string name="res_accept_fund">قبول — دفع الوديعة (%1$s)</string>
     <string name="res_secured">الحجز مؤمَّن</string>
     <string name="res_settle">تسوية — إنهاء الإقامة</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">الضمان جاهز — يدخل الإيجار وكلا التأمينين قبل التسليم.</string>
     <string name="res_pay_now">ادفع الإيجار والتأمين (%1$s)</string>
     <string name="res_paid_sent">أُرسل الإيجار والتأمين — جارٍ التأكيد على السلسلة…</string>
-    <string name="res_waiting_payment">بانتظار أن يدفع النزيل الإيجار وتأمينه…</string>
+    <string name="res_waiting_payment">في انتظار أن يدفعوا المبلغ ووديعتهم…</string>
     <string name="res_waiting_release">انتهى الإيجار — بانتظار أن يُفرج النزيل عن المال…</string>
     <string name="res_complete_ask">علّم المالك الإيجار بأنه منتهٍ.</string>
     <string name="res_split_stated">المقترح: %1$s تعود إلى النزيل، و%2$s إلى المالك.</string>

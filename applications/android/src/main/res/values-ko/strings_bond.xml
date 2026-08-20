@@ -32,7 +32,7 @@
     <string name="res_host_deposit">상대 보증금 (%1$s)</string>
     <string name="res_need_rent">임대료는 필수입니다.</string>
     <string name="res_send">예약 제안</string>
-    <string name="res_proposed">예약이 제안됨 — 보증금 입금이 수락입니다.</string>
+    <string name="res_proposed">상대가 %1$s를 냅니다 — 보증금을 넣으면 수락입니다.</string>
     <string name="res_accept_fund">수락 — 보증금 입금 (%1$s)</string>
     <string name="res_secured">예약 확보됨</string>
     <string name="res_settle">정산 — 숙박 종료</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">에스크로 준비됨 — 인도 전에 대여료와 양쪽 보증금이 들어갑니다.</string>
     <string name="res_pay_now">대여료와 보증금 결제 (%1$s)</string>
     <string name="res_paid_sent">대여료와 보증금을 보냈습니다 — 체인에서 확인 중…</string>
-    <string name="res_waiting_payment">빌리는 쪽이 대여료와 보증금을 내기를 기다리는 중…</string>
+    <string name="res_waiting_payment">상대가 금액과 보증금을 넣기를 기다리는 중…</string>
     <string name="res_waiting_release">대여 종료 — 빌리는 쪽이 자금을 풀기를 기다리는 중…</string>
     <string name="res_complete_ask">소유자가 대여를 종료로 표시했습니다.</string>
     <string name="res_split_stated">제안: %1$s은 빌리는 쪽에, %2$s은 소유자에게.</string>

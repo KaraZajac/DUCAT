@@ -32,7 +32,7 @@
     <string name="res_host_deposit">Deposit mereka (%1$s)</string>
     <string name="res_need_rent">Sewa wajib diisi.</string>
     <string name="res_send">Usulkan reservasi</string>
-    <string name="res_proposed">Reservasi diusulkan — menyetor deposit berarti menerima.</string>
+    <string name="res_proposed">Mereka membayar %1$s — menyetor deposit Anda berarti menerima.</string>
     <string name="res_accept_fund">Terima — setor deposit (%1$s)</string>
     <string name="res_secured">Reservasi aman</string>
     <string name="res_settle">Selesaikan — akhiri masa inap</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">Escrow siap — sewa dan kedua deposit masuk sebelum serah terima.</string>
     <string name="res_pay_now">Bayar sewa dan deposit (%1$s)</string>
     <string name="res_paid_sent">Sewa dan deposit terkirim — dikonfirmasi di rantai…</string>
-    <string name="res_waiting_payment">Menunggu penyewa membayar sewa dan depositnya…</string>
+    <string name="res_waiting_payment">Menunggu mereka membayar harga dan deposit…</string>
     <string name="res_waiting_release">Sewa selesai — menunggu penyewa melepas dananya…</string>
     <string name="res_complete_ask">Pemilik menandai sewa sebagai selesai.</string>
     <string name="res_split_stated">Usulan: %1$s kembali ke penyewa, %2$s ke pemilik.</string>

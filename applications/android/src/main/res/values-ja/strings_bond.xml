@@ -32,7 +32,7 @@
     <string name="res_host_deposit">相手の保証金 (%1$s)</string>
     <string name="res_need_rent">家賃は必須です。</string>
     <string name="res_send">予約を提案</string>
-    <string name="res_proposed">予約が提案されました — 保証金の入金が受諾です。</string>
+    <string name="res_proposed">相手は %1$s を支払います。デポジットの入金が承諾になります。</string>
     <string name="res_accept_fund">受諾 — 保証金を入金 (%1$s)</string>
     <string name="res_secured">予約が確保されました</string>
     <string name="res_settle">精算 — 滞在を終える</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">エスクロー準備完了 — 受け渡しの前に家賃と双方のデポジットが入ります。</string>
     <string name="res_pay_now">家賃とデポジットを支払う（%1$s）</string>
     <string name="res_paid_sent">家賃とデポジットを送金しました — チェーンで確認中…</string>
-    <string name="res_waiting_payment">借り手が家賃とデポジットを支払うのを待っています…</string>
+    <string name="res_waiting_payment">相手が代金とデポジットを支払うのを待っています…</string>
     <string name="res_waiting_release">レンタル終了 — 借り手が資金を解放するのを待っています…</string>
     <string name="res_complete_ask">貸し手がレンタルを終了と記録しました。</string>
     <string name="res_split_stated">提案：%1$s を借り手へ、%2$s を貸し手へ。</string>

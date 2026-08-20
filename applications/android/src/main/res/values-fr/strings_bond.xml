@@ -32,7 +32,7 @@
     <string name="res_host_deposit">Leur caution (%1$s)</string>
     <string name="res_need_rent">Le loyer est requis.</string>
     <string name="res_send">Proposer la réservation</string>
-    <string name="res_proposed">Réservation proposée — verser votre caution vaut acceptation.</string>
+    <string name="res_proposed">Ils versent %1$s — verser votre caution vaut acceptation.</string>
     <string name="res_accept_fund">Accepter — verser votre caution (%1$s)</string>
     <string name="res_secured">Réservation sécurisée</string>
     <string name="res_settle">Régler — terminer le séjour</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">Séquestre prêt — le loyer et les deux cautions entrent avant la remise.</string>
     <string name="res_pay_now">Payer le loyer et la caution (%1$s)</string>
     <string name="res_paid_sent">Loyer et caution envoyés — confirmation sur la chaîne…</string>
-    <string name="res_waiting_payment">En attente du paiement du loyer et de la caution par le locataire…</string>
+    <string name="res_waiting_payment">En attente du prix et de leur caution…</string>
     <string name="res_waiting_release">Location terminée — en attente de la libération des fonds par le locataire…</string>
     <string name="res_complete_ask">Le propriétaire a marqué la location comme terminée.</string>
     <string name="res_split_stated">Proposition : %1$s au locataire, %2$s au propriétaire.</string>

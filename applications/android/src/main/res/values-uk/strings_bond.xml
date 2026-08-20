@@ -32,7 +32,7 @@
     <string name="res_host_deposit">Їхня застава (%1$s)</string>
     <string name="res_need_rent">Вкажіть оренду.</string>
     <string name="res_send">Запропонувати бронювання</string>
-    <string name="res_proposed">Бронювання запропоновано — внести заставу означає прийняти.</string>
+    <string name="res_proposed">Вони платять %1$s — внести свою заставу означає погодитись.</string>
     <string name="res_accept_fund">Прийняти — внести заставу (%1$s)</string>
     <string name="res_secured">Бронювання забезпечено</string>
     <string name="res_settle">Розрахуватися — завершити перебування</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">Ескроу готовий — оренда й обидві застави вносяться до передачі.</string>
     <string name="res_pay_now">Сплатити оренду та заставу (%1$s)</string>
     <string name="res_paid_sent">Оренду й заставу надіслано — підтвердження в мережі…</string>
-    <string name="res_waiting_payment">Очікування оплати оренди та застави від орендаря…</string>
+    <string name="res_waiting_payment">Чекаємо, поки вони внесуть суму й свою заставу…</string>
     <string name="res_waiting_release">Оренду завершено — очікування, доки орендар звільнить кошти…</string>
     <string name="res_complete_ask">Власник позначив оренду завершеною.</string>
     <string name="res_split_stated">Запропоновано: %1$s орендарю, %2$s власнику.</string>

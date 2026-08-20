@@ -389,6 +389,28 @@ object Ceremony {
         else -> 0L
     }
 
+    /**
+     * The part of my share that comes home — my stake, not the price.
+     *
+     * Read from the record rather than recomputed, because the two sides
+     * *agreed* these numbers: the booking sheet suggests them from the deal
+     * table and then lets either side type over the suggestion. Anything that
+     * works them out again from the fare is answering a different question.
+     *
+     * The banner did exactly that, and with one deal for every reservation —
+     * a room's twenty percent, whatever was actually being agreed. So the note
+     * beside the button asking somebody to commit money quoted double the
+     * truth for a bicycle (ten percent), two thirds of it for a car (thirty),
+     * and any figure at all for a stake the two of them had negotiated.
+     */
+    fun myStakePxmr(o: JSONObject): Long = when {
+        isArbiter(o) -> 0L
+        isFunder(o) -> o.optLong("funderDepPxmr").takeIf { it > 0 }
+            ?: (rideFundAmount(o.optLong("farePxmr")) - o.optLong("farePxmr"))
+                .coerceAtLeast(0L)
+        else -> o.optLong("hostDepPxmr")
+    }
+
     private fun start(
         context: Context,
         contact: Contact,

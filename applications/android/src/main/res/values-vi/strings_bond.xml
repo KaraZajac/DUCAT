@@ -32,7 +32,7 @@
     <string name="res_host_deposit">Cọc của họ (%1$s)</string>
     <string name="res_need_rent">Cần nhập tiền thuê.</string>
     <string name="res_send">Đề xuất đặt chỗ</string>
-    <string name="res_proposed">Đã đề xuất đặt chỗ — nạp cọc là chấp nhận.</string>
+    <string name="res_proposed">Họ trả %1$s — nạp cọc của bạn là chấp nhận.</string>
     <string name="res_accept_fund">Chấp nhận — nạp cọc (%1$s)</string>
     <string name="res_secured">Đặt chỗ đã được bảo đảm</string>
     <string name="res_settle">Tất toán — kết thúc lưu trú</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">Escrow đã sẵn sàng — tiền thuê và cọc của cả hai bên vào trước khi bàn giao.</string>
     <string name="res_pay_now">Trả tiền thuê và cọc (%1$s)</string>
     <string name="res_paid_sent">Đã gửi tiền thuê và cọc — đang xác nhận trên chuỗi…</string>
-    <string name="res_waiting_payment">Đang chờ người thuê trả tiền thuê và tiền cọc…</string>
+    <string name="res_waiting_payment">Đang chờ họ trả số tiền và cọc…</string>
     <string name="res_waiting_release">Đã xong kỳ thuê — đang chờ người thuê giải phóng tiền…</string>
     <string name="res_complete_ask">Chủ tin đã đánh dấu kỳ thuê hoàn tất.</string>
     <string name="res_split_stated">Đề xuất: %1$s trả lại người thuê, %2$s cho chủ.</string>

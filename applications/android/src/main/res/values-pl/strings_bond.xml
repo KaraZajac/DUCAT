@@ -32,7 +32,7 @@
     <string name="res_host_deposit">Ich depozyt (%1$s)</string>
     <string name="res_need_rent">Podaj czynsz.</string>
     <string name="res_send">Zaproponuj rezerwację</string>
-    <string name="res_proposed">Rezerwacja zaproponowana — wpłata depozytu ją akceptuje.</string>
+    <string name="res_proposed">Zapłacą %1$s — wpłata twojego depozytu to akceptacja.</string>
     <string name="res_accept_fund">Akceptuj — wpłać depozyt (%1$s)</string>
     <string name="res_secured">Rezerwacja zabezpieczona</string>
     <string name="res_settle">Rozlicz — zakończ pobyt</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">Escrow gotowy — czynsz i obie kaucje wchodzą przed przekazaniem.</string>
     <string name="res_pay_now">Zapłać czynsz i kaucję (%1$s)</string>
     <string name="res_paid_sent">Czynsz i kaucja wysłane — potwierdzanie w łańcuchu…</string>
-    <string name="res_waiting_payment">Czekam, aż najemca zapłaci czynsz i swoją kaucję…</string>
+    <string name="res_waiting_payment">Czekam, aż wpłacą kwotę i swój depozyt…</string>
     <string name="res_waiting_release">Najem zakończony — czekam, aż najemca zwolni pieniądze…</string>
     <string name="res_complete_ask">Wynajmujący oznaczył najem jako zakończony.</string>
     <string name="res_split_stated">Propozycja: %1$s dla najemcy, %2$s dla wynajmującego.</string>

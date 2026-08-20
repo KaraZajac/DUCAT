@@ -667,6 +667,54 @@ fun main() {
         )
     }
 
+    // --- what comes home, and to whom -------------------------------------
+    //
+    // The banner beside "commit this money" quotes what the committer gets
+    // back. It used to work that out from the fare with one deal for every
+    // reservation — a room's twenty percent — instead of reading the figure
+    // the two sides actually agreed and the escrow actually holds.
+    run {
+        val C = org.ducatproject.ducat.Ceremony
+        fun res(i: Int, arbiter: Int, fare: Long, funderDep: Long, hostDep: Long) =
+            org.json.JSONObject()
+                .put("kind", C.KIND_RESERVATION)
+                .put("i", i).put("funderIdx", 1).put("arbiterIdx", arbiter)
+                .put("farePxmr", fare)
+                .put("funderDepPxmr", funderDep)
+                .put("hostDepPxmr", hostDep)
+
+        // A bicycle sold for ninety: ten percent each side, not twenty.
+        val fare = 90_000_000_000L
+        val ten = org.ducatproject.ducat.Stakes.stakeFor(
+            org.ducatproject.ducat.Stakes.Deal.Sale, fare,
+        )
+        val buyer = res(i = 1, arbiter = 0, fare = fare, funderDep = ten, hostDep = ten)
+        val seller = res(i = 2, arbiter = 0, fare = fare, funderDep = ten, hostDep = ten)
+        check("the buyer gets back what was agreed", C.myStakePxmr(buyer) == ten,
+            "${C.myStakePxmr(buyer)} vs $ten")
+        check("and so does the seller", C.myStakePxmr(seller) == ten)
+        check(
+            "not a room's twenty percent",
+            C.myStakePxmr(buyer) != org.ducatproject.ducat.Stakes.stakeFor(
+                org.ducatproject.ducat.Stakes.Deal.Stay, fare,
+            ),
+            "the old rule would have quoted double for a sale",
+        )
+
+        // Either side can type over the suggestion, and the two need not match.
+        val odd = res(i = 1, arbiter = 0, fare = 50_000_000_000L,
+            funderDep = 3_500_000_000L, hostDep = 7_000_000_000L)
+        check("a negotiated stake is the one shown", C.myStakePxmr(odd) == 3_500_000_000L)
+        check(
+            "and the other side sees theirs",
+            C.myStakePxmr(res(2, 0, 50_000_000_000L, 3_500_000_000L, 7_000_000_000L))
+                == 7_000_000_000L,
+        )
+
+        // The arbiter holds a share of the key and none of the money.
+        check("an arbiter has nothing at stake", C.myStakePxmr(res(3, 3, fare, ten, ten)) == 0L)
+    }
+
     println(if (failures == 0) "COUNTERTEST OK" else "COUNTERTEST FAILED ($failures)")
     if (failures > 0) kotlin.system.exitProcess(1)
 }

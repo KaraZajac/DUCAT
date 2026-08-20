@@ -32,7 +32,7 @@
     <string name="res_host_deposit">Hun borg (%1$s)</string>
     <string name="res_need_rent">Huur ontbreekt.</string>
     <string name="res_send">Reservering voorstellen</string>
-    <string name="res_proposed">Reservering voorgesteld — jouw borg storten is accepteren.</string>
+    <string name="res_proposed">Zij betalen %1$s — jouw borg storten is accepteren.</string>
     <string name="res_accept_fund">Accepteren — borg storten (%1$s)</string>
     <string name="res_secured">Reservering veiliggesteld</string>
     <string name="res_settle">Afrekenen — verblijf beëindigen</string>
@@ -46,7 +46,7 @@
     <string name="res_escrow_ready">Escrow klaar — huur en beide borgsommen gaan erin vóór de overdracht.</string>
     <string name="res_pay_now">Huur en borg betalen (%1$s)</string>
     <string name="res_paid_sent">Huur en borg verstuurd — bevestigen op de keten…</string>
-    <string name="res_waiting_payment">Wachten tot de huurder de huur en zijn borg betaalt…</string>
+    <string name="res_waiting_payment">Wachten tot zij de prijs en hun borg betalen…</string>
     <string name="res_waiting_release">Verhuur afgerond — wachten tot de huurder het geld vrijgeeft…</string>
     <string name="res_complete_ask">De aanbieder heeft de verhuur als afgerond gemarkeerd.</string>
     <string name="res_split_stated">Voorstel: %1$s terug naar de huurder, %2$s naar de aanbieder.</string>

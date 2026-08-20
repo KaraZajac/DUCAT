@@ -1880,12 +1880,9 @@ private fun RideBondBanner(contact: Contact) {
         }
     }
     val signNow: () -> Unit = { pinAction = signReally }
-    // The same figure the banner quotes, from the same place.
-    val myStakeShown = org.ducatproject.ducat.Stakes.stakeFor(
-        if (reservation) org.ducatproject.ducat.Stakes.Deal.Stay
-        else org.ducatproject.ducat.Stakes.Deal.Ride,
-        ride.optLong("farePxmr"),
-    )
+    // What actually comes back to me, read from the escrow rather than worked
+    // out again from the fare — see Ceremony.myStakePxmr for why that matters.
+    val myStakeShown = org.ducatproject.ducat.Ceremony.myStakePxmr(ride)
     val stakeNote = if (myStakeShown > 0) {
         stringResource(
             R.string.bond_stake_refunded,
@@ -1907,9 +1904,18 @@ private fun RideBondBanner(contact: Contact) {
         // The driver being asked for their stake.
         stage == "done" && !rider && myShare > 0 &&
             ride.optString("hostFundTxid").isEmpty() -> Step(
-            title = stringResource(
-                if (reservation) R.string.res_proposed else R.string.bond_stake_asked,
-            ),
+            title = if (reservation) {
+                // What is being offered, not only what is being asked for. The
+                // host was shown their own deposit and a button to commit it,
+                // with the amount they would actually receive nowhere on the
+                // screen: accept this deal, terms not supplied.
+                stringResource(
+                    R.string.res_proposed,
+                    Amounts.show(context, ride.optLong("farePxmr")).primary,
+                )
+            } else {
+                stringResource(R.string.bond_stake_asked)
+            },
             amount = myShare,
             note = stakeNote,
             action = stringResource(
