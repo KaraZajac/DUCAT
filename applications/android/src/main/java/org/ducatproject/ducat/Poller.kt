@@ -117,8 +117,7 @@ class Poller(private val context: Context) {
                                 // who had just paid that they had been paid.
                                 // Every output knows its transaction, and a
                                 // transaction in our send records is ours.
-                                val ourSends = WalletStore(context).sends()
-                                    .map { it.txidHex.lowercase() }.toSet()
+                                val ourSends = WalletStore(context).ourTxids()
                                 WalletStore(context).entries()
                                     .filter { it.keyImage.isNotEmpty() && it.keyImage !in before }
                                     .forEach {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,10 +46,32 @@ fun DonateScreen() {
     // What has arrived since this screen was opened — the busker's glance.
     // Counted by key image so a rescan cannot inflate it, and measured from
     // screen-open because "tonight" is the question a donation box answers.
-    val atOpen = remember { WalletStore(context).entries().map { it.keyImage }.toSet() }
-    val since = remember(version) {
+    //
+    // Saveable, because a rotation or a dark-mode switch recreates the
+    // activity: an ordinary `remember` re-snapshotted the baseline against
+    // whatever had arrived by then, so turning the phone sideways set the
+    // evening's tally back to nothing.
+    //
+    // Both identifiers, not just the key image. An output that landed just
+    // before the box was opened has not always derived its key image yet, and
+    // recording only that let it turn up later looking like a new donation.
+    val atOpen = rememberSaveable {
         WalletStore(context).entries()
-            .filter { it.keyImage.isNotEmpty() && it.keyImage !in atOpen }
+            .flatMap { listOf(it.keyImage, it.txHashHex) }
+            .filter { it.isNotEmpty() }
+            .joinToString(",")
+    }
+    val before = remember(atOpen) { atOpen.split(",").filter { it.isNotEmpty() }.toSet() }
+    val since = remember(version) {
+        // Our own change is an output like any other, and this screen was
+        // counting it as generosity: pay for a beer from the takings and the
+        // box announced most of the note back as a fresh donation. The poller
+        // already knows the answer — a transaction in our send records is
+        // ours — and the donation box needs it just as much.
+        val ours = WalletStore(context).ourTxids()
+        WalletStore(context).entries()
+            .filter { it.keyImage.isNotEmpty() && it.keyImage !in before && it.txHashHex !in before }
+            .filterNot { it.txHashHex.lowercase() in ours }
             .sumOf { it.amountPxmr }
     }
 

@@ -318,14 +318,19 @@ class TabStore(private val context: Context) {
                     WalletStore(context).subaddressCount().toUInt())
             }.getOrElse { return }
             if (hits.isEmpty()) return
+            // Our own change is in the mempool too, and it is an output to us
+            // like any other. Sighting it would tell the payer their money was
+            // on its way when what was on its way was our own.
+            val ours = WalletStore(context).ourTxids()
             val contacts = ContactStore(context)
             for (tab in waiting.sortedBy { it.settledAt }) {
                 val said = contacts.thread(tab.personaHex)
                     .filter { !it.outgoing && it.kind == 2 && it.amountPxmr >= tab.settledTotal }
                     .map { it.amountPxmr }.toSet()
                 val hit = hits.firstOrNull {
-                    it.amountPxmr.toLong() == tab.settledTotal ||
-                        it.amountPxmr.toLong() in said
+                    it.txHashHex.lowercase() !in ours &&
+                        (it.amountPxmr.toLong() == tab.settledTotal ||
+                            it.amountPxmr.toLong() in said)
                 } ?: continue
                 store.mutate(tab.id) { it.copy(seenTx = hit.txHashHex) }
                 Notify.post(
@@ -341,7 +346,14 @@ class TabStore(private val context: Context) {
             val contacts = ContactStore(context)
             val settled = store.all().filter { it.state == "settled" }.sortedBy { it.settledAt }
             if (settled.isEmpty()) return
+            // Same subtraction as the sighting above, and it matters more
+            // here: minor 0 stays admissible for bills that predate per-contact
+            // addresses, and minor 0 is exactly where our own change lands. An
+            // output of our own must never close a customer's tab and fire a
+            // receipt at somebody who has not paid.
+            val ours = WalletStore(context).ourTxids()
             val entries = WalletStore(context).entries()
+                .filterNot { it.txHashHex.lowercase() in ours }
             val claimed = (store.all().mapNotNull { it.paidKi } + store.claimedKis())
                 .toMutableSet()
 

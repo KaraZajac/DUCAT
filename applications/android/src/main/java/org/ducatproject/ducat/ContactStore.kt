@@ -1466,6 +1466,20 @@ class WalletStore(context: Context) {
         ContactStore.bump()
     }
 
+    /**
+     * Transactions this wallet sent — how to tell our own money from theirs.
+     *
+     * Every payment out leaves change, and change is an output to us like any
+     * other: it appears in the mempool, it lands in a block, it gets a key
+     * image, and nothing about the output itself says it came from our own
+     * pocket. Anything that watches for money arriving has to subtract this
+     * set or it will eventually call our own change somebody else's payment.
+     * The poller learned that the hard way — it told a customer who had just
+     * paid us that they had been paid — and it is the same set every time, so
+     * it lives here rather than being rebuilt at each watcher.
+     */
+    fun ourTxids(): Set<String> = sends().map { it.txidHex.lowercase() }.toSet()
+
     fun sends(): List<SentPayment> {
         val arr = JSONArray(prefs.getString("wallet_sends", "[]"))
         return (0 until arr.length()).map {

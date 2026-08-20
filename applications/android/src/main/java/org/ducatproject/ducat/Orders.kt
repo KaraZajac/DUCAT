@@ -370,10 +370,15 @@ object Orders {
         // order already sighted on it (it stays in the pool for minutes after,
         // and a later order could collide with it), and not twice in this
         // sweep.
+        // Our own change sits in the same mempool. It cannot pay for an
+        // order, and an order marked paid by it would hand out the goods.
+        val ours = WalletStore(context).ourTxids()
         val claimed = everything.mapNotNull { it.seenTx }.toMutableSet()
         for (order in waiting) {
             val hit = hits.firstOrNull {
-                it.amountPxmr.toLong() == order.totalPxmr && it.txHashHex !in claimed
+                it.amountPxmr.toLong() == order.totalPxmr &&
+                    it.txHashHex !in claimed &&
+                    it.txHashHex.lowercase() !in ours
             } ?: continue
             claimed += hit.txHashHex
             update(context, order.copy(state = State.Seen, seenTx = hit.txHashHex))
