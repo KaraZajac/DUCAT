@@ -1487,12 +1487,17 @@ private fun FareDetail(
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             trip?.let { t ->
-                                val (_, uberDriver, _) = org.ducatproject.ducat.Fare
-                                    .competitors(t.first, t.second)
+                                val (_, uberDriverUsd, _) = org.ducatproject.ducat.Fare
+                                    .competitors(context, t.first, t.second)
                                 val cur = Amounts.currency(context)
+                                // In the reader's money, not the table's: this
+                                // printed a dollar figure beside their own
+                                // currency code.
+                                val uberDriver =
+                                    org.ducatproject.ducat.Fare.usdToReader(context, uberDriverUsd)
                                 Text(
                                     stringResource(R.string.hail_keep_all_vs_rideshare,
-                                        cur, uberDriver),
+                                        cur, uberDriver ?: 0.0),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.ducat.settled,
                                 )
@@ -1751,11 +1756,13 @@ fun HailSheet(
                             style = MaterialTheme.typography.titleMedium,
                         )
                         est?.let { (fiat, _) ->
-                            val (uber, uberDriver, taxi) =
-                                org.ducatproject.ducat.Fare.competitors(r.meters, r.seconds)
+                            val (uberUsd, driverUsd, taxiUsd) =
+                                org.ducatproject.ducat.Fare.competitors(context, r.meters, r.seconds)
+                            fun here(d: Double) =
+                                org.ducatproject.ducat.Fare.usdToReader(context, d) ?: 0.0
                             Text(
                                 stringResource(R.string.hail_vs_competitors,
-                                    cur, uber, taxi, uberDriver),
+                                    cur, here(uberUsd), here(taxiUsd), here(driverUsd)),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.ducat.settled,
                             )

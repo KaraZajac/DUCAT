@@ -1749,6 +1749,25 @@ class RateStore(context: Context) {
 
     fun source(): String = prefs.getString("rate_source", "") ?: ""
 
+    /**
+     * The dollar's own rate, kept beside the user's currency.
+     *
+     * §15.12's fare table is in US dollars — one unit, so a hundred
+     * countries can be compared and checked — and turning a dollar figure
+     * into piconero needs the dollar's rate rather than the reader's. Without
+     * it the table's numbers were simply reread as whatever currency was
+     * selected, which is how an eight-kilometre ride came to cost thirteen
+     * cents in India.
+     *
+     * Absent until a fetch succeeds, and absent is answerable: the fare
+     * screen says it has no estimate rather than inventing one.
+     */
+    fun usdPerXmr(): Double? =
+        prefs.getFloat("rate_usd", 0f).toDouble().takeIf { it > 0 }
+
+    fun storeUsd(v: Double) =
+        prefs.edit().putFloat("rate_usd", v.toFloat()).apply()
+
     fun isStale(maxAgeSecs: Long = 1800): Boolean {
         val at = cached()?.second ?: return true
         return System.currentTimeMillis() / 1000 - at > maxAgeSecs

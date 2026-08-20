@@ -76,6 +76,8 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Enquiries.kt",
     "org/ducatproject/ducat/Stakes.kt",
     "org/ducatproject/ducat/Places.kt",
+    // §15.12's per-country fare table, which Places.kt prices from.
+    "org/ducatproject/ducat/FareRates.kt",
     "org/ducatproject/ducat/ui/Drawer.kt",
     "org/ducatproject/ducat/ui/Shells.kt",
     "org/ducatproject/ducat/ui/Hail.kt",
@@ -367,6 +369,13 @@ tasks.register<JavaExec>("tilltest") {
 // Two writers, one ceremony record. `./gradlew :desktop:escrowracetest`
 // The tap's two halves against each other, without a radio.
 // `./gradlew :desktop:taptest`
+// §15.12's fare suggestion, country by country. `./gradlew :desktop:faretest`
+tasks.register<JavaExec>("faretest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.FareTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("taptest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.TapTestKt"
