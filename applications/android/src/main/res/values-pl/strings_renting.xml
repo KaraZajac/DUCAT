@@ -96,4 +96,9 @@
     <string name="cat_tutoring">Korepetycje</string>
     <string name="cat_care">Opieka</string>
     <string name="cat_tech">Technika</string>
+    <string name="board_chip_places">Lokale</string>
+    <string name="board_chip_cars">Auta</string>
+    <string name="board_chip_gear">Sprzęt</string>
+    <string name="board_chip_sale">Na sprzedaż</string>
+    <string name="board_chip_skills">Fachy</string>
 </resources>

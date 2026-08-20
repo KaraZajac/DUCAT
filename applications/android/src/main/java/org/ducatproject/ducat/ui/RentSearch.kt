@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -38,6 +39,15 @@ import uniffi.ducat_mobile.RentalInfo
  * which at §16.18's precision 5 is roughly a metro area — the granularity
  * chosen because people travel to collect a car or a set of keys.
  */
+/** The chip a noun wears on the board. Short: five of them share a row. */
+private fun boardChip(kind: Int): Int = when (kind) {
+    Listings.KIND_VEHICLE -> R.string.board_chip_cars
+    Listings.KIND_GEAR -> R.string.board_chip_gear
+    Listings.KIND_SALE -> R.string.board_chip_sale
+    Listings.KIND_SKILL -> R.string.board_chip_skills
+    else -> R.string.board_chip_places
+}
+
 @Composable
 fun RentSearchCard(
     onOpenChat: (Contact) -> Unit,
@@ -61,7 +71,13 @@ fun RentSearchCard(
 private enum class Stall { NoPermission, NoFix, NoNetwork }
 
 @Composable
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contact) -> Unit) {
+    // Which nouns to show. The board holds all five and one read returns all
+    // of them (§16.18), so filtering here costs nothing — where asking the
+    // network once per noun would cost the read five times over, and an empty
+    // board is a flat twenty-one seconds each.
+    var showing by rememberSaveable { mutableStateOf(kind) }
     val context = LocalContext.current
     var results by remember { mutableStateOf<List<RentalInfo>?>(null) }
     var busy by remember { mutableStateOf(false) }
@@ -122,7 +138,8 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                 val replied = withContext(Dispatchers.IO) {
                     runCatching {
                         Listings.search(
-                            fix.first, fix.second, kind,
+                            // null: everything on the board, in one pass.
+                            fix.first, fix.second, null,
                             onFound = { sofar ->
                                 // Each board that answers updates the list, so
                                 // what is nearby appears while the ring is
@@ -181,6 +198,28 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                     // screen said "looking at the boards around you" and
                     // "waiting for a location fix" at the same time, forever,
                     // and both halves of that were untrue.
+                    // One read holds every noun, so switching between them is
+                    // free — and a count on each chip is the honest way to
+                    // say "there are three kayaks and no plumbers near you"
+                    // without making anybody wait again to find out.
+                    else -> Unit
+                }
+                if (results != null && stalled == null) {
+                    FlowRow(
+                        Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Listings.KINDS.forEach { k ->
+                            val n = results!!.count { it.kind.toInt() == k }
+                            FilterChip(
+                                selected = showing == k,
+                                onClick = { showing = k },
+                                label = { Text("${stringResource(boardChip(k))} $n") },
+                            )
+                        }
+                    }
+                }
+                when {
                     stalled != null -> Stalled(
                         stall = stalled!!,
                         onRetry = {
@@ -216,7 +255,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                     // may list a car five minutes from now, and a screen whose
                     // only exit is Cancel makes you start the whole thing over
                     // to find out.
-                    results!!.isEmpty() -> Column {
+                    results!!.none { it.kind.toInt() == showing } -> Column {
                         Text(
                             stringResource(R.string.rent_none_found),
                             style = MaterialTheme.typography.bodyMedium,
@@ -244,7 +283,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                                 Spacer(Modifier.height(8.dp))
                             }
                         }
-                        items(results!!) { info ->
+                        items(results!!.filter { it.kind.toInt() == showing }) { info ->
                             ListingCard(
                                 info = info,
                                 busy = busy,

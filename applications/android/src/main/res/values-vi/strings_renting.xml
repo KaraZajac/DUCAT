@@ -96,4 +96,9 @@
     <string name="cat_tutoring">Dạy kèm</string>
     <string name="cat_care">Chăm sóc</string>
     <string name="cat_tech">Công nghệ</string>
+    <string name="board_chip_places">Chỗ ở</string>
+    <string name="board_chip_cars">Xe</string>
+    <string name="board_chip_gear">Đồ dùng</string>
+    <string name="board_chip_sale">Cần bán</string>
+    <string name="board_chip_skills">Tay nghề</string>
 </resources>

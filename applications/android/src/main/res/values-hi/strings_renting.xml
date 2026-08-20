@@ -96,4 +96,9 @@
     <string name="cat_tutoring">ट्यूशन</string>
     <string name="cat_care">देखभाल</string>
     <string name="cat_tech">टेक</string>
+    <string name="board_chip_places">जगहें</string>
+    <string name="board_chip_cars">गाड़ियाँ</string>
+    <string name="board_chip_gear">सामान</string>
+    <string name="board_chip_sale">बिक्री</string>
+    <string name="board_chip_skills">हुनर</string>
 </resources>

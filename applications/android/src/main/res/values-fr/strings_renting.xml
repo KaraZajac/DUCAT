@@ -96,4 +96,9 @@
     <string name="cat_tutoring">Cours</string>
     <string name="cat_care">Aide à la personne</string>
     <string name="cat_tech">Informatique</string>
+    <string name="board_chip_places">Logements</string>
+    <string name="board_chip_cars">Voitures</string>
+    <string name="board_chip_gear">Matériel</string>
+    <string name="board_chip_sale">À vendre</string>
+    <string name="board_chip_skills">Savoir-faire</string>
 </resources>

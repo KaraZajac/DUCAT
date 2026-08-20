@@ -96,4 +96,9 @@
     <string name="cat_tutoring">家庭教師</string>
     <string name="cat_care">介護</string>
     <string name="cat_tech">IT</string>
+    <string name="board_chip_places">部屋</string>
+    <string name="board_chip_cars">車</string>
+    <string name="board_chip_gear">道具</string>
+    <string name="board_chip_sale">売ります</string>
+    <string name="board_chip_skills">腕</string>
 </resources>

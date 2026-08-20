@@ -96,4 +96,9 @@
     <string name="cat_tutoring">Bijles</string>
     <string name="cat_care">Zorg</string>
     <string name="cat_tech">Techniek</string>
+    <string name="board_chip_places">Ruimtes</string>
+    <string name="board_chip_cars">Auto\'s</string>
+    <string name="board_chip_gear">Spullen</string>
+    <string name="board_chip_sale">Te koop</string>
+    <string name="board_chip_skills">Vakwerk</string>
 </resources>

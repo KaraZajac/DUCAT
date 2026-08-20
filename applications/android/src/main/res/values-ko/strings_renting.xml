@@ -96,4 +96,9 @@
     <string name="cat_tutoring">과외</string>
     <string name="cat_care">돌봄</string>
     <string name="cat_tech">기술</string>
+    <string name="board_chip_places">숙소</string>
+    <string name="board_chip_cars">차량</string>
+    <string name="board_chip_gear">장비</string>
+    <string name="board_chip_sale">판매</string>
+    <string name="board_chip_skills">재능</string>
 </resources>

@@ -96,4 +96,9 @@
     <string name="cat_tutoring">تدريس</string>
     <string name="cat_care">رعاية</string>
     <string name="cat_tech">تقنية</string>
+    <string name="board_chip_places">أماكن</string>
+    <string name="board_chip_cars">سيارات</string>
+    <string name="board_chip_gear">معدات</string>
+    <string name="board_chip_sale">للبيع</string>
+    <string name="board_chip_skills">مهارات</string>
 </resources>

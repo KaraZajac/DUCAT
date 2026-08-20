@@ -96,4 +96,9 @@
     <string name="cat_tutoring">Les</string>
     <string name="cat_care">Perawatan</string>
     <string name="cat_tech">Teknologi</string>
+    <string name="board_chip_places">Tempat</string>
+    <string name="board_chip_cars">Mobil</string>
+    <string name="board_chip_gear">Peralatan</string>
+    <string name="board_chip_sale">Dijual</string>
+    <string name="board_chip_skills">Keahlian</string>
 </resources>

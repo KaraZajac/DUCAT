@@ -96,4 +96,9 @@
     <string name="cat_tutoring">Ripetizioni</string>
     <string name="cat_care">Assistenza</string>
     <string name="cat_tech">Informatica</string>
+    <string name="board_chip_places">Alloggi</string>
+    <string name="board_chip_cars">Auto</string>
+    <string name="board_chip_gear">Attrezzi</string>
+    <string name="board_chip_sale">In vendita</string>
+    <string name="board_chip_skills">Mestieri</string>
 </resources>

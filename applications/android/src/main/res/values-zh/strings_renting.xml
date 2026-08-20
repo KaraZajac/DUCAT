@@ -96,4 +96,9 @@
     <string name="cat_tutoring">家教</string>
     <string name="cat_care">看护</string>
     <string name="cat_tech">技术</string>
+    <string name="board_chip_places">住处</string>
+    <string name="board_chip_cars">车辆</string>
+    <string name="board_chip_gear">装备</string>
+    <string name="board_chip_sale">出售</string>
+    <string name="board_chip_skills">手艺</string>
 </resources>

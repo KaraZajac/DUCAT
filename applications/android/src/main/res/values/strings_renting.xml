@@ -96,4 +96,9 @@
     <string name="cat_tutoring">Tutoring</string>
     <string name="cat_care">Care</string>
     <string name="cat_tech">Tech</string>
+    <string name="board_chip_places">Places</string>
+    <string name="board_chip_cars">Cars</string>
+    <string name="board_chip_gear">Gear</string>
+    <string name="board_chip_sale">For sale</string>
+    <string name="board_chip_skills">Skills</string>
 </resources>

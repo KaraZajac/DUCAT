@@ -96,4 +96,9 @@
     <string name="cat_tutoring">Репетиторство</string>
     <string name="cat_care">Догляд</string>
     <string name="cat_tech">Техніка</string>
+    <string name="board_chip_places">Житло</string>
+    <string name="board_chip_cars">Авто</string>
+    <string name="board_chip_gear">Спорядження</string>
+    <string name="board_chip_sale">Продаж</string>
+    <string name="board_chip_skills">Уміння</string>
 </resources>

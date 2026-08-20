@@ -96,4 +96,9 @@
     <string name="cat_tutoring">Explicações</string>
     <string name="cat_care">Cuidados</string>
     <string name="cat_tech">Informática</string>
+    <string name="board_chip_places">Espaços</string>
+    <string name="board_chip_cars">Carros</string>
+    <string name="board_chip_gear">Equipamento</string>
+    <string name="board_chip_sale">À venda</string>
+    <string name="board_chip_skills">Ofícios</string>
 </resources>
