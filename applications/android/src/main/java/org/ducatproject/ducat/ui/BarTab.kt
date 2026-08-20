@@ -220,17 +220,11 @@ private fun TabRow(t: RunningTab, onClick: () -> Unit) {
                 },
             )
         }
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                "${formatXmr(t.totalPxmr)} XMR",
-                style = MaterialTheme.typography.bodyMedium,
-                fontFamily = FontFamily.Monospace,
-            )
-            Amounts.show(context, t.totalPxmr).secondary?.let {
-                Text(it, style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline)
-            }
-        }
+        // The till's own two-line amount, rather than a second copy of it that
+        // had drifted: this one still led with XMR and then printed
+        // `secondary` beneath, which is XMR again once the local currency
+        // leads, so a tab's total read the same piconero figure twice.
+        AmountBoth(t.totalPxmr)
     }
 }
 
@@ -465,7 +459,7 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                         ) {
                             Text(line.description, Modifier.weight(1f),
                                 style = MaterialTheme.typography.bodyLarge)
-                            Text("${formatXmr(line.amountPxmr)} XMR",
+                            Text(Amounts.show(context, line.amountPxmr).primary,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontFamily = FontFamily.Monospace)
                             if (tab.state == "open") {

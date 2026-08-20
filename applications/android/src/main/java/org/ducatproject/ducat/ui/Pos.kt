@@ -252,17 +252,25 @@ fun PosScreen() {
     }
 }
 
-/** Both units on one line, XMR mono with the fiat quietly under it. */
+/**
+ * Both units on one line, the way this till reads them.
+ *
+ * Was hardcoded to XMR on top with "the fiat quietly under it", which stopped
+ * being true the moment the local currency became the default: the second line
+ * is [Shown.secondary], so the line read the same piconero figure twice and
+ * never once said what the shop actually charges.
+ */
 @Composable
-private fun AmountBoth(pxmr: Long) {
+internal fun AmountBoth(pxmr: Long) {
     val context = LocalContext.current
+    val shown = Amounts.show(context, pxmr)
     Column(horizontalAlignment = Alignment.End) {
         Text(
-            "${formatXmr(pxmr)} XMR",
+            shown.primary,
             style = MaterialTheme.typography.bodyMedium,
             fontFamily = FontFamily.Monospace,
         )
-        Amounts.show(context, pxmr).secondary?.let {
+        shown.secondary?.let {
             Text(
                 it,
                 style = MaterialTheme.typography.labelSmall,
@@ -540,7 +548,7 @@ private fun PresentScreen(
                     Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
                         Text(i.description, Modifier.weight(1f),
                             style = MaterialTheme.typography.bodyMedium)
-                        Text("${formatXmr(i.amountPxmr)} XMR",
+                        Text(Amounts.show(context, i.amountPxmr).primary,
                             style = MaterialTheme.typography.bodyMedium,
                             fontFamily = FontFamily.Monospace)
                     }
@@ -549,7 +557,7 @@ private fun PresentScreen(
                     Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
                         Text(stringResource(R.string.pos_tax), Modifier.weight(1f),
                             style = MaterialTheme.typography.bodyMedium)
-                        Text("${formatXmr(it)} XMR",
+                        Text(Amounts.show(context, it).primary,
                             style = MaterialTheme.typography.bodyMedium,
                             fontFamily = FontFamily.Monospace)
                     }
