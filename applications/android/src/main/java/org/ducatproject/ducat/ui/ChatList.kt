@@ -309,7 +309,11 @@ internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
             )
         } else {
             Text(
-                name.take(1).uppercase(),
+                // The first letter, not the first character. Plenty of people
+                // put a mark before their name — ".kara" drew a full stop in
+                // a circle, which is not an initial and not a face.
+                (name.firstOrNull { it.isLetterOrDigit() } ?: name.firstOrNull() ?: '?')
+                    .uppercase(),
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                 fontWeight = FontWeight.Bold,
             )

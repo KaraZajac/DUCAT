@@ -1,6 +1,8 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -479,6 +481,10 @@ private fun PublishAddressSetting() {
 
 /** Every contact, with the two different kinds of removal spelled out. */
 @Composable
+internal fun ContactsAdminPreview() = ContactsAdminSection(onOpenChat = {})
+
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
 private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
     val context = LocalContext.current
     val store = remember { ContactStore(context) }
@@ -526,34 +532,55 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
         return
     }
 
+    // Which row is showing its menu. One at a time, by persona, so the menu
+    // survives the list re-sorting underneath it.
+    var menuFor by remember { mutableStateOf<String?>(null) }
+
     LazyColumn(Modifier.fillMaxSize()) {
         items(contacts, key = { it.personaHex }) { c ->
-            ListItem(
-                headlineContent = { Text(c.displayName()) },
-                supportingContent = {
-                    Text(
-                        c.personaHex.take(24) + "…",
-                        fontFamily = FontFamily.Monospace,
-                        style = MaterialTheme.typography.bodySmall,
+            Box {
+                ListItem(
+                    // The same avatar the chat list and the bar tab draw —
+                    // this was the only list of people in the app without
+                    // one, which is why it read as a table of hex rather
+                    // than a list of somebodies.
+                    leadingContent = { Avatar(c.displayName(), c.avatar) },
+                    headlineContent = { Text(c.displayName()) },
+                    supportingContent = { Text(personaGroups(c.personaHex)) },
+                    modifier = Modifier.combinedClickable(
+                        // Long press rather than a row of icons: the destructive
+                        // one was sitting a mistap away from a contact's name,
+                        // permanently, in the error colour.
+                        onClick = { profileOf = c },
+                        onLongClick = { menuFor = c.personaHex },
+                    ),
+                )
+                DropdownMenu(
+                    expanded = menuFor == c.personaHex,
+                    onDismissRequest = { menuFor = null },
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.drawer_open_chat)) },
+                        leadingIcon = { Icon(Icons.Filled.ChatBubbleOutline, null) },
+                        onClick = { menuFor = null; onOpenChat(c) },
                     )
-                },
-                modifier = Modifier.clickable { profileOf = c },
-                trailingContent = {
-                    Row {
-                        IconButton(onClick = { onOpenChat(c) }) {
-                            Icon(Icons.Filled.ChatBubbleOutline,
-                                stringResource(R.string.drawer_open_chat))
-                        }
-                        IconButton(onClick = { confirm = c }) {
-                            Icon(
-                                Icons.Filled.DeleteOutline,
+                    DropdownMenuItem(
+                        text = {
+                            Text(
                                 stringResource(R.string.drawer_delete_contact),
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Filled.DeleteOutline, null,
                                 tint = MaterialTheme.colorScheme.error,
                             )
-                        }
-                    }
-                },
-            )
+                        },
+                        onClick = { menuFor = null; confirm = c },
+                    )
+                }
+            }
             HorizontalDivider()
         }
     }
@@ -581,6 +608,19 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
         )
     }
 }
+
+
+/**
+ * A persona as something two people can read to each other.
+ *
+ * The same characters, in fours. Comparing `15e9b2cfce73c7b6fc4e0d3e` against
+ * another phone means holding a place in an unbroken run of hex and losing it;
+ * `15e9 b2cf ce73 c7b6 fc4e 0d3e` is six short words, which is how every other
+ * fingerprint anybody has ever had to check aloud is written. Nothing is
+ * hidden that was not hidden before — the full value is on the profile.
+ */
+private fun personaGroups(hex: String): String =
+    hex.take(24).chunked(4).joinToString(" ") + "…"
 
 @Composable
 private fun SelectionContainerText(text: String) {

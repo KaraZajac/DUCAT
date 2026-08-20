@@ -113,6 +113,28 @@ fun main() {
     render("monero") { org.ducatproject.ducat.ui.MoneroPanel() }
     render("logs") { org.ducatproject.ducat.ui.LogsScreen() }
     render("selftest") { org.ducatproject.ducat.ui.BridgeSelfTest() }
+    // The one list of people that had no faces on it. Seeded, because the
+    // empty state is not what this change was about.
+    run {
+        val store = org.ducatproject.ducat.ContactStore(context)
+        if (store.all().isEmpty()) {
+            listOf(
+                "sh3ll3t0r" to "15e9b2cfce73c7b6fc4e0d3e" + "11".repeat(20),
+                ".kara" to "894f2ee09e29dee2a107a859" + "22".repeat(20),
+                "desktop" to "5b6489c9c7fd0dcf50545e7c" + "33".repeat(20),
+            ).forEach { (name, hex) ->
+                store.add(
+                    org.ducatproject.ducat.Contact(
+                        personaHex = hex, petname = name, assertedName = name,
+                        myOutbox = "VLD0:mine", theirOutbox = "VLD0:theirs",
+                    ),
+                )
+            }
+        }
+    }
+    render("contacts", w = 520, h = 900) {
+        org.ducatproject.ducat.ui.ContactsAdminPreview()
+    }
     render("chatlist") {
         org.ducatproject.ducat.ui.ChatListScreen(personaSecret = null, onOpenChat = {})
     }
