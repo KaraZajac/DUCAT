@@ -576,7 +576,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         // the top of a chat is not a subject: the owner of four cars needs to
         // know which one this stranger read, and the stranger who tapped
         // three listings needs to know which one this is.
-        EnquiryLine(c, messages)
+        EnquiryLine(c, messages, onPropose = { reserveOpen = true })
         LazyColumn(
             Modifier.weight(1f).fillMaxWidth(),
             state = listState,
@@ -1694,8 +1694,10 @@ private fun ContactPickDialog(
 private fun EnquiryLine(
     contact: Contact,
     messages: List<org.ducatproject.ducat.StoredMessage>,
+    onPropose: () -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
+    val version by ContactStore.changes.collectAsState()
     val about = remember(contact.personaHex) {
         org.ducatproject.ducat.Enquiries.about(context, contact.personaHex)
     } ?: return
@@ -1753,6 +1755,28 @@ private fun EnquiryLine(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+            // The next thing that happens in a conversation which began at a
+            // board is that the two of them agree what it costs — and that
+            // lived in the attachment tray, behind a padlock, beside sending a
+            // photo. A thread that knows it is about a listing can say so.
+            //
+            // Not while a bond is already running: proposing a second
+            // reservation over a live escrow is not a thing anybody means to
+            // do, and the banner below this one is already narrating that one.
+            val bonded = remember(version, contact.personaHex) {
+                org.ducatproject.ducat.Ceremony.rideWith(context, contact.personaHex) != null
+            }
+            if (!bonded) {
+                TextButton(
+                    onClick = onPropose,
+                    contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+                ) {
+                    Text(
+                        stringResource(R.string.res_title),
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
             }
         }
     }
