@@ -1,5 +1,6 @@
 package org.ducatproject.desk
 
+import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.BillItem
 import org.ducatproject.ducat.Catalogue
 import org.ducatproject.ducat.Orders
@@ -625,6 +626,46 @@ fun main() {
         "and it survives a fresh context",
         Pin.verify(DeskContext(base), "1234") is Pin.Verdict.Locked,
     )
+
+    // --- money fields read back what they let you type ---------------------
+    //
+    // Every amount field filters keystrokes with `Amounts.isNumberChar`, which
+    // deliberately allows more than ASCII: a keyboard set to Persian or Hindi
+    // types its own digits, and refusing them would be refusing the keypad the
+    // phone came with. Whatever reads the field back has to accept the same
+    // set, or the number goes in and comes out null — which is not an error
+    // the user ever sees, just a button that does nothing.
+    run {
+        val cases = listOf(
+            "12.5" to 12_500_000_000_000L,          // ASCII
+            "\u0661\u0662\u066B\u0665" to 12_500_000_000_000L,   // Arabic-Indic, Arabic separator
+            "\u06F1\u06F2.\u06F5" to 12_500_000_000_000L,         // Persian digits
+            "\u0967\u0968.\u096B" to 12_500_000_000_000L,         // Devanagari
+            "12,5" to 12_500_000_000_000L,          // comma as a decimal point
+        )
+        for ((typed, want) in cases) {
+            check(
+                "a field accepts what it let you type: $typed",
+                typed.all { Amounts.isNumberChar(it) },
+                "the filter would have eaten it before anything could parse it",
+            )
+            val got = Amounts.parse(typed)?.let { Amounts.toPxmr(it) }
+            check("...and reads back as $want", got == want, "got $got")
+        }
+        // Never through a Double. Plenty of ordinary two-decimal amounts do
+        // not survive the trip: 2.01 comes back a piconero short, and the
+        // customer's bill then reads 2.009999999999.
+        check(
+            "a tax of 2.01 is exact",
+            Amounts.parse("2.01")?.let { Amounts.toPxmr(it) } == 2_010_000_000_000L,
+            "got ${Amounts.parse("2.01")?.let { Amounts.toPxmr(it) }}",
+        )
+        check(
+            "and the Double route was not",
+            ("2.01".toDouble() * 1e12).toLong() == 2_009_999_999_999L,
+            "the shortcut this replaced, still wrong: got ${("2.01".toDouble() * 1e12).toLong()}",
+        )
+    }
 
     println(if (failures == 0) "COUNTERTEST OK" else "COUNTERTEST FAILED ($failures)")
     if (failures > 0) kotlin.system.exitProcess(1)

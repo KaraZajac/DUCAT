@@ -2334,8 +2334,8 @@ private fun RideBondBanner(contact: Contact) {
                             Spacer(Modifier.width(6.dp))
                             Button(
                                 onClick = {
-                                    val pxmr = Amounts.parse(counterXmr)?.toDouble()
-                                        ?.let { (it * 1e12).toLong() }
+                                    val pxmr = Amounts.parse(counterXmr)
+                                        ?.let { Amounts.toPxmr(it) }
                                     if (pxmr != null) {
                                         busy = true; error = null
                                         scope.launch {
@@ -2483,7 +2483,16 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    fun pxmr(s: String): Long? = s.toDoubleOrNull()?.let { (it * 1e12).toLong() }?.takeIf { it > 0 }
+    // Through the shared parser, like every other money field. These three
+    // accept whatever `isNumberChar` allows — which is deliberately more than
+    // ASCII, because a keyboard set to Persian or Hindi types its own digits —
+    // and then read it back with `toDoubleOrNull`, which accepts only ASCII.
+    // So the numbers went in and came out null: no rent, no suggested stake
+    // when the deal chip was tapped, and a Propose button that did nothing at
+    // all and said nothing about why. The booking flow, dead, for anyone not
+    // typing on a Latin keypad.
+    fun pxmr(s: String): Long? =
+        Amounts.parse(s)?.let { Amounts.toPxmr(it) }?.takeIf { it > 0 }
 
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDone) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {

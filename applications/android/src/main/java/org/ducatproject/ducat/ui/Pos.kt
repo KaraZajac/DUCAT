@@ -355,7 +355,11 @@ private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
             value = text,
             onValueChange = {
                 text = it.filter { c -> Amounts.isNumberChar(c) }
-                onSet(moneyText(text).toDoubleOrNull()?.let { v -> (v * 1e12).toLong() } ?: 0L)
+                // BigDecimal, not Double. `2.01 * 1e12` truncates to a
+                // piconero short, and a customer holding an itemised bill
+                // that reads 2.009999999999 tax is being shown arithmetic,
+                // not a price.
+                onSet(Amounts.parse(text)?.let { v -> Amounts.toPxmr(v) } ?: 0L)
             },
             label = { Text("XMR") },
             placeholder = { Text("0") },
