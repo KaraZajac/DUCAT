@@ -172,7 +172,14 @@ private fun BookingsList() {
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        Amounts.show(context, need).primary,
+                        // The price, not the pot. `need` is what the escrow
+                        // has to hold — the price plus *both* deposits — which
+                        // is the right number for deciding whether the thing
+                        // is funded and the wrong one to head a row with: a
+                        // fifty-dollar room read seventy-four, a figure
+                        // matching nothing either side agreed, receives, or
+                        // pays. The deposits come home; the price does not.
+                        Amounts.show(context, o.optLong("farePxmr")).primary,
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Spacer(Modifier.height(2.dp))
