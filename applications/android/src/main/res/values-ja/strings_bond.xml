@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">運賃(%1$s)を確保中 — エスクローを作成しています…</string>
+    <string name="bond_building">%1$s を確保中 — エスクローを構築しています…</string>
     <string name="bond_escrow_ready">エスクロー準備完了 — 運賃は乗車前に預けます。</string>
     <string name="bond_secure_fare">運賃を確保 (%1$s)</string>
     <string name="bond_fare_sent">運賃送信済み — チェーン上で確認中…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">提案：乗客へ %1$s、ドライバーへ %2$s。</string>
     <string name="bond_sign_split">この配分に署名</string>
     <string name="bond_propose_split">別の配分を提案</string>
-    <string name="bond_back_to_rider">乗客へ (%1$s)</string>
+    <string name="bond_back_to_rider">支払った側へ（%1$s）</string>
     <string name="bond_counter">提案</string>
     <string name="bond_ask_arbiter">仲裁者に裁定を依頼</string>
     <string name="res_tray">予約</string>

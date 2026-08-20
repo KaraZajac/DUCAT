@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">Ritprijs (%1$s) veiligstellen — depot wordt opgebouwd…</string>
+    <string name="bond_building">%1$s vastzetten — escrow wordt opgebouwd…</string>
     <string name="bond_escrow_ready">Depot gereed — de ritprijs gaat er vóór de rit in.</string>
     <string name="bond_secure_fare">Ritprijs veiligstellen (%1$s)</string>
     <string name="bond_fare_sent">Ritprijs verstuurd — bevestiging op de keten…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">Voorstel: %1$s terug naar de passagier, %2$s naar de chauffeur.</string>
     <string name="bond_sign_split">Deze verdeling ondertekenen</string>
     <string name="bond_propose_split">Andere verdeling voorstellen</string>
-    <string name="bond_back_to_rider">Naar de passagier (%1$s)</string>
+    <string name="bond_back_to_rider">Terug naar de betaler (%1$s)</string>
     <string name="bond_counter">Voorstellen</string>
     <string name="bond_ask_arbiter">De arbiter laten beslissen</string>
     <string name="res_tray">Reservering</string>

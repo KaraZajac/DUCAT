@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">किराया (%1$s) सुरक्षित किया जा रहा है — एस्क्रो बन रहा है…</string>
+    <string name="bond_building">%1$s सुरक्षित हो रहा है — एस्क्रो बन रहा है…</string>
     <string name="bond_escrow_ready">एस्क्रो तैयार — किराया सवारी से पहले जमा होता है।</string>
     <string name="bond_secure_fare">किराया सुरक्षित करें (%1$s)</string>
     <string name="bond_fare_sent">किराया भेजा गया — चेन पर पुष्टि हो रही है…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">प्रस्ताव: %1$s सवार को वापस, %2$s चालक को।</string>
     <string name="bond_sign_split">इस बंटवारे पर हस्ताक्षर करें</string>
     <string name="bond_propose_split">अलग बंटवारा प्रस्तावित करें</string>
-    <string name="bond_back_to_rider">सवार को (%1$s)</string>
+    <string name="bond_back_to_rider">भुगतानकर्ता को वापस (%1$s)</string>
     <string name="bond_counter">प्रस्ताव</string>
     <string name="bond_ask_arbiter">मध्यस्थ से निर्णय माँगें</string>
     <string name="res_tray">आरक्षण</string>

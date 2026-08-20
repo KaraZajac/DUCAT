@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">요금(%1$s) 확보 중 — 에스크로 생성 중…</string>
+    <string name="bond_building">%1$s 확보 중 — 에스크로 구성 중…</string>
     <string name="bond_escrow_ready">에스크로 준비 완료 — 요금은 탑승 전에 예치합니다.</string>
     <string name="bond_secure_fare">요금 확보 (%1$s)</string>
     <string name="bond_fare_sent">요금 전송됨 — 체인에서 확인 중…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">제안: 승객에게 %1$s, 기사에게 %2$s.</string>
     <string name="bond_sign_split">이 분배에 서명</string>
     <string name="bond_propose_split">다른 분배 제안</string>
-    <string name="bond_back_to_rider">승객에게 (%1$s)</string>
+    <string name="bond_back_to_rider">지불한 쪽에게 (%1$s)</string>
     <string name="bond_counter">제안</string>
     <string name="bond_ask_arbiter">중재자에게 판정 요청</string>
     <string name="res_tray">예약</string>

@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">Asegurando la tarifa (%1$s) — creando el depósito…</string>
+    <string name="bond_building">Asegurando %1$s — creando el depósito…</string>
     <string name="bond_escrow_ready">Depósito listo — la tarifa se ingresa antes del viaje.</string>
     <string name="bond_secure_fare">Asegurar tarifa (%1$s)</string>
     <string name="bond_fare_sent">Tarifa enviada — confirmando en la cadena…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">Propuesta: %1$s de vuelta al pasajero, %2$s al conductor.</string>
     <string name="bond_sign_split">Firmar este reparto</string>
     <string name="bond_propose_split">Proponer otro reparto</string>
-    <string name="bond_back_to_rider">Al pasajero (%1$s)</string>
+    <string name="bond_back_to_rider">De vuelta al pagador (%1$s)</string>
     <string name="bond_counter">Proponer</string>
     <string name="bond_ask_arbiter">Pedir al árbitro que decida</string>
     <string name="res_tray">Reserva</string>

@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">Đang bảo đảm cước phí (%1$s) — đang tạo ký quỹ…</string>
+    <string name="bond_building">Đang giữ %1$s — dựng ký quỹ…</string>
     <string name="bond_escrow_ready">Ký quỹ sẵn sàng — cước phí được nạp trước chuyến đi.</string>
     <string name="bond_secure_fare">Bảo đảm cước phí (%1$s)</string>
     <string name="bond_fare_sent">Đã gửi cước phí — đang xác nhận trên chuỗi…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">Đề xuất: %1$s về hành khách, %2$s cho tài xế.</string>
     <string name="bond_sign_split">Ký chia phần này</string>
     <string name="bond_propose_split">Đề xuất chia khác</string>
-    <string name="bond_back_to_rider">Về hành khách (%1$s)</string>
+    <string name="bond_back_to_rider">Trả lại người trả (%1$s)</string>
     <string name="bond_counter">Đề xuất</string>
     <string name="bond_ask_arbiter">Nhờ trọng tài phân xử</string>
     <string name="res_tray">Đặt chỗ</string>

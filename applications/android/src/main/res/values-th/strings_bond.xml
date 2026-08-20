@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">กำลังคุ้มครองค่าโดยสาร (%1$s) — กำลังสร้างเอสโครว์…</string>
+    <string name="bond_building">กำลังกันเงิน %1$s — สร้างเอสโครว์…</string>
     <string name="bond_escrow_ready">เอสโครว์พร้อมแล้ว — ค่าโดยสารเข้าก่อนเริ่มเดินทาง</string>
     <string name="bond_secure_fare">คุ้มครองค่าโดยสาร (%1$s)</string>
     <string name="bond_fare_sent">ส่งค่าโดยสารแล้ว — กำลังยืนยันบนเชน…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">ข้อเสนอ: คืนผู้โดยสาร %1$s ให้คนขับ %2$s</string>
     <string name="bond_sign_split">ลงนามการแบ่งนี้</string>
     <string name="bond_propose_split">เสนอการแบ่งแบบอื่น</string>
-    <string name="bond_back_to_rider">คืนผู้โดยสาร (%1$s)</string>
+    <string name="bond_back_to_rider">คืนให้ผู้จ่าย (%1$s)</string>
     <string name="bond_counter">เสนอ</string>
     <string name="bond_ask_arbiter">ขอให้ผู้ชี้ขาดตัดสิน</string>
     <string name="res_tray">การจอง</string>

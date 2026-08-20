@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">Sécurisation du prix (%1$s) — création du séquestre…</string>
+    <string name="bond_building">Sécurisation de %1$s — création du séquestre…</string>
     <string name="bond_escrow_ready">Séquestre prêt — le prix est versé avant la course.</string>
     <string name="bond_secure_fare">Sécuriser le prix (%1$s)</string>
     <string name="bond_fare_sent">Prix envoyé — confirmation sur la chaîne…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">Proposition : %1$s au passager, %2$s au conducteur.</string>
     <string name="bond_sign_split">Signer cette répartition</string>
     <string name="bond_propose_split">Proposer une autre répartition</string>
-    <string name="bond_back_to_rider">Au passager (%1$s)</string>
+    <string name="bond_back_to_rider">Rendu au payeur (%1$s)</string>
     <string name="bond_counter">Proposer</string>
     <string name="bond_ask_arbiter">Demander à l’arbitre de trancher</string>
     <string name="res_tray">Réservation</string>

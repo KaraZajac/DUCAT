@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">در حال ایمن‌سازی کرایه (%1$s) — ساخت امانت…</string>
+    <string name="bond_building">در حال امن‌کردن %1$s — ساخت امانت…</string>
     <string name="bond_escrow_ready">امانت آماده است — کرایه پیش از سفر واریز می‌شود.</string>
     <string name="bond_secure_fare">ایمن‌سازی کرایه (%1$s)</string>
     <string name="bond_fare_sent">کرایه ارسال شد — در حال تأیید روی زنجیره…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">پیشنهاد: %1$s به مسافر، %2$s به راننده.</string>
     <string name="bond_sign_split">امضای این تقسیم</string>
     <string name="bond_propose_split">پیشنهاد تقسیم متفاوت</string>
-    <string name="bond_back_to_rider">به مسافر (%1$s)</string>
+    <string name="bond_back_to_rider">بازگشت به پرداخت‌کننده (%1$s)</string>
     <string name="bond_counter">پیشنهاد</string>
     <string name="bond_ask_arbiter">از داور بخواهید حکم کند</string>
     <string name="res_tray">رزرو</string>

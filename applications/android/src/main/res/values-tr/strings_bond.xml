@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">Ücret (%1$s) güvenceye alınıyor — emanet oluşturuluyor…</string>
+    <string name="bond_building">%1$s güvenceye alınıyor — emanet kuruluyor…</string>
     <string name="bond_escrow_ready">Emanet hazır — ücret yolculuktan önce yatırılır.</string>
     <string name="bond_secure_fare">Ücreti güvenceye al (%1$s)</string>
     <string name="bond_fare_sent">Ücret gönderildi — zincirde onaylanıyor…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">Öneri: %1$s yolcuya geri, %2$s sürücüye.</string>
     <string name="bond_sign_split">Bu paylaşımı imzala</string>
     <string name="bond_propose_split">Farklı bir paylaşım öner</string>
-    <string name="bond_back_to_rider">Yolcuya (%1$s)</string>
+    <string name="bond_back_to_rider">Ödeyene geri (%1$s)</string>
     <string name="bond_counter">Öner</string>
     <string name="bond_ask_arbiter">Hakemden karar iste</string>
     <string name="res_tray">Rezervasyon</string>

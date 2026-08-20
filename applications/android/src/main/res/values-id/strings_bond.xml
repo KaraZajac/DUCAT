@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">Mengamankan tarif (%1$s) — menyiapkan escrow…</string>
+    <string name="bond_building">Mengamankan %1$s — membangun escrow…</string>
     <string name="bond_escrow_ready">Escrow siap — tarif disetor sebelum perjalanan.</string>
     <string name="bond_secure_fare">Amankan tarif (%1$s)</string>
     <string name="bond_fare_sent">Tarif terkirim — menunggu konfirmasi di chain…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">Usulan: %1$s kembali ke penumpang, %2$s ke pengemudi.</string>
     <string name="bond_sign_split">Tanda tangani pembagian ini</string>
     <string name="bond_propose_split">Usulkan pembagian lain</string>
-    <string name="bond_back_to_rider">Ke penumpang (%1$s)</string>
+    <string name="bond_back_to_rider">Kembali ke pembayar (%1$s)</string>
     <string name="bond_counter">Usulkan</string>
     <string name="bond_ask_arbiter">Minta arbiter memutuskan</string>
     <string name="res_tray">Reservasi</string>

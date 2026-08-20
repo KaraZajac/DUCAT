@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">正在保障车费（%1$s）— 正在建立托管…</string>
+    <string name="bond_building">正在锁定 %1$s — 构建托管…</string>
     <string name="bond_escrow_ready">托管已就绪 — 车费在乘车前存入。</string>
     <string name="bond_secure_fare">保障车费（%1$s）</string>
     <string name="bond_fare_sent">车费已发送 — 正在链上确认…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">提议：%1$s 退还乘客，%2$s 给司机。</string>
     <string name="bond_sign_split">签署此分配</string>
     <string name="bond_propose_split">提议不同的分配</string>
-    <string name="bond_back_to_rider">退还乘客 (%1$s)</string>
+    <string name="bond_back_to_rider">退回付款方（%1$s）</string>
     <string name="bond_counter">提议</string>
     <string name="bond_ask_arbiter">请仲裁人裁决</string>
     <string name="res_tray">预订</string>

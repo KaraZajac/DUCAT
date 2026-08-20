@@ -2,7 +2,7 @@
 <!-- The ride escrow (§15.12): the bond banner in the thread, and the arbiter
      switch on a contact. -->
 <resources>
-    <string name="bond_building">تأمين الأجرة (%1$s) — يجري إنشاء الضمان…</string>
+    <string name="bond_building">تأمين %1$s — يجري بناء الضمان…</string>
     <string name="bond_escrow_ready">الضمان جاهز — تُودَع الأجرة قبل الرحلة.</string>
     <string name="bond_secure_fare">تأمين الأجرة (%1$s)</string>
     <string name="bond_fare_sent">أُرسلت الأجرة — يجري التأكيد على السلسلة…</string>
@@ -20,7 +20,7 @@
     <string name="bond_split_stated">الاقتراح: %1$s للراكب، %2$s للسائق.</string>
     <string name="bond_sign_split">توقيع هذا التقسيم</string>
     <string name="bond_propose_split">اقتراح تقسيم مختلف</string>
-    <string name="bond_back_to_rider">للراكب (%1$s)</string>
+    <string name="bond_back_to_rider">يعود للدافع (%1$s)</string>
     <string name="bond_counter">اقتراح</string>
     <string name="bond_ask_arbiter">اطلب من الحَكَم أن يفصل</string>
     <string name="res_tray">حجز</string>
