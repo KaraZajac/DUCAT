@@ -40,7 +40,7 @@
     <string name="bond_post_stake">保証金を預ける（%1$s）</string>
     <string name="bond_stake_refunded">そのうち %1$s はあなたの預り金です。終われば戻ります。</string>
     <string name="res_kind_stay">宿泊</string>
-    <string name="res_kind_vehicle">車両</string>
+    <string name="res_kind_vehicle">車両または用具</string>
     <string name="res_kind_note">双方 %1$d%% を提案</string>
     <string name="bond_await_their_stake">相手の預り金を待っています。入ったらお支払いです。</string>
     <string name="res_escrow_ready">エスクロー準備完了 — 受け渡し前に代金と双方のデポジットが入ります。</string>

@@ -61,4 +61,6 @@
     <string name="pay_node_no_answer">Węzeł Monero nie odpowiedział na czas. Nic nie wysłano. Spróbuj ponownie — aplikacja użyje innego węzła.</string>
     <string name="pay_not_enough">Za mało dostępnych środków — masz %1$s, a potrzeba %2$s wraz z opłatą sieciową.</string>
     <string name="pay_offline">Jeszcze bez połączenia — ten telefon nie zakończył dołączania do sieci. Nic nie wysłano; spróbuj za chwilę.</string>
+    <string name="pay_node_unreachable">Nie udało się połączyć z żadnym węzłem Monero. Nic nie wysłano — sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="pay_already_paid">Już wpłaciłeś do tego depozytu. Twoje pieniądze są w środku; nic nie wysłano ponownie.</string>
 </resources>

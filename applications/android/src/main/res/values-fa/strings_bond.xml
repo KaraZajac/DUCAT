@@ -40,7 +40,7 @@
     <string name="bond_post_stake">ودیعه‌تان را بگذارید (%1$s)</string>
     <string name="bond_stake_refunded">‏%1$s از آن ودیعهٔ شماست — وقتی کار تمام شود برمی‌گردد.</string>
     <string name="res_kind_stay">محل اقامت</string>
-    <string name="res_kind_vehicle">خودرو</string>
+    <string name="res_kind_vehicle">خودرو یا تجهیزات</string>
     <string name="res_kind_note">‏%1$d%% برای هر طرف پیشنهاد می‌شود</string>
     <string name="bond_await_their_stake">در انتظار ودیعهٔ آن‌ها — پس از واریز آن‌ها پرداخت می‌کنید.</string>
     <string name="res_escrow_ready">امانت آماده است — مبلغ و هر دو ودیعه پیش از تحویل وارد می‌شوند.</string>

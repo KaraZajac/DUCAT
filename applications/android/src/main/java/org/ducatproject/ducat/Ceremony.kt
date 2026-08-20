@@ -576,6 +576,20 @@ object Ceremony {
                 put("funderDepPxmr", inv.funderDepPxmr); put("hostDepPxmr", inv.hostDepPxmr)
                 put("created", System.currentTimeMillis())
                 put("peer", contact.personaHex)
+                // The same snapshot [start] takes, taken by the side that
+                // joins. It was only ever written by the initiator, so a
+                // host's copy of every deal carried no subject at all — and a
+                // host is the party who *always* joins. It went unnoticed
+                // because the fallback reads the thread, and for the newest
+                // deal with somebody the thread is still about the right
+                // thing. The second deal with the same neighbour is what
+                // exposes it: their bike repair relabelled itself "Unnamed
+                // contact" the moment a kayak was asked about, on the phone
+                // belonging to the person who did the work.
+                Enquiries.about(context, contact.personaHex)?.let { a ->
+                    put("aboutTitle", a.title)
+                    put("aboutKind", a.kind)
+                }
                 put("i", i); put("stage", "committed")
                 put("commits", JSONObject()); put("shares", JSONObject())
             }
@@ -698,7 +712,7 @@ object Ceremony {
             ?: throw IllegalStateException("this device holds no key share")
         val dest = WalletStore(context).address()
             ?: throw IllegalStateException("no wallet to return the deposit to")
-        val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
+        val nodeUrl = node(context) ?: throw NoNode()
 
         val roster = o.getJSONArray("roster").let { arr ->
             (0 until arr.length()).map { arr.getString(it) }
@@ -800,7 +814,7 @@ object Ceremony {
                         return
                     }
                     val nodeUrl = node(context)
-                        ?: throw IllegalStateException("no node reachable")
+                        ?: throw NoNode()
                     val txid = uniffi.ducat_mobile.frostComplete(
                         id, i.toUShort(), senderIdx.toUShort(), payload, nodeUrl,
                     )
@@ -889,6 +903,30 @@ object Ceremony {
         else -> true
     }
 
+    /**
+     * No Monero node would answer.
+     *
+     * Typed because it is the one failure in here a person meets by having bad
+     * signal rather than by something being wrong, and it was reaching them as
+     * the four English words above — `moneyFailure` prints the message when it
+     * recognises nothing, and it recognised nothing here. Everything else that
+     * throws in this file is an invariant: a user who sees "the arbiter funds
+     * nothing" has found a bug, and the sentence is for whoever reads the
+     * report.
+     */
+    class NoNode : IllegalStateException("no node reachable")
+
+    /**
+     * This party has already funded this escrow.
+     *
+     * Also typed, and also not an invariant: two taps a second apart on a slow
+     * network is the documented way to arrive here (see [fundRide]), and
+     * paying twice into an address that needs a co-signature to give anything
+     * back is the failure that costs. The second tap deserves a sentence in
+     * the reader's own language saying their money is where they put it.
+     */
+    class AlreadyPaid : IllegalStateException("you have already paid into this escrow")
+
     /** Stamp the moment an escrow stopped needing anyone. */
     private fun settle(o: JSONObject, stage: String): JSONObject =
         o.put("stage", stage).put("settledAt", System.currentTimeMillis() / 1000)
@@ -912,8 +950,8 @@ object Ceremony {
         // restarted mid-flight — must not pay twice into an escrow that
         // needs a co-signature to give anything back.
         val already = if (isFunder(o)) o.optString("fundTxid") else o.optString("hostFundTxid")
-        check(already.isEmpty()) { "you have already paid into this escrow" }
-        val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
+        if (already.isNotEmpty()) throw AlreadyPaid()
+        val nodeUrl = node(context) ?: throw NoNode()
         val mine = if (isFunder(o)) "fundTxid" else "hostFundTxid"
         // Claim the slot *before* the money moves, on the record as it stands
         // now. Two taps a second apart both passed the check above and both
@@ -936,11 +974,11 @@ object Ceremony {
                 if (sent != null) {
                     cur.put(mine, sent.txidHex)
                     DucatLog.w(TAG, "escrow $idHex: recovered a send nobody recorded")
-                    throw IllegalStateException("you have already paid into this escrow")
+                    throw AlreadyPaid()
                 }
                 DucatLog.i(TAG, "escrow $idHex: retaking a claim left by a send that never went")
             } else {
-                check(held.isEmpty()) { "you have already paid into this escrow" }
+                if (held.isNotEmpty()) throw AlreadyPaid()
             }
             cur.put(mine, SENDING)
         }
@@ -996,7 +1034,7 @@ object Ceremony {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
         val keys = hexToBytes(o.optString("keys"))
             ?: throw IllegalStateException("this device holds no key share")
-        val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
+        val nodeUrl = node(context) ?: throw NoNode()
         val from = o.optLong("scanFrom").takeIf { it > 0 }
             ?: WalletStore(context).restoreHeight().toLong()
         val total = runCatching {
@@ -1064,7 +1102,7 @@ object Ceremony {
         val i = o.optInt("i")
         val keys = hexToBytes(o.optString("keys"))
             ?: throw IllegalStateException("this device holds no key share")
-        val nodeUrl = node(context) ?: throw IllegalStateException("no node reachable")
+        val nodeUrl = node(context) ?: throw NoNode()
         val from = o.optLong("scanFrom").takeIf { it > 0 }
             ?: WalletStore(context).restoreHeight().toLong()
         val roster0 = o.getJSONArray("roster").let { arr ->

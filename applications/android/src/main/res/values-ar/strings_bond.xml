@@ -40,7 +40,7 @@
     <string name="bond_post_stake">أودع تأمينك (%1$s)</string>
     <string name="bond_stake_refunded">‏%1$s من ذلك ضمانك — يعود إليك عند انتهاء المعاملة.</string>
     <string name="res_kind_stay">مكان</string>
-    <string name="res_kind_vehicle">مركبة</string>
+    <string name="res_kind_vehicle">مركبة أو معدات</string>
     <string name="res_kind_note">يقترح %1$d%% لكل طرف</string>
     <string name="bond_await_their_stake">بانتظار ضمانهم — تدفع بعد دخول ضمانهم.</string>
     <string name="res_escrow_ready">الضمان جاهز — المبلغ وكلا التأمينين يدخلان قبل التسليم.</string>

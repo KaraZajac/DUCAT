@@ -40,7 +40,7 @@
     <string name="bond_post_stake">보증금 예치 (%1$s)</string>
     <string name="bond_stake_refunded">그중 %1$s는 당신의 보증금입니다 — 끝나면 돌아옵니다.</string>
     <string name="res_kind_stay">숙소</string>
-    <string name="res_kind_vehicle">차량</string>
+    <string name="res_kind_vehicle">차량 또는 장비</string>
     <string name="res_kind_note">양쪽 각 %1$d%% 제안</string>
     <string name="bond_await_their_stake">상대의 보증금을 기다리는 중 — 들어오면 결제합니다.</string>
     <string name="res_escrow_ready">에스크로 준비 완료 — 인계 전에 금액과 양쪽 보증금이 들어갑니다.</string>

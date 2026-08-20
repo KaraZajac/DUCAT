@@ -40,7 +40,7 @@
     <string name="bond_post_stake">Wpłać kaucję (%1$s)</string>
     <string name="bond_stake_refunded">%1$s z tego to twoja kaucja — wraca, gdy sprawa się zakończy.</string>
     <string name="res_kind_stay">Miejsce</string>
-    <string name="res_kind_vehicle">Pojazd</string>
+    <string name="res_kind_vehicle">Pojazd lub sprzęt</string>
     <string name="res_kind_note">sugeruje %1$d%% z każdej strony</string>
     <string name="bond_await_their_stake">Czekamy na ich kaucję — płacisz, gdy ich wpłynie.</string>
     <string name="res_escrow_ready">Escrow gotowe — kwota i oba depozyty wchodzą przed przekazaniem.</string>

@@ -61,4 +61,6 @@
     <string name="pay_node_no_answer">Der Monero-Knoten hat nicht rechtzeitig geantwortet. Es wurde nichts gesendet. Versuche es erneut — die App nimmt einen anderen Knoten.</string>
     <string name="pay_not_enough">Nicht genug verfügbar – du hast %1$s, nötig sind %2$s inklusive Netzwerkgebühr.</string>
     <string name="pay_offline">Noch nicht verbunden – dieses Telefon ist dem Netzwerk noch nicht beigetreten. Es wurde nichts gesendet; versuche es gleich noch einmal.</string>
+    <string name="pay_node_unreachable">Kein Monero-Knoten war erreichbar. Es wurde nichts gesendet – prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="pay_already_paid">Du hast bereits in diese Treuhand eingezahlt. Dein Geld ist drin; es wurde nichts erneut gesendet.</string>
 </resources>

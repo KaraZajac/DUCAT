@@ -40,7 +40,7 @@
     <string name="bond_post_stake">Post your stake (%1$s)</string>
     <string name="bond_stake_refunded">%1$s of that is your stake — it comes back when this is finished.</string>
     <string name="res_kind_stay">A place</string>
-    <string name="res_kind_vehicle">A vehicle</string>
+    <string name="res_kind_vehicle">A vehicle or gear</string>
     <string name="res_kind_note">suggests %1$d%% each side</string>
     <string name="bond_await_their_stake">Waiting for their stake — you pay once theirs is in.</string>
     <string name="res_escrow_ready">Escrow ready — the price and both deposits go in before the handover.</string>

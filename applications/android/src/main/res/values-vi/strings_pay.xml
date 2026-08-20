@@ -61,4 +61,6 @@
     <string name="pay_node_no_answer">Nút Monero không trả lời kịp. Chưa gửi gì cả. Hãy thử lại — ứng dụng sẽ dùng nút khác.</string>
     <string name="pay_not_enough">Số dư khả dụng không đủ — bạn có %1$s và cần %2$s kèm phí mạng.</string>
     <string name="pay_offline">Chưa kết nối — điện thoại này chưa tham gia xong mạng lưới. Chưa gửi gì cả; hãy thử lại sau giây lát.</string>
+    <string name="pay_node_unreachable">Không liên hệ được nút Monero nào. Chưa gửi gì cả — hãy kiểm tra kết nối và thử lại.</string>
+    <string name="pay_already_paid">Bạn đã thanh toán vào ký quỹ này rồi. Tiền đã vào; không gửi lại lần nữa.</string>
 </resources>

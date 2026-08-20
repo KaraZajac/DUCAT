@@ -40,7 +40,7 @@
     <string name="bond_post_stake">Déposer votre caution (%1$s)</string>
     <string name="bond_stake_refunded">%1$s de ce montant est votre dépôt : il revient quand c\'est terminé.</string>
     <string name="res_kind_stay">Un logement</string>
-    <string name="res_kind_vehicle">Un véhicule</string>
+    <string name="res_kind_vehicle">Un véhicule ou du matériel</string>
     <string name="res_kind_note">suggère %1$d%% de chaque côté</string>
     <string name="bond_await_their_stake">En attente de leur dépôt — vous payez une fois le leur versé.</string>
     <string name="res_escrow_ready">Séquestre prêt — le prix et les deux cautions entrent avant la remise.</string>

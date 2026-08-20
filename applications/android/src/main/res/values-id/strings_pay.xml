@@ -61,4 +61,6 @@
     <string name="pay_node_no_answer">Node Monero tidak menjawab tepat waktu. Tidak ada yang terkirim. Coba lagi — aplikasi akan memakai node lain.</string>
     <string name="pay_not_enough">Saldo terbuka tidak cukup — kamu punya %1$s dan ini butuh %2$s dengan biaya jaringan.</string>
     <string name="pay_offline">Belum terhubung — ponsel ini belum selesai bergabung ke jaringan. Tidak ada yang dikirim; coba lagi sebentar.</string>
+    <string name="pay_node_unreachable">Tidak ada node Monero yang bisa dihubungi. Tidak ada yang dikirim — periksa koneksimu dan coba lagi.</string>
+    <string name="pay_already_paid">Kamu sudah membayar ke escrow ini. Uangmu sudah masuk; tidak ada yang dikirim lagi.</string>
 </resources>

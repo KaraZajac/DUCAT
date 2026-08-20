@@ -40,7 +40,7 @@
     <string name="bond_post_stake">Внести заставу (%1$s)</string>
     <string name="bond_stake_refunded">%1$s з цього — ваша застава: вона повернеться, коли все завершиться.</string>
     <string name="res_kind_stay">Житло</string>
-    <string name="res_kind_vehicle">Транспорт</string>
+    <string name="res_kind_vehicle">Транспорт або спорядження</string>
     <string name="res_kind_note">по %1$d%% з кожного боку</string>
     <string name="bond_await_their_stake">Чекаємо на їхню заставу — ви платите, щойно вона надійде.</string>
     <string name="res_escrow_ready">Ескроу готове — сума й обидві застави вносяться до передачі.</string>

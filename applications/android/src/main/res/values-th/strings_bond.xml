@@ -40,7 +40,7 @@
     <string name="bond_post_stake">วางหลักประกันของคุณ (%1$s)</string>
     <string name="bond_stake_refunded">ในจำนวนนั้น %1$s เป็นหลักประกันของคุณ — จะคืนเมื่อเรื่องนี้เสร็จสิ้น</string>
     <string name="res_kind_stay">ที่พัก</string>
-    <string name="res_kind_vehicle">ยานพาหนะ</string>
+    <string name="res_kind_vehicle">ยานพาหนะหรืออุปกรณ์</string>
     <string name="res_kind_note">แนะนำฝ่ายละ %1$d%%</string>
     <string name="bond_await_their_stake">กำลังรอหลักประกันของอีกฝ่าย — คุณจ่ายเมื่อของเขาเข้าแล้ว</string>
     <string name="res_escrow_ready">เอสโครว์พร้อมแล้ว — ราคาและมัดจำทั้งสองเข้าก่อนส่งมอบ</string>

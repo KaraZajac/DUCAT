@@ -40,7 +40,7 @@
     <string name="bond_post_stake">Borg storten (%1$s)</string>
     <string name="bond_stake_refunded">%1$s daarvan is jouw borg — die komt terug als dit klaar is.</string>
     <string name="res_kind_stay">Een plek</string>
-    <string name="res_kind_vehicle">Een voertuig</string>
+    <string name="res_kind_vehicle">Een voertuig of uitrusting</string>
     <string name="res_kind_note">stelt %1$d%% per kant voor</string>
     <string name="bond_await_their_stake">Wachten op hun borg — jij betaalt zodra die van hen binnen is.</string>
     <string name="res_escrow_ready">Escrow klaar — de prijs en beide borgen gaan erin vóór de overdracht.</string>

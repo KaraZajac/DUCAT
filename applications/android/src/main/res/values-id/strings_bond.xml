@@ -40,7 +40,7 @@
     <string name="bond_post_stake">Setor jaminan Anda (%1$s)</string>
     <string name="bond_stake_refunded">Sebesar %1$s dari itu adalah jaminan Anda — kembali saat urusan ini selesai.</string>
     <string name="res_kind_stay">Sebuah tempat</string>
-    <string name="res_kind_vehicle">Sebuah kendaraan</string>
+    <string name="res_kind_vehicle">Kendaraan atau peralatan</string>
     <string name="res_kind_note">menyarankan %1$d%% tiap pihak</string>
     <string name="bond_await_their_stake">Menunggu jaminan mereka — Anda membayar setelah jaminan mereka masuk.</string>
     <string name="res_escrow_ready">Escrow siap — harga dan kedua deposit masuk sebelum serah terima.</string>

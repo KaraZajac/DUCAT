@@ -61,4 +61,6 @@
     <string name="pay_node_no_answer">Il nodo Monero non ha risposto in tempo. Non è stato inviato nulla. Riprova: l’app userà un altro nodo.</string>
     <string name="pay_not_enough">Fondi sbloccati insufficienti: hai %1$s e ne servono %2$s con la commissione di rete.</string>
     <string name="pay_offline">Non ancora connesso — questo telefono non ha finito di entrare nella rete. Non è stato inviato nulla; riprova tra poco.</string>
+    <string name="pay_node_unreachable">Nessun nodo Monero raggiungibile. Non è stato inviato nulla — controlla la connessione e riprova.</string>
+    <string name="pay_already_paid">Hai già pagato in questo deposito a garanzia. Il tuo denaro è dentro; non è stato inviato di nuovo.</string>
 </resources>

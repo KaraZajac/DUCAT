@@ -40,7 +40,7 @@
     <string name="bond_post_stake">Teminatı yatır (%1$s)</string>
     <string name="bond_stake_refunded">Bunun %1$s kadarı senin teminatın — iş bitince geri gelir.</string>
     <string name="res_kind_stay">Bir yer</string>
-    <string name="res_kind_vehicle">Bir araç</string>
+    <string name="res_kind_vehicle">Araç veya ekipman</string>
     <string name="res_kind_note">her taraf için %%%1$d öneriyor</string>
     <string name="bond_await_their_stake">Onların teminatı bekleniyor — onlarınki girince ödersin.</string>
     <string name="res_escrow_ready">Emanet hazır — tutar ve iki depozito teslimden önce girer.</string>

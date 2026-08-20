@@ -40,7 +40,7 @@
     <string name="bond_post_stake">Đặt cọc của bạn (%1$s)</string>
     <string name="bond_stake_refunded">Trong đó %1$s là tiền cọc của bạn — sẽ quay về khi xong việc.</string>
     <string name="res_kind_stay">Một chỗ ở</string>
-    <string name="res_kind_vehicle">Một phương tiện</string>
+    <string name="res_kind_vehicle">Xe hoặc thiết bị</string>
     <string name="res_kind_note">gợi ý %1$d%% mỗi bên</string>
     <string name="bond_await_their_stake">Đang chờ tiền cọc của họ — bạn trả sau khi họ đặt cọc.</string>
     <string name="res_escrow_ready">Ký quỹ sẵn sàng — số tiền và cả hai khoản cọc vào trước khi giao.</string>

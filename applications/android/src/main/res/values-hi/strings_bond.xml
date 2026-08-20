@@ -40,7 +40,7 @@
     <string name="bond_post_stake">अपनी जमानत राशि जमा करें (%1$s)</string>
     <string name="bond_stake_refunded">इसमें से %1$s आपकी जमानत राशि है — काम पूरा होने पर वापस आ जाती है।</string>
     <string name="res_kind_stay">एक जगह</string>
-    <string name="res_kind_vehicle">एक वाहन</string>
+    <string name="res_kind_vehicle">वाहन या उपकरण</string>
     <string name="res_kind_note">हर पक्ष के लिए %1$d%% सुझाया गया</string>
     <string name="bond_await_their_stake">उनकी जमानत राशि का इंतज़ार — उनकी आते ही आप भुगतान करेंगे।</string>
     <string name="res_escrow_ready">एस्क्रो तैयार — सौंपने से पहले रकम और दोनों जमा अंदर जाते हैं।</string>

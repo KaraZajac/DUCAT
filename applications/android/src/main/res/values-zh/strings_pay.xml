@@ -61,4 +61,6 @@
     <string name="pay_node_no_answer">Monero 节点没有及时响应，什么都没有发送。请再试一次——应用会换一个节点。</string>
     <string name="pay_not_enough">可用余额不足——你有 %1$s，加上网络手续费需要 %2$s。</string>
     <string name="pay_offline">尚未连接——这台手机还没有加入网络。什么都没有发送，请稍后再试。</string>
+    <string name="pay_node_unreachable">无法连接到任何 Monero 节点。什么都没有发送——请检查网络后重试。</string>
+    <string name="pay_already_paid">你已经向该托管付过款了。钱已存入，没有重复发送。</string>
 </resources>

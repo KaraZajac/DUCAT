@@ -61,4 +61,6 @@
     <string name="pay_node_no_answer">De Monero-node antwoordde niet op tijd. Er is niets verstuurd. Probeer opnieuw — de app pakt een andere node.</string>
     <string name="pay_not_enough">Niet genoeg beschikbaar — je hebt %1$s en dit vereist %2$s inclusief netwerkkosten.</string>
     <string name="pay_offline">Nog niet verbonden — deze telefoon is nog niet klaar met verbinden. Er is niets verzonden; probeer het zo opnieuw.</string>
+    <string name="pay_node_unreachable">Geen enkele Monero-node reageerde. Er is niets verzonden — controleer je verbinding en probeer opnieuw.</string>
+    <string name="pay_already_paid">Je hebt al in deze escrow betaald. Je geld staat erin; er is niets opnieuw verzonden.</string>
 </resources>

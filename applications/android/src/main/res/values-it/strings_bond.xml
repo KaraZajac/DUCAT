@@ -40,7 +40,7 @@
     <string name="bond_post_stake">Versa la tua cauzione (%1$s)</string>
     <string name="bond_stake_refunded">%1$s di questo è la tua cauzione: torna indietro quando è finita.</string>
     <string name="res_kind_stay">Un alloggio</string>
-    <string name="res_kind_vehicle">Un veicolo</string>
+    <string name="res_kind_vehicle">Un veicolo o attrezzatura</string>
     <string name="res_kind_note">suggerisce %1$d%% per parte</string>
     <string name="bond_await_their_stake">In attesa della loro cauzione: paghi quando la loro è dentro.</string>
     <string name="res_escrow_ready">Deposito pronto — il prezzo e le due cauzioni entrano prima della consegna.</string>

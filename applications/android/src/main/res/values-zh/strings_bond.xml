@@ -40,7 +40,7 @@
     <string name="bond_post_stake">缴纳保证金（%1$s）</string>
     <string name="bond_stake_refunded">其中 %1$s 是你的押金 —— 事情完成后会退回给你。</string>
     <string name="res_kind_stay">住处</string>
-    <string name="res_kind_vehicle">车辆</string>
+    <string name="res_kind_vehicle">车辆或装备</string>
     <string name="res_kind_note">建议双方各 %1$d%%</string>
     <string name="bond_await_their_stake">等待对方的押金 —— 对方押上后你再付。</string>
     <string name="res_escrow_ready">托管就绪 — 交付前存入价款和双方押金。</string>

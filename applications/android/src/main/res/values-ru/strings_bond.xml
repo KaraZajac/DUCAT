@@ -40,7 +40,7 @@
     <string name="bond_post_stake">Внести залог (%1$s)</string>
     <string name="bond_stake_refunded">%1$s из этого — ваш залог: он вернётся, когда всё завершится.</string>
     <string name="res_kind_stay">Жильё</string>
-    <string name="res_kind_vehicle">Транспорт</string>
+    <string name="res_kind_vehicle">Транспорт или снаряжение</string>
     <string name="res_kind_note">по %1$d%% с каждой стороны</string>
     <string name="bond_await_their_stake">Ждём их залог — вы платите, когда он внесён.</string>
     <string name="res_escrow_ready">Эскроу готово — сумма и оба залога вносятся до передачи.</string>

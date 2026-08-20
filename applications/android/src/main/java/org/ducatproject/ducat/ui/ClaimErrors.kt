@@ -85,6 +85,13 @@ fun moneyFailure(context: android.content.Context, t: Throwable): String = when 
     // release proposed before the routing table was ready reached the person
     // waiting to be paid as the word "TryAgain".
     Mailbox.isOffline(t) -> context.getString(org.ducatproject.ducat.R.string.pay_offline)
+    // The two failures in Ceremony a person meets by circumstance rather than
+    // by something being broken. Everything else that throws in there is an
+    // invariant, and its English sentence is for whoever reads the bug report.
+    t is org.ducatproject.ducat.Ceremony.NoNode ->
+        context.getString(org.ducatproject.ducat.R.string.pay_node_unreachable)
+    t is org.ducatproject.ducat.Ceremony.AlreadyPaid ->
+        context.getString(org.ducatproject.ducat.R.string.pay_already_paid)
     org.ducatproject.ducat.Wallet.isNodeTrouble(t) ->
         context.getString(org.ducatproject.ducat.R.string.pay_node_no_answer)
     // Short, with both numbers. Typed rather than matched on wording, because
