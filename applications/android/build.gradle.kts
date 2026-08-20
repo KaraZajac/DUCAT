@@ -118,3 +118,50 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("junit:junit:4.13.2")
 }
+
+/**
+ * Refuse to build against native libraries older than the Rust they came from.
+ *
+ * `mobile/build-android.sh` opens by saying nothing checks this, and that the
+ * app will happily load a stale library and behave like an older protocol.
+ * That is exactly what happened: three listing kinds were added to `core`, the
+ * script was not re-run, and every phone build after it carried a library from
+ * ninety minutes earlier. `rentalDecode` rejected the new kinds as invalid, and
+ * the reader drops what it cannot decode — silently, because a board full of
+ * strangers' notices is expected to contain some it does not understand.
+ *
+ * So a phone could neither post nor find gear, things for sale, or somebody's
+ * time. Everything looked right: no crash, no error, the boards answered, the
+ * counts said zero. It took posting one of each from a desk and finding two of
+ * five on a handset to see it.
+ *
+ * Timestamps rather than a hash of the sources: this only has to catch "you
+ * edited Rust and did not rebuild", which is the whole failure, and it must not
+ * cost anything on a build where nothing changed.
+ */
+val nativeFreshness = tasks.register("nativeFreshness") {
+    val libDir = File(projectDir, "src/main/jniLibs").absolutePath
+    val rustDirs = listOf("core/src", "mobile/src")
+        .map { File(rootProject.projectDir.parentFile, it).absolutePath }
+    doLast {
+        val libs = File(libDir).walkTopDown()
+            .filter { it.name == "libducat_mobile.so" }.toList()
+        if (libs.isEmpty()) return@doLast
+        val sources = rustDirs.map(::File).filter { it.isDirectory }
+            .flatMap { it.walkTopDown().filter { f -> f.isFile }.toList() }
+        val newest = sources.maxByOrNull { it.lastModified() } ?: return@doLast
+        val oldestLib = libs.minByOrNull { it.lastModified() } ?: return@doLast
+        if (newest.lastModified() > oldestLib.lastModified()) {
+            throw GradleException(
+                "native libraries are older than the Rust they were built from.\n" +
+                    "  ${newest.name} changed after jniLibs/${oldestLib.parentFile.name} " +
+                    "was written.\n" +
+                    "  The app would load it and behave like an older protocol — " +
+                    "silently, because a reader drops notices it cannot decode.\n" +
+                    "  Run ./mobile/build-android.sh",
+            )
+        }
+    }
+}
+
+tasks.matching { it.name == "preBuild" }.configureEach { dependsOn(nativeFreshness) }
