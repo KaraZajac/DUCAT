@@ -27,13 +27,17 @@ import org.ducatproject.ducat.R
  * and pushed everything below the fold. They are one kind of thing — a moment
  * you begin, not a job you run — so they get one shape.
  *
- * **All five nouns, not two.** The board grew from rooms and cars to gear,
- * things for sale and people\'s time, and this row did not: somebody could
- * post an electrician\'s hours and nobody had any way to go looking for one.
- * The search screen behind these has handled all five the whole time, with a
- * chip each and a count — the only thing missing was a door into it. So the
- * tiles wear the same words as the chips they land on, which also means they
- * cost no new strings in nineteen languages.
+ * **Six, in the order somebody would think of them**, and each one named as
+ * the errand it is rather than as the category it filters. The first version
+ * of this row reused the search screen\'s own chips — Places, Cars, Gear, For
+ * sale, Skills — which cost no new strings and read like a filing system.
+ * "Cars" is a heading; "Rent a car" is a thing you were about to do. The
+ * marketplace and hiring somebody are not filters over a board at all in
+ * anyone\'s head, whatever they are underneath.
+ *
+ * Ordered by hand, not by [org.ducatproject.ducat.Listings.KINDS], because
+ * that order is a wire numbering and this one is about what belongs beside
+ * what: the three rentals together, then buying, then people.
  */
 @Composable
 fun HomeTiles(
@@ -42,43 +46,34 @@ fun HomeTiles(
     onBrowse: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val kinds = org.ducatproject.ducat.Listings
     // Two rows of three rather than a wrapping flow: six tiles across a phone
     // is three and three, and an explicit pair of rows keeps every tile the
     // same width whatever the label does in a language with longer words.
-    val kinds = org.ducatproject.ducat.Listings.KINDS
+    val tiles = listOf(
+        Triple(Icons.Filled.LocalTaxi, R.string.hail_card_title, null),
+        Triple(listingIcon(kinds.KIND_VEHICLE), R.string.home_tile_rent_car, kinds.KIND_VEHICLE),
+        Triple(listingIcon(kinds.KIND_PLACE), R.string.home_tile_rent_place, kinds.KIND_PLACE),
+        Triple(listingIcon(kinds.KIND_GEAR), R.string.home_tile_rent_gear, kinds.KIND_GEAR),
+        Triple(listingIcon(kinds.KIND_SALE), R.string.home_tile_marketplace, kinds.KIND_SALE),
+        Triple(listingIcon(kinds.KIND_SKILL), R.string.home_tile_hire_help, kinds.KIND_SKILL),
+    )
     Column(
         modifier.fillMaxWidth().padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Tile(
-                icon = Icons.Filled.LocalTaxi,
-                label = stringResource(R.string.hail_card_title),
-                onClick = onHail,
-                modifier = Modifier.weight(1f),
-            )
-            kinds.take(2).forEach { k ->
-                Tile(
-                    icon = listingIcon(k),
-                    label = stringResource(boardChipLabel(k)),
-                    onClick = { onBrowse(k) },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            kinds.drop(2).forEach { k ->
-                Tile(
-                    icon = listingIcon(k),
-                    label = stringResource(boardChipLabel(k)),
-                    onClick = { onBrowse(k) },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-            // Keeps the second row's tiles the same width as the first when
-            // the kinds do not divide by three.
-            repeat(3 - (kinds.size - 2).coerceAtMost(3)) {
-                Spacer(Modifier.weight(1f))
+        tiles.chunked(3).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                row.forEach { (icon, label, kind) ->
+                    Tile(
+                        icon = icon,
+                        label = stringResource(label),
+                        onClick = { if (kind == null) onHail() else onBrowse(kind) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                // Keeps a short last row's tiles the same width as a full one.
+                repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
     }

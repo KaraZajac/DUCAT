@@ -24,4 +24,9 @@
     <string name="main_card_link_not_ready">Chưa đọc được thẻ của họ. Nếu họ đang ở cạnh bạn, hãy đợi một lát rồi quét lại — nếu không, nhờ họ mở DUCAT.</string>
     <string name="main_card_link_body_unnamed">Liên kết này mở một thẻ liên hệ không có tên. Thêm chứ? Sau đó hai bạn có thể nhắn tin và trả tiền cho nhau.</string>
     <string name="main_card_link_name">Gọi họ là</string>
+    <string name="home_tile_rent_car">Thuê xe</string>
+    <string name="home_tile_rent_place">Thuê chỗ ở</string>
+    <string name="home_tile_rent_gear">Thuê đồ dùng</string>
+    <string name="home_tile_marketplace">Chợ</string>
+    <string name="home_tile_hire_help">Thuê thợ</string>
 </resources>

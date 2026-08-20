@@ -24,4 +24,9 @@
     <string name="main_card_link_not_ready">ยังอ่านการ์ดของเขาไม่ได้ ถ้าเขาอยู่กับคุณ รอสักครู่แล้วสแกนใหม่ ถ้าไม่ ให้ขอให้เขาเปิด DUCAT</string>
     <string name="main_card_link_body_unnamed">ลิงก์นี้เปิดการ์ดผู้ติดต่อที่ไม่มีชื่อ เพิ่มไหม หลังจากนั้นคุณสองคนส่งข้อความและจ่ายเงินกันได้</string>
     <string name="main_card_link_name">เรียกเขาว่า</string>
+    <string name="home_tile_rent_car">เช่ารถ</string>
+    <string name="home_tile_rent_place">เช่าที่พัก</string>
+    <string name="home_tile_rent_gear">เช่าอุปกรณ์</string>
+    <string name="home_tile_marketplace">ตลาด</string>
+    <string name="home_tile_hire_help">จ้างช่าง</string>
 </resources>

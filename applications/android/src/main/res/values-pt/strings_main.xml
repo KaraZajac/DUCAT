@@ -24,4 +24,9 @@
     <string name="main_card_link_not_ready">O cartão deles ainda não está legível. Se estiverem consigo, espere um momento e digitalize de novo; caso contrário, peça-lhes para abrir o DUCAT.</string>
     <string name="main_card_link_body_unnamed">Esta ligação abre um cartão de contacto sem nome. Adicionar? Depois podem escrever-se e pagar-se.</string>
     <string name="main_card_link_name">Chamar-lhes</string>
+    <string name="home_tile_rent_car">Alugar um carro</string>
+    <string name="home_tile_rent_place">Alugar um lugar</string>
+    <string name="home_tile_rent_gear">Alugar equipamento</string>
+    <string name="home_tile_marketplace">Mercado</string>
+    <string name="home_tile_hire_help">Contratar ajuda</string>
 </resources>

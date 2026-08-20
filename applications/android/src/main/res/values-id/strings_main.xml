@@ -24,4 +24,9 @@
     <string name="main_card_link_not_ready">Kartu mereka belum bisa dibaca. Kalau mereka bersama Anda, tunggu sebentar lalu pindai lagi — kalau tidak, minta mereka membuka DUCAT.</string>
     <string name="main_card_link_body_unnamed">Tautan ini membuka kartu kontak tanpa nama. Tambahkan? Setelah itu kalian bisa saling berkirim pesan dan membayar.</string>
     <string name="main_card_link_name">Sebut mereka</string>
+    <string name="home_tile_rent_car">Sewa mobil</string>
+    <string name="home_tile_rent_place">Sewa tempat</string>
+    <string name="home_tile_rent_gear">Sewa perlengkapan</string>
+    <string name="home_tile_marketplace">Pasar</string>
+    <string name="home_tile_hire_help">Panggil tukang</string>
 </resources>
