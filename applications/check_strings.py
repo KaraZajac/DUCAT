@@ -128,19 +128,26 @@ def main() -> int:
 
             # 1b. An apostrophe must be escaped in an Android resource.
             #
+            #     The base language too, not only the translations. This
+            #     checked `strings` and not `base`, so it caught nineteen
+            #     Ukrainian apostrophes and missed the English one directly
+            #     above them — a check that only looks where you were already
+            #     careful is not a check.
+            #
             #     Only aapt knew this, and it says so as "Invalid unicode
             #     escape sequence" pointing at the whole file — which is a
             #     long way from "Ukrainian spells зв'язатися with one". The
             #     languages that need it most are the ones where the mark is
             #     a letter rather than punctuation.
-            for key, value in strings.items():
-                if value.startswith('"'):
-                    continue
-                for i, ch in enumerate(value):
-                    if ch == "'" and (i == 0 or value[i - 1] != "\\"):
-                        print(f"  ! {loc}/{name}: {key} has an unescaped apostrophe")
-                        problems += 1
-                        break
+            for where, table in (("values", base), (loc, strings)):
+                for key, value in table.items():
+                    if value.startswith('"'):
+                        continue
+                    for i, ch in enumerate(value):
+                        if ch == "'" and (i == 0 or value[i - 1] != "\\"):
+                            print(f"  ! {where}/{name}: {key} has an unescaped apostrophe")
+                            problems += 1
+                            break
 
             # 2. The text must be written in the language's own script.
             family = SCRIPTS.get(loc)

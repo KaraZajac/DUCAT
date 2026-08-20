@@ -55,5 +55,5 @@
     <string name="res_released">Reservation settled</string>
     <string name="res_send_details">Send the address and handover details</string>
     <string name="res_kind_sale">Something sold</string>
-    <string name="res_kind_labour">Somebody's time</string>
+    <string name="res_kind_labour">Somebody\'s time</string>
 </resources>
