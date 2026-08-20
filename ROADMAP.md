@@ -360,6 +360,86 @@ is already cross-platform Rust; the path, cheapest first:
    the Rust stack compiles for iOS — the protocol layer is free; the UI
    and App Store review are the cost. Nothing now forecloses it.
 
+## What else this shape is for (after 1.0)
+
+Four things the machinery already mostly supports. None are 1.0; all are
+reasons the 1.0 primitives are worth getting right.
+
+- **Selling a thing to a stranger.** The listings shape with a different
+  noun: post to a geocell board, somebody claims, you meet, escrow
+  releases on handover. What makes it worth building is not the payment —
+  it is that escrow answers the specific fear that makes this category
+  miserable. Meeting a stranger to buy a bike is frightening in both
+  directions, and every platform answers that with ratings and a support
+  queue. A 2-of-2 with a stake each side means neither party can walk.
+  Reuses listings, boards, claim-once cards and the bond almost entirely.
+
+- **Subscriptions with no card on file.** A weekly box, a monthly dues:
+  the seller bills the thread on a schedule, the buyer taps approve, money
+  moves. What is *absent* is the point — there is no stored payment
+  credential, so nothing to leak in a breach, nothing to charge after a
+  cancellation, and nothing that makes cancelling harder than subscribing.
+  Every recurring relationship today rests on the merchant holding a key
+  to the customer's money; this is recurring billing with no recurring
+  authority, which has no equivalent anywhere. Needs a schedule on a tab
+  and a standing thread; it needs no new protocol.
+
+- **Day labour by the hour.** The hail shape, again with a different noun:
+  two hours of help moving, claimed by somebody nearby, escrowed, released
+  on both saying it is done. Worth naming separately from selling because
+  the economics differ — for day labour the platform's cut *is* the
+  margin, so removing the operator is the whole product rather than a
+  nicety.
+
+- **Group messaging.** See below; the mechanism is already proven here.
+
+## Group messaging — the roster pattern, generalised (after 1.0)
+
+- **Small groups over pairwise threads.** A ceremony is already a group:
+  §17.9's roster of two or three personas, coordinated entirely over
+  pairwise threads, with round 0 carrying the roster because "a pairwise
+  thread only names two of the parties and the third has to learn who
+  else is in the room from the invitation itself." Group chat is that
+  pattern carrying words instead of DKG rounds — a roster message, then
+  fan-out: the sender writes the same body into each member's existing
+  thread.
+
+  **Why fan-out rather than a shared record.** A shared DHT record is one
+  write instead of N and is the obvious design, and it costs three things
+  that matter more. It needs a group key, which means key rotation on
+  every membership change and no good answer for removal — the removed
+  member keeps the key and the record's location. It needs a writer
+  secret shared among members, so any member can overwrite any other's
+  subkey. And it is a new object on the network that says *these N people
+  are a group*, where fan-out adds no metadata at all: the pairwise
+  threads already exist and already carry traffic. Fan-out also keeps
+  every property the thread already has — the prekey partitioning of
+  §16.11, forward secrecy per pair, deniability — for free, because it
+  changes nothing about how a message is sealed. Signal reached the same
+  answer for the same reasons.
+
+  **What it costs, stated plainly.** N writes per message, and N² across
+  a group if every member is talking. That bounds this at *small*: a
+  household, a stall's two staff phones, the three people organising a
+  thing. Not a channel with five hundred people in it — that is a
+  broadcast medium and wants different properties than a conversation.
+  Worth deciding whether that bound is a limitation or the right shape.
+
+  **The hard parts, none of them cryptographic.** Ordering: pairwise
+  chains give per-sender sequence and there is no global clock, so
+  concurrent replies arrive in different orders on different phones and
+  something has to decide whether that matters. Membership: who may add,
+  and what removal means when nobody can un-tell a person something.
+  History: somebody added on Tuesday has no record of Monday, and the
+  honest answer may be that they simply do not get one. Consistency: two
+  members disagreeing about the roster silently drop each other's
+  messages, which is the failure mode to design against first.
+
+  **The commerce shapes may matter more than the social one.** A tab split
+  across three people, a shop whose two phones share a till, a household
+  paying one subscription. Those are groups with money in them, which is
+  where this differs from every other group chat.
+
 ## Driver mode — navigation, from OsmAnd (after 1.0)
 
 - **Turn-by-turn for the driver, lifted from OsmAnd.** A driver who has
