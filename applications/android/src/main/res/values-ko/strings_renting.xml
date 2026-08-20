@@ -11,7 +11,7 @@
     <string name="rent_area_hint">평범한 말로 — 주소가 아니라 동네</string>
     <string name="rent_per_day">1일 요금 (%1$s)</string>
     <string name="rent_per_night">1박 요금 (%1$s)</string>
-    <string name="rent_stake_note">양쪽이 각각 %1$s를 보증금으로 걸고, 대여가 잘 끝나면 돌려받습니다.</string>
+    <string name="rent_stake_note">양쪽이 %1$s 를 걸고, 잘 끝나면 돌려받습니다.</string>
     <string name="rent_make">제조사</string>
     <string name="rent_model">모델</string>
     <string name="rent_year">연식</string>

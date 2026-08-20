@@ -11,7 +11,7 @@
     <string name="rent_area_hint">用平常的说法——一个街区，不是地址</string>
     <string name="rent_per_day">每日价格（%1$s）</string>
     <string name="rent_per_night">每晚价格（%1$s）</string>
-    <string name="rent_stake_note">双方各押 %1$s，租赁顺利结束后退回。</string>
+    <string name="rent_stake_note">双方各押 %1$s，顺利结束就退回。</string>
     <string name="rent_make">品牌</string>
     <string name="rent_model">型号</string>
     <string name="rent_year">年份</string>

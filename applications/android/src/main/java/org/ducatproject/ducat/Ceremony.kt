@@ -489,6 +489,17 @@ object Ceremony {
             put("funderDepPxmr", funderDepPxmr); put("hostDepPxmr", hostDepPxmr)
             put("created", System.currentTimeMillis())
             put("peer", contact.personaHex)
+            // What this deal is about, as it stood when it was struck.
+            //
+            // The thread's subject moves on — the same neighbour can sell you
+            // a grinder in March and fix your bike in April — so a booking
+            // that reads it back later would relabel itself with whatever is
+            // being discussed now. A settled deal is a record, and a record
+            // that changes its own subject is not one.
+            Enquiries.about(context, contact.personaHex)?.let { a ->
+                put("aboutTitle", a.title)
+                put("aboutKind", a.kind)
+            }
             put("i", i); put("stage", "committed")
             put("commits", JSONObject()); put("shares", JSONObject())
         }
@@ -838,6 +849,17 @@ object Ceremony {
     private const val SETTLED_SHOWN_SECS = 24 * 60 * 60L
 
     /** The ride escrow with this contact that the banner should be about. */
+    /**
+     * True when this escrow is over: paid out, signed away, or abandoned.
+     *
+     * [rideWith] deliberately returns the newest escrow whatever state it is
+     * in, because the banner narrates the newest deal. Anything asking "are
+     * these two in the middle of something" has to say so itself — asking
+     * only whether an escrow exists means yes for ever after the first one.
+     */
+    fun isFinished(o: JSONObject): Boolean =
+        o.optString("stage") in setOf("released", "release_cosigned", "aborted")
+
     fun rideWith(context: Context, peerHex: String): JSONObject? =
         all(context)
             .filter { it.optInt("kind") != KIND_BOND && !isArbiter(it) }

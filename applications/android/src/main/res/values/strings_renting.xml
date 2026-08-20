@@ -11,7 +11,7 @@
     <string name="rent_area_hint">Human words — a neighbourhood, not an address</string>
     <string name="rent_per_day">Price per day (%1$s)</string>
     <string name="rent_per_night">Price per night (%1$s)</string>
-    <string name="rent_stake_note">Each side stakes %1$s, refunded when the rental ends well.</string>
+    <string name="rent_stake_note">Each side stakes %1$s, refunded when it ends well.</string>
     <string name="rent_make">Make</string>
     <string name="rent_model">Model</string>
     <string name="rent_year">Year</string>

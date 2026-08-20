@@ -11,7 +11,7 @@
     <string name="rent_area_hint">Dengan kata biasa — nama daerah, bukan alamat</string>
     <string name="rent_per_day">Harga per hari (%1$s)</string>
     <string name="rent_per_night">Harga per malam (%1$s)</string>
-    <string name="rent_stake_note">Kedua pihak menaruh jaminan %1$s, dikembalikan bila sewanya berakhir baik.</string>
+    <string name="rent_stake_note">Masing-masing menaruh %1$s, kembali kalau berakhir baik.</string>
     <string name="rent_make">Merek</string>
     <string name="rent_model">Model</string>
     <string name="rent_year">Tahun</string>

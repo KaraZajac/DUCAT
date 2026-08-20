@@ -50,10 +50,31 @@ object Enquiries {
     fun remember(context: Context, personaHex: String, about: About) = synchronized(lock) {
         if (personaHex.isBlank()) return
         val p = prefs(context)
-        // Under the lock, or "first write wins" is only true when nothing
-        // races: two claims arriving together both pass this check and the
-        // later one repaints the subject the earlier one set.
-        if (p.contains(key(personaHex))) return
+        // The subject of the conversation *now*, which a second deal with the
+        // same person changes.
+        //
+        // This used to be first-write-wins for ever, per contact: whatever you
+        // first asked somebody about was what the thread said you were talking
+        // about, permanently. Buy a coffee grinder from a neighbour and then
+        // want to hire them to fix a bike, and the banner still says coffee
+        // grinder, the booking sheet still prefills its price, and "Propose a
+        // job" still says "Propose a purchase". In a marketplace where the
+        // whole point is that the same people trade with each other again,
+        // that is one deal per person for ever.
+        //
+        // Replaced only when it is genuinely a different thing — an identical
+        // repeat is still the same subject, and re-writing it would churn the
+        // store on every poll. Old bookings keep their own label because the
+        // escrow snapshots it (see Ceremony), rather than reading this back
+        // months later and finding it has moved on.
+        val existing = about(context, personaHex)
+        if (existing != null &&
+            existing.title == about.title &&
+            existing.pricePxmr == about.pricePxmr &&
+            existing.kind == about.kind
+        ) {
+            return
+        }
         p.edit().putString(
             key(personaHex),
             JSONObject()
@@ -64,6 +85,21 @@ object Enquiries {
                 .put("listing", about.listingId)
                 .toString(),
         ).apply()
+    }
+
+    /**
+     * Cards whose claim has already been turned into a subject.
+     *
+     * The owner's side used to skip a claim when the *contact* already had a
+     * subject, which meant a second enquiry from somebody you had already
+     * dealt with was dropped on the floor — the filter was answering "have we
+     * ever talked" when the question is "have we handled this card".
+     */
+    fun linked(context: Context, cardUri: String): Boolean =
+        prefs(context).contains("card:$cardUri")
+
+    fun markLinked(context: Context, cardUri: String) = synchronized(lock) {
+        prefs(context).edit().putBoolean("card:$cardUri", true).apply()
     }
 
     fun about(context: Context, personaHex: String): About? {

@@ -11,7 +11,7 @@
     <string name="rent_area_hint">Обычными словами — район, а не адрес</string>
     <string name="rent_per_day">Цена за день (%1$s)</string>
     <string name="rent_per_night">Цена за ночь (%1$s)</string>
-    <string name="rent_stake_note">Каждая сторона вносит залог %1$s, он возвращается, когда аренда завершается хорошо.</string>
+    <string name="rent_stake_note">Каждая сторона вносит %1$s — вернётся, если всё пройдёт хорошо.</string>
     <string name="rent_make">Марка</string>
     <string name="rent_model">Модель</string>
     <string name="rent_year">Год</string>

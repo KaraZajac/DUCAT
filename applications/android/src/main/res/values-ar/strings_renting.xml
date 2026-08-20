@@ -11,7 +11,7 @@
     <string name="rent_area_hint">بكلمات عادية — حي، وليس عنوانًا</string>
     <string name="rent_per_day">السعر لليوم (%1$s)</string>
     <string name="rent_per_night">السعر لليلة (%1$s)</string>
-    <string name="rent_stake_note">يضع كل طرف ضمانًا قدره %1$s، يُعاد عند انتهاء الإيجار على خير.</string>
+    <string name="rent_stake_note">يودع كل طرف %1$s، تُعاد عند انتهاء الأمر على خير.</string>
     <string name="rent_make">الماركة</string>
     <string name="rent_model">الطراز</string>
     <string name="rent_year">السنة</string>

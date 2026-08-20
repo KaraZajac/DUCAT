@@ -11,7 +11,7 @@
     <string name="rent_area_hint">Zwykłe słowa — dzielnica, nie adres</string>
     <string name="rent_per_day">Cena za dzień (%1$s)</string>
     <string name="rent_per_night">Cena za noc (%1$s)</string>
-    <string name="rent_stake_note">Każda strona wpłaca %1$s kaucji, zwracanej, gdy najem kończy się dobrze.</string>
+    <string name="rent_stake_note">Każda strona wpłaca %1$s, zwrot jeśli skończy się dobrze.</string>
     <string name="rent_make">Marka</string>
     <string name="rent_model">Model</string>
     <string name="rent_year">Rok</string>

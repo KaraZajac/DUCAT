@@ -1765,8 +1765,16 @@ private fun EnquiryLine(
             // Not while a bond is already running: proposing a second
             // reservation over a live escrow is not a thing anybody means to
             // do, and the banner below this one is already narrating that one.
+            // In the middle of something — not "has ever done something".
+            //
+            // This asked whether an escrow existed at all, and `rideWith`
+            // returns the newest one whatever state it is in, so the moment
+            // two people finished their first deal the button to start another
+            // one disappeared for good. One deal per pair, for ever, on the
+            // screen whose whole purpose is agreeing the next one.
             val bonded = remember(version, contact.personaHex) {
-                org.ducatproject.ducat.Ceremony.rideWith(context, contact.personaHex) != null
+                org.ducatproject.ducat.Ceremony.rideWith(context, contact.personaHex)
+                    ?.let { !org.ducatproject.ducat.Ceremony.isFinished(it) } == true
             }
             if (!bonded) {
                 TextButton(

@@ -11,7 +11,7 @@
     <string name="rent_area_hint">Gewone woorden — een buurt, geen adres</string>
     <string name="rent_per_day">Prijs per dag (%1$s)</string>
     <string name="rent_per_night">Prijs per nacht (%1$s)</string>
-    <string name="rent_stake_note">Beide kanten leggen %1$s borg in, die terugkomt als de verhuur goed afloopt.</string>
+    <string name="rent_stake_note">Elke partij zet %1$s in, terug als het goed afloopt.</string>
     <string name="rent_make">Merk</string>
     <string name="rent_model">Model</string>
     <string name="rent_year">Bouwjaar</string>

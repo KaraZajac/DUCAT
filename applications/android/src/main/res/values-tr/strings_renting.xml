@@ -11,7 +11,7 @@
     <string name="rent_area_hint">Gündelik sözcüklerle — bir semt, adres değil</string>
     <string name="rent_per_day">Günlük fiyat (%1$s)</string>
     <string name="rent_per_night">Gecelik fiyat (%1$s)</string>
-    <string name="rent_stake_note">Her iki taraf %1$s teminat yatırır; kiralama iyi biterse geri döner.</string>
+    <string name="rent_stake_note">Her iki taraf %1$s yatırır, iyi biterse geri gelir.</string>
     <string name="rent_make">Marka</string>
     <string name="rent_model">Model</string>
     <string name="rent_year">Yıl</string>

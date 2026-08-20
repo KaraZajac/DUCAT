@@ -166,7 +166,14 @@ private fun BookingsList() {
             ) {
                 Column(Modifier.padding(14.dp)) {
                     Text(
-                        about?.title ?: peer?.displayName()
+                        // The escrow's own snapshot first: the thread's
+                        // subject follows the latest conversation, and a
+                        // booking settled last month should still say what it
+                        // was for. `about` remains the fallback for deals
+                        // struck before the snapshot existed.
+                        o.optString("aboutTitle").takeIf { it.isNotBlank() }
+                            ?: about?.title
+                            ?: peer?.displayName()
                             ?: stringResource(R.string.shells_booking_someone),
                         style = MaterialTheme.typography.titleSmall,
                     )

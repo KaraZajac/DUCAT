@@ -11,7 +11,7 @@
     <string name="rent_area_hint">आम शब्दों में — मोहल्ला, पता नहीं</string>
     <string name="rent_per_day">प्रति दिन कीमत (%1$s)</string>
     <string name="rent_per_night">प्रति रात कीमत (%1$s)</string>
-    <string name="rent_stake_note">दोनों पक्ष %1$s जमानत राशि रखते हैं, जो किराया ठीक से पूरा होने पर लौट आती है।</string>
+    <string name="rent_stake_note">हर पक्ष %1$s रखता है, ठीक-ठाक निपटने पर वापस।</string>
     <string name="rent_make">कंपनी</string>
     <string name="rent_model">मॉडल</string>
     <string name="rent_year">साल</string>

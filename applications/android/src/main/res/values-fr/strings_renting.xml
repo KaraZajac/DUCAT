@@ -11,7 +11,7 @@
     <string name="rent_area_hint">Des mots simples : un quartier, pas une adresse</string>
     <string name="rent_per_day">Prix par jour (%1$s)</string>
     <string name="rent_per_night">Prix par nuit (%1$s)</string>
-    <string name="rent_stake_note">Chaque partie dépose %1$s, rendu quand la location se termine bien.</string>
+    <string name="rent_stake_note">Chaque partie dépose %1$s, rendus si tout se passe bien.</string>
     <string name="rent_make">Marque</string>
     <string name="rent_model">Modèle</string>
     <string name="rent_year">Année</string>

@@ -11,7 +11,7 @@
     <string name="rent_area_hint">با واژه‌های ساده — یک محله، نه نشانی</string>
     <string name="rent_per_day">قیمت هر روز (%1$s)</string>
     <string name="rent_per_night">قیمت هر شب (%1$s)</string>
-    <string name="rent_stake_note">هر طرف %1$s ودیعه می‌گذارد که با پایان خوش اجاره بازگردانده می‌شود.</string>
+    <string name="rent_stake_note">هر طرف %1$s می‌گذارد که اگر خوب تمام شود بازمی‌گردد.</string>
     <string name="rent_make">برند</string>
     <string name="rent_model">مدل</string>
     <string name="rent_year">سال</string>

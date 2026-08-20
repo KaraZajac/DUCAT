@@ -11,7 +11,7 @@
     <string name="rent_area_hint">Normale Worte — ein Viertel, keine Adresse</string>
     <string name="rent_per_day">Preis pro Tag (%1$s)</string>
     <string name="rent_per_night">Preis pro Nacht (%1$s)</string>
-    <string name="rent_stake_note">Beide Seiten hinterlegen %1$s als Einlage, die zurückkommt, wenn die Miete gut endet.</string>
+    <string name="rent_stake_note">Jede Seite hinterlegt %1$s, zurück wenn es gut ausgeht.</string>
     <string name="rent_make">Marke</string>
     <string name="rent_model">Modell</string>
     <string name="rent_year">Baujahr</string>

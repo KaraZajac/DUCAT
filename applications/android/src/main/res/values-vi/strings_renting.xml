@@ -11,7 +11,7 @@
     <string name="rent_area_hint">Bằng lời thường ngày — một khu phố, không phải địa chỉ</string>
     <string name="rent_per_day">Giá mỗi ngày (%1$s)</string>
     <string name="rent_per_night">Giá mỗi đêm (%1$s)</string>
-    <string name="rent_stake_note">Mỗi bên đặt cọc %1$s, được trả lại khi việc thuê kết thúc tốt đẹp.</string>
+    <string name="rent_stake_note">Mỗi bên đặt %1$s, hoàn lại nếu mọi việc suôn sẻ.</string>
     <string name="rent_make">Hãng</string>
     <string name="rent_model">Dòng xe</string>
     <string name="rent_year">Năm</string>

@@ -11,7 +11,7 @@
     <string name="rent_area_hint">ใช้คำธรรมดา — ชื่อย่าน ไม่ใช่ที่อยู่</string>
     <string name="rent_per_day">ราคาต่อวัน (%1$s)</string>
     <string name="rent_per_night">ราคาต่อคืน (%1$s)</string>
-    <string name="rent_stake_note">ทั้งสองฝ่ายวางหลักประกันฝ่ายละ %1$s และได้คืนเมื่อการเช่าจบด้วยดี</string>
+    <string name="rent_stake_note">แต่ละฝ่ายวาง %1$s คืนให้เมื่อจบด้วยดี</string>
     <string name="rent_make">ยี่ห้อ</string>
     <string name="rent_model">รุ่น</string>
     <string name="rent_year">ปี</string>

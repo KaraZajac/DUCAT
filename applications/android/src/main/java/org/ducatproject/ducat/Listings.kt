@@ -350,7 +350,12 @@ object Listings {
         // was settled days ago is work with no answer at the end of it.
         val answered = ContactStore(context).issuedCards()
             .filter { it.purpose == "rental" && it.answeredBy != null }
-            .filter { Enquiries.about(context, it.answeredBy!!) == null }
+            // By card, not by contact. "Has this person ever asked about
+            // anything" is the wrong question: a neighbour who bought
+            // something last week and is now asking about a different listing
+            // was skipped, and their enquiry arrived with the old subject
+            // still on it.
+            .filter { !Enquiries.linked(context, it.uri) }
         if (answered.isEmpty()) return
         val byCard = HashMap<String, JSONObject>()
         all(context).forEach { o ->
@@ -377,6 +382,7 @@ object Listings {
                     }
                     .onFailure { DucatLog.w(TAG, "re-post after enquiry: ${it.message}") }
             }
+            Enquiries.markLinked(context, issued.uri)
             Enquiries.remember(
                 context, issued.answeredBy!!,
                 Enquiries.About(
