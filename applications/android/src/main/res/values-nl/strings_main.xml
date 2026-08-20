@@ -4,7 +4,7 @@
     <string name="main_menu">Menu</string>
     <string name="main_codes">Codes</string>
     <string name="main_send_or_receive">Versturen of ontvangen</string>
-    <string name="main_bill_decline">Ik wijs die rekening van %1$s XMR af — deze keer niet.</string>
+    <string name="main_bill_decline">Ik wijs die rekening van %1$s af — deze keer niet.</string>
     <string name="main_backup_title">Back-up maken</string>
     <string name="main_backup_body">Je hebt contacten die niet in je laatste back-up staan. Een herstel zou het geld terugbrengen, maar niet de mensen.</string>
     <string name="main_open_backup_settings">Open back-upinstellingen</string>

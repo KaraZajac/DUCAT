@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">no se pudo publicar un código</string>
-    <string name="taxi_meter_started_msg">Taxímetro iniciado — base %1$s XMR, %2$s XMR por minuto. La cuenta al final muestra los minutos.</string>
+    <string name="taxi_meter_started_msg">Taxímetro iniciado — base %1$s, %2$s por minuto. La cuenta al final muestra los minutos.</string>
     <string name="taxi_err_terms_not_sent">Se conectó pero los términos no se enviaron: %1$s</string>
     <string name="taxi_set_fare">Fija la tarifa</string>
     <string name="taxi_base_label">Base (%1$s)</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">base %1$s + %2$s/min</string>
     <string name="taxi_rider">pasajero</string>
     <string name="taxi_line_base_fare">Tarifa base</string>
-    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s XMR/min</string>
+    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s/min</string>
     <string name="taxi_err_send_fare">no se pudo enviar la tarifa</string>
     <string name="taxi_end_ride_bill">Terminar viaje — cobrar %1$s</string>
     <string name="taxi_bill_hint">La cuenta muestra los minutos y la tarifa. El recibo le llega solo cuando cae el pago — incluso después de que se haya bajado.</string>

@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 Une carte pour me joindre — passe-la à qui devrait pouvoir me contacter. Un usage, une semaine :\n%1$s</string>
-    <string name="chat_decline_bill">Je refuse cette facture de %1$s XMR — pas cette fois.</string>
+    <string name="chat_decline_bill">Je refuse cette facture de %1$s — pas cette fois.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">Pas de clés pour ce contact — la poignée de main n\'a pas abouti. Demande-lui une nouvelle carte.</string>

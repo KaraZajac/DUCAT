@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">कोड जारी नहीं हो पाया</string>
-    <string name="taxi_meter_started_msg">मीटर शुरू — बेस %1$s XMR, %2$s XMR प्रति मिनट। आख़िर में बिल मिनट दिखाएगा।</string>
+    <string name="taxi_meter_started_msg">मीटर शुरू — बेस %1$s, %2$s प्रति मिनट। आख़िर में बिल मिनट दिखाएगा।</string>
     <string name="taxi_err_terms_not_sent">वे जुड़ गए, पर शर्तें नहीं गईं: %1$s</string>
     <string name="taxi_set_fare">किराया तय करें</string>
     <string name="taxi_base_label">बेस (%1$s)</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">बेस %1$s + %2$s/मिनट</string>
     <string name="taxi_rider">राइडर</string>
     <string name="taxi_line_base_fare">बेस किराया</string>
-    <string name="taxi_line_metered">%1$d मि %2$02d से × %3$s XMR/मिनट</string>
+    <string name="taxi_line_metered">%1$d मि %2$02d से × %3$s/मिनट</string>
     <string name="taxi_err_send_fare">किराया भेजा नहीं जा सका</string>
     <string name="taxi_end_ride_bill">राइड खत्म — बिल %1$s</string>
     <string name="taxi_bill_hint">बिल में मिनट और दर दिखते हैं। किराया पहुँचते ही रसीद अपने-आप उन तक जाती है — उनके चले जाने के बाद भी।</string>

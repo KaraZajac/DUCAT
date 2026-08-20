@@ -4,7 +4,7 @@
     <string name="main_menu">Menú</string>
     <string name="main_codes">Códigos</string>
     <string name="main_send_or_receive">Enviar o recibir</string>
-    <string name="main_bill_decline">Rechazo esa cuenta de %1$s XMR — esta vez no.</string>
+    <string name="main_bill_decline">Rechazo esa cuenta de %1$s — esta vez no.</string>
     <string name="main_backup_title">Respalda</string>
     <string name="main_backup_body">Tienes contactos que tu último respaldo no tiene. Una restauración devolvería el dinero pero no a las personas.</string>
     <string name="main_open_backup_settings">Abrir los ajustes de respaldo</string>

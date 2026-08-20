@@ -4,7 +4,7 @@
     <string name="main_menu">Меню</string>
     <string name="main_codes">Коди</string>
     <string name="main_send_or_receive">Надіслати чи отримати</string>
-    <string name="main_bill_decline">Відхиляю той рахунок на %1$s XMR — не цього разу.</string>
+    <string name="main_bill_decline">Відхиляю той рахунок на %1$s — не цього разу.</string>
     <string name="main_backup_title">Резервне копіювання</string>
     <string name="main_backup_body">У тебе є контакти, яких немає в останній копії. Відновлення поверне гроші, але не людей.</string>
     <string name="main_open_backup_settings">Відкрити налаштування копій</string>

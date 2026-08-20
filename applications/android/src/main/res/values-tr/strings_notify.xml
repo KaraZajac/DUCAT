@@ -12,4 +12,11 @@
     <string name="notify_asks_for_note">%1$s %2$s istiyor — %3$s</string>
     <string name="notify_sent">%1$s %2$s gönderdi</string>
     <string name="notify_receipt">%1$s kişisinden makbuz — %2$s</string>
+    <string name="notify_seen_title">Ödeme yolda</string>
+    <string name="notify_seen_body">%1$s görüldü — kapatılıyor</string>
+    <string name="notify_paid_title">%1$s ödedi</string>
+    <string name="notify_paid_body">%1$s — fiş gönderildi</string>
+    <string name="notify_paid_body_tip">%1$s (bahşiş %2$s) — fiş gönderildi</string>
+    <string name="notify_arrived_title">Para geldi</string>
+    <string name="notify_arrived_body">%1$s — on blok sonra çözülür</string>
 </resources>

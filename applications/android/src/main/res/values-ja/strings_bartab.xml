@@ -22,8 +22,8 @@
     <string name="bartab_err_publish_code">コードを公開できませんでした</string>
     <string name="bartab_or_regular">または常連から</string>
     <string name="bartab_back">戻る</string>
-    <string name="bartab_bill_cancelled_msg">%1$s XMRの請求はキャンセルされました — 支払いは不要です。</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · ツケ合計 %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">%1$sの請求はキャンセルされました — 支払いは不要です。</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · ツケ合計 %3$s</string>
     <string name="bartab_remove_line">削除</string>
     <string name="bartab_err_send_bill">請求を送れませんでした</string>
     <string name="bartab_settle_bill">精算 — 請求 %1$s</string>
@@ -51,5 +51,5 @@
     <string name="bill_note_tab">お会計</string>
     <string name="receipt_note">領収 — ありがとうございました</string>
     <string name="receipt_note_oob">領収 — DUCAT外でのお支払い。ありがとうございました</string>
-    <string name="bill_note_cancelled">%1$s XMR のご請求は取り消しました。お支払いは不要です。</string>
+    <string name="bill_note_cancelled">%1$s のご請求は取り消しました。お支払いは不要です。</string>
 </resources>

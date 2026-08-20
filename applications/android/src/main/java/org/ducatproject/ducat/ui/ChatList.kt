@@ -17,13 +17,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import android.content.Context
+import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.R
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.draw.clip
 import org.ducatproject.ducat.StoredMessage
-import org.ducatproject.ducat.formatXmr
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -325,11 +325,20 @@ internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
 /** What one message looks like from a list away (§16.13's kinds included). */
 internal fun previewOf(context: Context, m: StoredMessage): String = when {
     m.kind == 1 ->
-        context.getString(R.string.chatlist_preview_requested, formatXmr(m.amountPxmr))
+        context.getString(
+            R.string.chatlist_preview_requested,
+            Amounts.show(context, m.amountPxmr).primary,
+        )
     m.kind == 2 ->
-        context.getString(R.string.chatlist_preview_sent, formatXmr(m.amountPxmr))
+        context.getString(
+            R.string.chatlist_preview_sent,
+            Amounts.show(context, m.amountPxmr).primary,
+        )
     m.kind == 3 ->
-        context.getString(R.string.chatlist_preview_receipt, formatXmr(m.amountPxmr))
+        context.getString(
+            R.string.chatlist_preview_receipt,
+            Amounts.show(context, m.amountPxmr).primary,
+        )
     m.kind == 4 -> context.getString(R.string.chatlist_preview_reacted, m.body)
     m.attHash != null -> context.getString(R.string.chatlist_preview_photo)
     else -> m.body

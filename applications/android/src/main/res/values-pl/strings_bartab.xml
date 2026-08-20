@@ -25,8 +25,8 @@
     <string name="bartab_err_publish_code">nie udało się opublikować kodu</string>
     <string name="bartab_or_regular">Albo stały klient</string>
     <string name="bartab_back">Wstecz</string>
-    <string name="bartab_bill_cancelled_msg">To rozliczenie na %1$s XMR jest anulowane — nie ma nic do zapłaty.</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · rachunek: %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">To rozliczenie na %1$s jest anulowane — nie ma nic do zapłaty.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · rachunek: %3$s</string>
     <string name="bartab_remove_line">Usuń</string>
     <string name="bartab_err_send_bill">nie udało się wysłać rozliczenia</string>
     <string name="bartab_settle_bill">Zamknij — rozliczenie na %1$s</string>
@@ -54,5 +54,5 @@
     <string name="bill_note_tab">Twój rachunek</string>
     <string name="receipt_note">Paragon — dziękujemy</string>
     <string name="receipt_note_oob">Paragon — zapłacone poza DUCAT. Dziękujemy</string>
-    <string name="bill_note_cancelled">Rachunek na %1$s XMR został anulowany — nie ma nic do zapłaty.</string>
+    <string name="bill_note_cancelled">Rachunek na %1$s został anulowany — nie ma nic do zapłaty.</string>
 </resources>

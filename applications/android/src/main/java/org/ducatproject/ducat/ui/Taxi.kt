@@ -183,7 +183,13 @@ private fun NewRideScreen(rides: RideStore) {
                         context, fresh,
                         context.getString(
                             R.string.taxi_meter_started_msg,
-                            formatXmr(basePxmr!!), formatXmr(perMinPxmr!!),
+                            // The driver's own money, like the driver's own
+                            // language: a rider who reads "base 0.005357 XMR,
+                            // 0.000114 XMR per minute" has been told nothing
+                            // they can weigh against the ride they are about
+                            // to take.
+                            Amounts.show(context, basePxmr!!).primary,
+                            Amounts.show(context, perMinPxmr!!).primary,
                         ),
                         PersonaStore(context).personaHex(),
                     )
@@ -302,7 +308,8 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
         Text(
             stringResource(
                 R.string.taxi_meter_terms,
-                formatXmr(rides.basePxmr()), formatXmr(rides.perMinPxmr()),
+                Amounts.show(context, rides.basePxmr()).primary,
+                Amounts.show(context, rides.perMinPxmr()).primary,
             ) + " · " + (contact?.displayName() ?: stringResource(R.string.taxi_rider)),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -323,7 +330,8 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
                     add(BillItem(
                         context.getString(
                             R.string.taxi_line_metered,
-                            endSecs / 60, endSecs % 60, formatXmr(rides.perMinPxmr()),
+                            endSecs / 60, endSecs % 60,
+                            Amounts.show(context, rides.perMinPxmr()).primary,
                         ),
                         meteredEnd,
                     ))

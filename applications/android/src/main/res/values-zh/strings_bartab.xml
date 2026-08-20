@@ -22,8 +22,8 @@
     <string name="bartab_err_publish_code">无法发布连接码</string>
     <string name="bartab_or_regular">或选一位常客</string>
     <string name="bartab_back">返回</string>
-    <string name="bartab_bill_cancelled_msg">那张 %1$s XMR 的账单已取消 — 不用付了。</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · 挂账现共 %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">那张 %1$s 的账单已取消 — 不用付了。</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · 挂账现共 %3$s</string>
     <string name="bartab_remove_line">移除</string>
     <string name="bartab_err_send_bill">账单发不出去</string>
     <string name="bartab_settle_bill">结账 — 账单 %1$s</string>
@@ -51,5 +51,5 @@
     <string name="bill_note_tab">您的账单</string>
     <string name="receipt_note">收据 — 谢谢惠顾</string>
     <string name="receipt_note_oob">收据 — 已在 DUCAT 之外结清。谢谢惠顾</string>
-    <string name="bill_note_cancelled">%1$s XMR 的这笔账单已取消，无需付款。</string>
+    <string name="bill_note_cancelled">%1$s 的这笔账单已取消，无需付款。</string>
 </resources>

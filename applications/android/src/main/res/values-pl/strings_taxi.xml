@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">nie udało się opublikować kodu</string>
-    <string name="taxi_meter_started_msg">Taksometr wystartował — baza %1$s XMR, %2$s XMR za minutę. Rozliczenie na końcu pokaże minuty.</string>
+    <string name="taxi_meter_started_msg">Taksometr wystartował — baza %1$s, %2$s za minutę. Rozliczenie na końcu pokaże minuty.</string>
     <string name="taxi_err_terms_not_sent">Połączyli się, ale warunki nie doszły: %1$s</string>
     <string name="taxi_set_fare">Ustal stawkę</string>
     <string name="taxi_base_label">Baza (%1$s)</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">baza %1$s + %2$s/min</string>
     <string name="taxi_rider">pasażer</string>
     <string name="taxi_line_base_fare">Opłata bazowa</string>
-    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s XMR/min</string>
+    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s/min</string>
     <string name="taxi_err_send_fare">nie udało się wysłać rozliczenia</string>
     <string name="taxi_end_ride_bill">Zakończ przejazd — rozliczenie %1$s</string>
     <string name="taxi_bill_hint">Rozliczenie pokazuje minuty i stawkę. Paragon trafi do nich sam, gdy zapłata dojdzie — nawet jeśli już odeszli.</string>

@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 بطاقة تخصّني — مرّرها إلى من ينبغي أن يصل إليّ. استخدام واحد، أسبوع واحد:\n%1$s</string>
-    <string name="chat_decline_bill">أرفض تلك الفاتورة البالغة %1$s XMR — ليس هذه المرة.</string>
+    <string name="chat_decline_bill">أرفض تلك الفاتورة البالغة %1$s — ليس هذه المرة.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">لا مفاتيح لجهة الاتصال هذه — لم تكتمل المصافحة. اطلب منهم بطاقة جديدة.</string>

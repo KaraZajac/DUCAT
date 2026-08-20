@@ -25,8 +25,8 @@
     <string name="bartab_err_publish_code">не вдалося опублікувати код</string>
     <string name="bartab_or_regular">Або постійний клієнт</string>
     <string name="bartab_back">Назад</string>
-    <string name="bartab_bill_cancelled_msg">Той рахунок на %1$s XMR скасовано — платити нічого.</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · на рахунку вже %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">Той рахунок на %1$s скасовано — платити нічого.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · на рахунку вже %3$s</string>
     <string name="bartab_remove_line">Прибрати</string>
     <string name="bartab_err_send_bill">не вдалося надіслати рахунок</string>
     <string name="bartab_settle_bill">Розрахувати — рахунок %1$s</string>
@@ -54,5 +54,5 @@
     <string name="bill_note_tab">Ваш рахунок</string>
     <string name="receipt_note">Чек — дякуємо</string>
     <string name="receipt_note_oob">Чек — оплачено поза DUCAT. Дякуємо</string>
-    <string name="bill_note_cancelled">Рахунок на %1$s XMR скасовано — платити нічого.</string>
+    <string name="bill_note_cancelled">Рахунок на %1$s скасовано — платити нічого.</string>
 </resources>

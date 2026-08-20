@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 Bana ait bir kart — bana ulaşması gereken kişiye ver. Tek kullanım, bir hafta:\n%1$s</string>
-    <string name="chat_decline_bill">%1$s XMR tutarındaki hesabı reddediyorum — bu sefer değil.</string>
+    <string name="chat_decline_bill">%1$s tutarındaki hesabı reddediyorum — bu sefer değil.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">Bu kişi için anahtar yok — el sıkışma tamamlanmadı. Yeni bir kart iste.</string>

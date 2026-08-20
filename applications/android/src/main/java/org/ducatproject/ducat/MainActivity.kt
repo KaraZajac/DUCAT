@@ -426,7 +426,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 markSeen()
                 val mine = PersonaStore(context).personaHex()
                 val body = context.getString(
-                    R.string.main_bill_decline, formatXmr(m.amountPxmr),
+                    R.string.main_bill_decline,
+                    Amounts.show(context, m.amountPxmr).primary,
                 )
                 // Advisory, but not fire-and-forget: the other side is waiting
                 // on this bill, and a decline that never leaves reads as being

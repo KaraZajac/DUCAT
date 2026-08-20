@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 Kartu untukku — berikan ke siapa pun yang boleh menghubungiku. Satu klaim, satu minggu:\n%1$s</string>
-    <string name="chat_decline_bill">Menolak tagihan %1$s XMR itu — kali ini tidak.</string>
+    <string name="chat_decline_bill">Menolak tagihan %1$s itu — kali ini tidak.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">Tidak ada kunci untuk kontak ini — jabat tangannya tidak selesai. Minta kartu baru ke mereka.</string>

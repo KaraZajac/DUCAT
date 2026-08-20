@@ -4,7 +4,7 @@
     <string name="main_menu">Меню</string>
     <string name="main_codes">Коды</string>
     <string name="main_send_or_receive">Отправить или получить</string>
-    <string name="main_bill_decline">Отклоняю счёт на %1$s XMR — не в этот раз.</string>
+    <string name="main_bill_decline">Отклоняю счёт на %1$s — не в этот раз.</string>
     <string name="main_backup_title">Резервная копия</string>
     <string name="main_backup_body">У тебя есть контакты, которых нет в последней резервной копии. Восстановление вернёт деньги, но не людей.</string>
     <string name="main_open_backup_settings">Открыть настройки резервной копии</string>

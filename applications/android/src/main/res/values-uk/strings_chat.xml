@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 Картка для мене — передай її тому, хто має мене знайти. Одне використання, один тиждень:\n%1$s</string>
-    <string name="chat_decline_bill">Відхиляю той рахунок на %1$s XMR — не цього разу.</string>
+    <string name="chat_decline_bill">Відхиляю той рахунок на %1$s — не цього разу.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">Немає ключів для цього контакту — рукостискання не завершилося. Попроси нову картку.</string>

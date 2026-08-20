@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">could not publish a code</string>
-    <string name="taxi_meter_started_msg">Meter started — base %1$s XMR, %2$s XMR per minute. The bill at the end shows the minutes.</string>
+    <string name="taxi_meter_started_msg">Meter started — base %1$s, %2$s per minute. The bill at the end shows the minutes.</string>
     <string name="taxi_err_terms_not_sent">They connected but the terms did not send: %1$s</string>
     <string name="taxi_set_fare">Set the fare</string>
     <string name="taxi_base_label">Base (%1$s)</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">base %1$s + %2$s/min</string>
     <string name="taxi_rider">rider</string>
     <string name="taxi_line_base_fare">Base fare</string>
-    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s XMR/min</string>
+    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s/min</string>
     <string name="taxi_err_send_fare">could not send the fare</string>
     <string name="taxi_end_ride_bill">End ride — bill %1$s</string>
     <string name="taxi_bill_hint">The bill shows the minutes and the rate. The receipt goes to them by itself when the fare lands — even after they have walked away.</string>

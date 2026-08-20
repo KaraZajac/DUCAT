@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">Kişi ekle</string>
     <string name="chatlist_add_contact_hint">Sana verilen bir kartı tara ya da yapıştır</string>
     <string name="chatlist_no_contacts_yet">Henüz kişi yok.</string>
-    <string name="chatlist_preview_requested">💸 %1$s XMR istendi</string>
-    <string name="chatlist_preview_sent">💸 %1$s XMR gönderildi</string>
-    <string name="chatlist_preview_receipt">🧾 Makbuz — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 %1$s istendi</string>
+    <string name="chatlist_preview_sent">💸 %1$s gönderildi</string>
+    <string name="chatlist_preview_receipt">🧾 Makbuz — %1$s</string>
     <string name="chatlist_preview_reacted">%1$s ile tepki verdi</string>
     <string name="chatlist_preview_photo">📷 Fotoğraf</string>
     <string name="chatlist_time_now">şimdi</string>

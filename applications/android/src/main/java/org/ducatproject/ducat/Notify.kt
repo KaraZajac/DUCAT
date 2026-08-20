@@ -86,16 +86,24 @@ object Notify {
             1 -> {
                 val note = m.body.takeIf { it.isNotBlank() && it != "Payment request" }
                 if (note != null) context.getString(
-                    R.string.notify_asks_for_note, from, xmr(m.amountPxmr), note)
+                    R.string.notify_asks_for_note, from, xmr(context, m.amountPxmr), note)
                 else context.getString(
-                    R.string.notify_asks_for, from, xmr(m.amountPxmr))
+                    R.string.notify_asks_for, from, xmr(context, m.amountPxmr))
             }
-            2 -> context.getString(R.string.notify_sent, from, xmr(m.amountPxmr))
-            3 -> context.getString(R.string.notify_receipt, from, xmr(m.amountPxmr))
+            2 -> context.getString(R.string.notify_sent, from, xmr(context, m.amountPxmr))
+            3 -> context.getString(R.string.notify_receipt, from, xmr(context, m.amountPxmr))
             else -> m.body
         }
         post(context, from, what, openChat = personaHex)
     }
 
-    private fun xmr(pxmr: Long) = "${formatXmr(pxmr)} XMR"
+    /**
+     * An amount as this phone reads money.
+     *
+     * A notification is the one place a payment is met without a screen around
+     * it — no balance above, nothing to compare against — so "0.028571 XMR"
+     * arriving on the lock screen tells the person almost nothing. It was the
+     * last thing still quoting piconero at somebody who had not asked for it.
+     */
+    private fun xmr(context: Context, pxmr: Long) = Amounts.show(context, pxmr).primary
 }

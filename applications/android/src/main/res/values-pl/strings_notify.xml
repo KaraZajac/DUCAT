@@ -12,4 +12,11 @@
     <string name="notify_asks_for_note">%1$s prosi o %2$s — %3$s</string>
     <string name="notify_sent">%1$s wysyła %2$s</string>
     <string name="notify_receipt">Paragon od %1$s — %2$s</string>
+    <string name="notify_seen_title">Płatność w drodze</string>
+    <string name="notify_seen_body">Widać %1$s — rozliczam</string>
+    <string name="notify_paid_title">%1$s zapłacił</string>
+    <string name="notify_paid_body">%1$s — paragon wysłany</string>
+    <string name="notify_paid_body_tip">%1$s (napiwek %2$s) — paragon wysłany</string>
+    <string name="notify_arrived_title">Wpłynęły pieniądze</string>
+    <string name="notify_arrived_body">%1$s — odblokuje się po dziesięciu blokach</string>
 </resources>

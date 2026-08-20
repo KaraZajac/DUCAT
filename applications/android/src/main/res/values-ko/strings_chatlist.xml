@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">연락처 추가</string>
     <string name="chatlist_add_contact_hint">받은 카드를 스캔하거나 붙여넣으세요</string>
     <string name="chatlist_no_contacts_yet">아직 연락처가 없어요.</string>
-    <string name="chatlist_preview_requested">💸 %1$s XMR 요청</string>
-    <string name="chatlist_preview_sent">💸 %1$s XMR 보냄</string>
-    <string name="chatlist_preview_receipt">🧾 영수증 — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 %1$s 요청</string>
+    <string name="chatlist_preview_sent">💸 %1$s 보냄</string>
+    <string name="chatlist_preview_receipt">🧾 영수증 — %1$s</string>
     <string name="chatlist_preview_reacted">반응: %1$s</string>
     <string name="chatlist_preview_photo">📷 사진</string>
     <string name="chatlist_time_now">방금</string>

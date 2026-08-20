@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">rozliczone</string>
     <string name="kiosk_state_abandoned">odszedł</string>
     <string name="kiosk_notify_title">Zamówienie nr %1$d</string>
-    <string name="kiosk_notify_body">Widać %1$s XMR — zamówienie opłacone</string>
+    <string name="kiosk_notify_body">Widać %1$s — zamówienie opłacone</string>
     <string name="kiosk_mode_title">Kiosk</string>
     <string name="kiosk_mode_body">Ekran zwrócony do klienta: dotyka tego, co chce, potem przykłada telefon albo skanuje, a rachunek trafia na jego własny telefon. Wyjście wymaga twojego PIN-u.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

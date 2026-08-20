@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">Voeg een contact toe</string>
     <string name="chatlist_add_contact_hint">Scan of plak een kaartje dat je van iemand kreeg</string>
     <string name="chatlist_no_contacts_yet">Nog geen contacten.</string>
-    <string name="chatlist_preview_requested">💸 %1$s XMR gevraagd</string>
-    <string name="chatlist_preview_sent">💸 %1$s XMR verstuurd</string>
-    <string name="chatlist_preview_receipt">🧾 Bon — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 %1$s gevraagd</string>
+    <string name="chatlist_preview_sent">💸 %1$s verstuurd</string>
+    <string name="chatlist_preview_receipt">🧾 Bon — %1$s</string>
     <string name="chatlist_preview_reacted">Reageerde met %1$s</string>
     <string name="chatlist_preview_photo">📷 Foto</string>
     <string name="chatlist_time_now">nu</string>

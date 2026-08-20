@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">无法发布接客码</string>
-    <string name="taxi_meter_started_msg">计价器已启动 — 起步 %1$s XMR，每分钟 %2$s XMR。结束时账单列明分钟数。</string>
+    <string name="taxi_meter_started_msg">计价器已启动 — 起步 %1$s，每分钟 %2$s。结束时账单列明分钟数。</string>
     <string name="taxi_err_terms_not_sent">对方已连接，但计费条款没发出去：%1$s</string>
     <string name="taxi_set_fare">设定车费</string>
     <string name="taxi_base_label">起步价（%1$s）</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">起步 %1$s + %2$s/分钟</string>
     <string name="taxi_rider">乘客</string>
     <string name="taxi_line_base_fare">起步价</string>
-    <string name="taxi_line_metered">%1$d 分 %2$02d 秒 × %3$s XMR/分钟</string>
+    <string name="taxi_line_metered">%1$d 分 %2$02d 秒 × %3$s/分钟</string>
     <string name="taxi_err_send_fare">车费发不出去</string>
     <string name="taxi_end_ride_bill">结束行程 — 出账 %1$s</string>
     <string name="taxi_bill_hint">账单列明分钟数和费率。车费到账后收据会自动发给对方 — 哪怕人已经走远。</string>

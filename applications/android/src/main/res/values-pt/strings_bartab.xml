@@ -23,8 +23,8 @@
     <string name="bartab_err_publish_code">não foi possível publicar um código</string>
     <string name="bartab_or_regular">Ou um cliente habitual</string>
     <string name="bartab_back">Voltar</string>
-    <string name="bartab_bill_cancelled_msg">Aquela conta de %1$s XMR foi cancelada — nada a pagar.</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · comanda agora em %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">Aquela conta de %1$s foi cancelada — nada a pagar.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · comanda agora em %3$s</string>
     <string name="bartab_remove_line">Remover</string>
     <string name="bartab_err_send_bill">não foi possível enviar a conta</string>
     <string name="bartab_settle_bill">Fechar — conta %1$s</string>
@@ -52,5 +52,5 @@
     <string name="bill_note_tab">A sua conta</string>
     <string name="receipt_note">Recibo — obrigado</string>
     <string name="receipt_note_oob">Recibo — pago fora do DUCAT. Obrigado</string>
-    <string name="bill_note_cancelled">A conta de %1$s XMR foi anulada — não há nada a pagar.</string>
+    <string name="bill_note_cancelled">A conta de %1$s foi anulada — não há nada a pagar.</string>
 </resources>

@@ -32,7 +32,7 @@
 
     <!-- Corpi dei messaggi composti dall'app -->
     <string name="chat_intro_card_body">🎟 Un biglietto per me — passalo a chi deve potermi raggiungere. Un solo uso, una settimana:\n%1$s</string>
-    <string name="chat_decline_bill">Rifiuto quel conto da %1$s XMR — non stavolta.</string>
+    <string name="chat_decline_bill">Rifiuto quel conto da %1$s — non stavolta.</string>
 
     <!-- Avvisi del filo -->
     <string name="chat_no_keys">Nessuna chiave per questo contatto — la stretta di mano non si è completata. Chiedigli un nuovo biglietto.</string>

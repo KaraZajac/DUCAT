@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">कॉन्टैक्ट जोड़ें</string>
     <string name="chatlist_add_contact_hint">किसी का दिया कार्ड स्कैन करें या चिपकाएँ</string>
     <string name="chatlist_no_contacts_yet">अभी कोई कॉन्टैक्ट नहीं।</string>
-    <string name="chatlist_preview_requested">💸 %1$s XMR माँगे</string>
-    <string name="chatlist_preview_sent">💸 %1$s XMR भेजे</string>
-    <string name="chatlist_preview_receipt">🧾 रसीद — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 %1$s माँगे</string>
+    <string name="chatlist_preview_sent">💸 %1$s भेजे</string>
+    <string name="chatlist_preview_receipt">🧾 रसीद — %1$s</string>
     <string name="chatlist_preview_reacted">रिएक्शन %1$s</string>
     <string name="chatlist_preview_photo">📷 फ़ोटो</string>
     <string name="chatlist_time_now">अभी</string>

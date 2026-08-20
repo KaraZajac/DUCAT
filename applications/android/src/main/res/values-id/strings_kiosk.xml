@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">selesai</string>
     <string name="kiosk_state_abandoned">pergi</string>
     <string name="kiosk_notify_title">Pesanan #%1$d</string>
-    <string name="kiosk_notify_body">%1$s XMR terlihat — pesanan sudah dibayar</string>
+    <string name="kiosk_notify_body">%1$s terlihat — pesanan sudah dibayar</string>
     <string name="kiosk_mode_title">Kios</string>
     <string name="kiosk_mode_body">Layar yang menghadap pelanggan: mereka menekan apa yang diinginkan, lalu menempelkan ponsel atau memindai, dan tagihannya sampai di ponsel mereka sendiri. Keluar dari mode ini perlu PIN kamu.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

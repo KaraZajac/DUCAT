@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 Eine Karte für mich — gib sie weiter, an wen immer mich erreichen soll. Einmal einlösbar, eine Woche gültig:\n%1$s</string>
-    <string name="chat_decline_bill">Ich lehne die Rechnung über %1$s XMR ab — diesmal nicht.</string>
+    <string name="chat_decline_bill">Ich lehne die Rechnung über %1$s ab — diesmal nicht.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">Keine Schlüssel für diesen Kontakt — der Handshake wurde nicht abgeschlossen. Bitte um eine neue Karte.</string>

@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">рассчитан</string>
     <string name="kiosk_state_abandoned">ушёл</string>
     <string name="kiosk_notify_title">Заказ № %1$d</string>
-    <string name="kiosk_notify_body">Видно %1$s XMR — заказ оплачен</string>
+    <string name="kiosk_notify_body">Видно %1$s — заказ оплачен</string>
     <string name="kiosk_mode_title">Киоск</string>
     <string name="kiosk_mode_body">Экран, повёрнутый к покупателю: он нажимает то, что хочет, затем прикладывает телефон или сканирует — и счёт приходит на его собственный телефон. Чтобы выйти, нужен твой PIN.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

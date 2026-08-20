@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">đã tất toán</string>
     <string name="kiosk_state_abandoned">bỏ đi</string>
     <string name="kiosk_notify_title">Đơn số %1$d</string>
-    <string name="kiosk_notify_body">Đã thấy %1$s XMR — đơn đã được thanh toán</string>
+    <string name="kiosk_notify_body">Đã thấy %1$s — đơn đã được thanh toán</string>
     <string name="kiosk_mode_title">Kiosk</string>
     <string name="kiosk_mode_body">Một màn hình hướng về phía khách: họ chạm chọn thứ mình muốn, rồi chạm điện thoại hoặc quét mã, và hoá đơn về thẳng điện thoại của họ. Muốn thoát thì cần mã PIN của bạn.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

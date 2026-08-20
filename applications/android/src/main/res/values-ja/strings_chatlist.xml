@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">連絡先を追加</string>
     <string name="chatlist_add_contact_hint">もらったカードをスキャンまたは貼り付け</string>
     <string name="chatlist_no_contacts_yet">まだ連絡先はありません。</string>
-    <string name="chatlist_preview_requested">💸 %1$s XMRを請求</string>
-    <string name="chatlist_preview_sent">💸 %1$s XMRを送金</string>
-    <string name="chatlist_preview_receipt">🧾 レシート — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 %1$sを請求</string>
+    <string name="chatlist_preview_sent">💸 %1$sを送金</string>
+    <string name="chatlist_preview_receipt">🧾 レシート — %1$s</string>
     <string name="chatlist_preview_reacted">%1$sでリアクション</string>
     <string name="chatlist_preview_photo">📷 写真</string>
     <string name="chatlist_time_now">今</string>

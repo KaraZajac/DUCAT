@@ -12,4 +12,11 @@
     <string name="notify_asks_for_note">%1$s chiede %2$s — %3$s</string>
     <string name="notify_sent">%1$s ha inviato %2$s</string>
     <string name="notify_receipt">Ricevuta da %1$s — %2$s</string>
+    <string name="notify_seen_title">Pagamento in arrivo</string>
+    <string name="notify_seen_body">%1$s visto — sto chiudendo</string>
+    <string name="notify_paid_title">%1$s ha pagato</string>
+    <string name="notify_paid_body">%1$s — ricevuta inviata</string>
+    <string name="notify_paid_body_tip">%1$s (mancia %2$s) — ricevuta inviata</string>
+    <string name="notify_arrived_title">Denaro arrivato</string>
+    <string name="notify_arrived_body">%1$s — sbloccato dopo dieci blocchi</string>
 </resources>

@@ -1,7 +1,7 @@
 <resources>
     <!-- Tassametro (Taxi.kt) -->
     <string name="taxi_err_publish_code">impossibile pubblicare un codice</string>
-    <string name="taxi_meter_started_msg">Tassametro avviato — base %1$s XMR, %2$s XMR al minuto. Il conto alla fine mostra i minuti.</string>
+    <string name="taxi_meter_started_msg">Tassametro avviato — base %1$s, %2$s al minuto. Il conto alla fine mostra i minuti.</string>
     <string name="taxi_err_terms_not_sent">Si sono connessi ma le condizioni non sono partite: %1$s</string>
     <string name="taxi_set_fare">Imposta la tariffa</string>
     <string name="taxi_base_label">Base (%1$s)</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">base %1$s + %2$s/min</string>
     <string name="taxi_rider">passeggero</string>
     <string name="taxi_line_base_fare">Tariffa base</string>
-    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s XMR/min</string>
+    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s/min</string>
     <string name="taxi_err_send_fare">impossibile inviare la tariffa</string>
     <string name="taxi_end_ride_bill">Fine corsa — conto %1$s</string>
     <string name="taxi_bill_hint">Il conto mostra i minuti e la tariffa. La ricevuta gli arriva da sola quando la tariffa va a segno — anche dopo che si sono allontanati.</string>

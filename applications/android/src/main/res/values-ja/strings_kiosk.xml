@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">決済済み</string>
     <string name="kiosk_state_abandoned">立ち去りました</string>
     <string name="kiosk_notify_title">注文番号 %1$d</string>
-    <string name="kiosk_notify_body">%1$s XMR を確認 — 注文は支払い済みです</string>
+    <string name="kiosk_notify_body">%1$s を確認 — 注文は支払い済みです</string>
     <string name="kiosk_mode_title">キオスク</string>
     <string name="kiosk_mode_body">お客さんに向けた画面です。欲しいものを押してもらい、スマホをかざすか読み取ってもらうと、明細つきの請求がその人のスマホに届きます。抜けるにはPINが要ります。</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

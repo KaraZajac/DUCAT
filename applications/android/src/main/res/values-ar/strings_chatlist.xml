@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">إضافة جهة اتصال</string>
     <string name="chatlist_add_contact_hint">امسح أو الصق بطاقة أعطاك إياها أحدهم</string>
     <string name="chatlist_no_contacts_yet">لا جهات اتصال بعد.</string>
-    <string name="chatlist_preview_requested">💸 طلب %1$s XMR</string>
-    <string name="chatlist_preview_sent">💸 أُرسل %1$s XMR</string>
-    <string name="chatlist_preview_receipt">🧾 إيصال — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 طلب %1$s</string>
+    <string name="chatlist_preview_sent">💸 أُرسل %1$s</string>
+    <string name="chatlist_preview_receipt">🧾 إيصال — %1$s</string>
     <string name="chatlist_preview_reacted">تفاعل بـ %1$s</string>
     <string name="chatlist_preview_photo">📷 صورة</string>
     <string name="chatlist_time_now">الآن</string>

@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">افزودن مخاطب</string>
     <string name="chatlist_add_contact_hint">کارتی را که کسی به تو داده اسکن یا جای‌گذاری کن</string>
     <string name="chatlist_no_contacts_yet">هنوز مخاطبی نیست.</string>
-    <string name="chatlist_preview_requested">💸 درخواست %1$s XMR</string>
-    <string name="chatlist_preview_sent">💸 ارسال %1$s XMR</string>
-    <string name="chatlist_preview_receipt">🧾 رسید — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 درخواست %1$s</string>
+    <string name="chatlist_preview_sent">💸 ارسال %1$s</string>
+    <string name="chatlist_preview_receipt">🧾 رسید — %1$s</string>
     <string name="chatlist_preview_reacted">با %1$s واکنش نشان داد</string>
     <string name="chatlist_preview_photo">📷 عکس</string>
     <string name="chatlist_time_now">همین حالا</string>

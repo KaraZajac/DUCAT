@@ -23,8 +23,8 @@
     <string name="bartab_err_publish_code">kon geen code publiceren</string>
     <string name="bartab_or_regular">Of een vaste klant</string>
     <string name="bartab_back">Terug</string>
-    <string name="bartab_bill_cancelled_msg">Die rekening van %1$s XMR is geannuleerd — er hoeft niets betaald te worden.</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · tab nu %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">Die rekening van %1$s is geannuleerd — er hoeft niets betaald te worden.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · tab nu %3$s</string>
     <string name="bartab_remove_line">Verwijderen</string>
     <string name="bartab_err_send_bill">kon de rekening niet versturen</string>
     <string name="bartab_settle_bill">Afrekenen — rekening %1$s</string>
@@ -52,5 +52,5 @@
     <string name="bill_note_tab">Je rekening</string>
     <string name="receipt_note">Bon — bedankt</string>
     <string name="receipt_note_oob">Bon — buiten DUCAT betaald. Bedankt</string>
-    <string name="bill_note_cancelled">De rekening van %1$s XMR is ingetrokken — niets te betalen.</string>
+    <string name="bill_note_cancelled">De rekening van %1$s is ingetrokken — niets te betalen.</string>
 </resources>

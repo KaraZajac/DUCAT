@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">Code ließ sich nicht veröffentlichen</string>
-    <string name="taxi_meter_started_msg">Taxameter gestartet — Grundpreis %1$s XMR, %2$s XMR pro Minute. Die Rechnung am Ende zeigt die Minuten.</string>
+    <string name="taxi_meter_started_msg">Taxameter gestartet — Grundpreis %1$s, %2$s pro Minute. Die Rechnung am Ende zeigt die Minuten.</string>
     <string name="taxi_err_terms_not_sent">Verbunden, aber die Konditionen gingen nicht raus: %1$s</string>
     <string name="taxi_set_fare">Fahrpreis festlegen</string>
     <string name="taxi_base_label">Grundpreis (%1$s)</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">Grundpreis %1$s + %2$s/Min.</string>
     <string name="taxi_rider">Fahrgast</string>
     <string name="taxi_line_base_fare">Grundpreis</string>
-    <string name="taxi_line_metered">%1$d Min. %2$02d s × %3$s XMR/Min.</string>
+    <string name="taxi_line_metered">%1$d Min. %2$02d s × %3$s/Min.</string>
     <string name="taxi_err_send_fare">Fahrpreis ließ sich nicht senden</string>
     <string name="taxi_end_ride_bill">Fahrt beenden — Rechnung %1$s</string>
     <string name="taxi_bill_hint">Die Rechnung zeigt die Minuten und den Tarif. Die Quittung geht von selbst raus, sobald der Fahrpreis eintrifft — auch wenn der Fahrgast längst weg ist.</string>

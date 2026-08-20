@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 นามบัตรสำหรับติดต่อฉัน — ส่งต่อให้คนที่ควรติดต่อฉันได้ ใช้ได้ครั้งเดียว ภายในหนึ่งสัปดาห์:\n%1$s</string>
-    <string name="chat_decline_bill">ขอปฏิเสธบิล %1$s XMR นั้น — คราวนี้ขอผ่าน</string>
+    <string name="chat_decline_bill">ขอปฏิเสธบิล %1$s นั้น — คราวนี้ขอผ่าน</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">ไม่มีคีย์ของผู้ติดต่อนี้ — การเชื่อมต่อเริ่มแรกไม่เสร็จสมบูรณ์ ขอนามบัตรใบใหม่จากเขา</string>

@@ -385,7 +385,10 @@ object Orders {
             Notify.post(
                 context,
                 context.getString(R.string.kiosk_notify_title, order.number),
-                context.getString(R.string.kiosk_notify_body, formatXmr(order.totalPxmr)),
+                context.getString(
+                    R.string.kiosk_notify_body,
+                    Amounts.show(context, order.totalPxmr).primary,
+                ),
             )
             DucatLog.i(TAG, "order #${order.number} seen — ${hit.txHashHex.take(16)}…")
         }

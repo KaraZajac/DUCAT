@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">निपट गया</string>
     <string name="kiosk_state_abandoned">चला गया</string>
     <string name="kiosk_notify_title">ऑर्डर #%1$d</string>
-    <string name="kiosk_notify_body">%1$s XMR दिखा — ऑर्डर चुका दिया गया</string>
+    <string name="kiosk_notify_body">%1$s दिखा — ऑर्डर चुका दिया गया</string>
     <string name="kiosk_mode_title">कियोस्क</string>
     <string name="kiosk_mode_body">ग्राहक की तरफ़ मुड़ी एक स्क्रीन: वे जो चाहें टैप करें, फिर फ़ोन पास लाएँ या स्कैन करें — बिल उनके अपने फ़ोन पर आ जाता है। बाहर निकलने के लिए आपका पिन चाहिए।</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

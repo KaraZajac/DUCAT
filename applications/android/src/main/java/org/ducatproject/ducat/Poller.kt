@@ -128,8 +128,16 @@ class Poller(private val context: Context) {
                                             )
                                         } else {
                                             Notify.post(
-                                                context, "Money arrived",
-                                                "${formatXmr(it.amountPxmr)} XMR — unlocks after ten blocks",
+                                                context,
+                                                context.getString(
+                                                    R.string.notify_arrived_title,
+                                                ),
+                                                context.getString(
+                                                    R.string.notify_arrived_body,
+                                                    Amounts.show(
+                                                        context, it.amountPxmr,
+                                                    ).primary,
+                                                ),
                                             )
                                         }
                                     }

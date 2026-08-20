@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">settled</string>
     <string name="kiosk_state_abandoned">walked away</string>
     <string name="kiosk_notify_title">Order #%1$d</string>
-    <string name="kiosk_notify_body">%1$s XMR seen — the order is paid</string>
+    <string name="kiosk_notify_body">%1$s seen — the order is paid</string>
     <string name="kiosk_mode_title">Kiosk</string>
     <string name="kiosk_mode_body">A screen facing the customer: they tap what they want, then tap or scan to get the bill on their own phone. Leaving needs your PIN.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

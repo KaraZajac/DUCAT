@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">تمت التسوية</string>
     <string name="kiosk_state_abandoned">غادر</string>
     <string name="kiosk_notify_title">طلب رقم %1$d</string>
-    <string name="kiosk_notify_body">شوهد %1$s XMR — الطلب مدفوع</string>
+    <string name="kiosk_notify_body">شوهد %1$s — الطلب مدفوع</string>
     <string name="kiosk_mode_title">كشك</string>
     <string name="kiosk_mode_body">شاشة تواجه الزبون: يضغط على ما يريد، ثم يقرّب هاتفه أو يمسح الرمز فتصله الفاتورة على هاتفه. الخروج يحتاج رمزك السري.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

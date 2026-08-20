@@ -4,7 +4,7 @@
     <string name="main_menu">เมนู</string>
     <string name="main_codes">โค้ด</string>
     <string name="main_send_or_receive">ส่งหรือรับ</string>
-    <string name="main_bill_decline">ขอปฏิเสธบิล %1$s XMR นั้น — คราวนี้ขอผ่าน</string>
+    <string name="main_bill_decline">ขอปฏิเสธบิล %1$s นั้น — คราวนี้ขอผ่าน</string>
     <string name="main_backup_title">สำรองข้อมูล</string>
     <string name="main_backup_body">คุณมีผู้ติดต่อที่ไฟล์สำรองล่าสุดยังไม่มี การกู้คืนจะได้เงินกลับมา แต่ไม่ได้ผู้คนกลับมา</string>
     <string name="main_open_backup_settings">เปิดการตั้งค่าสำรองข้อมูล</string>

@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">ชำระเรียบร้อย</string>
     <string name="kiosk_state_abandoned">เดินจากไป</string>
     <string name="kiosk_notify_title">ออเดอร์ที่ %1$d</string>
-    <string name="kiosk_notify_body">เห็น %1$s XMR แล้ว — ออเดอร์ชำระแล้ว</string>
+    <string name="kiosk_notify_body">เห็น %1$s แล้ว — ออเดอร์ชำระแล้ว</string>
     <string name="kiosk_mode_title">คีออสก์</string>
     <string name="kiosk_mode_body">หน้าจอที่หันเข้าหาลูกค้า ลูกค้ากดสิ่งที่ต้องการ แล้วแตะโทรศัพท์หรือสแกน บิลจะไปอยู่บนโทรศัพท์ของเขาเอง ออกจากโหมดนี้ต้องใช้ PIN ของคุณ</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

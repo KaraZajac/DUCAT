@@ -4,7 +4,7 @@
     <string name="main_menu">Menu</string>
     <string name="main_codes">Codici</string>
     <string name="main_send_or_receive">Invia o ricevi</string>
-    <string name="main_bill_decline">Rifiuto quel conto da %1$s XMR — non stavolta.</string>
+    <string name="main_bill_decline">Rifiuto quel conto da %1$s — non stavolta.</string>
     <string name="main_backup_title">Fai un backup</string>
     <string name="main_backup_body">Hai contatti che il tuo ultimo backup non ha. Un ripristino riporterebbe i soldi ma non le persone.</string>
     <string name="main_open_backup_settings">Apri le impostazioni di backup</string>

@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">không phát hành được mã</string>
-    <string name="taxi_meter_started_msg">Đồng hồ đã chạy — mở cửa %1$s XMR, %2$s XMR mỗi phút. Hóa đơn cuối chuyến hiện số phút.</string>
+    <string name="taxi_meter_started_msg">Đồng hồ đã chạy — mở cửa %1$s, %2$s mỗi phút. Hóa đơn cuối chuyến hiện số phút.</string>
     <string name="taxi_err_terms_not_sent">Họ đã kết nối nhưng các điều khoản không gửi được: %1$s</string>
     <string name="taxi_set_fare">Đặt giá cước</string>
     <string name="taxi_base_label">Mở cửa (%1$s)</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">mở cửa %1$s + %2$s/phút</string>
     <string name="taxi_rider">khách</string>
     <string name="taxi_line_base_fare">Giá mở cửa</string>
-    <string name="taxi_line_metered">%1$d phút %2$02d giây × %3$s XMR/phút</string>
+    <string name="taxi_line_metered">%1$d phút %2$02d giây × %3$s/phút</string>
     <string name="taxi_err_send_fare">không gửi được tiền cước</string>
     <string name="taxi_end_ride_bill">Kết thúc chuyến — hóa đơn %1$s</string>
     <string name="taxi_bill_hint">Hóa đơn hiện số phút và giá. Biên nhận tự gửi cho khách khi tiền về — kể cả khi họ đã đi khỏi.</string>

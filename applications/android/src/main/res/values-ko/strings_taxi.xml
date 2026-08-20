@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">코드를 게시하지 못했어요</string>
-    <string name="taxi_meter_started_msg">미터 시작 — 기본요금 %1$s XMR, 분당 %2$s XMR. 마지막 계산서에 시간이 표시돼요.</string>
+    <string name="taxi_meter_started_msg">미터 시작 — 기본요금 %1$s, 분당 %2$s. 마지막 계산서에 시간이 표시돼요.</string>
     <string name="taxi_err_terms_not_sent">연결은 됐는데 조건이 가지 않았어요: %1$s</string>
     <string name="taxi_set_fare">요금 설정</string>
     <string name="taxi_base_label">기본요금 (%1$s)</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">기본 %1$s + 분당 %2$s</string>
     <string name="taxi_rider">승객</string>
     <string name="taxi_line_base_fare">기본요금</string>
-    <string name="taxi_line_metered">%1$d분 %2$02d초 × %3$s XMR/분</string>
+    <string name="taxi_line_metered">%1$d분 %2$02d초 × %3$s/분</string>
     <string name="taxi_err_send_fare">요금을 보내지 못했어요</string>
     <string name="taxi_end_ride_bill">운행 종료 — 계산서 %1$s</string>
     <string name="taxi_bill_hint">계산서에 시간과 요율이 표시돼요. 요금이 도착하면 영수증이 저절로 가요 — 이미 내려서 가 버린 뒤라도요.</string>

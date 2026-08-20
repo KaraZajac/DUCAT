@@ -4,7 +4,7 @@
     <string name="main_menu">منو</string>
     <string name="main_codes">کدها</string>
     <string name="main_send_or_receive">ارسال یا دریافت</string>
-    <string name="main_bill_decline">آن صورت‌حساب %1$s XMR را رد می‌کنم — این بار نه.</string>
+    <string name="main_bill_decline">آن صورت‌حساب %1$s را رد می‌کنم — این بار نه.</string>
     <string name="main_backup_title">پشتیبان بگیر</string>
     <string name="main_backup_body">مخاطبینی داری که در آخرین پشتیبانت نیستند. بازیابی، پول را برمی‌گرداند اما آدم‌ها را نه.</string>
     <string name="main_open_backup_settings">باز کردن تنظیمات پشتیبان</string>

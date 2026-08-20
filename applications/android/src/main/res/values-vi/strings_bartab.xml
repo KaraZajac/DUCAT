@@ -22,8 +22,8 @@
     <string name="bartab_err_publish_code">không phát hành được mã</string>
     <string name="bartab_or_regular">Hoặc khách quen</string>
     <string name="bartab_back">Quay lại</string>
-    <string name="bartab_bill_cancelled_msg">Hóa đơn %1$s XMR đó đã hủy — không cần trả gì.</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · tab hiện %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">Hóa đơn %1$s đó đã hủy — không cần trả gì.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · tab hiện %3$s</string>
     <string name="bartab_remove_line">Xóa</string>
     <string name="bartab_err_send_bill">không gửi được hóa đơn</string>
     <string name="bartab_settle_bill">Tất toán — hóa đơn %1$s</string>
@@ -51,5 +51,5 @@
     <string name="bill_note_tab">Hoá đơn của bạn</string>
     <string name="receipt_note">Biên nhận — cảm ơn bạn</string>
     <string name="receipt_note_oob">Biên nhận — đã thanh toán ngoài DUCAT. Cảm ơn bạn</string>
-    <string name="bill_note_cancelled">Hoá đơn %1$s XMR đã được huỷ — không phải trả gì.</string>
+    <string name="bill_note_cancelled">Hoá đơn %1$s đã được huỷ — không phải trả gì.</string>
 </resources>

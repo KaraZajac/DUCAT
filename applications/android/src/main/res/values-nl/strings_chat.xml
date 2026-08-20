@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 Een kaartje voor mij — geef het door aan wie mij moet kunnen bereiken. Eén claim, één week:\n%1$s</string>
-    <string name="chat_decline_bill">Ik wijs die rekening van %1$s XMR af — deze keer niet.</string>
+    <string name="chat_decline_bill">Ik wijs die rekening van %1$s af — deze keer niet.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">Geen sleutels voor dit contact — de handshake is niet afgerond. Vraag om een nieuw kaartje.</string>

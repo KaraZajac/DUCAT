@@ -12,4 +12,11 @@
     <string name="notify_asks_for_note">%1$s просить %2$s — %3$s</string>
     <string name="notify_sent">%1$s надсилає %2$s</string>
     <string name="notify_receipt">Чек від %1$s — %2$s</string>
+    <string name="notify_seen_title">Платіж у дорозі</string>
+    <string name="notify_seen_body">Бачимо %1$s — розраховуємось</string>
+    <string name="notify_paid_title">%1$s заплатив</string>
+    <string name="notify_paid_body">%1$s — чек надіслано</string>
+    <string name="notify_paid_body_tip">%1$s (чайові %2$s) — чек надіслано</string>
+    <string name="notify_arrived_title">Гроші надійшли</string>
+    <string name="notify_arrived_body">%1$s — розблокується через десять блоків</string>
 </resources>

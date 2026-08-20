@@ -12,4 +12,11 @@
     <string name="notify_asks_for_note">%1$s pede %2$s — %3$s</string>
     <string name="notify_sent">%1$s enviou %2$s</string>
     <string name="notify_receipt">Recibo de %1$s — %2$s</string>
+    <string name="notify_seen_title">Pagamento a caminho</string>
+    <string name="notify_seen_body">%1$s visto — a acertar</string>
+    <string name="notify_paid_title">%1$s pagou</string>
+    <string name="notify_paid_body">%1$s — recibo enviado</string>
+    <string name="notify_paid_body_tip">%1$s (gorjeta %2$s) — recibo enviado</string>
+    <string name="notify_arrived_title">Dinheiro chegou</string>
+    <string name="notify_arrived_body">%1$s — desbloqueia após dez blocos</string>
 </resources>

@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 मेरा एक कार्ड — जिसे मुझ तक पहुँचना हो, उसे दे दें। एक दावा, एक हफ़्ता:\n%1$s</string>
-    <string name="chat_decline_bill">%1$s XMR का वह बिल अस्वीकार — इस बार नहीं।</string>
+    <string name="chat_decline_bill">%1$s का वह बिल अस्वीकार — इस बार नहीं।</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">इस कॉन्टैक्ट की कोई कुंजी नहीं — हैंडशेक पूरा नहीं हुआ। उनसे नया कार्ड माँगें।</string>

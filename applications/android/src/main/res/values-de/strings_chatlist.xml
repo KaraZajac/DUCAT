@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">Kontakt hinzufügen</string>
     <string name="chatlist_add_contact_hint">Scanne oder füge eine Karte ein, die dir jemand gegeben hat</string>
     <string name="chatlist_no_contacts_yet">Noch keine Kontakte.</string>
-    <string name="chatlist_preview_requested">💸 %1$s XMR erbeten</string>
-    <string name="chatlist_preview_sent">💸 %1$s XMR gesendet</string>
-    <string name="chatlist_preview_receipt">🧾 Quittung — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 %1$s erbeten</string>
+    <string name="chatlist_preview_sent">💸 %1$s gesendet</string>
+    <string name="chatlist_preview_receipt">🧾 Quittung — %1$s</string>
     <string name="chatlist_preview_reacted">Reaktion: %1$s</string>
     <string name="chatlist_preview_photo">📷 Foto</string>
     <string name="chatlist_time_now">jetzt</string>

@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">เพิ่มผู้ติดต่อ</string>
     <string name="chatlist_add_contact_hint">สแกนหรือวางนามบัตรที่มีคนให้คุณ</string>
     <string name="chatlist_no_contacts_yet">ยังไม่มีผู้ติดต่อ</string>
-    <string name="chatlist_preview_requested">💸 ขอ %1$s XMR</string>
-    <string name="chatlist_preview_sent">💸 ส่งแล้ว %1$s XMR</string>
-    <string name="chatlist_preview_receipt">🧾 ใบเสร็จ — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 ขอ %1$s</string>
+    <string name="chatlist_preview_sent">💸 ส่งแล้ว %1$s</string>
+    <string name="chatlist_preview_receipt">🧾 ใบเสร็จ — %1$s</string>
     <string name="chatlist_preview_reacted">แสดงความรู้สึก %1$s</string>
     <string name="chatlist_preview_photo">📷 รูปภาพ</string>
     <string name="chatlist_time_now">ตอนนี้</string>

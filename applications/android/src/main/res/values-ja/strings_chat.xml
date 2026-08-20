@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 私へのカードです — 私に連絡すべき人へ渡してください。1回限り、有効期間は1週間です:\n%1$s</string>
-    <string name="chat_decline_bill">%1$s XMRの請求をお断りします — 今回は見送ります。</string>
+    <string name="chat_decline_bill">%1$sの請求をお断りします — 今回は見送ります。</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">この連絡先の鍵がありません — ハンドシェイクが完了しませんでした。新しいカードをもらってください。</string>

@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">kon geen code publiceren</string>
-    <string name="taxi_meter_started_msg">Meter gestart — basis %1$s XMR, %2$s XMR per minuut. De rekening aan het eind toont de minuten.</string>
+    <string name="taxi_meter_started_msg">Meter gestart — basis %1$s, %2$s per minuut. De rekening aan het eind toont de minuten.</string>
     <string name="taxi_err_terms_not_sent">Ze hebben verbinding gemaakt, maar de voorwaarden zijn niet verstuurd: %1$s</string>
     <string name="taxi_set_fare">Stel de ritprijs in</string>
     <string name="taxi_base_label">Basis (%1$s)</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">basis %1$s + %2$s/min</string>
     <string name="taxi_rider">passagier</string>
     <string name="taxi_line_base_fare">Basisprijs</string>
-    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s XMR/min</string>
+    <string name="taxi_line_metered">%1$d min %2$02d s × %3$s/min</string>
     <string name="taxi_err_send_fare">kon de ritprijs niet versturen</string>
     <string name="taxi_end_ride_bill">Rit beëindigen — rekening %1$s</string>
     <string name="taxi_bill_hint">De rekening toont de minuten en het tarief. De bon gaat vanzelf naar ze zodra de ritprijs binnenkomt — ook als ze al zijn weggelopen.</string>

@@ -23,8 +23,8 @@
     <string name="bartab_err_publish_code">कोड जारी नहीं हो पाया</string>
     <string name="bartab_or_regular">या कोई जाना-पहचाना ग्राहक</string>
     <string name="bartab_back">वापस</string>
-    <string name="bartab_bill_cancelled_msg">%1$s XMR का वह बिल रद्द है — कुछ नहीं चुकाना।</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · टैब अब %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">%1$s का वह बिल रद्द है — कुछ नहीं चुकाना।</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · टैब अब %3$s</string>
     <string name="bartab_remove_line">हटाएँ</string>
     <string name="bartab_err_send_bill">बिल भेजा नहीं जा सका</string>
     <string name="bartab_settle_bill">चुकता करें — बिल %1$s</string>
@@ -52,5 +52,5 @@
     <string name="bill_note_tab">आपका बिल</string>
     <string name="receipt_note">रसीद — धन्यवाद</string>
     <string name="receipt_note_oob">रसीद — DUCAT के बाहर चुकाया गया। धन्यवाद</string>
-    <string name="bill_note_cancelled">%1$s XMR का वह बिल रद्द कर दिया गया — कुछ भी नहीं देना है।</string>
+    <string name="bill_note_cancelled">%1$s का वह बिल रद्द कर दिया गया — कुछ भी नहीं देना है।</string>
 </resources>

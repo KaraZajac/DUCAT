@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">添加联系人</string>
     <string name="chatlist_add_contact_hint">扫描或粘贴对方给你的名片</string>
     <string name="chatlist_no_contacts_yet">还没有联系人。</string>
-    <string name="chatlist_preview_requested">💸 请求 %1$s XMR</string>
-    <string name="chatlist_preview_sent">💸 发送了 %1$s XMR</string>
-    <string name="chatlist_preview_receipt">🧾 收据 — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 请求 %1$s</string>
+    <string name="chatlist_preview_sent">💸 发送了 %1$s</string>
+    <string name="chatlist_preview_receipt">🧾 收据 — %1$s</string>
     <string name="chatlist_preview_reacted">回应了 %1$s</string>
     <string name="chatlist_preview_photo">📷 照片</string>
     <string name="chatlist_time_now">刚刚</string>

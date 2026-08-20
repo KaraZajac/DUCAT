@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">Thêm liên hệ</string>
     <string name="chatlist_add_contact_hint">Quét hoặc dán thẻ ai đó đưa bạn</string>
     <string name="chatlist_no_contacts_yet">Chưa có liên hệ nào.</string>
-    <string name="chatlist_preview_requested">💸 Yêu cầu %1$s XMR</string>
-    <string name="chatlist_preview_sent">💸 Đã gửi %1$s XMR</string>
-    <string name="chatlist_preview_receipt">🧾 Biên nhận — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 Yêu cầu %1$s</string>
+    <string name="chatlist_preview_sent">💸 Đã gửi %1$s</string>
+    <string name="chatlist_preview_receipt">🧾 Biên nhận — %1$s</string>
     <string name="chatlist_preview_reacted">Đã bày tỏ %1$s</string>
     <string name="chatlist_preview_photo">📷 Ảnh</string>
     <string name="chatlist_time_now">vừa xong</string>

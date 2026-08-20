@@ -23,8 +23,8 @@
     <string name="bartab_err_publish_code">انتشار کد ممکن نشد</string>
     <string name="bartab_or_regular">یا یک مشتری همیشگی</string>
     <string name="bartab_back">بازگشت</string>
-    <string name="bartab_bill_cancelled_msg">آن صورت‌حساب %1$s XMR لغو شد — چیزی برای پرداخت نیست.</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · حساب الان %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">آن صورت‌حساب %1$s لغو شد — چیزی برای پرداخت نیست.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · حساب الان %3$s</string>
     <string name="bartab_remove_line">حذف</string>
     <string name="bartab_err_send_bill">ارسال صورت‌حساب ممکن نشد</string>
     <string name="bartab_settle_bill">تسویه — صورت‌حساب %1$s</string>
@@ -52,5 +52,5 @@
     <string name="bill_note_tab">حساب تو</string>
     <string name="receipt_note">رسید — ممنون</string>
     <string name="receipt_note_oob">رسید — بیرون از DUCAT تسویه شد. ممنون</string>
-    <string name="bill_note_cancelled">صورت‌حساب %1$s XMR لغو شد — چیزی برای پرداخت نیست.</string>
+    <string name="bill_note_cancelled">صورت‌حساب %1$s لغو شد — چیزی برای پرداخت نیست.</string>
 </resources>

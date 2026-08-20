@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 کارتی برای من — بده به هر کسی که باید به من برسد. یک بار مصرف، یک هفته اعتبار:\n%1$s</string>
-    <string name="chat_decline_bill">آن صورت‌حساب %1$s XMR را رد می‌کنم — این بار نه.</string>
+    <string name="chat_decline_bill">آن صورت‌حساب %1$s را رد می‌کنم — این بار نه.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">کلیدی برای این مخاطب نیست — دست‌دادن کامل نشد. یک کارت تازه از او بخواه.</string>

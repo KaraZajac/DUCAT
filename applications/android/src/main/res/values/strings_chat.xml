@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 A card for me — pass it to whoever should reach me. One claim, one week:\n%1$s</string>
-    <string name="chat_decline_bill">Declining that bill for %1$s XMR — not this time.</string>
+    <string name="chat_decline_bill">Declining that bill for %1$s — not this time.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">No keys for this contact — the handshake did not complete. Ask them for a new card.</string>

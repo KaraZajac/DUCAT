@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 Una tarjeta para mí — pásasela a quien deba poder contactarme. Un solo uso, una semana:\n%1$s</string>
-    <string name="chat_decline_bill">Rechazo esa cuenta de %1$s XMR — esta vez no.</string>
+    <string name="chat_decline_bill">Rechazo esa cuenta de %1$s — esta vez no.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">No hay claves para este contacto — el intercambio inicial no se completó. Pídele una tarjeta nueva.</string>

@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">تسویه‌شده</string>
     <string name="kiosk_state_abandoned">رفت</string>
     <string name="kiosk_notify_title">سفارش شمارهٔ %1$d</string>
-    <string name="kiosk_notify_body">%1$s XMR دیده شد — سفارش پرداخت شده است</string>
+    <string name="kiosk_notify_body">%1$s دیده شد — سفارش پرداخت شده است</string>
     <string name="kiosk_mode_title">کیوسک</string>
     <string name="kiosk_mode_body">صفحه‌ای رو به مشتری: آنچه می‌خواهد را می‌زند، بعد گوشی‌اش را نزدیک می‌کند یا اسکن می‌کند و صورت‌حساب روی گوشی خودش می‌آید. برای خروج پین لازم است.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

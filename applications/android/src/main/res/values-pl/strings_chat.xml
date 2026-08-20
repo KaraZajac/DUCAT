@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 Wizytówka do mnie — przekaż ją temu, kto ma mnie znaleźć. Jedno użycie, jeden tydzień:\n%1$s</string>
-    <string name="chat_decline_bill">Odrzucam ten rachunek na %1$s XMR — nie tym razem.</string>
+    <string name="chat_decline_bill">Odrzucam ten rachunek na %1$s — nie tym razem.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">Brak kluczy dla tego kontaktu — uzgadnianie nie doszło do końca. Poproś o nową wizytówkę.</string>

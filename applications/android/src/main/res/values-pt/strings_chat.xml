@@ -32,7 +32,7 @@
 
     <!-- Mensagens compostas pelo app -->
     <string name="chat_intro_card_body">🎟 Um cartão para mim — passe a quem deve conseguir me contatar. Um uso, uma semana:\n%1$s</string>
-    <string name="chat_decline_bill">Recusando essa conta de %1$s XMR — desta vez não.</string>
+    <string name="chat_decline_bill">Recusando essa conta de %1$s — desta vez não.</string>
 
     <!-- Avisos na conversa -->
     <string name="chat_no_keys">Sem chaves para este contato — o handshake não foi concluído. Peça um cartão novo à pessoa.</string>

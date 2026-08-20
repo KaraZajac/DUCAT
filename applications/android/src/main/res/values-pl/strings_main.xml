@@ -4,7 +4,7 @@
     <string name="main_menu">Menu</string>
     <string name="main_codes">Kody</string>
     <string name="main_send_or_receive">Wyślij lub odbierz</string>
-    <string name="main_bill_decline">Odrzucam ten rachunek na %1$s XMR — nie tym razem.</string>
+    <string name="main_bill_decline">Odrzucam ten rachunek na %1$s — nie tym razem.</string>
     <string name="main_backup_title">Zrób kopię</string>
     <string name="main_backup_body">Masz kontakty, których nie ma w ostatniej kopii zapasowej. Przywrócenie odzyskałoby pieniądze, ale nie ludzi.</string>
     <string name="main_open_backup_settings">Otwórz ustawienia kopii zapasowej</string>

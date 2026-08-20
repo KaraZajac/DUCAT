@@ -12,4 +12,11 @@
     <string name="notify_asks_for_note">%1$s يطلب %2$s — %3$s</string>
     <string name="notify_sent">%1$s أرسل %2$s</string>
     <string name="notify_receipt">إيصال من %1$s — %2$s</string>
+    <string name="notify_seen_title">الدفعة في طريقها</string>
+    <string name="notify_seen_body">رُصد %1$s — جارٍ التسوية</string>
+    <string name="notify_paid_title">دفع %1$s</string>
+    <string name="notify_paid_body">%1$s — أُرسل الإيصال</string>
+    <string name="notify_paid_body_tip">%1$s (بقشيش %2$s) — أُرسل الإيصال</string>
+    <string name="notify_arrived_title">وصل المال</string>
+    <string name="notify_arrived_body">%1$s — يُفتح بعد عشرة كتل</string>
 </resources>

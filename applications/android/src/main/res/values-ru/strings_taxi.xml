@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">не удалось опубликовать код</string>
-    <string name="taxi_meter_started_msg">Счётчик запущен — базовая ставка %1$s XMR, %2$s XMR в минуту. Счёт в конце покажет минуты.</string>
+    <string name="taxi_meter_started_msg">Счётчик запущен — базовая ставка %1$s, %2$s в минуту. Счёт в конце покажет минуты.</string>
     <string name="taxi_err_terms_not_sent">Подключение было, но условия не отправились: %1$s</string>
     <string name="taxi_set_fare">Задай тариф</string>
     <string name="taxi_base_label">Базовая ставка (%1$s)</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">база %1$s + %2$s/мин</string>
     <string name="taxi_rider">пассажир</string>
     <string name="taxi_line_base_fare">Базовая ставка</string>
-    <string name="taxi_line_metered">%1$d мин %2$02d с × %3$s XMR/мин</string>
+    <string name="taxi_line_metered">%1$d мин %2$02d с × %3$s/мин</string>
     <string name="taxi_err_send_fare">не удалось отправить счёт за поездку</string>
     <string name="taxi_end_ride_bill">Завершить поездку — счёт %1$s</string>
     <string name="taxi_bill_hint">В счёте видны минуты и ставка. Чек уйдёт пассажиру сам, когда придут деньги, — даже если он уже ушёл.</string>

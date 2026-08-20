@@ -12,4 +12,11 @@
     <string name="notify_asks_for_note">%1$sが%2$sを請求しています — %3$s</string>
     <string name="notify_sent">%1$sが%2$sを送金しました</string>
     <string name="notify_receipt">%1$sからのレシート — %2$s</string>
+    <string name="notify_seen_title">支払いが向かっています</string>
+    <string name="notify_seen_body">%1$s を確認 — 精算中</string>
+    <string name="notify_paid_title">%1$s さんが支払いました</string>
+    <string name="notify_paid_body">%1$s — 領収書を送信</string>
+    <string name="notify_paid_body_tip">%1$s（チップ %2$s）— 領収書を送信</string>
+    <string name="notify_arrived_title">入金がありました</string>
+    <string name="notify_arrived_body">%1$s — 10 ブロック後に使えます</string>
 </resources>

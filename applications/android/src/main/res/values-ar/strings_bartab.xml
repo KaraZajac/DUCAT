@@ -27,8 +27,8 @@
     <string name="bartab_err_publish_code">تعذّر نشر رمز</string>
     <string name="bartab_or_regular">أو زبون دائم</string>
     <string name="bartab_back">رجوع</string>
-    <string name="bartab_bill_cancelled_msg">أُلغيت تلك الفاتورة البالغة %1$s XMR — لا شيء للدفع.</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · الحساب الآن %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">أُلغيت تلك الفاتورة البالغة %1$s — لا شيء للدفع.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · الحساب الآن %3$s</string>
     <string name="bartab_remove_line">إزالة</string>
     <string name="bartab_err_send_bill">تعذّر إرسال الفاتورة</string>
     <string name="bartab_settle_bill">تسوية — فاتورة بـ %1$s</string>
@@ -56,5 +56,5 @@
     <string name="bill_note_tab">حسابك</string>
     <string name="receipt_note">إيصال — شكرًا لك</string>
     <string name="receipt_note_oob">إيصال — سُدّد خارج DUCAT. شكرًا لك</string>
-    <string name="bill_note_cancelled">أُلغيت الفاتورة البالغة %1$s XMR — لا شيء للدفع.</string>
+    <string name="bill_note_cancelled">أُلغيت الفاتورة البالغة %1$s — لا شيء للدفع.</string>
 </resources>

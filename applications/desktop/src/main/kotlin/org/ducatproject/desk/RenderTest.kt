@@ -297,6 +297,40 @@ fun main() {
     // everybody sees: money leads in the currency of the country the phone is
     // in, with the piconero underneath it.
     render("till-priced") { org.ducatproject.ducat.ui.PosScreen() }
+    // The chat list, with money in it.
+    //
+    // `chatlist.png` above is drawn before any of these threads has a bill or
+    // a receipt, so it never exercised the preview line — which is how that
+    // line went on quoting piconero at somebody long after every screen around
+    // it had switched to their own currency. One thread with a bill, one with
+    // a receipt, and a rate to read them by.
+    run {
+        val ctx = context
+        val store = org.ducatproject.ducat.ContactStore(ctx)
+        store.all().firstOrNull()?.let { c ->
+            store.append(
+                c.personaHex,
+                org.ducatproject.ducat.StoredMessage(
+                    outgoing = false, seq = 900, body = "Two coffees",
+                    timestamp = System.currentTimeMillis() / 1000,
+                    kind = 1, amountPxmr = 15_200_000_000L,
+                ),
+            )
+        }
+        store.all().getOrNull(1)?.let { c ->
+            store.append(
+                c.personaHex,
+                org.ducatproject.ducat.StoredMessage(
+                    outgoing = false, seq = 901, body = "Thanks",
+                    timestamp = System.currentTimeMillis() / 1000,
+                    kind = 3, amountPxmr = 40_000_000_000L,
+                ),
+            )
+        }
+    }
+    render("chatlist-priced") {
+        org.ducatproject.ducat.ui.ChatListScreen(personaSecret = null, onOpenChat = {})
+    }
     // The balance, and the balance whose rate nobody could refresh.
     //
     // Worth a picture because the second one only exists since the local

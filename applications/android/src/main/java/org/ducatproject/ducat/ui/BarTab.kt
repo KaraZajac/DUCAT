@@ -366,7 +366,10 @@ internal fun cancelTabWithRetract(
     runCatching {
         Mailbox.send(
             context, contact,
-            context.getString(R.string.bartab_bill_cancelled_msg, formatXmr(tab.settledTotal)),
+            context.getString(
+                R.string.bartab_bill_cancelled_msg,
+                Amounts.show(context, tab.settledTotal).primary,
+            ),
             org.ducatproject.ducat.PersonaStore(context).personaHex(),
             kind = 5, reSeq = billSeq, reOwn = true,
         )
@@ -437,7 +440,9 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                             context, c,
                             context.getString(
                                 R.string.bartab_drink_notice,
-                                d, formatXmr(a), formatXmr(updated.totalPxmr),
+                                d,
+                                Amounts.show(context, a).primary,
+                                Amounts.show(context, updated.totalPxmr).primary,
                             ),
                             org.ducatproject.ducat.PersonaStore(context).personaHex(),
                         )

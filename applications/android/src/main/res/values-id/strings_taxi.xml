@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">tidak bisa menerbitkan kode</string>
-    <string name="taxi_meter_started_msg">Argo jalan — dasar %1$s XMR, %2$s XMR per menit. Tagihan di akhir menunjukkan menitnya.</string>
+    <string name="taxi_meter_started_msg">Argo jalan — dasar %1$s, %2$s per menit. Tagihan di akhir menunjukkan menitnya.</string>
     <string name="taxi_err_terms_not_sent">Mereka terhubung tapi ketentuannya tidak terkirim: %1$s</string>
     <string name="taxi_set_fare">Atur tarif</string>
     <string name="taxi_base_label">Dasar (%1$s)</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">dasar %1$s + %2$s/mnt</string>
     <string name="taxi_rider">penumpang</string>
     <string name="taxi_line_base_fare">Tarif dasar</string>
-    <string name="taxi_line_metered">%1$d mnt %2$02d dtk × %3$s XMR/mnt</string>
+    <string name="taxi_line_metered">%1$d mnt %2$02d dtk × %3$s/mnt</string>
     <string name="taxi_err_send_fare">tidak bisa mengirim tarif</string>
     <string name="taxi_end_ride_bill">Akhiri perjalanan — tagih %1$s</string>
     <string name="taxi_bill_hint">Tagihan menunjukkan menit dan tarifnya. Struk terkirim sendiri ke mereka saat ongkos masuk — bahkan setelah mereka pergi.</string>

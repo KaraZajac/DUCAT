@@ -23,8 +23,8 @@
     <string name="bartab_err_publish_code">could not publish a code</string>
     <string name="bartab_or_regular">Or a regular</string>
     <string name="bartab_back">Back</string>
-    <string name="bartab_bill_cancelled_msg">That bill for %1$s XMR is cancelled — nothing to pay.</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · tab now %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">That bill for %1$s is cancelled — nothing to pay.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · tab now %3$s</string>
     <string name="bartab_remove_line">Remove</string>
     <string name="bartab_err_send_bill">could not send the bill</string>
     <string name="bartab_settle_bill">Settle — bill %1$s</string>
@@ -52,5 +52,5 @@
     <string name="bill_note_tab">Your tab</string>
     <string name="receipt_note">Receipt — thank you</string>
     <string name="receipt_note_oob">Receipt — settled outside DUCAT. Thank you</string>
-    <string name="bill_note_cancelled">That bill for %1$s XMR is cancelled — nothing to pay.</string>
+    <string name="bill_note_cancelled">That bill for %1$s is cancelled — nothing to pay.</string>
 </resources>

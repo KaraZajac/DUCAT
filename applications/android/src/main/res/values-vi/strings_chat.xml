@@ -32,7 +32,7 @@
 
     <!-- Message bodies composed by the app -->
     <string name="chat_intro_card_body">🎟 Một tấm thẻ để liên hệ với mình — hãy chuyển cho người cần tìm mình. Một lượt nhận, hạn một tuần:\n%1$s</string>
-    <string name="chat_decline_bill">Từ chối hóa đơn %1$s XMR đó — lần này thì không.</string>
+    <string name="chat_decline_bill">Từ chối hóa đơn %1$s đó — lần này thì không.</string>
 
     <!-- Thread notices -->
     <string name="chat_no_keys">Không có khóa cho liên hệ này — bắt tay chưa hoàn tất. Hãy xin họ một thẻ mới.</string>

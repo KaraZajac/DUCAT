@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">réglé</string>
     <string name="kiosk_state_abandoned">reparti</string>
     <string name="kiosk_notify_title">Commande n° %1$d</string>
-    <string name="kiosk_notify_body">%1$s XMR vus — la commande est payée</string>
+    <string name="kiosk_notify_body">%1$s vus — la commande est payée</string>
     <string name="kiosk_mode_title">Borne</string>
     <string name="kiosk_mode_body">Un écran tourné vers le client : il touche ce qu\'il veut, puis approche son téléphone ou scanne, et l\'addition arrive sur son propre téléphone. Il faut ton code pour sortir.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

@@ -4,7 +4,7 @@
     <string name="main_menu">Menu</string>
     <string name="main_codes">Mã</string>
     <string name="main_send_or_receive">Gửi hoặc nhận</string>
-    <string name="main_bill_decline">Từ chối hóa đơn %1$s XMR đó — lần này thì không.</string>
+    <string name="main_bill_decline">Từ chối hóa đơn %1$s đó — lần này thì không.</string>
     <string name="main_backup_title">Sao lưu</string>
     <string name="main_backup_body">Bạn có những liên hệ mà bản sao lưu gần nhất chưa có. Khôi phục sẽ lấy lại tiền nhưng không lấy lại người.</string>
     <string name="main_open_backup_settings">Mở cài đặt sao lưu</string>

@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">Добавить контакт</string>
     <string name="chatlist_add_contact_hint">Отсканируй или вставь карточку, которую тебе дали</string>
     <string name="chatlist_no_contacts_yet">Контактов пока нет.</string>
-    <string name="chatlist_preview_requested">💸 Запрошено %1$s XMR</string>
-    <string name="chatlist_preview_sent">💸 Отправлено %1$s XMR</string>
-    <string name="chatlist_preview_receipt">🧾 Чек — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 Запрошено %1$s</string>
+    <string name="chatlist_preview_sent">💸 Отправлено %1$s</string>
+    <string name="chatlist_preview_receipt">🧾 Чек — %1$s</string>
     <string name="chatlist_preview_reacted">Реакция %1$s</string>
     <string name="chatlist_preview_photo">📷 Фото</string>
     <string name="chatlist_time_now">сейчас</string>

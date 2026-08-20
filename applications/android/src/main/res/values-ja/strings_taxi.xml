@@ -1,7 +1,7 @@
 <resources>
     <!-- Taxi meter (Taxi.kt) -->
     <string name="taxi_err_publish_code">コードを公開できませんでした</string>
-    <string name="taxi_meter_started_msg">メーターを開始しました — 基本料金%1$s XMR、1分あたり%2$s XMR。最後の請求書に分数が載ります。</string>
+    <string name="taxi_meter_started_msg">メーターを開始しました — 基本料金%1$s、1分あたり%2$s。最後の請求書に分数が載ります。</string>
     <string name="taxi_err_terms_not_sent">接続はされましたが、条件を送れませんでした: %1$s</string>
     <string name="taxi_set_fare">運賃を設定</string>
     <string name="taxi_base_label">基本料金（%1$s）</string>
@@ -14,7 +14,7 @@
     <string name="taxi_meter_terms">基本%1$s + %2$s/分</string>
     <string name="taxi_rider">乗客</string>
     <string name="taxi_line_base_fare">基本料金</string>
-    <string name="taxi_line_metered">%1$d分%2$02d秒 × %3$s XMR/分</string>
+    <string name="taxi_line_metered">%1$d分%2$02d秒 × %3$s/分</string>
     <string name="taxi_err_send_fare">運賃を送れませんでした</string>
     <string name="taxi_end_ride_bill">乗車終了 — 請求 %1$s</string>
     <string name="taxi_bill_hint">請求書には分数と料金が載ります。運賃が着金するとレシートは自動で相手へ届きます — 乗客が立ち去った後でも。</string>

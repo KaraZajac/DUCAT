@@ -22,8 +22,8 @@
     <string name="bartab_err_publish_code">tidak bisa menerbitkan kode</string>
     <string name="bartab_or_regular">Atau pelanggan tetap</string>
     <string name="bartab_back">Kembali</string>
-    <string name="bartab_bill_cancelled_msg">Tagihan %1$s XMR itu dibatalkan — tidak ada yang perlu dibayar.</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · bon sekarang %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">Tagihan %1$s itu dibatalkan — tidak ada yang perlu dibayar.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · bon sekarang %3$s</string>
     <string name="bartab_remove_line">Hapus</string>
     <string name="bartab_err_send_bill">tidak bisa mengirim tagihan</string>
     <string name="bartab_settle_bill">Tutup — tagih %1$s</string>
@@ -51,5 +51,5 @@
     <string name="bill_note_tab">Tagihanmu</string>
     <string name="receipt_note">Struk — terima kasih</string>
     <string name="receipt_note_oob">Struk — dibayar di luar DUCAT. Terima kasih</string>
-    <string name="bill_note_cancelled">Tagihan %1$s XMR dibatalkan — tidak ada yang perlu dibayar.</string>
+    <string name="bill_note_cancelled">Tagihan %1$s dibatalkan — tidak ada yang perlu dibayar.</string>
 </resources>

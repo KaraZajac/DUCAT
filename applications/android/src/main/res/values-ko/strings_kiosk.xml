@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">정산됨</string>
     <string name="kiosk_state_abandoned">그냥 감</string>
     <string name="kiosk_notify_title">주문 %1$d번</string>
-    <string name="kiosk_notify_body">%1$s XMR 확인 — 주문이 결제되었습니다</string>
+    <string name="kiosk_notify_body">%1$s 확인 — 주문이 결제되었습니다</string>
     <string name="kiosk_mode_title">키오스크</string>
     <string name="kiosk_mode_body">손님을 향한 화면입니다. 원하는 것을 누르고 휴대폰을 대거나 스캔하면 항목별 청구서가 손님 휴대폰으로 갑니다. 나가려면 PIN이 필요합니다.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

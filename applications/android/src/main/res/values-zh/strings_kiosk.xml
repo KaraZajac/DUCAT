@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">已结算</string>
     <string name="kiosk_state_abandoned">离开了</string>
     <string name="kiosk_notify_title">第 %1$d 号</string>
-    <string name="kiosk_notify_body">已看到 %1$s XMR — 订单已付款</string>
+    <string name="kiosk_notify_body">已看到 %1$s — 订单已付款</string>
     <string name="kiosk_mode_title">自助点单</string>
     <string name="kiosk_mode_body">面向顾客的一块屏幕：他们点选想要的东西，然后贴一下手机或扫码，账单就到他们自己手机上，逐项列好。退出需要你的 PIN 码。</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->

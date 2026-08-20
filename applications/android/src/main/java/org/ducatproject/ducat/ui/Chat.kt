@@ -698,7 +698,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         Mailbox.send(
                             context, c,
                             context.getString(
-                                R.string.chat_decline_bill, formatXmr(b.amountPxmr)
+                                R.string.chat_decline_bill,
+                                Amounts.show(context, b.amountPxmr).primary,
                             ),
                             mine,
                         )
@@ -1345,7 +1346,7 @@ private fun Bill(m: StoredMessage, fg: androidx.compose.ui.graphics.Color) {
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                formatXmr(pxmr),
+                Amounts.show(context, pxmr).primary,
                 style = MaterialTheme.typography.labelSmall,
                 fontFamily = FontFamily.Monospace,
                 color = fg.copy(alpha = if (strong) 1f else 0.85f),

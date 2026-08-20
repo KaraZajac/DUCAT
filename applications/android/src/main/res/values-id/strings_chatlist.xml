@@ -13,9 +13,9 @@
     <string name="chatlist_add_contact">Tambah kontak</string>
     <string name="chatlist_add_contact_hint">Pindai atau tempel kartu yang diberikan seseorang</string>
     <string name="chatlist_no_contacts_yet">Belum ada kontak.</string>
-    <string name="chatlist_preview_requested">💸 Meminta %1$s XMR</string>
-    <string name="chatlist_preview_sent">💸 Mengirim %1$s XMR</string>
-    <string name="chatlist_preview_receipt">🧾 Struk — %1$s XMR</string>
+    <string name="chatlist_preview_requested">💸 Meminta %1$s</string>
+    <string name="chatlist_preview_sent">💸 Mengirim %1$s</string>
+    <string name="chatlist_preview_receipt">🧾 Struk — %1$s</string>
     <string name="chatlist_preview_reacted">Bereaksi %1$s</string>
     <string name="chatlist_preview_photo">📷 Foto</string>
     <string name="chatlist_time_now">baru saja</string>

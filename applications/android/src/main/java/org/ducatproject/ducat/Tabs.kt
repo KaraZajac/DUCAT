@@ -258,7 +258,10 @@ class TabStore(private val context: Context) {
                 // The shop's language, like the bill and the receipt. This
                 // one was missed when those were done — its literal ran past
                 // the length the sweep was looking for.
-                context.getString(R.string.bill_note_cancelled, formatXmr(tab.settledTotal)),
+                context.getString(
+                    R.string.bill_note_cancelled,
+                    Amounts.show(context, tab.settledTotal).primary,
+                ),
                 PersonaStore(context).personaHex(),
             )
         }.onFailure { DucatLog.w(TAG, "cancel notice: ${it.message}") }
@@ -334,8 +337,12 @@ class TabStore(private val context: Context) {
                 } ?: continue
                 store.mutate(tab.id) { it.copy(seenTx = hit.txHashHex) }
                 Notify.post(
-                    context, "Payment on its way",
-                    "${formatXmr(hit.amountPxmr.toLong())} XMR seen — settling now",
+                    context,
+                    context.getString(R.string.notify_seen_title),
+                    context.getString(
+                        R.string.notify_seen_body,
+                        Amounts.show(context, hit.amountPxmr.toLong()).primary,
+                    ),
                 )
                 DucatLog.i(TAG, "pool sighting for ${tab.origin} tab: ${hit.txHashHex.take(16)}…")
             }
@@ -415,10 +422,21 @@ class TabStore(private val context: Context) {
                     store.addClaimedKi(hit.keyImage)
                     Notify.post(
                         context,
-                        "${contact.displayName()} paid",
-                        "${formatXmr(hit.amountPxmr)} XMR" +
-                            (if (tip > 0) " (tip ${formatXmr(tip)})" else "") +
-                            " — receipt sent",
+                        context.getString(
+                            R.string.notify_paid_title, contact.displayName(),
+                        ),
+                        if (tip > 0) {
+                            context.getString(
+                                R.string.notify_paid_body_tip,
+                                Amounts.show(context, hit.amountPxmr).primary,
+                                Amounts.show(context, tip).primary,
+                            )
+                        } else {
+                            context.getString(
+                                R.string.notify_paid_body,
+                                Amounts.show(context, hit.amountPxmr).primary,
+                            )
+                        },
                     )
                     DucatLog.i(
                         TAG,

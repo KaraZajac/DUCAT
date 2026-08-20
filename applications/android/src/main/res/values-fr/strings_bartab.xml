@@ -23,8 +23,8 @@
     <string name="bartab_err_publish_code">impossible de publier un code</string>
     <string name="bartab_or_regular">Ou un habitué</string>
     <string name="bartab_back">Retour</string>
-    <string name="bartab_bill_cancelled_msg">Cette addition de %1$s XMR est annulée — rien à payer.</string>
-    <string name="bartab_drink_notice">%1$s — %2$s XMR · ardoise à %3$s XMR</string>
+    <string name="bartab_bill_cancelled_msg">Cette addition de %1$s est annulée — rien à payer.</string>
+    <string name="bartab_drink_notice">%1$s — %2$s · ardoise à %3$s</string>
     <string name="bartab_remove_line">Retirer</string>
     <string name="bartab_err_send_bill">impossible d\'envoyer l\'addition</string>
     <string name="bartab_settle_bill">Clôturer — addition %1$s</string>
@@ -52,5 +52,5 @@
     <string name="bill_note_tab">Ton addition</string>
     <string name="receipt_note">Reçu — merci</string>
     <string name="receipt_note_oob">Reçu — réglé hors DUCAT. Merci</string>
-    <string name="bill_note_cancelled">L\'addition de %1$s XMR est annulée — rien à payer.</string>
+    <string name="bill_note_cancelled">L\'addition de %1$s est annulée — rien à payer.</string>
 </resources>

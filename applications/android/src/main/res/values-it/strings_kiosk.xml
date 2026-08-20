@@ -21,7 +21,7 @@
     <string name="kiosk_state_confirmed">liquidato</string>
     <string name="kiosk_state_abandoned">se n\'è andato</string>
     <string name="kiosk_notify_title">Ordine n. %1$d</string>
-    <string name="kiosk_notify_body">%1$s XMR visti — l\'ordine è pagato</string>
+    <string name="kiosk_notify_body">%1$s visti — l\'ordine è pagato</string>
     <string name="kiosk_mode_title">Chiosco</string>
     <string name="kiosk_mode_body">Uno schermo rivolto al cliente: tocca quello che vuole, poi avvicina il telefono o scansiona, e il conto gli arriva sul proprio telefono. Per uscire serve il tuo PIN.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
