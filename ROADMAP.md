@@ -251,10 +251,41 @@ money. Ordered by what blocks 1.0, not by effort.
   0.88** — the card now fires only when money exists (hasMoney/allLocked
   guards in BalanceCard); an empty wallet says nothing.
 
+## The counter — modes that take money (0.88, 2026-08-19)
+
+Not on this roadmap when it was written, and load-bearing now: these are
+payment paths with money in them.
+
+- **A saved menu** (Catalogue): items priced in the seller's own currency,
+  converted at the moment of the sale; shared by the till, the bar tab and
+  the kiosk so nobody types their menu twice. Sold-out is its own state,
+  distinct from archived.
+- **Kiosk mode**: a screen facing the customer. They tap what they want,
+  tap or scan once, and the bill arrives on their own phone itemised —
+  the counter speaks DUCAT rather than showing a bare `monero:` code, so
+  the payment is identified by the transaction the payer names and the
+  receipt lands beside it in their Activity. Leaving needs the PIN.
+  Proven end to end over live Veilid and stagenet (`:desktop:kiosktest`).
+  Tips, and calling an order ready, ride the conversation the card opened.
+- **A PIN** in front of every spend, set during onboarding, with the
+  phone's own lock offered where one is enrolled.
+
+**Left:** refunds. There is no path to give money back after settlement —
+`cancel` withdraws a bill before payment, `markPaidOutside` records
+another rail, and neither is a refund. The open question is what the
+customer's Activity should show when money comes back, which is a design
+question before it is a build.
+
 ## Validation — before the number says 1.0
 
 - **NFC tap, live.** §15's core gesture has never been tested on
   hardware. One field day: tap-to-pay, tap-to-contact, the §15.5 confirm.
+  The *wire* is covered as of 0.88 (`:desktop:taptest` runs the reader
+  against the card service: chunk boundaries, multi-byte payloads, a peer
+  that is not us, a field dropping mid-walk) and that found one real
+  defect — Type 4 NDEF stickers could not be read at all, because the
+  ISO-DEP branch returned before the NDEF branch was reachable. What is
+  left is the radio itself, which needs two handsets.
 - **Two-phone field day for dispatch.** Post, sweep, claim, offer/accept,
   drive, geofenced bill-on-arrival, receipt — all phone-to-phone, no
   harness.
@@ -328,6 +359,24 @@ is already cross-platform Rust; the path, cheapest first:
 3. **iPhone** eventually: uniffi generates Swift bindings natively and
    the Rust stack compiles for iOS — the protocol layer is free; the UI
    and App Store review are the cost. Nothing now forecloses it.
+
+## Driver mode — navigation, from OsmAnd (after 1.0)
+
+- **Turn-by-turn for the driver, lifted from OsmAnd.** A driver who has
+  accepted a fare needs the route, not a map with a pin on it. OsmAnd is
+  GPL-3.0 and Android, so its routing and guidance can be taken rather
+  than rebuilt — which is the only reason this is tractable at all.
+  Deliberately *after* 1.0: it is a large dependency to absorb, none of it
+  is protocol, and every part of the ride that involves money already
+  works without it. Sequenced behind the field day, because what the field
+  day teaches about a real driver's hands is what should shape this.
+  Notes for whoever picks it up: check the licence direction (GPL-3.0 is
+  stronger copyleft than this repo currently carries — this may force the
+  app's own licence, and that is a decision, not a detail); offline
+  routing is on the not-for-1.0 list below and this would supply it, so
+  the two should be read together; §15.12's live position (specified, not
+  built) is the piece that makes a driver's screen worth looking at, and
+  belongs first.
 
 ## Explicitly not for 1.0
 
