@@ -19,4 +19,5 @@
     <string name="scanner_would_not_start">相机无法启动：%1$s</string>
     <string name="scanner_torch_off">关闭手电筒</string>
     <string name="scanner_torch_on">打开手电筒</string>
+    <string name="scanner_no_camera_tap">扫码需要它。你仍然可以把这台手机贴到对方手机上——碰一下带的是同一张名片——或者把名片作为链接粘贴进来。</string>
 </resources>

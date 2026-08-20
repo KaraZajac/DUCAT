@@ -22,4 +22,5 @@
     <string name="scanner_would_not_start">La caméra n\'a pas démarré : %1$s</string>
     <string name="scanner_torch_off">Éteindre la lampe</string>
     <string name="scanner_torch_on">Allumer la lampe</string>
+    <string name="scanner_no_camera_tap">Le scan en a besoin. Tu peux quand même approcher ce téléphone du leur — un contact porte la même carte — ou coller la carte en lien.</string>
 </resources>

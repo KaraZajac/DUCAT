@@ -26,4 +26,5 @@
     <string name="scanner_would_not_start">The camera would not start: %1$s</string>
     <string name="scanner_torch_off">Torch off</string>
     <string name="scanner_torch_on">Torch on</string>
+    <string name="scanner_no_camera_tap">Scanning needs it. You can still hold this phone against theirs — a tap carries the same card — or paste the card as a link.</string>
 </resources>

@@ -32,4 +32,5 @@
     <string name="scanner_would_not_start">Камера не запустилася: %1$s</string>
     <string name="scanner_torch_off">Ліхтарик вимкнено</string>
     <string name="scanner_torch_on">Ліхтарик увімкнено</string>
+    <string name="scanner_no_camera_tap">Для сканування потрібна. Можеш прикласти цей телефон до їхнього — дотик несе ту саму картку — або вставити картку посиланням.</string>
 </resources>

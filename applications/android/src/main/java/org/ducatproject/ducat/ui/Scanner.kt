@@ -130,8 +130,19 @@ fun QrScannerContent(
                 ) {
                     Text(stringResource(R.string.scanner_no_camera_title), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
+                    // Tapping does not need the camera, and the reader above
+                    // is already running — it is mounted before this gate, not
+                    // inside it. Somebody who has just declined the camera was
+                    // being told to paste a link while the better answer was
+                    // in their hand.
+                    val canTap = remember {
+                        android.nfc.NfcAdapter.getDefaultAdapter(context) != null
+                    }
                     Text(
-                        stringResource(R.string.scanner_no_camera_body),
+                        stringResource(
+                            if (canTap) R.string.scanner_no_camera_tap
+                            else R.string.scanner_no_camera_body,
+                        ),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,

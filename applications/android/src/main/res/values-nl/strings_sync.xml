@@ -26,4 +26,5 @@
     <string name="scanner_would_not_start">De camera wilde niet starten: %1$s</string>
     <string name="scanner_torch_off">Zaklamp uit</string>
     <string name="scanner_torch_on">Zaklamp aan</string>
+    <string name="scanner_no_camera_tap">Scannen heeft hem nodig. Je kunt deze telefoon nog steeds tegen die van hen houden — een tik draagt dezelfde kaart — of de kaart als link plakken.</string>
 </resources>

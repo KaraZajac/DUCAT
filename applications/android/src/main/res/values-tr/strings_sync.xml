@@ -26,4 +26,5 @@
     <string name="scanner_would_not_start">Kamera başlatılamadı: %1$s</string>
     <string name="scanner_torch_off">Fener kapalı</string>
     <string name="scanner_torch_on">Fener açık</string>
+    <string name="scanner_no_camera_tap">Taramak için gerekli. Yine de bu telefonu onlarınkine yaklaştırabilirsin — bir dokunuş aynı kartı taşır — ya da kartı bağlantı olarak yapıştır.</string>
 </resources>

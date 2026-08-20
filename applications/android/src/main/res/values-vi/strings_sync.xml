@@ -23,4 +23,5 @@
     <string name="scanner_would_not_start">Camera không khởi động được: %1$s</string>
     <string name="scanner_torch_off">Tắt đèn</string>
     <string name="scanner_torch_on">Bật đèn</string>
+    <string name="scanner_no_camera_tap">Quét thì cần. Bạn vẫn có thể chạm máy này vào máy họ — một cú chạm mang đúng tấm thẻ đó — hoặc dán thẻ dưới dạng liên kết.</string>
 </resources>

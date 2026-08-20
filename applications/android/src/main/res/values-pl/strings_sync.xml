@@ -32,4 +32,5 @@
     <string name="scanner_would_not_start">Aparat nie chciał się uruchomić: %1$s</string>
     <string name="scanner_torch_off">Latarka wyłączona</string>
     <string name="scanner_torch_on">Latarka włączona</string>
+    <string name="scanner_no_camera_tap">Skanowanie go wymaga. Nadal możesz przyłożyć ten telefon do ich telefonu — dotknięcie przenosi tę samą kartę — albo wkleić kartę jako link.</string>
 </resources>

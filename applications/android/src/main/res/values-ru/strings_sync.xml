@@ -32,4 +32,5 @@
     <string name="scanner_would_not_start">Камера не запустилась: %1$s</string>
     <string name="scanner_torch_off">Фонарик: выкл</string>
     <string name="scanner_torch_on">Фонарик: вкл</string>
+    <string name="scanner_no_camera_tap">Для сканирования нужна. Можно приложить этот телефон к их телефону — касание несёт ту же карту — или вставить карту ссылкой.</string>
 </resources>

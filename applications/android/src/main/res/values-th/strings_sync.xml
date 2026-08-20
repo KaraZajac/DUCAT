@@ -23,4 +23,5 @@
     <string name="scanner_would_not_start">กล้องไม่ยอมเริ่มทำงาน: %1$s</string>
     <string name="scanner_torch_off">ปิดไฟฉาย</string>
     <string name="scanner_torch_on">เปิดไฟฉาย</string>
+    <string name="scanner_no_camera_tap">การสแกนต้องใช้กล้อง คุณยังแตะเครื่องนี้กับเครื่องของเขาได้ การแตะพาการ์ดใบเดียวกันไป หรือจะวางการ์ดเป็นลิงก์ก็ได้</string>
 </resources>

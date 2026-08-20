@@ -23,4 +23,5 @@
     <string name="scanner_would_not_start">카메라가 켜지지 않았어요: %1$s</string>
     <string name="scanner_torch_off">플래시 끄기</string>
     <string name="scanner_torch_on">플래시 켜기</string>
+    <string name="scanner_no_camera_tap">스캔에는 필요합니다. 이 기기를 상대 기기에 대도 같은 카드가 전달되고, 카드를 링크로 붙여넣어도 됩니다.</string>
 </resources>

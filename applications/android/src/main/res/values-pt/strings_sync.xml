@@ -22,4 +22,5 @@
     <string name="scanner_would_not_start">A câmera não iniciou: %1$s</string>
     <string name="scanner_torch_off">Desligar lanterna</string>
     <string name="scanner_torch_on">Ligar lanterna</string>
+    <string name="scanner_no_camera_tap">Digitalizar precisa dela. Ainda pode encostar este telefone no deles — um toque leva o mesmo cartão — ou colar o cartão como ligação.</string>
 </resources>

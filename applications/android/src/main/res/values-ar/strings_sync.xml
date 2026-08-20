@@ -34,4 +34,5 @@
     <string name="scanner_would_not_start">تعذّر تشغيل الكاميرا: %1$s</string>
     <string name="scanner_torch_off">إطفاء المصباح</string>
     <string name="scanner_torch_on">تشغيل المصباح</string>
+    <string name="scanner_no_camera_tap">المسح يحتاجها. لا يزال بإمكانك تقريب هذا الهاتف من هاتفهم — اللمسة تحمل البطاقة نفسها — أو لصق البطاقة كرابط.</string>
 </resources>

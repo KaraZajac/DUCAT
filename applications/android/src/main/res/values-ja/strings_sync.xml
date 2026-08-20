@@ -23,4 +23,5 @@
     <string name="scanner_would_not_start">カメラを起動できませんでした: %1$s</string>
     <string name="scanner_torch_off">ライトをオフ</string>
     <string name="scanner_torch_on">ライトをオン</string>
+    <string name="scanner_no_camera_tap">読み取りには必要です。この端末を相手の端末に近づければ同じカードが渡せますし、カードをリンクとして貼り付けることもできます。</string>
 </resources>

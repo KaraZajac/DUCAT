@@ -26,4 +26,5 @@
     <string name="scanner_would_not_start">دوربین روشن نشد: %1$s</string>
     <string name="scanner_torch_off">چراغ خاموش</string>
     <string name="scanner_torch_on">چراغ روشن</string>
+    <string name="scanner_no_camera_tap">برای اسکن لازم است. هنوز می‌توانی این گوشی را به گوشی آن‌ها نزدیک کنی — یک تماس همان کارت را می‌برد — یا کارت را به‌صورت لینک بچسبانی.</string>
 </resources>

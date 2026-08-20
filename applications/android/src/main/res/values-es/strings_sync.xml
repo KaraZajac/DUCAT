@@ -22,4 +22,5 @@
     <string name="scanner_would_not_start">La cámara no arrancó: %1$s</string>
     <string name="scanner_torch_off">Apagar linterna</string>
     <string name="scanner_torch_on">Encender linterna</string>
+    <string name="scanner_no_camera_tap">Escanear la necesita. Aún puedes acercar este teléfono al suyo: un toque lleva la misma tarjeta, o pega la tarjeta como enlace.</string>
 </resources>
