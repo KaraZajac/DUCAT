@@ -87,6 +87,26 @@ fun main() {
         if (!ok) failures++
     }
 
+    // A rate, before anything is drawn.
+    //
+    // Almost every render below used to happen before one existed, so the
+    // whole suite pictured the no-rate fallback: XMR everywhere, which is the
+    // honest thing to show when a phone cannot convert and the thing hardly
+    // any user actually sees. That is how a bill line printing the same
+    // piconero figure twice, and a chat list quoting piconero beside a chat
+    // that did not, both sat in pictures nobody could read as wrong.
+    //
+    // So: seed it first, and let the screens that specifically want the
+    // no-rate case clear it for themselves — `kiosk-no-rate` already does.
+    org.ducatproject.ducat.RateStore(context).apply {
+        store(150.0, System.currentTimeMillis() / 1000, "rendertest")
+        // The dollar too. §15.12's fare table is in dollars, so a meter with
+        // no USD rate cannot suggest anything and draws two empty boxes —
+        // which is what this suite has been picturing of a feature whose whole
+        // point is that a driver does not have to invent a rate at the curb.
+        storeUsd(150.0)
+    }
+
     // The rooms, as the window hosts them.
     render("activity") { org.ducatproject.ducat.ui.ActivityScreen() }
     render("till") { org.ducatproject.ducat.ui.PosScreen() }
@@ -210,10 +230,23 @@ fun main() {
                 myOutbox = "",
                 theirOutbox = "",
             ),
-            title = "Escrow ready — the fare goes in before the ride.",
+            // The app's own strings and the app's own formatting. These were
+            // three hand-written English literals with piconero baked into
+            // them, so the picture showed a confirm screen mixing units — a
+            // fault the app does not have, in the one artefact somebody would
+            // look at to check whether it did.
+            title = androidx.compose.ui.res.stringResource(
+                org.ducatproject.ducat.R.string.bond_escrow_ready,
+            ),
             amountPxmr = 1_200_000_000L,
-            note = "0.000400 XMR of that is your stake — it comes back when this is finished.",
-            action = "Secure fare (0.001200 XMR)",
+            note = androidx.compose.ui.res.stringResource(
+                org.ducatproject.ducat.R.string.bond_stake_refunded,
+                org.ducatproject.ducat.Amounts.show(context, 400_000_000L).primary,
+            ),
+            action = androidx.compose.ui.res.stringResource(
+                org.ducatproject.ducat.R.string.bond_secure_fare,
+                org.ducatproject.ducat.Amounts.show(context, 1_200_000_000L).primary,
+            ),
             onAction = {},
             onClose = {},
         )
