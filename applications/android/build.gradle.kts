@@ -68,6 +68,21 @@ dependencies {
     // PIN. Brings androidx.fragment with it, which is why MainActivity
     // is a FragmentActivity — BiometricPrompt hosts itself in one.
     implementation("androidx.biometric:biometric:1.1.0")
+    // ...and pinned forward, because what biometric drags in by default is
+    // fragment 1.2.5, from 2020. That version's `FragmentActivity` still
+    // implements `RequestPermissionsRequestCodeValidator`, whose only rule is
+    // that a request code fits in sixteen bits — a fragment-era convention
+    // that packed a fragment index into the high half.
+    //
+    // Every permission this app asks for goes through
+    // `rememberLauncherForActivityResult`, and androidx's result registry
+    // issues codes from 0x10000 upward *by construction*. So the check could
+    // never pass, and asking for any permission at all killed the process:
+    // notifications on the first screen after setup, location for a hail or a
+    // board read, the camera for the scanner. Nine launchers, six screens, one
+    // crash each. Fragment 1.5 dropped that validator when the Activity Result
+    // APIs replaced the old plumbing; this is the version where it is gone.
+    implementation("androidx.fragment:fragment:1.8.5")
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
