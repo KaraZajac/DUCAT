@@ -118,21 +118,21 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
             e.address?.let { Field(stringResource(R.string.txdetail_address), it, mono = true, copyable = true) }
             e.note?.takeIf { it.isNotBlank() }?.let { Field(stringResource(R.string.txdetail_note), it) }
             if (sent) {
-                Field(stringResource(R.string.txdetail_amount), "${formatXmr(e.amountPxmr)} XMR")
-                Field(stringResource(R.string.txdetail_network_fee), "${formatXmr(e.feePxmr)} XMR")
+                Field(stringResource(R.string.txdetail_amount), bothUnits(e.amountPxmr))
+                Field(stringResource(R.string.txdetail_network_fee), bothUnits(e.feePxmr))
                 if (e.changePxmr > 0) {
                     // Named explicitly because it is the number that makes a
                     // send look like a receipt when it is not labelled.
                     Field(
-                        stringResource(R.string.txdetail_change_back), "${formatXmr(e.changePxmr)} XMR",
+                        stringResource(R.string.txdetail_change_back), bothUnits(e.changePxmr),
                         note = stringResource(R.string.txdetail_change_back_note),
                     )
                 }
-                Field(stringResource(R.string.txdetail_total_leaving), "${formatXmr(-e.netPxmr)} XMR")
+                Field(stringResource(R.string.txdetail_total_leaving), bothUnits(-e.netPxmr))
             }
             Field(
                 stringResource(R.string.txdetail_balance_after),
-                "${formatXmr(e.balanceAfterPxmr)} XMR",
+                bothUnits(e.balanceAfterPxmr),
                 note = if (e.pending) stringResource(R.string.txdetail_balance_after_note) else null,
             )
 
@@ -145,10 +145,10 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
             if (e.receipted) {
                 Section(stringResource(R.string.txdetail_section_receipt))
                 e.items.forEach { i ->
-                    Field(i.description, "${formatXmr(i.amountPxmr)} XMR", mono = true)
+                    Field(i.description, Amounts.show(context, i.amountPxmr).primary, mono = true)
                 }
-                e.taxPxmr?.let { Field(stringResource(R.string.txdetail_tax), "${formatXmr(it)} XMR", mono = true) }
-                Field(stringResource(R.string.txdetail_total_receipted), "${formatXmr(e.amountPxmr)} XMR", mono = true)
+                e.taxPxmr?.let { Field(stringResource(R.string.txdetail_tax), Amounts.show(context, it).primary, mono = true) }
+                Field(stringResource(R.string.txdetail_total_receipted), bothUnits(e.amountPxmr), mono = true)
                 Field(
                     stringResource(R.string.txdetail_issued_by),
                     e.receiptBy ?: stringResource(R.string.txdetail_the_payee),
@@ -186,7 +186,7 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
                     stringResource(R.string.txdetail_inputs_outputs),
                     stringResource(R.string.txdetail_in_out, c.inputCount, c.outputCount),
                 )
-                Field(stringResource(R.string.txdetail_fee), "${formatXmr(c.feePxmr)} XMR")
+                Field(stringResource(R.string.txdetail_fee), bothUnits(c.feePxmr))
                 Field(
                     stringResource(R.string.txdetail_extra_field),
                     pluralStringResource(R.plurals.txdetail_extra_bytes, c.extraLen, c.extraLen),
@@ -268,6 +268,23 @@ private fun Section(title: String) {
     Spacer(Modifier.height(4.dp))
     HorizontalDivider()
     Spacer(Modifier.height(6.dp))
+}
+
+/**
+ * Both units on one line, for the figures a person actually reads.
+ *
+ * A statement's job is to let somebody check that the right amount of money
+ * moved, and they cannot do that in a unit they do not price anything in. The
+ * piconero stays beside it, because this is also the screen you open when you
+ * want the exact chain figure.
+ *
+ * Not used for the individual outputs further down: those are key images and
+ * block heights, where a currency conversion is noise rather than help.
+ */
+@Composable
+private fun bothUnits(pxmr: Long): String {
+    val s = Amounts.show(LocalContext.current, pxmr)
+    return s.secondary?.let { "${s.primary} \u00b7 $it" } ?: s.primary
 }
 
 @Composable
