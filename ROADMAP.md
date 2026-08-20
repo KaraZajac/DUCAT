@@ -276,6 +276,92 @@ another rail, and neither is a refund. The open question is what the
 customer's Activity should show when money comes back, which is a design
 question before it is a build.
 
+## The local board — marketplace, hire, and any rental (pre-1.0)
+
+One board, several nouns. A room, a car, a kayak, a bike to sell, an
+afternoon of an electrician's time — all the same act: somebody says what
+they have, near where they are, and somebody nearby answers. The listings
+machinery, the geocell boards, claim-once cards, enquiries and the
+reservation escrow already carry most of it.
+
+**What this is for, and what that forbids.** This is meant to put people
+in front of each other — a village notice board, not a feed. That is a
+design constraint with teeth, and these follow from it rather than from
+taste:
+
+- No infinite scroll, no ranking, no algorithmic order. A board is a
+  place with things on it, in the order they were posted.
+- No engagement metrics, no "people also viewed", no notification whose
+  purpose is to bring somebody back. A notification here means a person
+  answered you.
+- Nothing that rewards posting more. A listing is a thing somebody has,
+  not content.
+- The transaction ends in a meeting. In-person handover is the design,
+  not a fallback for when shipping fails.
+
+The read costs happen to enforce this. A populated board read is ~1.1 s,
+an empty one a flat 21 s (Veilid giving up rather than searching), and
+boards do not parallelise. A 3×3 neighbourhood is ten seconds at best and
+minutes at worst, so an endless feed is not available even if somebody
+wanted one. What is available is "what is near me, one board, cached,
+refreshed behind the screen" — which is the thing being aimed at anyway.
+
+- **Any rental — gear (`KIND_GEAR`).** Kayaks, bikes, skis, a pressure
+  washer. Nearly free: `Stakes.Deal.Vehicle`'s own docstring already reads
+  "a vehicle **or equipment**: the asset outlives the rental many times",
+  so the stake, the deposit and the release are the ones that exist. A
+  third button on the form that posts a car, minus year and seats. Do this
+  first; it is proven the same day.
+
+- **Local marketplace — selling a thing (`KIND_SALE`).** The one with a
+  genuinely new escrow leg: a sale has **no deposit and nothing comes
+  back**, so the "deposits come home in the split release" logic that
+  makes releasing beat sulking does not apply. Needs its own shape —
+  price plus a stake each side, released on handover — and a new
+  `Stakes.Deal`. What makes it worth building is not the payment: escrow
+  answers the exact fear that makes meeting a stranger to buy a bike
+  miserable in both directions, where every platform answers it with
+  ratings and a support queue.
+
+- **Hire help — skills by the hour (`KIND_SKILL`).** An electrician, a
+  plumber, somebody to help move a sofa. Priced hourly rather than per
+  day; released on both saying the work is done, which is close enough to
+  the ride's split release to reuse it. Worth naming separately from
+  selling because the economics differ: for day labour the platform's cut
+  *is* the margin, so removing the operator is the whole product.
+
+**Decided:** one board name (`local:$cell`) carrying a kind field, not one
+board per noun — every extra board name multiplies the read cost above,
+and the reads are the binding constraint.
+
+**Not decided, and worth settling before building:**
+
+- *Categories.* Professions especially: the category **is** the search, so
+  it cannot be free text alone — but a taxonomy is a translation
+  liability across nineteen languages, it dates, and people do not fit it
+  (most tradespeople are the handyman who also does electrics). Leaning
+  towards a small flat set, eight to twelve, plus free text for what
+  somebody actually does, with the categories understood as a coarse
+  filter rather than a directory. Item categories for the marketplace are
+  wide open.
+- *Whether these are modes or listings.* Argued as listings rather than
+  operating modes: a mode answers "what is this device for right now" —
+  a till, a meter, a counter — and "I am a plumber" stays true while its
+  owner is asleep. One place holding everything somebody has put on a
+  board, because a real person rents out a kayak *and* sells a bike *and*
+  wires a socket, and three modes would mean switching between listings
+  that do not conflict.
+- *The sale escrow's abandonment rule.* A rental that is never returned
+  has a deposit to take from. A sale where nobody turns up has neither
+  party at fault and no asset to point at.
+
+**Sequencing note.** Placed before 1.0 by decision (2026-08-19). The
+recorded risk: each is a new surface where money moves, and every money
+surface examined in the 0.88 sweep had a real defect in it. Landing two
+new ones before the adversarial review means the review covers more,
+later. Gear is the cheap one and carries almost none of this; marketplace
+and hire carry most of it.
+
 ## Validation — before the number says 1.0
 
 - **NFC tap, live.** §15's core gesture has never been tested on
@@ -362,17 +448,8 @@ is already cross-platform Rust; the path, cheapest first:
 
 ## What else this shape is for (after 1.0)
 
-Four things the machinery already mostly supports. None are 1.0; all are
-reasons the 1.0 primitives are worth getting right.
-
-- **Selling a thing to a stranger.** The listings shape with a different
-  noun: post to a geocell board, somebody claims, you meet, escrow
-  releases on handover. What makes it worth building is not the payment —
-  it is that escrow answers the specific fear that makes this category
-  miserable. Meeting a stranger to buy a bike is frightening in both
-  directions, and every platform answers that with ratings and a support
-  queue. A 2-of-2 with a stake each side means neither party can walk.
-  Reuses listings, boards, claim-once cards and the bond almost entirely.
+Two more the machinery already mostly supports. The marketplace, hire and
+gear rental that were here have moved above: they are pre-1.0 by decision.
 
 - **Subscriptions with no card on file.** A weekly box, a monthly dues:
   the seller bills the thread on a schedule, the buyer taps approve, money
@@ -383,13 +460,6 @@ reasons the 1.0 primitives are worth getting right.
   to the customer's money; this is recurring billing with no recurring
   authority, which has no equivalent anywhere. Needs a schedule on a tab
   and a standing thread; it needs no new protocol.
-
-- **Day labour by the hour.** The hail shape, again with a different noun:
-  two hours of help moving, claimed by somebody nearby, escrowed, released
-  on both saying it is done. Worth naming separately from selling because
-  the economics differ — for day labour the platform's cut *is* the
-  margin, so removing the operator is the whole product rather than a
-  nicety.
 
 - **Group messaging.** See below; the mechanism is already proven here.
 
