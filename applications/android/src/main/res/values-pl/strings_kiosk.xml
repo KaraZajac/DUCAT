@@ -38,4 +38,6 @@
     <string name="kiosk_tip">Napiwek</string>
     <string name="kiosk_tip_none">Bez</string>
     <string name="kiosk_tip_line">Napiwek</string>
+    <string name="kiosk_no_menu">W menu jeszcze nic nie ma. Dodaj to, co sprzedajesz, za kłódką.</string>
+    <string name="kiosk_all_off">Chwilowo nic nie jest dostępne.</string>
 </resources>

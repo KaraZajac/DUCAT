@@ -38,4 +38,6 @@
     <string name="kiosk_tip">Pourboire</string>
     <string name="kiosk_tip_none">Aucun</string>
     <string name="kiosk_tip_line">Pourboire</string>
+    <string name="kiosk_no_menu">Rien sur la carte pour l\'instant. Ajoutez ce que vous vendez derrière le cadenas.</string>
+    <string name="kiosk_all_off">Tout est retiré de la carte pour le moment.</string>
 </resources>

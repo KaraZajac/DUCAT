@@ -180,6 +180,28 @@ private fun Ordering(
         Spacer(Modifier.height(8.dp))
         ItemPicker(onPick = onAdd)
         Spacer(Modifier.height(16.dp))
+        // A kiosk with nothing on its menu draws no buttons at all, and then
+        // told the customer to tap one of them. Blank screen, cheerful
+        // instruction, nothing to press — and no sign to whoever set it up
+        // that the thing is not actually open. Say which of the two it is:
+        // never stocked, or everything off for the night.
+        val menu = remember(ContactStore.changes.collectAsState().value) {
+            org.ducatproject.ducat.Catalogue.live(context) to
+                org.ducatproject.ducat.Catalogue.sellable(context)
+        }
+        if (menu.second.isEmpty()) {
+            Text(
+                stringResource(
+                    if (menu.first.isEmpty()) R.string.kiosk_no_menu
+                    else R.string.kiosk_all_off,
+                ),
+                Modifier.fillMaxWidth().padding(24.dp),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+            return@Column
+        }
         if (basket.isEmpty()) {
             Text(
                 stringResource(R.string.kiosk_empty),

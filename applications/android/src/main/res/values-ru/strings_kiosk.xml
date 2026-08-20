@@ -38,4 +38,6 @@
     <string name="kiosk_tip">Чаевые</string>
     <string name="kiosk_tip_none">Без чаевых</string>
     <string name="kiosk_tip_line">Чаевые</string>
+    <string name="kiosk_no_menu">В меню пока пусто. Добавьте товары за замком.</string>
+    <string name="kiosk_all_off">Сейчас ничего нет в наличии.</string>
 </resources>

@@ -38,4 +38,6 @@
     <string name="kiosk_tip">Tip</string>
     <string name="kiosk_tip_none">No tip</string>
     <string name="kiosk_tip_line">Tip</string>
+    <string name="kiosk_no_menu">Nothing on the menu yet. Add what you sell behind the lock.</string>
+    <string name="kiosk_all_off">Everything is off the menu just now.</string>
 </resources>

@@ -38,4 +38,6 @@
     <string name="kiosk_tip">टिप</string>
     <string name="kiosk_tip_none">नहीं</string>
     <string name="kiosk_tip_line">टिप</string>
+    <string name="kiosk_no_menu">मेन्यू में अभी कुछ नहीं है। ताले के पीछे जो बेचते हैं वह जोड़ें।</string>
+    <string name="kiosk_all_off">अभी सब कुछ मेन्यू से हटा है।</string>
 </resources>

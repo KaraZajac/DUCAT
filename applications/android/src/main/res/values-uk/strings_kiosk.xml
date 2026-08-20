@@ -38,4 +38,6 @@
     <string name="kiosk_tip">Чайові</string>
     <string name="kiosk_tip_none">Без чайових</string>
     <string name="kiosk_tip_line">Чайові</string>
+    <string name="kiosk_no_menu">У меню поки порожньо. Додайте те, що продаєте, за замком.</string>
+    <string name="kiosk_all_off">Зараз нічого немає.</string>
 </resources>

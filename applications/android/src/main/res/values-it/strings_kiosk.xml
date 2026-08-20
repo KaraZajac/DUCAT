@@ -38,4 +38,6 @@
     <string name="kiosk_tip">Mancia</string>
     <string name="kiosk_tip_none">Nessuna</string>
     <string name="kiosk_tip_line">Mancia</string>
+    <string name="kiosk_no_menu">Ancora niente nel menù. Aggiungi ciò che vendi dietro il lucchetto.</string>
+    <string name="kiosk_all_off">Al momento non c\'è nulla disponibile.</string>
 </resources>

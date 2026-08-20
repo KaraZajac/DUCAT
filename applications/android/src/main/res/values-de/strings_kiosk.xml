@@ -38,4 +38,6 @@
     <string name="kiosk_tip">Trinkgeld</string>
     <string name="kiosk_tip_none">Kein</string>
     <string name="kiosk_tip_line">Trinkgeld</string>
+    <string name="kiosk_no_menu">Noch nichts auf der Karte. Hinter dem Schloss eintragen, was du verkaufst.</string>
+    <string name="kiosk_all_off">Gerade ist alles von der Karte.</string>
 </resources>

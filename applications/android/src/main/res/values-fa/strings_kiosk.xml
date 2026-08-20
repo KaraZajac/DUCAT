@@ -38,4 +38,6 @@
     <string name="kiosk_tip">انعام</string>
     <string name="kiosk_tip_none">بدون انعام</string>
     <string name="kiosk_tip_line">انعام</string>
+    <string name="kiosk_no_menu">هنوز چیزی در فهرست نیست. از پشت قفل آنچه می‌فروشی را اضافه کن.</string>
+    <string name="kiosk_all_off">الان همه‌چیز از فهرست خارج است.</string>
 </resources>
