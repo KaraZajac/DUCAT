@@ -1425,9 +1425,10 @@ private fun FareDetail(
     // The fare field can be typed in the local currency, like every other money
     // entry (Pay/POS/Taxi). It starts in whatever unit the wallet prefers, but
     // only if a rate is cached — without one, fiat entry has nothing to convert.
-    val rate = remember { RateStore(context).cached()?.first }
-    val cur = remember { Amounts.currency(context) }
-    val initFiat = remember { Amounts.preferFiat(context) && rate != null }
+    val rateVersion by ContactStore.changes.collectAsState()
+    val rate = remember(rateVersion) { RateStore(context).cached()?.first }
+    val cur = remember(rateVersion) { Amounts.currency(context) }
+    val initFiat = remember { Amounts.enterFiat(context) }
     var fiat by remember { mutableStateOf(initFiat) }
     // The fare the Take will put on the wire (kind 6): the rider's offer to
     // start with, editable because a counter-offer is a fare too. A "quote
@@ -1662,9 +1663,10 @@ fun HailSheet(
     var routing by remember { mutableStateOf(false) }
     // The offer can be typed in the local currency, like the rest of the app.
     // Only defaults to fiat when a rate is cached to convert it.
-    val rate = remember { RateStore(context).cached()?.first }
-    val cur = remember { Amounts.currency(context) }
-    var fiat by rememberSaveable { mutableStateOf(Amounts.preferFiat(context) && rate != null) }
+    val rateVersion by ContactStore.changes.collectAsState()
+    val rate = remember(rateVersion) { RateStore(context).cached()?.first }
+    val cur = remember(rateVersion) { Amounts.currency(context) }
+    var fiat by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
     var fareXmr by rememberSaveable { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }

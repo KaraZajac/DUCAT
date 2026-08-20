@@ -2327,7 +2327,7 @@ private fun RideBondBanner(contact: Contact) {
                                 onValueChange = {
                                     counterXmr = it.filter { c -> Amounts.isNumberChar(c) }
                                 },
-                                label = { Text(stringResource(R.string.bond_back_to_rider)) },
+                                label = { Text(stringResource(R.string.bond_back_to_rider, "XMR")) },
                                 singleLine = true,
                                 modifier = Modifier.weight(1f),
                             )
@@ -2483,6 +2483,16 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    // Priced in the reader's own money by default, like the rest of the app —
+    // agreeing what a room costs is exactly the moment nobody wants to be
+    // doing an exchange rate in their head.
+    val rateVersion by ContactStore.changes.collectAsState()
+    val rate = remember(rateVersion) {
+        org.ducatproject.ducat.RateStore(context).cached()?.first
+    }
+    val cur = remember(rateVersion) { Amounts.currency(context) }
+    var fiat by remember { mutableStateOf(Amounts.enterFiat(context)) }
+
     // Through the shared parser, like every other money field. These three
     // accept whatever `isNumberChar` allows — which is deliberately more than
     // ASCII, because a keyboard set to Persian or Hindi types its own digits —
@@ -2491,8 +2501,23 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     // when the deal chip was tapped, and a Propose button that did nothing at
     // all and said nothing about why. The booking flow, dead, for anyone not
     // typing on a Latin keypad.
-    fun pxmr(s: String): Long? =
-        Amounts.parse(s)?.let { Amounts.toPxmr(it) }?.takeIf { it > 0 }
+    fun pxmr(s: String): Long? {
+        val v = Amounts.parse(s) ?: return null
+        val xmr = if (fiat) {
+            if (rate == null || rate <= 0) return null
+            v.divide(java.math.BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
+        } else {
+            v
+        }
+        return Amounts.toPxmr(xmr)?.takeIf { it > 0 }
+    }
+
+    /** A stake, written back into a field in whatever unit that field shows. */
+    fun unitText(p: Long): String = if (fiat && rate != null) {
+        "%.2f".format(java.util.Locale.US, p / 1e12 * rate)
+    } else {
+        "%.6f".format(java.util.Locale.US, p / 1e12)
+    }
 
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDone) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
@@ -2523,7 +2548,7 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                             // Re-suggest from whatever rent has been typed.
                             pxmr(rent)?.let { r ->
                                 val st = org.ducatproject.ducat.Stakes.stakeFor(d, r)
-                                val text = "%.6f".format(java.util.Locale.US, st / 1e12)
+                                val text = unitText(st)
                                 myDep = text; hostDep = text
                             }
                         },
@@ -2538,6 +2563,7 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                 )
             }
             Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = rent,
                 onValueChange = { typed ->
@@ -2547,24 +2573,41 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                     // doing percentages in their head at a bus stop.
                     pxmr(rent)?.let { r ->
                         val st = org.ducatproject.ducat.Stakes.stakeFor(deal, r)
-                        val text = "%.6f".format(java.util.Locale.US, st / 1e12)
+                        val text = unitText(st)
                         myDep = text
                         hostDep = text
                     }
                 },
-                label = { Text(stringResource(R.string.res_rent)) },
-                singleLine = true, modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.res_rent, if (fiat) cur else "XMR")) },
+                singleLine = true, modifier = Modifier.weight(1f),
             )
+            if (rate != null) {
+                TextButton(
+                    onClick = {
+                        // Clear all three: half a proposal in one unit and half
+                        // in another is how somebody stakes a hundred times
+                        // what they meant to.
+                        fiat = !fiat; rent = ""; myDep = ""; hostDep = ""
+                    },
+                    contentPadding = PaddingValues(horizontal = 6.dp),
+                ) {
+                    Text(
+                        if (fiat) "\u2192XMR" else "\u2192$cur",
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
+            }
+            }
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = myDep, onValueChange = { myDep = it.filter { c -> Amounts.isNumberChar(c) } },
-                label = { Text(stringResource(R.string.res_my_deposit)) },
+                label = { Text(stringResource(R.string.res_my_deposit, if (fiat) cur else "XMR")) },
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = hostDep, onValueChange = { hostDep = it.filter { c -> Amounts.isNumberChar(c) } },
-                label = { Text(stringResource(R.string.res_host_deposit)) },
+                label = { Text(stringResource(R.string.res_host_deposit, if (fiat) cur else "XMR")) },
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
             error?.let {

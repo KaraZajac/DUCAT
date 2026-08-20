@@ -9,8 +9,8 @@
     <string name="rent_title">Una línea sobre esto</string>
     <string name="rent_area">Zona</string>
     <string name="rent_area_hint">Palabras normales: un barrio, no una dirección</string>
-    <string name="rent_per_day">Precio por día (XMR)</string>
-    <string name="rent_per_night">Precio por noche (XMR)</string>
+    <string name="rent_per_day">Precio por día (%1$s)</string>
+    <string name="rent_per_night">Precio por noche (%1$s)</string>
     <string name="rent_stake_note">Cada parte deja %1$s de garantía, que se devuelve cuando el alquiler acaba bien.</string>
     <string name="rent_make">Marca</string>
     <string name="rent_model">Modelo</string>
@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Prestar equipo</string>
     <string name="rent_form_sale">Vender algo</string>
     <string name="rent_form_skill">Ofrecer un oficio</string>
-    <string name="rent_per_hour">Precio por hora (XMR)</string>
-    <string name="rent_price_once">Precio (XMR)</string>
+    <string name="rent_per_hour">Precio por hora (%1$s)</string>
+    <string name="rent_price_once">Precio (%1$s)</string>
     <string name="rent_category">Categoría</string>
     <string name="rent_tags">Etiquetas</string>
     <string name="rent_tags_hint">Unas palabras, separadas por comas</string>

@@ -9,8 +9,8 @@
     <string name="rent_title">Один рядок про це</string>
     <string name="rent_area">Район</string>
     <string name="rent_area_hint">Звичайними словами — район, а не адреса</string>
-    <string name="rent_per_day">Ціна за день (XMR)</string>
-    <string name="rent_per_night">Ціна за ніч (XMR)</string>
+    <string name="rent_per_day">Ціна за день (%1$s)</string>
+    <string name="rent_per_night">Ціна за ніч (%1$s)</string>
     <string name="rent_stake_note">Кожна сторона вносить заставу %1$s, вона повертається, коли оренда завершується добре.</string>
     <string name="rent_make">Марка</string>
     <string name="rent_model">Модель</string>
@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Здати спорядження</string>
     <string name="rent_form_sale">Продати річ</string>
     <string name="rent_form_skill">Запропонувати вміння</string>
-    <string name="rent_per_hour">Ціна за годину (XMR)</string>
-    <string name="rent_price_once">Ціна (XMR)</string>
+    <string name="rent_per_hour">Ціна за годину (%1$s)</string>
+    <string name="rent_price_once">Ціна (%1$s)</string>
     <string name="rent_category">Категорія</string>
     <string name="rent_tags">Мітки</string>
     <string name="rent_tags_hint">Кілька слів, через кому</string>

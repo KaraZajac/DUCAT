@@ -9,8 +9,8 @@
     <string name="rent_title">Eén regel erover</string>
     <string name="rent_area">Buurt</string>
     <string name="rent_area_hint">Gewone woorden — een buurt, geen adres</string>
-    <string name="rent_per_day">Prijs per dag (XMR)</string>
-    <string name="rent_per_night">Prijs per nacht (XMR)</string>
+    <string name="rent_per_day">Prijs per dag (%1$s)</string>
+    <string name="rent_per_night">Prijs per nacht (%1$s)</string>
     <string name="rent_stake_note">Beide kanten leggen %1$s borg in, die terugkomt als de verhuur goed afloopt.</string>
     <string name="rent_make">Merk</string>
     <string name="rent_model">Model</string>
@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Spullen uitlenen</string>
     <string name="rent_form_sale">Iets verkopen</string>
     <string name="rent_form_skill">Vakwerk aanbieden</string>
-    <string name="rent_per_hour">Prijs per uur (XMR)</string>
-    <string name="rent_price_once">Prijs (XMR)</string>
+    <string name="rent_per_hour">Prijs per uur (%1$s)</string>
+    <string name="rent_price_once">Prijs (%1$s)</string>
     <string name="rent_category">Categorie</string>
     <string name="rent_tags">Labels</string>
     <string name="rent_tags_hint">Een paar woorden, met komma\'s</string>

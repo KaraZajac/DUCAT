@@ -109,6 +109,10 @@ object Listings {
         lonE7: Long,
         specs: JSONObject,
         privateDetails: String,
+        /** What the owner typed, and in what, when they priced in their own
+         *  currency. Kept so [reprice] can hold that price steady. */
+        priceTyped: String? = null,
+        priceCurrency: String? = null,
     ): JSONObject {
         val cell = runCatching {
             uniffi.ducat_mobile.geohashEncode(latE7, lonE7, CELL_PRECISION)
@@ -127,6 +131,10 @@ object Listings {
             put("specs", specs)
             put("private", privateDetails)
             put("created", System.currentTimeMillis() / 1000)
+            if (priceTyped != null && priceCurrency != null) {
+                put("priceTyped", priceTyped)
+                put("priceCurrency", priceCurrency)
+            }
         }
     }
 
@@ -185,8 +193,52 @@ object Listings {
      * listing that has been enquired about needs a new one before the next
      * stranger can reach its owner.
      */
+    /**
+     * Bring a listing's piconero back in line with the price its owner set.
+     *
+     * A listing is a *standing* price. The wire carries piconero and nothing
+     * else (§16.18), so a room posted at forty euros is forty euros' worth of
+     * monero on the day it went up — and a fortnight later, when the rate has
+     * moved, it is not forty euros any more. The owner did not change their
+     * price; the board changed it for them, and neither end was told.
+     *
+     * The till has always had the answer for this: a catalogue keeps what was
+     * typed and what it was typed in, and converts at the moment of the sale.
+     * A listing can do the same thing at the moment of the refresh, which
+     * comes round every six hours, so what a stranger reads is never more than
+     * a few hours away from what the owner meant.
+     *
+     * Two cases are deliberately left alone. A listing priced in XMR to begin
+     * with has nothing to hold steady — that is the price. And a phone whose
+     * rate store has since been switched to some other currency has no rate
+     * for the one this listing was written in, so the last good conversion
+     * stands rather than being replaced by an invented one.
+     */
+    fun reprice(context: Context, o: JSONObject): JSONObject {
+        val typed = o.optString("priceTyped", "").takeIf { it.isNotBlank() } ?: return o
+        val cur = o.optString("priceCurrency", "").takeIf { it.isNotBlank() } ?: return o
+        val store = RateStore(context)
+        if (!store.enabled() || !store.currency().equals(cur, ignoreCase = true)) return o
+        val rate = store.cached()?.first?.takeIf { it > 0 } ?: return o
+        val v = Amounts.parse(typed) ?: return o
+        val pxmr = Amounts.toPxmr(
+            v.divide(java.math.BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN),
+        )?.takeIf { it > 0 } ?: return o
+        if (pxmr == o.optLong("pricePxmr")) return o
+        val next = JSONObject(o.toString()).apply {
+            put("pricePxmr", pxmr)
+            put("depositPxmr", Stakes.stakeFor(dealFor(o.optInt("kind")), pxmr))
+        }
+        put(context, next)
+        DucatLog.i(
+            TAG,
+            "${o.optString("title")}: $typed $cur is now ${formatXmr(pxmr)} XMR",
+        )
+        return next
+    }
+
     fun post(context: Context, id: String): Boolean {
-        val o = get(context, id) ?: return false
+        val o = reprice(context, get(context, id) ?: return false)
         val cell = o.optString("cell")
         if (cell.isBlank()) throw IllegalStateException("this listing has no area yet")
         val card = Mailbox.issueCard(

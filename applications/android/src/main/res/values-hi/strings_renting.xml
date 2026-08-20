@@ -9,8 +9,8 @@
     <string name="rent_title">एक पंक्ति में</string>
     <string name="rent_area">इलाका</string>
     <string name="rent_area_hint">आम शब्दों में — मोहल्ला, पता नहीं</string>
-    <string name="rent_per_day">प्रति दिन कीमत (XMR)</string>
-    <string name="rent_per_night">प्रति रात कीमत (XMR)</string>
+    <string name="rent_per_day">प्रति दिन कीमत (%1$s)</string>
+    <string name="rent_per_night">प्रति रात कीमत (%1$s)</string>
     <string name="rent_stake_note">दोनों पक्ष %1$s जमानत राशि रखते हैं, जो किराया ठीक से पूरा होने पर लौट आती है।</string>
     <string name="rent_make">कंपनी</string>
     <string name="rent_model">मॉडल</string>
@@ -69,8 +69,8 @@
     <string name="rent_form_gear">सामान किराए पर देना</string>
     <string name="rent_form_sale">कुछ बेचना</string>
     <string name="rent_form_skill">हुनर देना</string>
-    <string name="rent_per_hour">प्रति घंटा कीमत (XMR)</string>
-    <string name="rent_price_once">कीमत (XMR)</string>
+    <string name="rent_per_hour">प्रति घंटा कीमत (%1$s)</string>
+    <string name="rent_price_once">कीमत (%1$s)</string>
     <string name="rent_category">श्रेणी</string>
     <string name="rent_tags">टैग</string>
     <string name="rent_tags_hint">कुछ शब्द, अल्पविराम से अलग</string>

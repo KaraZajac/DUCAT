@@ -9,8 +9,8 @@
     <string name="rent_title">Tek cümleyle</string>
     <string name="rent_area">Semt</string>
     <string name="rent_area_hint">Gündelik sözcüklerle — bir semt, adres değil</string>
-    <string name="rent_per_day">Günlük fiyat (XMR)</string>
-    <string name="rent_per_night">Gecelik fiyat (XMR)</string>
+    <string name="rent_per_day">Günlük fiyat (%1$s)</string>
+    <string name="rent_per_night">Gecelik fiyat (%1$s)</string>
     <string name="rent_stake_note">Her iki taraf %1$s teminat yatırır; kiralama iyi biterse geri döner.</string>
     <string name="rent_make">Marka</string>
     <string name="rent_model">Model</string>
@@ -69,8 +69,8 @@
     <string name="rent_form_gear">Ekipman kiralama</string>
     <string name="rent_form_sale">Bir şey satmak</string>
     <string name="rent_form_skill">Ustalık sunmak</string>
-    <string name="rent_per_hour">Saatlik fiyat (XMR)</string>
-    <string name="rent_price_once">Fiyat (XMR)</string>
+    <string name="rent_per_hour">Saatlik fiyat (%1$s)</string>
+    <string name="rent_price_once">Fiyat (%1$s)</string>
     <string name="rent_category">Kategori</string>
     <string name="rent_tags">Etiketler</string>
     <string name="rent_tags_hint">Virgülle ayrılmış birkaç kelime</string>

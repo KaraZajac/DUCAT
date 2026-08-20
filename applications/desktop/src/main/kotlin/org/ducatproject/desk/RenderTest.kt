@@ -291,6 +291,12 @@ fun main() {
         org.ducatproject.ducat.ui.ItemPicker(onPick = { _, _ -> })
     }
     render("kiosk-stocked", w = 520, h = 900) { org.ducatproject.ducat.ui.KioskScreen() }
+    // The till again, now that there is a rate. `till.png` above is drawn
+    // before one exists and shows the honest fallback — XMR, because a screen
+    // with no rate must not invent a conversion. This is the one nearly
+    // everybody sees: money leads in the currency of the country the phone is
+    // in, with the piconero underneath it.
+    render("till-priced") { org.ducatproject.ducat.ui.PosScreen() }
     // What the shop sees once it has proved it is the shop. The menu lives
     // here too now, so a stall can put the iced coffee on without leaving
     // kiosk mode and showing a customer its wallet on the way through.

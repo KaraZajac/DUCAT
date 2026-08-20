@@ -1718,8 +1718,21 @@ class RateStore(context: Context) {
      * A preference rather than a per-screen choice: the unit someone reads a
      * balance in has to be the unit they confirm a payment in, or the check
      * they think they are doing is not the one they are doing.
+     *
+     * **On by default.** Nobody knows what 0.0034 XMR is worth. They know what
+     * a coffee costs, what a night in a room costs, what an hour of an
+     * electrician's time costs — in the currency they are paid in and think in.
+     * Leading with piconero asked every user to do an exchange-rate sum in
+     * their head before they could tell whether a number was right, at exactly
+     * the moment they were about to act on it, and the one check that matters
+     * — does this look like the right amount of money — was the check it made
+     * hardest. XMR stays underneath every figure, so what is actually being
+     * sent is always one glance away and never hidden.
+     *
+     * Falls back to XMR on its own when there is no rate: [Amounts.show]
+     * declines to invent a conversion rather than showing a guess.
      */
-    fun preferFiat(): Boolean = prefs.getBoolean("rate_prefer_fiat", false)
+    fun preferFiat(): Boolean = prefs.getBoolean("rate_prefer_fiat", true)
 
     fun setPreferFiat(v: Boolean) = prefs.edit().putBoolean("rate_prefer_fiat", v).apply()
         .also { ContactStore.bump() }

@@ -56,6 +56,9 @@ private val BasketSaver = androidx.compose.runtime.saveable.listSaver<List<BillI
 @Composable
 fun PosScreen() {
     val context = LocalContext.current
+    // Keyed below, so a field that opened before the first price fetch stops
+    // being unusable the moment one lands.
+    val rateVersion by ContactStore.changes.collectAsState()
     var basket by rememberSaveable(stateSaver = BasketSaver) { mutableStateOf(listOf<BillItem>()) }
     var taxPxmr by rememberSaveable { mutableStateOf(0L) }
     var charging by rememberSaveable { mutableStateOf(false) }
@@ -65,7 +68,7 @@ fun PosScreen() {
     // line named "Sale", because a §16.13 bill must still add up.
     var quick by rememberSaveable { mutableStateOf(false) }
     var quickAmount by rememberSaveable { mutableStateOf("") }
-    var quickFiat by rememberSaveable { mutableStateOf(Amounts.preferFiat(context)) }
+    var quickFiat by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
 
     val total = basket.sumOf { it.amountPxmr } + taxPxmr
 
@@ -115,8 +118,8 @@ fun PosScreen() {
         }
 
         if (quick) {
-            val rate = remember { RateStore(context).cached()?.first }
-            val cur = remember { Amounts.currency(context) }
+            val rate = remember(rateVersion) { RateStore(context).cached()?.first }
+            val cur = remember(rateVersion) { Amounts.currency(context) }
             Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
@@ -284,9 +287,10 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
     // newest work, and rotation happens exactly when a hand is busy.
     var desc by rememberSaveable { mutableStateOf("") }
     var amount by rememberSaveable { mutableStateOf("") }
-    var fiat by rememberSaveable { mutableStateOf(Amounts.preferFiat(context)) }
-    val rate = remember { RateStore(context).cached()?.first }
-    val cur = remember { Amounts.currency(context) }
+    val rateVersion by ContactStore.changes.collectAsState()
+    var fiat by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
+    val rate = remember(rateVersion) { RateStore(context).cached()?.first }
+    val cur = remember(rateVersion) { Amounts.currency(context) }
 
     val pxmr: Long? = remember(amount, fiat, rate) {
         val v = moneyText(amount).toBigDecimalOrNull() ?: return@remember null
@@ -334,7 +338,23 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
 @Composable
 private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
     val context = LocalContext.current
+    val rateVersion by ContactStore.changes.collectAsState()
+    val rate = remember(rateVersion) { RateStore(context).cached()?.first }
+    val cur = remember(rateVersion) { Amounts.currency(context) }
+    var fiat by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
     var text by rememberSaveable { mutableStateOf(if (taxPxmr > 0) formatXmr(taxPxmr) else "") }
+
+    /** Whatever unit the field is showing, as piconero. */
+    fun toPxmr(s: String): Long {
+        val v = Amounts.parse(s) ?: return 0L
+        val xmr = if (fiat) {
+            if (rate == null || rate <= 0) return 0L
+            v.divide(BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
+        } else {
+            v
+        }
+        return Amounts.toPxmr(xmr) ?: 0L
+    }
     Row(
         Modifier.fillMaxWidth().padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -359,13 +379,24 @@ private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
                 // piconero short, and a customer holding an itemised bill
                 // that reads 2.009999999999 tax is being shown arithmetic,
                 // not a price.
-                onSet(Amounts.parse(text)?.let { v -> Amounts.toPxmr(v) } ?: 0L)
+                onSet(toPxmr(text))
             },
-            label = { Text("XMR") },
+            label = { Text(if (fiat) cur else "XMR") },
             placeholder = { Text("0") },
             singleLine = true,
             modifier = Modifier.width(150.dp),
         )
+        if (rate != null) {
+            TextButton(
+                onClick = { fiat = !fiat; text = ""; onSet(0L) },
+                contentPadding = PaddingValues(horizontal = 6.dp),
+            ) {
+                Text(
+                    if (fiat) "\u2192XMR" else "\u2192$cur",
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
+        }
     }
 }
 

@@ -9,8 +9,8 @@
     <string name="rent_title">อธิบายสั้น ๆ หนึ่งบรรทัด</string>
     <string name="rent_area">ย่าน</string>
     <string name="rent_area_hint">ใช้คำธรรมดา — ชื่อย่าน ไม่ใช่ที่อยู่</string>
-    <string name="rent_per_day">ราคาต่อวัน (XMR)</string>
-    <string name="rent_per_night">ราคาต่อคืน (XMR)</string>
+    <string name="rent_per_day">ราคาต่อวัน (%1$s)</string>
+    <string name="rent_per_night">ราคาต่อคืน (%1$s)</string>
     <string name="rent_stake_note">ทั้งสองฝ่ายวางหลักประกันฝ่ายละ %1$s และได้คืนเมื่อการเช่าจบด้วยดี</string>
     <string name="rent_make">ยี่ห้อ</string>
     <string name="rent_model">รุ่น</string>
@@ -69,8 +69,8 @@
     <string name="rent_form_gear">ให้ยืมอุปกรณ์</string>
     <string name="rent_form_sale">ขายของ</string>
     <string name="rent_form_skill">รับงานฝีมือ</string>
-    <string name="rent_per_hour">ราคาต่อชั่วโมง (XMR)</string>
-    <string name="rent_price_once">ราคา (XMR)</string>
+    <string name="rent_per_hour">ราคาต่อชั่วโมง (%1$s)</string>
+    <string name="rent_price_once">ราคา (%1$s)</string>
     <string name="rent_category">หมวด</string>
     <string name="rent_tags">แท็ก</string>
     <string name="rent_tags_hint">คำสั้นๆ คั่นด้วยจุลภาค</string>

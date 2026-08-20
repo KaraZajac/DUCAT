@@ -9,8 +9,8 @@
     <string name="rent_title">سطر واحد عنه</string>
     <string name="rent_area">المنطقة</string>
     <string name="rent_area_hint">بكلمات عادية — حي، وليس عنوانًا</string>
-    <string name="rent_per_day">السعر لليوم (XMR)</string>
-    <string name="rent_per_night">السعر لليلة (XMR)</string>
+    <string name="rent_per_day">السعر لليوم (%1$s)</string>
+    <string name="rent_per_night">السعر لليلة (%1$s)</string>
     <string name="rent_stake_note">يضع كل طرف ضمانًا قدره %1$s، يُعاد عند انتهاء الإيجار على خير.</string>
     <string name="rent_make">الماركة</string>
     <string name="rent_model">الطراز</string>
@@ -69,8 +69,8 @@
     <string name="rent_form_gear">إعارة معدات</string>
     <string name="rent_form_sale">بيع شيء</string>
     <string name="rent_form_skill">تقديم مهارة</string>
-    <string name="rent_per_hour">السعر للساعة (XMR)</string>
-    <string name="rent_price_once">السعر (XMR)</string>
+    <string name="rent_per_hour">السعر للساعة (%1$s)</string>
+    <string name="rent_price_once">السعر (%1$s)</string>
     <string name="rent_category">الفئة</string>
     <string name="rent_tags">وسوم</string>
     <string name="rent_tags_hint">بضع كلمات، مفصولة بفواصل</string>

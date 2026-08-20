@@ -61,6 +61,19 @@ object Amounts {
     fun currency(context: Context): String = RateStore(context).currency()
 
     /**
+     * The unit a money *entry* field should open in.
+     *
+     * [preferFiat] alone is not enough. Every one of these fields converts what
+     * was typed by dividing by a cached rate, and returns null when there is
+     * none — which the screens above render as a disabled button. So opening in
+     * the local currency on a phone that has never reached a price source gives
+     * somebody a field they can type into and a button that will not light,
+     * with nothing on screen connecting the two. Ask for both, and a phone with
+     * no rate simply asks for XMR, which it can always convert.
+     */
+    fun enterFiat(context: Context): Boolean = preferFiat(context) && canConvert(context)
+
+    /**
      * Everything a money field should let somebody type.
      *
      * Not `Char.isDigit() || c == '.' || c == ','`, which is what every amount

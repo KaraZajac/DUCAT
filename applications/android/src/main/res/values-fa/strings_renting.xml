@@ -9,8 +9,8 @@
     <string name="rent_title">یک خط درباره‌اش</string>
     <string name="rent_area">محله</string>
     <string name="rent_area_hint">با واژه‌های ساده — یک محله، نه نشانی</string>
-    <string name="rent_per_day">قیمت هر روز (XMR)</string>
-    <string name="rent_per_night">قیمت هر شب (XMR)</string>
+    <string name="rent_per_day">قیمت هر روز (%1$s)</string>
+    <string name="rent_per_night">قیمت هر شب (%1$s)</string>
     <string name="rent_stake_note">هر طرف %1$s ودیعه می‌گذارد که با پایان خوش اجاره بازگردانده می‌شود.</string>
     <string name="rent_make">برند</string>
     <string name="rent_model">مدل</string>
@@ -69,8 +69,8 @@
     <string name="rent_form_gear">کرایه دادن وسایل</string>
     <string name="rent_form_sale">فروش چیزی</string>
     <string name="rent_form_skill">ارائهٔ مهارت</string>
-    <string name="rent_per_hour">قیمت هر ساعت (XMR)</string>
-    <string name="rent_price_once">قیمت (XMR)</string>
+    <string name="rent_per_hour">قیمت هر ساعت (%1$s)</string>
+    <string name="rent_price_once">قیمت (%1$s)</string>
     <string name="rent_category">دسته</string>
     <string name="rent_tags">برچسب‌ها</string>
     <string name="rent_tags_hint">چند کلمه، جدا شده با ویرگول</string>

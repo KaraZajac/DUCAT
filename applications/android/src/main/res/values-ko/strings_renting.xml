@@ -9,8 +9,8 @@
     <string name="rent_title">한 줄 소개</string>
     <string name="rent_area">지역</string>
     <string name="rent_area_hint">평범한 말로 — 주소가 아니라 동네</string>
-    <string name="rent_per_day">1일 요금 (XMR)</string>
-    <string name="rent_per_night">1박 요금 (XMR)</string>
+    <string name="rent_per_day">1일 요금 (%1$s)</string>
+    <string name="rent_per_night">1박 요금 (%1$s)</string>
     <string name="rent_stake_note">양쪽이 각각 %1$s를 보증금으로 걸고, 대여가 잘 끝나면 돌려받습니다.</string>
     <string name="rent_make">제조사</string>
     <string name="rent_model">모델</string>
@@ -69,8 +69,8 @@
     <string name="rent_form_gear">장비 대여하기</string>
     <string name="rent_form_sale">물건 팔기</string>
     <string name="rent_form_skill">재능 제공하기</string>
-    <string name="rent_per_hour">시간당 요금 (XMR)</string>
-    <string name="rent_price_once">가격 (XMR)</string>
+    <string name="rent_per_hour">시간당 요금 (%1$s)</string>
+    <string name="rent_price_once">가격 (%1$s)</string>
     <string name="rent_category">분류</string>
     <string name="rent_tags">태그</string>
     <string name="rent_tags_hint">쉼표로 구분한 몇 단어</string>

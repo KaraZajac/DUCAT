@@ -351,9 +351,30 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
         grabFix(context) { fix = it }
     }
 
+    // Priced in the owner's own money by default. Nobody knows what 0.0034 XMR
+    // is; everybody knows what a night in their spare room is worth. What was
+    // typed travels with the listing so [Listings.reprice] can hold it there
+    // as the rate moves — the wire only carries piconero, and a standing price
+    // that quietly drifts is a price the owner never set.
+    val rateVersion by org.ducatproject.ducat.ContactStore.changes.collectAsState()
+    val rate = remember(rateVersion) {
+        org.ducatproject.ducat.RateStore(context).cached()?.first
+    }
+    val cur = remember(rateVersion) { Amounts.currency(context) }
+    var fiat by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
+
     // BigDecimal, like every other price in the app: a Double loses the
     // last piconero of a long figure and wraps silently on a huge one.
-    val pricePxmr = Amounts.parse(price)?.let { Amounts.toPxmr(it) } ?: 0L
+    val pricePxmr = remember(price, fiat, rate) {
+        val v = Amounts.parse(price) ?: return@remember 0L
+        val xmr = if (fiat) {
+            if (rate == null || rate <= 0) return@remember 0L
+            v.divide(java.math.BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
+        } else {
+            v
+        }
+        Amounts.toPxmr(xmr) ?: 0L
+    }
     val stake = Stakes.stakeFor(Listings.dealFor(kind), pricePxmr)
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
@@ -381,13 +402,34 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
             singleLine = true, modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(8.dp))
-        OutlinedTextField(
-            value = price,
-            onValueChange = { price = it.filter { c -> Amounts.isNumberChar(c) } },
-            label = { Text(stringResource(priceLabel(kind))) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            singleLine = true, modifier = Modifier.fillMaxWidth(),
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(
+                value = price,
+                onValueChange = { price = it.filter { c -> Amounts.isNumberChar(c) } },
+                label = { Text(stringResource(priceLabel(kind), if (fiat) cur else "XMR")) },
+                // What it comes to in monero, under the field, because that is
+                // what actually goes on the board and the owner should be able
+                // to see it without doing the sum.
+                supportingText = if (fiat && pricePxmr > 0) {
+                    { Text("${org.ducatproject.ducat.formatXmr(pricePxmr)} XMR") }
+                } else {
+                    null
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true, modifier = Modifier.weight(1f),
+            )
+            if (rate != null) {
+                TextButton(
+                    onClick = { fiat = !fiat; price = "" },
+                    contentPadding = PaddingValues(horizontal = 6.dp),
+                ) {
+                    Text(
+                        if (fiat) "\u2192XMR" else "\u2192$cur",
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
+            }
+        }
         if (stake > 0) {
             Spacer(Modifier.height(4.dp))
             Text(
@@ -604,6 +646,8 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
                     val draft = Listings.draft(
                         context, kind, title, area, pricePxmr,
                         here.first, here.second, specs, details,
+                        priceTyped = price.takeIf { fiat },
+                        priceCurrency = cur.takeIf { fiat },
                     )
                     Listings.put(context, draft)
                     scope.launch {

@@ -9,8 +9,8 @@
     <string name="rent_title">一句话介绍</string>
     <string name="rent_area">区域</string>
     <string name="rent_area_hint">用平常的说法——一个街区，不是地址</string>
-    <string name="rent_per_day">每日价格（XMR）</string>
-    <string name="rent_per_night">每晚价格（XMR）</string>
+    <string name="rent_per_day">每日价格（%1$s）</string>
+    <string name="rent_per_night">每晚价格（%1$s）</string>
     <string name="rent_stake_note">双方各押 %1$s，租赁顺利结束后退回。</string>
     <string name="rent_make">品牌</string>
     <string name="rent_model">型号</string>
@@ -69,8 +69,8 @@
     <string name="rent_form_gear">出借装备</string>
     <string name="rent_form_sale">卖点东西</string>
     <string name="rent_form_skill">接活儿</string>
-    <string name="rent_per_hour">每小时价格（XMR）</string>
-    <string name="rent_price_once">价格（XMR）</string>
+    <string name="rent_per_hour">每小时价格（%1$s）</string>
+    <string name="rent_price_once">价格（%1$s）</string>
     <string name="rent_category">分类</string>
     <string name="rent_tags">标签</string>
     <string name="rent_tags_hint">几个词，用逗号隔开</string>

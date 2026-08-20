@@ -9,8 +9,8 @@
     <string name="rent_title">ひとことで言うと</string>
     <string name="rent_area">エリア</string>
     <string name="rent_area_hint">ふつうの言葉で — 地区名であって住所ではありません</string>
-    <string name="rent_per_day">1日あたりの価格（XMR）</string>
-    <string name="rent_per_night">1泊あたりの価格（XMR）</string>
+    <string name="rent_per_day">1日あたりの価格（%1$s）</string>
+    <string name="rent_per_night">1泊あたりの価格（%1$s）</string>
     <string name="rent_stake_note">双方が %1$s を預り金として預け、貸し借りが無事に終われば戻ります。</string>
     <string name="rent_make">メーカー</string>
     <string name="rent_model">車種</string>
@@ -69,8 +69,8 @@
     <string name="rent_form_gear">道具を貸す</string>
     <string name="rent_form_sale">何かを売る</string>
     <string name="rent_form_skill">腕を貸す</string>
-    <string name="rent_per_hour">1時間あたりの価格（XMR）</string>
-    <string name="rent_price_once">価格（XMR）</string>
+    <string name="rent_per_hour">1時間あたりの価格（%1$s）</string>
+    <string name="rent_price_once">価格（%1$s）</string>
     <string name="rent_category">カテゴリ</string>
     <string name="rent_tags">タグ</string>
     <string name="rent_tags_hint">短い言葉を、読点で区切って</string>

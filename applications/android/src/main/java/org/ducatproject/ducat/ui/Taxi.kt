@@ -85,6 +85,7 @@ fun TaxiScreen() {
 @Composable
 private fun NewRideScreen(rides: RideStore) {
     val context = LocalContext.current
+    val rateVersion by ContactStore.changes.collectAsState()
     val prefs = remember {
         securePrefs(context, "ducat_contacts")
     }
@@ -93,7 +94,7 @@ private fun NewRideScreen(rides: RideStore) {
     // invent a rate at the curb. Locale-pinned to the dot, because these
     // strings are parsed by toPxmr below — a locale's decimal comma would
     // leave the defaults unparseable.
-    var fiat by remember { mutableStateOf(Amounts.preferFiat(context)) }
+    var fiat by remember { mutableStateOf(Amounts.enterFiat(context)) }
 
     /**
      * A suggested rate in the unit this field is read in.
@@ -125,7 +126,7 @@ private fun NewRideScreen(rides: RideStore) {
         prefs.getString("taxi_permin_text", null)
             ?: suggest(org.ducatproject.ducat.Fare.perMin(context))
     ) }
-    val rate = remember { RateStore(context).cached()?.first }
+    val rate = remember(rateVersion) { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
     var cardUri by remember { mutableStateOf<String?>(null) }
     var cardInbox by remember { mutableStateOf<String?>(null) }

@@ -285,7 +285,7 @@ private fun AmountStep(
     val scope = rememberCoroutineScope()
     val version by ContactStore.changes.collectAsState()
     val b = remember(version) { Wallet.balances(context) }
-    var fiatEntry by rememberSaveable { mutableStateOf(Amounts.preferFiat(context)) }
+    var fiatEntry by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
     val rate = remember(version) { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
     var priority by remember { mutableIntStateOf(1) }
