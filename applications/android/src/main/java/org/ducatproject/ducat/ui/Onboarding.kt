@@ -98,15 +98,27 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
             RestoreStep(
                 onCancel = { restoring = false },
                 onRestored = { r ->
-                    // Straight to the end: the wallet, the identity and the
-                    // people are already back, and the file that brought them
-                    // is the backup — asking for a second one before letting
-                    // this person in would be ceremony, not safety. The name
-                    // and the publish choice ride along so the shell does not
-                    // write setup's defaults over what was just restored.
+                    // Past the backup step: the file that brought them here is
+                    // the backup, and asking for a second one before letting
+                    // this person in would be ceremony, not safety. Past the
+                    // trust explainer too — they have used this before.
+                    //
+                    // **Not past the PIN.** That jumped straight to Done, and
+                    // the PIN is the one thing in setup a backup cannot carry:
+                    // it is device-local by design, so a restored phone had
+                    // none. The step's own docstring says why that matters —
+                    // it is what stands between somebody who picks up an
+                    // unlocked phone and the money on it, and asking for it
+                    // later means asking somebody who is holding a customer —
+                    // and later is exactly where it ended up, at the first
+                    // payment, from a gate that offers to set one because the
+                    // alternative is locking an owner out.
+                    //
+                    // So: restore, then choose a PIN, then done. One screen,
+                    // on the device that now has the money on it.
                     onState(
                         state.copy(
-                            step = Step.Done,
+                            step = Step.Pin,
                             backupConfirmed = true,
                             displayName = r.displayName,
                             publishPayto = r.publishPayto,
@@ -187,7 +199,17 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
             // Now it is where the PIN is actually chosen, before there is any
             // money to lose and while a person is still paying attention to
             // set-up rather than to a customer.
-            Step.Pin -> PinStep(onDone = { onState(state.copy(step = Step.Trust)) })
+            // Trust and Backup after this for a new wallet; straight to Done
+            // for a restored one, which has already done both.
+            Step.Pin -> PinStep(
+                onDone = {
+                    onState(
+                        state.copy(
+                            step = if (state.backupConfirmed) Step.Done else Step.Trust,
+                        ),
+                    )
+                },
+            )
 
             // Before the first deal, because it is the answer to the
             // question every user of a marketplace without a company asks

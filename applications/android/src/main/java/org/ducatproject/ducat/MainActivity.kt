@@ -117,14 +117,21 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
             var onboarded by remember { mutableStateOf(prefs.onboarded) }
             // Resume where a rotation or a killed process left off: the wallet
             // is persisted the moment it is created, so its presence means the
-            // expensive steps are already done and only the backup remains.
-            // Starting fresh here is what used to regenerate the wallet.
+            // expensive steps are already done. Starting fresh here is what
+            // used to regenerate the wallet.
+            //
+            // "Only the backup remains" was not quite true, and the gap it
+            // left is the one thing here that a later screen cannot make up
+            // for. Setup runs wallet, then PIN, then backup — so a process
+            // killed between the wallet and the PIN resumed at the backup
+            // step, walked to Done, and left a funded wallet with no PIN on
+            // it, for ever. Ask what is actually missing instead of assuming.
             var setup by remember {
                 mutableStateOf(
-                    if (WalletStore(this@MainActivity).address() != null) {
-                        Onboarding(step = Step.Backup)
-                    } else {
-                        Onboarding()
+                    when {
+                        WalletStore(this@MainActivity).address() == null -> Onboarding()
+                        !Pin.isSet(this@MainActivity) -> Onboarding(step = Step.Pin)
+                        else -> Onboarding(step = Step.Backup)
                     }
                 )
             }
