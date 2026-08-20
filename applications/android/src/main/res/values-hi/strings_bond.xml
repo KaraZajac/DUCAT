@@ -66,4 +66,5 @@
         <item quantity="other">हिलने से पहले एस्क्रो को %1$d और पुष्टियाँ चाहिए।</item>
     </plurals>
     <string name="res_too_small">एस्क्रो के लिए बहुत छोटा — छोड़ने का नेटवर्क शुल्क चीज़ से ज़्यादा होगा। %1$s या उससे ऊपर आज़माएँ।</string>
+    <string name="bond_will_retry">यह अपने आप फिर कोशिश करेगा।</string>
 </resources>

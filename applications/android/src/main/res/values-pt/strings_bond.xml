@@ -66,4 +66,5 @@
         <item quantity="other">O escrow precisa de mais %1$d confirmações antes de poder mover-se.</item>
     </plurals>
     <string name="res_too_small">Pequeno demais para um escrow — libertá-lo custaria mais em taxas de rede do que a própria coisa. Tente %1$s ou mais.</string>
+    <string name="bond_will_retry">Vai tentar de novo sozinho.</string>
 </resources>

@@ -66,4 +66,5 @@
         <item quantity="other">The escrow needs %1$d more confirmations before it can move.</item>
     </plurals>
     <string name="res_too_small">Too small for an escrow — releasing it would cost more in network fees than the thing itself. Try %1$s or more.</string>
+    <string name="bond_will_retry">It will try again on its own.</string>
 </resources>

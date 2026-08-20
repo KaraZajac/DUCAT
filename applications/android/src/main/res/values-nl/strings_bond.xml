@@ -66,4 +66,5 @@
         <item quantity="other">De escrow heeft nog %1$d bevestigingen nodig voordat er iets kan bewegen.</item>
     </plurals>
     <string name="res_too_small">Te klein voor escrow — vrijgeven kost meer netwerkkosten dan het ding zelf. Probeer %1$s of meer.</string>
+    <string name="bond_will_retry">Het probeert het vanzelf opnieuw.</string>
 </resources>

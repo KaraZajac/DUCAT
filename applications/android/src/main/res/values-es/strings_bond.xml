@@ -66,4 +66,5 @@
         <item quantity="other">El depósito necesita %1$d confirmaciones más antes de poder moverse.</item>
     </plurals>
     <string name="res_too_small">Demasiado pequeño para un depósito — liberarlo costaría más en comisiones de red que la cosa misma. Prueba %1$s o más.</string>
+    <string name="bond_will_retry">Se volverá a intentar automáticamente.</string>
 </resources>

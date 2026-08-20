@@ -65,4 +65,5 @@
         <item quantity="other">エスクローが動くには、あと %1$d 回の承認が必要です。</item>
     </plurals>
     <string name="res_too_small">エスクローには小さすぎます — 解放のネットワーク手数料が品物より高くつきます。%1$s 以上でお試しください。</string>
+    <string name="bond_will_retry">自動でもう一度試します。</string>
 </resources>

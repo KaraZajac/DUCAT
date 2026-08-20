@@ -70,4 +70,5 @@
         <item quantity="other">يحتاج الضمان %1$d تأكيد آخر قبل أن يتحرك.</item>
     </plurals>
     <string name="res_too_small">أصغر من أن يوضع في ضمان — سيكلف الإفراج رسوم شبكة أكثر من الشيء نفسه. جرّب %1$s أو أكثر.</string>
+    <string name="bond_will_retry">سيحاول مرة أخرى من تلقاء نفسه.</string>
 </resources>

@@ -68,4 +68,5 @@
         <item quantity="other">Эскроу нужно ещё %1$d подтверждений, прежде чем средства сдвинутся.</item>
     </plurals>
     <string name="res_too_small">Слишком мало для эскроу — выпуск обойдётся в сетевую комиссию дороже самой вещи. Попробуйте %1$s или больше.</string>
+    <string name="bond_will_retry">Повторит попытку само.</string>
 </resources>

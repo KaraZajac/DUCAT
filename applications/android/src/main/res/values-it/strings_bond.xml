@@ -66,4 +66,5 @@
         <item quantity="other">Il deposito ha bisogno di %1$d conferme in più prima di potersi muovere.</item>
     </plurals>
     <string name="res_too_small">Troppo piccolo per un deposito — liberarlo costerebbe più di commissioni di rete che la cosa stessa. Prova %1$s o più.</string>
+    <string name="bond_will_retry">Riproverà da solo.</string>
 </resources>

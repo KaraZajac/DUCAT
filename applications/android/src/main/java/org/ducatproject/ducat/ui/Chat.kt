@@ -1898,6 +1898,30 @@ private fun RideBondBanner(contact: Contact) {
         }
     }
     val signNow: () -> Unit = { pinAction = signReally }
+
+    // Ten blocks is the chain's answer, not a refusal.
+    //
+    // An escrow's newest output needs its confirmations like any other, so
+    // "not yet" is the ordinary reply to settling up promptly rather than a
+    // failure — and the only way to learn it had stopped being the reply was
+    // to keep pressing the button. On a two-minute chain that is ten presses
+    // over twenty minutes, on the screen where somebody is waiting to be paid,
+    // with nothing on it saying that pressing again is the plan.
+    //
+    // Only the proposal retries. It spends nothing — a proposal is a signature
+    // and a message, and the payout does not move until the other side signs
+    // too. That second signature is behind the PIN, which is exactly where a
+    // retry nobody asked for does not belong.
+    //
+    // User-initiated by construction: `error` is null until somebody presses
+    // the button, so this can only ever be continuing something already begun.
+    LaunchedEffect(idHex, error?.waiting) {
+        if (error?.waiting != true) return@LaunchedEffect
+        while (error?.waiting == true) {
+            kotlinx.coroutines.delay(30_000)
+            if (!busy) proposeNow()
+        }
+    }
     // What actually comes back to me, read from the escrow rather than worked
     // out again from the fare — see Ceremony.myStakePxmr for why that matters.
     val myStakeShown = org.ducatproject.ducat.Ceremony.myStakePxmr(ride)
@@ -2468,6 +2492,13 @@ private fun RideBondBanner(contact: Contact) {
                     else MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.labelSmall,
                 )
+                if (it.waiting) {
+                    Text(
+                        stringResource(R.string.bond_will_retry),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
             }
         }
     }

@@ -66,4 +66,5 @@
         <item quantity="other">Emanetin hareket edebilmesi için %1$d onay daha gerekiyor.</item>
     </plurals>
     <string name="res_too_small">Emanet için fazla küçük — serbest bırakmanın ağ ücreti eşyanın kendisinden pahalı. %1$s ya da üstünü dene.</string>
+    <string name="bond_will_retry">Kendiliğinden tekrar deneyecek.</string>
 </resources>

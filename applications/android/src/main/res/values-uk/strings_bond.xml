@@ -68,4 +68,5 @@
         <item quantity="other">Ескроу потрібно ще %1$d підтверджень, перш ніж кошти зрушать.</item>
     </plurals>
     <string name="res_too_small">Замало для ескроу — випуск коштуватиме більше мережевої комісії, ніж сама річ. Спробуйте %1$s або більше.</string>
+    <string name="bond_will_retry">Спробує ще раз саме.</string>
 </resources>

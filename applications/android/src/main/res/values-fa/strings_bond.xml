@@ -66,4 +66,5 @@
         <item quantity="other">امانت پیش از جابه‌جایی به %1$d تأیید دیگر نیاز دارد.</item>
     </plurals>
     <string name="res_too_small">برای امانت خیلی کوچک است — آزادسازی‌اش بیش از خودِ کالا کارمزد شبکه می‌برد. %1$s یا بیشتر را امتحان کن.</string>
+    <string name="bond_will_retry">خودش دوباره تلاش می‌کند.</string>
 </resources>

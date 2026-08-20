@@ -66,4 +66,5 @@
         <item quantity="other">Die Treuhand braucht noch %1$d Bestätigungen, bevor sie sich bewegen kann.</item>
     </plurals>
     <string name="res_too_small">Zu klein für eine Treuhand — die Freigabe würde mehr Netzgebühr kosten als die Sache selbst. Nimm %1$s oder mehr.</string>
+    <string name="bond_will_retry">Es versucht es von selbst erneut.</string>
 </resources>

@@ -571,6 +571,18 @@ fun EscrowStep(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 28.dp),
                     )
+                    // Said, because otherwise the screen shows the same
+                    // sentence for twenty minutes and nothing about it
+                    // suggests anyone is still working.
+                    if (errorWaiting) {
+                        Text(
+                            stringResource(R.string.bond_will_retry),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 28.dp),
+                        )
+                    }
                 }
                 Spacer(Modifier.height(28.dp))
                 Button(

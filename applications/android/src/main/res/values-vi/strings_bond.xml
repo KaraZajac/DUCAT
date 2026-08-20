@@ -65,4 +65,5 @@
         <item quantity="other">Ký quỹ cần thêm %1$d xác nhận nữa mới chuyển được.</item>
     </plurals>
     <string name="res_too_small">Quá nhỏ để ký quỹ — phí mạng khi giải phóng còn đắt hơn món đồ. Thử %1$s trở lên.</string>
+    <string name="bond_will_retry">Sẽ tự thử lại.</string>
 </resources>

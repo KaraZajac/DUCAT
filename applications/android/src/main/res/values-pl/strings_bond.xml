@@ -68,4 +68,5 @@
         <item quantity="other">Escrow potrzebuje jeszcze %1$d potwierdzeń, zanim się ruszy.</item>
     </plurals>
     <string name="res_too_small">Za mało na escrow — zwolnienie kosztowałoby więcej opłat sieciowych niż sama rzecz. Spróbuj %1$s lub więcej.</string>
+    <string name="bond_will_retry">Spróbuje ponownie samo.</string>
 </resources>
