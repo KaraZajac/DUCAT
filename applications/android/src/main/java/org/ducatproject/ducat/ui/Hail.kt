@@ -666,7 +666,21 @@ fun DriveScreen() {
     // each cell in the meantime — so filtering the taken job out once, at the
     // moment of the claim, lasted exactly until the next lap redrew it from
     // that cached read. A fare you have already taken is not a fare.
-    var takenCards by remember { mutableStateOf(setOf<String>()) }
+    // On disk, like the rest of the shift. Everything else a driver is in the
+    // middle of — where they are watching, their box, their range, an offer
+    // waiting on a rider — survives a trip to Settings and a process death,
+    // because a shift is not a screen. This one list did not, and it is the
+    // list that keeps a fare the driver has *already taken* off their map: the
+    // board clears by a write somebody has to read back, and until they do,
+    // the sweep keeps redrawing the job from its last good read. So a rotation
+    // put a claimed fare back on the map, and the driver could offer twice for
+    // a rider already in the car.
+    var takenCards by remember {
+        mutableStateOf(
+            dutyPrefs.getString("drive_taken", null)
+                ?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet(),
+        )
+    }
     var selected by remember { mutableStateOf<SeenHail?>(null) }
     var coverage by remember {
         mutableStateOf(
@@ -765,6 +779,13 @@ fun DriveScreen() {
                         // standing that they had just claimed.
                         withContext(Dispatchers.Main) {
                             takenCards = takenCards + taken.card
+                            // Bounded: a card is only worth remembering while
+                            // a notice for it could still be redrawn, and a
+                            // long shift must not grow this without end.
+                            dutyPrefs.edit().putString(
+                                "drive_taken",
+                                takenCards.toList().takeLast(200).joinToString(","),
+                            ).apply()
                             notices = notices.filterNot { it.card == taken.card }
                         }
                         // The offer is protocol now (kind 6): the fare and the
@@ -1955,6 +1976,6 @@ private fun AddressField(
 private fun forgetDuty(prefs: android.content.SharedPreferences) {
     prefs.edit()
         .remove("drive_watching").remove("drive_lat")
-        .remove("drive_lon").remove("drive_box")
+        .remove("drive_lon").remove("drive_box").remove("drive_taken")
         .apply()
 }
