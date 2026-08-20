@@ -61,4 +61,8 @@
     <string name="res_days">Gün</string>
     <string name="res_hours">Saat</string>
     <string name="res_total">Toplam (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="one">Emanetin hareket edebilmesi için %1$d onay daha gerekiyor.</item>
+        <item quantity="other">Emanetin hareket edebilmesi için %1$d onay daha gerekiyor.</item>
+    </plurals>
 </resources>

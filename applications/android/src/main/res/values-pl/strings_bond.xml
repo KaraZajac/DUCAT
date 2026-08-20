@@ -61,4 +61,10 @@
     <string name="res_days">Dni</string>
     <string name="res_hours">Godziny</string>
     <string name="res_total">Razem (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="one">Escrow potrzebuje jeszcze %1$d potwierdzenia, zanim się ruszy.</item>
+        <item quantity="few">Escrow potrzebuje jeszcze %1$d potwierdzeń, zanim się ruszy.</item>
+        <item quantity="many">Escrow potrzebuje jeszcze %1$d potwierdzeń, zanim się ruszy.</item>
+        <item quantity="other">Escrow potrzebuje jeszcze %1$d potwierdzeń, zanim się ruszy.</item>
+    </plurals>
 </resources>

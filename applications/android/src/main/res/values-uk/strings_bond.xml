@@ -61,4 +61,10 @@
     <string name="res_days">Днів</string>
     <string name="res_hours">Годин</string>
     <string name="res_total">Разом (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="one">Ескроу потрібно ще %1$d підтвердження, перш ніж кошти зрушать.</item>
+        <item quantity="few">Ескроу потрібно ще %1$d підтвердження, перш ніж кошти зрушать.</item>
+        <item quantity="many">Ескроу потрібно ще %1$d підтверджень, перш ніж кошти зрушать.</item>
+        <item quantity="other">Ескроу потрібно ще %1$d підтверджень, перш ніж кошти зрушать.</item>
+    </plurals>
 </resources>

@@ -61,4 +61,8 @@
     <string name="res_days">दिन</string>
     <string name="res_hours">घंटे</string>
     <string name="res_total">कुल (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="one">हिलने से पहले एस्क्रो को %1$d और पुष्टि चाहिए।</item>
+        <item quantity="other">हिलने से पहले एस्क्रो को %1$d और पुष्टियाँ चाहिए।</item>
+    </plurals>
 </resources>

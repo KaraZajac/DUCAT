@@ -61,4 +61,7 @@
     <string name="res_days">Hari</string>
     <string name="res_hours">Jam</string>
     <string name="res_total">Total (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="other">Escrow butuh %1$d konfirmasi lagi sebelum bisa dipindahkan.</item>
+    </plurals>
 </resources>

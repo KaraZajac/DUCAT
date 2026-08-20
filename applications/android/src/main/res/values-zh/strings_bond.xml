@@ -61,4 +61,7 @@
     <string name="res_days">天数</string>
     <string name="res_hours">小时</string>
     <string name="res_total">合计（%1$s）</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="other">托管还需要 %1$d 次确认才能动。</item>
+    </plurals>
 </resources>

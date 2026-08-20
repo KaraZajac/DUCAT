@@ -61,4 +61,8 @@
     <string name="res_days">Días</string>
     <string name="res_hours">Horas</string>
     <string name="res_total">Total (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="one">El depósito necesita %1$d confirmación más antes de poder moverse.</item>
+        <item quantity="other">El depósito necesita %1$d confirmaciones más antes de poder moverse.</item>
+    </plurals>
 </resources>

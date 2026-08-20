@@ -61,4 +61,8 @@
     <string name="res_days">روز</string>
     <string name="res_hours">ساعت</string>
     <string name="res_total">جمع (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="one">امانت پیش از جابه‌جایی به %1$d تأیید دیگر نیاز دارد.</item>
+        <item quantity="other">امانت پیش از جابه‌جایی به %1$d تأیید دیگر نیاز دارد.</item>
+    </plurals>
 </resources>

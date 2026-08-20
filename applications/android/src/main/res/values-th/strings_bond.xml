@@ -61,4 +61,7 @@
     <string name="res_days">วัน</string>
     <string name="res_hours">ชั่วโมง</string>
     <string name="res_total">รวม (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="other">เอสโครว์ต้องรออีก %1$d การยืนยันจึงจะย้ายได้</item>
+    </plurals>
 </resources>

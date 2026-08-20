@@ -51,9 +51,30 @@ fun claimFailureRes(
  * transport and fail the same way, and every one of them was printing the
  * same unreadable line at somebody. Same sentence for all of them.
  */
+/**
+ * How many confirmations a release is still waiting on, if that is the answer.
+ *
+ * The core refuses a release whose newest escrow output is younger than
+ * Monero's ten blocks, and says so with a count. On a slow chain that is the
+ * common case rather than the corner — so it is a sentence real users read,
+ * and it was reaching them as raw English from a Rust `format!`, in an app
+ * that ships in nineteen languages.
+ *
+ * Matched on the count rather than the wording, and the wording is the
+ * fallback when the match misses. A regex over an error string is not
+ * elegant; shipping one language to everybody is worse.
+ */
+private val NEEDS_CONFIRMATIONS = Regex("""needs (\d+) more confirmation""")
+
 fun moneyFailure(context: android.content.Context, t: Throwable): String = when {
     org.ducatproject.ducat.Wallet.isNodeTrouble(t) ->
         context.getString(org.ducatproject.ducat.R.string.pay_node_no_answer)
+    NEEDS_CONFIRMATIONS.find(t.message.orEmpty()) != null -> {
+        val n = NEEDS_CONFIRMATIONS.find(t.message.orEmpty())!!.groupValues[1].toInt()
+        context.resources.getQuantityString(
+            org.ducatproject.ducat.R.plurals.bond_needs_confirmations, n, n,
+        )
+    }
     else -> bridgeMessage(t.message ?: context.getString(
         org.ducatproject.ducat.R.string.main_card_link_failed_body,
     ))

@@ -238,12 +238,25 @@ private fun MyListingCard(
                 Text(o.optString("title"), style = MaterialTheme.typography.titleSmall)
             }
             Spacer(Modifier.height(4.dp))
+            // "each side stakes USD 0.00" is not a fact, it is a leftover.
+            //
+            // A stake below §17.9's floor is deliberately nothing — holding a
+            // fee-sized deposit costs more to hand back than it is worth — so
+            // a cheap listing genuinely has none. The card a *seeker* sees has
+            // always known that and left the line off. The owner's own row
+            // printed the zero, which reads like a broken calculation on the
+            // one screen where somebody would notice.
+            val deposit = o.optLong("depositPxmr")
             Text(
-                stringResource(
-                    R.string.rent_price_and_stake,
-                    Amounts.show(context, o.optLong("pricePxmr")).primary,
-                    Amounts.show(context, o.optLong("depositPxmr")).primary,
-                ),
+                if (deposit > 0) {
+                    stringResource(
+                        R.string.rent_price_and_stake,
+                        Amounts.show(context, o.optLong("pricePxmr")).primary,
+                        Amounts.show(context, deposit).primary,
+                    )
+                } else {
+                    Amounts.show(context, o.optLong("pricePxmr")).primary
+                },
                 style = MaterialTheme.typography.bodySmall,
             )
             Text(

@@ -61,4 +61,12 @@
     <string name="res_days">أيام</string>
     <string name="res_hours">ساعات</string>
     <string name="res_total">الإجمالي (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="zero">لا يحتاج الضمان تأكيدات أخرى قبل أن يتحرك.</item>
+        <item quantity="one">يحتاج الضمان تأكيدًا واحدًا آخر قبل أن يتحرك.</item>
+        <item quantity="two">يحتاج الضمان تأكيدين آخرين قبل أن يتحرك.</item>
+        <item quantity="few">يحتاج الضمان %1$d تأكيدات أخرى قبل أن يتحرك.</item>
+        <item quantity="many">يحتاج الضمان %1$d تأكيدًا آخر قبل أن يتحرك.</item>
+        <item quantity="other">يحتاج الضمان %1$d تأكيد آخر قبل أن يتحرك.</item>
+    </plurals>
 </resources>

@@ -61,4 +61,7 @@
     <string name="res_days">日数</string>
     <string name="res_hours">時間</string>
     <string name="res_total">合計（%1$s）</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="other">エスクローが動くには、あと %1$d 回の承認が必要です。</item>
+    </plurals>
 </resources>

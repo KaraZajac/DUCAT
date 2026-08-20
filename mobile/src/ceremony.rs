@@ -452,8 +452,14 @@ pub fn frost_propose_split(
     // releases that were nothing but a 7-of-10-confirmations wait).
     if youngest + 10 > tip + 1 {
         let left = youngest + 10 - (tip + 1);
+        // "the escrow", not "the fare": this same release ends a taxi ride, a
+        // room booking, a hired kayak and a second-hand bicycle, and a buyer
+        // reading about a fare has been handed somebody else's vocabulary.
+        // The shape is stable on purpose — the app matches the count out of it
+        // to say this in the reader's own language, and falls back to these
+        // words when it cannot.
         return Err(ContactError::Refused(format!(
-            "the fare needs {left} more confirmation(s) before it can move"
+            "the escrow needs {left} more confirmation(s) before it can move"
         )));
     }
     let total: u64 = outputs.iter().map(|o| o.commitment().amount).sum();

@@ -61,4 +61,10 @@
     <string name="res_days">Дней</string>
     <string name="res_hours">Часов</string>
     <string name="res_total">Итого (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="one">Эскроу нужно ещё %1$d подтверждение, прежде чем средства сдвинутся.</item>
+        <item quantity="few">Эскроу нужно ещё %1$d подтверждения, прежде чем средства сдвинутся.</item>
+        <item quantity="many">Эскроу нужно ещё %1$d подтверждений, прежде чем средства сдвинутся.</item>
+        <item quantity="other">Эскроу нужно ещё %1$d подтверждений, прежде чем средства сдвинутся.</item>
+    </plurals>
 </resources>

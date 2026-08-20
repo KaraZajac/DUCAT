@@ -61,4 +61,7 @@
     <string name="res_days">일</string>
     <string name="res_hours">시간</string>
     <string name="res_total">합계 (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="other">에스크로가 움직이려면 확인 %1$d 회가 더 필요합니다.</item>
+    </plurals>
 </resources>

@@ -61,4 +61,7 @@
     <string name="res_days">Ngày</string>
     <string name="res_hours">Giờ</string>
     <string name="res_total">Tổng (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="other">Ký quỹ cần thêm %1$d xác nhận nữa mới chuyển được.</item>
+    </plurals>
 </resources>

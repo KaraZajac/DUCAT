@@ -61,4 +61,8 @@
     <string name="res_days">Tage</string>
     <string name="res_hours">Stunden</string>
     <string name="res_total">Gesamt (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="one">Die Treuhand braucht noch %1$d Bestätigung, bevor sie sich bewegen kann.</item>
+        <item quantity="other">Die Treuhand braucht noch %1$d Bestätigungen, bevor sie sich bewegen kann.</item>
+    </plurals>
 </resources>

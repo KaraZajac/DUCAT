@@ -61,4 +61,8 @@
     <string name="res_days">Dias</string>
     <string name="res_hours">Horas</string>
     <string name="res_total">Total (%1$s)</string>
+    <plurals name="bond_needs_confirmations">
+        <item quantity="one">O escrow precisa de mais %1$d confirmação antes de poder mover-se.</item>
+        <item quantity="other">O escrow precisa de mais %1$d confirmações antes de poder mover-se.</item>
+    </plurals>
 </resources>
