@@ -1929,11 +1929,20 @@ private fun RideBondBanner(contact: Contact) {
         // waiting on the other side's, which is a wait, not a decision.
         stage == "done" && rider && ride.optString("fundTxid").isEmpty() &&
             !(ride.optLong("hostDepPxmr") > 0 && funded < ride.optLong("hostDepPxmr")) -> Step(
-            title = stringResource(R.string.bond_escrow_ready),
+            // The reservation wording, which existed all along and which the
+            // banner beneath this card has always used. Buying a coffee
+            // grinder was headed "the fare goes in before the ride", over a
+            // button reading "Accept — fund your deposit" — a string written
+            // for the *other* side, offered to the person who proposed the
+            // deal and is paying the price of it.
+            title = stringResource(
+                if (reservation) R.string.res_escrow_ready
+                else R.string.bond_escrow_ready,
+            ),
             amount = myShare,
             note = stakeNote,
             action = stringResource(
-                if (reservation) R.string.res_accept_fund else R.string.bond_secure_fare,
+                if (reservation) R.string.res_pay_now else R.string.bond_secure_fare,
                 Amounts.show(context, myShare).primary,
             ),
             onAction = fundNow,

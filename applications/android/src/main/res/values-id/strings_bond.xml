@@ -43,8 +43,8 @@
     <string name="res_kind_vehicle">Sebuah kendaraan</string>
     <string name="res_kind_note">menyarankan %1$d%% tiap pihak</string>
     <string name="bond_await_their_stake">Menunggu jaminan mereka — Anda membayar setelah jaminan mereka masuk.</string>
-    <string name="res_escrow_ready">Escrow siap — sewa dan kedua deposit masuk sebelum serah terima.</string>
-    <string name="res_pay_now">Bayar sewa dan deposit (%1$s)</string>
+    <string name="res_escrow_ready">Escrow siap — harga dan kedua deposit masuk sebelum serah terima.</string>
+    <string name="res_pay_now">Bayar harga dan deposit Anda (%1$s)</string>
     <string name="res_paid_sent">Sewa dan deposit terkirim — dikonfirmasi di rantai…</string>
     <string name="res_waiting_payment">Menunggu mereka membayar harga dan deposit…</string>
     <string name="res_waiting_release">Sewa selesai — menunggu penyewa melepas dananya…</string>

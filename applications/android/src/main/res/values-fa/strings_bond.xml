@@ -43,8 +43,8 @@
     <string name="res_kind_vehicle">خودرو</string>
     <string name="res_kind_note">‏%1$d%% برای هر طرف پیشنهاد می‌شود</string>
     <string name="bond_await_their_stake">در انتظار ودیعهٔ آن‌ها — پس از واریز آن‌ها پرداخت می‌کنید.</string>
-    <string name="res_escrow_ready">امانت آماده است — اجاره و هر دو ودیعه پیش از تحویل وارد می‌شوند.</string>
-    <string name="res_pay_now">پرداخت اجاره و ودیعه (%1$s)</string>
+    <string name="res_escrow_ready">امانت آماده است — مبلغ و هر دو ودیعه پیش از تحویل وارد می‌شوند.</string>
+    <string name="res_pay_now">پرداخت مبلغ و ودیعه‌ات (%1$s)</string>
     <string name="res_paid_sent">اجاره و ودیعه فرستاده شد — در حال تأیید روی زنجیره…</string>
     <string name="res_waiting_payment">در انتظار پرداخت مبلغ و ودیعهٔ آن‌ها…</string>
     <string name="res_waiting_release">اجاره تمام شد — در انتظار آزادسازی پول توسط مستأجر…</string>

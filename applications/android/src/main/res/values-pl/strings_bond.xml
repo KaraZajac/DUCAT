@@ -43,8 +43,8 @@
     <string name="res_kind_vehicle">Pojazd</string>
     <string name="res_kind_note">sugeruje %1$d%% z każdej strony</string>
     <string name="bond_await_their_stake">Czekamy na ich kaucję — płacisz, gdy ich wpłynie.</string>
-    <string name="res_escrow_ready">Escrow gotowy — czynsz i obie kaucje wchodzą przed przekazaniem.</string>
-    <string name="res_pay_now">Zapłać czynsz i kaucję (%1$s)</string>
+    <string name="res_escrow_ready">Escrow gotowe — kwota i oba depozyty wchodzą przed przekazaniem.</string>
+    <string name="res_pay_now">Zapłać kwotę i swój depozyt (%1$s)</string>
     <string name="res_paid_sent">Czynsz i kaucja wysłane — potwierdzanie w łańcuchu…</string>
     <string name="res_waiting_payment">Czekam, aż wpłacą kwotę i swój depozyt…</string>
     <string name="res_waiting_release">Najem zakończony — czekam, aż najemca zwolni pieniądze…</string>

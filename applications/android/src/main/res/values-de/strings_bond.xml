@@ -43,8 +43,8 @@
     <string name="res_kind_vehicle">Ein Fahrzeug</string>
     <string name="res_kind_note">schlägt je %1$d%% vor</string>
     <string name="bond_await_their_stake">Warte auf ihre Einlage — du zahlst, sobald ihre da ist.</string>
-    <string name="res_escrow_ready">Treuhand bereit — Miete und beide Kautionen gehen vor der Übergabe hinein.</string>
-    <string name="res_pay_now">Miete und Kaution zahlen (%1$s)</string>
+    <string name="res_escrow_ready">Treuhand bereit — Preis und beide Kautionen gehen vor der Übergabe hinein.</string>
+    <string name="res_pay_now">Preis und deine Kaution zahlen (%1$s)</string>
     <string name="res_paid_sent">Miete und Kaution gesendet — wird auf der Kette bestätigt…</string>
     <string name="res_waiting_payment">Warte darauf, dass sie den Preis und ihre Kaution zahlen…</string>
     <string name="res_waiting_release">Miete beendet — warte darauf, dass der Gast das Geld freigibt…</string>

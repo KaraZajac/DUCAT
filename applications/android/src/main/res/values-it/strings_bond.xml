@@ -43,8 +43,8 @@
     <string name="res_kind_vehicle">Un veicolo</string>
     <string name="res_kind_note">suggerisce %1$d%% per parte</string>
     <string name="bond_await_their_stake">In attesa della loro cauzione: paghi quando la loro è dentro.</string>
-    <string name="res_escrow_ready">Deposito a garanzia pronto — affitto e le due cauzioni entrano prima della consegna.</string>
-    <string name="res_pay_now">Paga affitto e cauzione (%1$s)</string>
+    <string name="res_escrow_ready">Deposito pronto — il prezzo e le due cauzioni entrano prima della consegna.</string>
+    <string name="res_pay_now">Paga il prezzo e la tua cauzione (%1$s)</string>
     <string name="res_paid_sent">Affitto e cauzione inviati — conferma sulla catena…</string>
     <string name="res_waiting_payment">In attesa che paghino il prezzo e la loro cauzione…</string>
     <string name="res_waiting_release">Noleggio concluso — in attesa che l\'ospite sblocchi il denaro…</string>

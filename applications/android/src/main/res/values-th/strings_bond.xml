@@ -43,8 +43,8 @@
     <string name="res_kind_vehicle">ยานพาหนะ</string>
     <string name="res_kind_note">แนะนำฝ่ายละ %1$d%%</string>
     <string name="bond_await_their_stake">กำลังรอหลักประกันของอีกฝ่าย — คุณจ่ายเมื่อของเขาเข้าแล้ว</string>
-    <string name="res_escrow_ready">เอสโครว์พร้อมแล้ว — ค่าเช่าและเงินมัดจำทั้งสองฝ่ายเข้าก่อนส่งมอบ</string>
-    <string name="res_pay_now">จ่ายค่าเช่าและมัดจำ (%1$s)</string>
+    <string name="res_escrow_ready">เอสโครว์พร้อมแล้ว — ราคาและมัดจำทั้งสองเข้าก่อนส่งมอบ</string>
+    <string name="res_pay_now">จ่ายราคาและมัดจำของคุณ (%1$s)</string>
     <string name="res_paid_sent">ส่งค่าเช่าและมัดจำแล้ว — กำลังยืนยันบนเชน…</string>
     <string name="res_waiting_payment">รอให้เขาจ่ายราคาและมัดจำ…</string>
     <string name="res_waiting_release">สิ้นสุดการเช่า — รอให้ผู้เช่าปล่อยเงิน…</string>

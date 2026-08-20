@@ -43,8 +43,8 @@
     <string name="res_kind_vehicle">Bir araç</string>
     <string name="res_kind_note">her taraf için %%%1$d öneriyor</string>
     <string name="bond_await_their_stake">Onların teminatı bekleniyor — onlarınki girince ödersin.</string>
-    <string name="res_escrow_ready">Emanet hazır — kira ve iki depozito teslimden önce girer.</string>
-    <string name="res_pay_now">Kira ve depozitoyu öde (%1$s)</string>
+    <string name="res_escrow_ready">Emanet hazır — tutar ve iki depozito teslimden önce girer.</string>
+    <string name="res_pay_now">Tutarı ve depozitonu öde (%1$s)</string>
     <string name="res_paid_sent">Kira ve depozito gönderildi — zincirde onaylanıyor…</string>
     <string name="res_waiting_payment">Tutarı ve depozitolarını yatırmalarını bekliyoruz…</string>
     <string name="res_waiting_release">Kiralama bitti — kiracının parayı serbest bırakması bekleniyor…</string>
