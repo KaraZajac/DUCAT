@@ -36,4 +36,5 @@
         <item quantity="many">приблизно %1$d годин</item>
         <item quantity="other">приблизно %1$d години</item>
     </plurals>
+    <string name="balance_rate_stale">Ця сума порахована за курсом %1$s тому.</string>
 </resources>

@@ -75,6 +75,20 @@ fun BalanceCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        // Under the figure it qualifies, by the same rule as the sync line
+        // below: a caveat further down is a caveat somebody reads after
+        // deciding. Only when the primary is a conversion, and only once it is
+        // old enough to be a fact about the phone rather than about the
+        // half-hour refresh — a warning that is always on screen is one nobody
+        // reads.
+        val rateAge = org.ducatproject.ducat.Amounts.rateAgeSecs(ctx)
+        if (rateAge != null && rateAge > STALE_BALANCE_RATE_SECS) {
+            Text(
+                stringResource(R.string.balance_rate_stale, humanDuration(ctx, rateAge)),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         // Directly under the figure it qualifies. A caveat placed further
         // down is a caveat someone reads after deciding.
         sync?.let {
@@ -194,3 +208,12 @@ internal fun minutesFor(context: Context, blocks: Int): String = when {
         R.plurals.balance_unlock_hours, (blocks * 2) / 60, (blocks * 2) / 60,
     )
 }
+
+/**
+ * Past this, the age of the rate behind the balance is worth saying.
+ *
+ * Longer than the till's hour, deliberately. The till is quoting a price to
+ * somebody standing in front of it; this is a number being read, and six hours
+ * is where "the phone has been asleep" stops being the likely explanation.
+ */
+private const val STALE_BALANCE_RATE_SECS = 6L * 60 * 60

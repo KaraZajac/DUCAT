@@ -30,4 +30,5 @@
         <item quantity="one">about %1$d hour</item>
         <item quantity="other">about %1$d hours</item>
     </plurals>
+    <string name="balance_rate_stale">That figure uses an exchange rate from %1$s ago.</string>
 </resources>

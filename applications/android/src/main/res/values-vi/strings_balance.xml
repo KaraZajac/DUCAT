@@ -27,4 +27,5 @@
     <plurals name="balance_unlock_hours">
         <item quantity="other">khoảng %1$d giờ</item>
     </plurals>
+    <string name="balance_rate_stale">Con số này dùng tỷ giá từ %1$s trước.</string>
 </resources>

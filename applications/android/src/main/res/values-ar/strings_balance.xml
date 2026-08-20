@@ -42,4 +42,5 @@
         <item quantity="many">%1$d ساعة تقريبًا</item>
         <item quantity="other">%1$d ساعة تقريبًا</item>
     </plurals>
+    <string name="balance_rate_stale">يستخدم هذا الرقم سعر صرف عمره %1$s.</string>
 </resources>

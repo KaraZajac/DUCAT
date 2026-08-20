@@ -30,4 +30,5 @@
         <item quantity="one">etwa %1$d Stunde</item>
         <item quantity="other">etwa %1$d Stunden</item>
     </plurals>
+    <string name="balance_rate_stale">Diese Zahl nutzt einen Wechselkurs von vor %1$s.</string>
 </resources>

@@ -27,4 +27,5 @@
     <plurals name="balance_unlock_hours">
         <item quantity="other">ประมาณ %1$d ชั่วโมง</item>
     </plurals>
+    <string name="balance_rate_stale">ตัวเลขนี้ใช้อัตราแลกเปลี่ยนเมื่อ %1$s ที่แล้ว</string>
 </resources>

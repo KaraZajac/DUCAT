@@ -30,4 +30,5 @@
         <item quantity="one">करीब %1$d घंटा</item>
         <item quantity="other">करीब %1$d घंटे</item>
     </plurals>
+    <string name="balance_rate_stale">यह आँकड़ा %1$s पुरानी विनिमय दर पर है।</string>
 </resources>

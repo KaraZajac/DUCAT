@@ -27,4 +27,5 @@
     <plurals name="balance_unlock_hours">
         <item quantity="other">大约 %1$d 小时</item>
     </plurals>
+    <string name="balance_rate_stale">这个数字用的是 %1$s 前的汇率。</string>
 </resources>

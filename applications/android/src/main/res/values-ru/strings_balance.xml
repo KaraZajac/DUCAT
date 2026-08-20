@@ -36,4 +36,5 @@
         <item quantity="many">около %1$d часов</item>
         <item quantity="other">около %1$d часа</item>
     </plurals>
+    <string name="balance_rate_stale">Эта сумма посчитана по курсу %1$s назад.</string>
 </resources>

@@ -27,4 +27,5 @@
     <plurals name="balance_unlock_hours">
         <item quantity="other">約%1$d時間</item>
     </plurals>
+    <string name="balance_rate_stale">この金額は %1$s 前のレートによるものです。</string>
 </resources>

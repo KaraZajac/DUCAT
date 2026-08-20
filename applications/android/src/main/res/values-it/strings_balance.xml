@@ -30,4 +30,5 @@
         <item quantity="one">circa %1$d ora</item>
         <item quantity="other">circa %1$d ore</item>
     </plurals>
+    <string name="balance_rate_stale">Quella cifra usa un cambio di %1$s fa.</string>
 </resources>

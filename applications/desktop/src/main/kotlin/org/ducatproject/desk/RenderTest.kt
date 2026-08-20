@@ -297,6 +297,43 @@ fun main() {
     // everybody sees: money leads in the currency of the country the phone is
     // in, with the piconero underneath it.
     render("till-priced") { org.ducatproject.ducat.ui.PosScreen() }
+    // The balance, and the balance whose rate nobody could refresh.
+    //
+    // Worth a picture because the second one only exists since the local
+    // currency started leading: the headline figure became a conversion, and a
+    // conversion from a two-day-old rate looks exactly as confident as a fresh
+    // one unless the screen says otherwise.
+    run {
+        val ctx = context
+        val rates = org.ducatproject.ducat.RateStore(ctx)
+        val had = rates.cached()
+        val float = org.ducatproject.ducat.Float(
+            spendablePxmr = 2_150_000_000L,
+            lockedPxmr = 0L,
+            blocksToUnlock = 0,
+            unlockedOutputs = 6,
+        )
+        render("balance-fresh", w = 520, h = 340) {
+            androidx.compose.foundation.layout.Column {
+            org.ducatproject.ducat.ui.BalanceCard(
+                spendablePxmr = 2_150_000_000L,
+                capacity = org.ducatproject.ducat.Capacity(approxPayments = 4),
+                float = float, locked = null, onTopUp = {},
+            )
+            }
+        }
+        rates.store(150.0, System.currentTimeMillis() / 1000 - 2 * 24 * 3600, "rendertest")
+        render("balance-stale-rate", w = 520, h = 340) {
+            androidx.compose.foundation.layout.Column {
+            org.ducatproject.ducat.ui.BalanceCard(
+                spendablePxmr = 2_150_000_000L,
+                capacity = org.ducatproject.ducat.Capacity(approxPayments = 4),
+                float = float, locked = null, onTopUp = {},
+            )
+            }
+        }
+        had?.let { (v, at) -> rates.store(v, at, "rendertest") }
+    }
     // What the shop sees once it has proved it is the shop. The menu lives
     // here too now, so a stall can put the iced coffee on without leaving
     // kiosk mode and showing a customer its wallet on the way through.

@@ -30,4 +30,5 @@
         <item quantity="one">ongeveer %1$d uur</item>
         <item quantity="other">ongeveer %1$d uur</item>
     </plurals>
+    <string name="balance_rate_stale">Dat bedrag gebruikt een wisselkoers van %1$s geleden.</string>
 </resources>

@@ -57,6 +57,24 @@ object Amounts {
         }
     }
 
+    /**
+     * How old the rate behind a currency figure is, or null when none is.
+     *
+     * The till has said this about its own prices for a while — a stall with
+     * no signal keeps selling at the last rate it saw and says which. Nothing
+     * said it about a *balance*, which mattered less while amounts led in XMR:
+     * piconero is piconero however old the rate is. Now that the local
+     * currency leads, the headline figure on the home screen is a conversion,
+     * and a conversion from a rate nobody could refresh for two days is a
+     * number that looks exactly as confident as a fresh one.
+     */
+    fun rateAgeSecs(context: Context): Long? {
+        val store = RateStore(context)
+        if (!store.enabled() || !store.preferFiat()) return null
+        val at = store.cached()?.second ?: return null
+        return (System.currentTimeMillis() / 1000 - at).coerceAtLeast(0)
+    }
+
     /** The currency code in use, for labelling a switch. */
     fun currency(context: Context): String = RateStore(context).currency()
 

@@ -36,4 +36,5 @@
         <item quantity="many">około %1$d godzin</item>
         <item quantity="other">około %1$d godziny</item>
     </plurals>
+    <string name="balance_rate_stale">Ta kwota opiera się na kursie sprzed %1$s.</string>
 </resources>

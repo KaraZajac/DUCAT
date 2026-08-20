@@ -30,4 +30,5 @@
         <item quantity="one">حدود %1$d ساعت</item>
         <item quantity="other">حدود %1$d ساعت</item>
     </plurals>
+    <string name="balance_rate_stale">این عدد از نرخ تبدیلی مربوط به %1$s پیش استفاده می‌کند.</string>
 </resources>
