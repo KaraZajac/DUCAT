@@ -464,8 +464,10 @@ private fun PresentScreen(
                 runCatching {
                     val store = TabStore(context)
                     val tab = store.open(fresh.personaHex, "pos")
-                    store.update(store.get(tab.id)!!.copy(lines = items, taxPxmr = taxPxmr))
-                    store.settle(store.get(tab.id)!!)
+                    val filled = store.mutate(tab.id) {
+                        it.copy(lines = items, taxPxmr = taxPxmr)
+                    }!!
+                    store.settle(filled)
                     tab.id
                 }.onSuccess { id ->
                     customerHex = fresh.personaHex

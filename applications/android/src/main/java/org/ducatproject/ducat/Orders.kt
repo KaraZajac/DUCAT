@@ -262,8 +262,7 @@ object Orders {
     fun bind(context: Context, order: Order, personaHex: String): Order {
         val tabs = TabStore(context)
         val opened = tabs.open(personaHex, ORIGIN)
-        tabs.update(tabs.get(opened.id)!!.copy(lines = order.lines))
-        val settled = tabs.settle(tabs.get(opened.id)!!)
+        val settled = tabs.settle(tabs.mutate(opened.id) { it.copy(lines = order.lines) }!!)
         val bound = order.copy(
             tabId = opened.id,
             personaHex = personaHex,

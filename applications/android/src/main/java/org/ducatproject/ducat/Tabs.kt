@@ -118,6 +118,37 @@ class TabStore(private val context: Context) {
 
     fun update(t: RunningTab) = guarded { save(all().map { if (it.id == t.id) t else it }) }
 
+    /**
+     * Change one tab, from whatever it says *now* rather than from a snapshot.
+     *
+     * [update] takes a whole tab, so it writes back every field — including the
+     * ones somebody else changed while the caller was holding its copy. A tab
+     * has two writers who cannot see each other: the till, in the bartender's
+     * hands, and the reconciler, on a background thread with seconds of network
+     * between reading a tab and writing it back. Both of the orderings lost
+     * money.
+     *
+     * A drink poured while the receipt was going out was erased by the
+     * reconciler's stale copy landing after it — the bar served it and never
+     * charged for it. And a drink added just after a tab was marked paid put
+     * `state` back to "open" and `paidKi` back to null, which sounds like the
+     * lesser bug and is the worse one: the key image had already been recorded
+     * as claimed, so the scan would never match that payment again, and the tab
+     * stayed open forever on a bill that was actually settled.
+     *
+     * So each writer touches only its own fields, and reads them from the tab
+     * as it stands inside the lock. Returns the new tab, or null if it is gone
+     * — deleted while the caller was working, which is not an error.
+     */
+    fun mutate(id: String, f: (RunningTab) -> RunningTab): RunningTab? = guarded {
+        val cur = all()
+        val i = cur.indexOfFirst { it.id == id }
+        if (i < 0) return@guarded null
+        val next = f(cur[i])
+        save(cur.mapIndexed { j, t -> if (j == i) next else t })
+        next
+    }
+
     fun delete(id: String) = guarded { save(all().filterNot { it.id == id }) }
 
     /**
@@ -161,14 +192,21 @@ class TabStore(private val context: Context) {
             payto = WalletStore(context).addressFor(tab.personaHex),
             items = tab.lines, taxPxmr = tab.taxPxmr,
         )
-        val settled = tab.copy(
-            state = "settled",
-            settledTotal = total,
-            settledAt = System.currentTimeMillis(),
-            knownKis = WalletStore(context).entries().map { it.keyImage },
-            tipAtBill = WalletStore(context).tip(),
-        )
-        update(settled)
+        // Pinned to what was billed, not to what the tab says now: the customer
+        // has the itemised request in their hand, and a drink poured between
+        // that going out and this landing is not on it. The tab must agree with
+        // the paper, so the lines and the total travel together.
+        val settled = mutate(tab.id) {
+            it.copy(
+                state = "settled",
+                lines = tab.lines,
+                taxPxmr = tab.taxPxmr,
+                settledTotal = total,
+                settledAt = System.currentTimeMillis(),
+                knownKis = WalletStore(context).entries().map { it.keyImage },
+                tipAtBill = WalletStore(context).tip(),
+            )
+        } ?: throw IllegalStateException("that tab is gone")
         DucatLog.i(TAG, "settled ${tab.origin} tab with ${contact.displayName()}: ${formatXmr(total)} XMR")
         return settled
     }
@@ -289,7 +327,7 @@ class TabStore(private val context: Context) {
                     it.amountPxmr.toLong() == tab.settledTotal ||
                         it.amountPxmr.toLong() in said
                 } ?: continue
-                store.update(tab.copy(seenTx = hit.txHashHex))
+                store.mutate(tab.id) { it.copy(seenTx = hit.txHashHex) }
                 Notify.post(
                     context, "Payment on its way",
                     "${formatXmr(hit.amountPxmr.toLong())} XMR seen — settling now",
@@ -361,7 +399,7 @@ class TabStore(private val context: Context) {
                         txidHex = hit.txHashHex.ifEmpty { null },
                     )
                 }.onSuccess {
-                    store.update(tab.copy(state = "paid", paidKi = hit.keyImage))
+                    store.mutate(tab.id) { it.copy(state = "paid", paidKi = hit.keyImage) }
                     store.addClaimedKi(hit.keyImage)
                     Notify.post(
                         context,

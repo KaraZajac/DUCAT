@@ -423,6 +423,75 @@ fun main() {
         )
     }
 
+    // --- the tab's two writers --------------------------------------------
+    //
+    // A tab is held at both ends: the till in the bartender's hand, and the
+    // reconciler on a background thread with seconds of network between
+    // reading a tab and writing it back. Neither can see the other, and both
+    // orderings used to lose money — so both are pinned here.
+    run {
+        val tabs = org.ducatproject.ducat.TabStore(context)
+        val who = "bb".repeat(32)
+
+        // Ordering one: a drink poured while the receipt is going out. The
+        // reconciler took its copy before the pour and writes after it.
+        val t = tabs.open(who, "bar")
+        tabs.mutate(t.id) { it.copy(lines = it.lines + BillItem("Last round", 5_000L)) }
+        tabs.mutate(t.id) { it.copy(state = "paid", paidKi = "ki-1") }
+        val settled = tabs.get(t.id)!!
+        check(
+            "a drink poured during the receipt is still on the tab",
+            settled.lines.size == 1,
+            "the bar served it and would never have charged for it",
+        )
+        check("and the payment still landed", settled.state == "paid", "got ${settled.state}")
+
+        // Ordering two: the tap comes in just after the tab is marked paid.
+        // The store hands the caller the tab as it stands, which is the whole
+        // point — the till reads "paid" and declines, rather than reopening a
+        // tab whose key image is already spent and can never match again.
+        tabs.mutate(t.id) {
+            if (it.state != "open") it else it.copy(lines = it.lines + BillItem("Too late", 9L))
+        }
+        val after2 = tabs.get(t.id)!!
+        check("a paid tab takes no more drinks", after2.lines.size == 1)
+        check("and stays paid", after2.state == "paid" && after2.paidKi == "ki-1")
+
+        // A tab deleted while somebody was working on it is not an error.
+        check("mutating a tab that is gone says so", tabs.mutate("no-such-tab") { it } == null)
+
+        // And the busiest moment of the night: chips tapped faster than the
+        // screen redraws, every tap reading the same tab.
+        val busy = tabs.open(who, "bar")
+        val n2 = 40
+        val pool2 = java.util.concurrent.Executors.newFixedThreadPool(8)
+        val gate2 = java.util.concurrent.CountDownLatch(1)
+        val done2 = java.util.concurrent.CountDownLatch(n2)
+        repeat(n2) { i ->
+            pool2.submit {
+                gate2.await()
+                runCatching {
+                    tabs.mutate(busy.id) { it.copy(lines = it.lines + BillItem("d$i", 100L)) }
+                }
+                done2.countDown()
+            }
+        }
+        gate2.countDown()
+        done2.await(60, java.util.concurrent.TimeUnit.SECONDS)
+        pool2.shutdown()
+        val poured = tabs.get(busy.id)!!
+        check(
+            "forty drinks rung up at once are forty drinks on the tab",
+            poured.lines.size == n2,
+            "got ${poured.lines.size}",
+        )
+        check(
+            "and the total is what was poured",
+            poured.totalPxmr == n2 * 100L,
+            "got ${poured.totalPxmr}",
+        )
+    }
+
     // --- the local board --------------------------------------------------
     //
     // Five nouns on one board (§16.18). The three added in 0.89 carry no

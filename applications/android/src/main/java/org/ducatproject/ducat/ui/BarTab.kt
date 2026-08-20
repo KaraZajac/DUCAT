@@ -368,7 +368,7 @@ internal fun cancelTabWithRetract(
         store.cancel(tab)
         return
     }
-    store.update(tab.copy(state = "cancelled"))
+    store.mutate(tab.id) { it.copy(state = "cancelled") }
     runCatching {
         Mailbox.send(
             context, contact,
@@ -419,8 +419,17 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
             // menu or typed by hand. A tab that told the customer about one
             // and not the other would be sending them half the evening.
             fun addLine(d: String, a: Long) {
-                val updated = tab.copy(lines = tab.lines + BillItem(d, a))
-                store.update(updated)
+                // Onto the tab as it stands, not as this screen last drew it.
+                // Two chips tapped inside one frame both read the same `tab`,
+                // and the second write dropped the first drink; and a tab that
+                // was billed a moment ago must not quietly take another line
+                // after the customer has the total in their hand.
+                var added = false
+                val updated = store.mutate(tab.id) {
+                    if (it.state != "open") it
+                    else { added = true; it.copy(lines = it.lines + BillItem(d, a)) }
+                } ?: return
+                if (!added) return
                 // Tell them, so the tab is never a surprise at close. A text
                 // message, deliberately — §15.11 forbids per-line payment
                 // requests, because five confirm screens for one evening is
@@ -462,9 +471,17 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                             if (tab.state == "open") {
                                 IconButton(
                                     onClick = {
-                                        store.update(tab.copy(
-                                            lines = tab.lines.filterIndexed { j, _ -> j != i }
-                                        ))
+                                        // By index against the current lines,
+                                        // which is safe because the only other
+                                        // writer appends: a drink poured while
+                                        // this row was being tapped lands after
+                                        // it and leaves i naming the same one.
+                                        store.mutate(tab.id) { t ->
+                                            if (t.state != "open") t
+                                            else t.copy(
+                                                lines = t.lines.filterIndexed { j, _ -> j != i },
+                                            )
+                                        }
                                     },
                                     modifier = Modifier.size(30.dp),
                                 ) { Icon(Icons.Filled.Close, stringResource(R.string.bartab_remove_line), Modifier.size(14.dp)) }

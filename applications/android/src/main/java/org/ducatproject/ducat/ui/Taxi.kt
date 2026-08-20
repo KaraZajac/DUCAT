@@ -332,8 +332,7 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
                         runCatching {
                             val store = TabStore(context)
                             val tab = store.open(personaHex, "taxi")
-                            store.update(tab.copy(lines = lines))
-                            store.settle(store.get(tab.id)!!)
+                            store.settle(store.mutate(tab.id) { it.copy(lines = lines) }!!)
                         }
                     }
                     busy = false
