@@ -1773,7 +1773,7 @@ private fun EnquiryLine(
                     contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
                 ) {
                     Text(
-                        stringResource(R.string.res_title),
+                        stringResource(bookingTitle(about.kind)),
                         style = MaterialTheme.typography.labelMedium,
                     )
                 }
@@ -2468,6 +2468,23 @@ private fun BondLine(spin: Boolean, text: String) {
 }
 
 /**
+ * What a booking is called, per noun (§16.18).
+ *
+ * "Propose a reservation" is right for a room and wrong for a second-hand
+ * bicycle. The escrow underneath is identical in all five cases — both sides
+ * stake, the stakes come home on release — but the word for the thing being
+ * agreed is not, and a screen that calls buying a bike a reservation is asking
+ * the reader to translate.
+ */
+private fun bookingTitle(kind: Int?): Int = when (kind) {
+    org.ducatproject.ducat.Listings.KIND_GEAR -> R.string.res_title_hire
+    org.ducatproject.ducat.Listings.KIND_SALE -> R.string.res_title_buy
+    org.ducatproject.ducat.Listings.KIND_SKILL -> R.string.res_title_job
+    // A place, a vehicle, or a conversation that did not begin at a board.
+    else -> R.string.res_title
+}
+
+/**
  * Propose a reservation to this contact (§15.12's Airbnb/Turo shape): rent
  * and both deposits, stated up front — the escrow will name its whole
  * arithmetic in the ceremony frame, and the host's phone shows exactly what
@@ -2549,7 +2566,10 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
 
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDone) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
-            Text(stringResource(R.string.res_title), style = MaterialTheme.typography.titleLarge)
+            Text(
+                stringResource(bookingTitle(about?.kind)),
+                style = MaterialTheme.typography.titleLarge,
+            )
             Spacer(Modifier.height(4.dp))
             Text(
                 // What is being booked, when we know: proposing money for an
@@ -2606,7 +2626,18 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                         hostDep = text
                     }
                 },
-                label = { Text(stringResource(R.string.res_rent, if (fiat) cur else "XMR")) },
+                label = {
+                    // The same label the listing form used to set this price:
+                    // "per night", "per day", "per hour", or nothing after it
+                    // for a sale. Free — those four already exist in nineteen
+                    // languages, and the two screens now agree word for word.
+                    Text(
+                        stringResource(
+                            about?.kind?.let { priceLabel(it) } ?: R.string.res_rent,
+                            if (fiat) cur else "XMR",
+                        ),
+                    )
+                },
                 singleLine = true, modifier = Modifier.weight(1f),
             )
             if (rate != null) {

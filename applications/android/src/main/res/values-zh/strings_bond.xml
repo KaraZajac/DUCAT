@@ -25,7 +25,7 @@
     <string name="bond_ask_arbiter">请仲裁人裁决</string>
     <string name="res_tray">预订</string>
     <string name="res_title">提议预订</string>
-    <string name="res_note">租金和双方押金进入同一托管。你存入租金+你的押金；对方接受即存入其押金。释放时押金退还。</string>
+    <string name="res_note">价款和双方押金进入同一托管。你存入租金+你的押金；对方接受即存入其押金。释放时押金退还。</string>
     <string name="res_about">关于 %1$s。租金和双方押金进入同一笔托管，押金在释放时退回。</string>
     <string name="res_rent">租金 (%1$s)</string>
     <string name="res_my_deposit">你的押金 (%1$s)</string>
@@ -54,4 +54,7 @@
     <string name="res_send_details">发送地址和交接说明</string>
     <string name="res_kind_sale">一笔买卖</string>
     <string name="res_kind_labour">某人的时间</string>
+    <string name="res_title_hire">提议租借</string>
+    <string name="res_title_buy">提议购买</string>
+    <string name="res_title_job">提议委托</string>
 </resources>

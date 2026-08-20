@@ -76,7 +76,7 @@ internal fun priceLabelShort(kind: Int): Int = when (kind) {
 }
 
 /** Per night, per day, per hour, or once — §16.18's unit-follows-the-kind. */
-private fun priceLabel(kind: Int): Int = when (kind) {
+internal fun priceLabel(kind: Int): Int = when (kind) {
     Listings.KIND_VEHICLE, Listings.KIND_GEAR -> R.string.rent_per_day
     Listings.KIND_SKILL -> R.string.rent_per_hour
     Listings.KIND_SALE -> R.string.rent_price_once

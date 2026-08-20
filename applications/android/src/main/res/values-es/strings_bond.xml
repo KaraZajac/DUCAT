@@ -26,7 +26,7 @@
     <string name="res_tray">Reserva</string>
     <string name="res_title">Proponer una reserva</string>
     <string name="res_note">La renta y ambos depósitos van a un mismo depósito en garantía. Tú pones renta + tu depósito; su aceptación es poner el suyo. Los depósitos vuelven al liberar.</string>
-    <string name="res_about">Para %1$s. El alquiler y ambos depósitos entran en un mismo depósito en garantía, y los depósitos vuelven al liberarlo.</string>
+    <string name="res_about">Para %1$s. El precio y ambos depósitos entran en un mismo depósito en garantía, y los depósitos vuelven al liberarlo.</string>
     <string name="res_rent">Renta (%1$s)</string>
     <string name="res_my_deposit">Tu depósito (%1$s)</string>
     <string name="res_host_deposit">Su depósito (%1$s)</string>
@@ -54,4 +54,7 @@
     <string name="res_send_details">Enviar la dirección y los detalles de entrega</string>
     <string name="res_kind_sale">Una venta</string>
     <string name="res_kind_labour">El tiempo de alguien</string>
+    <string name="res_title_hire">Proponer un alquiler</string>
+    <string name="res_title_buy">Proponer una compra</string>
+    <string name="res_title_job">Proponer un trabajo</string>
 </resources>

@@ -26,7 +26,7 @@
     <string name="res_tray">Reserva</string>
     <string name="res_title">Propor uma reserva</string>
     <string name="res_note">A renda e ambas as cauções vão para uma só caução. Tu pões renda + a tua; a aceitação deles é porem a deles. As cauções voltam na libertação.</string>
-    <string name="res_about">Para %1$s. O aluguel e os dois depósitos entram num mesmo escrow, e os depósitos voltam na liberação.</string>
+    <string name="res_about">Para %1$s. O preço e os dois depósitos entram num mesmo escrow, e os depósitos voltam na liberação.</string>
     <string name="res_rent">Renda (%1$s)</string>
     <string name="res_my_deposit">A tua caução (%1$s)</string>
     <string name="res_host_deposit">A caução deles (%1$s)</string>
@@ -54,4 +54,7 @@
     <string name="res_send_details">Enviar o endereço e os detalhes da entrega</string>
     <string name="res_kind_sale">Uma venda</string>
     <string name="res_kind_labour">O tempo de alguém</string>
+    <string name="res_title_hire">Propor um aluguel</string>
+    <string name="res_title_buy">Propor uma compra</string>
+    <string name="res_title_job">Propor um trabalho</string>
 </resources>

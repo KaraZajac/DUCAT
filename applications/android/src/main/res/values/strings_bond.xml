@@ -25,7 +25,7 @@
     <string name="bond_ask_arbiter">Ask the arbiter to rule</string>
     <string name="res_tray">Reservation</string>
     <string name="res_title">Propose a reservation</string>
-    <string name="res_note">Rent and both deposits go into one escrow. You fund rent + your deposit; their acceptance is funding theirs. Deposits come home in the release.</string>
+    <string name="res_note">The price and both deposits go into one escrow. You fund rent + your deposit; their acceptance is funding theirs. Deposits come home in the release.</string>
     <string name="res_about">For %1$s. Rent and both deposits go into one escrow, and the deposits come home in the release.</string>
     <string name="res_rent">Rent (%1$s)</string>
     <string name="res_my_deposit">Your deposit (%1$s)</string>
@@ -54,4 +54,7 @@
     <string name="res_send_details">Send the address and handover details</string>
     <string name="res_kind_sale">Something sold</string>
     <string name="res_kind_labour">Somebody\'s time</string>
+    <string name="res_title_hire">Propose a hire</string>
+    <string name="res_title_buy">Propose a purchase</string>
+    <string name="res_title_job">Propose a job</string>
 </resources>

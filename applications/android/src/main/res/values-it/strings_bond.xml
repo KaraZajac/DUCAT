@@ -25,7 +25,7 @@
     <string name="bond_ask_arbiter">Chiedi all’arbitro di decidere</string>
     <string name="res_tray">Prenotazione</string>
     <string name="res_title">Proponi una prenotazione</string>
-    <string name="res_note">Affitto e le due cauzioni vanno in un unico deposito. Tu versi affitto + la tua; la loro accettazione è versare la loro. Le cauzioni tornano allo sblocco.</string>
+    <string name="res_note">Il prezzo e le due cauzioni vanno in un unico deposito. Tu versi affitto + la tua; la loro accettazione è versare la loro. Le cauzioni tornano allo sblocco.</string>
     <string name="res_about">Per %1$s. Affitto e le due cauzioni entrano in un unico deposito a garanzia, e le cauzioni tornano al rilascio.</string>
     <string name="res_rent">Affitto (%1$s)</string>
     <string name="res_my_deposit">La tua cauzione (%1$s)</string>
@@ -54,4 +54,7 @@
     <string name="res_send_details">Invia l\'indirizzo e i dettagli della consegna</string>
     <string name="res_kind_sale">Una vendita</string>
     <string name="res_kind_labour">Il tempo di qualcuno</string>
+    <string name="res_title_hire">Proponi un noleggio</string>
+    <string name="res_title_buy">Proponi un acquisto</string>
+    <string name="res_title_job">Proponi un lavoro</string>
 </resources>

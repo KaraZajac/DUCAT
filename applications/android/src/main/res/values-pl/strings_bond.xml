@@ -26,7 +26,7 @@
     <string name="res_tray">Rezerwacja</string>
     <string name="res_title">Zaproponuj rezerwację</string>
     <string name="res_note">Czynsz i oba depozyty trafiają do jednego depozytu. Ty wpłacasz czynsz + swój; ich akceptacją jest wpłata ich. Depozyty wracają przy zwolnieniu.</string>
-    <string name="res_about">Dotyczy %1$s. Czynsz i obie kaucje trafiają do jednego escrow, a kaucje wracają przy zwolnieniu.</string>
+    <string name="res_about">Dotyczy %1$s. Kwota i obie kaucje trafiają do jednego escrow, a kaucje wracają przy zwolnieniu.</string>
     <string name="res_rent">Czynsz (%1$s)</string>
     <string name="res_my_deposit">Twój depozyt (%1$s)</string>
     <string name="res_host_deposit">Ich depozyt (%1$s)</string>
@@ -54,4 +54,7 @@
     <string name="res_send_details">Wyślij adres i szczegóły przekazania</string>
     <string name="res_kind_sale">Sprzedaż</string>
     <string name="res_kind_labour">Czyjś czas</string>
+    <string name="res_title_hire">Zaproponuj wypożyczenie</string>
+    <string name="res_title_buy">Zaproponuj zakup</string>
+    <string name="res_title_job">Zaproponuj zlecenie</string>
 </resources>

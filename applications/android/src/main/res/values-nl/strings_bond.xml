@@ -26,7 +26,7 @@
     <string name="res_tray">Reservering</string>
     <string name="res_title">Reservering voorstellen</string>
     <string name="res_note">Huur en beide borgen gaan in één depot. Jij stort huur + jouw borg; hun acceptatie is het storten van de hunne. Borgen komen terug bij vrijgave.</string>
-    <string name="res_about">Voor %1$s. De huur en beide borgsommen gaan in één escrow, en de borgsommen komen terug bij de vrijgave.</string>
+    <string name="res_about">Voor %1$s. De prijs en beide borgsommen gaan in één escrow, en de borgsommen komen terug bij de vrijgave.</string>
     <string name="res_rent">Huur (%1$s)</string>
     <string name="res_my_deposit">Jouw borg (%1$s)</string>
     <string name="res_host_deposit">Hun borg (%1$s)</string>
@@ -54,4 +54,7 @@
     <string name="res_send_details">Adres en overdrachtsgegevens sturen</string>
     <string name="res_kind_sale">Een verkoop</string>
     <string name="res_kind_labour">Iemands tijd</string>
+    <string name="res_title_hire">Verhuur voorstellen</string>
+    <string name="res_title_buy">Aankoop voorstellen</string>
+    <string name="res_title_job">Klus voorstellen</string>
 </resources>

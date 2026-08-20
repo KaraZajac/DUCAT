@@ -26,7 +26,7 @@
     <string name="res_tray">予約</string>
     <string name="res_title">予約を提案</string>
     <string name="res_note">家賃と両方の保証金は一つのエスクローへ。あなたは家賃+自分の保証金、相手の受諾は相手の保証金の入金。リリースで保証金は戻ります。</string>
-    <string name="res_about">%1$s について。家賃と双方のデポジットは一つのエスクローに入り、デポジットは解放時に戻ります。</string>
+    <string name="res_about">%1$s について。代金と双方のデポジットは一つのエスクローに入り、デポジットは解放時に戻ります。</string>
     <string name="res_rent">家賃 (%1$s)</string>
     <string name="res_my_deposit">あなたの保証金 (%1$s)</string>
     <string name="res_host_deposit">相手の保証金 (%1$s)</string>
@@ -54,4 +54,7 @@
     <string name="res_send_details">住所と受け渡しの詳細を送る</string>
     <string name="res_kind_sale">売買</string>
     <string name="res_kind_labour">人の時間</string>
+    <string name="res_title_hire">レンタルを提案</string>
+    <string name="res_title_buy">購入を提案</string>
+    <string name="res_title_job">依頼を提案</string>
 </resources>

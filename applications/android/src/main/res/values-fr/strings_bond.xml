@@ -25,7 +25,7 @@
     <string name="bond_ask_arbiter">Demander à l’arbitre de trancher</string>
     <string name="res_tray">Réservation</string>
     <string name="res_title">Proposer une réservation</string>
-    <string name="res_note">Le loyer et les deux cautions vont dans un même séquestre. Vous versez loyer + votre caution ; leur acceptation est de verser la leur. Les cautions reviennent à la libération.</string>
+    <string name="res_note">Le prix et les deux cautions vont dans un même séquestre. Vous versez loyer + votre caution ; leur acceptation est de verser la leur. Les cautions reviennent à la libération.</string>
     <string name="res_about">Pour %1$s. Le loyer et les deux cautions entrent dans un même séquestre, et les cautions reviennent à la libération.</string>
     <string name="res_rent">Loyer (%1$s)</string>
     <string name="res_my_deposit">Votre caution (%1$s)</string>
@@ -54,4 +54,7 @@
     <string name="res_send_details">Envoyer l\'adresse et les détails de remise</string>
     <string name="res_kind_sale">Une vente</string>
     <string name="res_kind_labour">Le temps de quelqu\'un</string>
+    <string name="res_title_hire">Proposer une location</string>
+    <string name="res_title_buy">Proposer un achat</string>
+    <string name="res_title_job">Proposer une mission</string>
 </resources>
