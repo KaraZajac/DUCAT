@@ -1558,6 +1558,36 @@ pub struct RentalNotice {
 
 pub const RENTAL_PLACE: u64 = 1;
 pub const RENTAL_VEHICLE: u64 = 2;
+/// A thing for sale. Nothing comes back, so the escrow's deposits are
+/// stakes: each side posts one and gets it back on handover.
+pub const RENTAL_SALE: u64 = 3;
+/// Equipment let by the day — a kayak, a bike, skis, a pressure washer.
+/// A vehicle without a make or a gearbox, and priced the same way.
+pub const RENTAL_GEAR: u64 = 4;
+/// Somebody's time, by the hour. The price is a rate, not a total.
+pub const RENTAL_SKILL: u64 = 5;
+
+/// How many top-level categories each kind of listing recognises.
+///
+/// Deliberately small and flat rather than a tree: the categories are a
+/// coarse filter on a board that is expensive to read, they have to be
+/// translated everywhere this ships, and a taxonomy fine enough to be
+/// accurate is one nobody fits — most tradespeople are the handyman who
+/// also does electrics. What somebody actually does goes in `features`.
+pub const fn rental_subtype_top(kind: u64) -> u64 {
+    match kind {
+        RENTAL_PLACE => 2,
+        RENTAL_VEHICLE => 3,
+        // Sale: goods, furniture, tools, sport, garden, electronics, music,
+        // vehicles-as-goods, other.
+        RENTAL_SALE => 9,
+        // Gear: sport, tools, outdoor, party, other.
+        RENTAL_GEAR => 5,
+        // Skill: trades and services, the flat set. See the spec's table.
+        RENTAL_SKILL => 12,
+        _ => 0,
+    }
+}
 const MAX_RENTAL_TITLE_CHARS: usize = 60;
 const MAX_RENTAL_AREA_CHARS: usize = 40;
 const MAX_RENTAL_WORD_CHARS: usize = 24;
@@ -1630,10 +1660,10 @@ impl RentalNotice {
             ));
         }
         let kind = r.uint(f::RN_KIND)?;
-        if kind != RENTAL_PLACE && kind != RENTAL_VEHICLE {
+        if !(RENTAL_PLACE..=RENTAL_SKILL).contains(&kind) {
             return Err(Reject::with_detail(
                 RejectCode::Malformed,
-                "a listing is a place or a vehicle",
+                "unknown listing kind",
             ));
         }
         let title = r.opt_text(f::RN_TITLE, MAX_RENTAL_TITLE_CHARS)?.ok_or_else(|| {
@@ -1699,6 +1729,17 @@ impl RentalNotice {
                 "a vehicle does not have bedrooms or floor area",
             ));
         }
+        // The three kinds added in 0.89 carry no typed extras at all: a
+        // kayak has no gearbox, a bike for sale has no bedrooms, and an
+        // electrician has neither. Everything they want to say is a title,
+        // a price, an area, a subtype and free-text features — which is
+        // also why they needed no new fields on the wire.
+        if kind > RENTAL_VEHICLE && (vehicle_only || place_only) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "this listing kind has no typed extras",
+            ));
+        }
         if let Some(g) = gearbox {
             if g == 0 || g > 2 {
                 return Err(Reject::with_detail(RejectCode::Malformed, "gearbox is manual or automatic"));
@@ -1710,7 +1751,7 @@ impl RentalNotice {
             }
         }
         if let Some(st) = subtype {
-            let top = if kind == RENTAL_PLACE { 2 } else { 3 };
+            let top = rental_subtype_top(kind);
             if st == 0 || st > top {
                 return Err(Reject::with_detail(RejectCode::Malformed, "unknown subtype"));
             }
@@ -1764,6 +1805,89 @@ impl RentalNotice {
 #[cfg(test)]
 mod rental_tests {
     use super::*;
+
+    /// The three kinds added in 0.89 carry no typed extras: a title, a
+    /// price, an area, a subtype and free-text features. Everything each of
+    /// them wants to say fits fields that already existed, which is why they
+    /// cost no new field numbers.
+    fn a_plain(kind: u64, subtype: Option<u64>) -> RentalNotice {
+        RentalNotice {
+            version: 1,
+            card: "ducat:card/abc".into(),
+            kind,
+            title: "A thing".into(),
+            area: "north side".into(),
+            cell: Some("dqcjq".into()),
+            price_pxmr: 40_000_000_000,
+            deposit_pxmr: 4_000_000_000,
+            expiry: 1_800_000_000,
+            make: None, model: None, year: None, gearbox: None, fuel: None,
+            seats: None, color: None, trim: None,
+            rooms: None, sleeps: None, size_m2: None,
+            subtype,
+            features: vec!["good condition".into()],
+        }
+    }
+
+    #[test]
+    fn the_new_kinds_round_trip() {
+        for kind in [RENTAL_SALE, RENTAL_GEAR, RENTAL_SKILL] {
+            let n = a_plain(kind, Some(1));
+            let back = RentalNotice::from_value(n.clone().to_value())
+                .unwrap_or_else(|e| panic!("kind {kind} was refused: {e:?}"));
+            assert_eq!(back.kind, kind);
+            assert_eq!(back.title, n.title);
+            assert_eq!(back.price_pxmr, n.price_pxmr);
+            assert_eq!(back.subtype, Some(1));
+            assert_eq!(back.features, n.features);
+        }
+    }
+
+    #[test]
+    fn a_kind_nobody_has_defined_is_refused() {
+        let mut n = a_plain(RENTAL_SKILL, None);
+        n.kind = 6;
+        assert!(RentalNotice::from_value(n.to_value()).is_err());
+        let mut z = a_plain(RENTAL_SALE, None);
+        z.kind = 0;
+        assert!(RentalNotice::from_value(z.to_value()).is_err());
+    }
+
+    #[test]
+    fn the_new_kinds_have_no_typed_extras() {
+        // A kayak has no gearbox and a bike for sale has no bedrooms. Saying
+        // otherwise on the wire is malformed rather than ignored, so a second
+        // implementation cannot quietly disagree about what a listing is.
+        let mut geared = a_plain(RENTAL_GEAR, None);
+        geared.gearbox = Some(2);
+        assert!(RentalNotice::from_value(geared.to_value()).is_err());
+
+        let mut roomed = a_plain(RENTAL_SALE, None);
+        roomed.rooms = Some(3);
+        assert!(RentalNotice::from_value(roomed.to_value()).is_err());
+    }
+
+    #[test]
+    fn each_kind_bounds_its_own_categories() {
+        // The top is per kind, so a subtype legal for a trade is not
+        // automatically legal for a kayak.
+        for (kind, top) in [
+            (RENTAL_PLACE, 2u64), (RENTAL_VEHICLE, 3), (RENTAL_SALE, 9),
+            (RENTAL_GEAR, 5), (RENTAL_SKILL, 12),
+        ] {
+            assert_eq!(rental_subtype_top(kind), top);
+            let ok = a_plain(kind, Some(top));
+            // Places and vehicles carry typed extras of their own; the plain
+            // shape is only valid for the three new kinds.
+            if kind > RENTAL_VEHICLE {
+                assert!(RentalNotice::from_value(ok.to_value()).is_ok());
+                let over = a_plain(kind, Some(top + 1));
+                assert!(RentalNotice::from_value(over.to_value()).is_err());
+                let zero = a_plain(kind, Some(0));
+                assert!(RentalNotice::from_value(zero.to_value()).is_err());
+            }
+        }
+    }
 
     fn a_car() -> RentalNotice {
         RentalNotice {

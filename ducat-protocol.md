@@ -2220,22 +2220,24 @@ The second object on a **public surface**, and the one that stays there. A hail 
 RENTAL_NOTICE {
   version      (220)  uint, = 1
   card         (221)  text, a ducat: card URI, claim-once
-  kind         (222)  uint, 1 = a place to stay, 2 = a vehicle
+  kind         (222)  uint, 1 place, 2 vehicle, 3 for sale, 4 gear, 5 a skill
   title        (223)  text, ≤ 60 chars — one human line
   area         (224)  text, ≤ 40 chars — human words, never an address
   cell         (225)  text, geohash, **≤ precision 5 (~5 km)**
-  price        (226)  uint, per night or per day, piconero, nonzero
+  price        (226)  uint, piconero, nonzero — the unit follows the kind:
+                      per night (1), per day (2, 4), per hour (5),
+                      the whole price once (3)
   deposit      (227)  uint, what *each* side stakes (§15.12); 0 is legal
   expiry       (228)  uint, unix seconds
 
-  // a vehicle's searchable shape — MALFORMED on a place
+  // a vehicle's searchable shape — MALFORMED on anything else
   make (229) model (230) year (231) gearbox (232) fuel (233)
   seats (234) color (235) trim (240)
 
-  // a place's searchable shape — MALFORMED on a vehicle
+  // a place's searchable shape — MALFORMED on anything else
   rooms (236) sleeps (237) size_m2 (241)
 
-  subtype      (238)  uint, place: 1 whole / 2 room; vehicle: 1 car / 2 van / 3 motorbike
+  subtype      (238)  uint, per kind — see the table below
   features     (239)  array of ≤ 8 short tags, ≤ 16 chars each
 }
 ```
@@ -2243,6 +2245,41 @@ RENTAL_NOTICE {
 **The board is coarser than a hail's, by rule.** A hail may name precision 6 (~1.2 km) because it describes someone standing at a kerb for ten minutes. A listing describes a home that will still be there next week, so precision 5 (~5 km) is the cap and anything finer is `MALFORMED`. This is also how people actually look: nobody searches one square kilometre for a car to rent — they search a city and drive to it. A seeker reads their cell and its 3×3 neighbourhood, which is a metro area, and that is the intended granularity of the whole feature.
 
 **What is on the board is what a stranger needs to *decide*. What they need to *arrive* is not.** The address, the plate, the door code, the photographs of someone's living room — none of it appears here. Those pass through the sealed thread after the two of them have agreed, because a listing is an advertisement, and an advertisement everyone can read must not double as a burglary brief. A client MUST NOT put an exact location, a registration plate, or a photograph on a board.
+
+**Five kinds, two of which have a shape.** A place and a vehicle carry typed
+fields because those are the things people filter on — nobody searches for a
+car without caring about the gearbox. The three added in draft 0.89 carry
+none: a kayak has no gearbox, a bicycle for sale has no bedrooms, and an
+electrician has neither. What each of them needs is a title, a price, an
+area, a category and a handful of tags, all of which already existed — so
+they cost no new field numbers, and a reader that understood a listing in
+0.88 understands the shape of these too. The typed fields of either shape are
+`MALFORMED` on kinds 3, 4 and 5.
+
+**`subtype` is bounded per kind**, because a category legal for a trade is not
+legal for a kayak:
+
+| kind | top | the set |
+|---|---|---|
+| 1 place | 2 | whole · room |
+| 2 vehicle | 3 | car · van · motorbike |
+| 3 for sale | 9 | goods · furniture · tools · sport · garden · electronics · music · vehicle · other |
+| 4 gear | 5 | sport · tools · outdoor · party · other |
+| 5 a skill | 12 | the trades and services set |
+
+The sets are deliberately small and flat rather than a tree. They are a coarse
+filter on a board that is expensive to read, every entry must be translated
+everywhere a client ships, and a taxonomy fine enough to be accurate is one
+nobody fits — most tradespeople are the handyman who also does electrics. What
+somebody *actually* does belongs in `features`, and the fine sorting belongs to
+the conversation the card opens.
+
+**Nothing comes back from a sale, and the escrow says so.** On kinds 1, 2 and 4
+the deposit is a deposit: the thing is returned and the deposit with it. On
+kind 3 there is no return, so `deposit` is a **stake** — each side posts one and
+gets it back on handover, and the pair of them is what makes completing beat
+walking away. The money moves identically either way, which is why this needs
+no new ceremony; only the words a client uses differ.
 
 **A place has no gearbox and a car has no bedrooms.** The vehicle fields are `MALFORMED` on a place and the place fields on a vehicle. A listing that carried both would be describing two things, and a reader would have to guess which half to believe — §18.1's rule against two encodings of one meaning, applied to a surface where the encoder is a stranger.
 
