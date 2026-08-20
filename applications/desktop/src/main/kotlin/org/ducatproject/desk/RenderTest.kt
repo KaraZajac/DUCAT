@@ -248,6 +248,15 @@ fun main() {
         org.ducatproject.ducat.ui.ItemPicker(onPick = { _, _ -> })
     }
     render("kiosk-stocked", w = 520, h = 900) { org.ducatproject.ducat.ui.KioskScreen() }
+    // What the shop sees once it has proved it is the shop. The menu lives
+    // here too now, so a stall can put the iced coffee on without leaving
+    // kiosk mode and showing a customer its wallet on the way through.
+    render("kiosk-staff", w = 520, h = 900) {
+        org.ducatproject.ducat.ui.StaffPanelPreview(tab = 0)
+    }
+    render("kiosk-staff-menu", w = 520, h = 900) {
+        org.ducatproject.ducat.ui.StaffPanelPreview(tab = 1)
+    }
     // The first morning: a menu typed in, and a phone that has not reached
     // the network, so nothing can be converted into monero yet. Every chip
     // disables itself correctly; the line under them is what stops the seller

@@ -487,18 +487,25 @@ private fun PayPanelMonero(order: Orders.Order, onDone: () -> Unit) {
  * the way out of kiosk mode.
  */
 @Composable
-private fun StaffPanel(onClose: () -> Unit) {
+internal fun StaffPanelPreview(tab: Int) = StaffPanel(onClose = {}, startOn = tab)
+
+@Composable
+private fun StaffPanel(onClose: () -> Unit, startOn: Int = 0) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val version by ContactStore.changes.collectAsState()
-    val orders = remember(version) { Orders.all(context) }
+    // The menu, behind the same door as the orders. A stall that has run out
+    // of croissants, or wants to put the iced coffee on now that it is warm,
+    // should not have to leave kiosk mode, find the menu screen, and set the
+    // mode up again — with the customer-facing screen showing somebody's
+    // wallet in between. Editing what you sell is shop work, and the PIN has
+    // already been answered.
+    var tab by rememberSaveable { mutableStateOf(startOn) }
     Column(Modifier.fillMaxSize()) {
         Row(
-            Modifier.fillMaxWidth().padding(16.dp),
+            Modifier.fillMaxWidth().padding(start = 16.dp, top = 8.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                stringResource(R.string.kiosk_orders),
+                stringResource(R.string.kiosk_staff),
                 Modifier.weight(1f),
                 style = MaterialTheme.typography.titleLarge,
             )
@@ -506,6 +513,33 @@ private fun StaffPanel(onClose: () -> Unit) {
                 Icon(Icons.Filled.Close, stringResource(R.string.kiosk_back_to_counter))
             }
         }
+        TabRow(selectedTabIndex = tab) {
+            Tab(
+                selected = tab == 0, onClick = { tab = 0 },
+                text = { Text(stringResource(R.string.kiosk_orders)) },
+            )
+            Tab(
+                selected = tab == 1, onClick = { tab = 1 },
+                text = { Text(stringResource(R.string.items_tab)) },
+            )
+        }
+        if (tab == 1) {
+            ItemsScreen()
+            return@Column
+        }
+        StaffOrders()
+    }
+}
+
+/** Today's orders, and the way out of kiosk mode. */
+@Composable
+private fun StaffOrders() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val version by ContactStore.changes.collectAsState()
+    val orders = remember(version) { Orders.all(context) }
+    Column(Modifier.fillMaxSize()) {
+        Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = { ModeStore(context).set(Mode.None) },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
