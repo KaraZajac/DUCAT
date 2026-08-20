@@ -360,8 +360,22 @@ object Ledger {
                     pending = false,
                     locked = tip > 0 && height > 0 && height + LOCK_BLOCKS > tip,
                     unlocksInBlocks = (height + LOCK_BLOCKS - tip).coerceAtLeast(0),
-                    // An unread transaction cannot be called a receipt yet.
-                    provisional = txid.isNotEmpty() && chain == null,
+                    // An unread transaction cannot be called a receipt yet —
+                    // *unless* we can already rule out the other thing it
+                    // might be. The hedge exists because an output that
+                    // arrived could be change from our own send, and until the
+                    // transaction is fetched the output alone does not say.
+                    //
+                    // But our own sends are recorded right here, and `sends`
+                    // is keyed by their transaction. An output from a
+                    // transaction we never sent is not our change, and no
+                    // amount of waiting for the chain will make it so. Without
+                    // this, somebody who had never sent anything in their life
+                    // was told that every payment they received "may be change
+                    // from your own payment" — on a slow phone, for as long as
+                    // the fetch took, and offline, for ever.
+                    provisional = txid.isNotEmpty() && chain == null &&
+                        sends.containsKey(txid),
                     sortHeight = height,
                 )
             }

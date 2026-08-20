@@ -364,6 +364,33 @@ fun main() {
     render("chatlist-priced") {
         org.ducatproject.ducat.ui.ChatListScreen(personaSecret = null, onOpenChat = {})
     }
+    // Activity, with money in it.
+    //
+    // `activity.png` is the empty state, which is the right first picture and
+    // the only one there was — so the screen a person opens to read their own
+    // history has never been pictured actually reading anything.
+    run {
+        val ctx = context
+        val w = org.ducatproject.ducat.WalletStore(ctx)
+        if (w.entries().isEmpty()) {
+            val now = System.currentTimeMillis() / 1000
+            w.replaceEntries(
+                listOf(
+                    org.ducatproject.ducat.WalletEntry(
+                        amountPxmr = 40_000_000_000L, height = 1_700_000, spent = false,
+                        keyImage = "aa".repeat(32), txHashHex = "11".repeat(32),
+                        timestamp = now - 3600, minor = 0,
+                    ),
+                    org.ducatproject.ducat.WalletEntry(
+                        amountPxmr = 12_500_000_000L, height = 1_700_010, spent = false,
+                        keyImage = "bb".repeat(32), txHashHex = "22".repeat(32),
+                        timestamp = now - 600, minor = 0,
+                    ),
+                ),
+            )
+        }
+    }
+    render("activity-priced") { org.ducatproject.ducat.ui.ActivityScreen() }
     // The balance, and the balance whose rate nobody could refresh.
     //
     // Worth a picture because the second one only exists since the local
