@@ -113,7 +113,7 @@ object Listings {
         val cell = runCatching {
             uniffi.ducat_mobile.geohashEncode(latE7, lonE7, CELL_PRECISION)
         }.getOrNull()
-        val deal = if (kind == KIND_VEHICLE) Stakes.Deal.Vehicle else Stakes.Deal.Stay
+        val deal = dealFor(kind)
         return JSONObject().apply {
             put("id", java.util.UUID.randomUUID().toString())
             put("kind", kind)
@@ -144,7 +144,12 @@ object Listings {
         val features = specs.optJSONArray("features")?.let { a ->
             (0 until a.length()).map { a.getString(it) }
         } ?: emptyList()
+        // Three-way, not two. `!vehicle` used to mean "a place", which was
+        // true while a board held two nouns and would now put bedrooms on a
+        // kayak — core refuses that, so a listing that reached the board
+        // would be one nobody could read back.
         val vehicle = kind == KIND_VEHICLE
+        val place = kind == KIND_PLACE
         return uniffi.ducat_mobile.RentalInfo(
             card = card,
             kind = kind.toULong(),
@@ -164,9 +169,9 @@ object Listings {
             seats = if (vehicle) num("seats") else null,
             color = if (vehicle) txt("color") else null,
             trim = if (vehicle) txt("trim") else null,
-            rooms = if (!vehicle) num("rooms") else null,
-            sleeps = if (!vehicle) num("sleeps") else null,
-            sizeM2 = if (!vehicle) num("size_m2") else null,
+            rooms = if (place) num("rooms") else null,
+            sleeps = if (place) num("sleeps") else null,
+            sizeM2 = if (place) num("size_m2") else null,
             subtype = num("subtype"),
             features = features,
         )
@@ -543,8 +548,61 @@ object Listings {
     }
 
     /** Rental boards are their own namespace: a hail must never collide. */
-    private fun boardName(cell: String) = "rent:$cell"
+    /**
+     * One board per cell, whatever is on it.
+     *
+     * Was `rent:` when a board held two nouns. A board name is a DHT record
+     * to find, an empty one costs a flat 21 seconds, and boards do not
+     * parallelise — so a name per noun would multiply the one cost that
+     * decides whether looking around is bearable. The kind is a field on the
+     * notice; the reader filters after one read rather than paying for five.
+     */
+    private fun boardName(cell: String) = "local:$cell"
 
     const val KIND_PLACE = 1
     const val KIND_VEHICLE = 2
+
+    /** A thing sold outright: a bicycle, a sofa, a drill. Nothing returns. */
+    const val KIND_SALE = 3
+
+    /** Equipment by the day: a kayak, skis, a pressure washer. */
+    const val KIND_GEAR = 4
+
+    /** Somebody's time by the hour: an electrician, a plumber, an afternoon
+     *  of help moving a sofa. */
+    const val KIND_SKILL = 5
+
+    /** Every kind a board carries, in the order a person meets them. */
+    val KINDS = listOf(KIND_PLACE, KIND_VEHICLE, KIND_GEAR, KIND_SALE, KIND_SKILL)
+
+    /**
+     * The stake table each kind draws from.
+     *
+     * A deposit and a stake are the same money and different words: on
+     * anything returned the deposit comes back with the thing, and on a sale
+     * there is nothing to return so the pair of stakes is the whole reason to
+     * turn up. See §16.18.
+     */
+    fun dealFor(kind: Int): Stakes.Deal = when (kind) {
+        KIND_VEHICLE, KIND_GEAR -> Stakes.Deal.Vehicle
+        KIND_SALE -> Stakes.Deal.Sale
+        KIND_SKILL -> Stakes.Deal.Labour
+        else -> Stakes.Deal.Stay
+    }
+
+    /**
+     * How many top-level categories a kind recognises — core's own table,
+     * mirrored so a form cannot offer one the wire will refuse.
+     */
+    fun subtypeTop(kind: Int): Int = when (kind) {
+        KIND_PLACE -> 2
+        KIND_VEHICLE -> 3
+        KIND_SALE -> 9
+        KIND_GEAR -> 5
+        KIND_SKILL -> 12
+        else -> 0
+    }
+
+    /** True for the kinds that carry no typed extras (§16.18). */
+    fun isPlain(kind: Int): Boolean = kind > KIND_VEHICLE
 }

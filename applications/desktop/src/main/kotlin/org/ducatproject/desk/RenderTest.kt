@@ -151,6 +151,16 @@ fun main() {
     render("rent-form-place", w = 520, h = 1200) {
         org.ducatproject.ducat.ui.ListingFormPreview(kind = 1)
     }
+    // The three kinds added in 0.89: no typed extras, a category and tags.
+    render("list-sale", w = 520, h = 1100) {
+        org.ducatproject.ducat.ui.ListingFormPreview(kind = 3)
+    }
+    render("list-gear", w = 520, h = 1000) {
+        org.ducatproject.ducat.ui.ListingFormPreview(kind = 4)
+    }
+    render("list-skill", w = 520, h = 1100) {
+        org.ducatproject.ducat.ui.ListingFormPreview(kind = 5)
+    }
     // The three ways into the personal screen's occasional jobs. This used to
     // render RentSearchCard's pair of chips; when those became tiles the card
     // was left drawing nothing at all, and this test said so — one colour.

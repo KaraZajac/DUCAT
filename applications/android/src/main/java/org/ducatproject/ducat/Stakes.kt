@@ -68,6 +68,28 @@ object Stakes {
 
         /** A vehicle or equipment: the asset outlives the rental many times. */
         Vehicle(30),
+
+        /**
+         * A thing sold outright (§16.18 kind 3).
+         *
+         * Not a deposit — nothing comes back, so this is a *stake*: each side
+         * posts one and gets it back on handover, and the pair of them is
+         * what makes turning up beat not bothering. Ten percent, like a ride,
+         * for the same reason: this is a short arrangement between two people
+         * who are about to stand in front of each other, and a stake that
+         * rivals the price is one nobody posts.
+         */
+        Sale(10),
+
+        /**
+         * Somebody's time (§16.18 kind 5).
+         *
+         * Priced by the hour, so the stake is against the agreed total rather
+         * than the rate. Ten percent for the same reason as a ride, and
+         * because the person being hired is usually the one who can least
+         * afford to have money tied up.
+         */
+        Labour(10),
     }
 
     /**

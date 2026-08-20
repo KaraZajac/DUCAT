@@ -5,6 +5,7 @@ import org.ducatproject.ducat.Catalogue
 import org.ducatproject.ducat.Orders
 import org.ducatproject.ducat.Pin
 import org.ducatproject.ducat.RateStore
+import org.ducatproject.ducat.Stakes
 import org.ducatproject.ducat.WalletStore
 import java.io.File
 
@@ -420,6 +421,66 @@ fun main() {
             kept == n,
             "kept $kept of $n (list went $before → ${after.size})",
         )
+    }
+
+    // --- the local board --------------------------------------------------
+    //
+    // Five nouns on one board (§16.18). The three added in 0.89 carry no
+    // typed extras, so what matters is that a draft for one of them cannot
+    // reach the wire carrying a bedroom or a gearbox — core refuses that, and
+    // a listing the network refuses is one nobody can answer.
+    run {
+        val L = org.ducatproject.ducat.Listings
+        check("a board carries five kinds", L.KINDS.size == 5, L.KINDS.toString())
+        check(
+            "the plain kinds are the three added",
+            L.KINDS.filter { L.isPlain(it) } == listOf(L.KIND_GEAR, L.KIND_SALE, L.KIND_SKILL),
+        )
+        // The stake table each kind draws from — a sale stakes, a rental
+        // deposits, and gear is a vehicle by another name.
+        check("gear stakes like a vehicle", L.dealFor(L.KIND_GEAR) == Stakes.Deal.Vehicle)
+        check("a sale has its own stake", L.dealFor(L.KIND_SALE) == Stakes.Deal.Sale)
+        check("hiring has its own", L.dealFor(L.KIND_SKILL) == Stakes.Deal.Labour)
+
+        // Categories must match core's table exactly, or a form offers one
+        // the wire refuses.
+        check(
+            "the category counts match the wire",
+            listOf(2, 3, 9, 5, 12) ==
+                listOf(L.KIND_PLACE, L.KIND_VEHICLE, L.KIND_SALE, L.KIND_GEAR, L.KIND_SKILL)
+                    .map { L.subtypeTop(it) },
+        )
+
+        // A draft of each new kind, through publicNotice, is what the board
+        // would actually receive.
+        listOf(L.KIND_SALE to "A bicycle", L.KIND_GEAR to "A kayak", L.KIND_SKILL to "An electrician")
+            .forEach { (kind, title) ->
+                val specs = org.json.JSONObject()
+                    .put("subtype", 1L)
+                    .put("features", org.json.JSONArray().put("good condition"))
+                val d = L.draft(
+                    context, kind, title, "north side", 40_000_000_000L,
+                    525_200_000L, 134_050_000L, specs, "the address",
+                )
+                val notice = L.publicNotice(d, "ducat:card/x")
+                check(
+                    "a $title listing carries no typed extras",
+                    notice.rooms == null && notice.sleeps == null && notice.sizeM2 == null &&
+                        notice.make == null && notice.gearbox == null && notice.seats == null,
+                    "kind $kind leaked a typed field",
+                )
+                check(
+                    "and keeps its category and tags",
+                    notice.subtype == 1uL && notice.features == listOf("good condition"),
+                )
+                check(
+                    "and stakes from its own table",
+                    d.optLong("depositPxmr") ==
+                        Stakes.stakeFor(L.dealFor(kind), 40_000_000_000L),
+                )
+                // The private half is never a field this function can reach.
+                check("and never carries the address", "the address" !in notice.toString())
+            }
     }
 
     // --- the PIN ----------------------------------------------------------

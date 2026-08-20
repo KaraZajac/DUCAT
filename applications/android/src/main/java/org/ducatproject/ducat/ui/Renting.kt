@@ -7,7 +7,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Backpack
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -40,6 +43,90 @@ import org.json.JSONObject
  * stranger can search on has to be asked here, and what would let them walk
  * up to the door must be asked here too and then kept off the board.
  */
+/**
+ * The words a kind wears.
+ *
+ * Kept together rather than scattered through the form, because five kinds
+ * with three labels each is exactly the shape that drifts: a screen ends up
+ * calling a kayak a vehicle in one place and gear in another.
+ */
+private fun listingButton(kind: Int): Int = when (kind) {
+    Listings.KIND_VEHICLE -> R.string.rent_list_a_vehicle
+    Listings.KIND_GEAR -> R.string.rent_list_gear
+    Listings.KIND_SALE -> R.string.rent_list_sale
+    Listings.KIND_SKILL -> R.string.rent_list_skill
+    else -> R.string.rent_list_a_place
+}
+
+private fun listingFormTitle(kind: Int): Int = when (kind) {
+    Listings.KIND_VEHICLE -> R.string.rent_form_vehicle
+    Listings.KIND_GEAR -> R.string.rent_form_gear
+    Listings.KIND_SALE -> R.string.rent_form_sale
+    Listings.KIND_SKILL -> R.string.rent_form_skill
+    else -> R.string.rent_form_place
+}
+
+/** Per night, per day, per hour, or once — §16.18's unit-follows-the-kind. */
+private fun priceLabel(kind: Int): Int = when (kind) {
+    Listings.KIND_VEHICLE, Listings.KIND_GEAR -> R.string.rent_per_day
+    Listings.KIND_SKILL -> R.string.rent_per_hour
+    Listings.KIND_SALE -> R.string.rent_price_once
+    else -> R.string.rent_per_night
+}
+
+/** The icon a kind wears, for a list that mixes all five. */
+internal fun listingIcon(kind: Int) = when (kind) {
+    Listings.KIND_VEHICLE -> Icons.Filled.DirectionsCar
+    Listings.KIND_GEAR -> Icons.Filled.Backpack
+    Listings.KIND_SALE -> Icons.Filled.LocalOffer
+    Listings.KIND_SKILL -> Icons.Filled.Build
+    else -> Icons.Filled.House
+}
+
+/**
+ * A category, per kind.
+ *
+ * Small flat sets rather than a tree, and the numbers must match core's
+ * `rental_subtype_top` exactly — a form offering a category the wire refuses
+ * would produce a listing nobody can read back.
+ */
+private fun categoryLabel(kind: Int, n: Int): Int = when (kind) {
+    Listings.KIND_SALE -> when (n) {
+        1 -> R.string.cat_goods
+        2 -> R.string.cat_furniture
+        3 -> R.string.cat_tools
+        4 -> R.string.cat_sport
+        5 -> R.string.cat_garden
+        6 -> R.string.cat_electronics
+        7 -> R.string.cat_music
+        8 -> R.string.cat_vehicle
+        else -> R.string.cat_other
+    }
+    Listings.KIND_GEAR -> when (n) {
+        1 -> R.string.cat_sport
+        2 -> R.string.cat_tools
+        3 -> R.string.cat_outdoor
+        4 -> R.string.cat_party
+        else -> R.string.cat_other
+    }
+    Listings.KIND_SKILL -> when (n) {
+        1 -> R.string.cat_electrical
+        2 -> R.string.cat_plumbing
+        3 -> R.string.cat_carpentry
+        4 -> R.string.cat_painting
+        5 -> R.string.cat_cleaning
+        6 -> R.string.cat_moving
+        7 -> R.string.cat_gardening
+        8 -> R.string.cat_repairs
+        9 -> R.string.cat_tutoring
+        10 -> R.string.cat_care
+        11 -> R.string.cat_tech
+        else -> R.string.cat_other
+    }
+    else -> R.string.cat_other
+}
+
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun RentingScreen() {
     val context = LocalContext.current
@@ -55,23 +142,21 @@ fun RentingScreen() {
     }
 
     Column(Modifier.fillMaxSize()) {
-        Row(Modifier.fillMaxWidth().padding(16.dp)) {
-            Button(
-                onClick = { composing = Listings.KIND_PLACE },
-                modifier = Modifier.weight(1f).height(48.dp),
-            ) {
-                Icon(Icons.Filled.House, null, Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.rent_list_a_place))
-            }
-            Spacer(Modifier.width(12.dp))
-            Button(
-                onClick = { composing = Listings.KIND_VEHICLE },
-                modifier = Modifier.weight(1f).height(48.dp),
-            ) {
-                Icon(Icons.Filled.DirectionsCar, null, Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.rent_list_a_vehicle))
+        // Five nouns on one board. Wrapped rather than a row, because five
+        // buttons across does not fit the phone a market stall actually owns.
+        FlowRow(
+            Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Listings.KINDS.forEach { k ->
+                Button(
+                    onClick = { composing = k },
+                    modifier = Modifier.height(44.dp),
+                ) {
+                    Icon(listingIcon(k), null, Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(listingButton(k)))
+                }
             }
         }
         error?.let {
@@ -185,10 +270,15 @@ private fun MyListingCard(
 @Composable
 fun ListingFormPreview(kind: Int) = ListingForm(kind = kind, onDone = {})
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun ListingForm(kind: Int, onDone: () -> Unit) {
     val context = LocalContext.current
     val vehicle = kind == Listings.KIND_VEHICLE
+    // The three kinds added in 0.89 carry no typed extras (§16.18): a title,
+    // a price, an area, a category and a few tags. Everything below that is
+    // about a gearbox or a bedroom is theirs to skip.
+    val plain = Listings.isPlain(kind)
     var title by remember { mutableStateOf("") }
     var area by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
@@ -206,6 +296,9 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
     var sleeps by remember { mutableStateOf("") }
     var sizeM2 by remember { mutableStateOf("") }
     var whole by remember { mutableStateOf(true) }
+    // Plain kinds: a category, and free words for what it actually is.
+    var category by remember { mutableStateOf(1) }
+    var tags by remember { mutableStateOf("") }
     // Private
     var details by remember { mutableStateOf("") }
     var fix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
@@ -237,13 +330,11 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
     // BigDecimal, like every other price in the app: a Double loses the
     // last piconero of a long figure and wraps silently on a huge one.
     val pricePxmr = Amounts.parse(price)?.let { Amounts.toPxmr(it) } ?: 0L
-    val stake = Stakes.stakeFor(
-        if (vehicle) Stakes.Deal.Vehicle else Stakes.Deal.Stay, pricePxmr,
-    )
+    val stake = Stakes.stakeFor(Listings.dealFor(kind), pricePxmr)
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(
-            stringResource(if (vehicle) R.string.rent_form_vehicle else R.string.rent_form_place),
+            stringResource(listingFormTitle(kind)),
             style = MaterialTheme.typography.titleLarge,
         )
         Spacer(Modifier.height(4.dp))
@@ -269,9 +360,7 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
         OutlinedTextField(
             value = price,
             onValueChange = { price = it.filter { c -> Amounts.isNumberChar(c) } },
-            label = {
-                Text(stringResource(if (vehicle) R.string.rent_per_day else R.string.rent_per_night))
-            },
+            label = { Text(stringResource(priceLabel(kind))) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true, modifier = Modifier.fillMaxWidth(),
         )
@@ -288,6 +377,29 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
         }
 
         Spacer(Modifier.height(16.dp))
+        if (plain) {
+            Text(
+                stringResource(R.string.rent_category),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Spacer(Modifier.height(8.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                (1..Listings.subtypeTop(kind)).forEach { n ->
+                    FilterChip(
+                        selected = category == n,
+                        onClick = { category = n },
+                        label = { Text(stringResource(categoryLabel(kind, n))) },
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(
+                value = tags, onValueChange = { tags = it.take(120) },
+                label = { Text(stringResource(R.string.rent_tags)) },
+                supportingText = { Text(stringResource(R.string.rent_tags_hint)) },
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
+            )
+        }
         if (vehicle) {
             Row {
                 OutlinedTextField(
@@ -356,7 +468,12 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
                     Spacer(Modifier.width(6.dp))
                 }
             }
-        } else {
+        } else if (!plain) {
+            // A place's own fields, and only a place's. This was a plain
+            // `else`, which was right while a board held two nouns and put
+            // bedrooms and "whole place / private room" on the form for an
+            // electrician the moment it held five. The posting path had
+            // already been taught the difference; the screen had not.
             Row {
                 OutlinedTextField(
                     value = rooms, onValueChange = { rooms = Amounts.typedNumber(it).filter { c -> c in '0'..'9' }.take(2) },
@@ -435,13 +552,27 @@ private fun ListingForm(kind: Int, onDone: () -> Unit) {
                             put("gearbox", gearbox)
                             put("fuel", fuel)
                             put("subtype", 1L)
+                        } else if (plain) {
+                            put("subtype", category.toLong())
                         } else {
                             rooms.toLongOrNull()?.let { put("rooms", it) }
                             sleeps.toLongOrNull()?.let { put("sleeps", it) }
                             sizeM2.toLongOrNull()?.let { put("size_m2", it) }
                             put("subtype", if (whole) 1L else 2L)
                         }
-                        put("features", JSONArray())
+                        // Eight short tags at most, and the wire refuses more
+                        // — a summary, because the description belongs in the
+                        // conversation where it is not being broadcast.
+                        put(
+                            "features",
+                            JSONArray().also { a ->
+                                tags.split(',')
+                                    .map { t -> t.trim().take(16) }
+                                    .filter { t -> t.isNotEmpty() }
+                                    .take(8)
+                                    .forEach { t -> a.put(t) }
+                            },
+                        )
                     }
                     val draft = Listings.draft(
                         context, kind, title, area, pricePxmr,

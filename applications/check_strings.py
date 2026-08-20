@@ -126,6 +126,22 @@ def main() -> int:
                     print(f"  ! {loc}/{name}: {key} has {got}, base has {want}")
                     problems += 1
 
+            # 1b. An apostrophe must be escaped in an Android resource.
+            #
+            #     Only aapt knew this, and it says so as "Invalid unicode
+            #     escape sequence" pointing at the whole file — which is a
+            #     long way from "Ukrainian spells зв'язатися with one". The
+            #     languages that need it most are the ones where the mark is
+            #     a letter rather than punctuation.
+            for key, value in strings.items():
+                if value.startswith('"'):
+                    continue
+                for i, ch in enumerate(value):
+                    if ch == "'" and (i == 0 or value[i - 1] != "\\"):
+                        print(f"  ! {loc}/{name}: {key} has an unescaped apostrophe")
+                        problems += 1
+                        break
+
             # 2. The text must be written in the language's own script.
             family = SCRIPTS.get(loc)
             if family:
