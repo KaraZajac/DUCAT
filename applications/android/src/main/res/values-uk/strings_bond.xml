@@ -25,8 +25,8 @@
     <string name="bond_ask_arbiter">Попросити арбітра вирішити</string>
     <string name="res_tray">Бронювання</string>
     <string name="res_title">Запропонувати бронювання</string>
-    <string name="res_note">Сума й обидві застави йдуть в одне ескроу. Ви вносите оренду + свою заставу; їхня згода — внести свою. Застави повертаються при випуску.</string>
-    <string name="res_about">Щодо %1$s. Оренда й обидві застави йдуть в один ескроу, а застави повертаються при звільненні.</string>
+    <string name="res_note">Сума й обидві застави йдуть в одне ескроу. Ви вносите суму + свою заставу; їхня згода — внести свою. Застави повертаються при випуску.</string>
+    <string name="res_about">Щодо %1$s. Сума й обидві застави йдуть в один ескроу, а застави повертаються при звільненні.</string>
     <string name="res_rent">Оренда (%1$s)</string>
     <string name="res_my_deposit">Ваша застава (%1$s)</string>
     <string name="res_host_deposit">Їхня застава (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">Запропонувати оренду</string>
     <string name="res_title_buy">Запропонувати купівлю</string>
     <string name="res_title_job">Запропонувати роботу</string>
+    <string name="res_nights">Ночей</string>
+    <string name="res_days">Днів</string>
+    <string name="res_hours">Годин</string>
+    <string name="res_total">Разом (%1$s)</string>
 </resources>

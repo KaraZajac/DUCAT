@@ -25,7 +25,7 @@
     <string name="bond_ask_arbiter">Pedir ao árbitro para decidir</string>
     <string name="res_tray">Reserva</string>
     <string name="res_title">Propor uma reserva</string>
-    <string name="res_note">A renda e ambas as cauções vão para uma só caução. Tu pões renda + a tua; a aceitação deles é porem a deles. As cauções voltam na libertação.</string>
+    <string name="res_note">O preço e ambas as cauções vão para uma só caução. Tu pões o preço + a tua; a aceitação deles é porem a deles. As cauções voltam na libertação.</string>
     <string name="res_about">Para %1$s. O preço e os dois depósitos entram num mesmo escrow, e os depósitos voltam na liberação.</string>
     <string name="res_rent">Renda (%1$s)</string>
     <string name="res_my_deposit">A tua caução (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">Propor um aluguel</string>
     <string name="res_title_buy">Propor uma compra</string>
     <string name="res_title_job">Propor um trabalho</string>
+    <string name="res_nights">Noites</string>
+    <string name="res_days">Dias</string>
+    <string name="res_hours">Horas</string>
+    <string name="res_total">Total (%1$s)</string>
 </resources>

@@ -25,8 +25,8 @@
     <string name="bond_ask_arbiter">Попросить арбитра решить</string>
     <string name="res_tray">Бронирование</string>
     <string name="res_title">Предложить бронирование</string>
-    <string name="res_note">Сумма и оба залога идут в одно эскроу. Вы вносите аренду + свой залог; их согласие — внести свой. Залоги возвращаются при выпуске.</string>
-    <string name="res_about">По поводу %1$s. Аренда и оба залога уходят в один эскроу, а залоги возвращаются при закрытии сделки.</string>
+    <string name="res_note">Сумма и оба залога идут в одно эскроу. Вы вносите сумму + свой залог; их согласие — внести свой. Залоги возвращаются при выпуске.</string>
+    <string name="res_about">По поводу %1$s. Сумма и оба залога уходят в один эскроу, а залоги возвращаются при закрытии сделки.</string>
     <string name="res_rent">Аренда (%1$s)</string>
     <string name="res_my_deposit">Ваш залог (%1$s)</string>
     <string name="res_host_deposit">Их залог (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">Предложить аренду</string>
     <string name="res_title_buy">Предложить покупку</string>
     <string name="res_title_job">Предложить работу</string>
+    <string name="res_nights">Ночей</string>
+    <string name="res_days">Дней</string>
+    <string name="res_hours">Часов</string>
+    <string name="res_total">Итого (%1$s)</string>
 </resources>

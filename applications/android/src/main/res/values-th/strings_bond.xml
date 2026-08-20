@@ -25,7 +25,7 @@
     <string name="bond_ask_arbiter">ขอให้ผู้ชี้ขาดตัดสิน</string>
     <string name="res_tray">การจอง</string>
     <string name="res_title">เสนอการจอง</string>
-    <string name="res_note">ค่าเช่าและมัดจำทั้งสองเข้าเอสโครว์เดียว คุณจ่ายค่าเช่า+มัดจำของคุณ การยอมรับของเขาคือจ่ายของเขา มัดจำคืนเมื่อปล่อย</string>
+    <string name="res_note">ราคาและมัดจำทั้งสองเข้าเอสโครว์เดียว คุณจ่ายราคา+มัดจำของคุณ การยอมรับของเขาคือจ่ายของเขา มัดจำคืนเมื่อปล่อย</string>
     <string name="res_about">สำหรับ %1$s ราคาและเงินมัดจำของทั้งสองฝ่ายเข้าสู่เอสโครว์เดียวกัน และเงินมัดจำจะคืนเมื่อปล่อย</string>
     <string name="res_rent">ค่าเช่า (%1$s)</string>
     <string name="res_my_deposit">มัดจำของคุณ (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">เสนอการเช่า</string>
     <string name="res_title_buy">เสนอการซื้อ</string>
     <string name="res_title_job">เสนองาน</string>
+    <string name="res_nights">คืน</string>
+    <string name="res_days">วัน</string>
+    <string name="res_hours">ชั่วโมง</string>
+    <string name="res_total">รวม (%1$s)</string>
 </resources>

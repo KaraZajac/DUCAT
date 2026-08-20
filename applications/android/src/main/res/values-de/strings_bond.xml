@@ -25,8 +25,8 @@
     <string name="bond_ask_arbiter">Die Schiedsperson entscheiden lassen</string>
     <string name="res_tray">Reservierung</string>
     <string name="res_title">Reservierung vorschlagen</string>
-    <string name="res_note">Der Preis und beide Kautionen gehen in eine Treuhand. Du zahlst Miete + deine Kaution; ihre Annahme ist das Einzahlen ihrer. Kautionen kommen bei der Freigabe zurück.</string>
-    <string name="res_about">Für %1$s. Miete und beide Kautionen gehen in ein Treuhandkonto, und die Kautionen kommen bei der Freigabe zurück.</string>
+    <string name="res_note">Der Preis und beide Kautionen gehen in eine Treuhand. Du zahlst den Preis + deine Kaution; ihre Annahme ist das Einzahlen ihrer. Kautionen kommen bei der Freigabe zurück.</string>
+    <string name="res_about">Für %1$s. Der Preis und beide Kautionen gehen in ein Treuhandkonto, und die Kautionen kommen bei der Freigabe zurück.</string>
     <string name="res_rent">Miete (%1$s)</string>
     <string name="res_my_deposit">Deine Kaution (%1$s)</string>
     <string name="res_host_deposit">Ihre Kaution (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">Ausleihe vorschlagen</string>
     <string name="res_title_buy">Kauf vorschlagen</string>
     <string name="res_title_job">Auftrag vorschlagen</string>
+    <string name="res_nights">Nächte</string>
+    <string name="res_days">Tage</string>
+    <string name="res_hours">Stunden</string>
+    <string name="res_total">Gesamt (%1$s)</string>
 </resources>

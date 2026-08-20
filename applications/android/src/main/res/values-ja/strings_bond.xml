@@ -25,7 +25,7 @@
     <string name="bond_ask_arbiter">仲裁者に裁定を依頼</string>
     <string name="res_tray">予約</string>
     <string name="res_title">予約を提案</string>
-    <string name="res_note">家賃と両方の保証金は一つのエスクローへ。あなたは家賃+自分の保証金、相手の受諾は相手の保証金の入金。リリースで保証金は戻ります。</string>
+    <string name="res_note">代金と双方のデポジットは一つのエスクローへ。あなたは代金+自分のデポジット、相手の受諾は相手のデポジットの入金。リリースでデポジットは戻ります。</string>
     <string name="res_about">%1$s について。代金と双方のデポジットは一つのエスクローに入り、デポジットは解放時に戻ります。</string>
     <string name="res_rent">家賃 (%1$s)</string>
     <string name="res_my_deposit">あなたの保証金 (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">レンタルを提案</string>
     <string name="res_title_buy">購入を提案</string>
     <string name="res_title_job">依頼を提案</string>
+    <string name="res_nights">泊数</string>
+    <string name="res_days">日数</string>
+    <string name="res_hours">時間</string>
+    <string name="res_total">合計（%1$s）</string>
 </resources>

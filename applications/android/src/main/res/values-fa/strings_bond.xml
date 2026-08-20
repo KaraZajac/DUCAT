@@ -25,8 +25,8 @@
     <string name="bond_ask_arbiter">از داور بخواهید حکم کند</string>
     <string name="res_tray">رزرو</string>
     <string name="res_title">پیشنهاد رزرو</string>
-    <string name="res_note">مبلغ و هر دو ودیعه در یک امانت. شما اجاره + ودیعه خود را می‌پردازید؛ پذیرش آن‌ها پرداخت ودیعه خودشان است. ودیعه‌ها هنگام آزادسازی بازمی‌گردند.</string>
-    <string name="res_about">دربارهٔ %1$s. اجاره و هر دو ودیعه در یک امانت قرار می‌گیرند و ودیعه‌ها هنگام آزادسازی برمی‌گردند.</string>
+    <string name="res_note">مبلغ و هر دو ودیعه در یک امانت. شما مبلغ + ودیعه خود را می‌پردازید؛ پذیرش آن‌ها پرداخت ودیعه خودشان است. ودیعه‌ها هنگام آزادسازی بازمی‌گردند.</string>
+    <string name="res_about">دربارهٔ %1$s. مبلغ و هر دو ودیعه در یک امانت قرار می‌گیرند و ودیعه‌ها هنگام آزادسازی برمی‌گردند.</string>
     <string name="res_rent">اجاره (%1$s)</string>
     <string name="res_my_deposit">ودیعه شما (%1$s)</string>
     <string name="res_host_deposit">ودیعه آن‌ها (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">پیشنهاد کرایه</string>
     <string name="res_title_buy">پیشنهاد خرید</string>
     <string name="res_title_job">پیشنهاد کار</string>
+    <string name="res_nights">شب</string>
+    <string name="res_days">روز</string>
+    <string name="res_hours">ساعت</string>
+    <string name="res_total">جمع (%1$s)</string>
 </resources>

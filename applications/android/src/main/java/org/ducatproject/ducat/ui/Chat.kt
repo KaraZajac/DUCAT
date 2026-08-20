@@ -2476,6 +2476,18 @@ private fun BondLine(spin: Boolean, text: String) {
  * agreed is not, and a screen that calls buying a bike a reservation is asking
  * the reader to translate.
  */
+private fun bookingUnit(kind: Int?): Int? = when (kind) {
+    org.ducatproject.ducat.Listings.KIND_PLACE -> R.string.res_nights
+    org.ducatproject.ducat.Listings.KIND_VEHICLE,
+    org.ducatproject.ducat.Listings.KIND_GEAR,
+    -> R.string.res_days
+    org.ducatproject.ducat.Listings.KIND_SKILL -> R.string.res_hours
+    // A sale is one thing, once. A thread that did not begin at a board has
+    // no unit to count, and asking "how many" of an unnamed thing is worse
+    // than not asking.
+    else -> null
+}
+
 private fun bookingTitle(kind: Int?): Int = when (kind) {
     org.ducatproject.ducat.Listings.KIND_GEAR -> R.string.res_title_hire
     org.ducatproject.ducat.Listings.KIND_SALE -> R.string.res_title_buy
@@ -2491,7 +2503,10 @@ private fun bookingTitle(kind: Int?): Int = when (kind) {
  * accepting costs. Nothing is at risk until money moves: the guest funds
  * rent + their deposit, and the host's acceptance IS funding theirs.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class,
+)
 @Composable
 private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -2523,7 +2538,17 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     fun asUnit(pxmr: Long): String =
         if (pxmr > 0) pxmrToField(pxmr, fiat, rate) else ""
 
+    // The rate, how many of them, and what that comes to.
+    //
+    // There used to be one field. It was labelled with the listing's own unit
+    // — "Price per night" — prefilled with one night's rent, and handed to the
+    // escrow as the whole thing. Nothing anywhere asked how long. So booking a
+    // room for a week either went through at one night's money, or the guest
+    // had to work out seven nights themselves and type the total into a box
+    // that said "per night". The commonest thing this screen does, and it did
+    // not have a place to say it.
     var rent by remember { mutableStateOf(about?.let { asUnit(it.pricePxmr) } ?: "") }
+    var count by remember { mutableStateOf("1") }
     var myDep by remember { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
     var hostDep by remember { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
     // What kind of thing is being handed over decides how much each side
@@ -2563,6 +2588,17 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
         return Amounts.toPxmr(xmr)?.takeIf { it > 0 }
     }
 
+    /**
+     * The rate times how many, which is what is actually being agreed.
+     *
+     * Derived rather than a field, so it cannot disagree with the two numbers
+     * above it. A sale has no count — one bicycle, once — so its total is
+     * simply its price.
+     */
+    val unit = bookingUnit(about?.kind)
+    val nights = count.filter { it.isDigit() }.toIntOrNull()?.coerceIn(1, 999) ?: 1
+    val totalPxmr = pxmr(rent)?.let { if (unit == null) it else it * nights } ?: 0L
+
 
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDone) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
@@ -2580,7 +2616,19 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(12.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // Wrapped, and the percentage on its own line.
+            //
+            // This was one `Row` holding four chips and a sentence. Four deal
+            // names and "each side stakes 20%" do not fit across a phone, and
+            // a Row does not wrap — it squeezes. So the last thing in it was
+            // crushed to a sliver against the right edge and its text wrapped
+            // one letter per line, which stretched the row to half the sheet
+            // and left a hole above the price nobody could explain.
+            androidx.compose.foundation.layout.FlowRow(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 // Every deal a listing can be, not two. The suggestion is
                 // still a starting point either side can type over.
                 listOf(
@@ -2594,34 +2642,39 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                         onClick = {
                             deal = d
                             // Re-suggest from whatever rent has been typed.
-                            pxmr(rent)?.let { r ->
-                                val st = org.ducatproject.ducat.Stakes.stakeFor(d, r)
-                                val text = asUnit(st)
+                            totalPxmr.takeIf { it > 0 }?.let { whole ->
+                                val text = asUnit(
+                                    org.ducatproject.ducat.Stakes.stakeFor(d, whole),
+                                )
                                 myDep = text; hostDep = text
                             }
                         },
                         label = { Text(stringResource(label)) },
                     )
-                    Spacer(Modifier.width(8.dp))
                 }
-                Text(
-                    stringResource(R.string.res_kind_note, deal.percent),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                stringResource(R.string.res_kind_note, deal.percent),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = rent,
                 onValueChange = { typed ->
                     rent = typed.filter { c -> Amounts.isNumberChar(c) }
-                    // Suggest both stakes from the rent as it is typed. Either
-                    // field can still be edited; this only saves the person
-                    // doing percentages in their head at a bus stop.
+                    // Suggest both stakes as the rate is typed. Either field
+                    // can still be edited; this only saves the person doing
+                    // percentages in their head at a bus stop.
+                    //
+                    // Off the whole booking rather than one night of it: a
+                    // stake is a share of what is at risk, and what is at risk
+                    // is the week somebody just agreed to.
                     pxmr(rent)?.let { r ->
-                        val st = org.ducatproject.ducat.Stakes.stakeFor(deal, r)
-                        val text = asUnit(st)
+                        val whole = if (unit == null) r else r * nights
+                        val text = asUnit(org.ducatproject.ducat.Stakes.stakeFor(deal, whole))
                         myDep = text
                         hostDep = text
                     }
@@ -2666,6 +2719,58 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                 }
             }
             }
+            unit?.let { unitLabel ->
+                Spacer(Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(
+                        value = count,
+                        onValueChange = { typed ->
+                            // Folded to ASCII before filtering, like every
+                            // other number in the app: a Persian keypad types
+                            // its own digits and `isDigit` passes them.
+                            count = Amounts.typedNumber(typed)
+                                .filter { c -> c in '0'..'9' }.take(3)
+                            // From the count just typed, not from `totalPxmr`
+                            // — that is a composition value, computed on the
+                            // last frame, so it still holds the old number of
+                            // nights while this handler runs. Reading it here
+                            // left the deposits at one night's stake while the
+                            // total beside them said five.
+                            val n = count.toIntOrNull()?.coerceIn(1, 999) ?: 1
+                            pxmr(rent)?.let { r ->
+                                val whole = if (unit == null) r else r * n
+                                val text = asUnit(
+                                    org.ducatproject.ducat.Stakes.stakeFor(deal, whole),
+                                )
+                                myDep = text; hostDep = text
+                            }
+                        },
+                        label = { Text(stringResource(unitLabel)) },
+                        singleLine = true,
+                        modifier = Modifier.width(120.dp),
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    // The arithmetic, spelled out. This is the number the
+                    // escrow will hold and the number the other side is being
+                    // asked to accept, so it belongs on screen rather than in
+                    // the reader's head.
+                    Column {
+                        Text(
+                            stringResource(R.string.res_total, if (fiat) cur else "XMR"),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            if (totalPxmr > 0) {
+                                Amounts.show(context, totalPxmr).primary
+                            } else {
+                                "—"
+                            },
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+                }
+            }
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = myDep, onValueChange = { myDep = it.filter { c -> Amounts.isNumberChar(c) } },
@@ -2686,7 +2791,11 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
             Spacer(Modifier.height(12.dp))
             Button(
                 onClick = {
-                    val r = pxmr(rent); val g = pxmr(myDep); val h = pxmr(hostDep)
+                    // The whole booking, not one night of it. This is the
+                    // one place the difference is money: the escrow holds what
+                    // is sent here, and it used to be sent the rate.
+                    val r = totalPxmr.takeIf { it > 0 }
+                    val g = pxmr(myDep); val h = pxmr(hostDep)
                     if (r == null) { error = context.getString(R.string.res_need_rent); return@Button }
                     busy = true; error = null
                     scope.launch {

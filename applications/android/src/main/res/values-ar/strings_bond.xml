@@ -25,7 +25,7 @@
     <string name="bond_ask_arbiter">اطلب من الحَكَم أن يفصل</string>
     <string name="res_tray">حجز</string>
     <string name="res_title">اقتراح حجز</string>
-    <string name="res_note">الإيجار والوديعتان في ضمان واحد. تدفع الإيجار + وديعتك؛ وقبولهم هو دفع وديعتهم. تعود الودائع عند التحرير.</string>
+    <string name="res_note">المبلغ والوديعتان في ضمان واحد. تدفع المبلغ + وديعتك؛ وقبولهم هو دفع وديعتهم. تعود الودائع عند التحرير.</string>
     <string name="res_about">بخصوص %1$s. يدخل المبلغ وكلا التأمينين في ضمان واحد، ويعود التأمينان عند الإفراج.</string>
     <string name="res_rent">الإيجار (%1$s)</string>
     <string name="res_my_deposit">وديعتك (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">اقتراح استئجار</string>
     <string name="res_title_buy">اقتراح شراء</string>
     <string name="res_title_job">اقتراح عمل</string>
+    <string name="res_nights">ليالٍ</string>
+    <string name="res_days">أيام</string>
+    <string name="res_hours">ساعات</string>
+    <string name="res_total">الإجمالي (%1$s)</string>
 </resources>

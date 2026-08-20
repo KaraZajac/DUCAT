@@ -25,7 +25,7 @@
     <string name="bond_ask_arbiter">Pedir al árbitro que decida</string>
     <string name="res_tray">Reserva</string>
     <string name="res_title">Proponer una reserva</string>
-    <string name="res_note">La renta y ambos depósitos van a un mismo depósito en garantía. Tú pones renta + tu depósito; su aceptación es poner el suyo. Los depósitos vuelven al liberar.</string>
+    <string name="res_note">El precio y ambos depósitos van a un mismo depósito en garantía. Tú pones el precio + tu depósito; su aceptación es poner el suyo. Los depósitos vuelven al liberar.</string>
     <string name="res_about">Para %1$s. El precio y ambos depósitos entran en un mismo depósito en garantía, y los depósitos vuelven al liberarlo.</string>
     <string name="res_rent">Renta (%1$s)</string>
     <string name="res_my_deposit">Tu depósito (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">Proponer un alquiler</string>
     <string name="res_title_buy">Proponer una compra</string>
     <string name="res_title_job">Proponer un trabajo</string>
+    <string name="res_nights">Noches</string>
+    <string name="res_days">Días</string>
+    <string name="res_hours">Horas</string>
+    <string name="res_total">Total (%1$s)</string>
 </resources>

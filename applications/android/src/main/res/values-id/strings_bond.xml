@@ -25,8 +25,8 @@
     <string name="bond_ask_arbiter">Minta arbiter memutuskan</string>
     <string name="res_tray">Reservasi</string>
     <string name="res_title">Usulkan reservasi</string>
-    <string name="res_note">Harga dan kedua deposit masuk satu escrow. Anda menyetor sewa + deposit Anda; penerimaan mereka adalah menyetor milik mereka. Deposit kembali saat rilis.</string>
-    <string name="res_about">Untuk %1$s. Sewa dan kedua deposit masuk ke satu escrow, dan deposit kembali saat dilepas.</string>
+    <string name="res_note">Harga dan kedua deposit masuk satu escrow. Anda menyetor harga + deposit Anda; penerimaan mereka adalah menyetor milik mereka. Deposit kembali saat rilis.</string>
+    <string name="res_about">Untuk %1$s. Harga dan kedua deposit masuk ke satu escrow, dan deposit kembali saat dilepas.</string>
     <string name="res_rent">Sewa (%1$s)</string>
     <string name="res_my_deposit">Deposit Anda (%1$s)</string>
     <string name="res_host_deposit">Deposit mereka (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">Ajukan sewa</string>
     <string name="res_title_buy">Ajukan pembelian</string>
     <string name="res_title_job">Ajukan pekerjaan</string>
+    <string name="res_nights">Malam</string>
+    <string name="res_days">Hari</string>
+    <string name="res_hours">Jam</string>
+    <string name="res_total">Total (%1$s)</string>
 </resources>

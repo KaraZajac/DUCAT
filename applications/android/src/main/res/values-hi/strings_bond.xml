@@ -25,8 +25,8 @@
     <string name="bond_ask_arbiter">मध्यस्थ से निर्णय माँगें</string>
     <string name="res_tray">आरक्षण</string>
     <string name="res_title">आरक्षण प्रस्तावित करें</string>
-    <string name="res_note">रकम और दोनों जमा एक एस्क्रो में। आप किराया + अपनी जमा डालें; उनकी स्वीकृति उनकी जमा डालना है। रिलीज़ पर जमा वापस।</string>
-    <string name="res_about">%1$s के लिए। किराया और दोनों जमा एक ही एस्क्रो में जाते हैं, और रिलीज़ पर जमा वापस आ जाते हैं।</string>
+    <string name="res_note">रकम और दोनों जमा एक एस्क्रो में। आप रकम + अपनी जमा डालें; उनकी स्वीकृति उनकी जमा डालना है। रिलीज़ पर जमा वापस।</string>
+    <string name="res_about">%1$s के लिए। रकम और दोनों जमा एक ही एस्क्रो में जाते हैं, और रिलीज़ पर जमा वापस आ जाते हैं।</string>
     <string name="res_rent">किराया (%1$s)</string>
     <string name="res_my_deposit">आपकी जमा (%1$s)</string>
     <string name="res_host_deposit">उनकी जमा (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">किराए का प्रस्ताव</string>
     <string name="res_title_buy">खरीद का प्रस्ताव</string>
     <string name="res_title_job">काम का प्रस्ताव</string>
+    <string name="res_nights">रातें</string>
+    <string name="res_days">दिन</string>
+    <string name="res_hours">घंटे</string>
+    <string name="res_total">कुल (%1$s)</string>
 </resources>

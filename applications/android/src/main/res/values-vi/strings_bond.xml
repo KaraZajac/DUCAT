@@ -25,7 +25,7 @@
     <string name="bond_ask_arbiter">Nhờ trọng tài phân xử</string>
     <string name="res_tray">Đặt chỗ</string>
     <string name="res_title">Đề xuất đặt chỗ</string>
-    <string name="res_note">Tiền thuê và cả hai khoản cọc vào một ký quỹ. Bạn nạp tiền thuê + cọc của bạn; họ chấp nhận bằng cách nạp cọc của họ. Cọc về lại khi giải phóng.</string>
+    <string name="res_note">Số tiền và cả hai khoản cọc vào một ký quỹ. Bạn nạp số tiền + cọc của bạn; họ chấp nhận bằng cách nạp cọc của họ. Cọc về lại khi giải phóng.</string>
     <string name="res_about">Về %1$s. Số tiền và tiền cọc của cả hai bên vào chung một escrow, và tiền cọc quay về khi giải phóng.</string>
     <string name="res_rent">Tiền thuê (%1$s)</string>
     <string name="res_my_deposit">Cọc của bạn (%1$s)</string>
@@ -57,4 +57,8 @@
     <string name="res_title_hire">Đề xuất thuê</string>
     <string name="res_title_buy">Đề xuất mua</string>
     <string name="res_title_job">Đề xuất công việc</string>
+    <string name="res_nights">Đêm</string>
+    <string name="res_days">Ngày</string>
+    <string name="res_hours">Giờ</string>
+    <string name="res_total">Tổng (%1$s)</string>
 </resources>
