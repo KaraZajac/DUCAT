@@ -66,9 +66,30 @@ fun claimFailureRes(
  */
 private val NEEDS_CONFIRMATIONS = Regex("""needs (\d+) more confirmation""")
 
+/**
+ * Is this the chain saying "not yet" rather than something being wrong?
+ *
+ * Asked of the throwable, because the sentence is no longer in a language
+ * anyone can grep for. Two screens decided how alarming to look by testing the
+ * message for the word "confirmation" — correct while the message was raw
+ * English from a Rust `format!`, and wrong the moment it became a localised
+ * plural: in the other eighteen languages the word is not there, so the
+ * ordinary "wait six blocks" answer turned red and read as a failure.
+ */
+fun isChainWait(t: Throwable): Boolean =
+    NEEDS_CONFIRMATIONS.containsMatchIn(t.message.orEmpty())
+
 fun moneyFailure(context: android.content.Context, t: Throwable): String = when {
     org.ducatproject.ducat.Wallet.isNodeTrouble(t) ->
         context.getString(org.ducatproject.ducat.R.string.pay_node_no_answer)
+    // Short, with both numbers. Typed rather than matched on wording, because
+    // this one is thrown by our own Kotlin and there is no reason to write a
+    // sentence in order to read it back with a regex.
+    t is org.ducatproject.ducat.Wallet.NotEnough -> context.getString(
+        org.ducatproject.ducat.R.string.pay_not_enough,
+        org.ducatproject.ducat.Amounts.show(context, t.availablePxmr).primary,
+        org.ducatproject.ducat.Amounts.show(context, t.neededPxmr).primary,
+    )
     NEEDS_CONFIRMATIONS.find(t.message.orEmpty()) != null -> {
         val n = NEEDS_CONFIRMATIONS.find(t.message.orEmpty())!!.groupValues[1].toInt()
         context.resources.getQuantityString(

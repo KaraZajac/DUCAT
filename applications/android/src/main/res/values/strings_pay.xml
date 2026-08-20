@@ -59,4 +59,5 @@
     <string name="pay_fee_unknown">not known right now</string>
     <string name="pay_fee_unknown_confirm">The fee could not be estimated just now. The transaction pays whatever it costs when it is built.</string>
     <string name="pay_node_no_answer">The Monero node did not answer in time. Nothing was sent. Try again — the app will use a different node.</string>
+    <string name="pay_not_enough">Not enough unlocked — you have %1$s and this needs %2$s with the network fee.</string>
 </resources>

@@ -156,8 +156,18 @@ data class SendPlan(
     val notes: List<WalletEntry>,
     val amountPxmr: Long,
     val totalInPxmr: Long,
+    /** What the picked notes will cost to spend, as far as anyone can know yet. */
+    val feePxmr: Long = 0,
 ) {
-    val enough: Boolean get() = totalInPxmr >= amountPxmr
+    /**
+     * Enough to cover the amount *and* the fee.
+     *
+     * It used to mean the amount alone, which is a different question from the
+     * one every caller was asking. A wallet holding 0.002315 refused to send
+     * 0.000978 — plenty of money, one note picked, and that note was a hair
+     * too small once the fee landed on it.
+     */
+    val enough: Boolean get() = totalInPxmr >= amountPxmr + feePxmr
 }
 
 object Wallet {
@@ -319,23 +329,44 @@ object Wallet {
      * sweeping five small notes to pay for a coffee leaves you unable to buy
      * the next one.
      *
-     * The fee is not known until the transaction is built, so this deliberately
-     * does not pretend to: it reports what it selected and lets the build come
-     * back with the real number.
+     * The exact fee is not known until the transaction is built and signed, but
+     * it is *estimable*, and this used to decline to estimate it — stopping the
+     * moment the picked notes covered the amount, fee uncounted. The builder
+     * then added the fee, came up short, and returned NotEnoughFunds, which
+     * reached a person as "not enough in the notes you picked, once the fee is
+     * counted" while their balance sat there visibly covering it twice over.
+     * Nothing was wrong with the wallet. The picker just stopped one note early
+     * and there was no way to tell it to keep going.
+     *
+     * So: keep picking until the notes cover amount *plus* the fee for spending
+     * exactly this many of them. The fee grows with the input count, which is
+     * why it is re-asked as the set grows rather than priced once up front —
+     * a fee for one input does not pay for three. [feeFor] caches per count, so
+     * a two-note payment asks the node once per distinct size and no more.
+     *
+     * An estimate that fails returns zero, which lands this back on the old
+     * behaviour rather than refusing to send at all — an offline fee estimate
+     * should not become an offline wallet.
      */
-    fun plan(context: Context, amountPxmr: Long): SendPlan {
+    fun plan(context: Context, amountPxmr: Long, priority: Int = 1): SendPlan {
         val tip = WalletStore(context).tip()
         val usable = WalletStore(context).entries()
             .filter { !it.spent && it.blob.isNotEmpty() && tip > 0 && it.height + LOCK_BLOCKS <= tip }
             .sortedByDescending { it.amountPxmr }
         val picked = mutableListOf<WalletEntry>()
         var total = 0L
+        var fee = 0L
         for (n in usable) {
-            if (total >= amountPxmr) break
+            fee = feeFor(context, picked.size, priority)
+            if (total >= amountPxmr + fee) break
             picked += n
             total += n.amountPxmr
         }
-        return SendPlan(picked, amountPxmr, total)
+        // Priced for what was actually picked: the loop exits either on the
+        // break above (fee already current) or by running out of notes, and in
+        // the second case the last estimate was for one note fewer than we hold.
+        fee = feeFor(context, picked.size, priority)
+        return SendPlan(picked, amountPxmr, total, fee)
     }
 
     /**
@@ -387,26 +418,37 @@ object Wallet {
         val b = balances(context)
         if (b.spendableOutputs == 0) return 0
 
-        // Converged rather than assumed. The fee depends on how many notes the
-        // payment consumes, and the notes consumed depend on the amount — so
-        // pricing the worst case understates the maximum, sometimes badly for
-        // someone holding many small notes. Start from every note, see how many
-        // that amount actually needs, and price again.
-        var fee = feeFor(context, b.spendableOutputs, priority)
-        repeat(2) {
-            val candidate = (b.spendablePxmr - fee).coerceAtLeast(0)
-            val needed = plan(context, candidate).notes.size.coerceAtLeast(1)
-            val next = feeFor(context, needed, priority)
-            if (next == fee) return@repeat
-            fee = next
-        }
-        return (b.spendablePxmr - fee).coerceAtLeast(0)
+        // The maximum is not "everything minus the fee", because a note can be
+        // worth less than it costs to spend. Sweeping a dust note in alongside
+        // a whole monero *lowers* the amount that comes out the other side, so
+        // the honest maximum leaves it behind.
+        //
+        // This used to converge by asking plan() how many notes an amount
+        // needed — which worked only while plan() ignored the fee, and became a
+        // loop that could never move the moment it stopped. Priced directly
+        // instead: one estimate for a single input and one for every input give
+        // the marginal cost of a note, and a note earns its place by being
+        // worth more than that.
+        val all = b.spendableOutputs
+        val feeOne = feeFor(context, 1, priority)
+        val feeAll = feeFor(context, all, priority)
+        val perNote = if (all > 1) (feeAll - feeOne) / (all - 1) else 0
+
+        val tip = WalletStore(context).tip()
+        val worth = WalletStore(context).entries()
+            .filter { !it.spent && it.blob.isNotEmpty() && tip > 0 && it.height + LOCK_BLOCKS <= tip }
+            .sortedByDescending { it.amountPxmr }
+            .filter { it.amountPxmr > perNote }
+            .ifEmpty { return 0 }
+
+        return (worth.sumOf { it.amountPxmr } - feeFor(context, worth.size, priority))
+            .coerceAtLeast(0)
     }
 
     /** Cost of sending this amount, with what is left afterwards. */
     fun quote(context: Context, amountPxmr: Long, priority: Int = 1): Quote {
         val b = balances(context)
-        val plan = plan(context, amountPxmr)
+        val plan = plan(context, amountPxmr, priority)
         // Fee scales with input count, and the input count comes from the
         // amount — so a quote for an unaffordable amount still prices the notes
         // it would have needed rather than pretending one would do.
@@ -421,7 +463,10 @@ object Wallet {
             minutesToConfirm = minutesToConfirm(priority),
             totalPxmr = total,
             remainingPxmr = (b.spendablePxmr - total).coerceAtLeast(0),
-            affordable = total <= b.spendablePxmr,
+            // The same question the send will ask, asked here. A quote that
+            // says affordable and a send that refuses were two answers to one
+            // question, and the user got them in that order.
+            affordable = plan.enough,
         )
     }
 
@@ -443,6 +488,22 @@ object Wallet {
         ).any { why.contains(it) }
     }
 
+    /**
+     * There is not enough unlocked to cover the amount and its fee.
+     *
+     * Typed, because the sentence it replaces was English in an app that ships
+     * in nineteen languages, and because it was reporting the wrong number:
+     * "not enough unlocked — 0.002315 XMR available" on a screen sending
+     * 0.000978 reads as a bug in the wallet, and the reader is right that
+     * something is wrong, just not about what. The fee is the missing term, so
+     * both numbers travel and the screen can name it.
+     */
+    class NotEnough(val availablePxmr: Long, val neededPxmr: Long) :
+        IllegalStateException(
+            "not enough unlocked — ${formatXmr(availablePxmr)} of " +
+                "${formatXmr(neededPxmr)} XMR needed with the fee",
+        )
+
     /** Build, sign and broadcast. Blocking; call it off the main thread. */
     fun send(
         context: Context,
@@ -457,11 +518,9 @@ object Wallet {
         val store = WalletStore(context)
         val spend = store.spendKeyHex()
             ?: throw IllegalStateException("no wallet on this device")
-        val plan = plan(context, amountPxmr)
+        val plan = plan(context, amountPxmr, priority)
         if (!plan.enough) {
-            throw IllegalStateException(
-                "not enough unlocked — ${formatXmr(plan.totalInPxmr)} XMR available"
-            )
+            throw NotEnough(plan.totalInPxmr, amountPxmr + plan.feePxmr)
         }
         DucatLog.i(
             TAG,

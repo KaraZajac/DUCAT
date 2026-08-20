@@ -59,4 +59,5 @@
     <string name="pay_fee_unknown">inconnus pour l’instant</string>
     <string name="pay_fee_unknown_confirm">Les frais n’ont pas pu être estimés pour l’instant. La transaction paiera ce qu’elle coûte au moment de sa construction.</string>
     <string name="pay_node_no_answer">Le nœud Monero n’a pas répondu à temps. Rien n’a été envoyé. Réessayez : l’application prendra un autre nœud.</string>
+    <string name="pay_not_enough">Fonds débloqués insuffisants : vous avez %1$s et il en faut %2$s avec les frais de réseau.</string>
 </resources>

@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">بانتظار ضمانهم — تدفع بعد دخول ضمانهم.</string>
     <string name="res_escrow_ready">الضمان جاهز — المبلغ وكلا التأمينين يدخلان قبل التسليم.</string>
     <string name="res_pay_now">ادفع المبلغ ووديعتك (%1$s)</string>
-    <string name="res_paid_sent">أُرسل الإيجار والتأمين — جارٍ التأكيد على السلسلة…</string>
+    <string name="res_paid_sent">تم إرسال الدفعة والوديعة — جارٍ التأكيد على السلسلة…</string>
     <string name="res_waiting_payment">في انتظار أن يدفعوا المبلغ ووديعتهم…</string>
-    <string name="res_waiting_release">انتهى الإيجار — بانتظار أن يُفرج النزيل عن المال…</string>
+    <string name="res_waiting_release">انتهى — في انتظار أن يُفرجوا عن المال…</string>
     <string name="res_complete_ask">طلبوا التسوية.</string>
     <string name="res_split_stated">المقترح: %1$s تعود للدافع، و%2$s للطرف الآخر.</string>
     <string name="res_released">تمت التسوية</string>

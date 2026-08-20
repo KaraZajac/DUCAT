@@ -1812,7 +1812,7 @@ private fun RideBondBanner(contact: Contact) {
     val need = if (reservation) org.ducatproject.ducat.Ceremony.expectedTotalPxmr(ride) else fare
     val idHex = ride.optString("id")
     var busy by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<Trouble?>(null) }
     var countering by remember { mutableStateOf(false) }
     var counterXmr by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -1861,7 +1861,7 @@ private fun RideBondBanner(contact: Contact) {
         scope.launch {
             withContext(Dispatchers.IO) {
                 runCatching { org.ducatproject.ducat.Ceremony.fundRide(context, idHex) }
-            }.onFailure { error = moneyFailure(context, it) }
+            }.onFailure { error = trouble(context, it) }
             busy = false
         }
     }
@@ -1873,7 +1873,7 @@ private fun RideBondBanner(contact: Contact) {
                 runCatching {
                     org.ducatproject.ducat.Ceremony.proposeRideRelease(context, idHex)
                 }
-            }.onFailure { error = moneyFailure(context, it) }
+            }.onFailure { error = trouble(context, it) }
             busy = false
         }
     }
@@ -1884,7 +1884,7 @@ private fun RideBondBanner(contact: Contact) {
                 runCatching {
                     org.ducatproject.ducat.Ceremony.approveRideRelease(context, idHex)
                 }
-            }.onFailure { error = moneyFailure(context, it) }
+            }.onFailure { error = trouble(context, it) }
             busy = false
         }
     }
@@ -2008,7 +2008,8 @@ private fun RideBondBanner(contact: Contact) {
             onAction = step.onAction,
             onClose = { stepOpen = false },
             busy = busy,
-            error = error,
+            error = error?.text,
+            errorWaiting = error?.waiting == true,
             secondaryLabel = step.secondary,
             onSecondary = step.onSecondary,
         )
@@ -2068,7 +2069,7 @@ private fun RideBondBanner(contact: Contact) {
                                             org.ducatproject.ducat.Ceremony
                                                 .fundRide(context, idHex)
                                         }
-                                    }.onFailure { error = moneyFailure(context, it) }
+                                    }.onFailure { error = trouble(context, it) }
                                     busy = false
                                 }
                             }
@@ -2125,7 +2126,7 @@ private fun RideBondBanner(contact: Contact) {
                                             org.ducatproject.ducat.Ceremony.proposeRideSplit(
                                                 context, idHex, funded, toArbiter = true)
                                         }
-                                    }.onFailure { error = moneyFailure(context, it) }
+                                    }.onFailure { error = trouble(context, it) }
                                     busy = false
                                 }
                             },
@@ -2144,9 +2145,21 @@ private fun RideBondBanner(contact: Contact) {
                     ride.optString("hostFundTxid").isEmpty() -> {
                     BondLine(
                         spin = false,
-                        text = stringResource(
-                            if (reservation) R.string.res_proposed else R.string.bond_stake_asked,
-                        ),
+                        // With its argument. `res_proposed` gained one when the
+                        // host stopped being asked to accept a deal whose terms
+                        // were nowhere on screen — and this, the other
+                        // rendering of the same moment, kept calling it with
+                        // none, so it printed "They pay %1$s" at somebody. The
+                        // fourth time these two have disagreed, and the first
+                        // one I caused.
+                        text = if (reservation) {
+                            stringResource(
+                                R.string.res_proposed,
+                                Amounts.show(context, ride.optLong("farePxmr")).primary,
+                            )
+                        } else {
+                            stringResource(R.string.bond_stake_asked)
+                        },
                     )
                     Spacer(Modifier.height(6.dp))
                     val myShown = Amounts.show(
@@ -2163,7 +2176,7 @@ private fun RideBondBanner(contact: Contact) {
                                             org.ducatproject.ducat.Ceremony
                                                 .fundRide(context, idHex)
                                         }
-                                    }.onFailure { error = moneyFailure(context, it) }
+                                    }.onFailure { error = trouble(context, it) }
                                     busy = false
                                 }
                             }
@@ -2203,7 +2216,7 @@ private fun RideBondBanner(contact: Contact) {
                                         org.ducatproject.ducat.Ceremony
                                             .proposeRideRelease(context, idHex)
                                     }
-                                }.onFailure { error = moneyFailure(context, it) }
+                                }.onFailure { error = trouble(context, it) }
                                 busy = false
                             }
                         },
@@ -2237,7 +2250,7 @@ private fun RideBondBanner(contact: Contact) {
                                                         .PersonaStore(context).personaHex(),
                                                 )
                                             }
-                                        }.onFailure { error = moneyFailure(context, it) }
+                                        }.onFailure { error = trouble(context, it) }
                                         busy = false
                                     }
                                 },
@@ -2271,7 +2284,7 @@ private fun RideBondBanner(contact: Contact) {
                                             org.ducatproject.ducat.Ceremony.proposeRideSplit(
                                                 context, idHex, back, toArbiter = true)
                                         }
-                                    }.onFailure { error = moneyFailure(context, it) }
+                                    }.onFailure { error = trouble(context, it) }
                                     busy = false
                                 }
                             },
@@ -2313,7 +2326,7 @@ private fun RideBondBanner(contact: Contact) {
                                             org.ducatproject.ducat.Ceremony
                                                 .proposeRideRelease(context, idHex)
                                         }
-                                    }.onFailure { error = moneyFailure(context, it) }
+                                    }.onFailure { error = trouble(context, it) }
                                     busy = false
                                 }
                             },
@@ -2356,7 +2369,7 @@ private fun RideBondBanner(contact: Contact) {
                                         org.ducatproject.ducat.Ceremony
                                             .approveRideRelease(context, idHex)
                                     }
-                                }.onFailure { error = moneyFailure(context, it) }
+                                }.onFailure { error = trouble(context, it) }
                                 busy = false
                             }
                         },
@@ -2396,7 +2409,7 @@ private fun RideBondBanner(contact: Contact) {
                                                     org.ducatproject.ducat.Ceremony
                                                         .proposeRideSplit(context, idHex, pxmr)
                                                 }
-                                            }.onFailure { error = moneyFailure(context, it) }
+                                            }.onFailure { error = trouble(context, it) }
                                             busy = false
                                             countering = false
                                         }
@@ -2440,10 +2453,9 @@ private fun RideBondBanner(contact: Contact) {
                 // promptly — not a failure. It arrived here as red text
                 // reading "v1=the fare needs 2 more confirmation(s) before it
                 // can move", which tells a driver their money is stuck.
-                val waiting = it.contains("confirmation", ignoreCase = true)
                 Text(
-                    bridgeMessage(it),
-                    color = if (waiting) MaterialTheme.colorScheme.onSurfaceVariant
+                    bridgeMessage(it.text),
+                    color = if (it.waiting) MaterialTheme.colorScheme.onSurfaceVariant
                     else MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.labelSmall,
                 )
@@ -2451,6 +2463,18 @@ private fun RideBondBanner(contact: Contact) {
         }
     }
 }
+
+/**
+ * What went wrong, and whether it is worth alarming anyone about.
+ *
+ * One value rather than a string beside a boolean, because the two were going
+ * to be set in thirteen places and cleared in fourteen, and the first one that
+ * forgot would show a calm sentence in red — or worse, a real failure in grey.
+ */
+private data class Trouble(val text: String, val waiting: Boolean)
+
+private fun trouble(context: android.content.Context, t: Throwable) =
+    Trouble(moneyFailure(context, t), isChainWait(t))
 
 /**
  * A message from the bridge, without the bridge showing through.

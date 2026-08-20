@@ -59,4 +59,5 @@
     <string name="pay_fee_unknown">teraz nieznana</string>
     <string name="pay_fee_unknown_confirm">Nie udało się teraz oszacować opłaty. Transakcja zapłaci tyle, ile będzie kosztować przy tworzeniu.</string>
     <string name="pay_node_no_answer">Węzeł Monero nie odpowiedział na czas. Nic nie wysłano. Spróbuj ponownie — aplikacja użyje innego węzła.</string>
+    <string name="pay_not_enough">Za mało dostępnych środków — masz %1$s, a potrzeba %2$s wraz z opłatą sieciową.</string>
 </resources>

@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">相手の預り金を待っています。入ったらお支払いです。</string>
     <string name="res_escrow_ready">エスクロー準備完了 — 受け渡し前に代金と双方のデポジットが入ります。</string>
     <string name="res_pay_now">代金とデポジットを支払う（%1$s）</string>
-    <string name="res_paid_sent">家賃とデポジットを送金しました — チェーンで確認中…</string>
+    <string name="res_paid_sent">支払いとデポジットを送信しました — チェーン上で確認中…</string>
     <string name="res_waiting_payment">相手が代金とデポジットを支払うのを待っています…</string>
-    <string name="res_waiting_release">レンタル終了 — 借り手が資金を解放するのを待っています…</string>
+    <string name="res_waiting_release">完了 — 相手が送金を解放するのを待っています…</string>
     <string name="res_complete_ask">相手が精算を申し出ました。</string>
     <string name="res_split_stated">提案：%1$s は支払った側へ、%2$s は相手へ。</string>
     <string name="res_released">精算済み</string>

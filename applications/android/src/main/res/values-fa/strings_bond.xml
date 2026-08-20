@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">در انتظار ودیعهٔ آن‌ها — پس از واریز آن‌ها پرداخت می‌کنید.</string>
     <string name="res_escrow_ready">امانت آماده است — مبلغ و هر دو ودیعه پیش از تحویل وارد می‌شوند.</string>
     <string name="res_pay_now">پرداخت مبلغ و ودیعه‌ات (%1$s)</string>
-    <string name="res_paid_sent">اجاره و ودیعه فرستاده شد — در حال تأیید روی زنجیره…</string>
+    <string name="res_paid_sent">پرداخت و ودیعه ارسال شد — در حال تأیید روی زنجیره…</string>
     <string name="res_waiting_payment">در انتظار پرداخت مبلغ و ودیعهٔ آن‌ها…</string>
-    <string name="res_waiting_release">اجاره تمام شد — در انتظار آزادسازی پول توسط مستأجر…</string>
+    <string name="res_waiting_release">تمام شد — در انتظار آزادسازی پول توسط آن‌ها…</string>
     <string name="res_complete_ask">آن‌ها درخواست تسویه دادند.</string>
     <string name="res_split_stated">پیشنهاد: %1$s به پرداخت‌کننده برمی‌گردد، %2$s به طرف مقابل.</string>
     <string name="res_released">تسویه شد</string>

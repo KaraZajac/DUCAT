@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">Onların teminatı bekleniyor — onlarınki girince ödersin.</string>
     <string name="res_escrow_ready">Emanet hazır — tutar ve iki depozito teslimden önce girer.</string>
     <string name="res_pay_now">Tutarı ve depozitonu öde (%1$s)</string>
-    <string name="res_paid_sent">Kira ve depozito gönderildi — zincirde onaylanıyor…</string>
+    <string name="res_paid_sent">Ödeme ve depozito gönderildi — zincirde onaylanıyor…</string>
     <string name="res_waiting_payment">Tutarı ve depozitolarını yatırmalarını bekliyoruz…</string>
-    <string name="res_waiting_release">Kiralama bitti — kiracının parayı serbest bırakması bekleniyor…</string>
+    <string name="res_waiting_release">Bitti — parayı serbest bırakmalarını bekliyoruz…</string>
     <string name="res_complete_ask">Hesabı kapatmak istiyorlar.</string>
     <string name="res_split_stated">Öneri: %1$s ödeyene geri, %2$s karşı tarafa.</string>
     <string name="res_released">Kapatıldı</string>

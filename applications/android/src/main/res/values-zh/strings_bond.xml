@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">等待对方的押金 —— 对方押上后你再付。</string>
     <string name="res_escrow_ready">托管就绪 — 交付前存入价款和双方押金。</string>
     <string name="res_pay_now">支付价款和你的押金（%1$s）</string>
-    <string name="res_paid_sent">租金和押金已发送 — 正在链上确认…</string>
+    <string name="res_paid_sent">付款和押金已发送——正在链上确认…</string>
     <string name="res_waiting_payment">等待对方支付价款和押金…</string>
-    <string name="res_waiting_release">租期结束 — 等待租客释放款项…</string>
+    <string name="res_waiting_release">已完成——等待对方释放款项…</string>
     <string name="res_complete_ask">对方提出结清。</string>
     <string name="res_split_stated">提议：%1$s 退回付款方，%2$s 给对方。</string>
     <string name="res_released">已结清</string>

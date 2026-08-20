@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">Waiting for their stake — you pay once theirs is in.</string>
     <string name="res_escrow_ready">Escrow ready — the price and both deposits go in before the handover.</string>
     <string name="res_pay_now">Pay the price and your deposit (%1$s)</string>
-    <string name="res_paid_sent">Rent and deposit sent — confirming on chain…</string>
+    <string name="res_paid_sent">Payment and deposit sent — confirming on chain…</string>
     <string name="res_waiting_payment">Waiting for them to pay the price and their deposit…</string>
-    <string name="res_waiting_release">Rental complete — waiting for the guest to release the money…</string>
+    <string name="res_waiting_release">Finished — waiting for them to release the money…</string>
     <string name="res_complete_ask">They asked to settle up.</string>
     <string name="res_split_stated">Proposed: %1$s back to the payer, %2$s to the other side.</string>
     <string name="res_released">Settled</string>

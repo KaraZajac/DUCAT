@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">Menunggu jaminan mereka — Anda membayar setelah jaminan mereka masuk.</string>
     <string name="res_escrow_ready">Escrow siap — harga dan kedua deposit masuk sebelum serah terima.</string>
     <string name="res_pay_now">Bayar harga dan deposit Anda (%1$s)</string>
-    <string name="res_paid_sent">Sewa dan deposit terkirim — dikonfirmasi di rantai…</string>
+    <string name="res_paid_sent">Pembayaran dan deposit terkirim — mengonfirmasi di rantai…</string>
     <string name="res_waiting_payment">Menunggu mereka membayar harga dan deposit…</string>
-    <string name="res_waiting_release">Sewa selesai — menunggu penyewa melepas dananya…</string>
+    <string name="res_waiting_release">Selesai — menunggu mereka melepaskan uangnya…</string>
     <string name="res_complete_ask">Mereka minta diselesaikan.</string>
     <string name="res_split_stated">Usulan: %1$s kembali ke pembayar, %2$s ke pihak lain.</string>
     <string name="res_released">Selesai</string>

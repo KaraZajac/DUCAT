@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -142,8 +143,23 @@ private fun BookingsList() {
         return
     }
     val contacts = remember(version) { ContactStore(context).all() }
+    // Which rows may guess their subject from the thread.
+    //
+    // A booking struck before escrows carried their own label has to fall back
+    // to what the conversation is about — but the conversation moves on, so on
+    // the second deal with somebody the first one relabels itself with the
+    // second one's title. Two rows, different amounts, same name, one of them
+    // a lie. Rows are newest-first, so only the newest per person may guess:
+    // for that one the thread's subject is almost certainly still right, and
+    // for the older ones the honest answer is who it was with.
+    val mayGuess = remember(rows) {
+        val seen = HashSet<String>()
+        rows.map { o ->
+            org.ducatproject.ducat.Ceremony.otherPrincipal(o)?.let { seen.add(it) } ?: true
+        }
+    }
     LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-        items(rows) { o ->
+        itemsIndexed(rows) { index, o ->
             val peerHex = org.ducatproject.ducat.Ceremony.otherPrincipal(o)
             val peer = contacts.firstOrNull { it.personaHex == peerHex }
             val about = peerHex?.let { org.ducatproject.ducat.Enquiries.about(context, it) }
@@ -165,18 +181,16 @@ private fun BookingsList() {
                 },
             ) {
                 Column(Modifier.padding(14.dp)) {
-                    Text(
-                        // The escrow's own snapshot first: the thread's
-                        // subject follows the latest conversation, and a
-                        // booking settled last month should still say what it
-                        // was for. `about` remains the fallback for deals
-                        // struck before the snapshot existed.
-                        o.optString("aboutTitle").takeIf { it.isNotBlank() }
-                            ?: about?.title
-                            ?: peer?.displayName()
-                            ?: stringResource(R.string.shells_booking_someone),
-                        style = MaterialTheme.typography.titleSmall,
-                    )
+                    // The escrow's own snapshot first: the thread's subject
+                    // follows the latest conversation, and a booking settled
+                    // last month should still say what it was for. `about`
+                    // remains the fallback for deals struck before the
+                    // snapshot existed.
+                    val title = o.optString("aboutTitle").takeIf { it.isNotBlank() }
+                        ?: about?.title?.takeIf { mayGuess.getOrElse(index) { false } }
+                        ?: peer?.displayName()
+                        ?: stringResource(R.string.shells_booking_someone)
+                    Text(title, style = MaterialTheme.typography.titleSmall)
                     Spacer(Modifier.height(2.dp))
                     Text(
                         // The price, not the pot. `need` is what the escrow
@@ -191,12 +205,19 @@ private fun BookingsList() {
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        // Who it is with, when the title above was the listing.
-                        if (about != null && peer != null) {
-                            "${stringResource(state)} · ${peer.displayName()}"
-                        } else {
-                            stringResource(state)
-                        },
+                        // Who it is with — unless that is already the title.
+                        //
+                        // The condition used to be "there is an `about`",
+                        // which stopped tracking what the title actually said
+                        // the moment the title was allowed to decline the
+                        // `about` and fall back to the person. That row read
+                        // "Unnamed contact / USD 0.12 / Finished · Unnamed
+                        // contact": the same three words twice, once as the
+                        // subject and once as the company.
+                        peer?.displayName()
+                            ?.takeIf { it != title }
+                            ?.let { "${stringResource(state)} · $it" }
+                            ?: stringResource(state),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

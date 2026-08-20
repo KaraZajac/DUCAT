@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">En attente de leur dépôt — vous payez une fois le leur versé.</string>
     <string name="res_escrow_ready">Séquestre prêt — le prix et les deux cautions entrent avant la remise.</string>
     <string name="res_pay_now">Payer le prix et votre caution (%1$s)</string>
-    <string name="res_paid_sent">Loyer et caution envoyés — confirmation sur la chaîne…</string>
+    <string name="res_paid_sent">Paiement et caution envoyés — confirmation sur la chaîne…</string>
     <string name="res_waiting_payment">En attente du prix et de leur caution…</string>
-    <string name="res_waiting_release">Location terminée — en attente de la libération des fonds par le locataire…</string>
+    <string name="res_waiting_release">Terminé — en attente de la libération des fonds…</string>
     <string name="res_complete_ask">Ils demandent à solder.</string>
     <string name="res_split_stated">Proposition : %1$s rendus au payeur, %2$s à l\'autre partie.</string>
     <string name="res_released">Soldé</string>

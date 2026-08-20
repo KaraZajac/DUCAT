@@ -495,6 +495,8 @@ fun EscrowStep(
     onClose: () -> Unit,
     busy: Boolean = false,
     error: String? = null,
+    /** True when the error is the chain saying "not yet". */
+    errorWaiting: Boolean = false,
     secondaryLabel: String? = null,
     onSecondary: (() -> Unit)? = null,
 ) {
@@ -557,7 +559,10 @@ fun EscrowStep(
                     Spacer(Modifier.height(12.dp))
                     Text(
                         bridgeMessage(it),
-                        color = if (it.contains("confirmation", ignoreCase = true)) {
+                        // Told, not guessed from the wording — the sentence
+                        // is a localised plural now and only English has the
+                        // word this used to look for.
+                        color = if (errorWaiting) {
                             MaterialTheme.colorScheme.onSurfaceVariant
                         } else {
                             MaterialTheme.colorScheme.error
@@ -574,11 +579,20 @@ fun EscrowStep(
                     modifier = Modifier.fillMaxWidth()
                         .padding(horizontal = 24.dp).height(52.dp),
                 ) {
+                    // Spinner *and* label. A disabled Button paints its
+                    // content at 38% alpha, so a lone indicator on the greyed
+                    // container came out as a barely-visible dot on a blank
+                    // button — the one moment the screen is asking for
+                    // patience is the moment it stopped saying for what.
                     if (busy) {
-                        CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                    } else {
-                        Text(action, style = MaterialTheme.typography.titleMedium)
+                        CircularProgressIndicator(
+                            Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.width(10.dp))
                     }
+                    Text(action, style = MaterialTheme.typography.titleMedium)
                 }
                 if (secondaryLabel != null && onSecondary != null) {
                     Spacer(Modifier.height(8.dp))

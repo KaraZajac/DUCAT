@@ -59,4 +59,5 @@
     <string name="pay_fee_unknown">belum diketahui</string>
     <string name="pay_fee_unknown_confirm">Biaya belum bisa diperkirakan saat ini. Transaksi membayar sebesar biayanya saat dibuat.</string>
     <string name="pay_node_no_answer">Node Monero tidak menjawab tepat waktu. Tidak ada yang terkirim. Coba lagi — aplikasi akan memakai node lain.</string>
+    <string name="pay_not_enough">Saldo terbuka tidak cukup — kamu punya %1$s dan ini butuh %2$s dengan biaya jaringan.</string>
 </resources>

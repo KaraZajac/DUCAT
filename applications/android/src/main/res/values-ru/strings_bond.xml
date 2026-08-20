@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">Ждём их залог — вы платите, когда он внесён.</string>
     <string name="res_escrow_ready">Эскроу готово — сумма и оба залога вносятся до передачи.</string>
     <string name="res_pay_now">Внести сумму и свой залог (%1$s)</string>
-    <string name="res_paid_sent">Аренда и залог отправлены — подтверждение в сети…</string>
+    <string name="res_paid_sent">Платёж и залог отправлены — подтверждение в сети…</string>
     <string name="res_waiting_payment">Ждём, пока они внесут сумму и свой залог…</string>
-    <string name="res_waiting_release">Аренда завершена — ожидание, пока арендатор освободит деньги…</string>
+    <string name="res_waiting_release">Готово — ждём, когда они разблокируют деньги…</string>
     <string name="res_complete_ask">Они предложили рассчитаться.</string>
     <string name="res_split_stated">Предложение: %1$s обратно плательщику, %2$s другой стороне.</string>
     <string name="res_released">Рассчитано</string>

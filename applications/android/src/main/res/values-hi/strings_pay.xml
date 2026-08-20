@@ -59,4 +59,5 @@
     <string name="pay_fee_unknown">अभी पता नहीं</string>
     <string name="pay_fee_unknown_confirm">अभी शुल्क का अनुमान नहीं लगाया जा सका। लेनदेन बनते समय जो लगेगा, वही चुकाएगा।</string>
     <string name="pay_node_no_answer">Monero नोड ने समय पर जवाब नहीं दिया। कुछ भी नहीं भेजा गया। फिर कोशिश करें — ऐप दूसरा नोड इस्तेमाल करेगा।</string>
+    <string name="pay_not_enough">पर्याप्त उपलब्ध राशि नहीं — आपके पास %1$s है और नेटवर्क शुल्क के साथ %2$s चाहिए।</string>
 </resources>

@@ -59,4 +59,5 @@
     <string name="pay_fee_unknown">şu an bilinmiyor</string>
     <string name="pay_fee_unknown_confirm">Ücret şu an tahmin edilemedi. İşlem, oluşturulurken ne tutuyorsa onu öder.</string>
     <string name="pay_node_no_answer">Monero düğümü zamanında yanıt vermedi. Hiçbir şey gönderilmedi. Tekrar dene — uygulama başka bir düğüm kullanacak.</string>
+    <string name="pay_not_enough">Yeterli kullanılabilir bakiye yok — %1$s var, ağ ücretiyle birlikte %2$s gerekiyor.</string>
 </resources>

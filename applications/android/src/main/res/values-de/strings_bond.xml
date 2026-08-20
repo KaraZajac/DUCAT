@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">Warte auf ihre Einlage — du zahlst, sobald ihre da ist.</string>
     <string name="res_escrow_ready">Treuhand bereit — Preis und beide Kautionen gehen vor der Übergabe hinein.</string>
     <string name="res_pay_now">Preis und deine Kaution zahlen (%1$s)</string>
-    <string name="res_paid_sent">Miete und Kaution gesendet — wird auf der Kette bestätigt…</string>
+    <string name="res_paid_sent">Zahlung und Kaution gesendet – wird auf der Blockchain bestätigt…</string>
     <string name="res_waiting_payment">Warte darauf, dass sie den Preis und ihre Kaution zahlen…</string>
-    <string name="res_waiting_release">Miete beendet — warte darauf, dass der Gast das Geld freigibt…</string>
+    <string name="res_waiting_release">Fertig – wartet darauf, dass sie das Geld freigeben…</string>
     <string name="res_complete_ask">Sie möchten abrechnen.</string>
     <string name="res_split_stated">Vorschlag: %1$s zurück an den Zahler, %2$s an die andere Seite.</string>
     <string name="res_released">Abgerechnet</string>

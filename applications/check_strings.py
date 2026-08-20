@@ -224,6 +224,38 @@ def main() -> int:
         print(f"  ! values/{name}: nothing references it")
         problems += 1
 
+    # --- strings called without the arguments they take --------------------
+    #
+    # A string with a `%1$s` in it and no argument at the call site does not
+    # fail to build, does not warn, and does not throw. It renders the
+    # placeholder, on screen, to a person: "They pay %1$s — funding your
+    # deposit accepts it." That shipped for exactly as long as it took to look
+    # at the screen, because the *other* rendering of the same moment passed
+    # its argument correctly and looked fine.
+    #
+    # Only the no-argument form is checked. Getting the count wrong is a
+    # different mistake and a rarer one; getting it to zero is what a
+    # find-and-replace does when a string grows an argument later.
+    takes_args = {}
+    for path in base_files:
+        with open(path, encoding="utf-8") as fh:
+            for m in re.finditer(r'<string name="([^"]+)">(.*?)</string>', fh.read(), re.S):
+                if re.search(r"%\d\$", m.group(2)):
+                    takes_args[m.group(1)] = True
+    bare = re.compile(r"(?:stringResource|getString)\(\s*R\.string\.(\w+)\s*\)")
+    for dirpath, _, filenames in os.walk(os.path.join(app, "android/src/main/java")):
+        for fn in filenames:
+            if not fn.endswith(".kt"):
+                continue
+            full = os.path.join(dirpath, fn)
+            with open(full, encoding="utf-8") as fh:
+                text = fh.read()
+            for m in bare.finditer(text):
+                if m.group(1) in takes_args:
+                    line = text[: m.start()].count("\n") + 1
+                    print(f"  ! {fn}:{line}: {m.group(1)} takes an argument and got none")
+                    problems += 1
+
     counted = len(base_files)
     if problems:
         print(f"strings — {problems} problem(s) across {counted} files, {len(locales)} languages")

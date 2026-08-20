@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">Wachten op hun borg — jij betaalt zodra die van hen binnen is.</string>
     <string name="res_escrow_ready">Escrow klaar — de prijs en beide borgen gaan erin vóór de overdracht.</string>
     <string name="res_pay_now">Prijs en jouw borg betalen (%1$s)</string>
-    <string name="res_paid_sent">Huur en borg verstuurd — bevestigen op de keten…</string>
+    <string name="res_paid_sent">Betaling en borg verzonden — bevestigen op de keten…</string>
     <string name="res_waiting_payment">Wachten tot zij de prijs en hun borg betalen…</string>
-    <string name="res_waiting_release">Verhuur afgerond — wachten tot de huurder het geld vrijgeeft…</string>
+    <string name="res_waiting_release">Klaar — wachten tot zij het geld vrijgeven…</string>
     <string name="res_complete_ask">Zij willen afrekenen.</string>
     <string name="res_split_stated">Voorstel: %1$s terug naar de betaler, %2$s naar de andere partij.</string>
     <string name="res_released">Afgerekend</string>

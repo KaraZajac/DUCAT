@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">Esperando su garantía: pagas cuando la suya esté puesta.</string>
     <string name="res_escrow_ready">Depósito en garantía listo — el precio y ambos depósitos entran antes de la entrega.</string>
     <string name="res_pay_now">Pagar el precio y tu depósito (%1$s)</string>
-    <string name="res_paid_sent">Alquiler y fianza enviados — confirmando en la cadena…</string>
+    <string name="res_paid_sent">Pago y depósito enviados: confirmando en la cadena…</string>
     <string name="res_waiting_payment">Esperando a que paguen el precio y su depósito…</string>
-    <string name="res_waiting_release">Alquiler terminado — esperando a que el huésped libere el dinero…</string>
+    <string name="res_waiting_release">Terminado: esperando a que liberen el dinero…</string>
     <string name="res_complete_ask">Han pedido liquidar.</string>
     <string name="res_split_stated">Propuesto: %1$s de vuelta al pagador, %2$s a la otra parte.</string>
     <string name="res_released">Liquidado</string>

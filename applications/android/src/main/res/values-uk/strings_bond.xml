@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">Чекаємо на їхню заставу — ви платите, щойно вона надійде.</string>
     <string name="res_escrow_ready">Ескроу готове — сума й обидві застави вносяться до передачі.</string>
     <string name="res_pay_now">Внести суму й свою заставу (%1$s)</string>
-    <string name="res_paid_sent">Оренду й заставу надіслано — підтвердження в мережі…</string>
+    <string name="res_paid_sent">Платіж і застава надіслані — підтвердження в мережі…</string>
     <string name="res_waiting_payment">Чекаємо, поки вони внесуть суму й свою заставу…</string>
-    <string name="res_waiting_release">Оренду завершено — очікування, доки орендар звільнить кошти…</string>
+    <string name="res_waiting_release">Готово — чекаємо, поки вони розблокують гроші…</string>
     <string name="res_complete_ask">Вони запропонували розрахуватися.</string>
     <string name="res_split_stated">Пропозиція: %1$s назад платнику, %2$s іншій стороні.</string>
     <string name="res_released">Розраховано</string>

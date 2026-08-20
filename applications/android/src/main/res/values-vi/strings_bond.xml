@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">Đang chờ tiền cọc của họ — bạn trả sau khi họ đặt cọc.</string>
     <string name="res_escrow_ready">Ký quỹ sẵn sàng — số tiền và cả hai khoản cọc vào trước khi giao.</string>
     <string name="res_pay_now">Trả số tiền và cọc của bạn (%1$s)</string>
-    <string name="res_paid_sent">Đã gửi tiền thuê và cọc — đang xác nhận trên chuỗi…</string>
+    <string name="res_paid_sent">Đã gửi tiền thanh toán và tiền cọc — đang xác nhận trên chuỗi…</string>
     <string name="res_waiting_payment">Đang chờ họ trả số tiền và cọc…</string>
-    <string name="res_waiting_release">Đã xong kỳ thuê — đang chờ người thuê giải phóng tiền…</string>
+    <string name="res_waiting_release">Xong — đang chờ họ giải phóng tiền…</string>
     <string name="res_complete_ask">Họ đề nghị tất toán.</string>
     <string name="res_split_stated">Đề xuất: %1$s trả lại người trả, %2$s cho bên kia.</string>
     <string name="res_released">Đã tất toán</string>

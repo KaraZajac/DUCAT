@@ -59,4 +59,5 @@
     <string name="pay_fee_unknown">gerade nicht bekannt</string>
     <string name="pay_fee_unknown_confirm">Die Gebühr konnte gerade nicht geschätzt werden. Die Transaktion zahlt, was sie beim Bauen kostet.</string>
     <string name="pay_node_no_answer">Der Monero-Knoten hat nicht rechtzeitig geantwortet. Es wurde nichts gesendet. Versuche es erneut — die App nimmt einen anderen Knoten.</string>
+    <string name="pay_not_enough">Nicht genug verfügbar – du hast %1$s, nötig sind %2$s inklusive Netzwerkgebühr.</string>
 </resources>

@@ -59,4 +59,5 @@
     <string name="pay_fee_unknown">いまは分かりません</string>
     <string name="pay_fee_unknown_confirm">いま手数料を見積もれませんでした。取引は組み立て時にかかる分を支払います。</string>
     <string name="pay_node_no_answer">Monero ノードが時間内に応答しませんでした。送金は行われていません。もう一度お試しください。別のノードを使います。</string>
+    <string name="pay_not_enough">利用可能な残高が足りません — %1$s あり、ネットワーク手数料込みで %2$s 必要です。</string>
 </resources>

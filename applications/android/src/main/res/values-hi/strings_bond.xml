@@ -45,9 +45,9 @@
     <string name="bond_await_their_stake">उनकी जमानत राशि का इंतज़ार — उनकी आते ही आप भुगतान करेंगे।</string>
     <string name="res_escrow_ready">एस्क्रो तैयार — सौंपने से पहले रकम और दोनों जमा अंदर जाते हैं।</string>
     <string name="res_pay_now">रकम और अपनी जमा दें (%1$s)</string>
-    <string name="res_paid_sent">किराया और जमा भेजे गए — चेन पर पुष्टि हो रही है…</string>
+    <string name="res_paid_sent">भुगतान और जमा भेजा गया — चेन पर पुष्टि हो रही है…</string>
     <string name="res_waiting_payment">उनके रकम और जमा भरने की प्रतीक्षा…</string>
-    <string name="res_waiting_release">किराया पूरा — किरायेदार द्वारा पैसे छोड़ने का इंतज़ार…</string>
+    <string name="res_waiting_release">पूरा हुआ — उनके पैसे जारी करने की प्रतीक्षा…</string>
     <string name="res_complete_ask">उन्होंने हिसाब पूरा करने को कहा।</string>
     <string name="res_split_stated">प्रस्ताव: %1$s भुगतानकर्ता को वापस, %2$s दूसरे पक्ष को।</string>
     <string name="res_released">निपट गया</string>
