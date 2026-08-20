@@ -874,6 +874,37 @@ object Ceremony {
     fun isFinished(o: JSONObject): Boolean =
         o.optString("stage") in setOf("released", "release_cosigned", "aborted")
 
+    /** How long a proposal nobody answered stays "probably just slow". */
+    private const val UNANSWERED_MS = 30L * 60 * 1000
+
+    /**
+     * True when this escrow has nothing at stake and nobody ever answered it.
+     *
+     * "aborted" is read in three places in this app and written in none: there
+     * is no decline, no cancel, and no expiry, so a proposal the other side
+     * simply never accepts stays unfinished for ever. That would be untidy on
+     * its own; what makes it a trap is that the button offering to propose the
+     * *next* deal is hidden while a deal is live. Ask a neighbour to rent you
+     * a kayak, have them never answer, and neither of you can ever propose
+     * anything to the other again — on the screen whose whole purpose is
+     * agreeing the next one. The last fix to that sentence caught the settled
+     * case and left this one.
+     *
+     * Nothing here abandons an escrow with money in it. The test is this
+     * device's own scan of the escrow address (§17.5) plus the two txids it
+     * would have written itself, so an escrow either side has funded is never
+     * stale, and the way out of one of those is the release or the arbiter —
+     * not a screen quietly deciding it is over.
+     */
+    fun isStale(o: JSONObject): Boolean {
+        if (isFinished(o)) return false
+        if (o.optLong("fundedPxmr") > 0) return false
+        if (o.optString("fundTxid").isNotEmpty()) return false
+        if (o.optString("hostFundTxid").isNotEmpty()) return false
+        val created = o.optLong("created").takeIf { it > 0 } ?: return false
+        return System.currentTimeMillis() - created > UNANSWERED_MS
+    }
+
     fun rideWith(context: Context, peerHex: String): JSONObject? =
         all(context)
             .filter { it.optInt("kind") != KIND_BOND && !isArbiter(it) }

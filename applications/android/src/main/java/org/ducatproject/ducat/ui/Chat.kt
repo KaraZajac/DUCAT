@@ -1772,9 +1772,18 @@ private fun EnquiryLine(
             // two people finished their first deal the button to start another
             // one disappeared for good. One deal per pair, for ever, on the
             // screen whose whole purpose is agreeing the next one.
+            //
+            // `isStale` closes the other half of that. Finished was only one
+            // way for a deal to stop being live; the other is a proposal the
+            // far side never answered, which nothing in this app can abort,
+            // decline, or expire — so it stayed "live" for ever and hid this
+            // button just as thoroughly.
             val bonded = remember(version, contact.personaHex) {
                 org.ducatproject.ducat.Ceremony.rideWith(context, contact.personaHex)
-                    ?.let { !org.ducatproject.ducat.Ceremony.isFinished(it) } == true
+                    ?.let {
+                        !org.ducatproject.ducat.Ceremony.isFinished(it) &&
+                            !org.ducatproject.ducat.Ceremony.isStale(it)
+                    } == true
             }
             if (!bonded) {
                 TextButton(
