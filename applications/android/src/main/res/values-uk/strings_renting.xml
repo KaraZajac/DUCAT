@@ -41,7 +41,6 @@
     <string name="rent_need_location">Чекаю на визначення місця — оголошенню потрібен приблизний район, на якому воно стоятиме.</string>
     <string name="rent_find_a_place">Знайти житло</string>
     <string name="rent_find_a_car">Знайти авто</string>
-    <string name="rent_search_title">Оренда поруч</string>
     <string name="rent_searching">Дивлюся дошки навколо вас…</string>
     <string name="rent_none_found">Тут поки нічого немає.</string>
     <string name="rent_search_needs_location">Оголошення висять на дошках, поділених за районами, тож DUCAT потрібно приблизно знати, де ви, щоб зрозуміти, які дошки читати. Це лишається на вашому телефоні й нікуди не надсилається.</string>

@@ -3,7 +3,6 @@
     <!-- Rider: the Home-screen hail card -->
     <string name="hail_card_title">차량 호출</string>
     <string name="hail_card_standing">호출 게시 중 — 기사를 기다려요</string>
-    <string name="hail_card_pitch">목적지를 승강장에 올리면 기사들이 봐요.</string>
     <string name="hail_standing_at">%1$s에 게시 중</string>
     <string name="hail_stands_for">%1$s 더 유지됩니다</string>
     <string name="hail_take_it_down">내리기</string>
@@ -96,7 +95,6 @@
     <string name="hail_vs_competitors">차량공유 약 %1$s %2$.0f · 택시 약 %1$s %3$.0f — 기사가 전부 가져가요 (차량공유는 기사에게 약 %1$s %4$.0f를 줘요)</string>
     <string name="hail_your_offer">내 제안 (%1$s)</string>
     <string name="hail_offer_invalid">제안은 0보다 큰 숫자여야 해요 — 비워 두면 견적을 요청해요.</string>
-    <string name="hail_shards_full">이곳 승강장 샤드가 모두 찼어요 — 잠시 후 다시 시도하세요</string>
     <string name="hail_post_failed">호출을 올리지 못했어요</string>
     <string name="hail_osm_privacy">검색·경로·지도는 OpenStreetMap 서버를 써요 — DUCAT이 위치를 기기 밖으로 보내는 유일한 곳이에요. 기사에게는 약 %1$s 구역만 보여요.</string>
     <string name="hail_post_button">호출 🚕</string>

@@ -3,7 +3,6 @@
     <!-- Rider: the Home-screen hail card -->
     <string name="hail_card_title">タクシーを呼ぶ</string>
     <string name="hail_card_standing">呼び出しを掲示中 — ドライバー待ち</string>
-    <string name="hail_card_pitch">ドライバーが見張っている乗り場に、行き先を掲示します。</string>
     <string name="hail_standing_at">%1$sに掲示中</string>
     <string name="hail_stands_for">あと %1$s 有効です</string>
     <string name="hail_take_it_down">取り下げる</string>
@@ -96,7 +95,6 @@
     <string name="hail_vs_competitors">ライドシェア 約%1$s %2$.0f · タクシー 約%1$s %3$.0f — ドライバーが全額受け取ります（ライドシェアがドライバーに払うのは約%1$s %4$.0f）</string>
     <string name="hail_your_offer">あなたのオファー（%1$s）</string>
     <string name="hail_offer_invalid">オファーはゼロより大きい数字にしてください — 空欄にすると見積もりを依頼します。</string>
-    <string name="hail_shards_full">この乗り場はどのシャードも満杯です — 少ししてからもう一度お試しください</string>
     <string name="hail_post_failed">呼び出しを掲示できませんでした</string>
     <string name="hail_osm_privacy">検索・経路・地図はOpenStreetMapのサーバーを使います — DUCATが位置情報を端末の外へ送る唯一の場所です。ドライバーに見えるのは約%1$s四方のエリアだけです。</string>
     <string name="hail_post_button">呼ぶ 🚕</string>

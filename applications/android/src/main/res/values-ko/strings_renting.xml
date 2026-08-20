@@ -41,7 +41,6 @@
     <string name="rent_need_location">위치를 기다리는 중 — 게시글이 자리할 대략적인 지역이 필요합니다.</string>
     <string name="rent_find_a_place">숙소 찾기</string>
     <string name="rent_find_a_car">차 찾기</string>
-    <string name="rent_search_title">근처 대여</string>
     <string name="rent_searching">주변 게시판을 보는 중…</string>
     <string name="rent_none_found">이 근처에는 아직 아무것도 없습니다.</string>
     <string name="rent_search_needs_location">매물은 지역별 게시판에 올라가기 때문에, 어느 게시판을 읽을지 알려면 DUCAT에 대략적인 위치가 필요합니다. 이 정보는 휴대폰 안에서만 쓰이고 어디로도 전송되지 않습니다.</string>

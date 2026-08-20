@@ -13,12 +13,10 @@
     <string name="bond_ask_again_note">Надішле запит ще раз — на випадок, якщо перший не дійшов.</string>
     <string name="bond_waiting_release">Поїздку завершено — чекаємо, поки пасажир відпустить оплату…</string>
     <string name="bond_ride_complete_ask">Водій позначив поїздку завершеною.</string>
-    <string name="bond_release_fare">Відпустити оплату (%1$s)</string>
     <string name="bond_released">Оплату відпущено</string>
     <string name="bond_released_amount">%1$s вам</string>
     <string name="profile_arbiter">Арбітр ескроу</string>
     <string name="profile_arbiter_note">Тримає вирішальний ключ ваших поїздок з ескроу. Долучається, лише якщо щось піде не так.</string>
-    <string name="bond_margin_back">Ваша застава (%1$s) повернеться до вас.</string>
     <string name="bond_split_stated">Пропозиція: %1$s пасажиру, %2$s водієві.</string>
     <string name="bond_sign_split">Підписати цей розподіл</string>
     <string name="bond_propose_split">Запропонувати інший розподіл</string>

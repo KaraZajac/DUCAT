@@ -41,7 +41,6 @@
     <string name="rent_need_location">Đang chờ vị trí — một tin đăng cần một khu vực đại khái để đứng.</string>
     <string name="rent_find_a_place">Tìm chỗ ở</string>
     <string name="rent_find_a_car">Tìm xe</string>
-    <string name="rent_search_title">Cho thuê gần đây</string>
     <string name="rent_searching">Đang xem các bảng quanh bạn…</string>
     <string name="rent_none_found">Quanh đây chưa có gì.</string>
     <string name="rent_search_needs_location">Tin đăng nằm trên các bảng chia theo khu vực, nên DUCAT cần biết đại khái bạn đang ở đâu để biết đọc bảng nào. Thông tin này dùng ngay trên máy bạn và không được gửi đi đâu cả.</string>

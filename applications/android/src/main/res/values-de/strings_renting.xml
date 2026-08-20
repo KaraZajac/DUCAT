@@ -41,7 +41,6 @@
     <string name="rent_need_location">Warte auf die Position — ein Eintrag braucht eine ungefähre Gegend, auf der er sitzt.</string>
     <string name="rent_find_a_place">Unterkunft finden</string>
     <string name="rent_find_a_car">Auto finden</string>
-    <string name="rent_search_title">Mieten in der Nähe</string>
     <string name="rent_searching">Sehe die Bretter um dich herum durch…</string>
     <string name="rent_none_found">Hier ist noch nichts eingestellt.</string>
     <string name="rent_search_needs_location">Anzeigen liegen auf Tafeln, die nach Gebiet geordnet sind. DUCAT braucht daher ungefähr deinen Standort, um die richtigen zu lesen. Er bleibt auf deinem Telefon und wird nirgendwohin gesendet.</string>

@@ -24,6 +24,4 @@
     <string name="main_card_link_not_ready">Ich karta nie jest jeszcze czytelna. Jeśli są przy tobie, poczekaj chwilę i zeskanuj ponownie — w przeciwnym razie poproś, by otworzyli DUCAT.</string>
     <string name="main_card_link_body_unnamed">Ten link otwiera wizytówkę bez nazwy. Dodać? Potem będziecie mogli pisać do siebie i płacić sobie.</string>
     <string name="main_card_link_name">Nazwij ich</string>
-    <string name="home_tile_rent_car">Wynajmij auto</string>
-    <string name="home_tile_rent_place">Wynajmij lokal</string>
 </resources>

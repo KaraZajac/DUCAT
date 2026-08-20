@@ -3,7 +3,6 @@
     <!-- Rider: the Home-screen hail card -->
     <string name="hail_card_title">เรียกรถ</string>
     <string name="hail_card_standing">การเรียกรถยังค้างอยู่ — กำลังรอคนขับ</string>
-    <string name="hail_card_pitch">โพสต์จุดหมายของคุณไปยังจุดจอดที่คนขับเฝ้าดูอยู่</string>
     <string name="hail_standing_at">ค้างอยู่ที่ %1$s</string>
     <string name="hail_stands_for">ยังอยู่อีก %1$s</string>
     <string name="hail_take_it_down">เอาลง</string>
@@ -96,7 +95,6 @@
     <string name="hail_vs_competitors">แอปเรียกรถราว %1$s %2$.0f · แท็กซี่ราว %1$s %3$.0f — คนขับของคุณได้ทั้งหมด (แอปเรียกรถจ่ายให้คนขับราว %1$s %4$.0f)</string>
     <string name="hail_your_offer">ข้อเสนอของคุณ (%1$s)</string>
     <string name="hail_offer_invalid">ข้อเสนอต้องเป็นตัวเลขที่มากกว่าศูนย์ — หรือเว้นว่างไว้เพื่อขอราคา</string>
-    <string name="hail_shards_full">ทุกชาร์ดของจุดจอดแถวนี้เต็ม — ลองใหม่อีกสักครู่</string>
     <string name="hail_post_failed">โพสต์การเรียกรถไม่สำเร็จ</string>
     <string name="hail_osm_privacy">การค้นหา เส้นทาง และแผนที่ใช้เซิร์ฟเวอร์ของ OpenStreetMap — จุดเดียวที่ DUCAT ส่งตำแหน่งออกนอกเครื่อง คนขับเห็นเพียงพื้นที่ราว %1$s</string>
     <string name="hail_post_button">เรียกรถ 🚕</string>

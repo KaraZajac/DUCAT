@@ -24,6 +24,4 @@
     <string name="main_card_link_not_ready">Kartları henüz okunabilir değil. Yanındaysalar biraz bekleyip yeniden tara — değilse DUCAT’ı açmalarını iste.</string>
     <string name="main_card_link_body_unnamed">Bu bağlantı isimsiz bir kişi kartı açıyor. Eklensin mi? Sonra birbirinize yazıp ödeme yapabilirsiniz.</string>
     <string name="main_card_link_name">Onlara ver</string>
-    <string name="home_tile_rent_car">Araba kirala</string>
-    <string name="home_tile_rent_place">Yer kirala</string>
 </resources>

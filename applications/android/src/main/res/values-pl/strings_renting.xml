@@ -41,7 +41,6 @@
     <string name="rent_need_location">Czekam na lokalizację — ogłoszenie potrzebuje przybliżonej okolicy, na której stanie.</string>
     <string name="rent_find_a_place">Znajdź lokal</string>
     <string name="rent_find_a_car">Znajdź auto</string>
-    <string name="rent_search_title">Wynajem w pobliżu</string>
     <string name="rent_searching">Przeglądam tablice wokół ciebie…</string>
     <string name="rent_none_found">Tutaj nic jeszcze nie ma.</string>
     <string name="rent_search_needs_location">Ogłoszenia wiszą na tablicach podzielonych według okolicy, więc DUCAT musi z grubsza wiedzieć, gdzie jesteś, żeby wiedzieć, które czytać. Zostaje to na twoim telefonie i nigdzie nie jest wysyłane.</string>

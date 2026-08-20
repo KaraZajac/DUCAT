@@ -41,7 +41,6 @@
     <string name="rent_need_location">À espera da localização — um anúncio precisa de uma zona aproximada onde assentar.</string>
     <string name="rent_find_a_place">Encontrar alojamento</string>
     <string name="rent_find_a_car">Encontrar carro</string>
-    <string name="rent_search_title">Alugueres por perto</string>
     <string name="rent_searching">A ver os quadros à sua volta…</string>
     <string name="rent_none_found">Ainda não há nada por aqui.</string>
     <string name="rent_search_needs_location">Os anúncios ficam em quadros organizados por área, então o DUCAT precisa saber mais ou menos onde você está para ler os certos. Fica no seu telefone e não é enviado a lugar nenhum.</string>

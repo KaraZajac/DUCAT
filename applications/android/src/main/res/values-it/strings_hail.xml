@@ -3,7 +3,6 @@
     <!-- Passeggero: la scheda di chiamata nella Home -->
     <string name="hail_card_title">Chiama una corsa</string>
     <string name="hail_card_standing">Chiamata in piedi — in attesa di un autista</string>
-    <string name="hail_card_pitch">Pubblica dove stai andando su un posteggio sorvegliato dagli autisti.</string>
     <string name="hail_standing_at">In piedi su %1$s</string>
     <string name="hail_stands_for">Resta in piedi ancora %1$s</string>
     <string name="hail_take_it_down">Ritirala</string>
@@ -96,7 +95,6 @@
     <string name="hail_vs_competitors">rideshare ~%1$s %2$.0f · taxi ~%1$s %3$.0f — il tuo autista tiene tutto (un\'app di rideshare al suo paga ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">La tua offerta (%1$s)</string>
     <string name="hail_offer_invalid">L\'offerta deve essere un numero sopra lo zero — o lasciala vuota per chiedere un prezzo.</string>
-    <string name="hail_shards_full">qui ogni shard del posteggio è pieno — riprova tra poco</string>
     <string name="hail_post_failed">impossibile pubblicare la chiamata</string>
     <string name="hail_osm_privacy">Ricerca, percorso e mappa usano i server di OpenStreetMap — l\'unico punto in cui DUCAT manda la posizione fuori dal dispositivo. Gli autisti vedono solo aree di ~%1$s.</string>
     <string name="hail_post_button">Chiama 🚕</string>

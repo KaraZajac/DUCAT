@@ -13,12 +13,10 @@
     <string name="bond_ask_again_note">ส่งคำขออีกครั้ง เผื่อครั้งแรกไปไม่ถึง</string>
     <string name="bond_waiting_release">จบการเดินทางแล้ว — รอผู้โดยสารปล่อยค่าโดยสาร…</string>
     <string name="bond_ride_complete_ask">คนขับระบุว่าการเดินทางเสร็จสิ้นแล้ว</string>
-    <string name="bond_release_fare">ปล่อยค่าโดยสาร (%1$s)</string>
     <string name="bond_released">ปล่อยค่าโดยสารแล้ว</string>
     <string name="bond_released_amount">%1$s เป็นของคุณ</string>
     <string name="profile_arbiter">ผู้ชี้ขาดเอสโครว์</string>
     <string name="profile_arbiter_note">ถือกุญแจชี้ขาดของการเดินทางแบบมีเอสโครว์ จะถูกติดต่อก็ต่อเมื่อมีปัญหา</string>
-    <string name="bond_margin_back">หลักประกันของคุณ (%1$s) จะกลับคืนสู่คุณ</string>
     <string name="bond_split_stated">ข้อเสนอ: คืนผู้โดยสาร %1$s ให้คนขับ %2$s</string>
     <string name="bond_sign_split">ลงนามการแบ่งนี้</string>
     <string name="bond_propose_split">เสนอการแบ่งแบบอื่น</string>

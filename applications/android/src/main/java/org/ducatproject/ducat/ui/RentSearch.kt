@@ -40,7 +40,7 @@ import uniffi.ducat_mobile.RentalInfo
  * chosen because people travel to collect a car or a set of keys.
  */
 /** The chip a noun wears on the board. Short: five of them share a row. */
-private fun boardChip(kind: Int): Int = when (kind) {
+internal fun boardChipLabel(kind: Int): Int = when (kind) {
     Listings.KIND_VEHICLE -> R.string.board_chip_cars
     Listings.KIND_GEAR -> R.string.board_chip_gear
     Listings.KIND_SALE -> R.string.board_chip_sale
@@ -215,7 +215,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                             FilterChip(
                                 selected = showing == k,
                                 onClick = { showing = k },
-                                label = { Text("${stringResource(boardChip(k))} $n") },
+                                label = { Text("${stringResource(boardChipLabel(k))} $n") },
                             )
                         }
                     }
@@ -425,7 +425,7 @@ internal fun ListingCardsPreview() {
                 FilterChip(
                     selected = k == Listings.KIND_SALE,
                     onClick = {},
-                    label = { Text("${stringResource(boardChip(k))} $n") },
+                    label = { Text("${stringResource(boardChipLabel(k))} $n") },
                 )
             }
         }

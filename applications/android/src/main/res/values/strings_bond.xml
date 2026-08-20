@@ -13,12 +13,10 @@
     <string name="bond_ask_again_note">Sends the request again, in case the first one never reached them.</string>
     <string name="bond_waiting_release">Ride complete — waiting for the rider to release the fare…</string>
     <string name="bond_ride_complete_ask">The driver marked the ride complete.</string>
-    <string name="bond_release_fare">Release fare (%1$s)</string>
     <string name="bond_released">Fare released</string>
     <string name="bond_released_amount">%1$s to you</string>
     <string name="profile_arbiter">Escrow arbiter</string>
     <string name="profile_arbiter_note">Holds the tie-breaking key in your bonded rides. Never contacted unless something goes wrong.</string>
-    <string name="bond_margin_back">Your stake (%1$s) comes back to you.</string>
     <string name="bond_split_stated">Proposed: %1$s back to the rider, %2$s to the driver.</string>
     <string name="bond_sign_split">Sign this split</string>
     <string name="bond_propose_split">Propose a different split</string>

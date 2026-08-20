@@ -13,12 +13,10 @@
     <string name="bond_ask_again_note">يرسل الطلب مرة أخرى، في حال لم يصلهم الأول.</string>
     <string name="bond_waiting_release">انتهت الرحلة — في انتظار أن يحرر الراكب الأجرة…</string>
     <string name="bond_ride_complete_ask">حدّد السائق الرحلة على أنها انتهت.</string>
-    <string name="bond_release_fare">تحرير الأجرة (%1$s)</string>
     <string name="bond_released">حُررت الأجرة</string>
     <string name="bond_released_amount">%1$s لك</string>
     <string name="profile_arbiter">حَكَم الضمان</string>
     <string name="profile_arbiter_note">يحمل مفتاح الترجيح في رحلاتك المضمونة. لا يُستدعى إلا إذا ساء شيء.</string>
-    <string name="bond_margin_back">‏ضمانك (%1$s) يعود إليك.</string>
     <string name="bond_split_stated">الاقتراح: %1$s للراكب، %2$s للسائق.</string>
     <string name="bond_sign_split">توقيع هذا التقسيم</string>
     <string name="bond_propose_split">اقتراح تقسيم مختلف</string>

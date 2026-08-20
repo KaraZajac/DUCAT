@@ -41,7 +41,6 @@
     <string name="rent_need_location">位置情報を待っています — 掲示にはおおよそのエリアが必要です。</string>
     <string name="rent_find_a_place">泊まる場所を探す</string>
     <string name="rent_find_a_car">車を探す</string>
-    <string name="rent_search_title">近くの貸し借り</string>
     <string name="rent_searching">まわりの掲示板を見ています…</string>
     <string name="rent_none_found">この辺りにはまだ何もありません。</string>
     <string name="rent_search_needs_location">掲載は地域ごとの掲示板に並んでいるので、どれを読むかを知るために DUCAT はおおよその現在地が必要です。位置はこの端末の中だけで使われ、どこにも送信されません。</string>

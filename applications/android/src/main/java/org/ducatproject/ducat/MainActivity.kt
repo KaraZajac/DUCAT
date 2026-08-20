@@ -732,8 +732,7 @@ private fun HomeScreen(
     Spacer(Modifier.height(12.dp))
     org.ducatproject.ducat.ui.HomeTiles(
         onHail = { hailSheet.value = true },
-        onRentCar = { rentKind.value = org.ducatproject.ducat.Listings.KIND_VEHICLE },
-        onRentPlace = { rentKind.value = org.ducatproject.ducat.Listings.KIND_PLACE },
+        onBrowse = { rentKind.value = it },
     )
     // Both flows live on, tiles or not: the hail keeps its card for a hail
     // that is actually standing, and each owns its own screens.

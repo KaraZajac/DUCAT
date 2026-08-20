@@ -24,6 +24,4 @@
     <string name="main_card_link_not_ready">La loro scheda non è ancora leggibile. Se sono con te, aspetta un momento e riscansiona; altrimenti chiedi loro di aprire DUCAT.</string>
     <string name="main_card_link_body_unnamed">Questo link apre una scheda contatto senza nome. Aggiungerla? Dopo potrete scrivervi e pagarvi.</string>
     <string name="main_card_link_name">Chiamali</string>
-    <string name="home_tile_rent_car">Noleggia un\'auto</string>
-    <string name="home_tile_rent_place">Affitta un posto</string>
 </resources>

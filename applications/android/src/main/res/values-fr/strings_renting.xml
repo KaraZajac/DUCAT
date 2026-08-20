@@ -41,7 +41,6 @@
     <string name="rent_need_location">En attente de la position : une annonce a besoin d’un quartier approximatif où se poser.</string>
     <string name="rent_find_a_place">Trouver un logement</string>
     <string name="rent_find_a_car">Trouver une voiture</string>
-    <string name="rent_search_title">Locations à proximité</string>
     <string name="rent_searching">Consultation des tableaux autour de vous…</string>
     <string name="rent_none_found">Rien par ici pour le moment.</string>
     <string name="rent_search_needs_location">Les annonces sont réparties sur des tableaux par zone : DUCAT a donc besoin de savoir à peu près où vous êtes pour lire les bons. Cela reste sur votre téléphone et n\'est envoyé nulle part.</string>

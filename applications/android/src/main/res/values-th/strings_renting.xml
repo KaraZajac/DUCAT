@@ -41,7 +41,6 @@
     <string name="rent_need_location">กำลังรอตำแหน่ง — ประกาศต้องมีย่านคร่าว ๆ ให้ยึด</string>
     <string name="rent_find_a_place">หาที่พัก</string>
     <string name="rent_find_a_car">หารถ</string>
-    <string name="rent_search_title">เช่าใกล้ ๆ</string>
     <string name="rent_searching">กำลังดูกระดานรอบตัวคุณ…</string>
     <string name="rent_none_found">แถวนี้ยังไม่มีอะไร</string>
     <string name="rent_search_needs_location">ประกาศอยู่บนกระดานที่แบ่งตามพื้นที่ DUCAT จึงต้องรู้คร่าว ๆ ว่าคุณอยู่ที่ไหนเพื่อจะรู้ว่าควรอ่านกระดานไหน ข้อมูลนี้ใช้อยู่ในเครื่องของคุณและไม่ถูกส่งไปที่ใด</string>

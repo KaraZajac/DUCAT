@@ -77,7 +77,11 @@ def read(path):
 
 def main() -> int:
     problems = 0
-    base_files = sorted(glob.glob(os.path.join(RES, "values/strings_*.xml")))
+    # `strings*.xml`, not `strings_*.xml`. The underscore excluded exactly one
+    # file — `values/strings.xml`, the app's oldest and least per-screen one —
+    # so forty strings had never been parity-checked in any language, and a
+    # new one added there was validated by nothing at all.
+    base_files = sorted(glob.glob(os.path.join(RES, "values/strings*.xml")))
     # Language folders only. `values-v29` and friends are API qualifiers, not
     # locales — counting one as a language makes this report every string in
     # the app as missing from it, which is a lot of noise for a themes file.
@@ -180,6 +184,45 @@ def main() -> int:
                 if base_plurals and want and not set(got) <= set(want):
                     print(f"  ! {loc}/{name}: plural {n}/{quantity} has {got}, base has {want}")
                     problems += 1
+
+    # --- keys nothing displays ------------------------------------------
+    #
+    # Parity only proves the languages agree with each other. A key no screen
+    # references still passes every check above, in all nineteen — so a screen
+    # that gets rewritten leaves a full set of translations behind it, and the
+    # next person to read the file cannot tell live copy from a fossil. Seven
+    # had accumulated before this check existed.
+    #
+    # Safe to be strict about, because nothing here builds a name at runtime:
+    # every reference is a literal `R.string.x` in Kotlin or `@string/x` in
+    # XML, and there is no `getIdentifier` anywhere in the tree.
+    app = os.path.dirname(os.path.abspath(__file__))
+    used = set()
+    for root in (
+        os.path.join(app, "android/src/main/java"),
+        os.path.join(app, "desktop/src/main/kotlin"),
+    ):
+        for dirpath, _, filenames in os.walk(root):
+            for fn in filenames:
+                if not fn.endswith(".kt"):
+                    continue
+                with open(os.path.join(dirpath, fn), encoding="utf-8") as fh:
+                    used |= set(re.findall(r"R\.(?:string|plurals)\.(\w+)", fh.read()))
+    for dirpath, _, filenames in os.walk(os.path.join(app, "android/src/main")):
+        if os.path.join("res", "values") in dirpath:
+            continue
+        for fn in filenames:
+            if not fn.endswith(".xml"):
+                continue
+            with open(os.path.join(dirpath, fn), encoding="utf-8") as fh:
+                used |= set(re.findall(r"@(?:string|plurals)/(\w+)", fh.read()))
+    declared = set()
+    for path in base_files:
+        with open(path, encoding="utf-8") as fh:
+            declared |= set(re.findall(r'<(?:string|plurals) name="([^"]+)"', fh.read()))
+    for name in sorted(declared - used):
+        print(f"  ! values/{name}: nothing references it")
+        problems += 1
 
     counted = len(base_files)
     if problems:

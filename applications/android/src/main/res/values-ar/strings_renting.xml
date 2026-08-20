@@ -41,7 +41,6 @@
     <string name="rent_need_location">بانتظار تحديد الموقع — يحتاج الإعلان إلى منطقة تقريبية يستقر عليها.</string>
     <string name="rent_find_a_place">ابحث عن مكان</string>
     <string name="rent_find_a_car">ابحث عن سيارة</string>
-    <string name="rent_search_title">إيجارات قريبة</string>
     <string name="rent_searching">أبحث في اللوحات من حولك…</string>
     <string name="rent_none_found">لا شيء مدرج هنا بعد.</string>
     <string name="rent_search_needs_location">تُعرض الإعلانات على لوحات مرتّبة حسب المنطقة، لذلك يحتاج DUCAT إلى معرفة مكانك تقريبًا ليعرف أي لوحة يقرأ. يُستخدم الموقع على هاتفك ولا يُرسل إلى أي جهة.</string>

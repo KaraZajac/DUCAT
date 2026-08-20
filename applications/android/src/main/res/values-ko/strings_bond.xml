@@ -13,12 +13,10 @@
     <string name="bond_ask_again_note">첫 요청이 닿지 않았을 경우를 대비해 다시 보냅니다.</string>
     <string name="bond_waiting_release">운행 완료 — 승객의 요금 지급을 기다리는 중…</string>
     <string name="bond_ride_complete_ask">기사가 운행 완료로 표시했습니다.</string>
-    <string name="bond_release_fare">요금 지급 (%1$s)</string>
     <string name="bond_released">요금이 지급되었습니다</string>
     <string name="bond_released_amount">%1$s 내 몫</string>
     <string name="profile_arbiter">에스크로 중재자</string>
     <string name="profile_arbiter_note">보증된 운행의 결정 키를 보관합니다. 문제가 생기지 않는 한 관여하지 않습니다.</string>
-    <string name="bond_margin_back">당신의 보증금(%1$s)은 돌아옵니다.</string>
     <string name="bond_split_stated">제안: 승객에게 %1$s, 기사에게 %2$s.</string>
     <string name="bond_sign_split">이 분배에 서명</string>
     <string name="bond_propose_split">다른 분배 제안</string>

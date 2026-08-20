@@ -41,7 +41,6 @@
     <string name="rent_need_location">در انتظار موقعیت — یک آگهی به محله‌ای تقریبی نیاز دارد تا روی آن بنشیند.</string>
     <string name="rent_find_a_place">پیدا کردن جا</string>
     <string name="rent_find_a_car">پیدا کردن خودرو</string>
-    <string name="rent_search_title">اجاره در این نزدیکی</string>
     <string name="rent_searching">تابلوهای اطرافتان را می‌بینم…</string>
     <string name="rent_none_found">هنوز چیزی این نزدیکی نیست.</string>
     <string name="rent_search_needs_location">آگهی‌ها روی تخته‌هایی هستند که بر اساس منطقه چیده شده‌اند، پس DUCAT باید تقریباً بداند کجا هستید تا بفهمد کدام‌ها را بخواند. این اطلاعات روی گوشی شما می‌ماند و جایی فرستاده نمی‌شود.</string>

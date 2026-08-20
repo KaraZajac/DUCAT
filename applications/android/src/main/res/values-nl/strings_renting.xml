@@ -41,7 +41,6 @@
     <string name="rent_need_location">Wachten op een locatie — een advertentie heeft een globale buurt nodig om op te staan.</string>
     <string name="rent_find_a_place">Een plek vinden</string>
     <string name="rent_find_a_car">Een auto vinden</string>
-    <string name="rent_search_title">Huren in de buurt</string>
     <string name="rent_searching">Ik kijk op de borden om je heen…</string>
     <string name="rent_none_found">Hier is nog niets geplaatst.</string>
     <string name="rent_search_needs_location">Advertenties staan op borden die per gebied zijn ingedeeld, dus DUCAT moet ongeveer weten waar je bent om de juiste te lezen. Dat blijft op je telefoon en wordt nergens naartoe gestuurd.</string>

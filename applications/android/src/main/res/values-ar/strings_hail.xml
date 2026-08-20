@@ -3,7 +3,6 @@
     <!-- Rider: the Home-screen hail card -->
     <string name="hail_card_title">اطلب مشوارًا</string>
     <string name="hail_card_standing">النداء قائم — في انتظار سائق</string>
-    <string name="hail_card_pitch">انشر وجهتك في موقف يراقبه السائقون.</string>
     <string name="hail_standing_at">قائم عند %1$s</string>
     <string name="hail_stands_for">يبقى قائمًا %1$s أخرى</string>
     <string name="hail_take_it_down">أنزله</string>
@@ -96,7 +95,6 @@
     <string name="hail_vs_competitors">النقل التشاركي ~%1$s %2$.0f · التاكسي ~%1$s %3$.0f — سائقك يحتفظ بالمبلغ كله (تطبيقات النقل تدفع لسائقيها ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">عرضك (%1$s)</string>
     <string name="hail_offer_invalid">يجب أن يكون العرض رقمًا أكبر من صفر — أو اتركه فارغًا لطلب تسعيرة.</string>
-    <string name="hail_shards_full">كل شظايا الموقف ممتلئة هنا — حاول بعد قليل</string>
     <string name="hail_post_failed">تعذّر نشر النداء</string>
     <string name="hail_osm_privacy">البحث والمسار والخريطة تستخدم خوادم OpenStreetMap — المكان الوحيد الذي يرسل فيه DUCAT الموقع خارج الجهاز. لا يرى السائقون سوى مناطق بعرض ~%1$s.</string>
     <string name="hail_post_button">اطلب 🚕</string>

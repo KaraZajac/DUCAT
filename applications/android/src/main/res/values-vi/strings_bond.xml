@@ -13,12 +13,10 @@
     <string name="bond_ask_again_note">Gửi lại yêu cầu, phòng khi lần đầu chưa tới nơi.</string>
     <string name="bond_waiting_release">Chuyến đi hoàn tất — chờ hành khách giải phóng cước phí…</string>
     <string name="bond_ride_complete_ask">Tài xế đã đánh dấu chuyến đi hoàn tất.</string>
-    <string name="bond_release_fare">Giải phóng cước phí (%1$s)</string>
     <string name="bond_released">Đã giải phóng cước phí</string>
     <string name="bond_released_amount">%1$s cho bạn</string>
     <string name="profile_arbiter">Trọng tài ký quỹ</string>
     <string name="profile_arbiter_note">Giữ chìa khóa quyết định cho các chuyến đi ký quỹ. Chỉ được liên hệ khi có sự cố.</string>
-    <string name="bond_margin_back">Tiền cọc của bạn (%1$s) sẽ quay về.</string>
     <string name="bond_split_stated">Đề xuất: %1$s về hành khách, %2$s cho tài xế.</string>
     <string name="bond_sign_split">Ký chia phần này</string>
     <string name="bond_propose_split">Đề xuất chia khác</string>

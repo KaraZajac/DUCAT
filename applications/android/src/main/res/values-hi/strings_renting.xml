@@ -41,7 +41,6 @@
     <string name="rent_need_location">जगह का पता चलने का इंतज़ार — सूची को टिकने के लिए एक मोटा-मोटा इलाका चाहिए।</string>
     <string name="rent_find_a_place">जगह ढूँढें</string>
     <string name="rent_find_a_car">गाड़ी ढूँढें</string>
-    <string name="rent_search_title">आस-पास किराये पर</string>
     <string name="rent_searching">आपके आस-पास के बोर्ड देख रहे हैं…</string>
     <string name="rent_none_found">यहाँ अभी कुछ नहीं है।</string>
     <string name="rent_search_needs_location">लिस्टिंग इलाक़े के हिसाब से बँटे बोर्ड पर होती हैं, इसलिए DUCAT को मोटे तौर पर पता होना चाहिए कि आप कहाँ हैं, ताकि वह सही बोर्ड पढ़ सके। यह आपके फ़ोन पर ही रहता है और कहीं नहीं भेजा जाता।</string>

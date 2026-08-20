@@ -3,7 +3,6 @@
     <!-- Rider: the Home-screen hail card -->
     <string name="hail_card_title">Pide un viaje</string>
     <string name="hail_card_standing">Pedido en pie — esperando un conductor</string>
-    <string name="hail_card_pitch">Publica adónde vas en una parada que los conductores vigilan.</string>
     <string name="hail_standing_at">En pie en %1$s</string>
     <string name="hail_stands_for">Sigue en pie %1$s más</string>
     <string name="hail_take_it_down">Retirarlo</string>
@@ -96,7 +95,6 @@
     <string name="hail_vs_competitors">app de viajes ~%1$s %2$.0f · taxi ~%1$s %3$.0f — tu conductor se queda con todo (una app le paga al suyo ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Tu oferta (%1$s)</string>
     <string name="hail_offer_invalid">La oferta debe ser un número mayor que cero — o déjala en blanco para pedir una cotización.</string>
-    <string name="hail_shards_full">todos los fragmentos de la parada están llenos aquí — intenta de nuevo en un momento</string>
     <string name="hail_post_failed">no se pudo publicar el pedido</string>
     <string name="hail_osm_privacy">La búsqueda, la ruta y el mapa usan los servidores de OpenStreetMap — el único lugar al que DUCAT envía ubicación fuera del dispositivo. Los conductores solo ven zonas de ~%1$s.</string>
     <string name="hail_post_button">Pedir 🚕</string>

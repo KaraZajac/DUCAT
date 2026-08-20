@@ -3,7 +3,6 @@
     <!-- Rider: the Home-screen hail card -->
     <string name="hail_card_title">Taksi çağır</string>
     <string name="hail_card_standing">Çağrı askıda — sürücü bekleniyor</string>
-    <string name="hail_card_pitch">Nereye gideceğini sürücülerin izlediği bir durağa as.</string>
     <string name="hail_standing_at">%1$s durağında askıda</string>
     <string name="hail_stands_for">%1$s daha geçerli</string>
     <string name="hail_take_it_down">Çağrıyı indir</string>
@@ -96,7 +95,6 @@
     <string name="hail_vs_competitors">araç çağırma ~%1$s %2$.0f · taksi ~%1$s %3$.0f — sürücün hepsini alır (araç çağırma uygulaması sürücüsüne ~%1$s %4$.0f öder)</string>
     <string name="hail_your_offer">Teklifin (%1$s)</string>
     <string name="hail_offer_invalid">Teklif sıfırdan büyük bir sayı olmalı — ya da fiyat sormak için boş bırak.</string>
-    <string name="hail_shards_full">buradaki tüm durak bölmeleri dolu — az sonra yeniden dene</string>
     <string name="hail_post_failed">çağrı asılamadı</string>
     <string name="hail_osm_privacy">Arama, rota ve harita OpenStreetMap\'in sunucularını kullanır — DUCAT\'ın konumu cihaz dışına gönderdiği tek yer. Sürücüler yalnızca ~%1$s büyüklüğünde bölgeler görür.</string>
     <string name="hail_post_button">Çağır 🚕</string>

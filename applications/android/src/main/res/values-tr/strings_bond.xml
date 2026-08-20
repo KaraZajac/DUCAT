@@ -13,12 +13,10 @@
     <string name="bond_ask_again_note">İsteği yeniden gönderir, ilki ulaşmadıysa diye.</string>
     <string name="bond_waiting_release">Yolculuk tamam — yolcunun ücreti serbest bırakması bekleniyor…</string>
     <string name="bond_ride_complete_ask">Sürücü yolculuğu tamamlandı olarak işaretledi.</string>
-    <string name="bond_release_fare">Ücreti serbest bırak (%1$s)</string>
     <string name="bond_released">Ücret serbest bırakıldı</string>
     <string name="bond_released_amount">%1$s sana</string>
     <string name="profile_arbiter">Emanet hakemi</string>
     <string name="profile_arbiter_note">Emanetli yolculuklarında belirleyici anahtarı tutar. Yalnızca bir sorun olursa devreye girer.</string>
-    <string name="bond_margin_back">Teminatın (%1$s) sana geri döner.</string>
     <string name="bond_split_stated">Öneri: %1$s yolcuya geri, %2$s sürücüye.</string>
     <string name="bond_sign_split">Bu paylaşımı imzala</string>
     <string name="bond_propose_split">Farklı bir paylaşım öner</string>

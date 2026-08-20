@@ -3,7 +3,6 @@
     <!-- Rider: the Home-screen hail card -->
     <string name="hail_card_title">Викликати таксі</string>
     <string name="hail_card_standing">Виклик висить — чекаємо на водія</string>
-    <string name="hail_card_pitch">Опублікуй, куди їдеш, на стоянці, за якою стежать водії.</string>
     <string name="hail_standing_at">Висить на %1$s</string>
     <string name="hail_stands_for">Стоїть ще %1$s</string>
     <string name="hail_take_it_down">Зняти</string>
@@ -96,7 +95,6 @@
     <string name="hail_vs_competitors">райдшеринг ~%1$s %2$.0f · таксі ~%1$s %3$.0f — твій водій забирає все (райдшеринг платить своєму ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Твоя пропозиція (%1$s)</string>
     <string name="hail_offer_invalid">Пропозиція має бути числом більше нуля — або залиш поле порожнім, щоб попросити ціну.</string>
-    <string name="hail_shards_full">усі шарди стоянки тут заповнені — спробуй трохи згодом</string>
     <string name="hail_post_failed">не вдалося опублікувати виклик</string>
     <string name="hail_osm_privacy">Пошук, маршрут і мапа використовують сервери OpenStreetMap — єдине місце, куди DUCAT відправляє локацію з пристрою. Водії бачать лише області ~%1$s.</string>
     <string name="hail_post_button">Викликати 🚕</string>

@@ -13,12 +13,10 @@
     <string name="bond_ask_again_note">अनुरोध दोबारा भेजता है, अगर पहला उन तक न पहुँचा हो।</string>
     <string name="bond_waiting_release">सवारी पूरी — सवार द्वारा किराया जारी करने की प्रतीक्षा…</string>
     <string name="bond_ride_complete_ask">चालक ने सवारी पूरी होने का चिह्न लगाया।</string>
-    <string name="bond_release_fare">किराया जारी करें (%1$s)</string>
     <string name="bond_released">किराया जारी किया गया</string>
     <string name="bond_released_amount">%1$s आपको</string>
     <string name="profile_arbiter">एस्क्रो मध्यस्थ</string>
     <string name="profile_arbiter_note">आपकी बॉन्ड सवारियों की निर्णायक कुंजी रखता है। कुछ गड़बड़ होने पर ही संपर्क होता है।</string>
-    <string name="bond_margin_back">आपकी जमानत राशि (%1$s) आपको वापस मिलती है।</string>
     <string name="bond_split_stated">प्रस्ताव: %1$s सवार को वापस, %2$s चालक को।</string>
     <string name="bond_sign_split">इस बंटवारे पर हस्ताक्षर करें</string>
     <string name="bond_propose_split">अलग बंटवारा प्रस्तावित करें</string>

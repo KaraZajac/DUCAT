@@ -3,7 +3,6 @@
     <!-- Rider: the Home-screen hail card -->
     <string name="hail_card_title">Roep een rit op</string>
     <string name="hail_card_standing">Oproep staat — wacht op een chauffeur</string>
-    <string name="hail_card_pitch">Zet waar je heen wilt op een standplaats die chauffeurs in de gaten houden.</string>
     <string name="hail_standing_at">Staat op %1$s</string>
     <string name="hail_stands_for">Blijft nog %1$s staan</string>
     <string name="hail_take_it_down">Haal hem weg</string>
@@ -96,7 +95,6 @@
     <string name="hail_vs_competitors">rideshare ~%1$s %2$.0f · taxi ~%1$s %3$.0f — jouw chauffeur houdt alles zelf (een rideshare betaalt de zijne ~%1$s %4$.0f)</string>
     <string name="hail_your_offer">Jouw bod (%1$s)</string>
     <string name="hail_offer_invalid">Het bod moet een getal boven nul zijn — of laat het leeg om een prijsvoorstel te vragen.</string>
-    <string name="hail_shards_full">elke shard van de standplaats zit hier vol — probeer het zo weer</string>
     <string name="hail_post_failed">kon de oproep niet plaatsen</string>
     <string name="hail_osm_privacy">Zoeken, route en kaart gebruiken de servers van OpenStreetMap — de enige plek waar DUCAT locatie van het apparaat af stuurt. Chauffeurs zien alleen gebieden van ~%1$s.</string>
     <string name="hail_post_button">Roep op 🚕</string>

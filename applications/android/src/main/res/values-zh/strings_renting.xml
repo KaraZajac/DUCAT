@@ -41,7 +41,6 @@
     <string name="rent_need_location">正在等待定位——发布需要一个大致的区域来落脚。</string>
     <string name="rent_find_a_place">找房子</string>
     <string name="rent_find_a_car">找车</string>
-    <string name="rent_search_title">附近的租赁</string>
     <string name="rent_searching">正在查看你周围的板…</string>
     <string name="rent_none_found">这附近还没有东西。</string>
     <string name="rent_search_needs_location">房源按区域挂在不同的板上，所以 DUCAT 需要大致知道你在哪里，才知道该读哪些板。位置只在你的手机上使用，不会发送到任何地方。</string>

@@ -41,7 +41,6 @@
     <string name="rent_need_location">Konum bekleniyor — bir ilanın oturacağı kabaca bir semte ihtiyacı var.</string>
     <string name="rent_find_a_place">Yer bul</string>
     <string name="rent_find_a_car">Araba bul</string>
-    <string name="rent_search_title">Yakında kiralık</string>
     <string name="rent_searching">Çevrendeki panolara bakılıyor…</string>
     <string name="rent_none_found">Buralarda henüz bir şey yok.</string>
     <string name="rent_search_needs_location">İlanlar bölgeye göre ayrılmış panolarda durur, bu yüzden DUCAT hangilerini okuyacağını bilmek için kabaca nerede olduğunu bilmeli. Bu bilgi telefonunda kalır, hiçbir yere gönderilmez.</string>

@@ -41,7 +41,6 @@
     <string name="rent_need_location">In attesa della posizione — un annuncio ha bisogno di una zona approssimativa su cui stare.</string>
     <string name="rent_find_a_place">Trova un alloggio</string>
     <string name="rent_find_a_car">Trova un’auto</string>
-    <string name="rent_search_title">Noleggi nelle vicinanze</string>
     <string name="rent_searching">Sto guardando le bacheche intorno a te…</string>
     <string name="rent_none_found">Qui non c’è ancora niente.</string>
     <string name="rent_search_needs_location">Gli annunci stanno su bacheche divise per zona, quindi DUCAT ha bisogno di sapere più o meno dove sei per leggere quelle giuste. Resta sul tuo telefono e non viene inviato da nessuna parte.</string>

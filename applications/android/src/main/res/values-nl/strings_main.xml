@@ -24,6 +24,4 @@
     <string name="main_card_link_not_ready">Hun kaart is nog niet leesbaar. Zijn ze bij je, wacht dan even en scan opnieuw — anders vraag je ze DUCAT te openen.</string>
     <string name="main_card_link_body_unnamed">Deze link opent een contactkaart zonder naam. Toevoegen? Daarna kunnen jullie elkaar berichten en betalen.</string>
     <string name="main_card_link_name">Noem ze</string>
-    <string name="home_tile_rent_car">Auto huren</string>
-    <string name="home_tile_rent_place">Plek huren</string>
 </resources>

@@ -24,6 +24,4 @@
     <string name="main_card_link_not_ready">相手のカードはまだ読み取れません。目の前にいるなら少し待ってもう一度読み取ってください。そうでなければ DUCAT を開いてもらってください。</string>
     <string name="main_card_link_body_unnamed">このリンクの連絡先カードには名前がありません。追加しますか？追加すればメッセージも支払いもできます。</string>
     <string name="main_card_link_name">呼び名</string>
-    <string name="home_tile_rent_car">車を借りる</string>
-    <string name="home_tile_rent_place">泊まる所を借りる</string>
 </resources>

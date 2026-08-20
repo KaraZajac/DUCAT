@@ -13,12 +13,10 @@
     <string name="bond_ask_again_note">Mengirim permintaannya lagi, kalau-kalau yang pertama tidak sampai.</string>
     <string name="bond_waiting_release">Perjalanan selesai — menunggu penumpang melepaskan tarif…</string>
     <string name="bond_ride_complete_ask">Pengemudi menandai perjalanan selesai.</string>
-    <string name="bond_release_fare">Lepaskan tarif (%1$s)</string>
     <string name="bond_released">Tarif dilepaskan</string>
     <string name="bond_released_amount">%1$s untukmu</string>
     <string name="profile_arbiter">Arbiter escrow</string>
     <string name="profile_arbiter_note">Memegang kunci penentu perjalanan ber-escrow Anda. Hanya dihubungi jika ada masalah.</string>
-    <string name="bond_margin_back">Jaminan Anda (%1$s) kembali kepada Anda.</string>
     <string name="bond_split_stated">Usulan: %1$s kembali ke penumpang, %2$s ke pengemudi.</string>
     <string name="bond_sign_split">Tanda tangani pembagian ini</string>
     <string name="bond_propose_split">Usulkan pembagian lain</string>
