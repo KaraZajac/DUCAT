@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">رمز دائم يمكن لأي محفظة Monero التبرع من خلاله. لا حاجة إلى تطبيق عندهم.</string>
     <!-- Renting mode -->
     <string name="mode_renting">التأجير</string>
-    <string name="mode_renting_desc">أجّر غرفة أو سيارة. تنشر ما لديك، فيجده من حولك ويسأل عنه.</string>
+    <string name="mode_renting_desc">أجّر أو أعِر أو بِع أو اعرض مهارة. تنشر ما لديك، فيجده من حولك ويسأل عنه.</string>
 </resources>

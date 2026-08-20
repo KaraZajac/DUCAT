@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">Un code permanent auquel n\'importe quel portefeuille Monero peut donner. Aucune app nécessaire de leur côté.</string>
     <!-- Renting mode -->
     <string name="mode_renting">Location</string>
-    <string name="mode_renting_desc">Loue une chambre ou une voiture. Tu publies ce que tu as ; les gens du coin le trouvent et te contactent.</string>
+    <string name="mode_renting_desc">Loue, prête, vends ou propose un savoir-faire. Tu publies ce que tu as ; les gens du coin le trouvent et te contactent.</string>
 </resources>

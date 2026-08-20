@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">Ein fester Code, an den jede Monero-Wallet geben kann. Keine App auf der anderen Seite nötig.</string>
     <!-- Renting mode -->
     <string name="mode_renting">Vermieten</string>
-    <string name="mode_renting_desc">Vermiete ein Zimmer oder ein Auto. Du stellst ein, was du hast; Leute in der Nähe finden es und fragen an.</string>
+    <string name="mode_renting_desc">Vermiete, verleihe, verkaufe oder biete ein Können an. Du stellst ein, was du hast; Leute in der Nähe finden es und fragen an.</string>
 </resources>

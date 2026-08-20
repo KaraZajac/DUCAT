@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -71,6 +72,20 @@ fun KioskScreen() {
     }
     var staffDoor by remember { mutableStateOf(false) }
     var staffOpen by remember { mutableStateOf(false) }
+
+    // The docstring above promises the PIN is the only way out. It was not:
+    // with no handler, Back went straight past the mode shell to the activity
+    // and closed the app, which leaves whoever pressed it standing in front of
+    // an unlocked phone on the launcher — the exact thing the lock is for. A
+    // kiosk has nowhere to go back to, so Back shuts whatever is open over the
+    // counter and otherwise does nothing at all.
+    BackHandler {
+        when {
+            staffOpen -> staffOpen = false
+            staffDoor -> staffDoor = false
+            else -> Unit
+        }
+    }
 
     // Nudge the store while an order is on screen. Reading it is what draws
     // the panel — `placed` is derived above — so this only has to make sure a

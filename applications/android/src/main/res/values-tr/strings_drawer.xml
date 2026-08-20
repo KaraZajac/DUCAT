@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">Her Monero cüzdanının bağış yapabildiği sabit bir kod. Karşı tarafta uygulama gerekmez.</string>
     <!-- Renting mode -->
     <string name="mode_renting">Kiralama</string>
-    <string name="mode_renting_desc">Bir oda ya da araba kirala. Elindekini yayınlarsın; yakındakiler bulur ve sorar.</string>
+    <string name="mode_renting_desc">Kirala, ödünç ver, sat ya da bir ustalık sun. Elindekini yayınlarsın; yakındakiler bulur ve sorar.</string>
 </resources>

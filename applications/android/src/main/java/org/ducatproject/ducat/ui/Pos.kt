@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -384,6 +385,9 @@ private fun PresentScreen(
     onDone: () -> Unit,
     onBack: () -> Unit,
 ) {
+    // Back is the on-screen arrow: return to the basket. It used to quit the
+    // app from a sale that was already presented to a customer.
+    BackHandler(onBack = onBack)
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     // The card survives recreation: reissuing on rotation would put a fresh QR

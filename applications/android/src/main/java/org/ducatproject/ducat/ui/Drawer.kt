@@ -742,6 +742,33 @@ fun ModesScreen() {
         org.ducatproject.ducat.DucatLog.i("Mode", "switched to $m")
     }
 
+    // Arming a kiosk requires a PIN to already exist.
+    //
+    // The staff door is the only way out of kiosk mode, and the gate behind it
+    // offers to *set* a PIN when the phone has none — which is right
+    // everywhere else, because the alternative is locking an owner out of
+    // their own wallet. On a counter nobody is standing at, it means the next
+    // customer chooses the PIN and walks straight through into the wallet and
+    // the chats. So the question is asked here instead, at the one moment the
+    // owner is provably the person holding the phone.
+    var pinFor by remember { mutableStateOf<org.ducatproject.ducat.Mode?>(null) }
+
+    fun choose(m: org.ducatproject.ducat.Mode) {
+        if (m == org.ducatproject.ducat.Mode.Kiosk &&
+            !org.ducatproject.ducat.Pin.isSet(context)
+        ) {
+            pinFor = m
+        } else {
+            pick(m)
+        }
+    }
+
+    PinGate(
+        open = pinFor != null,
+        onDismiss = { pinFor = null },
+        onPassed = { pinFor?.let { pick(it) }; pinFor = null },
+    )
+
     val options = listOf(
         Triple(
             org.ducatproject.ducat.Mode.None,
@@ -794,11 +821,11 @@ fun ModesScreen() {
                     if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     Row(
                         Modifier.fillMaxWidth()
-                            .clickable { pick(mode) }
+                            .clickable { choose(mode) }
                             .padding(horizontal = 16.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        RadioButton(selected = current == mode, onClick = { pick(mode) })
+                        RadioButton(selected = current == mode, onClick = { choose(mode) })
                         Spacer(Modifier.width(8.dp))
                         Column(Modifier.weight(1f)) {
                             Text(title, style = MaterialTheme.typography.titleMedium)

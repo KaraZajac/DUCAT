@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">Un codice fisso a cui può donare qualsiasi portafoglio Monero. Dall\'altra parte non serve nessuna app.</string>
     <!-- Renting mode -->
     <string name="mode_renting">Affitto</string>
-    <string name="mode_renting_desc">Affitta una stanza o un\'auto. Pubblichi quello che hai; chi è nei paraggi lo trova e ti scrive.</string>
+    <string name="mode_renting_desc">Affitta, presta, vendi o offri una competenza. Pubblichi quello che hai; chi è nei paraggi lo trova e ti scrive.</string>
 </resources>

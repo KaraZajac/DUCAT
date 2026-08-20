@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">یک کد ثابت که هر کیف پول Monero می‌تواند به آن کمک کند. آن طرف به هیچ برنامه‌ای نیاز نیست.</string>
     <!-- Renting mode -->
     <string name="mode_renting">اجاره</string>
-    <string name="mode_renting_desc">اتاق یا خودرویت را اجاره بده. آنچه داری را منتشر می‌کنی؛ کسانی که نزدیک‌اند پیدایش می‌کنند و می‌پرسند.</string>
+    <string name="mode_renting_desc">اجاره بده، قرض بده، بفروش یا مهارتت را عرضه کن. آنچه داری را منتشر می‌کنی؛ کسانی که نزدیک‌اند پیدایش می‌کنند و می‌پرسند.</string>
 </resources>

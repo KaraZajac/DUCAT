@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -286,6 +287,11 @@ fun ListingFormPreview(kind: Int) = ListingForm(kind = kind, onDone = {})
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun ListingForm(kind: Int, onDone: () -> Unit) {
+    // Back closes the form. Without this it went past the mode shell to the
+    // activity and quit the app, taking an eighteen-field listing with it —
+    // MainActivity says the rule at its own handlers, and a screen added
+    // later did not follow it.
+    BackHandler(onBack = onDone)
     val context = LocalContext.current
     val vehicle = kind == Listings.KIND_VEHICLE
     // The three kinds added in 0.89 carry no typed extras (§16.18): a title,
