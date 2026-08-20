@@ -101,4 +101,5 @@
     <string name="board_chip_gear">Matériel</string>
     <string name="board_chip_sale">À vendre</string>
     <string name="board_chip_skills">Savoir-faire</string>
+    <string name="rent_per_hour_short">%1$s / heure</string>
 </resources>

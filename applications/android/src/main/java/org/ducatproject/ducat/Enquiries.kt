@@ -29,7 +29,8 @@ object Enquiries {
         val title: String,
         val pricePxmr: Long,
         val depositPxmr: Long,
-        /** [Listings.KIND_VEHICLE] or [Listings.KIND_PLACE]. */
+        /** One of [Listings.KINDS] — a place, a vehicle, gear, a
+         *  thing for sale, or somebody's time (§16.18). */
         val kind: Int,
         /**
          * Which listing, on the side that owns it — so the address and the

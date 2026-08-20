@@ -396,26 +396,67 @@ private fun Stalled(stall: Stall, onRetry: () -> Unit) {
  * to ask. The address is not here because it is not on the board — the card
  * below is what turns this into a conversation where it can be.
  */
+/**
+ * The card as five nouns, for the render test.
+ *
+ * Worth drawing rather than reasoning about: this card read "not a vehicle"
+ * as "a place" for its icon, its price unit and its category, so a bicycle
+ * for sale arrived with a roof over it, priced per night, in the Whole place
+ * category. Three separate wrong answers from one assumption.
+ */
+@Composable
+internal fun ListingCardsPreview() {
+    androidx.compose.foundation.layout.Column(
+        Modifier.padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        listOf(
+            Listings.KIND_PLACE to Triple("Sunny room near the park", 25_000_000_000uL, 2uL),
+            Listings.KIND_VEHICLE to Triple("2019 Corolla, automatic", 40_000_000_000uL, 1uL),
+            Listings.KIND_GEAR to Triple("Sea kayak, paddle included", 15_000_000_000uL, 3uL),
+            Listings.KIND_SALE to Triple("Bicycle, barely ridden", 90_000_000_000uL, 4uL),
+            Listings.KIND_SKILL to Triple("Electrician, 20 years", 30_000_000_000uL, 1uL),
+        ).forEach { (kind, d) ->
+            val (title, price, subtype) = d
+            ListingCard(
+                info = RentalInfo(
+                    card = "ducat:card/x", kind = kind.toULong(), title = title,
+                    area = "north side", cell = "u33dc", pricePxmr = price,
+                    depositPxmr = 4_000_000_000uL, expiry = 1_800_000_000uL,
+                    make = null, model = null, year = null, gearbox = null, fuel = null,
+                    seats = null, color = null, trim = null,
+                    rooms = null, sleeps = null, sizeM2 = null,
+                    subtype = subtype, features = listOf("good condition"),
+                ),
+                busy = false, onAsk = {},
+            )
+        }
+    }
+}
+
 @Composable
 private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
     val context = LocalContext.current
-    val vehicle = info.kind.toInt() == Listings.KIND_VEHICLE
+    val kind = info.kind.toInt()
+    val vehicle = kind == Listings.KIND_VEHICLE
+    val place = kind == Listings.KIND_PLACE
     Card(Modifier.fillMaxWidth().clickable(enabled = !busy) { onAsk() }) {
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    if (vehicle) Icons.Filled.DirectionsCar else Icons.Filled.House,
-                    null, Modifier.size(18.dp),
-                )
+                // The kind's own icon. A house stood in for "not a vehicle",
+                // which put a roof on a kayak, a bicycle and an electrician
+                // the moment the board held more than two nouns.
+                Icon(listingIcon(kind), null, Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
                 Text(info.title, style = MaterialTheme.typography.titleSmall)
             }
             Spacer(Modifier.height(4.dp))
+            // Per night, per day, per hour — or, for a sale, the price with
+            // nothing after it, because that is the whole of it.
+            val shown = Amounts.show(context, info.pricePxmr.toLong()).primary
             Text(
-                stringResource(
-                    if (vehicle) R.string.rent_per_day_short else R.string.rent_per_night_short,
-                    Amounts.show(context, info.pricePxmr.toLong()).primary,
-                ),
+                if (kind == Listings.KIND_SALE) shown
+                else stringResource(priceLabelShort(kind), shown),
                 style = MaterialTheme.typography.bodyMedium,
             )
             if (info.depositPxmr > 0uL) {
@@ -448,7 +489,7 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                     }
                     info.trim?.let { add(it) }
                     info.seats?.let { add("$it") }
-                } else {
+                } else if (place) {
                     info.rooms?.let { add("$it") }
                     info.sleeps?.let { add("$it") }
                     info.sizeM2?.let { add("$it m²") }
@@ -458,6 +499,12 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                             else R.string.rent_whole_place,
                         ))
                     }
+                } else {
+                    // This branch used to be "a place", so every one of the
+                    // three new nouns rendered its category through a
+                    // whole-place / private-room lookup: a bicycle in the
+                    // Sport category read "Whole place".
+                    info.subtype?.let { add(stringResource(categoryLabel(kind, it.toInt()))) }
                 }
                 addAll(info.features)
             }

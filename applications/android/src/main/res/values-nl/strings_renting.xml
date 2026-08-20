@@ -101,4 +101,5 @@
     <string name="board_chip_gear">Spullen</string>
     <string name="board_chip_sale">Te koop</string>
     <string name="board_chip_skills">Vakwerk</string>
+    <string name="rent_per_hour_short">%1$s / uur</string>
 </resources>

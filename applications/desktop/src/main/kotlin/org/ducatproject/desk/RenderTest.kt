@@ -152,6 +152,10 @@ fun main() {
         org.ducatproject.ducat.ui.ListingFormPreview(kind = 1)
     }
     // The three kinds added in 0.89: no typed extras, a category and tags.
+    // Every noun as a seeker meets it.
+    render("board-cards", w = 520, h = 980) {
+        org.ducatproject.ducat.ui.ListingCardsPreview()
+    }
     render("list-sale", w = 520, h = 1100) {
         org.ducatproject.ducat.ui.ListingFormPreview(kind = 3)
     }

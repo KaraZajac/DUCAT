@@ -101,4 +101,5 @@
     <string name="board_chip_gear">Attrezzi</string>
     <string name="board_chip_sale">In vendita</string>
     <string name="board_chip_skills">Mestieri</string>
+    <string name="rent_per_hour_short">%1$s / ora</string>
 </resources>

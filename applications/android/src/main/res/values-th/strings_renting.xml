@@ -101,4 +101,5 @@
     <string name="board_chip_gear">อุปกรณ์</string>
     <string name="board_chip_sale">ขาย</string>
     <string name="board_chip_skills">งานฝีมือ</string>
+    <string name="rent_per_hour_short">%1$s / ชม.</string>
 </resources>

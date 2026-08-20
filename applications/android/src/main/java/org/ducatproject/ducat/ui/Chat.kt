@@ -1721,26 +1721,23 @@ private fun EnquiryLine(
     ) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // The kind's own icon and unit, like both listing cards. This
+                // read "not a vehicle" as "a place" too, so an enquiry about a
+                // kayak opened under a house priced per night.
                 Icon(
-                    if (about.kind == org.ducatproject.ducat.Listings.KIND_VEHICLE) {
-                        Icons.Filled.DirectionsCar
-                    } else {
-                        Icons.Filled.House
-                    },
+                    listingIcon(about.kind),
                     null,
                     Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    stringResource(
-                        if (about.kind == org.ducatproject.ducat.Listings.KIND_VEHICLE) {
-                            R.string.rent_per_day_short
-                        } else {
-                            R.string.rent_per_night_short
-                        },
-                        Amounts.show(context, about.pricePxmr).primary,
-                    ).let { price -> "${about.title} · $price" },
+                    Amounts.show(context, about.pricePxmr).primary
+                        .let { shown ->
+                            if (about.kind == org.ducatproject.ducat.Listings.KIND_SALE) shown
+                            else stringResource(priceLabelShort(about.kind), shown)
+                        }
+                        .let { price -> "${about.title} · $price" },
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

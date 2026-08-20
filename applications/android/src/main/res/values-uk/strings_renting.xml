@@ -101,4 +101,5 @@
     <string name="board_chip_gear">Спорядження</string>
     <string name="board_chip_sale">Продаж</string>
     <string name="board_chip_skills">Уміння</string>
+    <string name="rent_per_hour_short">%1$s / год</string>
 </resources>

@@ -66,6 +66,13 @@ private fun listingFormTitle(kind: Int): Int = when (kind) {
     else -> R.string.rent_form_place
 }
 
+/** The same, abbreviated, for a card in a list. */
+internal fun priceLabelShort(kind: Int): Int = when (kind) {
+    Listings.KIND_VEHICLE, Listings.KIND_GEAR -> R.string.rent_per_day_short
+    Listings.KIND_SKILL -> R.string.rent_per_hour_short
+    else -> R.string.rent_per_night_short
+}
+
 /** Per night, per day, per hour, or once — §16.18's unit-follows-the-kind. */
 private fun priceLabel(kind: Int): Int = when (kind) {
     Listings.KIND_VEHICLE, Listings.KIND_GEAR -> R.string.rent_per_day
@@ -90,7 +97,7 @@ internal fun listingIcon(kind: Int) = when (kind) {
  * `rental_subtype_top` exactly — a form offering a category the wire refuses
  * would produce a listing nobody can read back.
  */
-private fun categoryLabel(kind: Int, n: Int): Int = when (kind) {
+internal fun categoryLabel(kind: Int, n: Int): Int = when (kind) {
     Listings.KIND_SALE -> when (n) {
         1 -> R.string.cat_goods
         2 -> R.string.cat_furniture
@@ -216,8 +223,10 @@ private fun MyListingCard(
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    if (o.optInt("kind") == Listings.KIND_VEHICLE) Icons.Filled.DirectionsCar
-                    else Icons.Filled.House,
+                    // The kind's own icon, like the seeker's card. A house
+                    // stood in for "not a vehicle", which put a roof on
+                    // everything the moment the board held five nouns.
+                    listingIcon(o.optInt("kind")),
                     null, Modifier.size(18.dp),
                 )
                 Spacer(Modifier.width(8.dp))
