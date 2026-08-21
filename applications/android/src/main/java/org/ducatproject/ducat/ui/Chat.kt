@@ -2763,6 +2763,22 @@ private fun bookingTitle(kind: Int?): Int = when (kind) {
 }
 
 /**
+ * [Listings.dealFor] the other way round, for the four the chips offer.
+ *
+ * The chips let a reader say the listing's kind is not what this deal is —
+ * that is the whole reason they are there — but only the stake was listening.
+ * Picking "something sold" against a room's listing moved the suggestion to
+ * ten percent and left the sheet headed "propose a reservation", asking for a
+ * price per night and a number of nights. About a bicycle.
+ */
+private fun kindForDeal(d: org.ducatproject.ducat.Stakes.Deal): Int = when (d) {
+    org.ducatproject.ducat.Stakes.Deal.Vehicle -> org.ducatproject.ducat.Listings.KIND_VEHICLE
+    org.ducatproject.ducat.Stakes.Deal.Sale -> org.ducatproject.ducat.Listings.KIND_SALE
+    org.ducatproject.ducat.Stakes.Deal.Labour -> org.ducatproject.ducat.Listings.KIND_SKILL
+    else -> org.ducatproject.ducat.Listings.KIND_PLACE
+}
+
+/**
  * Propose a reservation to this contact (§15.12's Airbnb/Turo shape): rent
  * and both deposits, stated up front — the escrow will name its whole
  * arithmetic in the ceremony frame, and the host's phone shows exactly what
@@ -2861,7 +2877,15 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
      * above it. A sale has no count — one bicycle, once — so its total is
      * simply its price.
      */
-    val unit = bookingUnit(about?.kind)
+    // The listing's kind while the chips still agree with it, and whatever the
+    // chips say once they do not. Keeping the listing's own kind matters where
+    // one deal covers two nouns: gear and a vehicle are both `Vehicle`, and
+    // only the listing knows which of "hire" and "reserve" to say. A thread
+    // that began nowhere stays null, and asks for no count at all.
+    val shownKind = about?.kind?.let { k ->
+        if (org.ducatproject.ducat.Listings.dealFor(k) == deal) k else kindForDeal(deal)
+    }
+    val unit = bookingUnit(shownKind)
     val nights = count.filter { it.isDigit() }.toIntOrNull()?.coerceIn(1, 999) ?: 1
     val totalPxmr = pxmr(rent)?.let { if (unit == null) it else it * nights } ?: 0L
 
@@ -2869,7 +2893,7 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDone) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
             Text(
-                stringResource(bookingTitle(about?.kind)),
+                stringResource(bookingTitle(shownKind)),
                 style = MaterialTheme.typography.titleLarge,
             )
             Spacer(Modifier.height(4.dp))
@@ -2952,7 +2976,7 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                     // languages, and the two screens now agree word for word.
                     Text(
                         stringResource(
-                            about?.kind?.let { priceLabel(it) } ?: R.string.res_rent,
+                            shownKind?.let { priceLabel(it) } ?: R.string.res_rent,
                             if (fiat) cur else "XMR",
                         ),
                     )
