@@ -199,8 +199,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 draft = ""
                                 messages = store.thread(c.personaHex)
                             }.onFailure {
-                                error = it.message
+                                // Blank counts as missing here too — see afterSend.
+                                error = it.message?.takeIf { m -> m.isNotBlank() }
                                     ?: context.getString(R.string.chat_could_not_send)
+                                DucatLog.w(
+                                    "Chat",
+                                    "send: ${it.javaClass.simpleName}: ${it.message}",
+                                )
                             }
                         }
                     }
@@ -223,9 +228,22 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     val afterSend: (Result<*>, String) -> Unit = { r, what ->
                         r.onSuccess { messages = store.thread(c.personaHex) }
                             .onFailure {
-                                error = it.message
+                                // Blank counts as missing. `?:` only catches
+                                // null, and the throwable that stopped a
+                                // picture from sending carried an empty string
+                                // instead — so the line above the composer was
+                                // set to "" and drew nothing. Picking a photo
+                                // looked like picking a photo did nothing at
+                                // all: no bubble, no error, no clue.
+                                error = it.message?.takeIf { m -> m.isNotBlank() }
                                     ?: context.getString(R.string.chat_could_not_send_the, what)
-                                DucatLog.w("Chat", "$what: ${it.message}")
+                                // The class name, because an empty message is
+                                // exactly the case where the log needs to say
+                                // something else.
+                                DucatLog.w(
+                                    "Chat",
+                                    "$what: ${it.javaClass.simpleName}: ${it.message}",
+                                )
                             }
                         sending = false
                     }
