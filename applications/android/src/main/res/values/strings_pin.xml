@@ -10,7 +10,7 @@
     <string name="pin_confirm">Approve</string>
     <string name="pin_cancel">Cancel</string>
     <string name="pin_no_reset">There is no way to reset this from inside the app — anything that could reset it would be a way past it. If you forget it, restore this wallet from your backup.</string>
-    <string name="pin_locked">Too many wrong tries. Nothing is accepted for another %1$s.</string>
+    <string name="pin_locked">Too many wrong tries. Nothing is accepted for %1$s.</string>
     <string name="pin_gone">No PIN is set on this device. Set one before sending.</string>
     <plurals name="pin_wrong">
         <item quantity="one">That is not the PIN. %1$d try before the waiting starts.</item>
