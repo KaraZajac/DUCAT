@@ -231,10 +231,31 @@ object Mailbox {
             ),
         )
 
+        // What this thread already had, if we have met before.
+        //
+        // `add` replaces the whole record, and a Contact built here carries
+        // the *defaults* for the per-direction chain counters — zero and no
+        // previous link. Claiming a second card from somebody already known
+        // therefore rewound both counters while their log kept its history,
+        // and every later message was refused with "this message does not
+        // follow the one before it". The thread simply stopped, in both
+        // directions, with no way back. §16.12's counters are not metadata;
+        // they are whether the thread works.
+        //
+        // Our own outbox is genuinely new — it was created three lines up —
+        // so zero is right for the sending side. Their log is only new if the
+        // card names a different one, which is exactly the test below.
+        val prior = store.all().firstOrNull { it.personaHex == theirs.persona.toHexString() }
+        val sameLog = prior != null && prior.theirOutbox == theirs.outboxKey
+
         val c = Contact(
             personaHex = theirs.persona.toHexString(),
-            petname = petname,
+            // A name the reader chose survives a re-claim: this argument is
+            // null on every path that is not somebody typing one.
+            petname = petname ?: prior?.petname,
             assertedName = theirs.assertedName,
+            inSeq = if (sameLog) prior!!.inSeq else 0,
+            inPrevLink = if (sameLog) prior!!.inPrevLink else null,
             myOutbox = outbox.key,
             myOutboxOwnerPublic = outbox.ownerPublic,
             myOutboxOwnerSecret = outbox.ownerSecret,
@@ -276,11 +297,20 @@ object Mailbox {
                 if (raw.isEmpty()) continue
                 val theirs = parseContactDetails(raw)
                 val personaHex = theirs.persona.toHexString()
+                // The same rule as claimCard, from the issuer's side: keep the
+                // counters for whichever log has not changed underneath them.
+                val prior = store.all().firstOrNull { it.personaHex == personaHex }
+                val sameOurs = prior != null && prior.myOutbox == issued.outboxKey
+                val sameTheirs = prior != null && prior.theirOutbox == theirs.outboxKey
                 store.add(
                     Contact(
                         personaHex = personaHex,
-                        petname = null,
+                        petname = prior?.petname,
                         assertedName = theirs.assertedName,
+                        outSeq = if (sameOurs) prior!!.outSeq else 0,
+                        outPrevLink = if (sameOurs) prior!!.outPrevLink else null,
+                        inSeq = if (sameTheirs) prior!!.inSeq else 0,
+                        inPrevLink = if (sameTheirs) prior!!.inPrevLink else null,
                         myOutbox = issued.outboxKey,
                         myOutboxOwnerPublic = issued.outboxOwnerPublic,
                         myOutboxOwnerSecret = issued.outboxOwnerSecret,
