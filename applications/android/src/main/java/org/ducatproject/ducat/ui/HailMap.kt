@@ -54,7 +54,8 @@ fun RouteMap(
                 pts += g
                 map.overlays.add(Marker(map).apply {
                     position = g; title = map.context.getString(R.string.hailmap_pickup)
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    icon = hereDot(map.context)
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 })
             }
             to?.let {
@@ -149,6 +150,7 @@ fun DriverMap(
                 pts += g
                 map.overlays.add(Marker(map).apply {
                     position = g; title = map.context.getString(R.string.hailmap_you)
+                    icon = hereDot(map.context)
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 })
             }
@@ -175,4 +177,37 @@ fun DriverMap(
             }
         },
     )
+}
+
+/**
+ * "You are here", as a dot rather than another pin.
+ *
+ * Every marker on both of these maps was osmdroid's default teardrop, so a
+ * rider's pickup looked exactly like their destination and a driver's own
+ * position looked exactly like a fare. The titles differ, but a title costs a
+ * tap, and the question a map has to answer without one is "which of these is
+ * me". A dot for where you are and a pin for where you are going is the idiom
+ * every other map already taught people.
+ *
+ * Drawn rather than shipped: it is two circles, and a drawable in the
+ * resources would need its own copy per density and a name in nineteen
+ * languages' worth of nothing.
+ */
+private fun hereDot(context: android.content.Context): android.graphics.drawable.Drawable {
+    val d = context.resources.displayMetrics.density
+    val r = 7f * d
+    val ring = 2.5f * d
+    val size = ((r + ring) * 2f).toInt().coerceAtLeast(1)
+    val bmp = android.graphics.Bitmap.createBitmap(
+        size, size, android.graphics.Bitmap.Config.ARGB_8888,
+    )
+    val canvas = android.graphics.Canvas(bmp)
+    val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    val mid = size / 2f
+    // White first, so the dot reads against a dark tile as well as a pale one.
+    paint.color = android.graphics.Color.WHITE
+    canvas.drawCircle(mid, mid, r + ring, paint)
+    paint.color = android.graphics.Color.rgb(0x1A, 0x73, 0xE8)
+    canvas.drawCircle(mid, mid, r, paint)
+    return android.graphics.drawable.BitmapDrawable(context.resources, bmp)
 }
