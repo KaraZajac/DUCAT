@@ -39,4 +39,8 @@
     <string name="mode_marketplace_desc">ซื้อขายของใกล้ตัว ดูบอร์ดรอบ ๆ คุณ และลงขายของคุณเอง</string>
     <string name="shells_tab_browse">เลือกดู</string>
     <string name="shells_tab_my_listings">รายการของฉัน</string>
+    <string name="mode_hire_help">หาคนช่วย</string>
+    <string name="mode_hire_help_desc">หาคนใกล้ตัวมาทำงาน — ช่างประปา ช่างไฟ คนช่วยสักบ่าย — และเสนอทักษะกับค่าจ้างของคุณเอง</string>
+    <string name="shells_tab_my_skills">ทักษะของฉัน</string>
+    <string name="shells_tab_jobs">งาน</string>
 </resources>

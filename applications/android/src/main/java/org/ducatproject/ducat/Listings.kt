@@ -634,6 +634,19 @@ object Listings {
     val KINDS = listOf(KIND_PLACE, KIND_VEHICLE, KIND_GEAR, KIND_SALE, KIND_SKILL)
 
     /**
+     * The three jobs the five nouns divide into (§16.18).
+     *
+     * One board carries all of them — that is a transport detail — but the
+     * *work* is three different jobs and each is a mode. Somebody with a room
+     * and a kayak to let is doing one job with two nouns in it, which is why
+     * renting keeps its chips and the other two have nothing to switch
+     * between.
+     */
+    val RENT_KINDS = listOf(KIND_PLACE, KIND_VEHICLE, KIND_GEAR)
+    val SALE_KINDS = listOf(KIND_SALE)
+    val SKILL_KINDS = listOf(KIND_SKILL)
+
+    /**
      * The stake table each kind draws from.
      *
      * A deposit and a stake are the same money and different words: on

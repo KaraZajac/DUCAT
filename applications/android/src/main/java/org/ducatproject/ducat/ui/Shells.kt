@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.LocalBar
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PointOfSale
@@ -95,19 +96,36 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
             title = stringResource(R.string.shells_title_renting),
             openDrawer = openDrawer,
             tabs = listOf(
+                ShellTab(stringResource(R.string.shells_tab_browse), Icons.Filled.Search) {
+                    // Which noun to open on comes from the tile that was
+                    // tapped — a room, a car and a kayak are three doors into
+                    // the same job. `key` rather than a parameter alone: the
+                    // chip selection is remembered inside, so landing on a
+                    // different noun has to be a fresh composition or the
+                    // screen would keep showing the last one.
+                    val want by MainActivity.browseKind.collectAsState()
+                    androidx.compose.runtime.key(want) {
+                        RentBrowse(
+                            initial = want ?: Listings.KIND_PLACE,
+                            onOpenChat = { MainActivity.openChat.value = it.personaHex },
+                        )
+                    }
+                },
                 ShellTab(stringResource(R.string.shells_tab_listings), Icons.Filled.House) {
-                    // Everything but the sale: that one has its own mode now,
-                    // and a listing shown in both would be managed in both.
-                    RentingScreen(kinds = Listings.KINDS - Listings.KIND_SALE)
+                    RentingScreen(kinds = Listings.RENT_KINDS)
                 },
                 ShellTab(stringResource(R.string.shells_tab_bookings), Icons.Filled.Receipt) {
-                    BookingsList()
+                    BookingsList(kinds = Listings.RENT_KINDS)
                 },
             ),
         )
-        // Browse first, because most of the time this mode is opened to look
-        // rather than to list — and the tile that opens it is the one on the
-        // home screen labelled Marketplace, which is a shopper's word.
+        // Three jobs, one shape.
+        //
+        // Browse first in each, because these are opened to look far more
+        // often than to list; then what you are offering; then what has been
+        // agreed. The only difference between them is which nouns they are
+        // about — renting keeps its chips because three home tiles lead into
+        // it, and the other two have one noun and nothing to switch to.
         Mode.Marketplace -> Shell(
             title = stringResource(R.string.mode_marketplace),
             openDrawer = openDrawer,
@@ -122,7 +140,28 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
                     stringResource(R.string.shells_tab_my_listings),
                     Icons.Filled.LocalOffer,
                 ) {
-                    RentingScreen(kinds = listOf(Listings.KIND_SALE))
+                    RentingScreen(kinds = Listings.SALE_KINDS)
+                },
+                ShellTab(stringResource(R.string.shells_tab_bookings), Icons.Filled.Receipt) {
+                    BookingsList(kinds = Listings.SALE_KINDS)
+                },
+            ),
+        )
+        Mode.HireHelp -> Shell(
+            title = stringResource(R.string.mode_hire_help),
+            openDrawer = openDrawer,
+            tabs = listOf(
+                ShellTab(stringResource(R.string.shells_tab_browse), Icons.Filled.Search) {
+                    HireBrowse(onOpenChat = { MainActivity.openChat.value = it.personaHex })
+                },
+                ShellTab(
+                    stringResource(R.string.shells_tab_my_skills),
+                    Icons.Filled.Build,
+                ) {
+                    RentingScreen(kinds = Listings.SKILL_KINDS)
+                },
+                ShellTab(stringResource(R.string.shells_tab_jobs), Icons.Filled.Receipt) {
+                    BookingsList(kinds = Listings.SKILL_KINDS)
                 },
             ),
         )
@@ -146,14 +185,26 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
  * newest first, with the listing it came from when the thread remembers one.
  */
 @Composable
-private fun BookingsList() {
+private fun BookingsList(kinds: List<Int> = Listings.KINDS) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    val rows = remember(version) {
+    val rows = remember(version, kinds) {
         org.ducatproject.ducat.Ceremony.all(context)
             .filter {
                 it.optInt("kind") == org.ducatproject.ducat.Ceremony.KIND_RESERVATION &&
                     !org.ducatproject.ducat.Ceremony.isArbiter(it)
+            }
+            // To the mode whose job it was.
+            //
+            // `aboutKind` is the listing kind snapshotted when the escrow was
+            // struck — not the ceremony kind, which only says "reservation".
+            // Escrows older than that snapshot have none, and rather than
+            // vanish from all three modes or appear in all three they stay
+            // where they have always been: Renting, which is the only mode
+            // that had a bookings tab when they were made.
+            .filter { o ->
+                val about = o.optInt("aboutKind", 0)
+                if (about == 0) Listings.KIND_PLACE in kinds else about in kinds
             }
             .sortedByDescending { it.optLong("created") }
     }

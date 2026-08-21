@@ -852,6 +852,11 @@ fun ModesScreen() {
             stringResource(R.string.mode_renting_desc),
         ),
         Triple(
+            org.ducatproject.ducat.Mode.HireHelp,
+            stringResource(R.string.mode_hire_help),
+            stringResource(R.string.mode_hire_help_desc),
+        ),
+        Triple(
             org.ducatproject.ducat.Mode.Kiosk,
             stringResource(R.string.kiosk_mode_title),
             stringResource(R.string.kiosk_mode_body),

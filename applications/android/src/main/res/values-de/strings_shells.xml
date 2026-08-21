@@ -39,4 +39,8 @@
     <string name="mode_marketplace_desc">In der Nähe kaufen und verkaufen. Sieh dich auf den Boards um dich herum um und stelle eigene Sachen ein.</string>
     <string name="shells_tab_browse">Stöbern</string>
     <string name="shells_tab_my_listings">Meine Anzeigen</string>
+    <string name="mode_hire_help">Hilfe finden</string>
+    <string name="mode_hire_help_desc">Finde jemanden in der Nähe für eine Aufgabe – Klempnerin, Elektriker, eine helfende Hand – und biete deine eigenen Fähigkeiten und deinen Satz an.</string>
+    <string name="shells_tab_my_skills">Meine Fähigkeiten</string>
+    <string name="shells_tab_jobs">Aufträge</string>
 </resources>

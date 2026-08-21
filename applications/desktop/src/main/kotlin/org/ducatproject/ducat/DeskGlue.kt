@@ -43,6 +43,11 @@ object Notify {
  */
 object MainActivity {
     val openChat = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
+    /** Which noun Renting's board opens on — the phone's home tiles set it,
+     *  and the desk has no tiles, so here it simply stays null and the board
+     *  opens on a place. */
+    val browseKind = kotlinx.coroutines.flow.MutableStateFlow<Int?>(null)
 }
 
 /** The shared stores announce their own news too (a tab paid, a bill

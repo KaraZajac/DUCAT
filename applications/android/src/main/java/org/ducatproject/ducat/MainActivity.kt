@@ -72,6 +72,16 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
          */
         val openChat = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
 
+        /**
+         * Which noun Renting's board should open on.
+         *
+         * Three home tiles lead into one mode — a room, a car, a kayak — and
+         * the mode has to be told which door was used. Kept rather than
+         * cleared after reading: it is the last thing asked for, and re-entering
+         * the mode from the drawer should land where it was left.
+         */
+        val browseKind = kotlinx.coroutines.flow.MutableStateFlow<Int?>(null)
+
         /** A tapped ducat: link, waiting for the shell to show who it is. */
         val claimLink = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
     }
@@ -776,27 +786,33 @@ private fun HomeScreen(
     // person does occasionally, not jobs they run. The modes are for whoever
     // *has* a car or a room to let (§16.18).
     val hailSheet = remember { mutableStateOf(false) }
-    val rentKind = remember { mutableStateOf<Int?>(null) }
     Spacer(Modifier.height(12.dp))
     org.ducatproject.ducat.ui.HomeTiles(
         onHail = { hailSheet.value = true },
-        // Five of these open a sheet over the wallet. The sixth hands the app
-        // to a mode, because buying and selling is a job somebody stays in —
-        // browse, then list, then browse again — and a sheet is a thing you
-        // are holding open on top of something else.
+        // Every one of these hands the app to the mode whose job it is, rather
+        // than opening a sheet over the wallet. Browsing, listing and the
+        // deals that follow are one job somebody settles into; a sheet is a
+        // thing held open on top of something else.
+        //
+        // The three renting nouns share a mode and say which door they came
+        // through, which is the whole difference between them.
         onBrowse = { k ->
-            if (k == org.ducatproject.ducat.Listings.KIND_SALE) {
-                org.ducatproject.ducat.ModeStore(context)
-                    .set(org.ducatproject.ducat.Mode.Marketplace)
-            } else {
-                rentKind.value = k
+            val modes = org.ducatproject.ducat.ModeStore(context)
+            when (k) {
+                org.ducatproject.ducat.Listings.KIND_SALE ->
+                    modes.set(org.ducatproject.ducat.Mode.Marketplace)
+                org.ducatproject.ducat.Listings.KIND_SKILL ->
+                    modes.set(org.ducatproject.ducat.Mode.HireHelp)
+                else -> {
+                    MainActivity.browseKind.value = k
+                    modes.set(org.ducatproject.ducat.Mode.Renting)
+                }
             }
         },
     )
     // Both flows live on, tiles or not: the hail keeps its card for a hail
     // that is actually standing, and each owns its own screens.
     org.ducatproject.ducat.ui.HailCard(sheetState = hailSheet)
-    org.ducatproject.ducat.ui.RentSearchCard(onOpenChat = onOpenChat, kindState = rentKind)
 
     // Whose turn it is, on the screen somebody opens without being asked to.
     //
@@ -871,11 +887,14 @@ private fun HomeScreen(
     // hunting for a listing that is not where the row sent them.
     val mine = remember(version) { org.ducatproject.ducat.Listings.all(context) }
     val groups = remember(mine) {
+        fun n(kinds: List<Int>) = mine.count { it.optInt("kind") in kinds }
         listOf(
             org.ducatproject.ducat.Mode.Marketplace to
-                mine.count { it.optInt("kind") == org.ducatproject.ducat.Listings.KIND_SALE },
+                n(org.ducatproject.ducat.Listings.SALE_KINDS),
             org.ducatproject.ducat.Mode.Renting to
-                mine.count { it.optInt("kind") != org.ducatproject.ducat.Listings.KIND_SALE },
+                n(org.ducatproject.ducat.Listings.RENT_KINDS),
+            org.ducatproject.ducat.Mode.HireHelp to
+                n(org.ducatproject.ducat.Listings.SKILL_KINDS),
         ).filter { it.second > 0 }
     }
     groups.forEach { (m, n) ->
@@ -894,10 +913,12 @@ private fun HomeScreen(
                 Column(Modifier.weight(1f)) {
                     Text(
                         androidx.compose.ui.res.stringResource(
-                            if (m == org.ducatproject.ducat.Mode.Marketplace) {
-                                R.string.mode_marketplace
-                            } else {
-                                R.string.mode_renting
+                            when (m) {
+                                org.ducatproject.ducat.Mode.Marketplace ->
+                                    R.string.mode_marketplace
+                                org.ducatproject.ducat.Mode.HireHelp ->
+                                    R.string.mode_hire_help
+                                else -> R.string.mode_renting
                             },
                         ),
                         style = MaterialTheme.typography.titleSmall,

@@ -41,6 +41,7 @@ import uniffi.ducat_mobile.RentalInfo
  * chosen because people travel to collect a car or a set of keys.
  */
 /** The chip a noun wears on the board. Short: five of them share a row. */
+
 /** "Find a car", "Find help" — the heading, per noun. */
 private fun boardFindTitle(kind: Int): Int = when (kind) {
     Listings.KIND_VEHICLE -> R.string.rent_find_a_car
@@ -50,28 +51,13 @@ private fun boardFindTitle(kind: Int): Int = when (kind) {
     else -> R.string.rent_find_a_place
 }
 
+/** The chip a noun wears on the board. Short: five of them share a row. */
 internal fun boardChipLabel(kind: Int): Int = when (kind) {
     Listings.KIND_VEHICLE -> R.string.board_chip_cars
     Listings.KIND_GEAR -> R.string.board_chip_gear
     Listings.KIND_SALE -> R.string.board_chip_sale
     Listings.KIND_SKILL -> R.string.board_chip_skills
     else -> R.string.board_chip_places
-}
-
-@Composable
-fun RentSearchCard(
-    onOpenChat: (Contact) -> Unit,
-    /**
-     * Which search is open, or none — hoisted so the home screen's two tiles
-     * can start it. The card of chips this used to draw is gone: the tiles are
-     * the way in, and a second one underneath was the same button twice.
-     */
-    kindState: MutableState<Int?> = remember { mutableStateOf(null) },
-) {
-    var kind by kindState
-    kind?.let {
-        RentSearchScreen(kind = it, onClose = { kind = null }, onOpenChat = onOpenChat)
-    }
 }
 
 /**
@@ -84,12 +70,15 @@ private enum class Stall { NoPermission, NoFix, NoNetwork }
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 private fun RentSearchScreen(
     kind: Int,
-    /** Null when this *is* the screen — a mode's tab rather than a sheet over
-     *  something else. There is then nothing to cancel back to. */
-    onClose: (() -> Unit)?,
     onOpenChat: (Contact) -> Unit,
-    /** Fixed to one noun, so the chips that switch between them are noise. */
-    pinned: Boolean = false,
+    /**
+     * Which nouns this screen can switch between.
+     *
+     * One of them means no chips: there is nothing to switch to. Three means
+     * renting, where a room, a car and a kayak are one job with three nouns
+     * in it and the home tiles pick which to open on.
+     */
+    chips: List<Int> = Listings.KINDS,
 ) {
     // Which nouns to show. The board holds all five and one read returns all
     // of them (§16.18), so filtering here costs nothing — where asking the
@@ -233,11 +222,7 @@ private fun RentSearchScreen(
         }
     }
 
-    // Held as a value so the same content can be a full-screen sheet over the
-    // home tiles or the whole of a mode's tab, without either one being a
-    // second copy of it.
-    val body = @Composable {
-        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(Modifier.fillMaxSize().padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -252,13 +237,6 @@ private fun RentSearchScreen(
                         stringResource(boardFindTitle(showing)),
                         style = MaterialTheme.typography.titleLarge,
                     )
-                    Spacer(Modifier.weight(1f))
-                    // A tab is left by tapping another tab.
-                    onClose?.let { close ->
-                        TextButton(onClick = close) {
-                            Text(stringResource(R.string.rent_cancel))
-                        }
-                    }
                 }
                 Text(
                     stringResource(R.string.rent_search_note),
@@ -293,13 +271,13 @@ private fun RentSearchScreen(
                 // non-null. Snapshotting is what makes the guard and the use
                 // talk about the same value.
                 val found = results
-                if (found != null && stalled == null && !pinned) {
+                if (found != null && stalled == null && chips.size > 1) {
                     FlowRow(
                         Modifier.fillMaxWidth().padding(bottom = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        Listings.KINDS.forEach { k ->
+                        chips.forEach { k ->
                             val n = found.count { it.kind.toInt() == k }
                             FilterChip(
                                 selected = showing == k,
@@ -441,7 +419,7 @@ private fun RentSearchScreen(
                                             }
                                         }
                                         busy = false
-                                        r.onSuccess { onOpenChat(it); onClose?.invoke() }
+                                        r.onSuccess { onOpenChat(it) }
                                             .onFailure {
                                                 DucatLog.w("RentSearch", "claim: ${it.message}")
                                                 error = context.getString(
@@ -471,16 +449,6 @@ private fun RentSearchScreen(
         }
     }
 
-    if (onClose != null) {
-        androidx.compose.ui.window.Dialog(
-            onDismissRequest = onClose,
-            properties = fullScreenDialogProperties(),
-        ) { body() }
-    } else {
-        body()
-    }
-}
-
 /**
  * The Marketplace mode's first tab: the board, for the one noun it is about.
  *
@@ -493,9 +461,38 @@ private fun RentSearchScreen(
 fun MarketBrowse(onOpenChat: (Contact) -> Unit) {
     RentSearchScreen(
         kind = Listings.KIND_SALE,
-        onClose = null,
         onOpenChat = onOpenChat,
-        pinned = true,
+        chips = Listings.SALE_KINDS,
+    )
+}
+
+/**
+ * Hire help's board: people, and what they charge.
+ *
+ * One noun, so no chips — the same shape as Marketplace, pointed at somebody
+ * to do a job rather than something to buy.
+ */
+@Composable
+fun HireBrowse(onOpenChat: (Contact) -> Unit) {
+    RentSearchScreen(
+        kind = Listings.KIND_SKILL,
+        onOpenChat = onOpenChat,
+        chips = Listings.SKILL_KINDS,
+    )
+}
+
+/**
+ * Renting's board: a room, a car, a kayak.
+ *
+ * The one mode that keeps its chips, because three home tiles lead into it
+ * and each wants to land on a different noun. [initial] is which.
+ */
+@Composable
+fun RentBrowse(initial: Int, onOpenChat: (Contact) -> Unit) {
+    RentSearchScreen(
+        kind = initial,
+        onOpenChat = onOpenChat,
+        chips = Listings.RENT_KINDS,
     )
 }
 

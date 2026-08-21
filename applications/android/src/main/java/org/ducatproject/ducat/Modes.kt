@@ -25,7 +25,7 @@ import android.content.Context
 // jobs, and the board they share is an implementation detail of where the
 // notice lands. Appended rather than inserted — `current()` reads the name
 // out of preferences, so the order here is free but the spelling is not.
-enum class Mode { None, Pos, BarTab, Taxi, Donate, Renting, Kiosk, Marketplace }
+enum class Mode { None, Pos, BarTab, Taxi, Donate, Renting, Kiosk, Marketplace, HireHelp }
 
 class ModeStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")

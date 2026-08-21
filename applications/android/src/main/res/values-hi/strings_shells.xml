@@ -39,4 +39,8 @@
     <string name="mode_marketplace_desc">आस-पास खरीदें और बेचें। अपने आसपास के बोर्ड देखें और अपनी चीज़ें बिक्री पर रखें।</string>
     <string name="shells_tab_browse">ब्राउज़ करें</string>
     <string name="shells_tab_my_listings">मेरी सूचियाँ</string>
+    <string name="mode_hire_help">मदद खोजें</string>
+    <string name="mode_hire_help_desc">किसी काम के लिए आस-पास कोई ढूँढें — प्लंबर, इलेक्ट्रीशियन, दोपहर भर की मदद — और अपना हुनर और दर बताएँ।</string>
+    <string name="shells_tab_my_skills">मेरे हुनर</string>
+    <string name="shells_tab_jobs">काम</string>
 </resources>

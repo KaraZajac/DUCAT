@@ -39,4 +39,8 @@
     <string name="mode_marketplace_desc">Mua bán quanh bạn. Xem các bảng xung quanh và đăng bán đồ của bạn.</string>
     <string name="shells_tab_browse">Duyệt</string>
     <string name="shells_tab_my_listings">Tin của tôi</string>
+    <string name="mode_hire_help">Tìm người giúp</string>
+    <string name="mode_hire_help_desc">Tìm người gần bạn cho một công việc — thợ nước, thợ điện, một tay giúp buổi chiều — và đăng kỹ năng cùng giá của bạn.</string>
+    <string name="shells_tab_my_skills">Kỹ năng của tôi</string>
+    <string name="shells_tab_jobs">Công việc</string>
 </resources>
