@@ -144,6 +144,23 @@ class ContactStore(context: Context) {
         return all.size - kept.size
     }
 
+    /**
+     * Apply every conversation's window, not just the one on screen.
+     *
+     * [expireOld] is driven from the chat screen, so it ran only while
+     * somebody was looking at that thread — and the conversation a retention
+     * window matters most for is the one nobody has opened in a month. Set
+     * "delete after an hour" on a thread, walk away from it, and the plaintext
+     * sat on the device indefinitely while the setting on it said otherwise.
+     *
+     * Local work throughout: reads preferences, writes preferences, touches no
+     * network. Safe to run on every poll.
+     */
+    fun expireAll(): Int = all().sumOf { c ->
+        val secs = disappearAfter(c.personaHex)
+        if (secs > 0) expireOld(c.personaHex, secs) else 0
+    }
+
     /** Delete one message from this device. */
     fun deleteMessage(personaHex: String, seq: Long, outgoing: Boolean) {
         writeThread(

@@ -126,6 +126,15 @@ class Poller(private val context: Context) {
                 runCatching { Ceremony.remindWaiting(context) }
                     .onFailure { DucatLog.w(TAG, "reminders: ${it.message}") }
 
+                // Disappearing messages, for the threads nobody is looking at.
+                // The chat screen applies the window on the conversation it has
+                // open, which is the one case where it hardly matters; see
+                // ContactStore.expireAll.
+                runCatching {
+                    val gone = ContactStore(context).expireAll()
+                    if (gone > 0) DucatLog.i(TAG, "$gone message(s) past their window")
+                }.onFailure { DucatLog.w(TAG, "retention: ${it.message}") }
+
                 runCatching {
                     // Answers to a card we handed out land in its inbox, and
                     // that only becomes a contact once somebody looks.
