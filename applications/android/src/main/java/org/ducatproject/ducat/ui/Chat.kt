@@ -1870,7 +1870,21 @@ private fun RideBondBanner(contact: Contact) {
             tick++
             withContext(Dispatchers.IO) {
                 runCatching { Mailbox.poll(context) }
-                if (stage == "done" && funded < need && tick % 3 == 0) {
+                // While the escrow is filling, and while a split is parked
+                // waiting for this device to sign it.
+                //
+                // The second is the consent screen, and it states the split
+                // out of `fundedPxmr` — this device's own last scan. Polling
+                // stopped the moment the stage left "done", so a co-signer
+                // whose scan had seen one stake and not the other was asked to
+                // approve "USD 0.40 back to the payer, USD 0.00 to the other
+                // side" on a sale where the other side was getting four
+                // dollars. The transaction was right — the proposer builds it
+                // from what the escrow actually holds — but the sentence
+                // above the signature was not, and that sentence is the whole
+                // point of asking.
+                val filling = stage == "done" && funded < need
+                if ((filling || stage == "release_pending") && tick % 3 == 0) {
                     runCatching {
                         org.ducatproject.ducat.Ceremony.checkRideFunding(context, idHex)
                     }
