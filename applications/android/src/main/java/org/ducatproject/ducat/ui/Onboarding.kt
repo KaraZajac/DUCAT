@@ -25,6 +25,7 @@ import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.Stakes
 import org.ducatproject.ducat.WalletStore
+import org.ducatproject.ducat.saidWhy
 import uniffi.ducat_mobile.BackupInput
 import uniffi.ducat_mobile.NewWallet
 import uniffi.ducat_mobile.createPersonaSecret
@@ -574,7 +575,7 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                                 }
                             }
                             result.onSuccess { written = it }
-                                .onFailure { error = it.message ?: it::class.simpleName }
+                                .onFailure { error = it.saidWhy() ?: it::class.simpleName }
                             busy = false
                         }
                     },

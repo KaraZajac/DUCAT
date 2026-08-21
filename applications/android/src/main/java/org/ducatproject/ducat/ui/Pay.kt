@@ -35,6 +35,7 @@ import org.ducatproject.ducat.*
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.saidWhy
 import java.math.BigDecimal
 
 /**
@@ -968,5 +969,5 @@ private fun ConfirmSend(
  */
 private fun sendFailure(context: android.content.Context, t: Throwable): String = when {
     Wallet.isNodeTrouble(t) -> context.getString(R.string.pay_node_no_answer)
-    else -> t.message ?: context.getString(R.string.pay_could_not_send)
+    else -> t.saidWhy() ?: context.getString(R.string.pay_could_not_send)
 }

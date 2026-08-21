@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.saidWhy
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -164,7 +165,7 @@ fun NetworkPanel(storageDir: String) {
         routeResult = withContext(Dispatchers.IO) {
             runCatching {
                 context.getString(R.string.net_route_ok, nodeTestRoute().toString())
-            }.getOrElse { context.getString(R.string.net_route_failed, it.message ?: "?") }
+            }.getOrElse { context.getString(R.string.net_route_failed, it.saidWhy() ?: "?") }
         }
     }
 }

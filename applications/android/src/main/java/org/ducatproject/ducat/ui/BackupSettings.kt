@@ -33,6 +33,7 @@ import uniffi.ducat_mobile.exportBackup
 import uniffi.ducat_mobile.importBackup
 import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.DucatLog
+import org.ducatproject.ducat.saidWhy
 
 /**
  * Backup, after onboarding.
@@ -126,7 +127,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                                 share(context, f)
                                 message = context.getString(R.string.backup_exported_bytes, size)
                             }.onFailure {
-                                message = it.message
+                                message = it.saidWhy()
                                     ?: context.getString(R.string.backup_export_failed)
                             }
                             busy = false

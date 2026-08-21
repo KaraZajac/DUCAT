@@ -26,6 +26,7 @@ import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RateStore
 import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
+import org.ducatproject.ducat.saidWhy
 import java.math.BigDecimal
 
 private const val TAG = "Taxi"
@@ -159,7 +160,7 @@ private fun NewRideScreen(rides: RideStore) {
             }
         }
         r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure { error = it.message ?: context.getString(R.string.taxi_err_publish_code) }
+            .onFailure { error = it.saidWhy() ?: context.getString(R.string.taxi_err_publish_code) }
     }
 
     // Scan → terms into the thread → meter starts. The rider has the rate in
@@ -346,7 +347,7 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
                     }
                     busy = false
                     r.onSuccess { rides.clear() }
-                        .onFailure { error = it.message ?: context.getString(R.string.taxi_err_send_fare) }
+                        .onFailure { error = it.saidWhy() ?: context.getString(R.string.taxi_err_send_fare) }
                 }
             },
             enabled = !busy,

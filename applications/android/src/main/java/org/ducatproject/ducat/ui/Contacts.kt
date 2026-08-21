@@ -33,6 +33,7 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.NameStore
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.saidWhy
 import uniffi.ducat_mobile.createContactCard
 import uniffi.ducat_mobile.readContactCard
 
@@ -139,7 +140,7 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                             r.onSuccess {
                                 NameStore(context).put(name)
                                 uri = it.uri
-                            }.onFailure { error = it.message ?: context.getString(R.string.contacts_error_make_card) }
+                            }.onFailure { error = it.saidWhy() ?: context.getString(R.string.contacts_error_make_card) }
                         }
                     },
                     enabled = !busy && personaSecret != null,
@@ -278,7 +279,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                                     petname = it.assertedName ?: ""
                                 }
                             }
-                            .onFailure { error = it.message ?: context.getString(R.string.contacts_not_a_card) }
+                            .onFailure { error = it.saidWhy() ?: context.getString(R.string.contacts_not_a_card) }
                     },
                     enabled = text.isNotBlank(),
                     modifier = Modifier.fillMaxWidth(),

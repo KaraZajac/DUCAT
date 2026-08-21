@@ -2,6 +2,7 @@ package org.ducatproject.ducat.ui
 
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.saidWhy
 
 /**
  * Why a card could not be claimed, in words the reader can act on.
@@ -118,7 +119,7 @@ fun moneyFailure(context: android.content.Context, t: Throwable): String = when 
             org.ducatproject.ducat.R.plurals.bond_needs_confirmations, n, n,
         )
     }
-    else -> bridgeMessage(t.message ?: context.getString(
+    else -> bridgeMessage(t.saidWhy() ?: context.getString(
         org.ducatproject.ducat.R.string.main_card_link_failed_body,
     ))
 }

@@ -21,6 +21,7 @@ import org.ducatproject.ducat.R
 import org.ducatproject.ducat.SyncBlocker
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
+import org.ducatproject.ducat.saidWhy
 import uniffi.ducat_mobile.MoneroNodeStatus
 import uniffi.ducat_mobile.NodeTrust
 import uniffi.ducat_mobile.moneroDefaultNodes
@@ -62,7 +63,7 @@ fun MoneroPanel() {
             r.onSuccess { status = it; store.rememberLastGood(it.url) }
                 .onFailure {
                     status = null
-                    error = it.message ?: context.getString(R.string.monero_no_usable_node)
+                    error = it.saidWhy() ?: context.getString(R.string.monero_no_usable_node)
                 }
         }
     }

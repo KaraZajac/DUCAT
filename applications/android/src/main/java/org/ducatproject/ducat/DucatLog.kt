@@ -23,6 +23,17 @@ import java.util.Locale
  * stay out, because the whole point of this buffer is that it gets pasted into
  * a chat window — see [redact].
  */
+/**
+ * The reason a throwable gives, when it gives one worth showing.
+ *
+ * `message` is nullable, so a screen with something to explain reaches for
+ * `?:` and a fallback string — which is right for null and wrong for `""`. A
+ * throwable carrying an empty message set a chat's error line to `""`, which
+ * drew nothing, so a picture that failed to send looked exactly like a button
+ * that did not work. Blank is missing.
+ */
+fun Throwable.saidWhy(): String? = message?.takeIf { it.isNotBlank() }
+
 object DucatLog {
     private const val CAP = 600
     /** The on-disk tail: enough for a day of testing, small enough to share. */
