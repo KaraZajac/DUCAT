@@ -1789,7 +1789,24 @@ private fun EnquiryLine(
                             !org.ducatproject.ducat.Ceremony.isStale(it)
                     } == true
             }
-            if (!bonded) {
+            // And not on the side that owns the thing.
+            //
+            // `startReservation` makes the proposer the funder — the one who
+            // pays the price — because until now the person who proposed was
+            // always the person paying. It is offered on both sides, so the
+            // owner of a desk lamp who received an enquiry about it was shown
+            // "Propose a purchase", and taking it would have opened an escrow
+            // in which they bought their own lamp from the person asking.
+            //
+            // Hidden rather than inverted, because the invite frame carries
+            // the funder's refund subaddress (§17.9) and a proposer can only
+            // derive their own. Letting the far side fund a proposal would
+            // mean asking them for that address first, which is a round the
+            // wire does not have. The owner's move is to *accept* — funding
+            // their own stake is what acceptance is — and the seeker's is to
+            // propose.
+            val mineToOffer = about.listingId.isNotEmpty()
+            if (!bonded && !mineToOffer) {
                 TextButton(
                     onClick = onPropose,
                     contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),

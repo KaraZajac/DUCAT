@@ -826,8 +826,33 @@ object Ceremony {
                 else ->
                     DucatLog.w(TAG, "bond $idHex: frost round $round ignored at stage $stage")
             }
-        }.onFailure {
-            DucatLog.w(TAG, "bond $idHex frost round $round failed: ${it.message}")
+        }.onFailure { why ->
+            DucatLog.w(TAG, "bond $idHex frost round $round failed: ${why.message}")
+            // The one failure here that strands money, and the one that heals.
+            //
+            // A release is two rounds and the *proposer* is the side that
+            // assembles and broadcasts. The engine's half of that lives in
+            // memory, so a proposer whose app is restarted between sending
+            // round 0 and the co-signature coming back meets "no release in
+            // progress for this ceremony" — and stops. Nothing is broadcast.
+            // The co-signer has already written itself "release_cosigned",
+            // which reads as finished, so both screens say the deal is done
+            // while the money sits in the escrow. Found exactly that way,
+            // with a settled banner on one phone and a stuck one on the other.
+            //
+            // Proposing again is the designed recovery — `onFrostRound`
+            // accepts a fresh round 0 over a co-signed one for precisely this
+            // reason — so do it rather than wait for somebody to notice and
+            // press "Ask again". The split is the one already agreed, read
+            // back from the record, so this repeats the proposal rather than
+            // inventing a new one.
+            val lost = why.message?.contains("no release in progress") == true
+            if (lost && round?.toInt() == 1) {
+                val back = load(context, idHex)?.optLong("myRiderBack") ?: 0L
+                runCatching { proposeRideSplit(context, idHex, back) }
+                    .onSuccess { DucatLog.i(TAG, "bond $idHex: release state was lost — proposed again") }
+                    .onFailure { DucatLog.w(TAG, "bond $idHex: could not re-propose: ${it.message}") }
+            }
         }
     }
 
