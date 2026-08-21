@@ -99,6 +99,27 @@ class Poller(private val context: Context) {
                     }
                 }
 
+                // Keep what is on the boards on them.
+                //
+                // A notice carries a 24-hour expiry and `needRefresh` returns
+                // the ones past six hours so they can be re-posted before it
+                // runs out. Nothing in the app ever called it — only the desk
+                // test harness did — so every listing quietly fell off the
+                // board a day after it went up, while the owner's screen went
+                // on saying "Live on the board near you" because that label
+                // reads a local flag set at posting and never cleared.
+                //
+                // Re-posting is also where a listing's price is brought back
+                // in line with the currency it was written in (see
+                // Listings.reprice), so this was two features waiting on one
+                // loop that did not exist.
+                runCatching {
+                    Listings.needRefresh(context).forEach { l ->
+                        runCatching { Listings.post(context, l.optString("id")) }
+                            .onFailure { DucatLog.w(TAG, "refresh listing: ${it.message}") }
+                    }
+                }.onFailure { DucatLog.w(TAG, "listing refresh: ${it.message}") }
+
                 // A turn nobody has taken, mentioned again — see
                 // Ceremony.remindWaiting. Cheap: it reads records already on
                 // disk and sends nothing unless an hour has passed.

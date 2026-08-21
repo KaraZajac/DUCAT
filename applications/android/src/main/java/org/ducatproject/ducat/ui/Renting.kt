@@ -234,7 +234,17 @@ private fun MyListingCard(
     onDelete: () -> Unit,
 ) {
     val context = LocalContext.current
-    val live = o.optString("board").isNotBlank()
+    // Posted, and not so long ago that the notice has run out.
+    //
+    // "board" is set when a listing goes up and cleared when it is taken
+    // down, and nothing in between ever cleared it — so a notice that had
+    // simply expired still read "Live on the board near you". The poller
+    // re-posts every six hours against a 24-hour expiry, which keeps this
+    // true; this is what it says when the poller has not been able to (a
+    // phone off for a day, a node that never attached), instead of claiming
+    // a listing is somewhere it is not.
+    val live = o.optString("board").isNotBlank() &&
+        System.currentTimeMillis() / 1000 - o.optLong("postedAt") < Listings.TTL_SECONDS
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
