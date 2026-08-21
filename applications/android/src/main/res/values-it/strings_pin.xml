@@ -4,6 +4,7 @@
     <string name="pin_set_body">Viene chiesto prima che del denaro lasci questo telefono. Nient\'altro lo usa, quindi scegline uno che riesci a digitare a un bancone.</string>
     <string name="pin_ask_title">Inserisci il PIN</string>
     <string name="pin_ask_body">Sta per uscire del denaro da questo telefono.</string>
+    <string name="pin_ask_body_staff">Dietro c’è il lato personale di questa cassa.</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">Scrivilo di nuovo</string>
     <string name="pin_save">Salva PIN</string>

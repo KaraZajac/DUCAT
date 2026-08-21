@@ -4,6 +4,7 @@
     <string name="pin_set_body">इस फ़ोन से पैसा जाने से पहले यह पूछा जाता है। और कहीं इसकी ज़रूरत नहीं, तो ऐसा चुनें जो काउंटर पर टाइप कर सकें।</string>
     <string name="pin_ask_title">अपना PIN डालें</string>
     <string name="pin_ask_body">इस फ़ोन से अभी पैसा जाने वाला है।</string>
+    <string name="pin_ask_body_staff">इसके पीछे इस टिल का स्टाफ़ वाला हिस्सा है।</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">फिर से लिखें</string>
     <string name="pin_save">PIN सहेजें</string>

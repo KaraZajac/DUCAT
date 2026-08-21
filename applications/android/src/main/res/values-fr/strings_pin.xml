@@ -4,6 +4,7 @@
     <string name="pin_set_body">Il est demandé avant que de l\'argent quitte ce téléphone. Rien d\'autre ne s\'en sert, alors choisissez quelque chose que vous pouvez taper à un comptoir.</string>
     <string name="pin_ask_title">Entrez votre code</string>
     <string name="pin_ask_body">De l\'argent est sur le point de quitter ce téléphone.</string>
+    <string name="pin_ask_body_staff">Derrière, c’est le côté personnel de cette caisse.</string>
     <string name="pin_label">Code</string>
     <string name="pin_again">Retapez-le</string>
     <string name="pin_save">Enregistrer</string>

@@ -4,6 +4,7 @@
     <string name="pin_set_body">Jest pytany, zanim pieniądze opuszczą ten telefon. Nic innego go nie potrzebuje, więc wybierz taki, który wystukasz przy ladzie.</string>
     <string name="pin_ask_title">Wpisz PIN</string>
     <string name="pin_ask_body">Zaraz z tego telefonu wyjdą pieniądze.</string>
+    <string name="pin_ask_body_staff">Za tym jest część kasy dla obsługi.</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">Wpisz go jeszcze raz</string>
     <string name="pin_save">Zapisz PIN</string>

@@ -159,6 +159,7 @@ fun KioskScreen() {
         open = staffDoor,
         onDismiss = { staffDoor = false },
         onPassed = { staffDoor = false; staffOpen = true },
+        why = R.string.pin_ask_body_staff,
     )
 }
 

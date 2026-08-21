@@ -4,6 +4,7 @@
     <string name="pin_set_body">يُطلب قبل أن يغادر أي مال هذا الهاتف. لا شيء آخر يحتاجه، فاختر ما يمكنك كتابته عند الصندوق.</string>
     <string name="pin_ask_title">أدخل رمزك</string>
     <string name="pin_ask_body">المال على وشك أن يغادر هذا الهاتف.</string>
+    <string name="pin_ask_body_staff">الجانب الخاص بالموظفين من نقطة البيع هذه خلف هذا.</string>
     <string name="pin_label">الرمز</string>
     <string name="pin_again">اكتبه مرة أخرى</string>
     <string name="pin_save">حفظ الرمز</string>

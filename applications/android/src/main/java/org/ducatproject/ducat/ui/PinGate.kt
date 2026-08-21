@@ -38,6 +38,17 @@ fun PinGate(
     open: Boolean,
     onDismiss: () -> Unit,
     onPassed: () -> Unit,
+    /**
+     * The one line under the title, saying what is behind the gate.
+     *
+     * Defaults to the spend warning because that is what most of these guard,
+     * but not all of them do, and the default was being told to people it was
+     * not true of: opening the kiosk's staff panel and switching operating
+     * modes both announced "Money is about to leave this phone." Nothing was
+     * leaving. A gate that cries wolf about a spend is a gate people learn to
+     * tap through.
+     */
+    why: Int = R.string.pin_ask_body,
 ) {
     if (!open) return
     val context = LocalContext.current
@@ -97,7 +108,7 @@ fun PinGate(
             Column {
                 Text(
                     stringResource(
-                        if (setting) R.string.pin_set_body else R.string.pin_ask_body,
+                        if (setting) R.string.pin_set_body else why,
                     ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

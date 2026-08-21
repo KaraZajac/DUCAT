@@ -4,6 +4,7 @@
     <string name="pin_set_body">Được hỏi trước khi tiền rời khỏi máy này. Không chỗ nào khác cần nó, nên hãy chọn thứ bạn gõ được ngay tại quầy.</string>
     <string name="pin_ask_title">Nhập mã PIN</string>
     <string name="pin_ask_body">Tiền sắp rời khỏi máy này.</string>
+    <string name="pin_ask_body_staff">Phía sau đây là phần dành cho nhân viên của quầy này.</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">Gõ lại lần nữa</string>
     <string name="pin_save">Lưu PIN</string>

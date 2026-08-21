@@ -4,6 +4,7 @@
     <string name="pin_set_body">任何款项离开这台手机之前都会问它。别的地方都不用，所以挑一个在柜台前打得出来的。</string>
     <string name="pin_ask_title">输入你的 PIN</string>
     <string name="pin_ask_body">马上就有钱要离开这台手机。</string>
+    <string name="pin_ask_body_staff">这后面是这台收银机的员工端。</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">再输入一次</string>
     <string name="pin_save">保存 PIN</string>

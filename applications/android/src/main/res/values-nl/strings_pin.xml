@@ -4,6 +4,7 @@
     <string name="pin_set_body">Hij wordt gevraagd voordat er geld van deze telefoon af gaat. Verder heeft niets hem nodig, dus kies iets dat je aan een balie kunt typen.</string>
     <string name="pin_ask_title">Voer je pincode in</string>
     <string name="pin_ask_body">Er gaat zo geld van deze telefoon af.</string>
+    <string name="pin_ask_body_staff">Hierachter zit de personeelskant van deze kassa.</string>
     <string name="pin_label">Pincode</string>
     <string name="pin_again">Typ hem nog eens</string>
     <string name="pin_save">Pincode instellen</string>
