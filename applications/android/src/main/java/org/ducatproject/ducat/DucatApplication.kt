@@ -81,7 +81,16 @@ class DucatApplication : Application() {
             // fanout dies inside QEMU user-net; UDP-off gets zero peers at
             // all. SLIRP cannot carry a Veilid node either way, so the flag
             // stays available for future transports and real devices keep UDP.
+            // Said out loud when it fails. This was a bare runCatching whose
+            // result went nowhere, so a node that would not start left no
+            // trace at all: the log's next line was the poller reporting a
+            // transport that was never going to come up, and working out why
+            // meant noticing the *absence* of lines. The poller retries (see
+            // REVIVE_EVERY_MS); this is how anyone finds out it had to.
             runCatching { nodeStart("${filesDir.absolutePath}/veilid", udp = true) }
+                .onFailure {
+                    DucatLog.w("App", "node start: ${it.javaClass.simpleName}: ${it.message}")
+                }
             // Answering starts with the app, not with a screen. A contact who
             // messages while Ducat sits in the background must still be
             // answered — a peer that only replies when someone is looking at it

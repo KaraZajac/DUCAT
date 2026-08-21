@@ -27,6 +27,9 @@ class Poller(private val context: Context) {
     /** The last transport state narrated, so only changes are. */
     private var lastAttach: String? = null
 
+    /** When the node was last coaxed back to life — see the restart below. */
+    private var lastRevive = 0L
+
     /** Probe the candidates and remember the first usable one. */
     private fun pickNode(context: Context): String? = try {
         val store = NodeStore(context)
@@ -96,6 +99,38 @@ class Poller(private val context: Context) {
                     if (now != lastAttach) {
                         lastAttach = now
                         DucatLog.i(TAG, "transport $now — ${s.peers} peer(s)")
+                    }
+
+                    // A node that failed to start will not start itself.
+                    //
+                    // Start is attempted exactly once, at launch, and its
+                    // result is discarded on the reasoning that nothing can
+                    // act on it. Something can: this loop. Caught on the
+                    // emulator after a reinstall, where the app came up with
+                    // the node dead and simply stayed that way — every board
+                    // read returned nothing, and the search offered "try
+                    // again in a moment", which was a promise the app had no
+                    // way to keep. Only a force-quit fixed it.
+                    //
+                    // Cheap to be wrong about: node_start on a node that is
+                    // already up returns success without doing anything, so
+                    // the worst case of a spurious call is a lock and a
+                    // comparison.
+                    val at = System.currentTimeMillis()
+                    if (!s.running && at - lastRevive > REVIVE_EVERY_MS) {
+                        lastRevive = at
+                        DucatLog.w(TAG, "transport is down — starting the node again")
+                        runCatching {
+                            uniffi.ducat_mobile.nodeStart(
+                                "${context.filesDir.absolutePath}/veilid",
+                                udp = true,
+                            )
+                        }.onFailure {
+                            DucatLog.w(
+                                TAG,
+                                "restart: ${it.javaClass.simpleName}: ${it.message}",
+                            )
+                        }
                     }
                 }
 
@@ -303,5 +338,13 @@ class Poller(private val context: Context) {
          *  minutes. Watches make messages instant regardless; the heartbeat
          *  is the guarantee behind them, exactly like the sweep itself. */
         const val BG_HEARTBEAT_WAKES = 18
+
+        /**
+         * How often a downed node is offered another start. Long enough that a
+         * node genuinely unable to start is not thrashing its store, short
+         * enough that somebody staring at "could not reach the network" gets
+         * it back without knowing to force-quit.
+         */
+        const val REVIVE_EVERY_MS = 30_000L
     }
 }
