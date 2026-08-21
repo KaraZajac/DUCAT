@@ -43,6 +43,22 @@ object Listings {
      */
     private const val WAVE_BUDGET_MS = 120_000L
 
+    /** Shards read at once when climbing a full board's ladder — see readCell. */
+    private const val LADDER_RUNG = 3u
+
+    /**
+     * What each cell last showed, so the next search has something to draw
+     * before the network answers. Process-lifetime, and short: see the paint
+     * in [search] for why it is safe to be a little stale and why it is never
+     * the last word.
+     */
+    private val cellCache =
+        java.util.concurrent.ConcurrentHashMap<
+            String, Pair<Long, List<uniffi.ducat_mobile.RentalInfo>>,
+            >()
+
+    private const val CACHE_TTL_MS = 3 * 60_000L
+
     /** The same, for the second pass over boards that came back full. */
     private const val LADDER_BUDGET_MS = 90_000L
 
@@ -446,16 +462,32 @@ object Listings {
         val home = runCatching {
             uniffi.ducat_mobile.geohashEncode(latE7, lonE7, CELL_PRECISION)
         }.getOrNull() ?: return 0
-        val seen = HashSet<String>()
-        val found = mutableListOf<uniffi.ducat_mobile.RentalInfo>()
+        // What each board last said, rather than one growing pile.
+        //
+        // A pile could only be added to, so a board answering a second time —
+        // which is exactly what the ladder wave does, and what painting from
+        // the cache below does — could never take anything off the screen. A
+        // listing taken down stayed up. Keyed by cell and replaced wholesale,
+        // the second answer corrects the first.
+        //
+        // Insertion order is board order, and home is read first, so what is
+        // underfoot still comes first in the list.
+        val byCell = LinkedHashMap<String, List<uniffi.ducat_mobile.RentalInfo>>()
 
-        fun absorb(fresh: List<uniffi.ducat_mobile.RentalInfo>) {
-            synchronized(found) {
+        fun publish() {
+            val merged = LinkedHashMap<String, uniffi.ducat_mobile.RentalInfo>()
+            synchronized(byCell) {
                 // One card, one listing: a notice copied onto two boards is
                 // still one thing being rented.
-                fresh.filter { seen.add(it.card) }.forEach { found += it }
-                onFound(found.toList())
+                byCell.values.forEach { list -> list.forEach { merged.putIfAbsent(it.card, it) } }
             }
+            onFound(merged.values.toList())
+        }
+
+        fun absorb(cell: String, fresh: List<uniffi.ducat_mobile.RentalInfo>) {
+            synchronized(byCell) { byCell[cell] = fresh }
+            cellCache[cell] = System.currentTimeMillis() to fresh
+            publish()
         }
 
         val ring = runCatching { uniffi.ducat_mobile.geohashNeighbors(home) }
@@ -488,15 +520,56 @@ object Listings {
             val full = java.util.Collections.synchronizedSet(HashSet<String>())
             fun read(cell: String) {
                 val got = runCatching {
-                    readCell(cell, kind, false) { slots -> if (slots >= 8) full += cell }
+                    readCell(
+                        cell, kind, false,
+                        onSlots = { slots -> if (slots >= 8) full += cell },
+                    )
                 }.getOrNull()
                 if (got != null) {
-                    absorb(got)
+                    absorb(cell, got)
                     replied.incrementAndGet()
                 }
                 onProgress(answered.incrementAndGet(), boards.size)
             }
+
+            // What these boards said last time, on screen before the first
+            // read returns.
+            //
+            // Nothing about this is fast: a board with nothing on it costs two
+            // chained ten-second timeouts inside veilid, nine of them overlap
+            // to about forty-eight seconds, and none of that is ours to fix
+            // from here. What was ours to fix is paying it again from an empty
+            // screen every single time — switching Marketplace to Renting and
+            // back, or pressing "try again", re-asked the network questions it
+            // had answered a minute ago while the person watched a spinner.
+            //
+            // Only ever a first paint. Every cached cell is still read, and
+            // its answer replaces what was painted, so a listing taken down in
+            // the meantime survives on screen until its own board reports
+            // back rather than until the cache ages out. Notices past their
+            // own expiry are dropped here rather than shown: the cache can be
+            // older than the thing it remembers.
+            val nowSecs = System.currentTimeMillis() / 1000
+            val warmed = boards.count { cell ->
+                val hit = cellCache[cell]
+                    ?.takeIf { System.currentTimeMillis() - it.first < CACHE_TTL_MS }
+                    ?.second
+                    ?.filter { it.expiry.toLong() > nowSecs }
+                if (hit.isNullOrEmpty()) false
+                else { synchronized(byCell) { byCell[cell] = hit }; true }
+            }
+            if (warmed > 0) {
+                DucatLog.i(TAG, "painting from $warmed remembered board(s) while we look")
+                publish()
+            }
             onProgress(0, boards.size)
+            // Home alone and first, still. Submitting all nine together was
+            // tried and measured: same total to the second, because what
+            // bounds concurrency is inside veilid-core (see node.rs) and nine
+            // at once merely puts home in the queue with the rest. The barrier
+            // costs nothing it was not already going to cost, and it buys the
+            // one thing a searcher notices — what is underfoot, on screen
+            // first.
             read(home)
             val jobs = ring.map { cell -> pool.submit { read(cell) } }
             // One deadline for the wave, not one per board.
@@ -516,21 +589,32 @@ object Listings {
             val crowded = boards.filter { it in full }
             if (crowded.isNotEmpty()) {
                 DucatLog.i(TAG, "climbing the ladder on ${crowded.size} full board(s)")
-                waitAll(
-                    crowded.map { cell ->
-                        pool.submit {
-                            runCatching { readCell(cell, kind, true) }.getOrNull()
-                                ?.let { absorb(it) }
-                        }
-                    },
-                    LADDER_BUDGET_MS,
+                // A pool of its own for the rungs, because these tasks wait on
+                // theirs — see readCell's `climb`.
+                val climbPool = java.util.concurrent.Executors.newFixedThreadPool(
+                    (crowded.size * LADDER_RUNG.toInt()).coerceIn(1, 12),
                 )
+                try {
+                    waitAll(
+                        crowded.map { cell ->
+                            pool.submit {
+                                runCatching { readCell(cell, kind, true, climb = climbPool) }
+                                    .getOrNull()?.let { absorb(cell, it) }
+                            }
+                        },
+                        LADDER_BUDGET_MS,
+                    )
+                } finally {
+                    climbPool.shutdownNow()
+                }
             }
         } finally {
             pool.shutdownNow()
             DucatLog.i(
                 TAG,
-                "search near $home: ${found.size} listing(s) from " +
+                "search near $home: " +
+                    "${synchronized(byCell) { byCell.values.flatten().map { it.card }.toSet().size }}" +
+                    " listing(s) from " +
                     "${replied.get()} board(s) in " +
                     "${(System.currentTimeMillis() - started) / 1000}s",
             )
@@ -580,6 +664,13 @@ object Listings {
         kind: Int?,
         deep: Boolean,
         onSlots: (Int) -> Unit = {},
+        /**
+         * Threads for the climb, when there is one. Its own pool, never the
+         * caller's: a deep read runs *inside* a task on the search pool, and
+         * submitting the rung back into that same pool would have every
+         * thread in it waiting on work queued behind itself.
+         */
+        climb: java.util.concurrent.ExecutorService? = null,
     ): List<uniffi.ducat_mobile.RentalInfo>? {
         val base = boardName(cell)
         // Null, not empty. readShard is careful to tell "nobody has posted
@@ -590,17 +681,45 @@ object Listings {
         val first = readShard(base, kind, onSlots) ?: return null
         if (!deep) return first
         val out = first.toMutableList()
-        var quiet = 0
-        for (shard in 1u until uniffi.ducat_mobile.maxStandShards()) {
-            val name = runCatching { uniffi.ducat_mobile.standShardName(base, shard) }
-                .getOrNull() ?: break
-            val live = readShard(name, kind) ?: break
-            if (live.isEmpty()) {
-                if (++quiet >= 2) break
-            } else {
-                quiet = 0
-                out += live
+        val top = runCatching { uniffi.ducat_mobile.maxStandShards() }.getOrDefault(1u)
+
+        // A rung at a time, not a rung by rung by rung.
+        //
+        // The climb used to read shard 1, wait, read shard 2, wait, and stop
+        // after two empties — so proving a ladder had no more on it cost two
+        // whole board reads end to end, and an empty board read is a flat
+        // twenty-one seconds however little is on it. Forty seconds, tacked
+        // onto the end of a search, to establish nothing.
+        //
+        // Shards fill from the bottom (see `post`), so a ladder is dense: the
+        // question is only where it stops. Reading three at once answers that
+        // in one round trip instead of two, and looks one shard further up
+        // than the old rule did before giving up.
+        var shard = 1u
+        while (shard < top) {
+            val rung = (shard until minOf(shard + LADDER_RUNG, top)).toList()
+            val reads = rung.map { s ->
+                val name = runCatching { uniffi.ducat_mobile.standShardName(base, s) }
+                    .getOrNull()
+                when {
+                    name == null -> null
+                    climb == null -> java.util.concurrent.CompletableFuture
+                        .completedFuture(readShard(name, kind))
+                    else -> climb.submit<List<uniffi.ducat_mobile.RentalInfo>?> {
+                        readShard(name, kind)
+                    }
+                }
             }
+            var anything = false
+            reads.forEach { f ->
+                val live = f?.let { runCatching { it.get() }.getOrNull() }
+                if (live != null && live.isNotEmpty()) {
+                    anything = true
+                    out += live
+                }
+            }
+            if (!anything) break
+            shard += LADDER_RUNG
         }
         return out
     }

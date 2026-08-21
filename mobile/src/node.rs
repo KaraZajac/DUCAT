@@ -163,6 +163,14 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
     // workers those queue behind each other — nine boards took nine boards'
     // worth of time however many threads called in. This is still small enough
     // to be polite on a phone.
+    //
+    // Not the search's bottleneck, though it looks like it. A ring of boards
+    // comes back in about forty-eight seconds where one empty board costs a
+    // flat twenty-one, which reads as an effective width of four and invites
+    // exactly the fix you are thinking of. It was tried: sixteen workers,
+    // measured against the live network on the same boards, gave 63s where
+    // four gave 66s — noise. Whatever bounds concurrent `get_dht_value` calls
+    // is inside veilid-core, not here, and more threads only park.
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(4)
         .enable_all()
