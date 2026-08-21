@@ -314,7 +314,20 @@ private fun RentSearchScreen(
                             }
                         },
                     )
-                    found == null || (found.isEmpty() && searching) -> Column {
+                    // "Still looking" is decided on the tab you are actually
+                    // looking at, not on the raw pile.
+                    //
+                    // This asked whether anything at all had come back, while
+                    // the branch below asks whether anything of *this kind*
+                    // has. Between the two, a board that answered with a
+                    // bicycle while the rooms were still being read ended the
+                    // search as far as the screen was concerned and put
+                    // "nothing listed around here yet" up with a Try again
+                    // button, mid-search. Rare enough to look like a fluke
+                    // until the remembered paint (see Listings.search) made it
+                    // happen on every mode switch.
+                    found == null ||
+                        (searching && found.none { it.kind.toInt() == showing }) -> Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                             Spacer(Modifier.width(8.dp))

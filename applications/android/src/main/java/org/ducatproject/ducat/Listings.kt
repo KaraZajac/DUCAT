@@ -51,11 +51,19 @@ object Listings {
      * before the network answers. Process-lifetime, and short: see the paint
      * in [search] for why it is safe to be a little stale and why it is never
      * the last word.
+     *
+     * Keyed by kind as well as cell, because what a board "showed" is already
+     * filtered — [readShard] drops every notice of another kind before the
+     * caller sees it. Keyed by cell alone, leaving Marketplace for Renting
+     * would have painted the bicycles you were just offered into a list of
+     * rooms, for as long as it took the real read to land.
      */
     private val cellCache =
         java.util.concurrent.ConcurrentHashMap<
             String, Pair<Long, List<uniffi.ducat_mobile.RentalInfo>>,
             >()
+
+    private fun cacheKey(cell: String, kind: Int?) = "$cell|${kind ?: -1}"
 
     private const val CACHE_TTL_MS = 3 * 60_000L
 
@@ -486,7 +494,7 @@ object Listings {
 
         fun absorb(cell: String, fresh: List<uniffi.ducat_mobile.RentalInfo>) {
             synchronized(byCell) { byCell[cell] = fresh }
-            cellCache[cell] = System.currentTimeMillis() to fresh
+            cellCache[cacheKey(cell, kind)] = System.currentTimeMillis() to fresh
             publish()
         }
 
@@ -551,7 +559,7 @@ object Listings {
             // older than the thing it remembers.
             val nowSecs = System.currentTimeMillis() / 1000
             val warmed = boards.count { cell ->
-                val hit = cellCache[cell]
+                val hit = cellCache[cacheKey(cell, kind)]
                     ?.takeIf { System.currentTimeMillis() - it.first < CACHE_TTL_MS }
                     ?.second
                     ?.filter { it.expiry.toLong() > nowSecs }
