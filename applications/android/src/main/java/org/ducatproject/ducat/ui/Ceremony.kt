@@ -497,6 +497,8 @@ fun EscrowStep(
     error: String? = null,
     /** True when the error is the chain saying "not yet". */
     errorWaiting: Boolean = false,
+    /** What to add under it — "keeps trying", and how long is left. */
+    errorNote: String? = null,
     secondaryLabel: String? = null,
     onSecondary: (() -> Unit)? = null,
 ) {
@@ -574,9 +576,9 @@ fun EscrowStep(
                     // Said, because otherwise the screen shows the same
                     // sentence for twenty minutes and nothing about it
                     // suggests anyone is still working.
-                    if (errorWaiting) {
+                    errorNote?.let { note ->
                         Text(
-                            stringResource(R.string.bond_will_retry),
+                            note,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,

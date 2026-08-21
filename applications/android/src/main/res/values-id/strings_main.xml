@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">Sewa perlengkapan</string>
     <string name="home_tile_marketplace">Pasar</string>
     <string name="home_tile_hire_help">Panggil tukang</string>
+    <string name="main_waiting_pay">%1$s menunggu pembayaranmu</string>
+    <string name="main_waiting_sign">%1$s ingin menyelesaikan pembayaran</string>
+    <string name="main_waiting_body">Ketuk untuk membuka — tanpa kamu tidak bisa selesai.</string>
 </resources>

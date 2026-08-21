@@ -66,4 +66,6 @@
     </plurals>
     <string name="res_too_small">太小，无法托管 — 放款的网络手续费比东西本身还贵。试试 %1$s 或更多。</string>
     <string name="bond_will_retry">它会自动重试。</string>
+    <string name="bond_call_off">取消这笔交易</string>
+    <string name="bond_retry_in">它会自动重试——还需 %1$s。</string>
 </resources>

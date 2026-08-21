@@ -101,6 +101,7 @@ object Notify {
             // nobody had met yet.
             8 -> context.getString(R.string.notify_escrow_setup, from)
             9 -> context.getString(R.string.notify_escrow_settle, from)
+            10 -> context.getString(R.string.notify_escrow_called_off, from)
             else -> m.body
         }
         post(context, from, what, openChat = personaHex)

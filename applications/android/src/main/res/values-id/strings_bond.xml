@@ -66,4 +66,6 @@
     </plurals>
     <string name="res_too_small">Terlalu kecil untuk escrow — biaya jaringan untuk melepasnya lebih besar dari barangnya. Coba %1$s atau lebih.</string>
     <string name="bond_will_retry">Akan mencoba lagi sendiri.</string>
+    <string name="bond_call_off">Batalkan kesepakatan</string>
+    <string name="bond_retry_in">Akan mencoba lagi sendiri — tersisa %1$s.</string>
 </resources>

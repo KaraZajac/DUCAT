@@ -67,4 +67,6 @@
     </plurals>
     <string name="res_too_small">Too small for an escrow — releasing it would cost more in network fees than the thing itself. Try %1$s or more.</string>
     <string name="bond_will_retry">It will try again on its own.</string>
+    <string name="bond_call_off">Call it off</string>
+    <string name="bond_retry_in">It will try again on its own — %1$s left.</string>
 </resources>

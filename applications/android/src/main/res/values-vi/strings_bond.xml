@@ -66,4 +66,6 @@
     </plurals>
     <string name="res_too_small">Quá nhỏ để ký quỹ — phí mạng khi giải phóng còn đắt hơn món đồ. Thử %1$s trở lên.</string>
     <string name="bond_will_retry">Sẽ tự thử lại.</string>
+    <string name="bond_call_off">Hủy giao dịch</string>
+    <string name="bond_retry_in">Sẽ tự thử lại — còn %1$s.</string>
 </resources>

@@ -905,6 +905,100 @@ object Ceremony {
         return System.currentTimeMillis() - created > UNANSWERED_MS
     }
 
+    /**
+     * Deals that will not move until this person does something.
+     *
+     * Two moments qualify, and only two: a deal waiting on money this device
+     * owes, and a settlement the other side has proposed and parked. Both are
+     * turns — the counterparty has done their part and is now waiting, in the
+     * second case with their own money in an escrow that cannot pay out
+     * without a second signature.
+     *
+     * Neither had anywhere to be seen. The notification fires once, and if it
+     * is swiped away or arrives while the phone is face-down the app looks
+     * exactly as it does when nothing is happening: the home screen shows a
+     * balance and six tiles, and the person on the other side waits, believing
+     * they have been ignored.
+     *
+     * The arbiter is excluded. It holds a share and no opinion (§9.3), and
+     * nothing is waiting on it until it is asked.
+     */
+    fun waitingOnMe(context: Context): List<JSONObject> =
+        all(context)
+            .filter { it.optInt("kind") != KIND_BOND && !isArbiter(it) && !isFinished(it) }
+            .filter { o ->
+                when (o.optString("stage")) {
+                    "done" -> {
+                        val mine = mySharePxmr(o)
+                        when {
+                            mine <= 0 || myFundTxid(o).isNotEmpty() -> false
+                            // The funder goes second wherever a host stake was
+                            // asked for — the exposed side does not stand
+                            // alone. Until that stake lands this is a wait,
+                            // not a turn, and calling it one would nag
+                            // somebody to pay for something not yet accepted.
+                            isFunder(o) -> {
+                                val hostDep = o.optLong("hostDepPxmr")
+                                !(hostDep > 0 && o.optLong("fundedPxmr") < hostDep)
+                            }
+                            else -> true
+                        }
+                    }
+                    // They proposed a split and it is parked on this device.
+                    "release_pending" -> true
+                    else -> false
+                }
+            }
+            .sortedByDescending { it.optLong("created") }
+
+    /** How long a turn goes unanswered before it is mentioned again. */
+    private const val REMIND_AFTER_MS = 60L * 60 * 1000
+
+    /**
+     * Mention, once an hour, a turn nobody has taken.
+     *
+     * The proposal notification fires exactly once, when the message lands. A
+     * phone that was face-down, or had notifications off, or whose owner swiped
+     * it away on the way to something else, never mentions it again — and the
+     * other side is left holding an escrow that cannot pay out, with no way to
+     * tell being declined from being unseen.
+     *
+     * Hourly, and only while it is genuinely this device's turn: [waitingOnMe]
+     * stops returning a deal the moment it is funded, signed, called off or
+     * settled, so this stops with it. `nudgedAt` is per escrow rather than
+     * global, so two waiting deals do not silence each other.
+     */
+    fun remindWaiting(context: Context) {
+        val now = System.currentTimeMillis()
+        val contacts = ContactStore(context).all()
+        for (o in waitingOnMe(context)) {
+            val idHex = o.optString("id")
+            if (idHex.isEmpty()) continue
+            val since = maxOf(o.optLong("nudgedAt"), o.optLong("created"))
+            if (since <= 0 || now - since < REMIND_AFTER_MS) continue
+            val peerHex = otherPrincipal(o) ?: continue
+            val peer = contacts.firstOrNull { it.personaHex == peerHex } ?: continue
+            Notify.post(
+                context,
+                peer.displayName(),
+                context.getString(
+                    if (o.optString("stage") == "release_pending") {
+                        R.string.main_waiting_sign
+                    } else {
+                        R.string.main_waiting_pay
+                    },
+                    peer.displayName(),
+                ),
+                openChat = peerHex,
+            )
+            runCatching { mutate(context, idHex) { cur -> cur.put("nudgedAt", now) } }
+        }
+    }
+
+    /** The txid this party would have written for its own funding, if any. */
+    private fun myFundTxid(o: JSONObject): String =
+        if (isFunder(o)) o.optString("fundTxid") else o.optString("hostFundTxid")
+
     fun rideWith(context: Context, peerHex: String): JSONObject? =
         all(context)
             .filter { it.optInt("kind") != KIND_BOND && !isArbiter(it) }
@@ -957,6 +1051,87 @@ object Ceremony {
      * the reader's own language saying their money is where they put it.
      */
     class AlreadyPaid : IllegalStateException("you have already paid into this escrow")
+
+    /**
+     * Call this deal off, and say so.
+     *
+     * `MessageKind::CeremonyAbort` has been in the wire format the whole time
+     * — core validates it, refuses one that names no ceremony or carries a
+     * round payload, and `ceremony_abort` clears the threshold machine it
+     * names. Nothing in the app ever sent one. The result was that "aborted"
+     * was a stage three screens could read and nothing could ever write, so a
+     * proposal the far side did not want had no ending: no decline, no
+     * cancel, and two phones each waiting for the other.
+     *
+     * Refused once there is money in it. An escrow either side has funded is
+     * not called off, it is *released* — the funds need two signatures to move
+     * and no local flag can conjure the second one. [isStale]'s test, for the
+     * same reason and read from the same three places: this device's own scan
+     * of the escrow address plus the two txids it would have written itself.
+     *
+     * The message is best-effort and the local record is not. A peer who is
+     * offline learns about this on their next poll; a peer who never comes
+     * back leaves an escrow that goes stale on its own, which is what
+     * [isStale] is for. What must not happen is this device staying on the
+     * hook because the network was down when somebody said no.
+     */
+    fun callOff(context: Context, idHex: String) {
+        val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
+        check(!isFinished(o)) { "this escrow is already over" }
+        check(o.optLong("fundedPxmr") == 0L) { "there is money in this escrow" }
+        check(o.optString("fundTxid").isEmpty()) { "there is money in this escrow" }
+        check(o.optString("hostFundTxid").isEmpty()) { "there is money in this escrow" }
+
+        val id = hexToBytes(o.optString("id")) ?: throw IllegalStateException("no ceremony id")
+        val mineHex = PersonaStore(context).personaHex()
+        val roster = o.optJSONArray("roster")?.let { arr ->
+            (0 until arr.length()).map { arr.getString(it) }
+        } ?: emptyList()
+        for (peerHex in roster.filter { it != mineHex }) {
+            val peer = contactFor(context, peerHex) ?: continue
+            runCatching {
+                // A body, because core refuses a message of zero
+                // characters and this one carries its meaning in its kind.
+                // Never read by anybody: kind 10 is filtered out of the
+                // thread like the other ceremony traffic, and the reader's
+                // own phone writes the sentence they see.
+                Mailbox.send(
+                    context, peer, "ceremony: called off", mineHex,
+                    kind = 10, ceremonyId = id,
+                )
+            }.onFailure { DucatLog.w(TAG, "abort $idHex: ${it.message}") }
+        }
+        runCatching { uniffi.ducat_mobile.ceremonyAbort(id, o.optInt("i").toUShort()) }
+        mutate(context, idHex) { cur -> settle(cur, "aborted") }
+        ContactStore.bump()
+        DucatLog.i(TAG, "escrow $idHex: called off")
+    }
+
+    /**
+     * The other side called it off.
+     *
+     * Only ever *toward* aborted, and only from a state with nothing at stake.
+     * A peer cannot end an escrow this device has money in by sending a
+     * message — that is what the two signatures are for — so a stray or
+     * malicious abort against a funded escrow is dropped rather than obeyed.
+     */
+    fun onAbort(context: Context, idHex: String) {
+        val o = load(context, idHex) ?: return
+        if (isFinished(o)) return
+        if (o.optLong("fundedPxmr") > 0 ||
+            o.optString("fundTxid").isNotEmpty() ||
+            o.optString("hostFundTxid").isNotEmpty()
+        ) {
+            DucatLog.w(TAG, "escrow $idHex: abort ignored — it holds money")
+            return
+        }
+        hexToBytes(o.optString("id"))?.let {
+            runCatching { uniffi.ducat_mobile.ceremonyAbort(it, o.optInt("i").toUShort()) }
+        }
+        mutate(context, idHex) { cur -> settle(cur, "aborted") }
+        ContactStore.bump()
+        DucatLog.i(TAG, "escrow $idHex: the other side called it off")
+    }
 
     /** Stamp the moment an escrow stopped needing anyone. */
     private fun settle(o: JSONObject, stage: String): JSONObject =

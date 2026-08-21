@@ -854,6 +854,17 @@ object Mailbox {
                     )
                 }.onFailure { DucatLog.w(TAG, "frost round: ${it.message}") }
             }
+            // §17.9: the far side withdrew. Core has validated that this
+            // names a ceremony and carries no round payload, so all that is
+            // left is to believe it — and Ceremony.onAbort decides whether to,
+            // because an escrow with money in it is not endable by message.
+            if (arrived.kind == 10) {
+                runCatching {
+                    opened.ceremonyId?.let {
+                        Ceremony.onAbort(context, it.toHexString())
+                    }
+                }.onFailure { DucatLog.w(TAG, "ceremony abort: ${it.message}") }
+            }
             // A request carries a fresher address than anything stored (§16.12).
             opened.payto?.let { store.setTheirAddress(c.personaHex, it) }
             if (opened.consumedOneTime) store.burnOneTime(opened.prekeyId.toInt())

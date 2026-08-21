@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">Взять снаряжение</string>
     <string name="home_tile_marketplace">Рынок</string>
     <string name="home_tile_hire_help">Нанять мастера</string>
+    <string name="main_waiting_pay">%1$s ждёт вашей оплаты</string>
+    <string name="main_waiting_sign">%1$s хочет рассчитаться</string>
+    <string name="main_waiting_body">Нажмите, чтобы открыть — без вас это не завершится.</string>
 </resources>

@@ -21,4 +21,5 @@
     <string name="notify_arrived_body">%1$s — desbloqueia após dez blocos</string>
     <string name="notify_escrow_setup">%1$s está a preparar o depósito em garantia.</string>
     <string name="notify_escrow_settle">%1$s quer acertar contas.</string>
+    <string name="notify_escrow_called_off">%1$s cancelou o acordo.</string>
 </resources>

@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">اجارهٔ وسیله</string>
     <string name="home_tile_marketplace">بازار</string>
     <string name="home_tile_hire_help">استخدام کمک</string>
+    <string name="main_waiting_pay">%1$s منتظر پرداخت شماست</string>
+    <string name="main_waiting_sign">%1$s می‌خواهد تسویه کند</string>
+    <string name="main_waiting_body">برای باز کردن ضربه بزنید — بدون شما تمام نمی‌شود.</string>
 </resources>

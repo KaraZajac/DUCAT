@@ -599,7 +599,11 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             // as bubbles they came out as "You sent 0.000000 XMR — bond: your
             // share", which reads like a failed payment. The banner above
             // narrates the same ceremony in words, with a spinner.
-            items(messages.filter { it.kind != 4 && it.kind != 8 && it.kind != 9 }) { m ->
+            // 4 is a reaction, 8 and 9 are ceremony rounds, 10 is a
+            // withdrawal — none of them is something somebody typed, and all
+            // of them carry a body written for the protocol rather than for a
+            // reader.
+            items(messages.filter { it.kind !in setOf(4, 8, 9, 10) }) { m ->
                 if (m.kind == 5) {
                     // A retraction is a remark about the thread, not a message
                     // in it: one quiet centred line, no bubble and no buttons —
@@ -1898,6 +1902,18 @@ private fun RideBondBanner(contact: Contact) {
         }
     }
     val signNow: () -> Unit = { pinAction = signReally }
+    // Saying no, and saying it to the other phone rather than only to this
+    // one. Ceremony.callOff refuses once there is money in the escrow — that
+    // one ends with two signatures or an arbiter, never with a local flag.
+    val callOffNow: () -> Unit = {
+        busy = true; error = null
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                runCatching { org.ducatproject.ducat.Ceremony.callOff(context, idHex) }
+            }.onFailure { error = trouble(context, it) }
+            busy = false
+        }
+    }
 
     // Ten blocks is the chain's answer, not a refusal.
     //
@@ -1965,6 +1981,8 @@ private fun RideBondBanner(contact: Contact) {
                 Amounts.show(context, myShare).primary,
             ),
             onAction = fundNow,
+            secondary = stringResource(R.string.bond_call_off),
+            onSecondary = callOffNow,
         )
         // The rider putting the fare and their stake in — but not while still
         // waiting on the other side's, which is a wait, not a decision.
@@ -1987,6 +2005,8 @@ private fun RideBondBanner(contact: Contact) {
                 Amounts.show(context, myShare).primary,
             ),
             onAction = fundNow,
+            secondary = stringResource(R.string.bond_call_off),
+            onSecondary = callOffNow,
         )
         // The driver ending the ride and asking for the fare.
         stage == "done" && !rider && funded >= need -> Step(
@@ -2043,6 +2063,7 @@ private fun RideBondBanner(contact: Contact) {
             busy = busy,
             error = error?.text,
             errorWaiting = error?.waiting == true,
+            errorNote = error?.let { retryNote(it) },
             secondaryLabel = step.secondary,
             onSecondary = step.onSecondary,
         )
@@ -2073,8 +2094,18 @@ private fun RideBondBanner(contact: Contact) {
                 // makes "secured" a fact rather than a claim (§17.5).
                 stage == "done" && rider && ride.optString("fundTxid").isEmpty() &&
                     ride.optLong("hostDepPxmr") > 0 &&
-                    funded < ride.optLong("hostDepPxmr") ->
+                    funded < ride.optLong("hostDepPxmr") -> {
                     BondLine(spin = true, text = stringResource(R.string.bond_await_their_stake))
+                    // The one wait in this flow with no end of its own: the
+                    // far side may simply never answer, and until there was a
+                    // way to say so the only exits were to abandon the thread
+                    // or wait for ever.
+                    TextButton(
+                        onClick = callOffNow,
+                        enabled = !busy,
+                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+                    ) { Text(stringResource(R.string.bond_call_off)) }
+                }
 
                 stage == "done" && rider && ride.optString("fundTxid").isEmpty() -> {
                     BondLine(
@@ -2492,9 +2523,9 @@ private fun RideBondBanner(contact: Contact) {
                     else MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.labelSmall,
                 )
-                if (it.waiting) {
+                retryNote(it)?.let { note ->
                     Text(
-                        stringResource(R.string.bond_will_retry),
+                        note,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.labelSmall,
                     )
@@ -2511,10 +2542,37 @@ private fun RideBondBanner(contact: Contact) {
  * to be set in thirteen places and cleared in fourteen, and the first one that
  * forgot would show a calm sentence in red — or worse, a real failure in grey.
  */
-private data class Trouble(val text: String, val waiting: Boolean)
+private data class Trouble(
+    val text: String,
+    val waiting: Boolean,
+    /** Blocks the chain still wants, when waiting is what this is. */
+    val blocks: Int? = null,
+)
 
 private fun trouble(context: android.content.Context, t: Throwable) =
-    Trouble(moneyFailure(context, t), isChainWait(t))
+    chainWaitBlocks(t).let { Trouble(moneyFailure(context, t), it != null, it) }
+
+/** Monero aims at a block every two minutes (§8.7). */
+private const val BLOCK_MINUTES = 2
+
+/**
+ * "It keeps trying", with how long that is likely to take.
+ *
+ * The minutes come from the existing unlock plural rather than a new one —
+ * "about 12 minutes" is the same phrase the balance card has been using for
+ * locked change since long before this screen needed it.
+ */
+@Composable
+private fun retryNote(t: Trouble): String? {
+    if (!t.waiting) return null
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val blocks = t.blocks ?: return stringResource(R.string.bond_will_retry)
+    val mins = (blocks * BLOCK_MINUTES).coerceAtLeast(1)
+    return stringResource(
+        R.string.bond_retry_in,
+        context.resources.getQuantityString(R.plurals.balance_unlock_minutes, mins, mins),
+    )
+}
 
 /**
  * A message from the bridge, without the bridge showing through.

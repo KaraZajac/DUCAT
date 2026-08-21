@@ -143,6 +143,18 @@ private fun BookingsList() {
         return
     }
     val contacts = remember(version) { ContactStore(context).all() }
+    // Which of these are waiting on the reader rather than on the far side.
+    //
+    // "Waiting to be funded" is true of both and useful to neither: it is the
+    // same six words whether the host has yet to accept or the guest has yet
+    // to pay, so the one person who can move the deal along cannot tell from
+    // this list that it is them. The home screen says so now, and a host lives
+    // in Renting rather than on the home screen.
+    val mine = remember(version) {
+        org.ducatproject.ducat.Ceremony.waitingOnMe(context)
+            .mapNotNull { it.optString("id").takeIf { s -> s.isNotEmpty() } }
+            .toSet()
+    }
     // Which rows may guess their subject from the thread.
     //
     // A booking struck before escrows carried their own label has to fall back
@@ -164,7 +176,13 @@ private fun BookingsList() {
             val peer = contacts.firstOrNull { it.personaHex == peerHex }
             val about = peerHex?.let { org.ducatproject.ducat.Enquiries.about(context, it) }
             val need = org.ducatproject.ducat.Ceremony.expectedTotalPxmr(o)
-            val state = when (o.optString("stage")) {
+            // Whose turn first, stage second. A settlement parked on this
+            // device is `release_pending`, which the stage arm below calls
+            // "Settling" — accurate, and indistinguishable from the same word
+            // on the row where the *other* side is the one who has to sign.
+            val state = if (o.optString("id") in mine) {
+                R.string.shells_booking_your_turn
+            } else when (o.optString("stage")) {
                 "released", "release_cosigned" -> R.string.shells_booking_done
                 "releasing", "release_pending" -> R.string.shells_booking_settling
                 "aborted" -> R.string.shells_booking_aborted

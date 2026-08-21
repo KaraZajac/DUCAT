@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">เช่าอุปกรณ์</string>
     <string name="home_tile_marketplace">ตลาด</string>
     <string name="home_tile_hire_help">จ้างช่าง</string>
+    <string name="main_waiting_pay">%1$s กำลังรอการชำระเงินของคุณ</string>
+    <string name="main_waiting_sign">%1$s ต้องการชำระบัญชี</string>
+    <string name="main_waiting_body">แตะเพื่อเปิด — ถ้าไม่มีคุณก็จบไม่ได้</string>
 </resources>

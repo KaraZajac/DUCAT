@@ -33,4 +33,5 @@
     <string name="shells_booking_done">Finished</string>
     <string name="shells_booking_aborted">Called off</string>
     <string name="shells_booking_someone">A booking</string>
+    <string name="shells_booking_your_turn">Your turn</string>
 </resources>

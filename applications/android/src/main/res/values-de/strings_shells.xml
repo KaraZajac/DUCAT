@@ -34,4 +34,5 @@
     <string name="shells_tab_listings">Angebote</string>
     <string name="shells_tab_bookings">Buchungen</string>
     <string name="shells_no_bookings_yet">Noch keine Buchungen.</string>
+    <string name="shells_booking_your_turn">Du bist dran</string>
 </resources>

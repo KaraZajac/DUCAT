@@ -34,4 +34,5 @@
     <string name="shells_tab_listings">ประกาศ</string>
     <string name="shells_tab_bookings">การจอง</string>
     <string name="shells_no_bookings_yet">ยังไม่มีการจอง</string>
+    <string name="shells_booking_your_turn">ตาคุณแล้ว</string>
 </resources>

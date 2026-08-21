@@ -69,4 +69,6 @@
     </plurals>
     <string name="res_too_small">Замало для ескроу — випуск коштуватиме більше мережевої комісії, ніж сама річ. Спробуйте %1$s або більше.</string>
     <string name="bond_will_retry">Спробує ще раз саме.</string>
+    <string name="bond_call_off">Скасувати угоду</string>
+    <string name="bond_retry_in">Спробує ще раз саме — лишилося %1$s.</string>
 </resources>

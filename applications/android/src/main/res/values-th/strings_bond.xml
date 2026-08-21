@@ -66,4 +66,6 @@
     </plurals>
     <string name="res_too_small">เล็กเกินกว่าจะใส่เอสโครว์ — ค่าธรรมเนียมเครือข่ายตอนปล่อยจะแพงกว่าตัวของเอง ลอง %1$s ขึ้นไป</string>
     <string name="bond_will_retry">ระบบจะลองใหม่ให้เอง</string>
+    <string name="bond_call_off">ยกเลิกข้อตกลง</string>
+    <string name="bond_retry_in">ระบบจะลองใหม่ให้เอง — เหลืออีก %1$s</string>
 </resources>

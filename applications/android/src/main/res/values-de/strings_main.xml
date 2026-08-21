@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">Ausrüstung mieten</string>
     <string name="home_tile_marketplace">Marktplatz</string>
     <string name="home_tile_hire_help">Hilfe engagieren</string>
+    <string name="main_waiting_pay">%1$s wartet auf deine Zahlung</string>
+    <string name="main_waiting_sign">%1$s möchte abrechnen</string>
+    <string name="main_waiting_body">Zum Öffnen tippen – ohne dich geht es nicht zu Ende.</string>
 </resources>

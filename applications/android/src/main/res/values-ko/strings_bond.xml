@@ -66,4 +66,6 @@
     </plurals>
     <string name="res_too_small">에스크로에 넣기엔 너무 작습니다 — 푸는 네트워크 수수료가 물건보다 비쌉니다. %1$s 이상으로 해보세요.</string>
     <string name="bond_will_retry">자동으로 다시 시도합니다.</string>
+    <string name="bond_call_off">거래 취소</string>
+    <string name="bond_retry_in">자동으로 다시 시도합니다 — %1$s 남았습니다.</string>
 </resources>

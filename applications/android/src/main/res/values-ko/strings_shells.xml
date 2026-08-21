@@ -34,4 +34,5 @@
     <string name="shells_tab_listings">등록</string>
     <string name="shells_tab_bookings">예약</string>
     <string name="shells_no_bookings_yet">아직 예약이 없습니다.</string>
+    <string name="shells_booking_your_turn">당신 차례</string>
 </resources>

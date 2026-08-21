@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">Spullen huren</string>
     <string name="home_tile_marketplace">Marktplaats</string>
     <string name="home_tile_hire_help">Hulp inhuren</string>
+    <string name="main_waiting_pay">%1$s wacht op je betaling</string>
+    <string name="main_waiting_sign">%1$s wil afrekenen</string>
+    <string name="main_waiting_body">Tik om te openen — zonder jou kan het niet worden afgerond.</string>
 </resources>

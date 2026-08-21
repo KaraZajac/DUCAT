@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">Noleggia attrezzatura</string>
     <string name="home_tile_marketplace">Mercato</string>
     <string name="home_tile_hire_help">Ingaggia aiuto</string>
+    <string name="main_waiting_pay">%1$s aspetta il tuo pagamento</string>
+    <string name="main_waiting_sign">%1$s vuole chiudere il conto</string>
+    <string name="main_waiting_body">Tocca per aprire — senza di te non può finire.</string>
 </resources>

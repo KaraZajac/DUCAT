@@ -99,6 +99,12 @@ class Poller(private val context: Context) {
                     }
                 }
 
+                // A turn nobody has taken, mentioned again — see
+                // Ceremony.remindWaiting. Cheap: it reads records already on
+                // disk and sends nothing unless an hour has passed.
+                runCatching { Ceremony.remindWaiting(context) }
+                    .onFailure { DucatLog.w(TAG, "reminders: ${it.message}") }
+
                 runCatching {
                     // Answers to a card we handed out land in its inbox, and
                     // that only becomes a contact once somebody looks.

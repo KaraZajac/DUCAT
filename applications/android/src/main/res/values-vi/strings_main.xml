@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">Thuê đồ dùng</string>
     <string name="home_tile_marketplace">Chợ</string>
     <string name="home_tile_hire_help">Thuê thợ</string>
+    <string name="main_waiting_pay">%1$s đang đợi bạn thanh toán</string>
+    <string name="main_waiting_sign">%1$s muốn thanh toán xong</string>
+    <string name="main_waiting_body">Chạm để mở — không có bạn thì không xong được.</string>
 </resources>

@@ -34,4 +34,5 @@
     <string name="shells_tab_listings">Iklan</string>
     <string name="shells_tab_bookings">Pesanan</string>
     <string name="shells_no_bookings_yet">Belum ada pesanan.</string>
+    <string name="shells_booking_your_turn">Giliranmu</string>
 </resources>

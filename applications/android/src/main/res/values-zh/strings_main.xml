@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">租借装备</string>
     <string name="home_tile_marketplace">集市</string>
     <string name="home_tile_hire_help">雇人帮忙</string>
+    <string name="main_waiting_pay">%1$s 在等你付款</string>
+    <string name="main_waiting_sign">%1$s 想要结算</string>
+    <string name="main_waiting_body">点按打开——没有你就无法完成。</string>
 </resources>

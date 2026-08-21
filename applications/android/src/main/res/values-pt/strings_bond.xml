@@ -67,4 +67,6 @@
     </plurals>
     <string name="res_too_small">Pequeno demais para um escrow — libertá-lo custaria mais em taxas de rede do que a própria coisa. Tente %1$s ou mais.</string>
     <string name="bond_will_retry">Vai tentar de novo sozinho.</string>
+    <string name="bond_call_off">Cancelar o acordo</string>
+    <string name="bond_retry_in">Vai tentar de novo sozinho — faltam %1$s.</string>
 </resources>

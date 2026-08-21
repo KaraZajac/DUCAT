@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">Rent gear</string>
     <string name="home_tile_marketplace">Marketplace</string>
     <string name="home_tile_hire_help">Hire help</string>
+    <string name="main_waiting_pay">%1$s is waiting on your payment</string>
+    <string name="main_waiting_sign">%1$s asked to settle up</string>
+    <string name="main_waiting_body">Tap to open it — they cannot finish without you.</string>
 </resources>

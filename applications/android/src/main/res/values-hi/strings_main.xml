@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">सामान किराए पर लें</string>
     <string name="home_tile_marketplace">बाज़ार</string>
     <string name="home_tile_hire_help">कारीगर बुलाएँ</string>
+    <string name="main_waiting_pay">%1$s आपके भुगतान की प्रतीक्षा में हैं</string>
+    <string name="main_waiting_sign">%1$s हिसाब पूरा करना चाहते हैं</string>
+    <string name="main_waiting_body">खोलने के लिए टैप करें — आपके बिना यह पूरा नहीं हो सकता।</string>
 </resources>

@@ -67,4 +67,6 @@
     </plurals>
     <string name="res_too_small">Trop petit pour un séquestre — la libération coûterait plus en frais de réseau que la chose elle-même. Essayez %1$s ou plus.</string>
     <string name="bond_will_retry">Une nouvelle tentative se fera toute seule.</string>
+    <string name="bond_call_off">Annuler l\'accord</string>
+    <string name="bond_retry_in">Une nouvelle tentative se fera toute seule — il reste %1$s.</string>
 </resources>

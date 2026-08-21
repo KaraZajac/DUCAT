@@ -21,4 +21,5 @@
     <string name="notify_arrived_body">%1$s — terbuka setelah sepuluh blok</string>
     <string name="notify_escrow_setup">%1$s sedang menyiapkan escrow.</string>
     <string name="notify_escrow_settle">%1$s ingin menyelesaikan pembayaran.</string>
+    <string name="notify_escrow_called_off">%1$s membatalkan kesepakatan.</string>
 </resources>

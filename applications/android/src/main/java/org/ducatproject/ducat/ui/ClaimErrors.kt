@@ -76,8 +76,18 @@ private val NEEDS_CONFIRMATIONS = Regex("""needs (\d+) more confirmation""")
  * plural: in the other eighteen languages the word is not there, so the
  * ordinary "wait six blocks" answer turned red and read as a failure.
  */
-fun isChainWait(t: Throwable): Boolean =
-    NEEDS_CONFIRMATIONS.containsMatchIn(t.message.orEmpty())
+fun isChainWait(t: Throwable): Boolean = chainWaitBlocks(t) != null
+
+/**
+ * How many blocks the chain still wants, when that is the answer.
+ *
+ * The count was already being read to build the sentence; it is worth keeping
+ * because it is also a *duration*. Monero aims at a block every two minutes,
+ * so "six more confirmations" is "about twelve minutes" — which is the form
+ * of the answer somebody standing there waiting to be paid actually wants.
+ */
+fun chainWaitBlocks(t: Throwable): Int? =
+    NEEDS_CONFIRMATIONS.find(t.message.orEmpty())?.groupValues?.get(1)?.toIntOrNull()
 
 fun moneyFailure(context: android.content.Context, t: Throwable): String = when {
     // Our own node, not the Monero one. `claimFailureRes` has said this since

@@ -67,4 +67,6 @@
     </plurals>
     <string name="res_too_small">برای امانت خیلی کوچک است — آزادسازی‌اش بیش از خودِ کالا کارمزد شبکه می‌برد. %1$s یا بیشتر را امتحان کن.</string>
     <string name="bond_will_retry">خودش دوباره تلاش می‌کند.</string>
+    <string name="bond_call_off">لغو معامله</string>
+    <string name="bond_retry_in">خودش دوباره تلاش می‌کند — %1$s باقی مانده است.</string>
 </resources>

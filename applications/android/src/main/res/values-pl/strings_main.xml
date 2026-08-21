@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">Wypożycz sprzęt</string>
     <string name="home_tile_marketplace">Targ</string>
     <string name="home_tile_hire_help">Najmij fachowca</string>
+    <string name="main_waiting_pay">%1$s czeka na twoją płatność</string>
+    <string name="main_waiting_sign">%1$s chce się rozliczyć</string>
+    <string name="main_waiting_body">Dotknij, aby otworzyć — bez ciebie się nie zakończy.</string>
 </resources>

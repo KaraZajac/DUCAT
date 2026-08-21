@@ -21,4 +21,5 @@
     <string name="notify_arrived_body">%1$s — nach zehn Blöcken verfügbar</string>
     <string name="notify_escrow_setup">%1$s richtet die Treuhand ein.</string>
     <string name="notify_escrow_settle">%1$s möchte abrechnen.</string>
+    <string name="notify_escrow_called_off">%1$s hat abgebrochen.</string>
 </resources>

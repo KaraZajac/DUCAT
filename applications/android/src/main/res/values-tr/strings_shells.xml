@@ -34,4 +34,5 @@
     <string name="shells_tab_listings">İlanlar</string>
     <string name="shells_tab_bookings">Rezervasyonlar</string>
     <string name="shells_no_bookings_yet">Henüz rezervasyon yok.</string>
+    <string name="shells_booking_your_turn">Sıra sende</string>
 </resources>

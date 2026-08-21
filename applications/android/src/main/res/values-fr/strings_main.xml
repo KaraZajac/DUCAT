@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">Louer du matériel</string>
     <string name="home_tile_marketplace">Marché</string>
     <string name="home_tile_hire_help">Engager de l\'aide</string>
+    <string name="main_waiting_pay">%1$s attend votre paiement</string>
+    <string name="main_waiting_sign">%1$s veut solder</string>
+    <string name="main_waiting_body">Touchez pour ouvrir — sans vous, cela ne peut pas se terminer.</string>
 </resources>

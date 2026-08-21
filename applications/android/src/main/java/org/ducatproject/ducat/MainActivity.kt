@@ -787,6 +787,64 @@ private fun HomeScreen(
     org.ducatproject.ducat.ui.HailCard(sheetState = hailSheet)
     org.ducatproject.ducat.ui.RentSearchCard(onOpenChat = onOpenChat, kindState = rentKind)
 
+    // Whose turn it is, on the screen somebody opens without being asked to.
+    //
+    // A settlement proposal reaches the other phone as one notification. If it
+    // is swiped away, arrives face-down, or lands while notifications are off,
+    // the app afterwards looks exactly as it does when nothing is happening —
+    // a balance and six tiles — while on the other side somebody's money sits
+    // in an escrow that cannot pay out without a second signature, and they
+    // conclude they are being ignored. The same is true of a deal waiting on
+    // money this device owes.
+    val waiting = remember(version) { org.ducatproject.ducat.Ceremony.waitingOnMe(context) }
+    if (waiting.isNotEmpty()) {
+        val contacts = remember(version) { ContactStore(context).all() }
+        Spacer(Modifier.height(12.dp))
+        waiting.take(3).forEach { o ->
+            val peerHex = org.ducatproject.ducat.Ceremony.otherPrincipal(o)
+            val peer = contacts.firstOrNull { it.personaHex == peerHex }
+            val who = peer?.displayName()
+                ?: androidx.compose.ui.res.stringResource(R.string.shells_booking_someone)
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = MaterialTheme.shapes.large,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+            ) {
+                Row(
+                    Modifier
+                        .clickable { peer?.let { onOpenChat(it) } }
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            androidx.compose.ui.res.stringResource(
+                                if (o.optString("stage") == "release_pending") {
+                                    R.string.main_waiting_sign
+                                } else {
+                                    R.string.main_waiting_pay
+                                },
+                                who,
+                            ),
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                        Text(
+                            androidx.compose.ui.res.stringResource(R.string.main_waiting_body),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        Icons.Filled.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+
     // The nudge that keeps §4.3 true: the bundle carries the relationships
     // now, so every contact made after the last export is one a restore will
     // not bring back — and nobody re-exports unprompted.

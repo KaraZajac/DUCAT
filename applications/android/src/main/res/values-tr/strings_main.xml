@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">Ekipman kirala</string>
     <string name="home_tile_marketplace">Pazar</string>
     <string name="home_tile_hire_help">Usta tut</string>
+    <string name="main_waiting_pay">%1$s ödemeni bekliyor</string>
+    <string name="main_waiting_sign">%1$s hesabı kapatmak istiyor</string>
+    <string name="main_waiting_body">Açmak için dokun — sensiz bitmez.</string>
 </resources>

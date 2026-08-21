@@ -29,4 +29,7 @@
     <string name="home_tile_rent_gear">道具を借りる</string>
     <string name="home_tile_marketplace">マーケット</string>
     <string name="home_tile_hire_help">人手を頼む</string>
+    <string name="main_waiting_pay">%1$s があなたの支払いを待っています</string>
+    <string name="main_waiting_sign">%1$s が精算を希望しています</string>
+    <string name="main_waiting_body">タップして開いてください — あなたなしでは終われません。</string>
 </resources>

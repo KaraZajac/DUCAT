@@ -69,4 +69,6 @@
     </plurals>
     <string name="res_too_small">Za mało na escrow — zwolnienie kosztowałoby więcej opłat sieciowych niż sama rzecz. Spróbuj %1$s lub więcej.</string>
     <string name="bond_will_retry">Spróbuje ponownie samo.</string>
+    <string name="bond_call_off">Odwołaj transakcję</string>
+    <string name="bond_retry_in">Spróbuje ponownie samo — zostało %1$s.</string>
 </resources>

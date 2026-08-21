@@ -34,4 +34,5 @@
     <string name="shells_tab_listings">Anuncios</string>
     <string name="shells_tab_bookings">Reservas</string>
     <string name="shells_no_bookings_yet">Aún no hay reservas.</string>
+    <string name="shells_booking_your_turn">Te toca</string>
 </resources>
