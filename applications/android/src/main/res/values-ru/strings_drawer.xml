@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">Постоянный код, на который может отправить любой кошелёк Monero. На их стороне приложение не нужно.</string>
     <!-- Renting mode -->
     <string name="mode_renting">Аренда</string>
-    <string name="mode_renting_desc">Сдай, одолжи, продай или предложи своё умение. Ты выкладываешь то, что есть; люди рядом находят и спрашивают.</string>
+    <string name="mode_renting_desc">Сдавайте комнату, машину или снаряжение. Вы размещаете, что у вас есть; люди рядом находят и спрашивают.</string>
 </resources>

@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">Постійний код, на який може дати будь-який гаманець Monero. Застосунок з їхнього боку не потрібен.</string>
     <!-- Renting mode -->
     <string name="mode_renting">Оренда</string>
-    <string name="mode_renting_desc">Здай, позич, продай або запропонуй своє вміння. Ти публікуєш те, що маєш; люди поруч знаходять і питають.</string>
+    <string name="mode_renting_desc">Здавайте кімнату, авто або спорядження. Ви розміщуєте те, що маєте; люди поруч знаходять і питають.</string>
 </resources>

@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">一个常设收款码，任何 Monero 钱包都能捐。对方无需安装应用。</string>
     <!-- Renting mode -->
     <string name="mode_renting">出租</string>
-    <string name="mode_renting_desc">出租、出借、出售，或提供手艺。你把有的东西发出去，附近的人看到就来问。</string>
+    <string name="mode_renting_desc">出租房间、车辆或装备。你发布你有的东西，附近的人找到后来问。</string>
 </resources>

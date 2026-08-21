@@ -142,7 +142,9 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
                 ) {
                     RentingScreen(kinds = Listings.SALE_KINDS)
                 },
-                ShellTab(stringResource(R.string.shells_tab_bookings), Icons.Filled.Receipt) {
+                // Not "Bookings": nothing is booked, something is bought or
+                // sold, and it holds both directions.
+                ShellTab(stringResource(R.string.shells_tab_deals), Icons.Filled.Receipt) {
                     BookingsList(kinds = Listings.SALE_KINDS)
                 },
             ),
@@ -171,6 +173,31 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
         Mode.Kiosk -> KioskScreen()
         Mode.None -> {} // personal mode renders the full app, not a shell
     }
+}
+
+/**
+ * Which side of this deal the reader is on.
+ *
+ * The list holds both — an escrow is one agreement between two people, and
+ * filtering it to the half where you are the seller would hide the half where
+ * you are the one who has to pay or sign. Which made every row ambiguous:
+ * "Sam · USD 0.12 · Finished" reads exactly the same whether you bought that
+ * coffee grinder or sold it.
+ *
+ * The funder is whoever pays the price, so they are the buyer, the guest, the
+ * client. Worded per job rather than once, because "renting" said of both
+ * sides of a rental is no help at all.
+ */
+private fun sideLabel(aboutKind: Int, funder: Boolean): Int = when (aboutKind) {
+    Listings.KIND_SALE ->
+        if (funder) R.string.book_side_buying else R.string.book_side_selling
+    Listings.KIND_SKILL ->
+        if (funder) R.string.book_side_hiring else R.string.book_side_working
+    // A place, a vehicle, gear — and anything struck before escrows recorded
+    // what they were about, which lands here for the same reason it lands in
+    // Renting's tab.
+    else ->
+        if (funder) R.string.book_side_renting else R.string.book_side_letting
 }
 
 /**
@@ -299,6 +326,7 @@ private fun BookingsList(kinds: List<Int> = Listings.KINDS) {
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
+                        // Which side, then where it has got to, then who with.
                         // Who it is with — unless that is already the title.
                         //
                         // The condition used to be "there is an `about`",
@@ -308,10 +336,19 @@ private fun BookingsList(kinds: List<Int> = Listings.KINDS) {
                         // "Unnamed contact / USD 0.12 / Finished · Unnamed
                         // contact": the same three words twice, once as the
                         // subject and once as the company.
-                        peer?.displayName()
-                            ?.takeIf { it != title }
-                            ?.let { "${stringResource(state)} · $it" }
-                            ?: stringResource(state),
+                        run {
+                            val side = stringResource(
+                                sideLabel(
+                                    o.optInt("aboutKind", 0),
+                                    org.ducatproject.ducat.Ceremony.isFunder(o),
+                                ),
+                            )
+                            val rest = peer?.displayName()
+                                ?.takeIf { it != title }
+                                ?.let { "${stringResource(state)} · $it" }
+                                ?: stringResource(state)
+                            "$side · $rest"
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

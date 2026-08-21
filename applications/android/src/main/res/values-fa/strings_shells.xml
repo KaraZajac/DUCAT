@@ -43,4 +43,11 @@
     <string name="mode_hire_help_desc">کسی را در نزدیکی برای کاری پیدا کنید — لوله‌کش، برق‌کار، یک دست کمک — و مهارت و نرخ خود را ارائه دهید.</string>
     <string name="shells_tab_my_skills">مهارت‌های من</string>
     <string name="shells_tab_jobs">کارها</string>
+    <string name="book_side_buying">خرید</string>
+    <string name="book_side_selling">فروش</string>
+    <string name="book_side_renting">اجاره</string>
+    <string name="book_side_letting">اجاره‌دادن</string>
+    <string name="book_side_hiring">استخدام</string>
+    <string name="book_side_working">کار</string>
+    <string name="shells_tab_deals">معاملات</string>
 </resources>

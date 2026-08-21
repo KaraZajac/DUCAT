@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">Stały kod, na który wpłaci każdy portfel Monero. Po ich stronie nie trzeba żadnej aplikacji.</string>
     <!-- Renting mode -->
     <string name="mode_renting">Wynajem</string>
-    <string name="mode_renting_desc">Wynajmij, pożycz, sprzedaj albo zaproponuj fach. Wystawiasz to, co masz; ludzie w pobliżu znajdują i pytają.</string>
+    <string name="mode_renting_desc">Wynajmij pokój, samochód lub sprzęt. Wystawiasz, co masz; ludzie w pobliżu znajdują i pytają.</string>
 </resources>

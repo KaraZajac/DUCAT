@@ -43,4 +43,11 @@
     <string name="mode_hire_help_desc">Encuentra a alguien cerca para un trabajo — fontanero, electricista, una mano por la tarde — y ofrece tus propias habilidades y tarifa.</string>
     <string name="shells_tab_my_skills">Mis habilidades</string>
     <string name="shells_tab_jobs">Trabajos</string>
+    <string name="book_side_buying">Comprando</string>
+    <string name="book_side_selling">Vendiendo</string>
+    <string name="book_side_renting">Alquilando</string>
+    <string name="book_side_letting">En alquiler</string>
+    <string name="book_side_hiring">Contratando</string>
+    <string name="book_side_working">Trabajando</string>
+    <string name="shells_tab_deals">Tratos</string>
 </resources>

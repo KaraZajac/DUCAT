@@ -43,4 +43,11 @@
     <string name="mode_hire_help_desc">Yakınında bir iş için birini bul — tesisatçı, elektrikçi, bir çift el — ve kendi becerini ve ücretini sun.</string>
     <string name="shells_tab_my_skills">Becerilerim</string>
     <string name="shells_tab_jobs">İşler</string>
+    <string name="book_side_buying">Alıyorsun</string>
+    <string name="book_side_selling">Satıyorsun</string>
+    <string name="book_side_renting">Kiralıyorsun</string>
+    <string name="book_side_letting">Kiraya veriyorsun</string>
+    <string name="book_side_hiring">İşe alıyorsun</string>
+    <string name="book_side_working">Çalışıyorsun</string>
+    <string name="shells_tab_deals">Anlaşmalar</string>
 </resources>

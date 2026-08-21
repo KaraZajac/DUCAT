@@ -43,4 +43,11 @@
     <string name="mode_hire_help_desc">Tìm người gần bạn cho một công việc — thợ nước, thợ điện, một tay giúp buổi chiều — và đăng kỹ năng cùng giá của bạn.</string>
     <string name="shells_tab_my_skills">Kỹ năng của tôi</string>
     <string name="shells_tab_jobs">Công việc</string>
+    <string name="book_side_buying">Đang mua</string>
+    <string name="book_side_selling">Đang bán</string>
+    <string name="book_side_renting">Đang thuê</string>
+    <string name="book_side_letting">Đang cho thuê</string>
+    <string name="book_side_hiring">Đang thuê người</string>
+    <string name="book_side_working">Đang làm</string>
+    <string name="shells_tab_deals">Giao dịch</string>
 </resources>

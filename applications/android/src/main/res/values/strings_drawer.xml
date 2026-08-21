@@ -37,5 +37,5 @@
     <string name="mode_donate">Donations</string>
     <string name="mode_donate_desc">A standing code any Monero wallet can give to. No app needed on their side.</string>
     <string name="mode_renting">Renting</string>
-    <string name="mode_renting_desc">Rent out, lend, sell, or offer a skill. You post what you have; people nearby find it and ask.</string>
+    <string name="mode_renting_desc">Rent out a room, a car, or gear. You post what you have; people nearby find it and ask.</string>
 </resources>

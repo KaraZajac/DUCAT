@@ -43,4 +43,11 @@
     <string name="mode_hire_help_desc">Vind iemand in de buurt voor een klus — loodgieter, elektricien, een paar handen — en bied je eigen vaardigheden en tarief aan.</string>
     <string name="shells_tab_my_skills">Mijn vaardigheden</string>
     <string name="shells_tab_jobs">Klussen</string>
+    <string name="book_side_buying">Kopen</string>
+    <string name="book_side_selling">Verkopen</string>
+    <string name="book_side_renting">Huren</string>
+    <string name="book_side_letting">Verhuren</string>
+    <string name="book_side_hiring">Inhuren</string>
+    <string name="book_side_working">Werken</string>
+    <string name="shells_tab_deals">Deals</string>
 </resources>

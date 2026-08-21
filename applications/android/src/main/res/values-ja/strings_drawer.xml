@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">どのMoneroウォレットからでも送れる常設コード。相手側にアプリは不要です。</string>
     <!-- Renting mode -->
     <string name="mode_renting">貸し出し</string>
-    <string name="mode_renting_desc">貸す、譲る、売る、腕を提供する。持っているものを出しておくと、近くの人が見つけて聞いてきます。</string>
+    <string name="mode_renting_desc">部屋・車・用具を貸し出します。持っているものを出すと、近くの人が見つけて尋ねてきます。</string>
 </resources>

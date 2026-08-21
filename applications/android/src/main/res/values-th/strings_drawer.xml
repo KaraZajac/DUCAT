@@ -38,5 +38,5 @@
     <string name="mode_donate_desc">โค้ดถาวรที่กระเป๋า Monero ใดก็บริจาคได้ ฝั่งผู้ให้ไม่ต้องมีแอป</string>
     <!-- Renting mode -->
     <string name="mode_renting">ให้เช่า</string>
-    <string name="mode_renting_desc">ปล่อยเช่า ให้ยืม ขาย หรือเสนอฝีมือของคุณ คุณลงสิ่งที่มีไว้ แล้วคนแถวนั้นจะเจอและติดต่อมา</string>
+    <string name="mode_renting_desc">ให้เช่าห้อง รถ หรืออุปกรณ์ คุณลงสิ่งที่คุณมี คนใกล้ ๆ จะเจอและถามเข้ามา</string>
 </resources>
