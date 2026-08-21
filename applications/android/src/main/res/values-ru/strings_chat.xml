@@ -11,6 +11,7 @@
     <string name="chat_what_file">файл</string>
     <string name="chat_what_location">геопозицию</string>
     <string name="chat_what_voice_memo">голосовое сообщение</string>
+    <string name="chat_voice_failed">Это голосовое не записалось — удерживай микрофон ещё раз.</string>
     <string name="chat_what_card">карточку</string>
     <string name="chat_what_contact">контакт</string>
     <string name="chat_error_location_fix">не удалось определить местоположение</string>

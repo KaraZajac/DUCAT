@@ -11,6 +11,7 @@
     <string name="chat_what_file">Datei</string>
     <string name="chat_what_location">Standort</string>
     <string name="chat_what_voice_memo">Sprachmemo</string>
+    <string name="chat_voice_failed">Diese Sprachmemo wurde nicht aufgenommen — halte das Mikrofon noch einmal gedrückt.</string>
     <string name="chat_what_card">Karte</string>
     <string name="chat_what_contact">Kontakt</string>
     <string name="chat_error_location_fix">Standort ließ sich nicht bestimmen</string>

@@ -11,6 +11,7 @@
     <string name="chat_what_file">arquivo</string>
     <string name="chat_what_location">localização</string>
     <string name="chat_what_voice_memo">recado de voz</string>
+    <string name="chat_voice_failed">Esse recado de voz não gravou — segure o microfone de novo.</string>
     <string name="chat_what_card">cartão</string>
     <string name="chat_what_contact">contato</string>
     <string name="chat_error_location_fix">não foi possível obter sua localização</string>

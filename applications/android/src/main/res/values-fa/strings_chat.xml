@@ -11,6 +11,7 @@
     <string name="chat_what_file">فایل</string>
     <string name="chat_what_location">موقعیت</string>
     <string name="chat_what_voice_memo">پیام صوتی</string>
+    <string name="chat_voice_failed">این پیام صوتی ضبط نشد — دوباره میکروفون را نگه دار.</string>
     <string name="chat_what_card">کارت</string>
     <string name="chat_what_contact">مخاطب</string>
     <string name="chat_error_location_fix">موقعیت‌یابی ممکن نشد</string>

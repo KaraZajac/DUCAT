@@ -11,6 +11,7 @@
     <string name="chat_what_file">ไฟล์</string>
     <string name="chat_what_location">ตำแหน่งที่ตั้ง</string>
     <string name="chat_what_voice_memo">ข้อความเสียง</string>
+    <string name="chat_voice_failed">บันทึกเสียงนั้นไม่ได้ถูกบันทึก — ลองกดค้างที่ไมค์อีกครั้ง</string>
     <string name="chat_what_card">นามบัตร</string>
     <string name="chat_what_contact">ผู้ติดต่อ</string>
     <string name="chat_error_location_fix">ระบุตำแหน่งไม่สำเร็จ</string>

@@ -11,6 +11,7 @@
     <string name="chat_what_file">tệp</string>
     <string name="chat_what_location">vị trí</string>
     <string name="chat_what_voice_memo">ghi âm</string>
+    <string name="chat_voice_failed">Tin nhắn thoại đó chưa được ghi — hãy giữ micrô lần nữa.</string>
     <string name="chat_what_card">thẻ</string>
     <string name="chat_what_contact">liên hệ</string>
     <string name="chat_error_location_fix">không định vị được</string>

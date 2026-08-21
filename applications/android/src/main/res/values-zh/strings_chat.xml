@@ -11,6 +11,7 @@
     <string name="chat_what_file">文件</string>
     <string name="chat_what_location">位置</string>
     <string name="chat_what_voice_memo">语音消息</string>
+    <string name="chat_voice_failed">这条语音没有录上——再按住麦克风试一次。</string>
     <string name="chat_what_card">名片</string>
     <string name="chat_what_contact">联系人</string>
     <string name="chat_error_location_fix">无法获取定位</string>

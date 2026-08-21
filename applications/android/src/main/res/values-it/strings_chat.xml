@@ -11,6 +11,7 @@
     <string name="chat_what_file">file</string>
     <string name="chat_what_location">posizione</string>
     <string name="chat_what_voice_memo">memo vocale</string>
+    <string name="chat_voice_failed">Quel messaggio vocale non è stato registrato — tieni premuto di nuovo il microfono.</string>
     <string name="chat_what_card">biglietto</string>
     <string name="chat_what_contact">contatto</string>
     <string name="chat_error_location_fix">impossibile ottenere la posizione</string>

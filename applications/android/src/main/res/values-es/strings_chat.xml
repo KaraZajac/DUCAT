@@ -11,6 +11,7 @@
     <string name="chat_what_file">el archivo</string>
     <string name="chat_what_location">la ubicación</string>
     <string name="chat_what_voice_memo">la nota de voz</string>
+    <string name="chat_voice_failed">Esa nota de voz no se grabó — vuelve a mantener presionado el micrófono.</string>
     <string name="chat_what_card">la tarjeta</string>
     <string name="chat_what_contact">el contacto</string>
     <string name="chat_error_location_fix">no se pudo obtener tu ubicación</string>

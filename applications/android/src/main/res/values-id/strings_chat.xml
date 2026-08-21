@@ -11,6 +11,7 @@
     <string name="chat_what_file">file</string>
     <string name="chat_what_location">lokasi</string>
     <string name="chat_what_voice_memo">pesan suara</string>
+    <string name="chat_voice_failed">Memo suara itu tidak terekam — coba tahan mikrofonnya lagi.</string>
     <string name="chat_what_card">kartu</string>
     <string name="chat_what_contact">kontak</string>
     <string name="chat_error_location_fix">tidak bisa mendapatkan titik lokasi</string>

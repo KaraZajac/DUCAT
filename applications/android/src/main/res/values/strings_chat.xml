@@ -11,6 +11,7 @@
     <string name="chat_what_file">file</string>
     <string name="chat_what_location">location</string>
     <string name="chat_what_voice_memo">voice memo</string>
+    <string name="chat_voice_failed">That memo didn’t record — try holding the mic again.</string>
     <string name="chat_what_card">card</string>
     <string name="chat_what_contact">contact</string>
     <string name="chat_error_location_fix">could not get a location fix</string>

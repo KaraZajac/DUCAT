@@ -376,23 +376,36 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                                         )
                                                         return@detectTapGestures
                                                     }
-                                                    if (!recorder.start()) return@detectTapGestures
+                                                    if (!recorder.start()) {
+                                                        error = context.getString(
+                                                            R.string.chat_voice_failed
+                                                        )
+                                                        return@detectTapGestures
+                                                    }
                                                     recording = true
                                                     tryAwaitRelease()
                                                     recording = false
-                                                    val memo = recorder.stop()
-                                                    if (memo != null) {
-                                                        sending = true
-                                                        scope.launch(Dispatchers.IO) {
-                                                            afterSend(
-                                                                runCatching {
-                                                                    sendVoice(context, c, mine, memo)
-                                                                },
-                                                                context.getString(
-                                                                    R.string.chat_what_voice_memo
-                                                                ),
-                                                            )
+                                                    when (val take = recorder.stop()) {
+                                                        is Take.Memo -> {
+                                                            sending = true
+                                                            scope.launch(Dispatchers.IO) {
+                                                                afterSend(
+                                                                    runCatching {
+                                                                        sendVoice(
+                                                                            context, c, mine,
+                                                                            take.file,
+                                                                        )
+                                                                    },
+                                                                    context.getString(
+                                                                        R.string.chat_what_voice_memo
+                                                                    ),
+                                                                )
+                                                            }
                                                         }
+                                                        Take.Failed -> error = context.getString(
+                                                            R.string.chat_voice_failed
+                                                        )
+                                                        Take.TooShort -> Unit
                                                     }
                                                 })
                                             },
@@ -1597,22 +1610,33 @@ private class VoiceRecorder(private val context: android.content.Context) {
         rec?.release(); rec = null
     }.isSuccess
 
-    /** Null when the take was too short or the recorder failed. */
-    fun stop(): java.io.File? {
-        val r = rec ?: return null
+    fun stop(): Take {
+        val r = rec ?: return Take.Failed
         rec = null
         val clean = runCatching { r.stop() }.isSuccess
         r.release()
         val f = file
         file = null
         val longEnough = System.currentTimeMillis() - startedAt >= 700
-        return if (clean && longEnough && f != null && f.length() > 0) {
-            f
-        } else {
-            f?.delete()
-            null
-        }
+        if (clean && longEnough && f != null && f.length() > 0) return Take.Memo(f)
+        f?.delete()
+        // A brush of the icon is the gesture working as designed and stays
+        // silent whatever the encoder made of it. Holding the button for a
+        // second and getting nothing is not the same event, and used to look
+        // identical: the icon went red, the counter ran, the finger came up,
+        // and the memo was gone with nothing said. Found on a device whose
+        // encoder would not start at all, where every take vanished.
+        return if (!longEnough) Take.TooShort else Take.Failed
     }
+}
+
+/** What came of a take — see [VoiceRecorder.stop]. */
+private sealed interface Take {
+    class Memo(val file: java.io.File) : Take
+    /** Too brief to be speech. Discarded without comment, on purpose. */
+    object TooShort : Take
+    /** The recorder gave back nothing usable. The person should be told. */
+    object Failed : Take
 }
 
 

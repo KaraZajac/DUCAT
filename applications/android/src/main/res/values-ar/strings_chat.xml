@@ -11,6 +11,7 @@
     <string name="chat_what_file">الملف</string>
     <string name="chat_what_location">الموقع</string>
     <string name="chat_what_voice_memo">الرسالة الصوتية</string>
+    <string name="chat_voice_failed">لم تُسجَّل هذه الرسالة الصوتية — جرّب الضغط مطوّلاً على الميكروفون مرة أخرى.</string>
     <string name="chat_what_card">البطاقة</string>
     <string name="chat_what_contact">جهة الاتصال</string>
     <string name="chat_error_location_fix">تعذّر تحديد الموقع</string>

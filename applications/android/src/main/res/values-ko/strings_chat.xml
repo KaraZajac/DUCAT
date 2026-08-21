@@ -11,6 +11,7 @@
     <string name="chat_what_file">파일</string>
     <string name="chat_what_location">위치</string>
     <string name="chat_what_voice_memo">음성 메모</string>
+    <string name="chat_voice_failed">그 음성 메모는 녹음되지 않았어 — 마이크를 다시 길게 눌러 봐.</string>
     <string name="chat_what_card">카드</string>
     <string name="chat_what_contact">연락처</string>
     <string name="chat_error_location_fix">위치를 잡지 못했어요</string>
