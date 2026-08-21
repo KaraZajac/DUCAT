@@ -147,10 +147,27 @@ object Ceremony {
     }
 
     /** Every ceremony this device knows, for the UI to show. */
+    /**
+     * Every ceremony this device knows about.
+     *
+     * Read out of the one decrypted snapshot rather than decrypted twice. The
+     * store is encrypted at rest, so `.all` already costs a pass over every
+     * entry — and this then asked for each one again by key, and re-resolved
+     * `prefs(context)` inside the loop while doing it. Three screens call this
+     * on every change to the contact store, one of them the home screen, so
+     * the wasted work landed on the main thread every time a poll ticked.
+     *
+     * A record that will not parse is skipped rather than thrown: this is on
+     * the path that draws the home screen, and one malformed entry taking the
+     * whole screen down is a worse answer than one row missing.
+     */
     fun all(context: Context): List<JSONObject> =
-        prefs(context).all.keys
-            .filter { it.startsWith("c_") }
-            .mapNotNull { k -> prefs(context).getString(k, null)?.let { JSONObject(it) } }
+        prefs(context).all
+            .asSequence()
+            .filter { it.key.startsWith("c_") }
+            .mapNotNull { (it.value as? String) }
+            .mapNotNull { runCatching { JSONObject(it) }.getOrNull() }
+            .toList()
 
     /**
      * The 32-byte context every party derives identically: the sorted
