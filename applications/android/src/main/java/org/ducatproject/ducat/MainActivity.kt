@@ -647,26 +647,63 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             // copies of it in one bar and neither reads as the
                             // mark.
                             NavItem(Tab.Accounts, Icons.Filled.AccountBalanceWallet, tab) { tab = it }
-                            // The centre slot: only the label lives in the bar;
-                            // the circle floats in the wrapper above. A fixed
-                            // height, never fillMaxHeight — NavigationBar does
-                            // not constrain its children, so filling it expands
-                            // the bar to the whole screen. That lesson was in a
-                            // comment here once, which got deleted with the code
-                            // it annotated and promptly needed relearning.
-                            Box(
-                                Modifier.weight(1f).height(80.dp),
-                                contentAlignment = Alignment.BottomCenter,
-                            ) {
-                                Text(
-                                    androidx.compose.ui.res.stringResource(
-                                        R.string.tab_send_receive),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    modifier = Modifier.padding(bottom = 14.dp),
-                                )
-                            }
+                            // The centre slot: a real bar item with an empty
+                            // icon, the circle floating over it from the
+                            // wrapper above.
+                            //
+                            // It used to be a hand-built Box that placed its
+                            // label with `padding(bottom = 14.dp)`, guessing at
+                            // where Material puts the other four. It guessed
+                            // wrong, and measurably: the other labels sat at
+                            // y=2253 and this one at y=2266, in a smaller type
+                            // besides. Thirteen pixels is not much to look at
+                            // and is exactly what makes a bar look hand-made.
+                            // An empty icon of the same 24.dp reserves the same
+                            // space theirs does, so the label lands where
+                            // theirs land because it is placed by the same
+                            // code, not because the number was tuned until it
+                            // matched.
+                            //
+                            // It also makes the whole slot tappable. Only the
+                            // circle was, so a finger that landed on the word
+                            // "Send/Receive" did nothing at all.
+                            NavigationBarItem(
+                                selected = false,
+                                onClick = { payOpen = true },
+                                icon = { Spacer(Modifier.size(24.dp)) },
+                                label = {
+                                    Text(
+                                        androidx.compose.ui.res.stringResource(
+                                            R.string.tab_send_receive),
+                                        // The longest label in the bar, in the
+                                        // narrowest fifth of it. Material's
+                                        // default size does not fit at all, so
+                                        // the other four match this one rather
+                                        // than the other way round — see
+                                        // NavItem.
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        // Measured at its own width, not at the
+                                        // slot's. A bar item keeps horizontal
+                                        // padding for its label, which leaves
+                                        // less than "Send/Receive" needs, and
+                                        // `softWrap = false` spends the
+                                        // shortfall on clipping the last letter
+                                        // rather than on wrapping — the bar
+                                        // read "Send/Receiv" with the e cut
+                                        // through. Four of the nineteen
+                                        // translations are longer than the
+                                        // English ("Enviar/Receber",
+                                        // "Wyślij/Odbierz"), so this was going
+                                        // to be worse elsewhere than it looked
+                                        // here. The neighbours' labels end
+                                        // well short of this slot, so the few
+                                        // pixels it takes back are empty ones.
+                                        modifier = Modifier.wrapContentWidth(unbounded = true),
+                                    )
+                                },
+                            )
                             NavItem(Tab.Activity, Icons.Filled.Receipt, tab) { tab = it }
                             // The one number a messenger owes its bottom bar:
                             // how many conversations are waiting.
@@ -684,7 +721,16 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                                     }
                                 },
                                 label = {
-                                    Text(androidx.compose.ui.res.stringResource(Tab.Chat.labelRes))
+                                    // Spelled out rather than via NavItem,
+                                    // because this one carries the badge — so
+                                    // it needs the same label style spelled
+                                    // out too, or it is the odd one left.
+                                    Text(
+                                        androidx.compose.ui.res.stringResource(Tab.Chat.labelRes),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                    )
                                 },
                             )
                         }
@@ -1052,7 +1098,17 @@ private fun RowScope.NavItem(
             Icon(icon, contentDescription =
                 androidx.compose.ui.res.stringResource(target.labelRes))
         },
-        label = { Text(androidx.compose.ui.res.stringResource(target.labelRes)) },
+        // labelSmall, to match the centre slot rather than tower over it.
+        // "Send/Receive" is the longest word in the bar and sits in its
+        // narrowest fifth, so it sets the size and these four follow.
+        label = {
+            Text(
+                androidx.compose.ui.res.stringResource(target.labelRes),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                softWrap = false,
+            )
+        },
     )
 }
 
