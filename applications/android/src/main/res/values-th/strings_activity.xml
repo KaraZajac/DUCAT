@@ -29,4 +29,8 @@
     <string name="activity_from">จาก %1$s</string>
     <string name="activity_sent_unrecorded">ส่งแล้ว — ไม่ได้บันทึกผู้รับ</string>
     <string name="activity_received_unknown">ได้รับแล้ว — ไม่ทราบผู้ส่ง</string>
+    <string name="activity_escrow_in">เข้าเอสโครว์ — %1$s</string>
+    <string name="activity_escrow_in_untitled">เข้าเอสโครว์</string>
+    <string name="activity_escrow_out">ปล่อยจากเอสโครว์ — %1$s</string>
+    <string name="activity_escrow_out_untitled">ปล่อยจากเอสโครว์</string>
 </resources>

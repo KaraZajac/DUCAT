@@ -29,4 +29,8 @@
     <string name="activity_from">%1$s님에게서</string>
     <string name="activity_sent_unrecorded">보냄 — 받는 사람 기록 없음</string>
     <string name="activity_received_unknown">받음 — 보낸 사람 알 수 없음</string>
+    <string name="activity_escrow_in">에스크로로 — %1$s</string>
+    <string name="activity_escrow_in_untitled">에스크로로</string>
+    <string name="activity_escrow_out">에스크로에서 풀림 — %1$s</string>
+    <string name="activity_escrow_out_untitled">에스크로에서 풀림</string>
 </resources>

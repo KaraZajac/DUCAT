@@ -30,4 +30,8 @@
     <string name="activity_from">%1$s से</string>
     <string name="activity_sent_unrecorded">भेजा गया — पाने वाला दर्ज नहीं</string>
     <string name="activity_received_unknown">मिला — भेजने वाला अज्ञात</string>
+    <string name="activity_escrow_in">एस्क्रो में — %1$s</string>
+    <string name="activity_escrow_in_untitled">एक एस्क्रो में</string>
+    <string name="activity_escrow_out">एस्क्रो से जारी — %1$s</string>
+    <string name="activity_escrow_out_untitled">एक एस्क्रो से जारी</string>
 </resources>

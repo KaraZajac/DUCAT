@@ -29,4 +29,8 @@
     <string name="activity_from">Dari %1$s</string>
     <string name="activity_sent_unrecorded">Terkirim — penerima tidak tercatat</string>
     <string name="activity_received_unknown">Diterima — pengirim tidak diketahui</string>
+    <string name="activity_escrow_in">Ke escrow — %1$s</string>
+    <string name="activity_escrow_in_untitled">Ke sebuah escrow</string>
+    <string name="activity_escrow_out">Dilepaskan dari escrow — %1$s</string>
+    <string name="activity_escrow_out_untitled">Dilepaskan dari sebuah escrow</string>
 </resources>

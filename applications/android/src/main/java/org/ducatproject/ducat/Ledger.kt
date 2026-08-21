@@ -67,6 +67,14 @@ object Ledger {
         val balanceAfterPxmr: Long,
         val counterparty: String?,
         val address: String?,
+        /**
+         * The deal this movement belongs to, when it is an escrow's.
+         *
+         * Empty string for an escrow whose subject was never recorded — the
+         * distinction that matters is escrow or not, and "an escrow" is still
+         * a better answer than a raw address. Null when it is neither.
+         */
+        val escrow: String? = null,
         val source: Source,
         val note: String?,
         /** Our outputs created by this transaction. Includes change. */
@@ -181,7 +189,39 @@ object Ledger {
             nameOf = { h -> everyone.firstOrNull { it.personaHex == h }?.displayName() },
             announced = announced,
         )
-        return built.map { e ->
+        // Which of these were an escrow's, and whose deal.
+        //
+        // Both directions read as anonymous without it. A funding shows as
+        // "To 5ASXcL1JuxNY…MuXhmy", which tells nobody where six dollars
+        // went, and the deposit coming home shows as "Received — sender
+        // unknown" — which is *true*, Monero carries no sender, and reads as
+        // a stranger sending money. This device knows both ends anyway: the
+        // escrow address it paid into, and the subaddress it asked to be paid
+        // back on.
+        //
+        // Sends match on the destination. Receipts go the other way, through
+        // the minor that received the output: a ceremony's refund address is
+        // allocated under the key "ride_<id>", so the reverse lookup names
+        // the ceremony without guessing.
+        val escrowTitle = HashMap<String, String>()
+        val escrowByAddress = HashMap<String, String>()
+        Ceremony.all(context).forEach { c ->
+            val title = c.optString("aboutTitle")
+            c.optString("id").takeIf { it.isNotEmpty() }?.let { escrowTitle[it] = title }
+            c.optString("address").takeIf { it.isNotEmpty() }
+                ?.let { escrowByAddress[it] = title }
+        }
+        fun escrowOf(e: Event): String? = when (e.direction) {
+            Direction.Sent -> e.address?.let { escrowByAddress[it] }
+            Direction.Received -> e.ours.asSequence()
+                .mapNotNull { store.personaForMinor(it.minor) }
+                .filter { it.startsWith("ride_") }
+                .mapNotNull { escrowTitle[it.removePrefix("ride_")] }
+                .firstOrNull()
+        }
+
+        return built.map { e0 ->
+            val e = escrowOf(e0)?.let { e0.copy(escrow = it) } ?: e0
             var paper = papered[e.txid.lowercase()]
             // The counterparty the event can already name — our send record,
             // or the notice that announced it. A loose receipt must agree

@@ -297,6 +297,21 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
  */
 private fun who(context: Context, e: Ledger.Event): String {
     val sent = e.direction == Ledger.Direction.Sent
+    // An escrow first, because it explains the movement in a way no address
+    // and no absent sender can: money going into one has not been spent, and
+    // money coming out of one is your own deposit or your own earnings
+    // arriving — not a stranger paying you, which is what "sender unknown"
+    // reads as to the person holding the phone.
+    e.escrow?.let { title ->
+        return when {
+            title.isNotBlank() && sent ->
+                context.getString(R.string.activity_escrow_in, title)
+            title.isNotBlank() ->
+                context.getString(R.string.activity_escrow_out, title)
+            sent -> context.getString(R.string.activity_escrow_in_untitled)
+            else -> context.getString(R.string.activity_escrow_out_untitled)
+        }
+    }
     e.counterparty?.let {
         return if (sent) context.getString(R.string.activity_to, it)
         else context.getString(R.string.activity_from, it)

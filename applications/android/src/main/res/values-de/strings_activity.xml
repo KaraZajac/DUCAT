@@ -30,4 +30,8 @@
     <string name="activity_from">Von %1$s</string>
     <string name="activity_sent_unrecorded">Gesendet — Empfänger nicht festgehalten</string>
     <string name="activity_received_unknown">Empfangen — Absender unbekannt</string>
+    <string name="activity_escrow_in">In die Treuhand — %1$s</string>
+    <string name="activity_escrow_in_untitled">In eine Treuhand</string>
+    <string name="activity_escrow_out">Aus der Treuhand freigegeben — %1$s</string>
+    <string name="activity_escrow_out_untitled">Aus einer Treuhand freigegeben</string>
 </resources>

@@ -30,4 +30,8 @@
     <string name="activity_from">از %1$s</string>
     <string name="activity_sent_unrecorded">ارسال شده — گیرنده ثبت نشده</string>
     <string name="activity_received_unknown">دریافت شده — فرستنده نامشخص</string>
+    <string name="activity_escrow_in">به امانی — %1$s</string>
+    <string name="activity_escrow_in_untitled">به یک امانی</string>
+    <string name="activity_escrow_out">آزادشده از امانی — %1$s</string>
+    <string name="activity_escrow_out_untitled">آزادشده از یک امانی</string>
 </resources>

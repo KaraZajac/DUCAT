@@ -34,4 +34,8 @@
     <string name="activity_from">Від %1$s</string>
     <string name="activity_sent_unrecorded">Надіслано — отримувача не записано</string>
     <string name="activity_received_unknown">Отримано — відправник невідомий</string>
+    <string name="activity_escrow_in">В ескроу — %1$s</string>
+    <string name="activity_escrow_in_untitled">В ескроу</string>
+    <string name="activity_escrow_out">Випущено з ескроу — %1$s</string>
+    <string name="activity_escrow_out_untitled">Випущено з ескроу</string>
 </resources>

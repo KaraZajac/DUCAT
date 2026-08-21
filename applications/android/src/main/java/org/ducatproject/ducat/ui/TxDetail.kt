@@ -248,6 +248,19 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
 }
 
 private fun counterpartyText(context: Context, e: Ledger.Event): String = when {
+    // Same answer as the row it was opened from — see Activity.who.
+    e.escrow != null -> {
+        val sent = e.direction == Ledger.Direction.Sent
+        val title = e.escrow!!
+        when {
+            title.isNotBlank() && sent ->
+                context.getString(R.string.activity_escrow_in, title)
+            title.isNotBlank() ->
+                context.getString(R.string.activity_escrow_out, title)
+            sent -> context.getString(R.string.activity_escrow_in_untitled)
+            else -> context.getString(R.string.activity_escrow_out_untitled)
+        }
+    }
     e.counterparty != null -> when (e.source) {
         Ledger.Source.Notice -> context.getString(R.string.txdetail_counterparty_chat, e.counterparty)
         else -> e.counterparty

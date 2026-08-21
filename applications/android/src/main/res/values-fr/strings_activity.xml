@@ -30,4 +30,8 @@
     <string name="activity_from">De %1$s</string>
     <string name="activity_sent_unrecorded">Envoyé — destinataire non enregistré</string>
     <string name="activity_received_unknown">Reçu — expéditeur inconnu</string>
+    <string name="activity_escrow_in">Vers le séquestre — %1$s</string>
+    <string name="activity_escrow_in_untitled">Vers un séquestre</string>
+    <string name="activity_escrow_out">Libéré du séquestre — %1$s</string>
+    <string name="activity_escrow_out_untitled">Libéré d\'un séquestre</string>
 </resources>

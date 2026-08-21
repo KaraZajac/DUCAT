@@ -29,4 +29,8 @@
     <string name="activity_from">Từ %1$s</string>
     <string name="activity_sent_unrecorded">Đã gửi — không ghi lại người nhận</string>
     <string name="activity_received_unknown">Đã nhận — không rõ người gửi</string>
+    <string name="activity_escrow_in">Vào ký quỹ — %1$s</string>
+    <string name="activity_escrow_in_untitled">Vào một ký quỹ</string>
+    <string name="activity_escrow_out">Được giải phóng từ ký quỹ — %1$s</string>
+    <string name="activity_escrow_out_untitled">Được giải phóng từ ký quỹ</string>
 </resources>

@@ -30,4 +30,8 @@
     <string name="activity_from">Kimden: %1$s</string>
     <string name="activity_sent_unrecorded">Gönderildi — alıcı kaydedilmedi</string>
     <string name="activity_received_unknown">Alındı — gönderen bilinmiyor</string>
+    <string name="activity_escrow_in">Emanete — %1$s</string>
+    <string name="activity_escrow_in_untitled">Bir emanete</string>
+    <string name="activity_escrow_out">Emanetten serbest bırakıldı — %1$s</string>
+    <string name="activity_escrow_out_untitled">Bir emanetten serbest bırakıldı</string>
 </resources>

@@ -31,4 +31,8 @@
     <string name="activity_from">From %1$s</string>
     <string name="activity_sent_unrecorded">Sent — recipient not recorded</string>
     <string name="activity_received_unknown">Received — sender unknown</string>
+    <string name="activity_escrow_in">Into the escrow — %1$s</string>
+    <string name="activity_escrow_in_untitled">Into an escrow</string>
+    <string name="activity_escrow_out">Released from the escrow — %1$s</string>
+    <string name="activity_escrow_out_untitled">Released from an escrow</string>
 </resources>

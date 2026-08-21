@@ -38,4 +38,8 @@
     <string name="activity_from">من %1$s</string>
     <string name="activity_sent_unrecorded">أُرسلت — المستلم غير مسجَّل</string>
     <string name="activity_received_unknown">استُلمت — المرسل مجهول</string>
+    <string name="activity_escrow_in">إلى الضمان — %1$s</string>
+    <string name="activity_escrow_in_untitled">إلى ضمان</string>
+    <string name="activity_escrow_out">أُفرج عنه من الضمان — %1$s</string>
+    <string name="activity_escrow_out_untitled">أُفرج عنه من ضمان</string>
 </resources>

@@ -30,4 +30,8 @@
     <string name="activity_from">De %1$s</string>
     <string name="activity_sent_unrecorded">Enviado — destinatário não registrado</string>
     <string name="activity_received_unknown">Recebido — remetente desconhecido</string>
+    <string name="activity_escrow_in">Para o depósito em garantia — %1$s</string>
+    <string name="activity_escrow_in_untitled">Para um depósito em garantia</string>
+    <string name="activity_escrow_out">Libertado do depósito em garantia — %1$s</string>
+    <string name="activity_escrow_out_untitled">Libertado de um depósito em garantia</string>
 </resources>
