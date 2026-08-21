@@ -1,6 +1,6 @@
 package org.ducatproject.ducat.ui
 
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.window.DialogProperties
 
 /**
@@ -49,6 +49,14 @@ fun voiceMemoFile(context: android.content.Context): java.io.File =
 fun SystemBarIcons(dark: Boolean) {
     val view = androidx.compose.ui.platform.LocalView.current
     if (view.isInEditMode) return
+    // The colour the bars are painted, as well as the icons drawn on them.
+    //
+    // This app does not draw edge to edge, so the strip behind the clock is
+    // the *window's* background — which comes from Theme.DeviceDefault and is
+    // light whatever DUCAT is doing. On Latte that happened to match and hid
+    // the problem; on Mocha the app went to (30, 30, 46) and left a bright
+    // white band across the top of every screen, with white icons on it.
+    val bar = androidx.compose.material3.MaterialTheme.colorScheme.background.toArgb()
     androidx.compose.runtime.SideEffect {
         // The dialog's window when there is one, the activity's otherwise: a
         // full-screen dialog owns the bars while it is up, and unwrapping the
@@ -59,6 +67,11 @@ fun SystemBarIcons(dark: Boolean) {
                 (it as? android.content.ContextWrapper)?.baseContext
             }.filterIsInstance<android.app.Activity>().firstOrNull()?.window
             ?: return@SideEffect
+        @Suppress("DEPRECATION")
+        run {
+            window.statusBarColor = bar
+            window.navigationBarColor = bar
+        }
         androidx.core.view.WindowInsetsControllerCompat(window, window.decorView).apply {
             isAppearanceLightStatusBars = !dark
             isAppearanceLightNavigationBars = !dark
