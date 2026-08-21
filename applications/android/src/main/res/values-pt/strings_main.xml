@@ -36,5 +36,4 @@
         <item quantity="one">Tem 1 coisa publicada</item>
         <item quantity="other">Tem %1$d coisas publicadas</item>
     </plurals>
-    <string name="main_listings_body">Toque para alterar ou retirar o que oferece.</string>
 </resources>

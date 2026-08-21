@@ -20,7 +20,12 @@ import android.content.Context
 // taxi finds fares and runs a meter with the same hands. Renting is the
 // owner's side of §16.18: personal mode is where someone looks for a car or
 // a place, this is where someone has one to let.
-enum class Mode { None, Pos, BarTab, Taxi, Donate, Renting, Kiosk }
+// Marketplace is deliberately its own mode rather than a tab of Renting: a
+// person selling a bicycle and a person letting a room are doing different
+// jobs, and the board they share is an implementation detail of where the
+// notice lands. Appended rather than inserted — `current()` reads the name
+// out of preferences, so the order here is free but the spelling is not.
+enum class Mode { None, Pos, BarTab, Taxi, Donate, Renting, Kiosk, Marketplace }
 
 class ModeStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")

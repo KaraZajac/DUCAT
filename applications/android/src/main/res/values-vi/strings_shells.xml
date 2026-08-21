@@ -35,4 +35,8 @@
     <string name="shells_tab_bookings">Đặt chỗ</string>
     <string name="shells_no_bookings_yet">Chưa có đặt chỗ nào.</string>
     <string name="shells_booking_your_turn">Đến lượt bạn</string>
+    <string name="mode_marketplace">Chợ</string>
+    <string name="mode_marketplace_desc">Mua bán quanh bạn. Xem các bảng xung quanh và đăng bán đồ của bạn.</string>
+    <string name="shells_tab_browse">Duyệt</string>
+    <string name="shells_tab_my_listings">Tin của tôi</string>
 </resources>

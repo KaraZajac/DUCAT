@@ -40,5 +40,4 @@
         <item quantity="many">لديك %1$d إعلانات</item>
         <item quantity="other">لديك %1$d إعلانات</item>
     </plurals>
-    <string name="main_listings_body">اضغط لتعديل ما تعرضه أو إزالته.</string>
 </resources>

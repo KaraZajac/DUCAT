@@ -36,5 +36,4 @@
         <item quantity="one">Tienes 1 cosa publicada</item>
         <item quantity="other">Tienes %1$d cosas publicadas</item>
     </plurals>
-    <string name="main_listings_body">Toca para cambiar o retirar lo que ofreces.</string>
 </resources>

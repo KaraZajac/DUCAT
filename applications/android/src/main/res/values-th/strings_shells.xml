@@ -35,4 +35,8 @@
     <string name="shells_tab_bookings">การจอง</string>
     <string name="shells_no_bookings_yet">ยังไม่มีการจอง</string>
     <string name="shells_booking_your_turn">ตาคุณแล้ว</string>
+    <string name="mode_marketplace">ตลาด</string>
+    <string name="mode_marketplace_desc">ซื้อขายของใกล้ตัว ดูบอร์ดรอบ ๆ คุณ และลงขายของคุณเอง</string>
+    <string name="shells_tab_browse">เลือกดู</string>
+    <string name="shells_tab_my_listings">รายการของฉัน</string>
 </resources>

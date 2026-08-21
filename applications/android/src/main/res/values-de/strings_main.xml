@@ -36,5 +36,4 @@
         <item quantity="one">Du hast 1 Anzeige</item>
         <item quantity="other">Du hast %1$d Anzeigen</item>
     </plurals>
-    <string name="main_listings_body">Zum Ändern oder Zurückziehen deiner Angebote tippen.</string>
 </resources>

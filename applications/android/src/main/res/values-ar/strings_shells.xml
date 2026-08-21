@@ -35,4 +35,8 @@
     <string name="shells_tab_bookings">الحجوزات</string>
     <string name="shells_no_bookings_yet">لا توجد حجوزات بعد.</string>
     <string name="shells_booking_your_turn">دورك</string>
+    <string name="mode_marketplace">السوق</string>
+    <string name="mode_marketplace_desc">اشترِ وبع بالقرب منك. تصفّح ما على اللوحات حولك، واعرض أشياءك للبيع.</string>
+    <string name="shells_tab_browse">تصفّح</string>
+    <string name="shells_tab_my_listings">إعلاناتي</string>
 </resources>

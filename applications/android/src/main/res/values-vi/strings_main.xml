@@ -36,5 +36,4 @@
         <item quantity="one">Bạn có %1$d mục đã đăng</item>
         <item quantity="other">Bạn có %1$d mục đã đăng</item>
     </plurals>
-    <string name="main_listings_body">Chạm để sửa hoặc gỡ những gì bạn đang đăng.</string>
 </resources>

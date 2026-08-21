@@ -82,7 +82,15 @@ private enum class Stall { NoPermission, NoFix, NoNetwork }
 
 @Composable
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contact) -> Unit) {
+private fun RentSearchScreen(
+    kind: Int,
+    /** Null when this *is* the screen — a mode's tab rather than a sheet over
+     *  something else. There is then nothing to cancel back to. */
+    onClose: (() -> Unit)?,
+    onOpenChat: (Contact) -> Unit,
+    /** Fixed to one noun, so the chips that switch between them are noise. */
+    pinned: Boolean = false,
+) {
     // Which nouns to show. The board holds all five and one read returns all
     // of them (§16.18), so filtering here costs nothing — where asking the
     // network once per noun would cost the read five times over, and an empty
@@ -225,10 +233,10 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
         }
     }
 
-    androidx.compose.ui.window.Dialog(
-        onDismissRequest = onClose,
-        properties = fullScreenDialogProperties(),
-    ) {
+    // Held as a value so the same content can be a full-screen sheet over the
+    // home tiles or the whole of a mode's tab, without either one being a
+    // second copy of it.
+    val body = @Composable {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(Modifier.fillMaxSize().padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -245,7 +253,12 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                         style = MaterialTheme.typography.titleLarge,
                     )
                     Spacer(Modifier.weight(1f))
-                    TextButton(onClick = onClose) { Text(stringResource(R.string.rent_cancel)) }
+                    // A tab is left by tapping another tab.
+                    onClose?.let { close ->
+                        TextButton(onClick = close) {
+                            Text(stringResource(R.string.rent_cancel))
+                        }
+                    }
                 }
                 Text(
                     stringResource(R.string.rent_search_note),
@@ -280,7 +293,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                 // non-null. Snapshotting is what makes the guard and the use
                 // talk about the same value.
                 val found = results
-                if (found != null && stalled == null) {
+                if (found != null && stalled == null && !pinned) {
                     FlowRow(
                         Modifier.fillMaxWidth().padding(bottom = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -295,10 +308,14 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                             )
                         }
                     }
-                    // Reads as the chip above it: "Sell something" under For
-                    // sale, "Offer a skill" under Skills. The same five
-                    // labels the Renting screen uses, so the two ways in
-                    // cannot drift apart.
+                }
+                // Reads as the chip above it: "Sell something" under For sale,
+                // "Offer a skill" under Skills. The same five labels the
+                // Renting screen uses, so the two ways in cannot drift apart.
+                //
+                // Outside the chips' condition: a screen pinned to one noun
+                // has no chips and still has something to offer.
+                if (found != null && stalled == null) {
                     OutlinedButton(
                         onClick = { composing = showing },
                         modifier = Modifier.padding(bottom = 8.dp).height(40.dp),
@@ -424,7 +441,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                                             }
                                         }
                                         busy = false
-                                        r.onSuccess { onOpenChat(it); onClose() }
+                                        r.onSuccess { onOpenChat(it); onClose?.invoke() }
                                             .onFailure {
                                                 DucatLog.w("RentSearch", "claim: ${it.message}")
                                                 error = context.getString(
@@ -453,6 +470,33 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
             }
         }
     }
+
+    if (onClose != null) {
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = onClose,
+            properties = fullScreenDialogProperties(),
+        ) { body() }
+    } else {
+        body()
+    }
+}
+
+/**
+ * The Marketplace mode's first tab: the board, for the one noun it is about.
+ *
+ * The same search the tiles open, minus the chrome a sheet needs — no Cancel,
+ * because a tab is left by tapping another tab, and no noun chips, because
+ * this mode is about one noun. The board read underneath is unchanged: your
+ * own coarse cell first, then the eight around it (§15.12).
+ */
+@Composable
+fun MarketBrowse(onOpenChat: (Contact) -> Unit) {
+    RentSearchScreen(
+        kind = Listings.KIND_SALE,
+        onClose = null,
+        onOpenChat = onOpenChat,
+        pinned = true,
+    )
 }
 
 /**

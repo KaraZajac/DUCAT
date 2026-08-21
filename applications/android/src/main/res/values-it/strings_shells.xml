@@ -35,4 +35,8 @@
     <string name="shells_tab_bookings">Prenotazioni</string>
     <string name="shells_no_bookings_yet">Ancora nessuna prenotazione.</string>
     <string name="shells_booking_your_turn">Tocca a te</string>
+    <string name="mode_marketplace">Mercato</string>
+    <string name="mode_marketplace_desc">Compra e vendi nei dintorni. Sfoglia le bacheche intorno a te e metti in vendita le tue cose.</string>
+    <string name="shells_tab_browse">Sfoglia</string>
+    <string name="shells_tab_my_listings">I miei annunci</string>
 </resources>

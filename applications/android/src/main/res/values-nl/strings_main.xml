@@ -36,5 +36,4 @@
         <item quantity="one">Je hebt 1 advertentie</item>
         <item quantity="other">Je hebt %1$d advertenties</item>
     </plurals>
-    <string name="main_listings_body">Tik om aan te passen of weg te halen wat je aanbiedt.</string>
 </resources>

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.LocalBar
+import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PointOfSale
 import androidx.compose.material.icons.filled.Receipt
@@ -27,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import org.ducatproject.ducat.Listings
 import org.ducatproject.ducat.MainActivity
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.ContactStore
@@ -94,10 +96,33 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
             openDrawer = openDrawer,
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_listings), Icons.Filled.House) {
-                    RentingScreen()
+                    // Everything but the sale: that one has its own mode now,
+                    // and a listing shown in both would be managed in both.
+                    RentingScreen(kinds = Listings.KINDS - Listings.KIND_SALE)
                 },
                 ShellTab(stringResource(R.string.shells_tab_bookings), Icons.Filled.Receipt) {
                     BookingsList()
+                },
+            ),
+        )
+        // Browse first, because most of the time this mode is opened to look
+        // rather than to list — and the tile that opens it is the one on the
+        // home screen labelled Marketplace, which is a shopper's word.
+        Mode.Marketplace -> Shell(
+            title = stringResource(R.string.mode_marketplace),
+            openDrawer = openDrawer,
+            tabs = listOf(
+                ShellTab(stringResource(R.string.shells_tab_browse), Icons.Filled.Search) {
+                    // The same route the bookings list takes to a thread: a
+                    // shell has no chat of its own to open one in, so it asks
+                    // the activity, which owns the overlay.
+                    MarketBrowse(onOpenChat = { MainActivity.openChat.value = it.personaHex })
+                },
+                ShellTab(
+                    stringResource(R.string.shells_tab_my_listings),
+                    Icons.Filled.LocalOffer,
+                ) {
+                    RentingScreen(kinds = listOf(Listings.KIND_SALE))
                 },
             ),
         )

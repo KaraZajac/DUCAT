@@ -36,5 +36,4 @@
         <item quantity="one">1 ilanın var</item>
         <item quantity="other">%1$d ilanın var</item>
     </plurals>
-    <string name="main_listings_body">Sunduklarını değiştirmek veya kaldırmak için dokun.</string>
 </resources>

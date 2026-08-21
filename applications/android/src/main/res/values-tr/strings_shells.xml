@@ -35,4 +35,8 @@
     <string name="shells_tab_bookings">Rezervasyonlar</string>
     <string name="shells_no_bookings_yet">Henüz rezervasyon yok.</string>
     <string name="shells_booking_your_turn">Sıra sende</string>
+    <string name="mode_marketplace">Pazar</string>
+    <string name="mode_marketplace_desc">Yakınında al ve sat. Çevrendeki panolara göz at, kendi eşyalarını satışa koy.</string>
+    <string name="shells_tab_browse">Göz at</string>
+    <string name="shells_tab_my_listings">İlanlarım</string>
 </resources>

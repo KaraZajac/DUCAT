@@ -35,4 +35,8 @@
     <string name="shells_tab_bookings">予約</string>
     <string name="shells_no_bookings_yet">まだ予約はありません。</string>
     <string name="shells_booking_your_turn">あなたの番です</string>
+    <string name="mode_marketplace">マーケット</string>
+    <string name="mode_marketplace_desc">近くで売り買いします。周りのボードを見て、自分の品物も出品できます。</string>
+    <string name="shells_tab_browse">さがす</string>
+    <string name="shells_tab_my_listings">出品中</string>
 </resources>

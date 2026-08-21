@@ -35,4 +35,8 @@
     <string name="shells_tab_bookings">预订</string>
     <string name="shells_no_bookings_yet">还没有预订。</string>
     <string name="shells_booking_your_turn">轮到你了</string>
+    <string name="mode_marketplace">市场</string>
+    <string name="mode_marketplace_desc">在附近买卖东西。浏览你周围板块上的物品，也可以把自己的东西挂出来。</string>
+    <string name="shells_tab_browse">浏览</string>
+    <string name="shells_tab_my_listings">我的发布</string>
 </resources>

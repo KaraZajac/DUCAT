@@ -36,5 +36,4 @@
         <item quantity="one">आपकी 1 चीज़ सूचीबद्ध है</item>
         <item quantity="other">आपकी %1$d चीज़ें सूचीबद्ध हैं</item>
     </plurals>
-    <string name="main_listings_body">जो आप दे रहे हैं उसे बदलने या हटाने के लिए टैप करें।</string>
 </resources>

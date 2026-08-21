@@ -38,5 +38,4 @@
         <item quantity="many">У вас %1$d объявлений</item>
         <item quantity="other">У вас %1$d объявлений</item>
     </plurals>
-    <string name="main_listings_body">Нажмите, чтобы изменить или снять то, что вы предлагаете.</string>
 </resources>

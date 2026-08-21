@@ -35,4 +35,8 @@
     <string name="shells_tab_bookings">Reservas</string>
     <string name="shells_no_bookings_yet">Ainda não há reservas.</string>
     <string name="shells_booking_your_turn">É a sua vez</string>
+    <string name="mode_marketplace">Mercado</string>
+    <string name="mode_marketplace_desc">Compre e venda por perto. Veja o que está nos quadros à sua volta e ponha as suas coisas à venda.</string>
+    <string name="shells_tab_browse">Explorar</string>
+    <string name="shells_tab_my_listings">Os meus anúncios</string>
 </resources>

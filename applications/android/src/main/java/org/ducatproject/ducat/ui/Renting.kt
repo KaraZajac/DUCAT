@@ -136,11 +136,22 @@ internal fun categoryLabel(kind: Int, n: Int): Int = when (kind) {
 }
 
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+/**
+ * The things you are offering, and the buttons to offer more.
+ *
+ * Scoped to a set of kinds, because the board is shared and the *jobs* are
+ * not: selling a bicycle is Marketplace's business and letting a room is
+ * Renting's, and a screen that mixed them would show each mode the other
+ * one's work. One screen serves both — the only difference between them is
+ * which nouns they are about.
+ */
 @Composable
-fun RentingScreen() {
+fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    val listings = remember(version) { Listings.all(context) }
+    val listings = remember(version, kinds) {
+        Listings.all(context).filter { it.optInt("kind") in kinds }
+    }
     // Saveable: this is which form is open, and losing it on a rotation
     // threw somebody out of a half-filled listing back to the list.
     var composing by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -160,7 +171,7 @@ fun RentingScreen() {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Listings.KINDS.forEach { k ->
+            kinds.forEach { k ->
                 Button(
                     onClick = { composing = k },
                     modifier = Modifier.height(44.dp),

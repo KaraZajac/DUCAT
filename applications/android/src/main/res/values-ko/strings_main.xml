@@ -36,5 +36,4 @@
         <item quantity="one">%1$d개를 등록했습니다</item>
         <item quantity="other">%1$d개를 등록했습니다</item>
     </plurals>
-    <string name="main_listings_body">등록한 것을 변경하거나 내리려면 탭하세요.</string>
 </resources>

@@ -36,5 +36,4 @@
         <item quantity="one">Hai 1 annuncio</item>
         <item quantity="other">Hai %1$d annunci</item>
     </plurals>
-    <string name="main_listings_body">Tocca per modificare o ritirare ciò che offri.</string>
 </resources>

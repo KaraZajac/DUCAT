@@ -36,5 +36,4 @@
         <item quantity="one">你发布了 %1$d 项</item>
         <item quantity="other">你发布了 %1$d 项</item>
     </plurals>
-    <string name="main_listings_body">点按以修改或下架你的发布。</string>
 </resources>

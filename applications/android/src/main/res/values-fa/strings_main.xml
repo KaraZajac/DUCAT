@@ -36,5 +36,4 @@
         <item quantity="one">شما ۱ آگهی دارید</item>
         <item quantity="other">شما %1$d آگهی دارید</item>
     </plurals>
-    <string name="main_listings_body">برای تغییر یا حذف آنچه ارائه می‌دهید ضربه بزنید.</string>
 </resources>

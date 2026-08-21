@@ -36,5 +36,4 @@
         <item quantity="one">คุณลงประกาศไว้ %1$d รายการ</item>
         <item quantity="other">คุณลงประกาศไว้ %1$d รายการ</item>
     </plurals>
-    <string name="main_listings_body">แตะเพื่อแก้ไขหรือนำสิ่งที่คุณเสนอออก</string>
 </resources>

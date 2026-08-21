@@ -36,5 +36,4 @@
         <item quantity="one">You have 1 thing listed</item>
         <item quantity="other">You have %1$d things listed</item>
     </plurals>
-    <string name="main_listings_body">Tap to change or take down what you are offering.</string>
 </resources>

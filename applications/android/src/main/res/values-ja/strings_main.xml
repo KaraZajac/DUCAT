@@ -36,5 +36,4 @@
         <item quantity="one">%1$d 件を出品中です</item>
         <item quantity="other">%1$d 件を出品中です</item>
     </plurals>
-    <string name="main_listings_body">出品中のものを変更・取り下げするにはタップしてください。</string>
 </resources>

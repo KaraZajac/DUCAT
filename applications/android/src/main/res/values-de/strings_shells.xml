@@ -35,4 +35,8 @@
     <string name="shells_tab_bookings">Buchungen</string>
     <string name="shells_no_bookings_yet">Noch keine Buchungen.</string>
     <string name="shells_booking_your_turn">Du bist dran</string>
+    <string name="mode_marketplace">Marktplatz</string>
+    <string name="mode_marketplace_desc">In der Nähe kaufen und verkaufen. Sieh dich auf den Boards um dich herum um und stelle eigene Sachen ein.</string>
+    <string name="shells_tab_browse">Stöbern</string>
+    <string name="shells_tab_my_listings">Meine Anzeigen</string>
 </resources>

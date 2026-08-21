@@ -36,5 +36,4 @@
         <item quantity="one">Kamu punya %1$d hal terdaftar</item>
         <item quantity="other">Kamu punya %1$d hal terdaftar</item>
     </plurals>
-    <string name="main_listings_body">Ketuk untuk mengubah atau menurunkan yang kamu tawarkan.</string>
 </resources>

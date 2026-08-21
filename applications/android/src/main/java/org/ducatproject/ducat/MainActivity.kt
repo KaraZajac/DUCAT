@@ -780,7 +780,18 @@ private fun HomeScreen(
     Spacer(Modifier.height(12.dp))
     org.ducatproject.ducat.ui.HomeTiles(
         onHail = { hailSheet.value = true },
-        onBrowse = { rentKind.value = it },
+        // Five of these open a sheet over the wallet. The sixth hands the app
+        // to a mode, because buying and selling is a job somebody stays in —
+        // browse, then list, then browse again — and a sheet is a thing you
+        // are holding open on top of something else.
+        onBrowse = { k ->
+            if (k == org.ducatproject.ducat.Listings.KIND_SALE) {
+                org.ducatproject.ducat.ModeStore(context)
+                    .set(org.ducatproject.ducat.Mode.Marketplace)
+            } else {
+                rentKind.value = k
+            }
+        },
     )
     // Both flows live on, tiles or not: the hail keeps its card for a hail
     // that is actually standing, and each owns its own screens.
@@ -853,8 +864,21 @@ private fun HomeScreen(
     // from the Marketplace screen would have had nowhere to go to take it
     // down again, which is half a feature. Tapping this hands the app to that
     // mode, the same as choosing it from the drawer.
-    val listed = remember(version) { org.ducatproject.ducat.Listings.all(context).size }
-    if (listed > 0) {
+    // One row per mode that holds any, because they are managed in two places
+    // now: a bicycle for sale in Marketplace, a room in Renting. A single row
+    // would have to guess which, and would be wrong for anybody who offers
+    // both — the cost of the split, paid here rather than by the person
+    // hunting for a listing that is not where the row sent them.
+    val mine = remember(version) { org.ducatproject.ducat.Listings.all(context) }
+    val groups = remember(mine) {
+        listOf(
+            org.ducatproject.ducat.Mode.Marketplace to
+                mine.count { it.optInt("kind") == org.ducatproject.ducat.Listings.KIND_SALE },
+            org.ducatproject.ducat.Mode.Renting to
+                mine.count { it.optInt("kind") != org.ducatproject.ducat.Listings.KIND_SALE },
+        ).filter { it.second > 0 }
+    }
+    groups.forEach { (m, n) ->
         Spacer(Modifier.height(12.dp))
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant,
@@ -863,22 +887,25 @@ private fun HomeScreen(
         ) {
             Row(
                 Modifier
-                    .clickable {
-                        org.ducatproject.ducat.ModeStore(context)
-                            .set(org.ducatproject.ducat.Mode.Renting)
-                    }
+                    .clickable { org.ducatproject.ducat.ModeStore(context).set(m) }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        androidx.compose.ui.res.pluralStringResource(
-                            R.plurals.main_listings_count, listed, listed,
+                        androidx.compose.ui.res.stringResource(
+                            if (m == org.ducatproject.ducat.Mode.Marketplace) {
+                                R.string.mode_marketplace
+                            } else {
+                                R.string.mode_renting
+                            },
                         ),
                         style = MaterialTheme.typography.titleSmall,
                     )
                     Text(
-                        androidx.compose.ui.res.stringResource(R.string.main_listings_body),
+                        androidx.compose.ui.res.pluralStringResource(
+                            R.plurals.main_listings_count, n, n,
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
