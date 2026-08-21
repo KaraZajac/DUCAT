@@ -21,3 +21,10 @@ fun fullScreenDialogProperties(dismissOnBackPress: Boolean = true): DialogProper
  */
 fun voiceMemoFile(context: android.content.Context): java.io.File =
     java.io.File(context.cacheDir, "voice-memo.wav")
+
+/**
+ * The desk's half of SystemBarIcons: nothing to point. A desktop window has
+ * no status bar of the operating system's to tint.
+ */
+@androidx.compose.runtime.Composable
+fun SystemBarIcons(dark: Boolean) = Unit

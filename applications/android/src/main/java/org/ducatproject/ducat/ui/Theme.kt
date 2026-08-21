@@ -139,6 +139,10 @@ fun DucatTheme(mode: ThemeMode = ThemeMode.System, content: @Composable () -> Un
             typography = DucatTypography,
             shapes = DucatShapes,
         ) {
+            // The bars belong to the theme too. The app draws behind them, so
+            // the clock and the battery sit on this background — and unasked,
+            // the system painted them white on it.
+            SystemBarIcons(dark)
             // The Surface is not decoration. Without it only screens that bring
             // their own Scaffold get a background, and the rest show the
             // Activity's window colour through — which is how onboarding

@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.window.DialogProperties
 
 /**
@@ -29,3 +30,38 @@ fun fullScreenDialogProperties(dismissOnBackPress: Boolean = true): DialogProper
  */
 fun voiceMemoFile(context: android.content.Context): java.io.File =
     java.io.File(context.cacheDir, "voice-memo.m4a")
+
+/**
+ * Point the system bar icons at the theme they are sitting on.
+ *
+ * The app draws behind the status bar, so whatever the system decides to
+ * paint the clock and the battery with lands on the app's own background.
+ * Left alone it decided white, on a background that is very nearly white, and
+ * the clock had been all but invisible on every screen for as long as anyone
+ * had been looking at it — masked only on the full-screen dialogs, where the
+ * window dim happened to darken the strip enough to read.
+ *
+ * Takes the theme's own answer rather than the system's dark-mode flag,
+ * because the theme can be set to Latte or Mocha explicitly and the bars have
+ * to follow the app, not the phone.
+ */
+@androidx.compose.runtime.Composable
+fun SystemBarIcons(dark: Boolean) {
+    val view = androidx.compose.ui.platform.LocalView.current
+    if (view.isInEditMode) return
+    androidx.compose.runtime.SideEffect {
+        // The dialog's window when there is one, the activity's otherwise: a
+        // full-screen dialog owns the bars while it is up, and unwrapping the
+        // context is how a Compose view finds the activity it belongs to —
+        // `view.context` is a ContextWrapper, not the Activity itself.
+        val window = (view.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window
+            ?: generateSequence(view.context) {
+                (it as? android.content.ContextWrapper)?.baseContext
+            }.filterIsInstance<android.app.Activity>().firstOrNull()?.window
+            ?: return@SideEffect
+        androidx.core.view.WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !dark
+            isAppearanceLightNavigationBars = !dark
+        }
+    }
+}
