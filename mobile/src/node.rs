@@ -185,6 +185,33 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         for store in ["protected_store", "table_store", "block_store"] {
             cfg[store]["directory"] = serde_json::json!(format!("{storage_dir}/{store}"));
         }
+        // `protected_store.allow_insecure_fallback` is deliberately left at
+        // its default of false.
+        //
+        // Veilid's protected store holds the device encryption key for the
+        // table store. On Android it opens through the OS keyring, and when
+        // that will not open there is no second path: startup fails with
+        // "Could not initialize the protected store" and the node never
+        // starts.
+        //
+        // Seen on the emulator on 2026-08-21 and worth writing down, because
+        // it is invisible from the outside — the app simply has no network,
+        // every board read comes back empty, and the search offers to try
+        // again. It lasted about fifteen minutes across several process
+        // restarts and two reinstalls, then cleared on its own. Transient,
+        // then, not fatal, and nothing about the app provoked it.
+        //
+        // The fallback was *not* shown to help. It was switched on during
+        // that window and the node did come up, but no `protected_store`
+        // directory was ever written — so the secure keyring had simply
+        // started working again and the fallback path never ran. Whether it
+        // rescues this failure is untested.
+        //
+        // It stays false regardless. Moving that key from the keyring to a
+        // file is a decision about what this app promises, not a way to get a
+        // test phone back. What the failure gets instead is somewhere to be
+        // read: the start error is logged (see DucatApplication), the poller
+        // retries and says so, and the status screen names the reason.
         // An emulator's SLIRP user-networking silently eats sustained UDP —
         // reads worked, every DHT set died on the way out, and the app
         // believed its own local copy (observed 2026-08-15: an hour of

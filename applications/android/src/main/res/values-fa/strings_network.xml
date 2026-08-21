@@ -22,4 +22,5 @@
     <string name="net_test_route">آزمایش مسیر</string>
     <string name="net_route_ok">مسیر ساخته شد — بستهٔ %1$s بایتی</string>
     <string name="net_route_failed">مسیر ناموفق: %1$s</string>
+    <string name="net_keystore_failed">انبار کلید اندروید باز نشد، بنابراین انتقال نمی‌تواند شروع شود. کیف پول و مخاطبان شما جداگانه نگهداری می‌شوند و آسیبی ندیده‌اند — پیش از نصب دوباره، یک نسخهٔ پشتیبان بگیر.</string>
 </resources>

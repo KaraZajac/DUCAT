@@ -22,4 +22,5 @@
     <string name="net_test_route">Rota dene</string>
     <string name="net_route_ok">rota ayrıldı — %1$s baytlık öbek</string>
     <string name="net_route_failed">rota başarısız: %1$s</string>
+    <string name="net_keystore_failed">Android’in anahtar deposu açılmadı, bu yüzden taşıma başlatılamıyor. Cüzdanın ve kişilerin ayrı tutuluyor ve etkilenmedi — yeniden kurmadan önce bir yedek dışa aktar.</string>
 </resources>

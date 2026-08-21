@@ -22,4 +22,5 @@
     <string name="net_test_route">Проверить маршрут</string>
     <string name="net_route_ok">маршрут выделен — блоб %1$s байт</string>
     <string name="net_route_failed">маршрут не удался: %1$s</string>
+    <string name="net_keystore_failed">Хранилище ключей Android не открылось, поэтому транспорт не запускается. Кошелёк и контакты хранятся отдельно и не пострадали — сделай резервную копию перед переустановкой.</string>
 </resources>

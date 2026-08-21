@@ -22,4 +22,5 @@
     <string name="net_test_route">Przetestuj trasę</string>
     <string name="net_route_ok">trasa przydzielona — blob %1$s B</string>
     <string name="net_route_failed">trasa nie powiodła się: %1$s</string>
+    <string name="net_keystore_failed">Magazyn kluczy Androida nie otworzył się, więc transport nie może wystartować. Portfel i kontakty są trzymane osobno i nic im nie jest — wyeksportuj kopię zapasową przed ponowną instalacją.</string>
 </resources>

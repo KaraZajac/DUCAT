@@ -22,4 +22,5 @@
     <string name="net_test_route">Route testen</string>
     <string name="net_route_ok">Route zugewiesen — Blob mit %1$s Bytes</string>
     <string name="net_route_failed">Route fehlgeschlagen: %1$s</string>
+    <string name="net_keystore_failed">Der Schlüsselspeicher von Android ließ sich nicht öffnen, daher kann der Transport nicht starten. Wallet und Kontakte liegen getrennt davon und sind unversehrt — exportiere ein Backup, bevor du neu installierst.</string>
 </resources>

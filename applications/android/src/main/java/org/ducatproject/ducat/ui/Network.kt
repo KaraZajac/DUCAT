@@ -153,10 +153,10 @@ fun NetworkPanel(storageDir: String) {
     LaunchedEffect(starting) {
         if (!starting) return@LaunchedEffect
         val result = withContext(Dispatchers.IO) {
-            runCatching { nodeStart(storageDir, udp = true) }.exceptionOrNull()?.message
+            runCatching { nodeStart(storageDir, udp = true) }.exceptionOrNull()?.saidWhy()
         }
         status = withContext(Dispatchers.IO) { nodeStatus() }
-        if (result != null) status = status.copy(error = result)
+        if (result != null) status = status.copy(error = startupNote(context, result))
         starting = false
     }
 
@@ -168,6 +168,25 @@ fun NetworkPanel(storageDir: String) {
             }.getOrElse { context.getString(R.string.net_route_failed, it.saidWhy() ?: "?") }
         }
     }
+}
+
+/**
+ * A failed start, with a sentence in front of the machinery.
+ *
+ * This panel is the only place a person can find out why nothing works, so
+ * what it said mattered more than its length: `v1=startup: Internal: Could
+ * not initialize the protected store.` is accurate, is the whole story, and
+ * tells somebody holding a phone nothing they can act on — least of all that
+ * their money is not the thing that broke.
+ *
+ * The raw line stays underneath. It is what gets pasted into a bug report,
+ * and the wording above it is a guess about which failure this is; the guess
+ * must never replace the evidence.
+ */
+private fun startupNote(context: android.content.Context, raw: String): String {
+    val msg = bridgeMessage(raw).removePrefix("startup:").trim()
+    if (!msg.contains("protected store", ignoreCase = true)) return msg
+    return context.getString(R.string.net_keystore_failed) + "\n\n" + msg
 }
 
 @Composable

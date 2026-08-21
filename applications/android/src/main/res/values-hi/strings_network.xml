@@ -22,4 +22,5 @@
     <string name="net_test_route">रूट परखें</string>
     <string name="net_route_ok">रूट मिल गया — %1$s बाइट का ब्लॉब</string>
     <string name="net_route_failed">रूट विफल: %1$s</string>
+    <string name="net_keystore_failed">एंड्रॉइड का की-स्टोर नहीं खुला, इसलिए ट्रांसपोर्ट शुरू नहीं हो सकता। तुम्हारा वॉलेट और संपर्क अलग रखे जाते हैं और उन पर कोई असर नहीं पड़ा — दोबारा इंस्टॉल करने से पहले बैकअप निर्यात करो।</string>
 </resources>

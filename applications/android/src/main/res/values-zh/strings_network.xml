@@ -22,4 +22,5 @@
     <string name="net_test_route">测试路由</string>
     <string name="net_route_ok">路由已分配 — %1$s 字节数据块</string>
     <string name="net_route_failed">路由失败：%1$s</string>
+    <string name="net_keystore_failed">安卓的密钥库打不开，所以传输层无法启动。你的钱包和联系人是分开存放的，没有受到影响——重新安装前先导出一份备份。</string>
 </resources>
