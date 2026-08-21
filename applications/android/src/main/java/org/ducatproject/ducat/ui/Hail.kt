@@ -1033,6 +1033,10 @@ fun DriveScreen() {
                     cells
                 }
             }
+            // How many boards actually answered, which is not how many were
+            // asked — the same distinction the rental search draws, and for
+            // the same reason. See the publish below.
+            val answered = java.util.concurrent.atomic.AtomicInteger()
             kotlinx.coroutines.supervisorScope {
                 targets.map { c ->
                     async {
@@ -1047,6 +1051,7 @@ fun DriveScreen() {
                         // rather than blinking out; publish() filters by
                         // expiry again so a stale notice cannot linger.
                         if (got != null) {
+                            answered.incrementAndGet()
                             found[c] = got
                             withContext(Dispatchers.Main) { publish() }
                         }
@@ -1055,13 +1060,35 @@ fun DriveScreen() {
                     }
                 }.awaitAll()
             }
-            publish()
+            // An empty screen is a claim about the boards, and a lap where no
+            // board answered has not read them.
+            //
+            // `found` survives a lap, so a board that fails once keeps what it
+            // last said — but `found` is built fresh each time this effect
+            // restarts, and a first lap whose reads all failed left it empty.
+            // Publishing that wiped a fare the driver was already looking at
+            // and replaced it with "No hails standing", which is the one thing
+            // a driver must be able to believe. Observed as a standing hail
+            // blinking out and coming back two minutes later.
+            //
+            // Nothing is lost by staying quiet: every board that does answer
+            // has already published on its own, above.
+            if (answered.get() > 0 || found.isNotEmpty()) {
+                publish()
+            } else {
+                DucatLog.w(TAG, "no board answered this lap — leaving the map as it was")
+            }
             // How long a lap actually costs, over how many boards. The whole
             // question for a driver is whether a fare appears in seconds or
             // minutes, and that is not answerable by reading the code.
             DucatLog.i(
                 TAG,
-                "sweep lap: ${targets.size} board(s)" +
+                // Answered as well as asked. Without it a lap that read
+                // nothing at all and a lap that read nine empty boards were
+                // the same line — "0 notice(s)" — and the difference between
+                // them is the difference between "nobody wants a ride" and
+                // "we have no idea".
+                "sweep lap: ${answered.get()} of ${targets.size} board(s) answered" +
                     (if (targets.size < cells.size) " (the one that rang)" else "") +
                     " in ${System.currentTimeMillis() / 1000 - now}s, " +
                     "${found.values.sumOf { it.size }} notice(s)",
