@@ -32,4 +32,9 @@
     <string name="main_waiting_pay">%1$s があなたの支払いを待っています</string>
     <string name="main_waiting_sign">%1$s が精算を希望しています</string>
     <string name="main_waiting_body">タップして開いてください — あなたなしでは終われません。</string>
+    <plurals name="main_listings_count">
+        <item quantity="one">%1$d 件を出品中です</item>
+        <item quantity="other">%1$d 件を出品中です</item>
+    </plurals>
+    <string name="main_listings_body">出品中のものを変更・取り下げするにはタップしてください。</string>
 </resources>

@@ -52,7 +52,7 @@ import org.json.JSONObject
  * with three labels each is exactly the shape that drifts: a screen ends up
  * calling a kayak a vehicle in one place and gear in another.
  */
-private fun listingButton(kind: Int): Int = when (kind) {
+internal fun listingButton(kind: Int): Int = when (kind) {
     Listings.KIND_VEHICLE -> R.string.rent_list_a_vehicle
     Listings.KIND_GEAR -> R.string.rent_list_gear
     Listings.KIND_SALE -> R.string.rent_list_sale
@@ -299,7 +299,7 @@ fun ListingFormPreview(kind: Int) = ListingForm(kind = kind, onDone = {})
 
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-private fun ListingForm(kind: Int, onDone: () -> Unit) {
+internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     // Back closes the form. Without this it went past the mode shell to the
     // activity and quit the app, taking an eighteen-field listing with it —
     // MainActivity says the rule at its own handlers, and a screen added

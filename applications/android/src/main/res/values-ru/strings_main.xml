@@ -32,4 +32,11 @@
     <string name="main_waiting_pay">%1$s ждёт вашей оплаты</string>
     <string name="main_waiting_sign">%1$s хочет рассчитаться</string>
     <string name="main_waiting_body">Нажмите, чтобы открыть — без вас это не завершится.</string>
+    <plurals name="main_listings_count">
+        <item quantity="one">У вас 1 объявление</item>
+        <item quantity="few">У вас %1$d объявлений</item>
+        <item quantity="many">У вас %1$d объявлений</item>
+        <item quantity="other">У вас %1$d объявлений</item>
+    </plurals>
+    <string name="main_listings_body">Нажмите, чтобы изменить или снять то, что вы предлагаете.</string>
 </resources>

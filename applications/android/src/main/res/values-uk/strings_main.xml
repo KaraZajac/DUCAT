@@ -32,4 +32,11 @@
     <string name="main_waiting_pay">%1$s чекає на вашу оплату</string>
     <string name="main_waiting_sign">%1$s хоче розрахуватися</string>
     <string name="main_waiting_body">Натисніть, щоб відкрити — без вас це не завершиться.</string>
+    <plurals name="main_listings_count">
+        <item quantity="one">У вас 1 оголошення</item>
+        <item quantity="few">У вас %1$d оголошень</item>
+        <item quantity="many">У вас %1$d оголошень</item>
+        <item quantity="other">У вас %1$d оголошень</item>
+    </plurals>
+    <string name="main_listings_body">Натисніть, щоб змінити або зняти те, що ви пропонуєте.</string>
 </resources>

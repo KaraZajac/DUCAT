@@ -32,4 +32,9 @@
     <string name="main_waiting_pay">%1$s aspetta il tuo pagamento</string>
     <string name="main_waiting_sign">%1$s vuole chiudere il conto</string>
     <string name="main_waiting_body">Tocca per aprire — senza di te non può finire.</string>
+    <plurals name="main_listings_count">
+        <item quantity="one">Hai 1 annuncio</item>
+        <item quantity="other">Hai %1$d annunci</item>
+    </plurals>
+    <string name="main_listings_body">Tocca per modificare o ritirare ciò che offri.</string>
 </resources>

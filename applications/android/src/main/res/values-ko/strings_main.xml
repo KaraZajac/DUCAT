@@ -32,4 +32,9 @@
     <string name="main_waiting_pay">%1$s 님이 결제를 기다리고 있습니다</string>
     <string name="main_waiting_sign">%1$s 님이 정산을 원합니다</string>
     <string name="main_waiting_body">탭해서 여세요 — 당신 없이는 끝낼 수 없습니다.</string>
+    <plurals name="main_listings_count">
+        <item quantity="one">%1$d개를 등록했습니다</item>
+        <item quantity="other">%1$d개를 등록했습니다</item>
+    </plurals>
+    <string name="main_listings_body">등록한 것을 변경하거나 내리려면 탭하세요.</string>
 </resources>

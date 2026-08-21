@@ -32,4 +32,9 @@
     <string name="main_waiting_pay">%1$s menunggu pembayaranmu</string>
     <string name="main_waiting_sign">%1$s ingin menyelesaikan pembayaran</string>
     <string name="main_waiting_body">Ketuk untuk membuka — tanpa kamu tidak bisa selesai.</string>
+    <plurals name="main_listings_count">
+        <item quantity="one">Kamu punya %1$d hal terdaftar</item>
+        <item quantity="other">Kamu punya %1$d hal terdaftar</item>
+    </plurals>
+    <string name="main_listings_body">Ketuk untuk mengubah atau menurunkan yang kamu tawarkan.</string>
 </resources>

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material3.*
@@ -92,6 +93,20 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
     var busy by remember { mutableStateOf(false) }
     var searching by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    // Offering one of the things being looked at.
+    //
+    // Every one of the six home tiles searches. Listing lived only inside the
+    // Renting operating mode, three taps down a drawer, which meant somebody
+    // who wanted to sell a bicycle had to guess that selling is filed under
+    // "Renting" — and the Marketplace tile, the one place the word "sell"
+    // should have been, only ever browsed. This is the moment the intent
+    // actually forms: you look at what people are asking for a kayak and
+    // think, I have a kayak.
+    //
+    // Saveable for the same reason RentingScreen's is: a rotation should not
+    // throw somebody out of a half-filled listing.
+    var composing by rememberSaveable { mutableStateOf<Int?>(null) }
+
     // Nothing to introduce ourselves with, and about to introduce ourselves.
     // See NameGate: the name travels on the handshake, so a blank one arrives
     // as "Unnamed contact" and neither end is told.
@@ -101,6 +116,32 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
         onDismiss = { intro = null },
         onNamed = { val go = intro; intro = null; go?.invoke() },
     )
+
+    // The form owns the screen while it is open, exactly as it does on the
+    // Renting side — a half-filled listing over a live search behind it is
+    // two jobs at once.
+    //
+    // In its own full-screen Dialog, and that is not decoration. ListingForm
+    // scrolls internally; emitted here it would land in whatever composed
+    // this, which for the home tiles is a Column that scrolls — and a
+    // scrollable inside a scrollable is measured with infinite height, which
+    // Compose does not warn about, it throws. The first tap on "Sell
+    // something" took the whole app down.
+    //
+    // Returning rather than stacking: the search's state lives in this
+    // function and survives not emitting its own Dialog, so closing the form
+    // comes back to the results already read rather than searching again.
+    composing?.let { k ->
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { composing = null },
+            properties = fullScreenDialogProperties(),
+        ) {
+            Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                ListingForm(kind = k, onDone = { composing = null })
+            }
+        }
+        return
+    }
 
     var stalled by remember { mutableStateOf<Stall?>(null) }
     var progress by remember { mutableStateOf<Pair<Int, Int>?>(null) }
@@ -228,20 +269,43 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                     // without making anybody wait again to find out.
                     else -> Unit
                 }
-                if (results != null && stalled == null) {
+                // Read once, and use that.
+                //
+                // These branches used to test `results` and then dereference
+                // `results!!` — fine for the eager ones, a crash for the
+                // LazyColumn, whose content lambda is invoked later, inside
+                // its own measure pass. The search restarting between the two
+                // (which is what closing the listing form does) put a null
+                // through a `!!` that a `when` three lines up had just proved
+                // non-null. Snapshotting is what makes the guard and the use
+                // talk about the same value.
+                val found = results
+                if (found != null && stalled == null) {
                     FlowRow(
                         Modifier.fillMaxWidth().padding(bottom = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         Listings.KINDS.forEach { k ->
-                            val n = results!!.count { it.kind.toInt() == k }
+                            val n = found.count { it.kind.toInt() == k }
                             FilterChip(
                                 selected = showing == k,
                                 onClick = { showing = k },
                                 label = { Text("${stringResource(boardChipLabel(k))} $n") },
                             )
                         }
+                    }
+                    // Reads as the chip above it: "Sell something" under For
+                    // sale, "Offer a skill" under Skills. The same five
+                    // labels the Renting screen uses, so the two ways in
+                    // cannot drift apart.
+                    OutlinedButton(
+                        onClick = { composing = showing },
+                        modifier = Modifier.padding(bottom = 8.dp).height(40.dp),
+                    ) {
+                        Icon(Icons.Filled.Add, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(listingButton(showing)))
                     }
                 }
                 when {
@@ -255,7 +319,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                             }
                         },
                     )
-                    results == null || (results!!.isEmpty() && searching) -> Column {
+                    found == null || (found.isEmpty() && searching) -> Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                             Spacer(Modifier.width(8.dp))
@@ -280,7 +344,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                     // may list a car five minutes from now, and a screen whose
                     // only exit is Cancel makes you start the whole thing over
                     // to find out.
-                    results!!.none { it.kind.toInt() == showing } -> Column {
+                    found.none { it.kind.toInt() == showing } -> Column {
                         Text(
                             stringResource(R.string.rent_none_found),
                             style = MaterialTheme.typography.bodyMedium,
@@ -308,7 +372,7 @@ private fun RentSearchScreen(kind: Int, onClose: () -> Unit, onOpenChat: (Contac
                                 Spacer(Modifier.height(8.dp))
                             }
                         }
-                        items(results!!.filter { it.kind.toInt() == showing }) { info ->
+                        items(found.filter { it.kind.toInt() == showing }) { info ->
                             ListingCard(
                                 info = info,
                                 busy = busy,

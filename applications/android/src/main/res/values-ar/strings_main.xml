@@ -32,4 +32,13 @@
     <string name="main_waiting_pay">%1$s ينتظر دفعتك</string>
     <string name="main_waiting_sign">%1$s يريد التسوية</string>
     <string name="main_waiting_body">اضغط للفتح — لا يمكن إنهاؤه بدونك.</string>
+    <plurals name="main_listings_count">
+        <item quantity="one">لديك إعلان واحد</item>
+        <item quantity="zero">لديك %1$d إعلانات</item>
+        <item quantity="two">لديك %1$d إعلانات</item>
+        <item quantity="few">لديك %1$d إعلانات</item>
+        <item quantity="many">لديك %1$d إعلانات</item>
+        <item quantity="other">لديك %1$d إعلانات</item>
+    </plurals>
+    <string name="main_listings_body">اضغط لتعديل ما تعرضه أو إزالته.</string>
 </resources>

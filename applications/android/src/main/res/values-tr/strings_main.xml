@@ -32,4 +32,9 @@
     <string name="main_waiting_pay">%1$s ödemeni bekliyor</string>
     <string name="main_waiting_sign">%1$s hesabı kapatmak istiyor</string>
     <string name="main_waiting_body">Açmak için dokun — sensiz bitmez.</string>
+    <plurals name="main_listings_count">
+        <item quantity="one">1 ilanın var</item>
+        <item quantity="other">%1$d ilanın var</item>
+    </plurals>
+    <string name="main_listings_body">Sunduklarını değiştirmek veya kaldırmak için dokun.</string>
 </resources>

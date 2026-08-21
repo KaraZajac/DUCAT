@@ -32,4 +32,9 @@
     <string name="main_waiting_pay">%1$s 在等你付款</string>
     <string name="main_waiting_sign">%1$s 想要结算</string>
     <string name="main_waiting_body">点按打开——没有你就无法完成。</string>
+    <plurals name="main_listings_count">
+        <item quantity="one">你发布了 %1$d 项</item>
+        <item quantity="other">你发布了 %1$d 项</item>
+    </plurals>
+    <string name="main_listings_body">点按以修改或下架你的发布。</string>
 </resources>

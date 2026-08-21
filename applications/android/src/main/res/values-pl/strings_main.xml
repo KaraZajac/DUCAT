@@ -32,4 +32,11 @@
     <string name="main_waiting_pay">%1$s czeka na twoją płatność</string>
     <string name="main_waiting_sign">%1$s chce się rozliczyć</string>
     <string name="main_waiting_body">Dotknij, aby otworzyć — bez ciebie się nie zakończy.</string>
+    <plurals name="main_listings_count">
+        <item quantity="one">Masz 1 ogłoszenie</item>
+        <item quantity="few">Masz %1$d ogłoszeń</item>
+        <item quantity="many">Masz %1$d ogłoszeń</item>
+        <item quantity="other">Masz %1$d ogłoszeń</item>
+    </plurals>
+    <string name="main_listings_body">Dotknij, aby zmienić lub wycofać to, co oferujesz.</string>
 </resources>

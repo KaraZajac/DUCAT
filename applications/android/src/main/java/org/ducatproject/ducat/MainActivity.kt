@@ -845,6 +845,54 @@ private fun HomeScreen(
         }
     }
 
+    // The way back to what you are offering.
+    //
+    // Listing is reachable from the search screens now, which is where the
+    // thought occurs — but the things listed are only *managed* in the
+    // Renting mode, three taps down a drawer. Somebody who sold a bicycle
+    // from the Marketplace screen would have had nowhere to go to take it
+    // down again, which is half a feature. Tapping this hands the app to that
+    // mode, the same as choosing it from the drawer.
+    val listed = remember(version) { org.ducatproject.ducat.Listings.all(context).size }
+    if (listed > 0) {
+        Spacer(Modifier.height(12.dp))
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            Row(
+                Modifier
+                    .clickable {
+                        org.ducatproject.ducat.ModeStore(context)
+                            .set(org.ducatproject.ducat.Mode.Renting)
+                    }
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        androidx.compose.ui.res.pluralStringResource(
+                            R.plurals.main_listings_count, listed, listed,
+                        ),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    Text(
+                        androidx.compose.ui.res.stringResource(R.string.main_listings_body),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    Icons.Filled.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+
     // The nudge that keeps §4.3 true: the bundle carries the relationships
     // now, so every contact made after the last export is one a restore will
     // not bring back — and nobody re-exports unprompted.
