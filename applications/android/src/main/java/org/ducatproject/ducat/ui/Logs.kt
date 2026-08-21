@@ -117,6 +117,10 @@ fun LogsScreen() {
         }
         HorizontalDivider()
 
+        // else, not a return: this is inside Column's lambda, and returning
+        // out of it non-locally leaves Compose unwinding to a group marker
+        // that is no longer on the stack. See Items.kt, where the same line
+        // crashed the app on every fresh till.
         if (entries.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
                 Text(
@@ -125,30 +129,30 @@ fun LogsScreen() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            return
-        }
+        } else {
 
-        val clock = remember { SimpleDateFormat("HH:mm:ss", Locale.US) }
-        LazyColumn(Modifier.fillMaxSize(), state = listState) {
-            items(entries) { e ->
-                Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 3.dp)) {
-                    Text(
-                        clock.format(Date(e.at)),
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.outline,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        "${e.tag.removePrefix("Ducat")}: ${e.message}",
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 11.sp,
-                        color = when (e.level) {
-                            DucatLog.Level.Error -> MaterialTheme.colorScheme.error
-                            DucatLog.Level.Warn -> MaterialTheme.ducat.lowCapacity
-                            DucatLog.Level.Info -> MaterialTheme.colorScheme.onSurface
-                        },
-                    )
+            val clock = remember { SimpleDateFormat("HH:mm:ss", Locale.US) }
+            LazyColumn(Modifier.fillMaxSize(), state = listState) {
+                items(entries) { e ->
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 3.dp)) {
+                        Text(
+                            clock.format(Date(e.at)),
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "${e.tag.removePrefix("Ducat")}: ${e.message}",
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 11.sp,
+                            color = when (e.level) {
+                                DucatLog.Level.Error -> MaterialTheme.colorScheme.error
+                                DucatLog.Level.Warn -> MaterialTheme.ducat.lowCapacity
+                                DucatLog.Level.Info -> MaterialTheme.colorScheme.onSurface
+                            },
+                        )
+                    }
                 }
             }
         }

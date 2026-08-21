@@ -189,6 +189,10 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
                 style = MaterialTheme.typography.bodySmall,
             )
         }
+        // else, not a return: this is inside Column's lambda, and returning
+        // out of it non-locally leaves Compose unwinding to a group marker
+        // that is no longer on the stack. See Items.kt, where the same line
+        // crashed the app on every fresh till.
         if (listings.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
@@ -197,30 +201,30 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            return
-        }
-        LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-            items(listings) { o ->
-                MyListingCard(
-                    o = o,
-                    onPost = {
-                        scope.launch {
-                            error = null
-                            withContext(Dispatchers.IO) {
-                                runCatching { Listings.post(context, o.optString("id")) }
-                            }.onFailure { error = moneyFailure(context, it) }
-                        }
-                    },
-                    onStop = {
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                runCatching { Listings.unpost(context, o.optString("id")) }
-                            }.onFailure { error = moneyFailure(context, it) }
-                        }
-                    },
-                    onDelete = { Listings.remove(context, o.optString("id")) },
-                )
-                Spacer(Modifier.height(10.dp))
+        } else {
+            LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                items(listings) { o ->
+                    MyListingCard(
+                        o = o,
+                        onPost = {
+                            scope.launch {
+                                error = null
+                                withContext(Dispatchers.IO) {
+                                    runCatching { Listings.post(context, o.optString("id")) }
+                                }.onFailure { error = moneyFailure(context, it) }
+                            }
+                        },
+                        onStop = {
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching { Listings.unpost(context, o.optString("id")) }
+                                }.onFailure { error = moneyFailure(context, it) }
+                            }
+                        },
+                        onDelete = { Listings.remove(context, o.optString("id")) },
+                    )
+                    Spacer(Modifier.height(10.dp))
+                }
             }
         }
     }

@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Catalogue
+import org.ducatproject.ducat.formatXmr
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.R
 
@@ -83,15 +84,25 @@ fun ItemsScreen() {
             ) { Text(stringResource(R.string.items_add)) }
         }
         Spacer(Modifier.height(12.dp))
+        // else, not an early return.
+        //
+        // `return` here is a *non-local* return out of ItemsScreen from inside
+        // Column's inline lambda, so the groups Column had opened were never
+        // closed. Compose does not survive that: the composer unwinds to a
+        // marker that is no longer on its stack and the app dies with
+        // ArrayIndexOutOfBoundsException in IntStack.peek2, from a frame with
+        // nothing of ours in it.
+        //
+        // It fired on the one path anybody takes first — a till with no items
+        // yet, which is every till until somebody types one. Opening Items on
+        // a fresh kiosk crashed the app every time.
         if (items.isEmpty()) {
             Text(
                 stringResource(R.string.items_none),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            return
-        }
-        LazyColumn(Modifier.fillMaxSize()) {
+        } else LazyColumn(Modifier.fillMaxSize()) {
             items(items) { item ->
                 ListItem(
                     headlineContent = {
@@ -144,8 +155,13 @@ private fun ItemPriceLine(item: Catalogue.Item): String {
     val shown = "${item.price} ${item.currency}"
     val snag = (priced.exceptionOrNull() as? Catalogue.SnagException)?.snag
     return when {
+        // The XMR side, always — not `show().primary`, which follows the
+        // reader's own fiat preference and so rendered a till priced in
+        // dollars as "2.50 USD · USD 2.50". The whole point of the line is
+        // what the typed price converts to at today's rate; saying it back in
+        // the currency it was typed in is not an answer to that.
         priced.isSuccess ->
-            "$shown · ${Amounts.show(context, priced.getOrThrow().pxmr).primary}"
+            "$shown · ${formatXmr(priced.getOrThrow().pxmr)} XMR"
         snag == Catalogue.Snag.WrongCurrency ->
             "$shown · ${stringResource(R.string.items_other_currency)}"
         snag == Catalogue.Snag.NoRate -> "$shown · ${stringResource(R.string.items_no_rate)}"
