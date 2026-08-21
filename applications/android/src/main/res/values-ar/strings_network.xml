@@ -22,5 +22,5 @@
     <string name="net_test_route">اختبر مسارًا</string>
     <string name="net_route_ok">خُصص مسار — حزمة بحجم %1$s بايت</string>
     <string name="net_route_failed">فشل المسار: %1$s</string>
-    <string name="net_keystore_failed">لم يفتح مخزن مفاتيح أندرويد، لذا يتعذّر تشغيل النقل. محفظتك وجهات اتصالك محفوظة بشكل منفصل ولم تتأثر — صدّر نسخة احتياطية قبل إعادة التثبيت.</string>
+    <string name="net_keystore_failed">لم يفتح مخزن مفاتيح أندرويد، لذا يتعذّر تشغيل النقل. زال هذا من تلقاء نفسه بعد بضع دقائق، ولا يبدو أن إعادة تشغيل DUCAT تساعد. محفظتك وجهات اتصالك محفوظة بشكل منفصل ولم تتأثر.</string>
 </resources>

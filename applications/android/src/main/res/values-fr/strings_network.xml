@@ -22,5 +22,5 @@
     <string name="net_test_route">Tester une route</string>
     <string name="net_route_ok">route allouée — blob de %1$s octets</string>
     <string name="net_route_failed">échec de la route : %1$s</string>
-    <string name="net_keystore_failed">Le magasin de clés d’Android n’a pas pu s’ouvrir, le transport ne peut donc pas démarrer. Ton portefeuille et tes contacts sont stockés à part et sont intacts — exporte une sauvegarde avant de réinstaller.</string>
+    <string name="net_keystore_failed">Le magasin de clés d’Android n’a pas pu s’ouvrir, le transport ne peut donc pas démarrer. Cela s’est résolu tout seul au bout de quelques minutes ; relancer DUCAT ne semble pas aider. Ton portefeuille et tes contacts sont stockés à part et sont intacts.</string>
 </resources>

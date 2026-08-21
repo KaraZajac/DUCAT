@@ -22,5 +22,5 @@
     <string name="net_test_route">경로 테스트</string>
     <string name="net_route_ok">경로 할당됨 — %1$s바이트 블롭</string>
     <string name="net_route_failed">경로 실패: %1$s</string>
-    <string name="net_keystore_failed">안드로이드 키 저장소가 열리지 않아 전송을 시작할 수 없어. 지갑과 연락처는 따로 저장되어 있어서 영향은 없어 — 다시 설치하기 전에 백업을 내보내.</string>
+    <string name="net_keystore_failed">안드로이드 키 저장소가 열리지 않아 전송을 시작할 수 없어. 몇 분 뒤 저절로 풀린 적이 있고, DUCAT을 다시 켜는 건 도움이 안 되는 것 같아. 지갑과 연락처는 따로 저장되어 있어서 영향은 없어.</string>
 </resources>

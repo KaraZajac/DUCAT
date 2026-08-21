@@ -22,5 +22,5 @@
     <string name="net_test_route">経路をテスト</string>
     <string name="net_route_ok">経路を確保しました — %1$sバイトのブロブ</string>
     <string name="net_route_failed">経路の確立に失敗しました: %1$s</string>
-    <string name="net_keystore_failed">Android のキーストアが開かなかったため、トランスポートを開始できません。ウォレットと連絡先は別に保存されていて影響はありません。再インストールする前にバックアップを書き出して。</string>
+    <string name="net_keystore_failed">Android のキーストアが開かなかったため、トランスポートを開始できません。数分で自然に直ったことがあります。DUCAT を起動し直しても効果はないようです。ウォレットと連絡先は別に保存されていて影響はありません。</string>
 </resources>

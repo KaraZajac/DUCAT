@@ -22,5 +22,5 @@
     <string name="net_test_route">Test een route</string>
     <string name="net_route_ok">route toegewezen — blob van %1$s bytes</string>
     <string name="net_route_failed">route mislukt: %1$s</string>
-    <string name="net_keystore_failed">Androids sleutelopslag ging niet open, dus het transport kan niet starten. Je portemonnee en contacten staan apart en zijn ongemoeid — exporteer een back-up voordat je opnieuw installeert.</string>
+    <string name="net_keystore_failed">Androids sleutelopslag ging niet open, dus het transport kan niet starten. Dit loste na een paar minuten vanzelf op; DUCAT herstarten lijkt niet te helpen. Je portemonnee en contacten staan apart en zijn ongemoeid.</string>
 </resources>
