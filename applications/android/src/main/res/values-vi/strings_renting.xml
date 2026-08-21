@@ -49,6 +49,7 @@
     <string name="rent_search_no_network">Hiện chưa kết nối được tới mạng nên chưa đọc được bảng nào. Thường là ứng dụng vẫn đang tham gia — thử lại sau một lát.</string>
     <string name="rent_search_retry">Thử lại</string>
     <string name="rent_search_progress">Đã kiểm tra %1$d trên %2$d khu vực</string>
+    <string name="rent_search_closer">Đang xem kỹ hơn những khu vực đông nhất…</string>
     <string name="rent_asking_about">Xin chào — tôi thấy tin đăng của bạn, %1$s. Còn trống không?</string>
     <string name="rent_already_asked">Có người vừa hỏi về tin này ngay trước bạn. Máy của chủ tin sẽ đăng lại trong một hai phút — lát nữa xem lại nhé.</string>
     <string name="rent_ask_about_it">Hỏi về nó</string>

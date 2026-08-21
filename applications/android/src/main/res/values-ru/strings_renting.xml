@@ -49,6 +49,7 @@
     <string name="rent_search_no_network">Сеть сейчас недоступна, поэтому ни одна доска не прочитана. Обычно это значит, что приложение ещё подключается — попробуйте через минуту.</string>
     <string name="rent_search_retry">Повторить</string>
     <string name="rent_search_progress">Проверено %1$d из %2$d районов</string>
+    <string name="rent_search_closer">Смотрим внимательнее на самые оживлённые районы…</string>
     <string name="rent_asking_about">Здравствуйте! Ваше объявление, %1$s, ещё актуально?</string>
     <string name="rent_already_asked">Кто-то спросил об этом прямо перед вами. Телефон владельца вернёт объявление через минуту-другую — загляните чуть позже.</string>
     <string name="rent_ask_about_it">Спросить об этом</string>

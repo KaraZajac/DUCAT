@@ -49,6 +49,7 @@
     <string name="rent_search_no_network">现在连不上网络，所以没有读到任何板。通常是应用还在接入中，稍后再试一次。</string>
     <string name="rent_search_retry">重试</string>
     <string name="rent_search_progress">已查看 %2$d 个区域中的 %1$d 个</string>
+    <string name="rent_search_closer">正在更仔细地查看最热闹的区域…</string>
     <string name="rent_asking_about">你好，我看到你发布的 %1$s。还能租吗？</string>
     <string name="rent_already_asked">刚好有人在你之前问了这一个。发布者的手机会在一两分钟内重新放上去，稍后再看看。</string>
     <string name="rent_ask_about_it">问一问</string>

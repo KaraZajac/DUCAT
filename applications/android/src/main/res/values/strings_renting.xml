@@ -49,6 +49,7 @@
     <string name="rent_search_no_network">Could not reach the network just now, so no board was read. This usually means the app is still joining — try again in a moment.</string>
     <string name="rent_search_retry">Try again</string>
     <string name="rent_search_progress">%1$d of %2$d areas checked</string>
+    <string name="rent_search_closer">Looking more closely at the busiest areas…</string>
     <string name="rent_asking_about">Hello — I saw your listing, %1$s. Is it available?</string>
     <string name="rent_already_asked">Somebody asked about this one just before you. The owner\'s phone will put it back within a minute or two — look again shortly.</string>
     <string name="rent_ask_about_it">Ask about it</string>

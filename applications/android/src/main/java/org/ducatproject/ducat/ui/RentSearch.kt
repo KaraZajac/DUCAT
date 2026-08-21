@@ -339,10 +339,21 @@ private fun RentSearchScreen(
                         // Something that moves. Nine boards, most of a minute
                         // each when they are empty — without a count this is a
                         // minute and a half of a screen that looks broken.
+                        //
+                        // A count that has stopped moving looks broken too. The
+                        // ring is not the end of the search: a board that came
+                        // back with every slot taken gets its ladder climbed
+                        // afterwards, and during that the counter sits at "9 of
+                        // 9 areas checked" beside a spinner, which reads as
+                        // finished-but-hung. Say what it is doing instead.
                         progress?.let { (done, total) ->
                             Spacer(Modifier.height(6.dp))
                             Text(
-                                stringResource(R.string.rent_search_progress, done, total),
+                                if (done >= total) {
+                                    stringResource(R.string.rent_search_closer)
+                                } else {
+                                    stringResource(R.string.rent_search_progress, done, total)
+                                },
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )

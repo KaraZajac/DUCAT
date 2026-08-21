@@ -49,6 +49,7 @@
     <string name="rent_search_no_network">Das Netzwerk war gerade nicht erreichbar, also wurde keine Tafel gelesen. Meist heißt das, die App verbindet sich noch — versuch es gleich noch einmal.</string>
     <string name="rent_search_retry">Erneut versuchen</string>
     <string name="rent_search_progress">%1$d von %2$d Gebieten geprüft</string>
+    <string name="rent_search_closer">Sieht sich die vollsten Gegenden genauer an…</string>
     <string name="rent_asking_about">Hallo — ich habe deine Anzeige gesehen, %1$s. Ist sie noch frei?</string>
     <string name="rent_already_asked">Jemand hat kurz vor dir danach gefragt. Das Telefon der anbietenden Person stellt es in ein bis zwei Minuten wieder ein — schau gleich noch mal.</string>
     <string name="rent_ask_about_it">Danach fragen</string>

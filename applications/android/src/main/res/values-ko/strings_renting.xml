@@ -49,6 +49,7 @@
     <string name="rent_search_no_network">지금은 네트워크에 닿지 못해 게시판을 하나도 읽지 못했습니다. 보통은 앱이 아직 연결 중이라는 뜻입니다 — 잠시 후 다시 시도하세요.</string>
     <string name="rent_search_retry">다시 시도</string>
     <string name="rent_search_progress">%2$d개 지역 중 %1$d개 확인</string>
+    <string name="rent_search_closer">가장 붐비는 지역을 더 자세히 보는 중…</string>
     <string name="rent_asking_about">안녕하세요 — %1$s 게시글을 봤습니다. 아직 가능할까요?</string>
     <string name="rent_already_asked">바로 앞서 다른 사람이 문의했습니다. 게시자의 휴대폰이 1~2분 안에 다시 올립니다 — 조금 뒤에 다시 보세요.</string>
     <string name="rent_ask_about_it">문의하기</string>

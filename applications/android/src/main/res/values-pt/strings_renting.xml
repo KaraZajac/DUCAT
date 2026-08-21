@@ -49,6 +49,7 @@
     <string name="rent_search_no_network">Não deu para alcançar a rede agora, então nenhum quadro foi lido. Normalmente isso quer dizer que o app ainda está entrando — tente de novo daqui a pouco.</string>
     <string name="rent_search_retry">Tentar de novo</string>
     <string name="rent_search_progress">%1$d de %2$d áreas verificadas</string>
+    <string name="rent_search_closer">Olhando mais de perto as áreas mais movimentadas…</string>
     <string name="rent_asking_about">Olá — vi o seu anúncio, %1$s. Ainda está disponível?</string>
     <string name="rent_already_asked">Alguém perguntou por este pouco antes de você. O telefone do anunciante vai repor em um ou dois minutos — olhe de novo daqui a pouco.</string>
     <string name="rent_ask_about_it">Perguntar sobre isto</string>

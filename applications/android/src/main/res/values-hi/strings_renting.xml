@@ -49,6 +49,7 @@
     <string name="rent_search_no_network">अभी नेटवर्क तक नहीं पहुँचा जा सका, इसलिए कोई बोर्ड नहीं पढ़ा गया। आम तौर पर इसका मतलब है कि ऐप अभी जुड़ ही रहा है — थोड़ी देर में फिर कोशिश करें।</string>
     <string name="rent_search_retry">फिर कोशिश करें</string>
     <string name="rent_search_progress">%2$d में से %1$d इलाक़े देखे गए</string>
+    <string name="rent_search_closer">सबसे व्यस्त इलाक़ों को और क़रीब से देख रहे हैं…</string>
     <string name="rent_asking_about">नमस्ते — मैंने आपकी लिस्टिंग देखी, %1$s। क्या यह अभी उपलब्ध है?</string>
     <string name="rent_already_asked">आपसे थोड़ा पहले किसी ने इसके बारे में पूछ लिया। मालिक का फ़ोन इसे एक-दो मिनट में वापस लगा देगा — थोड़ी देर बाद फिर देखें।</string>
     <string name="rent_ask_about_it">इसके बारे में पूछें</string>

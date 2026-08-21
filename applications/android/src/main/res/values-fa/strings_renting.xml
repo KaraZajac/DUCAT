@@ -49,6 +49,7 @@
     <string name="rent_search_no_network">الان نشد به شبکه رسید، بنابراین هیچ تخته‌ای خوانده نشد. معمولاً یعنی برنامه هنوز در حال پیوستن است — کمی بعد دوباره تلاش کنید.</string>
     <string name="rent_search_retry">تلاش دوباره</string>
     <string name="rent_search_progress">%1$d از %2$d منطقه بررسی شد</string>
+    <string name="rent_search_closer">نگاه دقیق‌تری به شلوغ‌ترین محله‌ها…</string>
     <string name="rent_asking_about">سلام — آگهی شما را دیدم، %1$s. هنوز موجود است؟</string>
     <string name="rent_already_asked">یک نفر درست پیش از شما دربارهٔ این پرسید. گوشی صاحب آگهی تا یکی دو دقیقهٔ دیگر دوباره آن را می‌گذارد — کمی بعد دوباره نگاه کنید.</string>
     <string name="rent_ask_about_it">درباره‌اش بپرسید</string>
