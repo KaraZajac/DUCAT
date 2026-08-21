@@ -2,6 +2,7 @@ package org.ducatproject.ducat.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -163,12 +164,29 @@ fun SettingsScreen(
         Text(stringResource(R.string.settings_appearance_title),
             style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
+            // The whole row, not the dot. Settings had these two groups
+            // answering only to a tap on the eleven-dp circle itself, while
+            // the operating-mode list two hundred lines down and the chat's
+            // retention picker both take the row — so the same control
+            // behaved differently depending on which screen you met it on,
+            // and the one people meet first was the fussy one.
+            //
+            // `selectable` rather than `clickable`, with the button's own
+            // onClick given up: it puts the radio's role on the row, so a
+            // screen reader announces one control instead of a button beside
+            // a label.
         ThemeMode.entries.forEach { m ->
             Row(
-                Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                Modifier.fillMaxWidth()
+                    .selectable(
+                        selected = themeMode == m,
+                        onClick = { onThemeChange(m) },
+                        role = androidx.compose.ui.semantics.Role.RadioButton,
+                    )
+                    .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                RadioButton(selected = themeMode == m, onClick = { onThemeChange(m) })
+                RadioButton(selected = themeMode == m, onClick = null)
                 Spacer(Modifier.width(8.dp))
                 Text(
                     stringResource(
@@ -314,14 +332,18 @@ private fun DistanceSetting() {
             style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
         options.forEach { (value, label) ->
+            // The whole row — see the theme group above.
             Row(
-                Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                Modifier.fillMaxWidth()
+                    .selectable(
+                        selected = sys == value,
+                        onClick = { sys = value; store.setSystem(value); ContactStore.bump() },
+                        role = androidx.compose.ui.semantics.Role.RadioButton,
+                    )
+                    .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                RadioButton(
-                    selected = sys == value,
-                    onClick = { sys = value; store.setSystem(value); ContactStore.bump() },
-                )
+                RadioButton(selected = sys == value, onClick = null)
                 Spacer(Modifier.width(8.dp))
                 Text(label)
             }
