@@ -1883,8 +1883,14 @@ private fun RideBondBanner(contact: Contact) {
                 // from what the escrow actually holds — but the sentence
                 // above the signature was not, and that sentence is the whole
                 // point of asking.
+                //
+                // "releasing" is in for the same reason from the other end:
+                // the proposer's own banner states what the far side gets as
+                // `funded - mine`, and its scan is no fresher than the
+                // co-signer's was.
                 val filling = stage == "done" && funded < need
-                if ((filling || stage == "release_pending") && tick % 3 == 0) {
+                val settling = stage == "release_pending" || stage == "releasing"
+                if ((filling || settling) && tick % 3 == 0) {
                     runCatching {
                         org.ducatproject.ducat.Ceremony.checkRideFunding(context, idHex)
                     }
@@ -2218,8 +2224,24 @@ private fun RideBondBanner(contact: Contact) {
                                             // everything back; the arbiter
                                             // judges, and can decline by
                                             // simply not signing.
+                                            //
+                                            // Everything means everything.
+                                            // This passed `funded` — this
+                                            // device's last scan of the
+                                            // escrow — so a rider whose scan
+                                            // had not caught the other side's
+                                            // stake asked for less than the
+                                            // escrow held, and the remainder
+                                            // would have gone to the person
+                                            // they were in dispute with.
+                                            // proposeRideSplit clamps to the
+                                            // total it reads off the chain
+                                            // itself, so asking for more than
+                                            // exists is exactly how you ask
+                                            // for all of it.
                                             org.ducatproject.ducat.Ceremony.proposeRideSplit(
-                                                context, idHex, funded, toArbiter = true)
+                                                context, idHex, Long.MAX_VALUE,
+                                                toArbiter = true)
                                         }
                                     }.onFailure { error = trouble(context, it) }
                                     busy = false
