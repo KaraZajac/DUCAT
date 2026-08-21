@@ -1224,23 +1224,62 @@ private fun LinkableText(body: String, fg: androidx.compose.ui.graphics.Color) {
     }
     if (url == null) {
         Text(body, color = fg)
-    } else {
-        Text(
-            body,
-            color = fg,
-            textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
-            modifier = Modifier.clickable {
-                runCatching {
-                    context.startActivity(
-                        android.content.Intent(
-                            android.content.Intent.ACTION_VIEW,
-                            android.net.Uri.parse(url),
-                        )
-                    )
-                }
-            },
-        )
+        return
     }
+    // Show the link, not its innards. A card is a few hundred bytes of base64
+    // and a map link carries the coordinates twice over, so printing either in
+    // full buried the sentence explaining it under ten lines of gibberish —
+    // with, in the card's case, the QR that is the actual point of the message
+    // pushed off the top of the bubble. Long-press still copies `m.body`
+    // verbatim, which is how a link gets passed on by hand, so nothing that was
+    // reachable before has stopped being reachable.
+    val text = remember(body, url) {
+        val at = body.indexOf(url)
+        androidx.compose.ui.text.buildAnnotatedString {
+            append(body.substring(0, at))
+            // Only the link is underlined. Underlining the whole body drew a
+            // line under the explanation as well, which read as one enormous
+            // link and made the sentence hard to take in.
+            pushStyle(
+                androidx.compose.ui.text.SpanStyle(
+                    textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                ),
+            )
+            append(shortLink(url))
+            pop()
+            append(body.substring(at + url.length))
+        }
+    }
+    Text(
+        text,
+        color = fg,
+        modifier = Modifier.clickable {
+            runCatching {
+                context.startActivity(
+                    android.content.Intent(
+                        android.content.Intent.ACTION_VIEW,
+                        android.net.Uri.parse(url),
+                    )
+                )
+            }
+        },
+    )
+}
+
+/**
+ * How a link reads in a bubble.
+ *
+ * A location is the one case where the innards are worth keeping: "where I am"
+ * followed by nothing at all tells the reader less than the coordinates do, and
+ * they are the only part of that URL a person would ever read. Everything else
+ * gets its host and a stop — enough to know where tapping leads.
+ */
+private fun shortLink(url: String): String {
+    if (url.startsWith("ducat:")) return "ducat:…"
+    val coords = Regex("mlat=(-?[\\d.]+)&mlon=(-?[\\d.]+)").find(url)
+    if (coords != null) return "${coords.groupValues[1]}, ${coords.groupValues[2]}"
+    if (url.length <= 48) return url
+    return url.removePrefix("https://").removePrefix("www.").substringBefore('/') + "/…"
 }
 
 /** A voice memo: play and stop, nothing more. The bytes are already local. */
