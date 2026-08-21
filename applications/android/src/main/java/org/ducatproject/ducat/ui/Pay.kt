@@ -819,12 +819,21 @@ private fun AmountStep(
                         .onFailure { error = sendFailure(context, it) }
                 }
         }
+    // Outside the confirm, because it outlives it.
+    //
+    // `onConfirm` closes the dialog and opens the gate, in that order and in
+    // one frame. With the gate rendered *inside* `if (confirming)`, closing
+    // the dialog unmounted the gate in the same recomposition — so `askPin`
+    // went true against nothing, no PIN was ever asked for, and `doSend` was
+    // never reached. Pressing Send on the confirmation did nothing at all:
+    // no payment, no PIN, no error, back to the bill. Found paying a USD 3.20
+    // coffee at the till, twice, before looking at why.
+    PinGate(
+        open = askPin,
+        onDismiss = { askPin = false },
+        onPassed = { askPin = false; doSend() },
+    )
     if (confirming && pxmr != null) {
-        PinGate(
-            open = askPin,
-            onDismiss = { askPin = false },
-            onPassed = { askPin = false; doSend() },
-        )
         ConfirmSend(
             pxmr = pxmr,
             quote = quote,

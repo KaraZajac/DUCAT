@@ -50,4 +50,5 @@
     <string name="receipt_note">영수증 — 감사합니다</string>
     <string name="receipt_note_oob">영수증 — DUCAT 외부에서 결제됨. 감사합니다</string>
     <string name="bill_note_cancelled">%1$s 청구는 취소되었습니다 — 결제하실 것이 없습니다.</string>
+    <string name="bill_note_sale">결제 금액</string>
 </resources>

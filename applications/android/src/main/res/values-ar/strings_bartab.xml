@@ -55,4 +55,5 @@
     <string name="receipt_note">إيصال — شكرًا لك</string>
     <string name="receipt_note_oob">إيصال — سُدّد خارج DUCAT. شكرًا لك</string>
     <string name="bill_note_cancelled">أُلغيت الفاتورة البالغة %1$s — لا شيء للدفع.</string>
+    <string name="bill_note_sale">فاتورتك</string>
 </resources>

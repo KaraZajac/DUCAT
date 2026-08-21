@@ -51,4 +51,5 @@
     <string name="receipt_note">Recibo — gracias</string>
     <string name="receipt_note_oob">Recibo — pagado fuera de DUCAT. Gracias</string>
     <string name="bill_note_cancelled">La cuenta de %1$s queda anulada: no hay nada que pagar.</string>
+    <string name="bill_note_sale">Tu cuenta</string>
 </resources>

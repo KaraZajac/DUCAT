@@ -51,4 +51,5 @@
     <string name="receipt_note">Bon — bedankt</string>
     <string name="receipt_note_oob">Bon — buiten DUCAT betaald. Bedankt</string>
     <string name="bill_note_cancelled">De rekening van %1$s is ingetrokken — niets te betalen.</string>
+    <string name="bill_note_sale">Je rekening</string>
 </resources>

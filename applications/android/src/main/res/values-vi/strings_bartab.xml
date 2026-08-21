@@ -50,4 +50,5 @@
     <string name="receipt_note">Biên nhận — cảm ơn bạn</string>
     <string name="receipt_note_oob">Biên nhận — đã thanh toán ngoài DUCAT. Cảm ơn bạn</string>
     <string name="bill_note_cancelled">Hoá đơn %1$s đã được huỷ — không phải trả gì.</string>
+    <string name="bill_note_sale">Hóa đơn của bạn</string>
 </resources>

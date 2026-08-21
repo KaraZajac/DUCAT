@@ -53,4 +53,5 @@
     <string name="receipt_note">Paragon — dziękujemy</string>
     <string name="receipt_note_oob">Paragon — zapłacone poza DUCAT. Dziękujemy</string>
     <string name="bill_note_cancelled">Rachunek na %1$s został anulowany — nie ma nic do zapłaty.</string>
+    <string name="bill_note_sale">Twój rachunek</string>
 </resources>

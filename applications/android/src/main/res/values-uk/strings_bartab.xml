@@ -53,4 +53,5 @@
     <string name="receipt_note">Чек — дякуємо</string>
     <string name="receipt_note_oob">Чек — оплачено поза DUCAT. Дякуємо</string>
     <string name="bill_note_cancelled">Рахунок на %1$s скасовано — платити нічого.</string>
+    <string name="bill_note_sale">Ваш рахунок</string>
 </resources>

@@ -51,4 +51,5 @@
     <string name="receipt_note">Fiş — teşekkürler</string>
     <string name="receipt_note_oob">Fiş — DUCAT dışında ödendi. Teşekkürler</string>
     <string name="bill_note_cancelled">%1$s tutarındaki hesap iptal edildi — ödenecek bir şey yok.</string>
+    <string name="bill_note_sale">Hesabın</string>
 </resources>

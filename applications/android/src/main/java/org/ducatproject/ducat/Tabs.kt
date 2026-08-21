@@ -184,6 +184,12 @@ class TabStore(private val context: Context) {
                 when (tab.origin) {
                     "taxi" -> R.string.bill_note_fare
                     Orders.ORIGIN -> R.string.bill_note_order
+                    // A counter sale is not a tab. Only the bar opens one of
+                    // those; the till, the taxi and the kiosk each hand over
+                    // something with its own name, and "Your tab" was what a
+                    // shop's customer saw above a flat white they had already
+                    // paid for at the counter.
+                    "pos" -> R.string.bill_note_sale
                     else -> R.string.bill_note_tab
                 },
             ),
