@@ -588,7 +588,77 @@ object Mailbox {
 
     /** Where a fetched attachment lives, named by its ciphertext hash. */
     fun attachmentFile(context: Context, ctHashHex: String): java.io.File =
-        java.io.File(java.io.File(context.filesDir, "att").apply { mkdirs() }, ctHashHex)
+        java.io.File(attachmentDir(context), ctHashHex)
+
+    private fun attachmentDir(context: Context): java.io.File =
+        java.io.File(context.filesDir, "att").apply { mkdirs() }
+
+    /**
+     * How much of this phone the pictures may have.
+     *
+     * Generous, because what sits on the other side of this number is somebody
+     * losing a photograph. A mebibyte is the protocol's ceiling per
+     * attachment, so this is about five hundred of them.
+     */
+    private const val ATT_BUDGET_BYTES = 512L * 1024 * 1024
+
+    /**
+     * And how much of the phone must be left over regardless.
+     *
+     * The budget above protects somebody from their correspondents. This
+     * protects them from the budget: a phone with a gigabyte free should not
+     * spend half of it on pictures nobody asked for, whatever the budget says.
+     */
+    private const val ATT_FREE_FLOOR_BYTES = 500L * 1024 * 1024
+
+    /**
+     * Delete the attachment files no message points at any more.
+     *
+     * Nothing ever removed one. A chat set to forget its messages after an
+     * hour forgot the messages and kept every picture; clearing a conversation
+     * did the same. So the one directory that grows a mebibyte at a time only
+     * ever grew, and what it kept could never be shown by anything again.
+     *
+     * Files are named by ciphertext hash — which is also how a re-delivered
+     * message finds its picture already on disk — so "still referenced" is
+     * exactly the set of hashes some live thread still mentions.
+     *
+     * Returns the bytes reclaimed.
+     */
+    fun sweepAttachments(context: Context): Long {
+        val store = ContactStore(context)
+        val live = buildSet {
+            for (c in store.all()) {
+                for (m in store.thread(c.personaHex)) m.attHash?.let { add(it) }
+            }
+        }
+        var freed = 0L
+        attachmentDir(context).listFiles()?.forEach { f ->
+            if (f.name !in live) {
+                val n = f.length()
+                if (f.delete()) freed += n
+            }
+        }
+        if (freed > 0) DucatLog.i(TAG, "attachments: reclaimed ${freed / 1024} KiB")
+        return freed
+    }
+
+    /**
+     * Is there room for another picture?
+     *
+     * Asked before fetching, rather than enforced by eviction afterwards. The
+     * files are named by a hash of ciphertext whose DHT record this device
+     * deleted the moment it had the bytes (§18.7) — so a picture thrown away
+     * to make room cannot be fetched again, by anyone, ever. Declining to
+     * fetch loses nothing that was already kept, and the sender's record ages
+     * out on its own TTL.
+     *
+     * Both limits do work. The budget stops one contact spending the whole
+     * phone on pictures; the floor stops the budget doing it on a phone that
+     * was nearly full to begin with.
+     */
+    internal fun roomForAttachment(used: Long, free: Long, incoming: Long): Boolean =
+        used + incoming <= ATT_BUDGET_BYTES && free - incoming >= ATT_FREE_FLOOR_BYTES
 
     /**
      * Fetch one missing attachment, if any (§16.15).
@@ -609,6 +679,20 @@ object Mailbox {
                 val nonce = m.attNonce ?: continue
                 val out = attachmentFile(context, hash)
                 if (out.exists()) continue
+                // Room first. The bytes are about to be pulled off the network
+                // and written, and there is no undo — the record they came
+                // from gets deleted on the way past.
+                val dir = attachmentDir(context)
+                val used = dir.listFiles()?.sumOf { it.length() } ?: 0L
+                if (!roomForAttachment(used, dir.usableSpace, m.attLen)) {
+                    DucatLog.w(
+                        TAG,
+                        "attachment ${hash.take(12)}… not fetched: " +
+                            "${used / 1024 / 1024} MiB of pictures, " +
+                            "${dir.usableSpace / 1024 / 1024} MiB free",
+                    )
+                    return false
+                }
                 return runCatching {
                     nodeDhtOpen(rec, null, null)
                     val ctLen = m.attLen + 16 // AEAD tag

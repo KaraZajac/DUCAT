@@ -325,6 +325,14 @@ tasks.register<JavaExec>("smoke") {
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
 // Proves the escrow sweep takes what is over and leaves what is funded.
 // `./gradlew :desktop:escrowsweep`.
+// The attachment directory that only ever grew, and the room check that stops
+// it growing. `./gradlew :desktop:attsweep`.
+tasks.register<JavaExec>("attsweep") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.AttachmentSweepTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // A PIN cooldown measured on a clock the phone's owner cannot set.
 // `./gradlew :desktop:pinlockout`.
 tasks.register<JavaExec>("pinlockout") {

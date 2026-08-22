@@ -281,6 +281,11 @@ class Poller(private val context: Context) {
                 runCatching { Ceremony.sweep(context) }
                     .onFailure { DucatLog.w(TAG, "escrow sweep: ${it.message}") }
 
+                // And for the directory that only ever grew. A chat set to
+                // forget its messages kept every picture in them.
+                runCatching { Mailbox.sweepAttachments(context) }
+                    .onFailure { DucatLog.w(TAG, "attachment sweep: ${it.message}") }
+
                 // One attachment per pass: pictures arrive shortly after
                 // their messages without ever starving the payment paths.
                 runCatching { Mailbox.fetchOneAttachment(context) }
