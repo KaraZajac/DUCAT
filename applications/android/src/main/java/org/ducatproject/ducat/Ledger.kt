@@ -281,6 +281,36 @@ object Ledger {
         val timestamp: Long,
     )
 
+    /**
+     * Whether a bill has been answered — paid, receipted, withdrawn or declined.
+     *
+     * One place, because this question is asked on three screens and each one
+     * used to answer it differently. Activity listed withdrawn and declined
+     * bills under "Awaiting" for ever; the take-over prompt offered to pay a
+     * bill that was already settled. A predicate copied per caller is a
+     * predicate that disagrees with itself per caller.
+     *
+     * `m` must be the kind-1 bill; `thread` is the conversation it sits in.
+     */
+    fun billAnswered(thread: List<StoredMessage>, m: StoredMessage): Boolean =
+        thread.any { p ->
+            p.kind == 2 && p.outgoing != m.outgoing &&
+                p.timestamp >= m.timestamp && p.amountPxmr >= m.amountPxmr
+        } || thread.any { p ->
+            // A receipt at or above it also closes it (paid outside).
+            p.kind == 3 && p.timestamp >= m.timestamp &&
+                p.amountPxmr >= m.amountPxmr
+        } || thread.any { p ->
+            // §16.13's Retract closes it too. Named by sequence rather than
+            // matched by amount, so it is exact.
+            //
+            // Both directions. `reOwn` and the same side is the issuer taking
+            // their own bill back; not `reOwn` and the other side is the payer
+            // refusing it.
+            p.kind == 5 && p.reSeq == m.seq &&
+                (if (p.reOwn) p.outgoing == m.outgoing else p.outgoing != m.outgoing)
+        }
+
     fun openRequests(context: Context): List<OpenRequest> {
         val contacts = ContactStore(context)
         val out = ArrayList<OpenRequest>()
@@ -288,28 +318,7 @@ object Ledger {
             val thread = contacts.thread(c.personaHex)
             for (m in thread) {
                 if (m.kind != 1) continue
-                val answered = thread.any { p ->
-                    p.kind == 2 && p.outgoing != m.outgoing &&
-                        p.timestamp >= m.timestamp && p.amountPxmr >= m.amountPxmr
-                } || thread.any { p ->
-                    // A receipt at or above it also closes it (paid outside).
-                    p.kind == 3 && p.timestamp >= m.timestamp &&
-                        p.amountPxmr >= m.amountPxmr
-                } || thread.any { p ->
-                    // §16.13's Retract closes it too, and this list did not
-                    // know that: a bill its issuer had withdrawn and a bill its
-                    // payer had declined both sat under "Awaiting" for ever,
-                    // on the screen a person checks to find out what they still
-                    // owe. Named by sequence rather than matched by amount, so
-                    // it is exact.
-                    //
-                    // Both directions. `reOwn` and the same side is the issuer
-                    // taking their own bill back; not `reOwn` and the other
-                    // side is the payer refusing it.
-                    p.kind == 5 && p.reSeq == m.seq &&
-                        (if (p.reOwn) p.outgoing == m.outgoing else p.outgoing != m.outgoing)
-                }
-                if (!answered) {
+                if (!billAnswered(thread, m)) {
                     out += OpenRequest(
                         theyAsked = !m.outgoing,
                         counterparty = c.displayName(),

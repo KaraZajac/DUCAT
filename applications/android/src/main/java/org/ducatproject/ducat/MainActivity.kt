@@ -466,8 +466,14 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         val store = ContactStore(context)
         val now = System.currentTimeMillis() / 1000
         for (c in store.all()) {
-            val m = store.thread(c.personaHex)
-                .lastOrNull { !it.outgoing && it.kind == 1 } ?: continue
+            val thread = store.thread(c.personaHex)
+            val m = thread.lastOrNull { !it.outgoing && it.kind == 1 } ?: continue
+            // Not one that is already settled. `billseen_` only records bills
+            // this prompt itself handled, so paying or declining one from the
+            // thread left it unmarked — and inside the five-minute freshness
+            // window the prompt then took the screen over to offer a bill that
+            // had just been paid.
+            if (Ledger.billAnswered(thread, m)) continue
             val seen = billPrefs.getLong("billseen_${c.personaHex}", -1L)
             // Fresh only: reinstalls and restores must not replay history as
             // a stack of surprise take-overs.
@@ -497,11 +503,26 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 // on this bill, and a decline that never leaves reads as being
                 // ignored. One retry, then a log line so field logs show the
                 // decline never went out.
+                // A kind-5 Retract naming the bill, the same as the thread's
+                // own Decline. As plain text this told them in words and told
+                // neither client anything, so the bill stayed live on both
+                // sides — still offering "Review payment" in the thread, still
+                // listed under "Awaiting" — and this is the path most declines
+                // take, because this prompt is what appears when a bill lands.
+                val decline: () -> Result<Unit> = {
+                    runCatching {
+                        Mailbox.send(
+                            context, c, body, mine,
+                            kind = 5, reSeq = m.seq, reOwn = false,
+                        )
+                        Unit
+                    }
+                }
                 kotlinx.coroutines.MainScope().launch(kotlinx.coroutines.Dispatchers.IO) {
-                    var r = runCatching { Mailbox.send(context, c, body, mine) }
+                    var r = decline()
                     if (r.isFailure) {
                         kotlinx.coroutines.delay(5_000)
-                        r = runCatching { Mailbox.send(context, c, body, mine) }
+                        r = decline()
                     }
                     r.onFailure {
                         DucatLog.w(

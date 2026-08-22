@@ -55,6 +55,29 @@ object Mailbox {
     }
 
     /**
+     * §16.13's registry, for the log line.
+     *
+     * It used to be "message" for kind 0 and "payment note" for everything
+     * else, so a withdrawn bill, a declined bill, an emoji and every round of
+     * an escrow ceremony all went out as a payment note — in the log somebody
+     * reads to work out what happened to somebody's money. Never shown to a
+     * user; deliberately not translated.
+     */
+    private fun kindName(kind: Int): String = when (kind) {
+        0 -> "message"
+        1 -> "bill"
+        2 -> "payment note"
+        3 -> "receipt"
+        4 -> "reaction"
+        5 -> "retraction"
+        6 -> "ride offer"
+        7 -> "ride accept"
+        8, 9 -> "ceremony round"
+        10 -> "ceremony abort"
+        else -> "kind $kind"
+    }
+
+    /**
      * When to say a dead letter happened.
      *
      * Not now: the send time is inside the bytes that would not open, and the
@@ -434,8 +457,7 @@ object Mailbox {
             }
             store.clearPendingSlot(c.personaHex)
         }
-        DucatLog.i(TAG, "sending ${if (kind == 0) "message" else "payment note"} " +
-            "seq ${c.outSeq} to ${c.displayName()}")
+        DucatLog.i(TAG, "sending ${kindName(kind)} seq ${c.outSeq} to ${c.displayName()}")
         val sealed = sealMessage(
             bundle, c.outSeq.toULong(), c.outPrevLink ?: ByteArray(32), body,
             threadAad(minePersonaHex, c.personaHex),
