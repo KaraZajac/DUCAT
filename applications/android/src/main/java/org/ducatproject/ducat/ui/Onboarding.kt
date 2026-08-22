@@ -601,6 +601,15 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                                     val dir = File(context.filesDir, "backups").apply { mkdirs() }
                                     val f = File(dir, "ducat-backup.ducatbak")
                                     f.writeBytes(bytes)
+                                    // Say that one exists. Settings' export has
+                                    // always recorded this and setup's never did,
+                                    // so the app finished setup believing the
+                                    // backup it had just written did not exist —
+                                    // which is the baseline every later "your
+                                    // backup is out of date" is measured against,
+                                    // and the answer to what is missing when a
+                                    // killed process resumes mid-setup.
+                                    ContactStore(context).markBackupExported()
                                     f
                                 }
                             }

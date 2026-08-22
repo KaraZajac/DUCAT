@@ -141,6 +141,20 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                     when {
                         WalletStore(this@MainActivity).address() == null -> Onboarding()
                         !Pin.isSet(this@MainActivity) -> Onboarding(step = Step.Pin)
+                        // Ask about the backup too, rather than assuming it is
+                        // the thing still outstanding. A restore records one —
+                        // the file that got them here — and so does making one
+                        // at the last step, so this is answerable from the same
+                        // durable state the two checks above use.
+                        //
+                        // Assuming it left a restored phone being marched
+                        // through Trust and Backup to produce a bundle it did
+                        // not need, and could not leave setup until it did.
+                        // Whether that happened at all came down to whether the
+                        // process had been killed since the restore, which is
+                        // not something onboarding should vary on.
+                        ContactStore(this@MainActivity).backupExportedAt() > 0L ->
+                            Onboarding(step = Step.Done, backupConfirmed = true)
                         else -> Onboarding(step = Step.Backup)
                     }
                 )
