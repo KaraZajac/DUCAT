@@ -41,6 +41,7 @@ import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.threadAad
 import org.ducatproject.ducat.StoredMessage
 import org.ducatproject.ducat.Amounts
+import org.ducatproject.ducat.SafeImage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -1149,15 +1150,16 @@ private fun Bubble(
                         )
                         mime.startsWith("image/") -> {
                             val bmp = remember(att) {
-                                runCatching {
-                                    // Bounded decode: the protocol capped the
-                                    // bytes, but the pixels are still the
-                                    // decoder's problem.
-                                    val o = android.graphics.BitmapFactory.Options()
-                                        .apply { inSampleSize = 1 }
-                                    android.graphics.BitmapFactory
-                                        .decodeFile(file.absolutePath, o)
-                                }.getOrNull()
+                                // Bounded decode. The protocol capped the
+                                // bytes, which is the wrong quantity: PNG
+                                // compresses flat colour to nothing, so a
+                                // legal attachment can be 400 megapixels. And
+                                // this sits behind remember(), so an
+                                // unbounded decode would take the
+                                // conversation down every time it is opened.
+                                SafeImage.fromFile(
+                                    file.absolutePath, SafeImage.MESSAGE_PIXELS,
+                                )
                             }
                             if (bmp != null) {
                                 androidx.compose.foundation.Image(
@@ -1628,9 +1630,11 @@ private fun sendPicture(
     mine: String,
     uri: android.net.Uri,
 ) {
-    val src = context.contentResolver.openInputStream(uri).use {
-        android.graphics.BitmapFactory.decodeStream(it)
-    } ?: throw IllegalArgumentException(context.getString(R.string.chat_not_an_image))
+    // Ours, but picked from wherever the phone keeps pictures — which is where
+    // anything shared into it lands too, so the same ceiling applies.
+    val src = SafeImage.fromStream(
+        { context.contentResolver.openInputStream(uri) }, SafeImage.COMPOSE_PIXELS,
+    ) ?: throw IllegalArgumentException(context.getString(R.string.chat_not_an_image))
     val maxDim = 1280
     val scale = minOf(1f, maxDim.toFloat() / maxOf(src.width, src.height))
     val scaled = if (scale < 1f) android.graphics.Bitmap.createScaledBitmap(

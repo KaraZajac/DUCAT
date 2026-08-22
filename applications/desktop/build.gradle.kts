@@ -37,6 +37,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Wallet.kt",
     "org/ducatproject/ducat/Tabs.kt",
     "org/ducatproject/ducat/SecondOpinion.kt",
+    "org/ducatproject/ducat/SafeImage.kt",
     "org/ducatproject/ducat/ui/Qr.kt",
     "org/ducatproject/ducat/ui/Balance.kt",
     "org/ducatproject/ducat/ui/Monero.kt",
@@ -324,6 +325,14 @@ tasks.register<JavaExec>("smoke") {
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
 // Proves the escrow sweep takes what is over and leaves what is funded.
 // `./gradlew :desktop:escrowsweep`.
+// The arithmetic that stops a 416 KiB PNG decoding to 1.6 GB.
+// `./gradlew :desktop:safeimage`.
+tasks.register<JavaExec>("safeimage") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.SafeImageTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // What an unsigned card may do to a contact's payment address: establish one,
 // confirm one, but never replace one. `./gradlew :desktop:cardaddress`.
 tasks.register<JavaExec>("cardaddress") {

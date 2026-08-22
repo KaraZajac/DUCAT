@@ -101,8 +101,12 @@ class Bitmap internal constructor(
  * does, and the caller already draws initials in that case.
  */
 object BitmapFactory {
-    /** The phone's bounded-decode knob. ImageIO decodes whole; the protocol
-     *  already capped the bytes, so the sample size has nothing to do here. */
+    /** The phone's bounded-decode knobs.
+     *
+     *  `inJustDecodeBounds` is honoured: ImageIO can read a header without
+     *  building the raster, which is the whole point of the two-pass decode
+     *  SafeImage does. `inSampleSize` is recorded and ignored — the desk has
+     *  memory the phone does not, and nothing here draws a chat bubble. */
     class Options {
         @JvmField var inSampleSize: Int = 1
         @JvmField var inJustDecodeBounds: Boolean = false
@@ -110,24 +114,57 @@ object BitmapFactory {
         @JvmField var outHeight: Int = 0
     }
 
-    @JvmStatic
-    fun decodeFile(path: String, opts: Options? = null): Bitmap? = runCatching {
-        val img = javax.imageio.ImageIO.read(java.io.File(path)) ?: return null
-        Bitmap(img.width, img.height, img)
-    }.getOrNull()
+    /** Read the size without building the raster, and say so in [opts]. */
+    private fun bounds(stream: () -> java.io.InputStream?, opts: Options): Boolean =
+        runCatching {
+            javax.imageio.ImageIO.createImageInputStream(stream() ?: return false)
+                .use { iis ->
+                    val r = javax.imageio.ImageIO.getImageReaders(iis)
+                    if (!r.hasNext()) return false
+                    val reader = r.next()
+                    reader.setInput(iis, true, true)
+                    opts.outWidth = reader.getWidth(0)
+                    opts.outHeight = reader.getHeight(0)
+                    reader.dispose()
+                }
+            true
+        }.getOrDefault(false)
+
+    private fun decode(stream: () -> java.io.InputStream?, opts: Options?): Bitmap? {
+        if (opts?.inJustDecodeBounds == true) {
+            if (!bounds(stream, opts)) { opts.outWidth = -1; opts.outHeight = -1 }
+            return null
+        }
+        val img = javax.imageio.ImageIO.read(stream() ?: return null) ?: return null
+        return Bitmap(img.width, img.height, img)
+    }
 
     @JvmStatic
-    fun decodeStream(input: java.io.InputStream?): Bitmap? = runCatching {
-        val img = javax.imageio.ImageIO.read(input ?: return null) ?: return null
-        Bitmap(img.width, img.height, img)
-    }.getOrNull()
+    fun decodeFile(path: String, opts: Options? = null): Bitmap? =
+        decode({ runCatching { java.io.FileInputStream(path) }.getOrNull() }, opts)
 
     @JvmStatic
-    fun decodeByteArray(data: ByteArray?, offset: Int, length: Int): Bitmap? = runCatching {
+    fun decodeStream(input: java.io.InputStream?): Bitmap? = decode({ input }, null)
+
+    @JvmStatic
+    fun decodeStream(
+        input: java.io.InputStream?,
+        outPadding: Any?,
+        opts: Options?,
+    ): Bitmap? = decode({ input }, opts)
+
+    @JvmStatic
+    fun decodeByteArray(data: ByteArray?, offset: Int, length: Int): Bitmap? =
+        decodeByteArray(data, offset, length, null)
+
+    @JvmStatic
+    fun decodeByteArray(
+        data: ByteArray?,
+        offset: Int,
+        length: Int,
+        opts: Options?,
+    ): Bitmap? {
         if (data == null || length <= 0) return null
-        val img = javax.imageio.ImageIO.read(
-            java.io.ByteArrayInputStream(data, offset, length),
-        ) ?: return null
-        Bitmap(img.width, img.height, img)
-    }.getOrNull()
+        return decode({ java.io.ByteArrayInputStream(data, offset, length) }, opts)
+    }
 }

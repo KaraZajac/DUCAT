@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import android.content.Context
 import org.ducatproject.ducat.Amounts
+import org.ducatproject.ducat.SafeImage
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.R
@@ -328,8 +329,7 @@ private fun NewChatSheet(
 internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
     val bmp = remember(picture) {
         picture?.let {
-            runCatching { android.graphics.BitmapFactory.decodeByteArray(it, 0, it.size) }
-                .getOrNull()
+            SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS)
         }
     }
     Box(

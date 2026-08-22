@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ducatproject.ducat.DucatLog
+import org.ducatproject.ducat.SafeImage
 import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.R
 import java.io.ByteArrayOutputStream
@@ -89,7 +90,7 @@ fun MyProfileEditor() {
             ) {
                 val bmp = remember(avatar) {
                     avatar?.let {
-                        runCatching { BitmapFactory.decodeByteArray(it, 0, it.size) }.getOrNull()
+                        SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS)
                     }
                 }
                 if (bmp != null) {
@@ -282,9 +283,12 @@ private fun Field(
  * device's own image stack produced.
  */
 private fun squareThumbnail(context: android.content.Context, uri: Uri): ByteArray {
-    val src = context.contentResolver.openInputStream(uri).use { input ->
-        BitmapFactory.decodeStream(input)
-    } ?: throw IllegalArgumentException("not an image")
+    // Picked from the gallery, which is also where anything shared into the
+    // phone lands — and this one is on the way to becoming an avatar other
+    // people's phones will decode.
+    val src = SafeImage.fromStream(
+        { context.contentResolver.openInputStream(uri) }, SafeImage.COMPOSE_PIXELS,
+    ) ?: throw IllegalArgumentException("not an image")
 
     val side = minOf(src.width, src.height)
     val cropped = Bitmap.createBitmap(
