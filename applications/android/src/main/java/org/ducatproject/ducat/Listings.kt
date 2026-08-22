@@ -145,8 +145,10 @@ object Listings {
         return JSONObject().apply {
             put("id", java.util.UUID.randomUUID().toString())
             put("kind", kind)
-            put("title", title)
-            put("area", area)
+            // Straight from a text field, and headed for a public board where
+            // every reader's core will refuse it if it carries an override.
+            put("title", withoutDisplayHazards(title))
+            put("area", withoutDisplayHazards(area))
             put("cell", cell ?: "")
             put("pricePxmr", pricePxmr)
             // Suggested from the same table the escrow will use, so what the

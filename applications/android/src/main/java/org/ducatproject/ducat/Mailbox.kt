@@ -449,6 +449,11 @@ object Mailbox {
         ceremonyId: ByteArray? = null,
     ): Contact {
         val store = ContactStore(context)
+        // The recipient's core refuses a body carrying a bidirectional
+        // override, and it refuses it after the slot is spent — so a message
+        // that leaves here with one in it is a message that vanishes. Cleaned
+        // once, at the only door out.
+        @Suppress("NAME_SHADOWING") val body = withoutDisplayHazards(body)
         val bundle = c.theirBundle
             ?: throw IllegalStateException("No keys for this contact yet.")
         // Re-opened **as the owner**. Creating a record leaves it writable only

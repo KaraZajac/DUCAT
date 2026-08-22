@@ -1390,7 +1390,9 @@ data class StoredMessage(
 class NameStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")
     fun get(): String? = prefs.getString("my_name", null)
-    fun put(v: String) = prefs.edit().putString("my_name", v).apply()
+    /** Cleaned on the way in, because this travels on every handshake. */
+    fun put(v: String) =
+        prefs.edit().putString("my_name", withoutDisplayHazards(v)).apply()
 
     /**
      * Nothing to introduce ourselves with.
@@ -1455,6 +1457,29 @@ private fun unb64(s: String): ByteArray = Base64.decode(s, Base64.NO_WRAP)
  * the first screen draws, and Android recreates the activity on a language
  * change, so it follows the chosen language without anything watching for it.
  */
+/**
+ * Strip what the wire will refuse, on the way out.
+ *
+ * `opt_text` rejects the explicit bidirectional controls and the C0/C1
+ * controls, which is right for text arriving from a stranger — refusing beats
+ * stripping when two implementations have to agree on what was said. On the
+ * way *out* the calculus inverts: there is no second implementation to
+ * disagree with yet, it is our own user's text, and the alternative to
+ * stripping is publishing a listing that every reader silently drops.
+ *
+ * Nobody types U+202E. They paste it, along with a name copied off a web page,
+ * and then wonder why their listing is invisible.
+ *
+ * Delegates to the core rather than keeping a second copy of the table. Two
+ * copies drift, and both directions of drift are silent: miss a character and
+ * the message vanishes at the far end after the slot is spent; take one the
+ * wire allows and honest Arabic and Hebrew lose their typography on the way
+ * out. Falls back to the input if the bridge is unavailable — the wire will
+ * still refuse it, which is the safe direction to fail in.
+ */
+fun withoutDisplayHazards(s: String): String =
+    runCatching { uniffi.ducat_mobile.cleanDisplayText(s) }.getOrDefault(s)
+
 /**
  * What an incoming card is allowed to do to a contact's payment address.
  *

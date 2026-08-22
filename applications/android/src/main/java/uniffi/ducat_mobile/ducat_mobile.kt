@@ -907,6 +907,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -947,6 +949,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_ceremony_abort(`ceremonyId`: RustBuffer.ByValue,`i`: Short,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     fun uniffi_ducat_mobile_fn_func_check_verification(`policy`: RustBuffer.ByValue,`deviceUnlocked`: Byte,`appSecretAgeS`: RustBuffer.ByValue,`amountMinor`: Long,`spentInWindowMinor`: Long,`rateIsFresh`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_clean_display_text(`text`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_create_contact_card(`personaSecret`: RustBuffer.ByValue,`inboxKey`: RustBuffer.ByValue,`writerPublic`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`writerSecret`: RustBuffer.ByValue,`validSecs`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1256,6 +1260,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_check_verification(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_clean_display_text(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_create_contact_card(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_create_persona_secret(
@@ -1480,6 +1486,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_check_verification() != 369.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_clean_display_text() != 42473.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_create_contact_card() != 49005.toShort()) {
@@ -5782,6 +5791,25 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_check_verification(
         FfiConverterTypeVerificationPolicy.lower(`policy`),FfiConverterBoolean.lower(`deviceUnlocked`),FfiConverterOptionalULong.lower(`appSecretAgeS`),FfiConverterULong.lower(`amountMinor`),FfiConverterULong.lower(`spentInWindowMinor`),FfiConverterBoolean.lower(`rateIsFresh`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Strip what the wire will refuse, so a sender never publishes something
+         * every reader silently drops.
+         *
+         * Exposed rather than reimplemented on the Kotlin side: the stripper and the
+         * wire's own check have to agree on exactly which characters they are about,
+         * and two copies of that list drift. Miss one and the message leaves the
+         * phone and vanishes at the far end after the slot is already spent; take one
+         * the wire allows and honest Arabic and Hebrew quietly lose their typography.
+         */ fun `cleanDisplayText`(`text`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_clean_display_text(
+        FfiConverterString.lower(`text`),_status)
 }
     )
     }

@@ -647,7 +647,7 @@ impl Reader {
 /// for those, and costs nothing.
 ///
 /// Newline and tab survive: a memo is allowed to have shape.
-fn display_hazard(s: &str) -> Option<char> {
+pub fn display_hazard(s: &str) -> Option<char> {
     s.chars().find(|c| {
         matches!(c,
             // LRE RLE PDF LRO RLO — embeddings and overrides.
@@ -666,6 +666,19 @@ fn display_hazard(s: &str) -> Option<char> {
             | '\u{0080}'..='\u{009F}'
         )
     })
+}
+
+/// The same string with every [display_hazard] removed.
+///
+/// For text on its way *out*, where the calculus inverts: there is no second
+/// implementation to disagree with yet, it is the sender's own writing, and
+/// the alternative to stripping is publishing something every reader drops.
+/// Nobody types U+202E — they paste it, with a name copied off a web page.
+pub fn without_display_hazards(s: &str) -> String {
+    if display_hazard(s).is_none() {
+        return s.to_string();
+    }
+    s.chars().filter(|c| display_hazard(&c.to_string()).is_none()).collect()
 }
 
 fn enum_u8<T: Copy>(k: u64, raw: u64, table: &[(u64, T)]) -> Result<T, Reject> {

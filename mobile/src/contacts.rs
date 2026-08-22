@@ -1071,3 +1071,16 @@ pub fn geohashBounds(cell: String) -> Result<Vec<i64>, ContactError> {
 pub fn haversineM(lat1_e7: i64, lon1_e7: i64, lat2_e7: i64, lon2_e7: i64) -> u64 {
     ducat_core::geo::haversine_m(lat1_e7, lon1_e7, lat2_e7, lon2_e7)
 }
+
+/// Strip what the wire will refuse, so a sender never publishes something
+/// every reader silently drops.
+///
+/// Exposed rather than reimplemented on the Kotlin side: the stripper and the
+/// wire's own check have to agree on exactly which characters they are about,
+/// and two copies of that list drift. Miss one and the message leaves the
+/// phone and vanishes at the far end after the slot is already spent; take one
+/// the wire allows and honest Arabic and Hebrew quietly lose their typography.
+#[uniffi::export]
+pub fn clean_display_text(text: String) -> String {
+    ducat_core::wire::without_display_hazards(&text)
+}

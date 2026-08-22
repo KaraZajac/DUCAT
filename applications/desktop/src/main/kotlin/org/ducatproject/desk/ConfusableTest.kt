@@ -3,6 +3,7 @@ package org.ducatproject.desk
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactNaming
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.withoutDisplayHazards
 
 /**
  * Two contacts a person cannot tell apart. `./gradlew :desktop:confusable`.
@@ -87,5 +88,48 @@ fun main() {
         "CONFUSABLE_FAIL unnamed contacts were treated as a name collision"
     }
 
-    println("CONFUSABLE_OK folds=${disguises.size} distinct=${distinct.size} store=pair-flagged")
+    // The outbound stripper and the wire's inbound rule have to agree on
+    // exactly which characters they are about. If the stripper misses one, the
+    // message leaves here and vanishes at the far end after the slot is spent;
+    // if it takes one the wire allows, we quietly mangle honest writing.
+    //
+    // They agree by construction — withoutDisplayHazards crosses the bridge to
+    // the same table wire.rs refuses with — so this is checking the bridge
+    // reaches it, character by character, from the language that calls it.
+    val hazards = ((0x202A..0x202E) + (0x2066..0x2069) + (0x206A..0x206F) +
+        (0x0000..0x0008) + (0x000B..0x000C) + (0x000E..0x001F) + listOf(0x007F) +
+        (0x0080..0x009F)).map { it.toChar() }
+    for (h in hazards) {
+        check(withoutDisplayHazards("a${h}b") == "ab") {
+            "CONFUSABLE_FAIL U+%04X survived the outbound strip".format(h.code)
+        }
+    }
+    // And the ones the wire keeps must not be stripped, or Arabic and Hebrew
+    // lose their typography on the way out.
+    for (keep in listOf('\u200E', '\u200F', '\u061C', '\n', '\t', ' ')) {
+        check(withoutDisplayHazards("a${keep}b") == "a${keep}b") {
+            "CONFUSABLE_FAIL U+%04X was stripped but the wire allows it".format(keep.code)
+        }
+    }
+    // Ordinary writing crosses the bridge unchanged. Multi-byte characters
+    // included: the strip runs over chars, and a rule that counted bytes would
+    // cut a codepoint in half here rather than anywhere a Latin test looks.
+    for (plain in listOf(
+        "Sunny room near the park",
+        "غرفة مشمسة قرب الحديقة",
+        "חדר שמשי ליד הפארק",
+        "公園近くの日当たりの良い部屋",
+        "Chambre — 25 m², 2 pers.",
+        "🚗 Fiat Panda",
+    )) {
+        check(withoutDisplayHazards(plain) == plain) {
+            "CONFUSABLE_FAIL honest text came back changed: '$plain' -> " +
+                "'${withoutDisplayHazards(plain)}'"
+        }
+    }
+
+    println(
+        "CONFUSABLE_OK folds=${disguises.size} distinct=${distinct.size} " +
+            "store=pair-flagged hazards=${hazards.size}",
+    )
 }
