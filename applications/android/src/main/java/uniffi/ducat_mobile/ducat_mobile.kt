@@ -1617,7 +1617,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_open() != 42085.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_set() != 46746.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_set() != 6238.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_watch() != 21226.toShort()) {
@@ -6294,6 +6294,29 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
         /**
          * Write one subkey. The record must be open (see [`node_dht_open`]), and this
          * node must be the owner or a named writer for that subkey.
+         *
+         * Returning `Ok` means the network holds these bytes. It did not always: a set
+         * answers `Ok(None)` when the value was stored and `Ok(Some(theirs))` when it
+         * was refused for being older than what the network already has, and the
+         * `Some` used to be dropped on the floor here. Every caller reads `Ok` as
+         * delivered, so a refused write travelled all the way up as a sent message.
+         *
+         * Refusal is not an edge case, because the sequence number a write is signed
+         * with comes from `handle_get_single_local_value` — *local* state, never the
+         * network. A phone with no local copy of a record signs seq 0. Restore a
+         * backup and that is every record it owns: the keys come back from the file,
+         * veilid's table store does not, and so every message, every hail, every board
+         * post is signed seq 0 against a network holding seq N, refused, and reported
+         * as delivered. Found on exactly that path (2026-08-22) — two phones restored,
+         * both attached, "delivered seq 4 to Sam" logged in 900 ms, and nothing on
+         * Sam's screen, twice.
+         *
+         * The retry works because a refusal is not inert: veilid stores the network's
+         * value locally on its way out (`process_outbound_set_value_result_locked`),
+         * which is the priming the first attempt was missing. So the second signs from
+         * their seq and lands. One retry is the whole ladder — a third would mean
+         * somebody else is writing this subkey in the same breath, and for a log slot
+         * only its owner writes, that is a real conflict and not ours to paper over.
          */
     @Throws(NodeException::class) fun `nodeDhtSet`(`key`: kotlin.String, `subkey`: kotlin.UInt, `data`: kotlin.ByteArray)
         = 
