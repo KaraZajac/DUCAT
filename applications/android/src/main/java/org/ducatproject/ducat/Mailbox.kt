@@ -733,8 +733,21 @@ object Mailbox {
                     ),
                 )
             }.onFailure {
-                allLanded = false
-                DucatLog.w(TAG, "republish ${c.displayName()}: ${it.message}")
+                // A record the network no longer has is not a slow network:
+                // there is nothing at that key to republish and there never
+                // will be again, so holding the whole pass open for it means
+                // running on every poll for ever — cutting a fresh batch of
+                // thirty-two one-time keys for every other contact each time
+                // round. Seen on a restored phone carrying a thread whose
+                // record had expired: "republish Unnamed contact: Key not
+                // found", which no amount of retrying improves.
+                val gone = it.message?.contains("Key not found", ignoreCase = true) == true
+                if (!gone) allLanded = false
+                DucatLog.w(
+                    TAG,
+                    "republish ${c.displayName()}: ${it.message}" +
+                        if (gone) " — that record is gone, nothing to republish" else "",
+                )
             }
         }
         if (allLanded) {
