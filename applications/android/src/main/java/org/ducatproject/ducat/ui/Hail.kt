@@ -1799,9 +1799,16 @@ fun HailSheet(
                         onChosen = { from = it },
                         near = from?.let { it.latE7 to it.lonE7 },
                         hint = if (locating) stringResource(R.string.hail_locating) else null,
+                        // A plain icon button, matching the search beside it:
+                        // a filled tonal circle inside a text field reads as a
+                        // third thing crammed in rather than one of the
+                        // field's own controls.
                         trailing = {
-                            FilledTonalIconButton(onClick = { useMyLocation() }) {
-                                Icon(Icons.Filled.MyLocation, stringResource(R.string.hail_use_my_location))
+                            IconButton(onClick = { useMyLocation() }) {
+                                Icon(
+                                    Icons.Filled.MyLocation,
+                                    stringResource(R.string.hail_use_my_location),
+                                )
                             }
                         },
                     )
@@ -2004,13 +2011,29 @@ private fun AddressField(
                 onSearch = { search() },
             ),
             trailingIcon = {
-                IconButton(onClick = { search() }, enabled = query.isNotBlank() && !searching) {
-                    if (searching) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                    else Icon(Icons.Filled.Search, stringResource(R.string.hail_search))
+                // Inside the field, not beside it.
+                //
+                // The extra control used to sit in the Row after the text
+                // field, which shortened whichever field had one: the pickup
+                // ended 147px short of the destination stacked under it, so
+                // two inputs that should read as a pair had ragged right
+                // edges. In the trailing slot they are both full width and
+                // the button is where a field's own buttons live.
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    trailing?.invoke()
+                    IconButton(
+                        onClick = { search() },
+                        enabled = query.isNotBlank() && !searching,
+                    ) {
+                        if (searching) {
+                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        } else {
+                            Icon(Icons.Filled.Search, stringResource(R.string.hail_search))
+                        }
+                    }
                 }
             },
         )
-        trailing?.let { Spacer(Modifier.width(8.dp)); it() }
     }
     hits.forEach { h ->
         Text(
