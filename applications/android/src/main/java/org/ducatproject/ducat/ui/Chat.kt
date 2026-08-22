@@ -25,6 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -655,6 +656,30 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         kotlin.math.abs(m.timestamp - other.timestamp) < RUN_GAP_SECONDS
                 val startsRun = !runsWith(shown.getOrNull(at - 1))
                 val endsRun = !runsWith(shown.getOrNull(at + 1))
+                if (m.deadLetter) {
+                    // A gap, not a message: one quiet centred line where it
+                    // happened, the same shape a retraction takes below. As
+                    // bubbles these read as things the other person had said —
+                    // and a restore can leave four in a row, which filled the
+                    // screen with grey blocks saying nothing arrived.
+                    //
+                    // Only the last of a run draws, counting the run: the
+                    // sentence is identical every time, so repeating it says
+                    // nothing the number does not say better. The last, because
+                    // the timestamp under a run belongs at its end.
+                    if (shown.getOrNull(at + 1)?.deadLetter == true) return@itemsIndexed
+                    var runLen = 1
+                    while (shown.getOrNull(at - runLen)?.deadLetter == true) runLen += 1
+                    Text(
+                        pluralStringResource(R.plurals.chat_gap_unread, runLen, runLen),
+                        Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                    return@itemsIndexed
+                }
                 if (m.kind == 5) {
                     // A retraction is a remark about the thread, not a message
                     // in it: one quiet centred line, no bubble and no buttons —

@@ -850,6 +850,7 @@ object Mailbox {
                         outgoing = false, seq = seq.toLong(),
                         body = "[a message was lost — this device was away too long]",
                         timestamp = deadLetterTime(store, c.personaHex),
+                        deadLetter = true,
                     ),
                     (seq + 1uL).toLong(), null,
                 )
@@ -927,6 +928,7 @@ object Mailbox {
                         body = "[a message could not be opened — it was sealed " +
                             "to a key this device no longer holds]",
                         timestamp = deadLetterTime(store, c.personaHex),
+                        deadLetter = true,
                     ),
                     (seq + 1uL).toLong(), null,
                 )
@@ -953,6 +955,7 @@ object Mailbox {
                             body = "[a message could not be understood — " +
                                 "the sender's client encoded it wrongly]",
                             timestamp = deadLetterTime(store, c.personaHex),
+                        deadLetter = true,
                         ),
                         (seq + 1uL).toLong(), null,
                     )
@@ -1021,6 +1024,7 @@ object Mailbox {
                                     "to a key this device no longer holds]"
                             },
                             timestamp = deadLetterTime(store, c.personaHex),
+                        deadLetter = true,
                         ),
                         (seq + 1uL).toLong(), null,
                     )

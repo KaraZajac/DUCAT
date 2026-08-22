@@ -171,9 +171,23 @@ def main() -> int:
                             )
                             problems += 1
 
-            # 3. Plurals: 'other' is required of every language, and a class
-            #    the language does not use is dead text.
+            # 3. Plurals: present at all, first.
+            #
+            #    Check 0 above compares `<string>` keys and nothing else, so a
+            #    `<plurals>` added to values/ alone was missing from nineteen
+            #    languages and this script said they all agreed — the same
+            #    absence check 0 exists to catch, walking straight past it
+            #    because the element has a different tag. Absence is the
+            #    finding, whichever way the resource is spelled.
+            base_names = {n for (n, _) in base_plurals}
             names = {n for (n, _) in plurals}
+            missing = sorted(base_names - names)
+            if missing:
+                print(f"  ! {loc}/{name}: untranslated plural(s): {', '.join(missing)}")
+                problems += len(missing)
+
+            #    Then: 'other' is required of every language, and a class
+            #    the language does not use is dead text.
             for n in names:
                 if (n, "other") not in plurals:
                     print(f"  ! {loc}/{name}: plural {n} has no 'other'")

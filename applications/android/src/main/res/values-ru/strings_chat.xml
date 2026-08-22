@@ -118,4 +118,11 @@
     <string name="chat_someones_profile">Или чей-то профиль — имя и то, что человек сам решил опубликовать. Не код для связи: такие коды раздают только они сами.</string>
     <string name="chat_their_name_label">Их имя</string>
     <string name="chat_their_name_support">Только на вашем телефоне — им об этом не сообщают.</string>
+
+    <plurals name="chat_gap_unread">
+        <item quantity="one">Одно сообщение не открылось</item>
+        <item quantity="few">%1$d сообщения не открылись</item>
+        <item quantity="many">%1$d сообщений не открылись</item>
+        <item quantity="other">%1$d сообщения не открылись</item>
+    </plurals>
 </resources>

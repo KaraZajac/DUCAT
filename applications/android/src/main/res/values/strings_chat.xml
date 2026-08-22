@@ -46,6 +46,14 @@
     <string name="chat_they_declined">%1$s declined</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
 
+    <!-- Dead letters: sequences the reader could not open. Not messages, so
+         not bubbles — one quiet line where the gap is, and a run of them
+         counted rather than repeated. -->
+    <plurals name="chat_gap_unread">
+        <item quantity="one">A message could not be opened</item>
+        <item quantity="other">%1$d messages could not be opened</item>
+    </plurals>
+
     <!-- Long-press dialog -->
     <string name="chat_message_title">Message</string>
     <string name="chat_delete_note">Delete removes it from this phone only. The other side keeps their copy — nothing here can reach it.</string>

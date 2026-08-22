@@ -118,4 +118,8 @@
     <string name="chat_someones_profile">または誰かのプロフィール — 名前と、本人が公開を選んだ情報だけです。接続コードではありません: それは本人が渡すものです。</string>
     <string name="chat_their_name_label">相手の名前</string>
     <string name="chat_their_name_support">あなたの端末の中だけで、相手には伝わりません。</string>
+
+    <plurals name="chat_gap_unread">
+        <item quantity="other">%1$d 件のメッセージを開けませんでした</item>
+    </plurals>
 </resources>

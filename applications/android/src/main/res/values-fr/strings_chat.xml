@@ -118,4 +118,9 @@
     <string name="chat_someones_profile">Ou le profil de quelqu\'un — son nom et ce qu\'il a choisi de publier. Pas un code de connexion : ceux-là, c\'est à chacun de donner les siens.</string>
     <string name="chat_their_name_label">Leur nom</string>
     <string name="chat_their_name_support">Uniquement sur votre téléphone — ils n’en sauront rien.</string>
+
+    <plurals name="chat_gap_unread">
+        <item quantity="one">Un message n’a pas pu être ouvert</item>
+        <item quantity="other">%1$d messages n’ont pas pu être ouverts</item>
+    </plurals>
 </resources>

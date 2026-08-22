@@ -118,4 +118,9 @@
     <string name="chat_someones_profile">या किसी की प्रोफ़ाइल — उनका नाम और जो उन्होंने खुद प्रकाशित करना चुना। यह कनेक्शन कोड नहीं है: वे सिर्फ़ उन्हीं के देने के लिए हैं।</string>
     <string name="chat_their_name_label">इनका नाम</string>
     <string name="chat_their_name_support">सिर्फ़ आपके फ़ोन पर — उन्हें कभी नहीं बताया जाता।</string>
+
+    <plurals name="chat_gap_unread">
+        <item quantity="one">एक संदेश नहीं खुल सका</item>
+        <item quantity="other">%1$d संदेश नहीं खुल सके</item>
+    </plurals>
 </resources>

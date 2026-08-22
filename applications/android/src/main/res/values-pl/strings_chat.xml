@@ -118,4 +118,11 @@
     <string name="chat_someones_profile">Albo czyjś profil — imię i to, co ta osoba zdecydowała się opublikować. To nie kod połączenia: te są tylko ich.</string>
     <string name="chat_their_name_label">Ich nazwa</string>
     <string name="chat_their_name_support">Tylko na twoim telefonie — oni się o tym nie dowiedzą.</string>
+
+    <plurals name="chat_gap_unread">
+        <item quantity="one">Jedna wiadomość nie otworzyła się</item>
+        <item quantity="few">%1$d wiadomości nie otworzyły się</item>
+        <item quantity="many">%1$d wiadomości nie otworzyło się</item>
+        <item quantity="other">%1$d wiadomości nie otworzyło się</item>
+    </plurals>
 </resources>

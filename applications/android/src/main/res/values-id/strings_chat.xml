@@ -118,4 +118,8 @@
     <string name="chat_someones_profile">Atau profil seseorang — nama mereka dan apa pun yang mereka pilih untuk dipublikasikan. Bukan kode koneksi: itu hak mereka untuk memberikannya.</string>
     <string name="chat_their_name_label">Nama mereka</string>
     <string name="chat_their_name_support">Hanya di ponsel Anda — mereka tidak pernah diberi tahu.</string>
+
+    <plurals name="chat_gap_unread">
+        <item quantity="other">%1$d pesan tidak dapat dibuka</item>
+    </plurals>
 </resources>

@@ -1221,6 +1221,17 @@ data class StoredMessage(
     val oob: Boolean = false,
     /** §15.12: a ride offer's distance-in-time, seconds. */
     val etaSecs: Long? = null,
+    /**
+     * A hole the reader wrote, not a message the sender sent.
+     *
+     * Never on the wire — nothing sets this from an opened message. It marks
+     * the placeholders left where a sequence could not be read: the ring
+     * passed it, its key is gone, its bytes never authenticated, the chain
+     * broke. They matter and they are not messages, and rendering them as
+     * bubbles put four grey blocks in a thread that read as things the other
+     * person had said. §16.11's retraction already had the shape for this.
+     */
+    val deadLetter: Boolean = false,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("out", outgoing); put("seq", seq); put("body", body)
@@ -1246,6 +1257,7 @@ data class StoredMessage(
         }
         taxPxmr?.let { put("tax", it) }
         etaSecs?.let { put("eta", it) }
+        if (deadLetter) put("dead", true)
     }
 
     companion object {
@@ -1257,6 +1269,11 @@ data class StoredMessage(
             forwardSecret = o.optBoolean("fs", true),
             delivered = o.optBoolean("delivered", true),
             oob = o.optBoolean("oob", false),
+            // Rows written before the flag existed are recognised by the
+            // bodies this app gave them, so an old thread renders the same
+            // as a new one rather than keeping its four grey blocks.
+            deadLetter = o.optBoolean("dead", false) ||
+                o.getString("body").startsWith("[a message "),
             kind = o.optInt("kind", 0),
             amountPxmr = o.optLong("amt", 0L),
             payto = o.optStringOrNull("payto"),

@@ -118,4 +118,11 @@
     <string name="chat_someones_profile">Або чийсь профіль — ім\'я та все, що людина вирішила оприлюднити. Не код з\'єднання: ті роздають лише їхні власники.</string>
     <string name="chat_their_name_label">Їхнє ім’я</string>
     <string name="chat_their_name_support">Лише на вашому телефоні — їм про це не повідомляють.</string>
+
+    <plurals name="chat_gap_unread">
+        <item quantity="one">Одне повідомлення не відкрилося</item>
+        <item quantity="few">%1$d повідомлення не відкрилися</item>
+        <item quantity="many">%1$d повідомлень не відкрилося</item>
+        <item quantity="other">%1$d повідомлення не відкрилося</item>
+    </plurals>
 </resources>

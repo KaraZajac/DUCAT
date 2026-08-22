@@ -118,4 +118,9 @@
     <string name="chat_someones_profile">Ya da birinin profili — adı ve yayımlamayı seçtiği ne varsa. Bağlantı kodu değil: o kodları vermek sahiplerine düşer.</string>
     <string name="chat_their_name_label">Adı</string>
     <string name="chat_their_name_support">Yalnızca senin telefonunda — onlara söylenmez.</string>
+
+    <plurals name="chat_gap_unread">
+        <item quantity="one">Bir mesaj açılamadı</item>
+        <item quantity="other">%1$d mesaj açılamadı</item>
+    </plurals>
 </resources>

@@ -118,4 +118,9 @@
     <string name="chat_someones_profile">Oder jemandes Profil — der Name und was die Person veröffentlicht hat. Kein Verbindungscode: Die vergibt nur sie selbst.</string>
     <string name="chat_their_name_label">Ihr Name</string>
     <string name="chat_their_name_support">Nur auf deinem Telefon — sie erfahren es nie.</string>
+
+    <plurals name="chat_gap_unread">
+        <item quantity="one">Eine Nachricht ließ sich nicht öffnen</item>
+        <item quantity="other">%1$d Nachrichten ließen sich nicht öffnen</item>
+    </plurals>
 </resources>

@@ -118,4 +118,9 @@
     <string name="chat_someones_profile">Of iemands profiel — de naam en wat diegene zelf heeft gepubliceerd. Geen verbindingscode: die zijn van hen om weg te geven.</string>
     <string name="chat_their_name_label">Hun naam</string>
     <string name="chat_their_name_support">Alleen op jouw telefoon — zij horen het nooit.</string>
+
+    <plurals name="chat_gap_unread">
+        <item quantity="one">Eén bericht ging niet open</item>
+        <item quantity="other">%1$d berichten gingen niet open</item>
+    </plurals>
 </resources>

@@ -118,4 +118,13 @@
     <string name="chat_someones_profile">أو ملف شخص ما — اسمه وما اختار نشره. ليست رمز اتصال: تلك رموز أصحابها وهم من يمنحونها.</string>
     <string name="chat_their_name_label">اسمهم</string>
     <string name="chat_their_name_support">على هاتفك فقط — لا يُبلَّغون بذلك أبدًا.</string>
+
+    <plurals name="chat_gap_unread">
+        <item quantity="zero">تعذّر فتح أي رسالة</item>
+        <item quantity="one">تعذّر فتح رسالة واحدة</item>
+        <item quantity="two">تعذّر فتح رسالتين</item>
+        <item quantity="few">تعذّر فتح %1$d رسائل</item>
+        <item quantity="many">تعذّر فتح %1$d رسالة</item>
+        <item quantity="other">تعذّر فتح %1$d رسالة</item>
+    </plurals>
 </resources>
