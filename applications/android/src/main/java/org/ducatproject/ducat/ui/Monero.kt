@@ -146,11 +146,19 @@ fun MoneroPanel() {
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = {
-                        store.setOwnUrl(ownUrl.ifBlank { null })
-                        editing = false
-                        refresh()
-                    }) { Text(stringResource(R.string.monero_use_it)) }
+                    Button(
+                        onClick = {
+                            store.setOwnUrl(ownUrl.ifBlank { null })
+                            editing = false
+                            refresh()
+                        },
+                        // Not on an empty field. `ifBlank { null }` means a
+                        // blank one sets *no* node — so "Use it" pressed with
+                        // nothing typed quietly did what the button beside it
+                        // says it does, and went back to the public node while
+                        // claiming to use yours.
+                        enabled = ownUrl.isNotBlank(),
+                    ) { Text(stringResource(R.string.monero_use_it)) }
                     if (store.ownUrl() != null) {
                         OutlinedButton(onClick = {
                             store.setOwnUrl(null); ownUrl = ""; editing = false; refresh()
