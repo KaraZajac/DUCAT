@@ -700,7 +700,7 @@ mod backup_tests {
         let w = create_wallet(2_190_000, true);
         let persona = create_persona_secret();
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: w.restore_height, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None },
+            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: w.restore_height, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
             "a real passphrase".into(),
             persona.clone(),
         )
@@ -720,7 +720,7 @@ mod backup_tests {
         let w = create_wallet(1, true);
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None },
+                BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
                 "short".into(),
                 create_persona_secret(),
             ),
@@ -734,7 +734,7 @@ mod backup_tests {
     fn a_malformed_key_is_refused() {
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: "nothex".into(), restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None },
+                BackupInput { spend_key_hex: "nothex".into(), restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
                 "a real passphrase".into(),
                 create_persona_secret(),
             ),
@@ -753,7 +753,7 @@ mod restore_height_tests {
         let w = create_wallet(1, true);
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: u64::MAX, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None },
+                BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: u64::MAX, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
                 "a real passphrase".into(),
                 create_persona_secret(),
             ),
@@ -768,7 +768,7 @@ mod restore_height_tests {
     fn genesis_is_slow_but_permitted() {
         let w = create_wallet(0, true);
         assert!(export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 0, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None },
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 0, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
             "a real passphrase".into(),
             create_persona_secret(),
         )
@@ -889,7 +889,7 @@ mod import_tests {
     fn a_restored_key_controls_the_same_address() {
         let w = create_wallet(1000, true);
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None },
+            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
             "a real passphrase".into(),
             create_persona_secret(),
         )
@@ -907,7 +907,7 @@ mod import_tests {
     fn a_wrong_passphrase_is_indistinguishable_from_tampering() {
         let w = create_wallet(1, true);
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None },
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
             "a real passphrase".into(),
             create_persona_secret(),
         )

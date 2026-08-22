@@ -1010,7 +1010,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_probe(`url`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_monero_rate(`currency`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_monero_rate(`currency`: RustBuffer.ByValue,`timeoutMs`: Int,`lastKnown`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_scan(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,`subaddressMinors`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1569,7 +1569,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_monero_probe() != 57591.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_monero_rate() != 39660.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_rate() != 36072.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_scan() != 512.toShort()) {
@@ -4857,6 +4857,38 @@ public object FfiConverterOptionalULong: FfiConverterRustBuffer<kotlin.ULong?> {
 /**
  * @suppress
  */
+public object FfiConverterOptionalDouble: FfiConverterRustBuffer<kotlin.Double?> {
+    override fun read(buf: ByteBuffer): kotlin.Double? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterDouble.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.Double?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterDouble.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.Double?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterDouble.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?> {
     override fun read(buf: ByteBuffer): kotlin.String? {
         if (buf.get().toInt() == 0) {
@@ -6116,14 +6148,31 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     
 
         /**
-         * Fetch a quote. Two sources, because one going down should not blank the
-         * screen; both are public and need no account.
+         * Fetch a quote, and refuse one nothing corroborates.
+         *
+         * **The rate is not a caption.** Every fiat figure in the app is a
+         * conversion, and the direction that costs money is a rate that reads too
+         * *low*: quote XMR at a hundredth of its price and somebody typing "15" in
+         * their own currency sends a hundred times the piconero they meant to, on a
+         * confirm screen that faithfully shows them the number they typed.
+         *
+         * So one source is not enough on its own. This used to take the first
+         * endpoint that answered and store it unchecked — no bound, no second
+         * opinion, no comparison with what it knew an hour ago — which put the price
+         * of every payment in the gift of whichever public API replied first.
+         *
+         * Now: gather quotes until two agree within `RATE_AGREEMENT`, and take their
+         * midpoint. Where only one venue answers, believe it only if it is within
+         * `RATE_DRIFT` of `last_known`, and on a first run with no history, not at
+         * all. Refusing is safe here — the screens already say they have no price
+         * rather than inventing one, and `Amounts` falls back to piconero, which is
+         * the honest unit anyway.
          */
-    @Throws(MoneroException::class) fun `moneroRate`(`currency`: kotlin.String, `timeoutMs`: kotlin.UInt): Rate {
+    @Throws(MoneroException::class) fun `moneroRate`(`currency`: kotlin.String, `timeoutMs`: kotlin.UInt, `lastKnown`: kotlin.Double?): Rate {
             return FfiConverterTypeRate.lift(
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_rate(
-        FfiConverterString.lower(`currency`),FfiConverterUInt.lower(`timeoutMs`),_status)
+        FfiConverterString.lower(`currency`),FfiConverterUInt.lower(`timeoutMs`),FfiConverterOptionalDouble.lower(`lastKnown`),_status)
 }
     )
     }

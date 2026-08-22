@@ -624,7 +624,14 @@ object Rates {
         val store = RateStore(context)
         if (!store.enabled() || !store.isStale()) return
         try {
-            val r = uniffi.ducat_mobile.moneroRate(store.currency(), 12_000u)
+            // The last rate we trusted rides along: a lone quote nothing
+            // corroborates is believed only if it is close to it, and on a
+            // first run with no history it is not believed at all. A refused
+            // rate leaves the cache alone, which is the safe direction — the
+            // screens say they have no price rather than inventing one.
+            val r = uniffi.ducat_mobile.moneroRate(
+                store.currency(), 12_000u, store.cached()?.first,
+            )
             store.store(r.perXmr, r.fetchedAt.toLong(), r.source)
             // The dollar too, because §15.12's fare table is in dollars and a
             // dollar figure needs the dollar's rate. One extra call, and none
@@ -632,7 +639,9 @@ object Rates {
             if (store.currency().equals("USD", ignoreCase = true)) {
                 store.storeUsd(r.perXmr)
             } else {
-                runCatching { uniffi.ducat_mobile.moneroRate("USD", 12_000u) }
+                runCatching {
+                    uniffi.ducat_mobile.moneroRate("USD", 12_000u, store.usdPerXmr())
+                }
                     .onSuccess { store.storeUsd(it.perXmr) }
                     .onFailure { DucatLog.w(TAG, "usd rate: ${it.message}") }
             }

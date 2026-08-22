@@ -981,10 +981,47 @@ pub struct Rate {
     pub fetched_at: u64,
 }
 
-/// Fetch a quote. Two sources, because one going down should not blank the
-/// screen; both are public and need no account.
+/// How far two independent venues may disagree and still be believed.
+///
+/// Spot prices genuinely differ across exchanges and across the seconds
+/// between two requests; five percent is comfortably outside that and well
+/// inside the range where a wrong rate costs somebody money.
+const RATE_AGREEMENT: f64 = 0.05;
+
+/// How far a *lone* quote may sit from the last one we trusted.
+///
+/// Only reached when a single source answered, so there is nothing to
+/// corroborate it with. Monero can move twenty percent in a bad hour, and a
+/// rate that has is worth refusing until a second venue confirms it — the app
+/// says "no price" honestly, and that is the safe direction.
+const RATE_DRIFT: f64 = 0.20;
+
+/// Fetch a quote, and refuse one nothing corroborates.
+///
+/// **The rate is not a caption.** Every fiat figure in the app is a
+/// conversion, and the direction that costs money is a rate that reads too
+/// *low*: quote XMR at a hundredth of its price and somebody typing "15" in
+/// their own currency sends a hundred times the piconero they meant to, on a
+/// confirm screen that faithfully shows them the number they typed.
+///
+/// So one source is not enough on its own. This used to take the first
+/// endpoint that answered and store it unchecked — no bound, no second
+/// opinion, no comparison with what it knew an hour ago — which put the price
+/// of every payment in the gift of whichever public API replied first.
+///
+/// Now: gather quotes until two agree within `RATE_AGREEMENT`, and take their
+/// midpoint. Where only one venue answers, believe it only if it is within
+/// `RATE_DRIFT` of `last_known`, and on a first run with no history, not at
+/// all. Refusing is safe here — the screens already say they have no price
+/// rather than inventing one, and `Amounts` falls back to piconero, which is
+/// the honest unit anyway.
 #[uniffi::export]
-pub fn monero_rate(currency: String, timeout_ms: u32) -> Result<Rate, MoneroError> {
+pub fn monero_rate(
+    currency: String,
+    timeout_ms: u32,
+    // The last rate this device trusted, if it has one.
+    last_known: Option<f64>,
+) -> Result<Rate, MoneroError> {
     let cur = currency.to_lowercase();
     let agent = ureq::AgentBuilder::new()
         .timeout(Duration::from_millis(timeout_ms as u64))
@@ -994,19 +1031,12 @@ pub fn monero_rate(currency: String, timeout_ms: u32) -> Result<Rate, MoneroErro
         .map(|d| d.as_secs())
         .unwrap_or(0);
 
-    let done = |p: f64, source: &str| Rate {
-        currency: cur.to_uppercase(),
-        per_xmr: p,
-        source: source.into(),
-        fetched_at: now,
-    };
+    // A quote worth considering at all. Zero, negative and non-finite are not
+    // low prices, they are broken responses, and one reaching the cache would
+    // divide by itself all over the app.
+    let sane = |p: f64| p.is_finite() && p > 0.0;
 
-    // Four independent sources, tried in order; the common case is still one
-    // request. A field phone once printed "no price source answered" because
-    // the chain was two entries long and one of them only quoted three
-    // currencies — losing the price is losing the fiat display everywhere, so
-    // the chain is as deep as the free, keyless APIs allow (verified live
-    // 2026-08-17: CryptoCompare now demands a key and is deliberately absent).
+    let mut quotes: Vec<(f64, &'static str)> = Vec::new();
 
     // CoinGecko: every currency the app offers.
     let cg = format!(
@@ -1016,7 +1046,7 @@ pub fn monero_rate(currency: String, timeout_ms: u32) -> Result<Rate, MoneroErro
         if let Ok(txt) = r.into_string() {
             if let Ok(v) = serde_json::from_str::<serde_json::Value>(&txt) {
                 if let Some(p) = v["monero"][&cur].as_f64() {
-                    return Ok(done(p, "CoinGecko"));
+                    if sane(p) { quotes.push((p, "CoinGecko")); }
                 }
             }
         }
@@ -1031,7 +1061,7 @@ pub fn monero_rate(currency: String, timeout_ms: u32) -> Result<Rate, MoneroErro
         if let Ok(txt) = r.into_string() {
             if let Ok(v) = serde_json::from_str::<serde_json::Value>(&txt) {
                 if let Some(p) = v["quotes"][cur.to_uppercase()]["price"].as_f64() {
-                    return Ok(done(p, "CoinPaprika"));
+                    if sane(p) { quotes.push((p, "CoinPaprika")); }
                 }
             }
         }
@@ -1048,7 +1078,7 @@ pub fn monero_rate(currency: String, timeout_ms: u32) -> Result<Rate, MoneroErro
                         if let Some(first) = obj.values().next() {
                             if let Some(last) = first["c"][0].as_str() {
                                 if let Ok(p) = last.parse::<f64>() {
-                                    return Ok(done(p, "Kraken"));
+                                    if sane(p) { quotes.push((p, "Kraken")); }
                                 }
                             }
                         }
@@ -1059,21 +1089,121 @@ pub fn monero_rate(currency: String, timeout_ms: u32) -> Result<Rate, MoneroErro
     }
 
     // Bitfinex still lists XMR/USD; index 6 of the ticker array is the last
-    // trade. USD only, and last on purpose: by the time four sources have
-    // failed, the phone is offline and no fifth would answer either.
+    // trade. USD only, and last on purpose.
     if cur == "usd" {
         if let Ok(r) = agent.get("https://api-pub.bitfinex.com/v2/ticker/tXMRUSD").call() {
             if let Ok(txt) = r.into_string() {
                 if let Ok(v) = serde_json::from_str::<serde_json::Value>(&txt) {
                     if let Some(p) = v.get(6).and_then(|x| x.as_f64()) {
-                        return Ok(done(p, "Bitfinex"));
+                        if sane(p) { quotes.push((p, "Bitfinex")); }
                     }
                 }
             }
         }
     }
 
-    Err(MoneroError::Failed("no price source answered".into()))
+    match choose_rate(&quotes, last_known) {
+        Ok((per_xmr, source)) => Ok(Rate {
+            currency: cur.to_uppercase(),
+            per_xmr,
+            source,
+            fetched_at: now,
+        }),
+        Err(why) => Err(MoneroError::Failed(why.into())),
+    }
+}
+
+/// Which quote to believe, given what the venues said and what we knew before.
+///
+/// Split out from the fetching so it can be tested. This decides what a
+/// payment costs, and a rule that decides that should not be reachable only
+/// through four live HTTP requests.
+fn choose_rate(
+    quotes: &[(f64, &'static str)],
+    last_known: Option<f64>,
+) -> Result<(f64, String), &'static str> {
+    // Two that agree, preferring the closest pair — with four venues a single
+    // outlier should not get to pick its own partner.
+    let mut best: Option<(f64, f64, &str, &str)> = None;
+    for i in 0..quotes.len() {
+        for j in (i + 1)..quotes.len() {
+            let (a, an) = quotes[i];
+            let (b, bn) = quotes[j];
+            let spread = (a - b).abs() / a.max(b);
+            if spread <= RATE_AGREEMENT && best.map_or(true, |(s, ..)| spread < s) {
+                best = Some((spread, (a + b) / 2.0, an, bn));
+            }
+        }
+    }
+    if let Some((_, mid, an, bn)) = best {
+        return Ok((mid, format!("{an} + {bn}")));
+    }
+
+    // Nothing corroborated. A lone quote is believable only against history.
+    if quotes.len() == 1 {
+        let (p, name) = quotes[0];
+        if let Some(prev) = last_known.filter(|v| v.is_finite() && *v > 0.0) {
+            if (p - prev).abs() / prev <= RATE_DRIFT {
+                return Ok((p, name.to_string()));
+            }
+        }
+        return Err("only one price source answered, and nothing agrees with it");
+    }
+    if quotes.len() > 1 {
+        return Err("price sources disagree");
+    }
+    Err("no price source answered")
+}
+
+#[cfg(test)]
+mod rate_tests {
+    use super::*;
+
+    #[test]
+    fn two_that_agree_are_believed_and_averaged() {
+        let (p, src) = choose_rate(&[(150.0, "A"), (152.0, "B")], None).unwrap();
+        assert!((p - 151.0).abs() < 1e-9);
+        assert_eq!(src, "A + B");
+    }
+
+    #[test]
+    fn a_lone_outlier_cannot_pick_its_partner() {
+        // Two honest venues and one lying by a hundredfold. The pair that
+        // agrees is the honest one, and the liar is not in the answer at all.
+        let q = [(1.5, "Liar"), (150.0, "A"), (151.0, "B")];
+        let (p, src) = choose_rate(&q, None).unwrap();
+        assert!(p > 140.0, "took the outlier: {p}");
+        assert_eq!(src, "A + B");
+    }
+
+    #[test]
+    fn one_source_alone_is_refused_with_no_history() {
+        // The first-run case, and the one the old code got wrong: nothing to
+        // compare against means nothing to believe.
+        assert!(choose_rate(&[(1.5, "Liar")], None).is_err());
+    }
+
+    #[test]
+    fn one_source_alone_is_refused_when_it_contradicts_history() {
+        assert!(choose_rate(&[(1.5, "Liar")], Some(150.0)).is_err());
+    }
+
+    #[test]
+    fn one_source_alone_is_allowed_when_it_matches_history() {
+        let (p, _) = choose_rate(&[(147.0, "A")], Some(150.0)).unwrap();
+        assert!((p - 147.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn disagreement_across_the_board_is_no_rate_at_all() {
+        let q = [(150.0, "A"), (1.5, "B"), (9000.0, "C")];
+        assert!(choose_rate(&q, Some(150.0)).is_err());
+    }
+
+    #[test]
+    fn nothing_answered_is_its_own_answer() {
+        assert!(choose_rate(&[], Some(150.0)).is_err());
+    }
 }
 
 
