@@ -63,4 +63,6 @@
     <string name="pay_offline">अभी कनेक्ट नहीं — इस फ़ोन ने नेटवर्क से जुड़ना पूरा नहीं किया है। कुछ नहीं भेजा गया; थोड़ी देर में फिर कोशिश करें।</string>
     <string name="pay_node_unreachable">किसी भी Monero नोड से संपर्क नहीं हो सका। कुछ नहीं भेजा गया — अपना कनेक्शन जाँचें और फिर कोशिश करें।</string>
     <string name="pay_already_paid">आप इस एस्क्रो में पहले ही भुगतान कर चुके हैं। आपका पैसा अंदर है; दोबारा कुछ नहीं भेजा गया।</string>
+    <string name="pay_rate_line">1 XMR = %1$s %2$s की दर से</string>
+    <string name="pay_rate_line_source">1 XMR = %1$s %2$s की दर से · %3$s</string>
 </resources>

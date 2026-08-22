@@ -63,4 +63,6 @@
     <string name="pay_offline">Aún sin conexión: este teléfono no ha terminado de unirse a la red. No se envió nada; inténtalo de nuevo en un momento.</string>
     <string name="pay_node_unreachable">No se pudo contactar con ningún nodo de Monero. No se envió nada: comprueba tu conexión e inténtalo de nuevo.</string>
     <string name="pay_already_paid">Ya has pagado en este depósito en garantía. Tu dinero está dentro; no se ha enviado nada más.</string>
+    <string name="pay_rate_line">Convertido a 1 XMR = %1$s %2$s</string>
+    <string name="pay_rate_line_source">Convertido a 1 XMR = %1$s %2$s · %3$s</string>
 </resources>

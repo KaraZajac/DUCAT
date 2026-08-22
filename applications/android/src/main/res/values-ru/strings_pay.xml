@@ -63,4 +63,6 @@
     <string name="pay_offline">Ещё нет связи — этот телефон не закончил подключение к сети. Ничего не отправлено; попробуйте через минуту.</string>
     <string name="pay_node_unreachable">Не удалось связаться ни с одним узлом Monero. Ничего не отправлено — проверьте соединение и попробуйте снова.</string>
     <string name="pay_already_paid">Вы уже внесли средства в этот эскроу. Деньги на месте; повторно ничего не отправлено.</string>
+    <string name="pay_rate_line">По курсу 1 XMR = %1$s %2$s</string>
+    <string name="pay_rate_line_source">По курсу 1 XMR = %1$s %2$s · %3$s</string>
 </resources>

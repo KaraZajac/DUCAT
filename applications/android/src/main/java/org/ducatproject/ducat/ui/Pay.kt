@@ -633,6 +633,29 @@ private fun AmountStep(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline,
                         )
+                        // The rate this screen converted at, and who said so.
+                        //
+                        // Everything above is a conversion, and until now the
+                        // number it was converted at appeared nowhere. A wrong
+                        // rate — one venue having a bad day, or lying — reads
+                        // as a perfectly ordinary payment, because the fiat
+                        // figure is exactly the one the payer typed. Naming it
+                        // here is the last place it can be caught by somebody
+                        // who knows roughly what Monero costs.
+                        if (rate != null) {
+                            val src = org.ducatproject.ducat.RateStore(context).source()
+                            Text(
+                                if (src.isBlank()) {
+                                    stringResource(R.string.pay_rate_line, cur, fmtRate(rate))
+                                } else {
+                                    stringResource(
+                                        R.string.pay_rate_line_source, cur, fmtRate(rate), src,
+                                    )
+                                },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline,
+                            )
+                        }
                     }
                 }
             }
@@ -999,3 +1022,7 @@ private fun sendFailure(context: android.content.Context, t: Throwable): String 
     Wallet.isNodeTrouble(t) -> context.getString(R.string.pay_node_no_answer)
     else -> t.saidWhy() ?: context.getString(R.string.pay_could_not_send)
 }
+
+/** A rate as a person reads it: two decimals, no exponent, whatever the size. */
+private fun fmtRate(r: Double): String =
+    java.math.BigDecimal(r).setScale(2, java.math.RoundingMode.HALF_UP).toPlainString()

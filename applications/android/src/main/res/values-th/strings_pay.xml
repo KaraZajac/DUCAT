@@ -63,4 +63,6 @@
     <string name="pay_offline">ยังไม่ได้เชื่อมต่อ — โทรศัพท์เครื่องนี้ยังเข้าร่วมเครือข่ายไม่เสร็จ ยังไม่ได้ส่งอะไร ลองใหม่อีกครั้งในอีกสักครู่</string>
     <string name="pay_node_unreachable">ติดต่อโหนด Monero ไม่ได้เลย ยังไม่ได้ส่งอะไร — ตรวจสอบการเชื่อมต่อแล้วลองใหม่</string>
     <string name="pay_already_paid">คุณชำระเข้าเอสโครว์นี้ไปแล้ว เงินอยู่ในนั้นแล้ว ไม่ได้ส่งซ้ำ</string>
+    <string name="pay_rate_line">คิดที่อัตรา 1 XMR = %1$s %2$s</string>
+    <string name="pay_rate_line_source">คิดที่อัตรา 1 XMR = %1$s %2$s · %3$s</string>
 </resources>

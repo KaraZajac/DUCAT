@@ -63,4 +63,6 @@
     <string name="pay_offline">Belum terhubung — ponsel ini belum selesai bergabung ke jaringan. Tidak ada yang dikirim; coba lagi sebentar.</string>
     <string name="pay_node_unreachable">Tidak ada node Monero yang bisa dihubungi. Tidak ada yang dikirim — periksa koneksimu dan coba lagi.</string>
     <string name="pay_already_paid">Kamu sudah membayar ke escrow ini. Uangmu sudah masuk; tidak ada yang dikirim lagi.</string>
+    <string name="pay_rate_line">Dikonversi pada 1 XMR = %1$s %2$s</string>
+    <string name="pay_rate_line_source">Dikonversi pada 1 XMR = %1$s %2$s · %3$s</string>
 </resources>

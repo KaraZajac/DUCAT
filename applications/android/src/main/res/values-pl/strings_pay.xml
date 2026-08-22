@@ -63,4 +63,6 @@
     <string name="pay_offline">Jeszcze bez połączenia — ten telefon nie zakończył dołączania do sieci. Nic nie wysłano; spróbuj za chwilę.</string>
     <string name="pay_node_unreachable">Nie udało się połączyć z żadnym węzłem Monero. Nic nie wysłano — sprawdź połączenie i spróbuj ponownie.</string>
     <string name="pay_already_paid">Już wpłaciłeś do tego depozytu. Twoje pieniądze są w środku; nic nie wysłano ponownie.</string>
+    <string name="pay_rate_line">Przeliczone po 1 XMR = %1$s %2$s</string>
+    <string name="pay_rate_line_source">Przeliczone po 1 XMR = %1$s %2$s · %3$s</string>
 </resources>

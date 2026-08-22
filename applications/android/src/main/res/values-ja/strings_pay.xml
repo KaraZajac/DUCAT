@@ -63,4 +63,6 @@
     <string name="pay_offline">まだ接続していません — この端末はネットワークへの参加を完了していません。何も送信されていません。少し待ってからもう一度お試しください。</string>
     <string name="pay_node_unreachable">Monero ノードに接続できませんでした。何も送信されていません — 接続を確認してもう一度お試しください。</string>
     <string name="pay_already_paid">このエスクローにはすでに支払い済みです。資金は入っており、再送信はされていません。</string>
+    <string name="pay_rate_line">1 XMR = %1$s %2$s で換算</string>
+    <string name="pay_rate_line_source">1 XMR = %1$s %2$s で換算 · %3$s</string>
 </resources>

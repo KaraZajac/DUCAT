@@ -63,4 +63,6 @@
     <string name="pay_offline">Nog niet verbonden — deze telefoon is nog niet klaar met verbinden. Er is niets verzonden; probeer het zo opnieuw.</string>
     <string name="pay_node_unreachable">Geen enkele Monero-node reageerde. Er is niets verzonden — controleer je verbinding en probeer opnieuw.</string>
     <string name="pay_already_paid">Je hebt al in deze escrow betaald. Je geld staat erin; er is niets opnieuw verzonden.</string>
+    <string name="pay_rate_line">Omgerekend tegen 1 XMR = %1$s %2$s</string>
+    <string name="pay_rate_line_source">Omgerekend tegen 1 XMR = %1$s %2$s · %3$s</string>
 </resources>

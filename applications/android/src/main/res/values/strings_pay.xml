@@ -32,6 +32,8 @@
     <string name="pay_left_after">Left after</string>
     <string name="pay_uses_notes">Uses %1$d note(s) · usually confirmed in about %2$d minutes</string>
     <string name="pay_fee_estimate_note">The fee is an estimate until the transaction is built; the exact one is shown after sending.</string>
+    <string name="pay_rate_line">Converted at 1 XMR = %1$s %2$s</string>
+    <string name="pay_rate_line_source">Converted at 1 XMR = %1$s %2$s · %3$s</string>
     <string name="pay_speed">Speed</string>
     <string name="pay_speed_slow">Slow</string>
     <string name="pay_speed_normal">Normal</string>

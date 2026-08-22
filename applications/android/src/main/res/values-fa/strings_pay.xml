@@ -63,4 +63,6 @@
     <string name="pay_offline">هنوز متصل نیست — این گوشی هنوز به شبکه نپیوسته است. چیزی ارسال نشد؛ کمی بعد دوباره تلاش کنید.</string>
     <string name="pay_node_unreachable">به هیچ نود مونرو نمی‌توان وصل شد. چیزی ارسال نشد — اتصال خود را بررسی کنید و دوباره تلاش کنید.</string>
     <string name="pay_already_paid">شما قبلاً به این امانی پرداخت کرده‌اید. پول شما داخل است؛ چیزی دوباره ارسال نشد.</string>
+    <string name="pay_rate_line">تبدیل‌شده با نرخ ‎1 XMR = %1$s %2$s</string>
+    <string name="pay_rate_line_source">تبدیل‌شده با نرخ ‎1 XMR = %1$s %2$s · %3$s</string>
 </resources>

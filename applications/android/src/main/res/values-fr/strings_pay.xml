@@ -63,4 +63,6 @@
     <string name="pay_offline">Pas encore connecté — ce téléphone n\'a pas fini de rejoindre le réseau. Rien n\'a été envoyé ; réessayez dans un instant.</string>
     <string name="pay_node_unreachable">Aucun nœud Monero n\'a répondu. Rien n\'a été envoyé — vérifiez votre connexion et réessayez.</string>
     <string name="pay_already_paid">Vous avez déjà payé dans ce séquestre. Votre argent y est ; rien n\'a été envoyé de nouveau.</string>
+    <string name="pay_rate_line">Converti à 1 XMR = %1$s %2$s</string>
+    <string name="pay_rate_line_source">Converti à 1 XMR = %1$s %2$s · %3$s</string>
 </resources>
