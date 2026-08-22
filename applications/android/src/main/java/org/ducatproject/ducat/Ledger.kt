@@ -361,7 +361,9 @@ object Ledger {
                 out += Event(
                     txid = txid,
                     height = height,
-                    timestamp = if (ts > 0) ts else (rec?.timestamp?.div(1000) ?: 0L),
+                    // `recordSent` already stores seconds; dividing again put a
+                    // payment made this morning three weeks after the epoch.
+                    timestamp = if (ts > 0) ts else (rec?.timestamp ?: 0L),
                     direction = Direction.Sent,
                     amountPxmr = paid,
                     feePxmr = fee,
@@ -480,7 +482,7 @@ object Ledger {
             val s = pendingRecords[i]
             out[unattributedIdx[i]] = out[unattributedIdx[i]].copy(
                 txid = s.txidHex,
-                timestamp = s.timestamp / 1000,
+                timestamp = s.timestamp,
                 // What was paid, not what left the spendable pool. Monero
                 // spends whole notes, so the observed outflow is the note —
                 // and printing that beside a person's name would say you sent
@@ -505,7 +507,7 @@ object Ledger {
             out += Event(
                 txid = s.txidHex,
                 height = 0,
-                timestamp = s.timestamp / 1000,
+                timestamp = s.timestamp,
                 direction = Direction.Sent,
                 amountPxmr = s.amountPxmr,
                 feePxmr = s.feePxmr,
