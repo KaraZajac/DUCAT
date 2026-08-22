@@ -321,6 +321,7 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
             value = desc,
             onValueChange = { if (it.length <= 64) desc = it },
             label = { Text(stringResource(R.string.pos_item)) },
+            supportingText = { CharCounter(desc.length, 64) },
             singleLine = true,
             modifier = Modifier.weight(1.5f),
         )

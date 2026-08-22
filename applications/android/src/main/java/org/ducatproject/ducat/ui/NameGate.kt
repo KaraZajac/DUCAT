@@ -65,6 +65,7 @@ fun NameGate(
                     value = name,
                     onValueChange = { if (it.length <= 32) name = it },
                     label = { Text(stringResource(R.string.name_gate_label)) },
+                    supportingText = { CharCounter(name.length, 32) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )

@@ -113,7 +113,12 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                 value = name,
                 onValueChange = { if (it.length <= 32) name = it },
                 label = { Text(stringResource(R.string.contacts_name_to_show_label)) },
-                supportingText = { Text(stringResource(R.string.contacts_name_to_show_support)) },
+                supportingText = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.contacts_name_to_show_support), Modifier.weight(1f))
+                        CharCounter(name.length, 32)
+                    }
+                },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -325,7 +330,12 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                     value = petname,
                     onValueChange = { if (it.length <= 32) petname = it },
                     label = { Text(stringResource(R.string.contacts_save_them_as_label)) },
-                    supportingText = { Text(stringResource(R.string.contacts_save_them_as_support)) },
+                    supportingText = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.contacts_save_them_as_support), Modifier.weight(1f))
+                        CharCounter(petname.length, 32)
+                    }
+                },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )

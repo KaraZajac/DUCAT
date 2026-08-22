@@ -370,6 +370,28 @@ internal fun previewOf(context: Context, m: StoredMessage): String = when {
 internal fun isolate(s: String): String =
     if (s.isEmpty()) s else "⁨" + s + "⁩"
 
+/**
+ * How much room is left in a capped field, once the cap is in sight.
+ *
+ * Every text field in the app refuses input past its limit — a name at 32, an
+ * item at 40, a till note at 64 — and refused it *silently*, so typing simply
+ * stopped producing letters. That reads as the app having hung, not as a rule,
+ * and the person retypes rather than shortening.
+ *
+ * Only near the end, rather than Material's always-on counter: a permanent
+ * "3/32" under somebody's name is noise about a limit almost nobody meets.
+ */
+@Composable
+internal fun CharCounter(length: Int, max: Int, within: Int = 10) {
+    if (max - length > within) return
+    Text(
+        stringResource(R.string.field_counter, length, max),
+        style = MaterialTheme.typography.labelSmall,
+        color = if (length >= max) MaterialTheme.ducat.lowCapacity
+        else MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
 /** Now, minutes, hours, weekday, then a date — the resolution a list needs. */
 internal fun shortWhen(context: Context, epochSecs: Long): String {
     val now = System.currentTimeMillis() / 1000

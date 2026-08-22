@@ -134,7 +134,13 @@ fun MyProfileEditor() {
             onValueChange = { if (it.length <= 32) { name = it; saved = false } },
             label = { Text(stringResource(R.string.myprofile_name_label)) },
             supportingText = {
-                Text(stringResource(R.string.myprofile_name_support))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.myprofile_name_support),
+                        Modifier.weight(1f),
+                    )
+                    CharCounter(name.length, 32)
+                }
             },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),

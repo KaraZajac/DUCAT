@@ -142,7 +142,12 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 value = petname,
                 onValueChange = { if (it.length <= 32) { petname = it; saved = false } },
                 label = { Text(stringResource(R.string.profile_your_name_for_them_label)) },
-                supportingText = { Text(stringResource(R.string.profile_your_name_for_them_support)) },
+                supportingText = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.profile_your_name_for_them_support), Modifier.weight(1f))
+                        CharCounter(petname.length, 32)
+                    }
+                },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )

@@ -59,6 +59,7 @@ fun ItemsScreen() {
                 value = name,
                 onValueChange = { if (it.length <= 40) name = it },
                 label = { Text(stringResource(R.string.items_name)) },
+                supportingText = { CharCounter(name.length, 40) },
                 singleLine = true,
                 modifier = Modifier.weight(1.6f),
             )

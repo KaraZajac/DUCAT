@@ -1008,7 +1008,12 @@ private fun ChatSettingsDialog(
                     value = name,
                     onValueChange = { if (it.length <= 32) { name = it; onRename(it.trim().ifBlank { null }) } },
                     label = { Text(stringResource(R.string.chat_their_name_label)) },
-                    supportingText = { Text(stringResource(R.string.chat_their_name_support)) },
+                    supportingText = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.chat_their_name_support), Modifier.weight(1f))
+                        CharCounter(name.length, 32)
+                    }
+                },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )

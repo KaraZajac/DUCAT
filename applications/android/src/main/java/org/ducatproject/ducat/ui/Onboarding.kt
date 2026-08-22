@@ -696,6 +696,7 @@ private fun ProfileStep(
                 value = name,
                 onValueChange = { if (it.length <= 32) name = it },
                 label = { Text(stringResource(R.string.onb_profile_name_label)) },
+                supportingText = { CharCounter(name.length, 32) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
