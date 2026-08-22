@@ -86,6 +86,7 @@
     <string name="chat_min_away">करीब %1$d मिनट दूर</string>
     <string name="chat_paid">चुकाया ✓</string>
     <string name="chat_cancelled">रद्द</string>
+    <string name="chat_declined">अस्वीकृत</string>
     <string name="chat_review_payment">भुगतान देखें</string>
     <string name="chat_no_address">इस अनुरोध में कोई पता नहीं — उनसे पूछें कि कहाँ भेजना है।</string>
     <string name="chat_no_forward_secrecy">फ़ॉरवर्ड सीक्रेसी के बिना भेजा गया</string>

@@ -94,6 +94,7 @@
     <string name="chat_min_away">about %1$d min away</string>
     <string name="chat_paid">Paid ✓</string>
     <string name="chat_cancelled">Cancelled</string>
+    <string name="chat_declined">Declined</string>
     <string name="chat_review_payment">Review payment</string>
     <string name="chat_no_address">No address in this request — ask them where to send it.</string>
     <string name="chat_no_forward_secrecy">Sent without forward secrecy</string>

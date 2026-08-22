@@ -86,6 +86,7 @@
     <string name="chat_min_away">約%1$d分で到着</string>
     <string name="chat_paid">支払い済み ✓</string>
     <string name="chat_cancelled">キャンセル</string>
+    <string name="chat_declined">拒否しました</string>
     <string name="chat_review_payment">支払いを確認</string>
     <string name="chat_no_address">この請求にはアドレスがありません — 送り先を相手に確認してください。</string>
     <string name="chat_no_forward_secrecy">前方秘匿性なしで送信されました</string>

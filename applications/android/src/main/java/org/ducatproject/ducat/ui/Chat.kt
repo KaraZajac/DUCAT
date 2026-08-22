@@ -732,6 +732,14 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             it.kind == 5 && it.reOwn && it.reSeq == m.seq &&
                                 it.outgoing == m.outgoing
                         },
+                        // And the payer's refusal, which is the same mechanism
+                        // from the other end: not our log, so `reOwn` is false
+                        // and the sides differ. Without this the screen that
+                        // sent the decline still offered to pay the bill.
+                        declined = m.kind == 1 && messages.any {
+                            it.kind == 5 && !it.reOwn && it.reSeq == m.seq &&
+                                it.outgoing != m.outgoing
+                        },
                         onLongPress = { confirmDelete = m },
                         onPay = { billView = it },
                     )
@@ -784,6 +792,16 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                 billView = null
                 scope.launch(Dispatchers.IO) {
                     runCatching {
+                        // A kind-5 Retract naming the bill, not a sentence
+                        // about it. As plain text this told them in words and
+                        // told neither client anything: the bill stayed live on
+                        // both sides, so the screen that had just declined it
+                        // went on offering "Review payment" for it — decline a
+                        // bill and be invited to pay it, one tap away.
+                        //
+                        // `reOwn = false` because the bill is theirs; the
+                        // vendor's own withdrawal (BarTab's cancelTabWithRetract)
+                        // is the same shape with reOwn true.
                         Mailbox.send(
                             context, c,
                             context.getString(
@@ -791,6 +809,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 Amounts.show(context, b.amountPxmr).primary,
                             ),
                             mine,
+                            kind = 5, reSeq = b.seq, reOwn = false,
                         )
                     }
                 }
@@ -1044,6 +1063,10 @@ private fun Bubble(
     theirReadUpTo: Long? = null,
     paid: Boolean = false,
     cancelled: Boolean = false,
+    /** The payer refused it. Distinct from `cancelled`, which is the
+     *  issuer taking their own bill back — different party, different
+     *  word, and the thread already carries the sentence for each. */
+    declined: Boolean = false,
     /** Whether to draw the clock and the ticks under this one — see the run
      *  logic in the list. False for every message in a run but its last. */
     showMeta: Boolean = true,
@@ -1258,6 +1281,14 @@ private fun Bubble(
                             // the same bill twice.
                             Text(
                                 stringResource(R.string.chat_paid),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = fg.copy(alpha = 0.8f),
+                            )
+                        } else if (declined) {
+                            // Refused here. A live button would offer to pay
+                            // the bill this screen has already turned down.
+                            Text(
+                                stringResource(R.string.chat_declined),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = fg.copy(alpha = 0.8f),
                             )

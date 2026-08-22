@@ -86,6 +86,7 @@
     <string name="chat_min_away">sekitar %1$d menit lagi</string>
     <string name="chat_paid">Lunas ✓</string>
     <string name="chat_cancelled">Dibatalkan</string>
+    <string name="chat_declined">Ditolak</string>
     <string name="chat_review_payment">Tinjau pembayaran</string>
     <string name="chat_no_address">Tidak ada alamat di permintaan ini — tanyakan ke mereka harus dikirim ke mana.</string>
     <string name="chat_no_forward_secrecy">Dikirim tanpa forward secrecy</string>

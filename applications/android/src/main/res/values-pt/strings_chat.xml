@@ -86,6 +86,7 @@
     <string name="chat_min_away">a cerca de %1$d min daqui</string>
     <string name="chat_paid">Pago ✓</string>
     <string name="chat_cancelled">Cancelado</string>
+    <string name="chat_declined">Recusado</string>
     <string name="chat_review_payment">Revisar pagamento</string>
     <string name="chat_no_address">Sem endereço neste pedido — pergunte à pessoa para onde enviar.</string>
     <string name="chat_no_forward_secrecy">Enviada sem sigilo futuro</string>

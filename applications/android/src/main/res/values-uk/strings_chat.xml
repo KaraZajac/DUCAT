@@ -86,6 +86,7 @@
     <string name="chat_min_away">приблизно за %1$d хв</string>
     <string name="chat_paid">Сплачено ✓</string>
     <string name="chat_cancelled">Скасовано</string>
+    <string name="chat_declined">Відхилено</string>
     <string name="chat_review_payment">Переглянути платіж</string>
     <string name="chat_no_address">У цьому запиті немає адреси — спитай, куди надсилати.</string>
     <string name="chat_no_forward_secrecy">Надіслано без прямої секретності</string>

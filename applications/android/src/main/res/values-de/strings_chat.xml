@@ -86,6 +86,7 @@
     <string name="chat_min_away">etwa %1$d Min. entfernt</string>
     <string name="chat_paid">Bezahlt ✓</string>
     <string name="chat_cancelled">Storniert</string>
+    <string name="chat_declined">Abgelehnt</string>
     <string name="chat_review_payment">Zahlung prüfen</string>
     <string name="chat_no_address">Keine Adresse in dieser Anfrage — frag nach, wohin das Geld soll.</string>
     <string name="chat_no_forward_secrecy">Ohne Forward Secrecy gesendet</string>

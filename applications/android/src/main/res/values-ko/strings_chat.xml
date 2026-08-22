@@ -86,6 +86,7 @@
     <string name="chat_min_away">약 %1$d분 거리</string>
     <string name="chat_paid">결제 완료 ✓</string>
     <string name="chat_cancelled">취소됨</string>
+    <string name="chat_declined">거절함</string>
     <string name="chat_review_payment">결제 검토</string>
     <string name="chat_no_address">이 요청에는 주소가 없어요 — 어디로 보낼지 물어보세요.</string>
     <string name="chat_no_forward_secrecy">순방향 비밀성 없이 전송됨</string>

@@ -86,6 +86,7 @@
     <string name="chat_min_away">على بعد %1$d دقيقة تقريبًا</string>
     <string name="chat_paid">مدفوع ✓</string>
     <string name="chat_cancelled">أُلغي</string>
+    <string name="chat_declined">مرفوض</string>
     <string name="chat_review_payment">مراجعة الدفعة</string>
     <string name="chat_no_address">لا عنوان في هذا الطلب — اسألهم أين تُرسل المال.</string>
     <string name="chat_no_forward_secrecy">أُرسلت دون سرّية أمامية</string>

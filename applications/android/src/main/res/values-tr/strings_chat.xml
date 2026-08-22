@@ -86,6 +86,7 @@
     <string name="chat_min_away">yaklaşık %1$d dk uzakta</string>
     <string name="chat_paid">Ödendi ✓</string>
     <string name="chat_cancelled">İptal edildi</string>
+    <string name="chat_declined">Reddedildi</string>
     <string name="chat_review_payment">Ödemeyi incele</string>
     <string name="chat_no_address">Bu istekte adres yok — nereye göndereceğini onlara sor.</string>
     <string name="chat_no_forward_secrecy">İleriye dönük gizlilik olmadan gönderildi</string>

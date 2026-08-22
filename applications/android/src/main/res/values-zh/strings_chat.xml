@@ -86,6 +86,7 @@
     <string name="chat_min_away">距你约 %1$d 分钟</string>
     <string name="chat_paid">已付 ✓</string>
     <string name="chat_cancelled">已取消</string>
+    <string name="chat_declined">已拒绝</string>
     <string name="chat_review_payment">核对付款</string>
     <string name="chat_no_address">这个请求里没有地址 — 问问对方要把钱发到哪里。</string>
     <string name="chat_no_forward_secrecy">发送时未使用前向保密</string>

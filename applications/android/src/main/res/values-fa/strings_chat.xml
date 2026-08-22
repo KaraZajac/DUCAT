@@ -86,6 +86,7 @@
     <string name="chat_min_away">حدود %1$d دقیقه فاصله دارد</string>
     <string name="chat_paid">پرداخت شد ✓</string>
     <string name="chat_cancelled">لغو شد</string>
+    <string name="chat_declined">رد شد</string>
     <string name="chat_review_payment">بررسی پرداخت</string>
     <string name="chat_no_address">در این درخواست نشانی نیست — بپرس کجا بفرستی.</string>
     <string name="chat_no_forward_secrecy">بدون محرمانگی پیش‌رو فرستاده شد</string>

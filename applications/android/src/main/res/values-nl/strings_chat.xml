@@ -86,6 +86,7 @@
     <string name="chat_min_away">ongeveer %1$d min hiervandaan</string>
     <string name="chat_paid">Betaald ✓</string>
     <string name="chat_cancelled">Geannuleerd</string>
+    <string name="chat_declined">Geweigerd</string>
     <string name="chat_review_payment">Betaling bekijken</string>
     <string name="chat_no_address">Geen adres in dit verzoek — vraag ze waar je het naartoe moet sturen.</string>
     <string name="chat_no_forward_secrecy">Verstuurd zonder forward secrecy</string>

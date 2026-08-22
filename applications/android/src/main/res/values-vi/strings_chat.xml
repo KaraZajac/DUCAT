@@ -86,6 +86,7 @@
     <string name="chat_min_away">cách khoảng %1$d phút</string>
     <string name="chat_paid">Đã trả ✓</string>
     <string name="chat_cancelled">Đã hủy</string>
+    <string name="chat_declined">Đã từ chối</string>
     <string name="chat_review_payment">Xem lại thanh toán</string>
     <string name="chat_no_address">Yêu cầu này không kèm địa chỉ — hãy hỏi họ gửi về đâu.</string>
     <string name="chat_no_forward_secrecy">Gửi không có bảo mật chuyển tiếp</string>

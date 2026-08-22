@@ -86,6 +86,7 @@
     <string name="chat_min_away">ห่างประมาณ %1$d นาที</string>
     <string name="chat_paid">ชำระแล้ว ✓</string>
     <string name="chat_cancelled">ยกเลิกแล้ว</string>
+    <string name="chat_declined">ปฏิเสธแล้ว</string>
     <string name="chat_review_payment">ตรวจดูการชำระ</string>
     <string name="chat_no_address">คำขอนี้ไม่มีที่อยู่ — ถามเขาว่าให้ส่งไปที่ไหน</string>
     <string name="chat_no_forward_secrecy">ส่งโดยไม่มี forward secrecy</string>
