@@ -172,7 +172,13 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             kinds.forEach { k ->
-                Button(
+                // Tonal, not filled. These are peers — up to five of them — and
+                // five filled buttons is five primary actions shouting at once
+                // across the top third of an otherwise empty screen. Tonal
+                // keeps them the tab's obvious business without any one of them
+                // claiming to be the answer, which none of them is: which noun
+                // you have is not a thing the app can guess.
+                FilledTonalButton(
                     onClick = { composing = k },
                     modifier = Modifier.height(44.dp),
                 ) {
