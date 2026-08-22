@@ -147,11 +147,25 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
-            Button(onClick = {
-                store.add(c.copy(petname = petname.trim().ifBlank { null }))
-                c = store.all().first { it.personaHex == c.personaHex }
-                saved = true
-            }) { Text(if (saved) stringResource(R.string.profile_saved) else stringResource(R.string.profile_save_name)) }
+            Button(
+                onClick = {
+                    store.add(c.copy(petname = petname.trim().ifBlank { null }))
+                    c = store.all().first { it.personaHex == c.personaHex }
+                    saved = true
+                },
+                // Only when there is something to save. It was always live, so
+                // a contact you had never renamed showed a filled primary
+                // button inviting a tap that stored the blank you were already
+                // storing. Clearing a name you *had* set still counts as a
+                // change, which is why this compares against the stored value
+                // rather than checking the field is non-empty.
+                enabled = petname.trim() != (c.petname ?: ""),
+            ) {
+                Text(
+                    if (saved) stringResource(R.string.profile_saved)
+                    else stringResource(R.string.profile_save_name),
+                )
+            }
 
             // §15.12: the third key in every ride escrow this device builds.
             // A choice about *this* contact, made where they are looked at.
