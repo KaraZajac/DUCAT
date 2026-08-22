@@ -295,6 +295,19 @@ object Ledger {
                     // A receipt at or above it also closes it (paid outside).
                     p.kind == 3 && p.timestamp >= m.timestamp &&
                         p.amountPxmr >= m.amountPxmr
+                } || thread.any { p ->
+                    // §16.13's Retract closes it too, and this list did not
+                    // know that: a bill its issuer had withdrawn and a bill its
+                    // payer had declined both sat under "Awaiting" for ever,
+                    // on the screen a person checks to find out what they still
+                    // owe. Named by sequence rather than matched by amount, so
+                    // it is exact.
+                    //
+                    // Both directions. `reOwn` and the same side is the issuer
+                    // taking their own bill back; not `reOwn` and the other
+                    // side is the payer refusing it.
+                    p.kind == 5 && p.reSeq == m.seq &&
+                        (if (p.reOwn) p.outgoing == m.outgoing else p.outgoing != m.outgoing)
                 }
                 if (!answered) {
                     out += OpenRequest(
