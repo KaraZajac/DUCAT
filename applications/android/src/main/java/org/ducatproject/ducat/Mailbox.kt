@@ -685,10 +685,40 @@ object Mailbox {
      */
     private fun republishBundles(context: Context, store: ContactStore) {
         var allLanded = true
-        for (c in store.all()) {
-            if (c.myOutboxOwnerSecret.isEmpty()) continue
+        for (c0 in store.all()) {
+            if (c0.myOutboxOwnerSecret.isEmpty()) continue
+            var c = c0
             runCatching {
                 nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
+                // Catch the send counter up to what we actually published.
+                //
+                // A bundle restores the counter to where it stood when the
+                // bundle was written, and the messages sent after that are
+                // still out there — read, and counted, by the person we sent
+                // them to. Resuming underneath them means every message is
+                // written at a sequence they have already passed, so they skip
+                // it as one they have seen: nothing arrives, nothing errors,
+                // and both sides go on believing the thread is fine. Watched it
+                // happen — Sam's poller waking on the right record, at the right
+                // second, and reading nothing, twice.
+                //
+                // Our own head is the record of how far we got, and it survived
+                // on the network while the counter did not. Take the further of
+                // the two. Written before the head below, so the republish does
+                // not go on to overwrite that number with the stale one.
+                runCatching {
+                    val mine = nodeDhtGet(c.myOutbox, 0u, true)?.let { parseLogHead(it) }
+                    val published = mine?.nextSeq?.toLong() ?: 0L
+                    if (published > c.outSeq) {
+                        DucatLog.i(
+                            TAG,
+                            "our log for ${c.displayName()} reached $published, " +
+                                "the bundle said ${c.outSeq} — resuming from theirs",
+                        )
+                        store.advanceOutbound(c.personaHex, published, c.outPrevLink ?: ByteArray(32))
+                        c = store.all().first { it.personaHex == c.personaHex }
+                    }
+                }.onFailure { DucatLog.w(TAG, "own head for ${c.displayName()}: ${it.message}") }
                 nodeDhtSet(
                     c.myOutbox, 0u,
                     buildLogHead(
@@ -932,20 +962,30 @@ object Mailbox {
                     prev = null
                     continue
                 }
-                // The key fits and the ciphertext does not: a one-time id was
-                // re-minted, so the secret under it is not the one this message
-                // was sealed to. Nothing about that improves with time, and
-                // rethrowing aborts the contact's whole poll — every poll,
-                // forever, with no patience window and no dead letter, so one
-                // such message walls off every message behind it for good.
+                // Two refusals that are final for these bytes and were both
+                // rethrown, which aborts the contact's whole poll — every poll,
+                // forever, with no patience window and no dead letter. One such
+                // message walls off every message behind it for good, and both
+                // of these are things a restore produces.
                 //
-                // It still gets the window rather than an instant tombstone,
+                //  * **It does not authenticate.** The key fits and the
+                //    ciphertext does not, because a one-time id was re-minted
+                //    and the secret under it is not the one this was sealed to.
+                //  * **It does not follow the one before it.** The sender lost
+                //    messages it had already sent — restored from a bundle
+                //    older than its last send — so the chain has a hole in it
+                //    that neither side can fill. §16.11 already treats a gap as
+                //    unverifiable rather than fatal on the *reading* side; this
+                //    is the same hole arriving from the writing side.
+                //
+                // Both take the window rather than an instant tombstone,
                 // because the bytes on a slot may be a previous tenant that is
-                // simply slow to be replaced, and those do authenticate once
-                // the real write lands.
-                if (e.message?.contains("BadSig") == true ||
+                // slow to be replaced, and those open fine once the real write
+                // lands.
+                val unopenable = e.message?.contains("BadSig") == true ||
                     e.message?.contains("did not authenticate") == true
-                ) {
+                val outOfChain = e.message?.contains("does not follow") == true
+                if (unopenable || outOfChain) {
                     val badKey = "${c.personaHex}:$seq"
                     if (System.currentTimeMillis() - stuckSince(context, badKey) < STUCK_PATIENCE_MS) {
                         var behind = seq + 1uL
@@ -955,22 +995,31 @@ object Mailbox {
                         }
                         DucatLog.i(
                             TAG,
-                            "message $seq from ${c.displayName()} does not open with the " +
-                                "key it names — waiting for the slot to settle",
+                            "message $seq from ${c.displayName()} " +
+                                (if (outOfChain) "does not follow the one before it"
+                                else "does not open with the key it names") +
+                                " — waiting for the slot to settle",
                         )
                         break
                     }
                     clearStuck(context, badKey)
                     DucatLog.w(
                         TAG,
-                        "message $seq from ${c.displayName()} never authenticated — recorded and skipped",
+                        "message $seq from ${c.displayName()} " +
+                            (if (outOfChain) "broke the chain" else "never authenticated") +
+                            " — recorded and skipped",
                     )
                     store.appendAndAdvance(
                         c.personaHex,
                         StoredMessage(
                             outgoing = false, seq = seq.toLong(),
-                            body = "[a message could not be opened — it was sealed " +
-                                "to a key this device no longer holds]",
+                            body = if (outOfChain) {
+                                "[a message is missing here — the sender lost it " +
+                                    "before this device could read it]"
+                            } else {
+                                "[a message could not be opened — it was sealed " +
+                                    "to a key this device no longer holds]"
+                            },
                             timestamp = deadLetterTime(store, c.personaHex),
                         ),
                         (seq + 1uL).toLong(), null,
