@@ -604,7 +604,16 @@ class ContactStore(context: Context) {
     // receipts_v1 rides along deliberately: a receipt is the record that
     // must survive everything else — thread deletions, contact deletions,
     // and now device loss too.
-    private val appStateKeys = listOf("tabs_v1", "publish_address", "receipts_v1", "claimed_kis_v1")
+    // issued_cards is key material, not presentation, and it is here because
+    // losing it costs a connection somebody is still holding. A card names an
+    // inbox and carries the writer secret for it; the poller watches every
+    // unanswered one, and a claim is answered with that secret. Restore
+    // without them and the device is not watching those inboxes and could not
+    // answer if it were — so a card handed out before the bundle was written
+    // is dead, and the person holding it claims it into silence. They are
+    // pruned by their own TTL, so this does not grow.
+    private val appStateKeys =
+        listOf("tabs_v1", "publish_address", "receipts_v1", "claimed_kis_v1", "issued_cards")
 
     fun backupAppState(): ByteArray {
         val o = JSONObject()

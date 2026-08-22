@@ -39,10 +39,16 @@ private fun appState() {
     val dst = DeskContext(dstDir)
 
     val kis = setOf("ki-aaaa", "ki-bbbb", "ki-cccc")
+    // A card handed out and not yet claimed. Its writer secret is the only way
+    // to answer the claim, and the poller only watches inboxes it can find in
+    // here — so a restore without it leaves somebody holding a card that
+    // claims into silence.
+    val cards = """[{"inbox":"VLD0:abc","wsec":"c2Vjcg==","uri":"ducat:card","answered_by":null}]"""
     src.getSharedPreferences("ducat_contacts", 0).edit()
         .putStringSet("claimed_kis_v1", kis)
         .putBoolean("publish_address", true)
         .putString("receipts_v1", "[{\"r\":1}]")
+        .putString("issued_cards", cards)
         .apply()
 
     val blob = ContactStore(src).backupAppState()
@@ -71,10 +77,14 @@ private fun appState() {
     val rec = dst.getSharedPreferences("ducat_contacts", 0)
         .getString("receipts_v1", null)
 
+    val crd = dst.getSharedPreferences("ducat_contacts", 0)
+        .getString("issued_cards", null)
+
     check(got == kis) { "BACKUPTEST_FAIL claimed_kis: expected $kis got $got" }
     check(pub) { "BACKUPTEST_FAIL publish_address dropped" }
     check(rec == "[{\"r\":1}]") { "BACKUPTEST_FAIL receipts_v1: got $rec" }
-    println("BACKUPTEST_OK claimed_kis=$got publish=$pub receipts=$rec")
+    check(crd == cards) { "BACKUPTEST_FAIL issued_cards: got $crd" }
+    println("BACKUPTEST_OK claimed_kis=$got publish=$pub receipts=$rec cards=ok")
 }
 
 private fun escrowShares() {
