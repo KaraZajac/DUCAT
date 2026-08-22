@@ -560,6 +560,33 @@ pub fn export_backup(
         // rescan, too high is silent and total. For a wallet created moments ago
         // the tip is right, because there are no earlier outputs to miss.
         monero_restore_height: input.restore_height,
+        // These four are empty because this client has nothing to put in them,
+        // not because nobody got to them. Checked one by one on 2026-08-22,
+        // after `escrow_shares` sat here as `vec![]` for months next to a
+        // backup screen advertising the thing it was dropping — so the same
+        // four lines will not be re-investigated from scratch next time.
+        //
+        // **rendezvous** (§16.4) is already carried, under a better name. The
+        // spec's warning — "a restored persona keeps its identity and loses
+        // every contact" — is about the pairwise DHT record two contacts reach
+        // each other through, and here that is `my_outbox` / `their_outbox`,
+        // which travel in the typed `contacts` array with their writer keys.
+        // A second untyped copy would be the same records twice.
+        //
+        // **attestation_records** (§9.2) and **mandates** (§7.3) are features
+        // this client does not have — no attestation is published and no
+        // mandate is granted anywhere in the app. When either lands, its keys
+        // belong here, and the §9.2 failure is the nasty kind: reputation stays
+        // readable and can never be added to again, which nobody would think to
+        // blame on a backup.
+        //
+        // **verification** (§15.5.1) exists in core and is wired to nothing —
+        // `check_verification` is called only from the diagnostics self-test,
+        // so every real flow uses the default and there is no setting of the
+        // user's to lose. The moment a screen lets somebody raise their floor
+        // limit, this must carry it: the policy is stricter by default, so a
+        // restore fails safe and silently reverts a deliberate choice, which
+        // the core field's own comment names as its own kind of data loss.
         rendezvous: vec![],
         attestation_records: vec![],
         mandates: vec![],
