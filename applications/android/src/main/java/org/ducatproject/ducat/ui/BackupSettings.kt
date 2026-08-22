@@ -271,6 +271,16 @@ internal fun applyBackup(
     // contacts as the authoritative overlay — so a bundle from another client
     // still restores everyone.
     ContactStore(context).restoreFromBackup(r)
+    // What this device advertises is now a lie. The one-time secrets come back
+    // as they were when the bundle was written, but the ids burned between then
+    // and the export are dropped — and the peers still hold the older offer
+    // listing them, with no memory of which they already spent, because that
+    // ledger is not in a backup either. So they seal to keys this device cannot
+    // open, and every message arrives unreadable until it happens to send one.
+    // Recutting is the repair, and it already exists; it just waited for an
+    // outgoing message. A phone restored after a loss receives first — someone
+    // checking they are back — so the wait is exactly the wrong way round.
+    ContactStore(context).setBundlesNeedRepublish(true)
     // The money. The bundle carries the spend key and the height that key was
     // born at; before this, the import applied the contacts and dropped the
     // wallet on the floor.

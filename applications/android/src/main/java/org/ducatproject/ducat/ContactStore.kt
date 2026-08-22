@@ -262,6 +262,20 @@ class ContactStore(context: Context) {
     }
 
     /**
+     * Set by a restore: the one-time keys this device is advertising are not
+     * the ones it holds, so every head needs recutting before anyone writes to
+     * us (see `Mailbox.republishBundles`).
+     *
+     * Deliberately not in `appStateKeys` — it describes this device's state
+     * against the live network, and a backup that carried it would arrive
+     * already claiming a republish nobody performed.
+     */
+    fun bundlesNeedRepublish(): Boolean = prefs.getBoolean("republish_bundles", false)
+    fun setBundlesNeedRepublish(v: Boolean) {
+        prefs.edit().putBoolean("republish_bundles", v).apply()
+    }
+
+    /**
      * The last inbound sequence this user has *seen* — locally, for the
      * unread dot and the tab badge. Not §16.16's watermark: this never leaves
      * the device, so it needs no opt-in.

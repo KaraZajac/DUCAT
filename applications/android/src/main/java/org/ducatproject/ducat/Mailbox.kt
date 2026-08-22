@@ -54,6 +54,22 @@ object Mailbox {
         waitPrefs(context).edit().remove("stuck_$key").apply()
     }
 
+    /**
+     * When to say a dead letter happened.
+     *
+     * Not now: the send time is inside the bytes that would not open, and the
+     * clock is only ever read at the moment we give up — which can be an hour
+     * after the message, and *after* the messages that follow it. A restored
+     * phone showed four placeholders stamped 01:20 and 01:37 sitting above a
+     * real message stamped 01:17, which reads as arriving out of order, in a
+     * thread already asking the reader to trust it about what was lost.
+     *
+     * The message before it is the closest honest answer — the gap is
+     * somewhere after that — and it keeps the thread monotonic.
+     */
+    private fun deadLetterTime(store: ContactStore, personaHex: String): Long =
+        store.thread(personaHex).lastOrNull()?.timestamp ?: (System.currentTimeMillis() / 1000)
+
     /** Hash of the raw bytes last *processed* per (contact, slot) — persisted
      *  for the same reason: the stale-tenant/dead-letter distinction is only
      *  as durable as its memory. */
@@ -646,9 +662,78 @@ object Mailbox {
      *  joined a bond twice and double-committed (found live, 2026-08-16). One
      *  poll at a time; a second caller waits and then finds the log already
      *  drained, which costs nothing but the wait. */
+    /**
+     * Re-cut and re-publish every thread's one-time offer (§16.11).
+     *
+     * Only after a restore, and only once. The secrets come back from the
+     * bundle as they were when it was written; the ids burned between then and
+     * the export do not, since the burn pen is not exported. Meanwhile the
+     * peers hold the offer from before those burns and no record of which ids
+     * they already spent — that ledger is not in a backup either — so they
+     * re-offer dead keys, seal to them, and every message lands unreadable and
+     * is tombstoned ten minutes later.
+     *
+     * Recutting fixes it from this side alone: a fresh batch replaces the
+     * thread's offer wholesale, the peer picks it up on its next head read, and
+     * the channel is clean without either person doing anything. That already
+     * happened on the first outgoing message — this just stops it waiting for
+     * one, because a phone restored after a loss is on the receiving end first.
+     *
+     * Best-effort per contact, and the flag only clears when every one landed:
+     * a partial pass over a network still coming up must run again, not report
+     * itself done.
+     */
+    private fun republishBundles(context: Context, store: ContactStore) {
+        var allLanded = true
+        for (c in store.all()) {
+            if (c.myOutboxOwnerSecret.isEmpty()) continue
+            runCatching {
+                nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
+                nodeDhtSet(
+                    c.myOutbox, 0u,
+                    buildLogHead(
+                        c.outSeq.toULong(),
+                        // Forced, not topUpIfLow: the supply reads as healthy —
+                        // the secrets are there — and it is the *offer* that is
+                        // stale. Asking whether we are low would decline to fix
+                        // exactly the case this exists for.
+                        recutThreadBundle(store, c.myOutbox),
+                        if (store.readReceipts()) c.inSeq.toULong() else null,
+                        c.myRing.toUInt().takeIf { it != 8u },
+                    ),
+                )
+            }.onFailure {
+                allLanded = false
+                DucatLog.w(TAG, "republish ${c.displayName()}: ${it.message}")
+            }
+        }
+        if (allLanded) {
+            store.setBundlesNeedRepublish(false)
+            DucatLog.i(TAG, "republished every thread's one-time offer after a restore")
+        }
+    }
+
+    /** A fresh batch for this thread, whatever the current supply looks like. */
+    private fun recutThreadBundle(store: ContactStore, outbox: String): ByteArray {
+        val m = generatePrekeys(
+            ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL,
+            store.nextPrekeyStart(ONE_TIME_KEYS.toInt()).toUInt(),
+            store.signedPrekeySecret(),
+        )
+        store.savePrekeys(
+            ByteArray(0), m.signedSecret,
+            m.oneTimeIds.mapIndexed { i, id -> id.toInt() to m.oneTimeSecrets[i] }.toMap(),
+        )
+        store.setThreadBundle(outbox, m.bundle)
+        return m.bundle
+    }
+
     @Synchronized
     fun poll(context: Context): Int {
         val store = ContactStore(context)
+        // Before reading anyone: a restored device is advertising keys it does
+        // not hold, and every message written against them is lost on arrival.
+        if (store.bundlesNeedRepublish()) republishBundles(context, store)
         // Each poll is also the clock for the forward-secrecy delete: burned
         // one-time secrets past their grace window leave for good here.
         store.sweepBurnedPrekeys()
@@ -734,7 +819,7 @@ object Mailbox {
                     StoredMessage(
                         outgoing = false, seq = seq.toLong(),
                         body = "[a message was lost — this device was away too long]",
-                        timestamp = System.currentTimeMillis() / 1000,
+                        timestamp = deadLetterTime(store, c.personaHex),
                     ),
                     (seq + 1uL).toLong(), null,
                 )
@@ -772,6 +857,22 @@ object Mailbox {
                 val key = "${c.personaHex}:$seq"
                 val since = stuckSince(context, key)
                 if (System.currentTimeMillis() - since < STUCK_PATIENCE_MS) {
+                    // Everything behind this one is stuck too — the log is read
+                    // in order, so none of them can be reached until this
+                    // resolves. Start their clocks now rather than each in turn
+                    // when it reaches the front, or the windows run end to end
+                    // and a thread with n unreadable messages takes n times ten
+                    // minutes to drain. A restored phone is exactly that case:
+                    // its cursor rewinds to before a run of slots sealed to keys
+                    // it no longer holds, and until they clear it cannot see
+                    // anything newer. Nothing is declared lost early — this only
+                    // decides when the patience *started*, and it started when
+                    // the message was first sitting there unreadable.
+                    var behind = seq + 1uL
+                    while (behind < next) {
+                        stuckSince(context, "${c.personaHex}:$behind")
+                        behind += 1uL
+                    }
                     DucatLog.i(
                         TAG,
                         "message $seq from ${c.displayName()} not readable yet " +
@@ -795,7 +896,7 @@ object Mailbox {
                         outgoing = false, seq = seq.toLong(),
                         body = "[a message could not be opened — it was sealed " +
                             "to a key this device no longer holds]",
-                        timestamp = System.currentTimeMillis() / 1000,
+                        timestamp = deadLetterTime(store, c.personaHex),
                     ),
                     (seq + 1uL).toLong(), null,
                 )
@@ -821,11 +922,59 @@ object Mailbox {
                             outgoing = false, seq = seq.toLong(),
                             body = "[a message could not be understood — " +
                                 "the sender's client encoded it wrongly]",
-                            timestamp = System.currentTimeMillis() / 1000,
+                            timestamp = deadLetterTime(store, c.personaHex),
                         ),
                         (seq + 1uL).toLong(), null,
                     )
                     clearStuck(context, "${c.personaHex}:$seq")
+                    recordSlotSeen(context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode())
+                    seq += 1uL
+                    prev = null
+                    continue
+                }
+                // The key fits and the ciphertext does not: a one-time id was
+                // re-minted, so the secret under it is not the one this message
+                // was sealed to. Nothing about that improves with time, and
+                // rethrowing aborts the contact's whole poll — every poll,
+                // forever, with no patience window and no dead letter, so one
+                // such message walls off every message behind it for good.
+                //
+                // It still gets the window rather than an instant tombstone,
+                // because the bytes on a slot may be a previous tenant that is
+                // simply slow to be replaced, and those do authenticate once
+                // the real write lands.
+                if (e.message?.contains("BadSig") == true ||
+                    e.message?.contains("did not authenticate") == true
+                ) {
+                    val badKey = "${c.personaHex}:$seq"
+                    if (System.currentTimeMillis() - stuckSince(context, badKey) < STUCK_PATIENCE_MS) {
+                        var behind = seq + 1uL
+                        while (behind < next) {
+                            stuckSince(context, "${c.personaHex}:$behind")
+                            behind += 1uL
+                        }
+                        DucatLog.i(
+                            TAG,
+                            "message $seq from ${c.displayName()} does not open with the " +
+                                "key it names — waiting for the slot to settle",
+                        )
+                        break
+                    }
+                    clearStuck(context, badKey)
+                    DucatLog.w(
+                        TAG,
+                        "message $seq from ${c.displayName()} never authenticated — recorded and skipped",
+                    )
+                    store.appendAndAdvance(
+                        c.personaHex,
+                        StoredMessage(
+                            outgoing = false, seq = seq.toLong(),
+                            body = "[a message could not be opened — it was sealed " +
+                                "to a key this device no longer holds]",
+                            timestamp = deadLetterTime(store, c.personaHex),
+                        ),
+                        (seq + 1uL).toLong(), null,
+                    )
                     recordSlotSeen(context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode())
                     seq += 1uL
                     prev = null
