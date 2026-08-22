@@ -17,6 +17,8 @@
     <string name="notify_paid_title">%1$s pagou</string>
     <string name="notify_paid_body">%1$s — recibo enviado</string>
     <string name="notify_paid_body_tip">%1$s (gorjeta %2$s) — recibo enviado</string>
+    <string name="notify_unconfirmed_title">Pagamento não confirmado</string>
+    <string name="notify_unconfirmed_body">Outro nó não tem registro dele. Esta conta continua sem ser paga.</string>
     <string name="notify_arrived_title">Dinheiro chegou</string>
     <string name="notify_arrived_body">%1$s — desbloqueia após dez blocos</string>
     <string name="notify_escrow_setup">%1$s está a preparar o depósito em garantia.</string>

@@ -17,6 +17,8 @@
     <string name="notify_paid_title">%1$s ödedi</string>
     <string name="notify_paid_body">%1$s — fiş gönderildi</string>
     <string name="notify_paid_body_tip">%1$s (bahşiş %2$s) — fiş gönderildi</string>
+    <string name="notify_unconfirmed_title">Ödeme doğrulanamadı</string>
+    <string name="notify_unconfirmed_body">Başka bir düğümde kaydı yok. Bu hesap ödenmemiş kalıyor.</string>
     <string name="notify_arrived_title">Para geldi</string>
     <string name="notify_arrived_body">%1$s — on blok sonra çözülür</string>
     <string name="notify_escrow_setup">%1$s emaneti hazırlıyor.</string>

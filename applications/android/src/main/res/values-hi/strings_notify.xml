@@ -17,6 +17,8 @@
     <string name="notify_paid_title">%1$s ने भुगतान किया</string>
     <string name="notify_paid_body">%1$s — रसीद भेजी गई</string>
     <string name="notify_paid_body_tip">%1$s (टिप %2$s) — रसीद भेजी गई</string>
+    <string name="notify_unconfirmed_title">भुगतान की पुष्टि नहीं हुई</string>
+    <string name="notify_unconfirmed_body">किसी दूसरे नोड के पास इसका कोई रिकॉर्ड नहीं है। यह बिल बकाया रहेगा।</string>
     <string name="notify_arrived_title">पैसा आया</string>
     <string name="notify_arrived_body">%1$s — दस ब्लॉक बाद खुलेगा</string>
     <string name="notify_escrow_setup">%1$s एस्क्रो सेट कर रहे हैं।</string>

@@ -17,6 +17,8 @@
     <string name="notify_paid_title">دفع %1$s</string>
     <string name="notify_paid_body">%1$s — أُرسل الإيصال</string>
     <string name="notify_paid_body_tip">%1$s (بقشيش %2$s) — أُرسل الإيصال</string>
+    <string name="notify_unconfirmed_title">لم يتم تأكيد الدفعة</string>
+    <string name="notify_unconfirmed_body">لا توجد لدى عقدة أخرى أي سجل لها. تبقى هذه الفاتورة غير مدفوعة.</string>
     <string name="notify_arrived_title">وصل المال</string>
     <string name="notify_arrived_body">%1$s — يُفتح بعد عشرة كتل</string>
     <string name="notify_escrow_setup">%1$s يجهّز الضمان.</string>

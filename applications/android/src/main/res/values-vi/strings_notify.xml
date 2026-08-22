@@ -17,6 +17,8 @@
     <string name="notify_paid_title">%1$s đã trả</string>
     <string name="notify_paid_body">%1$s — đã gửi biên nhận</string>
     <string name="notify_paid_body_tip">%1$s (tiền tip %2$s) — đã gửi biên nhận</string>
+    <string name="notify_unconfirmed_title">Chưa xác nhận được thanh toán</string>
+    <string name="notify_unconfirmed_body">Một nút khác không có bản ghi nào về nó. Hóa đơn này vẫn chưa thanh toán.</string>
     <string name="notify_arrived_title">Tiền đã về</string>
     <string name="notify_arrived_body">%1$s — mở khoá sau mười khối</string>
     <string name="notify_escrow_setup">%1$s đang thiết lập ký quỹ.</string>

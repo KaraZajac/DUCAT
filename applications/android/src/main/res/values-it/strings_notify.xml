@@ -17,6 +17,8 @@
     <string name="notify_paid_title">%1$s ha pagato</string>
     <string name="notify_paid_body">%1$s — ricevuta inviata</string>
     <string name="notify_paid_body_tip">%1$s (mancia %2$s) — ricevuta inviata</string>
+    <string name="notify_unconfirmed_title">Pagamento non confermato</string>
+    <string name="notify_unconfirmed_body">Un altro nodo non ne ha traccia. Questo conto resta da pagare.</string>
     <string name="notify_arrived_title">Denaro arrivato</string>
     <string name="notify_arrived_body">%1$s — sbloccato dopo dieci blocchi</string>
     <string name="notify_escrow_setup">%1$s sta preparando il deposito a garanzia.</string>

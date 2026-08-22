@@ -36,6 +36,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/ui/TxDetail.kt",
     "org/ducatproject/ducat/Wallet.kt",
     "org/ducatproject/ducat/Tabs.kt",
+    "org/ducatproject/ducat/SecondOpinion.kt",
     "org/ducatproject/ducat/ui/Qr.kt",
     "org/ducatproject/ducat/ui/Balance.kt",
     "org/ducatproject/ducat/ui/Monero.kt",
@@ -323,6 +324,15 @@ tasks.register<JavaExec>("smoke") {
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
 // Proves the escrow sweep takes what is over and leaves what is funded.
 // `./gradlew :desktop:escrowsweep`.
+// What a second node's answer is allowed to do to a sale: corroborated
+// settles, unreachable still settles, unknown defers and eventually says so.
+// `./gradlew :desktop:secondopinion`.
+tasks.register<JavaExec>("secondopinion") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.SecondOpinionTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("escrowsweep") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.EscrowSweepTestKt"

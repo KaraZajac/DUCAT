@@ -405,6 +405,17 @@ class TabStore(private val context: Context) {
                         (it.minor == 0 || wantMinor == null || it.minor == wantMinor) &&
                         (it.amountPxmr == tab.settledTotal || it.amountPxmr in said)
                 } ?: continue
+                // Everything above this line trusted one node's account of the
+                // chain. Amount, subaddress and height all matched — but they
+                // matched against blocks that node handed us, and no part of
+                // the scan checks the work behind them. Before that becomes a
+                // receipt and a customer walking out with the goods, ask
+                // somebody else whether the transaction exists at all.
+                //
+                // Ahead of the claim, not after it: a deferral has to leave
+                // this pass exactly as it found it, and a claimed key image
+                // would lock the output out of the retry.
+                if (!SecondOpinion.settles(context, hit.txHashHex)) continue
                 claimed += hit.keyImage
                 val contact = contacts.all()
                     .firstOrNull { it.personaHex == tab.personaHex } ?: continue

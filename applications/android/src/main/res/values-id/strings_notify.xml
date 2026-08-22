@@ -17,6 +17,8 @@
     <string name="notify_paid_title">%1$s membayar</string>
     <string name="notify_paid_body">%1$s — struk terkirim</string>
     <string name="notify_paid_body_tip">%1$s (tip %2$s) — struk terkirim</string>
+    <string name="notify_unconfirmed_title">Pembayaran belum dikonfirmasi</string>
+    <string name="notify_unconfirmed_body">Node lain tidak punya catatannya. Tagihan ini tetap belum dibayar.</string>
     <string name="notify_arrived_title">Uang masuk</string>
     <string name="notify_arrived_body">%1$s — terbuka setelah sepuluh blok</string>
     <string name="notify_escrow_setup">%1$s sedang menyiapkan escrow.</string>

@@ -17,6 +17,8 @@
     <string name="notify_paid_title">%1$s заплатив</string>
     <string name="notify_paid_body">%1$s — чек надіслано</string>
     <string name="notify_paid_body_tip">%1$s (чайові %2$s) — чек надіслано</string>
+    <string name="notify_unconfirmed_title">Платіж не підтверджено</string>
+    <string name="notify_unconfirmed_body">На іншому вузлі його немає. Цей рахунок лишається неоплаченим.</string>
     <string name="notify_arrived_title">Гроші надійшли</string>
     <string name="notify_arrived_body">%1$s — розблокується через десять блоків</string>
     <string name="notify_escrow_setup">%1$s налаштовує ескроу.</string>

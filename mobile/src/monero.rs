@@ -602,6 +602,72 @@ pub struct TxDetails {
     pub coinbase: bool,
 }
 
+/// A second node's answer about one transaction.
+///
+/// Three states, not two, and the difference is the whole point. "I asked
+/// somebody else and they have never heard of it" is a reason to stop; "I
+/// could not reach anybody else" is not, and collapsing them would either
+/// hand over goods on an unchecked payment or refuse honest ones whenever the
+/// network is poor.
+#[derive(uniffi::Enum, Clone, Copy, PartialEq, Eq, Debug)]
+pub enum TxKnown {
+    /// This node has the transaction.
+    Yes,
+    /// This node answered, and does not have it.
+    No,
+    /// This node could not be reached, so it said nothing either way.
+    Unreachable,
+}
+
+/// Ask one node whether it has a transaction, without trusting it for anything else.
+///
+/// **Why a second opinion exists at all.** Blocks are fetched by height and
+/// scanned locally, and nothing in that path verifies proof-of-work or chain
+/// continuity — the client believes the node's account of the chain. A node
+/// that lies can present a block containing an output to you that was never
+/// mined, which in the selling modes means a merchant is shown a settlement
+/// and hands over the goods. Asking an independent node whether the
+/// transaction exists is cheap, and a fabricated one does not exist anywhere
+/// else.
+///
+/// This deliberately returns only presence. Comparing amounts across nodes
+/// would mean trusting the second one's arithmetic as well, and presence is
+/// the claim that a forgery cannot satisfy.
+#[uniffi::export]
+pub fn monero_tx_known(node_url: String, tx_hash_hex: String, timeout_ms: u32) -> TxKnown {
+    use monero_daemon_rpc::prelude::*;
+    use monero_wallet::transaction::Transaction;
+
+    let Some(raw) = hex_to_bytes(&tx_hash_hex).filter(|b| b.len() == 32) else {
+        // Not a transaction id at all. Nothing to confirm, and nothing a
+        // second node could tell us.
+        return TxKnown::No;
+    };
+    let mut hash = [0u8; 32];
+    hash.copy_from_slice(&raw);
+
+    let Ok(rt) = tokio::runtime::Builder::new_current_thread().enable_all().build() else {
+        return TxKnown::Unreachable;
+    };
+    let _ = timeout_ms;
+    rt.block_on(async {
+        let Ok(rpc) = monero_daemon_rpc::MoneroDaemon::new(UreqTransport::new(node_url)).await
+        else {
+            return TxKnown::Unreachable;
+        };
+        match rpc.transaction(hash).await {
+            Ok(_tx) => {
+                let _: Transaction = _tx;
+                TxKnown::Yes
+            }
+            // The node answered and does not have it. A daemon that is up but
+            // behind will also say this, which is why the caller waits and
+            // asks again rather than treating one No as proof of a forgery.
+            Err(_) => TxKnown::No,
+        }
+    })
+}
+
 /// Fetch one transaction from the daemon.
 #[uniffi::export]
 pub fn monero_tx_details(node_url: String, tx_hash_hex: String) -> Result<TxDetails, MoneroError> {
@@ -1474,4 +1540,53 @@ fn estimated_weight(inputs: u32, outputs: u32) -> u64 {
     let padded = outputs.next_power_of_two().max(2);
     let range_proof = 576 + 32 * (padded.trailing_zeros() as u64).saturating_sub(1) * 2;
     100 + (inputs as u64) * 650 + (outputs as u64) * 72 + range_proof
+}
+
+#[cfg(test)]
+mod tx_known_live {
+    use super::*;
+
+    /// The three answers, against real nodes. Ignored by default — it needs
+    /// the network. `cargo test -p ducat-mobile -- --ignored tx_known_live`
+    ///
+    /// The mapping is the whole defence: if a node that has never heard of a
+    /// transaction came back Unreachable instead of No, the check would
+    /// silently pass everything and nobody would notice.
+    #[test]
+    #[ignore]
+    fn three_answers() {
+        const NODE: &str = "http://node.monerodevs.org:38089";
+
+        // A transaction that is really on stagenet. Without this case the
+        // test would pass just as happily if every answer were No.
+        let real = "f4aa2444fc0d2380c39add6b2f7095456ba535d47825e3bcdd8e0ff274f768f5";
+        assert_eq!(
+            monero_tx_known(NODE.into(), real.into(), 8_000),
+            TxKnown::Yes,
+            "a transaction that is on the chain must be found — if this fails the \
+             check defers every honest sale"
+        );
+
+        // A hash no chain has. Not random bytes — a value we can be sure of.
+        let absent = "0".repeat(64);
+        assert_eq!(
+            monero_tx_known(NODE.into(), absent, 8_000),
+            TxKnown::No,
+            "a node that answered about a nonexistent tx must say No, not Unreachable — \
+             mapping it to Unreachable would disable the check silently"
+        );
+
+        // Nothing is listening here.
+        assert_eq!(
+            monero_tx_known("http://127.0.0.1:1".into(), "0".repeat(64), 8_000),
+            TxKnown::Unreachable,
+            "a dead node must be Unreachable, never No — No stops honest sales"
+        );
+
+        // Not a transaction id at all.
+        assert_eq!(
+            monero_tx_known(NODE.into(), "zzzz".into(), 8_000),
+            TxKnown::No,
+        );
+    }
 }

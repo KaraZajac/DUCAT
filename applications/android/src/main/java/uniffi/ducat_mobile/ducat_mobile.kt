@@ -905,6 +905,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1027,6 +1029,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_monero_subaddress(`spendKeyHex`: RustBuffer.ByValue,`minor`: Int,`stagenet`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_tx_details(`nodeUrl`: RustBuffer.ByValue,`txHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_tx_known(`nodeUrl`: RustBuffer.ByValue,`txHashHex`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_app_call(`routeBlob`: RustBuffer.ByValue,`message`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1334,6 +1338,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_tx_details(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_tx_known(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_app_call(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_changed_keys(
@@ -1597,6 +1603,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_tx_details() != 54569.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_tx_known() != 9535.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_app_call() != 36150.toShort()) {
@@ -4794,6 +4803,55 @@ public object FfiConverterTypePassphraseStrength: FfiConverterRustBuffer<Passphr
 
 
 /**
+ * A second node's answer about one transaction.
+ *
+ * Three states, not two, and the difference is the whole point. "I asked
+ * somebody else and they have never heard of it" is a reason to stop; "I
+ * could not reach anybody else" is not, and collapsing them would either
+ * hand over goods on an unchecked payment or refuse honest ones whenever the
+ * network is poor.
+ */
+
+enum class TxKnown {
+    
+    /**
+     * This node has the transaction.
+     */
+    YES,
+    /**
+     * This node answered, and does not have it.
+     */
+    NO,
+    /**
+     * This node could not be reached, so it said nothing either way.
+     */
+    UNREACHABLE;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeTxKnown: FfiConverterRustBuffer<TxKnown> {
+    override fun read(buf: ByteBuffer) = try {
+        TxKnown.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: TxKnown) = 4UL
+
+    override fun write(value: TxKnown, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
  * Assurance that the person present may spend, weakest first.
  */
 
@@ -6347,6 +6405,31 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_tx_details(
         FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`txHashHex`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Ask one node whether it has a transaction, without trusting it for anything else.
+         *
+         * **Why a second opinion exists at all.** Blocks are fetched by height and
+         * scanned locally, and nothing in that path verifies proof-of-work or chain
+         * continuity — the client believes the node's account of the chain. A node
+         * that lies can present a block containing an output to you that was never
+         * mined, which in the selling modes means a merchant is shown a settlement
+         * and hands over the goods. Asking an independent node whether the
+         * transaction exists is cheap, and a fabricated one does not exist anywhere
+         * else.
+         *
+         * This deliberately returns only presence. Comparing amounts across nodes
+         * would mean trusting the second one's arithmetic as well, and presence is
+         * the claim that a forgery cannot satisfy.
+         */ fun `moneroTxKnown`(`nodeUrl`: kotlin.String, `txHashHex`: kotlin.String, `timeoutMs`: kotlin.UInt): TxKnown {
+            return FfiConverterTypeTxKnown.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_tx_known(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`txHashHex`),FfiConverterUInt.lower(`timeoutMs`),_status)
 }
     )
     }

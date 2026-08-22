@@ -17,6 +17,8 @@
     <string name="notify_paid_title">%1$s heeft betaald</string>
     <string name="notify_paid_body">%1$s — bon verstuurd</string>
     <string name="notify_paid_body_tip">%1$s (fooi %2$s) — bon verstuurd</string>
+    <string name="notify_unconfirmed_title">Betaling niet bevestigd</string>
+    <string name="notify_unconfirmed_body">Een andere node kent hem niet. Deze rekening blijft openstaan.</string>
     <string name="notify_arrived_title">Geld binnen</string>
     <string name="notify_arrived_body">%1$s — vrij na tien blokken</string>
     <string name="notify_escrow_setup">%1$s stelt de escrow in.</string>

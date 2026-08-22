@@ -17,6 +17,8 @@
     <string name="notify_paid_title">%1$s さんが支払いました</string>
     <string name="notify_paid_body">%1$s — 領収書を送信</string>
     <string name="notify_paid_body_tip">%1$s（チップ %2$s）— 領収書を送信</string>
+    <string name="notify_unconfirmed_title">支払いを確認できません</string>
+    <string name="notify_unconfirmed_body">他のノードに記録がありません。この伝票は未払いのままです。</string>
     <string name="notify_arrived_title">入金がありました</string>
     <string name="notify_arrived_body">%1$s — 10 ブロック後に使えます</string>
     <string name="notify_escrow_setup">%1$s がエスクローを準備しています。</string>
