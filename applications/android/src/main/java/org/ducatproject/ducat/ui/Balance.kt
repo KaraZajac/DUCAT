@@ -48,7 +48,12 @@ fun BalanceCard(
     // the qualifications, which are details and deserve a box.
     val ctx = androidx.compose.ui.platform.LocalContext.current
     val shown = org.ducatproject.ducat.Amounts.show(ctx, spendablePxmr)
-    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+    // Sixteen, the same as the cards under it. The figure is not in a box and
+    // should not be, but it still has to start where everything else on the
+    // page starts: at twenty-four it sat eight pixels right of the seven
+    // elements below it, which reads as a misalignment rather than as a
+    // choice about hierarchy.
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Spacer(Modifier.height(20.dp))
         Text(
             stringResource(R.string.balance_ready_to_spend),
