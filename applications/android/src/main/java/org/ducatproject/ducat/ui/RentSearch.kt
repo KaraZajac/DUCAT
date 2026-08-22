@@ -433,7 +433,7 @@ private fun RentSearchScreen(
                                                         context, c,
                                                         context.getString(
                                                             R.string.rent_asking_about,
-                                                            info.title,
+                                                            isolate(info.title),
                                                         ),
                                                         org.ducatproject.ducat
                                                             .PersonaStore(context).personaHex(),
@@ -638,7 +638,10 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                 // the moment the board held more than two nouns.
                 Icon(listingIcon(kind), null, Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text(info.title, style = MaterialTheme.typography.titleSmall)
+                // Off a public board, so written by whoever posted it. The
+                // wire refuses the overrides; strong right-to-left text is
+                // honest and still has to be kept inside its own line.
+                Text(isolate(info.title), style = MaterialTheme.typography.titleSmall)
             }
             Spacer(Modifier.height(4.dp))
             // Per night, per day, per hour — or, for a sale, the price with
@@ -708,7 +711,7 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
             }
             if (info.area.isNotBlank()) {
                 Text(
-                    info.area,
+                    isolate(info.area),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

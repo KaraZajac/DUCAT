@@ -223,7 +223,9 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
             Spacer(Modifier.height(8.dp))
             Field(
                 stringResource(R.string.profile_their_name_label),
-                c.assertedName ?: stringResource(R.string.profile_none_given),
+                // What they call themselves, which is to say what they typed.
+                c.assertedName?.let { isolate(it) }
+                    ?: stringResource(R.string.profile_none_given),
                 clipboard,
             )
             Field(

@@ -266,7 +266,8 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                 ) {
                     Column(Modifier.padding(16.dp)) {
                         Text(
-                            s.assertedName ?: stringResource(R.string.contacts_no_name_given),
+                            s.assertedName?.let { isolate(it) }
+                                ?: stringResource(R.string.contacts_no_name_given),
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Spacer(Modifier.height(4.dp))

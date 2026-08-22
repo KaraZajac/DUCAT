@@ -606,6 +606,12 @@ impl Reader {
                 format!("text exceeds {max_chars} characters"),
             ));
         }
+        if let Some(bad) = display_hazard(t) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                format!("text contains U+{:04X}, which reorders what is drawn around it", bad as u32),
+            ));
+        }
         Ok(Some(t.to_string()))
     }
 
@@ -618,6 +624,48 @@ impl Reader {
         }
         Ok(())
     }
+}
+
+/// The first character in `s` that has no business in a string somebody reads.
+///
+/// Every text field on the wire is written by whoever sent it, and several are
+/// drawn next to a number that matters — a listing's title above its price, a
+/// name beside an amount. Unicode's explicit bidirectional controls reorder
+/// the text around them rather than themselves, which is exactly the property
+/// an attacker wants: `202E` alone turns the rest of a line back to front, and
+/// an unterminated embedding leaks past the end of the field into whatever the
+/// app drew next.
+///
+/// Refused rather than stripped. Stripping invents a second encoding of the
+/// same string — the same objection §18.1 makes to a present-but-empty text
+/// field — and leaves two implementations disagreeing about what was said.
+///
+/// **Not** refused: LRM, RLM and ALM (`200E`, `200F`, `061C`). Those are
+/// ordinary typography in Arabic and Hebrew, they only nudge neighbouring
+/// weak characters, and refusing them would reject honest writing in the
+/// languages this most needs to work in. Isolating at draw time is the answer
+/// for those, and costs nothing.
+///
+/// Newline and tab survive: a memo is allowed to have shape.
+fn display_hazard(s: &str) -> Option<char> {
+    s.chars().find(|c| {
+        matches!(c,
+            // LRE RLE PDF LRO RLO — embeddings and overrides.
+            '\u{202A}'..='\u{202E}'
+            // LRI RLI FSI PDI — isolates. The app adds these itself at draw
+            // time; arriving inside a field they nest against that wrapping.
+            | '\u{2066}'..='\u{2069}'
+            // Deprecated but still honoured by some shapers.
+            | '\u{206A}'..='\u{206F}'
+            // C0 and DEL, less the two that are legitimate shape.
+            | '\u{0000}'..='\u{0008}'
+            | '\u{000B}'..='\u{000C}'
+            | '\u{000E}'..='\u{001F}'
+            | '\u{007F}'
+            // C1.
+            | '\u{0080}'..='\u{009F}'
+        )
+    })
 }
 
 fn enum_u8<T: Copy>(k: u64, raw: u64, table: &[(u64, T)]) -> Result<T, Reject> {
@@ -2015,5 +2063,49 @@ pub fn check_static_tag(
                 Err(Reject::new(RejectCode::BadSig))
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod hazard_tests {
+    use super::display_hazard;
+
+    #[test]
+    fn overrides_and_isolates_are_refused() {
+        // The classic: everything after this is drawn backwards, so a title
+        // can be made to read as something else entirely.
+        assert_eq!(display_hazard("Sunny room\u{202E}"), Some('\u{202E}'));
+        // An embedding with no PDF leaks past the end of the field.
+        assert_eq!(display_hazard("\u{202B}Room"), Some('\u{202B}'));
+        // Isolates: the app wraps display strings in these itself, and one
+        // arriving inside a field nests against that wrapping.
+        assert_eq!(display_hazard("a\u{2066}b"), Some('\u{2066}'));
+        assert_eq!(display_hazard("a\u{2069}b"), Some('\u{2069}'));
+        // Deprecated shaping selectors — still honoured by some shapers.
+        assert_eq!(display_hazard("a\u{206C}"), Some('\u{206C}'));
+        // Controls that a text field has no use for.
+        assert_eq!(display_hazard("a\u{0000}b"), Some('\u{0000}'));
+        assert_eq!(display_hazard("a\u{001B}[31m"), Some('\u{001B}'));
+        assert_eq!(display_hazard("a\u{007F}"), Some('\u{007F}'));
+        assert_eq!(display_hazard("a\u{0085}"), Some('\u{0085}'));
+    }
+
+    #[test]
+    fn honest_writing_survives() {
+        // The whole point of drawing the line where it is: this must not
+        // start refusing the languages it most needs to work in.
+        assert_eq!(display_hazard("Sunny room near the park"), None);
+        assert_eq!(display_hazard("غرفة مشمسة قرب الحديقة"), None);
+        assert_eq!(display_hazard("חדר שמשי ליד הפארק"), None);
+        assert_eq!(display_hazard("公園近くの日当たりの良い部屋"), None);
+        assert_eq!(display_hazard("Chambre — 25 m², 2 pers."), None);
+        assert_eq!(display_hazard("🚗 Fiat Panda"), None);
+        // LRM/RLM/ALM are ordinary typography in mixed-direction text; they
+        // only nudge neighbouring weak characters, and isolating at draw time
+        // handles those.
+        assert_eq!(display_hazard("\u{200F}غرفة 25\u{200E}"), None);
+        assert_eq!(display_hazard("\u{061C}١٢٣"), None);
+        // A memo is allowed to have shape.
+        assert_eq!(display_hazard("line one\nline two\tindented"), None);
     }
 }

@@ -3121,7 +3121,7 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
             Text(
                 // What is being booked, when we know: proposing money for an
                 // unnamed thing is how the wrong thing gets booked.
-                about?.let { stringResource(R.string.res_about, it.title) }
+                about?.let { stringResource(R.string.res_about, isolate(it.title)) }
                     ?: stringResource(R.string.res_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
