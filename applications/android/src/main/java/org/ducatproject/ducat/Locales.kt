@@ -48,6 +48,19 @@ object Languages {
 
     /** "" is the device default, shown as its own row at the top. */
     val SUPPORTED = listOf(
+        // English is a choice, not just what you get by default.
+        //
+        // It was reachable only through "follow the system", which is a
+        // different question — it means "whatever this device is set to", and
+        // the two coincide only when the device is already English. Somebody
+        // reading English on a borrowed, secondhand or work phone set to
+        // Arabic had nineteen languages to pick from and not their own. That
+        // is the failure this menu's own rule describes: a language menu you
+        // cannot use is not a menu.
+        //
+        // There is no `values-en`; English is the default `values/`, and
+        // Android resolves the tag to it.
+        Lang("en", "English"),
         Lang("es", "Español"),
         Lang("fr", "Français"),
         Lang("de", "Deutsch"),
