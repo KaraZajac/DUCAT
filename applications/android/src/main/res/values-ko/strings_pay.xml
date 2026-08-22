@@ -16,6 +16,7 @@
     <string name="pay_back">뒤로</string>
     <string name="pay_in_ducat">DUCAT에서</string>
     <string name="pay_name_shared">같은 이름의 다른 연락처가 있습니다</string>
+    <string name="pay_payto_held">기존 주소로 결제합니다 — 카드가 변경을 요청했습니다</string>
     <string name="pay_name_shared_key">%1$s… — 같은 이름의 다른 연락처가 있습니다</string>
     <string name="pay_monero_address">Monero 주소</string>
     <string name="pay_bill">계산서</string>

@@ -231,6 +231,55 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 c.theirAddress ?: stringResource(R.string.profile_not_shared),
                 clipboard,
             )
+            // A card asked to move this and was not allowed to. The decision
+            // belongs here, beside the address it would replace, and it is
+            // deliberately not a one-tap yes: the honest version of this is a
+            // contact who lost their phone, and the way to tell the two apart
+            // is to ask them — which the copy says, because nothing on this
+            // screen can tell you.
+            c.pendingAddress?.let { held ->
+                Spacer(Modifier.height(12.dp))
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(Modifier.padding(14.dp)) {
+                        Text(
+                            stringResource(R.string.profile_payto_held_title),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            stringResource(
+                                R.string.profile_payto_held_body,
+                                isolate(c.displayName()),
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            held,
+                            fontFamily = FontFamily.Monospace,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Row {
+                            TextButton(onClick = {
+                                ContactStore(context).dismissPendingAddress(c.personaHex)
+                            }) { Text(stringResource(R.string.profile_payto_held_keep)) }
+                            Spacer(Modifier.width(8.dp))
+                            TextButton(onClick = {
+                                ContactStore(context).acceptPendingAddress(c.personaHex)
+                            }) { Text(stringResource(R.string.profile_payto_held_accept)) }
+                        }
+                    }
+                }
+            }
 
             Spacer(Modifier.height(24.dp))
             Text(stringResource(R.string.profile_where_reached), style = MaterialTheme.typography.titleMedium)

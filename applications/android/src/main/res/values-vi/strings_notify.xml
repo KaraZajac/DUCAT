@@ -21,6 +21,8 @@
     <string name="notify_unconfirmed_body">Một nút khác không có bản ghi nào về nó. Hóa đơn này vẫn chưa thanh toán.</string>
     <string name="notify_unbacked_title">Chưa xác nhận được ký quỹ</string>
     <string name="notify_unbacked_body">Một nút khác không thấy số tiền này. Chưa có gì được bảo đảm.</string>
+    <string name="notify_payto_changed_title">Địa chỉ thanh toán đã thay đổi</string>
+    <string name="notify_payto_changed_body">Một thẻ cho biết %1$s cần được thanh toán ở nơi khác. Chưa có gì thay đổi cho đến khi bạn đồng ý.</string>
     <string name="notify_arrived_title">Tiền đã về</string>
     <string name="notify_arrived_body">%1$s — mở khoá sau mười khối</string>
     <string name="notify_escrow_setup">%1$s đang thiết lập ký quỹ.</string>

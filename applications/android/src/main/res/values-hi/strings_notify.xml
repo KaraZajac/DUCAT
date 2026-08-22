@@ -21,6 +21,8 @@
     <string name="notify_unconfirmed_body">किसी दूसरे नोड के पास इसका कोई रिकॉर्ड नहीं है। यह बिल बकाया रहेगा।</string>
     <string name="notify_unbacked_title">एस्क्रो की पुष्टि नहीं हुई</string>
     <string name="notify_unbacked_body">किसी दूसरे नोड को यह राशि नहीं दिख रही। अभी कुछ भी सुरक्षित नहीं है।</string>
+    <string name="notify_payto_changed_title">भुगतान पता बदल गया</string>
+    <string name="notify_payto_changed_body">एक कार्ड कहता है कि %1$s को कहीं और भुगतान किया जाए। जब तक आप स्वीकार न करें, कुछ नहीं बदलेगा।</string>
     <string name="notify_arrived_title">पैसा आया</string>
     <string name="notify_arrived_body">%1$s — दस ब्लॉक बाद खुलेगा</string>
     <string name="notify_escrow_setup">%1$s एस्क्रो सेट कर रहे हैं।</string>

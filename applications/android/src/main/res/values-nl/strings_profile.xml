@@ -20,6 +20,10 @@
     <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
     <string name="profile_none_given">— geen opgegeven —</string>
     <string name="profile_monero_address">Monero-adres</string>
+    <string name="profile_payto_held_title">Een kaart wil dit wijzigen</string>
+    <string name="profile_payto_held_body">Vraag het %1$s voordat u akkoord gaat. Tot dan gaan betalingen naar het adres hierboven.</string>
+    <string name="profile_payto_held_keep">Oude houden</string>
+    <string name="profile_payto_held_accept">Accepteren</string>
     <!-- Must keep the leading em dash: see profile_none_given. -->
     <string name="profile_not_shared">— niet gedeeld; ze moeten een verzoek sturen —</string>
     <string name="profile_where_reached">Waar ze bereikt worden</string>

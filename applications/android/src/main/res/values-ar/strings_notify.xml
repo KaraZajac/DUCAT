@@ -21,6 +21,8 @@
     <string name="notify_unconfirmed_body">لا توجد لدى عقدة أخرى أي سجل لها. تبقى هذه الفاتورة غير مدفوعة.</string>
     <string name="notify_unbacked_title">لم يتم تأكيد الضمان</string>
     <string name="notify_unbacked_body">لا ترى عقدة أخرى هذه الأموال. لم يتم تأمين أي شيء بعد.</string>
+    <string name="notify_payto_changed_title">تغيّر عنوان الدفع</string>
+    <string name="notify_payto_changed_body">تقول إحدى البطاقات إنه يجب الدفع إلى %1$s في مكان جديد. لن يتغير شيء حتى توافق.</string>
     <string name="notify_arrived_title">وصل المال</string>
     <string name="notify_arrived_body">%1$s — يُفتح بعد عشرة كتل</string>
     <string name="notify_escrow_setup">%1$s يجهّز الضمان.</string>

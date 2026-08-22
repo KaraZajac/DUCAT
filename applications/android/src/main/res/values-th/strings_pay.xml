@@ -16,6 +16,7 @@
     <string name="pay_back">กลับ</string>
     <string name="pay_in_ducat">ใน DUCAT</string>
     <string name="pay_name_shared">มีผู้ติดต่ออื่นใช้ชื่อนี้</string>
+    <string name="pay_payto_held">จ่ายไปยังที่อยู่เดิมของคุณ — มีการ์ดต้องการเปลี่ยน</string>
     <string name="pay_name_shared_key">%1$s… — มีผู้ติดต่ออื่นใช้ชื่อนี้</string>
     <string name="pay_monero_address">ที่อยู่ Monero</string>
     <string name="pay_bill">บิล</string>

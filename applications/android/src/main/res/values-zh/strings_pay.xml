@@ -16,6 +16,7 @@
     <string name="pay_back">返回</string>
     <string name="pay_in_ducat">在 DUCAT 内</string>
     <string name="pay_name_shared">另一位联系人使用了这个名字</string>
+    <string name="pay_payto_held">付往你原有的地址 — 有张名片想更改它</string>
     <string name="pay_name_shared_key">%1$s… — 另一位联系人使用了这个名字</string>
     <string name="pay_monero_address">Monero 地址</string>
     <string name="pay_bill">账单</string>

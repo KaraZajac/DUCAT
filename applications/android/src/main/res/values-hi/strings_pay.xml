@@ -16,6 +16,7 @@
     <string name="pay_back">वापस</string>
     <string name="pay_in_ducat">DUCAT में</string>
     <string name="pay_name_shared">इस नाम का एक और संपर्क है</string>
+    <string name="pay_payto_held">आपके पुराने पते पर भुगतान — एक कार्ड इसे बदलना चाहता था</string>
     <string name="pay_name_shared_key">%1$s… — इस नाम का एक और संपर्क है</string>
     <string name="pay_monero_address">Monero पता</string>
     <string name="pay_bill">बिल</string>

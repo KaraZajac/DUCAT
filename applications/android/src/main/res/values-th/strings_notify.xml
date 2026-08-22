@@ -21,6 +21,8 @@
     <string name="notify_unconfirmed_body">โหนดอื่นไม่มีบันทึกรายการนี้ บิลนี้ยังค้างชำระ</string>
     <string name="notify_unbacked_title">ยืนยันเอสโครว์ไม่ได้</string>
     <string name="notify_unbacked_body">โหนดอื่นไม่เห็นเงินจำนวนนี้ ยังไม่มีอะไรได้รับการค้ำประกัน</string>
+    <string name="notify_payto_changed_title">ที่อยู่สำหรับชำระเงินเปลี่ยนไป</string>
+    <string name="notify_payto_changed_body">การ์ดใบหนึ่งระบุว่าต้องจ่ายให้ %1$s ที่ใหม่ จะยังไม่มีอะไรเปลี่ยนจนกว่าคุณจะยืนยัน</string>
     <string name="notify_arrived_title">เงินเข้าแล้ว</string>
     <string name="notify_arrived_body">%1$s — ปลดล็อกหลังสิบบล็อก</string>
     <string name="notify_escrow_setup">%1$s กำลังตั้งค่าเอสโครว์</string>

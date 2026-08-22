@@ -21,6 +21,8 @@
     <string name="notify_unconfirmed_body">Een andere node kent hem niet. Deze rekening blijft openstaan.</string>
     <string name="notify_unbacked_title">Escrow niet bevestigd</string>
     <string name="notify_unbacked_body">Een andere node ziet het geld niet. Er is nog niets zeker.</string>
+    <string name="notify_payto_changed_title">Betaaladres gewijzigd</string>
+    <string name="notify_payto_changed_body">Een kaart zegt dat %1$s ergens anders betaald moet worden. Er verandert niets tot u akkoord gaat.</string>
     <string name="notify_arrived_title">Geld binnen</string>
     <string name="notify_arrived_body">%1$s — vrij na tien blokken</string>
     <string name="notify_escrow_setup">%1$s stelt de escrow in.</string>

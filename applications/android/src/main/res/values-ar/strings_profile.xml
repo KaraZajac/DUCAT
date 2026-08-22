@@ -20,6 +20,10 @@
     <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
     <string name="profile_none_given">— لم يُعطَ اسم —</string>
     <string name="profile_monero_address">عنوان Monero</string>
+    <string name="profile_payto_held_title">بطاقة تريد تغيير هذا</string>
+    <string name="profile_payto_held_body">اسأل %1$s قبل الموافقة. حتى ذلك الحين، تستمر المدفوعات إلى العنوان أعلاه.</string>
+    <string name="profile_payto_held_keep">الاحتفاظ بالقديم</string>
+    <string name="profile_payto_held_accept">قبول</string>
     <!-- Must keep the leading em dash: see profile_none_given. -->
     <string name="profile_not_shared">— غير مشارَك؛ عليهم إرسال طلب —</string>
     <string name="profile_where_reached">أين يُوصَل إليهم</string>

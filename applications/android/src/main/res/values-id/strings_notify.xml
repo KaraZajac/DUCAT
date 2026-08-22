@@ -21,6 +21,8 @@
     <string name="notify_unconfirmed_body">Node lain tidak punya catatannya. Tagihan ini tetap belum dibayar.</string>
     <string name="notify_unbacked_title">Escrow belum dikonfirmasi</string>
     <string name="notify_unbacked_body">Node lain tidak melihat uangnya. Belum ada yang dijamin.</string>
+    <string name="notify_payto_changed_title">Alamat pembayaran berubah</string>
+    <string name="notify_payto_changed_body">Sebuah kartu menyebut %1$s harus dibayar ke tempat baru. Tidak ada yang berubah sampai Anda setuju.</string>
     <string name="notify_arrived_title">Uang masuk</string>
     <string name="notify_arrived_body">%1$s — terbuka setelah sepuluh blok</string>
     <string name="notify_escrow_setup">%1$s sedang menyiapkan escrow.</string>

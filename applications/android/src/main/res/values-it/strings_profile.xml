@@ -20,6 +20,10 @@
     <!-- Deve conservare il trattino lungo iniziale: la UI tratta un "—" iniziale come "nessun valore reale" (nasconde il pulsante Copia). -->
     <string name="profile_none_given">— non indicato —</string>
     <string name="profile_monero_address">Indirizzo Monero</string>
+    <string name="profile_payto_held_title">Una tessera vuole cambiarlo</string>
+    <string name="profile_payto_held_body">Chiedi a %1$s prima di accettare. Fino ad allora i pagamenti continuano verso l\'indirizzo qui sopra.</string>
+    <string name="profile_payto_held_keep">Tieni il vecchio</string>
+    <string name="profile_payto_held_accept">Accetta</string>
     <!-- Deve conservare il trattino lungo iniziale: vedi profile_none_given. -->
     <string name="profile_not_shared">— non condiviso; devono inviare una richiesta —</string>
     <string name="profile_where_reached">Dove si raggiungono</string>

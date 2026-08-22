@@ -16,6 +16,7 @@
     <string name="pay_back">Назад</string>
     <string name="pay_in_ducat">у DUCAT</string>
     <string name="pay_name_shared">Інший контакт має це саме ім\'я</string>
+    <string name="pay_payto_held">Платіж на попередню адресу — картка хотіла її змінити</string>
     <string name="pay_name_shared_key">%1$s… — інший контакт має це саме ім\'я</string>
     <string name="pay_monero_address">Адреса Monero</string>
     <string name="pay_bill">Рахунок</string>

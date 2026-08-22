@@ -21,6 +21,8 @@
     <string name="notify_unconfirmed_body">他のノードに記録がありません。この伝票は未払いのままです。</string>
     <string name="notify_unbacked_title">エスクローを確認できません</string>
     <string name="notify_unbacked_body">他のノードにこの資金が見えません。まだ何も保証されていません。</string>
+    <string name="notify_payto_changed_title">支払い先が変わりました</string>
+    <string name="notify_payto_changed_body">カードによると %1$s の支払い先が変わっています。承認するまで何も変わりません。</string>
     <string name="notify_arrived_title">入金がありました</string>
     <string name="notify_arrived_body">%1$s — 10 ブロック後に使えます</string>
     <string name="notify_escrow_setup">%1$s がエスクローを準備しています。</string>

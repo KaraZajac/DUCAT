@@ -16,6 +16,7 @@
     <string name="pay_back">Kembali</string>
     <string name="pay_in_ducat">di DUCAT</string>
     <string name="pay_name_shared">Kontak lain memakai nama ini</string>
+    <string name="pay_payto_held">Membayar ke alamat lama — sebuah kartu ingin mengubahnya</string>
     <string name="pay_name_shared_key">%1$s… — kontak lain memakai nama ini</string>
     <string name="pay_monero_address">Alamat Monero</string>
     <string name="pay_bill">Tagihan</string>

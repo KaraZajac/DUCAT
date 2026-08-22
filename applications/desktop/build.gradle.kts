@@ -324,6 +324,14 @@ tasks.register<JavaExec>("smoke") {
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
 // Proves the escrow sweep takes what is over and leaves what is funded.
 // `./gradlew :desktop:escrowsweep`.
+// What an unsigned card may do to a contact's payment address: establish one,
+// confirm one, but never replace one. `./gradlew :desktop:cardaddress`.
+tasks.register<JavaExec>("cardaddress") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.CardAddressTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Two contacts a person cannot tell apart: the confusable-name fold and the
 // store query that drives the warning. `./gradlew :desktop:confusable`.
 tasks.register<JavaExec>("confusable") {

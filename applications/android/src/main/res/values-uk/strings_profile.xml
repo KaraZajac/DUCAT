@@ -20,6 +20,10 @@
     <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
     <string name="profile_none_given">— не вказано —</string>
     <string name="profile_monero_address">Адреса Monero</string>
+    <string name="profile_payto_held_title">Картка хоче це змінити</string>
+    <string name="profile_payto_held_body">Запитайте %1$s, перш ніж погоджуватися. До того платежі йдуть на адресу вище.</string>
+    <string name="profile_payto_held_keep">Лишити стару</string>
+    <string name="profile_payto_held_accept">Прийняти</string>
     <!-- Must keep the leading em dash: see profile_none_given. -->
     <string name="profile_not_shared">— не поділилися; вони мають надіслати запит —</string>
     <string name="profile_where_reached">Де їх шукати</string>

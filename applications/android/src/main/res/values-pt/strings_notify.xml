@@ -21,6 +21,8 @@
     <string name="notify_unconfirmed_body">Outro nó não tem registro dele. Esta conta continua sem ser paga.</string>
     <string name="notify_unbacked_title">Custódia não confirmada</string>
     <string name="notify_unbacked_body">Outro nó não vê o dinheiro. Ainda não há nada garantido.</string>
+    <string name="notify_payto_changed_title">Endereço de pagamento mudou</string>
+    <string name="notify_payto_changed_body">Um cartão diz que %1$s deve ser pago em outro lugar. Nada muda até você aprovar.</string>
     <string name="notify_arrived_title">Dinheiro chegou</string>
     <string name="notify_arrived_body">%1$s — desbloqueia após dez blocos</string>
     <string name="notify_escrow_setup">%1$s está a preparar o depósito em garantia.</string>

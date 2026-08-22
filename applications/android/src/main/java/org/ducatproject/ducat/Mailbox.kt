@@ -286,6 +286,9 @@ object Mailbox {
         // card names a different one, which is exactly the test below.
         val prior = store.all().firstOrNull { it.personaHex == theirs.persona.toHexString() }
         val sameLog = prior != null && prior.theirOutbox == theirs.outboxKey
+        // A card carries a persona and nothing signed over it, so it may not
+        // move an address that is already working. See foldCardAddress.
+        val (payto, heldPayto) = foldCardAddress(prior, theirs.payto)
 
         val c = Contact(
             personaHex = theirs.persona.toHexString(),
@@ -300,7 +303,8 @@ object Mailbox {
             myOutboxOwnerSecret = outbox.ownerSecret,
             theirOutbox = theirs.outboxKey,
             theirBundle = theirs.prekeyBundle,
-            theirAddress = theirs.payto,
+            theirAddress = payto,
+            pendingAddress = heldPayto,
             avatar = theirs.profile.avatar,
             email = theirs.profile.email,
             phone = theirs.profile.phone,
@@ -312,6 +316,9 @@ object Mailbox {
             myRing = NEW_RING.toInt(),
         )
         store.add(c)
+        if (heldPayto != null && heldPayto != prior?.pendingAddress) {
+            warnAddressHeld(context, c)
+        }
         DucatLog.i(TAG, "claimed: their outbox=${theirs.outboxKey.take(24)}…")
         return c
     }
@@ -341,6 +348,7 @@ object Mailbox {
                 val prior = store.all().firstOrNull { it.personaHex == personaHex }
                 val sameOurs = prior != null && prior.myOutbox == issued.outboxKey
                 val sameTheirs = prior != null && prior.theirOutbox == theirs.outboxKey
+                val (payto, heldPayto) = foldCardAddress(prior, theirs.payto)
                 store.add(
                     Contact(
                         personaHex = personaHex,
@@ -355,7 +363,8 @@ object Mailbox {
                         myOutboxOwnerSecret = issued.outboxOwnerSecret,
                         theirOutbox = theirs.outboxKey,
                         theirBundle = theirs.prekeyBundle,
-                        theirAddress = theirs.payto,
+                        theirAddress = payto,
+                        pendingAddress = heldPayto,
                         avatar = theirs.profile.avatar,
                         email = theirs.profile.email,
                         phone = theirs.profile.phone,
@@ -367,6 +376,14 @@ object Mailbox {
                         myRing = NEW_RING.toInt(),
                     )
                 )
+                if (heldPayto != null && heldPayto != prior?.pendingAddress) {
+                    // firstOrNull, not first: all() drops contacts with no
+                    // outbox on either side, and this record was written from
+                    // whatever the card carried. Losing the notice beats
+                    // throwing out of a card that was otherwise collected.
+                    store.all().firstOrNull { it.personaHex == personaHex }
+                        ?.let { warnAddressHeld(context, it) }
+                }
                 store.markCardAnswered(issued.inboxKey, personaHex)
                 WalletStore(context).adoptMinor("card_${issued.inboxKey}", personaHex)
                 collected++
@@ -1141,6 +1158,25 @@ object Mailbox {
         }
         return count
     }
+}
+
+/**
+ * Somebody handed us a card that wants to be paid somewhere new.
+ *
+ * Worth waking a phone for. Every other consequence of a card is additive — a
+ * new contact, a fresher avatar — and this one is the single field where being
+ * wrong costs money. The notification does not say who is at fault, because
+ * the honest case is real: a contact who lost their phone comes back on a new
+ * card with a new wallet, and their old thread is dead so §16.12's rotation
+ * has nowhere to ride.
+ */
+private fun warnAddressHeld(context: Context, c: Contact) {
+    DucatLog.w(TAG, "${c.personaHex.take(12)}… card wants a different payment address — holding")
+    Notify.post(
+        context,
+        context.getString(R.string.notify_payto_changed_title),
+        context.getString(R.string.notify_payto_changed_body, c.displayName()),
+    )
 }
 
 fun ByteArray.toHexString(): String = joinToString("") { "%02x".format(it) }

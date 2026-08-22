@@ -20,6 +20,10 @@
     <!-- Precisa manter o travessão inicial: a interface trata um "—" inicial como "sem valor real" (esconde o botão Copiar). -->
     <string name="profile_none_given">— nenhum informado —</string>
     <string name="profile_monero_address">Endereço Monero</string>
+    <string name="profile_payto_held_title">Um cartão quer mudar isto</string>
+    <string name="profile_payto_held_body">Pergunte a %1$s antes de aceitar. Até lá, os pagamentos continuam indo para o endereço acima.</string>
+    <string name="profile_payto_held_keep">Manter o antigo</string>
+    <string name="profile_payto_held_accept">Aceitar</string>
     <!-- Precisa manter o travessão inicial: ver profile_none_given. -->
     <string name="profile_not_shared">— não compartilhado; a pessoa precisa enviar um pedido —</string>
     <string name="profile_where_reached">Onde a pessoa é alcançada</string>

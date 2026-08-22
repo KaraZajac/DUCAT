@@ -21,6 +21,8 @@
     <string name="notify_unconfirmed_body">На другом узле его нет. Этот счёт остаётся неоплаченным.</string>
     <string name="notify_unbacked_title">Депозит не подтверждён</string>
     <string name="notify_unbacked_body">Другой узел не видит эти деньги. Пока ничего не обеспечено.</string>
+    <string name="notify_payto_changed_title">Адрес для оплаты изменился</string>
+    <string name="notify_payto_changed_body">Карточка сообщает, что %1$s теперь платят по другому адресу. Пока вы не подтвердите, ничего не изменится.</string>
     <string name="notify_arrived_title">Деньги пришли</string>
     <string name="notify_arrived_body">%1$s — разблокируется через десять блоков</string>
     <string name="notify_escrow_setup">%1$s настраивает эскроу.</string>

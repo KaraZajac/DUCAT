@@ -455,23 +455,35 @@ private fun AmountStep(
                     val shared = remember(target.contact.personaHex, version) {
                         target.contact.personaHex in ContactStore(context).ambiguous()
                     }
+                    // A card tried to move where this contact gets paid and
+                    // was held. Said here as well as on their profile, because
+                    // this is the screen with the amount on it — and it wins
+                    // the slot over a shared name, which costs a mis-tap where
+                    // this costs the payment.
+                    val held = target.contact.pendingAddress != null
                     Column {
                         Text(target.contact.displayName(),
                              style = MaterialTheme.typography.titleMedium)
-                        if (shared) {
-                            Text(
-                                stringResource(R.string.pay_name_shared),
+                        when {
+                            held -> Text(
+                                stringResource(R.string.pay_payto_held),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.error,
                             )
-                            Text(
-                                target.contact.personaHex.take(24).chunked(4).joinToString(" "),
-                                fontFamily = FontFamily.Monospace,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.outline,
-                            )
-                        } else {
-                            Text(
+                            shared -> {
+                                Text(
+                                    stringResource(R.string.pay_name_shared),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                                Text(
+                                    target.contact.personaHex.take(24).chunked(4).joinToString(" "),
+                                    fontFamily = FontFamily.Monospace,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.outline,
+                                )
+                            }
+                            else -> Text(
                                 stringResource(R.string.pay_in_ducat),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.outline,

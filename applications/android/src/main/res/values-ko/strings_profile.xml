@@ -20,6 +20,10 @@
     <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
     <string name="profile_none_given">— 없음 —</string>
     <string name="profile_monero_address">Monero 주소</string>
+    <string name="profile_payto_held_title">카드가 이것을 바꾸려 합니다</string>
+    <string name="profile_payto_held_body">승인하기 전에 %1$s에게 확인하세요. 그때까지 결제는 위 주소로 갑니다.</string>
+    <string name="profile_payto_held_keep">이전 주소 유지</string>
+    <string name="profile_payto_held_accept">승인</string>
     <!-- Must keep the leading em dash: see profile_none_given. -->
     <string name="profile_not_shared">— 공유 안 함; 상대가 요청을 보내야 해요 —</string>
     <string name="profile_where_reached">연락이 닿는 곳</string>

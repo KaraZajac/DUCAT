@@ -20,6 +20,10 @@
     <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
     <string name="profile_none_given">— 未入力 —</string>
     <string name="profile_monero_address">Moneroアドレス</string>
+    <string name="profile_payto_held_title">カードがこれを変更しようとしています</string>
+    <string name="profile_payto_held_body">承認する前に %1$s に確認してください。それまで支払いは上の宛先に届きます。</string>
+    <string name="profile_payto_held_keep">元のままにする</string>
+    <string name="profile_payto_held_accept">承認</string>
     <!-- Must keep the leading em dash: see profile_none_given. -->
     <string name="profile_not_shared">— 未共有。相手からの請求が必要です —</string>
     <string name="profile_where_reached">連絡経路</string>

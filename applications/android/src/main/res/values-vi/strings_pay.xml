@@ -16,6 +16,7 @@
     <string name="pay_back">Quay lại</string>
     <string name="pay_in_ducat">trong DUCAT</string>
     <string name="pay_name_shared">Một liên hệ khác cũng có tên này</string>
+    <string name="pay_payto_held">Thanh toán tới địa chỉ bạn đã có — một thẻ muốn đổi nó</string>
     <string name="pay_name_shared_key">%1$s… — một liên hệ khác cũng có tên này</string>
     <string name="pay_monero_address">Địa chỉ Monero</string>
     <string name="pay_bill">Hóa đơn</string>

@@ -21,6 +21,8 @@
     <string name="notify_unconfirmed_body">Başka bir düğümde kaydı yok. Bu hesap ödenmemiş kalıyor.</string>
     <string name="notify_unbacked_title">Emanet doğrulanamadı</string>
     <string name="notify_unbacked_body">Başka bir düğüm bu parayı görmüyor. Henüz hiçbir şey güvenceye alınmadı.</string>
+    <string name="notify_payto_changed_title">Ödeme adresi değişti</string>
+    <string name="notify_payto_changed_body">Bir kart, %1$s kişisine başka bir adrese ödeme yapılması gerektiğini söylüyor. Siz onaylayana kadar hiçbir şey değişmez.</string>
     <string name="notify_arrived_title">Para geldi</string>
     <string name="notify_arrived_body">%1$s — on blok sonra çözülür</string>
     <string name="notify_escrow_setup">%1$s emaneti hazırlıyor.</string>

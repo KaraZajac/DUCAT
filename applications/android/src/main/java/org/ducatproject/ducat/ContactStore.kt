@@ -269,6 +269,27 @@ class ContactStore(context: Context) {
         bump()
     } }
 
+    /**
+     * Accept an address a card wanted to install — the user has said yes.
+     */
+    fun acceptPendingAddress(personaHex: String) { synchronized(lock) {
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return@synchronized
+        val fresh = c.pendingAddress ?: return@synchronized
+        save(all().filterNot { it.personaHex == personaHex } +
+            c.copy(theirAddress = fresh, pendingAddress = null))
+        DucatLog.i("Contacts", "${personaHex.take(12)}… address change accepted")
+        bump()
+    } }
+
+    /** Refuse it. The address that was already working keeps working. */
+    fun dismissPendingAddress(personaHex: String) { synchronized(lock) {
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return@synchronized
+        if (c.pendingAddress == null) return@synchronized
+        save(all().filterNot { it.personaHex == personaHex } + c.copy(pendingAddress = null))
+        DucatLog.i("Contacts", "${personaHex.take(12)}… address change dismissed")
+        bump()
+    } }
+
     /** Take a fresher address for a contact, from details or a request. */
     fun setTheirAddress(personaHex: String, address: String?) {
         if (address.isNullOrBlank()) return
@@ -1107,6 +1128,23 @@ data class Contact(
      */
     val theirAddress: String? = null,
     /**
+     * An address that arrived on a card claiming to replace [theirAddress],
+     * and has not been accepted.
+     *
+     * §16.12's rotation rides an opened message, so it is proof: only the
+     * holder of their ratchet keys can produce one. A card is not proof of
+     * anything — the details written to a card's inbox carry a persona but no
+     * signature over it, so a card that names an existing contact and a
+     * different payto is a payment redirect that costs an attacker one QR.
+     *
+     * A card still has to be able to *re-establish* a contact — somebody who
+     * lost their phone and restored a backup has a new outbox and possibly a
+     * new address, and the thread they would rotate over is dead. So the
+     * address is not refused, only held: payments keep going where they were
+     * going, and the person is asked.
+     */
+    val pendingAddress: String? = null,
+    /**
      * What they published about themselves (§16.9).
      *
      * Their claim, not a finding — nothing here is verified by anything. A
@@ -1170,6 +1208,7 @@ data class Contact(
         put("their_outbox", theirOutbox)
         put("their_bundle", theirBundle?.let { b64(it) } ?: JSONObject.NULL)
         put("their_address", theirAddress ?: JSONObject.NULL)
+        put("pending_address", pendingAddress ?: JSONObject.NULL)
         put("avatar", avatar?.let { Base64.encodeToString(it, Base64.NO_WRAP) } ?: JSONObject.NULL)
         put("email", email ?: JSONObject.NULL)
         put("phone", phone ?: JSONObject.NULL)
@@ -1208,6 +1247,7 @@ data class Contact(
             theirOutbox = o.optString("their_outbox", ""),
             theirBundle = o.optStringOrNull("their_bundle")?.let { unb64(it) },
             theirAddress = o.optStringOrNull("their_address"),
+            pendingAddress = o.optStringOrNull("pending_address"),
             outSeq = o.optLong("out_seq"),
             outPrevLink = o.optStringOrNull("out_prev")?.let { unb64(it) },
             inSeq = o.optLong("in_seq"),
@@ -1415,6 +1455,32 @@ private fun unb64(s: String): ByteArray = Base64.decode(s, Base64.NO_WRAP)
  * the first screen draws, and Android recreates the activity on a language
  * change, so it follows the chosen language without anything watching for it.
  */
+/**
+ * What an incoming card is allowed to do to a contact's payment address.
+ *
+ * Returns the address to keep using, and the one to hold for the user.
+ *
+ * The asymmetry is the point. §16.12's rotation arrives on an opened message,
+ * which only the holder of their ratchet keys can produce, so it is applied
+ * without asking. A card's details carry a persona and no signature over it —
+ * whoever can write the card's inbox can claim to be anybody — so a card may
+ * *establish* an address for somebody new and may *confirm* the one already
+ * held, but replacing one is a decision for the person whose money it is.
+ */
+fun foldCardAddress(prior: Contact?, incoming: String?): Pair<String?, String?> = when {
+    // Nobody by this persona yet, or nothing to protect: take it. This is the
+    // ordinary case — a card is how most contacts get an address at all.
+    prior == null || prior.theirAddress.isNullOrBlank() -> incoming to null
+    // The card said nothing about payment. Leave everything as it was,
+    // including a hold that is still waiting on an answer.
+    incoming.isNullOrBlank() -> prior.theirAddress to prior.pendingAddress
+    // It agrees with what we hold, which also settles any outstanding hold:
+    // a second card saying the old address is the contact disowning the new.
+    incoming == prior.theirAddress -> prior.theirAddress to null
+    // A replacement. Keep paying where payments were going, and ask.
+    else -> prior.theirAddress to incoming
+}
+
 object ContactNaming {
     @Volatile
     var unnamed: String = "Unnamed contact"

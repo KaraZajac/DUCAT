@@ -20,6 +20,10 @@
     <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
     <string name="profile_none_given">— 没有留 —</string>
     <string name="profile_monero_address">Monero 地址</string>
+    <string name="profile_payto_held_title">有张名片想更改此项</string>
+    <string name="profile_payto_held_body">接受前请先向 %1$s 确认。在此之前，付款仍会发往上方的地址。</string>
+    <string name="profile_payto_held_keep">保留原地址</string>
+    <string name="profile_payto_held_accept">接受</string>
     <!-- Must keep the leading em dash: see profile_none_given. -->
     <string name="profile_not_shared">— 未分享；对方必须发送请求 —</string>
     <string name="profile_where_reached">对方在哪里被联系到</string>

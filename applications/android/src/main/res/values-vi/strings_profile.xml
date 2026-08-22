@@ -20,6 +20,10 @@
     <!-- Must keep the leading em dash: the UI treats a leading "—" as "no real value" (hides the Copy button). -->
     <string name="profile_none_given">— không ghi —</string>
     <string name="profile_monero_address">Địa chỉ Monero</string>
+    <string name="profile_payto_held_title">Một thẻ muốn thay đổi mục này</string>
+    <string name="profile_payto_held_body">Hãy hỏi %1$s trước khi đồng ý. Cho đến lúc đó, thanh toán vẫn đi tới địa chỉ ở trên.</string>
+    <string name="profile_payto_held_keep">Giữ địa chỉ cũ</string>
+    <string name="profile_payto_held_accept">Đồng ý</string>
     <!-- Must keep the leading em dash: see profile_none_given. -->
     <string name="profile_not_shared">— chưa chia sẻ; họ phải gửi yêu cầu —</string>
     <string name="profile_where_reached">Nơi liên hệ họ</string>

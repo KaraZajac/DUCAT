@@ -16,6 +16,7 @@
     <string name="pay_back">Geri</string>
     <string name="pay_in_ducat">DUCAT\'ta</string>
     <string name="pay_name_shared">Başka bir kişi de bu adı taşıyor</string>
+    <string name="pay_payto_held">Zaten sahip olduğunuz adrese ödeniyor — bir kart bunu değiştirmek istedi</string>
     <string name="pay_name_shared_key">%1$s… — başka bir kişi de bu adı taşıyor</string>
     <string name="pay_monero_address">Monero adresi</string>
     <string name="pay_bill">Hesap</string>
