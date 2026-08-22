@@ -56,10 +56,7 @@ object DucatLog {
         file = f
         // Reload the tail, so a restart — crash or otherwise — keeps history.
         runCatching {
-            if (f.length() > FILE_CAP_BYTES) {
-                val tail = f.readBytes().let { it.copyOfRange(it.size - FILE_CAP_BYTES / 2, it.size) }
-                f.writeBytes(tail)
-            }
+            trimFile(f)
             f.readLines().takeLast(CAP).forEach { line ->
                 parseLine(line)?.let {
                     if (lines.size >= CAP) lines.removeFirst()
@@ -115,6 +112,40 @@ object DucatLog {
     fun e(tag: String, msg: String) = add(Level.Error, tag, msg)
 
     @Synchronized
+    /**
+     * Cut the file back to half the cap, keeping the newest half.
+     *
+     * Halving rather than trimming to the line: the point is to do this rarely,
+     * and a trim that leaves the file at the cap does it again on the next
+     * write, for ever. The first line of what survives is usually a fragment,
+     * which parseLine drops.
+     */
+    private fun trimFile(f: java.io.File) {
+        if (f.length() <= FILE_CAP_BYTES) return
+        runCatching {
+            val tail = f.readBytes().let { it.copyOfRange(it.size - FILE_CAP_BYTES / 2, it.size) }
+            f.writeBytes(tail)
+        }
+    }
+
+    /**
+     * Bytes appended since the file was last cut back.
+     *
+     * The cap used to be applied at [init] and nowhere else, which is fine for
+     * an app that gets restarted and wrong for this one: DUCAT holds a
+     * foreground service open for as long as the phone is on, so a device left
+     * running for a month never re-inits and the file "small enough to share"
+     * grows without a ceiling. The transport genuinely flaps between
+     * AttachedStrong and AttachedFull, which is a line every half-minute
+     * before anything else is written at all.
+     *
+     * Counted rather than stat'd, because add() is on the path of every log
+     * line and a length() syscall per line is a poor trade for a check that
+     * matters once every few thousand.
+     */
+    private var sinceTrim = 0L
+
+    @Synchronized
     private fun add(level: Level, tag: String, msg: String) {
         val clean = redact(msg)
         // Still to logcat, so a developer with a cable is not worse off.
@@ -130,10 +161,16 @@ object DucatLog {
         // must be on disk before the process is gone. One short line per event
         // keeps this cheap enough not to matter.
         runCatching {
-            file?.appendText(
-                "${entry.at}|${entry.level.name.first()}|${entry.tag}|" +
-                    entry.message.replace("\n", "\\u000A") + "\n"
-            )
+            val line = "${entry.at}|${entry.level.name.first()}|${entry.tag}|" +
+                entry.message.replace("\n", "\\u000A") + "\n"
+            file?.let { f ->
+                f.appendText(line)
+                sinceTrim += line.length
+                if (sinceTrim > FILE_CAP_BYTES / 4) {
+                    trimFile(f)
+                    sinceTrim = 0
+                }
+            }
         }
         _changes.value = _changes.value + 1
     }
@@ -144,6 +181,7 @@ object DucatLog {
     @Synchronized
     fun clear() {
         lines.clear()
+        sinceTrim = 0
         runCatching { file?.writeText("") }
         _changes.value = _changes.value + 1
     }
