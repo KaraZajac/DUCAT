@@ -2098,7 +2098,14 @@ data class BackupInput (
     /**
      * Same-client continuity (threads, tabs); opaque, no interop promise.
      */
-    var `appState`: kotlin.ByteArray?
+    var `appState`: kotlin.ByteArray?, 
+    /**
+     * §4.3.3's open escrows. The one part of a bundle with a freshness
+     * requirement, and the one whose absence costs money rather than
+     * convenience: on the two-party rung a lost share is an escrow that can
+     * never be released, by anyone, ever.
+     */
+    var `escrowShares`: List<EscrowShareEntry>
 ) {
     
     companion object
@@ -2120,6 +2127,7 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterSequenceTypePrekeyEntry.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
+            FfiConverterSequenceTypeEscrowShareEntry.read(buf),
         )
     }
 
@@ -2133,7 +2141,8 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterOptionalByteArray.allocationSize(value.`prekeySignedSecret`) +
             FfiConverterSequenceTypePrekeyEntry.allocationSize(value.`prekeyOneTime`) +
             FfiConverterULong.allocationSize(value.`prekeyNextId`) +
-            FfiConverterOptionalByteArray.allocationSize(value.`appState`)
+            FfiConverterOptionalByteArray.allocationSize(value.`appState`) +
+            FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`)
     )
 
     override fun write(value: BackupInput, buf: ByteBuffer) {
@@ -2147,6 +2156,7 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterSequenceTypePrekeyEntry.write(value.`prekeyOneTime`, buf)
             FfiConverterULong.write(value.`prekeyNextId`, buf)
             FfiConverterOptionalByteArray.write(value.`appState`, buf)
+            FfiConverterSequenceTypeEscrowShareEntry.write(value.`escrowShares`, buf)
     }
 }
 
@@ -2308,6 +2318,55 @@ public object FfiConverterTypeDhtRecord: FfiConverterRustBuffer<DhtRecord> {
             FfiConverterByteArray.write(value.`ownerPublic`, buf)
             FfiConverterByteArray.write(value.`ownerSecret`, buf)
             FfiConverterUInt.write(value.`subkeyCount`, buf)
+    }
+}
+
+
+
+/**
+ * One open escrow's membership, across the bridge (§4.3.3).
+ *
+ * `share` is this client's whole ceremony record — the FROST key package and
+ * the state around it that says which escrow it belongs to and how far it
+ * got. Opaque by design, exactly as the core field describes: another client
+ * implementing the same protocol restores its own shape from its own export,
+ * and nothing here promises interop on the bytes.
+ *
+ * The height is the same asymmetry as the wallet's, for the same reason: a
+ * restored share that starts scanning after the funding transaction reports an
+ * empty escrow, which looks identical to one that was never funded.
+ */
+data class EscrowShareEntry (
+    var `escrowId`: kotlin.ByteArray, 
+    var `share`: kotlin.ByteArray, 
+    var `restoreHeight`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeEscrowShareEntry: FfiConverterRustBuffer<EscrowShareEntry> {
+    override fun read(buf: ByteBuffer): EscrowShareEntry {
+        return EscrowShareEntry(
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: EscrowShareEntry) = (
+            FfiConverterByteArray.allocationSize(value.`escrowId`) +
+            FfiConverterByteArray.allocationSize(value.`share`) +
+            FfiConverterULong.allocationSize(value.`restoreHeight`)
+    )
+
+    override fun write(value: EscrowShareEntry, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`escrowId`, buf)
+            FfiConverterByteArray.write(value.`share`, buf)
+            FfiConverterULong.write(value.`restoreHeight`, buf)
     }
 }
 
@@ -3720,7 +3779,12 @@ data class RestoredBackup (
     /**
      * Escrow shares carried in the bundle (§4.3.3). Zero is the normal case.
      */
-    var `escrowCount`: kotlin.UInt
+    var `escrowCount`: kotlin.UInt, 
+    /**
+     * The shares themselves. This used to be the count alone, which told a
+     * restoring device how much it had just failed to restore.
+     */
+    var `escrowShares`: List<EscrowShareEntry>
 ) {
     
     companion object
@@ -3744,6 +3808,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterUInt.read(buf),
+            FfiConverterSequenceTypeEscrowShareEntry.read(buf),
         )
     }
 
@@ -3759,7 +3824,8 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterSequenceTypePrekeyEntry.allocationSize(value.`prekeyOneTime`) +
             FfiConverterULong.allocationSize(value.`prekeyNextId`) +
             FfiConverterOptionalByteArray.allocationSize(value.`appState`) +
-            FfiConverterUInt.allocationSize(value.`escrowCount`)
+            FfiConverterUInt.allocationSize(value.`escrowCount`) +
+            FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`)
     )
 
     override fun write(value: RestoredBackup, buf: ByteBuffer) {
@@ -3775,6 +3841,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterULong.write(value.`prekeyNextId`, buf)
             FfiConverterOptionalByteArray.write(value.`appState`, buf)
             FfiConverterUInt.write(value.`escrowCount`, buf)
+            FfiConverterSequenceTypeEscrowShareEntry.write(value.`escrowShares`, buf)
     }
 }
 
@@ -5132,6 +5199,34 @@ public object FfiConverterSequenceTypeContactBackup: FfiConverterRustBuffer<List
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypeContactBackup.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeEscrowShareEntry: FfiConverterRustBuffer<List<EscrowShareEntry>> {
+    override fun read(buf: ByteBuffer): List<EscrowShareEntry> {
+        val len = buf.getInt()
+        return List<EscrowShareEntry>(len) {
+            FfiConverterTypeEscrowShareEntry.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<EscrowShareEntry>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeEscrowShareEntry.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<EscrowShareEntry>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeEscrowShareEntry.write(it, buf)
         }
     }
 }

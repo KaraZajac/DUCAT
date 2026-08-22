@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.Ceremony
 import org.ducatproject.ducat.NameStore
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.WalletStore
@@ -127,6 +128,12 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                                             ContactStore(context).backupPrekeys().second,
                                             ContactStore(context).backupPrekeys().third.toULong(),
                                             ContactStore(context).backupAppState(),
+                                            // §4.3.3, and the reason this screen
+                                            // talks about freshness. They live in
+                                            // their own store, which is how they
+                                            // came to be left out of the one this
+                                            // is assembled from.
+                                            Ceremony.backupShares(context),
                                         ),
                                         passphrase,
                                         personaSecret!!,
@@ -281,6 +288,11 @@ internal fun applyBackup(
     // outgoing message. A phone restored after a loss receives first — someone
     // checking they are back — so the wait is exactly the wrong way round.
     ContactStore(context).setBundlesNeedRepublish(true)
+    // §4.3.3's escrows, before the wallet — an open escrow is money that needs
+    // two signatures to move, and on the two-party rung this share is one of
+    // exactly two in existence. Nothing else in a bundle is unrecoverable by
+    // the people still holding their own copies; this is.
+    Ceremony.restoreShares(context, r.escrowShares)
     // The money. The bundle carries the spend key and the height that key was
     // born at; before this, the import applied the contacts and dropped the
     // wallet on the floor.

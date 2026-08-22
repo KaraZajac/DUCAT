@@ -410,6 +410,11 @@ pub struct BackupInput {
     pub prekey_next_id: u64,
     /// Same-client continuity (threads, tabs); opaque, no interop promise.
     pub app_state: Option<Vec<u8>>,
+    /// §4.3.3's open escrows. The one part of a bundle with a freshness
+    /// requirement, and the one whose absence costs money rather than
+    /// convenience: on the two-party rung a lost share is an escrow that can
+    /// never be released, by anyone, ever.
+    pub escrow_shares: Vec<EscrowShareEntry>,
 }
 
 /// One relationship, across the bridge.
@@ -434,6 +439,24 @@ pub struct ContactBackup {
 pub struct PrekeyEntry {
     pub id: u64,
     pub secret: Vec<u8>,
+}
+
+/// One open escrow's membership, across the bridge (§4.3.3).
+///
+/// `share` is this client's whole ceremony record — the FROST key package and
+/// the state around it that says which escrow it belongs to and how far it
+/// got. Opaque by design, exactly as the core field describes: another client
+/// implementing the same protocol restores its own shape from its own export,
+/// and nothing here promises interop on the bytes.
+///
+/// The height is the same asymmetry as the wallet's, for the same reason: a
+/// restored share that starts scanning after the funding transaction reports an
+/// empty escrow, which looks identical to one that was never funded.
+#[derive(uniffi::Record, Clone)]
+pub struct EscrowShareEntry {
+    pub escrow_id: Vec<u8>,
+    pub share: Vec<u8>,
+    pub restore_height: u64,
 }
 
 fn contact_to_core(c: &ContactBackup) -> ducat_core::backup::BackupContact {
@@ -541,7 +564,21 @@ pub fn export_backup(
         attestation_records: vec![],
         mandates: vec![],
         verification: ducat_core::verify::VerificationPolicy::default(),
-        escrow_shares: vec![],
+        // §4.3.3, and the reason the backup screen talks about freshness at
+        // all. This was `vec![]` while the screen said an escrow needs a newer
+        // bundle — so the screen was asking people to re-export for something
+        // the export then threw away. On the three-party rung the other two
+        // can still release without the lost share; on the two-party rung
+        // nobody can, and the deposit is gone for good.
+        escrow_shares: input
+            .escrow_shares
+            .iter()
+            .map(|e| ducat_core::backup::EscrowShare {
+                escrow_id: e.escrow_id.clone(),
+                key_file: e.share.clone(),
+                restore_height: e.restore_height,
+            })
+            .collect(),
         // Carried through from the caller: these are the user's own settings,
         // and a backup that quietly drops them restores a persona that has
         // forgotten its name and its mind about being paid.
@@ -735,6 +772,9 @@ pub struct RestoredBackup {
     pub app_state: Option<Vec<u8>>,
     /// Escrow shares carried in the bundle (§4.3.3). Zero is the normal case.
     pub escrow_count: u32,
+    /// The shares themselves. This used to be the count alone, which told a
+    /// restoring device how much it had just failed to restore.
+    pub escrow_shares: Vec<EscrowShareEntry>,
 }
 
 /// Open a bundle.
@@ -774,6 +814,15 @@ pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup
         restore_height: b.monero_restore_height,
         persona_secret: b.persona_secret,
         escrow_count: b.escrow_shares.len() as u32,
+        escrow_shares: b
+            .escrow_shares
+            .iter()
+            .map(|e| EscrowShareEntry {
+                escrow_id: e.escrow_id.clone(),
+                share: e.key_file.clone(),
+                restore_height: e.restore_height,
+            })
+            .collect(),
     })
 }
 

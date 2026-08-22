@@ -21,6 +21,8 @@ import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ducatproject.ducat.Ceremony
+import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.Stakes
@@ -573,8 +575,25 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                                             state.displayName,
                                             state.publishPayto,
                                             state.profile,
-                                            // First run: no relationships yet.
-                                            emptyList(), null, emptyList(), 0uL, null,
+                                            // Read, not assumed empty. "First run:
+                                            // no relationships yet" was true of the
+                                            // only path this screen had when it was
+                                            // written, and stopped being true when
+                                            // restoring gained one: step 5 is where
+                                            // a restore ends too, and it was handing
+                                            // that person a bundle with no contacts,
+                                            // no prekeys, no threads and no escrows —
+                                            // 215 bytes against the 51 KB file they
+                                            // had just opened, offered as their
+                                            // backup. On a genuine first run these
+                                            // stores are empty and this reads the
+                                            // same emptiness the constants asserted.
+                                            ContactStore(context).backupContacts(),
+                                            ContactStore(context).backupPrekeys().first,
+                                            ContactStore(context).backupPrekeys().second,
+                                            ContactStore(context).backupPrekeys().third.toULong(),
+                                            ContactStore(context).backupAppState(),
+                                            Ceremony.backupShares(context),
                                         ),
                                         passphrase,
                                         persona,

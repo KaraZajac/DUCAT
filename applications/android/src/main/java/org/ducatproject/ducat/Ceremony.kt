@@ -170,6 +170,70 @@ object Ceremony {
             .toList()
 
     /**
+     * The open escrows, as §4.3.3 shares for the backup.
+     *
+     * These live in their own store, not the contact one the rest of the
+     * bundle is assembled from, which is how they came to be left out of it
+     * entirely — the backup screen has been telling people an open escrow
+     * needs a fresher bundle while the export threw the shares away.
+     *
+     * Finished ones are skipped: a released escrow restores as a released
+     * escrow, and carrying spent key material forward is a cost with no
+     * recipient. What travels is the whole record, because the share alone is
+     * not a resumable escrow — which roster, which index, which stage, and how
+     * far to scan are all in here too, and a key package without them restores
+     * something nobody can act on.
+     */
+    fun backupShares(context: Context): List<uniffi.ducat_mobile.EscrowShareEntry> =
+        all(context)
+            .asSequence()
+            .filterNot { isFinished(it) }
+            .mapNotNull { o ->
+                val id = hexToBytes(o.optString("id")) ?: return@mapNotNull null
+                // No key package yet means the DKG never finished, so there is
+                // nothing to sign with and nothing at stake to protect.
+                if (o.optString("keys").isEmpty()) return@mapNotNull null
+                uniffi.ducat_mobile.EscrowShareEntry(
+                    escrowId = id,
+                    share = o.toString().toByteArray(),
+                    restoreHeight = o.optLong("scanFrom").coerceAtLeast(0L).toULong(),
+                )
+            }
+            .toList()
+
+    /**
+     * Put restored escrows back, and never over one already here.
+     *
+     * A bundle's copy of an escrow is a photograph of it; the record on disk is
+     * the escrow. If both exist, the disk one has been carried forward by this
+     * device's own participation and is strictly the newer of the two — laying
+     * a snapshot over it would rewind a stage, and a stage rewound here is a
+     * ceremony that stalls or a funding mark that lets a second payment go.
+     *
+     * So: only what is missing. That is also the only case that matters, since
+     * the path this exists for is a device with nothing on it at all.
+     */
+    fun restoreShares(context: Context, shares: List<uniffi.ducat_mobile.EscrowShareEntry>) {
+        var added = 0
+        var kept = 0
+        for (s in shares) {
+            val o = runCatching { JSONObject(String(s.share)) }.getOrNull() ?: continue
+            val id = o.optString("id").ifEmpty { s.escrowId.toHexString() }
+            synchronized(lock) {
+                if (prefs(context).getString("c_$id", null) != null) {
+                    kept += 1
+                } else {
+                    prefs(context).edit().putString("c_$id", o.toString()).apply()
+                    added += 1
+                }
+            }
+        }
+        if (added > 0 || kept > 0) {
+            DucatLog.i(TAG, "escrows from the backup: $added restored, $kept already here")
+        }
+    }
+
+    /**
      * The 32-byte context every party derives identically: the sorted
      * personas and a nonce, so a fresh bond never collides with an old one.
      */
