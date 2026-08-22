@@ -760,7 +760,7 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
     confirm?.let { c ->
         AlertDialog(
             onDismissRequest = { confirm = null },
-            title = { Text(stringResource(R.string.drawer_forget_title, c.displayName())) },
+            title = { Text(stringResource(R.string.drawer_forget_title, isolate(c.displayName()))) },
             text = { Text(stringResource(R.string.drawer_forget_body)) },
             confirmButton = {
                 TextButton(onClick = {

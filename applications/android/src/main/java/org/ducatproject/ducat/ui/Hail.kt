@@ -406,7 +406,7 @@ fun HailCard(
         awaitingOffer?.let { d ->
             Spacer(Modifier.height(10.dp))
             Text(
-                stringResource(R.string.hail_awaiting_offer, d.displayName()),
+                stringResource(R.string.hail_awaiting_offer, isolate(d.displayName())),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -424,7 +424,7 @@ fun HailCard(
         parkedOffer?.let { (d, o) ->
             Spacer(Modifier.height(10.dp))
             Text(
-                stringResource(R.string.hail_parked_offer, d.displayName(),
+                stringResource(R.string.hail_parked_offer, isolate(d.displayName()),
                     Amounts.show(context, o.amountPxmr).primary),
                 style = MaterialTheme.typography.bodyMedium,
             )

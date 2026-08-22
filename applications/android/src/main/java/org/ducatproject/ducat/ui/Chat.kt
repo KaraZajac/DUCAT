@@ -694,14 +694,17 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     // the bill or offer it names greys out where it stands.
                     val retractLine = if (m.reOwn) {
                         if (m.outgoing) stringResource(R.string.chat_you_withdrew)
-                        else stringResource(R.string.chat_they_withdrew, c.displayName())
+                        else stringResource(R.string.chat_they_withdrew, isolate(c.displayName()))
                     } else {
                         if (m.outgoing) stringResource(R.string.chat_you_declined)
-                        else stringResource(R.string.chat_they_declined, c.displayName())
+                        else stringResource(R.string.chat_they_declined, isolate(c.displayName()))
                     }
                     Text(
                         if (m.body.isNotBlank()) {
-                            stringResource(R.string.chat_retract_with_quote, retractLine, m.body)
+                            stringResource(
+                                R.string.chat_retract_with_quote,
+                                retractLine, isolate(m.body),
+                            )
                         } else retractLine,
                         Modifier.fillMaxWidth().padding(vertical = 2.dp),
                         style = MaterialTheme.typography.labelMedium,
@@ -1388,7 +1391,9 @@ private fun LinkableText(body: String, fg: androidx.compose.ui.graphics.Color) {
         Regex("(https://|ducat:)\\S+").find(body)?.value
     }
     if (url == null) {
-        Text(body, color = fg)
+        // Fenced: a body is whatever somebody typed, and the paragraph around
+        // it belongs to the reader's language. See `isolate`.
+        Text(isolate(body), color = fg)
         return
     }
     // Show the link, not its innards. A card is a few hundred bytes of base64

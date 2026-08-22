@@ -329,7 +329,7 @@ private fun BondSection(
                         Row(
                             Modifier.fillMaxWidth().clickable { post(a) }
                                 .padding(vertical = 10.dp),
-                        ) { Text(stringResource(R.string.profile_bond_with_arbiter, a.displayName())) }
+                        ) { Text(stringResource(R.string.profile_bond_with_arbiter, isolate(a.displayName()))) }
                     }
                 }
             },

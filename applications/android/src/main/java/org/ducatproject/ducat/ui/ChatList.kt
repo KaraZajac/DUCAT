@@ -173,7 +173,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
             onDismissRequest = { confirm = null },
             title = { Text(stringResource(R.string.chatlist_delete_title)) },
             text = {
-                Text(stringResource(R.string.chatlist_delete_body, c.displayName()))
+                Text(stringResource(R.string.chatlist_delete_body, isolate(c.displayName())))
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -347,10 +347,28 @@ internal fun previewOf(context: Context, m: StoredMessage): String = when {
             R.string.chatlist_preview_receipt,
             Amounts.show(context, m.amountPxmr).primary,
         )
-    m.kind == 4 -> context.getString(R.string.chatlist_preview_reacted, m.body)
+    m.kind == 4 -> context.getString(R.string.chatlist_preview_reacted, isolate(m.body))
     m.attHash != null -> context.getString(R.string.chatlist_preview_photo)
-    else -> m.body
+    else -> isolate(m.body)
 }
+
+/**
+ * Fence text of unknown direction off from the paragraph around it.
+ *
+ * A message body is whatever somebody typed, in whatever script, and it gets
+ * dropped into a UI whose direction belongs to the *reader*. Without a fence,
+ * the bidi algorithm resolves the whole line together and the run's trailing
+ * punctuation migrates to the paragraph's end — so an English sentence read in
+ * Arabic came out as ".not this time", full stop first, and the retraction line
+ * (Arabic label, English quote, quotation marks between them) scrambled outright.
+ *
+ * U+2068 FIRST STRONG ISOLATE opens a run whose direction is decided by its own
+ * first strong character; U+2069 POP DIRECTIONAL ISOLATE closes it. The text is
+ * unchanged — these are formatting characters, they do not print, and they do
+ * not survive into anything copied out as plain content.
+ */
+internal fun isolate(s: String): String =
+    if (s.isEmpty()) s else "⁨" + s + "⁩"
 
 /** Now, minutes, hours, weekday, then a date — the resolution a list needs. */
 internal fun shortWhen(context: Context, epochSecs: Long): String {
