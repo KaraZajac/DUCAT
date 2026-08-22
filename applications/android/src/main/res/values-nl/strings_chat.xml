@@ -120,7 +120,7 @@
     <string name="chat_their_name_support">Alleen op jouw telefoon — zij horen het nooit.</string>
 
     <plurals name="chat_gap_unread">
-        <item quantity="one">Eén bericht ging niet open</item>
-        <item quantity="other">%1$d berichten gingen niet open</item>
+        <item quantity="one">Hier ontbreekt een bericht</item>
+        <item quantity="other">Hier ontbreken %1$d berichten</item>
     </plurals>
 </resources>

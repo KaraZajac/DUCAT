@@ -120,7 +120,7 @@
     <string name="chat_their_name_support">Solo sul tuo telefono: non glielo diciamo mai.</string>
 
     <plurals name="chat_gap_unread">
-        <item quantity="one">Un messaggio non si è aperto</item>
-        <item quantity="other">%1$d messaggi non si sono aperti</item>
+        <item quantity="one">Qui manca un messaggio</item>
+        <item quantity="other">Qui mancano %1$d messaggi</item>
     </plurals>
 </resources>

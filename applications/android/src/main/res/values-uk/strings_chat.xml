@@ -120,9 +120,9 @@
     <string name="chat_their_name_support">Лише на вашому телефоні — їм про це не повідомляють.</string>
 
     <plurals name="chat_gap_unread">
-        <item quantity="one">Одне повідомлення не відкрилося</item>
-        <item quantity="few">%1$d повідомлення не відкрилися</item>
-        <item quantity="many">%1$d повідомлень не відкрилося</item>
-        <item quantity="other">%1$d повідомлення не відкрилося</item>
+        <item quantity="one">Тут бракує одного повідомлення</item>
+        <item quantity="few">Тут бракує %1$d повідомлень</item>
+        <item quantity="many">Тут бракує %1$d повідомлень</item>
+        <item quantity="other">Тут бракує %1$d повідомлень</item>
     </plurals>
 </resources>

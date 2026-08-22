@@ -120,11 +120,11 @@
     <string name="chat_their_name_support">على هاتفك فقط — لا يُبلَّغون بذلك أبدًا.</string>
 
     <plurals name="chat_gap_unread">
-        <item quantity="zero">تعذّر فتح أي رسالة</item>
-        <item quantity="one">تعذّر فتح رسالة واحدة</item>
-        <item quantity="two">تعذّر فتح رسالتين</item>
-        <item quantity="few">تعذّر فتح %1$d رسائل</item>
-        <item quantity="many">تعذّر فتح %1$d رسالة</item>
-        <item quantity="other">تعذّر فتح %1$d رسالة</item>
+        <item quantity="zero">لا توجد رسائل مفقودة هنا</item>
+        <item quantity="one">رسالة واحدة مفقودة هنا</item>
+        <item quantity="two">رسالتان مفقودتان هنا</item>
+        <item quantity="few">%1$d رسائل مفقودة هنا</item>
+        <item quantity="many">%1$d رسالة مفقودة هنا</item>
+        <item quantity="other">%1$d رسالة مفقودة هنا</item>
     </plurals>
 </resources>

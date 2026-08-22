@@ -120,6 +120,6 @@
     <string name="chat_their_name_support">อยู่ในเครื่องคุณเท่านั้น — ไม่มีการบอกเขา</string>
 
     <plurals name="chat_gap_unread">
-        <item quantity="other">เปิดข้อความ %1$d ข้อความไม่ได้</item>
+        <item quantity="other">ตรงนี้ขาดข้อความอยู่ %1$d ข้อความ</item>
     </plurals>
 </resources>

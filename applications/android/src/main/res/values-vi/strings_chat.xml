@@ -120,6 +120,6 @@
     <string name="chat_their_name_support">Chỉ nằm trên máy bạn — họ không hề được cho biết.</string>
 
     <plurals name="chat_gap_unread">
-        <item quantity="other">Không mở được %1$d tin nhắn</item>
+        <item quantity="other">Thiếu %1$d tin nhắn ở đây</item>
     </plurals>
 </resources>

@@ -120,6 +120,6 @@
     <string name="chat_their_name_support">Hanya di ponsel Anda — mereka tidak pernah diberi tahu.</string>
 
     <plurals name="chat_gap_unread">
-        <item quantity="other">%1$d pesan tidak dapat dibuka</item>
+        <item quantity="other">Ada %1$d pesan yang hilang di sini</item>
     </plurals>
 </resources>

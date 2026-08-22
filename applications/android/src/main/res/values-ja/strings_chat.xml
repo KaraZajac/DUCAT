@@ -120,6 +120,6 @@
     <string name="chat_their_name_support">あなたの端末の中だけで、相手には伝わりません。</string>
 
     <plurals name="chat_gap_unread">
-        <item quantity="other">%1$d 件のメッセージを開けませんでした</item>
+        <item quantity="other">ここでメッセージが %1$d 件抜けています</item>
     </plurals>
 </resources>

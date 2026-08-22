@@ -120,7 +120,7 @@
     <string name="chat_their_name_support">Yalnızca senin telefonunda — onlara söylenmez.</string>
 
     <plurals name="chat_gap_unread">
-        <item quantity="one">Bir mesaj açılamadı</item>
-        <item quantity="other">%1$d mesaj açılamadı</item>
+        <item quantity="one">Burada bir mesaj eksik</item>
+        <item quantity="other">Burada %1$d mesaj eksik</item>
     </plurals>
 </resources>

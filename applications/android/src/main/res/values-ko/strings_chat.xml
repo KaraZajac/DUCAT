@@ -120,6 +120,6 @@
     <string name="chat_their_name_support">내 기기에만 저장되며 상대에게 알려지지 않습니다.</string>
 
     <plurals name="chat_gap_unread">
-        <item quantity="other">메시지 %1$d개를 열지 못했어</item>
+        <item quantity="other">여기 메시지 %1$d개가 빠져 있어</item>
     </plurals>
 </resources>

@@ -50,8 +50,8 @@
          not bubbles — one quiet line where the gap is, and a run of them
          counted rather than repeated. -->
     <plurals name="chat_gap_unread">
-        <item quantity="one">A message could not be opened</item>
-        <item quantity="other">%1$d messages could not be opened</item>
+        <item quantity="one">A message is missing here</item>
+        <item quantity="other">%1$d messages are missing here</item>
     </plurals>
 
     <!-- Long-press dialog -->

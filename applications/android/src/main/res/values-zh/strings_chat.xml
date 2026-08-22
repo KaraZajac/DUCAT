@@ -120,6 +120,6 @@
     <string name="chat_their_name_support">只保存在你的手机上——对方不会知道。</string>
 
     <plurals name="chat_gap_unread">
-        <item quantity="other">有 %1$d 条消息打不开</item>
+        <item quantity="other">这里少了 %1$d 条消息</item>
     </plurals>
 </resources>
