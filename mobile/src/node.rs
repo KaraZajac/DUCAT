@@ -636,6 +636,29 @@ pub fn node_dht_open(
 
 /// Write one subkey. The record must be open (see [`node_dht_open`]), and this
 /// node must be the owner or a named writer for that subkey.
+///
+/// Returning `Ok` means the network holds these bytes. It did not always: a set
+/// answers `Ok(None)` when the value was stored and `Ok(Some(theirs))` when it
+/// was refused for being older than what the network already has, and the
+/// `Some` used to be dropped on the floor here. Every caller reads `Ok` as
+/// delivered, so a refused write travelled all the way up as a sent message.
+///
+/// Refusal is not an edge case, because the sequence number a write is signed
+/// with comes from `handle_get_single_local_value` — *local* state, never the
+/// network. A phone with no local copy of a record signs seq 0. Restore a
+/// backup and that is every record it owns: the keys come back from the file,
+/// veilid's table store does not, and so every message, every hail, every board
+/// post is signed seq 0 against a network holding seq N, refused, and reported
+/// as delivered. Found on exactly that path (2026-08-22) — two phones restored,
+/// both attached, "delivered seq 4 to Sam" logged in 900 ms, and nothing on
+/// Sam's screen, twice.
+///
+/// The retry works because a refusal is not inert: veilid stores the network's
+/// value locally on its way out (`process_outbound_set_value_result_locked`),
+/// which is the priming the first attempt was missing. So the second signs from
+/// their seq and lands. One retry is the whole ladder — a third would mean
+/// somebody else is writing this subkey in the same breath, and for a log slot
+/// only its owner writes, that is a real conflict and not ours to paper over.
 #[uniffi::export]
 pub fn node_dht_set(key: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeError> {
     let (api, rt) = handles()?;
@@ -643,10 +666,26 @@ pub fn node_dht_set(key: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeE
         let rc = api
             .routing_context()
             .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
-        rc.set_dht_value(parse_key(&key)?, subkey, data, None)
+        let rk = parse_key(&key)?;
+        let refused = rc
+            .set_dht_value(rk.clone(), subkey, data.clone(), None)
             .await
             .map_err(|e| NodeError::Failed(format!("set: {e}")))?;
-        Ok(())
+        if refused.is_none() {
+            return Ok(());
+        }
+        // Their value is in our local store now. Sign against it and go again.
+        if rc
+            .set_dht_value(rk, subkey, data, None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("set (retry): {e}")))?
+            .is_none()
+        {
+            return Ok(());
+        }
+        Err(NodeError::Failed(format!(
+            "set: subkey {subkey} refused twice — the network holds a newer value"
+        )))
     })
 }
 
