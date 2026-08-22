@@ -324,6 +324,14 @@ internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
 
 /** What one message looks like from a list away (§16.13's kinds included). */
 internal fun previewOf(context: Context, m: StoredMessage): String = when {
+    // A gap, said the way the thread says it. These are placeholders the
+    // reader wrote, and their bodies are written for a bubble rather than a
+    // list — "[a message could not be opened — it was sealed to a key this
+    // device no longer holds]" is the whole preview line and then some, and
+    // it reads like an error escaping. A restored phone can have a run of
+    // them as the newest thing in a thread.
+    m.deadLetter ->
+        context.resources.getQuantityString(R.plurals.chat_gap_unread, 1, 1)
     m.kind == 1 ->
         context.getString(
             R.string.chatlist_preview_requested,
