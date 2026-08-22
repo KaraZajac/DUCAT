@@ -80,6 +80,23 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                 value = passphrase,
                 onValueChange = { passphrase = it; message = null },
                 label = { Text(stringResource(R.string.backup_passphrase)) },
+                // The rule both buttons are enforcing, said out loud — the
+                // same way onboarding says it, with the same string.
+                //
+                // Export and Import stay dead below eight characters and
+                // nothing on this screen mentioned eight, so somebody typing a
+                // short passphrase got two grey buttons and no reason. Green
+                // when it is satisfied, so the field answers the question
+                // rather than just repeating the demand.
+                supportingText = {
+                    val longEnough = passphrase.length >= 8
+                    Text(
+                        if (longEnough) stringResource(R.string.onb_backup_passphrase_good)
+                        else stringResource(R.string.onb_backup_passphrase_short),
+                        color = if (longEnough) MaterialTheme.ducat.settled
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
