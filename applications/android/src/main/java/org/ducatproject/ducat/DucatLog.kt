@@ -205,6 +205,18 @@ object DucatLog {
     private fun redact(s: String): String = s
         // 64+ hex characters: spend keys, view keys, key images, persona keys.
         .replace(Regex("\\b[0-9a-fA-F]{64,}\\b")) { "${it.value.take(8)}…[${it.value.length} hex]" }
+        // A Monero address. Ninety-odd characters of base58, and the one thing
+        // in this app that ties its user to a chain anyone can read: give
+        // somebody an escrow's address and they can watch it for ever. The
+        // file this is going into exists to be sent to somebody else.
+        //
+        // Matched by shape rather than by leading character, so it covers
+        // standard, subaddress and integrated forms on every network at once —
+        // and matched after the hex rule, which has already replaced anything
+        // that is really a key.
+        .replace(Regex("[1-9A-HJ-NP-Za-km-z]{90,}")) {
+            "${it.value.take(8)}…[${it.value.length} b58]"
+        }
         // Record keys are three base64 parts; the middle identifies it well enough.
         .replace(Regex("VLD0:([A-Za-z0-9_-]{8})[A-Za-z0-9_-]+:[A-Za-z0-9_-]+")) { "VLD0:${it.groupValues[1]}…" }
         // A whole card would carry its writer secret.

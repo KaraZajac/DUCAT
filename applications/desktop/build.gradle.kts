@@ -325,6 +325,13 @@ tasks.register<JavaExec>("smoke") {
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
 // Proves the escrow sweep takes what is over and leaves what is funded.
 // `./gradlew :desktop:escrowsweep`.
+// What the shareable log is allowed to say. `./gradlew :desktop:redact`.
+tasks.register<JavaExec>("redact") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.RedactTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The log file's ceiling, which was documented but only applied at startup.
 // `./gradlew :desktop:logcap`.
 tasks.register<JavaExec>("logcap") {

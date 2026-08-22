@@ -25,7 +25,12 @@ fun main() {
 
     // Well past the cap: about two megabytes of ordinary lines, which on a
     // phone is a few days of transport flapping and nothing else.
-    val filler = "x".repeat(200)
+    //
+    // Words, with spaces. An unbroken 200-character run is 200 characters of
+    // base58, which redact() quite rightly replaces with an ellipsis — the
+    // rule matches an address by shape, not by leading character — and the
+    // lines then come out too short to reach the cap at all.
+    val filler = List(25) { "transport AttachedFull" }.joinToString(" ")
     repeat(10_000) { DucatLog.i("LogCap", "$it $filler") }
 
     check(f.exists()) { "LOGCAP_FAIL nothing was written" }
