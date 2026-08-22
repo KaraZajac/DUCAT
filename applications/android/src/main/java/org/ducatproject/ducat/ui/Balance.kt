@@ -103,14 +103,32 @@ fun BalanceCard(
         Spacer(Modifier.height(20.dp))
     }
 
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+    // Hoisted, because the warning below decides what this card should say.
+    // An empty wallet is not tied-up change. "Your money is here, but it's
+    // all locked" over a zero balance is a lie the first-run screen used to
+    // tell — the card fires only when money actually exists but none of it
+    // is spendable, or when the spendable supply is running thin. A wallet
+    // with nothing in it says nothing here; the Send/Receive tab is where a
+    // first deposit comes from.
+    val hasMoney = float.unlockedOutputs > 0 || float.lockedPxmr > 0
+    val allLocked = float.unlockedOutputs == 0 && float.lockedPxmr > 0
+    val warning = hasMoney && (allLocked || capacity.approxPayments <= 2)
+    val arriving = locked != null && float.lockedPxmr > 0
+    // The count goes in the warning when there is one, rather than in a grey
+    // card directly above it saying the same thing in other words. Two stacked
+    // cards about one fact is how "3 notes, so about 2 more payments" ended up
+    // sitting on top of "Running low on notes".
+    if (!warning || arriving) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Column(Modifier.padding(20.dp)) {
             // §17.2 forbids an exact promise, so the wording carries the
             // approximation rather than hiding it behind a precise-looking digit.
-            Text(
-                notesPhrase(ctx, float.unlockedOutputs, capacity.approxPayments),
-                style = MaterialTheme.typography.bodyMedium,
-            )
+            if (!warning) {
+                Text(
+                    notesPhrase(ctx, float.unlockedOutputs, capacity.approxPayments),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
 
             if (locked != null && float.lockedPxmr > 0) {
                 Spacer(Modifier.height(12.dp))
@@ -143,20 +161,26 @@ fun BalanceCard(
                 }
             }
         }
+        }
     }
 
-    // An empty wallet is not tied-up change. "Your money is here, but it's
-    // all locked" over a zero balance is a lie the first-run screen used to
-    // tell — the card fires only when money actually exists but none of it
-    // is spendable, or when the spendable supply is running thin. A wallet
-    // with nothing in it says nothing here; the Send/Receive tab is where a
-    // first deposit comes from.
-    val hasMoney = float.unlockedOutputs > 0 || float.lockedPxmr > 0
-    val allLocked = float.unlockedOutputs == 0 && float.lockedPxmr > 0
-    if (hasMoney && (allLocked || capacity.approxPayments <= 2)) {
+    if (warning) {
         Spacer(Modifier.height(12.dp))
+        // Two situations, two registers.
+        //
+        // All locked means this wallet cannot pay at all right now, which is
+        // Material's `error` and reads as one. Running low means it can pay,
+        // twice — a heads-up, and putting it in the same alarming red said
+        // "something is wrong" about a wallet that was working. §17.2 already
+        // has a colour for exactly this and it was going unused: `lowCapacity`,
+        // "the float running out, which must be said before the counter". The
+        // arriving row three lines up makes the same argument for itself — it
+        // carries a meaning, not a mood.
+        val tint = if (allLocked) MaterialTheme.colorScheme.error
+        else MaterialTheme.ducat.lowCapacity
         Surface(
-            color = MaterialTheme.colorScheme.errorContainer,
+            color = if (allLocked) MaterialTheme.colorScheme.errorContainer
+            else MaterialTheme.ducat.lowCapacity.copy(alpha = 0.16f),
             shape = MaterialTheme.shapes.large,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         ) {
@@ -165,14 +189,24 @@ fun BalanceCard(
                     if (allLocked) stringResource(R.string.balance_all_locked_title)
                     else stringResource(R.string.balance_running_low_title),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    color = if (allLocked) MaterialTheme.colorScheme.onErrorContainer else tint,
                 )
                 Spacer(Modifier.height(4.dp))
+                // The count, here rather than in a second card above.
+                if (!allLocked) {
+                    Text(
+                        notesPhrase(ctx, float.unlockedOutputs, capacity.approxPayments),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                }
                 Text(
                     if (allLocked) stringResource(R.string.balance_all_locked_body)
                     else stringResource(R.string.balance_running_low_body),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    color = if (allLocked) MaterialTheme.colorScheme.onErrorContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(12.dp))
                 Button(onClick = onTopUp) { Text(stringResource(R.string.balance_top_up_action)) }
