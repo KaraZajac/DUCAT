@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (Trinkgeld %2$s) — Beleg gesendet</string>
     <string name="notify_unconfirmed_title">Zahlung nicht bestätigt</string>
     <string name="notify_unconfirmed_body">Ein anderer Knoten kennt sie nicht. Diese Rechnung bleibt offen.</string>
+    <string name="notify_unbacked_title">Treuhand nicht bestätigt</string>
+    <string name="notify_unbacked_body">Ein anderer Knoten sieht das Geld nicht. Noch ist nichts abgesichert.</string>
     <string name="notify_arrived_title">Geld angekommen</string>
     <string name="notify_arrived_body">%1$s — nach zehn Blöcken verfügbar</string>
     <string name="notify_escrow_setup">%1$s richtet die Treuhand ein.</string>

@@ -1404,7 +1404,18 @@ object Ceremony {
         val bal = runCatching {
             uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
         }.getOrElse { return o.optLong("fundedPxmr") }
-        if (bal != o.optLong("fundedPxmr")) {
+        val had = o.optLong("fundedPxmr")
+        // Money appearing in an escrow is the claim somebody acts on — the
+        // driver drives, the renter matches the host's stake — and it arrived
+        // from one node's account of the chain, scanned locally with nothing
+        // checking the work behind the blocks. Ask somebody else before
+        // showing it as secured. Only growth: a falling balance is a release,
+        // and holding that back would strand a record of money already spent.
+        if (bal > had && !SecondOpinion.holdsEscrow(context, idHex, keys, from, bal, nodeUrl)) {
+            DucatLog.i(TAG, "ride $idHex: escrow growth unconfirmed, holding at ${formatXmr(had)}")
+            return had
+        }
+        if (bal != had) {
             o.put("fundedPxmr", bal)
             save(context, idHex, o)
             ContactStore.bump()

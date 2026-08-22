@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (انعام %2$s) — رسید ارسال شد</string>
     <string name="notify_unconfirmed_title">پرداخت تأیید نشد</string>
     <string name="notify_unconfirmed_body">گره دیگری هیچ سابقه‌ای از آن ندارد. این صورت‌حساب پرداخت‌نشده می‌ماند.</string>
+    <string name="notify_unbacked_title">امانت تأیید نشد</string>
+    <string name="notify_unbacked_body">گره دیگری این پول را نمی‌بیند. هنوز چیزی تضمین نشده است.</string>
     <string name="notify_arrived_title">پول رسید</string>
     <string name="notify_arrived_body">%1$s — پس از ده بلاک آزاد می‌شود</string>
     <string name="notify_escrow_setup">%1$s در حال آماده‌سازی امانی است.</string>

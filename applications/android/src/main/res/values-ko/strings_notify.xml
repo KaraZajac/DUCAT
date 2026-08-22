@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (팁 %2$s) — 영수증 발송</string>
     <string name="notify_unconfirmed_title">결제를 확인할 수 없음</string>
     <string name="notify_unconfirmed_body">다른 노드에 기록이 없습니다. 이 계산서는 미결제 상태로 남습니다.</string>
+    <string name="notify_unbacked_title">에스크로를 확인할 수 없음</string>
+    <string name="notify_unbacked_body">다른 노드에서 이 금액이 보이지 않습니다. 아직 보장된 것이 없습니다.</string>
     <string name="notify_arrived_title">돈이 들어왔습니다</string>
     <string name="notify_arrived_body">%1$s — 열 블록 뒤 사용 가능</string>
     <string name="notify_escrow_setup">%1$s 님이 에스크로를 설정하고 있습니다.</string>

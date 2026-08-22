@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (pourboire %2$s) — reçu envoyé</string>
     <string name="notify_unconfirmed_title">Paiement non confirmé</string>
     <string name="notify_unconfirmed_body">Un autre nœud n\'en a aucune trace. Cette note reste impayée.</string>
+    <string name="notify_unbacked_title">Séquestre non confirmé</string>
+    <string name="notify_unbacked_body">Un autre nœud ne voit pas l\'argent. Rien n\'est encore garanti.</string>
     <string name="notify_arrived_title">Argent reçu</string>
     <string name="notify_arrived_body">%1$s — débloqué après dix blocs</string>
     <string name="notify_escrow_setup">%1$s prépare le séquestre.</string>

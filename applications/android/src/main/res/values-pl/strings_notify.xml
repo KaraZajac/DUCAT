@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (napiwek %2$s) — paragon wysłany</string>
     <string name="notify_unconfirmed_title">Płatność niepotwierdzona</string>
     <string name="notify_unconfirmed_body">Inny węzeł nie ma o niej żadnego zapisu. Ten rachunek pozostaje nieopłacony.</string>
+    <string name="notify_unbacked_title">Depozyt niepotwierdzony</string>
+    <string name="notify_unbacked_body">Inny węzeł nie widzi tych pieniędzy. Nic nie jest jeszcze zabezpieczone.</string>
     <string name="notify_arrived_title">Wpłynęły pieniądze</string>
     <string name="notify_arrived_body">%1$s — odblokuje się po dziesięciu blokach</string>
     <string name="notify_escrow_setup">%1$s przygotowuje depozyt.</string>

@@ -82,7 +82,54 @@ object SecondOpinion {
         val asked = prefs.getLong("asked_$key", 0L)
         if (asked != 0L && now - asked < REASK_MS) return false
 
-        return decide(context, key, onTx(context, key), now)
+        return decide(
+            context, key, onTx(context, key), now,
+            R.string.notify_unconfirmed_title, R.string.notify_unconfirmed_body,
+        )
+    }
+
+    /**
+     * May this escrow be believed to hold what our node says it holds?
+     *
+     * The same exposure as [settles] and the same stakes, one step earlier: a
+     * driver who is shown *fare secured* drives, and a renter who is shown the
+     * host's stake landed then funds their own side. Both act on a balance
+     * that came from one node's account of the chain, and both are expensive
+     * to be wrong about.
+     *
+     * There is no transaction id to ask about here — the escrow is found by
+     * scanning its own address — so the second node is asked the same question
+     * instead: scan it yourself, what do you see? An amount at least as large
+     * is corroboration. Less is a reason to wait, because a node a block
+     * behind sees less and so does an honest one mid-scan.
+     *
+     * Only growth is checked. Money leaving an escrow is a release, and
+     * holding that back would strand the record showing a balance already
+     * spent.
+     */
+    fun holdsEscrow(
+        context: Context,
+        idHex: String,
+        keys: ByteArray,
+        fromHeight: Long,
+        claimed: Long,
+        nodeInUse: String?,
+    ): Boolean {
+        if (claimed <= 0) return true
+        // Keyed by amount, not by escrow: every increase is its own claim, and
+        // corroborating a deposit says nothing about the next one.
+        val key = "esc_${idHex}_$claimed"
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (prefs.getBoolean("ok_$key", false)) return true
+
+        val now = System.currentTimeMillis()
+        val asked = prefs.getLong("asked_$key", 0L)
+        if (asked != 0L && now - asked < REASK_MS) return false
+
+        return decide(
+            context, key, onEscrow(keys, fromHeight, claimed, nodeInUse), now,
+            R.string.notify_unbacked_title, R.string.notify_unbacked_body,
+        )
     }
 
     /**
@@ -91,7 +138,14 @@ object SecondOpinion {
      * Split out from [settles] so the policy can be tested without a node on
      * the other end and without waiting ten real minutes for the alarm.
      */
-    internal fun decide(context: Context, key: String, verdict: Verdict, now: Long): Boolean {
+    internal fun decide(
+        context: Context,
+        key: String,
+        verdict: Verdict,
+        now: Long,
+        titleRes: Int = R.string.notify_unconfirmed_title,
+        bodyRes: Int = R.string.notify_unconfirmed_body,
+    ): Boolean {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val since = prefs.getLong("since_$key", 0L)
 
@@ -119,8 +173,8 @@ object SecondOpinion {
                     DucatLog.w(TAG, "${key.take(12)}… unknown to other nodes after ten minutes")
                     Notify.post(
                         context,
-                        context.getString(R.string.notify_unconfirmed_title),
-                        context.getString(R.string.notify_unconfirmed_body),
+                        context.getString(titleRes),
+                        context.getString(bodyRes),
                     )
                 }
                 DucatLog.i(TAG, "${key.take(12)}… deferring: $v")
@@ -136,6 +190,47 @@ object SecondOpinion {
      * configured, and the node in use is excluded — asking the same node twice
      * is not a second opinion.
      */
+    /**
+     * Does a node other than the one we are using also see this much in the
+     * escrow?
+     *
+     * More than one node is tried, and the first that agrees ends it. Asking
+     * only one would put every rental in the country behind whichever node
+     * happens to sit at the top of the list: one node stuck a few blocks back
+     * would stall escrows that are perfectly well funded, and the alarm would
+     * be telling people their money is missing when it is not. A single node's
+     * agreement is enough to corroborate; it takes all of them failing to see
+     * the money before this is worth deferring on.
+     */
+    private fun onEscrow(
+        keys: ByteArray,
+        fromHeight: Long,
+        claimed: Long,
+        nodeInUse: String?,
+    ): Verdict {
+        val inUse = nodeInUse?.trim()
+        val others = runCatching {
+            uniffi.ducat_mobile.moneroDefaultNodes(null)
+                .map { it.url }
+                .filter { it.trim() != inUse }
+        }.getOrDefault(emptyList())
+        if (others.isEmpty()) return Verdict.NoAnswer
+
+        var answered = false
+        for (url in others.take(TRIES)) {
+            val seen = runCatching {
+                uniffi.ducat_mobile.escrowBalance(keys, url, fromHeight.toULong()).toLong()
+            }.getOrNull() ?: continue
+            answered = true
+            if (seen >= claimed) {
+                DucatLog.i(TAG, "escrow corroborated by $url: ${formatXmr(seen)} XMR")
+                return Verdict.Confirmed
+            }
+            DucatLog.i(TAG, "escrow: $url sees ${formatXmr(seen)} of ${formatXmr(claimed)}")
+        }
+        return if (answered) Verdict.NotYet else Verdict.NoAnswer
+    }
+
     fun onTx(context: Context, txHashHex: String): Verdict {
         if (txHashHex.isBlank()) return Verdict.NoAnswer
         val inUse = NodeStore(context).lastGood()?.trim()

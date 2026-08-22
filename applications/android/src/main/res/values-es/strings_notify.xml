@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (propina %2$s) — recibo enviado</string>
     <string name="notify_unconfirmed_title">Pago sin confirmar</string>
     <string name="notify_unconfirmed_body">Otro nodo no tiene constancia de él. Esta cuenta sigue sin pagar.</string>
+    <string name="notify_unbacked_title">Depósito sin confirmar</string>
+    <string name="notify_unbacked_body">Otro nodo no ve el dinero. Todavía no hay nada asegurado.</string>
     <string name="notify_arrived_title">Ha llegado dinero</string>
     <string name="notify_arrived_body">%1$s — se desbloquea tras diez bloques</string>
     <string name="notify_escrow_setup">%1$s está preparando el depósito en garantía.</string>

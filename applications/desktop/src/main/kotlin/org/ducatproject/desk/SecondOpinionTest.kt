@@ -72,7 +72,27 @@ fun main() {
         "2NDTEST_FAIL a match with no transaction id was blocked forever"
     }
 
-    println("2NDTEST_OK confirmed=settles noanswer=settles notyet=defers alarm=once recovery=ok")
+    // An escrow's deposit is keyed by amount, so each increase stands on its
+    // own: corroborating 1 XMR must not vouch for the 5 XMR that follows it.
+    val keys = ByteArray(0)
+    check(SecondOpinion.decide(ctx, "esc_r1_1000", Verdict.Confirmed, t0)) {
+        "2NDTEST_FAIL a corroborated deposit was not believed"
+    }
+    check(SecondOpinion.holdsEscrow(ctx, "r1", keys, 0, 1000, null)) {
+        "2NDTEST_FAIL a corroborated deposit was re-asked"
+    }
+    check(!SecondOpinion.decide(ctx, "esc_r1_5000", Verdict.NotYet, t0)) {
+        "2NDTEST_FAIL a larger deposit rode in on the smaller one's corroboration"
+    }
+    // Nothing claimed is nothing to check — an empty escrow is not a lie.
+    check(SecondOpinion.holdsEscrow(ctx, "r1", keys, 0, 0, null)) {
+        "2NDTEST_FAIL an unfunded escrow was treated as a claim"
+    }
+
+    println(
+        "2NDTEST_OK confirmed=settles noanswer=settles notyet=defers alarm=once " +
+            "recovery=ok escrow=per-amount",
+    )
 }
 
 private fun alarmed(ctx: DeskContext, key: String) =

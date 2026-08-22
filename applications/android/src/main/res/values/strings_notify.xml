@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (tip %2$s) — receipt sent</string>
     <string name="notify_unconfirmed_title">Payment not confirmed</string>
     <string name="notify_unconfirmed_body">Another node has no record of it. This tab stays unpaid.</string>
+    <string name="notify_unbacked_title">Escrow not confirmed</string>
+    <string name="notify_unbacked_body">Another node does not see the money. Nothing is secured yet.</string>
     <string name="notify_arrived_title">Money arrived</string>
     <string name="notify_arrived_body">%1$s — unlocks after ten blocks</string>
     <string name="notify_escrow_setup">%1$s is setting up the escrow.</string>
