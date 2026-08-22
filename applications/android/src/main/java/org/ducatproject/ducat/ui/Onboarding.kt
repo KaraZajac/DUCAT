@@ -117,6 +117,17 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                     //
                     // So: restore, then choose a PIN, then done. One screen,
                     // on the device that now has the money on it.
+                    // Out of the restore branch first.
+                    //
+                    // `restoring` gates everything below it and returns early,
+                    // so advancing the step without lowering this flag changed
+                    // a value nothing was reading: the screen went on drawing
+                    // "Restored wallet" and its Continue button, which
+                    // recomputed the same state and drew it again. A working
+                    // restore — right wallet, right address — that could not
+                    // be walked away from, on the one path somebody reaches by
+                    // having already lost a phone.
+                    restoring = false
                     onState(
                         state.copy(
                             step = Step.Pin,
