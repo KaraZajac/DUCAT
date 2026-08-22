@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">Cudzy węzeł, przez Tor</string>
     <string name="monero_trust_onion_body">Widzi twoje transakcje, ale nie widzi, skąd przyszły.</string>
     <string name="monero_trust_public_title">Cudzy węzeł</string>
-    <string name="monero_trust_public_body">Widzi twój adres i twoje transakcje razem. Dandelion++ ukrywa pochodzenie transakcji przed resztą sieci — nie ukryje go przed węzłem, któremu ją wręczasz. Rozwiązaniem jest własny węzeł.</string>
+    <string name="monero_trust_public_body">Widzi twój adres i twoje transakcje razem. Dandelion++ ukrywa pochodzenie transakcji przed resztą sieci — nie przed węzłem, któremu ją oddałeś. Może też kłamać: saldo i pokazywane płatności to jego wersja łańcucha, a nic tutaj nie porównuje jej z drugim źródłem. Własny węzeł rozwiązuje jedno i drugie.</string>
     <string name="monero_wallet_title">Portfel</string>
     <string name="monero_no_wallet_key_title">Na tym urządzeniu nie ma klucza portfela</string>
     <string name="monero_no_wallet_key_body">Ta instalacja ukończyła konfigurację, zanim aplikacja zaczęła przechowywać portfel, więc nie ma czym skanować. Czekanie tego nie naprawi — przywróć z kopii zapasowej albo wyczyść dane aplikacji i skonfiguruj od nowa.</string>
@@ -44,4 +44,5 @@
     <string name="monero_last_window_failed">Ostatnie okno nie powiodło się: %1$s</string>
     <string name="monero_rescan_hint">Ten portfel skanuje od początku łańcucha, co trwa o wiele dłużej, niż musi, jeśli powstał niedawno.</string>
     <string name="monero_skip_ahead">Przeskocz dalej</string>
+    <string name="monero_trust_plaintext">Do tego łączysz się bez szyfrowania, więc każdy w sieci po drodze może to samo: przeczytać albo zmienić.</string>
 </resources>

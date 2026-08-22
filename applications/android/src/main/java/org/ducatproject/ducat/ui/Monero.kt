@@ -115,7 +115,7 @@ fun MoneroPanel() {
                         stringResource(R.string.monero_round_trip_ms, "${s.rttMs}"),
                     )
                     Spacer(Modifier.height(10.dp))
-                    TrustNote(trustOf(store.ownUrl(), s.url))
+                    TrustNote(trustOf(store.ownUrl(), s.url), s.url)
                 }
                 else -> Text(
                     error ?: stringResource(R.string.monero_no_node),
@@ -178,7 +178,7 @@ private fun trustOf(own: String?, inUse: String): NodeTrust = when {
 }
 
 @Composable
-private fun TrustNote(trust: NodeTrust) {
+private fun TrustNote(trust: NodeTrust, url: String) {
     val (title, body, colour) = when (trust) {
         NodeTrust.OWN -> Triple(
             stringResource(R.string.monero_trust_own_title),
@@ -204,6 +204,20 @@ private fun TrustNote(trust: NodeTrust) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        // Plain HTTP widens it from one party to anybody on the path.
+        //
+        // The note above is about a node that can watch and can lie. Without
+        // TLS, so can the network between here and it: a café's router, an
+        // ISP, whoever runs the hotspot. Same consequence, no relationship
+        // with the node required.
+        if (url.startsWith("http://", ignoreCase = true)) {
+            Spacer(Modifier.height(2.dp))
+            Text(
+                stringResource(R.string.monero_trust_plaintext),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.ducat.lowCapacity,
+            )
+        }
     }
 }
 

@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">他人のノード（Tor経由）</string>
     <string name="monero_trust_onion_body">トランザクションは見えますが、それがどこから来たかは見えません。</string>
     <string name="monero_trust_public_title">他人のノード</string>
-    <string name="monero_trust_public_body">アドレスとトランザクションをまとめて見られます。Dandelion++はトランザクションの発信元をネットワークの他の部分から隠しますが、手渡した先のノードからは隠せません。解決策は自分のノードを動かすことです。</string>
+    <string name="monero_trust_public_body">あなたのアドレスと取引をまとめて見ています。Dandelion++ は取引の出所をネットワークの他の部分からは隠しますが、渡した相手のノードからは隠せません。嘘をつくこともできます。残高も表示される支払いも、そのノードが語るチェーンであり、ここでは second source と突き合わせていません。自分のノードを動かせば両方とも解決します。</string>
     <string name="monero_wallet_title">ウォレット</string>
     <string name="monero_no_wallet_key_title">この端末にウォレット鍵がありません</string>
     <string name="monero_no_wallet_key_body">このインストールは、アプリがウォレットを保存するようになる前にセットアップを終えたため、スキャンに使うものがありません。待っても直りません — バックアップから復元するか、アプリのデータを消去してやり直してください。</string>
@@ -41,4 +41,5 @@
     <string name="monero_last_window_failed">直近の読み込みが失敗しました: %1$s</string>
     <string name="monero_rescan_hint">このウォレットはチェーンの最初からスキャンしています。最近作られたものなら、必要以上に時間がかかっています。</string>
     <string name="monero_skip_ahead">先へ飛ばす</string>
+    <string name="monero_trust_plaintext">これは暗号化なしで接続しているので、途中のネットワークにいる誰でも同じことができます — 読むことも、書き換えることも。</string>
 </resources>

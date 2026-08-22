@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">Başkasının düğümü, Tor üzerinden</string>
     <string name="monero_trust_onion_body">İşlemlerini görür ama nereden geldiklerini görmez.</string>
     <string name="monero_trust_public_title">Başkasının düğümü</string>
-    <string name="monero_trust_public_body">Adresini ve işlemlerini bir arada görür. Dandelion++ bir işlemin çıkış noktasını ağın geri kalanından gizler — teslim ettiğin düğümden gizleyemez. Çözüm, kendi düğümünü çalıştırmak.</string>
+    <string name="monero_trust_public_body">Adresini ve işlemlerini birlikte görür. Dandelion++ bir işlemin kaynağını ağın geri kalanından gizler — teslim ettiğin düğümden gizleyemez. Ayrıca yalan da söyleyebilir: bakiyen ve sana gösterilen ödemeler onun zincir anlatımıdır ve burada hiçbir şey bunu ikinci bir kaynakla karşılaştırmaz. Kendi düğümünü çalıştırmak ikisini de çözer.</string>
     <string name="monero_wallet_title">Cüzdan</string>
     <string name="monero_no_wallet_key_title">Bu cihazda cüzdan anahtarı yok</string>
     <string name="monero_no_wallet_key_body">Bu kurulum, uygulama cüzdanı saklamaya başlamadan önce tamamlanmış; bu yüzden taranacak bir şey yok. Beklemek düzeltmez — bir yedekten geri yükle ya da uygulamanın verilerini temizleyip yeniden kur.</string>
@@ -42,4 +42,5 @@
     <string name="monero_last_window_failed">Son pencere başarısız: %1$s</string>
     <string name="monero_rescan_hint">Bu cüzdan zincirin en başından tarıyor; yakın zamanda oluşturulduysa bu gereğinden çok daha uzun sürer.</string>
     <string name="monero_skip_ahead">İleri atla</string>
+    <string name="monero_trust_plaintext">Buna şifreleme olmadan bağlanılıyor; aradaki ağda olan herkes aynısını yapabilir: okuyabilir ya da değiştirebilir.</string>
 </resources>

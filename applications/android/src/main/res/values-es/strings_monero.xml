@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">El nodo de otra persona, por Tor</string>
     <string name="monero_trust_onion_body">Ve tus transacciones pero no de dónde vinieron.</string>
     <string name="monero_trust_public_title">El nodo de otra persona</string>
-    <string name="monero_trust_public_body">Ve tu dirección y tus transacciones juntas. Dandelion++ oculta el origen de una transacción ante el resto de la red — no puede ocultarlo del nodo al que se la entregaste. Correr tu propio nodo es la solución.</string>
+    <string name="monero_trust_public_body">Ve tu dirección y tus transacciones juntas. Dandelion++ oculta el origen de una transacción al resto de la red — no puede ocultarlo al nodo al que se la entregaste. También puede mentir: tu saldo y los pagos que ves son su versión de la cadena, y aquí nada la contrasta con una segunda fuente. Usar el tuyo propio resuelve ambas cosas.</string>
     <string name="monero_wallet_title">Billetera</string>
     <string name="monero_no_wallet_key_title">No hay clave de billetera en este dispositivo</string>
     <string name="monero_no_wallet_key_body">Esta instalación terminó la configuración antes de que la app conservara la billetera, así que no hay con qué escanear. Esperar no lo va a arreglar — restaura desde un respaldo, o borra los datos de la app y configúrala de nuevo.</string>
@@ -42,4 +42,5 @@
     <string name="monero_last_window_failed">La última ventana falló: %1$s</string>
     <string name="monero_rescan_hint">Esta billetera está escaneando desde el principio de la cadena, lo que toma mucho más tiempo del necesario si se creó hace poco.</string>
     <string name="monero_skip_ahead">Saltar adelante</string>
+    <string name="monero_trust_plaintext">A este se llega sin cifrado, así que cualquiera en la red entre tú y él puede hacer lo mismo: leerlo, o cambiarlo.</string>
 </resources>

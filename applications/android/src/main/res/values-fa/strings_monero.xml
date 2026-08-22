@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">نود کس دیگر، از راه Tor</string>
     <string name="monero_trust_onion_body">تراکنش‌هایت را می‌بیند اما نه اینکه از کجا آمده‌اند.</string>
     <string name="monero_trust_public_title">نود کس دیگر</string>
-    <string name="monero_trust_public_body">نشانی و تراکنش‌هایت را با هم می‌بیند. Dandelion++ خاستگاه تراکنش را از بقیهٔ شبکه پنهان می‌کند — اما نه از نودی که خودت تحویلش دادی. راه‌حل، راه انداختن نود خودت است.</string>
+    <string name="monero_trust_public_body">آدرس و تراکنش‌هایت را با هم می‌بیند. Dandelion++ منشأ یک تراکنش را از بقیهٔ شبکه پنهان می‌کند — نه از گرهی که به آن سپرده‌ای. می‌تواند دروغ هم بگوید: موجودی و پرداخت‌هایی که می‌بینی روایت او از زنجیره است و اینجا چیزی آن را با منبع دومی نمی‌سنجد. گرهٔ خودت هر دو را حل می‌کند.</string>
     <string name="monero_wallet_title">کیف پول</string>
     <string name="monero_no_wallet_key_title">کلید کیف پول روی این دستگاه نیست</string>
     <string name="monero_no_wallet_key_body">این نصب پیش از آنکه برنامه کیف پول را نگه دارد راه‌اندازی را تمام کرده، پس چیزی برای اسکن نیست. صبر کردن درستش نمی‌کند — از پشتیبان بازیابی کن، یا دادهٔ برنامه را پاک کن و از نو راه بینداز.</string>
@@ -42,4 +42,5 @@
     <string name="monero_last_window_failed">آخرین پنجره ناموفق بود: %1$s</string>
     <string name="monero_rescan_hint">این کیف پول از ابتدای زنجیره اسکن می‌کند؛ اگر تازه ساخته شده باشد، این خیلی بیشتر از حد لازم طول می‌کشد.</string>
     <string name="monero_skip_ahead">پرش به جلو</string>
+    <string name="monero_trust_plaintext">به این یکی بدون رمزگذاری وصل می‌شوی، پس هرکسی در شبکهٔ میان راه هم می‌تواند همان کار را بکند: بخواند یا تغییر دهد.</string>
 </resources>

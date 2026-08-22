@@ -24,7 +24,8 @@
     <string name="monero_trust_onion_title">Someone else\'s node, over Tor</string>
     <string name="monero_trust_onion_body">It sees your transactions but not where they came from.</string>
     <string name="monero_trust_public_title">Someone else\'s node</string>
-    <string name="monero_trust_public_body">It sees your address and your transactions together. Dandelion++ hides a transaction\'s origin from the rest of the network — it cannot hide it from the node you handed it to. Running your own is the fix.</string>
+    <string name="monero_trust_public_body">It sees your address and your transactions together. Dandelion++ hides a transaction\'s origin from the rest of the network — it cannot hide it from the node you handed it to. It can also lie: your balance and the payments you are shown are its account of the chain, which nothing here checks against a second source. Running your own is the fix for both.</string>
+    <string name="monero_trust_plaintext">This one is reached without encryption, so anyone on the network between here and it can do the same — read it, or change it.</string>
     <string name="monero_wallet_title">Wallet</string>
     <string name="monero_no_wallet_key_title">No wallet key on this device</string>
     <string name="monero_no_wallet_key_body">This install finished setup before the app kept the wallet, so there is nothing to scan with. Waiting will not fix it — restore from a backup, or clear the app\'s data and set up again.</string>

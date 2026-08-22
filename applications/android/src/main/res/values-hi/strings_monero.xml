@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">किसी और का नोड, Tor के ऊपर</string>
     <string name="monero_trust_onion_body">उसे आपके ट्रांज़ैक्शन दिखते हैं, पर यह नहीं कि वे कहाँ से आए।</string>
     <string name="monero_trust_public_title">किसी और का नोड</string>
-    <string name="monero_trust_public_body">उसे आपका पता और आपके ट्रांज़ैक्शन साथ-साथ दिखते हैं। Dandelion++ ट्रांज़ैक्शन का स्रोत बाकी नेटवर्क से छिपाता है — उस नोड से नहीं छिपा सकता जिसे आपने वह थमाया। इलाज एक ही है: अपना नोड चलाना।</string>
+    <string name="monero_trust_public_body">यह तुम्हारा पता और तुम्हारे लेन-देन एक साथ देखता है। Dandelion++ लेन-देन का स्रोत बाक़ी नेटवर्क से छिपाता है — उस नोड से नहीं जिसे तुमने वह दिया। यह झूठ भी बोल सकता है: तुम्हारा बैलेंस और दिखाए गए भुगतान इसकी बताई हुई चेन हैं, और यहाँ कुछ भी उसे दूसरे स्रोत से नहीं मिलाता। अपना नोड चलाना दोनों का हल है।</string>
     <string name="monero_wallet_title">वॉलेट</string>
     <string name="monero_no_wallet_key_title">इस डिवाइस पर वॉलेट कुंजी नहीं</string>
     <string name="monero_no_wallet_key_body">इस इंस्टॉल का सेटअप ऐप के वॉलेट सँभालने से पहले पूरा हो गया था, इसलिए स्कैन करने को कुछ नहीं है। इंतज़ार से यह ठीक नहीं होगा — बैकअप से रीस्टोर करें, या ऐप का डेटा साफ़ करके दोबारा सेटअप करें।</string>
@@ -42,4 +42,5 @@
     <string name="monero_last_window_failed">पिछली विंडो विफल: %1$s</string>
     <string name="monero_rescan_hint">यह वॉलेट चेन की शुरुआत से स्कैन कर रहा है — हाल में बने वॉलेट के लिए यह ज़रूरत से कहीं ज़्यादा लंबा है।</string>
     <string name="monero_skip_ahead">आगे कूदें</string>
+    <string name="monero_trust_plaintext">इस तक बिना एन्क्रिप्शन के पहुँचा जाता है, तो बीच के नेटवर्क पर मौजूद कोई भी यही कर सकता है — पढ़ना, या बदलना।</string>
 </resources>

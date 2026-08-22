@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">Fremder Node, über Tor</string>
     <string name="monero_trust_onion_body">Er sieht deine Transaktionen, aber nicht, woher sie kommen.</string>
     <string name="monero_trust_public_title">Fremder Node</string>
-    <string name="monero_trust_public_body">Er sieht deine Adresse und deine Transaktionen zusammen. Dandelion++ verbirgt den Ursprung einer Transaktion vor dem Rest des Netzwerks — nicht vor dem Node, dem du sie übergibst. Die Lösung ist ein eigener Node.</string>
+    <string name="monero_trust_public_body">Er sieht deine Adresse und deine Transaktionen zusammen. Dandelion++ verbirgt den Ursprung einer Transaktion vor dem übrigen Netz — nicht vor dem Knoten, dem du sie gegeben hast. Er kann auch lügen: dein Guthaben und die angezeigten Zahlungen sind seine Darstellung der Kette, die hier nichts mit einer zweiten Quelle abgleicht. Ein eigener Knoten löst beides.</string>
     <string name="monero_wallet_title">Wallet</string>
     <string name="monero_no_wallet_key_title">Kein Wallet-Schlüssel auf diesem Gerät</string>
     <string name="monero_no_wallet_key_body">Diese Installation hat die Einrichtung abgeschlossen, bevor die App die Wallet aufbewahrte — es gibt also nichts, womit sich scannen ließe. Warten hilft nicht: Stelle aus einem Backup wieder her, oder lösche die App-Daten und richte neu ein.</string>
@@ -42,4 +42,5 @@
     <string name="monero_last_window_failed">Letztes Fenster fehlgeschlagen: %1$s</string>
     <string name="monero_rescan_hint">Diese Wallet liest vom Anfang der Blockchain — das dauert weit länger als nötig, falls sie erst kürzlich angelegt wurde.</string>
     <string name="monero_skip_ahead">Vorspringen</string>
+    <string name="monero_trust_plaintext">Dieser wird unverschlüsselt erreicht, also kann jeder im Netz dazwischen dasselbe tun: mitlesen oder verändern.</string>
 </resources>

@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">Чужой узел, через Tor</string>
     <string name="monero_trust_onion_body">Он видит твои транзакции, но не видит, откуда они пришли.</string>
     <string name="monero_trust_public_title">Чужой узел</string>
-    <string name="monero_trust_public_body">Он видит твой адрес и твои транзакции вместе. Dandelion++ прячет происхождение транзакции от остальной сети — но не от узла, которому она вручена. Решение — свой узел.</string>
+    <string name="monero_trust_public_body">Он видит ваш адрес и ваши транзакции вместе. Dandelion++ скрывает источник транзакции от остальной сети — но не от узла, которому вы её отдали. Он ещё и может лгать: баланс и показанные платежи — это его версия цепочки, и здесь ничто не сверяет её со вторым источником. Свой узел решает и то и другое.</string>
     <string name="monero_wallet_title">Кошелёк</string>
     <string name="monero_no_wallet_key_title">На этом устройстве нет ключа кошелька</string>
     <string name="monero_no_wallet_key_body">Эта установка завершила настройку до того, как приложение стало хранить кошелёк, так что сканировать нечем. Ожидание не поможет — восстановись из резервной копии или сотри данные приложения и настрой заново.</string>
@@ -44,4 +44,5 @@
     <string name="monero_last_window_failed">Последнее окно не удалось: %1$s</string>
     <string name="monero_rescan_hint">Кошелёк сканирует цепочку с самого начала — если он создан недавно, это куда дольше, чем нужно.</string>
     <string name="monero_skip_ahead">Перемотать вперёд</string>
+    <string name="monero_trust_plaintext">К этому узлу подключение без шифрования, так что любой в сети по пути может сделать то же самое — прочитать или подменить.</string>
 </resources>

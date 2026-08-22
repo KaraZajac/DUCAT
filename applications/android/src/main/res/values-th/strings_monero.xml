@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">โหนดของคนอื่น ผ่าน Tor</string>
     <string name="monero_trust_onion_body">มันเห็นธุรกรรมของคุณ แต่ไม่เห็นว่ามาจากที่ใด</string>
     <string name="monero_trust_public_title">โหนดของคนอื่น</string>
-    <string name="monero_trust_public_body">มันเห็นที่อยู่และธุรกรรมของคุณคู่กัน Dandelion++ ซ่อนต้นทางของธุรกรรมจากส่วนอื่นของเครือข่าย — แต่ซ่อนจากโหนดที่คุณยื่นให้เองไม่ได้ ทางแก้คือรันโหนดของคุณเอง</string>
+    <string name="monero_trust_public_body">มันเห็นที่อยู่ของคุณและธุรกรรมของคุณพร้อมกัน Dandelion++ ซ่อนต้นทางของธุรกรรมจากเครือข่ายส่วนที่เหลือ — แต่ซ่อนจากโหนดที่คุณส่งให้ไม่ได้ และมันโกหกได้ด้วย ยอดเงินและการจ่ายที่คุณเห็นคือเรื่องเล่าของมันเกี่ยวกับเชน ซึ่งที่นี่ไม่มีอะไรเทียบกับแหล่งที่สอง การรันโหนดของคุณเองแก้ได้ทั้งสองอย่าง</string>
     <string name="monero_wallet_title">กระเป๋าเงิน</string>
     <string name="monero_no_wallet_key_title">ไม่มีคีย์กระเป๋าบนเครื่องนี้</string>
     <string name="monero_no_wallet_key_body">การติดตั้งนี้ตั้งค่าเสร็จก่อนที่แอปจะเริ่มเก็บกระเป๋า จึงไม่มีอะไรให้ใช้สแกน การรอไม่ช่วยอะไร — กู้คืนจากไฟล์สำรอง หรือล้างข้อมูลแอปแล้วตั้งค่าใหม่</string>
@@ -41,4 +41,5 @@
     <string name="monero_last_window_failed">ช่วงล่าสุดล้มเหลว: %1$s</string>
     <string name="monero_rescan_hint">กระเป๋านี้กำลังสแกนตั้งแต่ต้นเชน ซึ่งนานเกินจำเป็นมากหากมันเพิ่งถูกสร้างไม่นาน</string>
     <string name="monero_skip_ahead">ข้ามไปข้างหน้า</string>
+    <string name="monero_trust_plaintext">ตัวนี้เชื่อมต่อโดยไม่เข้ารหัส ใครก็ตามบนเครือข่ายระหว่างทางจึงทำแบบเดียวกันได้ — อ่าน หรือแก้</string>
 </resources>

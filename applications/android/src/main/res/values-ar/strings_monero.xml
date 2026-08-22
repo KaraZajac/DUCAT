@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">عقدة شخص آخر، عبر Tor</string>
     <string name="monero_trust_onion_body">ترى معاملاتك لكن لا ترى من أين أتت.</string>
     <string name="monero_trust_public_title">عقدة شخص آخر</string>
-    <string name="monero_trust_public_body">ترى عنوانك ومعاملاتك معًا. يخفي Dandelion++ مصدر المعاملة عن بقية الشبكة — لكنه لا يستطيع إخفاءه عن العقدة التي سلّمتها إياها. تشغيل عقدتك الخاصة هو الحل.</string>
+    <string name="monero_trust_public_body">يرى عنوانك ومعاملاتك معًا. يخفي Dandelion++ مصدر المعاملة عن بقية الشبكة — لا عن العقدة التي سلّمتها إليها. ويمكنه أيضًا أن يكذب: رصيدك والمدفوعات المعروضة هي روايته للسلسلة، ولا شيء هنا يقارنها بمصدر ثانٍ. تشغيل عقدتك يحل الأمرين.</string>
     <string name="monero_wallet_title">المحفظة</string>
     <string name="monero_no_wallet_key_title">لا مفتاح محفظة على هذا الجهاز</string>
     <string name="monero_no_wallet_key_body">أُكمل الإعداد في هذا التثبيت قبل أن يحتفظ التطبيق بالمحفظة، فليس هناك ما يُفحص به. الانتظار لن يصلح الأمر — استعد من نسخة احتياطية، أو امسح بيانات التطبيق وأعد الإعداد.</string>
@@ -46,4 +46,5 @@
     <string name="monero_last_window_failed">فشلت النافذة الأخيرة: %1$s</string>
     <string name="monero_rescan_hint">هذه المحفظة تفحص من بداية السلسلة، وهو ما يستغرق أطول بكثير مما يلزم إن كانت حديثة الإنشاء.</string>
     <string name="monero_skip_ahead">تجاوز إلى الأمام</string>
+    <string name="monero_trust_plaintext">يجري الوصول إلى هذه دون تشفير، فأي جهة على الشبكة بينك وبينها تستطيع الشيء نفسه: القراءة أو التغيير.</string>
 </resources>

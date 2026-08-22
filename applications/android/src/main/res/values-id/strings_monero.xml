@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">Node orang lain, lewat Tor</string>
     <string name="monero_trust_onion_body">Ia melihat transaksimu tapi tidak tahu dari mana asalnya.</string>
     <string name="monero_trust_public_title">Node orang lain</string>
-    <string name="monero_trust_public_body">Ia melihat alamat dan transaksimu sekaligus. Dandelion++ menyembunyikan asal transaksi dari jaringan lainnya — tapi tidak dari node yang kamu serahi. Menjalankan node sendiri adalah solusinya.</string>
+    <string name="monero_trust_public_body">Ia melihat alamatmu dan transaksimu sekaligus. Dandelion++ menyembunyikan asal sebuah transaksi dari sisa jaringan — bukan dari node yang kamu serahi. Ia juga bisa berbohong: saldomu dan pembayaran yang ditampilkan adalah versinya tentang rantai, dan tidak ada apa pun di sini yang membandingkannya dengan sumber kedua. Menjalankan node sendiri menyelesaikan keduanya.</string>
     <string name="monero_wallet_title">Dompet</string>
     <string name="monero_no_wallet_key_title">Tidak ada kunci dompet di perangkat ini</string>
     <string name="monero_no_wallet_key_body">Instalasi ini menyelesaikan penyiapan sebelum aplikasi menyimpan dompet, jadi tidak ada yang bisa dipindai. Menunggu tidak akan memperbaikinya — pulihkan dari cadangan, atau hapus data aplikasi dan siapkan ulang.</string>
@@ -41,4 +41,5 @@
     <string name="monero_last_window_failed">Jendela terakhir gagal: %1$s</string>
     <string name="monero_rescan_hint">Dompet ini memindai dari awal blockchain, yang jauh lebih lama dari seharusnya kalau dompet dibuat baru-baru ini.</string>
     <string name="monero_skip_ahead">Lompati</string>
+    <string name="monero_trust_plaintext">Yang ini dijangkau tanpa enkripsi, jadi siapa pun di jaringan di antaranya bisa melakukan hal yang sama: membaca, atau mengubah.</string>
 </resources>

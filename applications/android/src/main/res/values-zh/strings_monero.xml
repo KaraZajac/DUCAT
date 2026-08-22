@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">别人的节点，走 Tor</string>
     <string name="monero_trust_onion_body">它能看到你的交易，但看不到交易来自哪里。</string>
     <string name="monero_trust_public_title">别人的节点</string>
-    <string name="monero_trust_public_body">它能把你的地址和交易放在一起看。Dandelion++ 能对网络其余部分隐藏交易的来源 — 却藏不过你亲手递交的那个节点。自己跑一个节点才是解法。</string>
+    <string name="monero_trust_public_body">它同时看到你的地址和你的交易。Dandelion++ 对网络其余部分隐藏交易来源——但瞒不过你交给它的那个节点。它也可能说谎：你的余额和看到的付款都是它对链的说法，这里没有任何东西拿第二个来源去核对。自己跑一个节点能同时解决这两件事。</string>
     <string name="monero_wallet_title">钱包</string>
     <string name="monero_no_wallet_key_title">此设备上没有钱包密钥</string>
     <string name="monero_no_wallet_key_body">这次安装在应用保存钱包之前就完成了设置，所以没有可用来扫描的东西。等下去也没用 — 从备份恢复，或清除应用数据重新设置。</string>
@@ -41,4 +41,5 @@
     <string name="monero_last_window_failed">上一窗口失败：%1$s</string>
     <string name="monero_rescan_hint">这个钱包正从链的起点扫描；如果它是最近创建的，这比实际需要的时间长得多。</string>
     <string name="monero_skip_ahead">跳过一段</string>
+    <string name="monero_trust_plaintext">连到这一个没有加密，所以中间网络上的任何人都能做同样的事：读取，或者篡改。</string>
 </resources>

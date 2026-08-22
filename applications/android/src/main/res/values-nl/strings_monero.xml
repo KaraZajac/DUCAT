@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">De node van iemand anders, via Tor</string>
     <string name="monero_trust_onion_body">Die ziet je transacties, maar niet waar ze vandaan komen.</string>
     <string name="monero_trust_public_title">De node van iemand anders</string>
-    <string name="monero_trust_public_body">Die ziet je adres en je transacties samen. Dandelion++ verbergt de oorsprong van een transactie voor de rest van het netwerk — niet voor de node waaraan je hem afgeeft. Zelf een node draaien is de oplossing.</string>
+    <string name="monero_trust_public_body">Hij ziet je adres en je transacties samen. Dandelion++ verbergt de herkomst van een transactie voor de rest van het netwerk — niet voor de node waaraan je hem gaf. Hij kan ook liegen: je saldo en de getoonde betalingen zijn zijn versie van de keten, die hier met geen tweede bron wordt vergeleken. Een eigen node lost beide op.</string>
     <string name="monero_wallet_title">Wallet</string>
     <string name="monero_no_wallet_key_title">Geen walletsleutel op dit apparaat</string>
     <string name="monero_no_wallet_key_body">Deze installatie heeft het instellen afgerond voordat de app de wallet bewaarde, dus er is niets om mee te scannen. Wachten lost dit niet op — herstel vanuit een back-up, of wis de gegevens van de app en stel opnieuw in.</string>
@@ -42,4 +42,5 @@
     <string name="monero_last_window_failed">Laatste venster mislukt: %1$s</string>
     <string name="monero_rescan_hint">Deze wallet scant vanaf het begin van de keten, wat veel langer duurt dan nodig als hij recent is gemaakt.</string>
     <string name="monero_skip_ahead">Spring vooruit</string>
+    <string name="monero_trust_plaintext">Deze wordt onversleuteld bereikt, dus iedereen op het netwerk ertussen kan hetzelfde: meelezen of veranderen.</string>
 </resources>

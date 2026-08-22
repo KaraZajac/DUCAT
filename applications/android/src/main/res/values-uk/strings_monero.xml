@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">Чужий вузол, через Tor</string>
     <string name="monero_trust_onion_body">Він бачить твої транзакції, але не бачить, звідки вони прийшли.</string>
     <string name="monero_trust_public_title">Чужий вузол</string>
-    <string name="monero_trust_public_body">Він бачить твою адресу разом із транзакціями. Dandelion++ ховає походження транзакції від решти мережі — але не від вузла, якому ти її віддаєш. Ліки — власний вузол.</string>
+    <string name="monero_trust_public_body">Він бачить вашу адресу і ваші транзакції разом. Dandelion++ приховує походження транзакції від решти мережі — але не від вузла, якому ви її віддали. Він також може брехати: баланс і показані платежі — це його версія ланцюга, і ніщо тут не звіряє її з другим джерелом. Власний вузол розв’язує обидві проблеми.</string>
     <string name="monero_wallet_title">Гаманець</string>
     <string name="monero_no_wallet_key_title">На цьому пристрої немає ключа гаманця</string>
     <string name="monero_no_wallet_key_body">Ця інсталяція завершила налаштування ще до того, як застосунок почав зберігати гаманець, тож сканувати нема чим. Чекання не допоможе — віднови з резервної копії або зітри дані застосунку й налаштуй заново.</string>
@@ -44,4 +44,5 @@
     <string name="monero_last_window_failed">Останнє вікно не вдалося: %1$s</string>
     <string name="monero_rescan_hint">Цей гаманець сканує з самого початку ланцюга — це набагато довше, ніж треба, якщо його створено нещодавно.</string>
     <string name="monero_skip_ahead">Перескочити вперед</string>
+    <string name="monero_trust_plaintext">До цього вузла з’єднання без шифрування, тож будь-хто в мережі по дорозі може те саме — прочитати або підмінити.</string>
 </resources>

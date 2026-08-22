@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">Node của người khác, qua Tor</string>
     <string name="monero_trust_onion_body">Nó thấy giao dịch của bạn nhưng không thấy chúng đến từ đâu.</string>
     <string name="monero_trust_public_title">Node của người khác</string>
-    <string name="monero_trust_public_body">Nó thấy địa chỉ và giao dịch của bạn cùng lúc. Dandelion++ giấu nguồn gốc của một giao dịch khỏi phần còn lại của mạng — nhưng không giấu được với node bạn trao nó. Cách chữa là tự chạy node.</string>
+    <string name="monero_trust_public_body">Nó thấy địa chỉ và các giao dịch của bạn cùng lúc. Dandelion++ giấu nguồn gốc giao dịch khỏi phần còn lại của mạng — nhưng không giấu được khỏi nút bạn đã đưa. Nó cũng có thể nói dối: số dư và các khoản thanh toán bạn thấy là lời kể của nó về chuỗi, và ở đây không có gì đối chiếu với nguồn thứ hai. Chạy nút của riêng bạn giải quyết cả hai.</string>
     <string name="monero_wallet_title">Ví</string>
     <string name="monero_no_wallet_key_title">Không có khóa ví trên thiết bị này</string>
     <string name="monero_no_wallet_key_body">Bản cài này hoàn tất thiết lập trước khi ứng dụng lưu ví, nên không có gì để quét. Chờ cũng không giải quyết được — hãy khôi phục từ bản sao lưu, hoặc xóa dữ liệu ứng dụng và thiết lập lại.</string>
@@ -41,4 +41,5 @@
     <string name="monero_last_window_failed">Cửa sổ gần nhất thất bại: %1$s</string>
     <string name="monero_rescan_hint">Ví này đang quét từ đầu chuỗi, lâu hơn cần thiết rất nhiều nếu nó mới được tạo gần đây.</string>
     <string name="monero_skip_ahead">Nhảy tới</string>
+    <string name="monero_trust_plaintext">Nút này được kết nối không mã hoá, nên bất kỳ ai trên đường truyền cũng làm được điều tương tự: đọc, hoặc sửa.</string>
 </resources>

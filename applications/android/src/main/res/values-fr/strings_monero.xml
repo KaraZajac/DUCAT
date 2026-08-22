@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">Le nœud de quelqu\'un d\'autre, via Tor</string>
     <string name="monero_trust_onion_body">Il voit tes transactions mais pas d\'où elles viennent.</string>
     <string name="monero_trust_public_title">Le nœud de quelqu\'un d\'autre</string>
-    <string name="monero_trust_public_body">Il voit ton adresse et tes transactions ensemble. Dandelion++ cache l\'origine d\'une transaction au reste du réseau — il ne peut pas la cacher au nœud auquel tu l\'as remise. Faire tourner le tien est la solution.</string>
+    <string name="monero_trust_public_body">Il voit ton adresse et tes transactions ensemble. Dandelion++ cache l’origine d’une transaction au reste du réseau — pas au nœud à qui tu l’as remise. Il peut aussi mentir : ton solde et les paiements affichés sont sa version de la chaîne, que rien ici ne recoupe avec une autre source. Faire tourner le tien règle les deux.</string>
     <string name="monero_wallet_title">Portefeuille</string>
     <string name="monero_no_wallet_key_title">Aucune clé de portefeuille sur cet appareil</string>
     <string name="monero_no_wallet_key_body">Cette installation a terminé la configuration avant que l\'app ne conserve le portefeuille, donc il n\'y a rien avec quoi lire la chaîne. Attendre n\'y changera rien — restaure depuis une sauvegarde, ou efface les données de l\'app et recommence la configuration.</string>
@@ -42,4 +42,5 @@
     <string name="monero_last_window_failed">Dernière fenêtre en échec : %1$s</string>
     <string name="monero_rescan_hint">Ce portefeuille lit la chaîne depuis le début, ce qui prend bien plus longtemps que nécessaire s\'il a été créé récemment.</string>
     <string name="monero_skip_ahead">Sauter en avant</string>
+    <string name="monero_trust_plaintext">Celui-ci est joint sans chiffrement : n’importe qui sur le réseau entre ici et lui peut en faire autant — lire, ou modifier.</string>
 </resources>

@@ -24,7 +24,7 @@
     <string name="monero_trust_onion_title">남의 노드, Tor 경유</string>
     <string name="monero_trust_onion_body">내 거래는 보이지만 어디서 왔는지는 보이지 않아요.</string>
     <string name="monero_trust_public_title">남의 노드</string>
-    <string name="monero_trust_public_body">내 주소와 거래를 함께 봐요. Dandelion++는 거래의 출처를 네트워크의 나머지로부터 숨겨 주지만, 거래를 건네받은 노드에게서는 숨기지 못해요. 해결책은 직접 노드를 돌리는 거예요.</string>
+    <string name="monero_trust_public_body">네 주소와 거래를 함께 봐. Dandelion++는 거래의 출처를 네트워크의 나머지로부터 숨기지만, 네가 건넨 그 노드로부터는 숨기지 못해. 거짓말도 할 수 있어. 잔액과 보이는 결제는 그 노드가 말하는 체인이고, 여기서는 두 번째 출처와 대조하지 않아. 직접 노드를 돌리면 둘 다 해결돼.</string>
     <string name="monero_wallet_title">지갑</string>
     <string name="monero_no_wallet_key_title">이 기기에 지갑 키가 없어요</string>
     <string name="monero_no_wallet_key_body">이 설치본은 앱이 지갑을 보관하기 전에 설정을 마쳐서, 스캔할 대상이 없어요. 기다려도 해결되지 않아요 — 백업에서 복원하거나, 앱 데이터를 지우고 다시 설정하세요.</string>
@@ -41,4 +41,5 @@
     <string name="monero_last_window_failed">마지막 구간 실패: %1$s</string>
     <string name="monero_rescan_hint">이 지갑은 체인 처음부터 스캔하고 있어요. 최근에 만든 지갑이라면 그럴 필요가 없는데도 훨씬 오래 걸리는 중이에요.</string>
     <string name="monero_skip_ahead">건너뛰기</string>
+    <string name="monero_trust_plaintext">이건 암호화 없이 연결돼서, 중간 네트워크에 있는 누구든 똑같이 할 수 있어 — 읽거나, 바꾸거나.</string>
 </resources>
