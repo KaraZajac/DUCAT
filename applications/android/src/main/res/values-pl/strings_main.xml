@@ -14,6 +14,7 @@
     <string name="main_received">Otrzymane</string>
     <string name="main_card_link_title">Dodać kontakt?</string>
     <string name="main_card_link_body">Ten link otwiera wizytówkę kontaktu „%1$s”. Dodać? Potem możecie do siebie pisać i płacić.</string>
+    <string name="main_card_link_known">Masz już ten kontakt jako %1$s. Dane zostaną zaktualizowane, ale adres płatności nie zmieni się, dopóki tego nie zatwierdzisz.</string>
     <string name="main_card_link_add">Dodaj</string>
     <string name="main_card_link_not_now">Nie teraz</string>
     <string name="main_card_link_failed_title">Nie udało się dodać tej wizytówki</string>

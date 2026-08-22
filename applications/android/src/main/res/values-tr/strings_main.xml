@@ -14,6 +14,7 @@
     <string name="main_received">Alındı</string>
     <string name="main_card_link_title">Kişi eklensin mi?</string>
     <string name="main_card_link_body">Bu bağlantı “%1$s” için bir kişi kartı açıyor. Eklensin mi? Sonrasında birbirinize yazabilir ve ödeme yapabilirsiniz.</string>
+    <string name="main_card_link_known">Bu kişi zaten %1$s olarak kayıtlı. Bilgileri güncellenecek, ancak ödeme adresi siz onaylayana kadar değişmeyecek.</string>
     <string name="main_card_link_add">Ekle</string>
     <string name="main_card_link_not_now">Şimdi değil</string>
     <string name="main_card_link_failed_title">Kart eklenemedi</string>

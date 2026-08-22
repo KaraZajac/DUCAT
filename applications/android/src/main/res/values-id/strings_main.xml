@@ -14,6 +14,7 @@
     <string name="main_received">Diterima</string>
     <string name="main_card_link_title">Tambahkan kontak?</string>
     <string name="main_card_link_body">Tautan ini membuka kartu kontak untuk “%1$s”. Tambahkan? Setelah itu kalian bisa saling berkirim pesan dan membayar.</string>
+    <string name="main_card_link_known">Kontak ini sudah ada sebagai %1$s. Detailnya akan diperbarui — tapi alamat pembayarannya tidak berubah sampai Anda setuju.</string>
     <string name="main_card_link_add">Tambah</string>
     <string name="main_card_link_not_now">Nanti saja</string>
     <string name="main_card_link_failed_title">Kartu itu tidak dapat ditambahkan</string>

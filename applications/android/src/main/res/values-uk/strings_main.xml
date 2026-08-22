@@ -14,6 +14,7 @@
     <string name="main_received">Отримано</string>
     <string name="main_card_link_title">Додати контакт?</string>
     <string name="main_card_link_body">Це посилання відкриває картку контакту «%1$s». Додати? Потім ви зможете листуватися й платити одне одному.</string>
+    <string name="main_card_link_known">Цей контакт уже є у вас як %1$s. Дані оновляться, але адреса для оплати не зміниться, доки ви не підтвердите.</string>
     <string name="main_card_link_add">Додати</string>
     <string name="main_card_link_not_now">Не зараз</string>
     <string name="main_card_link_failed_title">Не вдалося додати картку</string>

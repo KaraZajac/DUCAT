@@ -14,6 +14,7 @@
     <string name="main_received">मिला</string>
     <string name="main_card_link_title">संपर्क जोड़ें?</string>
     <string name="main_card_link_body">यह लिंक “%1$s” का संपर्क कार्ड खोलता है। जोड़ें? इसके बाद आप एक-दूसरे को संदेश और भुगतान भेज सकते हैं।</string>
+    <string name="main_card_link_known">यह संपर्क आपके पास पहले से %1$s के रूप में है। इसका विवरण अपडेट होगा — पर भुगतान पता तब तक नहीं बदलेगा जब तक आप स्वीकार न करें।</string>
     <string name="main_card_link_add">जोड़ें</string>
     <string name="main_card_link_not_now">अभी नहीं</string>
     <string name="main_card_link_failed_title">वह कार्ड जोड़ा नहीं जा सका</string>

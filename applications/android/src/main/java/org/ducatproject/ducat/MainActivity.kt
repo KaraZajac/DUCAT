@@ -282,6 +282,12 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     // The name shown is the card's own claim (§16.9), like every name here.
     val tappedCard by MainActivity.claimLink.collectAsState()
     var cardAsk by remember { mutableStateOf<Pair<String, String>?>(null) }
+    // Not a new person. A card naming somebody already in the list is the
+    // ordinary way a contact comes back after losing their phone — and it is
+    // also how an attacker reaches an existing record, since a card carries a
+    // persona with nothing signed over it. Either way "Add Sam?" is the wrong
+    // question, so the dialog asks the right one.
+    var cardKnown by remember { mutableStateOf<Contact?>(null) }
     var cardFail by remember { mutableStateOf<Int?>(null) }
     LaunchedEffect(tappedCard) {
         val uri = tappedCard ?: return@LaunchedEffect
@@ -294,6 +300,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         }.onSuccess { card ->
             if (card.expired) cardFail = R.string.main_card_link_expired
             else cardAsk = uri to card.assertedName.orEmpty()
+            cardKnown = runCatching {
+                val hex = card.persona.joinToString("") { "%02x".format(it) }
+                ContactStore(context).all().firstOrNull { it.personaHex == hex }
+            }.getOrNull()
         }.onFailure {
             DucatLog.w("Main", "card link unreadable: ${it.message}")
             cardFail = org.ducatproject.ducat.ui.claimFailureRes(it)
@@ -331,6 +341,17 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             who,
                         ),
                     )
+                    cardKnown?.let { known ->
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            androidx.compose.ui.res.stringResource(
+                                R.string.main_card_link_known,
+                                org.ducatproject.ducat.ui.isolate(known.displayName()),
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(
                         value = naming,
@@ -376,6 +397,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                         store.markAsked()
                     }
                     cardAsk = null
+                    cardKnown = null
                     scope.launch {
                         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                             runCatching {
@@ -398,7 +420,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 }) { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_add)) }
             },
             dismissButton = {
-                TextButton(onClick = { cardAsk = null }) {
+                TextButton(onClick = { cardAsk = null; cardKnown = null }) {
                     Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_not_now))
                 }
             },

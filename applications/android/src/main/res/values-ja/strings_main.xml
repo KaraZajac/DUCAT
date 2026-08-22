@@ -14,6 +14,7 @@
     <string name="main_received">受取</string>
     <string name="main_card_link_title">連絡先を追加しますか？</string>
     <string name="main_card_link_body">このリンクは「%1$s」の連絡先カードです。追加しますか？追加後はメッセージや支払いをやり取りできます。</string>
+    <string name="main_card_link_known">この連絡先は %1$s としてすでに登録されています。情報は更新されますが、支払い先はあなたが承認するまで変わりません。</string>
     <string name="main_card_link_add">追加</string>
     <string name="main_card_link_not_now">後で</string>
     <string name="main_card_link_failed_title">カードを追加できませんでした</string>

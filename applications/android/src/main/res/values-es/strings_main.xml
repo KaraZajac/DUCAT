@@ -14,6 +14,7 @@
     <string name="main_received">Recibido</string>
     <string name="main_card_link_title">¿Añadir un contacto?</string>
     <string name="main_card_link_body">Este enlace abre una tarjeta de contacto de «%1$s». ¿Añadirle? Después podréis escribiros y pagaros.</string>
+    <string name="main_card_link_known">Ya tienes este contacto como %1$s. Se actualizarán sus datos, pero la dirección de pago no cambiará hasta que lo apruebes.</string>
     <string name="main_card_link_add">Añadir</string>
     <string name="main_card_link_not_now">Ahora no</string>
     <string name="main_card_link_failed_title">No se pudo añadir esa tarjeta</string>

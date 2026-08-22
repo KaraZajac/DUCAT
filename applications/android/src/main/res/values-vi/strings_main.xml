@@ -14,6 +14,7 @@
     <string name="main_received">Đã nhận</string>
     <string name="main_card_link_title">Thêm liên hệ?</string>
     <string name="main_card_link_body">Liên kết này mở thẻ liên hệ của “%1$s”. Thêm chứ? Sau đó hai bên có thể nhắn tin và thanh toán cho nhau.</string>
+    <string name="main_card_link_known">Bạn đã có liên hệ này với tên %1$s. Thông tin sẽ được cập nhật — nhưng địa chỉ thanh toán chưa đổi cho đến khi bạn đồng ý.</string>
     <string name="main_card_link_add">Thêm</string>
     <string name="main_card_link_not_now">Để sau</string>
     <string name="main_card_link_failed_title">Không thể thêm thẻ đó</string>

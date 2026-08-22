@@ -14,6 +14,7 @@
     <string name="main_received">Received</string>
     <string name="main_card_link_title">Add a contact?</string>
     <string name="main_card_link_body">This link opens a contact card for “%1$s”. Add them? You can message and pay each other afterwards.</string>
+    <string name="main_card_link_known">You already have this contact as %1$s. Their details will be updated — but where they get paid will not change until you say so.</string>
     <string name="main_card_link_add">Add</string>
     <string name="main_card_link_not_now">Not now</string>
     <string name="main_card_link_failed_title">That card could not be added</string>

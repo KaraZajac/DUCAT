@@ -14,6 +14,7 @@
     <string name="main_received">مُستلَم</string>
     <string name="main_card_link_title">إضافة جهة اتصال؟</string>
     <string name="main_card_link_body">يفتح هذا الرابط بطاقة اتصال لـ«%1$s». هل تريد الإضافة؟ بعدها يمكنكما التراسل والدفع لبعضكما.</string>
+    <string name="main_card_link_known">لديك هذه الجهة بالفعل باسم %1$s. سيتم تحديث بياناتها — لكن عنوان الدفع لن يتغير حتى توافق.</string>
     <string name="main_card_link_add">إضافة</string>
     <string name="main_card_link_not_now">ليس الآن</string>
     <string name="main_card_link_failed_title">تعذّرت إضافة البطاقة</string>
