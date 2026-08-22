@@ -285,7 +285,10 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
         }
     }
 
-    val regulars = remember {
+    // Keyed: a tab is started against a contact, and the contact you just
+    // added is exactly the one you are about to start it for.
+    val contactsV by ContactStore.changes.collectAsState()
+    val regulars = remember(contactsV) {
         ContactStore(context).all().filter { it.theirBundle != null }
             .sortedBy { it.displayName().lowercase() }
     }

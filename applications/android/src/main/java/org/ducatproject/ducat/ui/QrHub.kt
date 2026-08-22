@@ -201,8 +201,12 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
         org.ducatproject.ducat.nfc.Tap.offered = uri
         onDispose { org.ducatproject.ducat.nfc.Tap.offered = null }
     }
-    val name = remember { MyProfile(context).name() }
-    val pic = remember { MyProfile(context).avatar() }
+    // Keyed on the store, because this is the screen you hold up to
+    // somebody. A name or a picture set a minute ago and not shown here is
+    // wrong in front of a person, which is the worst place for it.
+    val profileV by ContactStore.changes.collectAsState()
+    val name = remember(profileV) { MyProfile(context).name() }
+    val pic = remember(profileV) { MyProfile(context).avatar() }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),

@@ -39,9 +39,13 @@ import org.ducatproject.ducat.WalletStore
 fun DonateScreen() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    val address = remember { WalletStore(context).address() }
-    val name = remember { MyProfile(context).name() }
-    val pic = remember { MyProfile(context).avatar() }
+    // Keyed, like `since` below already is. The version was being collected
+    // three lines up and then not used for the three values that actually
+    // change: somebody who set a name or a picture and came back to their
+    // donation box found it still saying whatever it said before.
+    val address = remember(version) { WalletStore(context).address() }
+    val name = remember(version) { MyProfile(context).name() }
+    val pic = remember(version) { MyProfile(context).avatar() }
 
     // What has arrived since this screen was opened — the busker's glance.
     // Counted by key image so a rescan cannot inflate it, and measured from
