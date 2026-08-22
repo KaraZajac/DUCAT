@@ -222,23 +222,30 @@ private fun ChooseTarget(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(4.dp))
-            LazyColumn(Modifier.heightIn(max = 240.dp)) {
-                items(contacts, key = { it.personaHex }) { c ->
-                    ListItem(
-                        headlineContent = { Text(c.displayName()) },
-                        supportingContent = {
-                            Text(
-                                c.personaHex.take(16) + "…",
-                                fontFamily = FontFamily.Monospace,
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                        leadingContent = { Avatar(c.displayName()) },
-                        modifier = Modifier.clickable { onPick(PayTarget.ToContact(c)) },
-                    )
-                }
+            // A plain Column, not a LazyColumn.
+            //
+            // The page already scrolls, and a lazy list inside a scroller of
+            // the same direction has no height to be lazy against — hence the
+            // 240dp cap that used to be here, which bought a second scroll
+            // gesture fighting the page and a fourth contact sliced through the
+            // middle, with half a screen of empty space below the button. A
+            // contact list is a few dozen rows at the outside; the page scroller
+            // can have all of them.
+            contacts.forEach { c ->
+                ListItem(
+                    headlineContent = { Text(c.displayName()) },
+                    supportingContent = {
+                        Text(
+                            c.personaHex.take(16) + "…",
+                            fontFamily = FontFamily.Monospace,
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    leadingContent = { Avatar(c.displayName()) },
+                    modifier = Modifier.clickable { onPick(PayTarget.ToContact(c)) },
+                )
             }
         }
 
