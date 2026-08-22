@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -612,7 +613,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             Modifier.weight(1f).fillMaxWidth(),
             state = listState,
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            // Two, not eight. Eight between every pair of messages made a run
+            // of three from one person read as three separate remarks; the
+            // gap that says "same person, still talking" has to be smaller
+            // than the one that says "someone else, or later". The larger gap
+            // comes back as top padding on whichever message starts a run —
+            // see `startsRun` below.
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             item {
                 Text(
@@ -634,7 +641,20 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             // withdrawal — none of them is something somebody typed, and all
             // of them carry a body written for the protocol rather than for a
             // reader.
-            items(messages.filter { it.kind !in setOf(4, 8, 9, 10) }) { m ->
+            // Hoisted, because a message needs to know what sits either side
+            // of it to know whether it is part of a run.
+            val shown = messages.filter { it.kind !in setOf(4, 8, 9, 10) }
+            itemsIndexed(shown) { at, m ->
+                // A run is consecutive plain messages from the same side,
+                // close together in time. Only kind 0: a bill, a payment or a
+                // reservation is a card that reads as one thing on its own,
+                // and stacking those tight makes a form look like a list.
+                fun runsWith(other: StoredMessage?) =
+                    other != null && m.kind == 0 && other.kind == 0 &&
+                        other.outgoing == m.outgoing &&
+                        kotlin.math.abs(m.timestamp - other.timestamp) < RUN_GAP_SECONDS
+                val startsRun = !runsWith(shown.getOrNull(at - 1))
+                val endsRun = !runsWith(shown.getOrNull(at + 1))
                 if (m.kind == 5) {
                     // A retraction is a remark about the thread, not a message
                     // in it: one quiet centred line, no bubble and no buttons —
@@ -656,11 +676,20 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )
-                    return@items
+                    return@itemsIndexed
                 }
-                Column {
+                Column(Modifier.padding(top = if (startsRun) 6.dp else 0.dp)) {
                     Bubble(
                         m, c.theirReadUpTo,
+                        // The clock and the ticks go under the *last* of a run
+                        // rather than under each of them. Three timestamps
+                        // stacked down the right edge of three messages sent
+                        // in the same minute is noise standing where the next
+                        // message should be.
+                        showMeta = endsRun,
+                        // And only the last of a run wears the tail corner, so
+                        // a run reads as one shape with one point on it.
+                        tail = endsRun,
                         // A later kind-2 notice for the same amount is this
                         // request being answered — the amount is the only
                         // thread from a payment back to the bill it settles.
@@ -966,6 +995,15 @@ private fun ChatSettingsDialog(
     )
 }
 
+/**
+ * How close together two messages have to be to read as one run.
+ *
+ * Five minutes. Long enough that somebody typing three lines in a row gets
+ * them grouped, short enough that a reply an hour later starts afresh with
+ * its own clock beside it.
+ */
+private const val RUN_GAP_SECONDS = 300L
+
 /** Seal, chain, append. Fails as a unit — nothing is stored unsent. */
 private fun sendOne(
     context: android.content.Context,
@@ -981,6 +1019,11 @@ private fun Bubble(
     theirReadUpTo: Long? = null,
     paid: Boolean = false,
     cancelled: Boolean = false,
+    /** Whether to draw the clock and the ticks under this one — see the run
+     *  logic in the list. False for every message in a run but its last. */
+    showMeta: Boolean = true,
+    /** Whether this one wears the pointed corner. Only a run's last does. */
+    tail: Boolean = true,
     onLongPress: () -> Unit,
     onPay: (StoredMessage) -> Unit,
 ) {
@@ -993,19 +1036,34 @@ private fun Bubble(
     else MaterialTheme.colorScheme.surfaceVariant
     val fg = if (m.outgoing) MaterialTheme.colorScheme.onPrimary
     else MaterialTheme.colorScheme.onSurfaceVariant
+    val point = if (tail) 4.dp else 16.dp
     val corner = if (m.outgoing) {
-        RoundedCornerShape(16.dp, 16.dp, 4.dp, 16.dp)
+        RoundedCornerShape(16.dp, 16.dp, point, 16.dp)
     } else {
-        RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp)
+        RoundedCornerShape(16.dp, 16.dp, 16.dp, point)
     }
+    // A picture is the bubble, not something sitting inside one.
+    //
+    // The bubble's padding wrapped every kind of content alike, so an image
+    // came out inset by fourteen and ten with the bubble's colour showing all
+    // round it — a purple picture frame that read as a mistake rather than a
+    // choice. Clipped to the same corners instead, with the caption (when
+    // there is one) keeping the padding it needs.
+    val bare = m.kind == 0 && m.attHash != null &&
+        (m.attMime ?: "").startsWith("image/") &&
+        (m.body.isBlank() || m.body == "📷")
 
     Column(Modifier.fillMaxWidth(), horizontalAlignment = align) {
         Box(
             Modifier
                 .widthIn(max = 280.dp)
                 .background(bg, corner)
+                .clip(corner)
                 .combinedClickable(onClick = {}, onLongClick = onLongPress)
-                .padding(horizontal = 14.dp, vertical = 10.dp)
+                .then(
+                    if (bare) Modifier
+                    else Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                )
         ) {
             if (m.kind == 0) {
                 val ctx = LocalContext.current
@@ -1041,8 +1099,19 @@ private fun Bubble(
                                 androidx.compose.foundation.Image(
                                     bmp.asImageBitmap(), stringResource(R.string.chat_picture_desc),
                                     modifier = Modifier
-                                        .widthIn(max = 240.dp)
-                                        .clip(MaterialTheme.shapes.medium),
+                                        // Wider when it is the whole bubble,
+                                        // since there is no padding to leave
+                                        // room for.
+                                        .widthIn(max = if (bare) 280.dp else 240.dp)
+                                        // And clipped by the bubble in that
+                                        // case, not by itself. Its own uniform
+                                        // radius fought the bubble's pointed
+                                        // corner and left a crescent of bubble
+                                        // colour showing through at the tail.
+                                        .then(
+                                            if (bare) Modifier
+                                            else Modifier.clip(MaterialTheme.shapes.medium),
+                                        ),
                                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                                 )
                             } else {
@@ -1202,6 +1271,7 @@ private fun Bubble(
                 }
             }
         }
+        if (!showMeta) return@Column
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (!m.forwardSecret) {
                 // §16.11: the signed-prekey fallback is a real weakening and is
