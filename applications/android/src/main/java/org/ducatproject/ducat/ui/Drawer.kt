@@ -51,7 +51,13 @@ enum class Section(val labelRes: Int) {
 @Composable
 fun DrawerContent(onPick: (Section) -> Unit) {
     val context = LocalContext.current
-    val name = remember { NameStore(context).get() }
+    // Keyed on the store's own version, like every other read of it in the
+    // app. `remember {}` with no key reads the name once and keeps it for the
+    // life of the composition, so somebody who set or changed their name — in
+    // the profile this very header opens, one tap away — came back to a
+    // drawer still offering to set it.
+    val version by ContactStore.changes.collectAsState()
+    val name = remember(version) { NameStore(context).get() }
 
     ModalDrawerSheet {
         // The header is a way into the profile, not just a label: a missing
