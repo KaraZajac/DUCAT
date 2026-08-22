@@ -1,7 +1,7 @@
 <resources>
     <!-- Profile.kt: ContactProfile -->
     <string name="profile_back">رجوع</string>
-    <string name="profile_calls_themselves">يسمّي نفسه \"%1$s\"</string>
+    <string name="profile_calls_themselves">يسمّي نفسه «%1$s»</string>
     <string name="profile_label_email">البريد الإلكتروني</string>
     <string name="profile_label_phone">الهاتف</string>
     <string name="profile_label_signal">Signal</string>

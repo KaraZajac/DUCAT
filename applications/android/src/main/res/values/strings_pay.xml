@@ -48,7 +48,7 @@
     <string name="pay_request_sent">Request sent</string>
     <string name="pay_could_not_send">could not send</string>
     <string name="pay_no_node">no node — check Status</string>
-    <string name="pay_no_address_error">They have not shared an address. Ask them to send a request, or to turn on \"let contacts pay me directly\".</string>
+    <string name="pay_no_address_error">They have not shared an address. Ask them to send a request, or to turn on “let contacts pay me directly”.</string>
 
     <!-- Pay.kt — confirm dialog -->
     <string name="pay_confirm_send_title">Send %1$s?</string>

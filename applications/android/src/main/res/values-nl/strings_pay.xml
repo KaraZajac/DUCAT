@@ -48,7 +48,7 @@
     <string name="pay_request_sent">Verzoek verstuurd</string>
     <string name="pay_could_not_send">kon niet versturen</string>
     <string name="pay_no_node">geen node — kijk bij Status</string>
-    <string name="pay_no_address_error">Ze hebben geen adres gedeeld. Vraag ze een verzoek te sturen, of om \"laat contacten mij direct betalen\" aan te zetten.</string>
+    <string name="pay_no_address_error">Ze hebben geen adres gedeeld. Vraag ze een verzoek te sturen, of om “laat contacten mij direct betalen” aan te zetten.</string>
 
     <!-- Pay.kt — confirm dialog -->
     <string name="pay_confirm_send_title">%1$s versturen?</string>

@@ -1,7 +1,7 @@
 <resources>
     <!-- Profile.kt: ContactProfile -->
     <string name="profile_back">Atrás</string>
-    <string name="profile_calls_themselves">se hace llamar \"%1$s\"</string>
+    <string name="profile_calls_themselves">se hace llamar «%1$s»</string>
     <string name="profile_label_email">Correo</string>
     <string name="profile_label_phone">Teléfono</string>
     <string name="profile_label_signal">Signal</string>

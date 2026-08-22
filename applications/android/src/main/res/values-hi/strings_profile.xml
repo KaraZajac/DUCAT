@@ -1,7 +1,7 @@
 <resources>
     <!-- Profile.kt: ContactProfile -->
     <string name="profile_back">वापस</string>
-    <string name="profile_calls_themselves">खुद को \"%1$s\" कहते हैं</string>
+    <string name="profile_calls_themselves">खुद को “%1$s” कहते हैं</string>
     <string name="profile_label_email">ईमेल</string>
     <string name="profile_label_phone">फ़ोन</string>
     <string name="profile_label_signal">Signal</string>

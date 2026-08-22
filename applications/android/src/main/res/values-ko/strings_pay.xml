@@ -48,7 +48,7 @@
     <string name="pay_request_sent">요청을 보냈어요</string>
     <string name="pay_could_not_send">보내지 못했어요</string>
     <string name="pay_no_node">노드 없음 — 상태를 확인하세요</string>
-    <string name="pay_no_address_error">상대가 주소를 공유하지 않았어요. 요청을 보내 달라고 하거나, \"연락처가 나에게 바로 결제하도록 허용\"을 켜 달라고 하세요.</string>
+    <string name="pay_no_address_error">상대가 주소를 공유하지 않았어요. 요청을 보내 달라고 하거나, “연락처가 나에게 바로 결제하도록 허용”을 켜 달라고 하세요.</string>
 
     <!-- Pay.kt — confirm dialog -->
     <string name="pay_confirm_send_title">%1$s 보낼까요?</string>

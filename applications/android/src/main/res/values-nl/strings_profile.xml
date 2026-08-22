@@ -1,7 +1,7 @@
 <resources>
     <!-- Profile.kt: ContactProfile -->
     <string name="profile_back">Terug</string>
-    <string name="profile_calls_themselves">noemt zichzelf \"%1$s\"</string>
+    <string name="profile_calls_themselves">noemt zichzelf “%1$s”</string>
     <string name="profile_label_email">E-mail</string>
     <string name="profile_label_phone">Telefoon</string>
     <string name="profile_label_signal">Signal</string>

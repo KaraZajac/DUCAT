@@ -48,7 +48,7 @@
     <string name="pay_request_sent">Đã gửi yêu cầu</string>
     <string name="pay_could_not_send">không gửi được</string>
     <string name="pay_no_node">không có node — xem Trạng thái</string>
-    <string name="pay_no_address_error">Họ chưa chia sẻ địa chỉ. Hãy nhờ họ gửi một yêu cầu, hoặc bật \"cho liên hệ trả tiền tôi trực tiếp\".</string>
+    <string name="pay_no_address_error">Họ chưa chia sẻ địa chỉ. Hãy nhờ họ gửi một yêu cầu, hoặc bật “cho liên hệ trả tiền tôi trực tiếp”.</string>
 
     <!-- Pay.kt — confirm dialog -->
     <string name="pay_confirm_send_title">Gửi %1$s?</string>

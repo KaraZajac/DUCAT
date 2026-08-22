@@ -48,7 +48,7 @@
     <string name="pay_request_sent">İstek gönderildi</string>
     <string name="pay_could_not_send">gönderilemedi</string>
     <string name="pay_no_node">düğüm yok — Durum\'a bak</string>
-    <string name="pay_no_address_error">Adres paylaşmamışlar. Bir istek göndermelerini ya da \"kişiler bana doğrudan ödeme yapabilsin\"i açmalarını iste.</string>
+    <string name="pay_no_address_error">Adres paylaşmamışlar. Bir istek göndermelerini ya da “kişiler bana doğrudan ödeme yapabilsin”i açmalarını iste.</string>
 
     <!-- Pay.kt — confirm dialog -->
     <string name="pay_confirm_send_title">%1$s gönderilsin mi?</string>

@@ -48,7 +48,7 @@
     <string name="pay_request_sent">अनुरोध भेजा गया</string>
     <string name="pay_could_not_send">भेजा नहीं जा सका</string>
     <string name="pay_no_node">कोई नोड नहीं — ‘स्थिति’ देखें</string>
-    <string name="pay_no_address_error">उन्होंने पता शेयर नहीं किया है। उनसे कहें कि अनुरोध भेजें, या \"कॉन्टैक्ट मुझे सीधे भुगतान कर सकें\" चालू करें।</string>
+    <string name="pay_no_address_error">उन्होंने पता शेयर नहीं किया है। उनसे कहें कि अनुरोध भेजें, या “कॉन्टैक्ट मुझे सीधे भुगतान कर सकें” चालू करें।</string>
 
     <!-- Pay.kt — confirm dialog -->
     <string name="pay_confirm_send_title">%1$s भेजें?</string>

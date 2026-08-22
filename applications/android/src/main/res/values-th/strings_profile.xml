@@ -1,7 +1,7 @@
 <resources>
     <!-- Profile.kt: ContactProfile -->
     <string name="profile_back">กลับ</string>
-    <string name="profile_calls_themselves">เรียกตัวเองว่า \"%1$s\"</string>
+    <string name="profile_calls_themselves">เรียกตัวเองว่า “%1$s”</string>
     <string name="profile_label_email">อีเมล</string>
     <string name="profile_label_phone">โทรศัพท์</string>
     <string name="profile_label_signal">Signal</string>

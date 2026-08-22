@@ -48,7 +48,7 @@
     <string name="pay_request_sent">Permintaan terkirim</string>
     <string name="pay_could_not_send">tidak bisa terkirim</string>
     <string name="pay_no_node">tidak ada node — cek Status</string>
-    <string name="pay_no_address_error">Mereka belum membagikan alamat. Minta mereka mengirim permintaan, atau menyalakan \"izinkan kontak membayarku langsung\".</string>
+    <string name="pay_no_address_error">Mereka belum membagikan alamat. Minta mereka mengirim permintaan, atau menyalakan “izinkan kontak membayarku langsung”.</string>
 
     <!-- Pay.kt — confirm dialog -->
     <string name="pay_confirm_send_title">Kirim %1$s?</string>

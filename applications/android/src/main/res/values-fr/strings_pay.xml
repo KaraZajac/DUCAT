@@ -48,7 +48,7 @@
     <string name="pay_request_sent">Demande envoyée</string>
     <string name="pay_could_not_send">envoi impossible</string>
     <string name="pay_no_node">aucun nœud — vérifie l\'état</string>
-    <string name="pay_no_address_error">Cette personne n\'a pas partagé d\'adresse. Demande-lui d\'envoyer une demande, ou d\'activer \"laisser mes contacts me payer directement\".</string>
+    <string name="pay_no_address_error">Cette personne n\'a pas partagé d\'adresse. Demande-lui d\'envoyer une demande, ou d\'activer « laisser mes contacts me payer directement ».</string>
 
     <!-- Pay.kt — confirm dialog -->
     <string name="pay_confirm_send_title">Envoyer %1$s ?</string>

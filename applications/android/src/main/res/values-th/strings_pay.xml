@@ -48,7 +48,7 @@
     <string name="pay_request_sent">ส่งคำขอแล้ว</string>
     <string name="pay_could_not_send">ส่งไม่สำเร็จ</string>
     <string name="pay_no_node">ไม่มีโหนด — ดูที่หน้าสถานะ</string>
-    <string name="pay_no_address_error">เขายังไม่ได้แชร์ที่อยู่ ขอให้เขาส่งคำขอมา หรือให้เปิด \"ให้ผู้ติดต่อจ่ายเงินให้ฉันได้โดยตรง\"</string>
+    <string name="pay_no_address_error">เขายังไม่ได้แชร์ที่อยู่ ขอให้เขาส่งคำขอมา หรือให้เปิด “ให้ผู้ติดต่อจ่ายเงินให้ฉันได้โดยตรง”</string>
 
     <!-- Pay.kt — confirm dialog -->
     <string name="pay_confirm_send_title">ส่ง %1$s?</string>

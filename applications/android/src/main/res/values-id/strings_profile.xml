@@ -1,7 +1,7 @@
 <resources>
     <!-- Profile.kt: ContactProfile -->
     <string name="profile_back">Kembali</string>
-    <string name="profile_calls_themselves">menyebut dirinya \"%1$s\"</string>
+    <string name="profile_calls_themselves">menyebut dirinya “%1$s”</string>
     <string name="profile_label_email">Email</string>
     <string name="profile_label_phone">Telepon</string>
     <string name="profile_label_signal">Signal</string>

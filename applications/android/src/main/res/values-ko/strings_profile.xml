@@ -1,7 +1,7 @@
 <resources>
     <!-- Profile.kt: ContactProfile -->
     <string name="profile_back">뒤로</string>
-    <string name="profile_calls_themselves">스스로를 \"%1$s\"라고 해요</string>
+    <string name="profile_calls_themselves">스스로를 “%1$s”라고 해요</string>
     <string name="profile_label_email">이메일</string>
     <string name="profile_label_phone">전화번호</string>
     <string name="profile_label_signal">Signal</string>

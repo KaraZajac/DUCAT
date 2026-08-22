@@ -48,7 +48,7 @@
     <string name="pay_request_sent">Richiesta inviata</string>
     <string name="pay_could_not_send">invio non riuscito</string>
     <string name="pay_no_node">nessun nodo — controlla lo Stato</string>
-    <string name="pay_no_address_error">Non ha condiviso un indirizzo. Chiedigli di mandare una richiesta, o di attivare \"lascia che i contatti mi paghino direttamente\".</string>
+    <string name="pay_no_address_error">Non ha condiviso un indirizzo. Chiedigli di mandare una richiesta, o di attivare «lascia che i contatti mi paghino direttamente».</string>
 
     <!-- Pay.kt — finestra di conferma -->
     <string name="pay_confirm_send_title">Inviare %1$s?</string>

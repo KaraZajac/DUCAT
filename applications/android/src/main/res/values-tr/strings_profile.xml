@@ -1,7 +1,7 @@
 <resources>
     <!-- Profile.kt: ContactProfile -->
     <string name="profile_back">Geri</string>
-    <string name="profile_calls_themselves">kendine \"%1$s\" diyor</string>
+    <string name="profile_calls_themselves">kendine “%1$s” diyor</string>
     <string name="profile_label_email">E-posta</string>
     <string name="profile_label_phone">Telefon</string>
     <string name="profile_label_signal">Signal</string>
