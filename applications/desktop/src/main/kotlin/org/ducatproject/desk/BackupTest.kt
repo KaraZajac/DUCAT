@@ -49,6 +49,10 @@ private fun appState() {
         .putBoolean("publish_address", true)
         .putString("receipts_v1", "[{\"r\":1}]")
         .putString("issued_cards", cards)
+        // §16.11: which of a contact's one-time ids we already spent.
+        // Lost, a restored device re-offers them and seals to keys the
+        // other side has burned.
+        .putString("usedtheirs_ab12", "3,7,11")
         .apply()
 
     val blob = ContactStore(src).backupAppState()
@@ -84,7 +88,10 @@ private fun appState() {
     check(pub) { "BACKUPTEST_FAIL publish_address dropped" }
     check(rec == "[{\"r\":1}]") { "BACKUPTEST_FAIL receipts_v1: got $rec" }
     check(crd == cards) { "BACKUPTEST_FAIL issued_cards: got $crd" }
-    println("BACKUPTEST_OK claimed_kis=$got publish=$pub receipts=$rec cards=ok")
+    val used = dst.getSharedPreferences("ducat_contacts", 0)
+        .getString("usedtheirs_ab12", null)
+    check(used == "3,7,11") { "BACKUPTEST_FAIL usedtheirs: got $used" }
+    println("BACKUPTEST_OK claimed_kis=$got publish=$pub receipts=$rec cards=ok used=$used")
 }
 
 private fun escrowShares() {

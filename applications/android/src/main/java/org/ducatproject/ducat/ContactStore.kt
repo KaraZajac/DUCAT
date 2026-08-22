@@ -618,9 +618,18 @@ class ContactStore(context: Context) {
     fun backupAppState(): ByteArray {
         val o = JSONObject()
         // Threads and per-thread settings, by prefix; the fixed keys after.
+        //
+        // `usedtheirs_` is here because §16.11 offers a one-time id to exactly
+        // one message. The cached copy of a contact's bundle is re-pruned
+        // against this ledger every time their head is read, so without it a
+        // restored device re-offers ids it already spent — seals to a key the
+        // other side burned, and the message arrives unreadable. Only ids used
+        // between the export and the restore are at risk, which is the same
+        // window everything else here goes wrong in.
         val threads = JSONObject()
         prefs.all.keys.filter {
-            it.startsWith("thread_") || it.startsWith("disappear_")
+            it.startsWith("thread_") || it.startsWith("disappear_") ||
+                it.startsWith("usedtheirs_")
         }.forEach { k -> prefs.getString(k, null)?.let { threads.put(k, it) }
             ?: threads.put(k, prefs.getLong(k, 0L)) }
         o.put("kv", threads)
