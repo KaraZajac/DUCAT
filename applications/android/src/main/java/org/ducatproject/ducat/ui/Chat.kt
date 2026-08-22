@@ -1908,6 +1908,12 @@ private fun EnquiryLine(
                 Spacer(Modifier.height(4.dp))
                 Text(
                     stringResource(R.string.rent_no_reply_yet),
+                    // Under the heading's text, not under its icon. The
+                    // heading is indented by the icon and the gap after it;
+                    // these lines were not, so the banner had a ragged left
+                    // edge — measured at 63px of daylight between the title
+                    // and the line below it.
+                    Modifier.padding(start = BANNER_GUTTER),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -1960,6 +1966,9 @@ private fun EnquiryLine(
             if (!bonded && !mineToOffer) {
                 TextButton(
                     onClick = onPropose,
+                    // Aligned with the heading's text like the line above it,
+                    // rather than with the icon.
+                    modifier = Modifier.padding(start = BANNER_GUTTER),
                     contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
                 ) {
                     Text(
@@ -1971,6 +1980,15 @@ private fun EnquiryLine(
         }
     }
 }
+
+/**
+ * How far a banner's icon pushes its heading in, and therefore how far the
+ * lines under that heading have to be pushed to line up with it.
+ *
+ * A 16.dp icon and the 8.dp after it. Measured on screen before it was named:
+ * the enquiry banner's title sat at x=105 and the line under it at x=42.
+ */
+private val BANNER_GUTTER = 24.dp
 
 /** How long an unanswered enquiry stays "probably just slow". */
 private const val QUIET_ENQUIRY_SECS = 10L * 60
@@ -2261,7 +2279,14 @@ private fun RideBondBanner(contact: Contact) {
         color = MaterialTheme.colorScheme.secondaryContainer,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+        // The gutter is part of the padding, and BondLine hangs its icon back
+        // out into it — so every line in this banner, heading or not, starts
+        // at the same x without each of the ten of them saying so.
+        Column(
+            Modifier.padding(
+                start = 16.dp + BOND_GUTTER, top = 10.dp, end = 16.dp, bottom = 10.dp,
+            ),
+        ) {
             val fareShown = Amounts.show(context, fare).primary
             when {
                 stage == "committed" || stage == "shared" -> {
@@ -2801,25 +2826,47 @@ private fun BondNote(text: String) {
     )
 }
 
+/**
+ * The banner's heading: an icon in the gutter, the words where every other
+ * line in the banner starts.
+ *
+ * The icon used to sit *in* the line and push the heading right by its own
+ * width, while the ten lines that can follow it started at the container's
+ * edge — so the strip had a ragged left side, the title standing 58px in
+ * from everything under it. Hung out into the container's start padding
+ * instead, which is what a gutter is for.
+ */
 @Composable
 private fun BondLine(spin: Boolean, text: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        if (spin) {
-            CircularProgressIndicator(Modifier.size(14.dp), strokeWidth = 2.dp)
-        } else {
-            Icon(
-                Icons.Filled.Lock, null, Modifier.size(14.dp),
-                tint = MaterialTheme.colorScheme.onSecondaryContainer,
-            )
+    Box(Modifier.fillMaxWidth()) {
+        Box(
+            Modifier.align(Alignment.CenterStart)
+                .offset(x = -BOND_GUTTER),
+        ) {
+            if (spin) {
+                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+            } else {
+                Icon(
+                    Icons.Filled.Lock, null, Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
         }
-        Spacer(Modifier.width(8.dp))
         Text(
             text,
+            Modifier.align(Alignment.CenterStart),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
         )
     }
 }
+
+/**
+ * The same gutter the enquiry banner uses, so the two strips share a left
+ * edge when they are stacked. They did not: a 14.dp lock against a 16.dp
+ * house put five pixels between the two bands' text, which reads as a step.
+ */
+private val BOND_GUTTER = BANNER_GUTTER
 
 /**
  * What a booking is called, per noun (§16.18).
