@@ -218,6 +218,14 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     // grammar on purpose: camera and mic live inside the field
                     // while it is empty, typing swaps the + for send.
                     var trayOpen by remember { mutableStateOf(false) }
+                    // Back closes the tray before it leaves the conversation.
+                    // It is the one thing this screen opens that is not a
+                    // dialog or a bottom sheet — those absorb back themselves —
+                    // so with the tray up, back walked out of the thread
+                    // entirely and the tray was still open on the way back in.
+                    androidx.activity.compose.BackHandler(enabled = trayOpen) {
+                        trayOpen = false
+                    }
                     var contactPick by remember { mutableStateOf(false) }
                     var recording by remember { mutableStateOf(false) }
                     var recSecs by remember { mutableStateOf(0) }
