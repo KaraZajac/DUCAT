@@ -903,6 +903,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1069,6 +1071,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_parse_contact_details(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_parse_log_head(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_passphrase_strength(`passphrase`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_persona_public_hex(`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1374,6 +1378,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_parse_log_head(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_passphrase_strength(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_persona_public_hex(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_plan_float(
@@ -1657,6 +1663,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_parse_log_head() != 56522.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_passphrase_strength() != 61750.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_persona_public_hex() != 1339.toShort()) {
@@ -4745,6 +4754,46 @@ public object FfiConverterTypeNodeTrust: FfiConverterRustBuffer<NodeTrust> {
 
 
 /**
+ * How much protection a passphrase offers the bundle (§4.3).
+ *
+ * The eight-byte floor in `export` is a floor, and the screens used to treat
+ * clearing it as an endorsement — green, and the word "Good", for a file
+ * holding the spend key, the persona and every relationship. Grading it is the
+ * difference between telling somebody the rule and telling them they are safe.
+ */
+
+enum class PassphraseStrength {
+    
+    TOO_SHORT,
+    WEAK,
+    FAIR,
+    STRONG;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePassphraseStrength: FfiConverterRustBuffer<PassphraseStrength> {
+    override fun read(buf: ByteBuffer) = try {
+        PassphraseStrength.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: PassphraseStrength) = 4UL
+
+    override fun write(value: PassphraseStrength, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
  * Assurance that the person present may spend, weakest first.
  */
 
@@ -6653,6 +6702,15 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_parse_log_head(
         FfiConverterByteArray.lower(`bytes`),_status)
+}
+    )
+    }
+    
+ fun `passphraseStrength`(`passphrase`: kotlin.String): PassphraseStrength {
+            return FfiConverterTypePassphraseStrength.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_passphrase_strength(
+        FfiConverterString.lower(`passphrase`),_status)
 }
     )
     }

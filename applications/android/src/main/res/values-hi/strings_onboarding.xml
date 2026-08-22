@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">तो इसे वापस पाने का कोई रास्ता नहीं। किसी के पास कॉपी नहीं और पूछने को कोई नहीं। यही वजह है कि आपका पैसा न कोई रोक सकता है, न छीन सकता है।</string>
     <string name="onb_backup_address_label">आपका पता</string>
     <string name="onb_backup_passphrase_label">पासफ़्रेज़</string>
-    <string name="onb_backup_passphrase_good">अच्छा</string>
+    <string name="onb_backup_passphrase_weak">कमज़ोर — यह फ़ाइल ही तुम्हारा पूरा वॉलेट है</string>
+    <string name="onb_backup_passphrase_fair">ठीक-ठाक। लंबा, या कई शब्द, बेहतर है</string>
+    <string name="onb_backup_passphrase_good">मज़बूत</string>
     <string name="onb_backup_passphrase_short">कम-से-कम 8 अक्षर</string>
     <string name="onb_backup_error_incomplete">सेटअप अधूरा है</string>
     <string name="onb_backup_create">बैकअप बनाएँ</string>

@@ -632,6 +632,81 @@ fn derive(passphrase: &[u8], salt: &[u8; 16]) -> Result<[u8; 32], Reject> {
 ///
 /// `salt` and `nonce` must be freshly random per export. They are stored in the
 /// clear, which is correct — they are not secrets, and reusing either would be.
+/// How much protection a passphrase actually offers this file.
+///
+/// The floor in [`export`] is eight bytes, and eight bytes is a floor rather
+/// than an endorsement — the screens used to turn green and say "Good" the
+/// moment it was cleared, which told somebody that eight characters was
+/// adequate protection for a file holding their spend key, their persona and
+/// every relationship they have. That file exists to be copied somewhere else,
+/// so it is an offline-attack target by design: an attacker gets unlimited
+/// attempts against it, and the only thing standing in the way is how hard the
+/// passphrase is to guess. Argon2id at 64 MiB makes each guess expensive; it
+/// cannot make a short one rare.
+///
+/// A crude entropy estimate, deliberately. Anything better needs a word list
+/// and a language, and a wrong confident answer is worse than an approximate
+/// honest one:
+///
+///  * a phrase with spaces is scored as words, at eleven bits each — what a
+///    word drawn from a two-thousand-word list is worth;
+///  * anything else is scored as characters over the alphabets it actually
+///    uses, which is generous, because it treats a chosen word as if it were
+///    random letters;
+///  * so a single unbroken run of one alphabet is capped short of Strong. That
+///    is exactly the shape of a dictionary word, and this cannot tell one from
+///    a random string of the same letters.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PassphraseStrength {
+    /// Below the floor. [`export`] will refuse it.
+    TooShort,
+    /// Clears the floor and little else.
+    Weak,
+    /// Worth having; not what this file deserves.
+    Fair,
+    /// Enough that guessing is not the way in.
+    Strong,
+}
+
+/// Estimated bits behind a passphrase — see [`PassphraseStrength`].
+pub fn passphrase_bits(p: &str) -> f64 {
+    let words = p.split_whitespace().filter(|w| !w.is_empty()).count();
+    if words >= 2 {
+        return words as f64 * 11.0;
+    }
+    let mut alphabet = 0u32;
+    if p.chars().any(|c| c.is_ascii_lowercase()) { alphabet += 26; }
+    if p.chars().any(|c| c.is_ascii_uppercase()) { alphabet += 26; }
+    if p.chars().any(|c| c.is_ascii_digit()) { alphabet += 10; }
+    if p.chars().any(|c| !c.is_ascii_alphanumeric()) { alphabet += 33; }
+    if alphabet == 0 { return 0.0; }
+    p.chars().count() as f64 * (alphabet as f64).log2()
+}
+
+pub fn passphrase_strength(p: &str) -> PassphraseStrength {
+    if p.len() < 8 {
+        return PassphraseStrength::TooShort;
+    }
+    // One unbroken run of a single alphabet is the shape of a dictionary word,
+    // and the estimate above cannot tell one from random letters — so it does
+    // not get to claim the top grade on length alone.
+    let one_word_one_alphabet = !p.contains(char::is_whitespace)
+        && (p.chars().all(|c| c.is_ascii_lowercase())
+            || p.chars().all(|c| c.is_ascii_uppercase()));
+    // Calibrated against what this file is: an offline target an attacker can
+    // grind at their leisure. Sixty-four bits is six words from a
+    // two-thousand-word list — the long-standing recommendation for exactly
+    // that threat — and the middle band starts high enough that eight
+    // characters of letters and digits does not reach it. `hunter22` estimates
+    // at forty-one bits, and forty-one bits is not "Fair" for a wallet.
+    let bits = passphrase_bits(p);
+    match bits {
+        b if b >= 64.0 && !one_word_one_alphabet => PassphraseStrength::Strong,
+        b if b >= 50.0 => PassphraseStrength::Fair,
+        _ => PassphraseStrength::Weak,
+    }
+}
+
 pub fn export(
     backup: &Backup,
     passphrase: &[u8],

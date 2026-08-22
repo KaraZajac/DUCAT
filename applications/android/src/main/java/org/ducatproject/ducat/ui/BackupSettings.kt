@@ -90,13 +90,13 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                 // when it is satisfied, so the field answers the question
                 // rather than just repeating the demand.
                 supportingText = {
-                    val longEnough = passphrase.length >= 8
-                    Text(
-                        if (longEnough) stringResource(R.string.onb_backup_passphrase_good)
-                        else stringResource(R.string.onb_backup_passphrase_short),
-                        color = if (longEnough) MaterialTheme.ducat.settled
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    // Graded, not merely measured. Clearing the eight-byte
+                    // floor used to turn this green and say "Good" — an
+                    // endorsement of the weakest passphrase the format will
+                    // accept, for a file that holds the spend key, the persona
+                    // and every relationship, and whose whole purpose is to be
+                    // kept somewhere else where an attacker can grind at it.
+                    PassphraseNote(passphrase)
                 },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -323,4 +323,32 @@ private fun share(context: Context, file: File) {
     }
     context.startActivity(
         Intent.createChooser(send, context.getString(R.string.backup_share_title)))
+}
+
+/**
+ * What a passphrase is actually worth, said plainly.
+ *
+ * Shared by the two screens that ask for one — setup and settings — because a
+ * rule stated differently in two places is a rule somebody disagrees with.
+ */
+@Composable
+internal fun PassphraseNote(passphrase: String) {
+    val s = remember(passphrase) {
+        uniffi.ducat_mobile.passphraseStrength(passphrase)
+    }
+    val (text, colour) = when (s) {
+        uniffi.ducat_mobile.PassphraseStrength.TOO_SHORT ->
+            stringResource(R.string.onb_backup_passphrase_short) to
+                MaterialTheme.colorScheme.onSurfaceVariant
+        uniffi.ducat_mobile.PassphraseStrength.WEAK ->
+            stringResource(R.string.onb_backup_passphrase_weak) to
+                MaterialTheme.ducat.lowCapacity
+        uniffi.ducat_mobile.PassphraseStrength.FAIR ->
+            stringResource(R.string.onb_backup_passphrase_fair) to
+                MaterialTheme.colorScheme.onSurfaceVariant
+        uniffi.ducat_mobile.PassphraseStrength.STRONG ->
+            stringResource(R.string.onb_backup_passphrase_good) to
+                MaterialTheme.ducat.settled
+    }
+    Text(text, color = colour)
 }

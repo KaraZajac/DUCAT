@@ -520,14 +520,10 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                 value = passphrase,
                 onValueChange = { passphrase = it; error = null },
                 label = { Text(stringResource(R.string.onb_backup_passphrase_label)) },
-                supportingText = {
-                    Text(
-                        if (longEnough) stringResource(R.string.onb_backup_passphrase_good)
-                        else stringResource(R.string.onb_backup_passphrase_short),
-                        color = if (longEnough) MaterialTheme.ducat.settled
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
+                // Graded rather than measured — see `PassphraseNote`. The
+                // button below still gates on the floor; this says what
+                // clearing it is actually worth.
+                supportingText = { PassphraseNote(passphrase) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )

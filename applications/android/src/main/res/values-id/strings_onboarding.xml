@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">tidak ada cara memulihkannya. Tidak ada yang menyimpan salinan dan tidak ada tempat bertanya. Itu alasan yang sama kenapa tidak ada yang bisa membekukan atau mengambil uangmu.</string>
     <string name="onb_backup_address_label">Alamatmu</string>
     <string name="onb_backup_passphrase_label">Frasa sandi</string>
-    <string name="onb_backup_passphrase_good">Bagus</string>
+    <string name="onb_backup_passphrase_weak">Lemah — berkas ini adalah seluruh dompetmu</string>
+    <string name="onb_backup_passphrase_fair">Lumayan. Lebih panjang, atau beberapa kata, lebih baik</string>
+    <string name="onb_backup_passphrase_good">Kuat</string>
     <string name="onb_backup_passphrase_short">Minimal 8 karakter</string>
     <string name="onb_backup_error_incomplete">Penyiapan belum selesai</string>
     <string name="onb_backup_create">Buat cadangan</string>

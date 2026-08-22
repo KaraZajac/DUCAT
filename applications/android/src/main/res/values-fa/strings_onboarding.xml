@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">هیچ راهی برای بازیابی نیست. هیچ‌کس نسخه‌ای ندارد و کسی نیست که از او بپرسی. همین هم دلیل آن است که هیچ‌کس نمی‌تواند پولت را مسدود کند یا بردارد.</string>
     <string name="onb_backup_address_label">نشانی تو</string>
     <string name="onb_backup_passphrase_label">عبارت عبور</string>
-    <string name="onb_backup_passphrase_good">خوب</string>
+    <string name="onb_backup_passphrase_weak">ضعیف — این فایل کل کیف پول توست</string>
+    <string name="onb_backup_passphrase_fair">متوسط. بلندتر یا چند کلمه بهتر است</string>
+    <string name="onb_backup_passphrase_good">قوی</string>
     <string name="onb_backup_passphrase_short">دست‌کم 8 نویسه</string>
     <string name="onb_backup_error_incomplete">راه‌اندازی ناقص است</string>
     <string name="onb_backup_create">ساخت پشتیبان</string>

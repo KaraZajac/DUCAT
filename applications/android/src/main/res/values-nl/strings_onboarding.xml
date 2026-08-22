@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">is er geen manier om hem terug te krijgen. Niemand heeft een kopie en er is niemand om het aan te vragen. Om diezelfde reden kan niemand je geld bevriezen of afpakken.</string>
     <string name="onb_backup_address_label">Jouw adres</string>
     <string name="onb_backup_passphrase_label">Wachtwoordzin</string>
-    <string name="onb_backup_passphrase_good">Goed</string>
+    <string name="onb_backup_passphrase_weak">Zwak — dit bestand is je hele portemonnee</string>
+    <string name="onb_backup_passphrase_fair">Redelijk. Langer, of meerdere woorden, is beter</string>
+    <string name="onb_backup_passphrase_good">Sterk</string>
     <string name="onb_backup_passphrase_short">Minstens 8 tekens</string>
     <string name="onb_backup_error_incomplete">Het instellen is nog niet af</string>
     <string name="onb_backup_create">Back-up maken</string>

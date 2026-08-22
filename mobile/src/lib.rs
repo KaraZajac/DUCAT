@@ -386,6 +386,30 @@ mod wallet_tests {
 // §4.3 — the backup, actually produced
 // ---------------------------------------------------------------------------
 
+/// How much protection a passphrase offers the bundle (§4.3).
+///
+/// The eight-byte floor in `export` is a floor, and the screens used to treat
+/// clearing it as an endorsement — green, and the word "Good", for a file
+/// holding the spend key, the persona and every relationship. Grading it is the
+/// difference between telling somebody the rule and telling them they are safe.
+#[derive(uniffi::Enum, Clone, Copy, PartialEq, Eq)]
+pub enum PassphraseStrength {
+    TooShort,
+    Weak,
+    Fair,
+    Strong,
+}
+
+#[uniffi::export]
+pub fn passphrase_strength(passphrase: String) -> PassphraseStrength {
+    match ducat_core::backup::passphrase_strength(&passphrase) {
+        ducat_core::backup::PassphraseStrength::TooShort => PassphraseStrength::TooShort,
+        ducat_core::backup::PassphraseStrength::Weak => PassphraseStrength::Weak,
+        ducat_core::backup::PassphraseStrength::Fair => PassphraseStrength::Fair,
+        ducat_core::backup::PassphraseStrength::Strong => PassphraseStrength::Strong,
+    }
+}
+
 /// What onboarding has to protect.
 #[derive(uniffi::Record)]
 pub struct BackupInput {

@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">就没有任何找回的办法。没有人存有副本，也没有人可问。也正因为如此，没有人能冻结或拿走你的钱。</string>
     <string name="onb_backup_address_label">你的地址</string>
     <string name="onb_backup_passphrase_label">口令</string>
-    <string name="onb_backup_passphrase_good">不错</string>
+    <string name="onb_backup_passphrase_weak">弱——这个文件就是你的整个钱包</string>
+    <string name="onb_backup_passphrase_fair">尚可。更长，或者用几个词，会更好</string>
+    <string name="onb_backup_passphrase_good">强</string>
     <string name="onb_backup_passphrase_short">至少 8 个字符</string>
     <string name="onb_backup_error_incomplete">设置尚未完成</string>
     <string name="onb_backup_create">创建备份</string>

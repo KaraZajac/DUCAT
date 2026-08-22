@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">gibt es keinen Weg, sie wiederzubekommen. Niemand hält eine Kopie, und es gibt niemanden, den man fragen könnte. Aus demselben Grund kann auch niemand dein Geld einfrieren oder dir wegnehmen.</string>
     <string name="onb_backup_address_label">Deine Adresse</string>
     <string name="onb_backup_passphrase_label">Passphrase</string>
-    <string name="onb_backup_passphrase_good">Gut</string>
+    <string name="onb_backup_passphrase_weak">Schwach — diese Datei ist deine ganze Wallet</string>
+    <string name="onb_backup_passphrase_fair">Passabel. Länger, oder mehrere Wörter, ist besser</string>
+    <string name="onb_backup_passphrase_good">Stark</string>
     <string name="onb_backup_passphrase_short">Mindestens 8 Zeichen</string>
     <string name="onb_backup_error_incomplete">Die Einrichtung ist unvollständig</string>
     <string name="onb_backup_create">Backup erstellen</string>

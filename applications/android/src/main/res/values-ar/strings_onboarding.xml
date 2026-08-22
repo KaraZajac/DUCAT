@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">فلا سبيل إلى استعادتها. لا أحد يحتفظ بنسخة ولا أحد تسأله. وهو السبب نفسه الذي يمنع أي أحد من تجميد مالك أو أخذه.</string>
     <string name="onb_backup_address_label">عنوانك</string>
     <string name="onb_backup_passphrase_label">عبارة المرور</string>
-    <string name="onb_backup_passphrase_good">جيدة</string>
+    <string name="onb_backup_passphrase_weak">ضعيفة — هذا الملف هو محفظتك كلها</string>
+    <string name="onb_backup_passphrase_fair">مقبولة. الأطول، أو عدة كلمات، أفضل</string>
+    <string name="onb_backup_passphrase_good">قوية</string>
     <string name="onb_backup_passphrase_short">8 محارف على الأقل</string>
     <string name="onb_backup_error_incomplete">الإعداد غير مكتمل</string>
     <string name="onb_backup_create">إنشاء النسخة الاحتياطية</string>

@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">non c\'è modo di recuperarla. Nessuno ne conserva una copia e non c\'è nessuno a cui chiedere. È lo stesso motivo per cui nessuno può congelare i tuoi soldi o prenderli.</string>
     <string name="onb_backup_address_label">Il tuo indirizzo</string>
     <string name="onb_backup_passphrase_label">Passphrase</string>
-    <string name="onb_backup_passphrase_good">Buona</string>
+    <string name="onb_backup_passphrase_weak">Debole — questo file è tutto il tuo portafoglio</string>
+    <string name="onb_backup_passphrase_fair">Discreta. Più lunga, o più parole, è meglio</string>
+    <string name="onb_backup_passphrase_good">Forte</string>
     <string name="onb_backup_passphrase_short">Almeno 8 caratteri</string>
     <string name="onb_backup_error_incomplete">La configurazione è incompleta</string>
     <string name="onb_backup_create">Crea il backup</string>

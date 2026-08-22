@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">thì không có cách nào lấy lại. Không ai giữ bản sao và không có ai để hỏi. Cũng chính vì lẽ đó mà không ai đóng băng hay lấy được tiền của bạn.</string>
     <string name="onb_backup_address_label">Địa chỉ của bạn</string>
     <string name="onb_backup_passphrase_label">Cụm mật khẩu</string>
-    <string name="onb_backup_passphrase_good">Tốt</string>
+    <string name="onb_backup_passphrase_weak">Yếu — tệp này là toàn bộ ví của bạn</string>
+    <string name="onb_backup_passphrase_fair">Tạm được. Dài hơn, hoặc nhiều từ, sẽ tốt hơn</string>
+    <string name="onb_backup_passphrase_good">Mạnh</string>
     <string name="onb_backup_passphrase_short">Ít nhất 8 ký tự</string>
     <string name="onb_backup_error_incomplete">Thiết lập chưa hoàn tất</string>
     <string name="onb_backup_create">Tạo bản sao lưu</string>

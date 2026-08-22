@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">відновити її неможливо. Ні в кого немає копії, і спитати нема кого. З тієї самої причини ніхто не може заморозити твої гроші чи забрати їх.</string>
     <string name="onb_backup_address_label">Твоя адреса</string>
     <string name="onb_backup_passphrase_label">Парольна фраза</string>
-    <string name="onb_backup_passphrase_good">Добре</string>
+    <string name="onb_backup_passphrase_weak">Слабка — у цьому файлі весь ваш гаманець</string>
+    <string name="onb_backup_passphrase_fair">Пічна. Довша або кілька слів — краще</string>
+    <string name="onb_backup_passphrase_good">Надійна</string>
     <string name="onb_backup_passphrase_short">Щонайменше 8 символів</string>
     <string name="onb_backup_error_incomplete">Налаштування не завершено</string>
     <string name="onb_backup_create">Створити копію</string>

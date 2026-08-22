@@ -34,7 +34,9 @@
     <string name="onb_backup_forget_body">there is no way to recover it. Nobody holds a copy and there is no one to ask. That is the same reason nobody can freeze your money or take it.</string>
     <string name="onb_backup_address_label">Your address</string>
     <string name="onb_backup_passphrase_label">Passphrase</string>
-    <string name="onb_backup_passphrase_good">Good</string>
+    <string name="onb_backup_passphrase_weak">Weak — this file is your whole wallet</string>
+    <string name="onb_backup_passphrase_fair">Fair. Longer, or several words, is better</string>
+    <string name="onb_backup_passphrase_good">Strong</string>
     <string name="onb_backup_passphrase_short">At least 8 characters</string>
     <string name="onb_backup_error_incomplete">Setup is incomplete</string>
     <string name="onb_backup_create">Create backup</string>

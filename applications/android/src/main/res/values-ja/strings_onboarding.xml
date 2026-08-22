@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">復元する方法はありません。誰もコピーを持たず、頼れる相手もいません。それは、誰もあなたのお金を凍結も没収もできない理由と同じです。</string>
     <string name="onb_backup_address_label">あなたのアドレス</string>
     <string name="onb_backup_passphrase_label">パスフレーズ</string>
-    <string name="onb_backup_passphrase_good">良好</string>
+    <string name="onb_backup_passphrase_weak">弱い — このファイルがウォレットのすべてです</string>
+    <string name="onb_backup_passphrase_fair">まずまず。長く、あるいは複数の語にするとより安全です</string>
+    <string name="onb_backup_passphrase_good">強い</string>
     <string name="onb_backup_passphrase_short">8文字以上にしてください</string>
     <string name="onb_backup_error_incomplete">セットアップが完了していません</string>
     <string name="onb_backup_create">バックアップを作成</string>

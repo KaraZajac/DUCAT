@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">복구할 방법이 없어요. 사본을 가진 사람도, 물어볼 곳도 없어요. 바로 그 이유로 아무도 내 돈을 동결하거나 가져갈 수 없어요.</string>
     <string name="onb_backup_address_label">내 주소</string>
     <string name="onb_backup_passphrase_label">암호 문구</string>
-    <string name="onb_backup_passphrase_good">좋아요</string>
+    <string name="onb_backup_passphrase_weak">약해 — 이 파일이 지갑 전부야</string>
+    <string name="onb_backup_passphrase_fair">무난해. 더 길거나 여러 단어면 더 좋아</string>
+    <string name="onb_backup_passphrase_good">강함</string>
     <string name="onb_backup_passphrase_short">8자 이상이어야 해요</string>
     <string name="onb_backup_error_incomplete">설정이 끝나지 않았어요</string>
     <string name="onb_backup_create">백업 만들기</string>

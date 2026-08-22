@@ -364,3 +364,43 @@ fn an_older_bundle_restores_with_no_contacts() {
     assert!(back.prekey_one_time.is_empty());
     assert!(back.app_state.is_none());
 }
+
+// ---------------------------------------------------------------------------
+// §4.3 — what a passphrase is actually worth
+// ---------------------------------------------------------------------------
+
+use ducat_core::backup::{passphrase_strength, PassphraseStrength as S};
+
+#[test]
+fn the_floor_is_a_floor_and_not_an_endorsement() {
+    // Eight characters clears `export`'s refusal and nothing else. The screens
+    // used to call this "Good".
+    assert_eq!(passphrase_strength("hunter22"), S::Weak);
+}
+
+#[test]
+fn below_the_floor_is_named_as_such() {
+    assert_eq!(passphrase_strength("short"), S::TooShort);
+}
+
+#[test]
+fn a_long_single_word_never_reaches_strong() {
+    // The estimate scores letters as if they were random, so length alone
+    // would promote a dictionary word this cannot recognise.
+    assert_ne!(passphrase_strength("counterrevolutionaries"), S::Strong);
+}
+
+#[test]
+fn a_handful_of_words_is_strong() {
+    assert_eq!(passphrase_strength("correct horse battery staple thing pin"), S::Strong);
+}
+
+#[test]
+fn mixed_and_long_is_strong() {
+    assert_eq!(passphrase_strength("T7#kq2Lm!vZr9x@W"), S::Strong);
+}
+
+#[test]
+fn a_middling_one_is_fair_rather_than_flattered() {
+    assert_eq!(passphrase_strength("Tea4two!"), S::Fair);
+}

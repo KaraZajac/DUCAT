@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">geri getirmenin yolu yok. Kimsede kopyası yok ve soracak kimse yok. Paranı kimsenin donduramamasının ya da elinden alamamasının nedeni de aynı.</string>
     <string name="onb_backup_address_label">Adresin</string>
     <string name="onb_backup_passphrase_label">Parola</string>
-    <string name="onb_backup_passphrase_good">İyi</string>
+    <string name="onb_backup_passphrase_weak">Zayıf — bu dosya cüzdanının tamamı</string>
+    <string name="onb_backup_passphrase_fair">İdare eder. Daha uzun ya da birkaç kelime daha iyi</string>
+    <string name="onb_backup_passphrase_good">Güçlü</string>
     <string name="onb_backup_passphrase_short">En az 8 karakter</string>
     <string name="onb_backup_error_incomplete">Kurulum tamamlanmadı</string>
     <string name="onb_backup_create">Yedek oluştur</string>

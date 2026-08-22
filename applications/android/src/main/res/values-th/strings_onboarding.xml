@@ -29,7 +29,9 @@
     <string name="onb_backup_forget_body">จะไม่มีทางกู้คืนได้เลย ไม่มีใครถือสำเนา และไม่มีใครให้ถาม นั่นคือเหตุผลเดียวกับที่ไม่มีใครอายัดหรือยึดเงินของคุณได้</string>
     <string name="onb_backup_address_label">ที่อยู่ของคุณ</string>
     <string name="onb_backup_passphrase_label">วลีรหัสผ่าน</string>
-    <string name="onb_backup_passphrase_good">ใช้ได้</string>
+    <string name="onb_backup_passphrase_weak">อ่อน — ไฟล์นี้คือกระเป๋าเงินทั้งใบของคุณ</string>
+    <string name="onb_backup_passphrase_fair">พอใช้ ยาวกว่านี้ หรือหลายคำ จะดีกว่า</string>
+    <string name="onb_backup_passphrase_good">แข็งแรง</string>
     <string name="onb_backup_passphrase_short">อย่างน้อย 8 ตัวอักษร</string>
     <string name="onb_backup_error_incomplete">การตั้งค่ายังไม่เสร็จ</string>
     <string name="onb_backup_create">สร้างไฟล์สำรอง</string>
