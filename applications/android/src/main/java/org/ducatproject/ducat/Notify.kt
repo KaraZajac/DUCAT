@@ -84,7 +84,12 @@ object Notify {
     fun message(context: Context, from: String, personaHex: String, m: StoredMessage) {
         val what = when (m.kind) {
             1 -> {
-                val note = m.body.takeIf { it.isNotBlank() && it != "Payment request" }
+                // Their language, not ours: the placeholder body a bill
+                // carries when nobody wrote a note is in the sender's.
+                val filler = Languages.everyTranslationOf(
+                    context, R.string.pay_payment_request,
+                )
+                val note = m.body.takeIf { it.isNotBlank() && it !in filler }
                 if (note != null) context.getString(
                     R.string.notify_asks_for_note, from, xmr(context, m.amountPxmr), note)
                 else context.getString(

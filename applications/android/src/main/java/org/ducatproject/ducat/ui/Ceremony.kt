@@ -87,7 +87,12 @@ fun BillScreen(
                     Text(it, style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                if (m.body.isNotBlank() && m.body != "Payment request") {
+                // In whatever language their phone was in — see
+                // `everyTranslationOf`.
+                val filler = org.ducatproject.ducat.Languages.everyTranslationOf(
+                    context, R.string.pay_payment_request,
+                )
+                if (m.body.isNotBlank() && m.body !in filler) {
                     Spacer(Modifier.height(6.dp))
                     Text(stringResource(R.string.ceremony_quoted_body, m.body),
                         style = MaterialTheme.typography.bodyMedium,

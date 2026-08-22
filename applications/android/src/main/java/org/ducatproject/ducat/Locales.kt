@@ -84,4 +84,37 @@ object Languages {
 
     /** The endonym for a stored tag, for showing the current choice. */
     fun endonymFor(tag: String): String? = SUPPORTED.firstOrNull { it.tag == tag }?.endonym
+
+    /**
+     * One of this app's own strings, in every language it ships.
+     *
+     * For reading a message somebody else's phone composed. A bill with no
+     * note travels with "Payment request" as its body, written in *the
+     * sender's* language — so the reader's two tests for "is there a note
+     * here" compared it against the English one and let every other language
+     * through. A bill from a Spanish phone then showed "Solicitud de pago" to
+     * an English reader as though it were the memo, in the notification and on
+     * the bill screen both.
+     *
+     * The set, not the reader's own copy: the sender could have been in any of
+     * them. Built once — nineteen configuration contexts is not something to
+     * do per message.
+     */
+    private val translationCache = HashMap<Int, Set<String>>()
+
+    fun everyTranslationOf(context: android.content.Context, resId: Int): Set<String> =
+        synchronized(translationCache) {
+            translationCache.getOrPut(resId) {
+                val out = HashSet<String>()
+                out += context.getString(resId)
+                for (l in SUPPORTED) {
+                    val conf = android.content.res.Configuration(context.resources.configuration)
+                    conf.setLocale(Locale.forLanguageTag(l.tag))
+                    runCatching {
+                        out += context.createConfigurationContext(conf).getString(resId)
+                    }
+                }
+                out
+            }
+        }
 }

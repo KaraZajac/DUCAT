@@ -1279,9 +1279,21 @@ private fun Bubble(
                             color = fg.copy(alpha = 0.8f),
                         )
                     }
-                    if (m.body.isNotBlank()) {
+                    // The note, when there is one. A bill with none carries a
+                    // placeholder written in the *sender's* language, so this
+                    // printed "Solicitud de pago" under an English reader's
+                    // bill as though somebody had typed it. Their words when
+                    // they wrote some; nothing when they did not.
+                    val filler = org.ducatproject.ducat.Languages.everyTranslationOf(
+                        context, R.string.pay_payment_request,
+                    )
+                    if (m.body.isNotBlank() && m.body !in filler) {
                         Spacer(Modifier.height(2.dp))
-                        Text(m.body, color = fg, style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            isolate(m.body),
+                            color = fg,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                     }
                     if (m.items.isNotEmpty()) {
                         Spacer(Modifier.height(8.dp))
