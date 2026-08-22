@@ -1958,8 +1958,14 @@ fun HailSheet(
                     Text(
                         stringResource(R.string.hail_osm_privacy,
                             org.ducatproject.ducat.Units.distance(context, 1000.0)),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.outline,
+                        style = MaterialTheme.typography.bodySmall,
+                        // onSurfaceVariant, which is what every other
+                        // explanatory line in the app uses — not `outline`,
+                        // the role for borders and timestamps. This sentence
+                        // is the app admitting the one place it sends your
+                        // location off the device, and it was set in the
+                        // faintest text on the screen.
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 8.dp),
                     )
                     Spacer(Modifier.height(16.dp))
