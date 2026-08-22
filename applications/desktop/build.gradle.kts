@@ -325,6 +325,14 @@ tasks.register<JavaExec>("smoke") {
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
 // Proves the escrow sweep takes what is over and leaves what is funded.
 // `./gradlew :desktop:escrowsweep`.
+// A PIN cooldown measured on a clock the phone's owner cannot set.
+// `./gradlew :desktop:pinlockout`.
+tasks.register<JavaExec>("pinlockout") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PinLockoutTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The arithmetic that stops a 416 KiB PNG decoding to 1.6 GB.
 // `./gradlew :desktop:safeimage`.
 tasks.register<JavaExec>("safeimage") {

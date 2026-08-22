@@ -69,11 +69,39 @@ object Pin {
         data object Unset : Verdict
     }
 
-    /** Seconds still to wait, or zero. */
+    /**
+     * Seconds still to wait, or zero.
+     *
+     * Measured on two clocks, and the longer answer wins.
+     *
+     * `currentTimeMillis` is the wall clock, which is a setting. Somebody
+     * holding this phone can open the date picker, push it a year forward, and
+     * every cooldown this object ever wrote is in the past — which turns a
+     * fifteen-minute wait per guess back into as fast as PBKDF2 will run, and
+     * a four-digit PIN falls in well under an hour.
+     *
+     * `elapsedRealtime` counts since boot and nothing can set it, so it is the
+     * honest one. What it cannot do is survive a reboot, and it comes back
+     * near zero — so a deadline written when the phone had been up three days
+     * would read as three days of lockout. Hence the cap: neither clock can
+     * assert more than one full cooldown, which is also the most any honest
+     * lockout is worth. A reboot is therefore not an escape, and not a brick
+     * either. It costs at most the wait that was already owed.
+     */
     fun lockedFor(context: Context): Long {
-        val until = prefs(context).getLong("locked_until", 0L)
-        return ((until - System.currentTimeMillis()) / 1000).coerceAtLeast(0)
+        val p = prefs(context)
+        val wall = p.getLong("locked_until", 0L) - System.currentTimeMillis()
+        val mono = p.getLong("locked_until_elapsed", 0L) -
+            android.os.SystemClock.elapsedRealtime()
+        return (remaining(wall, mono) / 1000).coerceAtLeast(0)
     }
+
+    /** The arithmetic of the two clocks, with no clock of its own to read. */
+    internal fun remaining(wallMs: Long, monoMs: Long): Long =
+        maxOf(
+            wallMs.coerceAtMost(MAX_COOLDOWN_MS),
+            monoMs.coerceAtMost(MAX_COOLDOWN_MS),
+        ).coerceAtLeast(0)
 
     fun verify(context: Context, pin: String): Verdict {
         val p = prefs(context)
@@ -88,7 +116,10 @@ object Pin {
         // Constant time: a comparison that returns early on the first wrong
         // digit tells an attacker which digit was wrong.
         if (java.security.MessageDigest.isEqual(got.toByteArray(), want.toByteArray())) {
-            p.edit().putInt("failures", 0).putLong("locked_until", 0L).apply()
+            p.edit().putInt("failures", 0)
+                .putLong("locked_until", 0L)
+                .putLong("locked_until_elapsed", 0L)
+                .apply()
             return Verdict.Ok
         }
         val failures = p.getInt("failures", 0) + 1
@@ -100,6 +131,10 @@ object Pin {
             val wait = (FIRST_COOLDOWN_MS shl (over - 1).coerceAtMost(20))
                 .coerceAtMost(MAX_COOLDOWN_MS)
             e.putLong("locked_until", System.currentTimeMillis() + wait)
+            e.putLong(
+                "locked_until_elapsed",
+                android.os.SystemClock.elapsedRealtime() + wait,
+            )
             e.apply()
             DucatLog.w(TAG, "wrong PIN ×$failures — waiting ${wait / 1000}s")
             return Verdict.Locked(wait / 1000)
