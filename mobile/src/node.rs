@@ -197,9 +197,17 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         // Seen on the emulator on 2026-08-21 and worth writing down, because
         // it is invisible from the outside — the app simply has no network,
         // every board read comes back empty, and the search offers to try
-        // again. It lasted about fifteen minutes across several process
-        // restarts and two reinstalls, then cleared on its own. Transient,
-        // then, not fatal, and nothing about the app provoked it.
+        // again.
+        //
+        // Twice it lasted about fifteen minutes across several process
+        // restarts and two reinstalls and then cleared on its own, which is
+        // what "transient" was written here on the strength of. The third
+        // time it did not: it survived repeated restarts, a reinstall, and a
+        // full reboot of the device, and was still failing an hour later. So
+        // it is not reliably transient. It correlates with repeated
+        // reinstalls — roughly fifteen of them in a day here — which a phone
+        // in somebody's pocket does not do, but an app update is the same
+        // motion.
         //
         // The fallback was *not* shown to help. It was switched on during
         // that window and the node did come up, but no `protected_store`

@@ -22,5 +22,5 @@
     <string name="net_test_route">Uji rute</string>
     <string name="net_route_ok">rute dialokasikan — blob %1$s byte</string>
     <string name="net_route_failed">rute gagal: %1$s</string>
-    <string name="net_keystore_failed">Penyimpanan kunci Android tidak dapat dibuka, jadi transport tidak bisa dimulai. Masalah ini pulih sendiri setelah beberapa menit; memulai ulang DUCAT tampaknya tidak membantu. Dompet dan kontakmu disimpan terpisah dan tidak terpengaruh.</string>
+    <string name="net_keystore_failed">Penyimpanan kunci Android tidak dapat dibuka, jadi transport tidak bisa dimulai. Kadang pulih sendiri setelah beberapa menit, kadang tidak — memulai ulang DUCAT tidak membantu dalam kedua kasus. Dompet dan kontakmu disimpan terpisah dan tidak terpengaruh.</string>
 </resources>

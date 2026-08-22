@@ -22,5 +22,5 @@
     <string name="net_test_route">Prova una rotta</string>
     <string name="net_route_ok">rotta allocata — blob da %1$s byte</string>
     <string name="net_route_failed">rotta non riuscita: %1$s</string>
-    <string name="net_keystore_failed">L’archivio chiavi di Android non si è aperto, quindi il trasporto non può partire. Si è risolto da sé dopo qualche minuto; riavviare DUCAT non sembra servire. Il portafoglio e i contatti sono conservati a parte e non sono stati toccati.</string>
+    <string name="net_keystore_failed">L’archivio chiavi di Android non si è aperto, quindi il trasporto non può partire. A volte si risolve da sé in qualche minuto, a volte no; riavviare DUCAT non serve in nessuno dei due casi. Il portafoglio e i contatti sono conservati a parte e non sono stati toccati.</string>
 </resources>

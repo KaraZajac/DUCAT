@@ -22,5 +22,5 @@
     <string name="net_test_route">Route testen</string>
     <string name="net_route_ok">Route zugewiesen — Blob mit %1$s Bytes</string>
     <string name="net_route_failed">Route fehlgeschlagen: %1$s</string>
-    <string name="net_keystore_failed">Der Schlüsselspeicher von Android ließ sich nicht öffnen, daher kann der Transport nicht starten. Das hat sich nach ein paar Minuten von selbst gelegt; ein Neustart von DUCAT scheint nicht zu helfen. Wallet und Kontakte liegen getrennt davon und sind unversehrt.</string>
+    <string name="net_keystore_failed">Der Schlüsselspeicher von Android ließ sich nicht öffnen, daher kann der Transport nicht starten. Manchmal legt sich das nach ein paar Minuten von selbst, manchmal bleibt es — ein Neustart von DUCAT hilft in beiden Fällen nicht. Wallet und Kontakte liegen getrennt davon und sind unversehrt.</string>
 </resources>
