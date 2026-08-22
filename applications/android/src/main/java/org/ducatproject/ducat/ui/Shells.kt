@@ -429,7 +429,8 @@ private fun SettledList(origin: String, @StringRes emptyTextRes: Int) {
     val earnedToday = done.filter { it.settledAt >= today }.sumOf { it.totalPxmr }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+        // Sixteen, like every other screen's number — see Pos.kt and Balance.kt.
+        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Spacer(Modifier.height(16.dp))
             Text(
                 stringResource(R.string.shells_today),

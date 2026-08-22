@@ -1220,7 +1220,10 @@ fun DriveScreen() {
         return
     }
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
+    // Sixteen, the margin the rest of the app uses. This screen was the only
+    // one at twenty, which is not a difference anybody can name and is exactly
+    // the sort a phone full of them adds up to.
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(stringResource(R.string.hail_driving_title), style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(4.dp))
         Text(

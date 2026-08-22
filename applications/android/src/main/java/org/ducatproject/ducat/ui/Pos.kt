@@ -84,8 +84,12 @@ fun PosScreen() {
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        // The running total is the hero, like every other screen's number.
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+        // The running total is the hero, like every other screen's number —
+        // and at the same sixteen they all sit at. This was twenty-four while
+        // the item row under it was sixteen, so the till's left edge stepped
+        // in and out down the screen. The home screen had the same split and
+        // the same answer.
+        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Spacer(Modifier.height(16.dp))
             Text(
                 stringResource(R.string.pos_this_sale),
@@ -225,7 +229,7 @@ fun PosScreen() {
                 stringResource(R.string.pos_network_fee_note),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(horizontal = 24.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
 
             Spacer(Modifier.height(16.dp))
@@ -246,7 +250,7 @@ fun PosScreen() {
                 stringResource(R.string.pos_add_first_item),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 24.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
         }
     }

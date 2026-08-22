@@ -89,7 +89,10 @@ fun BarTabScreen(
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         if (section != "closed") {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+        // Sixteen, like the button under it and like every other screen —
+        // see Pos.kt. At twenty-four the "Start a tab" button overhung the
+        // words above and below it by eight pixels.
+        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Spacer(Modifier.height(16.dp))
             Text(
                 stringResource(R.string.bartab_open_tabs),
@@ -132,7 +135,7 @@ fun BarTabScreen(
                 stringResource(R.string.bartab_receipt_auto_hint),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
             )
         }
 
@@ -159,7 +162,7 @@ fun BarTabScreen(
                 stringResource(R.string.bartab_nothing_settled),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier.padding(16.dp),
             )
         }
         if (section != "closed" && tabs.isEmpty()) {
@@ -167,7 +170,7 @@ fun BarTabScreen(
                 stringResource(R.string.bartab_no_tabs),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 24.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
         }
         Spacer(Modifier.height(24.dp))
