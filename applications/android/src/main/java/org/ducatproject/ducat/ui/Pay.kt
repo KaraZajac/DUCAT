@@ -510,13 +510,23 @@ private fun AmountStep(
                     label = { Text(if (fiatEntry) cur else "XMR") },
                     trailingIcon = { Icon(Icons.Filled.SwapVert, null, Modifier.size(16.dp)) },
                 )
-            } else {
+            } else if (!billed) {
+                // The unit beside the amount field, for when there is no rate
+                // to toggle against. `billed` hides the field, and this used to
+                // print "XMR" beside the space where it wasn't — a label with
+                // nothing to label, directly above a conversion line already
+                // shown under the bill.
                 Text("XMR", style = MaterialTheme.typography.labelLarge)
             }
         }
 
         // The other unit, live, so nobody converts in their head to check.
-        pxmr?.let {
+        //
+        // Only where there is an amount being typed. A bill already prints both
+        // units under its own total, and adds a second line with both when a
+        // tip is entered — so this one said the same number a third time, and
+        // on a bill with no tip it sat directly under the first one.
+        if (!billed) pxmr?.let {
             Text(
                 if (fiatEntry) "${formatXmr(it)} XMR"
                 else Amounts.show(context, it).secondary.orEmpty(),
@@ -545,10 +555,21 @@ private fun AmountStep(
                         else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.weight(1f))
-            TextButton(
-                onClick = { maxLocked = true },
-                enabled = maxPxmr > 0,
-            ) { Text(if (maxLocked) stringResource(R.string.pay_max_done) else stringResource(R.string.pay_max)) }
+            // Not on a bill. Max writes the wallet's maximum into `typed`, and
+            // a billed screen computes its amount from the bill plus the tip
+            // and never reads `typed` — so the button did nothing at all, on
+            // the one screen where a control that looks like it changes the
+            // amount had better not.
+            //
+            // The headroom line beside it stays: on a bill it is the room for
+            // the bill *and* the tip, it turns red when they exceed it, and
+            // that is what disables Send.
+            if (!billed) {
+                TextButton(
+                    onClick = { maxLocked = true },
+                    enabled = maxPxmr > 0,
+                ) { Text(if (maxLocked) stringResource(R.string.pay_max_done) else stringResource(R.string.pay_max)) }
+            }
         }
         if (overMax) {
             Text(
