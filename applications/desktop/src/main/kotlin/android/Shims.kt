@@ -39,6 +39,7 @@ abstract class Context {
     open fun getString(id: Int, vararg args: Any?): String =
         android.res.DeskRes.string(id, *args)
     open val resources: Resources get() = Resources
+    open fun createConfigurationContext(c: android.content.res.Configuration): Context = this
     open val contentResolver: ContentResolver get() = ContentResolver()
 
     /**
@@ -93,6 +94,8 @@ abstract class Context {
 
 /** Only the corner of android.content.res.Resources the screens touch. */
 object Resources {
+    val configuration: android.content.res.Configuration
+        get() = android.content.res.Configuration()
     fun getString(id: Int): String = android.res.DeskRes.string(id)
     fun getQuantityString(id: Int, count: Int): String =
         android.res.DeskRes.plural(id, count)
