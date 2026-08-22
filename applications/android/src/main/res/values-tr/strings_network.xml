@@ -22,5 +22,5 @@
     <string name="net_test_route">Rota dene</string>
     <string name="net_route_ok">rota ayrıldı — %1$s baytlık öbek</string>
     <string name="net_route_failed">rota başarısız: %1$s</string>
-    <string name="net_keystore_failed">Android’in anahtar deposu açılmadı, bu yüzden taşıma başlatılamıyor. Bazen birkaç dakika içinde kendiliğinden geçiyor, bazen geçmiyor — her iki durumda da DUCAT’ı yeniden başlatmak işe yaramıyor. Cüzdanın ve kişilerin ayrı tutuluyor ve etkilenmedi.</string>
+    <string name="net_keystore_failed">Android’in anahtar deposu açılmadı, bu yüzden taşıma başlatılamıyor. Cüzdanın ve kişilerin ayrı tutuluyor ve etkilenmedi. DUCAT’ı elle kurduysan, indirdiğin sürümün telefonunun işlemcisine uyduğunu kontrol et — yanlışı tam olarak böyle hata veriyor.</string>
 </resources>

@@ -22,5 +22,5 @@
     <string name="net_test_route">Testar uma rota</string>
     <string name="net_route_ok">rota alocada — blob de %1$s bytes</string>
     <string name="net_route_failed">rota falhou: %1$s</string>
-    <string name="net_keystore_failed">O armazenamento de chaves do Android não abriu, então o transporte não consegue iniciar. Às vezes se resolve sozinho em alguns minutos, às vezes não — reiniciar o DUCAT não adianta em nenhum dos casos. Sua carteira e seus contatos ficam à parte e não foram afetados.</string>
+    <string name="net_keystore_failed">O armazenamento de chaves do Android não abriu, então o transporte não consegue iniciar. Sua carteira e seus contatos ficam à parte e não foram afetados. Se você instalou o DUCAT na mão, confira se o download corresponde ao processador do seu telefone — a versão errada falha exatamente assim.</string>
 </resources>

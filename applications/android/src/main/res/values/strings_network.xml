@@ -22,5 +22,5 @@
     <string name="net_test_route">Test a route</string>
     <string name="net_route_ok">route allocated — %1$s byte blob</string>
     <string name="net_route_failed">route failed: %1$s</string>
-    <string name="net_keystore_failed">Android’s key store would not open, so the transport cannot start. It sometimes clears on its own after a few minutes, but it can also persist — restarting DUCAT does not appear to help either way. Your wallet and contacts are kept separately and are unaffected.</string>
+    <string name="net_keystore_failed">Android’s key store would not open, so the transport cannot start. Your wallet and contacts are kept separately and are unaffected. If you installed DUCAT by hand, check that the download matches your phone’s processor — the wrong build fails in exactly this way.</string>
 </resources>

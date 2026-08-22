@@ -22,5 +22,5 @@
     <string name="net_test_route">Probar una ruta</string>
     <string name="net_route_ok">ruta asignada — blob de %1$s bytes</string>
     <string name="net_route_failed">la ruta falló: %1$s</string>
-    <string name="net_keystore_failed">El almacén de claves de Android no se pudo abrir, así que el transporte no puede iniciarse. A veces se resuelve solo en unos minutos y a veces no; reiniciar DUCAT no ayuda en ninguno de los dos casos. Tu monedero y tus contactos se guardan aparte y no se han visto afectados.</string>
+    <string name="net_keystore_failed">El almacén de claves de Android no se pudo abrir, así que el transporte no puede iniciarse. Tu monedero y tus contactos se guardan aparte y no se han visto afectados. Si instalaste DUCAT a mano, comprueba que la descarga corresponda al procesador de tu teléfono: la versión equivocada falla exactamente así.</string>
 </resources>

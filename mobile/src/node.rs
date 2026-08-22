@@ -194,25 +194,28 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         // "Could not initialize the protected store" and the node never
         // starts.
         //
-        // Seen on the emulator on 2026-08-21 and worth writing down, because
-        // it is invisible from the outside — the app simply has no network,
-        // every board read comes back empty, and the search offers to try
-        // again.
+        // The one cause established here (2026-08-21, then found on 08-22):
+        // an APK built for the wrong CPU. The emulator is x86_64 and the
+        // arm64-v8a build had been installed on it by hand; the keyring goes
+        // through JNI into `androidx.security.crypto`, and under binary
+        // translation that call fails. Installing the x86_64 build fixed it
+        // in one attempt, having survived restarts, reinstalls and a full
+        // reboot before that. A keystore entry written under the translated
+        // build is then unusable by the native one, so the ABI switch also
+        // wants app data cleared.
         //
-        // Twice it lasted about fifteen minutes across several process
-        // restarts and two reinstalls and then cleared on its own, which is
-        // what "transient" was written here on the strength of. The third
-        // time it did not: it survived repeated restarts, a reinstall, and a
-        // full reboot of the device, and was still failing an hour later. So
-        // it is not reliably transient. It correlates with repeated
-        // reinstalls — roughly fifteen of them in a day here — which a phone
-        // in somebody's pocket does not do, but an app update is the same
-        // motion.
+        // Earlier notes here read the same failure as intermittent and
+        // blamed repeated reinstalls. That was wrong: the two "it cleared
+        // itself" episodes were installs that happened to land the right
+        // ABI. Nothing has shown this failing on a correctly-built install.
+        // DUCAT is sideloaded, though, so somebody picking a file off a
+        // releases page can reach it the same way — which is what the status
+        // screen now suggests checking.
         //
         // The fallback was *not* shown to help. It was switched on during
         // that window and the node did come up, but no `protected_store`
-        // directory was ever written — so the secure keyring had simply
-        // started working again and the fallback path never ran. Whether it
+        // directory was ever written — so the right-ABI install had simply
+        // started working and the fallback path never ran. Whether it
         // rescues this failure is untested.
         //
         // It stays false regardless. Moving that key from the keyring to a
