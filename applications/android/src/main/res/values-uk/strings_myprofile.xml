@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Ім\'я</string>
     <string name="myprofile_name_support">Показується на картках, які ти роздаєш. Той, хто тебе додасть, може перейменувати.</string>
     <string name="myprofile_pronouns">Займенники</string>
+    <string name="myprofile_reach_note">Способи зв’язатися з тобою поза DUCAT. Вони йдуть лише тоді, коли ти свідомо обмінюєшся контактами — не на касу, не в рахунок і не водієві, який прийняв твій виклик.</string>
     <string name="myprofile_email">Ел. пошта</string>
     <string name="myprofile_phone">Телефон</string>
     <string name="myprofile_phone_hint">Лише цифри, з кодом країни</string>

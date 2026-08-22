@@ -165,6 +165,21 @@ fun MyProfileEditor() {
         }
 
         Spacer(Modifier.height(16.dp))
+        // Said, like the driving note below says its half.
+        //
+        // Every other group on this screen explains itself — the picture, the
+        // pronouns, the car — and the three that did not were the three that
+        // matter most: an email, a phone and a Signal handle are the fields
+        // that locate somebody off this app. They are scoped (see
+        // MyProfile.toWire: they ride a deliberate contact exchange and
+        // nothing else), which is exactly the sort of care nobody benefits
+        // from unless it is written down where the typing happens.
+        Text(
+            stringResource(R.string.myprofile_reach_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(6.dp))
         Field(stringResource(R.string.myprofile_email), email, MyProfile.emailProblem(email)) { email = it; saved = false }
         Field(stringResource(R.string.myprofile_phone), phone, MyProfile.phoneProblem(phone),
             hint = stringResource(R.string.myprofile_phone_hint)) { phone = it; saved = false }

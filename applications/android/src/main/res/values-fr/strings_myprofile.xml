@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Nom</string>
     <string name="myprofile_name_support">Affiché sur les cartes que tu distribues. Qui t\'ajoute peut te renommer.</string>
     <string name="myprofile_pronouns">Pronoms</string>
+    <string name="myprofile_reach_note">Des moyens de te joindre en dehors de DUCAT. Ils ne partent que si tu échanges des contacts volontairement — jamais vers une caisse, une note ou le chauffeur qui prend ta course.</string>
     <string name="myprofile_email">E-mail</string>
     <string name="myprofile_phone">Téléphone</string>
     <string name="myprofile_phone_hint">Chiffres uniquement, indicatif pays inclus</string>

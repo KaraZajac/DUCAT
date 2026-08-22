@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Naam</string>
     <string name="myprofile_name_support">Staat op de kaartjes die je uitdeelt. Wie jou toevoegt, kan je hernoemen.</string>
     <string name="myprofile_pronouns">Voornaamwoorden</string>
+    <string name="myprofile_reach_note">Manieren om je buiten DUCAT te bereiken. Ze gaan alleen mee als je bewust contacten uitwisselt — nooit naar een kassa, een rekening of de chauffeur die je rit aanneemt.</string>
     <string name="myprofile_email">E-mail</string>
     <string name="myprofile_phone">Telefoon</string>
     <string name="myprofile_phone_hint">Alleen cijfers, inclusief landcode</string>

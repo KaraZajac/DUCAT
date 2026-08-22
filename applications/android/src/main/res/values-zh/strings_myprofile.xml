@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">名字</string>
     <string name="myprofile_name_support">显示在你发出的名片上。添加你的人可以给你改名。</string>
     <string name="myprofile_pronouns">人称代词</string>
+    <string name="myprofile_reach_note">在 DUCAT 之外联系你的方式。只有你有意交换联系人时才会送出——不会给收银台、账单，也不会给接单的司机。</string>
     <string name="myprofile_email">邮箱</string>
     <string name="myprofile_phone">电话</string>
     <string name="myprofile_phone_hint">只填数字，含国家代码</string>

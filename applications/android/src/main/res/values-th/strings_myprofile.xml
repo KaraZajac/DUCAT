@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">ชื่อ</string>
     <string name="myprofile_name_support">แสดงบนนามบัตรที่คุณแจก คนที่เพิ่มคุณเปลี่ยนชื่อคุณได้</string>
     <string name="myprofile_pronouns">สรรพนาม</string>
+    <string name="myprofile_reach_note">ช่องทางติดต่อคุณนอก DUCAT ข้อมูลนี้จะถูกส่งเฉพาะตอนที่คุณตั้งใจแลกผู้ติดต่อเท่านั้น ไม่ส่งให้เครื่องคิดเงิน บิล หรือคนขับที่รับงานของคุณ</string>
     <string name="myprofile_email">อีเมล</string>
     <string name="myprofile_phone">โทรศัพท์</string>
     <string name="myprofile_phone_hint">ตัวเลขเท่านั้น รวมรหัสประเทศ</string>

@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Nama</string>
     <string name="myprofile_name_support">Ditampilkan di kartu yang kamu bagikan. Siapa pun yang menambahkanmu bisa mengganti namamu.</string>
     <string name="myprofile_pronouns">Kata ganti</string>
+    <string name="myprofile_reach_note">Cara menghubungimu di luar DUCAT. Ini hanya ikut saat kamu sengaja bertukar kontak — bukan ke kasir, tagihan, atau sopir yang mengambil pesananmu.</string>
     <string name="myprofile_email">Email</string>
     <string name="myprofile_phone">Telepon</string>
     <string name="myprofile_phone_hint">Angka saja, termasuk kode negara</string>

@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">नाम</string>
     <string name="myprofile_name_support">आपके बाँटे कार्डों पर दिखता है। जो आपको जोड़े, वह नाम बदल सकता है।</string>
     <string name="myprofile_pronouns">सर्वनाम</string>
+    <string name="myprofile_reach_note">DUCAT के बाहर तुम तक पहुँचने के रास्ते। ये तभी जाते हैं जब तुम जानबूझकर संपर्क साझा करो — किसी टिल, बिल या तुम्हारी सवारी लेने वाले ड्राइवर को कभी नहीं।</string>
     <string name="myprofile_email">ईमेल</string>
     <string name="myprofile_phone">फ़ोन</string>
     <string name="myprofile_phone_hint">सिर्फ़ अंक, देश कोड समेत</string>

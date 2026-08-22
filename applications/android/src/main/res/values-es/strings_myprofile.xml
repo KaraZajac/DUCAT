@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Nombre</string>
     <string name="myprofile_name_support">Se muestra en las tarjetas que entregas. Quien te agregue puede renombrarte.</string>
     <string name="myprofile_pronouns">Pronombres</string>
+    <string name="myprofile_reach_note">Formas de localizarte fuera de DUCAT. Solo se envían cuando intercambias contactos a propósito: nunca a una caja, a una cuenta ni a quien acepta tu viaje.</string>
     <string name="myprofile_email">Correo</string>
     <string name="myprofile_phone">Teléfono</string>
     <string name="myprofile_phone_hint">Solo dígitos, con código de país</string>

@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">名前</string>
     <string name="myprofile_name_support">手渡すカードに表示されます。追加した相手は名前を変更できます。</string>
     <string name="myprofile_pronouns">代名詞</string>
+    <string name="myprofile_reach_note">DUCAT の外であなたに連絡する手段です。連絡先を意図的に交換したときだけ送られます。レジにも、伝票にも、配車を受けた運転手にも渡りません。</string>
     <string name="myprofile_email">メール</string>
     <string name="myprofile_phone">電話番号</string>
     <string name="myprofile_phone_hint">数字のみ、国番号込み</string>

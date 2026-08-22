@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">نام</string>
     <string name="myprofile_name_support">روی کارت‌هایی که می‌دهی نشان داده می‌شود. هر که اضافه‌ات کند می‌تواند نامت را عوض کند.</string>
     <string name="myprofile_pronouns">ضمیرها</string>
+    <string name="myprofile_reach_note">راه‌های تماس با شما بیرون از DUCAT. فقط وقتی می‌روند که عمداً مخاطب رد و بدل کنید — نه به صندوق، نه به صورت‌حساب، نه به راننده‌ای که درخواست شما را می‌پذیرد.</string>
     <string name="myprofile_email">ایمیل</string>
     <string name="myprofile_phone">تلفن</string>
     <string name="myprofile_phone_hint">فقط رقم، با کد کشور</string>

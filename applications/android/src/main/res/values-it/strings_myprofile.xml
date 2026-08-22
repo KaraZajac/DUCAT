@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Nome</string>
     <string name="myprofile_name_support">Mostrato sui biglietti che consegni. Chi ti aggiunge può rinominarti.</string>
     <string name="myprofile_pronouns">Pronomi</string>
+    <string name="myprofile_reach_note">Modi per raggiungerti fuori da DUCAT. Partono solo se scambi i contatti di proposito: mai a una cassa, a un conto o a chi accetta la tua corsa.</string>
     <string name="myprofile_email">Email</string>
     <string name="myprofile_phone">Telefono</string>
     <string name="myprofile_phone_hint">Solo cifre, prefisso internazionale incluso</string>

@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Name</string>
     <string name="myprofile_name_support">Steht auf den Karten, die du weitergibst. Wer dich hinzufügt, kann dich umbenennen.</string>
     <string name="myprofile_pronouns">Pronomen</string>
+    <string name="myprofile_reach_note">Wege, dich außerhalb von DUCAT zu erreichen. Sie werden nur mitgeschickt, wenn du bewusst Kontakte tauschst — nie an eine Kasse, eine Rechnung oder einen Fahrer, der deine Fahrt annimmt.</string>
     <string name="myprofile_email">E-Mail</string>
     <string name="myprofile_phone">Telefon</string>
     <string name="myprofile_phone_hint">Nur Ziffern, mit Ländervorwahl</string>

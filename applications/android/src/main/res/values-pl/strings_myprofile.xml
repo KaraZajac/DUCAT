@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Imię</string>
     <string name="myprofile_name_support">Widnieje na wizytówkach, które rozdajesz. Kto cię doda, może cię przemianować.</string>
     <string name="myprofile_pronouns">Zaimki</string>
+    <string name="myprofile_reach_note">Sposoby na kontakt z tobą poza DUCAT-em. Wysyłają się tylko wtedy, gdy świadomie wymieniasz kontakty — nigdy do kasy, rachunku ani kierowcy, który przyjmuje twój kurs.</string>
     <string name="myprofile_email">E-mail</string>
     <string name="myprofile_phone">Telefon</string>
     <string name="myprofile_phone_hint">Same cyfry, z kodem kraju</string>

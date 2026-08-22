@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Name</string>
     <string name="myprofile_name_support">Shown on cards you hand out. Whoever adds you can rename you.</string>
     <string name="myprofile_pronouns">Pronouns</string>
+    <string name="myprofile_reach_note">Ways to reach you away from DUCAT. They travel only when you swap contacts on purpose — never to a till, a tab, or a driver taking your hail.</string>
     <string name="myprofile_email">Email</string>
     <string name="myprofile_phone">Phone</string>
     <string name="myprofile_phone_hint">Digits only, country code included</string>

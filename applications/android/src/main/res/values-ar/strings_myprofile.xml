@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">الاسم</string>
     <string name="myprofile_name_support">يظهر على البطاقات التي تسلّمها. ومن يضيفك يمكنه إعادة تسميتك.</string>
     <string name="myprofile_pronouns">الضمائر</string>
+    <string name="myprofile_reach_note">طرق للوصول إليك خارج DUCAT. لا تُرسَل إلا عند تبادل جهات الاتصال عن قصد — لا إلى نقطة بيع ولا إلى حساب ولا إلى سائق يستجيب لطلبك.</string>
     <string name="myprofile_email">البريد الإلكتروني</string>
     <string name="myprofile_phone">الهاتف</string>
     <string name="myprofile_phone_hint">أرقام فقط، مع رمز الدولة</string>

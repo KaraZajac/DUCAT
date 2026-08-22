@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Tên</string>
     <string name="myprofile_name_support">Hiện trên các thẻ bạn đưa ra. Ai thêm bạn cũng có thể đổi tên bạn.</string>
     <string name="myprofile_pronouns">Đại từ xưng hô</string>
+    <string name="myprofile_reach_note">Cách liên lạc với bạn ngoài DUCAT. Chúng chỉ được gửi khi bạn chủ động trao đổi danh bạ — không gửi cho quầy thu ngân, hoá đơn hay tài xế nhận cuốc của bạn.</string>
     <string name="myprofile_email">Email</string>
     <string name="myprofile_phone">Điện thoại</string>
     <string name="myprofile_phone_hint">Chỉ chữ số, gồm cả mã quốc gia</string>

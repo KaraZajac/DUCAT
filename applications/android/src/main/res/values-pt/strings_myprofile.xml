@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Nome</string>
     <string name="myprofile_name_support">Aparece nos cartões que você entrega. Quem adicionar você pode renomear.</string>
     <string name="myprofile_pronouns">Pronomes</string>
+    <string name="myprofile_reach_note">Formas de falar com você fora do DUCAT. Só viajam quando você troca contatos de propósito — nunca para um caixa, uma comanda ou quem aceita a sua corrida.</string>
     <string name="myprofile_email">E-mail</string>
     <string name="myprofile_phone">Telefone</string>
     <string name="myprofile_phone_hint">Só dígitos, com o código do país</string>

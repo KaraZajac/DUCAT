@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">Ad</string>
     <string name="myprofile_name_support">Dağıttığın kartlarda görünür. Seni ekleyen, adını değiştirebilir.</string>
     <string name="myprofile_pronouns">Zamirler</string>
+    <string name="myprofile_reach_note">DUCAT dışında sana ulaşmanın yolları. Yalnızca bilerek kişi takası yaptığında gider — bir kasaya, bir hesaba ya da çağrını alan sürücüye asla.</string>
     <string name="myprofile_email">E-posta</string>
     <string name="myprofile_phone">Telefon</string>
     <string name="myprofile_phone_hint">Yalnızca rakamlar, ülke kodu dahil</string>

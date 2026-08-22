@@ -8,6 +8,7 @@
     <string name="myprofile_name_label">이름</string>
     <string name="myprofile_name_support">건네는 카드에 표시돼요. 나를 추가한 사람은 이름을 바꿀 수 있어요.</string>
     <string name="myprofile_pronouns">대명사</string>
+    <string name="myprofile_reach_note">DUCAT 밖에서 너에게 연락할 수단이야. 일부러 연락처를 주고받을 때만 전달돼 — 계산대나 탭, 네 호출을 받은 기사에게는 가지 않아.</string>
     <string name="myprofile_email">이메일</string>
     <string name="myprofile_phone">전화번호</string>
     <string name="myprofile_phone_hint">숫자만, 국가번호 포함</string>
