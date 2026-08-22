@@ -46,7 +46,18 @@ object Geo {
     fun search(query: String, near: Pair<Long, Long>? = null): List<Hit> {
         val q = URLEncoder.encode(query, "UTF-8")
         val bias = near?.let { (la, lo) ->
-            val lat = la / 1e7; val lon = lo / 1e7
+            // Snapped to a coarse grid first. The box is what biases the
+            // search, but a box is symmetric — average its corners and you
+            // have its centre, and the centre used to be the fix itself to
+            // four decimal places, which is about eleven metres. Nominatim,
+            // and Nominatim's logs, learned where somebody was standing every
+            // time they typed a letter into a search field.
+            //
+            // Snapping costs the search nothing. The box is ninety kilometres
+            // across; moving its centre by up to five changes which results
+            // rank higher not at all, and what leaves the phone is a cell
+            // coarser than the ~5 km one §16.17 allows on a public board.
+            val lat = coarse(la / 1e7); val lon = coarse(lo / 1e7)
             // Locale.US, non-negotiably: a comma-decimal locale would format
             // 48.85 as "48,85" and the URL's own commas stop meaning anything.
             "&viewbox=%.4f,%.4f,%.4f,%.4f&bounded=0".format(
@@ -112,6 +123,16 @@ object Geo {
             )
         }.getOrNull()
     }
+
+    /**
+     * A degree tenth — about eleven kilometres, and less near the poles.
+     *
+     * Rounding, not truncation: truncating always moves toward the equator and
+     * toward the prime meridian, which is a bias somebody could unpick. And
+     * the result is a grid point, so repeated searches from one place report
+     * one cell rather than a track through it.
+     */
+    internal fun coarse(deg: Double): Double = Math.round(deg * 10.0) / 10.0
 
     private fun get(url: String): String? = runCatching {
         val conn = URL(url).openConnection() as HttpURLConnection

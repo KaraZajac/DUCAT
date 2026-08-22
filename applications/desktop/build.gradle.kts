@@ -325,6 +325,14 @@ tasks.register<JavaExec>("smoke") {
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
 // Proves the escrow sweep takes what is over and leaves what is funded.
 // `./gradlew :desktop:escrowsweep`.
+// How precisely a search tells OpenStreetMap where somebody is standing.
+// `./gradlew :desktop:geoprivacy`.
+tasks.register<JavaExec>("geoprivacy") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.GeoPrivacyTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The attachment directory that only ever grew, and the room check that stops
 // it growing. `./gradlew :desktop:attsweep`.
 tasks.register<JavaExec>("attsweep") {
