@@ -105,6 +105,11 @@ fun ItemsScreen() {
         } else LazyColumn(Modifier.fillMaxSize()) {
             items(items) { item ->
                 ListItem(
+                    // Transparent, as everywhere else: a ListItem defaults to
+                    // `surface`, which is not the page it sits on.
+                    colors = ListItemDefaults.colors(
+                        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                    ),
                     headlineContent = {
                         Text(
                             item.name,

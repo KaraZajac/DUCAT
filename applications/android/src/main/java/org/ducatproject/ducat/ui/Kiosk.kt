@@ -657,6 +657,11 @@ private fun StaffOrders() {
                     headlineContent = {
                         Text(stringResource(R.string.kiosk_paid_number, o.number))
                     },
+                    // Transparent, as everywhere else: a ListItem defaults to
+                    // `surface`, which is not the page it sits on.
+                    colors = ListItemDefaults.colors(
+                        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                    ),
                     supportingContent = {
                         Text(
                             o.lines.joinToString(", ") { it.description }

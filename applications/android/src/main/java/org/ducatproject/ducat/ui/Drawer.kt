@@ -704,6 +704,15 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
                     leadingContent = { Avatar(c.displayName(), c.avatar) },
                     headlineContent = { Text(c.displayName()) },
                     supportingContent = { Text(personaGroups(c.personaHex)) },
+                    // Transparent, like the chat list and the activity list.
+                    // A ListItem defaults to `surface`, which is not the page
+                    // it sits on, so the rows drew a band of a slightly
+                    // different grey that stopped dead under the last one —
+                    // a block of list floating on the screen rather than a
+                    // list on the page.
+                    colors = ListItemDefaults.colors(
+                        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                    ),
                     modifier = Modifier.combinedClickable(
                         // Long press rather than a row of icons: the destructive
                         // one was sitting a mistap away from a contact's name,
