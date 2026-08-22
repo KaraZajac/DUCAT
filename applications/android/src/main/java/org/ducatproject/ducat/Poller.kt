@@ -277,6 +277,10 @@ class Poller(private val context: Context) {
                     }
                 }.onFailure { DucatLog.w(TAG, "prune: ${it.message}") }
 
+                // The same tenancy, for the store that never had a sweep.
+                runCatching { Ceremony.sweep(context) }
+                    .onFailure { DucatLog.w(TAG, "escrow sweep: ${it.message}") }
+
                 // One attachment per pass: pictures arrive shortly after
                 // their messages without ever starving the payment paths.
                 runCatching { Mailbox.fetchOneAttachment(context) }

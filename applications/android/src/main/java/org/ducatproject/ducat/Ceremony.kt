@@ -233,6 +233,71 @@ object Ceremony {
         }
     }
 
+    /** How long a finished escrow stays readable before it is forgotten. */
+    private const val KEEP_FINISHED_MS = 7L * 24 * 60 * 60 * 1000
+
+    /** Concurrent unfunded deals one contact may have open with you. */
+    private const val OPEN_PER_CONTACT = 3
+
+    /**
+     * Forget escrows that are over, and ones nobody ever answered.
+     *
+     * §18.7's stewardship, applied to the one store that had no sweep. Every
+     * round-0 that arrives writes a record here and none was ever removed —
+     * `isFinished` existed and nothing called it — so the set only grew, and
+     * three screens read all of it on every poll tick, one of them Home.
+     *
+     * Nothing with money in it is touched. `isStale` already carries that
+     * argument: it refuses any escrow this device has seen funded, by its own
+     * scan and by the two txids it would have written itself, precisely
+     * because the way out of a funded escrow is a release or an arbiter and
+     * not a screen quietly deciding it is over. Finished ones wait a week
+     * first, so a deal that just settled is still there to look at.
+     */
+    fun sweep(context: Context): Int {
+        val now = System.currentTimeMillis()
+        val doomed = all(context).filter { o ->
+            when {
+                isStale(o) -> true
+                isFinished(o) -> {
+                    val at = o.optLong("created").takeIf { it > 0 } ?: return@filter false
+                    now - at > KEEP_FINISHED_MS
+                }
+                else -> false
+            }
+        }.mapNotNull { it.optString("id").takeIf { s -> s.isNotEmpty() } }
+        if (doomed.isEmpty()) return 0
+        synchronized(lock) {
+            val e = prefs(context).edit()
+            doomed.forEach { e.remove("c_$it") }
+            e.apply()
+        }
+        DucatLog.i(TAG, "swept ${doomed.size} finished or unanswered escrow(s)")
+        return doomed.size
+    }
+
+    /**
+     * Whether this contact may open another deal with us right now.
+     *
+     * A round-0 is joined without asking: it commits, messages the rest of the
+     * roster and writes a record that used to live for ever. Unbounded, that is
+     * a contact who can make this phone cut prekeys and write to the DHT for as
+     * long as they care to. Nothing here moves money, so the answer is a
+     * ceiling rather than a consent screen.
+     *
+     * Only *unfunded* ones count. An escrow with money in it is a real
+     * obligation and must never be refused a round because of its neighbours.
+     */
+    private fun tooManyOpen(context: Context, peerHex: String): Boolean =
+        all(context).count { o ->
+            o.optString("peer") == peerHex &&
+                !isFinished(o) &&
+                !isStale(o) &&
+                o.optLong("fundedPxmr") == 0L &&
+                o.optString("fundTxid").isEmpty() &&
+                o.optString("hostFundTxid").isEmpty()
+        } >= OPEN_PER_CONTACT
+
     /**
      * The 32-byte context every party derives identically: the sorted
      * personas and a nonce, so a fresh bond never collides with an old one.
@@ -624,6 +689,16 @@ object Ceremony {
         if (o == null && round.toInt() == 0) {
             val inv = parseRound0(payload) ?: return
             if (mineHex !in inv.roster) return
+            // A ceiling on how many unfunded deals one contact may have open
+            // with us at once. Joining is automatic and free to ask for.
+            if (tooManyOpen(context, contact.personaHex)) {
+                DucatLog.w(
+                    TAG,
+                    "bond $idHex: ${contact.displayName()} already has " +
+                        "$OPEN_PER_CONTACT unfunded deals open — not joining",
+                )
+                return
+            }
             if (!ceremonyId(inv.roster, inv.nonce).contentEquals(id)) {
                 DucatLog.w(TAG, "bond $idHex: roster does not hash to the ceremony id")
                 return

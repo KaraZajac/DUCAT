@@ -321,6 +321,14 @@ tasks.register<JavaExec>("smoke") {
 
 // A backup app-state round-trip, offline: proves claimed_kis_v1 (a
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
+// Proves the escrow sweep takes what is over and leaves what is funded.
+// `./gradlew :desktop:escrowsweep`.
+tasks.register<JavaExec>("escrowsweep") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.EscrowSweepTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("backuptest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.BackupTestKt"
