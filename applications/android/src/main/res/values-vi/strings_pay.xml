@@ -15,6 +15,8 @@
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Quay lại</string>
     <string name="pay_in_ducat">trong DUCAT</string>
+    <string name="pay_name_shared">Một liên hệ khác cũng có tên này</string>
+    <string name="pay_name_shared_key">%1$s… — một liên hệ khác cũng có tên này</string>
     <string name="pay_monero_address">Địa chỉ Monero</string>
     <string name="pay_bill">Hóa đơn</string>
     <string name="pay_add_tip">Thêm tiền boa (%1$s) — tùy chọn</string>

@@ -45,42 +45,6 @@ import uniffi.ducat_mobile.readContactCard
  * *do* know. Both are in the app because both are real, and the UI has to make
  * which one you are in obvious rather than blurring them together.
  */
-@Composable
-private fun ContactRow(c: Contact, onClick: () -> Unit) {
-    ListItem(
-        headlineContent = { Text(c.displayName()) },
-        supportingContent = {
-            Text(
-                // §16.9: the asserted name is worth what the channel was worth.
-                // Showing the key fragment gives a user something to compare out
-                // of band, which is the only check available for a card that
-                // arrived through someone else's app.
-                c.personaHex.take(16) + "…",
-                fontFamily = FontFamily.Monospace,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        },
-        leadingContent = {
-            Box(
-                Modifier
-                    .size(40.dp)
-                    .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(20.dp)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    c.displayName().take(1).uppercase(),
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-        },
-        trailingContent = { Icon(Icons.Filled.ChatBubbleOutline, stringResource(R.string.contacts_chat)) },
-        modifier = Modifier.clickable { onClick() },
-    )
-}
-
 /**
  * Handing your card over.
  *

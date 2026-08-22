@@ -190,6 +190,7 @@ private fun ChooseTarget(
     val contacts = remember(version) {
         ContactStore(context).all().sortedBy { it.displayName().lowercase() }
     }
+    val ambiguous = remember(version) { ContactStore(context).ambiguous() }
     var address by rememberSaveable { mutableStateOf("") }
 
     Column(
@@ -232,14 +233,29 @@ private fun ChooseTarget(
             // contact list is a few dozen rows at the outside; the page scroller
             // can have all of them.
             contacts.forEach { c ->
+                val shared = c.personaHex in ambiguous
                 ListItem(
                     headlineContent = { Text(c.displayName()) },
                     supportingContent = {
+                        // The key was always here, but a key nobody has a
+                        // reason to read is furniture. When two rows carry the
+                        // same name it is the only thing between them, so the
+                        // row says which rows those are.
                         Text(
-                            c.personaHex.take(16) + "…",
-                            fontFamily = FontFamily.Monospace,
+                            if (shared) {
+                                stringResource(
+                                    R.string.pay_name_shared_key,
+                                    c.personaHex.take(16),
+                                )
+                            } else {
+                                c.personaHex.take(16) + "…"
+                            },
+                            fontFamily = if (shared) FontFamily.Default else FontFamily.Monospace,
                             style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
+                            color =
+                                if (shared) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                         )
                     },
@@ -431,14 +447,36 @@ private fun AmountStep(
                 is PayTarget.ToContact -> {
                     Avatar(target.contact.displayName())
                     Spacer(Modifier.width(10.dp))
+                    // Somebody else in the list reads the same on screen, so
+                    // the name on this header is not enough to know who is
+                    // about to be paid. Say so here rather than only in the
+                    // picker: this is the screen with the amount on it, and
+                    // it is the last one before the money goes.
+                    val shared = remember(target.contact.personaHex, version) {
+                        target.contact.personaHex in ContactStore(context).ambiguous()
+                    }
                     Column {
                         Text(target.contact.displayName(),
                              style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            stringResource(R.string.pay_in_ducat),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.outline,
-                        )
+                        if (shared) {
+                            Text(
+                                stringResource(R.string.pay_name_shared),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                            Text(
+                                target.contact.personaHex.take(24).chunked(4).joinToString(" "),
+                                fontFamily = FontFamily.Monospace,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline,
+                            )
+                        } else {
+                            Text(
+                                stringResource(R.string.pay_in_ducat),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline,
+                            )
+                        }
                     }
                 }
                 is PayTarget.ToAddress -> Column {

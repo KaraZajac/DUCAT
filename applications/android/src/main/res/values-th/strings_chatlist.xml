@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">นามบัตรของฉัน</string>
     <string name="chatlist_new_chat">แชทใหม่</string>
+    <string name="chatlist_name_shared">มีผู้ติดต่ออื่นใช้ชื่อนี้</string>
+    <string name="chatlist_name_shared_key">%1$s… — มีผู้ติดต่ออื่นใช้ชื่อนี้</string>
     <string name="chatlist_no_conversations">ไม่มีบทสนทนา</string>
     <string name="chatlist_empty_hint">ยื่นนามบัตรให้ใครสักคนต่อหน้า หรือส่งผ่านแอปไหนก็ได้ที่คุณไว้ใจอยู่แล้ว ไม่มีใครถูกค้นหาด้วยชื่อได้ — การติดต่อใครสักคนต้องใช้นามบัตรที่เขาให้คุณ</string>
     <string name="chatlist_preview_you">คุณ: %1$s</string>

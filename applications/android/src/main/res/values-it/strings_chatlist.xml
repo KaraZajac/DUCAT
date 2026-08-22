@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">Il mio biglietto</string>
     <string name="chatlist_new_chat">Nuova chat</string>
+    <string name="chatlist_name_shared">Un altro contatto ha questo nome</string>
+    <string name="chatlist_name_shared_key">%1$s… — un altro contatto ha questo nome</string>
     <string name="chatlist_no_conversations">Nessuna conversazione</string>
     <string name="chatlist_empty_hint">Consegna il tuo biglietto di persona, o invialo con qualsiasi app di cui già ti fidi. Nessuno può essere trovato per nome — per raggiungere una persona serve un biglietto che ti ha dato lei.</string>
     <string name="chatlist_preview_you">Tu: %1$s</string>

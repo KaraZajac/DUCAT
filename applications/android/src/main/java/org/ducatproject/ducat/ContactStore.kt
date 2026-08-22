@@ -77,6 +77,35 @@ class ContactStore(context: Context) {
         }
     }
 
+    /**
+     * The personas whose name is not their own — someone else in this list
+     * reads the same on screen.
+     *
+     * A name is what a person picks a row by, and half of every name here was
+     * chosen by the person it belongs to. Two contacts that look identical are
+     * a way to be paid instead of somebody else, and it costs an attacker
+     * nothing to try: assert the name of a bar their target drinks at and wait
+     * for one mis-tap. Nothing detects that today, so the screens that aim
+     * money at a person ask this and say so.
+     *
+     * Compared by [ContactNaming.skeleton], so `Sam`, `Ѕam` and `S​am` count as
+     * the same name — which they are, to the only reader that matters.
+     *
+     * A name I set myself is still included. It is tempting to trust a petname
+     * — I typed it, so nobody spoofed it — but the ambiguity is what hurts,
+     * and two rows saying `Sam` are equally unpickable whoever typed them.
+     */
+    fun ambiguous(): Set<String> {
+        val named = all().filter { it.named }
+        return named
+            .groupBy { ContactNaming.skeleton(it.displayName()) }
+            .filterValues { it.size > 1 }
+            .values
+            .flatten()
+            .map { it.personaHex }
+            .toSet()
+    }
+
     fun all(): List<Contact> {
         val raw = prefs.getString("contacts", null) ?: return emptyList()
         val arr = JSONArray(raw)
@@ -1389,6 +1418,80 @@ private fun unb64(s: String): ByteArray = Base64.decode(s, Base64.NO_WRAP)
 object ContactNaming {
     @Volatile
     var unnamed: String = "Unnamed contact"
+
+    /**
+     * What a name *looks* like, stripped of everything that only a machine can
+     * tell apart.
+     *
+     * A contact's asserted name is chosen by the contact. Nothing stops
+     * somebody who wants to be paid instead of the bar you drink at from
+     * calling themselves what the bar calls itself, and once two rows read
+     * `Sam` there is nothing on screen to pick between them. Exact string
+     * comparison does not find that, because the attacker does not have to use
+     * the same string: `Ѕam` opens with Cyrillic Ѕ, `Sаm` has a Cyrillic а in
+     * the middle, `Sam` can carry a zero-width space, and all three render
+     * identically in every font anybody has.
+     *
+     * So names are compared by skeleton (the idea is Unicode TR39's, the table
+     * is the practical subset): compatibility-normalise, drop the characters
+     * that take no space, fold the Cyrillic and Greek letters that are drawn
+     * as Latin ones onto their Latin twin, casefold, collapse the whitespace.
+     * Two names with the same skeleton cannot be told apart by eye, which is
+     * exactly the question being asked.
+     *
+     * False positives are cheap here and false negatives are not: the output
+     * of this drives a warning, never a refusal, so folding two genuinely
+     * different names together costs somebody one extra glance at a key.
+     */
+    fun skeleton(name: String): String {
+        val flat = java.text.Normalizer.normalize(name, java.text.Normalizer.Form.NFKC)
+        val sb = StringBuilder(flat.length)
+        for (ch in flat) {
+            when {
+                // Zero-width and directional formatting: invisible by
+                // construction, so they can never be part of what a name looks
+                // like. (Cf. the bidi isolates the chat list *adds* — those are
+                // ours and wrap the name rather than hiding inside it.)
+                ch.code in 0x200B..0x200F || ch.code in 0x202A..0x202E ||
+                    ch.code in 0x2066..0x2069 || ch == '﻿' -> Unit
+                // Combining marks: an accent stacked on a letter to make it a
+                // *slightly* different letter is exactly the trick.
+                Character.getType(ch) == Character.NON_SPACING_MARK.toInt() -> Unit
+                else -> sb.append(LOOKALIKE[ch] ?: ch)
+            }
+        }
+        return sb.toString().lowercase().replace(WHITESPACE, " ").trim()
+    }
+
+    private val WHITESPACE = Regex("\\s+")
+
+    /**
+     * Letters from other alphabets that are drawn as Latin ones.
+     *
+     * Cyrillic and Greek carry most of it — they are the two alphabets with
+     * enough shared history with Latin to have genuinely identical glyphs, and
+     * they are what every real homograph attack has used. Both cases are
+     * listed because the fold to lowercase happens after this, and Cyrillic
+     * lowercasing does not land on the Latin letter.
+     */
+    private val LOOKALIKE: Map<Char, Char> = buildMap {
+        // Cyrillic upper
+        putAll(
+            "АВЕКМНОРСТУХІЈЅԁЁ".zip("ABEKMHOPCTYXIJSdE").toMap(),
+        )
+        // Cyrillic lower
+        putAll(
+            "аеорсухіјѕԛ".zip("aeopcyxijsq").toMap(),
+        )
+        // Greek upper — ΑΒΕΖΗΙΚΜΝΟΡΤΥΧ are drawn as Latin capitals
+        putAll(
+            "ΑΒΕΖΗΙΚΜΝΟΡΤΥΧ".zip("ABEZHIKMNOPTYX").toMap(),
+        )
+        // Greek lower that passes for Latin
+        putAll(
+            "οναρτυκχ".zip("ovaptukx").toMap(),
+        )
+    }
 }
 
 class PersonaStore(context: Context) {

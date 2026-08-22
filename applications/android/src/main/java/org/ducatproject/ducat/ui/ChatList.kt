@@ -42,6 +42,9 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val store = remember { ContactStore(context) }
     var all by remember { mutableStateOf(store.all()) }
+    // Recomputed with the list, since adding or renaming a contact is
+    // exactly what makes two of them read the same.
+    val ambiguous = remember(all) { store.ambiguous() }
     // Same reason as the chat screen: a message arriving must move this list,
     // and nothing else tells it one did.
     val version by ContactStore.changes.collectAsState()
@@ -115,10 +118,29 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     ListItem(
                         colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                         headlineContent = {
-                            Text(
-                                c.displayName(),
-                                fontWeight = if (unread) FontWeight.Bold else FontWeight.Normal,
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    c.displayName(),
+                                    fontWeight = if (unread) FontWeight.Bold else FontWeight.Normal,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                )
+                                // Beside the name, not under it: the line below
+                                // is the last message, which is why anybody is
+                                // looking at this row. An icon rather than
+                                // words because the row is already full — the
+                                // sentence is on the screens that spend money.
+                                if (c.personaHex in ambiguous) {
+                                    Spacer(Modifier.width(6.dp))
+                                    Icon(
+                                        Icons.Filled.Warning,
+                                        stringResource(R.string.chatlist_name_shared),
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                }
+                            }
                         },
                         supportingContent = {
                             Text(
@@ -205,6 +227,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
         )
         Sheet.New -> NewChatSheet(
             contacts = all.sortedBy { it.displayName().lowercase() },
+            ambiguous = store.ambiguous(),
             onDismiss = { sheet = null },
             onAdd = { sheet = Sheet.Add },
             onPick = {
@@ -229,6 +252,7 @@ internal enum class Sheet { Share, Add, New }
 @Composable
 private fun NewChatSheet(
     contacts: List<Contact>,
+    ambiguous: Set<String>,
     onDismiss: () -> Unit,
     onAdd: () -> Unit,
     onPick: (Contact) -> Unit,
@@ -270,6 +294,20 @@ private fun NewChatSheet(
                         containerColor = androidx.compose.ui.graphics.Color.Transparent,
                     ),
                     headlineContent = { Text(c.displayName()) },
+                    // Of every list in the app this is the one with nothing but
+                    // a name on it, so a name two people share leaves nothing
+                    // to choose by. The key only appears where it is needed.
+                    supportingContent = if (c.personaHex !in ambiguous) null else {
+                        {
+                            Text(
+                                stringResource(
+                                    R.string.chatlist_name_shared_key, c.personaHex.take(16),
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    },
                     leadingContent = { Avatar(c.displayName(), c.avatar) },
                     modifier = Modifier.clickable { onPick(c) },
                 )

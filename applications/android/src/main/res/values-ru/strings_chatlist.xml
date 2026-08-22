@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">Моя карточка</string>
     <string name="chatlist_new_chat">Новый чат</string>
+    <string name="chatlist_name_shared">Другой контакт носит это же имя</string>
+    <string name="chatlist_name_shared_key">%1$s… — другой контакт носит это же имя</string>
     <string name="chatlist_no_conversations">Нет переписок</string>
     <string name="chatlist_empty_hint">Передай кому-нибудь свою карточку лично или отправь через любое приложение, которому уже доверяешь. Никого нельзя найти по имени — чтобы связаться с человеком, нужна карточка, которую он дал.</string>
     <string name="chatlist_preview_you">Ты: %1$s</string>

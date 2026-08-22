@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">بطاقتي</string>
     <string name="chatlist_new_chat">دردشة جديدة</string>
+    <string name="chatlist_name_shared">جهة اتصال أخرى تحمل هذا الاسم</string>
+    <string name="chatlist_name_shared_key">%1$s… — جهة اتصال أخرى تحمل هذا الاسم</string>
     <string name="chatlist_no_conversations">لا محادثات</string>
     <string name="chatlist_empty_hint">سلّم بطاقتك لشخص وجهًا لوجه، أو أرسلها عبر أي تطبيق تثق به أصلًا. لا يمكن العثور على أحد بالاسم — الوصول إلى شخص يحتاج إلى بطاقة أعطاك إياها.</string>
     <string name="chatlist_preview_you">أنت: %1$s</string>

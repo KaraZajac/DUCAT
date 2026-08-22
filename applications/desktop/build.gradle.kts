@@ -324,6 +324,14 @@ tasks.register<JavaExec>("smoke") {
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
 // Proves the escrow sweep takes what is over and leaves what is funded.
 // `./gradlew :desktop:escrowsweep`.
+// Two contacts a person cannot tell apart: the confusable-name fold and the
+// store query that drives the warning. `./gradlew :desktop:confusable`.
+tasks.register<JavaExec>("confusable") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ConfusableTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // What a second node's answer is allowed to do to a sale: corroborated
 // settles, unreachable still settles, unknown defers and eventually says so.
 // `./gradlew :desktop:secondopinion`.

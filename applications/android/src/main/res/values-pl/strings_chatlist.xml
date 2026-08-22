@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">Moja wizytówka</string>
     <string name="chatlist_new_chat">Nowy czat</string>
+    <string name="chatlist_name_shared">Inny kontakt ma tę samą nazwę</string>
+    <string name="chatlist_name_shared_key">%1$s… — inny kontakt ma tę samą nazwę</string>
     <string name="chatlist_no_conversations">Brak rozmów</string>
     <string name="chatlist_empty_hint">Wręcz komuś swoją wizytówkę osobiście albo wyślij ją przez dowolną aplikację, której już ufasz. Nikogo nie da się znaleźć po imieniu — do człowieka prowadzi tylko wizytówka, którą ci dał.</string>
     <string name="chatlist_preview_you">Ty: %1$s</string>

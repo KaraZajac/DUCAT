@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">Kartuku</string>
     <string name="chatlist_new_chat">Chat baru</string>
+    <string name="chatlist_name_shared">Kontak lain memakai nama ini</string>
+    <string name="chatlist_name_shared_key">%1$s… — kontak lain memakai nama ini</string>
     <string name="chatlist_no_conversations">Belum ada percakapan</string>
     <string name="chatlist_empty_hint">Berikan kartumu langsung ke orangnya, atau kirim lewat aplikasi apa pun yang sudah kamu percaya. Tidak ada yang bisa ditemukan lewat nama — menjangkau seseorang butuh kartu yang mereka berikan.</string>
     <string name="chatlist_preview_you">Kamu: %1$s</string>

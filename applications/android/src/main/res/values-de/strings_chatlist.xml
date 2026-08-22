@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">Meine Karte</string>
     <string name="chatlist_new_chat">Neuer Chat</string>
+    <string name="chatlist_name_shared">Ein anderer Kontakt heißt auch so</string>
+    <string name="chatlist_name_shared_key">%1$s… — ein anderer Kontakt heißt auch so</string>
     <string name="chatlist_no_conversations">Keine Unterhaltungen</string>
     <string name="chatlist_empty_hint">Gib jemandem deine Karte persönlich, oder schick sie über eine App, der du schon vertraust. Niemand ist über den Namen auffindbar — eine Person zu erreichen braucht eine Karte, die sie dir gegeben hat.</string>
     <string name="chatlist_preview_you">Du: %1$s</string>

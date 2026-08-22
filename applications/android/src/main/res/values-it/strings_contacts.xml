@@ -1,6 +1,5 @@
 <resources>
     <!-- Contacts.kt: riga della lista contatti -->
-    <string name="contacts_chat">Chat</string>
 
     <!-- Contacts.kt: ShareCardSheet -->
     <string name="contacts_share_card_title">Condividi il tuo biglietto</string>

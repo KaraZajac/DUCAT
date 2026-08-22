@@ -15,6 +15,8 @@
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Atrás</string>
     <string name="pay_in_ducat">en DUCAT</string>
+    <string name="pay_name_shared">Otro contacto tiene este nombre</string>
+    <string name="pay_name_shared_key">%1$s… — otro contacto tiene este nombre</string>
     <string name="pay_monero_address">Dirección de Monero</string>
     <string name="pay_bill">Cuenta</string>
     <string name="pay_add_tip">Agregar propina (%1$s) — opcional</string>

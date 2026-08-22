@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">کارت من</string>
     <string name="chatlist_new_chat">گفتگوی جدید</string>
+    <string name="chatlist_name_shared">مخاطب دیگری همین نام را دارد</string>
+    <string name="chatlist_name_shared_key">%1$s… — مخاطب دیگری همین نام را دارد</string>
     <string name="chatlist_no_conversations">گفتگویی نیست</string>
     <string name="chatlist_empty_hint">کارتت را حضوری به کسی بده، یا از هر برنامه‌ای که همین حالا به آن اعتماد داری بفرست. هیچ‌کس با نام پیدا نمی‌شود — برای رسیدن به یک نفر، کارتی لازم است که خودش داده باشد.</string>
     <string name="chatlist_preview_you">تو: %1$s</string>

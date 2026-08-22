@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">Mijn kaartje</string>
     <string name="chatlist_new_chat">Nieuwe chat</string>
+    <string name="chatlist_name_shared">Een ander contact heet ook zo</string>
+    <string name="chatlist_name_shared_key">%1$s… — een ander contact heet ook zo</string>
     <string name="chatlist_no_conversations">Geen gesprekken</string>
     <string name="chatlist_empty_hint">Geef iemand persoonlijk je kaartje, of stuur het via een app die je al vertrouwt. Niemand is op naam te vinden — iemand bereiken kan alleen met een kaartje dat je van diegene kreeg.</string>
     <string name="chatlist_preview_you">Jij: %1$s</string>

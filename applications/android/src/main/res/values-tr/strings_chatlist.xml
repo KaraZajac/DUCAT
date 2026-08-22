@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">Kartım</string>
     <string name="chatlist_new_chat">Yeni sohbet</string>
+    <string name="chatlist_name_shared">Başka bir kişi de bu adı taşıyor</string>
+    <string name="chatlist_name_shared_key">%1$s… — başka bir kişi de bu adı taşıyor</string>
     <string name="chatlist_no_conversations">Sohbet yok</string>
     <string name="chatlist_empty_hint">Kartını birine elden ver ya da zaten güvendiğin herhangi bir uygulamadan gönder. Kimse adıyla bulunamaz — birine ulaşmak, sana verdiği bir kartı gerektirir.</string>
     <string name="chatlist_preview_you">Sen: %1$s</string>

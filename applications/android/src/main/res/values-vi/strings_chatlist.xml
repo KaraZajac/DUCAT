@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">Thẻ của tôi</string>
     <string name="chatlist_new_chat">Trò chuyện mới</string>
+    <string name="chatlist_name_shared">Một liên hệ khác cũng có tên này</string>
+    <string name="chatlist_name_shared_key">%1$s… — một liên hệ khác cũng có tên này</string>
     <string name="chatlist_no_conversations">Chưa có cuộc trò chuyện nào</string>
     <string name="chatlist_empty_hint">Đưa thẻ của bạn cho ai đó khi gặp mặt, hoặc gửi qua ứng dụng nào bạn vốn tin. Không ai tìm được ai theo tên — muốn liên hệ một người, phải có thẻ họ đưa bạn.</string>
     <string name="chatlist_preview_you">Bạn: %1$s</string>

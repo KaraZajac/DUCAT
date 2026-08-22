@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">내 카드</string>
     <string name="chatlist_new_chat">새 채팅</string>
+    <string name="chatlist_name_shared">같은 이름의 다른 연락처가 있습니다</string>
+    <string name="chatlist_name_shared_key">%1$s… — 같은 이름의 다른 연락처가 있습니다</string>
     <string name="chatlist_no_conversations">대화가 없어요</string>
     <string name="chatlist_empty_hint">카드를 직접 건네거나, 이미 믿는 앱으로 보내세요. 이름으로는 아무도 찾을 수 없어요 — 누군가에게 닿으려면 그 사람이 준 카드가 필요해요.</string>
     <string name="chatlist_preview_you">나: %1$s</string>

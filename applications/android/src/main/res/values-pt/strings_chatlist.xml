@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">Meu cartão</string>
     <string name="chatlist_new_chat">Nova conversa</string>
+    <string name="chatlist_name_shared">Outro contato tem este nome</string>
+    <string name="chatlist_name_shared_key">%1$s… — outro contato tem este nome</string>
     <string name="chatlist_no_conversations">Nenhuma conversa</string>
     <string name="chatlist_empty_hint">Entregue seu cartão a alguém pessoalmente, ou envie por qualquer app em que você já confia. Ninguém pode ser encontrado pelo nome — para alcançar uma pessoa é preciso um cartão que ela deu a você.</string>
     <string name="chatlist_preview_you">Você: %1$s</string>

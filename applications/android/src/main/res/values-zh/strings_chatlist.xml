@@ -2,6 +2,8 @@
 <resources>
     <string name="chatlist_my_card">我的名片</string>
     <string name="chatlist_new_chat">新聊天</string>
+    <string name="chatlist_name_shared">另一位联系人使用了这个名字</string>
+    <string name="chatlist_name_shared_key">%1$s… — 另一位联系人使用了这个名字</string>
     <string name="chatlist_no_conversations">没有对话</string>
     <string name="chatlist_empty_hint">当面把名片交给对方，或通过你已经信任的任何应用发过去。没有人能靠名字被找到 — 要联系一个人，得有对方给你的名片。</string>
     <string name="chatlist_preview_you">你：%1$s</string>

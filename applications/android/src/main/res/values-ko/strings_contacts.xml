@@ -1,6 +1,5 @@
 <resources>
     <!-- Contacts.kt: contact list row -->
-    <string name="contacts_chat">채팅</string>
 
     <!-- Contacts.kt: ShareCardSheet -->
     <string name="contacts_share_card_title">카드 공유</string>
