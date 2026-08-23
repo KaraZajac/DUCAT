@@ -96,9 +96,27 @@ class LedgerTest {
 
     @Test
     fun `before the transaction is read the row admits it does not know`() {
-        // No chain data: the change output is indistinguishable from income,
-        // and the screen must not assert otherwise.
-        val events = ledger(emptyMap())
+        // No chain data *and a send of our own with that txid*: the output
+        // could be our change or it could be income, and the screen must not
+        // assert either.
+        //
+        // The send record is the half this test used to leave out. "Provisional"
+        // stopped meaning "unread" and started meaning "unread, and ours to be
+        // unsure about" — because a transaction this device never sent is not
+        // its change however long the chain takes, and hedging on it told
+        // somebody who had never sent anything in their life that every payment
+        // they received might be their own change. The test kept asserting the
+        // rule that behaviour came from.
+        val ourSpend = SentPayment(
+            txidHex = change.txHashHex,
+            amountPxmr = 1_000_000_000L,
+            feePxmr = 30_320_000L,
+            toAddress = "5xyz",
+            contactHex = null,
+            note = null,
+            timestamp = 1_786_638_000_000L,
+        )
+        val events = ledger(emptyMap(), listOf(ourSpend))
         val guess = events.first { it.txid == change.txHashHex }
         assertTrue("must be marked provisional", guess.provisional)
         // The spent output still has to appear, or the balance steps down with
@@ -109,6 +127,17 @@ class LedgerTest {
             7_466_000_000L,
             events.first().balanceAfterPxmr,
         )
+    }
+
+    @Test
+    fun `an unread transaction we never sent is not hedged as our change`() {
+        // The other side of the rule above. With no send record for it, the
+        // output is income — unread, but not ambiguous — and saying "this may
+        // be change from your own payment" about a stranger's payment is a
+        // false claim, not caution.
+        val events = ledger(emptyMap())
+        val row = events.first { it.txid == change.txHashHex }
+        assertTrue("a payment we did not send is not provisional", !row.provisional)
     }
 
     @Test
