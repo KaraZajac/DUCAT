@@ -349,8 +349,18 @@ class TabStore(private val context: Context) {
             // is the entire point of kiosk mode.
             val claimedTx = store.all().mapNotNull { it.seenTx }.toMutableSet()
             for (tab in waiting.sortedBy { it.settledAt }) {
+                // Notices about *this* bill, not every amount this person has
+                // ever claimed to send. reconcile has had the window since it
+                // was written; the mempool sighting beside it did not, so a
+                // notice from a visit last month still widened what would
+                // match — and a payer chooses both the amount and the
+                // timestamp, so without the bound they choose the set.
                 val said = contacts.thread(tab.personaHex)
-                    .filter { !it.outgoing && it.kind == 2 && it.amountPxmr >= tab.settledTotal }
+                    .filter {
+                        !it.outgoing && it.kind == 2 &&
+                            it.timestamp * 1000 >= tab.settledAt - 60_000 &&
+                            it.amountPxmr >= tab.settledTotal
+                    }
                     .map { it.amountPxmr }.toSet()
                 val hit = hits.firstOrNull {
                     it.txHashHex !in claimedTx &&

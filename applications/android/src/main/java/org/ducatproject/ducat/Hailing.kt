@@ -227,7 +227,15 @@ object Hailing {
                     if (h.expiry.toLong() > nowSecs && h.expiry.toLong() <= nowSecs + cap) {
                         Seen(
                             name, n.subkey, h.card, h.dest,
-                            h.farePxmr?.toLong(), h.expiry.toLong(),
+                            // A board's u64 narrowed to a Long: above 2^63 it
+                            // comes out negative, and one of the three fare
+                            // entry points takes it without a `> 0` guard. Any
+                            // fare that cannot survive the narrowing is not a
+                            // fare, so it is dropped here rather than at each
+                            // reader — the same rule the two guarded call
+                            // sites already apply, applied once.
+                            h.farePxmr?.toLong()?.takeIf { it > 0 },
+                            h.expiry.toLong(),
                             h.originCell, h.destCell,
                         )
                     } else {
