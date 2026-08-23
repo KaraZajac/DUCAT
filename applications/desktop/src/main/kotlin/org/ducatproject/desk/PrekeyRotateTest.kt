@@ -113,9 +113,73 @@ fun main() {
         "PREKEY_FAIL rotating an undated key left nothing to open its messages with"
     }
 
+    // --- and what a reader does with two keys --------------------------------
+    //
+    // Rotation is only survivable if opening tries both, and the *reporting*
+    // matters as much as the trying: everything downstream — dead-letter now,
+    // or wait out the patience window — branches on which failure escapes.
+    val tried = mutableListOf<String>()
+    fun key(n: Int) = ByteArray(32) { n.toByte() }
+
+    // The ordinary case: the current key opens it and the retired one is
+    // never touched.
+    tried.clear()
+    check(
+        org.ducatproject.ducat.Mailbox.openWithAny(listOf(key(1), key(2))) { k ->
+            tried += "k${k[0]}"; "opened"
+        } == "opened",
+    ) { "PREKEY_FAIL the first key did not open it" }
+    check(tried == listOf("k1")) { "PREKEY_FAIL it kept going after a key that worked" }
+
+    // Sealed to the key we just retired — a peer working from a cached
+    // bundle. This is the whole reason the retired key is kept.
+    tried.clear()
+    check(
+        org.ducatproject.ducat.Mailbox.openWithAny(listOf(key(1), key(2))) { k ->
+            tried += "k${k[0]}"
+            if (k[0].toInt() == 1) throw IllegalStateException("BadSig") else "opened"
+        } == "opened",
+    ) { "PREKEY_FAIL a message sealed to the retired key was not opened" }
+    check(tried == listOf("k1", "k2")) { "PREKEY_FAIL it did not fall through to the retired key" }
+
+    // Nothing opens it: the failure that escapes is a real one, not swallowed.
+    runCatching {
+        org.ducatproject.ducat.Mailbox.openWithAny<String>(listOf(key(1), key(2))) {
+            throw IllegalStateException("BadSig")
+        }
+    }.onSuccess { error("PREKEY_FAIL an unopenable message returned a value") }
+        .onFailure { check(it.message == "BadSig") { "PREKEY_FAIL wrong failure escaped: $it" } }
+
+    // **The one that is easy to get wrong.** The *current* key decrypts and
+    // the bytes will not parse — final, and the caller dead-letters on it.
+    // The retired key is then tried and fails at the seal. Keeping the last
+    // error would replace a verdict with a guess, and a message that should
+    // have been recorded and skipped would sit out the patience window first.
+    runCatching {
+        org.ducatproject.ducat.Mailbox.openWithAny<String>(listOf(key(1), key(2))) { k ->
+            if (k[0].toInt() == 1) throw IllegalStateException("Malformed message")
+            throw IllegalStateException("BadSig")
+        }
+    }.onFailure {
+        check(it.message?.contains("Malformed") == true) {
+            "PREKEY_FAIL a later wrong key overwrote the verdict of the right one: $it"
+        }
+    }
+    // And the same the other way round, which is the ordinary ordering.
+    runCatching {
+        org.ducatproject.ducat.Mailbox.openWithAny<String>(listOf(key(1), key(2))) { k ->
+            if (k[0].toInt() == 1) throw IllegalStateException("BadSig")
+            throw IllegalStateException("Malformed message")
+        }
+    }.onFailure {
+        check(it.message?.contains("Malformed") == true) {
+            "PREKEY_FAIL the informative failure was not the one reported: $it"
+        }
+    }
+
     println(
         "PREKEY_ROTATE_OK adopt=ok incidental=kept empty=kept due=after-term " +
             "rotate=two-keys same=noop grace=expires second=one-predecessor " +
-            "legacy=due-at-once",
+            "legacy=due-at-once open=first-that-works verdict=malformed-wins",
     )
 }

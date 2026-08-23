@@ -841,16 +841,26 @@ object Mailbox {
      * that escapes is the last one, so everything downstream still classifies
      * malformed and refused exactly as it did with a single key.
      */
-    private fun <T> openWithAny(keys: List<ByteArray>, open: (ByteArray) -> T): T {
-        var last: Exception? = null
+    fun <T> openWithAny(keys: List<ByteArray>, open: (ByteArray) -> T): T {
+        var best: Exception? = null
         for (k in keys) {
             try {
                 return open(k)
             } catch (e: Exception) {
-                last = e
+                // Keep the *most informative* failure, not the most recent.
+                //
+                // "Malformed" means the bytes decrypted and then would not
+                // parse — which only the right key can produce, since a wrong
+                // one fails at the seal. So it is the one answer here that
+                // identifies itself as final, and the caller dead-letters on
+                // it. Keeping the last error instead would let a wrong key
+                // tried *after* the right one overwrite that verdict with its
+                // own BadSig, and a message that should have been recorded and
+                // skipped would sit out the patience window first.
+                if (best == null || e.message?.contains("Malformed") == true) best = e
             }
         }
-        throw last ?: IllegalStateException("no key to open with")
+        throw best ?: IllegalStateException("no key to open with")
     }
 
     private fun topUpIfLow(store: ContactStore, outbox: String): ByteArray? {
