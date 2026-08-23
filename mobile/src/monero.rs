@@ -989,9 +989,25 @@ impl UreqTransport {
         UreqTransport {
             url: url.trim_end_matches('/').to_string(),
             agent: ureq::AgentBuilder::new()
-                // Generous: a scan asks for blocks one at a time and a slow node
-                // is better waited on than abandoned mid-window.
-                .timeout(Duration::from_secs(30))
+                // **Not a deadline on the whole call.** It was 30 seconds
+                // overall, which is fine for a scan — many small block
+                // requests — and impossible for the one call that decides
+                // whether an escrow can be released at all: decoy selection
+                // fetches `get_output_distribution`, and on stagenet that is
+                // ~9 MB. Thirty seconds for nine megabytes demands about
+                // 2.4 Mbps sustained, so a phone on a weak connection could
+                // not release its own money, and three different public nodes
+                // failed here in testing. What came back was
+                // `decoys: timed out reading response` — which reads as the
+                // ceremony being broken rather than the transfer being cut.
+                //
+                // So: fail fast on a node that will not answer, and stay
+                // patient with one that is answering steadily. A connect
+                // timeout catches the dead node; a *per-read* timeout catches
+                // a transfer that stalls; neither punishes a large body that
+                // keeps arriving.
+                .timeout_connect(Duration::from_secs(10))
+                .timeout_read(Duration::from_secs(30))
                 .build(),
         }
     }
