@@ -78,8 +78,35 @@ fun main(args: Array<String>) {
             if (id !in actedOn) {
                 println(
                     "ARBITER_RULING_REQUESTED ${id.take(8)} " +
-                        "riderBack=${o.optLong("pendingRiderBack", -1)} pXMR " +
-                        "(approve with: echo 'approve ${id.take(8)}' >> ${rulings.absolutePath})"
+                        "riderBack=${o.optLong("pendingRiderBack", -1)} pXMR (claimed) " +
+                        "escrow=${o.optLong("fundedPxmr", -1)} pXMR (this node's own scan)"
+                )
+                // Where the money actually goes, read out of the payload.
+                //
+                // The line above is the proposer's word for it, and an
+                // arbiter is the one signer that cannot check its own share
+                // against it — it has no share. Ruling on a claim while
+                // unable to read the transaction is how a captured proposer
+                // gets a human to authorise something nobody agreed to, so
+                // the outputs go on the console beside the claim and the
+                // person deciding can compare them.
+                val payload = org.ducatproject.ducat.hexToBytes(o.optString("pendingPayload"))
+                if (payload == null) {
+                    println("  outputs: the parked payload is gone — do not approve")
+                } else {
+                    runCatching { uniffi.ducat_mobile.frostDestinations(payload) }
+                        .onSuccess { dests ->
+                            for (d in dests) {
+                                val what =
+                                    if (d.residual) "residual (takes the remainder, pays the fee)"
+                                    else "${d.amountPxmr} pXMR"
+                                println("  pays ${d.address.ifEmpty { "<unnamed — refuse this>" }} — $what")
+                            }
+                        }
+                        .onFailure { println("  outputs: unreadable ($it) — do not approve") }
+                }
+                println(
+                    "  (approve with: echo 'approve ${id.take(8)}' >> ${rulings.absolutePath})"
                 )
                 actedOn.add(id)
             }

@@ -120,8 +120,20 @@ fun main() {
         Ceremony.releaseToMe(listOf(residual("5THEIRS")), me, funded) == 0L,
     ) { "RELREAD_FAIL a deliberate giveaway did not read as zero" }
 
+    // An **arbiter** reads zero for a different reason: it is on neither side
+    // of a split between two other people. The zero is truthful and the gate
+    // is satisfied by it, but it says nothing about how the principals are
+    // dividing the escrow — which is why the banner does not derive the split
+    // from it (an arbiter is shown the claim it is being asked to rule on),
+    // and why the desk console prints the transaction's own outputs instead.
+    check(
+        Ceremony.releaseToMe(
+            listOf(fixed("5RIDER", 400_000L), residual("5DRIVER")), me, funded,
+        ) == 0L,
+    ) { "RELREAD_FAIL a third party read itself a share of somebody else's split" }
+
     println(
         "RELREAD_OK fixed=exact stolen=caught nearmiss=caught residual=sized " +
-            "unscanned=defers nameless=refused multiaddr=ok",
+            "unscanned=defers nameless=refused multiaddr=ok arbiter=none-of-mine",
     )
 }

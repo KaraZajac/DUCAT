@@ -2134,7 +2134,17 @@ private fun RideBondBanner(contact: Contact) {
     // only their word for it and is used when the payload could not be sized,
     // never in preference to it. Both consent screens below read this, so
     // they cannot come to state different numbers about one proposal.
-    val verifiedToMe = ride.optLong("pendingToMe", -1L)
+    //
+    // Only a principal, though. The split has two sides and this device's own
+    // share names one of them; an **arbiter** is on neither, so its reading of
+    // "what the payload pays me" is a truthful zero that says nothing about
+    // how the two principals are dividing the escrow. Subtracting it would
+    // have shown the party asked to *rule* on a split the one arrangement
+    // nobody proposed — everything back to the rider. An arbiter is judging a
+    // claim, so it is shown the claim.
+    val verifiedToMe =
+        if (org.ducatproject.ducat.Ceremony.isArbiter(ride)) -1L
+        else ride.optLong("pendingToMe", -1L)
     val riderBack = when {
         verifiedToMe < 0 -> ride.optLong(
             "pendingRiderBack", (funded - fare).coerceAtLeast(0L),
