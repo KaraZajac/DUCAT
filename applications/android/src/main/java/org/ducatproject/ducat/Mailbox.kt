@@ -1021,7 +1021,46 @@ object Mailbox {
                 continue
             }
             val raw = nodeDhtGet(c.theirOutbox, logSubkey(seq, ring), true) ?: break
-            val id = sealedPrekeyId(raw).toInt()
+            // Inside a try, for the same reason openMessage is: these bytes
+            // are in hand and this is a pure decode, so a failure is final —
+            // the same bytes will fail the same way for ever.
+            //
+            // It was outside, seventy lines above the handler, so a slot
+            // holding anything that is not a well-formed SealedMessage threw
+            // past pollOne, was swallowed by the per-contact catch in poll,
+            // and left c.inSeq where it was. Every later poll repeated it
+            // byte for byte. One junk write into a peer's next log slot ended
+            // that conversation permanently — and with it every receipt, bill,
+            // ride accept and ceremony round that would have travelled it,
+            // since those are dispatched from inside this loop. §16.11's
+            // must-not-block rule, which the rest of this function is built
+            // around, had a hole exactly where nothing was watching.
+            val id = try {
+                sealedPrekeyId(raw).toInt()
+            } catch (e: uniffi.ducat_mobile.ContactException) {
+                DucatLog.w(
+                    TAG,
+                    "message $seq from ${c.displayName()} is not a readable " +
+                        "message at all (${e.message}) — recorded and skipped",
+                )
+                store.appendAndAdvance(
+                    c.personaHex,
+                    StoredMessage(
+                        outgoing = false, seq = seq.toLong(),
+                        body = "[a message could not be read — it was not in a " +
+                            "form this app understands]",
+                        timestamp = deadLetterTime(store, c.personaHex),
+                        deadLetter = true,
+                    ),
+                    (seq + 1uL).toLong(), null,
+                )
+                recordSlotSeen(
+                    context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode(),
+                )
+                seq += 1uL
+                prev = null
+                continue
+            }
             val isOneTime = id != 0
             val secret = if (isOneTime) store.oneTimeSecret(id) else store.signedPrekeySecret()
             if (secret == null) {
@@ -1192,7 +1231,41 @@ object Mailbox {
                     prev = null
                     continue
                 }
-                throw e
+                // Anything else, and there is no rethrow. Everything this try
+                // wraps is a decrypt-and-parse of bytes already in hand, so
+                // whatever came back is deterministic — the comment at the top
+                // of this catch has said so since it was written, and it is
+                // just as true of the shapes not named above.
+                //
+                // Rethrowing meant discriminating error classes by
+                // substring-matching a Rust Debug rendering across the FFI,
+                // and anything unmatched wedged the thread for good. A codec
+                // failure renders as "Truncated" or "NonCanonicalMapOrder" and
+                // matched none of the four tested substrings. Skipping a
+                // message that will never open is recoverable and visible;
+                // never advancing is neither.
+                DucatLog.w(
+                    TAG,
+                    "message $seq from ${c.displayName()} could not be opened " +
+                        "(${e.message}) — recorded and skipped",
+                )
+                store.appendAndAdvance(
+                    c.personaHex,
+                    StoredMessage(
+                        outgoing = false, seq = seq.toLong(),
+                        body = "[a message could not be read — it was not in a " +
+                            "form this app understands]",
+                        timestamp = deadLetterTime(store, c.personaHex),
+                        deadLetter = true,
+                    ),
+                    (seq + 1uL).toLong(), null,
+                )
+                recordSlotSeen(
+                    context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode(),
+                )
+                seq += 1uL
+                prev = null
+                continue
             }
             // If this seq had been waiting out the patience window, it made
             // it after all — the tracker must not keep growing.

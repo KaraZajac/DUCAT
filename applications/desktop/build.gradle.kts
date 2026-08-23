@@ -326,6 +326,13 @@ tasks.register<JavaExec>("smoke") {
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
 // Proves the escrow sweep takes what is over and leaves what is funded.
 // `./gradlew :desktop:escrowsweep`.
+// One junk write must not end a conversation. `./gradlew :desktop:wedge`.
+tasks.register<JavaExec>("wedge") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.WedgeTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Whether a message has actually left the phone. `./gradlew :desktop:delivery`.
 tasks.register<JavaExec>("delivery") {
     classpath = sourceSets["main"].runtimeClasspath

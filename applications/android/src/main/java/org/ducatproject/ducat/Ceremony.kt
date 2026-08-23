@@ -727,6 +727,37 @@ object Ceremony {
             }
             val i = indexOf(inv.roster, mineHex)
             val n = inv.roster.size
+            // **Our own money comes home to our own address.**
+            //
+            // Every economic term in a round-0 frame is the inviter's word for
+            // it, and the ceremony id binds only the roster and the nonce — so
+            // the id check above proves the frame is self-consistent, never
+            // that it is what the two of us agreed. An honest client always
+            // names *itself* the funder (see start), so this is invisible in
+            // normal use. A modified one names the victim as funder and keeps
+            // its own address in refundAddr.
+            //
+            // refundAddr is the funder's residual destination in every split
+            // proposeRideSplit can build — the ordinary one, the counter, and
+            // the ask-the-arbiter one. Adopted verbatim, there was no split
+            // the funder could construct that returned their own money.
+            //
+            // So the funder mints it locally, from the same seed start uses,
+            // and ignores what was sent. The frame echoed back to the roster
+            // still carries the inviter's value: the echo is the ceremony's
+            // self-description and every copy has to agree on it, and what
+            // this device *spends to* is its own record, not the echo.
+            val invitedRefund = inv.refundAddr
+            val myRefund = if (i == inv.funderIdx && inv.kind != KIND_BOND) {
+                WalletStore(context).addressFor("ride_$idHex") ?: invitedRefund
+            } else invitedRefund
+            if (myRefund != invitedRefund) {
+                DucatLog.w(
+                    TAG,
+                    "bond $idHex: the invite named this device the funder and " +
+                        "supplied someone else's refund address — using our own",
+                )
+            }
             val commit =
                 uniffi.ducat_mobile.dkgCommit(id, i.toUShort(), T.toUShort(), n.toUShort())
             // The join echoes the invite's own kind/funder/fare — the frame
@@ -750,7 +781,7 @@ object Ceremony {
                 put("roster", JSONArray(inv.roster)); put("arbiterIdx", inv.arbiterIdx)
                 put("kind", inv.kind); put("funderIdx", inv.funderIdx)
                 put("farePxmr", inv.farePxmr)
-                put("refundAddr", inv.refundAddr)
+                put("refundAddr", myRefund)
                 put("funderDepPxmr", inv.funderDepPxmr); put("hostDepPxmr", inv.hostDepPxmr)
                 put("created", System.currentTimeMillis())
                 put("peer", contact.personaHex)
@@ -1551,8 +1582,17 @@ object Ceremony {
         }
         val peer = contactFor(context, peerHex)
             ?: throw IllegalStateException("the counterparty is not a contact")
+        // This device's own record, which for the funder is an address this
+        // device minted — see the note in [join]. Not the invite's.
         val refund = o.optString("refundAddr")
         check(refund.isNotEmpty()) { "this ceremony has no refund address" }
+        // **Still open, and worth knowing.** The funder now always has a split
+        // it can build that returns its own money. What it cannot yet do is
+        // check a split somebody *else* built: the proposer spends to their
+        // copy of refundAddr, and the co-signer approves a payload it does not
+        // parse, on a screen that states amounts and not destinations. Closing
+        // that needs the outputs of the proposed transaction surfaced through
+        // the bridge so the approver can be shown where the money goes.
         // The driver's payout address: their own wallet when the driver
         // proposes; when the rider proposes, the driver's published
         // subaddress from the handshake — a rider cannot route the fare
