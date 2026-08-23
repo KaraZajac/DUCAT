@@ -947,6 +947,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "log.ring")
             } else if obj.contains_key("shard") {
                 ("contact", "stand.shard")
+            } else if obj.contains_key("epoch") {
+                ("contact", "stand.epoch")
             } else {
                 ("contact", "contact.card")
             }
@@ -1388,6 +1390,39 @@ fn contact_cases() -> Vec<J> {
                 Some(n) => json!({ "ok": true, "board": n }),
                 None => json!({ "ok": false, "reject": "MALFORMED",
                                 "hint": "ladder cap or empty base" }),
+            }
+        }));
+    }
+
+    // §15.12's generation: the same argument as the ladder, one level up. A
+    // board's write key is public, so anyone can freeze a slot for ever by
+    // writing it at the maximum sequence; the epoch in the name is what lets a
+    // poisoned cell be abandoned instead of lost. Both sides compute it from a
+    // clock and a cell, so the spelling is a vector rather than a convention.
+    for (name, why, base, epoch, expect) in [
+        ("epoch_zero",
+         "The first generation is spelled like any other — no special case for the beginning of time.",
+         "geo:u4pruy", 0u64, Some("geo:u4pruy@0")),
+        ("epoch_named",
+         "Decimal, unpadded, `@` before the shard suffix — a full board name reads `<cell>@<epoch>-<shard>`.",
+         "geo:u4pruy", 3021, Some("geo:u4pruy@3021")),
+        ("epoch_listing_board",
+         "Listings rotate on the same clock as hails; the prefix in front of the cell changes nothing.",
+         "local:u4pru", 3021, Some("local:u4pru@3021")),
+        ("epoch_of_nothing",
+         "A stand needs a name before it can have a generation.",
+         "", 3021, None),
+        ("epoch_already_stamped",
+         "Re-stamping a name that already names a generation would compute a board nobody else does — and would move a poster off the board its own notice is on.",
+         "geo:u4pruy@3021", 3022, None),
+    ] {
+        v.push(json!({
+            "name": name, "why": why,
+            "base": base, "epoch": epoch,
+            "expect": match expect {
+                Some(n) => json!({ "ok": true, "board": n }),
+                None => json!({ "ok": false, "reject": "MALFORMED",
+                                "hint": "empty base or already stamped" }),
             }
         }));
     }

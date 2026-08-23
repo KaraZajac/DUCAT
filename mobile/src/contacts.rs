@@ -1140,6 +1140,30 @@ pub fn maxStandShards() -> u32 {
     ducat_core::geo::MAX_STAND_SHARDS
 }
 
+/// §15.12's generation: which board a cell's notices live on right now.
+///
+/// The caller supplies the clock, because the epoch decides a *name* and a
+/// name that moved under a decoder would make every vector time-dependent.
+#[uniffi::export]
+pub fn standEpoch(nowSecs: u64) -> u64 {
+    ducat_core::geo::stand_epoch(nowSecs)
+}
+
+/// The board name for one generation of a stand — `<base>@<epoch>`.
+///
+/// Applied before the shard suffix, so a full name reads `geo:u4pruy@3021-3`.
+#[uniffi::export]
+pub fn standEpochName(base: String, epoch: u64) -> Result<String, ContactError> {
+    ducat_core::geo::stand_epoch_name(&base, epoch).map_err(refuse)
+}
+
+/// How long one generation lasts, so a client can tell how stale a board it
+/// last wrote to has become without recomputing the rule.
+#[uniffi::export]
+pub fn standEpochSecs() -> u64 {
+    ducat_core::geo::STAND_EPOCH_SECS
+}
+
 #[uniffi::export]
 pub fn geohashCenter(cell: String) -> Result<Vec<i64>, ContactError> {
     let (lat, lon) = ducat_core::geo::geohash_center(&cell).map_err(refuse)?;

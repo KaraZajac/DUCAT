@@ -334,6 +334,14 @@ tasks.register<JavaExec>("escrowagree") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// Boards rotate, so a poisoned one is abandoned rather than kept.
+// `./gradlew :desktop:generation`.
+tasks.register<JavaExec>("generation") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.GenerationTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // A card is answered once, and the DHT sequence proves it.
 // `./gradlew :desktop:claimonce`.
 tasks.register<JavaExec>("claimonce") {

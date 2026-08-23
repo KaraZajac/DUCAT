@@ -42,7 +42,7 @@ fun main() {
     check(nodeStatus().publicInternetReady) { "ATTACK_FAIL node never became ready" }
 
     val cell = uniffi.ducat_mobile.geohashEncode(lat, lon, 5u)
-    val base = "local:$cell"
+    val base = org.ducatproject.ducat.standNow("local:$cell")
     println("ATTACK_UP on $base")
 
     // Find a genuine notice and a free slot on the same board.

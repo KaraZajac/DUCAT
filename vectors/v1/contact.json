@@ -434,6 +434,63 @@
       "why": "A stand needs a name; a shard of the empty string is a board nobody meant to make."
     },
     {
+      "base": "geo:u4pruy",
+      "epoch": 0,
+      "expect": {
+        "board": "geo:u4pruy@0",
+        "ok": true
+      },
+      "kind": "stand.epoch",
+      "name": "epoch_zero",
+      "why": "The first generation is spelled like any other — no special case for the beginning of time."
+    },
+    {
+      "base": "geo:u4pruy",
+      "epoch": 3021,
+      "expect": {
+        "board": "geo:u4pruy@3021",
+        "ok": true
+      },
+      "kind": "stand.epoch",
+      "name": "epoch_named",
+      "why": "Decimal, unpadded, `@` before the shard suffix — a full board name reads `<cell>@<epoch>-<shard>`."
+    },
+    {
+      "base": "local:u4pru",
+      "epoch": 3021,
+      "expect": {
+        "board": "local:u4pru@3021",
+        "ok": true
+      },
+      "kind": "stand.epoch",
+      "name": "epoch_listing_board",
+      "why": "Listings rotate on the same clock as hails; the prefix in front of the cell changes nothing."
+    },
+    {
+      "base": "",
+      "epoch": 3021,
+      "expect": {
+        "hint": "empty base or already stamped",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "stand.epoch",
+      "name": "epoch_of_nothing",
+      "why": "A stand needs a name before it can have a generation."
+    },
+    {
+      "base": "geo:u4pruy@3021",
+      "epoch": 3022,
+      "expect": {
+        "hint": "empty base or already stamped",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "stand.epoch",
+      "name": "epoch_already_stamped",
+      "why": "Re-stamping a name that already names a generation would compute a board nobody else does — and would move a poster off the board its own notice is on."
+    },
+    {
       "expect": {
         "ok": true
       },

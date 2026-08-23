@@ -103,7 +103,10 @@ fun main() {
     val cells = (ring + listOf(wide) + uniffi.ducat_mobile.geohashNeighbors(wide))
         .distinct().map { "geo:$it" }
     println("HAIL_WATCHING ${cells.size} board(s)")
-    val armed = cells.count { runCatching { uniffi.ducat_mobile.standWatch(it) }.getOrDefault(false) }
+    val armed = cells.count {
+        runCatching { uniffi.ducat_mobile.standWatch(org.ducatproject.ducat.standNow(it)) }
+            .getOrDefault(false)
+    }
     check("the boards can actually be watched", armed > 0, "$armed of ${cells.size}")
 
     val started = System.currentTimeMillis()

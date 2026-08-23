@@ -915,6 +915,12 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1118,6 +1124,12 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_standepoch(`nowSecs`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    fun uniffi_ducat_mobile_fn_func_standepochname(`base`: RustBuffer.ByValue,`epoch`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_standepochsecs(uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
     fun uniffi_ducat_mobile_fn_func_standshardname(`base`: RustBuffer.ByValue,`shard`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_stand_post(`cell`: RustBuffer.ByValue,`subkey`: Int,`data`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1434,6 +1446,12 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_sealed_prekey_id(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_standepoch(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_standepochname(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_standepochsecs(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_standshardname(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_stand_post(
@@ -1747,6 +1765,15 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_standepoch() != 1504.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_standepochname() != 38385.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_standepochsecs() != 63885.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_standshardname() != 25766.toShort()) {
@@ -7321,6 +7348,49 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_sealed_prekey_id(
         FfiConverterByteArray.lower(`sealedBytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * §15.12's generation: which board a cell's notices live on right now.
+         *
+         * The caller supplies the clock, because the epoch decides a *name* and a
+         * name that moved under a decoder would make every vector time-dependent.
+         */ fun `standEpoch`(`nowSecs`: kotlin.ULong): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_standepoch(
+        FfiConverterULong.lower(`nowSecs`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The board name for one generation of a stand — `<base>@<epoch>`.
+         *
+         * Applied before the shard suffix, so a full name reads `geo:u4pruy@3021-3`.
+         */
+    @Throws(ContactException::class) fun `standEpochName`(`base`: kotlin.String, `epoch`: kotlin.ULong): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_standepochname(
+        FfiConverterString.lower(`base`),FfiConverterULong.lower(`epoch`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * How long one generation lasts, so a client can tell how stale a board it
+         * last wrote to has become without recomputing the rule.
+         */ fun `standEpochSecs`(): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_standepochsecs(
+        _status)
 }
     )
     }

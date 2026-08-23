@@ -1760,6 +1760,38 @@ def stand_shard_name(base, shard):
     return base if shard == 0 else f"{base}-{shard}"
 
 
+STAND_EPOCH_SECS = 7 * 24 * 60 * 60
+
+
+def stand_epoch(now_secs):
+    # §15.12's generation. Floor division of a clock the caller supplies —
+    # never read here, or a vector would start deciding differently one day.
+    return now_secs // STAND_EPOCH_SECS
+
+
+def stand_epoch_name(base, epoch):
+    # "<base>@<epoch>", decimal and unpadded, applied before the shard suffix.
+    # Re-stamping is refused rather than folded: a name that already names a
+    # generation has one, and stamping it again computes a board nobody else
+    # does.
+    if not base:
+        raise Reject("Malformed", "a stand needs a name")
+    if "@" in base:
+        raise Reject("Malformed", "that stand name already names a generation")
+    return f"{base}@{epoch}"
+
+
+def run_stand_epoch(cases, r):
+    for c in cases:
+        def go(c=c):
+            got = stand_epoch_name(c["base"], c["epoch"])
+            if got != c["expect"]["board"]:
+                raise Reject("StateViolation",
+                             f"board {got!r}, vector says {c['expect']['board']!r}")
+            return None
+        expect_reject(r, "contact", c, go)
+
+
 def run_stand_shard(cases, r):
     for c in cases:
         def go(c=c):
@@ -1872,6 +1904,7 @@ BY_KIND = {
     "log.head": run_log_head,
     "log.ring": run_log_ring,
     "stand.shard": run_stand_shard,
+    "stand.epoch": run_stand_epoch,
     "hail.notice": run_hail_notice,
     "rental.listing": run_listing,
     "board.sealed": run_board_sealed,

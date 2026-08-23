@@ -298,7 +298,13 @@ object Listings {
         // what lets a reader stop climbing, and what keeps the ladder short
         // enough to read.
         var placed: Pair<String, UInt>? = null
-        val existing = o.optString("board").takeIf { it.isNotBlank() }
+        // A tenancy on last week's board is not a tenancy. Keeping the slot is
+        // the right instinct — a second copy leaves the first as a ghost — but
+        // only while anybody is still reading the board it is on; past a
+        // rollover the whole ladder has moved and the notice has to move with
+        // it, which is the ordinary walk below.
+        val existing = o.optString("board")
+            .takeIf { it.isNotBlank() && !standStale(it) }
         val existingSlot = o.optInt("subkey", -1).takeIf { it >= 0 }?.toUInt()
         if (existing != null && existingSlot != null) {
             // Refreshing in place: keep the tenancy rather than taking a
@@ -311,7 +317,7 @@ object Listings {
         }
         if (placed == null) {
             ladder@ for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
-                val name = uniffi.ducat_mobile.standShardName(boardName(cell), shard)
+                val name = uniffi.ducat_mobile.standShardName(standNow(boardName(cell)), shard)
                 val taken = runCatching { uniffi.ducat_mobile.standRead(name) }
                     .getOrDefault(emptyList())
                     .mapNotNull { n ->
@@ -439,12 +445,24 @@ object Listings {
         }
     }
 
-    /** Live listings whose notice is old enough to be worth re-posting. */
+    /**
+     * Live listings whose notice is old enough to be worth re-posting — or
+     * whose board has stopped being read.
+     *
+     * The second clause is §15.12's generation. Boards rotate weekly, and at
+     * a rollover a perfectly good notice is still sitting on last week's
+     * board with hours of TTL left, where nobody is looking any more. Waiting
+     * out the ordinary refresh would leave it invisible for up to six hours;
+     * asking whether the board is stale costs a string compare and closes
+     * that to one poll.
+     */
     fun needRefresh(context: Context): List<JSONObject> {
         val now = System.currentTimeMillis() / 1000
         return all(context).filter {
-            it.optString("board").isNotBlank() &&
-                now - it.optLong("postedAt") >= REFRESH_SECONDS
+            val board = it.optString("board")
+            board.isNotBlank() && (
+                now - it.optLong("postedAt") >= REFRESH_SECONDS || standStale(board)
+            )
         }
     }
 
@@ -711,7 +729,7 @@ object Listings {
          */
         climb: java.util.concurrent.ExecutorService? = null,
     ): List<uniffi.ducat_mobile.RentalInfo>? {
-        val base = boardName(cell)
+        val base = standNow(boardName(cell))
         // Null, not empty. readShard is careful to tell "nobody has posted
         // here" from "we could not ask", and this used to flatten the two a
         // line later — so a search run before the node had finished attaching

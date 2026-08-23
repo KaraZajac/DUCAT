@@ -373,7 +373,7 @@ fun HailCard(
         if (p != null) {
             Spacer(Modifier.height(10.dp))
             Text(stringResource(R.string.hail_standing_at,
-                    p.cell.removePrefix("geo:").substringBefore("-")),
+                    org.ducatproject.ducat.standCell(p.cell)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             // How long it stands. A hail lasts fifteen minutes and then stops
@@ -1001,8 +1001,9 @@ fun DriveScreen() {
                         // The record key alongside, so a ring naming a record
                         // can be turned back into the board it belongs to.
                         // Local arithmetic, no round trip.
-                        runCatching { keyOf[c] = uniffi.ducat_mobile.standRecordKey(c) }
-                        runCatching { uniffi.ducat_mobile.standWatch(c) }.getOrDefault(false)
+                        val board = org.ducatproject.ducat.standNow(c)
+                        runCatching { keyOf[c] = uniffi.ducat_mobile.standRecordKey(board) }
+                        runCatching { uniffi.ducat_mobile.standWatch(board) }.getOrDefault(false)
                     }
                     // Counted out loud, because the silent version is what
                     // hid this: a number that stays zero is a broken watch.
@@ -1313,7 +1314,7 @@ fun DriveScreen() {
             if (w.size > 1) {
                 Text(
                     stringResource(R.string.hail_watching_neighbours,
-                        w.first().removePrefix("geo:")),
+                        org.ducatproject.ducat.standCell(w.first())),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline,
                 )

@@ -6,6 +6,65 @@ import uniffi.ducat_mobile.standPost
 import uniffi.ducat_mobile.standRead
 
 /**
+ * The board a cell's notices live on right now (§15.12's generation).
+ *
+ * A board's write key derives from its public name, so anyone can write any
+ * slot — griefing a board was always the accepted cost of having no operator.
+ * What was not accepted is that a grief could be **permanent**: a Veilid
+ * subkey accepts any write whose sequence is merely *greater* than the stored
+ * one, and the sequence has a maximum past which nothing can be written at
+ * all. One write per slot at that maximum freezes a cell for ever, and the
+ * record key is a pure function of the name, so there is no other board to go
+ * to.
+ *
+ * Stamping the generation into the name is what makes it recoverable: a
+ * poisoned board is abandoned when its epoch ends. It does not stop a live
+ * attacker — re-poisoning costs a handful of writes a week — and is not meant
+ * to. It removes the ratchet, so damage lasts only while somebody is paying
+ * for it.
+ *
+ * Every place that forms a board name goes through here. Names already
+ * carrying a generation are returned untouched, because a name written down
+ * must keep resolving to the record it was written to: [migrateDown] and
+ * anything re-reading its own posted board are working from where the notice
+ * *is*, not from where a new one would go.
+ */
+fun standNow(base: String): String {
+    if (base.contains('@')) return base
+    val epoch = uniffi.ducat_mobile.standEpoch((System.currentTimeMillis() / 1000).toULong())
+    return uniffi.ducat_mobile.standEpochName(base, epoch)
+}
+
+/**
+ * True when `board` belongs to a generation that has since turned over.
+ *
+ * What a poster asks before trusting where it last posted: the notice is
+ * still there, and still unexpired, and nobody is reading that board any more.
+ */
+fun standStale(board: String): Boolean {
+    // A name from before generations existed is the stalest thing there is:
+    // nothing reads that board now and nothing ever will again. Saying so
+    // makes an upgrading device migrate its own live notices on the next
+    // poll, rather than discovering it by a write that fails.
+    if (!board.contains('@')) return true
+    val base = board.substringBefore('@')
+    val generation = board.substringBefore('-')
+    return standNow(base) != generation
+}
+
+/**
+ * The cell a board name is about, for showing a person.
+ *
+ * `geo:u4pruy@3021-2` is three facts — where, which generation, which shard —
+ * and only the first belongs on a screen. Somebody standing at a corner does
+ * not need to know the boards rotate.
+ */
+fun standCell(board: String): String =
+    board.removePrefix("geo:").removePrefix("local:").removePrefix("rent:")
+        .substringBefore('@')
+        .substringBefore('-')
+
+/**
  * Standing at a corner, and looking for somebody standing at one (§15.12).
  *
  * Both halves of a hail used to live inside the screens that drew them — the
@@ -101,7 +160,7 @@ object Hailing {
         // the same free slot and the DHT keeps whoever wrote last, silently.
         // Only a slot that reads back holding our card counts as placed; a
         // lost one just continues the walk.
-        val base = "geo:$originCell"
+        val base = standNow("geo:$originCell")
         var placed: Pair<String, UInt>? = null
         // Who else was on the board we landed on, as the ladder saw it.
         var placedTaken: Set<UInt> = emptySet()
@@ -161,7 +220,7 @@ object Hailing {
      */
     fun wideCopy(context: Context, s: Standing): Pair<String, UInt>? {
         if (!s.aloneHere || s.originCell.length != 6) return null
-        val wide = "geo:${s.originCell.take(5)}"
+        val wide = standNow("geo:${s.originCell.take(5)}")
         // The same hail, signed again for where it is going. A notice is bound
         // to its slot, so the first board's bytes are not valid on the second
         // — which is the property that stops one signed hail being sprayed
@@ -217,7 +276,7 @@ object Hailing {
         val all = mutableListOf<Seen>()
         var quiet = 0
         for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
-            val name = uniffi.ducat_mobile.standShardName(cell, shard)
+            val name = uniffi.ducat_mobile.standShardName(standNow(cell), shard)
             val live = standRead(name).mapNotNull { n ->
                 runCatching { hailDecode(n.data, name, n.subkey) }.getOrNull()?.let { h ->
                     // Expired, or dated so far ahead that it is a squat rather

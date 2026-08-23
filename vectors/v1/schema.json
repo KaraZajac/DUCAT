@@ -191,6 +191,7 @@
             "log.head",
             "log.ring",
             "stand.shard",
+            "stand.epoch",
             "message.payment",
             "hail.notice",
             "rental.listing",

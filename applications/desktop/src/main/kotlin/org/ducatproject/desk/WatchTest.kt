@@ -41,7 +41,9 @@ fun main() {
         ?: error("WATCH_FAIL set DUCAT_WATCH_ROLE to watcher or poster")
     // A cell no test has used, so the board starts empty and the only change
     // on it is the one this run makes.
-    val cell = System.getenv("DUCAT_WATCH_CELL")?.takeIf { it.isNotEmpty() } ?: "geo:u0zh7wx"
+    val cell = org.ducatproject.ducat.standNow(
+        System.getenv("DUCAT_WATCH_CELL")?.takeIf { it.isNotEmpty() } ?: "geo:u0zh7wx",
+    )
     val waitSecs = System.getenv("DUCAT_WATCH_SECS")?.toLongOrNull() ?: 240L
 
     Unlock.orExit(dir)

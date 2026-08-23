@@ -213,6 +213,65 @@ pub fn stand_shard_name(base: &str, shard: u32) -> Result<String, Reject> {
     Ok(if shard == 0 { base.to_string() } else { format!("{base}-{shard}") })
 }
 
+/// How long one generation of a board lasts (§15.12).
+///
+/// A board's write key is derived from its name, and its name is public, so
+/// **anyone can write any slot** — that is the design, and griefing a board
+/// was always accepted as the cost of having no operator. What was not
+/// accepted, because nobody had noticed it, is that a grief could be
+/// *permanent*: a Veilid subkey carries a sequence number, an inbound write is
+/// accepted whenever its sequence is merely **greater** than the stored one
+/// rather than exactly one past it, and `ValueSeqNum::next()` fails at
+/// `u32::MAX - 1`. So one write per slot at the maximum leaves every slot
+/// unwritable by anyone, for ever, and the record key is a pure function of
+/// the name — there is no other board to move to.
+///
+/// A generation is what makes that recoverable. The name carries the epoch, so
+/// a poisoned board is abandoned when its epoch ends and the cell comes back.
+///
+/// **This does not stop a live attacker** and is not meant to. Re-poisoning
+/// costs 128 writes a week, which is nothing. What it removes is the ratchet:
+/// without it every cell anyone ever poisons stays poisoned, so the reachable
+/// surface only ever shrinks and no one can repair it. With it, damage lasts
+/// as long as somebody is paying for it and no longer.
+///
+/// A week, because the app already re-posts a live notice every six hours —
+/// so a rollover costs at most one refresh of visibility, and the ladder is
+/// cheap to re-fill. Longer would heal slower for no saving.
+pub const STAND_EPOCH_SECS: u64 = 7 * 24 * 60 * 60;
+
+/// Which generation of a board is current at `now_secs` (§15.12).
+///
+/// The clock is an argument and never read here. A board name that changed
+/// under a decoder would make every vector time-dependent, and §18.9's whole
+/// claim is that a case decided today decides the same way in a year.
+#[must_use]
+pub fn stand_epoch(now_secs: u64) -> u64 {
+    now_secs / STAND_EPOCH_SECS
+}
+
+/// The board name for one generation of a stand (§15.12).
+///
+/// `<base>@<epoch>`, decimal, no padding — the same rule the shard suffix
+/// follows and for the same reason: two spellings of one name are two record
+/// keys, and a writer and a reader who disagree are standing at different
+/// corners. `@` cannot occur in a geohash (base32, no `@`) so it cannot
+/// collide with a cell, and it is applied **before** the shard suffix, so a
+/// full board name reads `geo:u4pruy@3021-3`.
+///
+/// Composing it twice is refused rather than folded: a name that already
+/// carries an epoch has one, and re-stamping it would quietly produce a board
+/// nobody else computes.
+pub fn stand_epoch_name(base: &str, epoch: u64) -> Result<String, Reject> {
+    if base.is_empty() {
+        return Err(bad("a stand needs a name"));
+    }
+    if base.contains('@') {
+        return Err(bad("that stand name already names a generation"));
+    }
+    Ok(format!("{base}@{epoch}"))
+}
+
 /// A board cell is a valid geohash no finer than precision 6 (§16.17).
 /// The coarsest board a listing may name, and the finest it may.
 ///
@@ -296,6 +355,36 @@ mod tests {
         assert_eq!(stand_shard_name("geo:u4pruy", 15).unwrap(), "geo:u4pruy-15");
         assert!(stand_shard_name("geo:u4pruy", 16).is_err());
         assert!(stand_shard_name("", 0).is_err());
+    }
+
+    /// The generation names, pinned the same way and for the same reason:
+    /// both sides compute them independently from a clock and a cell.
+    #[test]
+    fn generation_names() {
+        assert_eq!(stand_epoch_name("geo:u4pruy", 0).unwrap(), "geo:u4pruy@0");
+        assert_eq!(stand_epoch_name("geo:u4pruy", 3021).unwrap(), "geo:u4pruy@3021");
+        assert!(stand_epoch_name("", 3021).is_err());
+        // Already stamped: re-stamping would compute a board nobody else does.
+        assert!(stand_epoch_name("geo:u4pruy@3021", 3022).is_err());
+
+        // Epoch first, shard second — the whole name is `<cell>@<epoch>-<n>`.
+        let gen = stand_epoch_name("geo:u4pruy", 3021).unwrap();
+        assert_eq!(stand_shard_name(&gen, 0).unwrap(), "geo:u4pruy@3021");
+        assert_eq!(stand_shard_name(&gen, 3).unwrap(), "geo:u4pruy@3021-3");
+    }
+
+    /// The epoch is a floor division of a clock that is always an argument.
+    /// Boundaries matter: two clients minutes apart across a rollover compute
+    /// different boards and cannot see each other, which is a week of
+    /// agreement for a few minutes of disagreement.
+    #[test]
+    fn generations_turn_over_on_the_hour_they_should() {
+        assert_eq!(stand_epoch(0), 0);
+        assert_eq!(stand_epoch(STAND_EPOCH_SECS - 1), 0);
+        assert_eq!(stand_epoch(STAND_EPOCH_SECS), 1);
+        assert_eq!(stand_epoch(STAND_EPOCH_SECS * 3021 + 5), 3021);
+        // A week, stated as one: the refresh cycle underneath it is hours.
+        assert_eq!(STAND_EPOCH_SECS, 604_800);
     }
 
     #[test]

@@ -839,6 +839,27 @@ fn parse_key(s: &str) -> Result<RecordKey, NodeError> {
 /// derives from the owner public key, and the *values* are encrypted under a
 /// key that rides the record-key handle — so a public board derives that too,
 /// or readers compute the right record and cannot open its values.
+/// Refuse a board name that does not name a generation (§15.12).
+///
+/// The epoch lives in the *name*, so that a name written down stays resolvable
+/// to the record it was written to — a board key derived from the clock would
+/// silently repoint every stored name at rollover. The cost of that choice is
+/// that every place forming a board name has to stamp it, and a place that
+/// forgets would read and write a board nobody else computes: a feature that
+/// fails only in the field, only against other people, and looks like the
+/// network being quiet.
+///
+/// So it is not allowed to be quiet. Every entry point funnels through
+/// `stand_material`, and this is the one check in front of it.
+fn require_generation(cell: &str) -> Result<(), NodeError> {
+    if cell.contains('@') {
+        return Ok(());
+    }
+    Err(NodeError::Failed(format!(
+        "board name {cell:?} names no generation — stamp it with standEpochName first"
+    )))
+}
+
 fn stand_material(cell: &str) -> (BareKeyPair, BareSharedSecret) {
     use sha2::{Digest, Sha256};
     let seed: [u8; 32] = Sha256::new()
@@ -900,6 +921,9 @@ fn is_watched(key: &RecordKey) -> bool {
 /// is refused too — arms the watch, and deliberately leaves the record open.
 #[uniffi::export]
 pub fn stand_watch(cell: String) -> Result<bool, NodeError> {
+    // Before the node, deliberately: this is a complaint about the argument,
+    // and a stopped node must not be able to answer in its place.
+    require_generation(&cell)?;
     let (api, rt) = handles()?;
     let (kp, enc) = stand_material(&cell);
     rt.block_on(async {
@@ -946,6 +970,9 @@ pub fn stand_watch(cell: String) -> Result<bool, NodeError> {
 /// The board's record key, computed locally. Costs no network round trip.
 #[uniffi::export]
 pub fn stand_record_key(cell: String) -> Result<String, NodeError> {
+    // Before the node, deliberately: this is a complaint about the argument,
+    // and a stopped node must not be able to answer in its place.
+    require_generation(&cell)?;
     let (api, rt) = handles()?;
     let (kp, enc) = stand_material(&cell);
     rt.block_on(async {
@@ -966,6 +993,9 @@ pub fn stand_record_key(cell: String) -> Result<String, NodeError> {
 /// for anyone who can derive the cell.
 #[uniffi::export]
 pub fn stand_post(cell: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeError> {
+    // Before the node, deliberately: this is a complaint about the argument,
+    // and a stopped node must not be able to answer in its place.
+    require_generation(&cell)?;
     let (api, rt) = handles()?;
     let (kp, enc) = stand_material(&cell);
     rt.block_on(async {
@@ -1049,6 +1079,9 @@ pub fn stand_post(cell: String, subkey: u32, data: Vec<u8>) -> Result<(), NodeEr
 /// fetched. Empty values are cleared slots and are skipped.
 #[uniffi::export]
 pub fn stand_read(cell: String) -> Result<Vec<StandNotice>, NodeError> {
+    // Before the node, deliberately: this is a complaint about the argument,
+    // and a stopped node must not be able to answer in its place.
+    require_generation(&cell)?;
     let (api, rt) = handles()?;
     let (kp, enc) = stand_material(&cell);
     rt.block_on(async {
@@ -1124,4 +1157,37 @@ pub fn stand_read(cell: String) -> Result<Vec<StandNotice>, NodeError> {
 pub struct StandNotice {
     pub subkey: u32,
     pub data: Vec<u8>,
+}
+
+#[cfg(test)]
+mod stand_tests {
+    use super::require_generation;
+
+    /// The guard that makes a forgotten stamp loud.
+    ///
+    /// The epoch lives in the board *name*, so every site that forms one has
+    /// to stamp it. A site that forgot would derive a different record key
+    /// from everyone else's and quietly read and write a board of its own —
+    /// working perfectly against itself, failing only against other people,
+    /// and looking exactly like a network with nobody on it. That is the
+    /// worst shape a bug can have here, so an unstamped name is refused
+    /// rather than derived from.
+    #[test]
+    fn a_board_name_must_name_a_generation() {
+        assert!(require_generation("geo:u4pruy@3021").is_ok());
+        assert!(require_generation("geo:u4pruy@3021-7").is_ok());
+        assert!(require_generation("local:u4pru@0").is_ok());
+
+        for bare in ["geo:u4pruy", "geo:u4pruy-7", "local:u4pru", ""] {
+            let e = require_generation(bare).unwrap_err();
+            let msg = format!("{e}");
+            assert!(
+                msg.contains("generation"),
+                "an unstamped name was accepted or refused unhelpfully: {msg}",
+            );
+            // The complaint has to say what to do about it — this is read by
+            // whoever is looking at a board that mysteriously has nobody on it.
+            assert!(msg.contains("standEpochName"), "the refusal names no remedy: {msg}");
+        }
+    }
 }

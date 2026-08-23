@@ -248,7 +248,7 @@ fun main() {
         val ring = listOf(home) + uniffi.ducat_mobile.geohashNeighbors(home)
         for (cell in ring) {
             val t0 = System.currentTimeMillis()
-            val n = runCatching { uniffi.ducat_mobile.standRead("rent:$cell") }
+            val n = runCatching { uniffi.ducat_mobile.standRead(org.ducatproject.ducat.standNow("rent:$cell")) }
                 .getOrDefault(emptyList()).size
             println("LIST_BOARD rent:$cell $n notice(s) in ${System.currentTimeMillis() - t0} ms")
         }
