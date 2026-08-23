@@ -1410,8 +1410,7 @@ private fun Bubble(
                 }
             }
             Text(
-                SimpleDateFormat("HH:mm", Locale.getDefault())
-                    .format(Date(m.timestamp * 1000)),
+                clockTime(context, m.timestamp),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
             )

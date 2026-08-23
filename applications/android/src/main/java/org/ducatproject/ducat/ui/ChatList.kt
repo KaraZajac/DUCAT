@@ -430,6 +430,22 @@ internal fun CharCounter(length: Int, max: Int, within: Int = 10) {
     )
 }
 
+/**
+ * A clock time, in the shape this phone's owner reads clock times.
+ *
+ * Not `SimpleDateFormat("HH:mm")`, which is what three screens used: `HH` is
+ * 24-hour by pattern, so it stayed 24-hour no matter what the person had set,
+ * and `Locale.getDefault()` does not change that — the setting is Android's
+ * own, not the locale's. Somebody in a country that writes half past two as
+ * 2:30 PM saw 14:30 under every message they had ever sent.
+ *
+ * The system formatter answers the setting, and answers it per-phone rather
+ * than per-country, which is the way the question is actually asked.
+ */
+internal fun clockTime(context: Context, epochSecs: Long): String =
+    android.text.format.DateFormat.getTimeFormat(context)
+        .format(java.util.Date(epochSecs * 1000))
+
 /** Now, minutes, hours, weekday, then a date — the resolution a list needs. */
 internal fun shortWhen(context: Context, epochSecs: Long): String {
     val now = System.currentTimeMillis() / 1000
