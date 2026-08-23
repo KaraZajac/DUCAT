@@ -61,6 +61,16 @@ fun main() {
         "TABMINOR_FAIL a tab with no address to compare against refused everything"
     }
 
+    // A bill that named the **main address** records no minor, and must stay
+    // settleable by a payment to it. `addressFor` allocates a minor before it
+    // can still fall back to the main address — on a wallet with no spend key,
+    // or a subaddress it could not derive — so recording whatever allocation
+    // reserved would demand payment at an address that was never on the bill.
+    // That tab could never be settled, and nothing about it would look wrong.
+    check(TabStore.paidWhereBilled(tab(null), null, 0)) {
+        "TABMINOR_FAIL a bill that named the main address could not be paid at it"
+    }
+
     // It has to survive being written down, or the strict rule silently
     // relaxes to the legacy one on the next restart — the worst outcome,
     // because nothing looks wrong.
@@ -90,6 +100,6 @@ fun main() {
 
     println(
         "TABMINOR_OK billed=strict main=refused other=refused legacy=permissive " +
-            "json=ok store=ok",
+            "mainaddr=payable json=ok store=ok",
     )
 }

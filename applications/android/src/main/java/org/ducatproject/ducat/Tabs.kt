@@ -190,6 +190,10 @@ class TabStore(private val context: Context) {
         val contact = ContactStore(context).all().firstOrNull { it.personaHex == tab.personaHex }
             ?: throw IllegalStateException("that contact is gone")
         val total = tab.lines.sumOf { it.amountPxmr } + (tab.taxPxmr ?: 0L)
+        val wallet = WalletStore(context)
+        // Held, because what the bill names is what the tab has to be settled
+        // by, and the two must not be derived separately.
+        val payto = wallet.addressFor(tab.personaHex)
         Mailbox.send(
             context, contact,
             // The shop's own language, not the reader's. This line is the
@@ -211,7 +215,7 @@ class TabStore(private val context: Context) {
             ),
             PersonaStore(context).personaHex(),
             kind = 1, amountPxmr = total,
-            payto = WalletStore(context).addressFor(tab.personaHex),
+            payto = payto,
             items = tab.lines, taxPxmr = tab.taxPxmr,
         )
         // Pinned to what was billed, not to what the tab says now: the customer
@@ -225,13 +229,22 @@ class TabStore(private val context: Context) {
                 taxPxmr = tab.taxPxmr,
                 settledTotal = total,
                 settledAt = System.currentTimeMillis(),
-                knownKis = WalletStore(context).entries().map { it.keyImage },
-                tipAtBill = WalletStore(context).tip(),
-                // The address the bill above actually named. Recorded here
-                // rather than derived at match time so that what settles the
-                // tab is checked against what the customer was told to pay,
-                // and not against whatever the wallet would mint today.
-                billedMinor = WalletStore(context).minorOf(tab.personaHex),
+                knownKis = wallet.entries().map { it.keyImage },
+                tipAtBill = wallet.tip(),
+                // The minor of the address the bill above **actually named** —
+                // not the one allocation happened to reserve.
+                //
+                // Recorded rather than derived at match time, so what settles
+                // the tab is checked against what the customer was told to
+                // pay. And checked against `payto`, because `addressFor`
+                // allocates a minor *before* it can still fall back to the
+                // main address — a subaddress it could not derive is an
+                // allocated index nobody was given, and recording that would
+                // leave a bill demanding payment at an address that was never
+                // on it, unsettleable for ever. Null then, which is the
+                // permissive rule, and correct: minor 0 is where it will land.
+                billedMinor = wallet.minorOf(tab.personaHex)
+                    ?.takeIf { payto != null && payto != wallet.address() },
             )
         } ?: throw IllegalStateException("that tab is gone")
         DucatLog.i(TAG, "settled ${tab.origin} tab with ${contact.displayName()}: ${formatXmr(total)} XMR")

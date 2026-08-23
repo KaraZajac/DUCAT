@@ -229,13 +229,22 @@ object Orders {
             prefs(context).edit().putInt("slot_next", (n + 1) % ADDRESS_SLOTS).apply()
             n
         }
+        val wallet = WalletStore(context)
+        val payto = wallet.addressFor("order_slot_$slot")
         val order = Order(
             id = id,
             number = next,
             lines = lines,
             totalPxmr = plain + noise,
-            address = WalletStore(context).addressFor("order_slot_$slot") ?: "",
-            billedMinor = WalletStore(context).minorOf("order_slot_$slot"),
+            address = payto ?: "",
+            // The minor of the address this order actually hands out. Checked
+            // against `payto` because `addressFor` allocates a minor *before*
+            // it can still fall back to the main address, and an order that
+            // demanded payment at an index nobody was shown could never be
+            // sighted. Null then — the permissive rule, and correct, since
+            // minor 0 is where that payment will land.
+            billedMinor = wallet.minorOf("order_slot_$slot")
+                ?.takeIf { payto != null && payto != wallet.address() },
             state = State.Awaiting,
             placedAt = System.currentTimeMillis() / 1000,
         )
