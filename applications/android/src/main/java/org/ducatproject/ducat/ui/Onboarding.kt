@@ -94,7 +94,8 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
     ) {
-        Progress(state.step)
+        // A restore is a shorter flow and has to be counted as one — see below.
+        Progress(state.step, restoring || state.backupConfirmed)
         Spacer(Modifier.height(24.dp))
 
         if (restoring) {
@@ -257,7 +258,7 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
 }
 
 @Composable
-private fun Progress(step: Step) {
+private fun Progress(step: Step, restored: Boolean) {
     // The step you are *on*, not the number completed. "0 of 4" on the first
     // screen reads as though nothing has started and something has gone wrong.
     //
@@ -265,8 +266,21 @@ private fun Progress(step: Step) {
     // Backup — then Done. `Step.Profile` exists but is skipped (Persona goes
     // straight to Wallet), so it is not counted; numbering the shown steps
     // contiguously is what keeps "Step 2 of 5" from ever jumping to "Step 3".
-    val total = 5
-    val n = when (step) {
+    //
+    // A restore is a different, shorter flow: the file that brought them here
+    // is the backup, so the wallet, the trust explainer and the backup step
+    // are all behind them, and what is left is the restore itself and a PIN.
+    // Counting that against five said "Step 3 of 5" and then finished — a bar
+    // that leapt from three fifths to full, to somebody who has just lost a
+    // phone and is watching this screen closely.
+    val total = if (restored) 2 else 5
+    val n = if (restored) {
+        when (step) {
+            Step.Pin -> 2
+            Step.Done -> 2
+            else -> 1 // the restore screen itself
+        }
+    } else when (step) {
         Step.Persona -> 1
         Step.Wallet -> 2
         Step.Profile -> 2 // unreachable in the current flow; kept in range
