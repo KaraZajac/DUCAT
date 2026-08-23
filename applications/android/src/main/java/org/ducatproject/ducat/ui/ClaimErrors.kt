@@ -114,6 +114,13 @@ fun moneyFailure(
         context.getString(org.ducatproject.ducat.R.string.pay_node_unreachable)
     t is org.ducatproject.ducat.Ceremony.AlreadyPaid ->
         context.getString(org.ducatproject.ducat.R.string.pay_already_paid)
+    // Two different answers, deliberately worded apart. One is a wait and the
+    // other is an accusation, and a person deciding whether to hand over money
+    // needs to know which they are looking at.
+    t is org.ducatproject.ducat.Ceremony.EscrowNotConfirmed ->
+        context.getString(org.ducatproject.ducat.R.string.escrow_not_confirmed)
+    t is org.ducatproject.ducat.Ceremony.EscrowDisagreed ->
+        context.getString(org.ducatproject.ducat.R.string.escrow_disagreed)
     org.ducatproject.ducat.Wallet.isNodeTrouble(t) ->
         context.getString(org.ducatproject.ducat.R.string.pay_node_no_answer)
     // Short, with both numbers. Typed rather than matched on wording, because

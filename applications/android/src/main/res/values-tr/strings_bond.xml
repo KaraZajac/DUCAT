@@ -71,4 +71,6 @@
     <string name="bond_retry_in">Kendiliğinden tekrar deneyecek — %1$s kaldı.</string>
     <string name="bond_close_ask">Teminat kapatılsın mı?</string>
     <string name="bond_close_all_to_them">%1$s teminatı kapatıp tamamını almak istiyor — %2$s. Size hiçbir şey dönmeyecek.</string>
+    <string name="escrow_not_confirmed">Emanet hâlâ herkesle karşılaştırılıyor. Genelde bir an sürer.</string>
+    <string name="escrow_disagreed">Katılımcılar aynı cüzdanı oluşturmadı. Buraya ödeme yapmayın — yenisini başlatın.</string>
 </resources>

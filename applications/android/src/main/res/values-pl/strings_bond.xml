@@ -73,4 +73,6 @@
     <string name="bond_retry_in">Spróbuje ponownie samo — zostało %1$s.</string>
     <string name="bond_close_ask">Zamknąć depozyt?</string>
     <string name="bond_close_all_to_them">%1$s prosi o zamknięcie depozytu i zabranie całej kwoty — %2$s. Do ciebie nic nie wróci.</string>
+    <string name="escrow_not_confirmed">Trwa sprawdzanie depozytu ze wszystkimi. Zwykle chwilę to zajmuje.</string>
+    <string name="escrow_disagreed">Uczestnicy nie utworzyli tego samego portfela. Nie wpłacaj — zacznij od nowa.</string>
 </resources>

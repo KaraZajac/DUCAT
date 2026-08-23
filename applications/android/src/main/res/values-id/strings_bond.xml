@@ -70,4 +70,6 @@
     <string name="bond_retry_in">Akan mencoba lagi sendiri — tersisa %1$s.</string>
     <string name="bond_close_ask">Tutup bond?</string>
     <string name="bond_close_all_to_them">%1$s meminta menutup bond dan mengambil seluruh deposit — %2$s. Tidak ada yang kembali ke Anda.</string>
+    <string name="escrow_not_confirmed">Masih memeriksa escrow dengan semua pihak. Biasanya sebentar saja.</string>
+    <string name="escrow_disagreed">Para peserta tidak membentuk dompet yang sama. Jangan bayar ke sana — mulai yang baru.</string>
 </resources>

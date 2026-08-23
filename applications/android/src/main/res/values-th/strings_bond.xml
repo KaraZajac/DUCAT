@@ -70,4 +70,6 @@
     <string name="bond_retry_in">ระบบจะลองใหม่ให้เอง — เหลืออีก %1$s</string>
     <string name="bond_close_ask">ปิดเงินประกันหรือไม่</string>
     <string name="bond_close_all_to_them">%1$s ขอปิดเงินประกันและรับไปทั้งหมด — %2$s คุณจะไม่ได้รับคืนเลย</string>
+    <string name="escrow_not_confirmed">กำลังตรวจสอบเอสโครว์กับทุกคน โดยปกติใช้เวลาสักครู่</string>
+    <string name="escrow_disagreed">ผู้ร่วมทั้งหมดไม่ได้สร้างกระเป๋าเดียวกัน อย่าจ่ายเข้าไป — เริ่มใหม่</string>
 </resources>

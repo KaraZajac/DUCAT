@@ -71,4 +71,6 @@
     <string name="bond_retry_in">Se volverá a intentar automáticamente: quedan %1$s.</string>
     <string name="bond_close_ask">¿Cerrar el bono?</string>
     <string name="bond_close_all_to_them">%1$s pide cerrar el bono y llevarse todo el depósito: %2$s. A ti no vuelve nada.</string>
+    <string name="escrow_not_confirmed">Todavía se está comprobando el depósito con todos. Suele tardar un momento.</string>
+    <string name="escrow_disagreed">Los participantes no crearon la misma cartera. No pagues en él: empieza uno nuevo.</string>
 </resources>

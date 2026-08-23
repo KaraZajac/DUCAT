@@ -825,6 +825,19 @@ object Ceremony {
                 o.getJSONObject("commits").put(senderIdx.toString(), it.commitment.toHexString())
             }
             1 -> o.getJSONObject("shares").put(senderIdx.toString(), payload.toHexString())
+            // What they say they formed. Compared, never adopted — a
+            // disagreement is the finding, so taking their answer would
+            // destroy the evidence.
+            2 -> {
+                val theirs = runCatching { String(payload, Charsets.UTF_8) }.getOrNull()
+                if (!theirs.isNullOrBlank()) {
+                    o.put(
+                        "addrs",
+                        (o.optJSONObject("addrs") ?: JSONObject())
+                            .put(senderIdx.toString(), theirs),
+                    )
+                }
+            }
         }
         save(context, idHex, o)
 
@@ -869,6 +882,38 @@ object Ceremony {
                 val keys = uniffi.ducat_mobile.dkgTakeKeys(id, i.toUShort())
                 o.put("stage", "done"); o.put("address", addr)
                 o.put("keys", keys.toHexString())
+                // **Say which wallet we formed, and wait to hear the same back.**
+                //
+                // Round 0's commitments travel pairwise — there is no broadcast
+                // channel here and no echo round — so a participant can send
+                // one commitment to B and a different one to C. Both verify:
+                // each is self-consistent and carries a valid proof of
+                // possession. B and C then derive *different group keys*, and
+                // therefore different escrow addresses, and nothing compared
+                // them. The funder funds B's address while the arbiter holds a
+                // share of C's, which is a 2-of-2 with the attacker wearing
+                // the shape of a 2-of-3.
+                //
+                // core::escrow::check_escrow_ready has made exactly this
+                // comparison since it was written — "three parties can each
+                // complete a ceremony successfully and end up in different
+                // groups" — and it was never reachable, because it needs three
+                // reports and nothing ever exchanged them. This is that
+                // exchange, as a third DKG round.
+                o.put("addrs", (o.optJSONObject("addrs") ?: JSONObject())
+                    .put(i.toString(), addr))
+                for (peerHex in roster.filter { it != mineHex }) {
+                    val peer = contactFor(context, peerHex) ?: continue
+                    runCatching {
+                        Mailbox.send(
+                            context, peer, "bond: the wallet I formed",
+                            mineHex, kind = 8, round = 2, ceremonyId = id,
+                            payload = addr.toByteArray(),
+                        )
+                    }.onFailure {
+                        DucatLog.w(TAG, "bond $idHex: could not announce the address: ${it.message}")
+                    }
+                }
                 // Where this device's escrow scans start: the chain as of the
                 // build, minus a safety margin. The escrow was minted seconds
                 // ago — its funding needs minutes of chain, not the wallet's
@@ -1416,6 +1461,37 @@ object Ceremony {
 
     /** The rider pays the fare into the escrow — an ordinary wallet send to
      *  an address that happens to need two of three keys to leave. */
+    /** Nobody has disagreed *yet* — the roster has not all reported. */
+    class EscrowNotConfirmed : IllegalStateException("waiting for the roster to agree")
+
+    /** Somebody formed a different wallet. This escrow is not what it claims. */
+    class EscrowDisagreed : IllegalStateException("participants formed different wallets")
+
+    /**
+     * Has every participant reported forming the same wallet as this device?
+     *
+     * The whole roster, not a majority: a silent participant has not agreed to
+     * anything, which is the rule core::escrow::check_escrow_ready states in
+     * its first branch and the reason it takes three reports rather than two.
+     *
+     * Throws rather than returning false on a mismatch, because the two are
+     * not the same answer. "Not yet" is a wait; "they formed a different
+     * wallet" is a finding, and a caller that treated them alike would sit
+     * politely in front of an attack.
+     */
+    fun escrowAgreed(o: JSONObject): Boolean {
+        val roster = o.optJSONArray("roster")?.let { arr ->
+            (0 until arr.length()).map { arr.getString(it) }
+        } ?: return false
+        val mine = o.optString("address")
+        if (mine.isEmpty()) return false
+        val addrs = o.optJSONObject("addrs") ?: return false
+        for (k in addrs.keys()) {
+            if (addrs.optString(k) != mine) throw EscrowDisagreed()
+        }
+        return addrs.length() >= roster.size
+    }
+
     fun fundRide(context: Context, idHex: String): String {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
         check(o.optString("stage") == "done") { "the escrow is not built yet" }
@@ -1428,6 +1504,11 @@ object Ceremony {
         val share = mySharePxmr(o)
         check(addr.isNotEmpty()) { "the escrow has no address yet" }
         check(share > 0) { "you owe this escrow nothing" }
+        // The money moment, and the last place to ask whether everyone built
+        // the same wallet. Funding one the roster has not confirmed is the
+        // whole cost of a DKG equivocation: the payer's money goes somewhere
+        // they hold no share of.
+        if (!escrowAgreed(o)) throw EscrowNotConfirmed()
         // Paid already, by this party. The banner hides the button once a
         // send is recorded, but a second tap on a slow network — or a client
         // restarted mid-flight — must not pay twice into an escrow that

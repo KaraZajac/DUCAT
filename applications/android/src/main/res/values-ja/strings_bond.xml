@@ -70,4 +70,6 @@
     <string name="bond_retry_in">自動でもう一度試します — 残り %1$s。</string>
     <string name="bond_close_ask">ボンドを解消しますか？</string>
     <string name="bond_close_all_to_them">%1$s がボンドを解消し、預り金の全額 %2$s を受け取ろうとしています。あなたには何も戻りません。</string>
+    <string name="escrow_not_confirmed">エスクローを全員と照合しています。通常はすぐ終わります。</string>
+    <string name="escrow_disagreed">参加者が同じウォレットを作成していません。入金せず、新しく始めてください。</string>
 </resources>

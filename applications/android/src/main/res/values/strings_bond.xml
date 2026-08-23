@@ -71,4 +71,6 @@
     <string name="bond_retry_in">It will try again on its own — %1$s left.</string>
     <string name="bond_close_ask">Close the bond?</string>
     <string name="bond_close_all_to_them">%1$s is asking to close the bond and take the whole deposit — %2$s. Nothing comes back to you.</string>
+    <string name="escrow_not_confirmed">Still checking the escrow with everyone. This usually takes a moment.</string>
+    <string name="escrow_disagreed">The people in this escrow did not all build the same wallet. Do not pay into it — start a new one.</string>
 </resources>

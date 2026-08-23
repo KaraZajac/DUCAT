@@ -75,4 +75,6 @@
     <string name="bond_retry_in">سيحاول مرة أخرى من تلقاء نفسه — بقي %1$s.</string>
     <string name="bond_close_ask">إغلاق الضمان؟</string>
     <string name="bond_close_all_to_them">يطلب %1$s إغلاق الضمان وأخذ كامل الوديعة — %2$s. لن يعود إليك شيء.</string>
+    <string name="escrow_not_confirmed">لا يزال يجري التحقق من الضمان مع الجميع. عادةً ما يستغرق ذلك لحظة.</string>
+    <string name="escrow_disagreed">لم يُنشئ المشاركون في هذا الضمان المحفظة نفسها. لا تدفع فيه — ابدأ ضمانًا جديدًا.</string>
 </resources>

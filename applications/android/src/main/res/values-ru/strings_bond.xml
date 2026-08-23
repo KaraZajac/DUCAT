@@ -73,4 +73,6 @@
     <string name="bond_retry_in">Повторит попытку само — осталось %1$s.</string>
     <string name="bond_close_ask">Закрыть залог?</string>
     <string name="bond_close_all_to_them">%1$s просит закрыть залог и забрать его целиком — %2$s. Вам не вернётся ничего.</string>
+    <string name="escrow_not_confirmed">Депозит ещё сверяется со всеми. Обычно это занимает мгновение.</string>
+    <string name="escrow_disagreed">Участники создали разные кошельки. Не платите в него — начните заново.</string>
 </resources>

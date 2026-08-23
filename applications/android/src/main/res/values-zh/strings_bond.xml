@@ -70,4 +70,6 @@
     <string name="bond_retry_in">它会自动重试——还需 %1$s。</string>
     <string name="bond_close_ask">结束保证金？</string>
     <string name="bond_close_all_to_them">%1$s 请求结束保证金并取走全部 %2$s。你不会收到任何退还。</string>
+    <string name="escrow_not_confirmed">仍在与各方核对托管。通常只需片刻。</string>
+    <string name="escrow_disagreed">参与者创建的钱包并不相同。请勿付款，请重新开始。</string>
 </resources>

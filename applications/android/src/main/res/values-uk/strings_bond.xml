@@ -73,4 +73,6 @@
     <string name="bond_retry_in">Спробує ще раз саме — лишилося %1$s.</string>
     <string name="bond_close_ask">Закрити заставу?</string>
     <string name="bond_close_all_to_them">%1$s просить закрити заставу й забрати її повністю — %2$s. Вам не повернеться нічого.</string>
+    <string name="escrow_not_confirmed">Депозит ще звіряється з усіма. Зазвичай це триває мить.</string>
+    <string name="escrow_disagreed">Учасники створили різні гаманці. Не платіть туди — почніть заново.</string>
 </resources>

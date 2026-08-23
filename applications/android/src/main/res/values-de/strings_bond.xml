@@ -71,4 +71,6 @@
     <string name="bond_retry_in">Es versucht es von selbst erneut – noch %1$s.</string>
     <string name="bond_close_ask">Bond auflösen?</string>
     <string name="bond_close_all_to_them">%1$s möchte den Bond auflösen und die ganze Kaution nehmen — %2$s. An Sie geht nichts zurück.</string>
+    <string name="escrow_not_confirmed">Die Treuhand wird noch mit allen abgeglichen. Das dauert meist nur einen Moment.</string>
+    <string name="escrow_disagreed">Die Beteiligten haben nicht dieselbe Wallet gebildet. Zahlen Sie nichts ein — beginnen Sie neu.</string>
 </resources>

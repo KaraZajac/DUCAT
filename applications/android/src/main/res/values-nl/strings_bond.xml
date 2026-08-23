@@ -71,4 +71,6 @@
     <string name="bond_retry_in">Het probeert het vanzelf opnieuw — nog %1$s.</string>
     <string name="bond_close_ask">Borg afsluiten?</string>
     <string name="bond_close_all_to_them">%1$s vraagt de borg af te sluiten en het hele bedrag te nemen — %2$s. Er komt niets naar u terug.</string>
+    <string name="escrow_not_confirmed">De escrow wordt nog met iedereen gecontroleerd. Dat duurt meestal even.</string>
+    <string name="escrow_disagreed">De deelnemers hebben niet dezelfde wallet gevormd. Betaal er niets in — begin opnieuw.</string>
 </resources>
