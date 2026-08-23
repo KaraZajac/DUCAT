@@ -486,6 +486,9 @@ object Mailbox {
                 DucatLog.i(TAG, "delivering seq $pseq to ${c.displayName()} " +
                     "left over from an interrupted send")
                 ring = writeSlotClamped(store, c, pseq.toULong(), pbytes, ring)
+                // The row this belongs to has been sitting in the thread
+                // marked undelivered since the send that was interrupted.
+                store.markDelivered(c.personaHex, pseq)
             }
             store.clearPendingSlot(c.personaHex)
         }
@@ -522,6 +525,10 @@ object Mailbox {
                 attMime = attachment?.mime, attName = attachment?.name,
                 oob = oob,
                 etaSecs = etaSecs,
+                // Not yet. The write is three lines below, and until it lands
+                // this row is a message that has not left the phone — which
+                // looked identical to one that had.
+                delivered = false,
             ),
             c.outSeq + 1, sealed.nextLink, sealed.bytes,
         )
@@ -541,6 +548,7 @@ object Mailbox {
                 .onSuccess { store.setTheirBundle(c.personaHex, it) }
         }
         ring = writeSlotClamped(store, c, c.outSeq.toULong(), sealed.bytes, ring)
+        store.markDelivered(c.personaHex, c.outSeq)
         // Republish our keys with every head write. Cheap — the head is read on
         // every poll anyway — and it is the only route back from an exhausted
         // supply, since the handshake inbox is a one-time artifact.

@@ -326,6 +326,13 @@ tasks.register<JavaExec>("smoke") {
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
 // Proves the escrow sweep takes what is over and leaves what is funded.
 // `./gradlew :desktop:escrowsweep`.
+// Whether a message has actually left the phone. `./gradlew :desktop:delivery`.
+tasks.register<JavaExec>("delivery") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.DeliveryTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // An attacker on a real board: write doctored notices to somebody else's
 // live cell and check a reader drops them. `./gradlew :desktop:boardattack`.
 tasks.register<JavaExec>("boardattack") {

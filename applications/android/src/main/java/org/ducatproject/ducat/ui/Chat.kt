@@ -1382,7 +1382,24 @@ private fun Bubble(
                 // §16.16: their watermark, when they publish one. Their claim,
                 // shown as one — a tick, not a certainty. No watermark, no
                 // ticks: absence of the feature is not "unread".
-                theirReadUpTo?.let { read ->
+                // Still on this phone. A send persists the row before it
+                // writes the slot — the sealed bytes are committed from that
+                // moment, so a re-seal is not allowed — which means a failed
+                // write leaves a bubble that has not gone anywhere and used to
+                // look exactly like one that had. It goes out with the next
+                // message to this contact, and the mark clears itself then.
+                //
+                // Ahead of the ticks and instead of them: a message that has
+                // not left cannot have been read, so showing both would be
+                // saying two things at once.
+                if (!m.delivered) {
+                    Text(
+                        stringResource(R.string.chat_not_sent_yet),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                    Spacer(Modifier.width(4.dp))
+                } else theirReadUpTo?.let { read ->
                     Text(
                         if (read > m.seq) "✓✓" else "✓",
                         style = MaterialTheme.typography.labelSmall,

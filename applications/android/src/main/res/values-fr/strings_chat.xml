@@ -124,4 +124,5 @@
         <item quantity="one">Il manque un message ici</item>
         <item quantity="other">Il manque %1$d messages ici</item>
     </plurals>
+    <string name="chat_not_sent_yet">pas encore envoyé</string>
 </resources>

@@ -128,4 +128,5 @@
         <item quantity="many">%1$d رسالة مفقودة هنا</item>
         <item quantity="other">%1$d رسالة مفقودة هنا</item>
     </plurals>
+    <string name="chat_not_sent_yet">لم يُرسل بعد</string>
 </resources>

@@ -124,4 +124,5 @@
         <item quantity="one">यहाँ एक संदेश गायब है</item>
         <item quantity="other">यहाँ %1$d संदेश गायब हैं</item>
     </plurals>
+    <string name="chat_not_sent_yet">अभी भेजा नहीं गया</string>
 </resources>

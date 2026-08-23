@@ -123,4 +123,5 @@
     <plurals name="chat_gap_unread">
         <item quantity="other">Thiếu %1$d tin nhắn ở đây</item>
     </plurals>
+    <string name="chat_not_sent_yet">chưa gửi</string>
 </resources>

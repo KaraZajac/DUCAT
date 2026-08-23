@@ -508,6 +508,32 @@ class ContactStore(context: Context) {
         prefs.edit().remove("pendingslot_$personaHex").apply()
     } }
 
+    /**
+     * The message at this sequence number is on the network now.
+     *
+     * A send persists the row *before* it writes the slot, because the sealed
+     * bytes are committed from that moment whether or not tonight's write
+     * lands — a re-seal would put different content under a sequence number
+     * that already went out. The consequence is a row in the thread that has
+     * not been delivered, and until now it looked exactly like one that had.
+     *
+     * Called after the write, so the flag means what a reader would assume it
+     * means: this left the phone.
+     */
+    fun markDelivered(personaHex: String, seq: Long) { synchronized(lock) {
+        val thread = thread(personaHex)
+        if (thread.none { it.outgoing && it.seq == seq && !it.delivered }) return@synchronized
+        val arr = JSONArray()
+        thread.forEach {
+            arr.put(
+                if (it.outgoing && it.seq == seq) it.copy(delivered = true).toJson()
+                else it.toJson(),
+            )
+        }
+        prefs.edit().putString("thread_$personaHex", arr.toString()).apply()
+        bump()
+    } }
+
     /** A receipt, kept apart from the conversation it arrived in. */
     data class ReceiptRecord(
         val txidHex: String?,

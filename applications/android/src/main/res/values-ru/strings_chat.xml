@@ -126,4 +126,5 @@
         <item quantity="many">Здесь не хватает %1$d сообщений</item>
         <item quantity="other">Здесь не хватает %1$d сообщений</item>
     </plurals>
+    <string name="chat_not_sent_yet">ещё не отправлено</string>
 </resources>

@@ -124,4 +124,5 @@
         <item quantity="one">یک پیام اینجا گم شده</item>
         <item quantity="other">%1$d پیام اینجا گم شده</item>
     </plurals>
+    <string name="chat_not_sent_yet">هنوز ارسال نشده</string>
 </resources>
