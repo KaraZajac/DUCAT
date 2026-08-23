@@ -632,6 +632,16 @@ private fun StaffPanel(onClose: () -> Unit, startOn: Int = 0) {
 /** Today's orders, and the way out of kiosk mode. */
 @Composable
 private fun StaffOrders() {
+    // Which orders have work in flight, and anything that went wrong.
+    //
+    // Both buttons below send over the network, which takes seconds, and both
+    // used to give nothing back while they did: the counter tapped "ready",
+    // saw no change, and tapped again — two messages to one customer. Worse
+    // on the other one, where a swallowed failure left the shop believing a
+    // bill had been withdrawn when it had not, and the customer's phone still
+    // showing money to pay.
+    val working = remember { mutableStateListOf<String>() }
+    var staffError by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val version by ContactStore.changes.collectAsState()
@@ -650,6 +660,15 @@ private fun StaffOrders() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             return@Column
+        }
+        // Above the list, where the buttons that produce it are.
+        staffError?.let {
+            Text(
+                it,
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
         LazyColumn(Modifier.fillMaxSize()) {
             items(orders) { o ->
@@ -693,12 +712,27 @@ private fun StaffOrders() {
                                 setOf(Orders.State.Seen, Orders.State.Confirmed)
                             ) {
                                 TextButton(
+                                    enabled = o.id !in working,
                                     onClick = {
-                                        scope.launch(Dispatchers.IO) {
-                                            runCatching { Orders.sayReady(context, o) }
+                                        working += o.id
+                                        staffError = null
+                                        scope.launch {
+                                            withContext(Dispatchers.IO) {
+                                                runCatching { Orders.sayReady(context, o) }
+                                            }.onFailure {
+                                                staffError = moneyFailure(context, it)
+                                            }
+                                            working -= o.id
                                         }
                                     },
-                                ) { Text(stringResource(R.string.kiosk_say_ready)) }
+                                ) {
+                                    Text(
+                                        stringResource(
+                                            if (o.id in working) R.string.kiosk_telling
+                                            else R.string.kiosk_say_ready,
+                                        ),
+                                    )
+                                }
                             }
                             if (o.readyAt > 0L) {
                                 Text(
@@ -718,15 +752,34 @@ private fun StaffOrders() {
                                 Orders.stateOf(context, o) == Orders.State.Awaiting
                             ) {
                                 TextButton(
+                                    enabled = o.id !in working,
                                     onClick = {
-                                        scope.launch(Dispatchers.IO) {
-                                            runCatching {
-                                                val tabs = TabStore(context)
-                                                tabs.get(o.tabId!!)?.let { tabs.cancel(it) }
+                                        working += o.id
+                                        staffError = null
+                                        scope.launch {
+                                            withContext(Dispatchers.IO) {
+                                                runCatching {
+                                                    val tabs = TabStore(context)
+                                                    tabs.get(o.tabId!!)?.let { tabs.cancel(it) }
+                                                }
+                                            }.onFailure {
+                                                // Said out loud. A withdrawal
+                                                // that quietly failed left the
+                                                // customer's phone pointing at
+                                                // money nobody was waiting for.
+                                                staffError = moneyFailure(context, it)
                                             }
+                                            working -= o.id
                                         }
                                     },
-                                ) { Text(stringResource(R.string.kiosk_withdraw)) }
+                                ) {
+                                    Text(
+                                        stringResource(
+                                            if (o.id in working) R.string.kiosk_withdrawing
+                                            else R.string.kiosk_withdraw,
+                                        ),
+                                    )
+                                }
                             }
                         }
                     },

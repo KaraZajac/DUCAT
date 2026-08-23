@@ -33,6 +33,8 @@
     <string name="kiosk_withdraw">سحب الفاتورة</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">جاهز</string>
+    <string name="kiosk_telling">جارٍ إخبارهم…</string>
+    <string name="kiosk_withdrawing">جارٍ السحب…</string>
     <string name="kiosk_told_ready">أُبلغوا</string>
     <string name="kiosk_ready_message">الطلب رقم %1$d جاهز.</string>
     <string name="kiosk_tip">إكرامية</string>

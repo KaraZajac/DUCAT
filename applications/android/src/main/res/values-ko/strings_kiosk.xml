@@ -33,6 +33,8 @@
     <string name="kiosk_withdraw">청구 취소</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">준비 완료</string>
+    <string name="kiosk_telling">알리는 중…</string>
+    <string name="kiosk_withdrawing">취소하는 중…</string>
     <string name="kiosk_told_ready">알림 보냄</string>
     <string name="kiosk_ready_message">%1$d번 주문이 준비되었습니다.</string>
     <string name="kiosk_tip">팁</string>

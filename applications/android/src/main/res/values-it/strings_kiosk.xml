@@ -33,6 +33,8 @@
     <string name="kiosk_withdraw">Ritira</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">Pronto</string>
+    <string name="kiosk_telling">Avviso in corso…</string>
+    <string name="kiosk_withdrawing">Ritiro in corso…</string>
     <string name="kiosk_told_ready">avvisato</string>
     <string name="kiosk_ready_message">L\'ordine n. %1$d è pronto.</string>
     <string name="kiosk_tip">Mancia</string>

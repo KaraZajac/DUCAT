@@ -33,6 +33,8 @@
     <string name="kiosk_withdraw">取り消す</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">できました</string>
+    <string name="kiosk_telling">お知らせ中…</string>
+    <string name="kiosk_withdrawing">取り消し中…</string>
     <string name="kiosk_told_ready">お知らせ済み</string>
     <string name="kiosk_ready_message">ご注文 #%1$d ができあがりました。</string>
     <string name="kiosk_tip">チップ</string>

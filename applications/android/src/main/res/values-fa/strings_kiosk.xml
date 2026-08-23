@@ -33,6 +33,8 @@
     <string name="kiosk_withdraw">پس‌گرفتن</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">آماده</string>
+    <string name="kiosk_telling">در حال اطلاع…</string>
+    <string name="kiosk_withdrawing">در حال پس‌گرفتن…</string>
     <string name="kiosk_told_ready">خبر داده شد</string>
     <string name="kiosk_ready_message">سفارش شمارهٔ %1$d آماده است.</string>
     <string name="kiosk_tip">انعام</string>

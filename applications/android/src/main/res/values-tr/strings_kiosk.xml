@@ -33,6 +33,8 @@
     <string name="kiosk_withdraw">Geri çek</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">Hazır</string>
+    <string name="kiosk_telling">Haber veriliyor…</string>
+    <string name="kiosk_withdrawing">Geri çekiliyor…</string>
     <string name="kiosk_told_ready">haber verildi</string>
     <string name="kiosk_ready_message">%1$d numaralı sipariş hazır.</string>
     <string name="kiosk_tip">Bahşiş</string>

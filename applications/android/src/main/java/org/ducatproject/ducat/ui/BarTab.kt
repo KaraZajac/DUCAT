@@ -560,9 +560,22 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 // fallback rails existing is half the design. They still get a
                 // receipt in the thread; it just points at no transaction.
                 Button(
+                    enabled = !busy,
                     onClick = {
-                        scope.launch(Dispatchers.IO) { runCatching { store.markPaidOutside(tab) } }
-                        onBack()
+                        // Awaited, and only then away. Leaving first meant the
+                        // bar was back at the tab list believing the tab was
+                        // closed while the receipt had not gone anywhere —
+                        // and there was no second chance to notice, because
+                        // the screen that would have said so was gone.
+                        busy = true; error = null
+                        scope.launch {
+                            withContext(Dispatchers.IO) {
+                                runCatching { store.markPaidOutside(tab) }
+                            }
+                                .onSuccess { onBack() }
+                                .onFailure { error = moneyFailure(context, it) }
+                            busy = false
+                        }
                     },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                 ) { Text(stringResource(R.string.bartab_paid_outside_button)) }
@@ -572,11 +585,21 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 // watching for, and a cancellation they never hear about is a
                 // payment into the void.
                 OutlinedButton(
+                    enabled = !busy,
                     onClick = {
-                        scope.launch(Dispatchers.IO) {
-                            runCatching { cancelTabWithRetract(context, store, tab) }
+                        // The note above this button says a cancellation they
+                        // never hear about is a payment into the void, and the
+                        // code then dropped the failure and walked away. Now
+                        // it stays until the retract has gone.
+                        busy = true; error = null
+                        scope.launch {
+                            withContext(Dispatchers.IO) {
+                                runCatching { cancelTabWithRetract(context, store, tab) }
+                            }
+                                .onSuccess { onBack() }
+                                .onFailure { error = moneyFailure(context, it) }
+                            busy = false
                         }
-                        onBack()
                     },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                 ) { Text(stringResource(R.string.bartab_cancel_bill), color = MaterialTheme.colorScheme.error) }

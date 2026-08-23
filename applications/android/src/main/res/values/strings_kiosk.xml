@@ -33,6 +33,8 @@
     <string name="kiosk_withdraw">Withdraw</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">Ready</string>
+    <string name="kiosk_telling">Telling them…</string>
+    <string name="kiosk_withdrawing">Withdrawing…</string>
     <string name="kiosk_told_ready">told them</string>
     <string name="kiosk_ready_message">Order #%1$d is ready.</string>
     <string name="kiosk_tip">Tip</string>

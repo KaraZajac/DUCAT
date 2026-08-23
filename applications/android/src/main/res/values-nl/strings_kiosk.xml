@@ -33,6 +33,8 @@
     <string name="kiosk_withdraw">Intrekken</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">Klaar</string>
+    <string name="kiosk_telling">Bezig met melden…</string>
+    <string name="kiosk_withdrawing">Bezig met intrekken…</string>
     <string name="kiosk_told_ready">laten weten</string>
     <string name="kiosk_ready_message">Bestelling #%1$d is klaar.</string>
     <string name="kiosk_tip">Fooi</string>

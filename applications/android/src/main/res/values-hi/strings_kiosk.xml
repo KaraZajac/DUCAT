@@ -33,6 +33,8 @@
     <string name="kiosk_withdraw">वापस लें</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">तैयार</string>
+    <string name="kiosk_telling">बताया जा रहा है…</string>
+    <string name="kiosk_withdrawing">वापस लिया जा रहा है…</string>
     <string name="kiosk_told_ready">बता दिया</string>
     <string name="kiosk_ready_message">ऑर्डर #%1$d तैयार है।</string>
     <string name="kiosk_tip">टिप</string>

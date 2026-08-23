@@ -33,6 +33,8 @@
     <string name="kiosk_withdraw">Відкликати</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">Готово</string>
+    <string name="kiosk_telling">Повідомляємо…</string>
+    <string name="kiosk_withdrawing">Відкликаємо…</string>
     <string name="kiosk_told_ready">повідомлено</string>
     <string name="kiosk_ready_message">Замовлення №%1$d готове.</string>
     <string name="kiosk_tip">Чайові</string>
