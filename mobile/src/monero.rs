@@ -765,6 +765,10 @@ pub fn monero_block_time(node_url: String, height: u64) -> Result<u64, MoneroErr
 pub struct PoolHit {
     pub tx_hash_hex: String,
     pub amount_pxmr: u64,
+    /// Which subaddress it landed on — 0 being the wallet's main address.
+    /// A sighting is what a kiosk hands goods over on, so it has to be able
+    /// to tell a payment for one bill from money that merely arrived.
+    pub minor: u32,
 }
 
 /// Scan the mempool for outputs to this wallet (§17.5's *seen*, not settled).
@@ -894,6 +898,7 @@ pub fn monero_scan_pool(
                     hits.push(PoolHit {
                         tx_hash_hex: hex_of(&hash),
                         amount_pxmr: o.commitment().amount,
+                        minor: o.subaddress().map(|s| s.address()).unwrap_or(0),
                     });
                 }
             }

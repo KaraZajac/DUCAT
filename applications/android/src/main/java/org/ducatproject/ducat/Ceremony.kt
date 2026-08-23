@@ -1053,11 +1053,26 @@ object Ceremony {
                     // The mechanics are unchanged — approveRideRelease does
                     // the identical frostCosign and round-1 send this branch
                     // did. What is added is the person.
+                    // What the payload *actually* pays this device, so the
+                    // consent screen states the transaction's figure and not
+                    // the proposer's. A payload this device cannot read is
+                    // refused outright rather than shown: nobody should be
+                    // asked to approve bytes we could not open.
+                    val toMe = runCatching { releaseToMe(context, o, payload) }
+                        .getOrElse { e ->
+                            DucatLog.w(
+                                TAG,
+                                "escrow $idHex: unreadable release proposal — $e",
+                            )
+                            return@runCatching
+                        }
                     o.put("stage", "release_pending")
                     o.put("pendingPayload", payload.toHexString())
                     o.put("proposerIdx", senderIdx)
                     if (riderBackPxmr != null) o.put("pendingRiderBack", riderBackPxmr)
                     else o.remove("pendingRiderBack")
+                    if (toMe != null) o.put("pendingToMe", toMe)
+                    else o.remove("pendingToMe")
                     save(context, idHex, o)
                     ContactStore.bump()
                     DucatLog.i(TAG, "escrow $idHex: release proposed — waiting for the yes")
@@ -1774,6 +1789,74 @@ object Ceremony {
         return prop.payoutPxmr.toLong()
     }
 
+    /** A release that pays this device less than the screen said it would. */
+    class ReleaseMisstated(val statedPxmr: Long, val actualPxmr: Long) :
+        IllegalStateException("the proposal pays $actualPxmr, not $statedPxmr")
+
+    /**
+     * Every address this deal could legitimately pay this device at.
+     *
+     * All three are derived from this device's own wallet, never from the
+     * wire: the main address a non-funder proposes to itself, the per-contact
+     * subaddress it published in the handshake and a counterparty routes the
+     * fare to, and the ride-scoped one a funder mints for its own residual.
+     * Which of them applies depends on the role and on who proposed, so the
+     * set is the answer rather than any one of them.
+     */
+    private fun myPayoutAddresses(context: Context, o: JSONObject): Set<String> {
+        val w = WalletStore(context)
+        val out = mutableSetOf<String>()
+        w.address()?.let { out += it }
+        w.addressFor("ride_${o.optString("id")}")?.let { out += it }
+        otherPrincipal(o)?.let { peer -> w.addressFor(peer)?.let { out += it } }
+        return out
+    }
+
+    /**
+     * What a proposed release actually pays this device, read out of the
+     * transaction it is being asked to sign — or null when this device cannot
+     * tell.
+     *
+     * §17.5's rule about payments is a rule about consent too. The figure that
+     * travels beside a proposal is written by the party who gains from being
+     * believed, and until now the co-signer approved a payload it never
+     * parsed: the screen stated amounts and the bytes could have paid anyone.
+     *
+     * Two shapes, because a split has two. A fixed output naming one of this
+     * device's addresses is exact, and needs nothing else to check. Being the
+     * *residual* claimant instead means taking whatever the fixed outputs and
+     * the fee leave behind, so it takes the escrow's total to size — and that
+     * total must be this device's own scan ([checkRideFunding], corroborated),
+     * never the proposal's word for it. Without one, the answer is null and
+     * not zero: unknown and nothing are different answers, and collapsing them
+     * would refuse honest releases on a phone that has not scanned yet.
+     *
+     * The residual figure is stated before the fee, which is the convention
+     * the split screen has always used — the fee comes out of the residual
+     * side, whoever that is, and is a few ten-thousandths of an XMR.
+     */
+    fun releaseToMe(context: Context, o: JSONObject, payload: ByteArray): Long? =
+        releaseToMe(
+            uniffi.ducat_mobile.frostDestinations(payload),
+            myPayoutAddresses(context, o),
+            o.optLong("fundedPxmr"),
+        )
+
+    /** [releaseToMe]'s arithmetic, over outputs already read. */
+    fun releaseToMe(
+        dests: List<uniffi.ducat_mobile.TxDestination>,
+        mine: Set<String>,
+        fundedPxmr: Long,
+    ): Long? {
+        val fixedToMe = dests
+            .filter { !it.residual && it.address in mine }
+            .sumOf { it.amountPxmr.toLong() }
+        if (dests.none { it.residual && it.address in mine }) return fixedToMe
+        val fixed = dests.filter { !it.residual }.sumOf { it.amountPxmr.toLong() }
+        if (fundedPxmr <= 0 || fundedPxmr < fixed) return null
+        return fixedToMe + (fundedPxmr - fixed)
+    }
+
     /**
      * The rider's yes: co-sign the parked proposal and send the signature
      * back. This is the §15 moment of the bonded ride — both parties present,
@@ -1797,6 +1880,22 @@ object Ceremony {
         val proposer = contactFor(context, proposerHex)
             ?: throw IllegalStateException("the driver is not a contact")
 
+        // Read the bytes again at the moment of consent, and refuse to sign
+        // anything that pays this device less than the screen stated. The
+        // figure was checked once when the proposal arrived; this catches a
+        // payload swapped underneath it since, and costs one parse.
+        val stated = o.optLong("pendingToMe", -1L)
+        if (stated >= 0) {
+            val actual = releaseToMe(context, o, payload)
+            if (actual != null && actual < stated) {
+                DucatLog.w(
+                    TAG,
+                    "ride $idHex: refusing to sign — the payload pays $actual, not $stated",
+                )
+                throw ReleaseMisstated(stated, actual)
+            }
+        }
+
         val ans = uniffi.ducat_mobile.frostCosign(
             id, i.toUShort(), proposerIdx.toUShort(), keys, payload,
         )
@@ -1807,6 +1906,7 @@ object Ceremony {
         )
         settle(o, "release_cosigned")
         o.remove("pendingPayload")
+        o.remove("pendingToMe")
         save(context, idHex, o)
         ContactStore.bump()
         DucatLog.i(TAG, "ride $idHex: rider approved the release (fee ${ans.feePxmr})")

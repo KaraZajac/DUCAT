@@ -23,6 +23,8 @@
     <string name="notify_unbacked_body">Another node does not see the money. Nothing is secured yet.</string>
     <string name="notify_payto_changed_title">Payment address changed</string>
     <string name="notify_payto_changed_body">A card says %1$s should be paid somewhere new. Nothing has changed until you say so.</string>
+    <string name="notify_card_contested_title">That code was answered twice</string>
+    <string name="notify_card_contested_body">More than one reply was written to it, so there is no telling which was the person you meant. Nobody was added. Show a fresh code to try again.</string>
     <string name="notify_arrived_title">Money arrived</string>
     <string name="notify_arrived_body">%1$s — unlocks after ten blocks</string>
     <string name="notify_escrow_setup">%1$s is setting up the escrow.</string>

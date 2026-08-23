@@ -339,8 +339,44 @@ object Mailbox {
         for (issued in store.issuedCards().filter { it.answeredBy == null }) {
             try {
                 nodeDhtOpen(issued.inboxKey, null, null)
-                val raw = nodeDhtGet(issued.inboxKey, 1u, true) ?: continue
+                val read = nodeDhtGetVersioned(issued.inboxKey, 1u, true) ?: continue
+                val raw = read.data
                 if (raw.isEmpty()) continue
+                // **Claim-once, enforced by reading the sequence.**
+                //
+                // A subkey is a mutable slot: SMPL(1,[writer]) bounds how many
+                // subkeys a member may write, not how many times, and the set
+                // helper retries against the network's sequence so a later
+                // write wins. For a hail or a listing the card URI — writer
+                // secret and all — is public board text, so anyone reading the
+                // board can overwrite whoever answered and be adopted as the
+                // counterparty instead, payment address included.
+                //
+                // What makes this checkable is that an honest claimant never
+                // overwrites: claimCard reads subkey 1 first and refuses a card
+                // that already holds a reply. So one write is the only honest
+                // history this slot has, and Some(0) is what one write leaves.
+                // Anything past that is somebody's second answer.
+                //
+                // Discarded rather than resolved, because there is no way to
+                // tell which of the writers was the person in front of you.
+                // Whoever contested it can only force a new card to be made —
+                // they could already have done that by claiming first, and a
+                // card nobody can trust is worse than a card that is gone.
+                if (!claimedOnce(read.seq)) {
+                    DucatLog.w(
+                        TAG,
+                        "card (${issued.purpose}) was answered more than once " +
+                            "(seq ${read.seq}) — discarding it unclaimed",
+                    )
+                    store.forgetIssuedCard(issued.inboxKey)
+                    Notify.post(
+                        context,
+                        context.getString(R.string.notify_card_contested_title),
+                        context.getString(R.string.notify_card_contested_body),
+                    )
+                    continue
+                }
                 val theirs = parseContactDetails(raw)
                 val personaHex = theirs.persona.toHexString()
                 // The same rule as claimCard, from the issuer's side: keep the
@@ -776,6 +812,47 @@ object Mailbox {
      * to write a head. Leaving headroom is what keeps forward secrecy the
      * normal case rather than the lucky one.
      */
+    /**
+     * Was a card's reply slot written exactly once?
+     *
+     * `Some(0)` is what a single write leaves — veilid numbers a subkey's
+     * first write zero — and one write is the only honest history this slot
+     * has, because [claimCard] reads it before writing and refuses a card that
+     * already holds a reply. Anything higher is a second answer.
+     *
+     * `None` means the slot has never been written, which the caller only
+     * reaches holding bytes it just read out of it. Taken as unwritten rather
+     * than as contested: a claim is not evidence against itself, and a node
+     * that stopped reporting sequences would otherwise discard every card
+     * anybody showed — a silent failure to pair, which is worse than the
+     * narrow race this closes.
+     */
+    fun claimedOnce(seq: UInt?): Boolean = seq == null || seq == 0u
+
+    /**
+     * Open with the first key that works, and report the last failure if none
+     * do.
+     *
+     * The signed prekey rotates, and a peer's cached bundle can be a month
+     * behind the one being offered, so which of the two a message is sealed to
+     * is not knowable from the outside — the sealed form names "the signed
+     * prekey", not which generation of it. Trying them in turn costs one extra
+     * decrypt on a message that was never going to open, and the exception
+     * that escapes is the last one, so everything downstream still classifies
+     * malformed and refused exactly as it did with a single key.
+     */
+    private fun <T> openWithAny(keys: List<ByteArray>, open: (ByteArray) -> T): T {
+        var last: Exception? = null
+        for (k in keys) {
+            try {
+                return open(k)
+            } catch (e: Exception) {
+                last = e
+            }
+        }
+        throw last ?: IllegalStateException("no key to open with")
+    }
+
     private fun topUpIfLow(store: ContactStore, outbox: String): ByteArray? {
         // §16.11: each thread's head offers its own disjoint batch of ids —
         // the secrets are global, the offering is partitioned, so two
@@ -783,10 +860,18 @@ object Mailbox {
         // the thread's offer wholesale; unconsumed ids from the old offer
         // keep their secrets, so a sender on a stale head still opens.
         if (store.threadOneTimeRemaining(outbox) > 6) return store.threadBundle(outbox)
+        // The one place the signed prekey rotates. Cutting a fresh batch is
+        // already the periodic event — it happens as a thread's supply runs
+        // down, on every device that is being used — so the term expiring is
+        // noticed here without a timer of its own. Card issuance deliberately
+        // does not rotate: it is a user gesture, it can happen several times a
+        // minute at a till, and its own comment records what rotating there
+        // cost. Passing no seed is what mints a new key.
+        val rotate = store.signedPrekeyDue()
         val m = generatePrekeys(
             ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL,
             store.nextPrekeyStart(ONE_TIME_KEYS.toInt()).toUInt(),
-            store.signedPrekeySecret(),
+            if (rotate) null else store.signedPrekeySecret(),
         )
         store.savePrekeys(
             // The global bundle field is legacy — heads now carry per-thread
@@ -794,7 +879,9 @@ object Mailbox {
             // rule, reused): only the secrets and the signed key land here.
             ByteArray(0), m.signedSecret,
             m.oneTimeIds.mapIndexed { i, id -> id.toInt() to m.oneTimeSecrets[i] }.toMap(),
+            rotate = rotate,
         )
+        if (rotate) DucatLog.i(TAG, "rotated the signed prekey; the old one opens for 30 days")
         store.setThreadBundle(outbox, m.bundle)
         DucatLog.i(TAG, "cut a fresh one-time batch for this thread")
         return m.bundle
@@ -1106,8 +1193,13 @@ object Mailbox {
                 continue
             }
             val isOneTime = id != 0
-            val secret = if (isOneTime) store.oneTimeSecret(id) else store.signedPrekeySecret()
-            if (secret == null) {
+            // Plural for the signed key: it rotates, and a peer sealing from a
+            // bundle it cached before the rotation addressed the one we just
+            // retired. Both are tried, newest first.
+            val secrets =
+                if (isOneTime) listOfNotNull(store.oneTimeSecret(id))
+                else store.signedPrekeySecrets()
+            if (secrets.isEmpty()) {
                 val slotKey = "${c.personaHex}:${logSubkey(seq, ring)}"
                 val rawHash = raw.contentHashCode()
                 if (slotSeen(context, slotKey) == rawHash) {
@@ -1180,9 +1272,11 @@ object Mailbox {
             }
 
             val opened = try {
-                openMessage(
-                    raw, secret, isOneTime, seq, prev, threadAad(minePersonaHex, c.personaHex),
-                )
+                openWithAny(secrets) { sk ->
+                    openMessage(
+                        raw, sk, isOneTime, seq, prev, threadAad(minePersonaHex, c.personaHex),
+                    )
+                }
             } catch (e: uniffi.ducat_mobile.ContactException) {
                 // Decrypted but refused: the bytes are final and will never
                 // parse differently, so this is a dead letter, not weather —
@@ -1319,6 +1413,14 @@ object Mailbox {
             val arrived = StoredMessage(
                 outgoing = false, seq = opened.seq.toLong(),
                 body = opened.body, timestamp = opened.timestamp.toLong(),
+                // Which key this was sealed to is the whole of §16.11, and it
+                // is known right here — `id == 0` is the signed-prekey
+                // fallback. Inbound rows never set it, so they all defaulted to
+                // true and the open-lock warning fired only on messages this
+                // device *sent*: the direction where the weakening is least
+                // surprising, because we chose it. Somebody whose contact has
+                // run out of one-time keys is the person who needs telling.
+                forwardSecret = isOneTime,
                 kind = opened.kind.toInt(),
                 amountPxmr = opened.amountPxmr?.toLong() ?: 0L,
                 payto = opened.payto,

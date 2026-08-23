@@ -2127,6 +2127,21 @@ private fun RideBondBanner(contact: Contact) {
     // rent plus both deposits — the host's included, because their funding
     // is their acceptance.
     val need = if (reservation) org.ducatproject.ducat.Ceremony.expectedTotalPxmr(ride) else fare
+    // What goes back to the rider under a proposal on the table — as the
+    // *transaction* states it. `pendingToMe` is what the payload was read to
+    // pay this device (Ceremony.releaseToMe, which parses the outputs);
+    // `pendingRiderBack` is the figure the proposer sent alongside, which is
+    // only their word for it and is used when the payload could not be sized,
+    // never in preference to it. Both consent screens below read this, so
+    // they cannot come to state different numbers about one proposal.
+    val verifiedToMe = ride.optLong("pendingToMe", -1L)
+    val riderBack = when {
+        verifiedToMe < 0 -> ride.optLong(
+            "pendingRiderBack", (funded - fare).coerceAtLeast(0L),
+        )
+        rider -> verifiedToMe
+        else -> (funded - verifiedToMe).coerceAtLeast(0L)
+    }
     val idHex = ride.optString("id")
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Trouble?>(null) }
@@ -2346,9 +2361,6 @@ private fun RideBondBanner(contact: Contact) {
         )
         // A split on the table, from either side.
         stage == "release_pending" -> {
-            val riderBack = ride.optLong(
-                "pendingRiderBack", (funded - fare).coerceAtLeast(0L),
-            )
             Step(
                 // Branched, like the note underneath it always was: this step
                 // is shared by a ride and a booking, and a guest settling up
@@ -2768,9 +2780,9 @@ private fun RideBondBanner(contact: Contact) {
                 }
                 stage == "release_pending" -> {
                     // A proposal stands, from the other side (either side may
-                    // propose — §15.12's settlement). State the claimed split
-                    // and offer the only two moves: sign it, or counter.
-                    val riderBack = ride.optLong("pendingRiderBack", (funded - fare).coerceAtLeast(0L))
+                    // propose — §15.12's settlement). State the split the
+                    // payload was read to make, and offer the only two moves:
+                    // sign it, or counter.
                     val toDriver = (funded - riderBack).coerceAtLeast(0L)
                     BondLine(
                         spin = false,

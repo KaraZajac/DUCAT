@@ -26,12 +26,16 @@ import org.json.JSONObject
  * **The old path is still here**, as the fallback it should always have been:
  * [place] and [payUri] serve somebody standing at the counter with a Monero
  * wallet and no DUCAT. Those orders carry their own subaddress and a few
- * piconero of noise in the total, because a mempool sighting reports an
- * amount and a hash and cannot say which subaddress an unconfirmed output
- * landed on — so with nobody to name the transaction, the amount is all there
- * is to match on, and two people ordering the same coffee would otherwise be
- * indistinguishable. That is the shape of the compromise, and the reason it
- * is not the default.
+ * piconero of noise in the total, so that with nobody to name the transaction
+ * two people ordering the same coffee are still told apart. That is the shape
+ * of the compromise, and the reason it is not the default.
+ *
+ * The sighting used to match on the amount *alone*, because a mempool hit
+ * reported only an amount and a hash. It now reports the subaddress the output
+ * landed on as well, so an order is sighted by money that arrived where that
+ * order asked for it — the noise separates one customer from another, and the
+ * subaddress separates all of them from every other payment this wallet
+ * receives.
  */
 object Orders {
     private const val TAG = "DucatOrders"
@@ -114,6 +118,19 @@ object Orders {
          * what a counter did before it could.
          */
         val readyAt: Long = 0,
+        /**
+         * The subaddress [address] belongs to, so a sighting can require the
+         * money to have landed *there*.
+         *
+         * Matching a mempool payment on amount alone was enough while the
+         * noise in each total kept two identical coffees apart, but it does
+         * not distinguish a customer's payment from any other output of the
+         * same size arriving anywhere in this wallet — a donation, a top-up,
+         * an escrow release. `Seen` is where a kiosk offers staff the Ready
+         * button, so that difference is goods leaving the counter. Null on
+         * orders placed before this was recorded.
+         */
+        val billedMinor: Int? = null,
     ) {
         /** True while this order is still waiting for somebody to pair. */
         val unpaired: Boolean get() = tabId == null && address.isEmpty()
@@ -142,6 +159,7 @@ object Orders {
                     tabId = o.optString("tab").takeIf { it.isNotBlank() },
                     personaHex = o.optString("who").takeIf { it.isNotBlank() },
                     readyAt = o.optLong("ready"),
+                    billedMinor = o.optInt("minor", -1).takeIf { it >= 0 },
                 )
             }.getOrNull()?.takeIf { it.id.isNotBlank() }
         }.sortedByDescending { it.placedAt }
@@ -166,7 +184,8 @@ object Orders {
                     .put("state", o.state.name).put("at", o.placedAt)
                     .put("seen", o.seenTx ?: "")
                     .put("tab", o.tabId ?: "").put("who", o.personaHex ?: "")
-                    .put("ready", o.readyAt),
+                    .put("ready", o.readyAt)
+                    .put("minor", o.billedMinor ?: -1),
             )
         }
         prefs(context).edit().putString("orders", arr.toString()).apply()
@@ -216,6 +235,7 @@ object Orders {
             lines = lines,
             totalPxmr = plain + noise,
             address = WalletStore(context).addressFor("order_slot_$slot") ?: "",
+            billedMinor = WalletStore(context).minorOf("order_slot_$slot"),
             state = State.Awaiting,
             placedAt = System.currentTimeMillis() / 1000,
         )
@@ -375,10 +395,17 @@ object Orders {
         val ours = WalletStore(context).ourTxids()
         val claimed = everything.mapNotNull { it.seenTx }.toMutableSet()
         for (order in waiting) {
+            // And it has to have landed on the subaddress this order handed
+            // out. Amount alone matched any output of the right size arriving
+            // anywhere in this wallet — a donation, an escrow release — and
+            // `Seen` is where staff are offered the Ready button. Orders
+            // placed before the minor was recorded keep the old rule; a kiosk
+            // clears them within the day.
             val hit = hits.firstOrNull {
                 it.amountPxmr.toLong() == order.totalPxmr &&
                     it.txHashHex !in claimed &&
-                    it.txHashHex.lowercase() !in ours
+                    it.txHashHex.lowercase() !in ours &&
+                    (order.billedMinor == null || it.minor.toInt() == order.billedMinor)
             } ?: continue
             claimed += hit.txHashHex
             update(context, order.copy(state = State.Seen, seenTx = hit.txHashHex))

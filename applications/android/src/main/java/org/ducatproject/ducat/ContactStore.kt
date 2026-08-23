@@ -10,6 +10,25 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
+ * How long a signed prekey is offered before a fresh one replaces it.
+ *
+ * §16.11's forward secrecy comes from the one-time keys; the signed key is the
+ * fallback for when a peer's supply of those has run out, and until it rotated
+ * that fallback covered the entire life of the install. A month bounds it.
+ */
+private const val SIGNED_PREKEY_LIFETIME_MS = 30L * 24 * 60 * 60 * 1000
+
+/**
+ * How long a retired signed prekey can still open a message.
+ *
+ * At least as long as a published bundle lives, or a peer working from a
+ * cached copy would seal to a key this device had already thrown away — which
+ * is precisely the breakage that stopped the key rotating in the first place.
+ * Bundles go out with a thirty-day TTL, so this matches it.
+ */
+private const val SIGNED_PREKEY_GRACE_MS = 30L * 24 * 60 * 60 * 1000
+
+/**
  * Where contacts, cards and message threads live on the device.
  *
  * Deliberately plain: `SharedPreferences` holding JSON. This is **not** the
@@ -919,6 +938,26 @@ class ContactStore(context: Context) {
         bump()
     }
 
+    /**
+     * Drop a card without adopting anybody — the reply slot was written more
+     * than once and there is no telling which answer was the real one.
+     *
+     * Removed rather than marked answered: `answered_by` names a contact, and
+     * the whole point here is that no contact was made. Leaving it in the
+     * registry would keep the poller reading a slot whose result can never be
+     * used, and would count against the standing profile code's replacement.
+     */
+    fun forgetIssuedCard(inboxKey: String) = synchronized(lock) {
+        val arr = prefs.getString("issued_cards", null)?.let { JSONArray(it) } ?: return
+        val keep = JSONArray()
+        for (i in 0 until arr.length()) {
+            val o = arr.getJSONObject(i)
+            if (o.getString("inbox") != inboxKey) keep.put(o)
+        }
+        prefs.edit().putString("issued_cards", keep.toString()).apply()
+        bump()
+    }
+
     /** Who answered a given card, if anyone has. */
     fun claimantOf(inboxKey: String): String? =
         issuedCards().firstOrNull { it.inboxKey == inboxKey }?.answeredBy
@@ -993,12 +1032,40 @@ class ContactStore(context: Context) {
      * the signed-prekey fallback that exists precisely for "my other keys are
      * gone". Secrets leave this store one way: [burnOneTime], §16.11's delete.
      */
-    fun savePrekeys(bundle: ByteArray, signedSecret: ByteArray, oneTime: Map<Int, ByteArray>) { synchronized(lock) {
+    fun savePrekeys(
+        bundle: ByteArray,
+        signedSecret: ByteArray,
+        oneTime: Map<Int, ByteArray>,
+        /**
+         * Retire the current signed prekey and put this one in its place.
+         *
+         * False for every incidental save — issuing a card, topping up a
+         * thread's one-time supply, applying a restore — because those pass
+         * back the key they were given and an overwrite there is what turned
+         * in-flight messages into BadSig. True only when [signedPrekeyDue]
+         * says the current key has served its term.
+         */
+        rotate: Boolean = false,
+    ) { synchronized(lock) {
         val o = prefs.getString("prekeys", null)?.let { JSONObject(it) } ?: JSONObject()
         // Empty material never overwrites real material: restore passes what
         // it has, and "nothing" must mean "keep", not "erase".
         if (bundle.isNotEmpty()) o.put("bundle", b64(bundle))
-        if (!o.has("signed") && signedSecret.size == 32) o.put("signed", b64(signedSecret))
+        if (signedSecret.size == 32) {
+            val current = if (o.has("signed")) unb64(o.getString("signed")) else null
+            val now = System.currentTimeMillis()
+            if (current == null) {
+                o.put("signed", b64(signedSecret)); o.put("signed_at", now)
+            } else if (rotate && !current.contentEquals(signedSecret)) {
+                // The outgoing key does not stop working — it stops being
+                // *offered*. Peers cache a bundle for as long as its TTL, so
+                // anything sealed while they were behind is still addressed to
+                // the old key, and dropping it here would strand exactly the
+                // messages rotation is supposed to be invisible to.
+                o.put("signed_prev", b64(current)); o.put("signed_prev_at", now)
+                o.put("signed", b64(signedSecret)); o.put("signed_at", now)
+            }
+        }
         val ot = o.optJSONObject("one_time") ?: JSONObject()
         oneTime.forEach { (id, sk) -> ot.put(id.toString(), b64(sk)) }
         o.put("one_time", ot)
@@ -1049,6 +1116,43 @@ class ContactStore(context: Context) {
 
     fun signedPrekeySecret(): ByteArray? =
         prefs.getString("prekeys", null)?.let { unb64(JSONObject(it).getString("signed")) }
+
+    /**
+     * The signed prekeys a message might be sealed to: the one being offered
+     * now, and the one just retired while its grace window lasts.
+     *
+     * `hpke.rs` promises forward secrecy "from the next rotation", and there
+     * was no rotation — the signed key was written once and kept for the life
+     * of the install, so the fallback path every thread lands on when the
+     * one-time supply runs out used one key for ever. It rotates now, and this
+     * is what makes that survivable for a reader.
+     */
+    fun signedPrekeySecrets(): List<ByteArray> = synchronized(lock) {
+        val o = prefs.getString("prekeys", null)?.let { JSONObject(it) } ?: return emptyList()
+        val out = mutableListOf<ByteArray>()
+        if (o.has("signed")) out += unb64(o.getString("signed"))
+        if (o.has("signed_prev") &&
+            System.currentTimeMillis() - o.optLong("signed_prev_at") < SIGNED_PREKEY_GRACE_MS
+        ) {
+            out += unb64(o.getString("signed_prev"))
+        }
+        return out
+    }
+
+    /**
+     * Has the current signed prekey served its term?
+     *
+     * A key stored before rotation existed carries no date, and is due at
+     * once: it has been in service since the install and retiring it is the
+     * whole point. The grace window keeps everything already sealed to it
+     * readable, so there is nothing to stagger.
+     */
+    fun signedPrekeyDue(): Boolean = synchronized(lock) {
+        val o = prefs.getString("prekeys", null)?.let { JSONObject(it) } ?: return false
+        if (!o.has("signed")) return false
+        val at = o.optLong("signed_at", 0L)
+        return at == 0L || System.currentTimeMillis() - at >= SIGNED_PREKEY_LIFETIME_MS
+    }
 
     fun oneTimeSecret(id: Int): ByteArray? {
         val raw = prefs.getString("prekeys", null) ?: return null

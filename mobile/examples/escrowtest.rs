@@ -36,7 +36,16 @@ use monero_wallet::ViewPair;
 use rand_core::{OsRng, RngCore};
 use zeroize::Zeroizing;
 
-const NODE: &str = "http://xmr-lux.boldsuck.org:38081";
+/// The stagenet node this harness talks to.
+///
+/// Overridable, because these are public nodes and a public node has bad
+/// afternoons: a decoy fetch timing out reads exactly like the ceremony
+/// failing, and re-running against a different one is the first thing worth
+/// trying. `DUCAT_STAGENET_NODE=http://host:port escrowtest …`.
+fn node() -> String {
+    std::env::var("DUCAT_STAGENET_NODE")
+        .unwrap_or_else(|_| "http://xmr-lux.boldsuck.org:38081".into())
+}
 // The DKG context binds a ceremony to a purpose; both parties must agree on
 // it, and it must be unique per multisig. In DUCAT it is the escrow's
 // ceremony_id (§17.9); here, a constant for the one demo escrow.
@@ -180,7 +189,7 @@ fn scan(vp: &ViewPair, from: u64) -> (u64, Vec<monero_wallet::WalletOutput>) {
     let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
     rt.block_on(async {
         let rpc =
-            monero_daemon_rpc::MoneroDaemon::new(Ureq::new(NODE.into())).await.expect("connect");
+            monero_daemon_rpc::MoneroDaemon::new(Ureq::new(node())).await.expect("connect");
         let tip = rpc.latest_block_number().await.expect("height") as u64;
         let mut scanner = Scanner::new(vp.clone());
         let mut outputs = Vec::new();
@@ -219,7 +228,7 @@ fn main() {
             let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
             let tip = rt.block_on(async {
                 let rpc =
-                    monero_daemon_rpc::MoneroDaemon::new(Ureq::new(NODE.into())).await.expect("c");
+                    monero_daemon_rpc::MoneroDaemon::new(Ureq::new(node())).await.expect("c");
                 rpc.latest_block_number().await.expect("height") as u64
             });
             std::fs::write(&height_path, tip.to_string()).unwrap();
@@ -291,7 +300,7 @@ fn main() {
                 tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
             let tip = rt.block_on(async {
                 let rpc =
-                    monero_daemon_rpc::MoneroDaemon::new(Ureq::new(NODE.into())).await.expect("c");
+                    monero_daemon_rpc::MoneroDaemon::new(Ureq::new(node())).await.expect("c");
                 rpc.latest_block_number().await.expect("height") as u64
             });
             std::fs::write(state_dir().join("escrow3.height"), tip.to_string()).unwrap();
@@ -312,13 +321,13 @@ fn main() {
             let k2 = std::fs::read(state_dir().join("escrow3.party2")).expect("party2");
             let k3 = std::fs::read(state_dir().join("escrow3.party3")).expect("party3");
             let cid = vec![0x3Bu8; 32];
-            let prop = cer::frost_propose(cid.clone(), 2, k2, dest, NODE.into(), from)
+            let prop = cer::frost_propose(cid.clone(), 2, k2, dest, node(), from)
                 .expect("propose");
             println!("  driver proposes: {} pXMR of {}", prop.payout_pxmr, prop.total_pxmr);
             let ans = cer::frost_cosign(cid.clone(), 3, 2, k3, prop.payload).expect("cosign");
             println!("  ARBITER co-signs (fee {} pXMR) — the ruling is a signature", ans.fee_pxmr);
             let txid =
-                cer::frost_complete(cid, 2, 3, ans.payload, NODE.into()).expect("complete");
+                cer::frost_complete(cid, 2, 3, ans.payload, node()).expect("complete");
             println!("  RULED — txid {txid}");
         }
         // The split release, through the *shipping* bridge functions — the
@@ -343,7 +352,7 @@ fn main() {
                 keys1,
                 vec![ducat_mobile::ceremony::SplitOut { dest: refund.clone(), amount_pxmr: amount }],
                 dest.clone(),
-                NODE.into(),
+                node(),
                 from,
             )
             .expect("propose");
@@ -351,10 +360,32 @@ fn main() {
                 "  proposed: total {} pXMR, residual ≈{} pXMR to payee, {} pXMR to refund",
                 prop.total_pxmr, prop.payout_pxmr, amount
             );
+            // What the *co-signer* reads out of the payload, which is the
+            // only account of the split it has any reason to believe. This is
+            // the case the unit tests cannot reach: real inputs, with real
+            // decoys, which the walk to the payments has to step over exactly.
+            let seen = ducat_mobile::ceremony::frost_destinations(prop.payload.clone())
+                .expect("read the proposed outputs");
+            for d in &seen {
+                let who = if d.residual { "residual" } else { "fixed   " };
+                println!("  co-signer reads: {who} {:>14} pXMR  {}", d.amount_pxmr, d.address);
+            }
+            assert!(
+                seen.iter().any(|d| !d.residual
+                    && d.address == refund
+                    && d.amount_pxmr == amount),
+                "the co-signer did not read back the fixed slice that was proposed",
+            );
+            assert!(
+                seen.iter().any(|d| d.residual && d.address == dest),
+                "the co-signer did not read back the residual claimant",
+            );
+            println!("  outputs agree with the proposal — the walk aligned over real inputs");
+
             let ans = ducat_mobile::ceremony::frost_cosign(cid.clone(), 2, 1, keys2, prop.payload)
                 .expect("cosign");
             println!("  co-signed (fee {} pXMR)", ans.fee_pxmr);
-            let txid = ducat_mobile::ceremony::frost_complete(cid, 1, 2, ans.payload, NODE.into())
+            let txid = ducat_mobile::ceremony::frost_complete(cid, 1, 2, ans.payload, node())
                 .expect("complete");
             println!("  SPLIT RELEASED — txid {txid}");
         }
@@ -382,7 +413,7 @@ fn release(dest: MoneroAddress, height_path: &std::path::Path) {
     let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
     rt.block_on(async {
         let rpc =
-            monero_daemon_rpc::MoneroDaemon::new(Ureq::new(NODE.into())).await.expect("connect");
+            monero_daemon_rpc::MoneroDaemon::new(Ureq::new(node())).await.expect("connect");
         let tip = rpc.latest_block_number().await.expect("height");
         let mut decoyed = Vec::new();
         for o in outputs {
@@ -441,7 +472,11 @@ fn release(dest: MoneroAddress, height_path: &std::path::Path) {
         println!("  txid {txid}");
 
         let mut accepted = 0u32;
-        for r in [NODE, "http://node.monerodevs.org:38089", "http://stagenet.xmr-tw.org:38081"] {
+        for r in [
+            node(),
+            "http://node.monerodevs.org:38089".into(),
+            "http://stagenet.xmr-tw.org:38081".into(),
+        ] {
             if let Ok(rpc) = monero_daemon_rpc::MoneroDaemon::new(Ureq::new(r.into())).await {
                 if rpc.publish_transaction(&signed).await.is_ok() {
                     accepted += 1;

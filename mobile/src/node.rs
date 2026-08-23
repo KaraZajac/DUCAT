@@ -773,6 +773,43 @@ pub fn node_dht_get(
     })
 }
 
+/// A subkey's bytes together with the sequence they were written at.
+///
+/// A DHT subkey is a *mutable slot*. `SMPL(1, [writer])` bounds how many
+/// subkeys a member may write, not how many times, and [node_dht_set]
+/// deliberately retries against the network's sequence so a later write wins.
+/// The sequence is therefore the only thing that tells "written once" from
+/// "written over" — and on a card's reply subkey that is the difference
+/// between the person who answered and somebody who read the same public board
+/// and answered after them.
+#[derive(uniffi::Record)]
+pub struct DhtRead {
+    pub data: Vec<u8>,
+    /// `Some(0)` for a slot written exactly once, `Some(n)` after n+1 writes,
+    /// and `None` for one never written at all.
+    pub seq: Option<u32>,
+}
+
+/// [node_dht_get], with the sequence kept.
+#[uniffi::export]
+pub fn node_dht_get_versioned(
+    key: String,
+    subkey: u32,
+    force_refresh: bool,
+) -> Result<Option<DhtRead>, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let v = rc
+            .get_dht_value(parse_key(&key)?, subkey, force_refresh)
+            .await
+            .map_err(|e| NodeError::Failed(format!("get: {e}")))?;
+        Ok(v.map(|d| DhtRead { data: d.data().to_vec(), seq: d.seq().to_option() }))
+    })
+}
+
 #[uniffi::export]
 pub fn node_dht_close(key: String) -> Result<(), NodeError> {
     let (api, rt) = handles()?;

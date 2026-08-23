@@ -44,6 +44,20 @@ data class RunningTab(
      *  below this height existed before the bill, however late a catch-up
      *  scan surfaces it, and cannot be its payment. */
     val tipAtBill: Long = 0,
+    /**
+     * The subaddress the bill named as the place to pay, so only an output
+     * that landed *there* can settle it.
+     *
+     * Matching used to admit minor 0 as well — the wallet's main address —
+     * because bills predating per-contact addressing named no address and
+     * were paid there. But minor 0 is also where donations, top-ups and
+     * escrow payouts arrive, and a payer names the amount, so an unrelated
+     * payment of the right size closed somebody else's tab and posted them a
+     * receipt for goods they never paid for. Every bill now carries the minor
+     * it billed to; null means a tab settled before this field existed, and
+     * only those keep the old permissive rule.
+     */
+    val billedMinor: Int? = null,
 ) {
     val totalPxmr: Long get() =
         if (state == "open") lines.sumOf { it.amountPxmr } + (taxPxmr ?: 0L) else settledTotal
@@ -60,6 +74,7 @@ data class RunningTab(
         put("paid_ki", paidKi ?: JSONObject.NULL)
         put("seen_tx", seenTx ?: JSONObject.NULL)
         put("tip_at_bill", tipAtBill)
+        billedMinor?.let { put("billed_minor", it) }
     }
 
     companion object {
@@ -84,6 +99,7 @@ data class RunningTab(
             paidKi = if (o.isNull("paid_ki")) null else o.optString("paid_ki"),
             seenTx = if (o.isNull("seen_tx")) null else o.optString("seen_tx"),
             tipAtBill = o.optLong("tip_at_bill", 0),
+            billedMinor = o.optInt("billed_minor", -1).takeIf { it >= 0 },
         )
     }
 }
@@ -211,6 +227,11 @@ class TabStore(private val context: Context) {
                 settledAt = System.currentTimeMillis(),
                 knownKis = WalletStore(context).entries().map { it.keyImage },
                 tipAtBill = WalletStore(context).tip(),
+                // The address the bill above actually named. Recorded here
+                // rather than derived at match time so that what settles the
+                // tab is checked against what the customer was told to pay,
+                // and not against whatever the wallet would mint today.
+                billedMinor = WalletStore(context).minorOf(tab.personaHex),
             )
         } ?: throw IllegalStateException("that tab is gone")
         DucatLog.i(TAG, "settled ${tab.origin} tab with ${contact.displayName()}: ${formatXmr(total)} XMR")
@@ -317,6 +338,21 @@ class TabStore(private val context: Context) {
          * unconfirmed transaction is a claim, not a settlement — accepting
          * one on sight is §8.6's bonded mode, which this is not.
          */
+        /**
+         * Did this output land where the bill asked for it?
+         *
+         * A tab that recorded the subaddress it billed to is settled by that
+         * subaddress and nothing else. Minor 0 — the wallet's main address —
+         * used to be admissible for every tab, and it is where donations,
+         * top-ups and escrow releases all arrive: with a payer-named amount
+         * beside it, money that had nothing to do with a bill could close it
+         * and send the customer a receipt. Tabs written before the field
+         * existed keep the old rule, and empty themselves within a day.
+         */
+        fun paidWhereBilled(tab: RunningTab, wantMinor: Int?, minor: Int): Boolean =
+            if (tab.billedMinor != null) minor == tab.billedMinor
+            else minor == 0 || wantMinor == null || minor == wantMinor
+
         fun poolSight(context: Context, node: String) {
             val store = TabStore(context)
             val waiting = store.all().filter { it.state == "settled" && it.seenTx == null }
@@ -362,9 +398,16 @@ class TabStore(private val context: Context) {
                             it.amountPxmr >= tab.settledTotal
                     }
                     .map { it.amountPxmr }.toSet()
+                // The same subaddress rule reconcile applies. It matters more
+                // here, not less: kiosk mode renders anything past Awaiting as
+                // paid and offers staff the Ready button on `Seen`, so a
+                // sighting is what goods leave the counter on. Matching on
+                // amount alone let a donation of the right size do that.
+                val wantMinor = tab.billedMinor ?: WalletStore(context).minorOf(tab.personaHex)
                 val hit = hits.firstOrNull {
                     it.txHashHex !in claimedTx &&
                         it.txHashHex.lowercase() !in ours &&
+                        paidWhereBilled(tab, wantMinor, it.minor.toInt()) &&
                         (it.amountPxmr.toLong() == tab.settledTotal ||
                             it.amountPxmr.toLong() in said)
                 } ?: continue
@@ -404,7 +447,7 @@ class TabStore(private val context: Context) {
                 // it. Minor 0 stays admissible for bills that predate the
                 // per-contact address; an output on someone *else's* minor is
                 // never this tab's money, whatever the amount says.
-                val wantMinor = WalletStore(context).minorOf(tab.personaHex)
+                val wantMinor = tab.billedMinor ?: WalletStore(context).minorOf(tab.personaHex)
                 // Amounts this payer *said* they sent for this bill, from
                 // their PAYMENT_SENT notices in the thread after it went out.
                 // The notice is why a tip works at all: a tipped payment
@@ -430,7 +473,7 @@ class TabStore(private val context: Context) {
                         // snapshot never saw, and an exact-amount coincidence
                         // from last week must not settle tonight's tab.
                         (tab.tipAtBill == 0L || it.height > tab.tipAtBill) &&
-                        (it.minor == 0 || wantMinor == null || it.minor == wantMinor) &&
+                        paidWhereBilled(tab, wantMinor, it.minor) &&
                         (it.amountPxmr == tab.settledTotal || it.amountPxmr in said)
                 } ?: continue
                 // Everything above this line trusted one node's account of the

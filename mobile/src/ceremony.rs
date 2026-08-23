@@ -363,14 +363,133 @@ pub struct FrostProposal {
     pub payout_pxmr: u64,
 }
 
-/// The co-signer's answer: its wire payload plus the one figure the
-/// transaction bytes expose to it (0.2.0 keeps payments private, so the
-/// destination/amount consent view waits on an upstream accessor — until
-/// then the co-signer signs the proposer's sweep as proposed).
+/// The co-signer's answer: its wire payload, the fee, and where the money
+/// actually goes — read out of the bytes being signed, not out of the note
+/// that arrived with them.
 #[derive(uniffi::Record)]
 pub struct FrostCosign {
     pub payload: Vec<u8>,
     pub fee_pxmr: u64,
+    /// Every output of the transaction this answer signs, so the caller can
+    /// check that what it put in front of somebody is what they agreed to.
+    pub destinations: Vec<TxDestination>,
+}
+
+/// One output of a proposed transaction.
+#[derive(uniffi::Record)]
+pub struct TxDestination {
+    /// The address, exactly as the transaction spells it. Empty for change
+    /// named by view pair instead of by address — nothing DUCAT builds, and
+    /// nothing a co-signer could recognise, so it is deliberately nameless.
+    pub address: String,
+    /// What this output receives. Zero for the residual claimant, whose
+    /// share is whatever the fixed outputs and the fee leave behind.
+    pub amount_pxmr: u64,
+    /// The change output: the residual claimant, who absorbs the remainder.
+    pub residual: bool,
+}
+
+/// More inputs or outputs than any release DUCAT builds. The bound stops a
+/// malformed payload asking for a huge allocation before it is rejected.
+const MAX_TX_PARTS: usize = 256;
+
+/// Read a transaction's outputs out of its own serialisation.
+///
+/// 0.2.0 keeps `SignableTransaction::payments` private with no accessor, so
+/// this walks the crate's encoding: a header, then the inputs — consumed by
+/// the crate's own `OutputWithDecoys::read`, which leaves the cursor exactly
+/// on the payment vector. Only the payment tags are read here, and they are
+/// a length-prefixed address string and a little-endian amount.
+///
+/// Callers must pass `tx.serialize()` of an already-parsed transaction, never
+/// the bytes off the wire. Then this reads the crate's own re-encoding of the
+/// very object that will be signed, and no disagreement between this walk and
+/// `SignableTransaction::read` is possible — which is the whole point, since
+/// a consent screen fed by a second, laxer parser is worse than no screen.
+fn read_destinations(serialized: &[u8]) -> Result<Vec<TxDestination>, ContactError> {
+    use monero_wallet::address::MoneroAddress;
+    use monero_wallet::extra::{MAX_ARBITRARY_DATA_SIZE, MAX_EXTRA_SIZE_BY_RELAY_RULE};
+    use monero_wallet::interface::FeeRate;
+    use monero_wallet::io::{read_byte, read_bytes, read_u32, read_u64, read_vec};
+    use monero_wallet::OutputWithDecoys;
+    use std::io;
+
+    fn address<R: io::Read>(r: &mut R) -> io::Result<String> {
+        let raw = read_vec(read_byte, Some(MoneroAddress::SIZE_UPPER_BOUND.0), r)?;
+        String::from_utf8(raw).map_err(|_| io::Error::other("address is not utf-8"))
+    }
+
+    fn payment<R: io::Read>(r: &mut R) -> io::Result<TxDestination> {
+        Ok(match read_byte(r)? {
+            0 => TxDestination {
+                address: address(r)?,
+                amount_pxmr: read_u64(r)?,
+                residual: false,
+            },
+            1 => TxDestination { address: address(r)?, amount_pxmr: 0, residual: true },
+            // Change named by a view pair: spend key, view key, subaddress.
+            // Consumed to keep the walk aligned, but there is no address to
+            // put in front of anybody, so it is reported nameless and every
+            // caller checking for its own address will refuse.
+            2 | 3 => {
+                let _spend: [u8; 32] = read_bytes(r)?;
+                let _view: [u8; 32] = read_bytes(r)?;
+                let (_major, _minor) = (read_u32(r)?, read_u32(r)?);
+                TxDestination { address: String::new(), amount_pxmr: 0, residual: true }
+            }
+            _ => Err(io::Error::other("unknown payment kind"))?,
+        })
+    }
+
+    fn reading(e: io::Error) -> ContactError {
+        ContactError::Refused(format!("reading the proposed outputs: {e}"))
+    }
+
+    let mut r = serialized;
+    let _rct_type = read_byte(&mut r).map_err(reading)?;
+    let _outgoing_view_key: [u8; 32] = read_bytes(&mut r).map_err(reading)?;
+    read_vec(OutputWithDecoys::read, Some(MAX_TX_PARTS), &mut r).map_err(reading)?;
+    let payments = read_vec(payment, Some(MAX_TX_PARTS), &mut r).map_err(reading)?;
+
+    // Keep reading to the end, and insist it lands exactly there.
+    //
+    // Everything above is a second walk over an encoding this crate owns, and
+    // a second walk can drift: an upstream layout change, a payment kind that
+    // grows a field, an input whose length this version reads differently.
+    // Drift would not announce itself — it would put a confident, wrong set of
+    // destinations in front of somebody about to sign. So finish the structure
+    // and require the tail to be consumed to the byte. Nothing here is used;
+    // reaching the end without residue is the whole result.
+    read_vec(
+        |r| read_vec(read_byte, Some(MAX_ARBITRARY_DATA_SIZE), r),
+        Some(MAX_EXTRA_SIZE_BY_RELAY_RULE),
+        &mut r,
+    )
+    .map_err(reading)?;
+    FeeRate::read(&mut r).map_err(reading)?;
+    if !r.is_empty() {
+        return Err(ContactError::Refused(
+            "the proposed transaction did not read to its end".into(),
+        ));
+    }
+    Ok(payments)
+}
+
+/// What a proposed release actually pays, and to whom — without keys, so a
+/// client can show it to somebody before they agree to sign it.
+///
+/// §17.5's rule applied to consent: the amount travelling beside a proposal
+/// is written by the party who benefits from being believed, so the screen
+/// has to be drawn from the payload instead.
+#[uniffi::export]
+pub fn frost_destinations(payload: Vec<u8>) -> Result<Vec<TxDestination>, ContactError> {
+    use monero_wallet::send::SignableTransaction;
+
+    let mut buf = payload.as_slice();
+    let tx_bytes = unframe(&mut buf)?;
+    let tx = SignableTransaction::read(&mut &tx_bytes[..])
+        .map_err(|e| ContactError::Refused(format!("transaction: {e}")))?;
+    read_destinations(&tx.serialize())
 }
 
 /// Reserved from the swept total to cover the network fee; the surplus
@@ -558,6 +677,9 @@ pub fn frost_cosign(
     let tx = SignableTransaction::read(&mut &tx_bytes[..])
         .map_err(|e| ContactError::Refused(format!("transaction: {e}")))?;
     let fee = tx.necessary_fee();
+    // Read from the parsed transaction's own re-encoding, so what the caller
+    // is told it signed is what it signed.
+    let destinations = read_destinations(&tx.serialize())?;
 
     let machine = tx
         .multisig(keys)
@@ -573,7 +695,7 @@ pub fn frost_cosign(
     let mut out = Vec::new();
     frame(&mut out, &preprocess.serialize());
     frame(&mut out, &share.serialize());
-    Ok(FrostCosign { payload: out, fee_pxmr: fee })
+    Ok(FrostCosign { payload: out, fee_pxmr: fee, destinations })
 }
 
 /// Round 2 — complete and broadcast. Consumes the parked machine, folds in
@@ -661,3 +783,128 @@ pub fn frost_complete(
     Ok(txid)
 }
 
+
+#[cfg(test)]
+mod destination_tests {
+    use super::read_destinations;
+
+    /// A whole `SignableTransaction` serialisation, minus the inputs — the
+    /// walk insists on reaching the end, so the tail has to be there. Counts
+    /// stay under 128 so every varint here is the single byte it encodes to.
+    fn tx(payments: &[Vec<u8>]) -> Vec<u8> {
+        let mut v = vec![0u8]; // rct type
+        v.extend_from_slice(&[7u8; 32]); // outgoing view key
+        v.push(0); // no inputs
+        v.push(payments.len() as u8);
+        for p in payments {
+            v.extend_from_slice(p);
+        }
+        v.push(0); // no arbitrary data
+        v.extend_from_slice(&3000u64.to_le_bytes()); // fee rate: per weight
+        v.extend_from_slice(&10u64.to_le_bytes()); // fee rate: mask
+        v
+    }
+
+    fn pay(addr: &str, amount: u64) -> Vec<u8> {
+        let mut v = vec![0u8, addr.len() as u8];
+        v.extend_from_slice(addr.as_bytes());
+        v.extend_from_slice(&amount.to_le_bytes());
+        v
+    }
+
+    fn change(addr: &str) -> Vec<u8> {
+        let mut v = vec![1u8, addr.len() as u8];
+        v.extend_from_slice(addr.as_bytes());
+        v
+    }
+
+    /// Change named by view pair: two keys and a subaddress index.
+    fn view_pair_change() -> Vec<u8> {
+        let mut v = vec![2u8];
+        v.extend_from_slice(&[1u8; 32]);
+        v.extend_from_slice(&[2u8; 32]);
+        v.extend_from_slice(&0u32.to_le_bytes());
+        v.extend_from_slice(&0u32.to_le_bytes());
+        v
+    }
+
+    /// The shape every DUCAT release has: fixed slices, then the residual
+    /// claimant. Address and amount have to come back exactly, because a
+    /// co-signer compares them against an address it minted itself.
+    #[test]
+    fn reads_a_split() {
+        let d = read_destinations(&tx(&[pay("5RIDER", 900), change("5DRIVER")])).unwrap();
+        assert_eq!(d.len(), 2);
+        assert_eq!(d[0].address, "5RIDER");
+        assert_eq!(d[0].amount_pxmr, 900);
+        assert!(!d[0].residual);
+        assert_eq!(d[1].address, "5DRIVER");
+        assert!(d[1].residual);
+    }
+
+    /// A sweep: nothing fixed, one address taking everything.
+    #[test]
+    fn reads_a_sweep() {
+        let d = read_destinations(&tx(&[change("5ALL")])).unwrap();
+        assert_eq!(d.len(), 1);
+        assert!(d[0].residual);
+        assert_eq!(d[0].amount_pxmr, 0);
+    }
+
+    /// A payment nobody can name must not be silently skipped: it is reported
+    /// nameless, and the walk stays aligned so what follows still reads. An
+    /// output that vanished from the list would be money leaving unannounced.
+    #[test]
+    fn view_pair_change_is_nameless_and_keeps_alignment() {
+        let d = read_destinations(&tx(&[view_pair_change(), pay("5AFTER", 42)])).unwrap();
+        assert_eq!(d.len(), 2);
+        assert_eq!(d[0].address, "");
+        assert!(d[0].residual);
+        assert_eq!(d[1].address, "5AFTER");
+        assert_eq!(d[1].amount_pxmr, 42);
+    }
+
+    /// Anything it cannot account for is refused rather than guessed at.
+    #[test]
+    fn refuses_what_it_cannot_read() {
+        let mut unknown_tag = tx(&[]);
+        unknown_tag[34] = 1; // one payment...
+        unknown_tag.insert(35, 9); // ...of a kind that does not exist
+        assert!(read_destinations(&unknown_tag).is_err());
+
+        let full = tx(&[pay("5RIDER", 900), change("5DRIVER")]);
+        for cut in [0, 1, 20, 34, 36, 40] {
+            assert!(
+                read_destinations(&full[.. cut.min(full.len())]).is_err(),
+                "a transaction truncated at {cut} was read as complete",
+            );
+        }
+    }
+
+    /// The alignment check itself. A walk that ended one byte early or late
+    /// would still produce a plausible-looking list of destinations, so the
+    /// test is that leftovers are fatal rather than ignored — that is the
+    /// property standing between an upstream layout change and a consent
+    /// screen quietly stating the wrong thing.
+    #[test]
+    fn a_walk_that_does_not_land_on_the_end_is_refused() {
+        let full = tx(&[pay("5RIDER", 900), change("5DRIVER")]);
+        assert!(read_destinations(&full).is_ok(), "the honest fixture must read");
+
+        let mut trailing = full.clone();
+        trailing.push(0);
+        assert!(
+            read_destinations(&trailing).is_err(),
+            "a transaction with a byte left over was read as complete",
+        );
+
+        // One payment short of what the vector declares: the walk consumes
+        // the change output as if it were the tail and lands off the end.
+        let mut miscounted = full.clone();
+        miscounted[34] = 1;
+        assert!(
+            read_destinations(&miscounted).is_err(),
+            "a payment count that did not match the payments was accepted",
+        );
+    }
+}

@@ -911,6 +911,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -977,6 +981,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_frost_complete(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`cosigner`: Short,`payload`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_frost_cosign(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`proposer`: Short,`keys`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_frost_destinations(`payload`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_frost_propose(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`keys`: RustBuffer.ByValue,`dest`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,`fromHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1053,6 +1059,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_node_dht_delete(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_dht_get(`key`: RustBuffer.ByValue,`subkey`: Int,`forceRefresh`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_dht_get_versioned(`key`: RustBuffer.ByValue,`subkey`: Int,`forceRefresh`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_open(`key`: RustBuffer.ByValue,`writerPublic`: RustBuffer.ByValue,`writerSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1290,6 +1298,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_frost_cosign(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_frost_destinations(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_frost_propose(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_frost_propose_split(
@@ -1365,6 +1375,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_node_dht_delete(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_get(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_dht_get_versioned(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_open(
     ): Short
@@ -1533,6 +1545,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_frost_cosign() != 7598.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_frost_destinations() != 23991.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_frost_propose() != 21602.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1645,6 +1660,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_get() != 61174.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_get_versioned() != 42103.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_open() != 42085.toShort()) {
@@ -2313,6 +2331,53 @@ public object FfiConverterTypeContactBackup: FfiConverterRustBuffer<ContactBacku
 
 
 /**
+ * A subkey's bytes together with the sequence they were written at.
+ *
+ * A DHT subkey is a *mutable slot*. `SMPL(1, [writer])` bounds how many
+ * subkeys a member may write, not how many times, and [node_dht_set]
+ * deliberately retries against the network's sequence so a later write wins.
+ * The sequence is therefore the only thing that tells "written once" from
+ * "written over" — and on a card's reply subkey that is the difference
+ * between the person who answered and somebody who read the same public board
+ * and answered after them.
+ */
+data class DhtRead (
+    var `data`: kotlin.ByteArray, 
+    /**
+     * `Some(0)` for a slot written exactly once, `Some(n)` after n+1 writes,
+     * and `None` for one never written at all.
+     */
+    var `seq`: kotlin.UInt?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeDhtRead: FfiConverterRustBuffer<DhtRead> {
+    override fun read(buf: ByteBuffer): DhtRead {
+        return DhtRead(
+            FfiConverterByteArray.read(buf),
+            FfiConverterOptionalUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: DhtRead) = (
+            FfiConverterByteArray.allocationSize(value.`data`) +
+            FfiConverterOptionalUInt.allocationSize(value.`seq`)
+    )
+
+    override fun write(value: DhtRead, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`data`, buf)
+            FfiConverterOptionalUInt.write(value.`seq`, buf)
+    }
+}
+
+
+
+/**
  * A record this node owns, and the credentials to write it.
  */
 data class DhtRecord (
@@ -2546,14 +2611,18 @@ public object FfiConverterTypeFromParty: FfiConverterRustBuffer<FromParty> {
 
 
 /**
- * The co-signer's answer: its wire payload plus the one figure the
- * transaction bytes expose to it (0.2.0 keeps payments private, so the
- * destination/amount consent view waits on an upstream accessor — until
- * then the co-signer signs the proposer's sweep as proposed).
+ * The co-signer's answer: its wire payload, the fee, and where the money
+ * actually goes — read out of the bytes being signed, not out of the note
+ * that arrived with them.
  */
 data class FrostCosign (
     var `payload`: kotlin.ByteArray, 
-    var `feePxmr`: kotlin.ULong
+    var `feePxmr`: kotlin.ULong, 
+    /**
+     * Every output of the transaction this answer signs, so the caller can
+     * check that what it put in front of somebody is what they agreed to.
+     */
+    var `destinations`: List<TxDestination>
 ) {
     
     companion object
@@ -2567,17 +2636,20 @@ public object FfiConverterTypeFrostCosign: FfiConverterRustBuffer<FrostCosign> {
         return FrostCosign(
             FfiConverterByteArray.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterSequenceTypeTxDestination.read(buf),
         )
     }
 
     override fun allocationSize(value: FrostCosign) = (
             FfiConverterByteArray.allocationSize(value.`payload`) +
-            FfiConverterULong.allocationSize(value.`feePxmr`)
+            FfiConverterULong.allocationSize(value.`feePxmr`) +
+            FfiConverterSequenceTypeTxDestination.allocationSize(value.`destinations`)
     )
 
     override fun write(value: FrostCosign, buf: ByteBuffer) {
             FfiConverterByteArray.write(value.`payload`, buf)
             FfiConverterULong.write(value.`feePxmr`, buf)
+            FfiConverterSequenceTypeTxDestination.write(value.`destinations`, buf)
     }
 }
 
@@ -3403,7 +3475,13 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
  */
 data class PoolHit (
     var `txHashHex`: kotlin.String, 
-    var `amountPxmr`: kotlin.ULong
+    var `amountPxmr`: kotlin.ULong, 
+    /**
+     * Which subaddress it landed on — 0 being the wallet's main address.
+     * A sighting is what a kiosk hands goods over on, so it has to be able
+     * to tell a payment for one bill from money that merely arrived.
+     */
+    var `minor`: kotlin.UInt
 ) {
     
     companion object
@@ -3417,17 +3495,20 @@ public object FfiConverterTypePoolHit: FfiConverterRustBuffer<PoolHit> {
         return PoolHit(
             FfiConverterString.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
         )
     }
 
     override fun allocationSize(value: PoolHit) = (
             FfiConverterString.allocationSize(value.`txHashHex`) +
-            FfiConverterULong.allocationSize(value.`amountPxmr`)
+            FfiConverterULong.allocationSize(value.`amountPxmr`) +
+            FfiConverterUInt.allocationSize(value.`minor`)
     )
 
     override fun write(value: PoolHit, buf: ByteBuffer) {
             FfiConverterString.write(value.`txHashHex`, buf)
             FfiConverterULong.write(value.`amountPxmr`, buf)
+            FfiConverterUInt.write(value.`minor`, buf)
     }
 }
 
@@ -4252,6 +4333,57 @@ public object FfiConverterTypeToParty: FfiConverterRustBuffer<ToParty> {
     override fun write(value: ToParty, buf: ByteBuffer) {
             FfiConverterUShort.write(value.`participant`, buf)
             FfiConverterByteArray.write(value.`bytes`, buf)
+    }
+}
+
+
+
+/**
+ * One output of a proposed transaction.
+ */
+data class TxDestination (
+    /**
+     * The address, exactly as the transaction spells it. Empty for change
+     * named by view pair instead of by address — nothing DUCAT builds, and
+     * nothing a co-signer could recognise, so it is deliberately nameless.
+     */
+    var `address`: kotlin.String, 
+    /**
+     * What this output receives. Zero for the residual claimant, whose
+     * share is whatever the fixed outputs and the fee leave behind.
+     */
+    var `amountPxmr`: kotlin.ULong, 
+    /**
+     * The change output: the residual claimant, who absorbs the remainder.
+     */
+    var `residual`: kotlin.Boolean
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeTxDestination: FfiConverterRustBuffer<TxDestination> {
+    override fun read(buf: ByteBuffer): TxDestination {
+        return TxDestination(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: TxDestination) = (
+            FfiConverterString.allocationSize(value.`address`) +
+            FfiConverterULong.allocationSize(value.`amountPxmr`) +
+            FfiConverterBoolean.allocationSize(value.`residual`)
+    )
+
+    override fun write(value: TxDestination, buf: ByteBuffer) {
+            FfiConverterString.write(value.`address`, buf)
+            FfiConverterULong.write(value.`amountPxmr`, buf)
+            FfiConverterBoolean.write(value.`residual`, buf)
     }
 }
 
@@ -5150,6 +5282,38 @@ public object FfiConverterOptionalTypeAttachmentRef: FfiConverterRustBuffer<Atta
 /**
  * @suppress
  */
+public object FfiConverterOptionalTypeDhtRead: FfiConverterRustBuffer<DhtRead?> {
+    override fun read(buf: ByteBuffer): DhtRead? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeDhtRead.read(buf)
+    }
+
+    override fun allocationSize(value: DhtRead?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeDhtRead.allocationSize(value)
+        }
+    }
+
+    override fun write(value: DhtRead?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeDhtRead.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalTypeInboundCall: FfiConverterRustBuffer<InboundCall?> {
     override fun read(buf: ByteBuffer): InboundCall? {
         if (buf.get().toInt() == 0) {
@@ -5651,6 +5815,34 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
         }
     }
 }
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List<TxDestination>> {
+    override fun read(buf: ByteBuffer): List<TxDestination> {
+        val len = buf.getInt()
+        return List<TxDestination>(len) {
+            FfiConverterTypeTxDestination.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<TxDestination>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeTxDestination.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<TxDestination>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeTxDestination.write(it, buf)
+        }
+    }
+}
         /**
          * The address a restored key controls, so a user can confirm they restored what
          * they meant to before trusting it with anything.
@@ -6044,6 +6236,24 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_cosign(
         FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterUShort.lower(`proposer`),FfiConverterByteArray.lower(`keys`),FfiConverterByteArray.lower(`payload`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * What a proposed release actually pays, and to whom — without keys, so a
+         * client can show it to somebody before they agree to sign it.
+         *
+         * §17.5's rule applied to consent: the amount travelling beside a proposal
+         * is written by the party who benefits from being believed, so the screen
+         * has to be drawn from the payload instead.
+         */
+    @Throws(ContactException::class) fun `frostDestinations`(`payload`: kotlin.ByteArray): List<TxDestination> {
+            return FfiConverterSequenceTypeTxDestination.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_destinations(
+        FfiConverterByteArray.lower(`payload`),_status)
 }
     )
     }
@@ -6639,6 +6849,19 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
             return FfiConverterOptionalByteArray.lift(
     uniffiRustCallWithError(NodeException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_get(
+        FfiConverterString.lower(`key`),FfiConverterUInt.lower(`subkey`),FfiConverterBoolean.lower(`forceRefresh`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * [node_dht_get], with the sequence kept.
+         */
+    @Throws(NodeException::class) fun `nodeDhtGetVersioned`(`key`: kotlin.String, `subkey`: kotlin.UInt, `forceRefresh`: kotlin.Boolean): DhtRead? {
+            return FfiConverterOptionalTypeDhtRead.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_get_versioned(
         FfiConverterString.lower(`key`),FfiConverterUInt.lower(`subkey`),FfiConverterBoolean.lower(`forceRefresh`),_status)
 }
     )

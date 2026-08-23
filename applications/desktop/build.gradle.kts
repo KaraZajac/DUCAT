@@ -334,6 +334,38 @@ tasks.register<JavaExec>("escrowagree") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// A card is answered once, and the DHT sequence proves it.
+// `./gradlew :desktop:claimonce`.
+tasks.register<JavaExec>("claimonce") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ClaimOnceTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// Only a payment to the address a bill named can close that bill.
+// `./gradlew :desktop:tabminor`.
+tasks.register<JavaExec>("tabminor") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.TabMinorTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The signed prekey's term, and what still opens after it ends.
+// `./gradlew :desktop:prekeyrotate`.
+tasks.register<JavaExec>("prekeyrotate") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PrekeyRotateTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// A co-signer reads where the money goes out of the payload, not out of the
+// note beside it. `./gradlew :desktop:releaseread`.
+tasks.register<JavaExec>("releaseread") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ReleaseReadTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // One junk write must not end a conversation. `./gradlew :desktop:wedge`.
 tasks.register<JavaExec>("wedge") {
     classpath = sourceSets["main"].runtimeClasspath
