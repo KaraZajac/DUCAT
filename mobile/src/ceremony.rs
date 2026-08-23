@@ -881,6 +881,33 @@ mod destination_tests {
         }
     }
 
+    /// The inputs are really stepped over, not assumed away.
+    ///
+    /// Every other fixture here declares zero inputs, which skips the one part
+    /// of the walk this code does not own — the crate's own
+    /// `OutputWithDecoys::read`. A real release has inputs with real decoys,
+    /// and building one by hand needs valid curve points, so what is pinned
+    /// here is the direction that keeps somebody safe: an input the crate
+    /// cannot read stops the walk rather than letting it guess where the
+    /// payments begin. Combined with the end-of-buffer check above, a
+    /// misalignment over real inputs can only ever refuse.
+    #[test]
+    fn an_unreadable_input_stops_the_walk() {
+        let mut v = vec![0u8];
+        v.extend_from_slice(&[7u8; 32]);
+        v.push(1); // one input...
+        v.extend_from_slice(&[0xFFu8; 64]); // ...that is not one
+        v.push(1);
+        v.extend_from_slice(&pay("5RIDER", 900));
+        v.push(0);
+        v.extend_from_slice(&3000u64.to_le_bytes());
+        v.extend_from_slice(&10u64.to_le_bytes());
+        assert!(
+            read_destinations(&v).is_err(),
+            "an input that could not be read was walked past anyway",
+        );
+    }
+
     /// The alignment check itself. A walk that ended one byte early or late
     /// would still produce a plausible-looking list of destinations, so the
     /// test is that leftovers are fatal rather than ignored — that is the

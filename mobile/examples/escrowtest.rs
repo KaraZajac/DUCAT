@@ -61,7 +61,13 @@ impl Ureq {
         Ureq {
             url: url.trim_end_matches('/').to_string(),
             agent: ureq::AgentBuilder::new()
-                .timeout(std::time::Duration::from_secs(30))
+                // Generous, because decoy selection is the heavy call and
+                // this harness talks to public stagenet nodes. Three
+                // different ones timed out at exactly that step on 30s —
+                // "timed out reading response", i.e. the request landed and
+                // the body did not arrive — which reads as the ceremony
+                // failing when it is the node being slow.
+                .timeout(std::time::Duration::from_secs(180))
                 .build(),
         }
     }
