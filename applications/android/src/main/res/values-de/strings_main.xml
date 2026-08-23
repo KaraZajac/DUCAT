@@ -37,4 +37,7 @@
         <item quantity="one">Du hast 1 Anzeige</item>
         <item quantity="other">Du hast %1$d Anzeigen</item>
     </plurals>
+    <string name="err_no_keys_yet">Ihr habt den Kartentausch noch nicht abgeschlossen.</string>
+    <string name="err_conversation_too_old">Ihre Karte ist zu alt für diese App. Bitten Sie um eine neue.</string>
+    <string name="err_board_full">Hier wird gerade zu viel gerufen. Versuchen Sie es in einer Minute noch einmal.</string>
 </resources>

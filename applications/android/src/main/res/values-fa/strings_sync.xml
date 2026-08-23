@@ -23,7 +23,7 @@
     <string name="scanner_no_camera_title">اجازهٔ دوربین داده نشده</string>
     <string name="scanner_no_camera_body">اسکن به آن نیاز دارد. باقی DUCAT بدونش کار می‌کند — کارت را همیشه می‌شود به‌جایش به‌صورت لینک جای‌گذاری کرد.</string>
     <string name="scanner_allow">اجازه بده</string>
-    <string name="scanner_would_not_start">دوربین روشن نشد: %1$s</string>
+    <string name="scanner_would_not_start">دوربین روشن نشد. هر برنامهٔ دیگری که ممکن است از آن استفاده کند ببندید و دوباره تلاش کنید.</string>
     <string name="scanner_torch_off">چراغ خاموش</string>
     <string name="scanner_torch_on">چراغ روشن</string>
     <string name="scanner_no_camera_tap">برای اسکن لازم است. هنوز می‌توانی این گوشی را به گوشی آن‌ها نزدیک کنی — یک تماس همان کارت را می‌برد — یا کارت را به‌صورت لینک بچسبانی.</string>

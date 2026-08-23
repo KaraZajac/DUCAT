@@ -29,7 +29,7 @@
     <string name="scanner_no_camera_title">Brak zgody na aparat</string>
     <string name="scanner_no_camera_body">Skanowanie go potrzebuje. Cała reszta DUCAT działa bez niego — wizytówkę zawsze można wkleić jako link.</string>
     <string name="scanner_allow">Zezwól</string>
-    <string name="scanner_would_not_start">Aparat nie chciał się uruchomić: %1$s</string>
+    <string name="scanner_would_not_start">Aparat się nie uruchomił. Zamknij inne aplikacje, które mogą go używać, i spróbuj ponownie.</string>
     <string name="scanner_torch_off">Latarka wyłączona</string>
     <string name="scanner_torch_on">Latarka włączona</string>
     <string name="scanner_no_camera_tap">Skanowanie go wymaga. Nadal możesz przyłożyć ten telefon do ich telefonu — dotknięcie przenosi tę samą kartę — albo wkleić kartę jako link.</string>

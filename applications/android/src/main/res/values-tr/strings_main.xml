@@ -37,4 +37,7 @@
         <item quantity="one">1 ilanın var</item>
         <item quantity="other">%1$d ilanın var</item>
     </plurals>
+    <string name="err_no_keys_yet">Kart alışverişiniz henüz tamamlanmadı.</string>
+    <string name="err_conversation_too_old">Kartları bu uygulama için fazla eski. Yenisini isteyin.</string>
+    <string name="err_board_full">Şu anda buralarda çok fazla çağrı var. Bir dakika sonra tekrar deneyin.</string>
 </resources>

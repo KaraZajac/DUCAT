@@ -23,7 +23,7 @@
     <string name="scanner_no_camera_title">The camera is not allowed</string>
     <string name="scanner_no_camera_body">Scanning needs it. Everything else in DUCAT works without it — a card can always be pasted as a link instead.</string>
     <string name="scanner_allow">Allow</string>
-    <string name="scanner_would_not_start">The camera would not start: %1$s</string>
+    <string name="scanner_would_not_start">The camera would not start. Close any other app that might be using it, then try again.</string>
     <string name="scanner_torch_off">Torch off</string>
     <string name="scanner_torch_on">Torch on</string>
     <string name="scanner_no_camera_tap">Scanning needs it. You can still hold this phone against theirs — a tap carries the same card — or paste the card as a link.</string>

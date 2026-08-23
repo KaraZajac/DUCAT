@@ -37,4 +37,7 @@
         <item quantity="one">شما ۱ آگهی دارید</item>
         <item quantity="other">شما %1$d آگهی دارید</item>
     </plurals>
+    <string name="err_no_keys_yet">هنوز تبادل کارت‌ها میان شما کامل نشده است.</string>
+    <string name="err_conversation_too_old">کارت آن‌ها برای این برنامه قدیمی است. کارت تازه‌ای بخواهید.</string>
+    <string name="err_board_full">الان درخواست‌های زیادی در این حوالی هست. یک دقیقه دیگر دوباره امتحان کنید.</string>
 </resources>

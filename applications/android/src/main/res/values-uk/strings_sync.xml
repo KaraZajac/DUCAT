@@ -29,7 +29,7 @@
     <string name="scanner_no_camera_title">Камера не дозволена</string>
     <string name="scanner_no_camera_body">Для сканування вона потрібна. Усе інше в DUCAT працює без неї — картку завжди можна вставити як посилання.</string>
     <string name="scanner_allow">Дозволити</string>
-    <string name="scanner_would_not_start">Камера не запустилася: %1$s</string>
+    <string name="scanner_would_not_start">Камера не запустилася. Закрийте інші застосунки, які можуть її використовувати, і спробуйте ще раз.</string>
     <string name="scanner_torch_off">Ліхтарик вимкнено</string>
     <string name="scanner_torch_on">Ліхтарик увімкнено</string>
     <string name="scanner_no_camera_tap">Для сканування потрібна. Можеш прикласти цей телефон до їхнього — дотик несе ту саму картку — або вставити картку посиланням.</string>

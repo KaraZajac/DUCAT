@@ -19,7 +19,7 @@
     <string name="scanner_no_camera_title">La cámara no está permitida</string>
     <string name="scanner_no_camera_body">Escanear la necesita. Todo lo demás en DUCAT funciona sin ella — una tarjeta siempre se puede pegar como enlace.</string>
     <string name="scanner_allow">Permitir</string>
-    <string name="scanner_would_not_start">La cámara no arrancó: %1$s</string>
+    <string name="scanner_would_not_start">La cámara no se inició. Cierra cualquier otra app que pueda estar usándola e inténtalo de nuevo.</string>
     <string name="scanner_torch_off">Apagar linterna</string>
     <string name="scanner_torch_on">Encender linterna</string>
     <string name="scanner_no_camera_tap">Escanear la necesita. Aún puedes acercar este teléfono al suyo: un toque lleva la misma tarjeta, o pega la tarjeta como enlace.</string>

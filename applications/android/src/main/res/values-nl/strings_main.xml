@@ -37,4 +37,7 @@
         <item quantity="one">Je hebt 1 advertentie</item>
         <item quantity="other">Je hebt %1$d advertenties</item>
     </plurals>
+    <string name="err_no_keys_yet">Jullie zijn nog niet klaar met kaarten uitwisselen.</string>
+    <string name="err_conversation_too_old">Hun kaart is te oud voor deze app. Vraag om een nieuwe.</string>
+    <string name="err_board_full">Er wordt hier op dit moment te veel gevraagd. Probeer het over een minuut opnieuw.</string>
 </resources>

@@ -37,4 +37,7 @@
         <item quantity="one">Tem 1 coisa publicada</item>
         <item quantity="other">Tem %1$d coisas publicadas</item>
     </plurals>
+    <string name="err_no_keys_yet">Vocês ainda não terminaram de trocar os cartões.</string>
+    <string name="err_conversation_too_old">O cartão deles é antigo demais para este app. Peça um novo.</string>
+    <string name="err_board_full">Há pedidos demais por aqui agora. Tente de novo daqui a um minuto.</string>
 </resources>

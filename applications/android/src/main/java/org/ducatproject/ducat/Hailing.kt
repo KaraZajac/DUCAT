@@ -21,6 +21,10 @@ import uniffi.ducat_mobile.standRead
  * charge and what to do about what comes back.
  */
 object Hailing {
+
+    /** Every slot on every shard of this cell is taken by a live hail. */
+    class BoardFull : IllegalStateException("stand ladder full")
+
     private const val TAG = "Hail"
 
     /** How long a hail stands before the boards forget it. */
@@ -123,7 +127,10 @@ object Hailing {
                 }
             }
         }
-        val (board, sub) = placed ?: throw IllegalStateException("every shard is full")
+        // Not "every shard is full", which was the sentence a rider actually
+        // saw: a ladder is our word for it, and what happened to them is that
+        // the corner is busy.
+        val (board, sub) = placed ?: throw BoardFull()
         RideStore(context).save(
             RideStore.PostedRide(
                 board = board, subkey = sub,

@@ -270,6 +270,34 @@ def main() -> int:
                     print(f"  ! {fn}:{line}: {m.group(1)} takes an argument and got none")
                     problems += 1
 
+    # An exception's own message, put on the screen.
+    #
+    # Every one of these was a sentence written in English reaching somebody
+    # in one of the other eighteen languages — a node timing out arriving as
+    # `InterfaceError(InterfaceError("timed out"))` on the screen holding
+    # their fare. `moneyFailure` maps a throwable to a localised sentence and
+    # falls back to one; the rule is simply that error *text* never comes from
+    # a Throwable.
+    #
+    # Matched on assigning to something called error/message, which is where
+    # it lands. Logging a raw message is right and stays right — that is what
+    # a log is for — so DucatLog lines are not matched.
+    raw_error = re.compile(
+        r"(?:error|message|errorText|msg)\s*=\s*[^\n]*\b(?:it|e|t|ex)\."
+        r"(?:message|localizedMessage)\b"
+    )
+    for dirpath, _, filenames in os.walk(os.path.join(app, "android/src/main/java")):
+        for fn in filenames:
+            if not fn.endswith(".kt"):
+                continue
+            full = os.path.join(dirpath, fn)
+            with open(full, encoding="utf-8") as fh:
+                text = fh.read()
+            for m in raw_error.finditer(text):
+                line = text[: m.start()].count("\n") + 1
+                print(f"  ! {fn}:{line}: an exception's message is being shown to a user")
+                problems += 1
+
     counted = len(base_files)
     if problems:
         print(f"strings — {problems} problem(s) across {counted} files, {len(locales)} languages")

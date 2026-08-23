@@ -31,7 +31,7 @@
     <string name="scanner_no_camera_title">الكاميرا غير مسموح بها</string>
     <string name="scanner_no_camera_body">المسح يحتاجها. كل شيء آخر في DUCAT يعمل بدونها — ويمكن دائمًا لصق البطاقة كرابط.</string>
     <string name="scanner_allow">السماح</string>
-    <string name="scanner_would_not_start">تعذّر تشغيل الكاميرا: %1$s</string>
+    <string name="scanner_would_not_start">لم تبدأ الكاميرا. أغلق أي تطبيق آخر قد يستخدمها ثم حاول مرة أخرى.</string>
     <string name="scanner_torch_off">إطفاء المصباح</string>
     <string name="scanner_torch_on">تشغيل المصباح</string>
     <string name="scanner_no_camera_tap">المسح يحتاجها. لا يزال بإمكانك تقريب هذا الهاتف من هاتفهم — اللمسة تحمل البطاقة نفسها — أو لصق البطاقة كرابط.</string>

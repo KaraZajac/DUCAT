@@ -39,4 +39,7 @@
         <item quantity="many">У вас %1$d объявлений</item>
         <item quantity="other">У вас %1$d объявлений</item>
     </plurals>
+    <string name="err_no_keys_yet">Вы ещё не обменялись карточками до конца.</string>
+    <string name="err_conversation_too_old">Их карточка слишком старая для этого приложения. Попросите новую.</string>
+    <string name="err_board_full">Сейчас здесь слишком много заказов. Попробуйте через минуту.</string>
 </resources>

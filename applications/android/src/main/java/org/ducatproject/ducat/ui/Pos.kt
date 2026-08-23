@@ -545,7 +545,13 @@ private fun PresentScreen(
                     saleTabId = id
                     DucatLog.i(TAG, "billed ${fresh.displayName()} ${formatXmr(totalPxmr)} XMR")
                 }.onFailure {
-                    error = context.getString(R.string.pos_error_bill_not_sent, it.message)
+                    // The frame was localised and the reason was not, so a
+                    // till in Bangkok read "could not send the bill:
+                    // InterfaceError(...)". Billing reaches the same node as
+                    // everything else and fails the same way.
+                    error = context.getString(
+                        R.string.pos_error_bill_not_sent, moneyFailure(context, it),
+                    )
                     DucatLog.e(TAG, "bill: ${it.message}")
                 }
             }

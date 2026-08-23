@@ -37,4 +37,7 @@
         <item quantity="one">Bạn có %1$d mục đã đăng</item>
         <item quantity="other">Bạn có %1$d mục đã đăng</item>
     </plurals>
+    <string name="err_no_keys_yet">Hai bạn chưa trao đổi thẻ xong.</string>
+    <string name="err_conversation_too_old">Thẻ của họ quá cũ với ứng dụng này. Hãy xin thẻ mới.</string>
+    <string name="err_board_full">Quanh đây đang có quá nhiều yêu cầu. Thử lại sau một phút.</string>
 </resources>

@@ -37,4 +37,7 @@
         <item quantity="one">You have 1 thing listed</item>
         <item quantity="other">You have %1$d things listed</item>
     </plurals>
+    <string name="err_no_keys_yet">You and they have not finished swapping cards yet.</string>
+    <string name="err_conversation_too_old">Their card is too old for this app. Ask them for a new one.</string>
+    <string name="err_board_full">Too many people are hailing around here right now. Try again in a minute.</string>
 </resources>

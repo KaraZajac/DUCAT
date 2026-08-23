@@ -199,7 +199,11 @@ private fun NewRideScreen(rides: RideStore) {
                         .putString("taxi_permin_text", perMin).apply()
                     rides.start(fresh.personaHex, basePxmr, perMinPxmr)
                     DucatLog.i(TAG, "ride started with ${fresh.displayName()}")
-                }.onFailure { error = context.getString(R.string.taxi_err_terms_not_sent, it.message) }
+                }.onFailure {
+                    error = context.getString(
+                        R.string.taxi_err_terms_not_sent, moneyFailure(context, it),
+                    )
+                }
             }
             break
         }

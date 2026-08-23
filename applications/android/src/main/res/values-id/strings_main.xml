@@ -37,4 +37,7 @@
         <item quantity="one">Kamu punya %1$d hal terdaftar</item>
         <item quantity="other">Kamu punya %1$d hal terdaftar</item>
     </plurals>
+    <string name="err_no_keys_yet">Kalian belum selesai bertukar kartu.</string>
+    <string name="err_conversation_too_old">Kartu mereka terlalu lama untuk aplikasi ini. Minta yang baru.</string>
+    <string name="err_board_full">Sekarang terlalu banyak permintaan di sekitar sini. Coba lagi semenit lagi.</string>
 </resources>

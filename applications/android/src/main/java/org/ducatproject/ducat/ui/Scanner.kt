@@ -153,21 +153,27 @@ fun QrScannerContent(
                 return@Column
             }
 
-            var failure by remember { mutableStateOf<String?>(null) }
-            failure?.let {
+            // Whether it failed, not what it said — the words are ours now.
+            var failed by remember { mutableStateOf(false) }
+            if (failed) {
                 Text(
-                    stringResource(R.string.scanner_would_not_start, it),
+                    // Without the framework's own words. "CameraUnavailable
+                    // Exception: CAMERA_DISABLED" told a person nothing they
+                    // could act on, in a language most of them do not read;
+                    // the sentence now names the thing they *can* do, and the
+                    // detail is in the log where it is useful.
+                    stringResource(R.string.scanner_would_not_start),
                     Modifier.padding(20.dp),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
-            CameraPreview(onResult) { failure = it }
+            CameraPreview(onResult) { failed = true }
     }
 }
 
 @Composable
-private fun CameraPreview(onResult: (String) -> Unit, onFailure: (String) -> Unit) {
+private fun CameraPreview(onResult: (String) -> Unit, onFailure: () -> Unit) {
     // The torch, because codes get scanned where this app gets used: across a
     // bar. A scanner that cannot light the dark is a scanner that works in
     // demos.
@@ -216,9 +222,8 @@ private fun CameraPreview(onResult: (String) -> Unit, onFailure: (String) -> Uni
                         lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis,
                     )
                 }.onFailure { e ->
-                    val msg = e.message ?: e.toString()
-                    DucatLog.w("Scanner", "camera bind failed: $msg")
-                    view.post { onFailure(msg) }
+                    DucatLog.w("Scanner", "camera bind failed: ${e.message ?: e}")
+                    view.post { onFailure() }
                 }
             }, ContextCompat.getMainExecutor(ctx))
             view

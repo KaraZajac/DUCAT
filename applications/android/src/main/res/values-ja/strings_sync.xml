@@ -20,7 +20,7 @@
     <string name="scanner_no_camera_title">カメラが許可されていません</string>
     <string name="scanner_no_camera_body">スキャンにはカメラが必要です。DUCATの他の機能はカメラなしで動きます — カードはいつでもリンクとして貼り付けられます。</string>
     <string name="scanner_allow">許可</string>
-    <string name="scanner_would_not_start">カメラを起動できませんでした: %1$s</string>
+    <string name="scanner_would_not_start">カメラを起動できませんでした。カメラを使っている可能性のある他のアプリを閉じて、もう一度お試しください。</string>
     <string name="scanner_torch_off">ライトをオフ</string>
     <string name="scanner_torch_on">ライトをオン</string>
     <string name="scanner_no_camera_tap">読み取りには必要です。この端末を相手の端末に近づければ同じカードが渡せますし、カードをリンクとして貼り付けることもできます。</string>

@@ -19,7 +19,7 @@
     <string name="scanner_no_camera_title">Die Kamera ist nicht erlaubt</string>
     <string name="scanner_no_camera_body">Zum Scannen wird sie gebraucht. Alles andere in DUCAT geht ohne — eine Karte lässt sich immer als Link einfügen.</string>
     <string name="scanner_allow">Erlauben</string>
-    <string name="scanner_would_not_start">Die Kamera startete nicht: %1$s</string>
+    <string name="scanner_would_not_start">Die Kamera startete nicht. Schließen Sie andere Apps, die sie verwenden könnten, und versuchen Sie es erneut.</string>
     <string name="scanner_torch_off">Licht aus</string>
     <string name="scanner_torch_on">Licht an</string>
     <string name="scanner_no_camera_tap">Zum Scannen schon. Du kannst dieses Telefon aber weiter an ihres halten — ein Tippen trägt dieselbe Karte — oder die Karte als Link einfügen.</string>

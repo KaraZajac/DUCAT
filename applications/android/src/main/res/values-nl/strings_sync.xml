@@ -23,7 +23,7 @@
     <string name="scanner_no_camera_title">De camera is niet toegestaan</string>
     <string name="scanner_no_camera_body">Scannen heeft hem nodig. Al het andere in DUCAT werkt zonder — een kaartje kan altijd als link worden geplakt.</string>
     <string name="scanner_allow">Toestaan</string>
-    <string name="scanner_would_not_start">De camera wilde niet starten: %1$s</string>
+    <string name="scanner_would_not_start">De camera startte niet. Sluit andere apps die hem mogelijk gebruiken en probeer het opnieuw.</string>
     <string name="scanner_torch_off">Zaklamp uit</string>
     <string name="scanner_torch_on">Zaklamp aan</string>
     <string name="scanner_no_camera_tap">Scannen heeft hem nodig. Je kunt deze telefoon nog steeds tegen die van hen houden — een tik draagt dezelfde kaart — of de kaart als link plakken.</string>

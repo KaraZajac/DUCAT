@@ -90,7 +90,18 @@ fun isChainWait(t: Throwable): Boolean = chainWaitBlocks(t) != null
 fun chainWaitBlocks(t: Throwable): Int? =
     NEEDS_CONFIRMATIONS.find(t.message.orEmpty())?.groupValues?.get(1)?.toIntOrNull()
 
-fun moneyFailure(context: android.content.Context, t: Throwable): String = when {
+fun moneyFailure(
+    context: android.content.Context,
+    t: Throwable,
+    /**
+     * What to say when nothing below matches.
+     *
+     * Per screen, because "we could not do that" is worse than "that photo
+     * would not send" when the screen knows which it was — and the default is
+     * the only sentence that fits everywhere.
+     */
+    fallback: Int = org.ducatproject.ducat.R.string.main_card_link_failed_body,
+): String = when {
     // Our own node, not the Monero one. `claimFailureRes` has said this since
     // the first card that would not claim; the money screens never did, so a
     // release proposed before the routing table was ready reached the person
@@ -119,7 +130,13 @@ fun moneyFailure(context: android.content.Context, t: Throwable): String = when 
             org.ducatproject.ducat.R.plurals.bond_needs_confirmations, n, n,
         )
     }
-    else -> bridgeMessage(t.saidWhy() ?: context.getString(
-        org.ducatproject.ducat.R.string.main_card_link_failed_body,
-    ))
+    // Things a person meets by circumstance rather than by something being
+    // broken, and which used to reach them as English through `it.message`.
+    t is org.ducatproject.ducat.Mailbox.NoKeysYet ->
+        context.getString(org.ducatproject.ducat.R.string.err_no_keys_yet)
+    t is org.ducatproject.ducat.Mailbox.ConversationTooOld ->
+        context.getString(org.ducatproject.ducat.R.string.err_conversation_too_old)
+    t is org.ducatproject.ducat.Hailing.BoardFull ->
+        context.getString(org.ducatproject.ducat.R.string.err_board_full)
+    else -> context.getString(fallback)
 }

@@ -19,7 +19,7 @@
     <string name="scanner_no_camera_title">La caméra n\'est pas autorisée</string>
     <string name="scanner_no_camera_body">Scanner en a besoin. Tout le reste dans DUCAT fonctionne sans — une carte peut toujours être collée sous forme de lien.</string>
     <string name="scanner_allow">Autoriser</string>
-    <string name="scanner_would_not_start">La caméra n\'a pas démarré : %1$s</string>
+    <string name="scanner_would_not_start">La caméra n\'a pas démarré. Fermez toute autre application qui pourrait l\'utiliser, puis réessayez.</string>
     <string name="scanner_torch_off">Éteindre la lampe</string>
     <string name="scanner_torch_on">Allumer la lampe</string>
     <string name="scanner_no_camera_tap">Le scan en a besoin. Tu peux quand même approcher ce téléphone du leur — un contact porte la même carte — ou coller la carte en lien.</string>

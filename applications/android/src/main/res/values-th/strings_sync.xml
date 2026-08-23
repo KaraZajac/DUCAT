@@ -20,7 +20,7 @@
     <string name="scanner_no_camera_title">ไม่ได้รับอนุญาตให้ใช้กล้อง</string>
     <string name="scanner_no_camera_body">การสแกนต้องใช้กล้อง อย่างอื่นใน DUCAT ทำงานได้โดยไม่ต้องมี — นามบัตรวางเป็นลิงก์แทนได้เสมอ</string>
     <string name="scanner_allow">อนุญาต</string>
-    <string name="scanner_would_not_start">กล้องไม่ยอมเริ่มทำงาน: %1$s</string>
+    <string name="scanner_would_not_start">กล้องเริ่มทำงานไม่ได้ ปิดแอปอื่นที่อาจกำลังใช้กล้องอยู่ แล้วลองใหม่</string>
     <string name="scanner_torch_off">ปิดไฟฉาย</string>
     <string name="scanner_torch_on">เปิดไฟฉาย</string>
     <string name="scanner_no_camera_tap">การสแกนต้องใช้กล้อง คุณยังแตะเครื่องนี้กับเครื่องของเขาได้ การแตะพาการ์ดใบเดียวกันไป หรือจะวางการ์ดเป็นลิงก์ก็ได้</string>

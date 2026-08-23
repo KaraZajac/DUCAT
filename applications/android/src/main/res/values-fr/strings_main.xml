@@ -37,4 +37,7 @@
         <item quantity="one">Vous avez 1 annonce</item>
         <item quantity="other">Vous avez %1$d annonces</item>
     </plurals>
+    <string name="err_no_keys_yet">Vous n\'avez pas encore fini d\'échanger vos cartes.</string>
+    <string name="err_conversation_too_old">Leur carte est trop ancienne pour cette application. Demandez-leur-en une nouvelle.</string>
+    <string name="err_board_full">Il y a trop de demandes dans le coin en ce moment. Réessayez dans une minute.</string>
 </resources>

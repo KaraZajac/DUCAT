@@ -202,9 +202,12 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 draft = ""
                                 messages = store.thread(c.personaHex)
                             }.onFailure {
-                                // Blank counts as missing here too — see afterSend.
-                                error = it.message?.takeIf { m -> m.isNotBlank() }
-                                    ?: context.getString(R.string.chat_could_not_send)
+                                // Mapped, not printed. Sending reaches the
+                                // same node as everything else and fails the
+                                // same way, and `it.message` put that failure
+                                // in front of a reader in English — in an app
+                                // that ships in nineteen languages.
+                                error = moneyFailure(context, it, R.string.chat_could_not_send)
                                 DucatLog.w(
                                     "Chat",
                                     "send: ${it.javaClass.simpleName}: ${it.message}",
@@ -246,8 +249,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 // set to "" and drew nothing. Picking a photo
                                 // looked like picking a photo did nothing at
                                 // all: no bubble, no error, no clue.
-                                error = it.message?.takeIf { m -> m.isNotBlank() }
-                                    ?: context.getString(R.string.chat_could_not_send_the, what)
+                                error = moneyFailure(context, it).takeIf {
+                                    // The generic sentence is worse than this
+                                    // screen's own, which names what failed.
+                                    !it.contentEquals(
+                                        context.getString(R.string.main_card_link_failed_body),
+                                    )
+                                } ?: context.getString(R.string.chat_could_not_send_the, what)
                                 // The class name, because an empty message is
                                 // exactly the case where the log needs to say
                                 // something else.

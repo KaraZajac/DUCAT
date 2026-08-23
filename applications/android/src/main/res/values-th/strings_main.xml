@@ -37,4 +37,7 @@
         <item quantity="one">คุณลงประกาศไว้ %1$d รายการ</item>
         <item quantity="other">คุณลงประกาศไว้ %1$d รายการ</item>
     </plurals>
+    <string name="err_no_keys_yet">คุณสองคนยังแลกการ์ดกันไม่เสร็จ</string>
+    <string name="err_conversation_too_old">การ์ดของเขาเก่าเกินไปสำหรับแอปนี้ ขอการ์ดใหม่จากเขา</string>
+    <string name="err_board_full">ตอนนี้แถวนี้มีคำขอมากเกินไป ลองใหม่อีกสักครู่</string>
 </resources>

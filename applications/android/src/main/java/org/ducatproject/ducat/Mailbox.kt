@@ -418,6 +418,21 @@ object Mailbox {
      * makes one briefly late — and a persisted counter with the slot still
      * owed is filled in by the next send, with the same seq and same bytes.
      */
+    /**
+     * Their handshake never completed, so there is nothing to encrypt to.
+     *
+     * Typed rather than a sentence, because the sentence was the thing being
+     * shown: the chat screen printed `it.message` when it had one, so this
+     * reached a reader as English in an app that ships in nineteen languages.
+     * Every other failure a person meets by circumstance in here is typed for
+     * exactly that reason — see Wallet.NotEnough, Ceremony.NoNode.
+     */
+    class NoKeysYet : IllegalStateException("no prekey bundle for this contact")
+
+    /** Their card predates the current outbox format; they need to send a new one. */
+    class ConversationTooOld :
+        IllegalStateException("conversation has no outbox owner secret")
+
     fun send(
         context: Context,
         c: Contact,
@@ -454,17 +469,12 @@ object Mailbox {
         // that leaves here with one in it is a message that vanishes. Cleaned
         // once, at the only door out.
         @Suppress("NAME_SHADOWING") val body = withoutDisplayHazards(body)
-        val bundle = c.theirBundle
-            ?: throw IllegalStateException("No keys for this contact yet.")
+        val bundle = c.theirBundle ?: throw NoKeysYet()
         // Re-opened **as the owner**. Creating a record leaves it writable only
         // for that process; a plain re-open is read-only and the write comes
         // back "value is not writable", which sounds like the network refusing
         // and is us having discarded the key.
-        if (c.myOutboxOwnerSecret.isEmpty()) {
-            throw IllegalStateException(
-                "This conversation predates the current format. Ask them for a new card."
-            )
-        }
+        if (c.myOutboxOwnerSecret.isEmpty()) throw ConversationTooOld()
         nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
         var ring = c.myRing.toUInt()
         // A previous send persisted its message and counters but died before

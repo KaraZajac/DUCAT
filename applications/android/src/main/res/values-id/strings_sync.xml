@@ -20,7 +20,7 @@
     <string name="scanner_no_camera_title">Kamera tidak diizinkan</string>
     <string name="scanner_no_camera_body">Memindai membutuhkannya. Semua hal lain di DUCAT bekerja tanpanya — kartu selalu bisa ditempel sebagai tautan.</string>
     <string name="scanner_allow">Izinkan</string>
-    <string name="scanner_would_not_start">Kamera tidak mau menyala: %1$s</string>
+    <string name="scanner_would_not_start">Kamera tidak mau menyala. Tutup aplikasi lain yang mungkin memakainya, lalu coba lagi.</string>
     <string name="scanner_torch_off">Senter mati</string>
     <string name="scanner_torch_on">Senter nyala</string>
     <string name="scanner_no_camera_tap">Memindai butuh itu. Kamu tetap bisa menempelkan ponsel ini ke ponsel mereka — satu sentuhan membawa kartu yang sama — atau menempel kartunya sebagai tautan.</string>
