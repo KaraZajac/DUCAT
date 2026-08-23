@@ -339,6 +339,23 @@ fn scan_escrow(
 /// from the party who benefits from being believed). `from_height` is the
 /// chain height near the ceremony's build — an escrow minted minutes ago
 /// needs minutes of chain, not the wallet's whole history.
+///
+/// **What arrived, not what remains.** The scan finds this escrow's outputs;
+/// it cannot tell whether they have since been spent, and that is not an
+/// omission to fix here. Deciding an output is spent means recognising its key
+/// image, and a multisig output's key image does not exist for any one party —
+/// it is assembled from the participants' partial images during signing. So a
+/// single party genuinely cannot answer the question from the chain alone.
+///
+/// What stands in for it is the ceremony's own stage: a device that co-signed
+/// a release knows the escrow is spent because it helped spend it, and stops
+/// asking. Anything reading this figure after a release, or with no ceremony
+/// state behind it, is reading history — `escrowtest` keeps no such state, so
+/// it will offer to spend an escrow that is already gone and find out from the
+/// relays. One did on 2026-08-23: proposed and co-signed cleanly, then every
+/// relay refused the finished transaction with no reason given, at a fee well
+/// above the minimum. Undiagnosed, and an already-spent escrow is the
+/// explanation that fits a scan which cannot see spends.
 #[uniffi::export]
 pub fn escrow_balance(
     keys: Vec<u8>,
