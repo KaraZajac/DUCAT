@@ -28,4 +28,6 @@
     <string name="notify_escrow_setup">%1$s emaneti hazırlıyor.</string>
     <string name="notify_escrow_settle">%1$s hesabı kapatmak istiyor.</string>
     <string name="notify_escrow_called_off">%1$s anlaşmayı iptal etti.</string>
+    <string name="notify_card_contested_title">O kod iki kez yanıtlandı</string>
+    <string name="notify_card_contested_body">İçine birden fazla yanıt yazıldı, bu yüzden hangisinin kastettiğiniz kişi olduğu bilinemez. Kimse eklenmedi. Yeniden denemek için yeni bir kod gösterin.</string>
 </resources>

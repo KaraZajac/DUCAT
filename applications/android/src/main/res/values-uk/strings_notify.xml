@@ -28,4 +28,6 @@
     <string name="notify_escrow_setup">%1$s налаштовує ескроу.</string>
     <string name="notify_escrow_settle">%1$s хоче розрахуватися.</string>
     <string name="notify_escrow_called_off">%1$s скасував угоду.</string>
+    <string name="notify_card_contested_title">На цей код відповіли двічі</string>
+    <string name="notify_card_contested_body">У нього записали більш ніж одну відповідь, тож неможливо визначити, яка з них від потрібної людини. Нікого не додано. Покажіть новий код, щоб спробувати ще раз.</string>
 </resources>

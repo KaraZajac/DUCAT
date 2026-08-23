@@ -28,4 +28,6 @@
     <string name="notify_escrow_setup">%1$s stelt de escrow in.</string>
     <string name="notify_escrow_settle">%1$s wil afrekenen.</string>
     <string name="notify_escrow_called_off">%1$s heeft het afgeblazen.</string>
+    <string name="notify_card_contested_title">Die code is twee keer beantwoord</string>
+    <string name="notify_card_contested_body">Er is meer dan één antwoord in geschreven, dus valt niet te zeggen welke van de bedoelde persoon kwam. Er is niemand toegevoegd. Laat een nieuwe code zien om het opnieuw te proberen.</string>
 </resources>

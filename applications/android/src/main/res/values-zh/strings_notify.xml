@@ -28,4 +28,6 @@
     <string name="notify_escrow_setup">%1$s 正在设置托管。</string>
     <string name="notify_escrow_settle">%1$s 想要结算。</string>
     <string name="notify_escrow_called_off">%1$s 取消了这笔交易。</string>
+    <string name="notify_card_contested_title">那个码被回应了两次</string>
+    <string name="notify_card_contested_body">上面被写入了不止一个回应，无法判断哪一个来自你要找的人。没有添加任何人。请出示一个新的码再试一次。</string>
 </resources>

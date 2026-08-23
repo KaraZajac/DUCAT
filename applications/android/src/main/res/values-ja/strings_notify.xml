@@ -28,4 +28,6 @@
     <string name="notify_escrow_setup">%1$s がエスクローを準備しています。</string>
     <string name="notify_escrow_settle">%1$s が精算を希望しています。</string>
     <string name="notify_escrow_called_off">%1$s が取引をやめました。</string>
+    <string name="notify_card_contested_title">そのコードに二重の返信がありました</string>
+    <string name="notify_card_contested_body">複数の返信が書き込まれたため、どれが目的の相手だったか判断できません。誰も追加されていません。新しいコードを表示してやり直してください。</string>
 </resources>

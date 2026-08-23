@@ -28,4 +28,6 @@
     <string name="notify_escrow_setup">%1$s está a preparar o depósito em garantia.</string>
     <string name="notify_escrow_settle">%1$s quer acertar contas.</string>
     <string name="notify_escrow_called_off">%1$s cancelou o acordo.</string>
+    <string name="notify_card_contested_title">Esse código foi respondido duas vezes</string>
+    <string name="notify_card_contested_body">Mais de uma resposta foi escrita nele, então não há como saber qual era a pessoa que você queria. Ninguém foi adicionado. Mostre um código novo para tentar de novo.</string>
 </resources>

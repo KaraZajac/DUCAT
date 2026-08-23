@@ -28,4 +28,6 @@
     <string name="notify_escrow_setup">%1$s prépare le séquestre.</string>
     <string name="notify_escrow_settle">%1$s veut solder.</string>
     <string name="notify_escrow_called_off">%1$s a annulé.</string>
+    <string name="notify_card_contested_title">Ce code a reçu deux réponses</string>
+    <string name="notify_card_contested_body">Plusieurs réponses y ont été écrites : impossible de savoir laquelle venait de la bonne personne. Personne n\'a été ajouté. Affichez un nouveau code pour réessayer.</string>
 </resources>

@@ -28,4 +28,6 @@
     <string name="notify_escrow_setup">%1$s در حال آماده‌سازی امانی است.</string>
     <string name="notify_escrow_settle">%1$s می‌خواهد تسویه کند.</string>
     <string name="notify_escrow_called_off">%1$s معامله را لغو کرد.</string>
+    <string name="notify_card_contested_title">به آن کد دو بار پاسخ داده شد</string>
+    <string name="notify_card_contested_body">بیش از یک پاسخ در آن نوشته شد، پس نمی‌توان گفت کدام‌یک از شخص موردنظر شما بود. کسی افزوده نشد. برای تلاش دوباره یک کد تازه نشان دهید.</string>
 </resources>

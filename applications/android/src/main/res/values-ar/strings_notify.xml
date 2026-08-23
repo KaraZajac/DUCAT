@@ -28,4 +28,6 @@
     <string name="notify_escrow_setup">%1$s يجهّز الضمان.</string>
     <string name="notify_escrow_settle">%1$s يريد التسوية.</string>
     <string name="notify_escrow_called_off">%1$s ألغى الاتفاق.</string>
+    <string name="notify_card_contested_title">رُدَّ على ذلك الرمز مرتين</string>
+    <string name="notify_card_contested_body">كُتب فيه أكثر من ردّ، فلا سبيل لمعرفة أيّها من الشخص الذي قصدته. لم يُضَف أحد. اعرض رمزًا جديدًا للمحاولة مرة أخرى.</string>
 </resources>

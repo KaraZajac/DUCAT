@@ -28,4 +28,6 @@
     <string name="notify_escrow_setup">%1$s przygotowuje depozyt.</string>
     <string name="notify_escrow_settle">%1$s chce się rozliczyć.</string>
     <string name="notify_escrow_called_off">%1$s odwołał transakcję.</string>
+    <string name="notify_card_contested_title">Ten kod otrzymał dwie odpowiedzi</string>
+    <string name="notify_card_contested_body">Zapisano w nim więcej niż jedną odpowiedź, więc nie sposób stwierdzić, która pochodziła od właściwej osoby. Nikogo nie dodano. Pokaż nowy kod, aby spróbować ponownie.</string>
 </resources>
