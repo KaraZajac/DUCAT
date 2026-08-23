@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">Mở cài đặt sao lưu</string>
     <string name="main_recent">Gần đây</string>
     <string name="main_see_all">Xem tất cả</string>
-    <string name="main_sent">Đã gửi</string>
-    <string name="main_received">Đã nhận</string>
     <string name="main_card_link_title">Thêm liên hệ?</string>
     <string name="main_card_link_body">Liên kết này mở thẻ liên hệ của “%1$s”. Thêm chứ? Sau đó hai bên có thể nhắn tin và thanh toán cho nhau.</string>
     <string name="main_card_link_known">Bạn đã có liên hệ này với tên %1$s. Thông tin sẽ được cập nhật — nhưng địa chỉ thanh toán chưa đổi cho đến khi bạn đồng ý.</string>

@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">Yedekleme ayarlarını aç</string>
     <string name="main_recent">Son hareketler</string>
     <string name="main_see_all">Tümünü gör</string>
-    <string name="main_sent">Gönderildi</string>
-    <string name="main_received">Alındı</string>
     <string name="main_card_link_title">Kişi eklensin mi?</string>
     <string name="main_card_link_body">Bu bağlantı “%1$s” için bir kişi kartı açıyor. Eklensin mi? Sonrasında birbirinize yazabilir ve ödeme yapabilirsiniz.</string>
     <string name="main_card_link_known">Bu kişi zaten %1$s olarak kayıtlı. Bilgileri güncellenecek, ancak ödeme adresi siz onaylayana kadar değişmeyecek.</string>

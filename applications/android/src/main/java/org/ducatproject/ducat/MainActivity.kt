@@ -1118,8 +1118,12 @@ private fun HomeScreen(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        e.counterparty ?: androidx.compose.ui.res.stringResource(
-                            if (sent) R.string.main_sent else R.string.main_received),
+                        // The same sentence the Activity screen uses. This row
+                        // used to fall back to the bare word "Sent", which the
+                        // arrow beside it and the minus sign after it were
+                        // already saying — while dropping the one thing they
+                        // could not say, which is where the money went.
+                        org.ducatproject.ducat.ui.who(context, e),
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,

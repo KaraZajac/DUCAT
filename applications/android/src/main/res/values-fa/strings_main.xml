@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">باز کردن تنظیمات پشتیبان</string>
     <string name="main_recent">اخیر</string>
     <string name="main_see_all">دیدن همه</string>
-    <string name="main_sent">ارسالی</string>
-    <string name="main_received">دریافتی</string>
     <string name="main_card_link_title">مخاطب افزوده شود؟</string>
     <string name="main_card_link_body">این پیوند کارت مخاطبِ «%1$s» را باز می‌کند. افزوده شود؟ سپس می‌توانید پیام بدهید و به هم پرداخت کنید.</string>
     <string name="main_card_link_known">این مخاطب را از پیش با نام %1$s دارید. اطلاعاتش به‌روز می‌شود — اما نشانی پرداخت تا تأیید شما تغییر نمی‌کند.</string>

@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">Apri le impostazioni di backup</string>
     <string name="main_recent">Recenti</string>
     <string name="main_see_all">Vedi tutto</string>
-    <string name="main_sent">Inviato</string>
-    <string name="main_received">Ricevuto</string>
     <string name="main_card_link_title">Aggiungere un contatto?</string>
     <string name="main_card_link_body">Questo link apre una scheda di contatto per “%1$s”. Aggiungerla? Poi potrete scrivervi e pagarvi.</string>
     <string name="main_card_link_known">Hai già questo contatto come %1$s. I suoi dati verranno aggiornati, ma l\'indirizzo di pagamento non cambia finché non lo accetti.</string>

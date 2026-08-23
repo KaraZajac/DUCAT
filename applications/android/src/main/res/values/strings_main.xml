@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">Open backup settings</string>
     <string name="main_recent">Recent</string>
     <string name="main_see_all">See all</string>
-    <string name="main_sent">Sent</string>
-    <string name="main_received">Received</string>
     <string name="main_card_link_title">Add a contact?</string>
     <string name="main_card_link_body">This link opens a contact card for “%1$s”. Add them? You can message and pay each other afterwards.</string>
     <string name="main_card_link_known">You already have this contact as %1$s. Their details will be updated — but where they get paid will not change until you say so.</string>

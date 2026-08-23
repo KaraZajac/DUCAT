@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">Відкрити налаштування копій</string>
     <string name="main_recent">Останнє</string>
     <string name="main_see_all">Усе</string>
-    <string name="main_sent">Надіслано</string>
-    <string name="main_received">Отримано</string>
     <string name="main_card_link_title">Додати контакт?</string>
     <string name="main_card_link_body">Це посилання відкриває картку контакту «%1$s». Додати? Потім ви зможете листуватися й платити одне одному.</string>
     <string name="main_card_link_known">Цей контакт уже є у вас як %1$s. Дані оновляться, але адреса для оплати не зміниться, доки ви не підтвердите.</string>

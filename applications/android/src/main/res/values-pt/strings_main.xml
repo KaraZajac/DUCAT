@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">Abrir configurações de backup</string>
     <string name="main_recent">Recentes</string>
     <string name="main_see_all">Ver tudo</string>
-    <string name="main_sent">Enviado</string>
-    <string name="main_received">Recebido</string>
     <string name="main_card_link_title">Adicionar um contacto?</string>
     <string name="main_card_link_body">Este link abre um cartão de contacto de “%1$s”. Adicionar? Depois podem trocar mensagens e pagamentos.</string>
     <string name="main_card_link_known">Você já tem este contato como %1$s. Os dados serão atualizados — mas o endereço de pagamento só muda se você aprovar.</string>

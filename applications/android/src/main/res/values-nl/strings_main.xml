@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">Open back-upinstellingen</string>
     <string name="main_recent">Recent</string>
     <string name="main_see_all">Alles bekijken</string>
-    <string name="main_sent">Verstuurd</string>
-    <string name="main_received">Ontvangen</string>
     <string name="main_card_link_title">Contact toevoegen?</string>
     <string name="main_card_link_body">Deze link opent een contactkaart voor “%1$s”. Toevoegen? Daarna kunnen jullie elkaar berichten en betalen.</string>
     <string name="main_card_link_known">U heeft dit contact al als %1$s. De gegevens worden bijgewerkt, maar het betaaladres verandert pas als u akkoord gaat.</string>

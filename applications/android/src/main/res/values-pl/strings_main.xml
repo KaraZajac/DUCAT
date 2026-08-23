@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">Otwórz ustawienia kopii zapasowej</string>
     <string name="main_recent">Ostatnie</string>
     <string name="main_see_all">Zobacz wszystko</string>
-    <string name="main_sent">Wysłane</string>
-    <string name="main_received">Otrzymane</string>
     <string name="main_card_link_title">Dodać kontakt?</string>
     <string name="main_card_link_body">Ten link otwiera wizytówkę kontaktu „%1$s”. Dodać? Potem możecie do siebie pisać i płacić.</string>
     <string name="main_card_link_known">Masz już ten kontakt jako %1$s. Dane zostaną zaktualizowane, ale adres płatności nie zmieni się, dopóki tego nie zatwierdzisz.</string>

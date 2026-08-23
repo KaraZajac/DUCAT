@@ -295,7 +295,17 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
  * transaction (§16.13). Saying "unknown sender" is the honest result, and
  * inventing anything else would be inventing a counterparty.
  */
-private fun who(context: Context, e: Ledger.Event): String {
+/**
+ * What one movement of money should be called.
+ *
+ * Shared with the Home screen's Recent list, which used to answer this
+ * question itself and answer it worse: `counterparty ?: "Sent"/"Received"`,
+ * so an escrow deposit read as a bare "Sent" — the very thing the escrow
+ * branch below exists to prevent — and a payment to a pasted address lost the
+ * address. Both surfaces name a movement the same way now, which is also one
+ * fewer place for the next rule to be added to only once.
+ */
+internal fun who(context: Context, e: Ledger.Event): String {
     val sent = e.direction == Ledger.Direction.Sent
     // An escrow first, because it explains the movement in a way no address
     // and no absent sender can: money going into one has not been spent, and

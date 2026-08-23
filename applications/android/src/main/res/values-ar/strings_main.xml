@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">افتح إعدادات النسخ الاحتياطي</string>
     <string name="main_recent">الأخيرة</string>
     <string name="main_see_all">عرض الكل</string>
-    <string name="main_sent">مُرسَل</string>
-    <string name="main_received">مُستلَم</string>
     <string name="main_card_link_title">إضافة جهة اتصال؟</string>
     <string name="main_card_link_body">يفتح هذا الرابط بطاقة اتصال لـ«%1$s». هل تريد الإضافة؟ بعدها يمكنكما التراسل والدفع لبعضكما.</string>
     <string name="main_card_link_known">لديك هذه الجهة بالفعل باسم %1$s. سيتم تحديث بياناتها — لكن عنوان الدفع لن يتغير حتى توافق.</string>

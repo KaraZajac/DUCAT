@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Mode shells (Shells.kt): per-job scaffolds and the settled ledger -->
-    <string name="shells_title_pos">Point of Sale</string>
+    <string name="shells_title_pos">Point of sale</string>
     <string name="shells_tab_register">Register</string>
     <string name="shells_tab_sales">Sales</string>
-    <string name="shells_title_bar_tab">Bar Tab</string>
+    <string name="shells_title_bar_tab">Bar tab</string>
     <string name="shells_tab_tabs">Tabs</string>
     <string name="shells_tab_closed">Closed</string>
     <string name="shells_title_taxi">Taxi</string>

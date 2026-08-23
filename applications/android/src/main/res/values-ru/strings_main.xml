@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">Открыть настройки резервной копии</string>
     <string name="main_recent">Недавнее</string>
     <string name="main_see_all">Все</string>
-    <string name="main_sent">Отправлено</string>
-    <string name="main_received">Получено</string>
     <string name="main_card_link_title">Добавить контакт?</string>
     <string name="main_card_link_body">Эта ссылка открывает карточку контакта «%1$s». Добавить? Потом вы сможете переписываться и платить друг другу.</string>
     <string name="main_card_link_known">Этот контакт уже есть у вас как %1$s. Данные обновятся, но адрес для оплаты не изменится, пока вы не подтвердите.</string>

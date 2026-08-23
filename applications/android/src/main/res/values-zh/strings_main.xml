@@ -10,8 +10,6 @@
     <string name="main_open_backup_settings">打开备份设置</string>
     <string name="main_recent">最近</string>
     <string name="main_see_all">查看全部</string>
-    <string name="main_sent">已发送</string>
-    <string name="main_received">已收到</string>
     <string name="main_card_link_title">添加联系人？</string>
     <string name="main_card_link_body">此链接是“%1$s”的联系人名片。要添加吗？添加后你们可以互发消息和付款。</string>
     <string name="main_card_link_known">你已有这位联系人，名为 %1$s。其资料会更新，但收款地址在你确认之前不会改变。</string>
