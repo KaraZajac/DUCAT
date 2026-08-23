@@ -97,12 +97,26 @@ fun main() {
 
     // The writes themselves must succeed — that is the premise, and a test
     // that quietly failed to write would prove nothing at all.
-    val placed = listOf(
-        Triple(liftBoard, lifted, "lifted to another slot"),
-        Triple(editBoard, editedSlot, "edited in place"),
-        Triple(stripBoard, strippedSlot, "stripped of its seal"),
+    // The bytes as well as the address, because this board is *live*. The
+    // owner is filling its own ladder while this runs, and a slot chosen as
+    // free can hold a genuine notice by the time it is read back — which then
+    // decodes correctly, because it is genuine. Comparing the bytes is what
+    // tells "our forgery was accepted" from "somebody else's real notice
+    // landed here", and without it this test reports the second as the first.
+    // Seen 2026-08-23: it failed on a listing called "Bicycle, barely ridden"
+    // that the owner had just posted to the slot the lift went into.
+    data class Doctored(
+        val board: String,
+        val slot: UInt,
+        val what: String,
+        val bytes: ByteArray,
     )
-    for ((brd, slot, what) in placed) {
+    val placed = listOf(
+        Doctored(liftBoard, lifted, "lifted to another slot", real),
+        Doctored(editBoard, editedSlot, "edited in place", edited),
+        Doctored(stripBoard, strippedSlot, "stripped of its seal", stripped),
+    )
+    for ((brd, slot, what, _) in placed) {
         check(standRead(brd).any { it.subkey == slot }) {
             "ATTACK_FAIL the notice $what never landed — the test proved nothing"
         }
@@ -110,13 +124,26 @@ fun main() {
     println("ATTACK all three are on the board (as they must be — the write key is public)")
 
     // Now the only question that matters: does a reader show them?
-    for ((brd, slot, what) in placed) {
+    var judged = 0
+    for ((brd, slot, what, wrote) in placed) {
         val data = standRead(brd).first { it.subkey == slot }.data
+        if (!data.contentEquals(wrote)) {
+            // Not our bytes any more. Says nothing either way, and saying
+            // nothing is the honest answer — the alternative is a security
+            // test that cries wolf at the owner doing its job.
+            println("ATTACK --   $what: slot $slot was overwritten by another writer, not judged")
+            continue
+        }
         val got = runCatching { rentalDecode(data, brd, slot) }
         check(got.isFailure) {
             "ATTACK_FAIL a notice $what was accepted at slot $slot: ${got.getOrNull()?.title}"
         }
         println("ATTACK ok   refused: $what")
+        judged++
+    }
+    check(judged > 0) {
+        "ATTACK_FAIL every doctored notice was overwritten before it could be judged — " +
+            "run this against a settled owner, or the test proves nothing"
     }
 
     // And the genuine one still reads, so the refusals above are the check
