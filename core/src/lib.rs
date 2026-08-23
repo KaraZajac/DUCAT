@@ -19,6 +19,7 @@ pub mod negotiate;
 pub mod reject;
 pub mod sig;
 pub mod state;
+pub mod board;
 pub mod wire;
 pub mod transport;
 pub mod verify;

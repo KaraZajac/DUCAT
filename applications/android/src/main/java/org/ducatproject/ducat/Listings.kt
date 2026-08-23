@@ -185,6 +185,9 @@ object Listings {
         val vehicle = kind == KIND_VEHICLE
         val place = kind == KIND_PLACE
         return uniffi.ducat_mobile.RentalInfo(
+            // Derived by the encoder from the listing's own signing key; a
+            // value set here would be a claim rather than a fact.
+            poster = "",
             card = card,
             kind = kind.toULong(),
             title = o.optString("title"),
@@ -270,8 +273,19 @@ object Listings {
         val card = Mailbox.issueCard(
             context, MyProfile(context).name(), TTL_SECONDS.toULong(), purpose = "rental",
         )
-        val bytes = uniffi.ducat_mobile.rentalEncode(publicNotice(o, card.uri))
+        val notice = publicNotice(o, card.uri)
+        val persona = PersonaStore(context).secret()
         val now = System.currentTimeMillis() / 1000
+
+        // A notice is signed for the slot it goes into and carries the proof of
+        // work for that slot, so the bytes cannot be built until the slot is
+        // chosen — and have to be rebuilt for the next candidate if a slot is
+        // lost to a race. That is the shape the defence requires: bytes that
+        // were good for any slot could be sprayed across all of them.
+        //
+        // Seconds of hashing, on the poll thread. See board.rs.
+        fun seal(board: String, slot: UInt): ByteArray =
+            uniffi.ducat_mobile.rentalEncode(notice, persona, id, board, slot)
 
         // §15.12's overflow ladder, which listings need far more than hails
         // do: a hail is one person for ten minutes, but a five-kilometre
@@ -289,7 +303,7 @@ object Listings {
         if (existing != null && existingSlot != null) {
             // Refreshing in place: keep the tenancy rather than taking a
             // second slot and leaving the first to expire as a ghost.
-            if (runCatching { uniffi.ducat_mobile.standPost(existing, existingSlot, bytes) }
+            if (runCatching { uniffi.ducat_mobile.standPost(existing, existingSlot, seal(existing, existingSlot)) }
                     .isSuccess
             ) {
                 placed = existing to existingSlot
@@ -301,7 +315,8 @@ object Listings {
                 val taken = runCatching { uniffi.ducat_mobile.standRead(name) }
                     .getOrDefault(emptyList())
                     .mapNotNull { n ->
-                        runCatching { uniffi.ducat_mobile.rentalDecode(n.data) }.getOrNull()
+                        runCatching { uniffi.ducat_mobile.rentalDecode(n.data, name, n.subkey) }
+                            .getOrNull()
                             ?.takeIf { it.expiry.toLong() > now }?.let { n.subkey }
                     }.toSet()
                 for (free in 0u..7u) {
@@ -309,7 +324,9 @@ object Listings {
                     // standPost verifies its own landing, so a slot two
                     // writers raced for is a throw here rather than a notice
                     // that quietly vanished under someone else's.
-                    if (runCatching { uniffi.ducat_mobile.standPost(name, free, bytes) }.isSuccess) {
+                    if (runCatching { uniffi.ducat_mobile.standPost(name, free, seal(name, free)) }
+                            .isSuccess
+                    ) {
                         placed = name to free
                         break@ladder
                     }
@@ -649,7 +666,12 @@ object Listings {
         val now = System.currentTimeMillis() / 1000
         val raw = runCatching { uniffi.ducat_mobile.standRead(name) }.getOrNull() ?: return null
         onSlots(raw.size)
-        return raw.mapNotNull { runCatching { uniffi.ducat_mobile.rentalDecode(it.data) }.getOrNull() }
+        return raw.mapNotNull {
+            // The slot is inside the signature, so it is an argument here and
+            // not a detail: a notice that verifies for slot 3 is refused at
+            // slot 4, which is what stops one signed listing papering a cell.
+            runCatching { uniffi.ducat_mobile.rentalDecode(it.data, name, it.subkey) }.getOrNull()
+        }
             // A reader MUST drop an expired listing unrendered (§16.18).
             .filter { it.expiry.toLong() > now }
             .filter { kind == null || it.kind.toInt() == kind }

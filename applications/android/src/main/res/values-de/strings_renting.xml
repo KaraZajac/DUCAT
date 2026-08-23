@@ -105,4 +105,5 @@
     <string name="rent_find_gear">Ausrüstung finden</string>
     <string name="rent_find_sale">Etwas zum Kaufen finden</string>
     <string name="rent_find_skill">Hilfe finden</string>
+    <string name="rent_poster_known">hier bekannt</string>
 </resources>

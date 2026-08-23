@@ -442,7 +442,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "object.roundtrip", "escrow.ceremony", "escrow.ready", "escrow.release",
         "bond.check", "slash.check",
         "contact.card", "contact.details", "log.head", "log.ring", "stand.shard", "message.chain",
-        "message.payment", "hail.notice", "rental.listing",
+        "message.payment", "hail.notice", "rental.listing", "board.sealed",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -589,6 +589,42 @@ fn contact_vectors_pass() {
                             hexs(&n.to_value().encode()),
                             c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"
                         );
+                    }
+                    Err(e) => {
+                        assert!(!ok, "{name}: refused a notice the vector accepts: {e:?}");
+                        assert_eq!(
+                            format!("{:?}", e.code).to_uppercase(),
+                            c["expect"]["reject"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                }
+            }
+            // §16.18 + board.rs: the sealed form, which is what is actually on
+            // a board. The notice inside is checked by the cases above; what
+            // this pins is the seal — the poster key, a signature over the
+            // notice *and the slot*, and a nonce doing board::POW_BITS of work.
+            "board.sealed" => {
+                let bytes = unhex(c["sealed_hex"].as_str().unwrap());
+                let board = c["board"].as_str().unwrap();
+                let subkey = c["subkey"].as_u64().unwrap() as u32;
+                let got = ducat_core::board::open(
+                    decode(&bytes).unwrap(),
+                    ducat_core::board::RENTAL,
+                    board,
+                    subkey,
+                );
+                let ok = c["expect"]["ok"].as_bool().unwrap_or(true);
+                match got {
+                    Ok((poster, inner)) => {
+                        assert!(ok, "{name}: opened a notice the vector refuses");
+                        assert_eq!(
+                            hexs(&poster),
+                            c["expect"]["poster_hex"].as_str().unwrap(), "{name}"
+                        );
+                        // And what is left is a listing this implementation
+                        // reads, so the seal and the notice really do compose.
+                        RentalNotice::from_value(inner)
+                            .unwrap_or_else(|e| panic!("{name}: inner listing refused: {e:?}"));
                     }
                     Err(e) => {
                         assert!(!ok, "{name}: refused a notice the vector accepts: {e:?}");

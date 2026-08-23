@@ -105,4 +105,5 @@
     <string name="rent_find_gear">找装备</string>
     <string name="rent_find_sale">找东西买</string>
     <string name="rent_find_skill">找人帮忙</string>
+    <string name="rent_poster_known">此处常见</string>
 </resources>

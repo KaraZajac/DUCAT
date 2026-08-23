@@ -65,6 +65,14 @@ pub enum ObjectType {
     SealedMessage,
     /// The head subkey of an outbox log (§16.12).
     LogHead,
+    /// A listing or a hail on a public board (§16.17, §16.18).
+    ///
+    /// The signature covers the notice *and the slot it sits in*, so a valid
+    /// one cannot be lifted onto another slot: a board's write key is public
+    /// by construction, and without the binding an attacker could scatter
+    /// somebody else's signed listing across every slot in a cell and have it
+    /// read as that person flooding the board.
+    BoardNotice,
 }
 
 impl ObjectType {
@@ -96,6 +104,7 @@ impl ObjectType {
             ObjectType::PreKeyBundle => b"PREKEY_BUNDLE",
             ObjectType::SealedMessage => b"SEALED_MESSAGE",
             ObjectType::LogHead => b"LOG_HEAD",
+            ObjectType::BoardNotice => b"BOARD_NOTICE",
         }
     }
 }
@@ -277,7 +286,19 @@ impl PublicKey {
         }
     }
 
-    fn verify_raw(
+    /// Verify a signature over bytes that are not a CBOR object.
+    ///
+    /// `pub(crate)`, and the narrowness is the point. Everything that signs a
+    /// protocol *object* goes through [`SignedBytes::verify`], which can only
+    /// be handed the bytes as received — that is what stops a caller verifying
+    /// a signature against their own re-encoding of something.
+    ///
+    /// board.rs is the one caller that cannot use it: a board notice's
+    /// signature covers the slot as well as the notice, so what is signed is
+    /// `board ‖ subkey ‖ body` rather than any single encoded value. It argues
+    /// its own case for re-encoding there, and cbor.rs refusing non-canonical
+    /// input is what makes that argument hold.
+    pub(crate) fn verify_raw(
         &self,
         object_type: ObjectType,
         canonical_bytes: &[u8],

@@ -992,9 +992,9 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_geohashneighbors(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_hail_decode(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_hail_decode(`bytes`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_hail_encode(`info`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_hail_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`hailId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_haversinem(`lat1E7`: Long,`lon1E7`: Long,`lat2E7`: Long,`lon2E7`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
@@ -1098,9 +1098,9 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_reconcile_float(`maxExposurePxmr`: Long,`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_rental_decode(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_rental_decode(`bytes`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1551,10 +1551,10 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_geohashneighbors() != 18841.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_hail_decode() != 8878.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_hail_decode() != 60011.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_hail_encode() != 59791.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_hail_encode() != 47667.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_haversinem() != 44993.toShort()) {
@@ -1710,10 +1710,10 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_reconcile_float() != 35020.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_rental_decode() != 11946.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_rental_decode() != 15632.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 61333.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 40307.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 2433.toShort()) {
@@ -2626,6 +2626,15 @@ public object FfiConverterTypeFrostProposal: FfiConverterRustBuffer<FrostProposa
  * A hail notice (§16.17), for the app's rider and driver screens.
  */
 data class HailInfo (
+    /**
+     * Who wrote this notice, hex, as verified on the way in.
+     *
+     * Not the poster's persona — a per-listing key (see `board::listing_seed`),
+     * so it is the same across that listing's refreshes and says nothing about
+     * who they are anywhere else. Empty on the way *out*: the encoder derives
+     * it, and a caller setting it would be claiming something.
+     */
+    var `poster`: kotlin.String, 
     var `card`: kotlin.String, 
     var `dest`: kotlin.String, 
     var `farePxmr`: kotlin.ULong?, 
@@ -2645,6 +2654,7 @@ public object FfiConverterTypeHailInfo: FfiConverterRustBuffer<HailInfo> {
         return HailInfo(
             FfiConverterString.read(buf),
             FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -2653,6 +2663,7 @@ public object FfiConverterTypeHailInfo: FfiConverterRustBuffer<HailInfo> {
     }
 
     override fun allocationSize(value: HailInfo) = (
+            FfiConverterString.allocationSize(value.`poster`) +
             FfiConverterString.allocationSize(value.`card`) +
             FfiConverterString.allocationSize(value.`dest`) +
             FfiConverterOptionalULong.allocationSize(value.`farePxmr`) +
@@ -2662,6 +2673,7 @@ public object FfiConverterTypeHailInfo: FfiConverterRustBuffer<HailInfo> {
     )
 
     override fun write(value: HailInfo, buf: ByteBuffer) {
+            FfiConverterString.write(value.`poster`, buf)
             FfiConverterString.write(value.`card`, buf)
             FfiConverterString.write(value.`dest`, buf)
             FfiConverterOptionalULong.write(value.`farePxmr`, buf)
@@ -3673,6 +3685,15 @@ public object FfiConverterTypeReconciliation: FfiConverterRustBuffer<Reconciliat
  * because everything in it goes on a board a stranger can read.
  */
 data class RentalInfo (
+    /**
+     * Who wrote this notice, hex, as verified on the way in.
+     *
+     * Not the poster's persona — a per-listing key (see `board::listing_seed`),
+     * so it is the same across that listing's refreshes and says nothing about
+     * who they are anywhere else. Empty on the way *out*: the encoder derives
+     * it, and a caller setting it would be claiming something.
+     */
+    var `poster`: kotlin.String, 
     var `card`: kotlin.String, 
     /**
      * 1 = a place to stay, 2 = a vehicle.
@@ -3709,6 +3730,7 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
     override fun read(buf: ByteBuffer): RentalInfo {
         return RentalInfo(
             FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterString.read(buf),
             FfiConverterString.read(buf),
@@ -3733,6 +3755,7 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
     }
 
     override fun allocationSize(value: RentalInfo) = (
+            FfiConverterString.allocationSize(value.`poster`) +
             FfiConverterString.allocationSize(value.`card`) +
             FfiConverterULong.allocationSize(value.`kind`) +
             FfiConverterString.allocationSize(value.`title`) +
@@ -3757,6 +3780,7 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
     )
 
     override fun write(value: RentalInfo, buf: ByteBuffer) {
+            FfiConverterString.write(value.`poster`, buf)
             FfiConverterString.write(value.`card`, buf)
             FfiConverterULong.write(value.`kind`, buf)
             FfiConverterString.write(value.`title`, buf)
@@ -6101,21 +6125,27 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     }
     
 
-    @Throws(ContactException::class) fun `hailDecode`(`bytes`: kotlin.ByteArray): HailInfo {
+        /**
+         * The hail's half of the same thing — see [`rental_decode`].
+         */
+    @Throws(ContactException::class) fun `hailDecode`(`bytes`: kotlin.ByteArray, `board`: kotlin.String, `subkey`: kotlin.UInt): HailInfo {
             return FfiConverterTypeHailInfo.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_hail_decode(
-        FfiConverterByteArray.lower(`bytes`),_status)
+        FfiConverterByteArray.lower(`bytes`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),_status)
 }
     )
     }
     
 
-    @Throws(ContactException::class) fun `hailEncode`(`info`: HailInfo): kotlin.ByteArray {
+        /**
+         * The hail's half of the same thing — see [`rental_encode`].
+         */
+    @Throws(ContactException::class) fun `hailEncode`(`info`: HailInfo, `personaSecret`: kotlin.ByteArray, `hailId`: kotlin.String, `board`: kotlin.String, `subkey`: kotlin.UInt): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_hail_encode(
-        FfiConverterTypeHailInfo.lower(`info`),_status)
+        FfiConverterTypeHailInfo.lower(`info`),FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`hailId`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),_status)
 }
     )
     }
@@ -6943,21 +6973,41 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     }
     
 
-    @Throws(ContactException::class) fun `rentalDecode`(`bytes`: kotlin.ByteArray): RentalInfo {
+        /**
+         * Read a listing off a board, refusing anything unsigned, mis-signed, signed
+         * for a different slot, or unpaid for.
+         *
+         * The slot has to be passed in because it is inside the signature: a board's
+         * write key is public, so without that binding a valid notice could be lifted
+         * onto every other slot in the cell.
+         */
+    @Throws(ContactException::class) fun `rentalDecode`(`bytes`: kotlin.ByteArray, `board`: kotlin.String, `subkey`: kotlin.UInt): RentalInfo {
             return FfiConverterTypeRentalInfo.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_rental_decode(
-        FfiConverterByteArray.lower(`bytes`),_status)
+        FfiConverterByteArray.lower(`bytes`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),_status)
 }
     )
     }
     
 
-    @Throws(ContactException::class) fun `rentalEncode`(`info`: RentalInfo): kotlin.ByteArray {
+        /**
+         * Encode a listing, signed for one slot and with the work done for it.
+         *
+         * `listing_id` is the poster's own local id for the listing, and it is what
+         * makes the signing key stable across that listing's refreshes without tying
+         * it to the persona — see `board::listing_seed`. `board` and `subkey` are the
+         * slot the notice is going into, and they are inside the signature, so this
+         * has to be called once the slot is chosen rather than once per listing.
+         *
+         * Blocking for a second or so: that is the proof of work, and it is the
+         * point. Call it off the main thread.
+         */
+    @Throws(ContactException::class) fun `rentalEncode`(`info`: RentalInfo, `personaSecret`: kotlin.ByteArray, `listingId`: kotlin.String, `board`: kotlin.String, `subkey`: kotlin.UInt): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_rental_encode(
-        FfiConverterTypeRentalInfo.lower(`info`),_status)
+        FfiConverterTypeRentalInfo.lower(`info`),FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`listingId`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),_status)
 }
     )
     }

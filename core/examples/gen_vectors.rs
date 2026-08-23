@@ -929,7 +929,9 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
         }
         "backup" => ("backup", "backup.import"),
         "contact" => {
-            if obj.contains_key("messages_hex") {
+            if obj.contains_key("sealed_hex") {
+                ("contact", "board.sealed")
+            } else if obj.contains_key("messages_hex") {
                 ("contact", "message.chain")
             } else if obj.contains_key("details_hex") {
                 ("contact", "contact.details")
@@ -1702,6 +1704,17 @@ fn contact_cases() -> Vec<J> {
             "expect": { "ok": false, "reject": "MALFORMED", "hint": "attachment fields travel together" } }));
     }
 
+    // §16.18: the verifying key a sealed notice carries, for the vector's
+    // expectation. Pulled back out rather than recomputed, so the vector
+    // asserts what the sealer actually wrote.
+    fn sealed_poster(v: &ducat_core::cbor::Value) -> Vec<u8> {
+        let ducat_core::cbor::Value::Map(m) = v else { unreachable!() };
+        match m.get(&ducat_core::wire::f::RN_POSTER) {
+            Some(ducat_core::cbor::Value::Bytes(b)) => b.clone(),
+            _ => unreachable!("a sealed notice carries its poster"),
+        }
+    }
+
     // §16.17: the hail notice, the one object that lives on a public board.
     {
         let mut ncase = |name: &str, why: &str, n: &HailNotice, bad: Option<(RejectCode, &str)>| {
@@ -1714,7 +1727,7 @@ fn contact_cases() -> Vec<J> {
             });
         };
         let base = HailNotice {
-            version: 1,
+            version: 2,
             card: "ducat:2m1CQVCAiPjIfW5EX7ja1i8dRAsCLZ3nSCEgKHZBHZY".into(),
             dest: "airport, terminal B".into(),
             fare_pxmr: Some(5_000_000_000),
@@ -1746,7 +1759,7 @@ fn contact_cases() -> Vec<J> {
             Some((RejectCode::Malformed, "text too long")));
         ncase("hail_wrong_version",
             "A version this reader does not speak, refused rather than guessed at.",
-            &HailNotice { version: 2, ..base.clone() },
+            &HailNotice { version: 1, ..base.clone() },
             Some((RejectCode::Malformed, "unknown version")));
         // §15.12's geocells: coarse place on the board, capped by construction.
         ncase("hail_with_geocells",
@@ -1782,7 +1795,7 @@ fn contact_cases() -> Vec<J> {
             });
         };
         let car = RentalNotice {
-            version: 1,
+            version: 2,
             card: "ducat:2m1CQVCAiPjIfW5EX7ja1i8dRAsCLZ3nSCEgKHZBHZY".into(),
             kind: 2,
             title: "2019 Corolla, automatic".into(),
@@ -1869,6 +1882,35 @@ fn contact_cases() -> Vec<J> {
         lcase("listing_no_deposit",
             "A stake of zero is legitimate: the floor rule (§15.12) zeroes a stake worth less than the fee to return it, and an owner may simply not ask for one.",
             &RentalNotice { deposit_pxmr: 0, ..room.clone() }, None);
+
+        // §16.18 + board.rs: the sealed form, which is what actually goes on a
+        // board. Everything above is the notice *inside* the seal; another
+        // implementation needs this to know how the two fit together.
+        //
+        // Deterministic in every part: Ed25519 signs deterministically, and
+        // the nonce search starts at zero and walks up, so the same inputs
+        // give the same bytes on any machine. Which is what makes it a vector.
+        {
+            let seed = ducat_core::board::listing_seed(b"vector-persona", "listing-1");
+            let board = "geo:u33db";
+            let subkey = 3u32;
+            let ducat_core::cbor::Value::Map(m) = room.to_value() else { unreachable!() };
+            let sealed = ducat_core::board::seal(
+                m, ducat_core::board::RENTAL, &seed, board, subkey,
+            );
+            let sealed_hex = hex(&sealed.encode());
+            v.push(json!({ "name": "listing_sealed",
+                "why": "What a listing looks like on the board: the notice, the listing's own verifying key, a signature over the notice *and the slot*, and a nonce whose SHA-256 shows board::POW_BITS leading zero bits. A board's write key is the cell name hashed, so anyone can write any slot — the signature says who wrote the bytes and the work says it was not free.",
+                "sealed_hex": sealed_hex,
+                "board": board, "subkey": subkey,
+                "expect": { "ok": true, "poster_hex": hex(&sealed_poster(&sealed)) } }));
+            v.push(json!({ "name": "listing_sealed_wrong_slot",
+                "why": "The same bytes offered as slot 4. The slot is inside the signature, so a valid notice cannot be lifted onto another one — without which an attacker holding the public write key could paper a whole cell with somebody else's signed listing.",
+                "sealed_hex": sealed_hex,
+                "board": board, "subkey": subkey + 1,
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "signed for another slot" } }));
+        }
+
     }
 
     v

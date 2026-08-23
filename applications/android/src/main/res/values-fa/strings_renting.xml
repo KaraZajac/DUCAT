@@ -105,4 +105,5 @@
     <string name="rent_find_gear">دنبال وسیله بگرد</string>
     <string name="rent_find_sale">دنبال چیزی برای خرید بگرد</string>
     <string name="rent_find_skill">دنبال کمک بگرد</string>
+    <string name="rent_poster_known">شناخته‌شده</string>
 </resources>

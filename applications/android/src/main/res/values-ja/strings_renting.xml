@@ -105,4 +105,5 @@
     <string name="rent_find_gear">道具を探す</string>
     <string name="rent_find_sale">買えるものを探す</string>
     <string name="rent_find_skill">手を借りる</string>
+    <string name="rent_poster_known">以前から</string>
 </resources>

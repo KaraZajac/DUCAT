@@ -105,4 +105,5 @@
     <string name="rent_find_gear">Cari perlengkapan</string>
     <string name="rent_find_sale">Cari barang untuk dibeli</string>
     <string name="rent_find_skill">Cari bantuan</string>
+    <string name="rent_poster_known">sudah dikenal</string>
 </resources>

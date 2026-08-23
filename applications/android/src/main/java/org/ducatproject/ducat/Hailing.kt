@@ -76,16 +76,23 @@ object Hailing {
             context, MyProfile(context).name(), (ttlSecs * 2).toULong(), purpose = "hail",
         )
         val expiry = System.currentTimeMillis() / 1000 + ttlSecs
-        val bytes = uniffi.ducat_mobile.hailEncode(
-            uniffi.ducat_mobile.HailInfo(
-                card = card.uri,
-                dest = destText,
-                farePxmr = farePxmr,
-                expiry = expiry.toULong(),
-                originCell = originCell,
-                destCell = destCell,
-            ),
+        val info = uniffi.ducat_mobile.HailInfo(
+            poster = "",
+            card = card.uri,
+            dest = destText,
+            farePxmr = farePxmr,
+            expiry = expiry.toULong(),
+            originCell = originCell,
+            destCell = destCell,
         )
+        val persona = PersonaStore(context).secret()
+        // The card's inbox key names this hail: unique to it, the same for the
+        // second pin on the containing cell (same author, correctly), and gone
+        // when the hail is. The notice is signed for the slot it goes into, so
+        // the bytes are built per candidate rather than once — see board.rs.
+        fun seal(board: String, slot: UInt): ByteArray =
+            uniffi.ducat_mobile.hailEncode(info, persona, card.inboxKey, board, slot)
+        var bytes: ByteArray = ByteArray(0)
         // §15.12's overflow ladder, with a read-back: two riders can race for
         // the same free slot and the DHT keeps whoever wrote last, silently.
         // Only a slot that reads back holding our card counts as placed; a
@@ -98,7 +105,7 @@ object Hailing {
             val name = uniffi.ducat_mobile.standShardName(base, shard)
             val nowS = System.currentTimeMillis() / 1000
             val taken = standRead(name).mapNotNull { n ->
-                runCatching { hailDecode(n.data) }.getOrNull()
+                runCatching { hailDecode(n.data, name, n.subkey) }.getOrNull()
                     ?.takeIf { it.expiry.toLong() > nowS }
                     ?.let { n.subkey }
             }.toSet()
@@ -108,7 +115,9 @@ object Hailing {
                 // standPost verifies its own landing (a refused or raced set
                 // throws); re-reading the network here raced its own
                 // propagation and read a nearly-empty cell as full.
-                if (runCatching { standPost(name, free, bytes) }.isSuccess) {
+                val sealed = runCatching { seal(name, free) }.getOrNull() ?: continue
+                if (runCatching { standPost(name, free, sealed) }.isSuccess) {
+                    bytes = sealed
                     placed = name to free
                     break@ladder
                 }
@@ -146,14 +155,28 @@ object Hailing {
     fun wideCopy(context: Context, s: Standing): Pair<String, UInt>? {
         if (!s.aloneHere || s.originCell.length != 6) return null
         val wide = "geo:${s.originCell.take(5)}"
+        // The same hail, signed again for where it is going. A notice is bound
+        // to its slot, so the first board's bytes are not valid on the second
+        // — which is the property that stops one signed hail being sprayed
+        // across a cell, and it applies to us as much as to anybody.
+        //
+        // Recovered by opening our own notice rather than threading the fields
+        // through Standing: it is the one place that already knows the bytes
+        // and the slot they were sealed for.
+        val info = runCatching { hailDecode(s.notice, s.board, s.subkey) }.getOrNull()
+            ?: return null
+        val persona = PersonaStore(context).secret()
         val second = runCatching {
             val busy = standRead(wide).mapNotNull { n ->
-                runCatching { hailDecode(n.data) }.getOrNull()
+                runCatching { hailDecode(n.data, wide, n.subkey) }.getOrNull()
                     ?.takeIf { it.expiry.toLong() > System.currentTimeMillis() / 1000 }
                     ?.let { n.subkey }
             }.toSet()
             (0u..7u).firstOrNull { it !in busy }?.let { s2 ->
-                standPost(wide, s2, s.notice)
+                standPost(
+                    wide, s2,
+                    uniffi.ducat_mobile.hailEncode(info, persona, s.inboxKey, wide, s2),
+                )
                 wide to s2
             }
         }.getOrNull() ?: return null
@@ -189,7 +212,7 @@ object Hailing {
         for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
             val name = uniffi.ducat_mobile.standShardName(cell, shard)
             val live = standRead(name).mapNotNull { n ->
-                runCatching { hailDecode(n.data) }.getOrNull()?.let { h ->
+                runCatching { hailDecode(n.data, name, n.subkey) }.getOrNull()?.let { h ->
                     if (h.expiry.toLong() > nowSecs) {
                         Seen(
                             name, n.subkey, h.card, h.dest,

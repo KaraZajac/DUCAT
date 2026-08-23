@@ -243,6 +243,25 @@ pub mod f {
     /// Floor area in square metres. Refused on a vehicle.
     pub const RN_SIZE_M2: u64 = 241;
 
+    // What a notice on a public board costs and who wrote it (see board.rs).
+    // A stand's write key is the cell name hashed, so these do not make a slot
+    // anybody's property — they make authorship visible and flooding paid for.
+    /// The listing's own verifying key. Not the poster's persona: a board is
+    /// read by everyone, and a persona here would publish which persona posted
+    /// which listing to anybody browsing.
+    pub const RN_POSTER: u64 = 242;
+    /// Over the notice *and the slot*, so it cannot be lifted onto another.
+    pub const RN_SIG: u64 = 243;
+    /// The nonce that satisfies board::POW_BITS for this slot and these bytes.
+    pub const RN_POW: u64 = 244;
+
+    // The same three on a hail. Numbered out of the HN_ run because 210-217
+    // were taken by DET_/MSG_ before this existed; the ids only have to be
+    // unique within one object's map.
+    pub const HN_POSTER: u64 = 245;
+    pub const HN_SIG: u64 = 246;
+    pub const HN_POW: u64 = 247;
+
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;
     pub const PKB_ONETIME: u64 = 162;
@@ -459,6 +478,10 @@ pub(crate) fn type_code(t: ObjectType) -> u64 {
         ObjectType::PreKeyBundle => 24,
         ObjectType::SealedMessage => 25,
         ObjectType::LogHead => 26,
+        // Never rides the sealed envelope — a board notice carries its own
+        // signature field rather than being wrapped — but sig_input needs the
+        // type to exist, and an exhaustive match is how that stays true.
+        ObjectType::BoardNotice => 27,
     }
 }
 

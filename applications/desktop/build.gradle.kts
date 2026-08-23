@@ -38,6 +38,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Tabs.kt",
     "org/ducatproject/ducat/SecondOpinion.kt",
     "org/ducatproject/ducat/SafeImage.kt",
+    "org/ducatproject/ducat/Posters.kt",
     "org/ducatproject/ducat/ui/Qr.kt",
     "org/ducatproject/ducat/ui/Balance.kt",
     "org/ducatproject/ducat/ui/Monero.kt",
@@ -325,6 +326,14 @@ tasks.register<JavaExec>("smoke") {
 // StringSet) survives export/restore. `./gradlew :desktop:backuptest`.
 // Proves the escrow sweep takes what is over and leaves what is funded.
 // `./gradlew :desktop:escrowsweep`.
+// What a signature and a proof of work buy on a board nobody owns.
+// `./gradlew :desktop:boardnotice`.
+tasks.register<JavaExec>("boardnotice") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.BoardNoticeTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // What the shareable log is allowed to say. `./gradlew :desktop:redact`.
 tasks.register<JavaExec>("redact") {
     classpath = sourceSets["main"].runtimeClasspath

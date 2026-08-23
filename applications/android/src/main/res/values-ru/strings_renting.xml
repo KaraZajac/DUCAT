@@ -105,4 +105,5 @@
     <string name="rent_find_gear">Найти снаряжение</string>
     <string name="rent_find_sale">Найти что купить</string>
     <string name="rent_find_skill">Найти помощь</string>
+    <string name="rent_poster_known">здесь давно</string>
 </resources>

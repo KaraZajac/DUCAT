@@ -286,6 +286,11 @@ class Poller(private val context: Context) {
                 runCatching { Mailbox.sweepAttachments(context) }
                     .onFailure { DucatLog.w(TAG, "attachment sweep: ${it.message}") }
 
+                // Board authors whose listings are long gone. Kept forever it
+                // would be a record of everywhere this phone has browsed.
+                runCatching { Posters.sweep(context, System.currentTimeMillis()) }
+                    .onFailure { DucatLog.w(TAG, "poster sweep: ${it.message}") }
+
                 // One attachment per pass: pictures arrive shortly after
                 // their messages without ever starving the payment paths.
                 runCatching { Mailbox.fetchOneAttachment(context) }

@@ -165,9 +165,16 @@ fun main() {
 
         // The claim §16.18 makes about itself: the bytes on the board carry
         // nothing that would get a stranger to the door.
+        // Sealed for a slot, because a notice is signed for the one it goes
+        // into — any slot will do here, since what is being checked is what
+        // the bytes contain rather than where they land.
+        val persona = org.ducatproject.ducat.PersonaStore(context).secret()
         val onBoard = Listings.all(context).mapNotNull { o ->
             runCatching {
-                uniffi.ducat_mobile.rentalEncode(Listings.publicNotice(o, o.optString("card")))
+                uniffi.ducat_mobile.rentalEncode(
+                    Listings.publicNotice(o, o.optString("card")),
+                    persona, o.optString("id"), "geo:u33dc", 0u,
+                )
             }.getOrNull()
         }.joinToString("\n") { it.decodeToString() }
         check("the address is not in what goes on the board", !onBoard.contains("Rosenthaler"))

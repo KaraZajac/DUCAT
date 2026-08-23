@@ -1454,7 +1454,10 @@ impl HailNotice {
     pub fn from_value(v: Value) -> Result<Self, Reject> {
         let mut r = Reader::new(v)?;
         let version = r.uint(f::HN_VERSION)?;
-        if version != 1 {
+        // 2, not 1: a version-1 notice carries neither an author nor a proof
+        // of work, and there is no safe way to read one — accepting it would
+        // be the downgrade that makes both worthless. See board.rs.
+        if version != 2 {
             return Err(Reject::with_detail(RejectCode::Malformed, "unknown hail notice version"));
         }
         let card = r.opt_text(f::HN_CARD, MAX_HAIL_CARD_CHARS)?.ok_or_else(|| {
@@ -1644,7 +1647,8 @@ impl RentalNotice {
     pub fn from_value(v: Value) -> Result<Self, Reject> {
         let mut r = Reader::new(v)?;
         let version = r.uint(f::RN_VERSION)?;
-        if version != 1 {
+        // 2, not 1 — see the hail's note above, and board.rs.
+        if version != 2 {
             return Err(Reject::with_detail(
                 RejectCode::Malformed,
                 "unknown rental notice version",
@@ -1812,7 +1816,7 @@ mod rental_tests {
     /// cost no new field numbers.
     fn a_plain(kind: u64, subtype: Option<u64>) -> RentalNotice {
         RentalNotice {
-            version: 1,
+            version: 2,
             card: "ducat:card/abc".into(),
             kind,
             title: "A thing".into(),
@@ -1891,7 +1895,7 @@ mod rental_tests {
 
     fn a_car() -> RentalNotice {
         RentalNotice {
-            version: 1,
+            version: 2,
             card: "ducat:card/abc".into(),
             kind: RENTAL_VEHICLE,
             title: "2019 Corolla, automatic".into(),
@@ -1918,7 +1922,7 @@ mod rental_tests {
 
     fn a_room() -> RentalNotice {
         RentalNotice {
-            version: 1,
+            version: 2,
             card: "ducat:card/xyz".into(),
             kind: RENTAL_PLACE,
             title: "Sunny room near the park".into(),
@@ -2019,7 +2023,7 @@ mod hail_tests {
 
     fn ok_notice() -> HailNotice {
         HailNotice {
-            version: 1,
+            version: 2,
             card: "ducat:abc123".into(),
             dest: "terminal B".into(),
             fare_pxmr: Some(5_000_000_000),
@@ -2049,7 +2053,10 @@ mod hail_tests {
         bad.fare_pxmr = Some(0);
         assert!(HailNotice::from_value(bad.to_value()).is_err());
         let mut bad = ok_notice();
-        bad.version = 2;
+        bad.version = 1;
+        assert!(HailNotice::from_value(bad.to_value()).is_err());
+        let mut bad = ok_notice();
+        bad.version = 3;
         assert!(HailNotice::from_value(bad.to_value()).is_err());
         // "Quote me" — fare absent — is fine.
         let mut ok = ok_notice();

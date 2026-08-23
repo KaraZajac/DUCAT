@@ -118,7 +118,7 @@ private fun clearOwnSlot(board: String, subkey: UInt, myCardUri: String): Boolea
     return runCatching {
         val held = standRead(board).firstOrNull { it.subkey == subkey }
             ?: return@runCatching true
-        val notice = runCatching { hailDecode(held.data) }.getOrNull()
+        val notice = runCatching { hailDecode(held.data, board, subkey) }.getOrNull()
             ?: return@runCatching true
         if (notice.card != myCardUri) return@runCatching true
         standPost(board, subkey, ByteArray(0))
@@ -126,7 +126,7 @@ private fun clearOwnSlot(board: String, subkey: UInt, myCardUri: String): Boolea
         // primed by the reads above, but the network still referees) — only
         // an empty or foreign read-back counts as cleared.
         standRead(board).firstOrNull { it.subkey == subkey }
-            ?.let { runCatching { hailDecode(it.data) }.getOrNull()?.card != myCardUri }
+            ?.let { runCatching { hailDecode(it.data, board, subkey) }.getOrNull()?.card != myCardUri }
             ?: true
     }.getOrDefault(false)
 }
@@ -139,24 +139,32 @@ private fun clearOwnSlot(board: String, subkey: UInt, myCardUri: String): Boolea
  * race over either copy identically. Returns the new tenancy, or null when
  * nothing lower is free or the landing could not be confirmed.
  */
-private fun migrateDown(p: PostedHail): PostedHail? {
+private fun migrateDown(context: android.content.Context, p: PostedHail): PostedHail? {
     val base = p.cell.substringBeforeLast('-')
     val myShard = p.cell.substringAfterLast('-').toUIntOrNull() ?: return null
     val now = System.currentTimeMillis() / 1000
+    // A notice is signed for its slot, so moving one means signing it again
+    // for where it is going. Recovered by opening our own copy, which is the
+    // only thing here that knows both the bytes and the slot they were for.
+    val info = runCatching { hailDecode(p.notice, p.cell, p.subkey) }.getOrNull() ?: return null
+    val persona = org.ducatproject.ducat.PersonaStore(context).secret()
     return runCatching {
         for (shard in 0u until myShard) {
             val name = uniffi.ducat_mobile.standShardName(base, shard)
             val taken = standRead(name).mapNotNull { n ->
-                runCatching { hailDecode(n.data) }.getOrNull()
+                runCatching { hailDecode(n.data, name, n.subkey) }.getOrNull()
                     ?.takeIf { it.expiry.toLong() > now }
                     ?.let { n.subkey }
             }.toSet()
             val free = (0u..7u).firstOrNull { it !in taken } ?: continue
             // standPost verifies its own landing; a raced slot throws and the
             // walk simply keeps its current home this round.
-            if (runCatching { standPost(name, free, p.notice) }.isSuccess) {
+            val sealed = runCatching {
+                hailEncode(info, persona, p.inboxKey, name, free)
+            }.getOrNull() ?: continue
+            if (runCatching { standPost(name, free, sealed) }.isSuccess) {
                 clearOwnSlot(p.cell, p.subkey, p.card)
-                return@runCatching p.copy(cell = name, subkey = free)
+                return@runCatching p.copy(cell = name, subkey = free, notice = sealed)
             }
         }
         null
@@ -240,7 +248,7 @@ fun HailCard(
             // and an overflow shard is a worse address the moment a better
             // one opens. Every tenth tick, not every poll: two board reads.
             if (tick % 10 == 0 && p.cell.contains('-') && p.notice.isNotEmpty()) {
-                val moved = withContext(Dispatchers.IO) { migrateDown(p) }
+                val moved = withContext(Dispatchers.IO) { migrateDown(context, p) }
                 if (moved != null) {
                     RideStore(context).save(
                         RideStore.PostedRide(

@@ -105,4 +105,5 @@
     <string name="rent_find_gear">장비 찾기</string>
     <string name="rent_find_sale">살 물건 찾기</string>
     <string name="rent_find_skill">도움 찾기</string>
+    <string name="rent_poster_known">여기서 알려짐</string>
 </resources>

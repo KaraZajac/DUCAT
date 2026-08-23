@@ -105,4 +105,5 @@
     <string name="rent_find_gear">Ekipman bul</string>
     <string name="rent_find_sale">Alacak bir şey bul</string>
     <string name="rent_find_skill">Yardım bul</string>
+    <string name="rent_poster_known">burada tanıdık</string>
 </resources>

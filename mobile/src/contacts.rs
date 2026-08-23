@@ -918,6 +918,13 @@ fn random32() -> [u8; 32] {
 /// A hail notice (§16.17), for the app's rider and driver screens.
 #[derive(uniffi::Record)]
 pub struct HailInfo {
+    /// Who wrote this notice, hex, as verified on the way in.
+    ///
+    /// Not the poster's persona — a per-listing key (see `board::listing_seed`),
+    /// so it is the same across that listing's refreshes and says nothing about
+    /// who they are anywhere else. Empty on the way *out*: the encoder derives
+    /// it, and a caller setting it would be claiming something.
+    pub poster: String,
     pub card: String,
     pub dest: String,
     pub fare_pxmr: Option<u64>,
@@ -933,6 +940,13 @@ pub struct HailInfo {
 /// because everything in it goes on a board a stranger can read.
 #[derive(uniffi::Record)]
 pub struct RentalInfo {
+    /// Who wrote this notice, hex, as verified on the way in.
+    ///
+    /// Not the poster's persona — a per-listing key (see `board::listing_seed`),
+    /// so it is the same across that listing's refreshes and says nothing about
+    /// who they are anywhere else. Empty on the way *out*: the encoder derives
+    /// it, and a caller setting it would be claiming something.
+    pub poster: String,
     pub card: String,
     /// 1 = a place to stay, 2 = a vehicle.
     pub kind: u64,
@@ -959,6 +973,9 @@ pub struct RentalInfo {
 
 fn rental_from_core(n: ducat_core::contact::RentalNotice) -> RentalInfo {
     RentalInfo {
+        // Filled by rental_decode once it has verified one; the mapping from
+        // core knows nothing about who signed.
+        poster: String::new(),
         card: n.card, kind: n.kind, title: n.title, area: n.area, cell: n.cell,
         price_pxmr: n.price_pxmr, deposit_pxmr: n.deposit_pxmr, expiry: n.expiry,
         make: n.make, model: n.model, year: n.year, gearbox: n.gearbox,
@@ -968,10 +985,26 @@ fn rental_from_core(n: ducat_core::contact::RentalNotice) -> RentalInfo {
     }
 }
 
+/// Encode a listing, signed for one slot and with the work done for it.
+///
+/// `listing_id` is the poster's own local id for the listing, and it is what
+/// makes the signing key stable across that listing's refreshes without tying
+/// it to the persona — see `board::listing_seed`. `board` and `subkey` are the
+/// slot the notice is going into, and they are inside the signature, so this
+/// has to be called once the slot is chosen rather than once per listing.
+///
+/// Blocking for a second or so: that is the proof of work, and it is the
+/// point. Call it off the main thread.
 #[uniffi::export]
-pub fn rental_encode(info: RentalInfo) -> Result<Vec<u8>, ContactError> {
+pub fn rental_encode(
+    info: RentalInfo,
+    persona_secret: Vec<u8>,
+    listing_id: String,
+    board: String,
+    subkey: u32,
+) -> Result<Vec<u8>, ContactError> {
     let n = ducat_core::contact::RentalNotice {
-        version: 1,
+        version: 2,
         card: info.card, kind: info.kind, title: info.title, area: info.area,
         cell: info.cell, price_pxmr: info.price_pxmr,
         deposit_pxmr: info.deposit_pxmr, expiry: info.expiry,
@@ -981,25 +1014,53 @@ pub fn rental_encode(info: RentalInfo) -> Result<Vec<u8>, ContactError> {
         sleeps: info.sleeps, size_m2: info.size_m2,
         subtype: info.subtype, features: info.features,
     };
+    let ducat_core::cbor::Value::Map(m) = n.to_value() else { unreachable!() };
+    let seed = ducat_core::board::listing_seed(&persona_secret, &listing_id);
+    let sealed = ducat_core::board::seal(m, ducat_core::board::RENTAL, &seed, &board, subkey);
+    let bytes = sealed.encode();
     // Encode-then-decode, as the hail does: what goes onto a public board is
-    // only ever bytes this implementation would itself accept.
-    let bytes = n.to_value().encode();
-    ducat_core::contact::RentalNotice::from_value(decode(&bytes).map_err(refuse)?)
-        .map_err(refuse)?;
+    // only ever bytes this implementation would itself accept — which now
+    // includes the signature and the work verifying against this very slot.
+    rental_decode(bytes.clone(), board, subkey)?;
     Ok(bytes)
 }
 
+/// Read a listing off a board, refusing anything unsigned, mis-signed, signed
+/// for a different slot, or unpaid for.
+///
+/// The slot has to be passed in because it is inside the signature: a board's
+/// write key is public, so without that binding a valid notice could be lifted
+/// onto every other slot in the cell.
 #[uniffi::export]
-pub fn rental_decode(bytes: Vec<u8>) -> Result<RentalInfo, ContactError> {
-    let n = ducat_core::contact::RentalNotice::from_value(decode(&bytes).map_err(refuse)?)
-        .map_err(refuse)?;
-    Ok(rental_from_core(n))
+pub fn rental_decode(
+    bytes: Vec<u8>,
+    board: String,
+    subkey: u32,
+) -> Result<RentalInfo, ContactError> {
+    let (poster, inner) = ducat_core::board::open(
+        decode(&bytes).map_err(refuse)?,
+        ducat_core::board::RENTAL,
+        &board,
+        subkey,
+    )
+    .map_err(refuse)?;
+    let n = ducat_core::contact::RentalNotice::from_value(inner).map_err(refuse)?;
+    let mut info = rental_from_core(n);
+    info.poster = poster.iter().map(|b| format!("{b:02x}")).collect::<String>();
+    Ok(info)
 }
 
+/// The hail's half of the same thing — see [`rental_encode`].
 #[uniffi::export]
-pub fn hail_encode(info: HailInfo) -> Result<Vec<u8>, ContactError> {
+pub fn hail_encode(
+    info: HailInfo,
+    persona_secret: Vec<u8>,
+    hail_id: String,
+    board: String,
+    subkey: u32,
+) -> Result<Vec<u8>, ContactError> {
     let n = ducat_core::contact::HailNotice {
-        version: 1,
+        version: 2,
         card: info.card,
         dest: info.dest,
         fare_pxmr: info.fare_pxmr,
@@ -1007,21 +1068,33 @@ pub fn hail_encode(info: HailInfo) -> Result<Vec<u8>, ContactError> {
         origin_cell: info.origin_cell,
         dest_cell: info.dest_cell,
     };
+    let ducat_core::cbor::Value::Map(m) = n.to_value() else { unreachable!() };
+    let seed = ducat_core::board::listing_seed(&persona_secret, &hail_id);
+    let sealed = ducat_core::board::seal(m, ducat_core::board::HAIL, &seed, &board, subkey);
+    let bytes = sealed.encode();
     // Encode-then-decode: what goes onto a public board is only ever bytes
     // this implementation would itself accept.
-    let bytes = n.to_value().encode();
-    ducat_core::contact::HailNotice::from_value(
-        decode(&bytes).map_err(refuse)?,
-    ).map_err(refuse)?;
+    hail_decode(bytes.clone(), board, subkey)?;
     Ok(bytes)
 }
 
+/// The hail's half of the same thing — see [`rental_decode`].
 #[uniffi::export]
-pub fn hail_decode(bytes: Vec<u8>) -> Result<HailInfo, ContactError> {
-    let n = ducat_core::contact::HailNotice::from_value(
+pub fn hail_decode(
+    bytes: Vec<u8>,
+    board: String,
+    subkey: u32,
+) -> Result<HailInfo, ContactError> {
+    let (poster, inner) = ducat_core::board::open(
         decode(&bytes).map_err(refuse)?,
-    ).map_err(refuse)?;
+        ducat_core::board::HAIL,
+        &board,
+        subkey,
+    )
+    .map_err(refuse)?;
+    let n = ducat_core::contact::HailNotice::from_value(inner).map_err(refuse)?;
     Ok(HailInfo {
+        poster: poster.iter().map(|b| format!("{b:02x}")).collect::<String>(),
         card: n.card,
         dest: n.dest,
         fare_pxmr: n.fare_pxmr,

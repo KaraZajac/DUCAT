@@ -198,6 +198,16 @@ private fun RentSearchScreen(
                             // null: everything on the board, in one pass.
                             fix.first, fix.second, null,
                             onFound = { sofar ->
+                                // Every verified author gets a first-seen
+                                // date. Stamped when a listing is in front of
+                                // somebody, which is what "has been on this
+                                // board a while" has to mean — and only for
+                                // notices that verified, since an unsigned one
+                                // never gets this far.
+                                val at = System.currentTimeMillis()
+                                sofar.forEach {
+                                    org.ducatproject.ducat.Posters.seen(context, it.poster, at)
+                                }
                                 // Each board that answers updates the list, so
                                 // what is nearby appears while the ring is
                                 // still being read (an empty board can take a
@@ -603,6 +613,9 @@ internal fun ListingCardsPreview() {
             val (subtype, features) = extra
             ListingCard(
                 info = RentalInfo(
+                    // A preview, so an author nobody has seen before — which
+                    // is exactly what these cards would say on a real board.
+                    poster = "",
                     card = "ducat:card/x", kind = kind.toULong(), title = title,
                     area = "north side", cell = "u33dc", pricePxmr = price.toULong(),
                     // From the kind's own deal, like a real notice. Every card
@@ -641,7 +654,32 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                 // Off a public board, so written by whoever posted it. The
                 // wire refuses the overrides; strong right-to-left text is
                 // honest and still has to be kept inside its own line.
-                Text(isolate(info.title), style = MaterialTheme.typography.titleSmall)
+                Text(
+                    isolate(info.title),
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                // How long this listing's author has been on this phone's
+                // boards. Nobody owns a board slot, so a copied listing with a
+                // swapped card is indistinguishable by content — the author is
+                // the only difference there is, and a substitution shows up as
+                // one that turned up today.
+                //
+                // Said only when it is the reassuring direction. A "new"
+                // badge on every honest first listing would train people to
+                // ignore the one that mattered.
+                val settled = remember(info.poster) {
+                    org.ducatproject.ducat.Posters
+                        .settled(context, info.poster, System.currentTimeMillis())
+                }
+                if (settled) {
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        stringResource(R.string.rent_poster_known),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
             Spacer(Modifier.height(4.dp))
             // Per night, per day, per hour — or, for a sale, the price with

@@ -105,4 +105,5 @@
     <string name="rent_find_gear">ابحث عن عتاد</string>
     <string name="rent_find_sale">ابحث عن شيء تشتريه</string>
     <string name="rent_find_skill">ابحث عن مساعدة</string>
+    <string name="rent_poster_known">معروف هنا</string>
 </resources>
