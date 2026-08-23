@@ -26,6 +26,13 @@ import uniffi.ducat_mobile.importBackup
  * gone. That one goes through `exportBackup`/`importBackup` rather than a
  * hand-built record, because the bug was in the bridge and a hand-built
  * `RestoredBackup` would have passed the whole time it was broken.
+ *
+ * Two more ride along in that second round, for the same reason — they are
+ * bridge behaviour, invisible to a hand-built record. **`created`** was
+ * hardcoded to zero, so freshness, the property the escrow shares above exist
+ * to have, was unanswerable for every bundle ever written. And a **malformed
+ * seed** must be refused at the door rather than found at the end of a restore
+ * that has already overwritten the device.
  */
 fun main() {
     appState()
@@ -78,6 +85,7 @@ private fun appState() {
         appState = blob,
         escrowCount = 0u,
         escrowShares = emptyList(),
+        created = 0uL,
     )
     ContactStore(dst).restoreFromBackup(restored)
 
@@ -141,6 +149,7 @@ private fun appState() {
             appState = poisoned,
             escrowCount = 0u,
             escrowShares = emptyList(),
+            created = 0uL,
         ),
     )
     val after = dst.getSharedPreferences("ducat_contacts", 0)
@@ -207,6 +216,45 @@ private fun escrowShares() {
     check(back.escrowCount.toInt() == 2) { "BACKUPTEST_FAIL escrowCount=${back.escrowCount}" }
     check(back.escrowShares.size == 2) { "BACKUPTEST_FAIL escrowShares=${back.escrowShares.size}" }
 
+    // A bundle has to know its own age, and this was hardcoded to zero at
+    // export — so every backup this app ever wrote claimed to have been made in
+    // 1970, and nothing could tell one taken this morning from one taken last
+    // year. That matters for exactly the shares checked above: they are the one
+    // part of a bundle that expires, and "is this file fresh enough" was a
+    // question with no data behind it.
+    val age = System.currentTimeMillis() / 1000 - back.created.toLong()
+    check(back.created > 0uL && age in -5..300) {
+        "BACKUPTEST_FAIL created=${back.created} is ${age}s old, which is not 'just now'"
+    }
+
+    // The seed is checked on the way *in* as well as out — an unusable one used
+    // to be discovered by the last step of a restore, after the persona secret,
+    // the name, the profile, the contacts and these very shares had already
+    // been written over the device. A bundle carrying one cannot be built
+    // through this bridge, which is the point, so the import side is pinned in
+    // `mobile/src/lib.rs`; what this end can prove is that the export door is
+    // still shut.
+    val refused = runCatching {
+        exportBackup(
+            BackupInput(
+                spendKeyHex = "not hex at all",
+                restoreHeight = 2187000uL,
+                displayName = null,
+                publishPayto = false,
+                profile = Profile(null, null, null, null, null, null, null, null),
+                contacts = emptyList(),
+                prekeySignedSecret = null,
+                prekeyOneTime = emptyList(),
+                prekeyNextId = 0uL,
+                appState = null,
+                escrowShares = emptyList(),
+            ),
+            "correcthorsebattery",
+            persona,
+        )
+    }
+    check(refused.isFailure) { "BACKUPTEST_FAIL a bundle was written around a malformed seed" }
+
     Ceremony.restoreShares(dst, back.escrowShares)
     val p = dst.getSharedPreferences("ducat_ceremonies", 0)
     check(p.getString("c_aa11", null) != null) { "BACKUPTEST_FAIL aa11 did not restore" }
@@ -231,5 +279,8 @@ private fun escrowShares() {
         "BACKUPTEST_FAIL a restore rewound a live escrow to ${live.optString("stage")}"
     }
 
-    println("BACKUPTEST_OK escrows: carried=${back.escrowShares.size} released_skipped keyless_skipped live_preserved")
+    println(
+        "BACKUPTEST_OK escrows: carried=${back.escrowShares.size} released_skipped " +
+            "keyless_skipped live_preserved created=${back.created} badseed=refused",
+    )
 }

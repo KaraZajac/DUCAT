@@ -649,13 +649,27 @@ fn derive(passphrase: &[u8], salt: &[u8; 16]) -> Result<[u8; 32], Reject> {
 /// honest one:
 ///
 ///  * a phrase with spaces is scored as words, at eleven bits each — what a
-///    word drawn from a two-thousand-word list is worth;
+///    word drawn from a two-thousand-word list is worth — but only its
+///    **distinct** words count, because repeating one is a choice made once
+///    and typed twice;
+///  * and no phrase is credited with more than its own characters could hold,
+///    which is what stops a row of separators from manufacturing bits out of
+///    nothing;
 ///  * anything else is scored as characters over the alphabets it actually
 ///    uses, which is generous, because it treats a chosen word as if it were
 ///    random letters;
 ///  * so a single unbroken run of one alphabet is capped short of Strong. That
 ///    is exactly the shape of a dictionary word, and this cannot tell one from
 ///    a random string of the same letters.
+///
+/// The two qualifiers on the word count are not hypothetical shapes. Counting
+/// tokens alone graded `1 2 3 4 5 6` at sixty-six bits and painted the meter
+/// green: six tokens, eleven bits apiece, Strong — for six digits, worth about
+/// twenty bits between them and guessable in a moment. `aaa aaa aaa aaa aaa
+/// aaa` scored the same. That meter is what somebody reads while choosing the
+/// passphrase on their spend key, their persona and every relationship they
+/// have, so it must not be flattering in the one direction that costs them the
+/// lot.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PassphraseStrength {
     /// Below the floor. [`export`] will refuse it.
@@ -668,19 +682,42 @@ pub enum PassphraseStrength {
     Strong,
 }
 
-/// Estimated bits behind a passphrase — see [`PassphraseStrength`].
-pub fn passphrase_bits(p: &str) -> f64 {
-    let words = p.split_whitespace().filter(|w| !w.is_empty()).count();
-    if words >= 2 {
-        return words as f64 * 11.0;
-    }
+/// What a run of characters could hold, over the alphabets it actually uses.
+///
+/// Whitespace is structure rather than secret: it neither widens the alphabet
+/// nor counts towards the length. Spaces are where a passphrase is *typed* to
+/// break, so treating each one as a thirty-three-symbol choice would pay the
+/// user for the separators they were always going to use.
+fn character_bits(p: &str) -> f64 {
     let mut alphabet = 0u32;
     if p.chars().any(|c| c.is_ascii_lowercase()) { alphabet += 26; }
     if p.chars().any(|c| c.is_ascii_uppercase()) { alphabet += 26; }
     if p.chars().any(|c| c.is_ascii_digit()) { alphabet += 10; }
-    if p.chars().any(|c| !c.is_ascii_alphanumeric()) { alphabet += 33; }
+    if p.chars().any(|c| !c.is_ascii_alphanumeric() && !c.is_whitespace()) { alphabet += 33; }
     if alphabet == 0 { return 0.0; }
-    p.chars().count() as f64 * (alphabet as f64).log2()
+    p.chars().filter(|c| !c.is_whitespace()).count() as f64 * (alphabet as f64).log2()
+}
+
+/// Estimated bits behind a passphrase — see [`PassphraseStrength`].
+pub fn passphrase_bits(p: &str) -> f64 {
+    // Distinct, case-folded. A word list pays eleven bits for *drawing* a word;
+    // typing the same one again is not a second draw, and `aaa aaa aaa aaa aaa
+    // aaa` was reaching Strong on the arithmetic that said it was.
+    let mut distinct = std::collections::BTreeSet::new();
+    let mut tokens = 0usize;
+    for w in p.split_whitespace() {
+        tokens += 1;
+        distinct.insert(w.to_lowercase());
+    }
+    if tokens >= 2 {
+        // The ceiling is what the characters themselves could hold. Eleven bits
+        // per word assumes each token *is* a word off a two-thousand-word list,
+        // and a one-character token cannot be: there are ten digits, not two
+        // thousand. `1 2 3 4 5 6` claimed sixty-six bits and holds about twenty,
+        // and the ceiling is what tells the two apart without needing the list.
+        return (distinct.len() as f64 * 11.0).min(character_bits(p));
+    }
+    character_bits(p)
 }
 
 pub fn passphrase_strength(p: &str) -> PassphraseStrength {
@@ -783,4 +820,63 @@ pub fn import(blob: &[u8], passphrase: &[u8]) -> Result<Backup, Reject> {
         })?;
 
     Backup::from_value(decode(&plaintext)?)
+}
+
+/// The meter, pinned at the shapes it used to flatter.
+///
+/// The rest of §4.3's cases live in `core/tests/backup.rs`; these sit next to
+/// the arithmetic because they are about the arithmetic, and because each one
+/// is a passphrase somebody could plausibly type into the box that protects
+/// their spend key and be told, in green, that it was fine.
+#[cfg(test)]
+mod passphrase_tests {
+    use super::{passphrase_bits, passphrase_strength, PassphraseStrength as S};
+
+    /// The one that started this. Six tokens, sixty-six bits by word count,
+    /// Strong on the screen — for six digits worth roughly twenty bits, which a
+    /// laptop exhausts before the user has let go of the phone.
+    #[test]
+    fn a_row_of_digits_is_not_strong() {
+        assert_eq!(passphrase_strength("1 2 3 4 5 6"), S::Weak);
+        assert!(passphrase_bits("1 2 3 4 5 6") < 25.0);
+    }
+
+    /// Spacing a short thing out further must not buy anything. Under the old
+    /// count every extra separator was another eleven bits, so the meter could
+    /// be walked to Strong by pressing the space bar.
+    #[test]
+    fn separators_do_not_manufacture_bits() {
+        assert_ne!(passphrase_strength("1 2 3 4 5 6 7 8"), S::Strong);
+        assert_ne!(passphrase_strength("a b a b a b a b"), S::Strong);
+    }
+
+    /// One word typed six times is one word. It is also the exact thing a
+    /// person does when a meter demands more words and they have none.
+    #[test]
+    fn repetition_is_not_entropy() {
+        assert_eq!(passphrase_strength("aaa aaa aaa aaa aaa aaa"), S::Weak);
+        assert_eq!(passphrase_strength("hunter2 hunter2 hunter2 hunter2"), S::Weak);
+        // Case is not a seventh choice either.
+        assert_ne!(passphrase_strength("horse Horse HORSE hOrSe horsE horse"), S::Strong);
+    }
+
+    /// And the point of the whole exercise: a real diceware phrase still grades
+    /// Strong. A meter that solved the flattery by refusing to say Strong at all
+    /// would be just as useless, and the user would learn to ignore it.
+    #[test]
+    fn a_real_diceware_phrase_still_grades_strong() {
+        assert_eq!(passphrase_strength("correct horse battery staple thing pin"), S::Strong);
+        assert_eq!(passphrase_strength("velvet anchor pumice drifting lantern rehearse"), S::Strong);
+    }
+
+    /// The character path is untouched, whitespace aside: no spaces means the
+    /// same alphabet arithmetic as before, and the same grades.
+    #[test]
+    fn the_unspaced_grades_are_unchanged() {
+        assert_eq!(passphrase_strength("hunter22"), S::Weak);
+        assert_eq!(passphrase_strength("Tea4two!"), S::Fair);
+        assert_eq!(passphrase_strength("T7#kq2Lm!vZr9x@W"), S::Strong);
+        assert_eq!(passphrase_strength("short"), S::TooShort);
+        assert_ne!(passphrase_strength("counterrevolutionaries"), S::Strong);
+    }
 }

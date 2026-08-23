@@ -649,7 +649,17 @@ pub fn export_backup(
             .collect(),
         prekey_next_id: input.prekey_next_id,
         app_state: input.app_state.clone(),
-        created: 0,
+        // When this bundle was made, and it was `0` — the epoch — from the day
+        // the field existed. §4.3's whole freshness story rests on this number:
+        // an escrow share is the one part of a bundle that expires, so "is this
+        // file new enough" is a real question with a real answer, and every
+        // bundle ever exported answered January 1970. Nothing could tell a
+        // backup taken this morning from one taken last year, so nothing tried.
+        //
+        // Wall-clock, and that is fine here. A wrong phone clock skews an age
+        // shown to the user; it authorises nothing and is checked by nobody, so
+        // there is no monotonic source this needs instead.
+        created: now(),
     };
 
     // Fresh per export (§4.3.2). Reusing either would be the bug.
@@ -703,6 +713,16 @@ pub fn create_persona_secret() -> Vec<u8> {
     let mut k = [0u8; 32];
     OsRng.fill_bytes(&mut k);
     k.to_vec()
+}
+
+/// Seconds since the epoch, or zero if the platform has no clock to offer —
+/// which is the same value the field carried before it meant anything, so a
+/// caller reading an age still has exactly one "unknown" to handle.
+fn now() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0)
 }
 
 fn hex_to_bytes(s: &str) -> Option<Vec<u8>> {
@@ -826,6 +846,17 @@ pub struct RestoredBackup {
     /// The shares themselves. This used to be the count alone, which told a
     /// restoring device how much it had just failed to restore.
     pub escrow_shares: Vec<EscrowShareEntry>,
+    /// When the bundle was written, in seconds since the epoch — the thing that
+    /// makes "how old is this backup" answerable.
+    ///
+    /// Carried across the bridge rather than kept inside, because §4.3.3's
+    /// escrow shares are the one part of a bundle that goes out of date, and
+    /// the client that has to say so is the one with the screen. Zero means the
+    /// bundle predates the export that started stamping this, and a caller must
+    /// read it as *unknown* rather than as 1970: a file of unknown age is not a
+    /// stale one, and refusing it, or nagging about it, would be a lie about a
+    /// perfectly good backup.
+    pub created: u64,
 }
 
 /// Open a bundle.
@@ -837,6 +868,26 @@ pub struct RestoredBackup {
 pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup, BackupError> {
     let b = ducat_core::backup::import(&blob, passphrase.as_bytes())
         .map_err(|e| BackupError::Failed(format!("{:?}", e.code)))?;
+    // **The same check `export_backup` makes, on the way back in.**
+    //
+    // Decrypting proves the passphrase and that nobody altered the file. It
+    // proves nothing about the seed inside, and this end trusted it: a bundle
+    // whose `monero_seed` was empty or not hex opened cleanly and was handed
+    // over as a `RestoredBackup`. The caller then applies a restore in order —
+    // persona secret, name, publish choice, profile, every contact, then the
+    // escrow shares — and only reaches the wallet last, where
+    // `address_for_spend_key` finally rejects the key and throws. By then the
+    // device has been overwritten with somebody else's identity and has no
+    // wallet, which is neither the old device nor the new one, and the user is
+    // told only that the import failed.
+    //
+    // A bundle this client wrote cannot be in that state; one hand-built,
+    // truncated, or written by a buggy other implementation can. So it is
+    // checked here, before a single field crosses the bridge, and the whole
+    // restore is refused rather than half-applied.
+    if hex_to_bytes(&b.monero_seed).map(|k| k.len()) != Some(32) {
+        return Err(BackupError::BadKey);
+    }
     Ok(RestoredBackup {
         display_name: b.display_name.clone(),
         publish_payto: b.publish_payto,
@@ -874,6 +925,7 @@ pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup
                 restore_height: e.restore_height,
             })
             .collect(),
+        created: b.created,
     })
 }
 
@@ -946,6 +998,89 @@ mod import_tests {
             .err()
             .map(|e| e.to_string());
         assert!(wrong.is_some() && wrong == tampered, "{wrong:?} vs {tampered:?}");
+    }
+
+    /// A bundle with whatever seed we like, built past `export_backup`'s own
+    /// check — which is exactly the position an attacker, a truncated file, or
+    /// another implementation's bug puts the import in.
+    fn bundle_with_seed(seed: &str) -> Vec<u8> {
+        let bundle = ducat_core::backup::Backup {
+            persona_suite: 1,
+            persona_secret: create_persona_secret(),
+            monero_seed: seed.into(),
+            monero_restore_height: 1000,
+            rendezvous: vec![],
+            attestation_records: vec![],
+            mandates: vec![],
+            verification: ducat_core::verify::VerificationPolicy::default(),
+            escrow_shares: vec![],
+            display_name: Some("someone".into()),
+            publish_payto: true,
+            avatar: None,
+            email: None,
+            phone: None,
+            signal: None,
+            pronouns: None,
+            contacts: vec![],
+            prekey_signed_secret: None,
+            prekey_one_time: vec![],
+            prekey_next_id: 0,
+            app_state: None,
+            created: 1_700_000_000,
+        };
+        ducat_core::backup::export(&bundle, b"a real passphrase", [3u8; 16], [4u8; 24]).unwrap()
+    }
+
+    /// A bundle that decrypts has proved the passphrase, not the seed.
+    ///
+    /// The caller applies a restore in order and reaches the wallet last, so an
+    /// unusable key here used to be discovered *after* the persona secret, the
+    /// name, the publish choice, the profile, the contacts and the escrow
+    /// shares had all been written over. The device ends up as neither identity
+    /// and the user is told only that the import failed.
+    #[test]
+    fn a_malformed_seed_is_refused_on_the_way_in() {
+        for seed in ["", "nothex", "1f1f1f", &"ab".repeat(33)] {
+            assert!(
+                matches!(
+                    import_backup(bundle_with_seed(seed), "a real passphrase".into()),
+                    Err(BackupError::BadKey)
+                ),
+                "a bundle whose seed is {seed:?} was accepted"
+            );
+        }
+        // And the good one still opens, or the check has eaten the feature.
+        let w = create_wallet(1000, true);
+        assert!(
+            import_backup(bundle_with_seed(&w.spend_key_hex), "a real passphrase".into()).is_ok()
+        );
+    }
+
+    /// A bundle has to know its own age. This was hardcoded to `0` at export,
+    /// so every backup ever written claimed to have been made in 1970 and
+    /// nothing could tell this morning's from last year's.
+    #[test]
+    fn a_bundle_says_when_it_was_made() {
+        let w = create_wallet(1000, true);
+        let before = now();
+        let blob = export_backup(
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
+            "a real passphrase".into(),
+            create_persona_secret(),
+        )
+        .unwrap();
+        let r = import_backup(blob, "a real passphrase".into()).unwrap();
+        assert!(r.created >= before, "created {} predates the export", r.created);
+        assert!(r.created <= now(), "created {} is in the future", r.created);
+    }
+
+    /// And it survives the wire rather than being invented at either end.
+    #[test]
+    fn the_age_is_the_bundles_own_and_not_the_readers() {
+        let w = create_wallet(1000, true);
+        let r = import_backup(bundle_with_seed(&w.spend_key_hex), "a real passphrase".into())
+            .unwrap();
+        assert_eq!(r.created, 1_700_000_000);
     }
 }
 

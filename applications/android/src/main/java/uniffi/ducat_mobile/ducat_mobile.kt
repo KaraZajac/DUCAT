@@ -3835,7 +3835,20 @@ data class RestoredBackup (
      * The shares themselves. This used to be the count alone, which told a
      * restoring device how much it had just failed to restore.
      */
-    var `escrowShares`: List<EscrowShareEntry>
+    var `escrowShares`: List<EscrowShareEntry>, 
+    /**
+     * When the bundle was written, in seconds since the epoch — the thing that
+     * makes "how old is this backup" answerable.
+     *
+     * Carried across the bridge rather than kept inside, because §4.3.3's
+     * escrow shares are the one part of a bundle that goes out of date, and
+     * the client that has to say so is the one with the screen. Zero means the
+     * bundle predates the export that started stamping this, and a caller must
+     * read it as *unknown* rather than as 1970: a file of unknown age is not a
+     * stale one, and refusing it, or nagging about it, would be a lie about a
+     * perfectly good backup.
+     */
+    var `created`: kotlin.ULong
 ) {
     
     companion object
@@ -3860,6 +3873,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterUInt.read(buf),
             FfiConverterSequenceTypeEscrowShareEntry.read(buf),
+            FfiConverterULong.read(buf),
         )
     }
 
@@ -3876,7 +3890,8 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterULong.allocationSize(value.`prekeyNextId`) +
             FfiConverterOptionalByteArray.allocationSize(value.`appState`) +
             FfiConverterUInt.allocationSize(value.`escrowCount`) +
-            FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`)
+            FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`) +
+            FfiConverterULong.allocationSize(value.`created`)
     )
 
     override fun write(value: RestoredBackup, buf: ByteBuffer) {
@@ -3893,6 +3908,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterOptionalByteArray.write(value.`appState`, buf)
             FfiConverterUInt.write(value.`escrowCount`, buf)
             FfiConverterSequenceTypeEscrowShareEntry.write(value.`escrowShares`, buf)
+            FfiConverterULong.write(value.`created`, buf)
     }
 }
 

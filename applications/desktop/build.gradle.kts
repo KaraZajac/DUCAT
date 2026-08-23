@@ -440,6 +440,14 @@ tasks.register<JavaExec>("backuptest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// §4.3's strength meter, through the bridge the screen calls: the shapes it
+// used to grade Strong, and the ones it still must. `./gradlew :desktop:passmeter`.
+tasks.register<JavaExec>("passmeter") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PassMeterTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Proves §16.9's profile scope offline: reach-me identifiers ride only a
 // "profile" handshake, the car only a driving one, and the purpose survives the
 // wire. `./gradlew :desktop:profilescope`.
