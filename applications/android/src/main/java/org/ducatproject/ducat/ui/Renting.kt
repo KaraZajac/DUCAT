@@ -331,11 +331,6 @@ fun ListingFormPreview(kind: Int) = ListingForm(kind = kind, onDone = {})
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 internal fun ListingForm(kind: Int, onDone: () -> Unit) {
-    // Back closes the form. Without this it went past the mode shell to the
-    // activity and quit the app, taking an eighteen-field listing with it —
-    // MainActivity says the rule at its own handlers, and a screen added
-    // later did not follow it.
-    BackHandler(onBack = onDone)
     val context = LocalContext.current
     val vehicle = kind == Listings.KIND_VEHICLE
     // The three kinds added in 0.89 carry no typed extras (§16.18): a title,
@@ -372,6 +367,45 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     var fix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+
+    // Back closes the form — but not over the top of a half-written listing.
+    //
+    // Without a handler at all it went past the mode shell to the activity and
+    // quit the app; with `onDone` it stopped quitting and went on discarding,
+    // which on this screen is nearly the same loss. There is no draft anywhere:
+    // `rememberSaveable` carries these fields through a rotation, not through a
+    // leaving, and eighteen of them is twenty minutes of somebody's evening. An
+    // edge swipe while scrolling the private-details box at the bottom is all it
+    // takes, and unlike the Cancel button beside Post it is not a thing anybody
+    // aimed at. So it asks, the same courtesy a bar tab gets before it is
+    // deleted, and only when there is something to lose — an empty form
+    // discarded is just leaving.
+    var confirmDiscard by remember { mutableStateOf(false) }
+    val started = listOf(
+        title, area, price, make, model, year, color, seats, trim,
+        rooms, sleeps, sizeM2, tags, details,
+    ).any { it.isNotBlank() }
+    BackHandler { if (started) confirmDiscard = true else onDone() }
+    if (confirmDiscard) {
+        AlertDialog(
+            onDismissRequest = { confirmDiscard = false },
+            title = { Text(stringResource(R.string.rent_discard_title)) },
+            text = { Text(stringResource(R.string.rent_discard_body)) },
+            confirmButton = {
+                TextButton(onClick = { confirmDiscard = false; onDone() }) {
+                    Text(
+                        stringResource(R.string.rent_discard_confirm),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDiscard = false }) {
+                    Text(stringResource(R.string.rent_keep_editing))
+                }
+            },
+        )
+    }
 
     // The Post button is dead without a fix — a listing has to sit on some
     // board, and which board is the question a position answers. So this

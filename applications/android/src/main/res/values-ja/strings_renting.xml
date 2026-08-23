@@ -32,6 +32,10 @@
     <string name="rent_private_label">待ち合わせ場所と、伝えておくこと</string>
     <string name="rent_post_it">掲示する</string>
     <string name="rent_cancel">キャンセル</string>
+    <string name="rent_discard_title">この掲載を破棄しますか？</string>
+    <string name="rent_discard_body">ここにはまだ何も保存されていません。このフォームに入力した内容はすべて失われ、戻れる下書きもありません。</string>
+    <string name="rent_discard_confirm">破棄</string>
+    <string name="rent_keep_editing">入力を続ける</string>
     <string name="rent_take_down">取り下げる</string>
     <string name="rent_delete">削除</string>
     <string name="rent_live">近くの掲示板に出ています</string>

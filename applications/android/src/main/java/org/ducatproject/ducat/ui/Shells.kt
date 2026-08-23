@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -368,6 +369,19 @@ private data class ShellTab(
 @Composable
 private fun Shell(title: String, openDrawer: () -> Unit, tabs: List<ShellTab>) {
     var current by remember { mutableStateOf(0) }
+    // Back walks the tabs home before it leaves.
+    //
+    // The activity's own tab handler is gated on `Mode.None` so that it does
+    // not swallow presses meant for a shell — and no shell was catching them,
+    // so Back from the till's Items tab, or the taxi's Meter, went straight
+    // past everything here to the activity and closed the app. A vendor
+    // checking a price mid-sale lost the sale.
+    //
+    // The same rule the personal tabs follow: while there is a tab to come
+    // back to, come back to it; on the first tab do nothing at all, because
+    // what is outside a job — the drawer, and then putting the phone down —
+    // is the honest next step and swallowing Back forever is not.
+    BackHandler(enabled = current != 0) { current = 0 }
     Scaffold(
         topBar = {
             TopAppBar(

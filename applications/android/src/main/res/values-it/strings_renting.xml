@@ -32,6 +32,10 @@
     <string name="rent_private_label">Dove vedersi, e cosa devono sapere</string>
     <string name="rent_post_it">Pubblica</string>
     <string name="rent_cancel">Annulla</string>
+    <string name="rent_discard_title">Eliminare questo annuncio?</string>
+    <string name="rent_discard_body">Qui non è stato salvato nulla. Tutto ciò che è stato scritto in questo modulo va perso, e non c\'è nessuna bozza a cui tornare.</string>
+    <string name="rent_discard_confirm">Elimina</string>
+    <string name="rent_keep_editing">Continua a compilare</string>
     <string name="rent_take_down">Ritira</string>
     <string name="rent_delete">Elimina</string>
     <string name="rent_live">In bacheca vicino a te</string>

@@ -32,6 +32,10 @@
     <string name="rent_private_label">Gặp ở đâu, và họ cần biết gì</string>
     <string name="rent_post_it">Đăng lên</string>
     <string name="rent_cancel">Huỷ</string>
+    <string name="rent_discard_title">Bỏ tin đăng này?</string>
+    <string name="rent_discard_body">Ở đây chưa có gì được lưu. Mọi thứ đã nhập vào biểu mẫu này sẽ mất, và không có bản nháp nào để quay lại viết tiếp.</string>
+    <string name="rent_discard_confirm">Bỏ</string>
+    <string name="rent_keep_editing">Tiếp tục điền</string>
     <string name="rent_take_down">Gỡ xuống</string>
     <string name="rent_delete">Xoá</string>
     <string name="rent_live">Đang hiển thị trên bảng gần bạn</string>

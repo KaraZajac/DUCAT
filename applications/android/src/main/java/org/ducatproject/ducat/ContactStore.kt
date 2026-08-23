@@ -688,6 +688,30 @@ class ContactStore(context: Context) {
     // answer if it were — so a card handed out before the bundle was written
     // is dead, and the person holding it claims it into silence. They are
     // pruned by their own TTL, so this does not grow.
+    /**
+     * Which loose keys a backup may carry — asked on the way out *and* on the
+     * way in, so the two cannot drift.
+     *
+     * They lived only on the export side. Import took `kv` and wrote every key
+     * in it straight into this store, which is the same file as `wallet_spend`,
+     * `persona_secret`, `wallet_address` and `contacts` — so a bundle whose
+     * passphrase somebody knows could overwrite the spend key, and every
+     * address the device then handed out would derive from the attacker's.
+     * A restore is exactly the moment somebody accepts a file they were given.
+     *
+     * `sub_` is new here and is the other half of the bug. The per-contact
+     * subaddress map (§15.10) matched neither the old prefixes nor the fixed
+     * list, so it was never backed up and nothing rebuilt it. After a restore
+     * `subaddressCount()` answered 0 — and that count *is* the scanner's watch
+     * list, so every payment ever made to a per-contact address became
+     * invisible, unspendable and unreconcilable. Worse quietly: `minorFor`
+     * then re-allocated from 1, handing old minors to new contacts, while
+     * `minorOf` returning null disabled the tab-attribution guard that uses it.
+     */
+    private fun backupKey(k: String): Boolean =
+        k.startsWith("thread_") || k.startsWith("disappear_") ||
+            k.startsWith("usedtheirs_") || k.startsWith("sub_")
+
     private val appStateKeys =
         listOf("tabs_v1", "publish_address", "receipts_v1", "claimed_kis_v1", "issued_cards")
 
@@ -703,11 +727,20 @@ class ContactStore(context: Context) {
         // between the export and the restore are at risk, which is the same
         // window everything else here goes wrong in.
         val threads = JSONObject()
-        prefs.all.keys.filter {
-            it.startsWith("thread_") || it.startsWith("disappear_") ||
-                it.startsWith("usedtheirs_")
-        }.forEach { k -> prefs.getString(k, null)?.let { threads.put(k, it) }
-            ?: threads.put(k, prefs.getLong(k, 0L)) }
+        // Straight off the map, not through getString-then-getLong. The `sub_`
+        // counters are stored as Int, and SharedPreferences.getLong on an Int
+        // throws — the old shape only worked because everything it collected
+        // happened to be a String or a Long.
+        prefs.all.forEach { (k, v) ->
+            if (!backupKey(k)) return@forEach
+            when (v) {
+                is String -> threads.put(k, v)
+                is Int -> threads.put(k, v)
+                is Long -> threads.put(k, v)
+                is Boolean -> threads.put(k, v)
+                else -> Unit
+            }
+        }
         o.put("kv", threads)
         appStateKeys.forEach { k ->
             when (val v = prefs.all[k]) {
@@ -738,10 +771,30 @@ class ContactStore(context: Context) {
                 val o = JSONObject(String(blob, Charsets.UTF_8))
                 val e = prefs.edit()
                 o.optJSONObject("kv")?.let { kv ->
+                    var refused = 0
                     kv.keys().forEach { k ->
+                        // The same question the export asked. Anything else in
+                        // here was not put there by this app.
+                        if (!backupKey(k)) { refused++; return@forEach }
                         val v = kv.get(k)
+                        // `sub_` is counters, and Int is how they are stored —
+                        // putLong would make every later getInt throw.
+                        if (k.startsWith("sub_")) {
+                            when (v) {
+                                is Int -> e.putInt(k, v)
+                                is Long -> e.putInt(k, v.toInt())
+                                else -> Unit
+                            }
+                            return@forEach
+                        }
                         if (v is String) e.putString(k, v) else if (v is Long) e.putLong(k, v)
                         else if (v is Int) e.putLong(k, v.toLong())
+                    }
+                    if (refused > 0) {
+                        DucatLog.w(
+                            "Backup",
+                            "refused $refused key(s) a backup should not carry",
+                        )
                     }
                 }
                 o.optString("contacts_raw").takeIf { it.isNotEmpty() }

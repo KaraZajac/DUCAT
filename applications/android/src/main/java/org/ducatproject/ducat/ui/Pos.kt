@@ -452,9 +452,6 @@ private fun PresentScreen(
     onDone: () -> Unit,
     onBack: () -> Unit,
 ) {
-    // Back is the on-screen arrow: return to the basket. It used to quit the
-    // app from a sale that was already presented to a customer.
-    BackHandler(onBack = onBack)
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     // The card survives recreation: reissuing on rotation would put a fresh QR
@@ -485,6 +482,43 @@ private fun PresentScreen(
             }
         }
         else -> Sale.Waiting
+    }
+
+    val scope = rememberCoroutineScope()
+    // Leaving a billed sale must withdraw the bill, not just the screen.
+    // The settled record would otherwise sit in the store forever, and a
+    // later unrelated payment of the same amount would match it — a
+    // receipt fired into a dead sale's thread.
+    fun abandon() {
+        saleTabId?.let { id ->
+            scope.launch(Dispatchers.IO) {
+                runCatching {
+                    val store = TabStore(context)
+                    store.get(id)
+                        ?.takeIf { it.state == "settled" }
+                        // The retract path: the customer's Review button
+                        // greys out by itself when the bill can be named.
+                        ?.let { cancelTabWithRetract(context, store, it) }
+                }
+            }
+        }
+    }
+
+    // Back is the on-screen Back button, retraction included.
+    //
+    // It used to quit the app from a sale already presented to a customer;
+    // then it returned to the basket and did only that, which is the same bug
+    // wearing a quieter face. The button beside the QR withdraws the bill
+    // first, so leaving by gesture left a settled tab nothing would ever close
+    // — waiting to be matched by the next unrelated payment that happens to
+    // come to the same figure — and a live "Review payment" on the customer's
+    // phone for a sale the till had already forgotten.
+    //
+    // Sighted and paid sales are exempt for the reason the Cancel button
+    // gives below: the money is in flight, and retracting now orphans it.
+    BackHandler {
+        if (stage == Sale.Waiting || stage == Sale.Billed) abandon()
+        onBack()
     }
 
     // While the code is up, a tap offers the same sale card.
@@ -683,25 +717,6 @@ private fun PresentScreen(
         }
 
         Spacer(Modifier.height(20.dp))
-        val scope = rememberCoroutineScope()
-        // Leaving a billed sale must withdraw the bill, not just the screen.
-        // The settled record would otherwise sit in the store forever, and a
-        // later unrelated payment of the same amount would match it — a
-        // receipt fired into a dead sale's thread.
-        fun abandon() {
-            saleTabId?.let { id ->
-                scope.launch(Dispatchers.IO) {
-                    runCatching {
-                        val store = TabStore(context)
-                        store.get(id)
-                            ?.takeIf { it.state == "settled" }
-                            // The retract path: the customer's Review button
-                            // greys out by itself when the bill can be named.
-                            ?.let { cancelTabWithRetract(context, store, it) }
-                    }
-                }
-            }
-        }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (stage == Sale.Waiting || stage == Sale.Billed) {
                 OutlinedButton(

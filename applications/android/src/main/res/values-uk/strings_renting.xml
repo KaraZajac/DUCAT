@@ -32,6 +32,10 @@
     <string name="rent_private_label">Де зустрітись і що треба знати</string>
     <string name="rent_post_it">Розмістити</string>
     <string name="rent_cancel">Скасувати</string>
+    <string name="rent_discard_title">Викинути це оголошення?</string>
+    <string name="rent_discard_body">Тут нічого не збережено. Усе, що набрано в цій формі, зникне, і чернетки, до якої можна повернутися, немає.</string>
+    <string name="rent_discard_confirm">Викинути</string>
+    <string name="rent_keep_editing">Продовжити заповнення</string>
     <string name="rent_take_down">Зняти</string>
     <string name="rent_delete">Видалити</string>
     <string name="rent_live">На дошці поруч із вами</string>

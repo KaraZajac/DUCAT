@@ -32,6 +32,10 @@
     <string name="rent_private_label">Où se retrouver, et ce qu\'il faut savoir</string>
     <string name="rent_post_it">Publier</string>
     <string name="rent_cancel">Annuler</string>
+    <string name="rent_discard_title">Jeter cette annonce ?</string>
+    <string name="rent_discard_body">Rien n\'est enregistré ici. Tout ce qui a été tapé dans ce formulaire est perdu, et il n\'y a aucun brouillon où revenir.</string>
+    <string name="rent_discard_confirm">Jeter</string>
+    <string name="rent_keep_editing">Continuer à remplir</string>
     <string name="rent_take_down">Retirer</string>
     <string name="rent_delete">Supprimer</string>
     <string name="rent_live">En ligne sur le tableau près de vous</string>

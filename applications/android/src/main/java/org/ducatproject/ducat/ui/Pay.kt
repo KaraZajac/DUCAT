@@ -120,7 +120,9 @@ fun PaySheet(
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             // The system back mirrors the on-screen arrow: a step back, not a
             // bigger Close. Only the first step — or a flow that started with
-            // its target chosen for it — leaves the sheet.
+            // its target chosen for it — leaves the sheet. A send already in
+            // flight is the one moment neither is allowed; [AmountStep] holds
+            // its own handler for that, and being the inner one it wins.
             BackHandler {
                 if (target != null && prefillAddress == null && prefillContact == null) {
                     target = null
@@ -369,6 +371,21 @@ private fun AmountStep(
             onDone()
         }
     }
+
+    // And nothing leaves it while a payment is halfway out.
+    //
+    // Back steps the sheet back to the chooser or closes it outright, either
+    // of which unmounts this screen — and unmounting cancels the scope
+    // `doSend` is running in. Not the transaction: by then it is with a node
+    // and cannot be taken back. What dies with the scope is everything after
+    // it — the §16.13 kind-2 notice that names the txid, which is the only
+    // way their wallet can put a sender on the output that just arrived, and
+    // the arm that would have shown the error if there had been one. Money
+    // gone, nothing in the thread, nothing on screen to say so.
+    //
+    // The few seconds this covers have a spinner on them and nothing else, so
+    // there is no step to take and swallowing the press costs nobody a thing.
+    BackHandler(enabled = busy) {}
 
     // The ceiling, priced. Not the balance: offering the balance as the maximum
     // is how a wallet lets someone type a number it will then refuse, after

@@ -32,6 +32,10 @@
     <string name="rent_private_label">在哪儿碰面，以及他们需要知道什么</string>
     <string name="rent_post_it">发布</string>
     <string name="rent_cancel">取消</string>
+    <string name="rent_discard_title">放弃这条发布？</string>
+    <string name="rent_discard_body">这里还没有保存任何内容。填进这张表单的东西都会丢掉，也没有草稿可以回来接着写。</string>
+    <string name="rent_discard_confirm">丢弃</string>
+    <string name="rent_keep_editing">继续填写</string>
     <string name="rent_take_down">撤下</string>
     <string name="rent_delete">删除</string>
     <string name="rent_live">已发布在你附近的板上</string>

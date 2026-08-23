@@ -32,6 +32,10 @@
     <string name="rent_private_label">Tempat bertemu, dan yang perlu mereka tahu</string>
     <string name="rent_post_it">Pasang</string>
     <string name="rent_cancel">Batal</string>
+    <string name="rent_discard_title">Buang iklan ini?</string>
+    <string name="rent_discard_body">Belum ada yang tersimpan di sini. Semua yang diketik di formulir ini hilang, dan tidak ada draf untuk kembali.</string>
+    <string name="rent_discard_confirm">Buang</string>
+    <string name="rent_keep_editing">Lanjut mengisi</string>
     <string name="rent_take_down">Turunkan</string>
     <string name="rent_delete">Hapus</string>
     <string name="rent_live">Tayang di papan dekat Anda</string>

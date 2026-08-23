@@ -32,6 +32,10 @@
     <string name="rent_private_label">นัดเจอที่ไหน และมีอะไรต้องรู้</string>
     <string name="rent_post_it">ลงประกาศ</string>
     <string name="rent_cancel">ยกเลิก</string>
+    <string name="rent_discard_title">ทิ้งประกาศนี้?</string>
+    <string name="rent_discard_body">ยังไม่มีอะไรถูกบันทึกไว้ที่นี่ ทุกอย่างที่พิมพ์ลงในแบบฟอร์มนี้จะหายไป และไม่มีฉบับร่างให้กลับมาเขียนต่อ</string>
+    <string name="rent_discard_confirm">ทิ้ง</string>
+    <string name="rent_keep_editing">กรอกต่อ</string>
     <string name="rent_take_down">เอาลง</string>
     <string name="rent_delete">ลบ</string>
     <string name="rent_live">อยู่บนกระดานใกล้คุณ</string>

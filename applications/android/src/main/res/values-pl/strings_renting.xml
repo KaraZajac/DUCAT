@@ -32,6 +32,10 @@
     <string name="rent_private_label">Gdzie się spotkać i co trzeba wiedzieć</string>
     <string name="rent_post_it">Wystaw</string>
     <string name="rent_cancel">Anuluj</string>
+    <string name="rent_discard_title">Odrzucić to ogłoszenie?</string>
+    <string name="rent_discard_body">Nic tu nie zostało zapisane. Wszystko, co wpisano w ten formularz, przepada, i nie ma wersji roboczej, do której można wrócić.</string>
+    <string name="rent_discard_confirm">Odrzuć</string>
+    <string name="rent_keep_editing">Wypełniaj dalej</string>
     <string name="rent_take_down">Wycofaj</string>
     <string name="rent_delete">Usuń</string>
     <string name="rent_live">Na tablicy w twojej okolicy</string>

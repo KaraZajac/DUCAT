@@ -32,6 +32,10 @@
     <string name="rent_private_label">Where to meet, and what they need to know</string>
     <string name="rent_post_it">Post it</string>
     <string name="rent_cancel">Cancel</string>
+    <string name="rent_discard_title">Discard this listing?</string>
+    <string name="rent_discard_body">Nothing here has been saved. Everything typed into this form is thrown away, and there is no draft to come back to.</string>
+    <string name="rent_discard_confirm">Discard</string>
+    <string name="rent_keep_editing">Keep editing</string>
     <string name="rent_take_down">Take it down</string>
     <string name="rent_delete">Delete</string>
     <string name="rent_live">Live on the board near you</string>

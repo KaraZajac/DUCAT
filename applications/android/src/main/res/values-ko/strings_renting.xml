@@ -32,6 +32,10 @@
     <string name="rent_private_label">만날 장소와 알아야 할 것</string>
     <string name="rent_post_it">올리기</string>
     <string name="rent_cancel">취소</string>
+    <string name="rent_discard_title">이 게시글을 버릴까요?</string>
+    <string name="rent_discard_body">여기에는 아직 아무것도 저장되지 않았어요. 이 양식에 입력한 내용은 모두 사라지고, 돌아올 임시 저장본도 없어요.</string>
+    <string name="rent_discard_confirm">버리기</string>
+    <string name="rent_keep_editing">계속 작성</string>
     <string name="rent_take_down">내리기</string>
     <string name="rent_delete">삭제</string>
     <string name="rent_live">근처 게시판에 올라가 있음</string>

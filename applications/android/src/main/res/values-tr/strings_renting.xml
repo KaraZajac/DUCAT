@@ -32,6 +32,10 @@
     <string name="rent_private_label">Nerede buluşacağınız ve bilmeleri gerekenler</string>
     <string name="rent_post_it">Yayınla</string>
     <string name="rent_cancel">Vazgeç</string>
+    <string name="rent_discard_title">Bu ilan silinsin mi?</string>
+    <string name="rent_discard_body">Burada hiçbir şey kaydedilmedi. Bu forma yazılan her şey gider ve dönülecek bir taslak yok.</string>
+    <string name="rent_discard_confirm">Sil</string>
+    <string name="rent_keep_editing">Doldurmaya devam et</string>
     <string name="rent_take_down">Kaldır</string>
     <string name="rent_delete">Sil</string>
     <string name="rent_live">Yakınındaki panoda yayında</string>

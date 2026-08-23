@@ -32,6 +32,10 @@
     <string name="rent_private_label">مكان اللقاء وما يحتاج معرفته</string>
     <string name="rent_post_it">انشره</string>
     <string name="rent_cancel">إلغاء</string>
+    <string name="rent_discard_title">أتحذف هذا الإعلان؟</string>
+    <string name="rent_discard_body">لم يُحفظ هنا شيء. كل ما كُتب في هذه الاستمارة يضيع، ولا مسودة تعود إليها.</string>
+    <string name="rent_discard_confirm">حذف</string>
+    <string name="rent_keep_editing">متابعة الكتابة</string>
     <string name="rent_take_down">أزله</string>
     <string name="rent_delete">حذف</string>
     <string name="rent_live">معروض على اللوحة القريبة منك</string>

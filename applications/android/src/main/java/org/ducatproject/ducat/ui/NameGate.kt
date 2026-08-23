@@ -44,15 +44,35 @@ import org.ducatproject.ducat.R
 @Composable
 fun NameGate(
     open: Boolean,
-    onDismiss: () -> Unit,
+    // Never called any more, and still in the signature because four callers
+    // name it. There is no exit from this dialog that is not Skip — `skip`
+    // below says why there must not be one.
+    @Suppress("UNUSED_PARAMETER") onDismiss: () -> Unit,
     onNamed: () -> Unit,
 ) {
     if (!open) return
     val context = LocalContext.current
     var name by remember { mutableStateOf("") }
 
+    // Staying anonymous, however you say it.
+    //
+    // Both buttons go through, so the only ways to reach the cancel path were
+    // Back and a tap on the scrim — and every caller reads that path as "drop
+    // whatever you were about to do", which is the one answer this dialog was
+    // built never to give silently. Worse, cancelling never recorded that the
+    // question had been put, so the action it interrupted returned to a gate
+    // that simply opened again: a driver going on duty could press Back at it
+    // all evening and never get on the road.
+    //
+    // So the quiet exit is the quiet button. Nobody is trapped, nobody is
+    // asked twice, and the introduction happens either way.
+    val skip = {
+        NameStore(context).markAsked()
+        onNamed()
+    }
+
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = skip,
         title = { Text(stringResource(R.string.name_gate_title)) },
         text = {
             Column {
@@ -92,12 +112,7 @@ fun NameGate(
             // Quieter than the other one, and it still goes through: the
             // introduction happens either way. What it must not do is happen
             // *silently*, which is the whole of the original bug.
-            TextButton(
-                onClick = {
-                    NameStore(context).markAsked()
-                    onNamed()
-                },
-            ) { Text(stringResource(R.string.name_gate_skip)) }
+            TextButton(onClick = skip) { Text(stringResource(R.string.name_gate_skip)) }
         },
     )
 }

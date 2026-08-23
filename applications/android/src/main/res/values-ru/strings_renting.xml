@@ -32,6 +32,10 @@
     <string name="rent_private_label">Где встретиться и что нужно знать</string>
     <string name="rent_post_it">Разместить</string>
     <string name="rent_cancel">Отмена</string>
+    <string name="rent_discard_title">Выбросить это объявление?</string>
+    <string name="rent_discard_body">Здесь ничего не сохранено. Всё, что набрано в этой форме, пропадёт, и черновика, к которому можно вернуться, нет.</string>
+    <string name="rent_discard_confirm">Выбросить</string>
+    <string name="rent_keep_editing">Продолжить заполнение</string>
     <string name="rent_take_down">Снять</string>
     <string name="rent_delete">Удалить</string>
     <string name="rent_live">На доске рядом с вами</string>

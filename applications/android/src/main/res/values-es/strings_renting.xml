@@ -32,6 +32,10 @@
     <string name="rent_private_label">Dónde quedar y qué necesitan saber</string>
     <string name="rent_post_it">Publicarlo</string>
     <string name="rent_cancel">Cancelar</string>
+    <string name="rent_discard_title">¿Descartar este anuncio?</string>
+    <string name="rent_discard_body">Aquí no se ha guardado nada. Todo lo escrito en este formulario se pierde, y no hay ningún borrador al que volver.</string>
+    <string name="rent_discard_confirm">Descartar</string>
+    <string name="rent_keep_editing">Seguir rellenando</string>
     <string name="rent_take_down">Retirarlo</string>
     <string name="rent_delete">Eliminar</string>
     <string name="rent_live">Publicado en el tablón cercano</string>

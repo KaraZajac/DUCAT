@@ -32,6 +32,10 @@
     <string name="rent_private_label">محل قرار و آنچه باید بدانند</string>
     <string name="rent_post_it">آگهی کن</string>
     <string name="rent_cancel">انصراف</string>
+    <string name="rent_discard_title">این آگهی دور انداخته شود؟</string>
+    <string name="rent_discard_body">اینجا هنوز چیزی ذخیره نشده. هر چه در این فرم نوشته شده از بین می‌رود و پیش‌نویسی برای بازگشت وجود ندارد.</string>
+    <string name="rent_discard_confirm">دور بینداز</string>
+    <string name="rent_keep_editing">ادامهٔ نوشتن</string>
     <string name="rent_take_down">بردار</string>
     <string name="rent_delete">حذف</string>
     <string name="rent_live">روی تابلوی نزدیک شما</string>

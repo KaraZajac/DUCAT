@@ -1363,9 +1363,38 @@ object Ceremony {
      * message — that is what the two signatures are for — so a stray or
      * malicious abort against a funded escrow is dropped rather than obeyed.
      */
-    fun onAbort(context: Context, idHex: String) {
+    fun onAbort(context: Context, idHex: String, fromHex: String) {
         val o = load(context, idHex) ?: return
         if (isFinished(o)) return
+        // Only somebody in this escrow may end it. onDkgRound and onFrostRound
+        // both compute a sender index and bail on a stranger; this one took
+        // anybody's word for it.
+        val roster = o.optJSONArray("roster")?.let { arr ->
+            (0 until arr.length()).map { arr.getString(it) }
+        } ?: emptyList()
+        if (fromHex !in roster) {
+            DucatLog.w(TAG, "escrow $idHex: abort from ${fromHex.take(8)}…, who is not in it")
+            return
+        }
+        // **An arbiter never accepts one.**
+        //
+        // The three tests below ask whether *this* device has seen the escrow
+        // funded, and an arbiter never will: it does not fund, and it is not
+        // shown the banner that scans. So it believed every abort it was sent
+        // — and "aborted" is not a stage onFrostRound will sign at, so one
+        // message permanently disabled the only recovery path a funded 2-of-3
+        // has. The victim's "ask the arbiter" button went on working and was
+        // silently ignored at the other end.
+        //
+        // An arbiter is the party whose whole purpose is to still be there
+        // when the principals disagree. Whether the money is really gone is
+        // not something it can check, and not something it should act on
+        // anyone's say-so about: the record simply stays, and the key-share
+        // rule in [sweep] keeps it.
+        if (isArbiter(o)) {
+            DucatLog.i(TAG, "escrow $idHex: an arbiter does not stand down on request")
+            return
+        }
         if (o.optLong("fundedPxmr") > 0 ||
             o.optString("fundTxid").isNotEmpty() ||
             o.optString("hostFundTxid").isNotEmpty()

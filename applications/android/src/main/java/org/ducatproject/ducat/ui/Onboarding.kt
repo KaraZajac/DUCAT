@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -386,6 +387,22 @@ private fun RestoreStep(
     val picker = rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
     ) { uri -> pending = uri }
+
+    // The Cancel button below, reachable by gesture.
+    //
+    // A restore is a second level: the flow returns early on `restoring`, so
+    // the step behind this card is not on screen and there is nothing under it
+    // to fall through to. With no handler the press went past the whole of
+    // setup to the activity and closed the app, on the one screen somebody
+    // only reaches by having already lost a phone.
+    //
+    // It follows the button rather than the flag, in both directions the
+    // button is unavailable. Mid-import there is nothing to cancel — the work
+    // is NonCancellable for the reason the effect above gives — and once the
+    // backup is *in*, the wallet is on this device: going back to "Create a
+    // persona" would offer to mint a fresh one over the top of it, and the
+    // only honest way on is Continue.
+    BackHandler { if (!busy && done == null) onCancel() }
 
     // `pending` is cleared last and the work is NonCancellable — clearing it
     // first would change this effect's key and cancel the restore it started.

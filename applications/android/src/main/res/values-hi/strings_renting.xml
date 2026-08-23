@@ -32,6 +32,10 @@
     <string name="rent_private_label">कहाँ मिलना है, और उन्हें क्या जानना चाहिए</string>
     <string name="rent_post_it">इसे लगाएँ</string>
     <string name="rent_cancel">रद्द करें</string>
+    <string name="rent_discard_title">यह लिस्टिंग मिटा दें?</string>
+    <string name="rent_discard_body">यहाँ अभी कुछ भी सहेजा नहीं गया है। इस फ़ॉर्म में लिखी हर चीज़ चली जाएगी, और लौटकर आगे लिखने के लिए कोई ड्राफ़्ट नहीं है।</string>
+    <string name="rent_discard_confirm">मिटाएँ</string>
+    <string name="rent_keep_editing">लिखते रहें</string>
     <string name="rent_take_down">हटा लें</string>
     <string name="rent_delete">मिटाएँ</string>
     <string name="rent_live">आपके पास के बोर्ड पर है</string>

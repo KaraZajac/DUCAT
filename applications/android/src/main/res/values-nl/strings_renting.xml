@@ -32,6 +32,10 @@
     <string name="rent_private_label">Waar jullie afspreken, en wat ze moeten weten</string>
     <string name="rent_post_it">Plaatsen</string>
     <string name="rent_cancel">Annuleren</string>
+    <string name="rent_discard_title">Deze advertentie weggooien?</string>
+    <string name="rent_discard_body">Hier is niets opgeslagen. Alles wat in dit formulier is getypt gaat verloren, en er is geen concept om naar terug te keren.</string>
+    <string name="rent_discard_confirm">Weggooien</string>
+    <string name="rent_keep_editing">Verder invullen</string>
     <string name="rent_take_down">Weghalen</string>
     <string name="rent_delete">Verwijderen</string>
     <string name="rent_live">Live op het bord bij jou in de buurt</string>

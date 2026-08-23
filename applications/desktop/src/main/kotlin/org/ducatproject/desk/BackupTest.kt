@@ -53,6 +53,13 @@ private fun appState() {
         // Lost, a restored device re-offers them and seals to keys the
         // other side has burned.
         .putString("usedtheirs_ab12", "3,7,11")
+        // §15.10's per-contact subaddress map. Never backed up before, and
+        // nothing rebuilt it: subaddressCount() answered 0 on a restored
+        // phone, and that count *is* the scanner's watch list — so every
+        // payment ever made to a per-contact address went invisible.
+        .putInt("sub_next", 4)
+        .putInt("sub_minor_aa11", 1)
+        .putInt("sub_minor_bb22", 3)
         .apply()
 
     val blob = ContactStore(src).backupAppState()
@@ -91,7 +98,62 @@ private fun appState() {
     val used = dst.getSharedPreferences("ducat_contacts", 0)
         .getString("usedtheirs_ab12", null)
     check(used == "3,7,11") { "BACKUPTEST_FAIL usedtheirs: got $used" }
-    println("BACKUPTEST_OK claimed_kis=$got publish=$pub receipts=$rec cards=ok used=$used")
+
+    // The subaddress map came across, as Ints — stored as Long it would look
+    // present and throw on the first read.
+    val store = org.ducatproject.ducat.WalletStore(dst)
+    check(store.subaddressCount() == 3) {
+        "BACKUPTEST_FAIL subaddressCount is ${store.subaddressCount()}, expected 3"
+    }
+    check(store.minorOf("aa11") == 1 && store.minorOf("bb22") == 3) {
+        "BACKUPTEST_FAIL minors came back as ${store.minorOf("aa11")}/${store.minorOf("bb22")}"
+    }
+    // And a fresh contact gets the *next* minor rather than reusing one.
+    check(store.minorFor("cc33") == 4) {
+        "BACKUPTEST_FAIL a restored wallet reissued a minor already in use"
+    }
+
+    // A bundle carrying keys the export would never write must not be able to
+    // put them in this store — it is the same file as wallet_spend and
+    // persona_secret, and a restore is exactly when somebody accepts a file
+    // they were handed.
+    val poisoned = org.json.JSONObject(String(blob, Charsets.UTF_8)).also { o ->
+        o.getJSONObject("kv").apply {
+            put("wallet_spend", "deadbeef".repeat(8))
+            put("persona_secret", "AAAA")
+            put("wallet_address", "5AttackerAddress")
+        }
+    }.toString().toByteArray()
+    val before = dst.getSharedPreferences("ducat_contacts", 0)
+        .getString("wallet_spend", null)
+    ContactStore(dst).restoreFromBackup(
+        RestoredBackup(
+            spendKeyHex = "",
+            restoreHeight = 0uL,
+            personaSecret = ByteArray(0),
+            displayName = null,
+            publishPayto = false,
+            profile = Profile(null, null, null, null, null, null, null, null),
+            contacts = emptyList(),
+            prekeySignedSecret = null,
+            prekeyOneTime = emptyList(),
+            prekeyNextId = 0uL,
+            appState = poisoned,
+            escrowCount = 0u,
+            escrowShares = emptyList(),
+        ),
+    )
+    val after = dst.getSharedPreferences("ducat_contacts", 0)
+    check(after.getString("wallet_spend", null) == before) {
+        "BACKUPTEST_FAIL a backup overwrote the spend key"
+    }
+    check(after.getString("persona_secret", null) == null) {
+        "BACKUPTEST_FAIL a backup planted a persona secret"
+    }
+    check(after.getString("wallet_address", null) == null) {
+        "BACKUPTEST_FAIL a backup planted a wallet address"
+    }
+    println("BACKUPTEST_OK claimed_kis=$got publish=$pub receipts=$rec cards=ok used=$used subaddrs=3 poison=refused")
 }
 
 private fun escrowShares() {

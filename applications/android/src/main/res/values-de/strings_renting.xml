@@ -32,6 +32,10 @@
     <string name="rent_private_label">Wo ihr euch trefft, und was sie wissen müssen</string>
     <string name="rent_post_it">Einstellen</string>
     <string name="rent_cancel">Abbrechen</string>
+    <string name="rent_discard_title">Dieses Inserat verwerfen?</string>
+    <string name="rent_discard_body">Hier ist nichts gespeichert. Alles, was in dieses Formular getippt wurde, ist weg, und einen Entwurf zum Zurückkommen gibt es nicht.</string>
+    <string name="rent_discard_confirm">Verwerfen</string>
+    <string name="rent_keep_editing">Weiter ausfüllen</string>
     <string name="rent_take_down">Zurückziehen</string>
     <string name="rent_delete">Löschen</string>
     <string name="rent_live">Live auf dem Brett in deiner Nähe</string>

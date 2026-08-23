@@ -1325,7 +1325,12 @@ object Mailbox {
             if (arrived.kind == 10) {
                 runCatching {
                     opened.ceremonyId?.let {
-                        Ceremony.onAbort(context, it.toHexString())
+                        // Who said so. onAbort has to know, because the only
+                        // people entitled to call an escrow off are the ones
+                        // in it — the other ceremony kinds already compute a
+                        // sender index and refuse a stranger, and this one
+                        // took anybody's word.
+                        Ceremony.onAbort(context, it.toHexString(), c.personaHex)
                     }
                 }.onFailure { DucatLog.w(TAG, "ceremony abort: ${it.message}") }
             }
