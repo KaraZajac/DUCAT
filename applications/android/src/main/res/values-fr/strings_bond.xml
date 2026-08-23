@@ -69,4 +69,6 @@
     <string name="bond_will_retry">Une nouvelle tentative se fera toute seule.</string>
     <string name="bond_call_off">Annuler l\'accord</string>
     <string name="bond_retry_in">Une nouvelle tentative se fera toute seule — il reste %1$s.</string>
+    <string name="bond_close_ask">Clore la caution ?</string>
+    <string name="bond_close_all_to_them">%1$s demande à clore la caution et à prendre tout le dépôt — %2$s. Rien ne vous revient.</string>
 </resources>

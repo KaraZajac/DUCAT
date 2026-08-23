@@ -68,4 +68,6 @@
     <string name="bond_will_retry">它会自动重试。</string>
     <string name="bond_call_off">取消这笔交易</string>
     <string name="bond_retry_in">它会自动重试——还需 %1$s。</string>
+    <string name="bond_close_ask">结束保证金？</string>
+    <string name="bond_close_all_to_them">%1$s 请求结束保证金并取走全部 %2$s。你不会收到任何退还。</string>
 </resources>

@@ -2119,6 +2119,10 @@ private fun RideBondBanner(contact: Contact) {
     val funded = ride.optLong("fundedPxmr")
     val rider = org.ducatproject.ducat.Ceremony.isFunder(ride)
     val reservation = ride.optInt("kind") == org.ducatproject.ducat.Ceremony.KIND_RESERVATION
+    // A plain bond has no fare and no split: releaseBond sweeps the whole
+    // escrow to whoever proposed it. The consent screen has to say that,
+    // because the ride wording underneath would quietly say the opposite.
+    val plainBond = ride.optInt("kind") == org.ducatproject.ducat.Ceremony.KIND_BOND
     // What "secured" means: a ride waits for the fare; a reservation for
     // rent plus both deposits — the host's included, because their funding
     // is their acceptance.
@@ -2350,19 +2354,38 @@ private fun RideBondBanner(contact: Contact) {
                 // is shared by a ride and a booking, and a guest settling up
                 // for a room was told "the driver marked the ride complete".
                 title = stringResource(
-                    if (reservation) R.string.res_complete_ask
-                    else R.string.bond_ride_complete_ask,
+                    when {
+                        plainBond -> R.string.bond_close_ask
+                        reservation -> R.string.res_complete_ask
+                        else -> R.string.bond_ride_complete_ask
+                    },
                 ),
-                amount = if (rider) riderBack else (funded - riderBack).coerceAtLeast(0L),
-                note = stringResource(
+                // For a bond the whole escrow goes to them, so that is the
+                // number — not a split of it, which is what the ride
+                // arithmetic below would have produced.
+                amount = when {
+                    plainBond -> funded
+                    rider -> riderBack
+                    else -> (funded - riderBack).coerceAtLeast(0L)
+                },
+                note = if (plainBond) {
+                    stringResource(
+                        R.string.bond_close_all_to_them,
+                        isolate(contact.displayName()),
+                        Amounts.show(context, funded).primary,
+                    )
+                } else stringResource(
                     if (reservation) R.string.res_split_stated else R.string.bond_split_stated,
                     Amounts.show(context, riderBack).primary,
                     Amounts.show(context, (funded - riderBack).coerceAtLeast(0L)).primary,
                 ),
                 action = stringResource(R.string.bond_sign_split),
                 onAction = signNow,
-                secondary = stringResource(R.string.bond_counter),
-                onSecondary = { countering = true },
+                // No counter on a plain bond: there is no split to counter
+                // with. The way to disagree is to not sign, and to propose
+                // your own release from the profile.
+                secondary = if (plainBond) null else stringResource(R.string.bond_counter),
+                onSecondary = if (plainBond) null else ({ countering = true }),
             )
         }
         else -> null

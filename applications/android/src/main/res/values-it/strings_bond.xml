@@ -69,4 +69,6 @@
     <string name="bond_will_retry">Riproverà da solo.</string>
     <string name="bond_call_off">Annulla l\'accordo</string>
     <string name="bond_retry_in">Riproverà da solo — mancano %1$s.</string>
+    <string name="bond_close_ask">Chiudere il vincolo?</string>
+    <string name="bond_close_all_to_them">%1$s chiede di chiudere il vincolo e prendere tutto il deposito — %2$s. A te non torna nulla.</string>
 </resources>

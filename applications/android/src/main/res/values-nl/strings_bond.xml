@@ -69,4 +69,6 @@
     <string name="bond_will_retry">Het probeert het vanzelf opnieuw.</string>
     <string name="bond_call_off">Afblazen</string>
     <string name="bond_retry_in">Het probeert het vanzelf opnieuw — nog %1$s.</string>
+    <string name="bond_close_ask">Borg afsluiten?</string>
+    <string name="bond_close_all_to_them">%1$s vraagt de borg af te sluiten en het hele bedrag te nemen — %2$s. Er komt niets naar u terug.</string>
 </resources>

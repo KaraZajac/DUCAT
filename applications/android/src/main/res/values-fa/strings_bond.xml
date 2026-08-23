@@ -69,4 +69,6 @@
     <string name="bond_will_retry">خودش دوباره تلاش می‌کند.</string>
     <string name="bond_call_off">لغو معامله</string>
     <string name="bond_retry_in">خودش دوباره تلاش می‌کند — %1$s باقی مانده است.</string>
+    <string name="bond_close_ask">بستن ودیعه؟</string>
+    <string name="bond_close_all_to_them">%1$s می‌خواهد ودیعه را ببندد و کل مبلغ را بردارد — %2$s. چیزی به شما بازنمی‌گردد.</string>
 </resources>

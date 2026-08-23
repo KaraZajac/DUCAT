@@ -68,4 +68,6 @@
     <string name="bond_will_retry">ระบบจะลองใหม่ให้เอง</string>
     <string name="bond_call_off">ยกเลิกข้อตกลง</string>
     <string name="bond_retry_in">ระบบจะลองใหม่ให้เอง — เหลืออีก %1$s</string>
+    <string name="bond_close_ask">ปิดเงินประกันหรือไม่</string>
+    <string name="bond_close_all_to_them">%1$s ขอปิดเงินประกันและรับไปทั้งหมด — %2$s คุณจะไม่ได้รับคืนเลย</string>
 </resources>

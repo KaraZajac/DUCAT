@@ -68,4 +68,6 @@
     <string name="bond_will_retry">Sẽ tự thử lại.</string>
     <string name="bond_call_off">Hủy giao dịch</string>
     <string name="bond_retry_in">Sẽ tự thử lại — còn %1$s.</string>
+    <string name="bond_close_ask">Đóng khoản đặt cọc?</string>
+    <string name="bond_close_all_to_them">%1$s muốn đóng khoản đặt cọc và lấy toàn bộ — %2$s. Bạn sẽ không nhận lại gì.</string>
 </resources>

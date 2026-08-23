@@ -954,34 +954,38 @@ object Ceremony {
                     (o.optInt("kind") != KIND_BOND &&
                         stage in listOf("releasing", "release_pending", "release_cosigned"))) &&
                     round.toInt() == 0 -> {
-                    // A ride's release is money moving, and the other side's
-                    // yes is a screen, not an automatic signature — §15.5's
-                    // confirm rule surviving into escrow. Park the proposal;
+                    // Money moving, so the other side's yes is a screen and
+                    // not an automatic signature — §15.5's confirm rule
+                    // surviving into escrow. Park the proposal;
                     // approveRideRelease() is the tap. A fresh proposal
                     // supersedes a parked, co-signed, or even our own
                     // outstanding one — that last case is the counter-offer:
-                    // both sides can propose, and whoever signs ends it. A
-                    // plain bond keeps the proven auto-cosign.
-                    if (o.optInt("kind") != KIND_BOND) {
-                        o.put("stage", "release_pending")
-                        o.put("pendingPayload", payload.toHexString())
-                        o.put("proposerIdx", senderIdx)
-                        if (riderBackPxmr != null) o.put("pendingRiderBack", riderBackPxmr)
-                        else o.remove("pendingRiderBack")
-                        save(context, idHex, o)
-                        ContactStore.bump()
-                        DucatLog.i(TAG, "ride $idHex: release proposed — waiting for the yes")
-                        return@runCatching
-                    }
-                    val ans = uniffi.ducat_mobile.frostCosign(
-                        id, i.toUShort(), senderIdx.toUShort(), keys, payload,
-                    )
-                    c = Mailbox.send(
-                        context, c, "bond: co-signed the release",
-                        mineHex, kind = 9, round = 1, ceremonyId = id, payload = ans.payload,
-                    )
-                    settle(o, "release_cosigned"); save(context, idHex, o)
-                    DucatLog.i(TAG, "bond $idHex: co-signed the release (fee ${ans.feePxmr})")
+                    // both sides can propose, and whoever signs ends it.
+                    //
+                    // **A plain bond used to be exempt** and co-signed here,
+                    // on the poller thread, with no screen and no PIN. But
+                    // releaseBond sweeps the escrow to the *proposer's* own
+                    // wallet, so whichever side tapped "Return the deposit"
+                    // first took all of it and the other phone signed that
+                    // away by itself on its next poll. The bond's own
+                    // description reads "spending it needs both keys, so
+                    // neither side can take it alone" — true about keys, false
+                    // about consent, which is the only sense a reader means it
+                    // in. With an arbiter it was worse: the arbiter is a stock
+                    // client too and would rubber-stamp the same sweep.
+                    //
+                    // The mechanics are unchanged — approveRideRelease does
+                    // the identical frostCosign and round-1 send this branch
+                    // did. What is added is the person.
+                    o.put("stage", "release_pending")
+                    o.put("pendingPayload", payload.toHexString())
+                    o.put("proposerIdx", senderIdx)
+                    if (riderBackPxmr != null) o.put("pendingRiderBack", riderBackPxmr)
+                    else o.remove("pendingRiderBack")
+                    save(context, idHex, o)
+                    ContactStore.bump()
+                    DucatLog.i(TAG, "escrow $idHex: release proposed — waiting for the yes")
+                    return@runCatching
                 }
                 stage == "releasing" && round.toInt() == 1 -> {
                     // Only the co-signer we actually asked: in a 2-of-3 an

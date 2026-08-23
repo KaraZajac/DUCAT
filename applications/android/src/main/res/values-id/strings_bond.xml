@@ -68,4 +68,6 @@
     <string name="bond_will_retry">Akan mencoba lagi sendiri.</string>
     <string name="bond_call_off">Batalkan kesepakatan</string>
     <string name="bond_retry_in">Akan mencoba lagi sendiri — tersisa %1$s.</string>
+    <string name="bond_close_ask">Tutup bond?</string>
+    <string name="bond_close_all_to_them">%1$s meminta menutup bond dan mengambil seluruh deposit — %2$s. Tidak ada yang kembali ke Anda.</string>
 </resources>
