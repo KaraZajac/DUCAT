@@ -785,7 +785,7 @@ OBJECT_TYPE_CODES = {
     "DISPUTE": 13, "RULING": 14, "HAIL": 15, "HAIL_REPLY": 16, "TapStatic": 17,
     "TXID": 18, "ESCROW_SETUP": 19, "ESCROW_READY": 20, "RELEASE": 21,
     "SLASH_CLAIM": 22, "MESSAGE": 23, "PREKEY_BUNDLE": 24,
-    "SEALED_MESSAGE": 25, "LOG_HEAD": 26,
+    "SEALED_MESSAGE": 25, "LOG_HEAD": 26, "BOARD_NOTICE": 27,
 }
 
 
@@ -976,6 +976,14 @@ RN_SUBTYPE = 238
 RN_FEATURES = 239
 RN_TRIM = 240
 RN_SIZE_M2 = 241
+# §16.18 + board.rs: who wrote a board notice, and what it cost them. A stand's
+# write key is the cell name hashed, so anybody can write any slot — these do
+# not make a slot somebody's property, they make authorship checkable and
+# flooding paid for.
+RN_POSTER, RN_SIG, RN_POW = 242, 243, 244
+HN_POSTER, HN_SIG, HN_POW = 245, 246, 247
+# Leading zero bits a notice's proof of work must show.
+POW_BITS = 20
 GEOHASH_ALPHABET = set("0123456789bcdefghjkmnpqrstuvwxyz")
 MAX_ATTACHMENT_BYTES = 1_048_576 - 64
 MAX_MIME_CHARS, MAX_FILENAME_CHARS = 64, 96
@@ -1201,7 +1209,9 @@ def parse_hail_notice(buf):
         "dest": _take(b, HN_DEST, "text", "destination"),
         "fare": b.pop(HN_FARE, (None, None))[1],
     }
-    if out["version"] != 1:
+    # 2, not 1: a version-1 notice carries neither an author nor a proof of
+    # work, and there is no safe way to read one.
+    if out["version"] != 2:
         raise Reject("Malformed", "unknown hail notice version")
     if not out["card"].startswith("ducat:"):
         raise Reject("Malformed", "a hail card must be a ducat: URI")
@@ -1238,7 +1248,7 @@ def parse_listing(buf):
         "kind": _take(b, RN_KIND, "uint", "kind"),
         "title": _take(b, RN_TITLE, "text", "title"),
     }
-    if out["version"] != 1:
+    if out["version"] != 2:
         raise Reject("Malformed", "unknown rental notice version")
     if not out["card"].startswith("ducat:"):
         raise Reject("Malformed", "a listing card must be a ducat: URI")
@@ -1310,6 +1320,78 @@ def parse_listing(buf):
             out["features"].append(val)
     _finish(b)
     return out
+
+
+
+def leading_zero_bits(h):
+    """How many zero bits a digest opens with."""
+    n = 0
+    for b in h:
+        if b:
+            return n + (8 - b.bit_length())
+        n += 8
+    return n
+
+
+def open_board_notice(buf, board, subkey):
+    """§16.18: check who wrote a board notice and that writing it cost something.
+
+    A stand's write key is SHA-256 of the cell name, so every reader of a board
+    also holds the key to every slot on it. Nothing here changes that. What the
+    seal establishes is narrower, and worth stating precisely:
+
+      * the *bytes* have an author, so a listing copied with somebody else's
+        card comes back as a different author rather than as the same one;
+      * the signature covers the slot as well as the notice, so a valid one
+        cannot be lifted onto another slot — without that, one signed listing
+        could paper a whole cell and read as its author flooding the board;
+      * a nonce proves the write cost a search, so flooding is no longer free.
+
+    Re-encoding a decoded map to check a signature is normally the wrong
+    instinct. It is right here for one reason, and only that one: the codec
+    refuses non-canonical input outright, so decoding having succeeded *means*
+    the bytes were exactly the canonical encoding of this map.
+    """
+    import hashlib
+    body_map = _body(buf)
+    poster = body_map.pop(RN_POSTER, (None, None))[1]
+    sig = body_map.pop(RN_SIG, (None, None))[1]
+    nonce = body_map.pop(RN_POW, (None, None))[1]
+    if not isinstance(poster, (bytes, bytearray)):
+        raise Reject("Malformed", "a board notice must say who wrote it")
+    if not isinstance(sig, (bytes, bytearray)) or len(sig) != 64:
+        raise Reject("Malformed", "a board notice must be signed")
+    if not isinstance(nonce, int):
+        raise Reject("Malformed", "a board notice must carry its proof of work")
+
+    body = _reencode_map(sorted(body_map.items()))
+    signed = (board.encode() + b"\x00" + int(subkey).to_bytes(4, "little")
+              + b"\x00" + body)
+    verify_sig(1, bytes(poster), bytes(sig), sig_input("BOARD_NOTICE", 1, signed))
+
+    pow_input = b"DUCAT-POW-v0" + b"\x00" + signed + b"\x00" + bytes(sig)
+    if leading_zero_bits(
+        hashlib.sha256(pow_input + nonce.to_bytes(8, "little")).digest()
+    ) < POW_BITS:
+        raise Reject("Malformed", "this notice did not pay for its slot")
+    return bytes(poster), body
+
+
+def run_board_sealed(cases, r):
+    for c in cases:
+        def go(c=c):
+            poster, inner = open_board_notice(
+                unhex(c["sealed_hex"]), c["board"], c["subkey"])
+            # What is left has to be a listing this implementation reads, so
+            # the seal and the notice really do compose.
+            parse_listing(inner)
+            return poster
+        out = expect_reject(r, "contact", c, go)
+        want = c["expect"].get("poster_hex")
+        if out is not None and want is not None and out.hex() != want:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"poster {out.hex()}, expected {want}")
 
 
 def run_listing(cases, r):
@@ -1792,6 +1874,7 @@ BY_KIND = {
     "stand.shard": run_stand_shard,
     "hail.notice": run_hail_notice,
     "rental.listing": run_listing,
+    "board.sealed": run_board_sealed,
     "message.payment": run_message_payment,
     "message.chain": run_message_chain,
     "escrow.ceremony": run_escrow_ceremony,

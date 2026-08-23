@@ -332,15 +332,33 @@ class TabStore(private val context: Context) {
             // on its way when what was on its way was our own.
             val ours = WalletStore(context).ourTxids()
             val contacts = ContactStore(context)
+            // One transaction sights one tab. Orders.poolSight has kept this
+            // set since it was written, and says why: "noise collides
+            // eventually, and when it does the same transaction would
+            // otherwise mark two orders paid and hand somebody a free one."
+            // The till had the same loop without the set.
+            //
+            // A coffee stall is where it bites, because a stall's whole menu
+            // is a handful of identical prices: two customers order the same
+            // thing, both tabs settle at the same total, one of them pays, and
+            // the single mempool hit sighted both. Kiosk renders anything past
+            // Awaiting as paid and offers staff the Ready button on `Seen`, so
+            // the second customer walks out with it. Chain reconciliation does
+            // catch up — the key image is claimed once, so the second tab never
+            // reaches `paid` — but the goods left the counter at `Seen`, which
+            // is the entire point of kiosk mode.
+            val claimedTx = store.all().mapNotNull { it.seenTx }.toMutableSet()
             for (tab in waiting.sortedBy { it.settledAt }) {
                 val said = contacts.thread(tab.personaHex)
                     .filter { !it.outgoing && it.kind == 2 && it.amountPxmr >= tab.settledTotal }
                     .map { it.amountPxmr }.toSet()
                 val hit = hits.firstOrNull {
-                    it.txHashHex.lowercase() !in ours &&
+                    it.txHashHex !in claimedTx &&
+                        it.txHashHex.lowercase() !in ours &&
                         (it.amountPxmr.toLong() == tab.settledTotal ||
                             it.amountPxmr.toLong() in said)
                 } ?: continue
+                claimedTx += hit.txHashHex
                 store.mutate(tab.id) { it.copy(seenTx = hit.txHashHex) }
                 Notify.post(
                     context,

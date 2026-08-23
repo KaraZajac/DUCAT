@@ -232,6 +232,28 @@ impl Pronouns {
 /// does not fit is a contact who cannot be reached at all.
 pub const MAX_AVATAR_BYTES: usize = 12 * 1024;
 
+/// How far ahead a board notice may claim to be good for.
+///
+/// board.rs prices flooding by making each slot cost a search, and its own
+/// cost model depends on the notices *expiring*: "a region of a hundred cells
+/// costs a couple of hours — repeated as notices expire." Without a ceiling
+/// that repetition never comes. Every reader tests only `expiry > now`, and
+/// every writer skips a slot that is still live, so 128 correctly signed and
+/// correctly paid-for notices dated to the year 2100 fill a cell's sixteen
+/// shards for good: nobody can hail from that corner again, and every sweep
+/// renders ghosts that never age out. `clear_own_slot` quite rightly refuses
+/// to erase somebody else's notice, so no honest client ever reclaims one.
+///
+/// Thirty-one days. A hail lives ten minutes and a listing a day, so this is
+/// far above any real use and far below "for ever".
+///
+/// Checked by the *reader*, not at decode, and deliberately: decoding must not
+/// depend on the clock. The conformance vectors pin exact bytes to exact
+/// outcomes, and a decode that consulted the time would start failing on its
+/// own one day with nothing changed. Every reader already tests `expiry > now`
+/// to drop a stale notice; the ceiling is the other half of that same test.
+pub const MAX_NOTICE_TTL_SECS: u64 = 31 * 24 * 60 * 60;
+
 pub const MAX_EMAIL_CHARS: usize = 254;
 pub const MAX_PHONE_DIGITS: usize = 15;
 pub const MAX_SIGNAL_CHARS: usize = 48;

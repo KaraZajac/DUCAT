@@ -996,12 +996,56 @@ object Mailbox {
         var prev = c.inPrevLink
         var count = 0
 
+        // **One marker for the whole gap, not one per sequence number.**
+        //
+        // `next` is the peer's word for how far their log has got, taken off
+        // the wire with no bound — core clamps `ring` to 2..=1024 twelve lines
+        // below and leaves this one alone. Everything from here to `next -
+        // ring` is past the ring and unreadable, and the loop below wrote a
+        // durable row for each one: `appendAndAdvance` re-serialises the whole
+        // thread into encrypted prefs every time, and `deadLetterTime`
+        // re-parses it. A head advertising next_seq = 2^40 therefore did not
+        // fail — it ran, on the poll thread, for ever, writing as it went. The
+        // app stayed responsive while every poll behind it stopped: no
+        // messages, no tab reconciliation, no mempool sighting, no watches.
+        // Persisted cursor, so a restart resumed it.
+        //
+        // Collapsing it is also the more honest rendering. A thread does not
+        // want four billion "a message was lost" rows; the true statement is
+        // that a run of messages went past while this device was away, and one
+        // row says it once.
+        if (next > seq && next - seq > ring.toULong()) {
+            val lost = next - seq - ring.toULong()
+            DucatLog.w(
+                TAG,
+                "$lost message(s) from ${c.displayName()} passed the ring while " +
+                    "this device was away — recorded as one gap",
+            )
+            store.appendAndAdvance(
+                c.personaHex,
+                StoredMessage(
+                    outgoing = false, seq = seq.toLong(),
+                    body = "[$lost messages were lost — this device was away too long]",
+                    timestamp = deadLetterTime(store, c.personaHex),
+                    deadLetter = true,
+                ),
+                (next - ring.toULong()).toLong(), null,
+            )
+            clearStuck(context, "${c.personaHex}:$seq")
+            seq = next - ring.toULong()
+            prev = null
+        }
+
         while (seq < next) {
             if (!logStillReadable(seq, next, ring)) {
                 // The ring passed us. Saying so beats rendering a thread with a
                 // hole in it (§16.10's conversation that did not happen).
                 // Placeholder and cursor in one commit, or a process death
                 // between them re-appends the same loss on the next poll.
+                //
+                // Bounded by the collapse above: at most `ring` of these can
+                // run in one pass, which is what the two sibling loops below
+                // have always relied on without saying so.
                 DucatLog.w(TAG, "lost message $seq from ${c.displayName()} — ring wrapped")
                 store.appendAndAdvance(
                     c.personaHex,

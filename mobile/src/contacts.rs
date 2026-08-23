@@ -1122,6 +1122,18 @@ pub fn standShardName(base: String, shard: u32) -> Result<String, ContactError> 
     ducat_core::geo::stand_shard_name(&base, shard).map_err(refuse)
 }
 
+/// The longest a board notice may claim to be good for.
+///
+/// A reader's question, not a decoder's: decoding must not depend on the
+/// clock, or the conformance vectors would start failing on their own one day.
+/// Every sweep already drops a notice whose expiry has passed; this is the
+/// other end of the same test, and without it one payment of proof-of-work
+/// buys a slot for ever. See `MAX_NOTICE_TTL_SECS`.
+#[uniffi::export]
+pub fn maxNoticeTtlSecs() -> u64 {
+    ducat_core::contact::MAX_NOTICE_TTL_SECS
+}
+
 /// How tall a ladder may grow — readers sweep until an empty shard or this.
 #[uniffi::export]
 pub fn maxStandShards() -> u32 {

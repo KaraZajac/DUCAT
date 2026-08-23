@@ -220,7 +220,11 @@ object Hailing {
             val name = uniffi.ducat_mobile.standShardName(cell, shard)
             val live = standRead(name).mapNotNull { n ->
                 runCatching { hailDecode(n.data, name, n.subkey) }.getOrNull()?.let { h ->
-                    if (h.expiry.toLong() > nowSecs) {
+                    // Expired, or dated so far ahead that it is a squat rather
+                    // than a hail — see maxNoticeTtlSecs.
+                    val cap = runCatching { uniffi.ducat_mobile.maxNoticeTtlSecs().toLong() }
+                        .getOrDefault(31L * 24 * 60 * 60)
+                    if (h.expiry.toLong() > nowSecs && h.expiry.toLong() <= nowSecs + cap) {
                         Seen(
                             name, n.subkey, h.card, h.dest,
                             h.farePxmr?.toLong(), h.expiry.toLong(),

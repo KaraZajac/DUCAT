@@ -193,7 +193,8 @@
             "stand.shard",
             "message.payment",
             "hail.notice",
-            "rental.listing"
+            "rental.listing",
+            "board.sealed"
           ]
         },
         "name": {

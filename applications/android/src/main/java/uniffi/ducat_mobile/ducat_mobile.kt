@@ -909,6 +909,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1004,6 +1006,8 @@ internal interface UniffiLib : Library {
     ): Byte
     fun uniffi_ducat_mobile_fn_func_log_subkey(`seq`: Long,`subkeyCount`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_maxnoticettlsecs(uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
     fun uniffi_ducat_mobile_fn_func_maxstandshards(uniffi_out_err: UniffiRustCallStatus, 
     ): Int
     fun uniffi_ducat_mobile_fn_func_monero_block_time(`nodeUrl`: RustBuffer.ByValue,`height`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -1314,6 +1318,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_log_subkey(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_maxnoticettlsecs(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_maxstandshards(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_block_time(
@@ -1567,6 +1573,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_log_subkey() != 6279.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_maxnoticettlsecs() != 58060.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_maxstandshards() != 25679.toShort()) {
@@ -6215,6 +6224,24 @@ public object FfiConverterSequenceTypeToParty: FfiConverterRustBuffer<List<ToPar
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_log_subkey(
         FfiConverterULong.lower(`seq`),FfiConverterUInt.lower(`subkeyCount`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The longest a board notice may claim to be good for.
+         *
+         * A reader's question, not a decoder's: decoding must not depend on the
+         * clock, or the conformance vectors would start failing on their own one day.
+         * Every sweep already drops a notice whose expiry has passed; this is the
+         * other end of the same test, and without it one payment of proof-of-work
+         * buys a slot for ever. See `MAX_NOTICE_TTL_SECS`.
+         */ fun `maxNoticeTtlSecs`(): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_maxnoticettlsecs(
+        _status)
 }
     )
     }

@@ -664,6 +664,8 @@ object Listings {
         onSlots: (Int) -> Unit = {},
     ): List<uniffi.ducat_mobile.RentalInfo>? {
         val now = System.currentTimeMillis() / 1000
+        val ttlCap = runCatching { uniffi.ducat_mobile.maxNoticeTtlSecs().toLong() }
+            .getOrDefault(31L * 24 * 60 * 60)
         val raw = runCatching { uniffi.ducat_mobile.standRead(name) }.getOrNull() ?: return null
         onSlots(raw.size)
         return raw.mapNotNull {
@@ -672,8 +674,13 @@ object Listings {
             // slot 4, which is what stops one signed listing papering a cell.
             runCatching { uniffi.ducat_mobile.rentalDecode(it.data, name, it.subkey) }.getOrNull()
         }
-            // A reader MUST drop an expired listing unrendered (§16.18).
-            .filter { it.expiry.toLong() > now }
+            // A reader MUST drop an expired listing unrendered (§16.18) — and
+            // one dated past the ceiling too. board.rs prices flooding by
+            // making each slot cost a search, and that price only recurs
+            // because notices expire; a notice good until 2100 turns one
+            // payment into a permanent squat, and no honest client will ever
+            // clear it because clearing somebody else's slot is refused.
+            .filter { it.expiry.toLong() > now && it.expiry.toLong() <= now + ttlCap }
             .filter { kind == null || it.kind.toInt() == kind }
     }
 
