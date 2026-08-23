@@ -830,16 +830,18 @@ object Mailbox {
     fun claimedOnce(seq: UInt?): Boolean = seq == null || seq == 0u
 
     /**
-     * Open with the first key that works, and report the last failure if none
-     * do.
+     * Open with the first key that works; if none do, report the failure that
+     * says the most.
      *
      * The signed prekey rotates, and a peer's cached bundle can be a month
      * behind the one being offered, so which of the two a message is sealed to
      * is not knowable from the outside — the sealed form names "the signed
      * prekey", not which generation of it. Trying them in turn costs one extra
-     * decrypt on a message that was never going to open, and the exception
-     * that escapes is the last one, so everything downstream still classifies
-     * malformed and refused exactly as it did with a single key.
+     * decrypt on a message that was never going to open.
+     *
+     * What escapes matters as much as what is tried, because everything
+     * downstream branches on it — dead-letter now, or wait out the patience
+     * window. See the choice at the catch.
      */
     fun <T> openWithAny(keys: List<ByteArray>, open: (ByteArray) -> T): T {
         var best: Exception? = null
