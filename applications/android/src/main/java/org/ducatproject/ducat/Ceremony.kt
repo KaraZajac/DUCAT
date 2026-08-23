@@ -257,6 +257,28 @@ object Ceremony {
     fun sweep(context: Context): Int {
         val now = System.currentTimeMillis()
         val doomed = all(context).filter { o ->
+            // Never a record holding a key share. This is the whole safety
+            // rule and it sits above every other test on purpose.
+            //
+            // A share means the ceremony finished and an address exists on a
+            // chain anybody can pay. Money can arrive at it tomorrow, and the
+            // share is this device's only means of ever moving that money —
+            // there is no second copy and no way to derive it again.
+            //
+            // The tests below cannot stand in for this. Every one of them
+            // asks whether *this* device has seen funding, and there are
+            // parties who never will: an arbiter neither funds nor is offered
+            // the banner that scans (checkRideFunding has exactly one caller,
+            // Chat.kt, inside the ride banner the arbiter is excluded from),
+            // and a one-sided ride's driver or a zero-deposit host stake
+            // nothing by design. For all of them the funding tests are
+            // permanently false, so every 2-of-3 quietly became a 2-of-2
+            // half an hour after it was built — losing the exact property
+            // the escrow is sold on.
+            //
+            // The cost of keeping them is a few hundred bytes per completed
+            // escrow, for ever. That is the right side to err on.
+            if (holdsShare(o)) return@filter false
             when {
                 isStale(o) -> true
                 isFinished(o) -> {
@@ -1077,7 +1099,17 @@ object Ceremony {
      * stale, and the way out of one of those is the release or the arbiter —
      * not a screen quietly deciding it is over.
      */
+    /**
+     * Does this record hold the only copy of a threshold key share?
+     *
+     * Written by dkgFinish once the group key exists. From that moment the
+     * escrow has an address on chain, and this share is the device's one way
+     * to sign for it — see the note in [sweep].
+     */
+    fun holdsShare(o: JSONObject): Boolean = o.optString("keys").isNotEmpty()
+
     fun isStale(o: JSONObject): Boolean {
+        if (holdsShare(o)) return false
         if (isFinished(o)) return false
         if (o.optLong("fundedPxmr") > 0) return false
         if (o.optString("fundTxid").isNotEmpty()) return false
