@@ -262,7 +262,14 @@ fn unframe<'a>(buf: &mut &'a [u8]) -> Result<&'a [u8], ContactError> {
         return Err(ContactError::Refused("truncated frame".into()));
     }
     let len = u32::from_le_bytes(buf[..4].try_into().unwrap()) as usize;
-    if buf.len() < 4 + len {
+    // Subtract to compare, never add. `len` is a u32 widened to usize, and on
+    // a 32-bit target — armeabi-v7a is one, and it ships — `4 + len` wraps for
+    // a length near u32::MAX. Release builds have overflow checks off, so it
+    // wraps silently to something small, the bounds test passes, and the slice
+    // below panics with start > end: a remote crash spelled out by four bytes
+    // a counterparty chose. `buf.len() - 4` cannot underflow because the
+    // length check above has already returned.
+    if len > buf.len() - 4 {
         return Err(ContactError::Refused("truncated frame body".into()));
     }
     let part = &buf[4..4 + len];
@@ -800,6 +807,64 @@ pub fn frost_complete(
     Ok(txid)
 }
 
+
+#[cfg(test)]
+mod frame_tests {
+    use super::{frame, unframe};
+
+    /// A frame's length prefix is four bytes a counterparty chose.
+    ///
+    /// It used to be compared as `buf.len() < 4 + len`, and `len` is a u32
+    /// widened to usize. On a 32-bit target — armeabi-v7a, which ships — that
+    /// addition wraps for a length near u32::MAX, and release builds have
+    /// overflow checks off, so it wraps *silently* to something small: the
+    /// bounds test passes, and `&buf[4..wrapped]` panics with start > end.
+    /// Four bytes on the wire, and the app is gone. Comparing by subtraction
+    /// removes the arithmetic that could wrap rather than checking it after.
+    #[test]
+    fn a_length_prefix_cannot_be_made_to_wrap() {
+        for len in [u32::MAX, u32::MAX - 1, u32::MAX - 3, 0x8000_0000, 0x7FFF_FFFF] {
+            let mut bytes = len.to_le_bytes().to_vec();
+            bytes.extend_from_slice(b"only a few real bytes");
+            let mut buf = bytes.as_slice();
+            assert!(
+                unframe(&mut buf).is_err(),
+                "a frame claiming {len} bytes out of {} was accepted",
+                bytes.len(),
+            );
+        }
+    }
+
+    /// And the ordinary shape still round-trips, including the empty part and
+    /// several parts in sequence — the reason framing exists at all.
+    #[test]
+    fn frames_round_trip() {
+        let mut out = Vec::new();
+        frame(&mut out, b"first");
+        frame(&mut out, b"");
+        frame(&mut out, b"third part, longer");
+        let mut buf = out.as_slice();
+        assert_eq!(unframe(&mut buf).unwrap(), b"first");
+        assert_eq!(unframe(&mut buf).unwrap(), b"");
+        assert_eq!(unframe(&mut buf).unwrap(), b"third part, longer");
+        assert!(buf.is_empty(), "the whole payload should be consumed");
+        assert!(unframe(&mut buf).is_err(), "reading past the end must refuse");
+    }
+
+    /// Truncation at every boundary, since a short read is what a dropped
+    /// connection and a doctored payload look like alike.
+    #[test]
+    fn truncation_is_refused_everywhere() {
+        let mut out = Vec::new();
+        frame(&mut out, b"a body worth cutting");
+        for cut in 0 .. out.len() {
+            let mut buf = &out[.. cut];
+            assert!(unframe(&mut buf).is_err(), "a frame cut at {cut} was accepted");
+        }
+        let mut whole = out.as_slice();
+        assert!(unframe(&mut whole).is_ok(), "the uncut frame must still read");
+    }
+}
 
 #[cfg(test)]
 mod destination_tests {
