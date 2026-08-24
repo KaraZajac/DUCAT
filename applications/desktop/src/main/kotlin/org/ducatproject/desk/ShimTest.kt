@@ -111,14 +111,41 @@ fun main() {
     check("out-of-range refused", DeskLocation.parse("999, 0") == null)
 
     // 7. The clipboard, which "Copy" and the share sheet both end in.
+    //
+    // **Put back whatever was there.** This is the only check in the suite
+    // that reaches out of its own process into something the person running
+    // it is also using, and a clipboard does not stop at this machine: a
+    // desktop paired over KDE Connect (or GSConnect, or Phone Link) syncs it
+    // to a phone. On 2026-08-24 that is exactly what happened — every full
+    // desk sweep pushed the string below onto a paired Xperia, so the owner's
+    // next paste, on their phone, was "ducat-shim-test".
+    //
+    // Note this check is vacuous on CI, where there is no display and `back`
+    // is null. The only machine it tests anything on is a real desktop, which
+    // is the same machine it was damaging; save-and-restore is what lets it
+    // keep the coverage without owning somebody's clipboard.
+    val clipHeld = runCatching {
+        java.awt.Toolkit.getDefaultToolkit().systemClipboard
+            .getData(java.awt.datatransfer.DataFlavor.stringFlavor) as? String
+    }.getOrNull()
     android.content.ClipboardManager()
         .setPrimaryClip(android.content.ClipData.newPlainText("t", "ducat-shim-test"))
     val back = runCatching {
         java.awt.Toolkit.getDefaultToolkit().systemClipboard
             .getData(java.awt.datatransfer.DataFlavor.stringFlavor) as? String
     }.getOrNull()
+    // Restored before the assertion, so a failing check still hands the
+    // clipboard back rather than leaving the test string on a phone.
+    runCatching {
+        android.content.ClipboardManager()
+            .setPrimaryClip(android.content.ClipData.newPlainText("t", clipHeld ?: ""))
+    }
     check("clipboard round-trips", back == "ducat-shim-test" || back == null,
         back ?: "no clipboard on this display")
+    check("and the clipboard was handed back", runCatching {
+        (java.awt.Toolkit.getDefaultToolkit().systemClipboard
+            .getData(java.awt.datatransfer.DataFlavor.stringFlavor) as? String) != "ducat-shim-test"
+    }.getOrDefault(true))
 
     // 8. Voice memos, if this machine has a microphone at all.
     val mic = runCatching {
