@@ -7,7 +7,24 @@
 #   adb -s emulator-5556 emu geo fix <lon> <lat>    mock GPS (phone 2)
 #
 # The one that works, learned the hard way:
-#   -gpu host          the bundled SwiftShader segfaults on this glibc
+#   -gpu host          the bundled SwiftShader segfaults on this glibc, and
+#                      so does -gpu guest — both die with SIGSEGV about
+#                      fifteen seconds in, after printing a clean
+#                      "SwiftShader 4.0.0.1" banner, so the crash looks like
+#                      a hang rather than a crash. `coredumpctl list` is what
+#                      settles it. That leaves -gpu host, which needs an X
+#                      display, which is the trap below.
+#
+#   DISPLAY            **-gpu host needs X11, and a Wayland session may have
+#                      none.** KWin runs with --xwayland but starts Xwayland
+#                      only when something asks for X; after a reboot with no
+#                      X11 app running, DISPLAY is empty session-wide, there
+#                      is no socket in /tmp/.X11-unix, and the emulator dies
+#                      with "Failed to get EGL display. DISPLAY: [:0]".
+#                      Nothing about the emulator changed — the session did.
+#                      Fix: `Xwayland :1 &` then run with DISPLAY=:1. It is a
+#                      plain user process, changes no settings, and `kill`
+#                      undoes it.
 #   -feature -Vulkan   the bundled Vulkan loader fails the same way
 #   TAP networking     SLIRP cannot carry a Veilid node (reads yes, writes
 #                      never) — scripts/emulator-tap.sh raises two TAPs
