@@ -367,7 +367,7 @@ object Ceremony {
      *  beside the rent. Same consent gates, settlement and ruling as a ride. */
     const val KIND_RESERVATION = 2
 
-    private fun frameRound0(
+    internal fun frameRound0(
         roster: List<String>,
         arbiterIdx: Int,
         kind: Int,
@@ -405,7 +405,7 @@ object Ceremony {
         return out.toByteArray()
     }
 
-    private data class Invite(
+    internal data class Invite(
         val roster: List<String>,
         val arbiterIdx: Int,
         val kind: Int,
@@ -418,29 +418,40 @@ object Ceremony {
         val commitment: ByteArray,
     )
 
-    private fun parseRound0(payload: ByteArray): Invite? {
+    internal fun parseRound0(payload: ByteArray): Invite? {
         var p = 0
+        // `n < 0` as well as past-the-end, because this parser's whole contract
+        // is that malformed input comes back as null. A length byte is written
+        // unsigned (`out.write(size)` is the low eight bits) and was read with
+        // `Byte.toInt()`, which **sign-extends** — so any length from 128 up
+        // arrived as negative, `copyOfRange(p, p - k)` threw
+        // IllegalArgumentException, and the one path documented to return null
+        // instead raised. The caller's runCatching contained it, so this cost a
+        // confusing log line rather than a crash, but "returns null when
+        // malformed" was not true and the next caller might not have caught.
         fun take(n: Int): ByteArray? {
-            if (p + n > payload.size) return null
+            if (n < 0 || p + n > payload.size) return null
             return payload.copyOfRange(p, p + n).also { p += n }
         }
-        val n = take(1)?.get(0)?.toInt() ?: return null
+        /** A byte off the wire, read the way it was written: unsigned. */
+        fun byte(): Int? = take(1)?.get(0)?.toInt()?.and(0xFF)
+        val n = byte() ?: return null
         if (n < 2 || n > 3) return null
         val roster = (0 until n).map { take(32)?.toHexString() ?: return null }
-        val arbiterIdx = take(1)?.get(0)?.toInt() ?: return null
-        val kind = take(1)?.get(0)?.toInt() ?: return null
-        val funderIdx = take(1)?.get(0)?.toInt() ?: return null
+        val arbiterIdx = byte() ?: return null
+        val kind = byte() ?: return null
+        val funderIdx = byte() ?: return null
         val fare = take(8)?.let {
             java.nio.ByteBuffer.wrap(it).order(java.nio.ByteOrder.LITTLE_ENDIAN).long
         } ?: return null
-        val refundLen = take(1)?.get(0)?.toInt() ?: return null
+        val refundLen = byte() ?: return null
         val refund = String(take(refundLen) ?: return null)
         fun u64(): Long? = take(8)?.let {
             java.nio.ByteBuffer.wrap(it).order(java.nio.ByteOrder.LITTLE_ENDIAN).long
         }
         val fDep = u64() ?: return null
         val hDep = u64() ?: return null
-        val nonceLen = take(1)?.get(0)?.toInt() ?: return null
+        val nonceLen = byte() ?: return null
         val nonce = String(take(nonceLen) ?: return null)
         val commitment = payload.copyOfRange(p, payload.size)
         if (commitment.isEmpty()) return null

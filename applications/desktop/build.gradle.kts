@@ -334,6 +334,14 @@ tasks.register<JavaExec>("escrowagree") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// The round-0 invite frame reads the way it was written.
+// `./gradlew :desktop:inviteframe`.
+tasks.register<JavaExec>("inviteframe") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.InviteFrameTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Boards rotate, so a poisoned one is abandoned rather than kept.
 // `./gradlew :desktop:generation`.
 tasks.register<JavaExec>("generation") {
