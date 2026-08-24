@@ -4,6 +4,38 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// The build's own name for itself, derived the same way `release.sh` derives
+// the tag — draft from the spec, a monotonic commit count, the short hash.
+//
+// It used to be a hardcoded "0.1.0" while releases were called v0.88.516, so
+// the app's log banner ("started — v0.1.0, …") named a version that had never
+// been released and could not identify the build somebody was reporting from.
+// A field report you cannot pin to a commit is a field report you cannot act
+// on, and that banner is the first line of every one of them.
+//
+// Falls back when git is absent — a source tarball still has to build — and
+// says so in the name rather than inventing a number.
+fun gitOut(vararg cmd: String): String? = runCatching {
+    val p = ProcessBuilder(*cmd)
+        .directory(rootProject.projectDir.parentFile)
+        .redirectErrorStream(true)
+        .start()
+    val out = p.inputStream.bufferedReader().readText().trim()
+    if (p.waitFor() == 0 && out.isNotEmpty()) out else null
+}.getOrNull()
+
+val specDraft: String =
+    runCatching {
+        Regex("""^\*\*Draft ([0-9.]+)""", RegexOption.MULTILINE)
+            .find(File(rootProject.projectDir.parentFile, "ducat-protocol.md").readText())
+            ?.groupValues?.get(1)
+    }.getOrNull() ?: "0"
+
+// Monotonic, which is what Android needs: a versionCode that never moved meant
+// every build looked like the same version to the package manager.
+val buildCount: Int = gitOut("git", "rev-list", "--count", "HEAD")?.toIntOrNull() ?: 1
+val buildHash: String = gitOut("git", "rev-parse", "--short", "HEAD") ?: "nogit"
+
 android {
     namespace = "org.ducatproject.ducat"
 
@@ -22,8 +54,8 @@ android {
         applicationId = "org.ducatproject.ducat"
         minSdk = 26          // HCE needs 19; 26 is where Keystore and BLE settle down
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = buildCount
+        versionName = "$specDraft.$buildCount-$buildHash"
     }
 
     // One APK per ABI. A universal build carries every architecture's copy of a
