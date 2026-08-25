@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">乗車終了 — 運賃を請求</string>
     <string name="bond_ask_again">もう一度頼む</string>
     <string name="bond_ask_again_note">最初の依頼が届かなかった場合に備えて、もう一度送ります。</string>
-    <string name="bond_waiting_release">乗車終了 — 乗客の運賃リリースを待っています…</string>
+    <string name="bond_waiting_release">乗車終了 — 相手が運賃を解放するのを待っています…</string>
     <string name="bond_ride_complete_ask">ドライバーが乗車終了としました。</string>
+    <string name="bond_countered_split">相手が別の分け方を提案しました。</string>
     <string name="bond_released">運賃をリリースしました</string>
     <string name="bond_released_amount">%1$s があなたへ</string>
     <string name="profile_arbiter">エスクロー仲裁者</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">この配分に署名</string>
     <string name="bond_propose_split">別の配分を提案</string>
     <string name="bond_back_to_rider">支払った側へ（%1$s）</string>
+    <string name="bond_back_to_you">あなたに戻る（%1$s）</string>
+    <string name="bond_back_to_them">%1$s に戻る（%2$s）</string>
     <string name="bond_counter">提案</string>
     <string name="bond_ask_arbiter">仲裁者に裁定を依頼</string>
     <string name="res_tray">予約</string>

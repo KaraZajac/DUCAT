@@ -329,7 +329,8 @@ stagenet ran a marketplace sale (`284eb311`) and a two-day gear hire
 (`709f4d38`) entirely through the UI, and a hail was driven rider-to-driver
 the same way, hail to release (`112e0983`). What that does not answer is a
 handset: two radios, two batteries, two independent clocks. The settlement
-UI's **counter-offer** has still never run anywhere. A co-signer today
+UI's counter-offer ran for the first time on 2026-08-25 (`74bc40b9`); a
+counter to a counter has still never been tried. A co-signer today
 consents to a stated fee, not an itemised destination list — honest consent
 waits on an upstream wallet API making payments readable.
 

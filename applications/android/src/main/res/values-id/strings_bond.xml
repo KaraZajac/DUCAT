@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">Selesaikan perjalanan — minta tarif</string>
     <string name="bond_ask_again">Tanya lagi</string>
     <string name="bond_ask_again_note">Mengirim permintaannya lagi, kalau-kalau yang pertama tidak sampai.</string>
-    <string name="bond_waiting_release">Perjalanan selesai — menunggu penumpang melepaskan tarif…</string>
+    <string name="bond_waiting_release">Perjalanan selesai — menunggu mereka melepas tarifnya…</string>
     <string name="bond_ride_complete_ask">Pengemudi menandai perjalanan selesai.</string>
+    <string name="bond_countered_split">Mereka mengusulkan pembagian lain.</string>
     <string name="bond_released">Tarif dilepaskan</string>
     <string name="bond_released_amount">%1$s untukmu</string>
     <string name="profile_arbiter">Arbiter escrow</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">Tanda tangani pembagian ini</string>
     <string name="bond_propose_split">Usulkan pembagian lain</string>
     <string name="bond_back_to_rider">Kembali ke pembayar (%1$s)</string>
+    <string name="bond_back_to_you">Kembali ke Anda (%1$s)</string>
+    <string name="bond_back_to_them">Kembali ke %1$s (%2$s)</string>
     <string name="bond_counter">Usulkan</string>
     <string name="bond_ask_arbiter">Minta arbiter memutuskan</string>
     <string name="res_tray">Reservasi</string>

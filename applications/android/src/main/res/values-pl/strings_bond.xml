@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">Zakończ przejazd — poproś o opłatę</string>
     <string name="bond_ask_again">Zapytaj ponownie</string>
     <string name="bond_ask_again_note">Wyśle prośbę jeszcze raz, na wypadek gdyby pierwsza nie dotarła.</string>
-    <string name="bond_waiting_release">Przejazd zakończony — czekamy, aż pasażer zwolni opłatę…</string>
+    <string name="bond_waiting_release">Kurs zakończony — czekamy, aż zwolnią opłatę…</string>
     <string name="bond_ride_complete_ask">Kierowca oznaczył przejazd jako zakończony.</string>
+    <string name="bond_countered_split">Zaproponowali inny podział.</string>
     <string name="bond_released">Opłata zwolniona</string>
     <string name="bond_released_amount">%1$s dla ciebie</string>
     <string name="profile_arbiter">Arbiter depozytu</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">Podpisz ten podział</string>
     <string name="bond_propose_split">Zaproponuj inny podział</string>
     <string name="bond_back_to_rider">Z powrotem do płacącego (%1$s)</string>
+    <string name="bond_back_to_you">Wraca do ciebie (%1$s)</string>
+    <string name="bond_back_to_them">Wraca do %1$s (%2$s)</string>
     <string name="bond_counter">Zaproponuj</string>
     <string name="bond_ask_arbiter">Poproś arbitra o decyzję</string>
     <string name="res_tray">Rezerwacja</string>

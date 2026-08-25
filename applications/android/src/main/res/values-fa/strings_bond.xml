@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">پایان سفر — درخواست کرایه</string>
     <string name="bond_ask_again">دوباره بپرس</string>
     <string name="bond_ask_again_note">درخواست را دوباره می‌فرستد، اگر اولی به دستشان نرسیده باشد.</string>
-    <string name="bond_waiting_release">سفر پایان یافت — در انتظار آزادسازی کرایه توسط مسافر…</string>
+    <string name="bond_waiting_release">سفر تمام شد — منتظر آزادسازی کرایه از سوی آن‌ها…</string>
     <string name="bond_ride_complete_ask">راننده سفر را پایان‌یافته علامت زد.</string>
+    <string name="bond_countered_split">تقسیم دیگری پیشنهاد کردند.</string>
     <string name="bond_released">کرایه آزاد شد</string>
     <string name="bond_released_amount">%1$s برای شما</string>
     <string name="profile_arbiter">داور امانت</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">امضای این تقسیم</string>
     <string name="bond_propose_split">پیشنهاد تقسیم متفاوت</string>
     <string name="bond_back_to_rider">بازگشت به پرداخت‌کننده (%1$s)</string>
+    <string name="bond_back_to_you">به شما برمی‌گردد (%1$s)</string>
+    <string name="bond_back_to_them">به %1$s برمی‌گردد (%2$s)</string>
     <string name="bond_counter">پیشنهاد</string>
     <string name="bond_ask_arbiter">از داور بخواهید حکم کند</string>
     <string name="res_tray">رزرو</string>

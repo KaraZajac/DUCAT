@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">Hoàn tất chuyến đi — yêu cầu cước phí</string>
     <string name="bond_ask_again">Hỏi lại</string>
     <string name="bond_ask_again_note">Gửi lại yêu cầu, phòng khi lần đầu chưa tới nơi.</string>
-    <string name="bond_waiting_release">Chuyến đi hoàn tất — chờ hành khách giải phóng cước phí…</string>
+    <string name="bond_waiting_release">Xong chuyến — đang chờ họ giải phóng tiền cước…</string>
     <string name="bond_ride_complete_ask">Tài xế đã đánh dấu chuyến đi hoàn tất.</string>
+    <string name="bond_countered_split">Họ đề xuất cách chia khác.</string>
     <string name="bond_released">Đã giải phóng cước phí</string>
     <string name="bond_released_amount">%1$s cho bạn</string>
     <string name="profile_arbiter">Trọng tài ký quỹ</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">Ký chia phần này</string>
     <string name="bond_propose_split">Đề xuất chia khác</string>
     <string name="bond_back_to_rider">Trả lại người trả (%1$s)</string>
+    <string name="bond_back_to_you">Trả lại cho bạn (%1$s)</string>
+    <string name="bond_back_to_them">Trả lại cho %1$s (%2$s)</string>
     <string name="bond_counter">Đề xuất</string>
     <string name="bond_ask_arbiter">Nhờ trọng tài phân xử</string>
     <string name="res_tray">Đặt chỗ</string>

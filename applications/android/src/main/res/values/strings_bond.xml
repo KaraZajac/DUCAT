@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">Complete ride — request the fare</string>
     <string name="bond_ask_again">Ask again</string>
     <string name="bond_ask_again_note">Sends the request again, in case the first one never reached them.</string>
-    <string name="bond_waiting_release">Ride complete — waiting for the rider to release the fare…</string>
+    <string name="bond_waiting_release">Ride complete — waiting for them to release the fare…</string>
     <string name="bond_ride_complete_ask">The driver marked the ride complete.</string>
+    <string name="bond_countered_split">They proposed a different split.</string>
     <string name="bond_released">Fare released</string>
     <string name="bond_released_amount">%1$s to you</string>
     <string name="profile_arbiter">Escrow arbiter</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">Sign this split</string>
     <string name="bond_propose_split">Propose a different split</string>
     <string name="bond_back_to_rider">Back to the payer (%1$s)</string>
+    <string name="bond_back_to_you">Back to you (%1$s)</string>
+    <string name="bond_back_to_them">Back to %1$s (%2$s)</string>
     <string name="bond_counter">Propose</string>
     <string name="bond_ask_arbiter">Ask the arbiter to rule</string>
     <string name="res_tray">Reservation</string>

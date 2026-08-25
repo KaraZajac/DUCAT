@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">Завершити поїздку — запросити оплату</string>
     <string name="bond_ask_again">Запитати ще раз</string>
     <string name="bond_ask_again_note">Надішле запит ще раз — на випадок, якщо перший не дійшов.</string>
-    <string name="bond_waiting_release">Поїздку завершено — чекаємо, поки пасажир відпустить оплату…</string>
+    <string name="bond_waiting_release">Поїздку завершено — чекаємо, поки вони випустять оплату…</string>
     <string name="bond_ride_complete_ask">Водій позначив поїздку завершеною.</string>
+    <string name="bond_countered_split">Вони запропонували інший поділ.</string>
     <string name="bond_released">Оплату відпущено</string>
     <string name="bond_released_amount">%1$s вам</string>
     <string name="profile_arbiter">Арбітр ескроу</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">Підписати цей розподіл</string>
     <string name="bond_propose_split">Запропонувати інший розподіл</string>
     <string name="bond_back_to_rider">Назад платнику (%1$s)</string>
+    <string name="bond_back_to_you">Назад тобі (%1$s)</string>
+    <string name="bond_back_to_them">Назад %1$s (%2$s)</string>
     <string name="bond_counter">Запропонувати</string>
     <string name="bond_ask_arbiter">Попросити арбітра вирішити</string>
     <string name="res_tray">Бронювання</string>

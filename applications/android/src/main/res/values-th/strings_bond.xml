@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">จบการเดินทาง — ขอรับค่าโดยสาร</string>
     <string name="bond_ask_again">ถามอีกครั้ง</string>
     <string name="bond_ask_again_note">ส่งคำขออีกครั้ง เผื่อครั้งแรกไปไม่ถึง</string>
-    <string name="bond_waiting_release">จบการเดินทางแล้ว — รอผู้โดยสารปล่อยค่าโดยสาร…</string>
+    <string name="bond_waiting_release">จบการเดินทาง — รออีกฝ่ายปล่อยค่าโดยสาร…</string>
     <string name="bond_ride_complete_ask">คนขับระบุว่าการเดินทางเสร็จสิ้นแล้ว</string>
+    <string name="bond_countered_split">อีกฝ่ายเสนอการแบ่งแบบอื่น</string>
     <string name="bond_released">ปล่อยค่าโดยสารแล้ว</string>
     <string name="bond_released_amount">%1$s เป็นของคุณ</string>
     <string name="profile_arbiter">ผู้ชี้ขาดเอสโครว์</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">ลงนามการแบ่งนี้</string>
     <string name="bond_propose_split">เสนอการแบ่งแบบอื่น</string>
     <string name="bond_back_to_rider">คืนให้ผู้จ่าย (%1$s)</string>
+    <string name="bond_back_to_you">คืนให้คุณ (%1$s)</string>
+    <string name="bond_back_to_them">คืนให้ %1$s (%2$s)</string>
     <string name="bond_counter">เสนอ</string>
     <string name="bond_ask_arbiter">ขอให้ผู้ชี้ขาดตัดสิน</string>
     <string name="res_tray">การจอง</string>

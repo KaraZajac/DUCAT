@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">Concluir viagem — pedir a tarifa</string>
     <string name="bond_ask_again">Pedir de novo</string>
     <string name="bond_ask_again_note">Envia o pedido de novo, caso o primeiro não tenha chegado.</string>
-    <string name="bond_waiting_release">Viagem concluída — à espera de que o passageiro liberte a tarifa…</string>
+    <string name="bond_waiting_release">Viagem concluída — esperando que liberem a tarifa…</string>
     <string name="bond_ride_complete_ask">O motorista marcou a viagem como concluída.</string>
+    <string name="bond_countered_split">Propuseram uma divisão diferente.</string>
     <string name="bond_released">Tarifa libertada</string>
     <string name="bond_released_amount">%1$s para você</string>
     <string name="profile_arbiter">Árbitro da caução</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">Assinar esta divisão</string>
     <string name="bond_propose_split">Propor outra divisão</string>
     <string name="bond_back_to_rider">De volta a quem pagou (%1$s)</string>
+    <string name="bond_back_to_you">De volta para você (%1$s)</string>
+    <string name="bond_back_to_them">De volta para %1$s (%2$s)</string>
     <string name="bond_counter">Propor</string>
     <string name="bond_ask_arbiter">Pedir ao árbitro para decidir</string>
     <string name="res_tray">Reserva</string>

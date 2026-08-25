@@ -116,14 +116,18 @@ Turn the Escrow-arbiter switch OFF on both phones' contact profiles first.
    rider's refund address, fare − fee → driver.
 3. Verify the numbers on both banners match, then on chain.
 
-## Pass 5 — settlement (proposal and Sign proven; **Counter has never run**)
+## Pass 5 — settlement (proven off-hardware, counter included; re-run here)
 
-The propose-and-sign half ran three times on 2026-08-25 off-hardware — a
-ride, a marketplace sale and a two-day gear hire — each one proposed on one
-client and signed on the other, each released on chain (`112e0983`,
-`284eb311`, `709f4d38`). **The counter-offer has still never been exercised
-by anybody**, so step 2 below is the one that matters here: it is the only
-part of the settlement UI with no live pass at all.
+Propose-and-sign ran three times on 2026-08-25 off-hardware — a ride, a
+marketplace sale and a two-day gear hire, each proposed on one client and
+signed on the other (`112e0983`, `284eb311`, `709f4d38`). **The counter ran
+the same day** and was worth every minute: the rider countered, the driver
+signed, and the money was right both times — while three separate sentences
+were wrong, because a counter swaps the roles and nothing that named them
+swapped with it (`4c9a027d`, then `74bc40b9` on the fixed build).
+
+One thing here is still untested anywhere: a counter to a **counter**. Both
+passes ended on the first one.
 
 On a fresh 2-of-2 ride (or the same one before releasing):
 

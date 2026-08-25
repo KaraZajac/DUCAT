@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">Yolculuğu tamamla — ücreti iste</string>
     <string name="bond_ask_again">Tekrar sor</string>
     <string name="bond_ask_again_note">İsteği yeniden gönderir, ilki ulaşmadıysa diye.</string>
-    <string name="bond_waiting_release">Yolculuk tamam — yolcunun ücreti serbest bırakması bekleniyor…</string>
+    <string name="bond_waiting_release">Yolculuk bitti — ücreti bırakmaları bekleniyor…</string>
     <string name="bond_ride_complete_ask">Sürücü yolculuğu tamamlandı olarak işaretledi.</string>
+    <string name="bond_countered_split">Farklı bir paylaşım önerdiler.</string>
     <string name="bond_released">Ücret serbest bırakıldı</string>
     <string name="bond_released_amount">%1$s sana</string>
     <string name="profile_arbiter">Emanet hakemi</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">Bu paylaşımı imzala</string>
     <string name="bond_propose_split">Farklı bir paylaşım öner</string>
     <string name="bond_back_to_rider">Ödeyene geri (%1$s)</string>
+    <string name="bond_back_to_you">Sana geri (%1$s)</string>
+    <string name="bond_back_to_them">%1$s kişisine geri (%2$s)</string>
     <string name="bond_counter">Öner</string>
     <string name="bond_ask_arbiter">Hakemden karar iste</string>
     <string name="res_tray">Rezervasyon</string>

@@ -2280,6 +2280,18 @@ private fun RideBondBanner(contact: Contact) {
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Trouble?>(null) }
     var countering by remember { mutableStateOf(false) }
+    // The counter is a money field, so it reads money the way the rest of the
+    // app does. It asked for XMR — directly under a line saying "USD 2.23 back
+    // to you" — which made the one field in the settlement a person types into
+    // the only one requiring them to do an exchange rate in their head, at the
+    // moment they are disputing an amount. Falls back to XMR with no cached
+    // rate, like every other entry.
+    val counterRateV by ContactStore.changes.collectAsState()
+    val counterRate = remember(counterRateV) {
+        org.ducatproject.ducat.RateStore(context).cached()?.first
+    }
+    val counterFiat = remember(counterRateV) { Amounts.enterFiat(context) }
+    val counterCur = remember(counterRateV) { Amounts.currency(context) }
     var counterXmr by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     // Whatever is waiting on the PIN. Held rather than run, so that the only
@@ -2503,7 +2515,15 @@ private fun RideBondBanner(contact: Contact) {
                     when {
                         plainBond -> R.string.bond_close_ask
                         reservation -> R.string.res_complete_ask
-                        else -> R.string.bond_ride_complete_ask
+                        // The ordinary direction: the driver ended the ride
+                        // and the rider is being asked to sign.
+                        rider -> R.string.bond_ride_complete_ask
+                        // A driver being asked is a driver whose rider
+                        // countered. Telling them "the driver marked the ride
+                        // complete" reported their own earlier action back at
+                        // them as the news — the same slip the booking's own
+                        // branch above was added to fix.
+                        else -> R.string.bond_countered_split
                     },
                 ),
                 // For a bond the whole escrow goes to them, so that is the
@@ -2919,8 +2939,19 @@ private fun RideBondBanner(contact: Contact) {
                     BondLine(
                         spin = false,
                         text = stringResource(
-                            if (reservation) R.string.res_complete_ask
-                            else R.string.bond_ride_complete_ask,
+                            when {
+                                reservation -> R.string.res_complete_ask
+                                // The ordinary direction: the driver ended the
+                                // ride and the rider is being asked. Saying so
+                                // is worth keeping — it is the news.
+                                rider -> R.string.bond_ride_complete_ask
+                                // A driver being asked to sign is a driver
+                                // whose rider countered, and telling them "the
+                                // driver marked the ride complete" reported
+                                // their own earlier action back to them as
+                                // though it were the thing that just happened.
+                                else -> R.string.bond_countered_split
+                            },
                         ),
                     )
                     Spacer(Modifier.height(2.dp))
@@ -2962,15 +2993,27 @@ private fun RideBondBanner(contact: Contact) {
                                 onValueChange = {
                                     counterXmr = it.filter { c -> Amounts.isNumberChar(c) }
                                 },
-                                label = { Text(stringResource(R.string.bond_back_to_rider, "XMR")) },
+                                label = {
+                                    val unit = if (counterFiat) counterCur else "XMR"
+                                    Text(
+                                        // Whose side of the split this is,
+                                        // said to whoever is typing it. "Back
+                                        // to the payer" sat under a sentence
+                                        // that had just called them "you".
+                                        if (rider) stringResource(R.string.bond_back_to_you, unit)
+                                        else stringResource(
+                                            R.string.bond_back_to_them,
+                                            isolate(contact.displayName()), unit,
+                                        ),
+                                    )
+                                },
                                 singleLine = true,
                                 modifier = Modifier.weight(1f),
                             )
                             Spacer(Modifier.width(6.dp))
                             Button(
                                 onClick = {
-                                    val pxmr = Amounts.parse(counterXmr)
-                                        ?.let { Amounts.toPxmr(it) }
+                                    val pxmr = offerToPxmr(counterXmr, counterFiat, counterRate)
                                     if (pxmr != null) {
                                         busy = true; error = null
                                         scope.launch {
@@ -3002,8 +3045,36 @@ private fun RideBondBanner(contact: Contact) {
                             if (reservation) R.string.res_released else R.string.bond_released,
                         ),
                     )
-                    val mine = if (stage == "released") ride.optLong("payoutPxmr")
-                    else ride.optLong("pendingRiderBack")
+                    // Which side of the split I am on, not which end of the
+                    // ceremony I happened to be.
+                    //
+                    // This read `payoutPxmr` for the proposer and
+                    // `pendingRiderBack` for the co-signer, which is right
+                    // only while the proposer is always the driver. It is not:
+                    // a counter-offer swaps the roles, and then both people
+                    // were shown the *other* one's number as theirs. Found on
+                    // the first counter anybody has run — the rider countered
+                    // for 0.005, took exactly 0.005, and was told "USD 3.67 to
+                    // you"; the driver took 0.008235 and was told 2.23. The
+                    // money was right both times, and the sentence at the one
+                    // moment somebody checks they were paid what they agreed
+                    // was the other party's.
+                    //
+                    // Both ends already hold the same figure — what goes back
+                    // to the rider — under different names: the proposer wrote
+                    // `myRiderBack`, the co-signer stored the proposer's
+                    // `pendingRiderBack`. Take that, then take my own side of
+                    // it.
+                    val riderShare = if (stage == "released") {
+                        ride.optLong("myRiderBack", -1L)
+                    } else {
+                        ride.optLong("pendingRiderBack", -1L)
+                    }
+                    val mine = when {
+                        riderShare < 0 -> 0L
+                        rider -> riderShare
+                        else -> (funded - riderShare).coerceAtLeast(0L)
+                    }
                     if (mine > 0) {
                         Spacer(Modifier.height(4.dp))
                         BondNote(

@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">Concludi corsa — richiedi la tariffa</string>
     <string name="bond_ask_again">Chiedi di nuovo</string>
     <string name="bond_ask_again_note">Invia di nuovo la richiesta, nel caso la prima non sia arrivata.</string>
-    <string name="bond_waiting_release">Corsa conclusa — in attesa che il passeggero sblocchi la tariffa…</string>
+    <string name="bond_waiting_release">Corsa finita — in attesa che liberino la tariffa…</string>
     <string name="bond_ride_complete_ask">L\'autista ha segnato la corsa come conclusa.</string>
+    <string name="bond_countered_split">Hanno proposto una divisione diversa.</string>
     <string name="bond_released">Tariffa sbloccata</string>
     <string name="bond_released_amount">%1$s a te</string>
     <string name="profile_arbiter">Arbitro del deposito</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">Firma questa divisione</string>
     <string name="bond_propose_split">Proponi un\'altra divisione</string>
     <string name="bond_back_to_rider">Al pagante (%1$s)</string>
+    <string name="bond_back_to_you">Torna a te (%1$s)</string>
+    <string name="bond_back_to_them">Torna a %1$s (%2$s)</string>
     <string name="bond_counter">Proponi</string>
     <string name="bond_ask_arbiter">Chiedi all’arbitro di decidere</string>
     <string name="res_tray">Prenotazione</string>

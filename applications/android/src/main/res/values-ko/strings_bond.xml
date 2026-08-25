@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">운행 완료 — 요금 요청</string>
     <string name="bond_ask_again">다시 요청</string>
     <string name="bond_ask_again_note">첫 요청이 닿지 않았을 경우를 대비해 다시 보냅니다.</string>
-    <string name="bond_waiting_release">운행 완료 — 승객의 요금 지급을 기다리는 중…</string>
+    <string name="bond_waiting_release">운행 완료 — 상대가 요금을 풀어주기를 기다리는 중…</string>
     <string name="bond_ride_complete_ask">기사가 운행 완료로 표시했습니다.</string>
+    <string name="bond_countered_split">상대가 다른 분배를 제안했어요.</string>
     <string name="bond_released">요금이 지급되었습니다</string>
     <string name="bond_released_amount">%1$s 내 몫</string>
     <string name="profile_arbiter">에스크로 중재자</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">이 분배에 서명</string>
     <string name="bond_propose_split">다른 분배 제안</string>
     <string name="bond_back_to_rider">지불한 쪽에게 (%1$s)</string>
+    <string name="bond_back_to_you">당신에게 반환 (%1$s)</string>
+    <string name="bond_back_to_them">%1$s에게 반환 (%2$s)</string>
     <string name="bond_counter">제안</string>
     <string name="bond_ask_arbiter">중재자에게 판정 요청</string>
     <string name="res_tray">예약</string>

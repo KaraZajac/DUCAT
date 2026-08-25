@@ -11,8 +11,9 @@
     <string name="bond_complete_ride">सवारी पूरी करें — किराया माँगें</string>
     <string name="bond_ask_again">फिर पूछें</string>
     <string name="bond_ask_again_note">अनुरोध दोबारा भेजता है, अगर पहला उन तक न पहुँचा हो।</string>
-    <string name="bond_waiting_release">सवारी पूरी — सवार द्वारा किराया जारी करने की प्रतीक्षा…</string>
+    <string name="bond_waiting_release">सवारी पूरी — किराया जारी करने का इंतज़ार…</string>
     <string name="bond_ride_complete_ask">चालक ने सवारी पूरी होने का चिह्न लगाया।</string>
+    <string name="bond_countered_split">उन्होंने अलग बँटवारा सुझाया।</string>
     <string name="bond_released">किराया जारी किया गया</string>
     <string name="bond_released_amount">%1$s आपको</string>
     <string name="profile_arbiter">एस्क्रो मध्यस्थ</string>
@@ -20,6 +21,8 @@
     <string name="bond_sign_split">इस बंटवारे पर हस्ताक्षर करें</string>
     <string name="bond_propose_split">अलग बंटवारा प्रस्तावित करें</string>
     <string name="bond_back_to_rider">भुगतानकर्ता को वापस (%1$s)</string>
+    <string name="bond_back_to_you">आपको वापस (%1$s)</string>
+    <string name="bond_back_to_them">%1$s को वापस (%2$s)</string>
     <string name="bond_counter">प्रस्ताव</string>
     <string name="bond_ask_arbiter">मध्यस्थ से निर्णय माँगें</string>
     <string name="res_tray">आरक्षण</string>

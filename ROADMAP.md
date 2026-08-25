@@ -126,9 +126,9 @@ money. Ordered by what blocks 1.0, not by effort.
   accept flow and the settlement UI both had their live two-client pass on
   2026-08-25** — two emulators, live Veilid, live stagenet: a ride
   (`112e0983`), a marketplace sale (`284eb311`) and a two-day gear hire
-  (`709f4d38`), each proposed on one client and signed on the other. **Left
-  for the field day:** the counter-offer, which no pass has ever exercised,
-  and the whole of it again on hardware.
+  (`709f4d38`), each proposed on one client and signed on the other. The counter-offer ran on the same
+  day (`74bc40b9`) and cost three wrong sentences to find. **Left for the
+  field day:** a counter to a counter, and the whole of it again on hardware.
 - **Opt-in live location after commitment.** ~~Spec it before building
   it~~ **specified, 0.88 (2026-08-16)** — §15.12 "Live position after the
   accept": gated on RIDE_ACCEPT, consent per ride per direction, off by
