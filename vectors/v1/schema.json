@@ -1262,11 +1262,9 @@
             "properties": {
               "reason": {
                 "type": "integer",
-                "enum": [
-                  1,
-                  2
-                ],
-                "description": "1 = cure window expired, 2 = conflicting key image. Reason 2 skips the waiting period, which is why it must carry evidence."
+                "minimum": 0,
+                "maximum": 255,
+                "description": "1 = cure window expired, 2 = conflicting key image. Reason 2 skips the waiting period, which is why it must carry evidence. Deliberately not an enum: a schema admitting only the two valid reasons makes the case that matters — an unrecognised one — impossible to write down, so the size of the set was asserted nowhere a runner could check it, and a second implementation was reading every unknown reason as the double spend. `slash_unknown_reason` states it instead, where it is checked rather than assumed."
               },
               "key_image_hex": {
                 "$ref": "#/$defs/hex"

@@ -911,6 +911,13 @@ def run_slash_check(cases, r):
         def go(c=c):
             if c["claim_pxmr"] > c["agreed_pxmr"]:
                 raise Reject("PriceMismatch", "claim exceeds what was agreed")
+            # Two reasons, and nothing else. This read `else:` — so any
+            # unrecognised reason was handled as a double spend, which is the
+            # one that skips the waiting period. An implementation that rounds
+            # an unknown cause to the nearest one it knows is honouring a claim
+            # on somebody's bond for a cause nobody defined.
+            if c["reason"] not in (1, 2):
+                raise Reject("Malformed", "unknown slash reason")
             if c["reason"] == 1:
                 if c["elapsed_blocks"] < c["cure_blocks"]:
                     raise Reject("PolicyRefused", "cure window has not expired")

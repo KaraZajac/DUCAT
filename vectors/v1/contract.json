@@ -581,6 +581,22 @@
     },
     {
       "agreed_pxmr": 21000000000,
+      "claim_pxmr": 21000000000,
+      "cure_blocks": 20,
+      "elapsed_blocks": 30,
+      "expect": {
+        "ok": false,
+        "reject_code": 10,
+        "reject_name": "Malformed"
+      },
+      "key_image_hex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "kind": "slash.check",
+      "name": "slash_unknown_reason",
+      "reason": 3,
+      "why": "Two reasons a bond may be slashed, and nothing else. A reader that treats an unrecognised reason as the nearest one it knows is honouring a claim on somebody's money for a cause nobody defined — and the nearest one here is the one that skips the waiting period."
+    },
+    {
+      "agreed_pxmr": 21000000000,
       "claim_pxmr": 21000000001,
       "cure_blocks": 20,
       "elapsed_blocks": 30,

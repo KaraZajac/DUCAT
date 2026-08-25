@@ -873,16 +873,31 @@ fn contract_vectors_pass() {
                     prev: commit(Purpose::ChainLink, &accept_bytes),
                     amount_final: agreed, timestamp: 1_800_000_005, unilateral: false,
                 };
+                // Not "the nearest reason we know".
+                //
+                // This read `if reason == 1 { cure window } else { double
+                // spend }`, and so did the second implementation — both
+                // rounding an unrecognised reason to the same known one, which
+                // is why no vector ever caught that neither of them refused
+                // it. `SlashClaim::from_value` does, and the reason they both
+                // rounded to is the one that skips the waiting period.
+                let reason = match c["reason"].as_u64().unwrap() {
+                    1 => SlashReason::CureWindowExpired,
+                    2 => SlashReason::ConflictingKeyImage,
+                    _ => {
+                        check_outcome(
+                            name, &c["expect"],
+                            Err(ducat_core::reject::RejectCode::Malformed as u8),
+                        );
+                        continue;
+                    }
+                };
                 let claim = SlashClaim {
                     version: 1, suite: 1,
                     accept_link: commit(Purpose::ChainLink, &accept_bytes),
                     receipt_link: commit(Purpose::ChainLink, &receipt_bytes),
                     txid: [0x77; 32],
-                    reason: if c["reason"].as_u64().unwrap() == 1 {
-                        SlashReason::CureWindowExpired
-                    } else {
-                        SlashReason::ConflictingKeyImage
-                    },
+                    reason,
                     key_image: c["key_image_hex"].as_str()
                         .map(|k| unhex(k).try_into().unwrap()),
                     claim_pxmr: c["claim_pxmr"].as_u64().unwrap(),

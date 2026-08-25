@@ -1310,6 +1310,21 @@ fn contact_cases() -> Vec<J> {
         &ContactDetails { outbox_key: String::new(), ..det.clone() },
         Some((RejectCode::Malformed, "empty text field")));
 
+    // A pronouns code nobody has a word for.
+    //
+    // Built by hand, because the field is an enum in this implementation and
+    // cannot hold one — which is precisely why it needed a vector: the closed
+    // set had an "absent" case and no "wrong" case, so its *size* was never
+    // pinned and a second implementation could have picked its own.
+    {
+        let ducat_core::cbor::Value::Map(mut m) = det.to_value() else { unreachable!() };
+        m.insert(ducat_core::wire::f::DET_PRONOUNS, ducat_core::cbor::Value::Uint(7));
+        v.push(json!({ "name": "details_unknown_pronouns",
+            "why": "Seven. The set is closed at six on purpose — this is drawn beside a name on a stranger's screen, and free text there is a place to put a message — so a code outside it is refused rather than rendered as a number.",
+            "details_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "unknown pronouns code" } }));
+    }
+
     for (name, why, seq) in [
         ("head_zero", "A log nobody has written to yet: the next message will be sequence 0.", 0u64),
         ("head_mid", "next_seq doubles as the count of messages ever written, which is what makes a gap detectable.", 42u64),
@@ -1817,6 +1832,21 @@ fn contact_cases() -> Vec<J> {
             Some((RejectCode::Malformed, "not a geohash")));
     }
 
+    // A message kind nobody has a name for.
+    //
+    // Forged, because the field is an enum here and cannot hold one — which
+    // is why it had no vector: eleven kinds are each exercised positively and
+    // the *edge* of the set never was. A reader that renders an unknown kind
+    // as text shows a payment request as a chat line, or the reverse.
+    {
+        let ducat_core::cbor::Value::Map(mut m) = base_pay.to_value() else { unreachable!() };
+        m.insert(ducat_core::wire::f::MSG_KIND, ducat_core::cbor::Value::Uint(11));
+        v.push(json!({ "name": "message_unknown_kind",
+            "why": "Kind 11. The set is closed at ten, and a kind decides what every other field on the message *means* — an amount, a target sequence, a ceremony payload. Falling back to text would render a request for money as something to read.",
+            "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "unknown message kind" } }));
+    }
+
     // §16.18: the listing — the other object that lives on a public board,
     // and the one that stays there for days.
     {
@@ -1950,6 +1980,77 @@ fn contact_cases() -> Vec<J> {
             "An hourly rate for one person's time, offered three at a time. Somebody's time is not stock, and the number would be describing staffing the listing does not have.",
             &RentalNotice { kind: 5, subtype: Some(1), quantity: 3, ..six.clone() },
             Some((RejectCode::Malformed, "somebody's time is not stock")));
+
+        // The text bounds, which had none. A listing sits in the open for days
+        // and every one of these is a field a stranger's screen has to lay
+        // out; two implementations disagreeing about where the limit falls is
+        // one of them rendering a notice the other refuses.
+        lcase("listing_title_too_long",
+            "One human line. Sixty characters is a headline; past that it is a description, and a description belongs in the conversation where it is not being broadcast.",
+            &RentalNotice { title: "x".repeat(61), ..car.clone() },
+            Some((RejectCode::Malformed, "text too long")));
+        lcase("listing_area_too_long",
+            "Human words for a neighbourhood. Forty characters holds one; more is an address being smuggled into the field that exists so an address does not have to be.",
+            &RentalNotice { area: "x".repeat(41), ..car.clone() },
+            Some((RejectCode::Malformed, "text too long")));
+        lcase("listing_word_too_long",
+            "Make, model, colour, trim: single words for filtering on, not free text. The bound is the same for all four, and this is the one that pins it.",
+            &RentalNotice { model: Some("x".repeat(25)), ..car.clone() },
+            Some((RejectCode::Malformed, "text too long")));
+        lcase("listing_feature_too_long",
+            "A tag is a short word. The count had a vector and the length did not — so an implementation could have taken a sentence per tag and still agreed with this one on everything tested.",
+            &RentalNotice { features: vec!["x".repeat(17)], ..room.clone() },
+            Some((RejectCode::Malformed, "a feature is a short word")));
+
+        // The version, on the object that lives longest in the open. A hail
+        // had this vector and a listing did not, and a listing is the one that
+        // sits on a public board for days.
+        lcase("listing_wrong_version",
+            "Version 1 was never shipped on a board — the notice carries 2 because the sealed form around it does (board.rs). A reader that guessed at an older shape would be reading fields nobody wrote.",
+            &RentalNotice { version: 1, ..car.clone() },
+            Some((RejectCode::Malformed, "unknown rental notice version")));
+
+        // Every kind's subtype ceiling, from both sides.
+        //
+        // The table — 2, 3, 9, 5, 12 — had no vector at all, and a second
+        // implementation was carrying the two-kind version of it from before
+        // draft 0.89 without anything noticing. A reject past the top pins it
+        // from above and an accept at the top pins it from below; either alone
+        // leaves an implementation free to pick a different number.
+        for kind in RENTAL_PLACE..=RENTAL_SKILL {
+            let top = rental_subtype_top(kind);
+            // No typed extras, so one shape serves every kind: a place and a
+            // vehicle refuse each other's fields, not the absence of them.
+            let base = RentalNotice { kind, quantity: 1, subtype: Some(top), ..six.clone() };
+            lcase(
+                &format!("listing_subtype_top_kind_{kind}"),
+                &format!(
+                    "The last category kind {kind} recognises. The set is deliberately \
+                     small and flat — a coarse filter on a board that is expensive to \
+                     read, translated everywhere this ships — so its size is part of \
+                     the wire and not an implementation's own idea.",
+                ),
+                &base, None,
+            );
+            lcase(
+                &format!("listing_subtype_past_top_kind_{kind}"),
+                &format!(
+                    "One past it. A reader cannot render a category it has no name \
+                     for, and showing the raw number instead would be a listing \
+                     claiming something nobody can read.",
+                ),
+                &RentalNotice { subtype: Some(top + 1), ..base.clone() },
+                Some((RejectCode::Malformed, "unknown subtype")),
+            );
+        }
+        lcase("listing_subtype_zero",
+            "Subtypes are one-based; zero is the absence of one, and the way to say that is to omit the field.",
+            &RentalNotice { subtype: Some(0), quantity: 1, ..six.clone() },
+            Some((RejectCode::Malformed, "unknown subtype")));
+        lcase("listing_bad_fuel",
+            "Petrol, diesel, electric or hybrid. A fifth value is a claim this reader cannot render — the same rule as the gearbox beside it, which had a vector while this did not.",
+            &RentalNotice { fuel: Some(5), ..car.clone() },
+            Some((RejectCode::Malformed, "unknown fuel")));
 
         let forge = |q: u64| {
             let ducat_core::cbor::Value::Map(mut m) = six.to_value() else { unreachable!() };
@@ -2193,6 +2294,14 @@ fn contract_cases() -> Vec<J> {
     v.push(slash("slash_double_spend_with_evidence_skips_the_cure_window",
         "a conflicting key image is on-chain and self-authenticating",
         2, Some(&hex(&[0x5Au8; 32])), 0, 21_000_000_000, json!({"ok": true})));
+    v.push(slash("slash_unknown_reason",
+        "Two reasons a bond may be slashed, and nothing else. A reader that treats an \
+         unrecognised reason as the nearest one it knows is honouring a claim on somebody's \
+         money for a cause nobody defined — and the nearest one here is the one that skips \
+         the waiting period.",
+        3, Some(&hex(&[0x5Au8; 32])), 30, 21_000_000_000,
+        json!({"ok": false, "reject_code": RejectCode::Malformed as u8,
+               "reject_name": "Malformed"})));
     v.push(slash("slash_claim_over_the_agreed_amount_refused",
         "a claim exceeding what was agreed is a claimant helping themselves",
         1, None, 30, 21_000_000_001,

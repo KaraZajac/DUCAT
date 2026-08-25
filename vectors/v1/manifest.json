@@ -3,8 +3,8 @@
     "backup": 7,
     "codec": 43,
     "commit": 2,
-    "contact": 130,
-    "contract": 24,
+    "contact": 149,
+    "contract": 25,
     "negotiate": 4,
     "object": 8,
     "signing": 17,
@@ -34,6 +34,6 @@
   "generated_by": "ducat-core examples/gen_vectors.rs",
   "protocol_draft": "0.42",
   "reject_codes_are": "§18.5 wire codes. Two clients must agree an input is MALFORMED; they need not agree on which internal decoder rule said so. The non-normative `hint` field names the rule.",
-  "total_cases": 268,
+  "total_cases": 288,
   "vector_set": "1"
 }

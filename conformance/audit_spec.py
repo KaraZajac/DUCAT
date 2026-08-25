@@ -205,6 +205,32 @@ if ranges:
         if not any(lo <= n <= hi for lo, hi in ranges):
             bad("registry", f"field {n} ({name}) is outside every range §18.4.2 declares")
 
+# --- 12. §16.18's subtype ceilings match rental_subtype_top -----------------
+# The one table in this document that is also a table in the code, and the
+# code's copy is what a board is validated against. A second implementation
+# was found carrying the pre-0.89 two-kind version of it — accepted by nothing
+# and refused by nothing, because no vector had ever exercised the three newer
+# kinds. Vectors pin it across implementations now; this pins the prose to the
+# same numbers, so a kind added to one has to be added to the other.
+_top = read("core/src/contact.rs")
+_fn = _top[_top.find("pub const fn rental_subtype_top") :]
+_fn = _fn[: _fn.find("\n}")]
+code_tops = {}
+_names = dict(re.findall(r"pub const (RENTAL_[A-Z]+): u64 = (\d+);", _top))
+for arm, val in re.findall(r"(RENTAL_[A-Z]+)\s*=>\s*(\d+)", _fn):
+    if arm in _names:
+        code_tops[int(_names[arm])] = int(val)
+spec_tops = {}
+for kind, top in re.findall(r"^\|\s*(\d+)\s+[a-z ]+\|\s*(\d+)\s*\|", SPEC, re.M):
+    spec_tops[int(kind)] = int(top)
+# Only the kinds the code declares; the registry table above uses the same shape.
+spec_tops = {k: v for k, v in spec_tops.items() if k in code_tops}
+if not code_tops:
+    bad("subtypes", "rental_subtype_top could not be read from core")
+elif spec_tops != code_tops:
+    bad("subtypes",
+        f"§16.18's category table says {spec_tops}; rental_subtype_top says {code_tops}")
+
 print(f"\nspec audit — {len(problems)} problem(s)\n")
 for p in problems:
     print(f"  {p}")

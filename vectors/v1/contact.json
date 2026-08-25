@@ -267,6 +267,17 @@
       "why": "An empty outbox key would leave the other side with a contact it can never write to, reported as success."
     },
     {
+      "details_hex": "a8000a0101020118ac5820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18ad785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118ae5830dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd18af6373616d18bf07",
+      "expect": {
+        "hint": "unknown pronouns code",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "contact.details",
+      "name": "details_unknown_pronouns",
+      "why": "Seven. The set is closed at six on purpose — this is drawn beside a name on a stranger's screen, and free text there is a place to put a message — so a code outside it is refused rather than rendered as a number."
+    },
+    {
       "expect": {
         "ok": true,
         "reencodes_to_hex": "a400181a0101020118b000"
@@ -1183,6 +1194,17 @@
     },
     {
       "expect": {
+        "hint": "unknown message kind",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "message_unknown_kind",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20b18b31b00000004e3b29200",
+      "why": "Kind 11. The set is closed at ten, and a kind decides what every other field on the message *means* — an amount, a target sequence, a ceremony payload. Falling back to text would render a request for money as something to read."
+    },
+    {
+      "expect": {
         "ok": true,
         "reencodes_to_hex": "b318dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0218df773230313920436f726f6c6c612c206175746f6d6174696318e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018e566546f796f746118e667436f726f6c6c6118e71907e318e80218e90118ea0518eb6673696c76657218ee0118ef816a6368696c64207365617418f069487962726964204c45"
       },
@@ -1373,6 +1395,188 @@
       "listing_hex": "ac18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0518df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0118ef8166706164646c6518f803",
       "name": "listing_skill_with_a_quantity",
       "why": "An hourly rate for one person's time, offered three at a time. Somebody's time is not stock, and the number would be describing staffing the listing does not have."
+    },
+    {
+      "expect": {
+        "hint": "text too long",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "b318dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0218df783d7878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787818e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018e566546f796f746118e667436f726f6c6c6118e71907e318e80218e90118ea0518eb6673696c76657218ee0118ef816a6368696c64207365617418f069487962726964204c45",
+      "name": "listing_title_too_long",
+      "why": "One human line. Sixty characters is a headline; past that it is a description, and a description belongs in the conversation where it is not being broadcast."
+    },
+    {
+      "expect": {
+        "hint": "text too long",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "b318dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0218df773230313920436f726f6c6c612c206175746f6d6174696318e07829787878787878787878787878787878787878787878787878787878787878787878787878787878787818e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018e566546f796f746118e667436f726f6c6c6118e71907e318e80218e90118ea0518eb6673696c76657218ee0118ef816a6368696c64207365617418f069487962726964204c45",
+      "name": "listing_area_too_long",
+      "why": "Human words for a neighbourhood. Forty characters holds one; more is an address being smuggled into the field that exists so an address does not have to be."
+    },
+    {
+      "expect": {
+        "hint": "text too long",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "b318dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0218df773230313920436f726f6c6c612c206175746f6d6174696318e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018e566546f796f746118e678197878787878787878787878787878787878787878787878787818e71907e318e80218e90118ea0518eb6673696c76657218ee0118ef816a6368696c64207365617418f069487962726964204c45",
+      "name": "listing_word_too_long",
+      "why": "Make, model, colour, trim: single words for filtering on, not free text. The bound is the same for all four, and this is the one that pins it."
+    },
+    {
+      "expect": {
+        "hint": "a feature is a short word",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ae18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e31b000000012a05f20018e41a6b49d20018ec0118ed0218ee0218ef8171787878787878787878787878787878787818f1181c",
+      "name": "listing_feature_too_long",
+      "why": "A tag is a short word. The count had a vector and the length did not — so an implementation could have taken a sentence per tag and still agreed with this one on everything tested."
+    },
+    {
+      "expect": {
+        "hint": "unknown rental notice version",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "b318dc0118dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0218df773230313920436f726f6c6c612c206175746f6d6174696318e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018e566546f796f746118e667436f726f6c6c6118e71907e318e80218e90118ea0518eb6673696c76657218ee0118ef816a6368696c64207365617418f069487962726964204c45",
+      "name": "listing_wrong_version",
+      "why": "Version 1 was never shipped on a board — the notice carries 2 because the sealed form around it does (board.rs). A reader that guessed at an older shape would be reading fields nobody wrote."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0218ef8166706164646c65"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0218ef8166706164646c65",
+      "name": "listing_subtype_top_kind_1",
+      "why": "The last category kind 1 recognises. The set is deliberately small and flat — a coarse filter on a board that is expensive to read, translated everywhere this ships — so its size is part of the wire and not an implementation's own idea."
+    },
+    {
+      "expect": {
+        "hint": "unknown subtype",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0318ef8166706164646c65",
+      "name": "listing_subtype_past_top_kind_1",
+      "why": "One past it. A reader cannot render a category it has no name for, and showing the raw number instead would be a listing claiming something nobody can read."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0218df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0318ef8166706164646c65"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0218df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0318ef8166706164646c65",
+      "name": "listing_subtype_top_kind_2",
+      "why": "The last category kind 2 recognises. The set is deliberately small and flat — a coarse filter on a board that is expensive to read, translated everywhere this ships — so its size is part of the wire and not an implementation's own idea."
+    },
+    {
+      "expect": {
+        "hint": "unknown subtype",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0218df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0418ef8166706164646c65",
+      "name": "listing_subtype_past_top_kind_2",
+      "why": "One past it. A reader cannot render a category it has no name for, and showing the raw number instead would be a listing claiming something nobody can read."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0318df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0918ef8166706164646c65"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0318df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0918ef8166706164646c65",
+      "name": "listing_subtype_top_kind_3",
+      "why": "The last category kind 3 recognises. The set is deliberately small and flat — a coarse filter on a board that is expensive to read, translated everywhere this ships — so its size is part of the wire and not an implementation's own idea."
+    },
+    {
+      "expect": {
+        "hint": "unknown subtype",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0318df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0a18ef8166706164646c65",
+      "name": "listing_subtype_past_top_kind_3",
+      "why": "One past it. A reader cannot render a category it has no name for, and showing the raw number instead would be a listing claiming something nobody can read."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0418df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0518ef8166706164646c65"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0418df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0518ef8166706164646c65",
+      "name": "listing_subtype_top_kind_4",
+      "why": "The last category kind 4 recognises. The set is deliberately small and flat — a coarse filter on a board that is expensive to read, translated everywhere this ships — so its size is part of the wire and not an implementation's own idea."
+    },
+    {
+      "expect": {
+        "hint": "unknown subtype",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0418df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0618ef8166706164646c65",
+      "name": "listing_subtype_past_top_kind_4",
+      "why": "One past it. A reader cannot render a category it has no name for, and showing the raw number instead would be a listing claiming something nobody can read."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0518df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0c18ef8166706164646c65"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0518df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0c18ef8166706164646c65",
+      "name": "listing_subtype_top_kind_5",
+      "why": "The last category kind 5 recognises. The set is deliberately small and flat — a coarse filter on a board that is expensive to read, translated everywhere this ships — so its size is part of the wire and not an implementation's own idea."
+    },
+    {
+      "expect": {
+        "hint": "unknown subtype",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0518df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0d18ef8166706164646c65",
+      "name": "listing_subtype_past_top_kind_5",
+      "why": "One past it. A reader cannot render a category it has no name for, and showing the raw number instead would be a listing claiming something nobody can read."
+    },
+    {
+      "expect": {
+        "hint": "unknown subtype",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0418df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0018ef8166706164646c65",
+      "name": "listing_subtype_zero",
+      "why": "Subtypes are one-based; zero is the absence of one, and the way to say that is to omit the field."
+    },
+    {
+      "expect": {
+        "hint": "unknown fuel",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "b318dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0218df773230313920436f726f6c6c612c206175746f6d6174696318e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018e566546f796f746118e667436f726f6c6c6118e71907e318e80218e90518ea0518eb6673696c76657218ee0118ef816a6368696c64207365617418f069487962726964204c45",
+      "name": "listing_bad_fuel",
+      "why": "Petrol, diesel, electric or hybrid. A fifth value is a claim this reader cannot render — the same rule as the gearbox beside it, which had a vector while this did not."
     },
     {
       "expect": {
