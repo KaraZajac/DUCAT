@@ -2279,6 +2279,16 @@ private fun RideBondBanner(contact: Contact) {
     val idHex = ride.optString("id")
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Trouble?>(null) }
+    // Whether the proposal on the table is a *counter* — meaning this device
+    // has already put one of its own on it.
+    //
+    // Keying this on the role was right for two of the three cases and wrong
+    // for the third: a rider countering is answered correctly, but a driver
+    // countering *back* left the rider reading "the driver marked the ride
+    // complete" about a proposal that was a reply to their own. `myRiderBack`
+    // is written by whichever side proposed, so its presence is exactly the
+    // question — have I already proposed here — and it answers all three.
+    val iHaveProposed = ride.optLong("myRiderBack", -1L) >= 0
     var countering by remember { mutableStateOf(false) }
     // The counter is a money field, so it reads money the way the rest of the
     // app does. It asked for XMR — directly under a line saying "USD 2.23 back
@@ -2364,12 +2374,33 @@ private fun RideBondBanner(contact: Contact) {
         }
     }
     val fundNow: () -> Unit = { pinAction = fundReally }
+    // Send the proposal again — *the* proposal, not a fresh default one.
+    //
+    // This called `proposeRideRelease`, which recomputes the default split
+    // from the fare. That is right the first time and wrong every time after:
+    // "Ask again", whose own caption says it sends the request again in case
+    // the first never arrived, re-proposed the default and silently walked
+    // back a split the two of them had negotiated. A driver who had accepted
+    // USD 2.00 back to the rider and pressed it put USD 0.90 on the table
+    // instead — in their own favour, under a button that said it was
+    // resending. Both banners restated the new figure honestly, so nobody
+    // signed a stale number; what was lost was the agreement.
+    //
+    // `myRiderBack` is what this device last proposed, so re-proposing it is
+    // the resend the button promises. Fresh nonces either way, which is what
+    // makes a retry useful after a broadcast that never landed.
     val proposeNow: () -> Unit = {
         busy = true; error = null
         scope.launch {
             withContext(Dispatchers.IO) {
                 runCatching {
-                    org.ducatproject.ducat.Ceremony.proposeRideRelease(context, idHex)
+                    val standing = ride.optLong("myRiderBack", -1L)
+                    if (standing >= 0) {
+                        org.ducatproject.ducat.Ceremony
+                            .proposeRideSplit(context, idHex, standing)
+                    } else {
+                        org.ducatproject.ducat.Ceremony.proposeRideRelease(context, idHex)
+                    }
                 }
             }.onFailure { error = trouble(context, it) }
             busy = false
@@ -2515,14 +2546,10 @@ private fun RideBondBanner(contact: Contact) {
                     when {
                         plainBond -> R.string.bond_close_ask
                         reservation -> R.string.res_complete_ask
-                        // The ordinary direction: the driver ended the ride
-                        // and the rider is being asked to sign.
-                        rider -> R.string.bond_ride_complete_ask
-                        // A driver being asked is a driver whose rider
-                        // countered. Telling them "the driver marked the ride
-                        // complete" reported their own earlier action back at
-                        // them as the news — the same slip the booking's own
-                        // branch above was added to fix.
+                        // The first proposal is news: the driver ended the
+                        // ride. Anything arriving after one of *mine* is a
+                        // reply to it, whichever side I am on.
+                        !iHaveProposed -> R.string.bond_ride_complete_ask
                         else -> R.string.bond_countered_split
                     },
                 ),
@@ -2912,18 +2939,9 @@ private fun RideBondBanner(contact: Contact) {
                     if (!rider) {
                         Spacer(Modifier.height(6.dp))
                         OutlinedButton(
-                            onClick = {
-                                busy = true; error = null
-                                scope.launch {
-                                    withContext(Dispatchers.IO) {
-                                        runCatching {
-                                            org.ducatproject.ducat.Ceremony
-                                                .proposeRideRelease(context, idHex)
-                                        }
-                                    }.onFailure { error = trouble(context, it) }
-                                    busy = false
-                                }
-                            },
+                            // The same path the first proposal took, so the
+                            // two cannot drift about what "again" means.
+                            onClick = proposeNow,
                             enabled = !busy,
                             modifier = Modifier.fillMaxWidth().height(40.dp),
                         ) { Text(stringResource(R.string.bond_ask_again)) }
@@ -2941,15 +2959,10 @@ private fun RideBondBanner(contact: Contact) {
                         text = stringResource(
                             when {
                                 reservation -> R.string.res_complete_ask
-                                // The ordinary direction: the driver ended the
-                                // ride and the rider is being asked. Saying so
-                                // is worth keeping — it is the news.
-                                rider -> R.string.bond_ride_complete_ask
-                                // A driver being asked to sign is a driver
-                                // whose rider countered, and telling them "the
-                                // driver marked the ride complete" reported
-                                // their own earlier action back to them as
-                                // though it were the thing that just happened.
+                                // The first proposal is news; anything after
+                                // one of mine is a reply to it, whichever side
+                                // I am on.
+                                !iHaveProposed -> R.string.bond_ride_complete_ask
                                 else -> R.string.bond_countered_split
                             },
                         ),
