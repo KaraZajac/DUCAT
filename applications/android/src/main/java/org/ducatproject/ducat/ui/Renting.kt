@@ -562,11 +562,16 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                 value = tags, onValueChange = { tags = it.take(120) },
                 label = { Text(stringResource(R.string.rent_tags)) },
                 supportingText = {
-                    // What the board will carry, once it differs from what was
-                    // typed. Silence here was the whole bug.
-                    val shown = posting.joinToString(", ")
-                    if (posting.isNotEmpty() && shown != tags.trim()) {
-                        Text(stringResource(R.string.rent_tags_on_board, shown))
+                    // What the board will carry, but only once that is not
+                    // what was typed — a tag cut to sixteen characters or a
+                    // ninth one dropped. Silence there was the whole bug;
+                    // saying it when nothing was lost is just noise, and the
+                    // comparison is against the same tags unlimited rather
+                    // than against the raw text, or re-spacing a list would
+                    // trip it.
+                    val asTyped = tags.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+                    if (posting != asTyped) {
+                        Text(stringResource(R.string.rent_tags_on_board, posting.joinToString(", ")))
                     } else {
                         Text(stringResource(R.string.rent_tags_hint))
                     }
