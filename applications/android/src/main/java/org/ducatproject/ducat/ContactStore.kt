@@ -1824,6 +1824,14 @@ fun threadAad(minePersonaHex: String, theirsPersonaHex: String): ByteArray =
  * the key that controls the money.
  */
 class WalletStore(context: Context) {
+    companion object {
+        /**
+         * Guards read-modify-write of the whole output list — the wallet's
+         * record of what it owns. See [mutateEntries].
+         */
+        private val walletLock = Any()
+    }
+
     private val prefs = securePrefs(context, "ducat_contacts")
 
     fun save(address: String, spendKeyHex: String, restoreHeight: ULong, stagenet: Boolean) {
@@ -2021,7 +2029,29 @@ class WalletStore(context: Context) {
         .apply()
         .also { ContactStore.bump() }
 
-    fun recordScan(scannedTo: Long, tip: Long, found: List<OwnedOutput>) {
+    /**
+     * Change the output set from whatever it says *now*.
+     *
+     * The whole list is rewritten by every writer, and there are several: the
+     * poller's scan records what it found, the spent check writes back what
+     * the chain confirms, and the ledger's backfill fills in transaction ids
+     * and block times. Each did its own `entries()` … `writeEntries()` with
+     * nothing in between, so two of them overlapping meant the second wrote a
+     * list it had read *before* the first's change — and a freshly scanned
+     * output, already announced in the log as received, simply vanished. The
+     * money is still on the chain and a rescan finds it again, but the wallet
+     * has stopped counting it and "Ready to spend" understates by whatever
+     * arrived.
+     *
+     * [Orders] learned this exact lesson and says so at its own lock; the
+     * wallet is the store where it costs the most and had none. On the
+     * companion, because callers build a fresh `WalletStore` per operation and
+     * a per-instance lock would guard nothing.
+     */
+    fun mutateEntries(f: (List<WalletEntry>) -> List<WalletEntry>?) =
+        synchronized(walletLock) { f(entries())?.let { writeEntries(it) } }
+
+    fun recordScan(scannedTo: Long, tip: Long, found: List<OwnedOutput>) = synchronized(walletLock) {
         val now = System.currentTimeMillis()
         val lastAt = prefs.getLong("wallet_scan_at", 0L)
         val lastTo = prefs.getLong("wallet_scanned_to", 0L)
@@ -2067,10 +2097,10 @@ class WalletStore(context: Context) {
      * that changes what the wallet owns. Callers pass a list derived from
      * [entries]; passing a partial one drops money.
      */
-    fun replaceEntries(list: List<WalletEntry>) = writeEntries(list)
+    fun replaceEntries(list: List<WalletEntry>) = synchronized(walletLock) { writeEntries(list) }
 
-    fun recordSpent(status: Map<String, Boolean>) {
-        writeEntries(entries().map { it.copy(spent = status[it.keyImage] ?: it.spent) })
+    fun recordSpent(status: Map<String, Boolean>) = mutateEntries { list ->
+        list.map { it.copy(spent = status[it.keyImage] ?: it.spent) }
     }
 
     fun entries(): List<WalletEntry> {

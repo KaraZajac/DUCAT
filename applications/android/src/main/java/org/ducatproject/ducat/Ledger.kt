@@ -581,20 +581,28 @@ object Ledger {
         val entries = store.entries()
         if (entries.any { it.txHashHex.isEmpty() && it.blob.isNotEmpty() }) {
             var recovered = 0
-            val filled = entries.map { e ->
-                if (e.txHashHex.isNotEmpty() || e.blob.isEmpty()) e
-                else runCatching {
-                    val id = uniffi.ducat_mobile.moneroOutputMeta(e.blob).txHashHex
-                    if (id.isNotEmpty()) recovered++
-                    e.copy(txHashHex = id)
-                }.getOrElse { e }
+            // Re-read inside the lock rather than writing back the list read
+            // above: a scan landing in between would otherwise be erased by
+            // this backfill, taking a received output with it.
+            //
+            // And it returns null when nothing was recovered, because writing
+            // unconditionally meant a blob that would not parse rewrote
+            // identical data and raised the change flag every ten seconds —
+            // every screen watching the store redrawing forever over nothing.
+            store.mutateEntries { current ->
+                var got = 0
+                val filled = current.map { e ->
+                    if (e.txHashHex.isNotEmpty() || e.blob.isEmpty()) e
+                    else runCatching {
+                        val id = uniffi.ducat_mobile.moneroOutputMeta(e.blob).txHashHex
+                        if (id.isNotEmpty()) got++
+                        e.copy(txHashHex = id)
+                    }.getOrElse { e }
+                }
+                recovered = got
+                if (got > 0) filled else null
             }
-            // Only when something was actually recovered. Writing unconditionally
-            // meant a blob that would not parse rewrote identical data and raised
-            // the change flag every ten seconds — every screen watching the store
-            // redrawing forever over nothing.
             if (recovered > 0) {
-                store.replaceEntries(filled)
                 DucatLog.i(TAG, "recovered $recovered transaction id(s) from stored outputs")
                 changed = true
             }
@@ -621,9 +629,11 @@ object Ledger {
                     .onFailure { DucatLog.w(TAG, "block $h time: ${it.message}") }
             }
             if (times.isNotEmpty()) {
-                store.replaceEntries(store.entries().map {
-                    if (it.timestamp == 0L) it.copy(timestamp = times[it.height] ?: 0L) else it
-                })
+                store.mutateEntries { current ->
+                    current.map {
+                        if (it.timestamp == 0L) it.copy(timestamp = times[it.height] ?: 0L) else it
+                    }
+                }
                 DucatLog.i(TAG, "filled in ${times.size} block time(s)")
                 changed = true
             }

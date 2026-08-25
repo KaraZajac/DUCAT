@@ -334,6 +334,14 @@ tasks.register<JavaExec>("escrowagree") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// Money that arrived must not be erased by a concurrent backfill.
+// `./gradlew :desktop:walletrace`.
+tasks.register<JavaExec>("walletrace") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.WalletRaceTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The round-0 invite frame reads the way it was written.
 // `./gradlew :desktop:inviteframe`.
 tasks.register<JavaExec>("inviteframe") {
