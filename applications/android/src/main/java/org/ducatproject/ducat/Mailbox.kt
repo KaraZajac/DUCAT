@@ -804,6 +804,13 @@ object Mailbox {
     fun markRead(context: Context, c: Contact) {
         val store = ContactStore(context)
         if (!store.readReceipts()) return
+        // The same snapshot rule [send] states at length: this writes the
+        // head, and the head carries the outgoing sequence. A screen's copy
+        // of a contact is minutes old by the time somebody scrolls, and a
+        // head one behind the log advertises a message as not there — the
+        // reader waits for it until the next write.
+        @Suppress("NAME_SHADOWING") val c =
+            store.all().firstOrNull { it.personaHex == c.personaHex } ?: c
         if (c.myOutboxOwnerSecret.isEmpty()) return
         runCatching {
             nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
