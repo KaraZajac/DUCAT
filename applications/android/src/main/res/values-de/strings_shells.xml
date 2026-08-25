@@ -23,6 +23,7 @@
     <string name="shells_billed_unpaid">abgerechnet, unbezahlt</string>
     <string name="shells_paid_outside">außerhalb von DUCAT bezahlt ✓</string>
     <string name="shells_paid">bezahlt ✓</string>
+    <string name="shells_paid_incl_tip">bezahlt ✓ · %1$s Trinkgeld</string>
     <string name="shells_booking_waiting">Wartet auf Zahlung</string>
     <string name="shells_booking_secured">Gesichert</string>
     <string name="shells_booking_settling">Wird abgerechnet</string>

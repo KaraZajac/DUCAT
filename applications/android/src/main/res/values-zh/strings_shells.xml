@@ -23,6 +23,7 @@
     <string name="shells_billed_unpaid">已出账，未付</string>
     <string name="shells_paid_outside">在 DUCAT 之外付清 ✓</string>
     <string name="shells_paid">已付 ✓</string>
+    <string name="shells_paid_incl_tip">已付 ✓ · 小费 %1$s</string>
     <string name="shells_booking_waiting">等待付款</string>
     <string name="shells_booking_secured">已锁定</string>
     <string name="shells_booking_settling">结算中</string>

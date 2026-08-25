@@ -23,6 +23,7 @@
     <string name="shells_billed_unpaid">conto presentato, non pagato</string>
     <string name="shells_paid_outside">pagato fuori da DUCAT ✓</string>
     <string name="shells_paid">pagato ✓</string>
+    <string name="shells_paid_incl_tip">pagato ✓ · %1$s di mancia</string>
     <string name="shells_booking_waiting">In attesa di pagamento</string>
     <string name="shells_booking_secured">Garantita</string>
     <string name="shells_booking_settling">In liquidazione</string>

@@ -23,6 +23,7 @@
     <string name="shells_billed_unpaid">صدرت الفاتورة، لم تُدفع</string>
     <string name="shells_paid_outside">دُفع خارج DUCAT ✓</string>
     <string name="shells_paid">مدفوع ✓</string>
+    <string name="shells_paid_incl_tip">مدفوع ✓ · إكرامية %1$s</string>
     <string name="shells_booking_waiting">بانتظار الدفع</string>
     <string name="shells_booking_secured">مضمونة</string>
     <string name="shells_booking_settling">قيد التسوية</string>

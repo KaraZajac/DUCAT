@@ -23,6 +23,7 @@
     <string name="shells_billed_unpaid">बिल भेजा, भुगतान बाकी</string>
     <string name="shells_paid_outside">DUCAT से बाहर चुकाया ✓</string>
     <string name="shells_paid">चुकाया ✓</string>
+    <string name="shells_paid_incl_tip">भुगतान ✓ · %1$s टिप</string>
     <string name="shells_booking_waiting">भुगतान का इंतज़ार</string>
     <string name="shells_booking_secured">सुरक्षित</string>
     <string name="shells_booking_settling">निपटान जारी</string>

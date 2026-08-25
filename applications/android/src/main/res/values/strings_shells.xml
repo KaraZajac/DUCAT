@@ -23,6 +23,7 @@
     <string name="shells_billed_unpaid">billed, unpaid</string>
     <string name="shells_paid_outside">paid outside DUCAT ✓</string>
     <string name="shells_paid">paid ✓</string>
+    <string name="shells_paid_incl_tip">paid ✓ · %1$s tip</string>
     <string name="shells_title_renting">Renting</string>
     <string name="shells_tab_listings">Listings</string>
     <string name="shells_tab_bookings">Bookings</string>

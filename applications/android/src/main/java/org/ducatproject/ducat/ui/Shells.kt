@@ -440,7 +440,9 @@ private fun SettledList(origin: String, @StringRes emptyTextRes: Int) {
         set(java.util.Calendar.HOUR_OF_DAY, 0); set(java.util.Calendar.MINUTE, 0)
         set(java.util.Calendar.SECOND, 0)
     }.timeInMillis }
-    val earnedToday = done.filter { it.settledAt >= today }.sumOf { it.totalPxmr }
+    // What came in, not what was asked for: `takePxmr` is the payment when one
+    // has landed, so a tipped sale counts for what it actually paid.
+    val earnedToday = done.filter { it.settledAt >= today }.sumOf { it.takePxmr }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         // Sixteen, like every other screen's number — see Pos.kt and Balance.kt.
@@ -511,7 +513,12 @@ private fun SettledSection(label: String, tabs: List<RunningTab>) {
                                     stringResource(R.string.shells_payment_seen_settling)
                                     else stringResource(R.string.shells_billed_unpaid)
                                 "paid_oob" -> stringResource(R.string.shells_paid_outside)
-                                else -> stringResource(R.string.shells_paid)
+                                // A tip is the line a counter cares most
+                                // about, and it was nowhere on this screen.
+                                else -> if (t.tipPxmr > 0) stringResource(
+                                    R.string.shells_paid_incl_tip,
+                                    Amounts.show(context, t.tipPxmr).primary,
+                                ) else stringResource(R.string.shells_paid)
                             },
                             style = MaterialTheme.typography.labelSmall,
                             color = if (t.state == "settled")
@@ -522,7 +529,7 @@ private fun SettledSection(label: String, tabs: List<RunningTab>) {
                     // Honour the fiat toggle the "Today" total above already
                     // respects, so a vendor who reads in dollars sees each line
                     // in dollars too, not raw XMR.
-                    val line = Amounts.show(context, t.totalPxmr)
+                    val line = Amounts.show(context, t.takePxmr)
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
                             line.primary,

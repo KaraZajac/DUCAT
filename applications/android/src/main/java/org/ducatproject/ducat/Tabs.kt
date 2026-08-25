@@ -58,9 +58,30 @@ data class RunningTab(
      * only those keep the old permissive rule.
      */
     val billedMinor: Int? = null,
+    /**
+     * What actually arrived, which is the bill plus whatever was tipped on
+     * top of it. Zero until the payment is matched, and on tabs written
+     * before this field existed.
+     *
+     * Kept apart from [settledTotal] rather than replacing it: what was
+     * *billed* is what the customer holds on paper and what reconciliation
+     * matches against, and neither may drift. But the takings are what came
+     * in, and reconcile knew the tip — it put it on the receipt and in the
+     * notification — and then dropped it. So the day's total on the sales
+     * screen was the sum of the bills, and a shop where tipping is most of
+     * the margin read its own till short by every tip it took.
+     */
+    val paidPxmr: Long = 0,
 ) {
     val totalPxmr: Long get() =
         if (state == "open") lines.sumOf { it.amountPxmr } + (taxPxmr ?: 0L) else settledTotal
+
+    /** What this tab actually brought in — the bill, or the payment when one
+     *  has landed and may have carried a tip. */
+    val takePxmr: Long get() = if (paidPxmr > 0) paidPxmr else totalPxmr
+
+    /** Paid over the bill. Zero unless a payment has landed above it. */
+    val tipPxmr: Long get() = (paidPxmr - settledTotal).coerceAtLeast(0)
 
     fun toJson(): JSONObject = JSONObject().apply {
         put("id", id); put("origin", origin); put("persona", personaHex)
@@ -74,6 +95,7 @@ data class RunningTab(
         put("paid_ki", paidKi ?: JSONObject.NULL)
         put("seen_tx", seenTx ?: JSONObject.NULL)
         put("tip_at_bill", tipAtBill)
+        put("paid_total", paidPxmr)
         billedMinor?.let { put("billed_minor", it) }
     }
 
@@ -99,6 +121,7 @@ data class RunningTab(
             paidKi = if (o.isNull("paid_ki")) null else o.optString("paid_ki"),
             seenTx = if (o.isNull("seen_tx")) null else o.optString("seen_tx"),
             tipAtBill = o.optLong("tip_at_bill", 0),
+            paidPxmr = o.optLong("paid_total", 0),
             billedMinor = o.optInt("billed_minor", -1).takeIf { it >= 0 },
         )
     }
@@ -262,7 +285,9 @@ class TabStore(private val context: Context) {
      * failure is logged rather than blocking.
      */
     fun markPaidOutside(tab: RunningTab) {
-        update(tab.copy(state = "paid_oob"))
+        // Cash across the bar settles the bill exactly; there is no chain
+        // output to read a tip from.
+        update(tab.copy(state = "paid_oob", paidPxmr = tab.settledTotal))
         val contact = ContactStore(context).all()
             .firstOrNull { it.personaHex == tab.personaHex } ?: return
         runCatching {
@@ -519,7 +544,14 @@ class TabStore(private val context: Context) {
                         txidHex = hit.txHashHex.ifEmpty { null },
                     )
                 }.onSuccess {
-                    store.mutate(tab.id) { it.copy(state = "paid", paidKi = hit.keyImage) }
+                    store.mutate(tab.id) {
+                        it.copy(
+                            state = "paid", paidKi = hit.keyImage,
+                            // What landed, tip and all. The receipt above
+                            // already says it; the till's own books did not.
+                            paidPxmr = hit.amountPxmr,
+                        )
+                    }
                     store.addClaimedKi(hit.keyImage)
                     Notify.post(
                         context,

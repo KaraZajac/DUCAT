@@ -350,6 +350,22 @@ tasks.register<JavaExec>("inviteframe") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// The takings are what came in, not what was asked for.
+// `./gradlew :desktop:tiptake`.
+tasks.register<JavaExec>("tiptake") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.TipTakeTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// A sequence number is unique in a mailbox, not in a conversation.
+// `./gradlew :desktop:billanswer`.
+tasks.register<JavaExec>("billanswer") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.BillAnswerTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // A second hail quotes the second driver, not the first one.
 // `./gradlew :desktop:staleoffer`.
 tasks.register<JavaExec>("staleoffer") {

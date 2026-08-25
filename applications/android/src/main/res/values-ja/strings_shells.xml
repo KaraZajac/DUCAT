@@ -23,6 +23,7 @@
     <string name="shells_billed_unpaid">請求済み・未払い</string>
     <string name="shells_paid_outside">DUCAT外で支払い ✓</string>
     <string name="shells_paid">支払い済み ✓</string>
+    <string name="shells_paid_incl_tip">支払済 ✓ · チップ %1$s</string>
     <string name="shells_booking_waiting">支払い待ち</string>
     <string name="shells_booking_secured">確保済み</string>
     <string name="shells_booking_settling">精算中</string>

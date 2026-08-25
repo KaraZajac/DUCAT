@@ -23,6 +23,7 @@
     <string name="shells_billed_unpaid">cuenta enviada, sin pagar</string>
     <string name="shells_paid_outside">pagado fuera de DUCAT ✓</string>
     <string name="shells_paid">pagado ✓</string>
+    <string name="shells_paid_incl_tip">pagado ✓ · %1$s de propina</string>
     <string name="shells_booking_waiting">Esperando el pago</string>
     <string name="shells_booking_secured">Asegurada</string>
     <string name="shells_booking_settling">Liquidando</string>

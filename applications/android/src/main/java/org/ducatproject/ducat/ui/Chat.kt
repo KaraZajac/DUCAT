@@ -81,6 +81,50 @@ import androidx.compose.ui.graphics.Color
  * The screen shows when a message went out **without** forward secrecy, because
  * §16.11 requires the fallback be visible rather than silently accepted.
  */
+/** Bills a kind-5 has answered, keyed by (seq, timestamp) of the bill:
+ *  [withdrawn] by the sender, [refused] by the payer. */
+internal data class BillAnswers(
+    val withdrawn: Set<Pair<Long, Long>>,
+    val refused: Set<Pair<Long, Long>>,
+)
+
+/**
+ * Which message each retraction or refusal actually answers.
+ *
+ * A kind-5 names its target by sequence number alone, and the comment that
+ * used to sit on the check called that "exact". It is exact only while a
+ * sequence number is unique in a thread, and it is not: every card cut for a
+ * hail, a sale or a listing restarts the mailbox, so one conversation holds
+ * several messages numbered 0. Declining a ride offer at seq 0 therefore
+ * marked a shop's bill "Declined" — a bill that had arrived on a later card,
+ * also at seq 0, and whose Pay button vanished with the label. The customer
+ * was standing at the counter holding an unpayable bill they had never
+ * refused, while the till read "bill sent" and waited (found live,
+ * 2026-08-24: a coffee and a croissant, USD 8.03).
+ *
+ * With only a seq on the wire the honest reading is positional: a reaction
+ * answers the message with that seq which most recently preceded it. Resolve
+ * against every message rather than only bills, so a reaction that answered
+ * something else resolves to that something else and leaves the bills alone.
+ */
+internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
+    val withdrawn = HashSet<Pair<Long, Long>>()
+    val refused = HashSet<Pair<Long, Long>>()
+    for (r in messages) {
+        if (r.kind != 5) continue
+        val seq = r.reSeq ?: continue
+        // Whose log the seq belongs to: our own for a retraction, the other
+        // side's for a refusal.
+        val side = if (r.reOwn) r.outgoing else !r.outgoing
+        val target = messages
+            .filter { it.outgoing == side && it.seq == seq && it.timestamp <= r.timestamp }
+            .maxByOrNull { it.timestamp } ?: continue
+        if (target.kind != 1) continue
+        (if (r.reOwn) withdrawn else refused) += target.seq to target.timestamp
+    }
+    return BillAnswers(withdrawn, refused)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(contact: Contact, onBack: () -> Unit) {
@@ -97,6 +141,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         messages.filter { it.kind == 4 && it.reSeq != null }
             .associateBy { r -> Triple(r.outgoing == r.reOwn, r.reSeq!!, r.outgoing) }
     }
+    // Withdrawn and refused bills, worked out once for the whole thread.
+    val answers = remember(messages) { billAnswers(messages) }
     // A half-typed message survives a rotation. It is the single most
     // common thing to lose, and the least excusable.
     var draft by rememberSaveable { mutableStateOf("") }
@@ -735,31 +781,38 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         // And only the last of a run wears the tail corner, so
                         // a run reads as one shape with one point on it.
                         tail = endsRun,
-                        // A later kind-2 notice for the same amount is this
-                        // request being answered — the amount is the only
-                        // thread from a payment back to the bill it settles.
-                        // An identical re-bill will also read as paid, which
-                        // errs the safe way for a button that spends.
+                        // A later payment of *at least* this much answers the
+                        // request. The amount is the only thread from a
+                        // payment back to the bill it settles — kind 2 carries
+                        // no back-reference — and this asked for the amount
+                        // exactly, so a bill paid with a tip on top never
+                        // matched: the coffee was paid for and the bubble went
+                        // on offering "Review payment", one tap from paying
+                        // for it twice. At-least is also the rule the payee's
+                        // own reconciliation uses, and it has to be, or a tip
+                        // could never settle anything.
+                        //
+                        // The payee's receipt counts too, and is the better
+                        // evidence where it exists: it is sent only after that
+                        // tab was matched to an output on chain.
+                        //
+                        // An identical re-bill still reads as paid, which errs
+                        // the safe way for a button that spends.
                         paid = m.kind == 1 && !m.outgoing && messages.any {
-                            it.kind == 2 && it.outgoing &&
-                                it.amountPxmr == m.amountPxmr &&
+                            ((it.kind == 2 && it.outgoing) ||
+                                (it.kind == 3 && !it.outgoing)) &&
+                                it.amountPxmr >= m.amountPxmr &&
                                 it.timestamp >= m.timestamp
                         },
                         // The sender's own retract (kind 5, reOwn) withdraws
-                        // the bill: same log, same seq, so the match is exact
-                        // where the paid-check above can only go by amount.
-                        cancelled = m.kind == 1 && messages.any {
-                            it.kind == 5 && it.reOwn && it.reSeq == m.seq &&
-                                it.outgoing == m.outgoing
-                        },
-                        // And the payer's refusal, which is the same mechanism
-                        // from the other end: not our log, so `reOwn` is false
-                        // and the sides differ. Without this the screen that
-                        // sent the decline still offered to pay the bill.
-                        declined = m.kind == 1 && messages.any {
-                            it.kind == 5 && !it.reOwn && it.reSeq == m.seq &&
-                                it.outgoing != m.outgoing
-                        },
+                        // the bill, and the payer's refusal is the same
+                        // mechanism from the other end. Both are resolved in
+                        // one pass by `billAnswers`, which knows that a seq
+                        // is only unique inside one mailbox.
+                        cancelled = m.kind == 1 &&
+                            (m.seq to m.timestamp) in answers.withdrawn,
+                        declined = m.kind == 1 &&
+                            (m.seq to m.timestamp) in answers.refused,
                         onLongPress = { confirmDelete = m },
                         onPay = { billView = it },
                     )

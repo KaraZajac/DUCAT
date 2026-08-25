@@ -103,29 +103,30 @@ fun BillScreen(
                     Spacer(Modifier.height(16.dp))
                     Card(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
                         Column(Modifier.padding(14.dp)) {
-                            m.items.forEach { i ->
+                            // In the unit this wallet reads money in, like the
+                            // total above them and like the same list in the
+                            // chat. Priced in XMR under a USD headline, the
+                            // lines were a receipt nobody could check against
+                            // the menu board they had just read: "Flat white
+                            // 0.009515" under "USD 8.03".
+                            @Composable
+                            fun line(label: String, pxmr: Long) {
                                 Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
-                                    Text(i.description,
+                                    Text(label,
                                         style = MaterialTheme.typography.bodyMedium,
                                         modifier = Modifier.weight(1f))
-                                    Text(formatXmr(i.amountPxmr),
+                                    Text(Amounts.show(context, pxmr).primary,
                                         style = MaterialTheme.typography.bodySmall,
                                         fontFamily = FontFamily.Monospace)
                                 }
                             }
+                            m.items.forEach { line(it.description, it.amountPxmr) }
                             m.taxPxmr?.let {
                                 HorizontalDivider(
                                     Modifier.padding(vertical = 4.dp),
                                     color = MaterialTheme.colorScheme.outlineVariant,
                                 )
-                                Row(Modifier.fillMaxWidth()) {
-                                    Text(stringResource(R.string.ceremony_tax),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        modifier = Modifier.weight(1f))
-                                    Text(formatXmr(it),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontFamily = FontFamily.Monospace)
-                                }
+                                line(stringResource(R.string.ceremony_tax), it)
                             }
                         }
                     }

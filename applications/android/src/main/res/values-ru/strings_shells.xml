@@ -23,6 +23,7 @@
     <string name="shells_billed_unpaid">выставлен, не оплачен</string>
     <string name="shells_paid_outside">оплачено вне DUCAT ✓</string>
     <string name="shells_paid">оплачено ✓</string>
+    <string name="shells_paid_incl_tip">оплачено ✓ · чаевые %1$s</string>
     <string name="shells_booking_waiting">Ожидает оплаты</string>
     <string name="shells_booking_secured">Обеспечено</string>
     <string name="shells_booking_settling">Расчёт</string>

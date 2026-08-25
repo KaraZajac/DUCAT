@@ -23,6 +23,7 @@
     <string name="shells_billed_unpaid">đã gửi hóa đơn, chưa trả</string>
     <string name="shells_paid_outside">trả ngoài DUCAT ✓</string>
     <string name="shells_paid">đã trả ✓</string>
+    <string name="shells_paid_incl_tip">đã trả ✓ · tiền boa %1$s</string>
     <string name="shells_booking_waiting">Chờ thanh toán</string>
     <string name="shells_booking_secured">Đã bảo đảm</string>
     <string name="shells_booking_settling">Đang tất toán</string>
