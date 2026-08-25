@@ -350,6 +350,14 @@ tasks.register<JavaExec>("inviteframe") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// A code that names an amount is read for it.
+// `./gradlew :desktop:monerouri`.
+tasks.register<JavaExec>("monerouri") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.MoneroUriTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The takings are what came in, not what was asked for.
 // `./gradlew :desktop:tiptake`.
 tasks.register<JavaExec>("tiptake") {

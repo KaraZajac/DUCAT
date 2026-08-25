@@ -44,7 +44,7 @@ private const val TAG = "QrHub"
 fun QrHub(
     onOpenChat: (Contact) -> Unit,
     /** A Monero code is not a contact; it is a payment about to happen. */
-    onScanAddress: (String) -> Unit,
+    onScanAddress: (String, Long) -> Unit,
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -153,9 +153,12 @@ fun QrHub(
                                     // A Monero code. Not a contact and never
                                     // becomes one — hand it to the pay screen,
                                     // which is what the person scanning it
-                                    // wanted in the first place.
-                                    val addr = text.removePrefix("monero:").substringBefore("?")
-                                    if (addr.length in 90..110) onScanAddress(addr)
+                                    // wanted in the first place. The amount
+                                    // goes with it: a code that named one was
+                                    // being read for its address alone, and
+                                    // the payer left to retype the figure.
+                                    val m = moneroUri(text)
+                                    if (m != null) onScanAddress(m.first, m.second)
                                     else error = context.getString(R.string.qrhub_not_a_code)
                                 } else {
                                     val go: () -> Unit = {

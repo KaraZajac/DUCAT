@@ -414,7 +414,7 @@ private fun runDesk(deskDir: File) = application {
                                         selected = it.personaHex
                                         room = Room.Conversations
                                     },
-                                    onScanAddress = { payOpen = true },
+                                    onScanAddress = { _, _ -> payOpen = true },
                                 )
                                 Room.Settings -> SettingsRoom()
                                 else -> Unit

@@ -247,6 +247,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     ) { mutableStateOf<Overlay>(Overlay.None) }
     var payOpen by rememberSaveable { mutableStateOf(false) }
     var payAddress by rememberSaveable { mutableStateOf<String?>(null) }
+    // What the scanned code asked for, when it asked for anything.
+    var payAmountPxmr by rememberSaveable { mutableStateOf(0L) }
     var qrOpen by rememberSaveable { mutableStateOf(false) }
     val drawer = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -630,7 +632,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         // The whole send/request flow: who first, then how much, with contacts
         // listed above an address field because a payment to a contact carries
         // a note and a thread and an address payment carries neither.
-        if (payOpen) PaySheet(prefillAddress = payAddress) { payOpen = false; payAddress = null }
+        if (payOpen) PaySheet(
+            prefillAddress = payAddress,
+            prefillAmountPxmr = payAmountPxmr,
+        ) { payOpen = false; payAddress = null; payAmountPxmr = 0L }
 
         // Venmo puts this in the corner of every screen, and the reason it
         // works is that "show me yours / here is mine" is one gesture between
@@ -638,7 +643,9 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         if (qrOpen) {
             QrHub(
                 onOpenChat = { qrOpen = false; overlay = Overlay.Chat(it) },
-                onScanAddress = { qrOpen = false; payAddress = it; payOpen = true },
+                onScanAddress = { addr, pxmr ->
+                    qrOpen = false; payAddress = addr; payAmountPxmr = pxmr; payOpen = true
+                },
                 onClose = { qrOpen = false },
             )
         }

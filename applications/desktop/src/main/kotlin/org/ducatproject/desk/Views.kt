@@ -309,7 +309,7 @@ fun DeskPlaceSetting() {
 
 /** The phone's code hub: this desk's card, and a place to paste one. */
 @Composable
-fun CodesRoom(onOpenChat: (Contact) -> Unit, onScanAddress: (String) -> Unit) {
+fun CodesRoom(onOpenChat: (Contact) -> Unit, onScanAddress: (String, Long) -> Unit) {
     org.ducatproject.ducat.ui.QrHub(
         onOpenChat = onOpenChat,
         onScanAddress = onScanAddress,

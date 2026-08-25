@@ -459,22 +459,76 @@ object Orders {
     }
 
     /**
-     * Promote sighted orders once their money is actually on the chain.
+     * Promote sighted orders once their money is actually on the chain — and
+     * find the ones that were never sighted at all.
      *
-     * By transaction hash, not by amount: the sighting already learned which
-     * transaction it was, and the wallet records the same hash against the
-     * output when the block carrying it is scanned. Matching on the amount
-     * again would be guessing twice about something already known.
+     * The first half is by transaction hash, not by amount: the sighting
+     * already learned which transaction it was, and the wallet records the
+     * same hash against the output when the block carrying it is scanned.
+     * Matching on the amount again would be guessing twice about something
+     * already known.
+     *
+     * The second half exists because the first was the *only* way an order
+     * ever became paid, and it starts from a mempool sighting. A transaction
+     * mined between two polls is never sighted — found live on 2026-08-25, a
+     * kiosk order paid in full, `received 0.016508 XMR at block 2192910` in
+     * the till's own log, and the order sat at Awaiting with its QR still on
+     * the screen. Which is the worst shape a bug can take here: the customer
+     * has paid, the money is in the shop's wallet, and the shop has no idea
+     * an order exists. Unattended self-service is the entire point of this
+     * mode, so it cannot depend on catching a transaction in flight.
+     *
+     * The rule is poolSight's, against confirmed outputs instead of pool
+     * hits: exact amount — which the per-order tag makes unique — landing on
+     * the subaddress this order handed out, not one of ours, and not already
+     * claimed by another order.
      */
     fun reconcile(context: Context) {
-        val seen = all(context).filter { it.state == State.Seen && it.seenTx != null }
-        if (seen.isEmpty()) return
-        val landed = WalletStore(context).entries().map { it.txHashHex }.toSet()
-        seen.forEach { order ->
+        val everything = all(context)
+        val wallet = WalletStore(context)
+        val entries = wallet.entries()
+        val landed = entries.map { it.txHashHex }.toSet()
+        everything.filter { it.state == State.Seen && it.seenTx != null }.forEach { order ->
             if (order.seenTx in landed) {
                 update(context, order.copy(state = State.Confirmed))
                 DucatLog.i(TAG, "order #${order.number} confirmed on chain")
             }
+        }
+
+        val waiting = everything.filter { it.state == State.Awaiting }
+        if (waiting.isEmpty()) return
+        val ours = wallet.ourTxids()
+        // One transaction settles one order, and an order that already has its
+        // transaction keeps it: without this the same output could pay for two
+        // identical baskets and hand somebody a free one.
+        val claimed = everything.mapNotNull { it.seenTx }.toMutableSet()
+        for (order in waiting.sortedBy { it.placedAt }) {
+            val hit = entries.firstOrNull {
+                it.amountPxmr == order.totalPxmr &&
+                    it.txHashHex.isNotEmpty() &&
+                    it.txHashHex !in claimed &&
+                    it.txHashHex.lowercase() !in ours &&
+                    (order.billedMinor == null || it.minor == order.billedMinor)
+            } ?: continue
+            // The same second opinion the bar's reconciliation takes before a
+            // receipt goes out, and for the same reason: everything above this
+            // line trusted one node's account of the chain, and what follows
+            // is goods leaving a counter.
+            if (!SecondOpinion.settles(context, hit.txHashHex)) continue
+            claimed += hit.txHashHex
+            update(context, order.copy(state = State.Confirmed, seenTx = hit.txHashHex))
+            Notify.post(
+                context,
+                context.getString(R.string.kiosk_notify_title, order.number),
+                context.getString(
+                    R.string.kiosk_notify_body,
+                    Amounts.show(context, order.totalPxmr).primary,
+                ),
+            )
+            DucatLog.i(
+                TAG,
+                "order #${order.number} paid on chain, never sighted — ${hit.txHashHex.take(16)}…",
+            )
         }
     }
 }

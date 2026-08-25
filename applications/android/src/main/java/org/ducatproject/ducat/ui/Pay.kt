@@ -93,6 +93,11 @@ fun PaySheet(
         )
     }
     var scanning by remember { mutableStateOf(false) }
+    // What a code scanned *here* asked for. The sheet's own parameter covers a
+    // scan made from the codes screen; this covers the scanner inside it, and
+    // without it the amount survived one route into this screen and not the
+    // other.
+    var scannedPxmr by remember { mutableStateOf(0L) }
 
     if (scanning) {
         QrScanner(
@@ -100,6 +105,7 @@ fun PaySheet(
             onResult = { raw ->
                 scanning = false
                 target = readScan(context, raw)
+                scannedPxmr = moneroUri(raw)?.second ?: 0L
             },
             onDismiss = { scanning = false },
         )
@@ -132,13 +138,13 @@ fun PaySheet(
             }
             when (val t = target) {
                 null -> ChooseTarget(
-                    onPick = { target = it },
+                    onPick = { t, amt -> target = t; scannedPxmr = amt },
                     onScan = { scanning = true },
                     onClose = onDismiss,
                 )
                 else -> AmountStep(
                     target = t,
-                    prefillAmountPxmr = prefillAmountPxmr,
+                    prefillAmountPxmr = if (scannedPxmr > 0) scannedPxmr else prefillAmountPxmr,
                     // With a target chosen for us there is no earlier step to
                     // return to, so back leaves rather than doing nothing.
                     onBack = {
@@ -165,6 +171,38 @@ sealed interface PayTarget {
  * a card is an introduction, and someone scanning one at a payment screen meant
  * to add a person, not to pay a stranger their card happens to name.
  */
+/**
+ * The address and the amount out of a `monero:` URI.
+ *
+ * The amount used to be thrown away. `substringBefore("?")` took the address
+ * and dropped the query with it, so a code that had *said* what it wanted —
+ * DUCAT writes `tx_amount` on every kiosk order, and so does every other
+ * payment-request QR — landed on a pay screen with an empty amount field, and
+ * the payer had to read the number off the merchant's screen and type it back
+ * in. For a kiosk that is worse than clumsy: an order is attributed by its
+ * exact amount, down to a sub-cent tag that makes it unique, so a hand-typed
+ * round number is a payment the till can never match to the order it paid for.
+ *
+ * Returns null for anything that is not an address. The amount is 0 when the
+ * URI did not name one, which is the same as "the payer decides".
+ */
+internal fun moneroUri(raw: String): Pair<String, Long>? {
+    val t = raw.trim().removePrefix("monero:")
+    val addr = t.substringBefore("?")
+    if (addr.length !in 90..110) return null
+    val q = t.substringAfter("?", "")
+    // Only tx_amount. `amount` is not a Monero URI field, and guessing at one
+    // would be inventing a request nobody made.
+    val amount = q.split('&')
+        .firstOrNull { it.startsWith("tx_amount=") }
+        ?.removePrefix("tx_amount=")
+        ?.let { java.net.URLDecoder.decode(it, "UTF-8") }
+        ?.let { v -> runCatching { Amounts.toPxmr(java.math.BigDecimal(v)) }.getOrNull() }
+        ?.takeIf { it > 0 }
+        ?: 0L
+    return addr to amount
+}
+
 private fun readScan(context: android.content.Context, raw: String): PayTarget? {
     val t = raw.trim()
     if (t.startsWith("ducat:card/")) {
@@ -175,13 +213,12 @@ private fun readScan(context: android.content.Context, raw: String): PayTarget? 
         val c = hex?.let { h -> ContactStore(context).all().firstOrNull { it.personaHex == h } }
         return c?.let { PayTarget.ToContact(it) }
     }
-    val addr = t.removePrefix("monero:").substringBefore("?")
-    return if (addr.length in 90..110) PayTarget.ToAddress(addr) else null
+    return moneroUri(t)?.let { (addr, _) -> PayTarget.ToAddress(addr) }
 }
 
 @Composable
 private fun ChooseTarget(
-    onPick: (PayTarget) -> Unit,
+    onPick: (PayTarget, Long) -> Unit,
     onScan: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -262,7 +299,7 @@ private fun ChooseTarget(
                         )
                     },
                     leadingContent = { Avatar(c.displayName()) },
-                    modifier = Modifier.clickable { onPick(PayTarget.ToContact(c)) },
+                    modifier = Modifier.clickable { onPick(PayTarget.ToContact(c), 0L) },
                 )
             }
         }
@@ -278,12 +315,16 @@ private fun ChooseTarget(
             minLines = 2,
         )
         Spacer(Modifier.height(8.dp))
+        // A pasted `monero:` link is an address too — and one that may name an
+        // amount. Refusing it as "not a Monero address" was a dead end for the
+        // ordinary act of copying a payment request.
+        val pasted = moneroUri(address)
         Button(
-            onClick = { onPick(PayTarget.ToAddress(address.trim())) },
-            enabled = address.trim().length in 90..110,
+            onClick = { pasted?.let { (a, amt) -> onPick(PayTarget.ToAddress(a), amt) } },
+            enabled = pasted != null,
             modifier = Modifier.fillMaxWidth(),
         ) { Text(stringResource(R.string.pay_continue)) }
-        if (address.isNotBlank() && address.trim().length !in 90..110) {
+        if (address.isNotBlank() && pasted == null) {
             Text(
                 stringResource(R.string.pay_not_monero_address),
                 style = MaterialTheme.typography.bodySmall,
