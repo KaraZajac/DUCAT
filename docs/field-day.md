@@ -100,7 +100,13 @@ rider consent tap → paid. If funding is younger than ten blocks the
 release refuses with "the fare needs N more confirmation(s)" — that is
 maturity, not failure; wait and retry with the banner's retry.
 
-## Pass 4 — 2-of-2 mutual stakes (first live pass ever)
+## Pass 4 — 2-of-2 mutual stakes (proven off-hardware; re-run here)
+
+Done end to end on 2026-08-25 between two emulators on the live Veilid
+network and live stagenet — hail, offer, accept, 2-of-2 built, both stakes
+and the fare in, complete, release (`112e0983`). So this is no longer the
+first live pass; what it is here is the same flow on two radios, two
+batteries and two real clocks, which is the part an emulator cannot answer.
 
 Turn the Escrow-arbiter switch OFF on both phones' contact profiles first.
 
@@ -110,7 +116,14 @@ Turn the Escrow-arbiter switch OFF on both phones' contact profiles first.
    rider's refund address, fare − fee → driver.
 3. Verify the numbers on both banners match, then on chain.
 
-## Pass 5 — settlement (first live pass ever)
+## Pass 5 — settlement (proposal and Sign proven; **Counter has never run**)
+
+The propose-and-sign half ran three times on 2026-08-25 off-hardware — a
+ride, a marketplace sale and a two-day gear hire — each one proposed on one
+client and signed on the other, each released on chain (`112e0983`,
+`284eb311`, `709f4d38`). **The counter-offer has still never been exercised
+by anybody**, so step 2 below is the one that matters here: it is the only
+part of the settlement UI with no live pass at all.
 
 On a fresh 2-of-2 ride (or the same one before releasing):
 
@@ -129,7 +142,12 @@ judgment: `echo 'approve <id8>' >> /home/kara/ducat-arbiter/rulings.txt`.
 Driver's banner completes the release without the rider. This is the
 lost-phone story working in front of you.
 
-## Pass 7 — the reservation (first live pass ever)
+## Pass 7 — the reservation (proven off-hardware; re-run here)
+
+Ran twice on 2026-08-25 between two emulators: a marketplace sale
+(`284eb311`) and a two-day gear hire (`709f4d38`), both through
+propose → accept-is-funding → both secured → checkout split. The steps below
+are unchanged; what hardware adds is two independent clocks and two radios.
 
 1. Phone 1 (guest): chat tray → the Lock icon → rent + both deposits.
 2. Phone 2 (host): banner shows the terms; **accepting IS funding** their

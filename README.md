@@ -323,9 +323,13 @@ review** (§2.5 is the project's own argument for why that matters), no
 implementer who has never read `core/` (O21), NFC compile-verified but never
 field-tested between two phones, and no measurement of the tap on a handset.
 The latency figures in §8.7.2 are a desktop with an attached node. The
-booking arc above ran between two headless clients; its screens have not yet
-carried one on a handset, and neither has a hail been driven rider-to-driver
-through the actual UI since the discovery work below. A co-signer today
+booking arc above ran between two headless clients; **its screens have since
+carried one** — on 2026-08-25 two emulators on the live network and live
+stagenet ran a marketplace sale (`284eb311`) and a two-day gear hire
+(`709f4d38`) entirely through the UI, and a hail was driven rider-to-driver
+the same way, hail to release (`112e0983`). What that does not answer is a
+handset: two radios, two batteries, two independent clocks. The settlement
+UI's **counter-offer** has still never run anywhere. A co-signer today
 consents to a stated fee, not an itemised destination list — honest consent
 waits on an upstream wallet API making payments readable.
 
