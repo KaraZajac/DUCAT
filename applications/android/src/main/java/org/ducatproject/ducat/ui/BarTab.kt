@@ -209,7 +209,14 @@ private fun TabRow(t: RunningTab, onClick: () -> Unit) {
                     else stringResource(R.string.bartab_state_billed_unpaid)
                 "paid_oob" -> stringResource(R.string.bartab_state_paid_oob)
                 "cancelled" -> stringResource(R.string.bartab_state_cancelled)
-                else -> stringResource(R.string.bartab_state_paid)
+                // A tip is named here for the same reason it is on the till's
+                // own sales list: it is the line a counter cares most about,
+                // and this row was showing the bill as though nothing had been
+                // left on top of it.
+                else -> if (t.tipPxmr > 0) stringResource(
+                    R.string.shells_paid_incl_tip,
+                    Amounts.show(context, t.tipPxmr).primary,
+                ) else stringResource(R.string.bartab_state_paid)
             }
             Text(
                 buildString {
@@ -227,7 +234,10 @@ private fun TabRow(t: RunningTab, onClick: () -> Unit) {
         // had drifted: this one still led with XMR and then printed
         // `secondary` beneath, which is XMR again once the local currency
         // leads, so a tab's total read the same piconero figure twice.
-        AmountBoth(t.totalPxmr)
+        //
+        // `takePxmr`, not `totalPxmr`: what a closed tab brought in, which on
+        // a tipped one is more than it billed.
+        AmountBoth(t.takePxmr)
     }
 }
 
