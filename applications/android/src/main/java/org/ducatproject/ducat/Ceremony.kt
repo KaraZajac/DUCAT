@@ -971,7 +971,26 @@ object Ceremony {
             // asking for anything. An early round arriving here after we are
             // done is that party knocking — it can only have come from a
             // retransmit — so answer it with everything we ever sent them.
-            if (o.optString("stage") == "done" && round.toInt() <= 1) {
+            //
+            // Never at somebody who has already finished, and never twice in
+            // a hurry. Answering unconditionally is a live-lock between two
+            // *completed* parties: each reads the other's catch-up as a party
+            // in trouble and catches it up straight back, every two seconds,
+            // for as long as both stay up (seen on the first run of this
+            // code). A round-2 address echo from a participant is that
+            // participant saying they are done, so it is also the signal to
+            // stop helping them; the interval is the belt to that's braces,
+            // and bounds the exchange even if the echo never arrived.
+            val theyFinished = o.optJSONObject("addrs")?.has(senderIdx.toString()) == true
+            val caughtUp = o.optJSONObject("caughtUp") ?: JSONObject()
+            val lastHelp = caughtUp.optLong(senderIdx.toString())
+            if (o.optString("stage") == "done" && round.toInt() <= 1 &&
+                !theyFinished &&
+                System.currentTimeMillis() - lastHelp > NUDGE_AFTER_MS
+            ) {
+                caughtUp.put(senderIdx.toString(), System.currentTimeMillis())
+                o.put("caughtUp", caughtUp)
+                save(context, idHex, o)
                 runCatching { resend(context, o, senderIdx) }
                     .onFailure { DucatLog.w(TAG, "bond $idHex: catch-up — ${it.message}") }
             }
