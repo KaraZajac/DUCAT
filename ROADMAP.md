@@ -127,8 +127,8 @@ money. Ordered by what blocks 1.0, not by effort.
   2026-08-25** — two emulators, live Veilid, live stagenet: a ride
   (`112e0983`), a marketplace sale (`284eb311`) and a two-day gear hire
   (`709f4d38`), each proposed on one client and signed on the other. The counter-offer ran on the same
-  day (`74bc40b9`) and cost three wrong sentences to find. **Left for the
-  field day:** a counter to a counter, and the whole of it again on hardware.
+  day (`74bc40b9`) and cost three wrong sentences to find. A counter to a counter followed
+  (`ba8f17f6`). **Left for the field day:** the whole of it on hardware.
 - **Opt-in live location after commitment.** ~~Spec it before building
   it~~ **specified, 0.88 (2026-08-16)** — §15.12 "Live position after the
   accept": gated on RIDE_ACCEPT, consent per ride per direction, off by

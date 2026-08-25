@@ -126,8 +126,8 @@ signed, and the money was right both times — while three separate sentences
 were wrong, because a counter swaps the roles and nothing that named them
 swapped with it (`4c9a027d`, then `74bc40b9` on the fixed build).
 
-One thing here is still untested anywhere: a counter to a **counter**. Both
-passes ended on the first one.
+The counter to a counter ran too (`ba8f17f6`), and cost two more wrong
+sentences to find. What is still untested is the whole of it on hardware.
 
 On a fresh 2-of-2 ride (or the same one before releasing):
 
