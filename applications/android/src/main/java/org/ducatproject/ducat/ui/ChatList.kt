@@ -58,7 +58,11 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     // never spoken sink to the bottom together.
     val shown = remember(all) {
         all.filter { it.chatVisible }.sortedByDescending { c ->
-            store.thread(c.personaHex).lastOrNull()?.timestamp ?: 0L
+            // By the last message a person could have read, not the last one
+            // the protocol wrote. Calling off an escrow sends a kind 10, and
+            // that alone lifted a dormant arbiter to the top of the list
+            // above conversations with actual sentences in them.
+            store.thread(c.personaHex).lastOrNull { it.kind !in CEREMONY_KINDS }?.timestamp ?: 0L
         }
     }
     Column(Modifier.fillMaxSize()) {
@@ -107,13 +111,16 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
             LazyColumn(Modifier.fillMaxSize()) {
                 items(shown, key = { it.personaHex }) { c ->
                     // The newest message a person would recognise. Ceremony
-                    // rounds (8, 9) are the last thing in a thread whenever an
-                    // escrow is mid-flight, and as a preview they read as
-                    // "bond: your share" — internal words, about nothing the
-                    // reader can act on. The thread still sorts by its real
-                    // last message; only the line shown skips the machinery.
+                    // traffic is the last thing in a thread whenever an escrow
+                    // is mid-flight, and as a preview it reads as "bond: your
+                    // share" — internal words, about nothing the reader can
+                    // act on. The abort (kind 10) was left out of the list
+                    // when the other two went in, so calling a deal off put
+                    // "You: ceremony: called off" under the other person's
+                    // name — the one ceremony message a *person* sends, and
+                    // the one that therefore reaches the list.
                     val last = remember(c.personaHex, all) {
-                        store.thread(c.personaHex).lastOrNull { it.kind != 8 && it.kind != 9 }
+                        store.thread(c.personaHex).lastOrNull { it.kind !in CEREMONY_KINDS }
                     }
                     val unread = c.inSeq > store.chatSeen(c.personaHex)
                     ListItem(
@@ -359,6 +366,14 @@ internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
     }
 }
 
+
+/**
+ * The message kinds that are machinery rather than conversation: the DKG and
+ * FROST rounds and the abort that ends a ceremony. Chat.kt filters the same
+ * set out of the thread itself; here it keeps them out of the preview line
+ * and out of the order the list is sorted in.
+ */
+private val CEREMONY_KINDS = setOf(8, 9, 10)
 
 /** What one message looks like from a list away (§16.13's kinds included). */
 internal fun previewOf(context: Context, m: StoredMessage): String = when {
