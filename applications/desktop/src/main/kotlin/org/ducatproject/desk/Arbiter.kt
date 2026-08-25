@@ -67,10 +67,15 @@ fun main(args: Array<String>) {
     while (true) {
         runCatching { Mailbox.collectClaims(context) }
         runCatching { Mailbox.poll(context) }
-        // The phones do this on their poller; a desk has no poller. A
+        // The phones do these on their poller; a desk has no poller. A
         // half-built escrow whose missing frame is *this* node's would
-        // otherwise wait for one of the principals to notice.
+        // otherwise wait for one of the principals to notice, and the
+        // records of deals that never happened would stay for ever — this
+        // node had seven, two of them from builds that stalled in August.
+        // sweep never touches a record holding a key share, which is every
+        // escrow an arbiter is actually the arbiter of.
         runCatching { Ceremony.nudge(context) }
+        runCatching { Ceremony.sweep(context) }
         val all = Ceremony.all(context)
         val stages = all.joinToString { "${it.optString("id").take(8)}=${it.optString("stage")}" }
         if (stages != lastStages) {
