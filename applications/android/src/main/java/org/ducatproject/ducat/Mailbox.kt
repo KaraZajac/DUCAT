@@ -500,6 +500,21 @@ object Mailbox {
         ceremonyId: ByteArray? = null,
     ): Contact {
         val store = ContactStore(context)
+        // **The caller's copy of this contact is a snapshot, and counters move.**
+        //
+        // Everything numbered on the way out — the sequence, the previous
+        // link, the ring, the peer's remaining one-time keys — lives on the
+        // contact record and is advanced by the last send. A caller that sends
+        // twice from one `Contact` writes both messages at the same sequence
+        // number: two payloads into one slot, of which the network keeps the
+        // second and the reader will never learn there was a first. This is
+        // why send *returns* the contact; the rule was easy to miss and cost
+        // an escrow (2026-08-25, the arbiter's round-0 and round-1 to the same
+        // peer, both "delivered seq 4", the share gone and the build stuck at
+        // 1/2 for ever). Reading it back here is the cheap end of the fix and
+        // it retires the whole class.
+        @Suppress("NAME_SHADOWING") val c =
+            store.all().firstOrNull { it.personaHex == c.personaHex } ?: c
         // The recipient's core refuses a body carrying a bidirectional
         // override, and it refuses it after the slot is spent — so a message
         // that leaves here with one in it is a message that vanishes. Cleaned
