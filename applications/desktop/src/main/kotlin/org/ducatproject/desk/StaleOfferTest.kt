@@ -2,6 +2,7 @@ package org.ducatproject.desk
 
 import org.ducatproject.ducat.StoredMessage
 import org.ducatproject.ducat.ui.freshRideOffer
+import org.ducatproject.ducat.ui.offerAwaiting
 import org.ducatproject.ducat.ui.offerStillOpen
 import org.ducatproject.ducat.ui.rideOfferMark
 
@@ -80,6 +81,78 @@ fun main() {
         outgoing = false, seq = 3, body = "see you", timestamp = 5_000, kind = 0,
     )
     check(freshRideOffer(listOf(first, chat), before) == null) { "STALE_FAIL kind" }
+
+    // ---- and the mirror image: an offer that beat the wait to the thread ----
+    //
+    // The mark is taken when this screen notices the claim, and the claim is
+    // collected by whoever gets there first — usually the background poller,
+    // which then pulls the driver's fare in before the screen has looked.
+    // Two minutes passed between the two, live on 2026-08-25, and the fare
+    // that answered the hail was recorded as one the thread "already had".
+    //
+    // So a second test: an offer younger than the hail answers the hail,
+    // whatever the mark says about it.
+    val postedAt = 3_000L
+    val raced = offer(seq = 0, ts = 3_400, pxmr = 2_755_000_000)
+    val markedTooLate = rideOfferMark(listOf(first, raced))
+    check(freshRideOffer(listOf(first, raced), markedTooLate) == null) {
+        "STALE_FAIL the premise changed — the mark no longer swallows it"
+    }
+    check(
+        freshRideOffer(listOf(first, raced), markedTooLate, postedAt)?.amountPxmr ==
+            2_755_000_000L,
+    ) { "STALE_FAIL an offer that answered this hail was treated as an old one" }
+
+    // And the one case that must still be refused: last ride's offer is both
+    // in the mark and older than this hail. Neither test rescues it.
+    check(freshRideOffer(listOf(first), markedTooLate, postedAt) == null) {
+        "STALE_FAIL a fare from a finished ride came back"
+    }
+
+    // A driver whose clock is behind: the timestamp reads older than the
+    // hail, and only the mark can tell that it is new. Both tests are needed.
+    val behind = offer(seq = 0, ts = 2_900, pxmr = 7_000_000_000)
+    check(freshRideOffer(listOf(first, behind), before, postedAt)?.amountPxmr == 7_000_000_000L) {
+        "STALE_FAIL a driver with a slow clock could not be accepted"
+    }
+
+    // ---- and the claim, remembered before the fare arrives ----
+    //
+    // The mark is written when the driver takes the hail, naming them and
+    // nothing else, so the offer has somewhere to land however long it takes
+    // and whatever the screen is doing when it does.
+    val ttlSecs = 15L * 60
+    val nowS = 100_000L
+    val fresh = offer(seq = 0, ts = nowS - 30, pxmr = 2_755_000_000)
+    check(offerAwaiting(listOf(fresh), nowS, ttlSecs)?.amountPxmr == 2_755_000_000L) {
+        "AWAIT_FAIL the offer a claimed hail is owed was not found"
+    }
+    // Answered already: the rider said yes, and it must not come back.
+    val yes = StoredMessage(
+        outgoing = true, seq = 0, body = "see you soon", timestamp = nowS - 20,
+        kind = 7, amountPxmr = 2_755_000_000, reSeq = 0,
+    )
+    check(offerAwaiting(listOf(fresh, yes), nowS, ttlSecs) == null) {
+        "AWAIT_FAIL an accepted offer was offered again"
+    }
+    // Declined already: same.
+    val no = StoredMessage(
+        outgoing = true, seq = 1, body = "not this time", timestamp = nowS - 20,
+        kind = 5, reSeq = 0,
+    )
+    check(offerAwaiting(listOf(fresh, no), nowS, ttlSecs) == null) {
+        "AWAIT_FAIL a declined offer was offered again"
+    }
+    // Older than the hail could possibly be: last ride's, and it stays gone.
+    val ancient = offer(seq = 0, ts = nowS - ttlSecs - 1, pxmr = 41_913_000_000)
+    check(offerAwaiting(listOf(ancient), nowS, ttlSecs) == null) {
+        "AWAIT_FAIL a fare older than a hail's whole life came back"
+    }
+    // Two offers in the window, one already answered: the live one wins.
+    check(
+        offerAwaiting(listOf(fresh, yes, offer(seq = 2, ts = nowS - 10, pxmr = 3_000_000_000)),
+            nowS, ttlSecs)?.amountPxmr == 3_000_000_000L,
+    ) { "AWAIT_FAIL the newest unanswered offer did not win" }
 
     // ---- and the fare survives the screen that showed it ----
     //

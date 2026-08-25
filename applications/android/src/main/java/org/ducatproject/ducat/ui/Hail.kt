@@ -216,6 +216,11 @@ fun HailCard(
     // that screen without deciding — parked, not dropped, so a stray back
     // press cannot silently discard a fare.
     var awaitingOffer by remember { mutableStateOf<org.ducatproject.ducat.Contact?>(null) }
+    // When the hail this wait belongs to went up, in seconds. Read off the
+    // notice's own expiry rather than the clock, so it survives the screen
+    // being rebuilt — and so it is the *hail's* moment, not the moment the
+    // claim happened to be noticed. See [freshRideOffer].
+    var hailPostedAt by remember { mutableStateOf(Long.MAX_VALUE) }
     var rideOffer by remember {
         mutableStateOf<Pair<org.ducatproject.ducat.Contact, StoredMessage>?>(null)
     }
@@ -253,10 +258,20 @@ fun HailCard(
                 val store = ContactStore(context)
                 val c = store.all().firstOrNull { it.personaHex == persona }
                     ?: return@runCatchingCancellable null
-                offerStillOpen(
-                    store.thread(persona), seq,
-                    System.currentTimeMillis() / 1000, HAIL_TTL_SECS,
-                )?.let { c to it }
+                val nowS = System.currentTimeMillis() / 1000
+                // A negative seq is a claim with no fare against it yet: the
+                // mark is written when the driver takes the hail, not when
+                // their number arrives, because the two are minutes apart and
+                // everything in between used to be a hole. The rider whose
+                // offer landed while this screen was elsewhere had no screen
+                // that would show it and no way to say yes, while the driver
+                // sat under "waiting for Jordan" (found live 2026-08-25).
+                val o = if (seq < 0) {
+                    offerAwaiting(store.thread(persona), nowS, HAIL_TTL_SECS)
+                } else {
+                    offerStillOpen(store.thread(persona), seq, nowS, HAIL_TTL_SECS)
+                }
+                o?.let { c to it }
             }.getOrNull()
         }
         // Answered or expired while we were away: stop keeping the address.
@@ -328,6 +343,11 @@ fun HailCard(
                 }
                 val d = ContactStore(context).all().firstOrNull { it.personaHex == claimant }
                 DucatLog.i(TAG, "hail claimed by ${d?.displayName() ?: "a driver"}")
+                hailPostedAt = p.expiry - HAIL_TTL_SECS
+                // Durable from here, not from the offer screen. Everything
+                // above this line is Compose state that a backgrounded app
+                // loses; the driver has spent the hail and is committed.
+                if (d != null) runCatching { rememberOffered(context, d.personaHex, -1L) }
                 posted = null
                 if (d != null) {
                     // The claim is only half the ceremony: the driver's
@@ -377,7 +397,9 @@ fun HailCard(
             val offer = withContext(Dispatchers.IO) {
                 runCatchingCancellable {
                     Mailbox.poll(context)
-                    freshRideOffer(ContactStore(context).thread(d.personaHex), before)
+                    freshRideOffer(
+                        ContactStore(context).thread(d.personaHex), before, hailPostedAt,
+                    )
                 }.getOrNull()
             } ?: continue
             // Re-read the contact: the profile (car, plate) may have landed
@@ -1561,17 +1583,68 @@ internal fun offerStillOpen(
     return o.takeIf { !answered }
 }
 
+/**
+ * The newest live offer in a thread that this device has neither accepted nor
+ * declined — for when the mark names a driver but no sequence number yet.
+ *
+ * [offerStillOpen] answers "is *that* offer still open", and it needs a seq
+ * because the offer screen had already picked one. This answers the question
+ * one step earlier: a driver claimed the hail, so something of theirs is
+ * coming, and whatever arrived is it. Same two guards — inside the hail's own
+ * lifetime, and not already answered — so last ride's fare cannot come back.
+ */
+internal fun offerAwaiting(
+    thread: List<org.ducatproject.ducat.StoredMessage>,
+    nowSecs: Long,
+    ttlSecs: Long,
+): org.ducatproject.ducat.StoredMessage? = thread
+    .filter { !it.outgoing && it.kind == 6 && it.timestamp >= nowSecs - ttlSecs }
+    .sortedByDescending { it.timestamp }
+    .firstOrNull { o ->
+        thread.none {
+            it.outgoing && it.reSeq == o.seq && it.timestamp >= o.timestamp &&
+                (it.kind == 7 || it.kind == 5)
+        }
+    }
+
 /** The kind-6 offers a thread already held, as (seq, timestamp) pairs. */
 internal fun rideOfferMark(thread: List<org.ducatproject.ducat.StoredMessage>): Set<Pair<Long, Long>> =
     thread.filter { !it.outgoing && it.kind == 6 }.map { it.seq to it.timestamp }.toSet()
 
-/** The offer a hail is waiting for: the newest kind-6 that was *not* in the
- *  thread when the wait began. Null while only old ones are there. */
+/**
+ * The offer a hail is waiting for: the newest kind-6 that is either new to
+ * this thread since the wait began, or younger than the hail it answers.
+ * Null while only old ones are there.
+ *
+ * **Two clocks, because either one alone strands a rider.**
+ *
+ * `before` alone assumes the wait starts before the answer arrives, and it
+ * does not: the claim is collected by whichever loop gets there first — the
+ * background poller usually — while this screen's own loop is off doing two
+ * DHT board reads, and an empty cell costs a flat twenty-one seconds. The
+ * gap ran to two minutes live on 2026-08-25, the poller pulled the driver's
+ * fare into the thread inside it, and the mark then recorded that fare as
+ * something the thread "already had". The rider sat under "waiting for their
+ * offer…" while the driver sat under "waiting for their yes", for ever.
+ *
+ * `since` alone would be the sender's clock against ours — the timestamp in
+ * an inbound message is the *driver's* — so a driver a minute behind quotes
+ * a fare that reads as older than the hail it answers.
+ *
+ * Either test passing is enough, and each covers the other's blind spot: a
+ * genuinely old offer is both in the mark *and* older than this hail, which
+ * is the one case that must stay excluded (found live 2026-08-24, a second
+ * hail to the same driver quoted the first ride's fare).
+ */
 internal fun freshRideOffer(
     thread: List<org.ducatproject.ducat.StoredMessage>,
     before: Set<Pair<Long, Long>>,
+    since: Long = Long.MAX_VALUE,
 ): org.ducatproject.ducat.StoredMessage? = thread
-    .filter { !it.outgoing && it.kind == 6 && (it.seq to it.timestamp) !in before }
+    .filter {
+        !it.outgoing && it.kind == 6 &&
+            ((it.seq to it.timestamp) !in before || it.timestamp >= since)
+    }
     .maxByOrNull { it.timestamp }
 
 /**
