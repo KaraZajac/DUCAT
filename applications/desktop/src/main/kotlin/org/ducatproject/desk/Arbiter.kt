@@ -85,10 +85,20 @@ fun main(args: Array<String>) {
         for (o in all.filter { it.optString("stage") == "release_pending" }) {
             val id = o.optString("id")
             if (id !in actedOn) {
+                // What this node knows for itself, and plainly when that is
+                // nothing. An arbiter does not fund and is not shown the
+                // banner that scans, so `fundedPxmr` is normally absent —
+                // and printing the sentinel made that read as an escrow
+                // holding minus one picomonero, next to a claim it was
+                // supposed to be checked against. Saying there is no second
+                // opinion is the useful thing: it tells whoever is deciding
+                // that the outputs below are the only check they have.
+                val scanned = o.optLong("fundedPxmr", -1L)
                 println(
                     "ARBITER_RULING_REQUESTED ${id.take(8)} " +
                         "riderBack=${o.optLong("pendingRiderBack", -1)} pXMR (claimed) " +
-                        "escrow=${o.optLong("fundedPxmr", -1)} pXMR (this node's own scan)"
+                        (if (scanned >= 0) "escrow=$scanned pXMR (this node's own scan)"
+                         else "escrow=unknown (this node does not scan — judge on the outputs below)")
                 )
                 // Where the money actually goes, read out of the payload.
                 //
