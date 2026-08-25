@@ -14,6 +14,7 @@
     <string name="shells_title_donations">Bağışlar</string>
     <string name="shells_tab_code">Kod</string>
     <string name="shells_menu">Menü</string>
+    <string name="shells_back_to_wallet">Cüzdana dön</string>
     <string name="shells_today">Bugün</string>
     <string name="shells_billed_waiting">Hesap gönderildi — bekliyor</string>
     <string name="shells_settled">Kapatılan</string>

@@ -34,8 +34,32 @@ class ModeStore(context: Context) {
         runCatching { Mode.valueOf(prefs.getString("mode_current", null) ?: "None") }
             .getOrDefault(Mode.None)
 
-    fun set(m: Mode) {
-        prefs.edit().putString("mode_current", m.name).apply()
+    /**
+     * Switch the device's job.
+     *
+     * [browsing] says the mode was entered by tapping a tile on the wallet's
+     * own home screen — somebody going to look at what is for sale nearby,
+     * not somebody starting a shift. The two want opposite things from the
+     * chrome: a shift wants the wallet out of the way until it is switched
+     * off deliberately, and a look wants a way back.
+     *
+     * Without the distinction there was only the shift. Tapping "Rent gear"
+     * to browse turned the phone into a renting terminal, permanently; the
+     * only way back was a drawer item two levels down, and Back from the
+     * shell's first tab did not return to the wallet — it left the app, and
+     * relaunching came back into renting.
+     */
+    fun set(m: Mode, browsing: Boolean = false) {
+        prefs.edit()
+            .putString("mode_current", m.name)
+            // Only a mode entered this way can be left this way. Choosing
+            // Taxi from Operating modes means it, and should not sprout a
+            // door out of a decision somebody already made.
+            .putBoolean("mode_browsing", browsing && m != Mode.None)
+            .apply()
         ContactStore.bump()
     }
+
+    /** Whether the current mode was opened to look, rather than to work. */
+    fun browsing(): Boolean = prefs.getBoolean("mode_browsing", false)
 }

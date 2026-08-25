@@ -14,6 +14,7 @@
     <string name="shells_title_donations">Doações</string>
     <string name="shells_tab_code">Código</string>
     <string name="shells_menu">Menu</string>
+    <string name="shells_back_to_wallet">Voltar à carteira</string>
     <string name="shells_today">Hoje</string>
     <string name="shells_billed_waiting">Cobrado — aguardando</string>
     <string name="shells_settled">Liquidado</string>

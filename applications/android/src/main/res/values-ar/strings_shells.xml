@@ -14,6 +14,7 @@
     <string name="shells_title_donations">التبرعات</string>
     <string name="shells_tab_code">الرمز</string>
     <string name="shells_menu">القائمة</string>
+    <string name="shells_back_to_wallet">العودة إلى محفظتك</string>
     <string name="shells_today">اليوم</string>
     <string name="shells_billed_waiting">صدرت الفاتورة — في الانتظار</string>
     <string name="shells_settled">مسوّاة</string>

@@ -14,6 +14,7 @@
     <string name="shells_title_donations">Пожертви</string>
     <string name="shells_tab_code">Код</string>
     <string name="shells_menu">Меню</string>
+    <string name="shells_back_to_wallet">Назад до гаманця</string>
     <string name="shells_today">Сьогодні</string>
     <string name="shells_billed_waiting">Виставлено — очікування</string>
     <string name="shells_settled">Розраховано</string>

@@ -908,14 +908,17 @@ private fun HomeScreen(
         // through, which is the whole difference between them.
         onBrowse = { k ->
             val modes = org.ducatproject.ducat.ModeStore(context)
+            // browsing = true: this is somebody on their own home screen
+            // going to look at what is nearby, not somebody starting a shift.
+            // The shell grows a way back for it — see ModeStore.set.
             when (k) {
                 org.ducatproject.ducat.Listings.KIND_SALE ->
-                    modes.set(org.ducatproject.ducat.Mode.Marketplace)
+                    modes.set(org.ducatproject.ducat.Mode.Marketplace, browsing = true)
                 org.ducatproject.ducat.Listings.KIND_SKILL ->
-                    modes.set(org.ducatproject.ducat.Mode.HireHelp)
+                    modes.set(org.ducatproject.ducat.Mode.HireHelp, browsing = true)
                 else -> {
                     MainActivity.browseKind.value = k
-                    modes.set(org.ducatproject.ducat.Mode.Renting)
+                    modes.set(org.ducatproject.ducat.Mode.Renting, browsing = true)
                 }
             }
         },

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PointOfSale
 import androidx.compose.material.icons.filled.Receipt
@@ -54,10 +55,24 @@ import org.ducatproject.ducat.formatXmr
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
+    val context = LocalContext.current
+    val modeVersion by ContactStore.changes.collectAsState()
+    // Only when the mode was opened to look rather than to work — see
+    // ModeStore.set. A till, a taxi and a bar tab are shifts: they are put
+    // down deliberately, through the drawer, and grow no exit here.
+    val leaving = remember(modeVersion) {
+        org.ducatproject.ducat.ModeStore(context).browsing()
+    }
+    val onLeave: (() -> Unit)? = if (leaving) {
+        { org.ducatproject.ducat.ModeStore(context).set(org.ducatproject.ducat.Mode.None) }
+    } else {
+        null
+    }
     when (mode) {
         Mode.Pos -> Shell(
             title = stringResource(R.string.shells_title_pos),
             openDrawer = openDrawer,
+            onLeave = onLeave,
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_register), Icons.Filled.PointOfSale) { PosScreen() },
                 ShellTab(stringResource(R.string.shells_tab_sales), Icons.Filled.Receipt) {
@@ -69,6 +84,7 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
         Mode.BarTab -> Shell(
             title = stringResource(R.string.shells_title_bar_tab),
             openDrawer = openDrawer,
+            onLeave = onLeave,
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_tabs), Icons.Filled.LocalBar) { BarTabScreen(section = "open") },
                 ShellTab(stringResource(R.string.shells_tab_closed), Icons.Filled.Receipt) { BarTabScreen(section = "closed") },
@@ -78,6 +94,7 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
         Mode.Taxi -> Shell(
             title = stringResource(R.string.shells_title_taxi),
             openDrawer = openDrawer,
+            onLeave = onLeave,
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_fares), Icons.Filled.Search) { DriveScreen() },
                 ShellTab(stringResource(R.string.shells_tab_meter), Icons.Filled.Speed) { TaxiScreen() },
@@ -89,6 +106,7 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
         Mode.Donate -> Shell(
             title = stringResource(R.string.shells_title_donations),
             openDrawer = openDrawer,
+            onLeave = onLeave,
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_code), Icons.Filled.RadioButtonUnchecked) { DonateScreen() },
             ),
@@ -96,6 +114,7 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
         Mode.Renting -> Shell(
             title = stringResource(R.string.shells_title_renting),
             openDrawer = openDrawer,
+            onLeave = onLeave,
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_browse), Icons.Filled.Search) {
                     // Which noun to open on comes from the tile that was
@@ -130,6 +149,7 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
         Mode.Marketplace -> Shell(
             title = stringResource(R.string.mode_marketplace),
             openDrawer = openDrawer,
+            onLeave = onLeave,
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_browse), Icons.Filled.Search) {
                     // The same route the bookings list takes to a thread: a
@@ -153,6 +173,7 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
         Mode.HireHelp -> Shell(
             title = stringResource(R.string.mode_hire_help),
             openDrawer = openDrawer,
+            onLeave = onLeave,
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_browse), Icons.Filled.Search) {
                     HireBrowse(onOpenChat = { MainActivity.openChat.value = it.personaHex })
@@ -367,7 +388,14 @@ private data class ShellTab(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Shell(title: String, openDrawer: () -> Unit, tabs: List<ShellTab>) {
+private fun Shell(
+    title: String,
+    openDrawer: () -> Unit,
+    tabs: List<ShellTab>,
+    /** Back to the wallet, when this mode was opened to look at something.
+     *  Null for a mode somebody chose to work in. */
+    onLeave: (() -> Unit)? = null,
+) {
     var current by remember { mutableStateOf(0) }
     // Back walks the tabs home before it leaves.
     //
@@ -381,7 +409,15 @@ private fun Shell(title: String, openDrawer: () -> Unit, tabs: List<ShellTab>) {
     // back to, come back to it; on the first tab do nothing at all, because
     // what is outside a job — the drawer, and then putting the phone down —
     // is the honest next step and swallowing Back forever is not.
-    BackHandler(enabled = current != 0) { current = 0 }
+    // ...and then, if this was a look rather than a shift, out to the wallet.
+    //
+    // On the first tab this used to do nothing and let the press fall through
+    // to the activity, which closed the app — so somebody who tapped a tile to
+    // see what was for sale nearby pressed Back and left DUCAT, and relaunched
+    // into the same mode with no memory of having chosen it.
+    BackHandler(enabled = current != 0 || onLeave != null) {
+        if (current != 0) current = 0 else onLeave?.invoke()
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -390,9 +426,30 @@ private fun Shell(title: String, openDrawer: () -> Unit, tabs: List<ShellTab>) {
                 ),
                 title = { Text(title, style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
-                    IconButton(onClick = openDrawer) {
-                        Icon(Icons.Filled.Menu,
-                            contentDescription = stringResource(R.string.shells_menu))
+                    // The way out sits where a way out sits. The drawer moves
+                    // to the other side rather than making room for it,
+                    // because both have to stay reachable: somebody who came
+                    // to look may decide to post something.
+                    if (onLeave != null) {
+                        IconButton(onClick = onLeave) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.shells_back_to_wallet),
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = openDrawer) {
+                            Icon(Icons.Filled.Menu,
+                                contentDescription = stringResource(R.string.shells_menu))
+                        }
+                    }
+                },
+                actions = {
+                    if (onLeave != null) {
+                        IconButton(onClick = openDrawer) {
+                            Icon(Icons.Filled.Menu,
+                                contentDescription = stringResource(R.string.shells_menu))
+                        }
                     }
                 },
             )
