@@ -1781,6 +1781,65 @@ object Ceremony {
     }
 
     /**
+     * Learn from your own wallet that an escrow settled without you.
+     *
+     * **The 2-of-3 has a third party for exactly the case where a principal
+     * is gone, and the party who is gone is the one who never finds out.**
+     * escrow_balance says so in its own doc: a multisig output's key image
+     * does not exist for any one party, so no single device can read a spend
+     * off the escrow address, and what stands in for it is "a device that
+     * co-signed knows, because it helped spend it". An arbiter ruling is
+     * precisely the release with no co-signature from this side.
+     *
+     * So the rider's phone came back from being switched off, saw a proposal
+     * still parked and a "Sign this split" button, and offered a signature on
+     * money that had moved twenty minutes earlier (live, 2026-08-25, txid
+     * 3697e203). Tapping it builds a transaction spending inputs that are
+     * gone; escrow_balance's own note records what that looks like from the
+     * outside — every relay refusing the finished transaction, no reason
+     * given, at a fee well above the minimum.
+     *
+     * The chain can still answer, just from the other end. The funder's
+     * residual comes home to a subaddress minted for this ceremony and
+     * nothing else, so an output arriving there — in a transaction this
+     * device did not send — is the release, found by this device's own scan
+     * rather than taken on anybody's word (§17.5).
+     *
+     * **Only the funder, deliberately.** A driver's payout goes to their
+     * ordinary address and an arbiter is owed nothing at all, so neither has
+     * an arrival that belongs to one escrow. They are also not the ones
+     * holding a button: the proposer knows because it broadcast, and the
+     * arbiter never had an opinion to change.
+     */
+    fun checkSettled(context: Context): Int {
+        val wallet = WalletStore(context)
+        val ours by lazy { wallet.ourTxids() }
+        val entries by lazy { wallet.entries() }
+        var found = 0
+        for (o in all(context)) {
+            if (isFinished(o) || !holdsShare(o)) continue
+            val idHex = o.optString("id")
+            if (idHex.isBlank()) continue
+            if (o.optInt("i") != o.optInt("funderIdx")) continue
+            val minor = wallet.minorOf("ride_$idHex") ?: continue
+            // Not one of ours: the funding transaction and its change are
+            // this wallet's own, and the release is the counterparty's.
+            val hit = entries.firstOrNull {
+                it.minor == minor && it.txHashHex.isNotEmpty() &&
+                    it.txHashHex.lowercase() !in ours
+            } ?: continue
+            // Ending a deal is the same weight as starting one, and one
+            // node's account of the chain is a claim (§17.5).
+            if (!SecondOpinion.settles(context, hit.txHashHex)) continue
+            mutate(context, idHex) { cur -> settle(cur, "released").put("txid", hit.txHashHex) }
+            ContactStore.bump()
+            DucatLog.i(TAG, "escrow $idHex: released without us — txid ${hit.txHashHex}")
+            found += 1
+        }
+        return found
+    }
+
+    /**
      * The driver marks the ride complete: the default proposal, giving the
      * rider back exactly their margin and the fare to the driver.
      */

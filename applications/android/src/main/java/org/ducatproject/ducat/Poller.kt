@@ -284,6 +284,12 @@ class Poller(private val context: Context) {
                 runCatching { Ceremony.nudge(context) }
                     .onFailure { DucatLog.w(TAG, "escrow nudge: ${it.message}") }
 
+                // And the other half of a 2-of-3: a release this device did
+                // not sign leaves no trace on the escrow address it can read,
+                // only an arrival in its own wallet.
+                runCatching { Ceremony.checkSettled(context) }
+                    .onFailure { DucatLog.w(TAG, "escrow settled: ${it.message}") }
+
                 // The same tenancy, for the store that never had a sweep.
                 runCatching { Ceremony.sweep(context) }
                     .onFailure { DucatLog.w(TAG, "escrow sweep: ${it.message}") }
