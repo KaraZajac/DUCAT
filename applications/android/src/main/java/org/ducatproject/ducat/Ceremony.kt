@@ -1810,6 +1810,12 @@ object Ceremony {
      * an arrival that belongs to one escrow. They are also not the ones
      * holding a button: the proposer knows because it broadcast, and the
      * arbiter never had an opinion to change.
+     *
+     * One case is left, and left knowingly: a funder owed *nothing* by the
+     * release gets no arrival to recognise. That is a deal too small to carry
+     * a stake — below [Stakes.FLOOR_PXMR] there is none to hand back — so the
+     * banner can still go stale there, on the one shape where the person
+     * reading it is owed no money.
      */
     fun checkSettled(context: Context): Int {
         val wallet = WalletStore(context)
