@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">Держит решающий ключ ваших поездок с эскроу. Участвует, только если что-то пошло не так.</string>
     <string name="bond_sign_split">Подписать это разделение</string>
     <string name="bond_propose_split">Предложить другое разделение</string>
-    <string name="bond_back_to_rider">Обратно плательщику (%1$s)</string>
     <string name="bond_back_to_you">Обратно тебе (%1$s)</string>
     <string name="bond_back_to_them">Обратно %1$s (%2$s)</string>
     <string name="bond_counter">Предложить</string>

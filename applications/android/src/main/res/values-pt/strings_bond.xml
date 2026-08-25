@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">Guarda a chave de desempate das tuas viagens com caução. Só entra se algo correr mal.</string>
     <string name="bond_sign_split">Assinar esta divisão</string>
     <string name="bond_propose_split">Propor outra divisão</string>
-    <string name="bond_back_to_rider">De volta a quem pagou (%1$s)</string>
     <string name="bond_back_to_you">De volta para você (%1$s)</string>
     <string name="bond_back_to_them">De volta para %1$s (%2$s)</string>
     <string name="bond_counter">Propor</string>

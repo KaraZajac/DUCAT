@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">Hält den entscheidenden Schlüssel deiner Treuhand-Fahrten. Wird nur bei Problemen kontaktiert.</string>
     <string name="bond_sign_split">Diese Aufteilung signieren</string>
     <string name="bond_propose_split">Andere Aufteilung vorschlagen</string>
-    <string name="bond_back_to_rider">Zurück an den Zahler (%1$s)</string>
     <string name="bond_back_to_you">Zurück an dich (%1$s)</string>
     <string name="bond_back_to_them">Zurück an %1$s (%2$s)</string>
     <string name="bond_counter">Vorschlagen</string>

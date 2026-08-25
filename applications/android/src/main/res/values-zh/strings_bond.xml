@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">持有你担保行程的决定性密钥。除非出了问题，否则不会参与。</string>
     <string name="bond_sign_split">签署此分配</string>
     <string name="bond_propose_split">提议不同的分配</string>
-    <string name="bond_back_to_rider">退回付款方（%1$s）</string>
     <string name="bond_back_to_you">退还给你（%1$s）</string>
     <string name="bond_back_to_them">退还给 %1$s（%2$s）</string>
     <string name="bond_counter">提议</string>

@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">کلید تعیین‌کننده سفرهای امانت‌دار شما را نگه می‌دارد. فقط در صورت بروز مشکل وارد می‌شود.</string>
     <string name="bond_sign_split">امضای این تقسیم</string>
     <string name="bond_propose_split">پیشنهاد تقسیم متفاوت</string>
-    <string name="bond_back_to_rider">بازگشت به پرداخت‌کننده (%1$s)</string>
     <string name="bond_back_to_you">به شما برمی‌گردد (%1$s)</string>
     <string name="bond_back_to_them">به %1$s برمی‌گردد (%2$s)</string>
     <string name="bond_counter">پیشنهاد</string>

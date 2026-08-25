@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">ボンド付き乗車の決定キーを保持します。問題が起きない限り出番はありません。</string>
     <string name="bond_sign_split">この配分に署名</string>
     <string name="bond_propose_split">別の配分を提案</string>
-    <string name="bond_back_to_rider">支払った側へ（%1$s）</string>
     <string name="bond_back_to_you">あなたに戻る（%1$s）</string>
     <string name="bond_back_to_them">%1$s に戻る（%2$s）</string>
     <string name="bond_counter">提案</string>

@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">Détient la clé d\'arbitrage de vos courses sous séquestre. Jamais sollicité, sauf problème.</string>
     <string name="bond_sign_split">Signer cette répartition</string>
     <string name="bond_propose_split">Proposer une autre répartition</string>
-    <string name="bond_back_to_rider">Rendu au payeur (%1$s)</string>
     <string name="bond_back_to_you">Qui te revient (%1$s)</string>
     <string name="bond_back_to_them">Qui revient à %1$s (%2$s)</string>
     <string name="bond_counter">Proposer</string>

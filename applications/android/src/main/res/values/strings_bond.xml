@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">Holds the tie-breaking key in your bonded rides. Never contacted unless something goes wrong.</string>
     <string name="bond_sign_split">Sign this split</string>
     <string name="bond_propose_split">Propose a different split</string>
-    <string name="bond_back_to_rider">Back to the payer (%1$s)</string>
     <string name="bond_back_to_you">Back to you (%1$s)</string>
     <string name="bond_back_to_them">Back to %1$s (%2$s)</string>
     <string name="bond_counter">Propose</string>

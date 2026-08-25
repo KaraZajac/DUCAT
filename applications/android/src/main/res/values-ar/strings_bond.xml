@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">يحمل مفتاح الترجيح في رحلاتك المضمونة. لا يُستدعى إلا إذا ساء شيء.</string>
     <string name="bond_sign_split">توقيع هذا التقسيم</string>
     <string name="bond_propose_split">اقتراح تقسيم مختلف</string>
-    <string name="bond_back_to_rider">يعود للدافع (%1$s)</string>
     <string name="bond_back_to_you">تعود إليك (%1$s)</string>
     <string name="bond_back_to_them">تعود إلى %1$s (%2$s)</string>
     <string name="bond_counter">اقتراح</string>

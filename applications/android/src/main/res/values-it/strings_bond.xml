@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">Custodisce la chiave decisiva delle corse con deposito. Interviene solo se qualcosa va storto.</string>
     <string name="bond_sign_split">Firma questa divisione</string>
     <string name="bond_propose_split">Proponi un\'altra divisione</string>
-    <string name="bond_back_to_rider">Al pagante (%1$s)</string>
     <string name="bond_back_to_you">Torna a te (%1$s)</string>
     <string name="bond_back_to_them">Torna a %1$s (%2$s)</string>
     <string name="bond_counter">Proponi</string>

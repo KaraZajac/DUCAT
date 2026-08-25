@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">Emanetli yolculuklarında belirleyici anahtarı tutar. Yalnızca bir sorun olursa devreye girer.</string>
     <string name="bond_sign_split">Bu paylaşımı imzala</string>
     <string name="bond_propose_split">Farklı bir paylaşım öner</string>
-    <string name="bond_back_to_rider">Ödeyene geri (%1$s)</string>
     <string name="bond_back_to_you">Sana geri (%1$s)</string>
     <string name="bond_back_to_them">%1$s kişisine geri (%2$s)</string>
     <string name="bond_counter">Öner</string>

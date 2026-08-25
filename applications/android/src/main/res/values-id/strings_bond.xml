@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">Memegang kunci penentu perjalanan ber-escrow Anda. Hanya dihubungi jika ada masalah.</string>
     <string name="bond_sign_split">Tanda tangani pembagian ini</string>
     <string name="bond_propose_split">Usulkan pembagian lain</string>
-    <string name="bond_back_to_rider">Kembali ke pembayar (%1$s)</string>
     <string name="bond_back_to_you">Kembali ke Anda (%1$s)</string>
     <string name="bond_back_to_them">Kembali ke %1$s (%2$s)</string>
     <string name="bond_counter">Usulkan</string>

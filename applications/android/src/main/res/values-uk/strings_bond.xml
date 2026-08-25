@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">Тримає вирішальний ключ ваших поїздок з ескроу. Долучається, лише якщо щось піде не так.</string>
     <string name="bond_sign_split">Підписати цей розподіл</string>
     <string name="bond_propose_split">Запропонувати інший розподіл</string>
-    <string name="bond_back_to_rider">Назад платнику (%1$s)</string>
     <string name="bond_back_to_you">Назад тобі (%1$s)</string>
     <string name="bond_back_to_them">Назад %1$s (%2$s)</string>
     <string name="bond_counter">Запропонувати</string>

@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">Trzyma rozstrzygający klucz twoich przejazdów z depozytem. Odzywa się tylko, gdy coś pójdzie źle.</string>
     <string name="bond_sign_split">Podpisz ten podział</string>
     <string name="bond_propose_split">Zaproponuj inny podział</string>
-    <string name="bond_back_to_rider">Z powrotem do płacącego (%1$s)</string>
     <string name="bond_back_to_you">Wraca do ciebie (%1$s)</string>
     <string name="bond_back_to_them">Wraca do %1$s (%2$s)</string>
     <string name="bond_counter">Zaproponuj</string>

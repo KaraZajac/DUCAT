@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">Giữ chìa khóa quyết định cho các chuyến đi ký quỹ. Chỉ được liên hệ khi có sự cố.</string>
     <string name="bond_sign_split">Ký chia phần này</string>
     <string name="bond_propose_split">Đề xuất chia khác</string>
-    <string name="bond_back_to_rider">Trả lại người trả (%1$s)</string>
     <string name="bond_back_to_you">Trả lại cho bạn (%1$s)</string>
     <string name="bond_back_to_them">Trả lại cho %1$s (%2$s)</string>
     <string name="bond_counter">Đề xuất</string>

@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">보증된 운행의 결정 키를 보관합니다. 문제가 생기지 않는 한 관여하지 않습니다.</string>
     <string name="bond_sign_split">이 분배에 서명</string>
     <string name="bond_propose_split">다른 분배 제안</string>
-    <string name="bond_back_to_rider">지불한 쪽에게 (%1$s)</string>
     <string name="bond_back_to_you">당신에게 반환 (%1$s)</string>
     <string name="bond_back_to_them">%1$s에게 반환 (%2$s)</string>
     <string name="bond_counter">제안</string>

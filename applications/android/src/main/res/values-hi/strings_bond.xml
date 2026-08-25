@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">आपकी बॉन्ड सवारियों की निर्णायक कुंजी रखता है। कुछ गड़बड़ होने पर ही संपर्क होता है।</string>
     <string name="bond_sign_split">इस बंटवारे पर हस्ताक्षर करें</string>
     <string name="bond_propose_split">अलग बंटवारा प्रस्तावित करें</string>
-    <string name="bond_back_to_rider">भुगतानकर्ता को वापस (%1$s)</string>
     <string name="bond_back_to_you">आपको वापस (%1$s)</string>
     <string name="bond_back_to_them">%1$s को वापस (%2$s)</string>
     <string name="bond_counter">प्रस्ताव</string>

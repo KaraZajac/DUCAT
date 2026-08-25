@@ -20,7 +20,6 @@
     <string name="profile_arbiter_note">ถือกุญแจชี้ขาดของการเดินทางแบบมีเอสโครว์ จะถูกติดต่อก็ต่อเมื่อมีปัญหา</string>
     <string name="bond_sign_split">ลงนามการแบ่งนี้</string>
     <string name="bond_propose_split">เสนอการแบ่งแบบอื่น</string>
-    <string name="bond_back_to_rider">คืนให้ผู้จ่าย (%1$s)</string>
     <string name="bond_back_to_you">คืนให้คุณ (%1$s)</string>
     <string name="bond_back_to_them">คืนให้ %1$s (%2$s)</string>
     <string name="bond_counter">เสนอ</string>
