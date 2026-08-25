@@ -28,10 +28,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">탑승 확정</string>
-    <string name="ceremony_expecting_you">기사님이 기다리고 있어요 — 다른 이야기는 채팅으로 하세요.</string>
+    <string name="ceremony_expecting_you">채팅에서 보증금을 예치하세요 — 들어오는 대로 요금을 보내줍니다.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">차가 오고 있어요</string>
-    <string name="ceremony_eta_in_chat">도착 시간과 그 밖의 이야기는 채팅에서요.</string>
+    <string name="ceremony_eta_in_chat">상대의 보증금이 들어오면 채팅에서 결제하세요 — 도착 시간도 거기 있어요.</string>
     <string name="ceremony_stake_note">당신은 %2$s를 넣습니다: 요금에 %1$s 보증금을 더한 금액입니다. 기사도 %1$s를 걸고, 운행이 끝나면 둘 다 돌아옵니다.</string>
 </resources>

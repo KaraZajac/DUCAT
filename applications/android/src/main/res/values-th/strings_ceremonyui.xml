@@ -28,10 +28,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">ยืนยันการเดินทางแล้ว</string>
-    <string name="ceremony_expecting_you">เขากำลังรอคุณอยู่ — เรื่องอื่น ๆ คุยกันในแชท</string>
+    <string name="ceremony_expecting_you">วางหลักประกันของคุณในแชท — พอวางแล้วอีกฝ่ายจะจ่ายทันที</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">รถของคุณกำลังมา</string>
-    <string name="ceremony_eta_in_chat">เวลาที่จะถึงและเรื่องอื่น ๆ — อยู่ในแชท</string>
+    <string name="ceremony_eta_in_chat">จ่ายในแชทเมื่อหลักประกันของอีกฝ่ายเข้าแล้ว — เวลาที่จะถึงก็อยู่ในนั้น</string>
     <string name="ceremony_stake_note">คุณวาง %2$s คือค่าโดยสารบวกหลักประกัน %1$s คนขับก็วาง %1$s เช่นกัน และทั้งสองจะคืนเมื่อจบการเดินทาง</string>
 </resources>

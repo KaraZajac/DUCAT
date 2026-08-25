@@ -98,5 +98,6 @@
     <string name="hail_osm_privacy">Zoeken, route en kaart gebruiken de servers van OpenStreetMap — de enige plek waar DUCAT locatie van het apparaat af stuurt. Chauffeurs zien alleen gebieden van ~%1$s.</string>
     <string name="hail_post_button">Roep op 🚕</string>
     <string name="hail_search">Zoeken</string>
+    <string name="hail_clear_place">Wissen</string>
     <string name="hail_joining_network">Verbinden met het netwerk — de borden zijn nog niet gelezen.</string>
 </resources>

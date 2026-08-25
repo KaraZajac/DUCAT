@@ -29,10 +29,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Rit bevestigd</string>
-    <string name="ceremony_expecting_you">Ze verwachten je — al het andere gaat via de chat.</string>
+    <string name="ceremony_expecting_you">Stort je borg in de chat — ze betalen zodra die er is.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Je rit komt eraan</string>
-    <string name="ceremony_eta_in_chat">Aankomsttijd en al het andere — in de chat.</string>
+    <string name="ceremony_eta_in_chat">Betaal in de chat zodra hun borg er is — de aankomsttijd staat er ook.</string>
     <string name="ceremony_stake_note">Jij legt %2$s in: de ritprijs plus %1$s borg. De chauffeur legt ook %1$s in, en beide komen terug als de rit klaar is.</string>
 </resources>

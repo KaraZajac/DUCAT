@@ -98,5 +98,6 @@
     <string name="hail_osm_privacy">Busca, rota e mapa usam os servidores do OpenStreetMap — o único lugar para onde o DUCAT envia localização para fora do aparelho. Motoristas veem apenas áreas de ~%1$s.</string>
     <string name="hail_post_button">Chamar 🚕</string>
     <string name="hail_search">Buscar</string>
+    <string name="hail_clear_place">Limpar</string>
     <string name="hail_joining_network">A entrar na rede — os quadros ainda não foram lidos.</string>
 </resources>

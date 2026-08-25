@@ -28,10 +28,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Tumpangan dikonfirmasi</string>
-    <string name="ceremony_expecting_you">Mereka menunggumu — hal lain bisa lewat chat.</string>
+    <string name="ceremony_expecting_you">Setor jaminan Anda di chat — mereka membayar begitu jaminan masuk.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Tumpanganmu sedang datang</string>
-    <string name="ceremony_eta_in_chat">Perkiraan tiba dan hal lainnya — di chat.</string>
+    <string name="ceremony_eta_in_chat">Bayar di chat begitu jaminan mereka masuk — perkiraan tiba juga ada di sana.</string>
     <string name="ceremony_stake_note">Anda menaruh %2$s: tarif ditambah jaminan %1$s. Pengemudi juga menaruh %1$s, dan keduanya kembali saat perjalanan selesai.</string>
 </resources>

@@ -29,10 +29,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Corrida confirmada</string>
-    <string name="ceremony_expecting_you">Estão esperando por você — qualquer outra coisa vai pela conversa.</string>
+    <string name="ceremony_expecting_you">Deposite a sua caução na conversa — eles pagam assim que ela entrar.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Sua corrida está a caminho</string>
-    <string name="ceremony_eta_in_chat">Tempo de chegada e o resto — na conversa.</string>
+    <string name="ceremony_eta_in_chat">Pague na conversa assim que a caução deles entrar — o tempo de chegada também está lá.</string>
     <string name="ceremony_stake_note">Você põe %2$s: o valor mais uma caução de %1$s. O condutor também deixa %1$s, e as duas voltam no fim da viagem.</string>
 </resources>

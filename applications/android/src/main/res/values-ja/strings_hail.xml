@@ -98,5 +98,6 @@
     <string name="hail_osm_privacy">検索・経路・地図はOpenStreetMapのサーバーを使います — DUCATが位置情報を端末の外へ送る唯一の場所です。ドライバーに見えるのは約%1$s四方のエリアだけです。</string>
     <string name="hail_post_button">呼ぶ 🚕</string>
     <string name="hail_search">検索</string>
+    <string name="hail_clear_place">消去</string>
     <string name="hail_joining_network">ネットワークに参加中 — 掲示板はまだ読めていません。</string>
 </resources>

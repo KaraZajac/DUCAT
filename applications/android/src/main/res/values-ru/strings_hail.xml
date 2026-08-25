@@ -98,5 +98,6 @@
     <string name="hail_osm_privacy">Поиск, маршрут и карта работают через серверы OpenStreetMap — единственное место, куда DUCAT отправляет геопозицию наружу. Водители видят только районы ~%1$s.</string>
     <string name="hail_post_button">Поймать 🚕</string>
     <string name="hail_search">Поиск</string>
+    <string name="hail_clear_place">Очистить</string>
     <string name="hail_joining_network">Подключение к сети — доски ещё не прочитаны.</string>
 </resources>

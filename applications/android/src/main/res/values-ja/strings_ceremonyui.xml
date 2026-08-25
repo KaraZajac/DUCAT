@@ -28,10 +28,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">配車が確定しました</string>
-    <string name="ceremony_expecting_you">ドライバーはあなたを待っています — 連絡はチャットでどうぞ。</string>
+    <string name="ceremony_expecting_you">保証金をチャットで預けてください — 入り次第、相手が支払います。</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">車が向かっています</string>
-    <string name="ceremony_eta_in_chat">到着予定など、連絡はチャットで。</string>
+    <string name="ceremony_eta_in_chat">相手の保証金が入ったらチャットで支払ってください — 到着予定もそこにあります。</string>
     <string name="ceremony_stake_note">あなたは %2$s を預けます。運賃に %1$s の預り金を足した額です。ドライバーも %1$s を預け、乗車が終われば両方戻ります。</string>
 </resources>

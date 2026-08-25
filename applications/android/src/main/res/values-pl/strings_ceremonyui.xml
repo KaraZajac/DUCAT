@@ -31,10 +31,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Przejazd potwierdzony</string>
-    <string name="ceremony_expecting_you">Kierowca na ciebie czeka — cała reszta w czacie.</string>
+    <string name="ceremony_expecting_you">Wpłać kaucję w czacie — zapłacą, gdy tylko tam będzie.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Twój przejazd jedzie</string>
-    <string name="ceremony_eta_in_chat">Czas dojazdu i cała reszta — w czacie.</string>
+    <string name="ceremony_eta_in_chat">Zapłać w czacie, gdy tylko będzie ich kaucja — czas dojazdu też tam znajdziesz.</string>
     <string name="ceremony_stake_note">Wpłacasz %2$s: cenę plus kaucję %1$s. Kierowca też wpłaca %1$s, a obie wracają po zakończeniu przejazdu.</string>
 </resources>

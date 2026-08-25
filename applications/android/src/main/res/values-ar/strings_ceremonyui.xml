@@ -33,10 +33,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">تأكّد المشوار</string>
-    <string name="ceremony_expecting_you">إنهم في انتظارك — وأي شيء آخر مكانه الدردشة.</string>
+    <string name="ceremony_expecting_you">أودع تأمينك في الدردشة — سيدفعون بمجرد وصوله.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">مشوارك قادم</string>
-    <string name="ceremony_eta_in_chat">وقت الوصول وكل ما عداه — في الدردشة.</string>
+    <string name="ceremony_eta_in_chat">ادفع في الدردشة بمجرد وصول تأمينهم — ووقت الوصول هناك أيضًا.</string>
     <string name="ceremony_stake_note">‏تضع %2$s: الأجرة مع ضمان %1$s. والسائق يضع %1$s أيضًا، ويعود الضمانان عند انتهاء الرحلة.</string>
 </resources>

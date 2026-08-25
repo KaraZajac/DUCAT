@@ -28,10 +28,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Đã chốt chuyến</string>
-    <string name="ceremony_expecting_you">Họ đang đợi bạn — có gì thêm thì nhắn trong cuộc trò chuyện.</string>
+    <string name="ceremony_expecting_you">Đặt cọc của bạn trong cuộc trò chuyện — họ trả ngay khi tiền cọc vào.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Xe của bạn đang tới</string>
-    <string name="ceremony_eta_in_chat">Giờ tới nơi và mọi thứ khác — trong cuộc trò chuyện.</string>
+    <string name="ceremony_eta_in_chat">Trả tiền trong cuộc trò chuyện ngay khi tiền cọc của họ vào — giờ tới nơi cũng ở đó.</string>
     <string name="ceremony_stake_note">Bạn đặt %2$s: giá cước cộng tiền cọc %1$s. Tài xế cũng đặt %1$s, và cả hai quay về khi chuyến đi kết thúc.</string>
 </resources>

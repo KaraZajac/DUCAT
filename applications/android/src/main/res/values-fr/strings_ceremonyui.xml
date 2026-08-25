@@ -29,10 +29,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Course confirmée</string>
-    <string name="ceremony_expecting_you">On t\'attend — pour tout le reste, c\'est dans la discussion.</string>
+    <string name="ceremony_expecting_you">Dépose ta caution dans la discussion — on te paie dès qu\'elle y est.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Ta course arrive</string>
-    <string name="ceremony_eta_in_chat">L\'heure d\'arrivée et tout le reste — dans la discussion.</string>
+    <string name="ceremony_eta_in_chat">Paie dans la discussion dès que sa caution y est — l\'heure d\'arrivée y est aussi.</string>
     <string name="ceremony_stake_note">Vous versez %2$s : le prix plus un dépôt de %1$s. Le conducteur dépose aussi %1$s, et les deux reviennent à la fin de la course.</string>
 </resources>

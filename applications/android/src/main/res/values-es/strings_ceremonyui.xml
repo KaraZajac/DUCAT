@@ -29,10 +29,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Viaje confirmado</string>
-    <string name="ceremony_expecting_you">Te están esperando — cualquier otra cosa va por el chat.</string>
+    <string name="ceremony_expecting_you">Deposita tu fianza en el chat: te pagan en cuanto esté.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Tu viaje viene en camino</string>
-    <string name="ceremony_eta_in_chat">La hora de llegada y todo lo demás — en el chat.</string>
+    <string name="ceremony_eta_in_chat">Paga en el chat en cuanto esté su fianza — la hora de llegada también está ahí.</string>
     <string name="ceremony_stake_note">Pones %2$s: la tarifa más una garantía de %1$s. El conductor también deja %1$s, y ambas vuelven al terminar el viaje.</string>
 </resources>

@@ -31,10 +31,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Поїздку підтверджено</string>
-    <string name="ceremony_expecting_you">На тебе чекають — усе інше в чаті.</string>
+    <string name="ceremony_expecting_you">Внеси заставу в чаті — вони заплатять, щойно вона там буде.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Твоє авто вже їде</string>
-    <string name="ceremony_eta_in_chat">Час прибуття й усе інше — в чаті.</string>
+    <string name="ceremony_eta_in_chat">Заплати в чаті, щойно з\'явиться їхня застава — час прибуття теж там.</string>
     <string name="ceremony_stake_note">Ви вносите %2$s: вартість плюс застава %1$s. Водій теж вносить %1$s, і обидві повернуться наприкінці поїздки.</string>
 </resources>

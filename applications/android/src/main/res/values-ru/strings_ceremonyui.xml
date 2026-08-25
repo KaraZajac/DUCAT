@@ -31,10 +31,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Поездка подтверждена</string>
-    <string name="ceremony_expecting_you">Тебя ждут — всё остальное в чате.</string>
+    <string name="ceremony_expecting_you">Внеси залог в чате — они заплатят, как только он там будет.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Машина едет</string>
-    <string name="ceremony_eta_in_chat">Время прибытия и всё остальное — в чате.</string>
+    <string name="ceremony_eta_in_chat">Заплати в чате, как только появится их залог — время прибытия тоже там.</string>
     <string name="ceremony_stake_note">Вы вносите %2$s: стоимость плюс залог %1$s. Водитель тоже вносит %1$s, и оба залога вернутся в конце поездки.</string>
 </resources>

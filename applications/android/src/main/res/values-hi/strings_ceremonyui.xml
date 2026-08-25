@@ -29,10 +29,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">राइड पक्की</string>
-    <string name="ceremony_expecting_you">वे आपकी राह देख रहे हैं — बाकी सब चैट में।</string>
+    <string name="ceremony_expecting_you">अपनी जमानत राशि चैट में जमा करें — जमा होते ही वे भुगतान कर देंगे।</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">आपकी राइड आ रही है</string>
-    <string name="ceremony_eta_in_chat">पहुँचने का समय और बाकी सब — चैट में।</string>
+    <string name="ceremony_eta_in_chat">उनकी जमानत राशि जमा होते ही चैट में भुगतान करें — पहुँचने का समय भी वहीं है।</string>
     <string name="ceremony_stake_note">आप %2$s देते हैं: किराया और %1$s जमानत राशि। ड्राइवर भी %1$s रखता है, और सवारी खत्म होने पर दोनों वापस आ जाती हैं।</string>
 </resources>

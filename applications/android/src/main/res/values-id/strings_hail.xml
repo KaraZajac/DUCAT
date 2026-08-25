@@ -98,5 +98,6 @@
     <string name="hail_osm_privacy">Pencarian, rute, dan peta memakai server OpenStreetMap — satu-satunya tempat DUCAT mengirim lokasi ke luar perangkat. Sopir hanya melihat area ~%1$s.</string>
     <string name="hail_post_button">Panggil 🚕</string>
     <string name="hail_search">Cari</string>
+    <string name="hail_clear_place">Hapus</string>
     <string name="hail_joining_network">Bergabung ke jaringan — papan belum dibaca.</string>
 </resources>

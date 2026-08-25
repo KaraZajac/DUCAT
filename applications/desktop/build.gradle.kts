@@ -350,6 +350,14 @@ tasks.register<JavaExec>("inviteframe") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// A second hail quotes the second driver, not the first one.
+// `./gradlew :desktop:staleoffer`.
+tasks.register<JavaExec>("staleoffer") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.StaleOfferTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Boards rotate, so a poisoned one is abandoned rather than kept.
 // `./gradlew :desktop:generation`.
 tasks.register<JavaExec>("generation") {

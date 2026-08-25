@@ -29,10 +29,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Fahrt bestätigt</string>
-    <string name="ceremony_expecting_you">Du wirst erwartet — alles Weitere läuft über den Chat.</string>
+    <string name="ceremony_expecting_you">Hinterlege deine Sicherheit im Chat — sie zahlen, sobald sie da ist.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Deine Fahrt kommt</string>
-    <string name="ceremony_eta_in_chat">Ankunftszeit und alles Weitere — im Chat.</string>
+    <string name="ceremony_eta_in_chat">Zahle im Chat, sobald ihre Sicherheit da ist — die Ankunftszeit steht auch dort.</string>
     <string name="ceremony_stake_note">Du zahlst %2$s ein: den Fahrpreis plus %1$s Einlage. Die Fahrerin legt ebenfalls %1$s hinein, und beide kommen am Ende zurück.</string>
 </resources>

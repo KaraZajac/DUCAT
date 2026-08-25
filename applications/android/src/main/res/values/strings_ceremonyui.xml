@@ -29,10 +29,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Ride confirmed</string>
-    <string name="ceremony_expecting_you">They\'re expecting you — anything else goes in the chat.</string>
+    <string name="ceremony_expecting_you">Post your stake in the chat — they pay once it\'s in.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Your ride is coming</string>
-    <string name="ceremony_eta_in_chat">ETA and anything else — in the chat.</string>
+    <string name="ceremony_eta_in_chat">Pay in the chat once their stake is in — the ETA is there too.</string>
     <string name="ceremony_stake_note">You put in %2$s: the fare plus a %1$s stake. The driver stakes %1$s too, and both come back when the ride ends.</string>
 </resources>

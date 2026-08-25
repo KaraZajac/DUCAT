@@ -29,10 +29,10 @@
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">سفر قطعی شد</string>
-    <string name="ceremony_expecting_you">منتظرت هستند — بقیهٔ حرف‌ها در گفتگو.</string>
+    <string name="ceremony_expecting_you">ودیعه‌تان را در گفتگو بگذارید — به‌محض رسیدنش پرداخت می‌کنند.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">ماشینت دارد می‌آید</string>
-    <string name="ceremony_eta_in_chat">زمان رسیدن و هر چیز دیگر — در گفتگو.</string>
+    <string name="ceremony_eta_in_chat">به‌محض رسیدن ودیعهٔ آن‌ها در گفتگو پرداخت کنید — زمان رسیدن هم همان‌جاست.</string>
     <string name="ceremony_stake_note">‏شما %2$s می‌گذارید: کرایه به‌علاوهٔ ودیعهٔ %1$s. راننده هم %1$s می‌گذارد و هر دو در پایان سفر برمی‌گردند.</string>
 </resources>
