@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">حدّد السائق الرحلة على أنها انتهت.</string>
     <string name="bond_countered_split">اقترحوا تقسيمًا مختلفًا.</string>
     <string name="bond_released">حُررت الأجرة</string>
+    <string name="bond_called_off">أُلغي — لم يُدفع شيء.</string>
     <string name="bond_released_amount">%1$s لك</string>
     <string name="profile_arbiter">حَكَم الضمان</string>
     <string name="profile_arbiter_note">يحمل مفتاح الترجيح في رحلاتك المضمونة. لا يُستدعى إلا إذا ساء شيء.</string>

@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">De chauffeur heeft de rit als afgerond gemarkeerd.</string>
     <string name="bond_countered_split">Ze stelden een andere verdeling voor.</string>
     <string name="bond_released">Ritprijs vrijgegeven</string>
+    <string name="bond_called_off">Afgezegd — er is niets betaald.</string>
     <string name="bond_released_amount">%1$s naar jou</string>
     <string name="profile_arbiter">Depot-arbiter</string>
     <string name="profile_arbiter_note">Houdt de doorslaggevende sleutel van je rit-depots. Wordt alleen benaderd als er iets misgaat.</string>

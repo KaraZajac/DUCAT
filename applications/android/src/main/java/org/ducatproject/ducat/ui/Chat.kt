@@ -3051,6 +3051,14 @@ private fun RideBondBanner(contact: Contact) {
                 // banner fell through to an older escrow — while the side
                 // that co-signed ("release_cosigned") saw a bare "Fare
                 // released" with no idea how much had arrived.
+                // Called off before any money went in. The side that did the
+                // calling knows; this is for the other one, and it is the only
+                // thing on a screen that says so — everything else about this
+                // escrow simply stopped.
+                stage == "aborted" -> BondLine(
+                    spin = false,
+                    text = stringResource(R.string.bond_called_off),
+                )
                 stage == "released" || stage == "release_cosigned" -> {
                     BondLine(
                         spin = false,

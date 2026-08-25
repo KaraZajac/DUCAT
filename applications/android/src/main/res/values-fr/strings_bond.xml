@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">Le conducteur a marqué la course comme terminée.</string>
     <string name="bond_countered_split">Iels ont proposé un autre partage.</string>
     <string name="bond_released">Prix libéré</string>
+    <string name="bond_called_off">Annulé — rien n\'a été payé.</string>
     <string name="bond_released_amount">%1$s pour vous</string>
     <string name="profile_arbiter">Arbitre du séquestre</string>
     <string name="profile_arbiter_note">Détient la clé d\'arbitrage de vos courses sous séquestre. Jamais sollicité, sauf problème.</string>

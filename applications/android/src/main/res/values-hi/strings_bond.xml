@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">चालक ने सवारी पूरी होने का चिह्न लगाया।</string>
     <string name="bond_countered_split">उन्होंने अलग बँटवारा सुझाया।</string>
     <string name="bond_released">किराया जारी किया गया</string>
+    <string name="bond_called_off">रद्द — कुछ भी भुगतान नहीं हुआ।</string>
     <string name="bond_released_amount">%1$s आपको</string>
     <string name="profile_arbiter">एस्क्रो मध्यस्थ</string>
     <string name="profile_arbiter_note">आपकी बॉन्ड सवारियों की निर्णायक कुंजी रखता है। कुछ गड़बड़ होने पर ही संपर्क होता है।</string>

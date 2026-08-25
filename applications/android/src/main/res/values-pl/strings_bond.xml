@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">Kierowca oznaczył przejazd jako zakończony.</string>
     <string name="bond_countered_split">Zaproponowali inny podział.</string>
     <string name="bond_released">Opłata zwolniona</string>
+    <string name="bond_called_off">Odwołane — nic nie zapłacono.</string>
     <string name="bond_released_amount">%1$s dla ciebie</string>
     <string name="profile_arbiter">Arbiter depozytu</string>
     <string name="profile_arbiter_note">Trzyma rozstrzygający klucz twoich przejazdów z depozytem. Odzywa się tylko, gdy coś pójdzie źle.</string>

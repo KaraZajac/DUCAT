@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">Pengemudi menandai perjalanan selesai.</string>
     <string name="bond_countered_split">Mereka mengusulkan pembagian lain.</string>
     <string name="bond_released">Tarif dilepaskan</string>
+    <string name="bond_called_off">Dibatalkan — tidak ada yang dibayar.</string>
     <string name="bond_released_amount">%1$s untukmu</string>
     <string name="profile_arbiter">Arbiter escrow</string>
     <string name="profile_arbiter_note">Memegang kunci penentu perjalanan ber-escrow Anda. Hanya dihubungi jika ada masalah.</string>

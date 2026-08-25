@@ -513,6 +513,23 @@ fun HailCard(
     }
     }
     }
+    // A driver who calls the ride off before either stake goes in leaves this
+    // card saying a ride is coming. The abort is recorded and it does fire a
+    // notification, but a notification is the one channel somebody clears
+    // without reading — and this card is what they are actually looking at
+    // while they stand on the kerb. Take it down when the escrow is called
+    // off; the chat banner says what happened.
+    val ceremonyV by ContactStore.changes.collectAsState()
+    LaunchedEffect(ceremonyV, driverFound?.personaHex) {
+        val d = driverFound ?: return@LaunchedEffect
+        val stage = withContext(Dispatchers.IO) {
+            runCatchingCancellable {
+                org.ducatproject.ducat.Ceremony.rideWith(context, d.personaHex)
+                    ?.optString("stage")
+            }.getOrNull()
+        }
+        if (stage == "aborted") driverFound = null
+    }
     driverFound?.let { d ->
         DriverFound(
             contact = d,

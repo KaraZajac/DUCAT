@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">L\'autista ha segnato la corsa come conclusa.</string>
     <string name="bond_countered_split">Hanno proposto una divisione diversa.</string>
     <string name="bond_released">Tariffa sbloccata</string>
+    <string name="bond_called_off">Annullato — non è stato pagato nulla.</string>
     <string name="bond_released_amount">%1$s a te</string>
     <string name="profile_arbiter">Arbitro del deposito</string>
     <string name="profile_arbiter_note">Custodisce la chiave decisiva delle corse con deposito. Interviene solo se qualcosa va storto.</string>

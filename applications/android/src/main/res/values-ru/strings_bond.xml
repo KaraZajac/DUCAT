@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">Водитель отметил поездку завершённой.</string>
     <string name="bond_countered_split">Они предложили другое деление.</string>
     <string name="bond_released">Оплата отпущена</string>
+    <string name="bond_called_off">Отменено — ничего не оплачено.</string>
     <string name="bond_released_amount">%1$s вам</string>
     <string name="profile_arbiter">Арбитр эскроу</string>
     <string name="profile_arbiter_note">Держит решающий ключ ваших поездок с эскроу. Участвует, только если что-то пошло не так.</string>

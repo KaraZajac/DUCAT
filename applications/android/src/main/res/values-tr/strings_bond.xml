@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">Sürücü yolculuğu tamamlandı olarak işaretledi.</string>
     <string name="bond_countered_split">Farklı bir paylaşım önerdiler.</string>
     <string name="bond_released">Ücret serbest bırakıldı</string>
+    <string name="bond_called_off">İptal edildi — hiçbir ödeme yapılmadı.</string>
     <string name="bond_released_amount">%1$s sana</string>
     <string name="profile_arbiter">Emanet hakemi</string>
     <string name="profile_arbiter_note">Emanetli yolculuklarında belirleyici anahtarı tutar. Yalnızca bir sorun olursa devreye girer.</string>

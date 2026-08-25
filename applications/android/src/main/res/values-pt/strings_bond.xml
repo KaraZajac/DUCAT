@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">O motorista marcou a viagem como concluída.</string>
     <string name="bond_countered_split">Propuseram uma divisão diferente.</string>
     <string name="bond_released">Tarifa libertada</string>
+    <string name="bond_called_off">Cancelado — nada foi pago.</string>
     <string name="bond_released_amount">%1$s para você</string>
     <string name="profile_arbiter">Árbitro da caução</string>
     <string name="profile_arbiter_note">Guarda a chave de desempate das tuas viagens com caução. Só entra se algo correr mal.</string>

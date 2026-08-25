@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">Der Fahrer hat die Fahrt als beendet markiert.</string>
     <string name="bond_countered_split">Sie haben eine andere Aufteilung vorgeschlagen.</string>
     <string name="bond_released">Fahrpreis freigegeben</string>
+    <string name="bond_called_off">Abgebrochen — es wurde nichts gezahlt.</string>
     <string name="bond_released_amount">%1$s an dich</string>
     <string name="profile_arbiter">Treuhand-Schiedsperson</string>
     <string name="profile_arbiter_note">Hält den entscheidenden Schlüssel deiner Treuhand-Fahrten. Wird nur bei Problemen kontaktiert.</string>

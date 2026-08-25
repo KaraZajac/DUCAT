@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">ドライバーが乗車終了としました。</string>
     <string name="bond_countered_split">相手が別の分け方を提案しました。</string>
     <string name="bond_released">運賃をリリースしました</string>
+    <string name="bond_called_off">取り消されました — 支払いはありません。</string>
     <string name="bond_released_amount">%1$s があなたへ</string>
     <string name="profile_arbiter">エスクロー仲裁者</string>
     <string name="profile_arbiter_note">ボンド付き乗車の決定キーを保持します。問題が起きない限り出番はありません。</string>

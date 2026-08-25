@@ -15,6 +15,7 @@
     <string name="bond_ride_complete_ask">기사가 운행 완료로 표시했습니다.</string>
     <string name="bond_countered_split">상대가 다른 분배를 제안했어요.</string>
     <string name="bond_released">요금이 지급되었습니다</string>
+    <string name="bond_called_off">취소됨 — 지불된 것은 없습니다.</string>
     <string name="bond_released_amount">%1$s 내 몫</string>
     <string name="profile_arbiter">에스크로 중재자</string>
     <string name="profile_arbiter_note">보증된 운행의 결정 키를 보관합니다. 문제가 생기지 않는 한 관여하지 않습니다.</string>

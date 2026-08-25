@@ -1337,10 +1337,18 @@ object Ceremony {
 
     /** Whether this escrow still has something to say to the person. */
     private fun bannerWorthy(o: JSONObject): Boolean = when (o.optString("stage")) {
-        "aborted" -> false
-        // Settled: shown for a day so both sides get the same confirmation,
-        // then it is history like any other finished thing.
-        "released", "release_cosigned" -> {
+        // Settled *or* called off: shown for a day so both sides get the same
+        // confirmation, then it is history like any other finished thing.
+        //
+        // "aborted" used to be `false` — a dead deal says nothing — and the
+        // side that did not do the calling off was left with the last live
+        // thing it had been told. A rider whose driver cancelled before either
+        // stake went in kept "Your ride is coming" on screen, with the whole
+        // of the news in a notification, which is the one channel a person
+        // swipes away without reading. The reasoning already written for
+        // `released` one line down is the reasoning here: the party who did
+        // not take the action is the one who has to be told.
+        "aborted", "released", "release_cosigned" -> {
             val at = o.optLong("settledAt")
             at > 0L && System.currentTimeMillis() / 1000 - at < SETTLED_SHOWN_SECS
         }
