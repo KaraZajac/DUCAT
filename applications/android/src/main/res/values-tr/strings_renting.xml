@@ -111,4 +111,10 @@
     <string name="rent_find_sale">Alacak bir şey bul</string>
     <string name="rent_find_skill">Yardım bul</string>
     <string name="rent_poster_known">burada tanıdık</string>
+    <string name="rent_how_many">Kaç adet</string>
+    <string name="rent_how_many_hint">Daha fazlası yoksa bir bırak</string>
+    <string name="rent_n_available">%1$d adet var</string>
+    <string name="rent_n_left">%1$d kaldı</string>
+    <string name="rent_one_fewer">Bir eksilt</string>
+    <string name="rent_one_more">Bir artır</string>
 </resources>

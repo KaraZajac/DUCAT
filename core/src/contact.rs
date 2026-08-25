@@ -1579,6 +1579,15 @@ pub struct RentalNotice {
     pub subtype: Option<u64>,
     /// A few short tags for what no field will ever cover.
     pub features: Vec<String>,
+    /// How many of this the poster has. Always at least one.
+    ///
+    /// Almost every listing is a single thing — a bike, a room, an
+    /// afternoon — and this exists for the shop with six identical kayaks:
+    /// somebody deciding whether to ask wants to know they are not
+    /// competing for the last one. One is written as *absent*, so the
+    /// ordinary listing costs nothing on a board that is expensive to read,
+    /// and every listing that means "one" has the same bytes.
+    pub quantity: u64,
 }
 
 pub const RENTAL_PLACE: u64 = 1;
@@ -1618,6 +1627,10 @@ const MAX_RENTAL_AREA_CHARS: usize = 40;
 const MAX_RENTAL_WORD_CHARS: usize = 24;
 const MAX_RENTAL_FEATURES: usize = 8;
 const MAX_RENTAL_FEATURE_CHARS: usize = 16;
+/// A shop with six kayaks, not a warehouse. A board slot is a scarce, shared
+/// thing and a listing is an advertisement for what somebody has to hand; a
+/// count past this is describing inventory that wants its own listing.
+const MAX_RENTAL_QUANTITY: u64 = 999;
 
 impl RentalNotice {
     pub fn to_value(&self) -> Value {
@@ -1662,6 +1675,13 @@ impl RentalNotice {
                 f::RN_FEATURES,
                 Value::Array(self.features.iter().cloned().map(Value::Text).collect()),
             );
+        }
+        // Only when it says something. One is the default and the absent
+        // case, so "I have one of these" has exactly one encoding — which
+        // matters here more than it usually would, because the signature is
+        // over these bytes and over the slot they went into.
+        if self.quantity > 1 {
+            m.insert(f::RN_QUANTITY, Value::Uint(self.quantity));
         }
         Value::Map(m)
     }
@@ -1730,6 +1750,7 @@ impl RentalNotice {
         let sleeps = r.opt_uint(f::RN_SLEEPS)?;
         let size_m2 = r.opt_uint(f::RN_SIZE_M2)?;
         let subtype = r.opt_uint(f::RN_SUBTYPE)?;
+        let quantity = r.opt_uint(f::RN_QUANTITY)?;
 
         // A place has no gearbox and a car has no bedrooms. Refusing the
         // mismatch keeps a reader from having to guess which fields it is
@@ -1776,6 +1797,33 @@ impl RentalNotice {
                 return Err(Reject::with_detail(RejectCode::Malformed, "unknown fuel"));
             }
         }
+        // A count is only meaningful for something you can have more than one
+        // of. An hourly rate is one person's time, and a skill saying "3
+        // available" would be describing staffing it does not have.
+        if quantity.is_some() && kind == RENTAL_SKILL {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "somebody's time is not stock",
+            ));
+        }
+        let quantity = match quantity {
+            // One is the absent case, and writing it explicitly would be a
+            // second spelling of the same listing.
+            Some(1) | Some(0) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a quantity is written only when it is more than one",
+                ))
+            }
+            Some(q) if q > MAX_RENTAL_QUANTITY => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "more than a listing is for",
+                ))
+            }
+            Some(q) => q,
+            None => 1,
+        };
         if let Some(st) = subtype {
             let top = rental_subtype_top(kind);
             if st == 0 || st > top {
@@ -1823,7 +1871,7 @@ impl RentalNotice {
         Ok(RentalNotice {
             version, card, kind, title, area, cell, price_pxmr, deposit_pxmr, expiry,
             make, model, year, gearbox, fuel, seats, color, trim,
-            rooms, sleeps, size_m2, subtype, features,
+            rooms, sleeps, size_m2, subtype, features, quantity,
         })
     }
 }
@@ -1852,6 +1900,7 @@ mod rental_tests {
             rooms: None, sleeps: None, size_m2: None,
             subtype,
             features: vec!["good condition".into()],
+            quantity: 1,
         }
     }
 
@@ -1939,6 +1988,7 @@ mod rental_tests {
             size_m2: None,
             subtype: Some(1),
             features: vec!["child seat".into(), "roof box".into()],
+            quantity: 1,
         }
     }
 
@@ -1960,6 +2010,7 @@ mod rental_tests {
             size_m2: Some(28),
             subtype: Some(2),
             features: vec!["wifi".into()],
+            quantity: 1,
         }
     }
 
@@ -2026,6 +2077,69 @@ mod rental_tests {
         let mut n = a_car();
         n.year = Some(1750);
         assert!(round_trip(&n).is_err(), "a car from 1750");
+    }
+
+    /// One is the absent case, and the only spelling of it.
+    ///
+    /// A board slot is scarce and a signature is over these exact bytes, so a
+    /// listing that means "I have one of these" — which is almost all of them
+    /// — writes nothing, and there is no second encoding that means the same.
+    #[test]
+    fn one_of_a_thing_is_written_as_nothing() {
+        let mut n = a_plain(RENTAL_SALE, Some(1));
+        assert_eq!(n.quantity, 1);
+        let Value::Map(m) = n.to_value() else { panic!() };
+        assert!(!m.contains_key(&f::RN_QUANTITY), "one wrote a field");
+        assert_eq!(round_trip(&n).unwrap().quantity, 1);
+
+        n.quantity = 6;
+        let Value::Map(m) = n.to_value() else { panic!() };
+        assert!(m.contains_key(&f::RN_QUANTITY), "six wrote nothing");
+        assert_eq!(round_trip(&n).unwrap().quantity, 6);
+    }
+
+    /// The two values that must not arrive: a listing of nothing, and the
+    /// second spelling of one.
+    #[test]
+    fn a_quantity_of_zero_or_one_is_refused_on_the_wire() {
+        for q in [0u64, 1] {
+            let mut m = match a_plain(RENTAL_SALE, Some(1)).to_value() {
+                Value::Map(m) => m,
+                _ => panic!(),
+            };
+            m.insert(f::RN_QUANTITY, Value::Uint(q));
+            assert!(
+                RentalNotice::from_value(Value::Map(m)).is_err(),
+                "quantity {q} was accepted",
+            );
+        }
+    }
+
+    /// A shop, not a warehouse.
+    #[test]
+    fn a_quantity_has_a_ceiling() {
+        let mut n = a_plain(RENTAL_SALE, Some(1));
+        n.quantity = MAX_RENTAL_QUANTITY;
+        assert!(round_trip(&n).is_ok());
+        n.quantity = MAX_RENTAL_QUANTITY + 1;
+        assert!(round_trip(&n).is_err(), "a warehouse got onto a board");
+    }
+
+    /// Somebody's time is not stock. An hourly rate saying "3 available"
+    /// would be describing staffing the listing does not have.
+    #[test]
+    fn a_skill_cannot_be_stocked() {
+        let mut n = a_plain(RENTAL_SKILL, Some(1));
+        n.quantity = 3;
+        assert!(round_trip(&n).is_err(), "an hour was sold three at a time");
+        // And the kinds that can be counted still can.
+        for kind in [RENTAL_PLACE, RENTAL_VEHICLE, RENTAL_SALE, RENTAL_GEAR] {
+            let mut ok = a_plain(kind, Some(1));
+            ok.quantity = 3;
+            // a_plain carries no typed extras, which the two shaped kinds
+            // also accept — they only refuse each *other's*.
+            assert_eq!(round_trip(&ok).unwrap().quantity, 3, "kind {kind}");
+        }
     }
 
     #[test]

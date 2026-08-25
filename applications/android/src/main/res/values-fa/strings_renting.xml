@@ -111,4 +111,10 @@
     <string name="rent_find_sale">دنبال چیزی برای خرید بگرد</string>
     <string name="rent_find_skill">دنبال کمک بگرد</string>
     <string name="rent_poster_known">شناخته‌شده</string>
+    <string name="rent_how_many">چند تا</string>
+    <string name="rent_how_many_hint">اگر بیشتر ندارید روی یک بگذارید</string>
+    <string name="rent_n_available">%1$d موجود</string>
+    <string name="rent_n_left">%1$d باقی مانده</string>
+    <string name="rent_one_fewer">یکی کمتر</string>
+    <string name="rent_one_more">یکی بیشتر</string>
 </resources>

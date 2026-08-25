@@ -111,4 +111,10 @@
     <string name="rent_find_sale">Trouver quelque chose à acheter</string>
     <string name="rent_find_skill">Trouver de l\'aide</string>
     <string name="rent_poster_known">connu ici</string>
+    <string name="rent_how_many">Combien</string>
+    <string name="rent_how_many_hint">Laisse à un, sauf si tu en as plusieurs</string>
+    <string name="rent_n_available">%1$d disponibles</string>
+    <string name="rent_n_left">%1$d restants</string>
+    <string name="rent_one_fewer">Un de moins</string>
+    <string name="rent_one_more">Un de plus</string>
 </resources>

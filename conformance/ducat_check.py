@@ -976,6 +976,7 @@ RN_SUBTYPE = 238
 RN_FEATURES = 239
 RN_TRIM = 240
 RN_SIZE_M2 = 241
+RN_QUANTITY = 248
 # §16.18 + board.rs: who wrote a board notice, and what it cost them. A stand's
 # write key is the cell name hashed, so anybody can write any slot — these do
 # not make a slot somebody's property, they make authorship checkable and
@@ -1252,8 +1253,13 @@ def parse_listing(buf):
         raise Reject("Malformed", "unknown rental notice version")
     if not out["card"].startswith("ducat:"):
         raise Reject("Malformed", "a listing card must be a ducat: URI")
-    if out["kind"] not in (1, 2):
-        raise Reject("Malformed", "a listing is a place or a vehicle")
+    # Five kinds. This knew two, and had known two since draft 0.89 added a
+    # thing for sale (3), gear by the day (4) and somebody's time (5) — no
+    # vector had ever exercised one, so a second implementation that would
+    # have refused every real sale, hire and trade listing on a live board sat
+    # here agreeing with itself.
+    if out["kind"] not in (1, 2, 3, 4, 5):
+        raise Reject("Malformed", "unknown listing kind")
     if not out["title"] or len(out["title"]) > 60:
         raise Reject("Malformed", "a listing needs a title")
     out["area"] = _opt(b, RN_AREA, "text")
@@ -1300,12 +1306,28 @@ def parse_listing(buf):
         raise Reject("Malformed", "gearbox is manual or automatic")
     if out["fuel"] is not None and not (1 <= out["fuel"] <= 4):
         raise Reject("Malformed", "unknown fuel")
+    # The three kinds added in 0.89 carry no typed extras at all: a kayak has
+    # no gearbox, a bicycle for sale has no bedrooms, an electrician neither.
+    if out["kind"] > 2 and (vehicle_only or place_only):
+        raise Reject("Malformed", "this listing kind has no typed extras")
     if out["subtype"] is not None:
-        top = 2 if out["kind"] == 1 else 3
+        top = {1: 2, 2: 3, 3: 9, 4: 5, 5: 12}.get(out["kind"], 0)
         if not (1 <= out["subtype"] <= top):
             raise Reject("Malformed", "unknown subtype")
     if out["year"] is not None and not (1900 <= out["year"] <= 2200):
         raise Reject("Malformed", "implausible year")
+
+    # How many of it there are. One is the absent case and the only spelling
+    # of it: a board slot is scarce, and two byte-strings that mean the same
+    # listing is the seam the signature is meant to close.
+    q = _opt(b, RN_QUANTITY, "uint")
+    if q is not None and out["kind"] == 5:
+        raise Reject("Malformed", "somebody's time is not stock")
+    if q is not None and q <= 1:
+        raise Reject("Malformed", "a quantity is written only when it is more than one")
+    if q is not None and q > 999:
+        raise Reject("Malformed", "more than a listing is for")
+    out["quantity"] = q if q is not None else 1
 
     feats = _opt(b, RN_FEATURES, "array")
     out["features"] = []
@@ -1422,6 +1444,8 @@ def run_listing(cases, r):
                     fields.append((fid, (typ, n[name])))
             if n["features"]:
                 fields.append((RN_FEATURES, ("array", [("text", f) for f in n["features"]])))
+            if n["quantity"] > 1:
+                fields.append((RN_QUANTITY, ("uint", n["quantity"])))
             return _reencode_map(fields)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

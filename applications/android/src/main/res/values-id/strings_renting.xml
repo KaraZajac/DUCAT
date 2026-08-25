@@ -111,4 +111,10 @@
     <string name="rent_find_sale">Cari barang untuk dibeli</string>
     <string name="rent_find_skill">Cari bantuan</string>
     <string name="rent_poster_known">sudah dikenal</string>
+    <string name="rent_how_many">Berapa banyak</string>
+    <string name="rent_how_many_hint">Biarkan satu kecuali punya lebih</string>
+    <string name="rent_n_available">%1$d tersedia</string>
+    <string name="rent_n_left">sisa %1$d</string>
+    <string name="rent_one_fewer">Kurangi satu</string>
+    <string name="rent_one_more">Tambah satu</string>
 </resources>

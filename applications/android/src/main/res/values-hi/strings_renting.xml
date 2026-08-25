@@ -111,4 +111,10 @@
     <string name="rent_find_sale">खरीदने को कुछ ढूँढ़ें</string>
     <string name="rent_find_skill">मदद ढूँढ़ें</string>
     <string name="rent_poster_known">यहाँ परिचित</string>
+    <string name="rent_how_many">कितने</string>
+    <string name="rent_how_many_hint">एक ही रहने दें, जब तक ज़्यादा न हों</string>
+    <string name="rent_n_available">%1$d उपलब्ध</string>
+    <string name="rent_n_left">%1$d बचे</string>
+    <string name="rent_one_fewer">एक कम</string>
+    <string name="rent_one_more">एक और</string>
 </resources>

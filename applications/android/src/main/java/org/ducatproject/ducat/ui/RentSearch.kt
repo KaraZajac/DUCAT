@@ -629,7 +629,7 @@ internal fun ListingCardsPreview() {
                     make = null, model = null, year = null, gearbox = null, fuel = null,
                     seats = null, color = null, trim = null,
                     rooms = null, sleeps = null, sizeM2 = null,
-                    subtype = subtype, features = features,
+                    subtype = subtype, features = features, quantity = 1uL,
                 ),
                 busy = false, onAsk = {},
             )
@@ -738,6 +738,13 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                     info.subtype?.let { add(stringResource(categoryLabel(kind, it.toInt()))) }
                 }
                 addAll(info.features)
+                // Only when there is more than one. Somebody deciding whether
+                // to ask wants to know they are not competing for the last
+                // one — and for the listing that *is* one thing, which is
+                // nearly all of them, saying so would be noise.
+                if (info.quantity > 1uL) {
+                    add(stringResource(R.string.rent_n_available, info.quantity.toLong()))
+                }
             }
             if (specs.isNotEmpty()) {
                 Spacer(Modifier.height(4.dp))

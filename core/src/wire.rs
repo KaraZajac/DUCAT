@@ -242,6 +242,12 @@ pub mod f {
     pub const RN_TRIM: u64 = 240;
     /// Floor area in square metres. Refused on a vehicle.
     pub const RN_SIZE_M2: u64 = 241;
+    /// How many of this the poster has. Absent means one, which is what
+    /// almost every listing is; the field exists for the shop with six
+    /// identical kayaks, so it is written only when it says something.
+    /// Refused on a skill — an hourly rate for one person's time cannot be
+    /// stocked, and "3 available" against it would be a lie.
+    pub const RN_QUANTITY: u64 = 248;
 
     // What a notice on a public board costs and who wrote it (see board.rs).
     // A stand's write key is the cell name hashed, so these do not make a slot

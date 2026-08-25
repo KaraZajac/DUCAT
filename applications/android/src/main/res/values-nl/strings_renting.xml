@@ -111,4 +111,10 @@
     <string name="rent_find_sale">Iets te koop vinden</string>
     <string name="rent_find_skill">Hulp vinden</string>
     <string name="rent_poster_known">hier bekend</string>
+    <string name="rent_how_many">Hoeveel</string>
+    <string name="rent_how_many_hint">Laat op één staan, tenzij je er meer hebt</string>
+    <string name="rent_n_available">%1$d beschikbaar</string>
+    <string name="rent_n_left">nog %1$d</string>
+    <string name="rent_one_fewer">Eén minder</string>
+    <string name="rent_one_more">Eén meer</string>
 </resources>

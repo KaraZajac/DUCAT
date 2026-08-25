@@ -111,4 +111,10 @@
     <string name="rent_find_sale">ابحث عن شيء تشتريه</string>
     <string name="rent_find_skill">ابحث عن مساعدة</string>
     <string name="rent_poster_known">معروف هنا</string>
+    <string name="rent_how_many">كم العدد</string>
+    <string name="rent_how_many_hint">اتركه واحدًا ما لم يكن لديك أكثر</string>
+    <string name="rent_n_available">متوفّر: %1$d</string>
+    <string name="rent_n_left">المتبقّي: %1$d</string>
+    <string name="rent_one_fewer">واحد أقل</string>
+    <string name="rent_one_more">واحد أكثر</string>
 </resources>

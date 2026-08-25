@@ -30,6 +30,7 @@ fun main() {
         make = null, model = null, year = null, gearbox = null, fuel = null,
         seats = null, color = null, trim = null,
         rooms = 2uL, sleeps = null, sizeM2 = null, subtype = null, features = emptyList(),
+        quantity = 1uL,
     )
 
     // The ordinary path: post to a slot, read it back from that slot.

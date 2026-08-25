@@ -111,4 +111,10 @@
     <string name="rent_find_sale">Знайти що купити</string>
     <string name="rent_find_skill">Знайти допомогу</string>
     <string name="rent_poster_known">тут давно</string>
+    <string name="rent_how_many">Скільки</string>
+    <string name="rent_how_many_hint">Залиш одну, якщо в тебе не більше</string>
+    <string name="rent_n_available">у наявності: %1$d</string>
+    <string name="rent_n_left">лишилось: %1$d</string>
+    <string name="rent_one_fewer">На одну менше</string>
+    <string name="rent_one_more">На одну більше</string>
 </resources>

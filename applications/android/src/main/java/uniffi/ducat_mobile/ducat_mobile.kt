@@ -3834,7 +3834,11 @@ data class RentalInfo (
     var `sleeps`: kotlin.ULong?, 
     var `sizeM2`: kotlin.ULong?, 
     var `subtype`: kotlin.ULong?, 
-    var `features`: List<kotlin.String>
+    var `features`: List<kotlin.String>, 
+    /**
+     * How many the poster has. One unless they said otherwise.
+     */
+    var `quantity`: kotlin.ULong
 ) {
     
     companion object
@@ -3868,6 +3872,7 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterSequenceString.read(buf),
+            FfiConverterULong.read(buf),
         )
     }
 
@@ -3893,7 +3898,8 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
             FfiConverterOptionalULong.allocationSize(value.`sleeps`) +
             FfiConverterOptionalULong.allocationSize(value.`sizeM2`) +
             FfiConverterOptionalULong.allocationSize(value.`subtype`) +
-            FfiConverterSequenceString.allocationSize(value.`features`)
+            FfiConverterSequenceString.allocationSize(value.`features`) +
+            FfiConverterULong.allocationSize(value.`quantity`)
     )
 
     override fun write(value: RentalInfo, buf: ByteBuffer) {
@@ -3919,6 +3925,7 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
             FfiConverterOptionalULong.write(value.`sizeM2`, buf)
             FfiConverterOptionalULong.write(value.`subtype`, buf)
             FfiConverterSequenceString.write(value.`features`, buf)
+            FfiConverterULong.write(value.`quantity`, buf)
     }
 }
 

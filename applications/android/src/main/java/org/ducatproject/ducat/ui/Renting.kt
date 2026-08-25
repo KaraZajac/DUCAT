@@ -8,10 +8,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backpack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -241,6 +243,18 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
                             }
                         },
                         onDelete = { Listings.remove(context, o.optString("id")) },
+                        onQuantity = { n ->
+                            Listings.setQuantity(context, o.optString("id"), n)
+                            // Straight onto the board rather than at the next
+                            // six-hourly refresh: the count is what a reader
+                            // is deciding on, and "two left" that is really
+                            // none is the reason to have it at all.
+                            if (o.optString("board").isNotBlank()) scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching { Listings.post(context, o.optString("id")) }
+                                }.onFailure { error = moneyFailure(context, it) }
+                            }
+                        },
                     )
                     Spacer(Modifier.height(10.dp))
                 }
@@ -255,6 +269,7 @@ private fun MyListingCard(
     onPost: () -> Unit,
     onStop: () -> Unit,
     onDelete: () -> Unit,
+    onQuantity: (Long) -> Unit,
 ) {
     val context = LocalContext.current
     // Posted, and not so long ago that the notice has run out.
@@ -308,6 +323,32 @@ private fun MyListingCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            // How many are left, and a way to say one just went.
+            //
+            // A listing was post-only: an owner who sold one of six had to
+            // take the whole thing down and write it again, so the count
+            // would have been a number you could set exactly once. The board
+            // follows on the next refresh, which is the same path a price
+            // change would take.
+            if (o.optInt("kind") != Listings.KIND_SKILL) {
+                val left = Listings.quantityOf(o)
+                Spacer(Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.rent_n_left, left),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Spacer(Modifier.weight(1f))
+                    IconButton(
+                        onClick = { onQuantity(left - 1) },
+                        enabled = left > 1,
+                    ) { Icon(Icons.Filled.Remove, stringResource(R.string.rent_one_fewer)) }
+                    IconButton(
+                        onClick = { onQuantity(left + 1) },
+                        enabled = left < Listings.MAX_QUANTITY,
+                    ) { Icon(Icons.Filled.Add, stringResource(R.string.rent_one_more)) }
+                }
+            }
             Spacer(Modifier.height(8.dp))
             Text(
                 stringResource(if (live) R.string.rent_live else R.string.rent_not_posted),
@@ -374,6 +415,10 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     var whole by rememberSaveable { mutableStateOf(true) }
     // Plain kinds: a category, and free words for what it actually is.
     var category by rememberSaveable { mutableStateOf(1) }
+    // How many of it. Starts at one, because almost every listing is one
+    // thing and the number should be answered before it is asked. Cleared to
+    // nothing it still means one — an empty box is not a listing of nothing.
+    var howMany by rememberSaveable { mutableStateOf("1") }
     var tags by rememberSaveable { mutableStateOf("") }
     // Private
     var details by rememberSaveable { mutableStateOf("") }
@@ -534,6 +579,22 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        // Not on a skill: the price there is an hour of one person's time,
+        // and the wire refuses a count on it for the same reason.
+        if (kind != org.ducatproject.ducat.Listings.KIND_SKILL) {
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = howMany,
+                onValueChange = { v ->
+                    howMany = v.filter { it.isDigit() }.take(3)
+                },
+                label = { Text(stringResource(R.string.rent_how_many)) },
+                supportingText = { Text(stringResource(R.string.rent_how_many_hint)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
         }
 
@@ -754,6 +815,7 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                         here.first, here.second, specs, details,
                         priceTyped = price.takeIf { fiat },
                         priceCurrency = cur.takeIf { fiat },
+                        quantity = howMany.toLongOrNull() ?: 1L,
                     )
                     Listings.put(context, draft)
                     scope.launch {

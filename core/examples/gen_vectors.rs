@@ -1850,6 +1850,7 @@ fn contact_cases() -> Vec<J> {
             rooms: None, sleeps: None, size_m2: None,
             subtype: Some(1),
             features: vec!["child seat".into()],
+            quantity: 1,
         };
         let room = RentalNotice {
             kind: 1,
@@ -1917,6 +1918,56 @@ fn contact_cases() -> Vec<J> {
         lcase("listing_no_deposit",
             "A stake of zero is legitimate: the floor rule (§15.12) zeroes a stake worth less than the fee to return it, and an owner may simply not ask for one.",
             &RentalNotice { deposit_pxmr: 0, ..room.clone() }, None);
+
+        // The stall with six of something. Almost every listing is one thing,
+        // so one is the *absent* case and the only spelling of it.
+        let six = RentalNotice {
+            kind: 4,
+            title: "Sea kayak, single".into(),
+            subtype: Some(1),
+            features: vec!["paddle".into()],
+            rooms: None, sleeps: None, size_m2: None,
+            make: None, model: None, year: None, gearbox: None, fuel: None,
+            seats: None, color: None, trim: None,
+            quantity: 6,
+            ..car.clone()
+        };
+        lcase("listing_quantity_six",
+            "Six identical kayaks on one slot. A board slot is scarce and somebody deciding whether to ask wants to know they are not competing for the last one.",
+            &six, None);
+        lcase("listing_quantity_one_is_absent",
+            "The same listing with one of them: the field is not written at all. One is the default, so the ordinary listing costs nothing on a board that is expensive to read — and there is exactly one encoding of \"I have one of these\", which matters because the signature is over these bytes.",
+            &RentalNotice { quantity: 1, ..six.clone() }, None);
+        // These two cannot be built by encoding a notice: `to_value` will not
+        // write a quantity of one or zero, which is the property under test.
+        // So the field is put into the map by hand — which is also exactly
+        // what a careless third implementation would do.
+        lcase("listing_quantity_a_warehouse",
+            "Past the ceiling. A listing is an advertisement for what somebody has to hand, and a board slot is a scarce shared thing.",
+            &RentalNotice { quantity: 100_000, ..six.clone() },
+            Some((RejectCode::Malformed, "more than a listing is for")));
+        lcase("listing_skill_with_a_quantity",
+            "An hourly rate for one person's time, offered three at a time. Somebody's time is not stock, and the number would be describing staffing the listing does not have.",
+            &RentalNotice { kind: 5, subtype: Some(1), quantity: 3, ..six.clone() },
+            Some((RejectCode::Malformed, "somebody's time is not stock")));
+
+        let forge = |q: u64| {
+            let ducat_core::cbor::Value::Map(mut m) = six.to_value() else { unreachable!() };
+            m.insert(ducat_core::wire::f::RN_QUANTITY, ducat_core::cbor::Value::Uint(q));
+            hex(&ducat_core::cbor::Value::Map(m).encode())
+        };
+        for (name, why, q) in [
+            ("listing_quantity_stated_as_one",
+             "One, written down. Refused: it is a second spelling of the listing above, and two byte-strings that mean the same thing is the seam a signature is supposed to close.",
+             1u64),
+            ("listing_quantity_zero",
+             "A listing of nothing. An owner who has run out stops refreshing the notice; they do not advertise the absence.",
+             0),
+        ] {
+            v.push(json!({ "name": name, "why": why, "listing_hex": forge(q),
+                "expect": { "ok": false, "reject": "MALFORMED",
+                            "hint": "a quantity is written only when it is more than one" } }));
+        }
 
         // §16.18 + board.rs: the sealed form, which is what actually goes on a
         // board. Everything above is the notice *inside* the seal; another

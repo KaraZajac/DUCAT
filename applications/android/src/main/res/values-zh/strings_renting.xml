@@ -111,4 +111,10 @@
     <string name="rent_find_sale">找东西买</string>
     <string name="rent_find_skill">找人帮忙</string>
     <string name="rent_poster_known">此处常见</string>
+    <string name="rent_how_many">有几件</string>
+    <string name="rent_how_many_hint">除非你有更多，否则保持一件</string>
+    <string name="rent_n_available">有 %1$d 件</string>
+    <string name="rent_n_left">还剩 %1$d 件</string>
+    <string name="rent_one_fewer">少一件</string>
+    <string name="rent_one_more">多一件</string>
 </resources>

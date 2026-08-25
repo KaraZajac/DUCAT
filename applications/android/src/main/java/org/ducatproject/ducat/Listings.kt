@@ -137,6 +137,8 @@ object Listings {
          *  currency. Kept so [reprice] can hold that price steady. */
         priceTyped: String? = null,
         priceCurrency: String? = null,
+        /** How many of it there are. One unless the owner said otherwise. */
+        quantity: Long = 1,
     ): JSONObject {
         val cell = runCatching {
             uniffi.ducat_mobile.geohashEncode(latE7, lonE7, CELL_PRECISION)
@@ -156,6 +158,9 @@ object Listings {
             put("depositPxmr", Stakes.stakeFor(deal, pricePxmr))
             put("specs", specs)
             put("private", privateDetails)
+            // Stored even when it is one, so the owner's counter has something
+            // to count down from without a migration the first time they sell.
+            put("quantity", quantity.coerceIn(1L, MAX_QUANTITY))
             put("created", System.currentTimeMillis() / 1000)
             if (priceTyped != null && priceCurrency != null) {
                 put("priceTyped", priceTyped)
@@ -163,6 +168,31 @@ object Listings {
             }
         }
     }
+
+    /** Change how many are left. Clamped to what the wire will take. */
+    fun setQuantity(context: Context, id: String, n: Long) = synchronized(lock) {
+        val items = all(context).map { o ->
+            if (o.optString("id") == id) {
+                JSONObject(o.toString()).put("quantity", n.coerceIn(1L, MAX_QUANTITY))
+            } else o
+        }
+        save(context, items)
+        ContactStore.bump()
+    }
+
+    /**
+     * How many of this listing there are, defaulting to one.
+     *
+     * One place, so a listing written before the field existed and a listing
+     * whose owner never touched the number are the same thing, and neither
+     * has to be migrated. Clamped to what the wire will take, because a stored
+     * value that core refuses is a listing nobody could post.
+     */
+    fun quantityOf(o: JSONObject): Long =
+        o.optLong("quantity", 1L).coerceIn(1L, MAX_QUANTITY)
+
+    /** A shop with six kayaks, not a warehouse — core's own ceiling. */
+    const val MAX_QUANTITY = 999L
 
     /**
      * The public half, as the wire object (§16.18).
@@ -211,6 +241,10 @@ object Listings {
             sizeM2 = if (place) num("size_m2") else null,
             subtype = num("subtype"),
             features = features,
+            // How many are left, not how many there ever were: the owner's
+            // own screen counts down as they sell, and this is read at every
+            // refresh so the board follows. A skill cannot carry one at all.
+            quantity = (if (kind == KIND_SKILL) 1L else quantityOf(o)).toULong(),
         )
     }
 

@@ -1333,6 +1333,70 @@
       "why": "A stake of zero is legitimate: the floor rule (§15.12) zeroes a stake worth less than the fee to return it, and an owner may simply not ask for one."
     },
     {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "ac18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0418df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0118ef8166706164646c6518f806"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ac18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0418df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0118ef8166706164646c6518f806",
+      "name": "listing_quantity_six",
+      "why": "Six identical kayaks on one slot. A board slot is scarce and somebody deciding whether to ask wants to know they are not competing for the last one."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0418df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0118ef8166706164646c65"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ab18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0418df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0118ef8166706164646c65",
+      "name": "listing_quantity_one_is_absent",
+      "why": "The same listing with one of them: the field is not written at all. One is the default, so the ordinary listing costs nothing on a board that is expensive to read — and there is exactly one encoding of \"I have one of these\", which matters because the signature is over these bytes."
+    },
+    {
+      "expect": {
+        "hint": "more than a listing is for",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ac18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0418df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0118ef8166706164646c6518f81a000186a0",
+      "name": "listing_quantity_a_warehouse",
+      "why": "Past the ceiling. A listing is an advertisement for what somebody has to hand, and a board slot is a scarce shared thing."
+    },
+    {
+      "expect": {
+        "hint": "somebody's time is not stock",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ac18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0518df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0118ef8166706164646c6518f803",
+      "name": "listing_skill_with_a_quantity",
+      "why": "An hourly rate for one person's time, offered three at a time. Somebody's time is not stock, and the number would be describing staffing the listing does not have."
+    },
+    {
+      "expect": {
+        "hint": "a quantity is written only when it is more than one",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ac18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0418df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0118ef8166706164646c6518f801",
+      "name": "listing_quantity_stated_as_one",
+      "why": "One, written down. Refused: it is a second spelling of the listing above, and two byte-strings that mean the same thing is the seam a signature is supposed to close."
+    },
+    {
+      "expect": {
+        "hint": "a quantity is written only when it is more than one",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ac18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0418df71536561206b6179616b2c2073696e676c6518e06a6e6f727468207369646518e1656471636a7118e21b00000009502f900018e31b00000002cb41780018e41a6b49d20018ee0118ef8166706164646c6518f800",
+      "name": "listing_quantity_zero",
+      "why": "A listing of nothing. An owner who has run out stops refreshing the notice; they do not advertise the absence."
+    },
+    {
       "board": "geo:u33db",
       "expect": {
         "ok": true,

@@ -111,4 +111,10 @@
     <string name="rent_find_sale">살 물건 찾기</string>
     <string name="rent_find_skill">도움 찾기</string>
     <string name="rent_poster_known">여기서 알려짐</string>
+    <string name="rent_how_many">몇 개</string>
+    <string name="rent_how_many_hint">더 있을 때만 개수를 바꾸세요</string>
+    <string name="rent_n_available">%1$d개 있음</string>
+    <string name="rent_n_left">%1$d개 남음</string>
+    <string name="rent_one_fewer">하나 줄이기</string>
+    <string name="rent_one_more">하나 늘리기</string>
 </resources>

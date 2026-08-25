@@ -111,4 +111,10 @@
     <string name="rent_find_sale">買えるものを探す</string>
     <string name="rent_find_skill">手を借りる</string>
     <string name="rent_poster_known">以前から</string>
+    <string name="rent_how_many">いくつ</string>
+    <string name="rent_how_many_hint">それ以上ある場合だけ数を変えてください</string>
+    <string name="rent_n_available">在庫 %1$d</string>
+    <string name="rent_n_left">残り %1$d</string>
+    <string name="rent_one_fewer">一つ減らす</string>
+    <string name="rent_one_more">一つ増やす</string>
 </resources>

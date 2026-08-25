@@ -111,4 +111,10 @@
     <string name="rent_find_sale">Tìm thứ để mua</string>
     <string name="rent_find_skill">Tìm người giúp</string>
     <string name="rent_poster_known">đã quen ở đây</string>
+    <string name="rent_how_many">Bao nhiêu</string>
+    <string name="rent_how_many_hint">Để là một, trừ khi bạn có nhiều hơn</string>
+    <string name="rent_n_available">còn %1$d cái</string>
+    <string name="rent_n_left">còn lại %1$d</string>
+    <string name="rent_one_fewer">Bớt một</string>
+    <string name="rent_one_more">Thêm một</string>
 </resources>

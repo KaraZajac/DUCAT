@@ -969,6 +969,8 @@ pub struct RentalInfo {
     pub size_m2: Option<u64>,
     pub subtype: Option<u64>,
     pub features: Vec<String>,
+    /// How many the poster has. One unless they said otherwise.
+    pub quantity: u64,
 }
 
 fn rental_from_core(n: ducat_core::contact::RentalNotice) -> RentalInfo {
@@ -981,7 +983,7 @@ fn rental_from_core(n: ducat_core::contact::RentalNotice) -> RentalInfo {
         make: n.make, model: n.model, year: n.year, gearbox: n.gearbox,
         fuel: n.fuel, seats: n.seats, color: n.color, trim: n.trim,
         rooms: n.rooms, sleeps: n.sleeps, size_m2: n.size_m2,
-        subtype: n.subtype, features: n.features,
+        subtype: n.subtype, features: n.features, quantity: n.quantity,
     }
 }
 
@@ -1013,6 +1015,9 @@ pub fn rental_encode(
         color: info.color, trim: info.trim, rooms: info.rooms,
         sleeps: info.sleeps, size_m2: info.size_m2,
         subtype: info.subtype, features: info.features,
+        // Zero would be a listing of nothing, and the UI has no way to mean
+        // it; a caller that leaves it unset means one.
+        quantity: info.quantity.max(1),
     };
     let ducat_core::cbor::Value::Map(m) = n.to_value() else { unreachable!() };
     let seed = ducat_core::board::listing_seed(&persona_secret, &listing_id);

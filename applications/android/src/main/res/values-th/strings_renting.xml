@@ -111,4 +111,10 @@
     <string name="rent_find_sale">หาของที่จะซื้อ</string>
     <string name="rent_find_skill">หาคนช่วย</string>
     <string name="rent_poster_known">รู้จักที่นี่</string>
+    <string name="rent_how_many">มีกี่ชิ้น</string>
+    <string name="rent_how_many_hint">ปล่อยไว้ที่หนึ่ง เว้นแต่คุณมีมากกว่านั้น</string>
+    <string name="rent_n_available">มี %1$d ชิ้น</string>
+    <string name="rent_n_left">เหลือ %1$d ชิ้น</string>
+    <string name="rent_one_fewer">ลดหนึ่ง</string>
+    <string name="rent_one_more">เพิ่มหนึ่ง</string>
 </resources>
