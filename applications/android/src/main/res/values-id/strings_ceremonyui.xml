@@ -25,6 +25,7 @@
     <string name="ceremony_plate">pelat %1$s</string>
     <string name="ceremony_accept">Terima</string>
     <string name="ceremony_accepting_agrees_fare">Menerima akan mengunci tarif dan jaminan Anda di escrow yang hanya bisa dibuka kalian berdua.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">Menerima akan mengunci tarif dan jaminan Anda di escrow yang butuh dua dari tiga kunci: milik Anda, milik mereka, dan milik %1$s, yang hanya dimintai pendapat kalau kalian berdua tidak bisa sepakat.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Tumpangan dikonfirmasi</string>

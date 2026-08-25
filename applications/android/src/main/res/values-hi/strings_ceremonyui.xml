@@ -26,6 +26,7 @@
     <string name="ceremony_plate">प्लेट %1$s</string>
     <string name="ceremony_accept">स्वीकारें</string>
     <string name="ceremony_accepting_agrees_fare">स्वीकार करने पर किराया और आपकी जमानत राशि एक ऐसे एस्क्रो में बंद हो जाती है जिसे सिर्फ आप दोनों खोल सकते हैं।</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">स्वीकार करने पर किराया और आपकी जमानत राशि एक ऐसे एस्क्रो में बंद हो जाती है जिसे खोलने के लिए तीन में से दो चाबियाँ चाहिए: आपकी, उनकी, और %1$s की — जिनसे तभी पूछा जाता है जब आप दोनों सहमत न हो पाएँ।</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">राइड पक्की</string>

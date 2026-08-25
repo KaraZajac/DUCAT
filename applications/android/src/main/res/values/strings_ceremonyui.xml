@@ -26,6 +26,7 @@
     <string name="ceremony_plate">plate %1$s</string>
     <string name="ceremony_accept">Accept</string>
     <string name="ceremony_accepting_agrees_fare">Accepting locks the fare and your stake in an escrow only the two of you can open.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">Accepting locks the fare and your stake in an escrow that needs two of three keys: yours, theirs, and %1$s\'s, who is asked only if the two of you cannot agree.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Ride confirmed</string>

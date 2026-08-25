@@ -26,6 +26,7 @@
     <string name="ceremony_plate">placa %1$s</string>
     <string name="ceremony_accept">Aceptar</string>
     <string name="ceremony_accepting_agrees_fare">Aceptar bloquea la tarifa y tu garantía en un depósito que solo vosotros dos podéis abrir.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">Aceptar bloquea la tarifa y tu garantía en un depósito que necesita dos de tres llaves: la tuya, la suya y la de %1$s, a quien solo se recurre si vosotros dos no lográis poneros de acuerdo.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Viaje confirmado</string>

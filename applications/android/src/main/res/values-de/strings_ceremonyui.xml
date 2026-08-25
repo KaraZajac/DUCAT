@@ -26,6 +26,7 @@
     <string name="ceremony_plate">Kennzeichen %1$s</string>
     <string name="ceremony_accept">Annehmen</string>
     <string name="ceremony_accepting_agrees_fare">Annehmen sperrt Fahrpreis und Einlage in ein Depot, das nur ihr beide öffnen könnt.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">Annehmen sperrt Fahrpreis und Einlage in ein Depot, das zwei von drei Schlüsseln braucht: deinen, ihren und den von %1$s, die nur gefragt werden, wenn ihr beide euch nicht einig werdet.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Fahrt bestätigt</string>

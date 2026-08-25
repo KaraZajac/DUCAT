@@ -25,6 +25,7 @@
     <string name="ceremony_plate">번호판 %1$s</string>
     <string name="ceremony_accept">수락</string>
     <string name="ceremony_accepting_agrees_fare">수락하면 요금과 보증금이 두 사람만 열 수 있는 에스크로에 잠깁니다.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">수락하면 요금과 보증금이 세 개 중 두 개의 열쇠로 열리는 에스크로에 잠깁니다. 당신의 열쇠, 상대의 열쇠, 그리고 두 사람이 합의하지 못할 때만 요청받는 %1$s의 열쇠입니다.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">탑승 확정</string>

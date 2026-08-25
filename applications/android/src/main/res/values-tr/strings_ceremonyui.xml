@@ -26,6 +26,7 @@
     <string name="ceremony_plate">plaka %1$s</string>
     <string name="ceremony_accept">Kabul et</string>
     <string name="ceremony_accepting_agrees_fare">Kabul etmek, ücreti ve teminatını yalnızca ikinizin açabileceği bir emanete kilitler.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">Kabul etmek, ücreti ve teminatını üç anahtardan ikisini gerektiren bir emanete kilitler: seninki, onlarınki ve yalnızca ikiniz anlaşamazsanız başvurulan %1$s’ninki.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Yolculuk onaylandı</string>

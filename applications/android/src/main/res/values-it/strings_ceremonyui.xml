@@ -26,6 +26,7 @@
     <string name="ceremony_plate">targa %1$s</string>
     <string name="ceremony_accept">Accetta</string>
     <string name="ceremony_accepting_agrees_fare">Accettare blocca la tariffa e la tua cauzione in un deposito che solo voi due potete aprire.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">Accettare blocca la tariffa e la tua cauzione in un deposito che richiede due chiavi su tre: la tua, la loro e quella di %1$s, interpellato solo se voi due non riuscite a mettervi d’accordo.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Corsa confermata</string>

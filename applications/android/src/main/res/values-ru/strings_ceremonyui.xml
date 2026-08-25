@@ -28,6 +28,7 @@
     <string name="ceremony_plate">номер %1$s</string>
     <string name="ceremony_accept">Принять</string>
     <string name="ceremony_accepting_agrees_fare">Принятие блокирует стоимость и ваш залог на счёте, который можете открыть только вы вдвоём.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">Принятие блокирует стоимость и ваш залог на счёте, который открывается двумя ключами из трёх: вашим, их и ключом %1$s, к которому обращаются, только если вы вдвоём не смогли договориться.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Поездка подтверждена</string>

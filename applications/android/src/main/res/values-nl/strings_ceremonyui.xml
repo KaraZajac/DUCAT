@@ -26,6 +26,7 @@
     <string name="ceremony_plate">kenteken %1$s</string>
     <string name="ceremony_accept">Accepteren</string>
     <string name="ceremony_accepting_agrees_fare">Accepteren zet de ritprijs en jouw borg vast in een escrow die alleen jullie samen kunnen openen.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">Accepteren zet de ritprijs en jouw borg vast in een escrow die twee van de drie sleutels nodig heeft: die van jou, die van hen en die van %1$s, die alleen gevraagd wordt als jullie er samen niet uitkomen.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Rit bevestigd</string>

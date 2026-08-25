@@ -28,6 +28,7 @@
     <string name="ceremony_plate">rejestracja %1$s</string>
     <string name="ceremony_accept">Przyjmij</string>
     <string name="ceremony_accepting_agrees_fare">Akceptacja blokuje cenę i twoją kaucję w depozycie, który możecie otworzyć tylko we dwoje.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">Akceptacja blokuje cenę i twoją kaucję w depozycie, który wymaga dwóch z trzech kluczy: twojego, ich i klucza %1$s, o który prosi się tylko wtedy, gdy nie zdołacie się dogadać.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Przejazd potwierdzony</string>

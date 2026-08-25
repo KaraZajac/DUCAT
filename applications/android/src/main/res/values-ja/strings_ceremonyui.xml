@@ -25,6 +25,7 @@
     <string name="ceremony_plate">ナンバー %1$s</string>
     <string name="ceremony_accept">承認</string>
     <string name="ceremony_accepting_agrees_fare">承諾すると、運賃とあなたの預り金は二人だけで開ける預託先に入ります。</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">承諾すると、運賃とあなたの預り金は三つのうち二つの鍵で開く預託先に入ります。あなたの鍵、相手の鍵、そして二人で折り合えないときにだけ頼まれる%1$sの鍵です。</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">配車が確定しました</string>

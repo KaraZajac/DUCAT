@@ -25,6 +25,7 @@
     <string name="ceremony_plate">ทะเบียน %1$s</string>
     <string name="ceremony_accept">ยอมรับ</string>
     <string name="ceremony_accepting_agrees_fare">การตอบรับจะล็อกค่าโดยสารและหลักประกันของคุณไว้ในบัญชีที่มีเพียงคุณสองคนเท่านั้นที่เปิดได้</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">การตอบรับจะล็อกค่าโดยสารและหลักประกันของคุณไว้ในบัญชีที่ต้องใช้กุญแจสองในสามดอก คือของคุณ ของเขา และของ %1$s ซึ่งจะถูกเรียกก็ต่อเมื่อคุณสองคนตกลงกันไม่ได้</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">ยืนยันการเดินทางแล้ว</string>

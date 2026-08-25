@@ -30,6 +30,7 @@
     <string name="ceremony_plate">اللوحة %1$s</string>
     <string name="ceremony_accept">قبول</string>
     <string name="ceremony_accepting_agrees_fare">‏القبول يقفل الأجرة وضمانك في حساب لا يفتحه إلا أنتما معًا.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">‏القبول يقفل الأجرة وضمانك في حساب يحتاج مفتاحين من ثلاثة: مفتاحك ومفتاحهما ومفتاح %1$s، الذي لا يُسأل إلا إذا تعذّر اتفاقكما.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">تأكّد المشوار</string>

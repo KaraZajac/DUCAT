@@ -28,6 +28,7 @@
     <string name="ceremony_plate">номер %1$s</string>
     <string name="ceremony_accept">Прийняти</string>
     <string name="ceremony_accepting_agrees_fare">Прийняття блокує вартість і вашу заставу на рахунку, який можете відкрити лише ви вдвох.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">Прийняття блокує вартість і вашу заставу на рахунку, який відкривається двома ключами з трьох: вашим, їхнім і ключем %1$s, до якого звертаються, лише якщо ви вдвох не змогли домовитися.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Поїздку підтверджено</string>

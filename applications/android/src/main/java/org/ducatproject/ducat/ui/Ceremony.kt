@@ -336,8 +336,32 @@ fun RideOfferScreen(
                     ) { Text(stringResource(R.string.ceremony_decline),
                         color = MaterialTheme.colorScheme.error) }
                     Spacer(Modifier.height(8.dp))
+                    // **Which escrow this actually builds.**
+                    //
+                    // "only the two of you can open" is true of the 2-of-2
+                    // rung and false of the one above it, and this device
+                    // chooses between them a second later, in Hail's accept
+                    // handler, from the same ArbiterStore read below. So the
+                    // sentence at the moment of consent promised a two-key
+                    // escrow to everyone who had ever named an arbiter — and
+                    // named nobody, on the one screen where the third
+                    // keyholder's identity is the whole question.
+                    val arbiterName = remember {
+                        org.ducatproject.ducat.ArbiterStore(context).hex()
+                            ?.takeIf { it != contact.personaHex }
+                            ?.let { h ->
+                                org.ducatproject.ducat.ContactStore(context).all()
+                                    .firstOrNull { it.personaHex == h }
+                            }?.displayName()
+                    }
                     Text(
-                        stringResource(R.string.ceremony_accepting_agrees_fare),
+                        if (arbiterName != null) {
+                            stringResource(
+                                R.string.ceremony_accepting_agrees_fare_arbiter, arbiterName,
+                            )
+                        } else {
+                            stringResource(R.string.ceremony_accepting_agrees_fare)
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                     )

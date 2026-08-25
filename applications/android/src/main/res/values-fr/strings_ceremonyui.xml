@@ -26,6 +26,7 @@
     <string name="ceremony_plate">plaque %1$s</string>
     <string name="ceremony_accept">Accepter</string>
     <string name="ceremony_accepting_agrees_fare">Accepter bloque le prix et votre dépôt dans un séquestre que vous seuls deux pouvez ouvrir.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter">Accepter bloque le prix et votre dépôt dans un séquestre qui exige deux clés sur trois : la vôtre, la leur et celle de %1$s, sollicité seulement si vous deux n’arrivez pas à vous entendre.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Course confirmée</string>
