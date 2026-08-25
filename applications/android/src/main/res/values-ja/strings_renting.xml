@@ -78,6 +78,7 @@
     <string name="rent_category">カテゴリ</string>
     <string name="rent_tags">タグ</string>
     <string name="rent_tags_hint">短い言葉を、読点で区切って</string>
+    <string name="rent_tags_on_board">ボードには：%1$s</string>
     <string name="cat_goods">品物</string>
     <string name="cat_furniture">家具</string>
     <string name="cat_tools">工具</string>

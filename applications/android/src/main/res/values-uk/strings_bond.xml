@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s вам</string>
     <string name="profile_arbiter">Арбітр ескроу</string>
     <string name="profile_arbiter_note">Тримає вирішальний ключ ваших поїздок з ескроу. Долучається, лише якщо щось піде не так.</string>
-    <string name="bond_split_stated">Пропозиція: %1$s пасажиру, %2$s водієві.</string>
     <string name="bond_sign_split">Підписати цей розподіл</string>
     <string name="bond_propose_split">Запропонувати інший розподіл</string>
     <string name="bond_back_to_rider">Назад платнику (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">Чекаємо, поки вони внесуть суму й свою заставу…</string>
     <string name="res_waiting_release">Готово — чекаємо, поки вони розблокують гроші…</string>
     <string name="res_complete_ask">Вони запропонували розрахуватися.</string>
-    <string name="res_split_stated">Пропозиція: %1$s назад платнику, %2$s іншій стороні.</string>
     <string name="res_released">Розраховано</string>
     <string name="res_send_details">Надіслати адресу та деталі передачі</string>
     <string name="res_kind_sale">Продаж</string>
@@ -75,4 +73,6 @@
     <string name="bond_close_all_to_them">%1$s просить закрити заставу й забрати її повністю — %2$s. Вам не повернеться нічого.</string>
     <string name="escrow_not_confirmed">Депозит ще звіряється з усіма. Зазвичай це триває мить.</string>
     <string name="escrow_disagreed">Учасники створили різні гаманці. Не платіть туди — почніть заново.</string>
+    <string name="split_back_to_you">Пропозиція: %1$s назад тобі, %2$s — %3$s.</string>
+    <string name="split_back_to_them">Пропозиція: %1$s назад %3$s, %2$s — тобі.</string>
 </resources>

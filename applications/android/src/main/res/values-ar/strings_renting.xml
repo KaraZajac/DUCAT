@@ -78,6 +78,7 @@
     <string name="rent_category">الفئة</string>
     <string name="rent_tags">وسوم</string>
     <string name="rent_tags_hint">بضع كلمات، مفصولة بفواصل</string>
+    <string name="rent_tags_on_board">على اللوحة: %1$s</string>
     <string name="cat_goods">أغراض</string>
     <string name="cat_furniture">أثاث</string>
     <string name="cat_tools">أدوات</string>

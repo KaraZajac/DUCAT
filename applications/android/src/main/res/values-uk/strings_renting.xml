@@ -78,6 +78,7 @@
     <string name="rent_category">Категорія</string>
     <string name="rent_tags">Мітки</string>
     <string name="rent_tags_hint">Кілька слів, через кому</string>
+    <string name="rent_tags_on_board">На дошці: %1$s</string>
     <string name="cat_goods">Речі</string>
     <string name="cat_furniture">Меблі</string>
     <string name="cat_tools">Інструменти</string>

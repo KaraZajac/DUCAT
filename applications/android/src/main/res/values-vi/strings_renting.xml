@@ -78,6 +78,7 @@
     <string name="rent_category">Danh mục</string>
     <string name="rent_tags">Thẻ</string>
     <string name="rent_tags_hint">Vài từ, cách nhau bằng dấu phẩy</string>
+    <string name="rent_tags_on_board">Trên bảng: %1$s</string>
     <string name="cat_goods">Đồ đạc</string>
     <string name="cat_furniture">Nội thất</string>
     <string name="cat_tools">Dụng cụ</string>

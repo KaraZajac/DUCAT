@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s cho bạn</string>
     <string name="profile_arbiter">Trọng tài ký quỹ</string>
     <string name="profile_arbiter_note">Giữ chìa khóa quyết định cho các chuyến đi ký quỹ. Chỉ được liên hệ khi có sự cố.</string>
-    <string name="bond_split_stated">Đề xuất: %1$s về hành khách, %2$s cho tài xế.</string>
     <string name="bond_sign_split">Ký chia phần này</string>
     <string name="bond_propose_split">Đề xuất chia khác</string>
     <string name="bond_back_to_rider">Trả lại người trả (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">Đang chờ họ trả số tiền và cọc…</string>
     <string name="res_waiting_release">Xong — đang chờ họ giải phóng tiền…</string>
     <string name="res_complete_ask">Họ đề nghị tất toán.</string>
-    <string name="res_split_stated">Đề xuất: %1$s trả lại người trả, %2$s cho bên kia.</string>
     <string name="res_released">Đã tất toán</string>
     <string name="res_send_details">Gửi địa chỉ và chi tiết bàn giao</string>
     <string name="res_kind_sale">Một món bán</string>
@@ -72,4 +70,6 @@
     <string name="bond_close_all_to_them">%1$s muốn đóng khoản đặt cọc và lấy toàn bộ — %2$s. Bạn sẽ không nhận lại gì.</string>
     <string name="escrow_not_confirmed">Vẫn đang đối chiếu ký quỹ với mọi người. Thường chỉ mất một lát.</string>
     <string name="escrow_disagreed">Những người tham gia không tạo ra cùng một ví. Đừng nạp tiền — hãy bắt đầu lại.</string>
+    <string name="split_back_to_you">Đề xuất: %1$s trả lại cho bạn, %2$s cho %3$s.</string>
+    <string name="split_back_to_them">Đề xuất: %1$s trả lại cho %3$s, %2$s cho bạn.</string>
 </resources>

@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s 내 몫</string>
     <string name="profile_arbiter">에스크로 중재자</string>
     <string name="profile_arbiter_note">보증된 운행의 결정 키를 보관합니다. 문제가 생기지 않는 한 관여하지 않습니다.</string>
-    <string name="bond_split_stated">제안: 승객에게 %1$s, 기사에게 %2$s.</string>
     <string name="bond_sign_split">이 분배에 서명</string>
     <string name="bond_propose_split">다른 분배 제안</string>
     <string name="bond_back_to_rider">지불한 쪽에게 (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">상대가 금액과 보증금을 넣기를 기다리는 중…</string>
     <string name="res_waiting_release">완료 — 상대가 대금을 풀어주기를 기다리는 중…</string>
     <string name="res_complete_ask">상대가 정산을 요청했습니다.</string>
-    <string name="res_split_stated">제안: %1$s 는 지불한 쪽에게, %2$s 는 상대에게.</string>
     <string name="res_released">정산 완료</string>
     <string name="res_send_details">주소와 인수인계 정보 보내기</string>
     <string name="res_kind_sale">판매</string>
@@ -72,4 +70,6 @@
     <string name="bond_close_all_to_them">%1$s 님이 본드를 종료하고 보증금 전액 %2$s을(를) 가져가려 합니다. 회원님께는 아무것도 돌아오지 않습니다.</string>
     <string name="escrow_not_confirmed">에스크로를 모두와 확인하는 중입니다. 보통 잠시면 끝납니다.</string>
     <string name="escrow_disagreed">참여자들이 같은 지갑을 만들지 않았습니다. 입금하지 말고 새로 시작하세요.</string>
+    <string name="split_back_to_you">제안: %1$s 당신에게 반환, %2$s %3$s에게.</string>
+    <string name="split_back_to_them">제안: %1$s %3$s에게 반환, %2$s 당신에게.</string>
 </resources>

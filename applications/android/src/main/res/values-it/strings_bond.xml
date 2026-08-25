@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s a te</string>
     <string name="profile_arbiter">Arbitro del deposito</string>
     <string name="profile_arbiter_note">Custodisce la chiave decisiva delle corse con deposito. Interviene solo se qualcosa va storto.</string>
-    <string name="bond_split_stated">Proposta: %1$s al passeggero, %2$s all\'autista.</string>
     <string name="bond_sign_split">Firma questa divisione</string>
     <string name="bond_propose_split">Proponi un\'altra divisione</string>
     <string name="bond_back_to_rider">Al pagante (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">In attesa che paghino il prezzo e la loro cauzione…</string>
     <string name="res_waiting_release">Finito — in attesa che liberino il denaro…</string>
     <string name="res_complete_ask">Hanno chiesto di chiudere.</string>
-    <string name="res_split_stated">Proposta: %1$s al pagante, %2$s all\'altra parte.</string>
     <string name="res_released">Chiuso</string>
     <string name="res_send_details">Invia l\'indirizzo e i dettagli della consegna</string>
     <string name="res_kind_sale">Una vendita</string>
@@ -73,4 +71,6 @@
     <string name="bond_close_all_to_them">%1$s chiede di chiudere il vincolo e prendere tutto il deposito — %2$s. A te non torna nulla.</string>
     <string name="escrow_not_confirmed">Verifica del deposito con tutti in corso. Di solito è questione di un attimo.</string>
     <string name="escrow_disagreed">I partecipanti non hanno formato lo stesso portafoglio. Non pagarci nulla: ricomincia.</string>
+    <string name="split_back_to_you">Proposta: %1$s torna a te, %2$s a %3$s.</string>
+    <string name="split_back_to_them">Proposta: %1$s torna a %3$s, %2$s a te.</string>
 </resources>

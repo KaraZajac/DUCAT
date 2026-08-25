@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s para você</string>
     <string name="profile_arbiter">Árbitro da caução</string>
     <string name="profile_arbiter_note">Guarda a chave de desempate das tuas viagens com caução. Só entra se algo correr mal.</string>
-    <string name="bond_split_stated">Proposta: %1$s de volta ao passageiro, %2$s ao motorista.</string>
     <string name="bond_sign_split">Assinar esta divisão</string>
     <string name="bond_propose_split">Propor outra divisão</string>
     <string name="bond_back_to_rider">De volta a quem pagou (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">À espera de que paguem o preço e a caução…</string>
     <string name="res_waiting_release">Concluído — aguardando que liberem o dinheiro…</string>
     <string name="res_complete_ask">Pediram para acertar.</string>
-    <string name="res_split_stated">Proposta: %1$s de volta a quem pagou, %2$s para a outra parte.</string>
     <string name="res_released">Acertado</string>
     <string name="res_send_details">Enviar o endereço e os detalhes da entrega</string>
     <string name="res_kind_sale">Uma venda</string>
@@ -73,4 +71,6 @@
     <string name="bond_close_all_to_them">%1$s está pedindo para encerrar o depósito e levar tudo — %2$s. Nada volta para você.</string>
     <string name="escrow_not_confirmed">Ainda conferindo a custódia com todos. Costuma levar um instante.</string>
     <string name="escrow_disagreed">Os participantes não formaram a mesma carteira. Não pague nela — comece outra.</string>
+    <string name="split_back_to_you">Proposta: %1$s de volta para você, %2$s para %3$s.</string>
+    <string name="split_back_to_them">Proposta: %1$s de volta para %3$s, %2$s para você.</string>
 </resources>

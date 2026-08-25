@@ -82,6 +82,31 @@ import androidx.compose.ui.graphics.Color
  * §16.11 requires the fallback be visible rather than silently accepted.
  */
 /**
+ * The split, stated to whoever is reading it.
+ *
+ * This said "%1$s back to the payer, %2$s to the other side" — third person,
+ * on a screen with exactly two people on it, above the button that moves the
+ * money irreversibly. A buyer signing had to work out that "the payer" meant
+ * them and "the other side" meant the shop. The ride wording named roles
+ * instead of people and was no better: it is the same sentence with "rider"
+ * and "driver" in it.
+ *
+ * Which side is reading is known here — `isFunder` — so it says "you" and
+ * their name, and the ride/reservation split of this one line disappears with
+ * it, because roles were the only thing it was carrying.
+ */
+@Composable
+private fun splitStated(funderBackPxmr: Long, toOtherPxmr: Long, iFund: Boolean, them: String): String {
+    val context = LocalContext.current
+    return stringResource(
+        if (iFund) R.string.split_back_to_you else R.string.split_back_to_them,
+        Amounts.show(context, funderBackPxmr).primary,
+        Amounts.show(context, toOtherPxmr).primary,
+        isolate(them),
+    )
+}
+
+/**
  * The emoji on each message: what I put there, and what they did.
  *
  * Keyed by the target's (seq, timestamp) for the reason [billAnswers] is: a
@@ -2495,10 +2520,9 @@ private fun RideBondBanner(contact: Contact) {
                         isolate(contact.displayName()),
                         Amounts.show(context, funded).primary,
                     )
-                } else stringResource(
-                    if (reservation) R.string.res_split_stated else R.string.bond_split_stated,
-                    Amounts.show(context, riderBack).primary,
-                    Amounts.show(context, (funded - riderBack).coerceAtLeast(0L)).primary,
+                } else splitStated(
+                    riderBack, (funded - riderBack).coerceAtLeast(0L),
+                    rider, contact.displayName(),
                 ),
                 action = stringResource(R.string.bond_sign_split),
                 onAction = signNow,
@@ -2847,10 +2871,9 @@ private fun RideBondBanner(contact: Contact) {
                     if (mine >= 0) {
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            stringResource(
-                                if (reservation) R.string.res_split_stated else R.string.bond_split_stated,
-                                Amounts.show(context, mine).primary,
-                                Amounts.show(context, (funded - mine).coerceAtLeast(0L)).primary,
+                            splitStated(
+                                mine, (funded - mine).coerceAtLeast(0L),
+                                rider, contact.displayName(),
                             ),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -2902,11 +2925,7 @@ private fun RideBondBanner(contact: Contact) {
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        stringResource(
-                            if (reservation) R.string.res_split_stated else R.string.bond_split_stated,
-                            Amounts.show(context, riderBack).primary,
-                            Amounts.show(context, toDriver).primary,
-                        ),
+                        splitStated(riderBack, toDriver, rider, contact.displayName()),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                     )

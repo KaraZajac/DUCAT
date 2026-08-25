@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s pour vous</string>
     <string name="profile_arbiter">Arbitre du séquestre</string>
     <string name="profile_arbiter_note">Détient la clé d\'arbitrage de vos courses sous séquestre. Jamais sollicité, sauf problème.</string>
-    <string name="bond_split_stated">Proposition : %1$s au passager, %2$s au conducteur.</string>
     <string name="bond_sign_split">Signer cette répartition</string>
     <string name="bond_propose_split">Proposer une autre répartition</string>
     <string name="bond_back_to_rider">Rendu au payeur (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">En attente du prix et de leur caution…</string>
     <string name="res_waiting_release">Terminé — en attente de la libération des fonds…</string>
     <string name="res_complete_ask">Ils demandent à solder.</string>
-    <string name="res_split_stated">Proposition : %1$s rendus au payeur, %2$s à l\'autre partie.</string>
     <string name="res_released">Soldé</string>
     <string name="res_send_details">Envoyer l\'adresse et les détails de remise</string>
     <string name="res_kind_sale">Une vente</string>
@@ -73,4 +71,6 @@
     <string name="bond_close_all_to_them">%1$s demande à clore la caution et à prendre tout le dépôt — %2$s. Rien ne vous revient.</string>
     <string name="escrow_not_confirmed">Vérification du séquestre avec tout le monde. Cela prend généralement un instant.</string>
     <string name="escrow_disagreed">Les participants n\'ont pas formé le même portefeuille. N\'y versez rien — recommencez.</string>
+    <string name="split_back_to_you">Proposition : %1$s te revient, %2$s pour %3$s.</string>
+    <string name="split_back_to_them">Proposition : %1$s revient à %3$s, %2$s pour toi.</string>
 </resources>

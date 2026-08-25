@@ -78,6 +78,7 @@
     <string name="rent_category">دسته</string>
     <string name="rent_tags">برچسب‌ها</string>
     <string name="rent_tags_hint">چند کلمه، جدا شده با ویرگول</string>
+    <string name="rent_tags_on_board">روی تابلو: %1$s</string>
     <string name="cat_goods">کالا</string>
     <string name="cat_furniture">مبلمان</string>
     <string name="cat_tools">ابزار</string>

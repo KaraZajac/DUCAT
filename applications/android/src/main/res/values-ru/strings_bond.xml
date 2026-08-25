@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s вам</string>
     <string name="profile_arbiter">Арбитр эскроу</string>
     <string name="profile_arbiter_note">Держит решающий ключ ваших поездок с эскроу. Участвует, только если что-то пошло не так.</string>
-    <string name="bond_split_stated">Предложение: %1$s пассажиру, %2$s водителю.</string>
     <string name="bond_sign_split">Подписать это разделение</string>
     <string name="bond_propose_split">Предложить другое разделение</string>
     <string name="bond_back_to_rider">Обратно плательщику (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">Ждём, пока они внесут сумму и свой залог…</string>
     <string name="res_waiting_release">Готово — ждём, когда они разблокируют деньги…</string>
     <string name="res_complete_ask">Они предложили рассчитаться.</string>
-    <string name="res_split_stated">Предложение: %1$s обратно плательщику, %2$s другой стороне.</string>
     <string name="res_released">Рассчитано</string>
     <string name="res_send_details">Отправить адрес и детали передачи</string>
     <string name="res_kind_sale">Продажа</string>
@@ -75,4 +73,6 @@
     <string name="bond_close_all_to_them">%1$s просит закрыть залог и забрать его целиком — %2$s. Вам не вернётся ничего.</string>
     <string name="escrow_not_confirmed">Депозит ещё сверяется со всеми. Обычно это занимает мгновение.</string>
     <string name="escrow_disagreed">Участники создали разные кошельки. Не платите в него — начните заново.</string>
+    <string name="split_back_to_you">Предложено: %1$s обратно тебе, %2$s — %3$s.</string>
+    <string name="split_back_to_them">Предложено: %1$s обратно %3$s, %2$s — тебе.</string>
 </resources>

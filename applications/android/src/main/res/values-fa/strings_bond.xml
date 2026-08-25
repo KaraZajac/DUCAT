@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s برای شما</string>
     <string name="profile_arbiter">داور امانت</string>
     <string name="profile_arbiter_note">کلید تعیین‌کننده سفرهای امانت‌دار شما را نگه می‌دارد. فقط در صورت بروز مشکل وارد می‌شود.</string>
-    <string name="bond_split_stated">پیشنهاد: %1$s به مسافر، %2$s به راننده.</string>
     <string name="bond_sign_split">امضای این تقسیم</string>
     <string name="bond_propose_split">پیشنهاد تقسیم متفاوت</string>
     <string name="bond_back_to_rider">بازگشت به پرداخت‌کننده (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">در انتظار پرداخت مبلغ و ودیعهٔ آن‌ها…</string>
     <string name="res_waiting_release">تمام شد — در انتظار آزادسازی پول توسط آن‌ها…</string>
     <string name="res_complete_ask">آن‌ها درخواست تسویه دادند.</string>
-    <string name="res_split_stated">پیشنهاد: %1$s به پرداخت‌کننده برمی‌گردد، %2$s به طرف مقابل.</string>
     <string name="res_released">تسویه شد</string>
     <string name="res_send_details">ارسال آدرس و جزئیات تحویل</string>
     <string name="res_kind_sale">یک فروش</string>
@@ -73,4 +71,6 @@
     <string name="bond_close_all_to_them">%1$s می‌خواهد ودیعه را ببندد و کل مبلغ را بردارد — %2$s. چیزی به شما بازنمی‌گردد.</string>
     <string name="escrow_not_confirmed">هنوز در حال بررسی امانت با همه است. معمولاً لحظه‌ای طول می‌کشد.</string>
     <string name="escrow_disagreed">شرکت‌کنندگان کیف پول یکسانی نساخته‌اند. پرداخت نکنید — یکی تازه شروع کنید.</string>
+    <string name="split_back_to_you">پیشنهاد: %1$s به شما برمی‌گردد، %2$s به %3$s.</string>
+    <string name="split_back_to_them">پیشنهاد: %1$s به %3$s برمی‌گردد، %2$s به شما.</string>
 </resources>

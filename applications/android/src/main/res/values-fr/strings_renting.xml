@@ -78,6 +78,7 @@
     <string name="rent_category">Catégorie</string>
     <string name="rent_tags">Mots-clés</string>
     <string name="rent_tags_hint">Quelques mots, séparés par des virgules</string>
+    <string name="rent_tags_on_board">Sur le tableau : %1$s</string>
     <string name="cat_goods">Objets</string>
     <string name="cat_furniture">Meubles</string>
     <string name="cat_tools">Outils</string>

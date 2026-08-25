@@ -78,6 +78,7 @@
     <string name="rent_category">Categoría</string>
     <string name="rent_tags">Etiquetas</string>
     <string name="rent_tags_hint">Unas palabras, separadas por comas</string>
+    <string name="rent_tags_on_board">En el tablón: %1$s</string>
     <string name="cat_goods">Cosas</string>
     <string name="cat_furniture">Muebles</string>
     <string name="cat_tools">Herramientas</string>

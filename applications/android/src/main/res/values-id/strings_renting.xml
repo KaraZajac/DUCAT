@@ -78,6 +78,7 @@
     <string name="rent_category">Kategori</string>
     <string name="rent_tags">Tagar</string>
     <string name="rent_tags_hint">Beberapa kata, dipisah koma</string>
+    <string name="rent_tags_on_board">Di papan: %1$s</string>
     <string name="cat_goods">Barang</string>
     <string name="cat_furniture">Perabot</string>
     <string name="cat_tools">Perkakas</string>

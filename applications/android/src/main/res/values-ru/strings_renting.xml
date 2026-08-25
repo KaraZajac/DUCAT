@@ -78,6 +78,7 @@
     <string name="rent_category">Категория</string>
     <string name="rent_tags">Метки</string>
     <string name="rent_tags_hint">Пара слов, через запятую</string>
+    <string name="rent_tags_on_board">На доске: %1$s</string>
     <string name="cat_goods">Вещи</string>
     <string name="cat_furniture">Мебель</string>
     <string name="cat_tools">Инструменты</string>

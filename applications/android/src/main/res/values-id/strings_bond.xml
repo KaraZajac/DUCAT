@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s untukmu</string>
     <string name="profile_arbiter">Arbiter escrow</string>
     <string name="profile_arbiter_note">Memegang kunci penentu perjalanan ber-escrow Anda. Hanya dihubungi jika ada masalah.</string>
-    <string name="bond_split_stated">Usulan: %1$s kembali ke penumpang, %2$s ke pengemudi.</string>
     <string name="bond_sign_split">Tanda tangani pembagian ini</string>
     <string name="bond_propose_split">Usulkan pembagian lain</string>
     <string name="bond_back_to_rider">Kembali ke pembayar (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">Menunggu mereka membayar harga dan deposit…</string>
     <string name="res_waiting_release">Selesai — menunggu mereka melepaskan uangnya…</string>
     <string name="res_complete_ask">Mereka minta diselesaikan.</string>
-    <string name="res_split_stated">Usulan: %1$s kembali ke pembayar, %2$s ke pihak lain.</string>
     <string name="res_released">Selesai</string>
     <string name="res_send_details">Kirim alamat dan detail serah terima</string>
     <string name="res_kind_sale">Sebuah penjualan</string>
@@ -72,4 +70,6 @@
     <string name="bond_close_all_to_them">%1$s meminta menutup bond dan mengambil seluruh deposit — %2$s. Tidak ada yang kembali ke Anda.</string>
     <string name="escrow_not_confirmed">Masih memeriksa escrow dengan semua pihak. Biasanya sebentar saja.</string>
     <string name="escrow_disagreed">Para peserta tidak membentuk dompet yang sama. Jangan bayar ke sana — mulai yang baru.</string>
+    <string name="split_back_to_you">Usulan: %1$s kembali ke Anda, %2$s untuk %3$s.</string>
+    <string name="split_back_to_them">Usulan: %1$s kembali ke %3$s, %2$s untuk Anda.</string>
 </resources>

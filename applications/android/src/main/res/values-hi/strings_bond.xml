@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s आपको</string>
     <string name="profile_arbiter">एस्क्रो मध्यस्थ</string>
     <string name="profile_arbiter_note">आपकी बॉन्ड सवारियों की निर्णायक कुंजी रखता है। कुछ गड़बड़ होने पर ही संपर्क होता है।</string>
-    <string name="bond_split_stated">प्रस्ताव: %1$s सवार को वापस, %2$s चालक को।</string>
     <string name="bond_sign_split">इस बंटवारे पर हस्ताक्षर करें</string>
     <string name="bond_propose_split">अलग बंटवारा प्रस्तावित करें</string>
     <string name="bond_back_to_rider">भुगतानकर्ता को वापस (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">उनके रकम और जमा भरने की प्रतीक्षा…</string>
     <string name="res_waiting_release">पूरा हुआ — उनके पैसे जारी करने की प्रतीक्षा…</string>
     <string name="res_complete_ask">उन्होंने हिसाब पूरा करने को कहा।</string>
-    <string name="res_split_stated">प्रस्ताव: %1$s भुगतानकर्ता को वापस, %2$s दूसरे पक्ष को।</string>
     <string name="res_released">निपट गया</string>
     <string name="res_send_details">पता और सौंपने का विवरण भेजें</string>
     <string name="res_kind_sale">कोई बिक्री</string>
@@ -73,4 +71,6 @@
     <string name="bond_close_all_to_them">%1$s बॉन्ड बंद करके पूरी जमा राशि लेना चाहते हैं — %2$s। आपको कुछ वापस नहीं आएगा।</string>
     <string name="escrow_not_confirmed">एस्क्रो की जाँच अभी सबके साथ चल रही है। आमतौर पर इसमें एक पल लगता है।</string>
     <string name="escrow_disagreed">सभी प्रतिभागियों ने एक ही वॉलेट नहीं बनाया। इसमें भुगतान न करें — नया शुरू करें।</string>
+    <string name="split_back_to_you">प्रस्ताव: %1$s आपको वापस, %2$s %3$s को।</string>
+    <string name="split_back_to_them">प्रस्ताव: %1$s %3$s को वापस, %2$s आपको।</string>
 </resources>

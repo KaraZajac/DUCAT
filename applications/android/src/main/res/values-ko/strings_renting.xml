@@ -78,6 +78,7 @@
     <string name="rent_category">분류</string>
     <string name="rent_tags">태그</string>
     <string name="rent_tags_hint">쉼표로 구분한 몇 단어</string>
+    <string name="rent_tags_on_board">게시판에는: %1$s</string>
     <string name="cat_goods">물건</string>
     <string name="cat_furniture">가구</string>
     <string name="cat_tools">공구</string>

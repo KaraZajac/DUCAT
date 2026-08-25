@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s 归你</string>
     <string name="profile_arbiter">托管仲裁人</string>
     <string name="profile_arbiter_note">持有你担保行程的决定性密钥。除非出了问题，否则不会参与。</string>
-    <string name="bond_split_stated">提议：%1$s 退还乘客，%2$s 给司机。</string>
     <string name="bond_sign_split">签署此分配</string>
     <string name="bond_propose_split">提议不同的分配</string>
     <string name="bond_back_to_rider">退回付款方（%1$s）</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">等待对方支付价款和押金…</string>
     <string name="res_waiting_release">已完成——等待对方释放款项…</string>
     <string name="res_complete_ask">对方提出结清。</string>
-    <string name="res_split_stated">提议：%1$s 退回付款方，%2$s 给对方。</string>
     <string name="res_released">已结清</string>
     <string name="res_send_details">发送地址和交接说明</string>
     <string name="res_kind_sale">一笔买卖</string>
@@ -72,4 +70,6 @@
     <string name="bond_close_all_to_them">%1$s 请求结束保证金并取走全部 %2$s。你不会收到任何退还。</string>
     <string name="escrow_not_confirmed">仍在与各方核对托管。通常只需片刻。</string>
     <string name="escrow_disagreed">参与者创建的钱包并不相同。请勿付款，请重新开始。</string>
+    <string name="split_back_to_you">提议：%1$s 退还给你，%2$s 给 %3$s。</string>
+    <string name="split_back_to_them">提议：%1$s 退还给 %3$s，%2$s 给你。</string>
 </resources>

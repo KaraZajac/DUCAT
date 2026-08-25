@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s to you</string>
     <string name="profile_arbiter">Escrow arbiter</string>
     <string name="profile_arbiter_note">Holds the tie-breaking key in your bonded rides. Never contacted unless something goes wrong.</string>
-    <string name="bond_split_stated">Proposed: %1$s back to the rider, %2$s to the driver.</string>
     <string name="bond_sign_split">Sign this split</string>
     <string name="bond_propose_split">Propose a different split</string>
     <string name="bond_back_to_rider">Back to the payer (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">Waiting for them to pay the price and their deposit…</string>
     <string name="res_waiting_release">Finished — waiting for them to release the money…</string>
     <string name="res_complete_ask">They asked to settle up.</string>
-    <string name="res_split_stated">Proposed: %1$s back to the payer, %2$s to the other side.</string>
     <string name="res_released">Settled</string>
     <string name="res_send_details">Send the address and handover details</string>
     <string name="res_kind_sale">Something sold</string>
@@ -73,4 +71,6 @@
     <string name="bond_close_all_to_them">%1$s is asking to close the bond and take the whole deposit — %2$s. Nothing comes back to you.</string>
     <string name="escrow_not_confirmed">Still checking the escrow with everyone. This usually takes a moment.</string>
     <string name="escrow_disagreed">The people in this escrow did not all build the same wallet. Do not pay into it — start a new one.</string>
+    <string name="split_back_to_you">Proposed: %1$s back to you, %2$s to %3$s.</string>
+    <string name="split_back_to_them">Proposed: %1$s back to %3$s, %2$s to you.</string>
 </resources>

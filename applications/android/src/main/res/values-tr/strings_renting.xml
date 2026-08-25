@@ -78,6 +78,7 @@
     <string name="rent_category">Kategori</string>
     <string name="rent_tags">Etiketler</string>
     <string name="rent_tags_hint">Virgülle ayrılmış birkaç kelime</string>
+    <string name="rent_tags_on_board">Panoda: %1$s</string>
     <string name="cat_goods">Eşya</string>
     <string name="cat_furniture">Mobilya</string>
     <string name="cat_tools">Alet</string>

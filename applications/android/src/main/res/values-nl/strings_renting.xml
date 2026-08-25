@@ -78,6 +78,7 @@
     <string name="rent_category">Categorie</string>
     <string name="rent_tags">Labels</string>
     <string name="rent_tags_hint">Een paar woorden, met komma\'s</string>
+    <string name="rent_tags_on_board">Op het bord: %1$s</string>
     <string name="cat_goods">Spullen</string>
     <string name="cat_furniture">Meubels</string>
     <string name="cat_tools">Gereedschap</string>

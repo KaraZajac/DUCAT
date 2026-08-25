@@ -78,6 +78,7 @@
     <string name="rent_category">Categoria</string>
     <string name="rent_tags">Etiquetas</string>
     <string name="rent_tags_hint">Algumas palavras, separadas por vírgulas</string>
+    <string name="rent_tags_on_board">No quadro: %1$s</string>
     <string name="cat_goods">Coisas</string>
     <string name="cat_furniture">Móveis</string>
     <string name="cat_tools">Ferramentas</string>

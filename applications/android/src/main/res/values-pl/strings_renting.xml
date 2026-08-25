@@ -78,6 +78,7 @@
     <string name="rent_category">Kategoria</string>
     <string name="rent_tags">Tagi</string>
     <string name="rent_tags_hint">Kilka słów, po przecinku</string>
+    <string name="rent_tags_on_board">Na tablicy: %1$s</string>
     <string name="cat_goods">Rzeczy</string>
     <string name="cat_furniture">Meble</string>
     <string name="cat_tools">Narzędzia</string>

@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s があなたへ</string>
     <string name="profile_arbiter">エスクロー仲裁者</string>
     <string name="profile_arbiter_note">ボンド付き乗車の決定キーを保持します。問題が起きない限り出番はありません。</string>
-    <string name="bond_split_stated">提案：乗客へ %1$s、ドライバーへ %2$s。</string>
     <string name="bond_sign_split">この配分に署名</string>
     <string name="bond_propose_split">別の配分を提案</string>
     <string name="bond_back_to_rider">支払った側へ（%1$s）</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">相手が代金とデポジットを支払うのを待っています…</string>
     <string name="res_waiting_release">完了 — 相手が送金を解放するのを待っています…</string>
     <string name="res_complete_ask">相手が精算を申し出ました。</string>
-    <string name="res_split_stated">提案：%1$s は支払った側へ、%2$s は相手へ。</string>
     <string name="res_released">精算済み</string>
     <string name="res_send_details">住所と受け渡しの詳細を送る</string>
     <string name="res_kind_sale">売買</string>
@@ -72,4 +70,6 @@
     <string name="bond_close_all_to_them">%1$s がボンドを解消し、預り金の全額 %2$s を受け取ろうとしています。あなたには何も戻りません。</string>
     <string name="escrow_not_confirmed">エスクローを全員と照合しています。通常はすぐ終わります。</string>
     <string name="escrow_disagreed">参加者が同じウォレットを作成していません。入金せず、新しく始めてください。</string>
+    <string name="split_back_to_you">提案：%1$s があなたに戻り、%2$s が %3$s に。</string>
+    <string name="split_back_to_them">提案：%1$s が %3$s に戻り、%2$s があなたに。</string>
 </resources>

@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s an dich</string>
     <string name="profile_arbiter">Treuhand-Schiedsperson</string>
     <string name="profile_arbiter_note">Hält den entscheidenden Schlüssel deiner Treuhand-Fahrten. Wird nur bei Problemen kontaktiert.</string>
-    <string name="bond_split_stated">Vorschlag: %1$s zurück an den Fahrgast, %2$s an den Fahrer.</string>
     <string name="bond_sign_split">Diese Aufteilung signieren</string>
     <string name="bond_propose_split">Andere Aufteilung vorschlagen</string>
     <string name="bond_back_to_rider">Zurück an den Zahler (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">Warte darauf, dass sie den Preis und ihre Kaution zahlen…</string>
     <string name="res_waiting_release">Fertig – wartet darauf, dass sie das Geld freigeben…</string>
     <string name="res_complete_ask">Sie möchten abrechnen.</string>
-    <string name="res_split_stated">Vorschlag: %1$s zurück an den Zahler, %2$s an die andere Seite.</string>
     <string name="res_released">Abgerechnet</string>
     <string name="res_send_details">Adresse und Übergabedetails senden</string>
     <string name="res_kind_sale">Ein Verkauf</string>
@@ -73,4 +71,6 @@
     <string name="bond_close_all_to_them">%1$s möchte den Bond auflösen und die ganze Kaution nehmen — %2$s. An Sie geht nichts zurück.</string>
     <string name="escrow_not_confirmed">Die Treuhand wird noch mit allen abgeglichen. Das dauert meist nur einen Moment.</string>
     <string name="escrow_disagreed">Die Beteiligten haben nicht dieselbe Wallet gebildet. Zahlen Sie nichts ein — beginnen Sie neu.</string>
+    <string name="split_back_to_you">Vorschlag: %1$s zurück an dich, %2$s an %3$s.</string>
+    <string name="split_back_to_them">Vorschlag: %1$s zurück an %3$s, %2$s an dich.</string>
 </resources>

@@ -78,6 +78,7 @@
     <string name="rent_category">หมวด</string>
     <string name="rent_tags">แท็ก</string>
     <string name="rent_tags_hint">คำสั้นๆ คั่นด้วยจุลภาค</string>
+    <string name="rent_tags_on_board">บนบอร์ด: %1$s</string>
     <string name="cat_goods">ข้าวของ</string>
     <string name="cat_furniture">เฟอร์นิเจอร์</string>
     <string name="cat_tools">เครื่องมือ</string>

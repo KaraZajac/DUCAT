@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s เป็นของคุณ</string>
     <string name="profile_arbiter">ผู้ชี้ขาดเอสโครว์</string>
     <string name="profile_arbiter_note">ถือกุญแจชี้ขาดของการเดินทางแบบมีเอสโครว์ จะถูกติดต่อก็ต่อเมื่อมีปัญหา</string>
-    <string name="bond_split_stated">ข้อเสนอ: คืนผู้โดยสาร %1$s ให้คนขับ %2$s</string>
     <string name="bond_sign_split">ลงนามการแบ่งนี้</string>
     <string name="bond_propose_split">เสนอการแบ่งแบบอื่น</string>
     <string name="bond_back_to_rider">คืนให้ผู้จ่าย (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">รอให้เขาจ่ายราคาและมัดจำ…</string>
     <string name="res_waiting_release">เสร็จแล้ว — รอให้อีกฝ่ายปล่อยเงิน…</string>
     <string name="res_complete_ask">เขาขอเคลียร์ยอด</string>
-    <string name="res_split_stated">ข้อเสนอ: %1$s คืนให้ผู้จ่าย, %2$s ให้อีกฝ่าย</string>
     <string name="res_released">เคลียร์แล้ว</string>
     <string name="res_send_details">ส่งที่อยู่และรายละเอียดการส่งมอบ</string>
     <string name="res_kind_sale">การขาย</string>
@@ -72,4 +70,6 @@
     <string name="bond_close_all_to_them">%1$s ขอปิดเงินประกันและรับไปทั้งหมด — %2$s คุณจะไม่ได้รับคืนเลย</string>
     <string name="escrow_not_confirmed">กำลังตรวจสอบเอสโครว์กับทุกคน โดยปกติใช้เวลาสักครู่</string>
     <string name="escrow_disagreed">ผู้ร่วมทั้งหมดไม่ได้สร้างกระเป๋าเดียวกัน อย่าจ่ายเข้าไป — เริ่มใหม่</string>
+    <string name="split_back_to_you">ข้อเสนอ: %1$s คืนให้คุณ %2$s ให้ %3$s</string>
+    <string name="split_back_to_them">ข้อเสนอ: %1$s คืนให้ %3$s %2$s ให้คุณ</string>
 </resources>

@@ -93,6 +93,19 @@ internal fun listingIcon(kind: Int) = when (kind) {
 }
 
 /**
+ * The tags that will actually go on the board.
+ *
+ * The wire takes eight tags of sixteen characters, and this used to cut them
+ * to fit in silence at the moment of posting: somebody who typed
+ * "skis winter alpine" published "skis winter alpi" — mid-word, on a public
+ * board, and only ever saw it afterwards on somebody else's screen. The cut
+ * has to happen, so it happens here and the form shows the result while there
+ * is still a chance to write it differently.
+ */
+internal fun boardTags(typed: String): List<String> =
+    typed.split(',').map { it.trim().take(16) }.filter { it.isNotEmpty() }.take(8)
+
+/**
  * A category, per kind.
  *
  * Small flat sets rather than a tree, and the numbers must match core's
@@ -544,10 +557,20 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(12.dp))
+            val posting = boardTags(tags)
             OutlinedTextField(
                 value = tags, onValueChange = { tags = it.take(120) },
                 label = { Text(stringResource(R.string.rent_tags)) },
-                supportingText = { Text(stringResource(R.string.rent_tags_hint)) },
+                supportingText = {
+                    // What the board will carry, once it differs from what was
+                    // typed. Silence here was the whole bug.
+                    val shown = posting.joinToString(", ")
+                    if (posting.isNotEmpty() && shown != tags.trim()) {
+                        Text(stringResource(R.string.rent_tags_on_board, shown))
+                    } else {
+                        Text(stringResource(R.string.rent_tags_hint))
+                    }
+                },
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -717,11 +740,7 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                         put(
                             "features",
                             JSONArray().also { a ->
-                                tags.split(',')
-                                    .map { t -> t.trim().take(16) }
-                                    .filter { t -> t.isNotEmpty() }
-                                    .take(8)
-                                    .forEach { t -> a.put(t) }
+                                boardTags(tags).forEach { t -> a.put(t) }
                             },
                         )
                     }

@@ -17,7 +17,6 @@
     <string name="bond_released_amount">%1$s naar jou</string>
     <string name="profile_arbiter">Depot-arbiter</string>
     <string name="profile_arbiter_note">Houdt de doorslaggevende sleutel van je rit-depots. Wordt alleen benaderd als er iets misgaat.</string>
-    <string name="bond_split_stated">Voorstel: %1$s terug naar de passagier, %2$s naar de chauffeur.</string>
     <string name="bond_sign_split">Deze verdeling ondertekenen</string>
     <string name="bond_propose_split">Andere verdeling voorstellen</string>
     <string name="bond_back_to_rider">Terug naar de betaler (%1$s)</string>
@@ -49,7 +48,6 @@
     <string name="res_waiting_payment">Wachten tot zij de prijs en hun borg betalen…</string>
     <string name="res_waiting_release">Klaar — wachten tot zij het geld vrijgeven…</string>
     <string name="res_complete_ask">Zij willen afrekenen.</string>
-    <string name="res_split_stated">Voorstel: %1$s terug naar de betaler, %2$s naar de andere partij.</string>
     <string name="res_released">Afgerekend</string>
     <string name="res_send_details">Adres en overdrachtsgegevens sturen</string>
     <string name="res_kind_sale">Een verkoop</string>
@@ -73,4 +71,6 @@
     <string name="bond_close_all_to_them">%1$s vraagt de borg af te sluiten en het hele bedrag te nemen — %2$s. Er komt niets naar u terug.</string>
     <string name="escrow_not_confirmed">De escrow wordt nog met iedereen gecontroleerd. Dat duurt meestal even.</string>
     <string name="escrow_disagreed">De deelnemers hebben niet dezelfde wallet gevormd. Betaal er niets in — begin opnieuw.</string>
+    <string name="split_back_to_you">Voorstel: %1$s terug naar jou, %2$s naar %3$s.</string>
+    <string name="split_back_to_them">Voorstel: %1$s terug naar %3$s, %2$s naar jou.</string>
 </resources>

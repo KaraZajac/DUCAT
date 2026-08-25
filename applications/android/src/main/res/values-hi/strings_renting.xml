@@ -78,6 +78,7 @@
     <string name="rent_category">श्रेणी</string>
     <string name="rent_tags">टैग</string>
     <string name="rent_tags_hint">कुछ शब्द, अल्पविराम से अलग</string>
+    <string name="rent_tags_on_board">बोर्ड पर: %1$s</string>
     <string name="cat_goods">सामान</string>
     <string name="cat_furniture">फ़र्नीचर</string>
     <string name="cat_tools">औज़ार</string>
