@@ -75,4 +75,6 @@
     <string name="escrow_disagreed">Những người tham gia không tạo ra cùng một ví. Đừng nạp tiền — hãy bắt đầu lại.</string>
     <string name="split_back_to_you">Đề xuất: %1$s trả lại cho bạn, %2$s cho %3$s.</string>
     <string name="split_back_to_them">Đề xuất: %1$s trả lại cho %3$s, %2$s cho bạn.</string>
+    <string name="split_fee_yours">Phí mạng trừ vào phần của bạn, nên số đến sẽ ít hơn một chút.</string>
+    <string name="split_fee_theirs">Phí mạng trừ vào phần của %1$s, nên phần của bạn đến đúng bằng đó.</string>
 </resources>

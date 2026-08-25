@@ -76,4 +76,6 @@
     <string name="escrow_disagreed">De deelnemers hebben niet dezelfde wallet gevormd. Betaal er niets in — begin opnieuw.</string>
     <string name="split_back_to_you">Voorstel: %1$s terug naar jou, %2$s naar %3$s.</string>
     <string name="split_back_to_them">Voorstel: %1$s terug naar %3$s, %2$s naar jou.</string>
+    <string name="split_fee_yours">De netwerkkosten gaan van jouw deel af, dus er komt iets minder binnen.</string>
+    <string name="split_fee_theirs">De netwerkkosten gaan van het deel van %1$s af; dat van jou komt precies binnen.</string>
 </resources>

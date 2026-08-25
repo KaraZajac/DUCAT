@@ -76,4 +76,6 @@
     <string name="escrow_disagreed">Les participants n\'ont pas formé le même portefeuille. N\'y versez rien — recommencez.</string>
     <string name="split_back_to_you">Proposition : %1$s te revient, %2$s pour %3$s.</string>
     <string name="split_back_to_them">Proposition : %1$s revient à %3$s, %2$s pour toi.</string>
+    <string name="split_fee_yours">Les frais de réseau sortent de votre part : il arrivera un peu moins que cela.</string>
+    <string name="split_fee_theirs">Les frais de réseau sortent de la part de %1$s ; la vôtre arrive exactement.</string>
 </resources>

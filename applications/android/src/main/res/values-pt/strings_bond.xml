@@ -76,4 +76,6 @@
     <string name="escrow_disagreed">Os participantes não formaram a mesma carteira. Não pague nela — comece outra.</string>
     <string name="split_back_to_you">Proposta: %1$s de volta para você, %2$s para %3$s.</string>
     <string name="split_back_to_them">Proposta: %1$s de volta para %3$s, %2$s para você.</string>
+    <string name="split_fee_yours">A taxa da rede sai da sua parte, por isso chega um pouco menos.</string>
+    <string name="split_fee_theirs">A taxa da rede sai da parte de %1$s, por isso a sua chega exata.</string>
 </resources>

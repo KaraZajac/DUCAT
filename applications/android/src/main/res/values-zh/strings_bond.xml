@@ -75,4 +75,6 @@
     <string name="escrow_disagreed">参与者创建的钱包并不相同。请勿付款，请重新开始。</string>
     <string name="split_back_to_you">提议：%1$s 退还给你，%2$s 给 %3$s。</string>
     <string name="split_back_to_them">提议：%1$s 退还给 %3$s，%2$s 给你。</string>
+    <string name="split_fee_yours">网络手续费从你的份额里出，所以实际到账会略少一些。</string>
+    <string name="split_fee_theirs">网络手续费从 %1$s 的份额里出，所以你的份额会分毫不差地到账。</string>
 </resources>

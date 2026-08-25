@@ -96,12 +96,32 @@ import androidx.compose.ui.graphics.Color
  * it, because roles were the only thing it was carrying.
  */
 @Composable
+/**
+ * The two halves of a proposed release, and which of them pays the fee.
+ *
+ * One side of a split is a fixed output and the other takes the remainder,
+ * and the remainder is where the network fee comes from. Stating both as
+ * round numbers made the residual side a quote nobody could meet: a driver
+ * told "USD 1.38 to you" received USD 1.30, every time, and the difference
+ * had no name on any screen. The fixed side is exact and stays exact.
+ *
+ * Which side is residual is [Ceremony.proposeRideSplit]'s own test, repeated
+ * here: normally the funder's slice is fixed and the other side takes what is
+ * left, and it flips when what is left could not cover a fee.
+ */
 private fun splitStated(funderBackPxmr: Long, toOtherPxmr: Long, iFund: Boolean, them: String): String {
     val context = LocalContext.current
-    return stringResource(
+    val split = stringResource(
         if (iFund) R.string.split_back_to_you else R.string.split_back_to_them,
         Amounts.show(context, funderBackPxmr).primary,
         Amounts.show(context, toOtherPxmr).primary,
+        isolate(them),
+    )
+    val margin = org.ducatproject.ducat.Ceremony.MIN_ESCROW_PXMR
+    val funderIsResidual = toOtherPxmr < margin && funderBackPxmr >= margin
+    val mineIsResidual = if (iFund) funderIsResidual else !funderIsResidual
+    return split + " " + stringResource(
+        if (mineIsResidual) R.string.split_fee_yours else R.string.split_fee_theirs,
         isolate(them),
     )
 }

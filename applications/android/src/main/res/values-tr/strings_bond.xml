@@ -76,4 +76,6 @@
     <string name="escrow_disagreed">Katılımcılar aynı cüzdanı oluşturmadı. Buraya ödeme yapmayın — yenisini başlatın.</string>
     <string name="split_back_to_you">Öneri: %1$s sana geri, %2$s %3$s tarafına.</string>
     <string name="split_back_to_them">Öneri: %1$s %3$s tarafına geri, %2$s sana.</string>
+    <string name="split_fee_yours">Ağ ücreti senin payından çıkar, bu yüzden biraz daha azı gelir.</string>
+    <string name="split_fee_theirs">Ağ ücreti %1$s’nin payından çıkar, seninki tam olarak gelir.</string>
 </resources>

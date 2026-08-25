@@ -78,4 +78,6 @@
     <string name="escrow_disagreed">Учасники створили різні гаманці. Не платіть туди — почніть заново.</string>
     <string name="split_back_to_you">Пропозиція: %1$s назад тобі, %2$s — %3$s.</string>
     <string name="split_back_to_them">Пропозиція: %1$s назад %3$s, %2$s — тобі.</string>
+    <string name="split_fee_yours">Комісія мережі береться з вашої частки, тож надійде трохи менше.</string>
+    <string name="split_fee_theirs">Комісія мережі береться з частки %1$s, тож ваша надійде рівно.</string>
 </resources>

@@ -75,4 +75,6 @@
     <string name="escrow_disagreed">참여자들이 같은 지갑을 만들지 않았습니다. 입금하지 말고 새로 시작하세요.</string>
     <string name="split_back_to_you">제안: %1$s 당신에게 반환, %2$s %3$s에게.</string>
     <string name="split_back_to_them">제안: %1$s %3$s에게 반환, %2$s 당신에게.</string>
+    <string name="split_fee_yours">네트워크 수수료는 당신 몫에서 나가므로 그보다 조금 적게 도착합니다.</string>
+    <string name="split_fee_theirs">네트워크 수수료는 %1$s의 몫에서 나가므로 당신 몫은 그대로 도착합니다.</string>
 </resources>

@@ -76,4 +76,6 @@
     <string name="escrow_disagreed">Los participantes no crearon la misma cartera. No pagues en él: empieza uno nuevo.</string>
     <string name="split_back_to_you">Propuesta: %1$s de vuelta para ti, %2$s para %3$s.</string>
     <string name="split_back_to_them">Propuesta: %1$s de vuelta para %3$s, %2$s para ti.</string>
+    <string name="split_fee_yours">La comisión de red sale de tu parte, así que llega un poco menos.</string>
+    <string name="split_fee_theirs">La comisión de red sale de la parte de %1$s, así que la tuya llega exacta.</string>
 </resources>
