@@ -1895,6 +1895,11 @@ private fun ContactPickDialog(
     onPick: (Contact) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    // Whose name belongs to more than one person. Sharing somebody's profile
+    // with the wrong Sam sends a stranger a contact card; the row has to say
+    // which rows are two people, the way Pay's picker already does.
+    val ambiguous = remember(contacts) { ContactStore(context).ambiguous() }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.chat_share)) },
@@ -1935,7 +1940,19 @@ private fun ContactPickDialog(
                         ) {
                             Avatar(c.displayName(), c.avatar)
                             Spacer(Modifier.width(12.dp))
-                            Text(c.displayName(), style = MaterialTheme.typography.bodyLarge)
+                            Column {
+                                Text(c.displayName(), style = MaterialTheme.typography.bodyLarge)
+                                if (c.personaHex in ambiguous) {
+                                    Text(
+                                        stringResource(
+                                            R.string.pay_name_shared_key,
+                                            c.personaHex.take(16),
+                                        ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
                         }
                     }
                 }

@@ -292,6 +292,13 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
         ContactStore(context).all().filter { it.theirBundle != null }
             .sortedBy { it.displayName().lowercase() }
     }
+    // Which of these names belong to more than one person. Two regulars called
+    // Sam are two identical rows, and picking the wrong one bills somebody who
+    // is not standing at the bar — the till says "delivered", the customer in
+    // front of you never sees it, and nothing about either screen says why.
+    // Pay's picker has shown the key on ambiguous rows since it was written;
+    // this one is the same question asked at the same moment.
+    val ambiguous = remember(contactsV) { ContactStore(context).ambiguous() }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -329,7 +336,19 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
                         ) {
                             Avatar(c.displayName(), c.avatar)
                             Spacer(Modifier.width(12.dp))
-                            Text(c.displayName(), style = MaterialTheme.typography.bodyLarge)
+                            Column {
+                                Text(c.displayName(), style = MaterialTheme.typography.bodyLarge)
+                                if (c.personaHex in ambiguous) {
+                                    Text(
+                                        stringResource(
+                                            R.string.pay_name_shared_key,
+                                            c.personaHex.take(16),
+                                        ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
                         }
                     }
                 }
