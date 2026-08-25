@@ -277,6 +277,13 @@ class Poller(private val context: Context) {
                     }
                 }.onFailure { DucatLog.w(TAG, "prune: ${it.message}") }
 
+                // Before the sweep, not after: a half-built escrow gets its
+                // frames sent again while there is still a record to send
+                // them from. A dropped ceremony round is otherwise permanent
+                // — nothing in the key ceremony ever asked twice.
+                runCatching { Ceremony.nudge(context) }
+                    .onFailure { DucatLog.w(TAG, "escrow nudge: ${it.message}") }
+
                 // The same tenancy, for the store that never had a sweep.
                 runCatching { Ceremony.sweep(context) }
                     .onFailure { DucatLog.w(TAG, "escrow sweep: ${it.message}") }

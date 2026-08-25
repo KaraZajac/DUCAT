@@ -2620,6 +2620,20 @@ private fun RideBondBanner(contact: Contact) {
             when {
                 stage == "committed" || stage == "shared" -> {
                     BondLine(spin = true, text = stringResource(R.string.bond_building, fareShown))
+                    // The build has no end of its own either. It normally
+                    // takes a minute or two of round trips, and a frame that
+                    // never arrives is re-sent by Ceremony.nudge — but a
+                    // party who has gone away for good leaves this spinning
+                    // until the half-hour sweep quietly deletes the record,
+                    // and a ride that erases itself is worse than one that
+                    // says it failed. Nothing is at stake yet: no address
+                    // exists to fund, so calling it off costs nobody money.
+                    Spacer(Modifier.height(2.dp))
+                    TextButton(
+                        onClick = callOffNow,
+                        enabled = !busy,
+                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+                    ) { Text(stringResource(R.string.bond_call_off)) }
                 }
                 // The exposed side goes second. Whoever funds first stands
                 // alone until the other follows, and the payer is carrying

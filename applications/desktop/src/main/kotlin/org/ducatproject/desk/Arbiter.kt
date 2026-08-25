@@ -67,6 +67,10 @@ fun main(args: Array<String>) {
     while (true) {
         runCatching { Mailbox.collectClaims(context) }
         runCatching { Mailbox.poll(context) }
+        // The phones do this on their poller; a desk has no poller. A
+        // half-built escrow whose missing frame is *this* node's would
+        // otherwise wait for one of the principals to notice.
+        runCatching { Ceremony.nudge(context) }
         val all = Ceremony.all(context)
         val stages = all.joinToString { "${it.optString("id").take(8)}=${it.optString("stage")}" }
         if (stages != lastStages) {

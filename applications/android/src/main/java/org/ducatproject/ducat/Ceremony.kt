@@ -681,6 +681,13 @@ object Ceremony {
             }
             put("i", i); put("stage", "committed")
             put("commits", JSONObject()); put("shares", JSONObject())
+            // The bytes, not the recipe. dkgCommit draws from OsRng and
+            // replaces the engine's machine, so asking for the commitment a
+            // second time produces a different one and destroys the first —
+            // a retransmit has to be the same bytes or it is a fork. See
+            // [nudge].
+            put("sent0", frame.toHexString())
+            put("progressAt", System.currentTimeMillis())
         }
         save(context, idHex, o)
         DucatLog.i(TAG, "started ${when (kind) {
@@ -812,6 +819,8 @@ object Ceremony {
                 }
                 put("i", i); put("stage", "committed")
                 put("commits", JSONObject()); put("shares", JSONObject())
+                put("sent0", frame.toHexString())
+                put("progressAt", System.currentTimeMillis())
             }
             save(context, idHex, o)
             DucatLog.i(TAG, "joined bond $idHex (i=$i of $n), sent commitment")
@@ -850,6 +859,9 @@ object Ceremony {
                 }
             }
         }
+        // Something arrived from somebody: the build is moving, so the
+        // retransmit clock in [nudge] starts again from here.
+        o.put("progressAt", System.currentTimeMillis())
         save(context, idHex, o)
 
         // Then advance through every stage the collected material now allows,
@@ -866,14 +878,21 @@ object Ceremony {
                 val shares = uniffi.ducat_mobile.dkgShare(
                     id, i.toUShort(), T.toUShort(), n.toUShort(), from,
                 )
+                val sent1 = JSONObject()
                 for (s in shares) {
                     val peerHex = roster[s.participant.toInt() - 1]
+                    // Kept whether or not the send lands: dkgShare consumes
+                    // the round-1 machine, so these bytes cannot be asked
+                    // for twice and a peer who is briefly unreachable would
+                    // otherwise be unreachable for good.
+                    sent1.put(s.participant.toInt().toString(), s.bytes.toHexString())
                     val peer = contactFor(context, peerHex) ?: continue
                     Mailbox.send(
                         context, peer, "bond: your share",
                         mineHex, kind = 8, round = 1, ceremonyId = id, payload = s.bytes,
                     )
                 }
+                o.put("sent1", sent1)
                 o.put("stage", "shared"); save(context, idHex, o)
                 DucatLog.i(TAG, "bond $idHex: shared, sent ${shares.size} share(s)")
             } else if (o.optString("stage") == "committed") {
@@ -941,6 +960,20 @@ object Ceremony {
                 DucatLog.i(TAG, "bond $idHex done — escrow $addr")
             } else if (o.optString("stage") == "shared") {
                 DucatLog.i(TAG, "bond $idHex: share ${sh.length()}/${n - 1}")
+            }
+
+            // **A finished party still owes the unfinished one its bytes.**
+            //
+            // [nudge] only fires while this device is itself half-built, and
+            // the device that is stuck is rarely the one that can unstick
+            // itself: the party that lost a frame needs it re-sent by the
+            // party that sent it, who by then has everything and has stopped
+            // asking for anything. An early round arriving here after we are
+            // done is that party knocking — it can only have come from a
+            // retransmit — so answer it with everything we ever sent them.
+            if (o.optString("stage") == "done" && round.toInt() <= 1) {
+                runCatching { resend(context, o, senderIdx) }
+                    .onFailure { DucatLog.w(TAG, "bond $idHex: catch-up — ${it.message}") }
             }
         }.onFailure {
             DucatLog.w(TAG, "bond $idHex round $round failed: ${it.message}")
@@ -1185,6 +1218,99 @@ object Ceremony {
 
     /** How long a proposal nobody answered stays "probably just slow". */
     private const val UNANSWERED_MS = 30L * 60 * 1000
+
+    /** How long a half-built escrow waits before saying it all again. */
+    private const val NUDGE_AFTER_MS = 3L * 60 * 1000
+
+    /**
+     * Say it all again, to whoever has not answered.
+     *
+     * **A lost round used to end the deal.** The mailbox declares a message
+     * lost on purpose — a one-time prekey that is already spent has no second
+     * reading, and `prekey N is gone; message M is lost` is a designed
+     * outcome, not a fault. But the key ceremony had no retransmit: every
+     * stage advances only on an inbound round, so one dropped frame left the
+     * three parties permanently disagreeing about how far they had got. Seen
+     * live 2026-08-25, 2-of-3: the arbiter never received the driver's
+     * commitment, sat at `commitment 1/2` for ever, and both phones showed
+     * "building the escrow…" with a spinner and no way out until the
+     * half-hour sweep deleted the record out from under them.
+     *
+     * Everything this device has sent goes out again, not just the round it
+     * is itself waiting on. The party that is behind is not necessarily the
+     * one that is missing something: here the arbiter lacked the driver's
+     * *round 0*, while the driver and rider lacked the arbiter's *round 1* —
+     * so a device that resent only what it was waiting for would have had
+     * every party talking and nobody unblocked.
+     *
+     * Safe to repeat because it is a retransmit and never a re-derivation.
+     * `dkgCommit` draws from OsRng and replaces the engine's machine, and
+     * `dkgShare` consumes it; asking either for its bytes a second time would
+     * hand two different commitments to two peers, which is a fork, not a
+     * retry. So the bytes are kept when they are first sent, and these are
+     * those bytes. A receiver records them into a map keyed by the sender's
+     * index, so a duplicate overwrites itself and a party who already had
+     * them is unaffected.
+     */
+    fun nudge(context: Context): Int {
+        val now = System.currentTimeMillis()
+        val due = all(context).filter { o ->
+            o.optString("stage") in setOf("committed", "shared") &&
+                !isFinished(o) && !isStale(o) &&
+                now - o.optLong("progressAt", o.optLong("created")) > NUDGE_AFTER_MS
+        }
+        for (o in due) {
+            val idHex = o.optString("id")
+            if (idHex.isEmpty()) continue
+            runCatching { resend(context, o, null) }
+                .onFailure { DucatLog.w(TAG, "escrow $idHex: nudge — ${it.message}") }
+            mutate(context, idHex) { cur -> cur.put("progressAt", now) }
+        }
+        return due.size
+    }
+
+    /**
+     * Every frame this device has sent for one escrow, to one peer or to all
+     * of them. Best-effort per peer: one unreachable party must not stop the
+     * others from being caught up.
+     */
+    private fun resend(context: Context, o: JSONObject, onlyIdx: Int?) {
+        val idHex = o.optString("id")
+        val id = hexToBytes(idHex) ?: return
+        val mineHex = PersonaStore(context).personaHex()
+        val roster = o.optJSONArray("roster")?.let { arr ->
+            (0 until arr.length()).map { arr.getString(it) }
+        } ?: return
+        val frame = hexToBytes(o.optString("sent0"))
+        val sent1 = o.optJSONObject("sent1")
+        var n = 0
+        roster.forEachIndexed { zero, peerHex ->
+            val idx = zero + 1
+            if (peerHex == mineHex) return@forEachIndexed
+            if (onlyIdx != null && idx != onlyIdx) return@forEachIndexed
+            val peer = contactFor(context, peerHex) ?: return@forEachIndexed
+            if (frame != null) {
+                runCatching {
+                    Mailbox.send(
+                        context, peer, "bond: building a shared deposit",
+                        mineHex, kind = 8, round = 0, ceremonyId = id, payload = frame,
+                    )
+                }.onSuccess { n++ }
+                    .onFailure { DucatLog.w(TAG, "escrow $idHex: round 0 again — ${it.message}") }
+            }
+            sent1?.optString(idx.toString())?.takeIf { it.isNotEmpty() }
+                ?.let { hexToBytes(it) }?.let { share ->
+                    runCatching {
+                        Mailbox.send(
+                            context, peer, "bond: your share",
+                            mineHex, kind = 8, round = 1, ceremonyId = id, payload = share,
+                        )
+                    }.onSuccess { n++ }
+                        .onFailure { DucatLog.w(TAG, "escrow $idHex: round 1 again — ${it.message}") }
+                }
+        }
+        if (n > 0) DucatLog.i(TAG, "escrow $idHex: sent $n frame(s) again")
+    }
 
     /**
      * True when this escrow has nothing at stake and nobody ever answered it.
