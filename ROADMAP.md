@@ -122,7 +122,7 @@ money. Ordered by what blocks 1.0, not by effort.
   proposal can only pay the driver at the address the driver published;
   near-total refunds flip the fee to the rider's side. FROST_ROUND round 0
   MAY carry the claimed amount now — the second implementation caught the
-  rule drift (O21 doing its job) and both agree on 241 vectors. **Left for
+  rule drift (O21 doing its job) and both agree on 288 vectors. **Left for
   the field day:** the 2-of-2 accept flow and the settlement UI's live
   two-phone pass (the underlying split tx is chain-proven, de818596…).
 - **Opt-in live location after commitment.** ~~Spec it before building

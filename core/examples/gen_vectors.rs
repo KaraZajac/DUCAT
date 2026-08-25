@@ -23,7 +23,26 @@ use serde_json::{json, Map, Value as J};
 use std::time::Duration;
 
 const VECTOR_SET_VERSION: &str = "1";
-const PROTOCOL_DRAFT: &str = "0.42";
+/// The draft these vectors describe, read from the document itself.
+///
+/// This was the string "0.42", written once and never again — so every
+/// manifest published since has told a third-party implementer that the
+/// vectors they are about to write code against describe a protocol
+/// forty-six drafts old. The one artifact this project points outsiders at
+/// was the one thing not checking itself.
+fn protocol_draft() -> String {
+    let spec = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .expect("crate has a parent")
+        .join("ducat-protocol.md");
+    let text = std::fs::read_to_string(spec).expect("the spec is beside the crate");
+    let at = text.find("**Draft ").expect("the spec states its draft");
+    text[at + "**Draft ".len()..]
+        .split(|c: char| !(c.is_ascii_digit() || c == '.'))
+        .next()
+        .expect("a draft number follows")
+        .to_string()
+}
 
 fn hex(b: &[u8]) -> String {
     b.iter().map(|x| format!("{:02x}", x)).collect()
@@ -2360,7 +2379,7 @@ fn main() -> std::io::Result<()> {
     let total: usize = by_file.values().map(|c| c.len()).sum();
     let manifest = json!({
         "vector_set": VECTOR_SET_VERSION,
-        "protocol_draft": PROTOCOL_DRAFT,
+        "protocol_draft": protocol_draft(),
         "generated_by": "ducat-core examples/gen_vectors.rs",
         "deterministic": "all keys derive from fixed seeds; no clock or RNG is consulted, so regeneration is byte-identical on an unchanged implementation",
         "reject_codes_are": "§18.5 wire codes. Two clients must agree an input is MALFORMED; they need not agree on which internal decoder rule said so. The non-normative `hint` field names the rule.",

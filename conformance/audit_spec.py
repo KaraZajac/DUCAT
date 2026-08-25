@@ -150,6 +150,14 @@ hdr = re.search(r"\*\*Draft (\d+\.\d+)", SPEC)
 first = re.search(r"^- \*\*(\d+\.\d+)\*\* —", SPEC, re.M)
 if hdr and first and hdr.group(1) != first.group(1):
     bad("version", f"header says {hdr.group(1)}, newest changelog entry is {first.group(1)}")
+# ...and the published artifact says the same. `protocol_draft` was a string
+# written once, at 0.42, so every manifest since told an implementer the
+# vectors they were about to write code against described a protocol
+# forty-six drafts old.
+_man = json.loads(read("vectors/v1/manifest.json") or "{}")
+if hdr and _man.get("protocol_draft") not in (None, hdr.group(1)):
+    bad("version",
+        f"the vector manifest says draft {_man['protocol_draft']}; the spec is {hdr.group(1)}")
 
 # --- 8. Transport identifiers match the spec -------------------------------
 tr = read("core/src/transport.rs")
@@ -170,16 +178,26 @@ for uuid in re.findall(r'BLE_\w+_UUID: &str = "([0-9a-f-]+)"', tr):
 # and a document that miscounts its own artifacts is one a reader stops trusting.
 manifest = json.loads(read("vectors/v1/manifest.json") or "{}")
 total = manifest.get("total_cases")
-for line in SPEC.splitlines():
-    # Changelog entries are history and are supposed to say what was true then.
-    # Only live prose is checked, or every release note becomes a false alarm and
-    # the check gets ignored.
-    if re.match(r"- \*\*\d+\.\d+\*\* —", line.strip()):
-        continue
-    for m in re.finditer(r"(\d+)\s+vectors\b", line):
-        n = int(m.group(1))
-        if n != total and n > 20:
-            bad("counts", f"live prose says '{n} vectors'; the manifest has {total}")
+# Every document that quotes the number, not just this one. The spec was
+# checked and the README, the roadmap and the review brief were not — so all
+# three drifted, and the two a newcomer reads first were the furthest out.
+COUNTED = ["ducat-protocol.md", "README.md", "ROADMAP.md", "docs/review-brief.md"]
+for doc in COUNTED:
+    for line in read(doc).splitlines():
+        # Changelog entries are history and are supposed to say what was true
+        # then. Only live prose is checked, or every release note becomes a
+        # false alarm and the check gets ignored.
+        if re.match(r"- \*\*\d+\.\d+\*\* —", line.strip()):
+            continue
+        for m in re.finditer(r"(\d+)\s+(?:conformance\s+)?(?:vectors|cases)\b", line):
+            n = int(m.group(1))
+            # O21 records what a *past* run of a second implementation agreed
+            # on. That is a measurement, not a claim about today's set, and it
+            # is supposed to keep saying what it said.
+            if re.search(rf"agreed on {n} cases", line):
+                continue
+            if n != total and n > 20:
+                bad("counts", f"{doc} says '{m.group(0)}'; the manifest has {total}")
 
 # --- 10. Every object type appears in §6's message table -------------------
 # A type with a label and a code that no table lists is an object an implementer
