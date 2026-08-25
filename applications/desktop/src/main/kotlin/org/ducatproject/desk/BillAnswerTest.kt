@@ -2,6 +2,7 @@ package org.ducatproject.desk
 
 import org.ducatproject.ducat.StoredMessage
 import org.ducatproject.ducat.ui.billAnswers
+import org.ducatproject.ducat.ui.reactionsOn
 
 /**
  * A sequence number is unique in a mailbox, not in a conversation.
@@ -89,6 +90,40 @@ fun main() {
     // An emoji reaction (kind 4) is not a refusal.
     val emoji = msg(kind = 4, seq = 9, ts = 410, outgoing = true, reSeq = 0)
     check(billAnswers(listOf(firstBill, emoji)).refused.isEmpty()) { "BILL_FAIL kind 4" }
+
+    // ---- and an emoji lands on the message it was left on ----
+    // Same address, same collision: a thumbs-up on one card's message must not
+    // decorate a different message that a later card numbered the same.
+    val theirMsg = msg(kind = 0, seq = 0, ts = 100, outgoing = false)
+    val thumbs = StoredMessage(
+        outgoing = true, seq = 5, body = "\uD83D\uDC4D", timestamp = 110,
+        kind = 4, reSeq = 0, reOwn = false,
+    )
+    val laterBill = msg(kind = 1, seq = 0, ts = 300, outgoing = false, pxmr = 900)
+    val on = reactionsOn(listOf(theirMsg, thumbs, laterBill))
+    check(on[0L to 100L]?.first == "\uD83D\uDC4D") { "REACT_FAIL lost its own message" }
+    check(on[0L to 300L] == null) { "REACT_FAIL agreed to a bill nobody had reacted to" }
+
+    // Their reaction to our message goes in the other slot.
+    val myMsg = msg(kind = 0, seq = 2, ts = 400, outgoing = true)
+    val theirs = StoredMessage(
+        outgoing = false, seq = 6, body = "\u2764\uFE0F", timestamp = 410,
+        kind = 4, reSeq = 2, reOwn = false,
+    )
+    check(reactionsOn(listOf(myMsg, theirs))[2L to 400L]?.second == "\u2764\uFE0F") {
+        "REACT_FAIL side"
+    }
+
+    // Changing your mind: the later one wins.
+    val first4 = StoredMessage(
+        outgoing = true, seq = 5, body = "a", timestamp = 110, kind = 4, reSeq = 0, reOwn = false,
+    )
+    val second4 = StoredMessage(
+        outgoing = true, seq = 7, body = "b", timestamp = 150, kind = 4, reSeq = 0, reOwn = false,
+    )
+    check(reactionsOn(listOf(theirMsg, first4, second4))[0L to 100L]?.first == "b") {
+        "REACT_FAIL latest per side"
+    }
 
     println("BILL_OK a refusal answers the message it was sent about")
 }

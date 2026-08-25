@@ -81,6 +81,37 @@ import androidx.compose.ui.graphics.Color
  * The screen shows when a message went out **without** forward secrecy, because
  * §16.11 requires the fallback be visible rather than silently accepted.
  */
+/**
+ * The emoji on each message: what I put there, and what they did.
+ *
+ * Keyed by the target's (seq, timestamp) for the reason [billAnswers] is: a
+ * reaction names its target by sequence number, and a sequence number is
+ * unique in a mailbox rather than in a conversation. Keying by seq alone put a
+ * thumbs-up left on one card's message onto a different message that a later
+ * card happened to number the same — and in a thread where most messages are
+ * bills, an agreement shown against the wrong amount is not decoration.
+ *
+ * Resolved positionally, then latest-per-side wins, which is how changing your
+ * mind works.
+ */
+internal fun reactionsOn(
+    messages: List<StoredMessage>,
+): Map<Pair<Long, Long>, Pair<String?, String?>> {
+    val out = HashMap<Pair<Long, Long>, Pair<String?, String?>>()
+    for (r in messages.sortedBy { it.timestamp }) {
+        if (r.kind != 4) continue
+        val seq = r.reSeq ?: continue
+        val side = if (r.reOwn) r.outgoing else !r.outgoing
+        val t = messages
+            .filter { it.outgoing == side && it.seq == seq && it.timestamp <= r.timestamp }
+            .maxByOrNull { it.timestamp } ?: continue
+        val k = t.seq to t.timestamp
+        val cur = out[k] ?: (null to null)
+        out[k] = if (r.outgoing) r.body to cur.second else cur.first to r.body
+    }
+    return out
+}
+
 /** Bills a kind-5 has answered, keyed by (seq, timestamp) of the bill:
  *  [withdrawn] by the sender, [refused] by the payer. */
 internal data class BillAnswers(
@@ -137,10 +168,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     // Reactions decorate their targets rather than being bubbles (§16.14):
     // the message is the unit of rendering, the reaction is a remark upon one.
     // Latest per (sender, target) wins, which is how changing your mind works.
-    val reactions = remember(messages) {
-        messages.filter { it.kind == 4 && it.reSeq != null }
-            .associateBy { r -> Triple(r.outgoing == r.reOwn, r.reSeq!!, r.outgoing) }
-    }
+    val reactions = remember(messages) { reactionsOn(messages) }
     // Withdrawn and refused bills, worked out once for the whole thread.
     val answers = remember(messages) { billAnswers(messages) }
     // A half-typed message survives a rotation. It is the single most
@@ -816,8 +844,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         onLongPress = { confirmDelete = m },
                         onPay = { billView = it },
                     )
-                    val mine2 = reactions[Triple(m.outgoing, m.seq, true)]?.body
-                    val theirs2 = reactions[Triple(m.outgoing, m.seq, false)]?.body
+                    val on = reactions[m.seq to m.timestamp]
+                    val mine2 = on?.first
+                    val theirs2 = on?.second
                     if (mine2 != null || theirs2 != null) {
                         Row(
                             Modifier.fillMaxWidth().padding(horizontal = 20.dp),
