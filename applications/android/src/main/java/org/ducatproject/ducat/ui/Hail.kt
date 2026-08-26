@@ -349,6 +349,12 @@ fun HailCard(
                 // loses; the driver has spent the hail and is committed.
                 if (d != null) runCatching { rememberOffered(context, d.personaHex, -1L) }
                 posted = null
+                // "Posted. Waiting for a driver…" is not true any more, and
+                // it was left standing directly under "Sam took your hail —
+                // waiting for their offer…". Two answers to the same
+                // question, one of them stale, on the card whose whole job is
+                // to say where the ride has got to.
+                status = null
                 if (d != null) {
                     // The claim is only half the ceremony: the driver's
                     // kind-6 offer names the fare, and the offer screen —
