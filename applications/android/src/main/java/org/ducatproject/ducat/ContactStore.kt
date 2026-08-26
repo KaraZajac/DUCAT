@@ -309,13 +309,38 @@ class ContactStore(context: Context) {
         bump()
     } }
 
-    /** Take a fresher address for a contact, from details or a request. */
-    fun setTheirAddress(personaHex: String, address: String?) {
-        if (address.isNullOrBlank()) return
-        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
-        if (c.theirAddress == address) return
-        save(all().filterNot { it.personaHex == personaHex } + c.copy(theirAddress = address))
-    }
+    /**
+     * Take a fresher address for a contact, from details or a request.
+     *
+     * **This is the authenticated channel, and it answers the card's
+     * question.** Only [Mailbox.readInto] calls this, and only for a message
+     * that opened — which is proof the contact wrote it, where a card is bytes
+     * anyone can hand you. So when one arrives, a card's held address has been
+     * overruled by the contact themselves and must not go on being offered:
+     * without this, a till's second card held its new subaddress for review,
+     * the bill that followed named where to pay in an opened message, the
+     * payment went there correctly — and the confirm screen still said "a card
+     * wanted to change it", about an address that payment never touched. On
+     * the one screen whose job is saying where money goes, a warning about a
+     * destination not in use teaches people to read past the warnings.
+     *
+     * Clearing it loses nothing: reaching this path needs the thread's keys,
+     * and anyone holding those is the contact as far as any of this can tell.
+     * A message naming the address already stored clears the hold too — that
+     * is the contact disowning the card, the same reading [foldCardAddress]
+     * gives a second card that says the old address.
+     */
+    fun setTheirAddress(personaHex: String, address: String?) { synchronized(lock) {
+        if (address.isNullOrBlank()) return@synchronized
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return@synchronized
+        if (c.theirAddress == address && c.pendingAddress == null) return@synchronized
+        if (c.pendingAddress != null) {
+            DucatLog.i("Contacts", "${personaHex.take(12)}… address settled by a message they signed")
+        }
+        save(all().filterNot { it.personaHex == personaHex } +
+            c.copy(theirAddress = address, pendingAddress = null))
+        bump()
+    } }
 
     /** Whether we publish our own address so contacts can pay without asking. */
     fun publishAddress(): Boolean = prefs.getBoolean("publish_address", false)
