@@ -68,6 +68,17 @@ private fun appState() {
         .putInt("sub_minor_aa11", 1)
         .putInt("sub_minor_bb22", 3)
         .apply()
+    // The shop and the till: the two stores of typed-in business state that
+    // live *outside* ducat_contacts. Neither was in the blob until the 1.0
+    // restore sweep found a restored phone saying "Nothing listed yet" — and
+    // a listing's id is what its signing key is derived from, so losing it
+    // also resets the seller's "established a while" signal to zero.
+    val listings = """[{"id":"L1","title":"Vintage record player","quantity":2}]"""
+    val catalogue = """[{"name":"Flat white","minor":450}]"""
+    src.getSharedPreferences("ducat_listings", 0).edit()
+        .putString("listings", listings).apply()
+    src.getSharedPreferences("ducat_catalogue", 0).edit()
+        .putString("items", catalogue).apply()
 
     val blob = ContactStore(src).backupAppState()
 
@@ -121,6 +132,11 @@ private fun appState() {
         "BACKUPTEST_FAIL a restored wallet reissued a minor already in use"
     }
 
+    val lst = dst.getSharedPreferences("ducat_listings", 0).getString("listings", null)
+    check(lst == listings) { "BACKUPTEST_FAIL listings: got $lst" }
+    val cat = dst.getSharedPreferences("ducat_catalogue", 0).getString("items", null)
+    check(cat == catalogue) { "BACKUPTEST_FAIL catalogue: got $cat" }
+
     // A bundle carrying keys the export would never write must not be able to
     // put them in this store — it is the same file as wallet_spend and
     // persona_secret, and a restore is exactly when somebody accepts a file
@@ -162,7 +178,7 @@ private fun appState() {
     check(after.getString("wallet_address", null) == null) {
         "BACKUPTEST_FAIL a backup planted a wallet address"
     }
-    println("BACKUPTEST_OK claimed_kis=$got publish=$pub receipts=$rec cards=ok used=$used subaddrs=3 poison=refused")
+    println("BACKUPTEST_OK shop+till carried; claimed_kis=$got publish=$pub receipts=$rec cards=ok used=$used subaddrs=3 poison=refused")
 }
 
 private fun escrowShares() {

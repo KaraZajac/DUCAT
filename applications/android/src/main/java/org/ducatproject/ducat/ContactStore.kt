@@ -776,6 +776,26 @@ class ContactStore(context: Context) {
         // Their profiles ride inside the contacts JSON already; carry it whole
         // so avatars and pronouns survive on the same client.
         prefs.getString("contacts", null)?.let { o.put("contacts_raw", it) }
+        // The two stores holding what somebody *typed* and cannot re-derive:
+        // the shop (listings, each with its private where-to-meet half) and
+        // the till's catalogue. Discovered missing the hard way, in the 1.0
+        // restore sweep — a restored phone said "Nothing listed yet" and the
+        // seller was never told their shop had quietly closed.
+        //
+        // Listings carry a second, sharper reason: the key a listing signs
+        // with is derived from its *id* (board::listing_seed), so losing the
+        // id means a re-typed listing signs as a brand-new author — the
+        // "established a while" signal a careful buyer reads resets to zero,
+        // through no fault of the seller's.
+        //
+        // Raw JSON, same as contacts_raw: this blob is this client's own
+        // format (core carries it as opaque bytes), an old client restoring a
+        // newer backup ignores keys it does not know, and a new client
+        // restoring an old backup simply finds these absent. No wire change.
+        securePrefs(appContext, "ducat_listings").getString("listings", null)
+            ?.let { o.put("listings_raw", it) }
+        securePrefs(appContext, "ducat_catalogue").getString("items", null)
+            ?.let { o.put("catalogue_raw", it) }
         return o.toString().toByteArray(Charsets.UTF_8)
     }
 
@@ -818,6 +838,19 @@ class ContactStore(context: Context) {
                 }
                 o.optString("contacts_raw").takeIf { it.isNotEmpty() }
                     ?.let { e.putString("contacts", it) }
+                // Separate stores, separate editors — but written inside the
+                // same restore so nothing observes contacts back and the shop
+                // still empty. The poller's next pass re-posts each listing
+                // to the current board generation with a fresh stamp, exactly
+                // as it would after any quiet week.
+                o.optString("listings_raw").takeIf { it.isNotEmpty() }?.let {
+                    securePrefs(appContext, "ducat_listings").edit()
+                        .putString("listings", it).apply()
+                }
+                o.optString("catalogue_raw").takeIf { it.isNotEmpty() }?.let {
+                    securePrefs(appContext, "ducat_catalogue").edit()
+                        .putString("items", it).apply()
+                }
                 appStateKeys.forEach { k ->
                     if (o.has(k)) when (val v = o.get(k)) {
                         is Boolean -> e.putBoolean(k, v)
