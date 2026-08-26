@@ -68,6 +68,7 @@
     </plurals>
     <string name="res_too_small">Te klein voor escrow — vrijgeven kost meer netwerkkosten dan het ding zelf. Probeer %1$s of meer.</string>
     <string name="bond_will_retry">Het probeert het vanzelf opnieuw.</string>
+    <string name="bond_release_asked">Je hebt dit al gevraagd. Het blijft vanzelf proberen tot het lukt — je kunt de app sluiten.</string>
     <string name="bond_call_off">Afblazen</string>
     <string name="bond_retry_in">Het probeert het vanzelf opnieuw — nog %1$s.</string>
     <string name="bond_close_ask">Borg afsluiten?</string>

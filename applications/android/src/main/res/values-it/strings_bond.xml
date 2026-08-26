@@ -68,6 +68,7 @@
     </plurals>
     <string name="res_too_small">Troppo piccolo per un deposito — liberarlo costerebbe più di commissioni di rete che la cosa stessa. Prova %1$s o più.</string>
     <string name="bond_will_retry">Riproverà da solo.</string>
+    <string name="bond_release_asked">L\'hai già richiesto. Continua a riprovare da solo finché non passa: puoi uscire dall\'app.</string>
     <string name="bond_call_off">Annulla l\'accordo</string>
     <string name="bond_retry_in">Riproverà da solo — mancano %1$s.</string>
     <string name="bond_close_ask">Chiudere il vincolo?</string>

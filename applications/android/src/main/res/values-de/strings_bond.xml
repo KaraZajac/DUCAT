@@ -68,6 +68,7 @@
     </plurals>
     <string name="res_too_small">Zu klein für eine Treuhand — die Freigabe würde mehr Netzgebühr kosten als die Sache selbst. Nimm %1$s oder mehr.</string>
     <string name="bond_will_retry">Es versucht es von selbst erneut.</string>
+    <string name="bond_release_asked">Du hast das bereits angefordert. Es versucht es von selbst weiter, bis es klappt — du kannst die App verlassen.</string>
     <string name="bond_call_off">Abbrechen</string>
     <string name="bond_retry_in">Es versucht es von selbst erneut – noch %1$s.</string>
     <string name="bond_close_ask">Bond auflösen?</string>

@@ -68,6 +68,7 @@
     </plurals>
     <string name="res_too_small">Demasiado pequeño para un depósito — liberarlo costaría más en comisiones de red que la cosa misma. Prueba %1$s o más.</string>
     <string name="bond_will_retry">Se volverá a intentar automáticamente.</string>
+    <string name="bond_release_asked">Ya lo has pedido. Seguirá intentándolo por su cuenta hasta que salga — puedes salir de la app.</string>
     <string name="bond_call_off">Cancelar el trato</string>
     <string name="bond_retry_in">Se volverá a intentar automáticamente: quedan %1$s.</string>
     <string name="bond_close_ask">¿Cerrar el bono?</string>

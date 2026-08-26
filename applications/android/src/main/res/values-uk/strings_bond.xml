@@ -70,6 +70,7 @@
     </plurals>
     <string name="res_too_small">Замало для ескроу — випуск коштуватиме більше мережевої комісії, ніж сама річ. Спробуйте %1$s або більше.</string>
     <string name="bond_will_retry">Спробує ще раз саме.</string>
+    <string name="bond_release_asked">Ви вже це запросили. Застосунок сам продовжить спроби, доки не вдасться — його можна закрити.</string>
     <string name="bond_call_off">Скасувати угоду</string>
     <string name="bond_retry_in">Спробує ще раз саме — лишилося %1$s.</string>
     <string name="bond_close_ask">Закрити заставу?</string>

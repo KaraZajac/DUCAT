@@ -68,6 +68,7 @@
     </plurals>
     <string name="res_too_small">एस्क्रो के लिए बहुत छोटा — छोड़ने का नेटवर्क शुल्क चीज़ से ज़्यादा होगा। %1$s या उससे ऊपर आज़माएँ।</string>
     <string name="bond_will_retry">यह अपने आप फिर कोशिश करेगा।</string>
+    <string name="bond_release_asked">आपने यह माँग लिया है। यह अपने आप कोशिश करता रहेगा जब तक हो न जाए — आप ऐप बंद कर सकते हैं।</string>
     <string name="bond_call_off">सौदा रद्द करें</string>
     <string name="bond_retry_in">यह अपने आप फिर कोशिश करेगा — %1$s बाकी।</string>
     <string name="bond_close_ask">बॉन्ड बंद करें?</string>

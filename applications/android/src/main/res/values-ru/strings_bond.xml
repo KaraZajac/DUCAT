@@ -70,6 +70,7 @@
     </plurals>
     <string name="res_too_small">Слишком мало для эскроу — выпуск обойдётся в сетевую комиссию дороже самой вещи. Попробуйте %1$s или больше.</string>
     <string name="bond_will_retry">Повторит попытку само.</string>
+    <string name="bond_release_asked">Вы уже запросили это. Приложение само продолжит попытки, пока не пройдёт — его можно закрыть.</string>
     <string name="bond_call_off">Отменить сделку</string>
     <string name="bond_retry_in">Повторит попытку само — осталось %1$s.</string>
     <string name="bond_close_ask">Закрыть залог?</string>

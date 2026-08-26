@@ -3167,6 +3167,28 @@ private fun RideBondBanner(contact: Contact) {
                     )
                 }
             }
+            // **The same news, from stored state rather than from this
+            // process's memory.**
+            //
+            // `error` is the last failure *this* run of the app saw, so the
+            // sentence telling a driver their request keeps retrying vanished
+            // the moment the app restarted — and the screen went back to a
+            // bare "Complete ride", inviting a tap for something already in
+            // hand. A crash during the maturity wait is the obvious way in;
+            // simply reopening the app is the common one, and the field-day
+            // instruction is literally "pocket the phone and check back".
+            //
+            // The retry itself was never in memory: the poller works from
+            // `wantRelease` on the escrow, which is why it fires with the
+            // phone away. This reads the same field the poller does.
+            if (error == null && ride.has("wantRelease")) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.bond_release_asked),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
         }
     }
 }

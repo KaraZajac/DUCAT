@@ -68,6 +68,7 @@
     </plurals>
     <string name="res_too_small">Emanet için fazla küçük — serbest bırakmanın ağ ücreti eşyanın kendisinden pahalı. %1$s ya da üstünü dene.</string>
     <string name="bond_will_retry">Kendiliğinden tekrar deneyecek.</string>
+    <string name="bond_release_asked">Bunu zaten istediniz. Geçene kadar kendi kendine denemeye devam eder — uygulamadan çıkabilirsiniz.</string>
     <string name="bond_call_off">Anlaşmayı iptal et</string>
     <string name="bond_retry_in">Kendiliğinden tekrar deneyecek — %1$s kaldı.</string>
     <string name="bond_close_ask">Teminat kapatılsın mı?</string>
