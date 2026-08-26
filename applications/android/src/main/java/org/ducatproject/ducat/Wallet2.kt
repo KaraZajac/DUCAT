@@ -568,13 +568,30 @@ object Wallet {
     }
 }
 
-/** Piconero to a human string. 1 XMR is 10^12 piconero. */
+/**
+ * Piconero to a human string. 1 XMR is 10^12 piconero.
+ *
+ * **The separator follows the digits.** `%d` formats in the default locale, so
+ * on an Arabic phone the digits come out Arabic-Indic — while the `.` between
+ * them was a literal, and stayed ASCII. The balance screen showed
+ * `USD ٣٦٫٢٣` above `٠.٠٨٣٩٠٦ XMR`: two figures side by side, disagreeing
+ * about what a decimal point is, in a half-localised number that is neither
+ * convention. Either whole answer would do; this is the one that matches the
+ * fiat line beside it and the rule [Amounts.isNumberChar] already states —
+ * *"the languages this ships in write their decimal point that way"*.
+ *
+ * Safe for the one place this is not merely read: [ui.Pay] prefills an
+ * editable amount with it, and `Amounts.typedNumber` folds every separator
+ * this could produce — and every digit shape — back to ASCII before parsing.
+ */
 fun formatXmr(pxmr: Long): String {
     val whole = pxmr / 1_000_000_000_000L
     val frac = pxmr % 1_000_000_000_000L
     // Six places: enough to show a stagenet dust payment, few enough to read.
     val micro = frac / 1_000_000L
-    return if (whole == 0L && micro == 0L && pxmr > 0) "<0.000001" else "%d.%06d".format(whole, micro)
+    val dot = java.text.DecimalFormatSymbols.getInstance().decimalSeparator
+    return if (whole == 0L && micro == 0L && pxmr > 0) "<%d%c%06d".format(0, dot, 1)
+    else "%d%c%06d".format(whole, dot, micro)
 }
 
 /**
