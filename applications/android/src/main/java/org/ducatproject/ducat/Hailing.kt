@@ -175,8 +175,12 @@ object Hailing {
         ladder@ for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
             val name = uniffi.ducat_mobile.standShardName(base, shard)
             val nowS = System.currentTimeMillis() / 1000
+            // One reading for the board, not one per notice: the tip is
+            // cached anyway, and a cache that expired halfway down a board
+            // would judge its slots against two different chains.
+            val tip = Beacons.tip(context).toULong()
             val taken = standRead(name).mapNotNull { n ->
-                runCatching { hailDecode(n.data, name, n.subkey, Beacons.tip(context).toULong()) }.getOrNull()
+                runCatching { hailDecode(n.data, name, n.subkey, tip) }.getOrNull()
                     ?.takeIf { it.expiry.toLong() > nowS }
                     ?.let { n.subkey }
             }.toSet()
@@ -241,8 +245,9 @@ object Hailing {
             ?: return null
         val persona = PersonaStore(context).secret()
         val second = runCatching {
+            val wideTip = Beacons.tip(context).toULong()
             val busy = standRead(wide).mapNotNull { n ->
-                runCatching { hailDecode(n.data, wide, n.subkey, Beacons.tip(context).toULong()) }.getOrNull()
+                runCatching { hailDecode(n.data, wide, n.subkey, wideTip) }.getOrNull()
                     ?.takeIf { it.expiry.toLong() > System.currentTimeMillis() / 1000 }
                     ?.let { n.subkey }
             }.toSet()
@@ -290,8 +295,9 @@ object Hailing {
         var quiet = 0
         for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
             val name = uniffi.ducat_mobile.standShardName(standNow(cell), shard)
+            val tip = Beacons.tip(context).toULong()
             val live = standRead(name).mapNotNull { n ->
-                runCatching { hailDecode(n.data, name, n.subkey, Beacons.tip(context).toULong()) }
+                runCatching { hailDecode(n.data, name, n.subkey, tip) }
                     .getOrNull()
                     // §16.18.1's expensive half, and the one that matters: the
                     // height is signed and cheap to test, but an attacker who

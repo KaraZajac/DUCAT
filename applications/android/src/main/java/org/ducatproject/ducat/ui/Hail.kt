@@ -151,8 +151,9 @@ private fun migrateDown(context: android.content.Context, p: PostedHail): Posted
     return runCatching {
         for (shard in 0u until myShard) {
             val name = uniffi.ducat_mobile.standShardName(base, shard)
+            val tip = org.ducatproject.ducat.Beacons.tip(context).toULong()
             val taken = standRead(name).mapNotNull { n ->
-                runCatching { hailDecode(n.data, name, n.subkey, org.ducatproject.ducat.Beacons.tip(context).toULong()) }.getOrNull()
+                runCatching { hailDecode(n.data, name, n.subkey, tip) }.getOrNull()
                     ?.takeIf { it.expiry.toLong() > now }
                     ?.let { n.subkey }
             }.toSet()
