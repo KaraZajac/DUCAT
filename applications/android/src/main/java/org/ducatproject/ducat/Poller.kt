@@ -294,7 +294,7 @@ class Poller(private val context: Context) {
                 // it. Here rather than on a screen, because the bound must
                 // hold with the phone in a pocket — which is exactly when a
                 // stream left running would be worst.
-                runCatching { Ceremony.stopFinishedPositions(context) }
+                runCatching { Positions.enforceBounds(context) }
                     .onFailure { DucatLog.w(TAG, "position stop: ${it.message}") }
 
                 // "It will try again on its own": here, so that it does even

@@ -6,6 +6,7 @@
     <string name="pos_share_mine">Chia sẻ vị trí của tôi</string>
     <string name="pos_stop_sharing">Ngừng chia sẻ</string>
     <string name="pos_sharing_note">Vị trí của bạn được chia sẻ khi màn hình này còn mở. Nó dừng khi bạn rời đi và khi chuyến đi kết thúc.</string>
+    <string name="pos_no_fix">Điện thoại của bạn hiện không lấy được vị trí — không có gì được gửi đi.</string>
     <string name="pos_waiting">Đang chờ vị trí của %1$s…</string>
     <string name="pos_moving">%1$s đang chia sẻ vị trí.</string>
     <string name="pos_open_map">Mở trên bản đồ</string>

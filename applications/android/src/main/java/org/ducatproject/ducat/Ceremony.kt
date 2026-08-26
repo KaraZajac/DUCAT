@@ -1464,6 +1464,21 @@ object Ceremony {
         if (isFunder(o)) o.optString("fundTxid") else o.optString("hostFundTxid")
 
     fun rideWith(context: Context, peerHex: String): JSONObject? =
+        dealWith(context, peerHex)?.takeIf { bannerWorthy(it) }
+
+    /**
+     * The same escrow [rideWith] would show, without the banner's own filter.
+     *
+     * The two exist separately because `bannerWorthy` answers *should a person
+     * be told about this*, and a day after a ride settles the honest answer is
+     * no. That is a display rule, and it read as a state rule exactly once:
+     * [Positions.rideIsLive] asked `rideWith` whether the ride was over, got
+     * `null` for a ride that had been over since yesterday, and concluded there
+     * was no escrow — so the position card came back on a settled thread a day
+     * late. Anything asking about the deal's *state* wants this one; only the
+     * banner wants the filtered one.
+     */
+    fun dealWith(context: Context, peerHex: String): JSONObject? =
         all(context)
             .filter { it.optInt("kind") != KIND_BOND && !isArbiter(it) }
             .filter { otherPrincipal(it) == peerHex }
@@ -1478,7 +1493,6 @@ object Ceremony {
             // never expires, so this got worse the longer two people used the
             // app. A newer escrow supersedes an older one, full stop.
             .maxByOrNull { it.optLong("created") }
-            ?.takeIf { bannerWorthy(it) }
 
     /** Whether this escrow still has something to say to the person. */
     private fun bannerWorthy(o: JSONObject): Boolean = when (o.optString("stage")) {
@@ -1637,32 +1651,6 @@ object Ceremony {
     /** Stamp the moment an escrow stopped needing anyone. */
     private fun settle(o: JSONObject, stage: String): JSONObject =
         o.put("stage", stage).put("settledAt", System.currentTimeMillis() / 1000)
-
-    /**
-     * §15.12's bound on live position, enforced from the deal's own state.
-     *
-     * Sharing stops at the receipt, at a retract, or at expiry — whichever is
-     * first. A settled escrow is the receipt in the shape this app actually
-     * has: the ride is over, so the stream that accompanied it is over too,
-     * and the record is blanked and forgotten rather than left running on a
-     * TTL nobody is watching (§18.7). Runs from the poller, so it holds
-     * whether or not anybody has the screen open — the one bound that must not
-     * depend on somebody looking at it.
-     *
-     * The screen stops its own sharing when it closes; this is the backstop
-     * for the case where the ride ended while the phone was in a pocket.
-     */
-    fun stopFinishedPositions(context: Context): Int {
-        var n = 0
-        for (o in all(context)) {
-            if (!isFinished(o)) continue
-            val peer = otherPrincipal(o) ?: continue
-            if (!Positions.sharing(context, peer) && !Positions.watching(context, peer)) continue
-            Positions.stop(context, peer)
-            n += 1
-        }
-        return n
-    }
 
     /** The rider pays the fare into the escrow — an ordinary wallet send to
      *  an address that happens to need two of three keys to leave. */

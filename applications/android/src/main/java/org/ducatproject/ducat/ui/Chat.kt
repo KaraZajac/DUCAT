@@ -744,7 +744,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         // §15.12's last rung of the disclosure ladder, gated on the accept
         // being in this thread — before that the same stream is a
         // stranger-tracking primitive, which is what §5.2.3 refuses.
-        PositionCard(c, hasAccept = messages.any { it.kind == 7 })
+        PositionCard(c)
         // And, when the thread began at a board, what it is about. A name at
         // the top of a chat is not a subject: the owner of four cars needs to
         // know which one this stranger read, and the stranger who tapped
@@ -784,7 +784,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             // reader.
             // Hoisted, because a message needs to know what sits either side
             // of it to know whether it is part of a run.
-            val shown = messages.filter { it.kind !in setOf(4, 8, 9, 10) }
+            val shown = messages.filter { it.kind !in setOf(4, 8, 9, 10, 11) }
             itemsIndexed(shown) { at, m ->
                 // A run is consecutive plain messages from the same side,
                 // close together in time. Only kind 0: a bill, a payment or a

@@ -369,11 +369,13 @@ internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
 
 /**
  * The message kinds that are machinery rather than conversation: the DKG and
- * FROST rounds and the abort that ends a ceremony. Chat.kt filters the same
+ * FROST rounds, the abort that ends a ceremony, and the position reference
+ * that hands over a live-position stream — the app writes that one, not a
+ * person, and the ride's own card is what somebody reads. Chat.kt filters the same
  * set out of the thread itself; here it keeps them out of the preview line
  * and out of the order the list is sorted in.
  */
-private val CEREMONY_KINDS = setOf(8, 9, 10)
+private val CEREMONY_KINDS = setOf(8, 9, 10, 11)
 
 /** What one message looks like from a list away (§16.13's kinds included). */
 internal fun previewOf(context: Context, m: StoredMessage): String = when {

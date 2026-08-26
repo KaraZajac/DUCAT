@@ -6,6 +6,7 @@
     <string name="pos_share_mine">Поділитися місцем</string>
     <string name="pos_stop_sharing">Припинити</string>
     <string name="pos_sharing_note">Ваше місце передається, доки відкрито цей екран. Воно припиняється, коли ви виходите і коли поїздка завершується.</string>
+    <string name="pos_no_fix">Ваш телефон зараз не може визначити місцеперебування — нічого не надсилається.</string>
     <string name="pos_waiting">Очікування місця %1$s…</string>
     <string name="pos_moving">%1$s ділиться своїм місцем.</string>
     <string name="pos_open_map">Відкрити на карті</string>

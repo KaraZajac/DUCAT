@@ -329,6 +329,15 @@ object Mailbox {
      * Called on a poll rather than pushed, because the answer may have been
      * written while this device was off.
      */
+    /** Consecutive sweeps a card's record has been missing from the network. */
+    private val missingCard = java.util.concurrent.ConcurrentHashMap<String, Int>()
+
+    private const val MISSES_BEFORE_RETIRING = 5
+
+    /** The network says it has no such record — not that it could not ask. */
+    private fun isMissing(e: Exception): Boolean =
+        e.message?.contains("Key not found", ignoreCase = true) == true
+
     fun collectClaims(context: Context): Int {
         val store = ContactStore(context)
         var collected = 0
@@ -339,6 +348,7 @@ object Mailbox {
         for (issued in store.issuedCards().filter { it.answeredBy == null }) {
             try {
                 nodeDhtOpen(issued.inboxKey, null, null)
+                missingCard.remove(issued.inboxKey)
                 val read = nodeDhtGetVersioned(issued.inboxKey, 1u, true) ?: continue
                 val raw = read.data
                 if (raw.isEmpty()) continue
@@ -437,6 +447,40 @@ object Mailbox {
                     // One line, not one per card: offline fails them all alike.
                     DucatLog.i(TAG, "offline — claims wait for the network")
                     break
+                }
+                // **A card whose record the network has lost is dead, and it
+                // was being polled for ever.** The DHT forgets a record when
+                // its TTL runs out, so every handshake code that nobody ever
+                // scanned — a till's, a ride's, yesterday's profile code —
+                // leaves an entry here that fails its open on every sweep,
+                // logs a line, and spends a round trip, from now until the
+                // phone is wiped. There is no local expiry stamp to read:
+                // "Key not found" is the only news we get.
+                //
+                // Which is why it takes several. One miss is a network that
+                // could not find a holder this minute, and retiring a card on
+                // that would quietly break a code somebody is about to scan.
+                // Five consecutive sweeps is minutes of the record being
+                // unreachable, at which point the code is useless in a
+                // person's hands too.
+                if (isMissing(e)) {
+                    val n = (missingCard[issued.inboxKey] ?: 0) + 1
+                    if (n >= MISSES_BEFORE_RETIRING) {
+                        missingCard.remove(issued.inboxKey)
+                        store.forgetIssuedCard(issued.inboxKey)
+                        DucatLog.i(TAG, "retired an expired code — the network no longer holds it")
+                        // The standing code is the one a person expects to
+                        // still be there; cut its replacement now rather than
+                        // at the next handshake.
+                        if (issued.purpose == "profile") {
+                            runCatching {
+                                issueCard(context, NameStore(context).get(), 60uL * 60uL * 24uL)
+                            }.onFailure { DucatLog.w(TAG, "could not re-issue: ${it.message}") }
+                        }
+                    } else {
+                        missingCard[issued.inboxKey] = n
+                    }
+                    continue
                 }
                 DucatLog.w(TAG, "collectClaims(${issued.inboxKey.take(16)}…): ${e.message}")
             }

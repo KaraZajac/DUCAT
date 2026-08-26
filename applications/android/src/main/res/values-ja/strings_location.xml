@@ -6,6 +6,7 @@
     <string name="pos_share_mine">現在地を共有</string>
     <string name="pos_stop_sharing">共有をやめる</string>
     <string name="pos_sharing_note">この画面を開いているあいだ現在地を共有します。画面を離れたとき、そして乗車が終わったときに止まります。</string>
+    <string name="pos_no_fix">いま端末が現在地を取得できません — 何も送信されていません。</string>
     <string name="pos_waiting">%1$sの現在地を待っています…</string>
     <string name="pos_moving">%1$sが現在地を共有しています。</string>
     <string name="pos_open_map">地図で開く</string>

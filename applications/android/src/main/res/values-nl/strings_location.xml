@@ -6,6 +6,7 @@
     <string name="pos_share_mine">Mijn positie delen</string>
     <string name="pos_stop_sharing">Stoppen met delen</string>
     <string name="pos_sharing_note">Je positie wordt gedeeld zolang dit scherm open is. Het stopt als je weggaat, en als de rit eindigt.</string>
+    <string name="pos_no_fix">Je telefoon kan nu geen positie bepalen — er wordt niets verzonden.</string>
     <string name="pos_waiting">Wachten op de positie van %1$s…</string>
     <string name="pos_moving">%1$s deelt de eigen positie.</string>
     <string name="pos_open_map">Openen op een kaart</string>

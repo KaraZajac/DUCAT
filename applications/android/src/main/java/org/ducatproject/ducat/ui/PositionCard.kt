@@ -39,11 +39,15 @@ import org.ducatproject.ducat.R
  * and either alone is useful.
  */
 @Composable
-fun PositionCard(contact: Contact, hasAccept: Boolean) {
-    // No accept, no card. The gate, stated once, at the top.
-    if (!hasAccept) return
+fun PositionCard(contact: Contact) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val version by ContactStore.changes.collectAsState()
+    // The gate, asked the same way the poller's bound asks it — see
+    // Positions.rideIsLive for why those must be one question and not two.
+    val live = remember(version, contact.personaHex) {
+        Positions.rideIsLive(context, contact.personaHex)
+    }
+    if (!live) return
     val sharing = remember(version, contact.personaHex) {
         Positions.sharing(context, contact.personaHex)
     }
@@ -66,6 +70,8 @@ fun PositionCard(contact: Contact, hasAccept: Boolean) {
     }
 
     var fix by remember(contact.personaHex) { mutableStateOf<Positions.Fix?>(null) }
+    // Consecutive fixes the phone could not get. Three is ~12s of trying.
+    var misses by remember(contact.personaHex) { mutableStateOf(0) }
     var now by remember { mutableStateOf(System.currentTimeMillis()) }
     val uri = androidx.compose.ui.platform.LocalUriHandler.current
 
@@ -76,7 +82,18 @@ fun PositionCard(contact: Contact, hasAccept: Boolean) {
         if (!sharing) return@LaunchedEffect
         while (true) {
             grabFix(context) { at ->
-                at?.let { (lat, lon) ->
+                if (at == null) {
+                    // **Say so.** A phone that cannot get a fix sends nothing,
+                    // and the card used to go on saying "Sharing your
+                    // position" regardless — the same screen claiming a thing
+                    // it was not doing. One miss is ordinary (a fix arrives a
+                    // beat later); a run of them is the person needing to
+                    // know, because the other side is watching a dot that
+                    // stopped and cannot tell whose end is at fault.
+                    misses++
+                } else {
+                    misses = 0
+                    val (lat, lon) = at
                     // Fire-and-forget onto IO: a DHT write is seconds and this
                     // callback is on the main thread.
                     Thread {
@@ -147,7 +164,9 @@ fun PositionCard(contact: Contact, hasAccept: Boolean) {
             if (sharing) {
                 if (watching) Spacer(Modifier.height(4.dp))
                 Text(
-                    stringResource(R.string.pos_sharing_note),
+                    stringResource(
+                        if (misses >= 3) R.string.pos_no_fix else R.string.pos_sharing_note,
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                 )

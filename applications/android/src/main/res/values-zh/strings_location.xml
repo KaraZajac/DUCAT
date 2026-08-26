@@ -6,6 +6,7 @@
     <string name="pos_share_mine">共享我的位置</string>
     <string name="pos_stop_sharing">停止共享</string>
     <string name="pos_sharing_note">这个页面开着时会共享你的位置。你离开页面时、以及行程结束时都会停止。</string>
+    <string name="pos_no_fix">你的手机现在无法获取位置 — 没有任何内容被发送。</string>
     <string name="pos_waiting">正在等待 %1$s 的位置…</string>
     <string name="pos_moving">%1$s 正在共享位置。</string>
     <string name="pos_open_map">在地图上打开</string>

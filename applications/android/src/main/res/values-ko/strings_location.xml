@@ -6,6 +6,7 @@
     <string name="pos_share_mine">내 위치 공유</string>
     <string name="pos_stop_sharing">공유 중지</string>
     <string name="pos_sharing_note">이 화면이 열려 있는 동안 위치가 공유됩니다. 화면을 벗어나거나 이동이 끝나면 멈춥니다.</string>
+    <string name="pos_no_fix">지금 휴대전화가 위치를 확인하지 못합니다 — 아무것도 전송되지 않습니다.</string>
     <string name="pos_waiting">%1$s의 위치를 기다리는 중…</string>
     <string name="pos_moving">%1$s님이 위치를 공유하고 있습니다.</string>
     <string name="pos_open_map">지도에서 열기</string>

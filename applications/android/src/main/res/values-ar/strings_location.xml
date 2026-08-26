@@ -6,6 +6,7 @@
     <string name="pos_share_mine">شارك موقعي</string>
     <string name="pos_stop_sharing">أوقف المشاركة</string>
     <string name="pos_sharing_note">تتم مشاركة موقعك ما دامت هذه الشاشة مفتوحة. تتوقف عند مغادرتها وعند انتهاء الرحلة.</string>
+    <string name="pos_no_fix">لا يستطيع هاتفك تحديد موقعك الآن — لا يتم إرسال أي شيء.</string>
     <string name="pos_waiting">‏في انتظار موقع %1$s…</string>
     <string name="pos_moving">‏%1$s يشارك موقعه.</string>
     <string name="pos_open_map">افتح على الخريطة</string>

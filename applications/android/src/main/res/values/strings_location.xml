@@ -9,6 +9,7 @@
     <string name="pos_share_mine">Share my position</string>
     <string name="pos_stop_sharing">Stop sharing</string>
     <string name="pos_sharing_note">Sharing your position while this screen is open. It stops when you leave, and when the ride ends.</string>
+    <string name="pos_no_fix">Your phone cannot get a position right now — nothing is being sent.</string>
     <string name="pos_waiting">Waiting for %1$s\'s position…</string>
     <string name="pos_moving">%1$s is sharing their position.</string>
     <!-- Staleness rendered as staleness (§15.12): never a guessed position. -->

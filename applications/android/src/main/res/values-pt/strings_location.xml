@@ -6,6 +6,7 @@
     <string name="pos_share_mine">Partilhar a minha posição</string>
     <string name="pos_stop_sharing">Parar de partilhar</string>
     <string name="pos_sharing_note">A sua posição é partilhada enquanto este ecrã estiver aberto. Para quando sair e quando a viagem terminar.</string>
+    <string name="pos_no_fix">O seu telemóvel não consegue obter uma posição agora — nada está a ser enviado.</string>
     <string name="pos_waiting">À espera da posição de %1$s…</string>
     <string name="pos_moving">%1$s está a partilhar a posição.</string>
     <string name="pos_open_map">Abrir num mapa</string>

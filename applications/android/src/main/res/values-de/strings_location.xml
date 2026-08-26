@@ -6,6 +6,7 @@
     <string name="pos_share_mine">Meine Position teilen</string>
     <string name="pos_stop_sharing">Teilen beenden</string>
     <string name="pos_sharing_note">Deine Position wird geteilt, solange dieser Bildschirm offen ist. Sie stoppt, wenn du ihn verlässt, und wenn die Fahrt endet.</string>
+    <string name="pos_no_fix">Dein Telefon kann gerade keine Position bestimmen — es wird nichts gesendet.</string>
     <string name="pos_waiting">Warte auf %1$ss Position…</string>
     <string name="pos_moving">%1$s teilt die eigene Position.</string>
     <string name="pos_open_map">Auf einer Karte öffnen</string>

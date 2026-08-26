@@ -6,6 +6,7 @@
     <string name="pos_share_mine">موقعیتم را به اشتراک بگذار</string>
     <string name="pos_stop_sharing">توقف اشتراک</string>
     <string name="pos_sharing_note">تا وقتی این صفحه باز است موقعیت شما به اشتراک گذاشته می‌شود. با خروج و با پایان سفر متوقف می‌شود.</string>
+    <string name="pos_no_fix">تلفن شما در حال حاضر نمی‌تواند موقعیت را تعیین کند — چیزی ارسال نمی‌شود.</string>
     <string name="pos_waiting">‏در انتظار موقعیت %1$s…</string>
     <string name="pos_moving">‏%1$s موقعیتش را به اشتراک می‌گذارد.</string>
     <string name="pos_open_map">باز کردن روی نقشه</string>
