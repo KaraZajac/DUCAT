@@ -172,6 +172,22 @@ object Beacons {
     internal fun usableTip(stored: Long, storedAt: Long, now: Long): Long =
         if (stored > 0 && storedAt > 0 && now - storedAt < TIP_FRESH_MS) stored else 0L
 
+    /**
+     * Whether this device has a chain view *right now*, answered from state
+     * alone — no network, safe anywhere.
+     *
+     * For screens that need to say the degraded mode exists, not decide it:
+     * with no reachable node every stamp shows on its signature and its work,
+     * which is the accepted trade (§16.18.1) — but a trade somebody standing
+     * in it should be able to see. A marketplace quietly running unverified
+     * looks identical to a healthy one, and "cut this reader off, then spam
+     * the board" is exactly the play that identical look invites. The browser
+     * precedent: an insecure connection still loads, marked.
+     */
+    fun hasChainView(): Boolean = synchronized(this) {
+        tipHeight > 0 && System.currentTimeMillis() - tipAt < TIP_FRESH_MS
+    }
+
     /** The tip and its hash, for stamping something about to be posted. */
     data class Stamp(val height: Long, val hashHex: String)
 
@@ -251,6 +267,16 @@ object Beacons {
         // Bounded by the window it serves, with room for the churn either
         // side of it. Cleared wholesale rather than evicted one at a time:
         // this is a cache of public facts, and losing it costs lookups.
+        //
+        // "Facts" as one chain view has them, which can shift by a block or
+        // two: Monero reorgs occasionally, so an entry near the tip can name
+        // a hash that ends up orphaned, and a poster who stamped the losing
+        // side reads as WRONG here after the reorg. Both outcomes are
+        // harmless and neither is a bug to hunt — the work was still paid
+        // against a real recent block, and the refused poster re-mines for
+        // under a second at the next refresh. Not worth expiring entries
+        // over: only the last block or two can shift, and a stale *negative*
+        // for an orphaned stamp is the correct answer anyway.
         if (hashes.size > 4 * 720) hashes.clear()
         hashes[height] = hashHex
     }

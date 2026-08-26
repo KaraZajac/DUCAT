@@ -793,6 +793,9 @@ fun DriveScreen() {
     // side already knew this: a posted hail is rehydrated from RideStore
     // precisely so a restart resumes watching the same slot.
     val dutyPrefs = remember { securePrefs(context, "ducat_contacts") }
+    // §16.18.1's accepted degradation, made visible — see RentSearch, which
+    // draws the same line for the same reason.
+    var unverified by remember { mutableStateOf(false) }
     var watching by remember {
         mutableStateOf(
             dutyPrefs.getString("drive_watching", null)
@@ -1225,6 +1228,9 @@ fun DriveScreen() {
             } else {
                 DucatLog.w(TAG, "no board answered this lap — leaving the map as it was")
             }
+            // The same read the lap itself judged stamps against, surfaced —
+            // a driver acting on unverified hails should know they are.
+            unverified = !org.ducatproject.ducat.Beacons.hasChainView()
             // How long a lap actually costs, over how many boards. The whole
             // question for a driver is whether a fare appears in seconds or
             // minutes, and that is not answerable by reading the code.
@@ -1284,6 +1290,23 @@ fun DriveScreen() {
                 }
                 OutlinedButton(onClick = { watching = null; notices = emptyList(); forgetDuty(dutyPrefs) }) {
                     Text(stringResource(R.string.hail_stop))
+                }
+            }
+            if (unverified) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 4.dp),
+                ) {
+                    Text(
+                        stringResource(R.string.board_unverified_note),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    )
                 }
             }
             pendingOffer?.let {

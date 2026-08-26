@@ -65,6 +65,7 @@
     <string name="pay_not_enough">Za mało dostępnych środków — masz %1$s, a potrzeba %2$s wraz z opłatą sieciową.</string>
     <string name="pay_offline">Jeszcze bez połączenia — ten telefon nie zakończył dołączania do sieci. Nic nie wysłano; spróbuj za chwilę.</string>
     <string name="pay_node_unreachable">Nie udało się połączyć z żadnym węzłem Monero. Nic nie wysłano — sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="board_unverified_note">Żaden węzeł Monero nie jest osiągalny, więc tego, co tu widać, nie dało się sprawdzić z łańcuchem. Nadal jest podpisane i opłacone — po prostu traktuj to z ostrożnością należną niezweryfikowanej tablicy.</string>
     <string name="board_needs_a_block">Nie udało się połączyć z żadnym węzłem Monero. To, co trafia na tablicę, jest stemplowane niedawnym blokiem, więc na razie nie może się tam znaleźć — sprawdź połączenie i spróbuj ponownie.</string>
     <string name="pay_already_paid">Już wpłaciłeś do tego depozytu. Twoje pieniądze są w środku; nic nie wysłano ponownie.</string>
     <string name="pay_rate_line">Przeliczone po 1 XMR = %1$s %2$s</string>

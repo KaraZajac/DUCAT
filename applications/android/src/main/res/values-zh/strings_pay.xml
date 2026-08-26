@@ -65,6 +65,7 @@
     <string name="pay_not_enough">可用余额不足——你有 %1$s，加上网络手续费需要 %2$s。</string>
     <string name="pay_offline">尚未连接——这台手机还没有加入网络。什么都没有发送，请稍后再试。</string>
     <string name="pay_node_unreachable">无法连接到任何 Monero 节点。什么都没有发送——请检查网络后重试。</string>
+    <string name="board_unverified_note">无法连接任何 Monero 节点，所以这里显示的内容未能与链核对。它仍然经过签名并已付费——只是请像对待未经核实的板一样多加留意。</string>
     <string name="board_needs_a_block">无法连接任何 Monero 节点。上板的内容会以一个近期区块盖章，所以现在还发不出去——请检查网络后重试。</string>
     <string name="pay_already_paid">你已经向该托管付过款了。钱已存入，没有重复发送。</string>
     <string name="pay_rate_line">按 1 XMR = %1$s %2$s 换算</string>

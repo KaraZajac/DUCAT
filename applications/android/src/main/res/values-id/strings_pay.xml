@@ -65,6 +65,7 @@
     <string name="pay_not_enough">Saldo terbuka tidak cukup — kamu punya %1$s dan ini butuh %2$s dengan biaya jaringan.</string>
     <string name="pay_offline">Belum terhubung — ponsel ini belum selesai bergabung ke jaringan. Tidak ada yang dikirim; coba lagi sebentar.</string>
     <string name="pay_node_unreachable">Tidak ada node Monero yang bisa dihubungi. Tidak ada yang dikirim — periksa koneksimu dan coba lagi.</string>
+    <string name="board_unverified_note">Tidak ada node Monero yang terjangkau, jadi yang tampil di sini belum bisa dicek terhadap rantai. Semuanya tetap ditandatangani dan dibayar — hanya saja perlakukan dengan kehati-hatian seperti papan yang belum terverifikasi.</string>
     <string name="board_needs_a_block">Tidak ada node Monero yang bisa dihubungi. Apa pun yang naik ke papan dicap dengan blok terbaru, jadi ini belum bisa tayang — periksa koneksi Anda lalu coba lagi.</string>
     <string name="pay_already_paid">Kamu sudah membayar ke escrow ini. Uangmu sudah masuk; tidak ada yang dikirim lagi.</string>
     <string name="pay_rate_line">Dikonversi pada 1 XMR = %1$s %2$s</string>

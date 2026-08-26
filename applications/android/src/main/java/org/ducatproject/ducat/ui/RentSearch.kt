@@ -142,6 +142,12 @@ private fun RentSearchScreen(
 
     var stalled by remember { mutableStateOf<Stall?>(null) }
     var progress by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    // §16.18.1's accepted degradation, made visible. With no chain view the
+    // stamps on these listings show on signature and work alone — honest
+    // boards look exactly the same, but so does a board somebody spammed
+    // after cutting this reader off from its node. Read after the search,
+    // from the state the search itself used; never a network call here.
+    var unverified by remember { mutableStateOf(false) }
     // Bumped to start the search over; `asked` remembers that the system
     // dialog has had its turn, which is how a refusal is told apart from a
     // permission simply not requested yet.
@@ -228,6 +234,7 @@ private fun RentSearchScreen(
                     stalled = Stall.NoNetwork
                 }
                 if (results == null) results = emptyList()
+                unverified = !org.ducatproject.ducat.Beacons.hasChainView()
                 searching = false
             }
         }
@@ -282,6 +289,20 @@ private fun RentSearchScreen(
                 // non-null. Snapshotting is what makes the guard and the use
                 // talk about the same value.
                 val found = results
+                if (unverified && !found.isNullOrEmpty() && stalled == null) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = MaterialTheme.shapes.small,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    ) {
+                        Text(
+                            stringResource(R.string.board_unverified_note),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        )
+                    }
+                }
                 if (found != null && stalled == null && chips.size > 1) {
                     FlowRow(
                         Modifier.fillMaxWidth().padding(bottom = 8.dp),
