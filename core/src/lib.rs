@@ -16,6 +16,7 @@ pub mod escrow;
 pub mod float;
 pub mod commit;
 pub mod negotiate;
+pub mod position;
 pub mod reject;
 pub mod sig;
 pub mod state;

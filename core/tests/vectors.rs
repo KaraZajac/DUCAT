@@ -443,7 +443,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "bond.check", "slash.check",
         "contact.card", "contact.details", "log.head", "log.ring", "stand.shard", "stand.epoch", "message.chain",
         "message.payment", "hail.notice", "rental.listing", "board.sealed",
-        "board.beacon_window", "board.beacon_verdict",
+        "board.beacon_window", "board.beacon_verdict", "position.frame",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -696,6 +696,39 @@ fn contact_vectors_pass() {
                     other => panic!("{name}: unknown verdict {other}"),
                 };
                 assert_eq!(got, want, "{name}");
+            }
+            // §15.12 — one live-position frame, the encrypted value written
+            // to the stream's record. The runner opens the given bytes with
+            // the vector's stream key and record, and checks the fields or the
+            // refusal — the fixed layout and the record-as-AAD binding are what
+            // this pins across implementations.
+            "position.frame" => {
+                let mut sk = [0u8; 32];
+                sk.copy_from_slice(&unhex(c["stream_key_hex"].as_str().unwrap()));
+                let rec = c["record_key"].as_str().unwrap();
+                let got = ducat_core::position::open(&sk, rec, &unhex(c["frame_sealed_hex"].as_str().unwrap()));
+                let ok = c["expect"]["ok"].as_bool().unwrap();
+                match got {
+                    Ok(fr) => {
+                        assert!(ok, "{name}: opened a frame the vector refuses");
+                        assert_eq!(fr.counter, c["expect"]["counter"].as_u64().unwrap(), "{name} counter");
+                        assert_eq!(fr.lat_e7, c["expect"]["lat_e7"].as_i64().unwrap(), "{name} lat");
+                        assert_eq!(fr.lon_e7, c["expect"]["lon_e7"].as_i64().unwrap(), "{name} lon");
+                        assert_eq!(fr.captured, c["expect"]["captured"].as_u64().unwrap(), "{name} captured");
+                        // Heading is present in some cases and absent in others.
+                        match c["expect"]["heading"].as_u64() {
+                            Some(h) => assert_eq!(fr.heading, Some(h as u16), "{name} heading"),
+                            None => assert_eq!(fr.heading, None, "{name} heading absent"),
+                        }
+                    }
+                    Err(e) => {
+                        assert!(!ok, "{name}: refused a frame the vector accepts: {e:?}");
+                        assert_eq!(
+                            format!("{:?}", e.code).to_uppercase(),
+                            c["expect"]["reject"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                }
             }
             "rental.listing" => {
                 let got = RentalNotice::from_value(

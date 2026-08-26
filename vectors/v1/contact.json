@@ -1066,6 +1066,117 @@
     },
     {
       "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f782073686172696e67206d7920706f736974696f6e20666f7220746865207269646518a01a6553f10018b20b18da782f564c44303a4162436445664768496a4b6c4d6e4f705172537455765778597a3031323334353637383961426344654618db58205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"
+      },
+      "kind": "message.payment",
+      "name": "position_ref",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f782073686172696e67206d7920706f736974696f6e20666f7220746865207269646518a01a6553f10018b20b18da782f564c44303a4162436445664768496a4b6c4d6e4f705172537455765778597a3031323334353637383961426344654618db58205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "why": "A reference to a live-position stream after a RideAccept: a DHT record and the key to read it, sealed into the thread once. The stream is a record overwritten in place (a now with no past), so this message only carries the pointer."
+    },
+    {
+      "expect": {
+        "hint": "only a position message carries a stream reference",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "position_ref_on_a_text",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f62686918a01a6553f10018da782f564c44303a4162436445664768496a4b6c4d6e4f705172537455765778597a3031323334353637383961426344654618db58205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "why": "The stream reference is a PositionRef's whole content and nothing else's — on a text message it is a field with no meaning to act on."
+    },
+    {
+      "expect": {
+        "hint": "a position message carries a reference to the stream",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "position_kind_without_a_reference",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f65656d70747918a01a6553f10018b20b18b31b00000004e3b29200",
+      "why": "A PositionRef whose reference is absent hands over nothing."
+    },
+    {
+      "expect": {
+        "hint": "a position reference carries its record and its key together",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "position_ref_without_key",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f782073686172696e67206d7920706f736974696f6e20666f7220746865207269646518a01a6553f10018b20b18da782f564c44303a4162436445664768496a4b6c4d6e4f705172537455765778597a30313233343536373839614263446546",
+      "why": "A record with no key cannot be opened. Both halves of a position reference travel together or not at all (§16.15's rule)."
+    },
+    {
+      "expect": {
+        "hint": "a position reference carries its record and its key together",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "position_ref_without_record",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f782073686172696e67206d7920706f736974696f6e20666f7220746865207269646518a01a6553f10018b20b18db58205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "why": "A key pointing at no record points nowhere."
+    },
+    {
+      "expect": {
+        "captured": 1800000000,
+        "counter": 42,
+        "heading": 270,
+        "lat_e7": 525200000,
+        "lon_e7": 133760000,
+        "ok": true
+      },
+      "frame_sealed_hex": "111111111111111111111111111111111111111111111111e063c71536c0109170686fd27cc613ff8531c4bc9e59633c99d9ede75bf312914c128e8a3a60bdd7c53722b0b5dc7fcf18ee08cae305a253ecfe3f1f9bc8e2792f1b5a7738aa26560982e2e3938dc9e2",
+      "kind": "position.frame",
+      "name": "position_frame",
+      "record_key": "VLD0:positionstreamrecordkeyexample000000000",
+      "stream_key_hex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "why": "One live-position update, sealed XChaCha20-Poly1305 under the stream key with the record key as associated data, padded to a constant length. A now with no past; the receiver drops a non-increasing counter as a replay."
+    },
+    {
+      "expect": {
+        "captured": 1800000000,
+        "counter": 42,
+        "lat_e7": 525200000,
+        "lon_e7": 133760000,
+        "ok": true
+      },
+      "frame_sealed_hex": "111111111111111111111111111111111111111111111111e063c71536c0109170686fd27cc613ff8531c4bc9e59633c6728ede75bf312914c128e8a3a60bdd7c53722b0b5dc7fcf18ee08cae305a253ecfe3f1f9bc8e27931df087f094d89a1cee375afb6f82a1c",
+      "kind": "position.frame",
+      "name": "position_frame_no_heading",
+      "record_key": "VLD0:positionstreamrecordkeyexample000000000",
+      "stream_key_hex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "why": "A frame without a heading is the same length as one with it — every update is identical in size, so the sequence carries only its cadence."
+    },
+    {
+      "expect": {
+        "hint": "did not authenticate",
+        "ok": false,
+        "reject": "BADSIG"
+      },
+      "frame_sealed_hex": "111111111111111111111111111111111111111111111111e063c71536c0109170686fd27cc613ff8531c4bc9e59633c99d9ede75bf312914c128e8a3a60bdd7c53722b0b5dc7fcf18ee08cae305a253ecfe3f1f9bc8e2792f1b5a7738aa26560982e2e3938dc9e2",
+      "kind": "position.frame",
+      "name": "position_frame_wrong_record",
+      "record_key": "VLD0:a-different-record-entirely-00000000000000",
+      "stream_key_hex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "why": "The record key is the AEAD's associated data, so a value lifted from one ride's record cannot authenticate in another's — which is what stops a fresh key from silently linking two rides."
+    },
+    {
+      "expect": {
+        "hint": "fixed length",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "frame_sealed_hex": "111111111111111111111111111111111111111111111111e063c71536c0109170686fd27cc613ff8531c4bc9e59633c99d9ede75bf312914c128e8a3a60bdd7c53722b0b5dc7fcf18ee08cae305a253ecfe3f1f9bc8e2792f1b5a7738aa26560982e2e3",
+      "kind": "position.frame",
+      "name": "position_frame_truncated",
+      "record_key": "VLD0:positionstreamrecordkeyexample000000000",
+      "stream_key_hex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "why": "A sealed frame is a constant length; anything else did not come from this construction."
+    },
+    {
+      "expect": {
         "hint": "attachment fields travel together",
         "ok": false,
         "reject": "MALFORMED"

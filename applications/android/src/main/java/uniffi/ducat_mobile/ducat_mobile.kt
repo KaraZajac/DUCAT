@@ -923,6 +923,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1108,6 +1112,10 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_plan_float(`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_position_open(`streamKey`: RustBuffer.ByValue,`recordKey`: RustBuffer.ByValue,`value`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_position_seal(`streamKey`: RustBuffer.ByValue,`recordKey`: RustBuffer.ByValue,`nonce`: RustBuffer.ByValue,`frame`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_pronoun_options(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_protocol_version(uniffi_out_err: UniffiRustCallStatus, 
@@ -1124,7 +1132,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`beaconHeight`: Long,`beaconHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,`positionRecord`: RustBuffer.ByValue,`positionStreamKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1431,6 +1439,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_persona_public_hex(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_plan_float(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_position_open(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_position_seal(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_pronoun_options(
     ): Short
@@ -1746,6 +1758,12 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_plan_float() != 49046.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_position_open() != 27904.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_position_seal() != 37393.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_pronoun_options() != 20135.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1770,7 +1788,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 60190.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 2433.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 18584.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
@@ -3297,7 +3315,11 @@ data class OpenedMessage (
      */
     var `payload`: kotlin.ByteArray?, 
     var `round`: kotlin.ULong?, 
-    var `ceremonyId`: kotlin.ByteArray?
+    var `ceremonyId`: kotlin.ByteArray?, 
+    /**
+     * §15.12: a live-position stream reference. Present only on kind 11.
+     */
+    var `position`: PositionRefOut?
 ) {
     
     companion object
@@ -3328,6 +3350,7 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalTypePositionRefOut.read(buf),
         )
     }
 
@@ -3350,7 +3373,8 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.allocationSize(value.`etaSecs`) +
             FfiConverterOptionalByteArray.allocationSize(value.`payload`) +
             FfiConverterOptionalULong.allocationSize(value.`round`) +
-            FfiConverterOptionalByteArray.allocationSize(value.`ceremonyId`)
+            FfiConverterOptionalByteArray.allocationSize(value.`ceremonyId`) +
+            FfiConverterOptionalTypePositionRefOut.allocationSize(value.`position`)
     )
 
     override fun write(value: OpenedMessage, buf: ByteBuffer) {
@@ -3373,6 +3397,7 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalByteArray.write(value.`payload`, buf)
             FfiConverterOptionalULong.write(value.`round`, buf)
             FfiConverterOptionalByteArray.write(value.`ceremonyId`, buf)
+            FfiConverterOptionalTypePositionRefOut.write(value.`position`, buf)
     }
 }
 
@@ -3624,6 +3649,91 @@ public object FfiConverterTypePoolHit: FfiConverterRustBuffer<PoolHit> {
             FfiConverterString.write(value.`txHashHex`, buf)
             FfiConverterULong.write(value.`amountPxmr`, buf)
             FfiConverterUInt.write(value.`minor`, buf)
+    }
+}
+
+
+
+/**
+ * One live-position update as it crosses the bridge (§15.12).
+ */
+data class PositionFrameIo (
+    var `counter`: kotlin.ULong, 
+    var `latE7`: kotlin.Long, 
+    var `lonE7`: kotlin.Long, 
+    /**
+     * Whole degrees 0..=359, or absent.
+     */
+    var `heading`: kotlin.UShort?, 
+    var `captured`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePositionFrameIo: FfiConverterRustBuffer<PositionFrameIo> {
+    override fun read(buf: ByteBuffer): PositionFrameIo {
+        return PositionFrameIo(
+            FfiConverterULong.read(buf),
+            FfiConverterLong.read(buf),
+            FfiConverterLong.read(buf),
+            FfiConverterOptionalUShort.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PositionFrameIo) = (
+            FfiConverterULong.allocationSize(value.`counter`) +
+            FfiConverterLong.allocationSize(value.`latE7`) +
+            FfiConverterLong.allocationSize(value.`lonE7`) +
+            FfiConverterOptionalUShort.allocationSize(value.`heading`) +
+            FfiConverterULong.allocationSize(value.`captured`)
+    )
+
+    override fun write(value: PositionFrameIo, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`counter`, buf)
+            FfiConverterLong.write(value.`latE7`, buf)
+            FfiConverterLong.write(value.`lonE7`, buf)
+            FfiConverterOptionalUShort.write(value.`heading`, buf)
+            FfiConverterULong.write(value.`captured`, buf)
+    }
+}
+
+
+
+/**
+ * A live-position stream reference as it crosses the bridge (§15.12).
+ */
+data class PositionRefOut (
+    var `recordKey`: kotlin.String, 
+    var `streamKey`: kotlin.ByteArray
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePositionRefOut: FfiConverterRustBuffer<PositionRefOut> {
+    override fun read(buf: ByteBuffer): PositionRefOut {
+        return PositionRefOut(
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PositionRefOut) = (
+            FfiConverterString.allocationSize(value.`recordKey`) +
+            FfiConverterByteArray.allocationSize(value.`streamKey`)
+    )
+
+    override fun write(value: PositionRefOut, buf: ByteBuffer) {
+            FfiConverterString.write(value.`recordKey`, buf)
+            FfiConverterByteArray.write(value.`streamKey`, buf)
     }
 }
 
@@ -5232,6 +5342,38 @@ public object FfiConverterTypeVerification: FfiConverterRustBuffer<Verification>
 /**
  * @suppress
  */
+public object FfiConverterOptionalUShort: FfiConverterRustBuffer<kotlin.UShort?> {
+    override fun read(buf: ByteBuffer): kotlin.UShort? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterUShort.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.UShort?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterUShort.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.UShort?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterUShort.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalUInt: FfiConverterRustBuffer<kotlin.UInt?> {
     override fun read(buf: ByteBuffer): kotlin.UInt? {
         if (buf.get().toInt() == 0) {
@@ -5478,6 +5620,38 @@ public object FfiConverterOptionalTypeInboundCall: FfiConverterRustBuffer<Inboun
         } else {
             buf.put(1)
             FfiConverterTypeInboundCall.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypePositionRefOut: FfiConverterRustBuffer<PositionRefOut?> {
+    override fun read(buf: ByteBuffer): PositionRefOut? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypePositionRefOut.read(buf)
+    }
+
+    override fun allocationSize(value: PositionRefOut?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypePositionRefOut.allocationSize(value)
+        }
+    }
+
+    override fun write(value: PositionRefOut?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypePositionRefOut.write(value, buf)
         }
     }
 }
@@ -7323,6 +7497,38 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     
 
         /**
+         * Open a value read from a live-position record (§15.12). The record key MUST
+         * be the one the value was written under — it is the associated data — so a
+         * mismatch fails to authenticate rather than returning the wrong ride's
+         * position. The caller enforces counter monotonicity across calls.
+         */
+    @Throws(ContactException::class) fun `positionOpen`(`streamKey`: kotlin.ByteArray, `recordKey`: kotlin.String, `value`: kotlin.ByteArray): PositionFrameIo {
+            return FfiConverterTypePositionFrameIo.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_position_open(
+        FfiConverterByteArray.lower(`streamKey`),FfiConverterString.lower(`recordKey`),FfiConverterByteArray.lower(`value`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Seal one position frame into the value written to the stream's record
+         * subkey (§15.12). `nonce` is fresh per write, drawn by the caller; the
+         * record key is bound in as associated data, so the value cannot be lifted
+         * into another record. Returns a constant length whatever the fields.
+         */
+    @Throws(ContactException::class) fun `positionSeal`(`streamKey`: kotlin.ByteArray, `recordKey`: kotlin.String, `nonce`: kotlin.ByteArray, `frame`: PositionFrameIo): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_position_seal(
+        FfiConverterByteArray.lower(`streamKey`),FfiConverterString.lower(`recordKey`),FfiConverterByteArray.lower(`nonce`),FfiConverterTypePositionFrameIo.lower(`frame`),_status)
+}
+    )
+    }
+    
+
+        /**
          * The labels, in the order a picker should show them. Kept here so the app and
          * the protocol cannot drift on what a code means.
          */ fun `pronounOptions`(): List<kotlin.String> {
@@ -7466,11 +7672,11 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
         /**
          * Seal one message in a thread.
          */
-    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?): SealedOut {
+    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?, `positionRecord`: kotlin.String?, `positionStreamKey`: kotlin.ByteArray?): SealedOut {
             return FfiConverterTypeSealedOut.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
-        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),_status)
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),FfiConverterOptionalString.lower(`positionRecord`),FfiConverterOptionalByteArray.lower(`positionStreamKey`),_status)
 }
     )
     }

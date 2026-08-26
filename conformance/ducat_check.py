@@ -953,6 +953,8 @@ MSG_ETA = 213
 MSG_PAYLOAD, MSG_ROUND, MSG_CEREMONY = 214, 215, 216
 MSG_ATT_RECORD, MSG_ATT_KEY, MSG_ATT_NONCE = 194, 195, 196
 MSG_ATT_LEN, MSG_ATT_HASH, MSG_ATT_MIME, MSG_ATT_NAME = 197, 198, 199, 200
+# §15.12 — the live-position reference (kind 11): record + stream key.
+MSG_POS_RECORD, MSG_POS_STREAM = 218, 219
 HEAD_BUNDLE = 177
 HEAD_READ, HEAD_RING = 201, 202
 # HAIL_NOTICE (§16.17) — the one object on a public surface.
@@ -1516,6 +1518,76 @@ def beacon_verdict(height, beacon_hash, tip_height, known_hash):
     return "show" if known_hash == beacon_hash else "refuse"
 
 
+def open_position_frame(stream_key, record_key, value):
+    """§15.12 — one live-position update, opened.
+
+    A fixed-length XChaCha20-Poly1305 value: 24-byte nonce, then the sealed
+    64-byte frame with its 16-byte tag. The record key is the associated data,
+    so a value lifted from another ride's record fails to authenticate rather
+    than returning someone else's position. Counter monotonicity is the
+    reader's, not the frame's — this parses one frame in isolation.
+    """
+    NONCE, FRAME, TAG = 24, 64, 16
+    if len(value) != NONCE + FRAME + TAG:
+        raise Reject("Malformed", "a sealed position frame is a fixed length")
+    nonce, ct = value[:NONCE], value[NONCE:]
+    from Crypto.Cipher import ChaCha20_Poly1305
+    cipher = ChaCha20_Poly1305.new(key=stream_key, nonce=nonce)
+    cipher.update(record_key.encode())
+    try:
+        plain = cipher.decrypt_and_verify(ct[:-TAG], ct[-TAG:])
+    except ValueError:
+        raise Reject("BadSig", "position frame did not authenticate")
+    counter = int.from_bytes(plain[0:8], "big")
+    lat = int.from_bytes(plain[8:16], "big", signed=True)
+    lon = int.from_bytes(plain[16:24], "big", signed=True)
+    heading_raw = int.from_bytes(plain[24:26], "big")
+    captured = int.from_bytes(plain[26:34], "big")
+    if any(x != 0 for x in plain[34:]):
+        raise Reject("Malformed", "a position frame's padding must be zero")
+    if not (-900_000_000 <= lat <= 900_000_000):
+        raise Reject("Malformed", "latitude out of range")
+    if not (-1_800_000_000 <= lon <= 1_800_000_000):
+        raise Reject("Malformed", "longitude out of range")
+    if heading_raw == 0xFFFF:
+        heading = None
+    elif heading_raw <= 359:
+        heading = heading_raw
+    else:
+        raise Reject("Malformed", "heading is 0..=359 or absent")
+    return {"counter": counter, "lat_e7": lat, "lon_e7": lon,
+            "heading": heading, "captured": captured}
+
+
+def run_position_frame(cases, r):
+    for c in cases:
+        sk = bytes.fromhex(c["stream_key_hex"])
+        rec = c["record_key"]
+        try:
+            got = open_position_frame(sk, rec, unhex(c["frame_sealed_hex"]))
+        except Reject as e:
+            if c["expect"]["ok"]:
+                r.bad("contact", c["name"], c.get("why", ""),
+                      f"refused a frame the vector accepts: {e.name}")
+            elif e.name.upper() != c["expect"]["reject"].upper():
+                r.bad("contact", c["name"], c.get("why", ""),
+                      f"refused with {e.name}, vector says {c['expect']['reject']}")
+            else:
+                r.passed += 1
+            continue
+        if not c["expect"]["ok"]:
+            r.bad("contact", c["name"], c.get("why", ""), "opened a frame the vector refuses")
+            continue
+        exp = c["expect"]
+        want_heading = exp.get("heading")
+        if (got["counter"] != exp["counter"] or got["lat_e7"] != exp["lat_e7"]
+                or got["lon_e7"] != exp["lon_e7"] or got["captured"] != exp["captured"]
+                or got["heading"] != want_heading):
+            r.bad("contact", c["name"], c.get("why", ""), f"decoded {got}")
+        else:
+            r.passed += 1
+
+
 def run_beacon_verdict(cases, r):
     for c in cases:
         got = beacon_verdict(
@@ -1615,7 +1687,7 @@ def parse_message(buf):
             raise Reject("Malformed", "kind is not an integer")
         if kind == 0:
             raise Reject("Malformed", "text is encoded by omitting the kind")
-        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10):
+        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11):
             raise Reject("Malformed", "unknown message kind")
     else:
         kind = 0
@@ -1688,6 +1760,19 @@ def parse_message(buf):
     else:
         raise Reject("Malformed",
                      "an attachment carries record, key, nonce, length, hash and mime together")
+
+    # §15.12 — the live-position reference: both fields together or neither.
+    pos_record = _take_text(b, MSG_POS_RECORD, MAX_RECORD_KEY_CHARS, "record", False)
+    pos_stream = b.pop(MSG_POS_STREAM, (None, None))[1]
+    if pos_record is None and pos_stream is None:
+        out["position"] = None
+    elif pos_record is not None and pos_stream is not None:
+        if len(pos_stream) != 32:
+            raise Reject("Malformed", "a stream key is 32 bytes")
+        out["position"] = {"record": pos_record, "stream": pos_stream}
+    else:
+        raise Reject("Malformed",
+                     "a position reference carries its record and its key together")
     _finish(b)
 
     # A payment with no amount is a screen with a blank where the number goes;
@@ -1730,6 +1815,11 @@ def parse_message(buf):
         raise Reject("Malformed", "only a reaction, a retract or an accept targets another message")
     if out["attachment"] is not None and kind != 0:
         raise Reject("Malformed", "only a text message carries an attachment")
+    # A stream reference is a PositionRef's whole content and nothing else's.
+    if kind == 11 and out["position"] is None:
+        raise Reject("Malformed", "a position message carries a reference to the stream")
+    if kind != 11 and out["position"] is not None:
+        raise Reject("Malformed", "only a position message carries a stream reference")
     if kind in (0, 5, 6, 7, 8, 9, 10) and (out["items"] or out["tax"] is not None):
         raise Reject("Malformed", "this message kind has no bill to itemise")
     # An eta is a ride offer's courtesy figure, bounded by honesty: a day.
@@ -2007,6 +2097,10 @@ def run_message_payment(cases, r):
                 fields.append((MSG_ATT_MIME, ("text", a["mime"])))
                 if a["name"] is not None:
                     fields.append((MSG_ATT_NAME, ("text", a["name"])))
+            pos = m.get("position")
+            if pos is not None:
+                fields.append((MSG_POS_RECORD, ("text", pos["record"])))
+                fields.append((MSG_POS_STREAM, ("bytes", pos["stream"])))
             return encode(("map", fields))
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
@@ -2047,6 +2141,7 @@ BY_KIND = {
     "board.sealed": run_board_sealed,
     "board.beacon_window": run_beacon_window,
     "board.beacon_verdict": run_beacon_verdict,
+    "position.frame": run_position_frame,
     "message.payment": run_message_payment,
     "message.chain": run_message_chain,
     "escrow.ceremony": run_escrow_ceremony,

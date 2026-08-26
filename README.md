@@ -238,7 +238,7 @@ to a banknote.
 ```
 ducat-protocol.md   the spec — draft 0.88, changelog first
 core/               reference implementation (Rust)
-vectors/            305 conformance cases + schema — the published artifact
+vectors/            314 conformance cases + schema — the published artifact
 conformance/        four checkers: schema, second implementation, spec audit,
                     declared dependencies
 harness/            end-to-end over real Veilid routes and real settlement

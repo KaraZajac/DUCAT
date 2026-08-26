@@ -954,6 +954,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "board.beacon_window")
             } else if obj.contains_key("verdict_tip") {
                 ("contact", "board.beacon_verdict")
+            } else if obj.contains_key("frame_sealed_hex") {
+                ("contact", "position.frame")
             } else if obj.contains_key("messages_hex") {
                 ("contact", "message.chain")
             } else if obj.contains_key("details_hex") {
@@ -1465,9 +1467,9 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None };
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
         v.push(json!({
@@ -1512,7 +1514,7 @@ fn contact_cases() -> Vec<J> {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1_700_000_000,
         kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
-        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None,
+        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None,
     };
     money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
     money("payment_sent",
@@ -1761,6 +1763,107 @@ fn contact_cases() -> Vec<J> {
         &Message { kind: MessageKind::CeremonyAbort, amount_pxmr: None,
                    payload: Some(vec![0xd1; 8]), ceremony_id: Some([0x33; 32]), ..base_pay.clone() },
         Some((RejectCode::Malformed, "an abort withdraws a ceremony; it carries no round payload")));
+
+    // §15.12 — the live-position reference (kind 11). The message only hands
+    // over the pointer; the stream itself is board.beacon's sibling below,
+    // pinned as its own frame kind. Both fields together or neither.
+    let pos_ref = Message {
+        kind: MessageKind::PositionRef, amount_pxmr: None,
+        body: "sharing my position for the ride".into(),
+        position: Some(ducat_core::contact::PositionRef {
+            record_key: "VLD0:AbCdEfGhIjKlMnOpQrStUvWxYz0123456789aBcDeF".into(),
+            stream_key: [0x5au8; 32],
+        }),
+        ..base_pay.clone()
+    };
+    money("position_ref",
+        "A reference to a live-position stream after a RideAccept: a DHT record and the key to read it, sealed into the thread once. The stream is a record overwritten in place (a now with no past), so this message only carries the pointer.",
+        &pos_ref, None);
+    money("position_ref_on_a_text",
+        "The stream reference is a PositionRef's whole content and nothing else's — on a text message it is a field with no meaning to act on.",
+        &Message { kind: MessageKind::Text, body: "hi".into(), ..pos_ref.clone() },
+        Some((RejectCode::Malformed, "only a position message carries a stream reference")));
+    money("position_kind_without_a_reference",
+        "A PositionRef whose reference is absent hands over nothing.",
+        &Message { kind: MessageKind::PositionRef, position: None,
+                   body: "empty".into(), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "a position message carries a reference to the stream")));
+    // The half-reference cannot be built from the struct (both fields or none),
+    // so it is made by deleting one from the encoding — same trick as the
+    // half-attachment below.
+    {
+        let mut v2 = pos_ref.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = v2 {
+            m.remove(&ducat_core::wire::f::MSG_POS_STREAM);
+        }
+        v.push(json!({ "name": "position_ref_without_key",
+            "why": "A record with no key cannot be opened. Both halves of a position reference travel together or not at all (§16.15's rule).",
+            "payment_hex": hex(&v2.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a position reference carries its record and its key together" } }));
+        let mut v3 = pos_ref.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = v3 {
+            m.remove(&ducat_core::wire::f::MSG_POS_RECORD);
+        }
+        v.push(json!({ "name": "position_ref_without_record",
+            "why": "A key pointing at no record points nowhere.",
+            "payment_hex": hex(&v3.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a position reference carries its record and its key together" } }));
+    }
+
+    // The stream itself (§15.12): the encrypted value written to the record's
+    // subkey each cadence. A fixed-length primitive, not CBOR — so the
+    // ciphertext sequence leaks its heartbeat and nothing else. Deterministic
+    // in every part (fixed key, record, nonce, frame), which is what lets it
+    // be a vector at all.
+    {
+        use ducat_core::position::{seal, PositionFrame};
+        let stream_key = [0x5au8; 32];
+        let record = "VLD0:positionstreamrecordkeyexample000000000";
+        let nonce = [0x11u8; ducat_core::position::NONCE_LEN];
+        let frame = PositionFrame {
+            counter: 42, lat_e7: 525_200_000, lon_e7: 133_760_000,
+            heading: Some(270), captured: 1_800_000_000,
+        };
+        let sealed = seal(&stream_key, record, &nonce, &frame);
+        let stream_key_hex: String = stream_key.iter().map(|b| format!("{b:02x}")).collect();
+        v.push(json!({ "name": "position_frame",
+            "why": "One live-position update, sealed XChaCha20-Poly1305 under the stream key with the record key as associated data, padded to a constant length. A now with no past; the receiver drops a non-increasing counter as a replay.",
+            "frame_sealed_hex": hex(&sealed),
+            "stream_key_hex": stream_key_hex,
+            "record_key": record,
+            "expect": { "ok": true, "counter": 42, "lat_e7": 525_200_000,
+                        "lon_e7": 133_760_000, "heading": 270, "captured": 1_800_000_000i64 } }));
+
+        // No heading: the same length on the wire (the whole point of the pad).
+        let mut noh = frame;
+        noh.heading = None;
+        let sealed_noh = seal(&stream_key, record, &nonce, &noh);
+        v.push(json!({ "name": "position_frame_no_heading",
+            "why": "A frame without a heading is the same length as one with it — every update is identical in size, so the sequence carries only its cadence.",
+            "frame_sealed_hex": hex(&sealed_noh),
+            "stream_key_hex": stream_key_hex,
+            "record_key": record,
+            "expect": { "ok": true, "counter": 42, "lat_e7": 525_200_000,
+                        "lon_e7": 133_760_000, "captured": 1_800_000_000i64 } }));
+
+        // Lifted into another record: the AAD no longer matches, so it fails to
+        // authenticate rather than returning a position from the wrong ride.
+        v.push(json!({ "name": "position_frame_wrong_record",
+            "why": "The record key is the AEAD's associated data, so a value lifted from one ride's record cannot authenticate in another's — which is what stops a fresh key from silently linking two rides.",
+            "frame_sealed_hex": hex(&sealed),
+            "stream_key_hex": stream_key_hex,
+            "record_key": "VLD0:a-different-record-entirely-00000000000000",
+            "expect": { "ok": false, "reject": "BADSIG", "hint": "did not authenticate" } }));
+
+        // Truncated: a sealed frame is a fixed length; a short one is refused
+        // before the AEAD, so a reader never feeds a runt to decrypt.
+        v.push(json!({ "name": "position_frame_truncated",
+            "why": "A sealed frame is a constant length; anything else did not come from this construction.",
+            "frame_sealed_hex": hex(&sealed[..sealed.len() - 4]),
+            "stream_key_hex": stream_key_hex,
+            "record_key": record,
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "fixed length" } }));
+    }
 
 
     // Handcrafted: the struct cannot express a half-attachment, which is the

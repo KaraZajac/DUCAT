@@ -207,6 +207,15 @@ pub mod f {
     /// *other* side reveals in reply — see ContactDetails::purpose.
     pub const DET_PURPOSE: u64 = 217;
 
+    // §15.12's live position after the accept: a POSITION_REF (kind 11)
+    // carries a reference to a DHT record and the key to read it. Both
+    // travel together or not at all — a reference you cannot open, or a key
+    // pointing at nothing, is a field with no meaning.
+    /// The record the position stream is written to, overwritten in place.
+    pub const MSG_POS_RECORD: u64 = 218;
+    /// A fresh 32-byte key for that stream, one per ride, never reused.
+    pub const MSG_POS_STREAM: u64 = 219;
+
     // RENTAL_NOTICE (§16.18) — a listing on a public board. The second
     // object that lives in the open, and the one that stays there for days
     // rather than minutes, so what it may carry is drawn tighter than a

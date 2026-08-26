@@ -467,6 +467,67 @@ pub struct AttachmentRef {
     pub name: Option<String>,
 }
 
+/// One live-position update as it crosses the bridge (§15.12).
+#[derive(uniffi::Record)]
+pub struct PositionFrameIo {
+    pub counter: u64,
+    pub lat_e7: i64,
+    pub lon_e7: i64,
+    /// Whole degrees 0..=359, or absent.
+    pub heading: Option<u16>,
+    pub captured: u64,
+}
+
+/// Seal one position frame into the value written to the stream's record
+/// subkey (§15.12). `nonce` is fresh per write, drawn by the caller; the
+/// record key is bound in as associated data, so the value cannot be lifted
+/// into another record. Returns a constant length whatever the fields.
+#[uniffi::export]
+pub fn position_seal(
+    stream_key: Vec<u8>,
+    record_key: String,
+    nonce: Vec<u8>,
+    frame: PositionFrameIo,
+) -> Result<Vec<u8>, ContactError> {
+    let sk: [u8; 32] = stream_key
+        .try_into()
+        .map_err(|_| ContactError::Refused("a stream key is 32 bytes".into()))?;
+    let n: [u8; ducat_core::position::NONCE_LEN] = nonce
+        .try_into()
+        .map_err(|_| ContactError::Refused("a position nonce is 24 bytes".into()))?;
+    let f = ducat_core::position::PositionFrame {
+        counter: frame.counter,
+        lat_e7: frame.lat_e7,
+        lon_e7: frame.lon_e7,
+        heading: frame.heading,
+        captured: frame.captured,
+    };
+    Ok(ducat_core::position::seal(&sk, &record_key, &n, &f))
+}
+
+/// Open a value read from a live-position record (§15.12). The record key MUST
+/// be the one the value was written under — it is the associated data — so a
+/// mismatch fails to authenticate rather than returning the wrong ride's
+/// position. The caller enforces counter monotonicity across calls.
+#[uniffi::export]
+pub fn position_open(
+    stream_key: Vec<u8>,
+    record_key: String,
+    value: Vec<u8>,
+) -> Result<PositionFrameIo, ContactError> {
+    let sk: [u8; 32] = stream_key
+        .try_into()
+        .map_err(|_| ContactError::Refused("a stream key is 32 bytes".into()))?;
+    let f = ducat_core::position::open(&sk, &record_key, &value).map_err(refuse)?;
+    Ok(PositionFrameIo {
+        counter: f.counter,
+        lat_e7: f.lat_e7,
+        lon_e7: f.lon_e7,
+        heading: f.heading,
+        captured: f.captured,
+    })
+}
+
 /// Seal attachment bytes; returns the ciphertext to park in a record.
 /// The key and nonce are the caller's to generate fresh — never reuse either.
 #[uniffi::export]
@@ -523,6 +584,11 @@ pub fn seal_message(
     payload: Option<Vec<u8>>,
     round: Option<u64>,
     ceremony_id: Option<Vec<u8>>,
+    // §15.12: a live-position stream reference on a kind-11 message. Both or
+    // neither — core refuses a half-reference, and a reference on any other
+    // kind.
+    position_record: Option<String>,
+    position_stream_key: Option<Vec<u8>>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -539,6 +605,22 @@ pub fn seal_message(
     let prev: [u8; 32] = prev_link
         .try_into()
         .map_err(|_| ContactError::Refused("previous link is not 32 bytes".into()))?;
+    // Both or neither, checked before we build: a lone record or a lone key is
+    // a caller bug, refused here rather than shipped as a half-reference.
+    let position = match (position_record, position_stream_key) {
+        (Some(record_key), Some(k)) => {
+            let stream_key: [u8; 32] = k.try_into().map_err(|_| {
+                ContactError::Refused("a position stream key is 32 bytes".into())
+            })?;
+            Some(ducat_core::contact::PositionRef { record_key, stream_key })
+        }
+        (None, None) => None,
+        _ => {
+            return Err(ContactError::Refused(
+                "a position reference carries its record and its key together".into(),
+            ))
+        }
+    };
     let msg = Message {
         version: 1, suite: 1, seq, prev, body, timestamp: now(),
         kind: match kind {
@@ -552,6 +634,7 @@ pub fn seal_message(
             8 => MessageKind::DkgRound,
             9 => MessageKind::FrostRound,
             10 => MessageKind::CeremonyAbort,
+            11 => MessageKind::PositionRef,
             _ => MessageKind::Text,
         },
         amount_pxmr,
@@ -581,6 +664,7 @@ pub fn seal_message(
             mime: a.mime,
             name: a.name,
         }),
+        position,
     };
     // A message this encoder produces must be one its own decoder accepts —
     // otherwise the malformation ships sealed, and it is the *recipient's*
@@ -713,6 +797,15 @@ pub struct OpenedMessage {
     pub payload: Option<Vec<u8>>,
     pub round: Option<u64>,
     pub ceremony_id: Option<Vec<u8>>,
+    /// §15.12: a live-position stream reference. Present only on kind 11.
+    pub position: Option<PositionRefOut>,
+}
+
+/// A live-position stream reference as it crosses the bridge (§15.12).
+#[derive(uniffi::Record, Clone)]
+pub struct PositionRefOut {
+    pub record_key: String,
+    pub stream_key: Vec<u8>,
 }
 
 /// Open an inbound sealed message and check it follows the thread.
@@ -799,6 +892,10 @@ pub fn open_message(
             ct_hash: a.ct_hash.to_vec(),
             mime: a.mime.clone(),
             name: a.name.clone(),
+        }),
+        position: msg.position.as_ref().map(|p| PositionRefOut {
+            record_key: p.record_key.clone(),
+            stream_key: p.stream_key.to_vec(),
         }),
     })
 }

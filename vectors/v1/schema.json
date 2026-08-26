@@ -197,7 +197,8 @@
             "rental.listing",
             "board.sealed",
             "board.beacon_window",
-            "board.beacon_verdict"
+            "board.beacon_verdict",
+            "position.frame"
           ]
         },
         "name": {

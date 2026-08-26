@@ -678,6 +678,12 @@ pub enum MessageKind {
     /// happens" is never safe (§9.3.4), so an aborted build says so rather
     /// than leaving the other side waiting for a round that never comes.
     CeremonyAbort = 10,
+    /// A reference to a live-position stream (§15.12): a DHT record and the
+    /// key to read it, sealed into the thread once after a `RideAccept`. The
+    /// stream itself is not messages — it is one record overwritten in place,
+    /// a *now* with no past — so this message only hands over the pointer.
+    /// MUST NOT be sent before a `RideAccept` exists in the thread.
+    PositionRef = 11,
 }
 
 impl MessageKind {
@@ -694,6 +700,7 @@ impl MessageKind {
             8 => MessageKind::DkgRound,
             9 => MessageKind::FrostRound,
             10 => MessageKind::CeremonyAbort,
+            11 => MessageKind::PositionRef,
             _ => return None,
         })
     }
@@ -814,6 +821,27 @@ pub struct Message {
     /// the network is noise to everyone but the thread. The message stays
     /// small; the ring stays a ring.
     pub attachment: Option<Attachment>,
+    /// A live-position stream, by reference (§15.12). Present only on a
+    /// `PositionRef`.
+    pub position: Option<PositionRef>,
+}
+
+/// The pointer to a live-position stream (§15.12).
+///
+/// Like an [`Attachment`], the payload lives in its own DHT record and the
+/// key to read it travels inside the sealed message — so the record on the
+/// network is noise to anyone who was not a party. Unlike an attachment, the
+/// record is a *single subkey overwritten in place*: the stream has a now and
+/// no past by construction, which is the whole point (a chat history that
+/// doubled as a movement log would be §5.2.3's surveillance database rebuilt
+/// inside the E2EE).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PositionRef {
+    /// The record whose subkey 0 the sender overwrites each cadence.
+    pub record_key: String,
+    /// XChaCha20-Poly1305 key for the stream, one per ride, never reused —
+    /// reuse would make the key a long-lived identifier linking rides.
+    pub stream_key: [u8; 32],
 }
 
 /// A sealed blob parked in a DHT record (§16.15).
@@ -901,6 +929,10 @@ impl Message {
             if let Some(n) = &a.name {
                 m.insert(f::MSG_ATT_NAME, Value::Text(n.clone()));
             }
+        }
+        if let Some(p) = &self.position {
+            m.insert(f::MSG_POS_RECORD, Value::Text(p.record_key.clone()));
+            m.insert(f::MSG_POS_STREAM, Value::Bytes(p.stream_key.to_vec()));
         }
         Value::Map(m)
     }
@@ -1022,6 +1054,25 @@ impl Message {
                         return Err(Reject::with_detail(
                             RejectCode::Malformed,
                             "an attachment carries record, key, nonce, length, hash and mime together",
+                        ))
+                    }
+                }
+            },
+            position: {
+                let record_key = r.opt_text(f::MSG_POS_RECORD, MAX_RECORD_KEY_CHARS)?;
+                let stream_key = r.opt_bytes(f::MSG_POS_STREAM, Some(32))?;
+                match (record_key, stream_key) {
+                    (None, None) => None,
+                    (Some(record_key), Some(stream_key)) => Some(PositionRef {
+                        record_key,
+                        stream_key: stream_key.try_into().unwrap(),
+                    }),
+                    // Both or neither, §16.15's rule: a reference with no key
+                    // cannot be opened, a key with no record points nowhere.
+                    _ => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a position reference carries its record and its key together",
                         ))
                     }
                 }
@@ -1167,6 +1218,26 @@ impl Message {
                     "an eta longer than a day is not an eta",
                 ));
             }
+        }
+        // A position reference is a PositionRef's whole content and nothing
+        // else's, and a PositionRef with no reference is an empty gesture.
+        // The gate that it MUST NOT precede a RideAccept is the sender's and
+        // the reader's (they hold the thread; this decoder sees one message),
+        // exactly as the "no offer before a claim" rule lives above the wire.
+        match (out.kind, out.position.is_some()) {
+            (MessageKind::PositionRef, false) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a position message carries a reference to the stream",
+                ))
+            }
+            (k, true) if k != MessageKind::PositionRef => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "only a position message carries a stream reference",
+                ))
+            }
+            _ => {}
         }
         // §17.9 ceremony fields ride only on ceremony kinds. A payload or a
         // ceremony_id anywhere else is a field with no meaning to act on, and
@@ -2217,5 +2288,69 @@ mod attachment_tests {
         assert!(attachment_open(&key, &nonce, &bad).is_err());
         let wrong = [8u8; 32];
         assert!(attachment_open(&wrong, &nonce, &ct).is_err());
+    }
+}
+
+#[cfg(test)]
+mod position_ref_tests {
+    use super::*;
+
+    fn base() -> Message {
+        Message {
+            version: 1, suite: 1, seq: 3, prev: [0u8; 32],
+            body: "sharing my position".into(), timestamp: 1_800_000_000,
+            kind: MessageKind::PositionRef,
+            amount_pxmr: None, txid: None, payto: None, items: vec![], tax_pxmr: None,
+            re_seq: None, re_own: false, eta_secs: None,
+            payload: None, round: None, ceremony_id: None, attachment: None,
+            position: Some(PositionRef {
+                record_key: "VLD0:positionrecord".into(),
+                stream_key: [0x5au8; 32],
+            }),
+        }
+    }
+
+    #[test]
+    fn a_position_ref_round_trips() {
+        let m = base();
+        let got = Message::from_value(m.to_value()).expect("opens");
+        assert_eq!(got.position, m.position);
+        assert_eq!(got.kind, MessageKind::PositionRef);
+    }
+
+    #[test]
+    fn a_position_kind_without_a_reference_is_refused() {
+        let mut m = base();
+        m.position = None;
+        assert!(Message::from_value(m.to_value()).is_err());
+    }
+
+    #[test]
+    fn a_reference_on_another_kind_is_refused() {
+        let mut m = base();
+        m.kind = MessageKind::Text;
+        // A text body is required for a Text kind; give it one.
+        assert!(Message::from_value(m.to_value()).is_err());
+    }
+
+    #[test]
+    fn a_reference_needs_both_halves() {
+        // Encode by hand: a record with no key, then a key with no record.
+        let m = base();
+        let Value::Map(mut map) = m.to_value() else { unreachable!() };
+        map.remove(&f::MSG_POS_STREAM);
+        assert!(Message::from_value(Value::Map(map)).is_err());
+
+        let Value::Map(mut map) = m.to_value() else { unreachable!() };
+        map.remove(&f::MSG_POS_RECORD);
+        assert!(Message::from_value(Value::Map(map)).is_err());
+    }
+
+    #[test]
+    fn a_stream_key_is_thirty_two_bytes() {
+        let m = base();
+        let Value::Map(mut map) = m.to_value() else { unreachable!() };
+        map.insert(f::MSG_POS_STREAM, Value::Bytes(vec![0x5au8; 31]));
+        assert!(Message::from_value(Value::Map(map)).is_err());
     }
 }

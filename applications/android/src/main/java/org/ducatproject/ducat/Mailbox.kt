@@ -498,6 +498,10 @@ object Mailbox {
         payload: ByteArray? = null,
         round: Long? = null,
         ceremonyId: ByteArray? = null,
+        /** §15.12: a live-position stream reference on a kind-11 message.
+         *  Both or neither — the bridge refuses a half. */
+        positionRecord: String? = null,
+        positionStreamKey: ByteArray? = null,
     ): Contact {
         val store = ContactStore(context)
         // **The caller's copy of this contact is a snapshot, and counters move.**
@@ -554,6 +558,7 @@ object Mailbox {
             reSeq?.toULong(), reOwn, attachment,
             etaSecs?.toULong(),
             payload, round?.toULong(), ceremonyId,
+            positionRecord, positionStreamKey,
         )
         // Everything local lands before anything remote. The failure orders
         // are not symmetric: a published slot and head with the counter lost
