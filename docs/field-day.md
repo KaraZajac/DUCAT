@@ -96,6 +96,11 @@ Real GPS at last (the emulator's `geo fix` lied to us; a real phone won't).
    read the job card (pickup distance, trip, payout), claim it.
 3. Rider sees the acceptance with the driver's face/car/plate; driver
    drives (walk it), meter runs, geofenced bill fires on arrival.
+   **Tap "Share my position" on both** once the ride is accepted — it
+   only appears after the accept, by design, and it runs while the chat
+   screen is open. Leave one phone's screen on and pocket the other; the
+   watching side should say "last seen N seconds ago" rather than draw a
+   dot that keeps moving.
 4. Pay with tip. Receipt lands on both. Record every message that needed
    a retry — on emulators the boards were slow; real-network numbers are
    wanted here.
@@ -115,8 +120,12 @@ the phone and check back; pressing the banner's retry only hurries it.
 
 Done end to end on 2026-08-25 between two emulators on the live Veilid
 network and live stagenet — hail, offer, accept, 2-of-2 built, both stakes
-and the fare in, complete, release (`112e0983`). So this is no longer the
-first live pass; what it is here is the same flow on two radios, two
+and the fare in, complete, release (`112e0983`), and again on 2026-08-26
+on the 0.89 build with live position riding along (`3382f6e3`). That
+second run also proved the maturity retry **pocketed**: Complete refused
+with "needs 5 more confirmations", both phones went to the home screen,
+and the release proposed itself ten minutes later with nobody looking.
+So this is no longer the first live pass; what it is here is the same flow on two radios, two
 batteries and two real clocks, which is the part an emulator cannot answer.
 
 Turn the Escrow-arbiter switch OFF on both phones' contact profiles first.
@@ -200,9 +209,16 @@ Screen-on time will dominate — note it so the number is honest.
 
 ## What the field day unblocks
 
-- **Live position after the accept** (§15.12): building now, ahead of the
-  day — so Pass 2's ride can carry it and real GPS judges it, instead of
-  the build waiting on the day and the day waiting on the build.
+- **A position that actually moves** (§15.12). The stream itself is built
+  and proven between two emulators on 2026-08-26 — offered, read,
+  rendered, aged honestly when the sender left the screen, released when
+  the sender stopped, and swept off both phones by the poller when the
+  ride settled. What no emulator can judge is a *moving* dot: `adb emu
+  geo fix` reports OK and changes nothing, so both phones shared one
+  frozen fix all afternoon. Share in both directions during Pass 2 and
+  watch whether the other phone's dot tracks the walk, whether four
+  seconds feels like the right cadence on a real radio, and how long a
+  fix takes indoors.
 - True §8.7.2 latency figures from a handset.
 - The README's "what is not proven" paragraph loses four entries.
 
