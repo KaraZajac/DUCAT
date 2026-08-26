@@ -114,6 +114,12 @@ fun moneyFailure(
         context.getString(org.ducatproject.ducat.R.string.pay_node_unreachable)
     t is org.ducatproject.ducat.Ceremony.AlreadyPaid ->
         context.getString(org.ducatproject.ducat.R.string.pay_already_paid)
+    // §16.18.1: a board notice is stamped against a recent Monero block, so
+    // posting one needs a node even though *reading* boards never does. Its
+    // own sentence rather than pay_node_unreachable's, which ends "nothing
+    // was sent" — nothing was being sent, and a hail is not a payment.
+    t is org.ducatproject.ducat.Beacons.NoBlock ->
+        context.getString(org.ducatproject.ducat.R.string.board_needs_a_block)
     // Two different answers, deliberately worded apart. One is a wait and the
     // other is an accusation, and a person deciding whether to hand over money
     // needs to know which they are looking at.

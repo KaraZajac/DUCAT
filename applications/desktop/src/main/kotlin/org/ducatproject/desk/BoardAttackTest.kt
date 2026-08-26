@@ -59,7 +59,7 @@ fun main() {
         val taken = slots.map { it.subkey }.toSet()
         if (board == null) {
             slots.firstOrNull {
-                runCatching { rentalDecode(it.data, name, it.subkey) }.isSuccess
+                runCatching { rentalDecode(it.data, name, it.subkey, 0uL) }.isSuccess
             }?.let { board = name; genuine = it.data; genuineSlot = it.subkey }
         }
         free += (0u..7u).filter { it !in taken }.map { name to it }
@@ -70,7 +70,7 @@ fun main() {
     println("ATTACK found a genuine notice at $b slot $genuineSlot, ${free.size} free slot(s)")
     check(free.size >= 3) { "ATTACK_FAIL need three free slots, cell has ${free.size}" }
 
-    val title = rentalDecode(real, b, genuineSlot).title
+    val title = rentalDecode(real, b, genuineSlot, 0uL).title
     println("ATTACK it reads: \"$title\"")
 
     // 1. Lift it onto another slot, unchanged. This is the flood: one signed
@@ -134,7 +134,7 @@ fun main() {
             println("ATTACK --   $what: slot $slot was overwritten by another writer, not judged")
             continue
         }
-        val got = runCatching { rentalDecode(data, brd, slot) }
+        val got = runCatching { rentalDecode(data, brd, slot, 0uL) }
         check(got.isFailure) {
             "ATTACK_FAIL a notice $what was accepted at slot $slot: ${got.getOrNull()?.title}"
         }
@@ -148,7 +148,7 @@ fun main() {
 
     // And the genuine one still reads, so the refusals above are the check
     // working rather than everything being broken.
-    check(runCatching { rentalDecode(real, b, genuineSlot) }.isSuccess) {
+    check(runCatching { rentalDecode(real, b, genuineSlot, 0uL) }.isSuccess) {
         "ATTACK_FAIL the genuine notice stopped verifying"
     }
     println("ATTACK ok   the genuine notice still reads")
@@ -156,7 +156,7 @@ fun main() {
     // Finally, through the search a person actually uses: the doctored slots
     // must not appear among the results.
     val found = mutableListOf<uniffi.ducat_mobile.RentalInfo>()
-    Listings.search(lat, lon, null, onFound = { found.clear(); found.addAll(it) })
+    Listings.search(context, lat, lon, null, onFound = { found.clear(); found.addAll(it) })
     println("ATTACK search returned ${found.size} listing(s)")
     check(found.any { it.title == title }) {
         "ATTACK_FAIL the genuine listing vanished from search"

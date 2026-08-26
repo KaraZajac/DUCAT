@@ -760,6 +760,58 @@ pub fn monero_block_time(node_url: String, height: u64) -> Result<u64, MoneroErr
     })
 }
 
+/// The chain's tip height and the hash of one block, for a board stamp
+/// (§16.18.1).
+///
+/// Two answers in one round trip because a reader wants both together: the
+/// height decides cheaply whether a notice is even worth checking, and the
+/// hash is the half that cannot be forged. `at_height` of zero asks only for
+/// the tip.
+///
+/// Deliberately not a batch of hashes. A sweep sees a handful of distinct
+/// heights — every honest poster in a cell stamps against roughly the same
+/// block — so a caller that caches by height makes a few calls per lap, and
+/// the alternative (holding a day of hashes against the chance one is wanted)
+/// is a thousand round trips for the same answer.
+#[derive(uniffi::Record)]
+pub struct BlockRef {
+    pub tip_height: u64,
+    /// Empty when `at_height` was zero, or is above the tip.
+    pub hash_hex: String,
+}
+
+#[uniffi::export]
+pub fn monero_block_ref(node_url: String, at_height: u64) -> Result<BlockRef, MoneroError> {
+    use monero_daemon_rpc::prelude::*;
+
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .map_err(|e| MoneroError::Failed(format!("runtime: {e}")))?;
+
+    rt.block_on(async {
+        let rpc = monero_daemon_rpc::MoneroDaemon::new(UreqTransport::new(node_url))
+            .await
+            .map_err(|e| MoneroError::Failed(format!("connect: {e:?}")))?;
+        // `latest_block_number` is the number of the newest block, which is
+        // the tip a beacon is judged against.
+        let tip = rpc
+            .latest_block_number()
+            .await
+            .map_err(|e| MoneroError::Failed(format!("height: {e:?}")))? as u64;
+        let hash_hex = if at_height == 0 || at_height > tip {
+            String::new()
+        } else {
+            let block = rpc
+                .block_by_number(at_height as usize)
+                .await
+                .map_err(|e| MoneroError::Failed(format!("block: {e:?}")))?;
+            hex_of(&block.hash())
+        };
+        Ok(BlockRef { tip_height: tip, hash_hex })
+    })
+}
+
 /// A payment sighted in the mempool: real bytes, zero confirmations.
 #[derive(uniffi::Record, Clone)]
 pub struct PoolHit {

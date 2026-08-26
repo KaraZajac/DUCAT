@@ -931,6 +931,20 @@ pub struct HailInfo {
     pub expiry: u64,
     pub origin_cell: Option<String>,
     pub dest_cell: Option<String>,
+    /// The block this notice was stamped against (§16.18.1), read back out so
+    /// a caller with a chain view can check that height really has that hash.
+    /// Passing the height alone is the cheap test and it is not the whole one:
+    /// the height is signed, but the hash beside it is only bytes until
+    /// somebody compares it to a block.
+    ///
+    /// Defaulted, and ignored on the way *out*: the beacon is a parameter of
+    /// the encoder, not a field a caller fills in, and every screen that
+    /// builds one of these would otherwise have to name two values it has no
+    /// opinion about.
+    #[uniffi(default = 0)]
+    pub beacon_height: u64,
+    #[uniffi(default = "")]
+    pub beacon_hash: String,
 }
 
 /// A listing, as the app hands it over (§16.18).
@@ -947,6 +961,20 @@ pub struct RentalInfo {
     /// who they are anywhere else. Empty on the way *out*: the encoder derives
     /// it, and a caller setting it would be claiming something.
     pub poster: String,
+    /// The block this notice was stamped against (§16.18.1), read back out so
+    /// a caller with a chain view can check that height really has that hash.
+    /// Passing the height alone is the cheap test and it is not the whole one:
+    /// the height is signed, but the hash beside it is only bytes until
+    /// somebody compares it to a block.
+    ///
+    /// Defaulted, and ignored on the way *out*: the beacon is a parameter of
+    /// the encoder, not a field a caller fills in, and every screen that
+    /// builds one of these would otherwise have to name two values it has no
+    /// opinion about.
+    #[uniffi(default = 0)]
+    pub beacon_height: u64,
+    #[uniffi(default = "")]
+    pub beacon_hash: String,
     pub card: String,
     /// 1 = a place to stay, 2 = a vehicle.
     pub kind: u64,
@@ -976,8 +1004,11 @@ pub struct RentalInfo {
 fn rental_from_core(n: ducat_core::contact::RentalNotice) -> RentalInfo {
     RentalInfo {
         // Filled by rental_decode once it has verified one; the mapping from
-        // core knows nothing about who signed.
+        // core knows nothing about who signed, or about which block it was
+        // stamped against.
         poster: String::new(),
+        beacon_height: 0,
+        beacon_hash: String::new(),
         card: n.card, kind: n.kind, title: n.title, area: n.area, cell: n.cell,
         price_pxmr: n.price_pxmr, deposit_pxmr: n.deposit_pxmr, expiry: n.expiry,
         make: n.make, model: n.model, year: n.year, gearbox: n.gearbox,
@@ -1004,6 +1035,12 @@ pub fn rental_encode(
     listing_id: String,
     board: String,
     subkey: u32,
+    // §16.18.1: the Monero block this stamp is mined against, so that next
+    // year's boards cannot be mined this afternoon. A caller with no chain
+    // view cannot post — there is nothing honest to put here, and a beacon
+    // the poster invents is the precomputation this exists to stop.
+    beacon_height: u64,
+    beacon_hash_hex: String,
 ) -> Result<Vec<u8>, ContactError> {
     let n = ducat_core::contact::RentalNotice {
         version: 2,
@@ -1021,37 +1058,73 @@ pub fn rental_encode(
     };
     let ducat_core::cbor::Value::Map(m) = n.to_value() else { unreachable!() };
     let seed = ducat_core::board::listing_seed(&persona_secret, &listing_id);
-    let sealed = ducat_core::board::seal(m, ducat_core::board::RENTAL, &seed, &board, subkey);
+    let beacon = beacon_from(beacon_height, &beacon_hash_hex)?;
+    let sealed =
+        ducat_core::board::seal(m, ducat_core::board::RENTAL, &seed, &board, subkey, &beacon);
     let bytes = sealed.encode();
     // Encode-then-decode, as the hail does: what goes onto a public board is
     // only ever bytes this implementation would itself accept — which now
     // includes the signature and the work verifying against this very slot.
-    rental_decode(bytes.clone(), board, subkey)?;
+    rental_decode(bytes.clone(), board, subkey, 0)?;
     Ok(bytes)
 }
 
+/// A beacon out of the two values a caller can actually hold.
+fn beacon_from(height: u64, hash_hex: &str) -> Result<ducat_core::board::Beacon, ContactError> {
+    let raw = crate::hex_to_bytes(hash_hex)
+        .ok_or_else(|| ContactError::Refused("that is not a block hash".into()))?;
+    let hash: [u8; 32] = raw
+        .as_slice()
+        .try_into()
+        .map_err(|_| ContactError::Refused("a block hash is 32 bytes".into()))?;
+    Ok(ducat_core::board::Beacon { height, hash })
+}
+
 /// Read a listing off a board, refusing anything unsigned, mis-signed, signed
-/// for a different slot, or unpaid for.
+/// for a different slot, unpaid for, or stamped against a block too old to be
+/// the one it claims.
 ///
 /// The slot has to be passed in because it is inside the signature: a board's
 /// write key is public, so without that binding a valid notice could be lifted
 /// onto every other slot in the cell.
+///
+/// **`tip_height` is what this device believes the chain height to be, and
+/// zero means it does not know.** Reading a board has never needed a Monero
+/// node and this does not make it need one: with no chain view the freshness
+/// test is skipped and the notice is judged on its signature and its work
+/// alone, which is what it was judged on before the beacon existed. A
+/// marketplace that goes dark because a daemon is unreachable would be a worse
+/// answer than the spam it was avoiding, and an attacker cannot choose which
+/// readers have a node.
+///
+/// What passes here is the *cheap* half. The height is inside the signature so
+/// it cannot be moved, but the hash beside it is only bytes until somebody
+/// compares them to a real block — see `board::beacon_in_window`. The returned
+/// `beacon_height`/`beacon_hash` are for the caller that does.
 #[uniffi::export]
 pub fn rental_decode(
     bytes: Vec<u8>,
     board: String,
     subkey: u32,
+    tip_height: u64,
 ) -> Result<RentalInfo, ContactError> {
-    let (poster, inner) = ducat_core::board::open(
+    let o = ducat_core::board::open(
         decode(&bytes).map_err(refuse)?,
         ducat_core::board::RENTAL,
         &board,
         subkey,
     )
     .map_err(refuse)?;
-    let n = ducat_core::contact::RentalNotice::from_value(inner).map_err(refuse)?;
+    if tip_height > 0 && !ducat_core::board::beacon_in_window(&o.beacon, tip_height) {
+        return Err(ContactError::Refused(
+            "this notice was stamped against a block that is not recent".into(),
+        ));
+    }
+    let n = ducat_core::contact::RentalNotice::from_value(o.notice).map_err(refuse)?;
     let mut info = rental_from_core(n);
-    info.poster = poster.iter().map(|b| format!("{b:02x}")).collect::<String>();
+    info.poster = o.poster.iter().map(|b| format!("{b:02x}")).collect::<String>();
+    info.beacon_height = o.beacon.height;
+    info.beacon_hash = o.beacon.hash.iter().map(|b| format!("{b:02x}")).collect::<String>();
     Ok(info)
 }
 
@@ -1063,6 +1136,8 @@ pub fn hail_encode(
     hail_id: String,
     board: String,
     subkey: u32,
+    beacon_height: u64,
+    beacon_hash_hex: String,
 ) -> Result<Vec<u8>, ContactError> {
     let n = ducat_core::contact::HailNotice {
         version: 2,
@@ -1075,11 +1150,13 @@ pub fn hail_encode(
     };
     let ducat_core::cbor::Value::Map(m) = n.to_value() else { unreachable!() };
     let seed = ducat_core::board::listing_seed(&persona_secret, &hail_id);
-    let sealed = ducat_core::board::seal(m, ducat_core::board::HAIL, &seed, &board, subkey);
+    let beacon = beacon_from(beacon_height, &beacon_hash_hex)?;
+    let sealed =
+        ducat_core::board::seal(m, ducat_core::board::HAIL, &seed, &board, subkey, &beacon);
     let bytes = sealed.encode();
     // Encode-then-decode: what goes onto a public board is only ever bytes
     // this implementation would itself accept.
-    hail_decode(bytes.clone(), board, subkey)?;
+    hail_decode(bytes.clone(), board, subkey, 0)?;
     Ok(bytes)
 }
 
@@ -1089,17 +1166,25 @@ pub fn hail_decode(
     bytes: Vec<u8>,
     board: String,
     subkey: u32,
+    tip_height: u64,
 ) -> Result<HailInfo, ContactError> {
-    let (poster, inner) = ducat_core::board::open(
+    let o = ducat_core::board::open(
         decode(&bytes).map_err(refuse)?,
         ducat_core::board::HAIL,
         &board,
         subkey,
     )
     .map_err(refuse)?;
-    let n = ducat_core::contact::HailNotice::from_value(inner).map_err(refuse)?;
+    if tip_height > 0 && !ducat_core::board::beacon_in_window(&o.beacon, tip_height) {
+        return Err(ContactError::Refused(
+            "this notice was stamped against a block that is not recent".into(),
+        ));
+    }
+    let n = ducat_core::contact::HailNotice::from_value(o.notice).map_err(refuse)?;
     Ok(HailInfo {
-        poster: poster.iter().map(|b| format!("{b:02x}")).collect::<String>(),
+        poster: o.poster.iter().map(|b| format!("{b:02x}")).collect::<String>(),
+        beacon_height: o.beacon.height,
+        beacon_hash: o.beacon.hash.iter().map(|b| format!("{b:02x}")).collect::<String>(),
         card: n.card,
         dest: n.dest,
         fare_pxmr: n.fare_pxmr,

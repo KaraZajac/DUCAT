@@ -1603,14 +1603,16 @@
     {
       "board": "geo:u33db",
       "expect": {
+        "beacon_hash": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+        "beacon_height": 3210000,
         "ok": true,
         "poster_hex": "057a88def05a2428308ed2ae1eb434284e9ea45daa85e06154cbeb49c1912944"
       },
       "kind": "board.sealed",
       "name": "listing_sealed",
-      "sealed_hex": "b118dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e31b000000012a05f20018e41a6b49d20018ec0118ed0218ee0218ef81647769666918f1181c18f25820057a88def05a2428308ed2ae1eb434284e9ea45daa85e06154cbeb49c191294418f358400c32c900e53696e2f60ca17f7135e7fecbfc9528a4fef860a6c89786abc693c6b53a318363acb8f06682b287b66338e177d9720078915be15af05572a2cfcd0018f41a00016c3a",
+      "sealed_hex": "b318dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e31b000000012a05f20018e41a6b49d20018ec0118ed0218ee0218ef81647769666918f1181c18f25820057a88def05a2428308ed2ae1eb434284e9ea45daa85e06154cbeb49c191294418f358404246645bf5537a06c57fd294a43f07a3a50387f9ecbf8f4eab3d68d73a5908743fd00da21e1a040204ec12ea6c2a461778022d8b942f9c7d7341f8ca4a67580618f419018218f91a0030fb1018fa58205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
       "subkey": 3,
-      "why": "What a listing looks like on the board: the notice, the listing's own verifying key, a signature over the notice *and the slot*, and a nonce whose SHA-256 shows board::POW_BITS leading zero bits. A board's write key is the cell name hashed, so anyone can write any slot — the signature says who wrote the bytes and the work says it was not free."
+      "why": "What a listing looks like on the board: the notice, the listing's own verifying key, a signature over the notice, the slot *and the block it was stamped against*, and a nonce whose Argon2id output shows board::POW_BITS leading zero bits. A board's write key is the cell name hashed, so anyone can write any slot — the signature says who wrote the bytes and the work says it was not free."
     },
     {
       "board": "geo:u33db",
@@ -1621,9 +1623,134 @@
       },
       "kind": "board.sealed",
       "name": "listing_sealed_wrong_slot",
-      "sealed_hex": "b118dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e31b000000012a05f20018e41a6b49d20018ec0118ed0218ee0218ef81647769666918f1181c18f25820057a88def05a2428308ed2ae1eb434284e9ea45daa85e06154cbeb49c191294418f358400c32c900e53696e2f60ca17f7135e7fecbfc9528a4fef860a6c89786abc693c6b53a318363acb8f06682b287b66338e177d9720078915be15af05572a2cfcd0018f41a00016c3a",
+      "sealed_hex": "b318dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e31b000000012a05f20018e41a6b49d20018ec0118ed0218ee0218ef81647769666918f1181c18f25820057a88def05a2428308ed2ae1eb434284e9ea45daa85e06154cbeb49c191294418f358404246645bf5537a06c57fd294a43f07a3a50387f9ecbf8f4eab3d68d73a5908743fd00da21e1a040204ec12ea6c2a461778022d8b942f9c7d7341f8ca4a67580618f419018218f91a0030fb1018fa58205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
       "subkey": 4,
       "why": "The same bytes offered as slot 4. The slot is inside the signature, so a valid notice cannot be lifted onto another one — without which an attacker holding the public write key could paper a whole cell with somebody else's signed listing."
+    },
+    {
+      "board": "geo:u33db",
+      "expect": {
+        "hint": "signed for another slot",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "board.sealed",
+      "name": "listing_sealed_beacon_hash_swapped",
+      "sealed_hex": "b318dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e31b000000012a05f20018e41a6b49d20018ec0118ed0218ee0218ef81647769666918f1181c18f25820057a88def05a2428308ed2ae1eb434284e9ea45daa85e06154cbeb49c191294418f358404246645bf5537a06c57fd294a43f07a3a50387f9ecbf8f4eab3d68d73a5908743fd00da21e1a040204ec12ea6c2a461778022d8b942f9c7d7341f8ca4a67580618f419018218f91a0030fb1018fa58201111111111111111111111111111111111111111111111111111111111111111",
+      "subkey": 3,
+      "why": "A different block hash against the same work. Without a beacon in the preimage every stamp in the protocol's future is mineable this afternoon — cell, slot, body and signature are all the poster's own and the board epoch is a floor division — so the block is what makes the work perishable, and it has to be as unforgeable as the rest of the notice."
+    },
+    {
+      "board": "geo:u33db",
+      "expect": {
+        "hint": "signed for another slot",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "board.sealed",
+      "name": "listing_sealed_beacon_height_moved",
+      "sealed_hex": "b318dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e31b000000012a05f20018e41a6b49d20018ec0118ed0218ee0218ef81647769666918f1181c18f25820057a88def05a2428308ed2ae1eb434284e9ea45daa85e06154cbeb49c191294418f358404246645bf5537a06c57fd294a43f07a3a50387f9ecbf8f4eab3d68d73a5908743fd00da21e1a040204ec12ea6c2a461778022d8b942f9c7d7341f8ca4a67580618f419018218f91a0098967f18fa58205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "subkey": 3,
+      "why": "The same block hash re-labelled with a newer height. A reader tests the height first because it is free, and looks the hash up only for heights that survive — so a height that could be moved would let one mined notice claim any tip, and the cheap test would be worth nothing."
+    },
+    {
+      "board": "geo:u33db",
+      "expect": {
+        "hint": "a block hash is 32 bytes",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "board.sealed",
+      "name": "listing_sealed_beacon_hash_short",
+      "sealed_hex": "b318dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e31b000000012a05f20018e41a6b49d20018ec0118ed0218ee0218ef81647769666918f1181c18f25820057a88def05a2428308ed2ae1eb434284e9ea45daa85e06154cbeb49c191294418f358404246645bf5537a06c57fd294a43f07a3a50387f9ecbf8f4eab3d68d73a5908743fd00da21e1a040204ec12ea6c2a461778022d8b942f9c7d7341f8ca4a67580618f419018218f91a0030fb1018fa581f5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "subkey": 3,
+      "why": "Thirty-one bytes where a block hash goes. Pinned because a reader that accepted a short hash would be reading a different preimage from the one the poster signed, and would then disagree with every other implementation about which notices are valid."
+    },
+    {
+      "beacon_height": 3210000,
+      "expect": {
+        "ok": true
+      },
+      "kind": "board.beacon_window",
+      "name": "beacon_window_at_the_tip",
+      "tip_height": 3210000,
+      "why": "A notice stamped against the reader's own tip. The ordinary case, and the one an implementation cannot get wrong by accident — it is here so the two that follow have something to be one past."
+    },
+    {
+      "beacon_height": 3209280,
+      "expect": {
+        "ok": true
+      },
+      "kind": "board.beacon_window",
+      "name": "beacon_window_oldest_accepted",
+      "tip_height": 3210000,
+      "why": "Exactly 720 blocks back, which is the oldest block still inside the window: about a day. A day rather than the hour a precomputation argument alone would want, because the limit is the reader — a phone that has been in a drawer would otherwise show an empty marketplace and no reason for it."
+    },
+    {
+      "beacon_height": 3209279,
+      "expect": {
+        "ok": false
+      },
+      "kind": "board.beacon_window",
+      "name": "beacon_window_one_too_old",
+      "tip_height": 3210000,
+      "why": "One block past the edge. Without this the top of the range is unpinned and a second implementation could pick any number it liked, agreeing with the first on every case anybody wrote down."
+    },
+    {
+      "beacon_height": 3210002,
+      "expect": {
+        "ok": true
+      },
+      "kind": "board.beacon_window",
+      "name": "beacon_window_reader_two_behind",
+      "tip_height": 3210000,
+      "why": "A poster whose node is two blocks ahead of the reader's. Ordinary — nodes lag — and refusing it would make freshness a race between daemons rather than a property of the notice."
+    },
+    {
+      "beacon_height": 3210003,
+      "expect": {
+        "ok": false
+      },
+      "kind": "board.beacon_window",
+      "name": "beacon_window_ahead_of_the_chain",
+      "tip_height": 3210000,
+      "why": "Three blocks ahead of the reader's tip: a height nobody could have mined against yet. The other edge of the same range, pinned for the same reason."
+    },
+    {
+      "beacon_height": 3210000,
+      "expect": {
+        "ok": true
+      },
+      "kind": "board.beacon_window",
+      "name": "beacon_window_no_chain_view",
+      "tip_height": 0,
+      "why": "A reader that does not know the height. Zero is a real answer and means *skip the test*, not *everything is stale*: reading a board has never needed a Monero node, and a marketplace that goes dark because a daemon is unreachable is a worse answer than the spam it was avoiding."
+    },
+    {
+      "board": "geo:u33db",
+      "expect": {
+        "hint": "must name the block it was stamped against",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "board.sealed",
+      "name": "listing_sealed_no_beacon_height",
+      "sealed_hex": "b218dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e31b000000012a05f20018e41a6b49d20018ec0118ed0218ee0218ef81647769666918f1181c18f25820057a88def05a2428308ed2ae1eb434284e9ea45daa85e06154cbeb49c191294418f358404246645bf5537a06c57fd294a43f07a3a50387f9ecbf8f4eab3d68d73a5908743fd00da21e1a040204ec12ea6c2a461778022d8b942f9c7d7341f8ca4a67580618f419018218fa58205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "subkey": 3,
+      "why": "A notice with no beacon height. There is no unstamped path: a reader that treated a missing beacon as legacy would be offering an attacker the whole of the precomputation back, and a defence with an opt-out is not one."
+    },
+    {
+      "board": "geo:u33db",
+      "expect": {
+        "hint": "must name the block it was stamped against",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "board.sealed",
+      "name": "listing_sealed_no_beacon_hash",
+      "sealed_hex": "b218dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e31b000000012a05f20018e41a6b49d20018ec0118ed0218ee0218ef81647769666918f1181c18f25820057a88def05a2428308ed2ae1eb434284e9ea45daa85e06154cbeb49c191294418f358404246645bf5537a06c57fd294a43f07a3a50387f9ecbf8f4eab3d68d73a5908743fd00da21e1a040204ec12ea6c2a461778022d8b942f9c7d7341f8ca4a67580618f419018218f91a0030fb10",
+      "subkey": 3,
+      "why": "A notice with no beacon hash. The same rule from the other side — the hash is what the work is actually bound to."
     }
   ],
   "category": "contact"

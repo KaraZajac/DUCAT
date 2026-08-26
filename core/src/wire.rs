@@ -268,6 +268,19 @@ pub mod f {
     pub const HN_SIG: u64 = 246;
     pub const HN_POW: u64 = 247;
 
+    // §16.18.1's freshness beacon: the Monero block a stamp was mined
+    // against. Without it every field in the preimage is the poster's own or
+    // a weekly epoch, so the whole of next year is mineable this afternoon
+    // and the generation rotation's "paid for again each week" is not true.
+    /// The block's height — the cheap half of the test, against a chain tip
+    /// the reader already has.
+    pub const RN_BEACON_HEIGHT: u64 = 249;
+    /// And its hash, which is what the work is actually bound to. A beacon
+    /// nobody looks up is thirty-two bytes the attacker chose.
+    pub const RN_BEACON_HASH: u64 = 250;
+    pub const HN_BEACON_HEIGHT: u64 = 251;
+    pub const HN_BEACON_HASH: u64 = 252;
+
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;
     pub const PKB_ONETIME: u64 = 162;

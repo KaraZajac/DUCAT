@@ -174,6 +174,9 @@ fun main() {
                 uniffi.ducat_mobile.rentalEncode(
                     Listings.publicNotice(o, o.optString("card")),
                     persona, o.optString("id"), "geo:u33dc", 0u,
+                    // A pinned block: this test asks what the *bytes* contain,
+                    // and reaching for a chain tip would make it need a node.
+                    3_210_000uL, "5a".repeat(32),
                 )
             }.getOrNull()
         }.joinToString("\n") { it.decodeToString() }
@@ -260,7 +263,7 @@ fun main() {
     var found: List<uniffi.ducat_mobile.RentalInfo> = emptyList()
     val t0 = System.currentTimeMillis()
     runCatching {
-        Listings.search(lat, lon, null, onFound = { sofar ->
+        Listings.search(context, lat, lon, null, onFound = { sofar ->
             if (sofar.size != found.size) {
                 println("LIST_PARTIAL found=${sofar.size} after ${System.currentTimeMillis() - t0} ms")
             }

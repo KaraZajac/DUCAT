@@ -122,11 +122,17 @@ except Exception:
     schema_kinds = set()
     bad("vectors", "schema.json has no kind enum")
 
-gen_kinds = set(re.findall(r'"([a-z]+\.[a-z]+)"', read("core/examples/gen_vectors.rs")))
+# `[a-z_]`, not `[a-z]`. Every kind happened to be two bare words until one
+# was not, and `board.beacon_window` then read as no kind at all — so the
+# checks below saw a schema entry with no runner on either side and *also*
+# failed to see the runners that existed. An audit that cannot see what it is
+# auditing reports the opposite of the truth, which is worse than not looking.
+KIND_RE = r'"([a-z_]+\.[a-z_]+)"'
+gen_kinds = set(re.findall(KIND_RE, read("core/examples/gen_vectors.rs")))
 gen_kinds = {k for k in gen_kinds if k.split(".")[0] in
              {"codec", "signing", "negotiate", "commit", "state", "transcript", "backup", "object"}}
-py_kinds = set(re.findall(r'"([a-z]+\.[a-z]+)":\s*run_', read("conformance/ducat_check.py")))
-rs_kinds = set(re.findall(r'"([a-z]+\.[a-z]+)"', read("core/tests/vectors.rs")))
+py_kinds = set(re.findall(KIND_RE[:-1] + r'":\s*run_', read("conformance/ducat_check.py")))
+rs_kinds = set(re.findall(KIND_RE, read("core/tests/vectors.rs")))
 rs_kinds = {k for k in rs_kinds if "." in k}
 
 for missing in sorted(schema_kinds - py_kinds):

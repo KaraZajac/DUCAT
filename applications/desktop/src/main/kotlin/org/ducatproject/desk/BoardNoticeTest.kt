@@ -22,6 +22,14 @@ import uniffi.ducat_mobile.rentalEncode
 fun main() {
     val persona = ByteArray(32) { it.toByte() }
     val board = "geo:u33dc"
+    // A pinned block, never a real one: this test drives the bridge, not a
+    // node, and a case that reached for a chain tip would decide differently
+    // tomorrow — the same rule §18.9 states about the clock.
+    val height = 3_210_000uL
+    val hash = "5a".repeat(32)
+    // Zero tip: the freshness test is the caller's and this caller has no
+    // chain view, so every check below is about the seal itself.
+    val noTip = 0uL
 
     fun notice(title: String, expiry: ULong = 2_000_000_000uL) = RentalInfo(
         poster = "", card = "ducat:card/aaaa", kind = 1uL, title = title,
@@ -34,8 +42,8 @@ fun main() {
     )
 
     // The ordinary path: post to a slot, read it back from that slot.
-    val a = rentalEncode(notice("Sunny room near the park"), persona, "listing-1", board, 3u)
-    val readA = rentalDecode(a, board, 3u)
+    val a = rentalEncode(notice("Sunny room near the park"), persona, "listing-1", board, 3u, height, hash)
+    val readA = rentalDecode(a, board, 3u, noTip)
     check(readA.title == "Sunny room near the park") { "BOARD_FAIL round trip" }
     check(readA.poster.length == 64) { "BOARD_FAIL poster is '${readA.poster}'" }
 
@@ -44,22 +52,22 @@ fun main() {
     // one valid notice and paper the whole cell with it, and every copy would
     // verify as the original author.
     for (slot in listOf(0u, 2u, 4u, 7u)) {
-        check(runCatching { rentalDecode(a, board, slot) }.isFailure) {
+        check(runCatching { rentalDecode(a, board, slot, noTip) }.isFailure) {
             "BOARD_FAIL a notice signed for slot 3 verified at slot $slot"
         }
     }
-    check(runCatching { rentalDecode(a, "geo:u33dc-1", 3u) }.isFailure) {
+    check(runCatching { rentalDecode(a, "geo:u33dc-1", 3u, noTip) }.isFailure) {
         "BOARD_FAIL a notice moved to another shard of the same cell"
     }
-    check(runCatching { rentalDecode(a, "geo:u33dd", 3u) }.isFailure) {
+    check(runCatching { rentalDecode(a, "geo:u33dd", 3u, noTip) }.isFailure) {
         "BOARD_FAIL a notice moved to another cell"
     }
 
     // Substitution: same content, an attacker's key. It verifies — it has to,
     // they signed it — but as a *different author*, which is the whole point.
     val attacker = ByteArray(32) { (it + 99).toByte() }
-    val b = rentalEncode(notice("Sunny room near the park"), attacker, "listing-1", board, 3u)
-    val readB = rentalDecode(b, board, 3u)
+    val b = rentalEncode(notice("Sunny room near the park"), attacker, "listing-1", board, 3u, height, hash)
+    val readB = rentalDecode(b, board, 3u, noTip)
     check(readB.title == readA.title) { "BOARD_FAIL the copy should be identical in content" }
     check(readB.poster != readA.poster) {
         "BOARD_FAIL a copied listing came back as the same author"
@@ -69,12 +77,12 @@ fun main() {
     // to the poster's other listings. Both halves matter — the first is what
     // makes "seen before" mean anything, the second is why this is not the
     // persona.
-    val refreshed = rentalEncode(notice("Sunny room, now with wifi"), persona, "listing-1", board, 3u)
-    check(rentalDecode(refreshed, board, 3u).poster == readA.poster) {
+    val refreshed = rentalEncode(notice("Sunny room, now with wifi"), persona, "listing-1", board, 3u, height, hash)
+    check(rentalDecode(refreshed, board, 3u, noTip).poster == readA.poster) {
         "BOARD_FAIL a refresh changed the author"
     }
-    val other = rentalEncode(notice("Garage space"), persona, "listing-2", board, 3u)
-    check(rentalDecode(other, board, 3u).poster != readA.poster) {
+    val other = rentalEncode(notice("Garage space"), persona, "listing-2", board, 3u, height, hash)
+    check(rentalDecode(other, board, 3u, noTip).poster != readA.poster) {
         "BOARD_FAIL two listings from one phone share a key"
     }
 
@@ -83,17 +91,17 @@ fun main() {
     var survived = 0
     for (i in a.indices step 7) {
         val edited = a.copyOf().also { it[i] = (it[i].toInt() xor 0x01).toByte() }
-        if (runCatching { rentalDecode(edited, board, 3u) }.isSuccess) survived++
+        if (runCatching { rentalDecode(edited, board, 3u, noTip) }.isSuccess) survived++
     }
     check(survived == 0) { "BOARD_FAIL $survived edited notices verified" }
 
     // The downgrade that would make all of it decorative: an unsigned notice.
     // There is no version of this the reader accepts, so an attacker cannot
     // skip the work by simply not doing it.
-    check(runCatching { rentalDecode(ByteArray(0), board, 3u) }.isFailure) {
+    check(runCatching { rentalDecode(ByteArray(0), board, 3u, noTip) }.isFailure) {
         "BOARD_FAIL empty bytes were read as a notice"
     }
-    check(runCatching { rentalDecode(a.copyOf(a.size - 4), board, 3u) }.isFailure) {
+    check(runCatching { rentalDecode(a.copyOf(a.size - 4), board, 3u, noTip) }.isFailure) {
         "BOARD_FAIL a truncated notice was accepted"
     }
 
@@ -126,13 +134,67 @@ fun main() {
         "BOARD_FAIL a swept poster is still known"
     }
 
-    // What a poster actually pays. Not an assertion — a phone is slower than
-    // this and the number is the point of the exercise, so it gets printed
-    // rather than pinned.
+    // ---- §16.18.1: the stamp perishes with a block ----
+    //
+    // Without a beacon in the preimage nothing in it is unpredictable — cell,
+    // slot, body and signature are the poster's own and a board's generation
+    // is a floor division — so a year of every cell in a region is mineable in
+    // an afternoon, and §15.12's weekly rotation stops costing anybody
+    // anything. These are the properties that make it perishable.
+    check(readA.beaconHeight == height && readA.beaconHash == hash) {
+        "BOARD_FAIL the beacon did not come back out: ${readA.beaconHeight}/${readA.beaconHash}"
+    }
+
+    // A reader with a chain view refuses a block that is not recent. 720
+    // blocks back is a day, which is the slack a phone left in a drawer needs.
+    check(runCatching { rentalDecode(a, board, 3u, height + 721uL) }.isFailure) {
+        "BOARD_FAIL a stamp a day and a half stale was accepted"
+    }
+    check(runCatching { rentalDecode(a, board, 3u, height + 720uL) }.isSuccess) {
+        "BOARD_FAIL the oldest block still inside the window was refused"
+    }
+    // And a height nobody could have mined against — a reader whose own tip is
+    // a block or two behind the poster's is ordinary, further ahead is not.
+    check(runCatching { rentalDecode(a, board, 3u, height - 2uL) }.isSuccess) {
+        "BOARD_FAIL a reader two blocks behind refused a fresh notice"
+    }
+    check(runCatching { rentalDecode(a, board, 3u, height - 3uL) }.isFailure) {
+        "BOARD_FAIL a notice stamped ahead of the chain was accepted"
+    }
+
+    // The whole point: a stamp cannot be re-labelled with a different block
+    // once the work is done. Both halves — the hash is what the work is bound
+    // to, the height is the cheap test a reader runs before looking anything
+    // up, and an implementation that signed only one would pass for the other.
+    val same = rentalEncode(
+        notice("Sunny room near the park"), persona, "listing-1", board, 3u,
+        height + 1uL, hash,
+    )
+    check(!same.contentEquals(a)) {
+        "BOARD_FAIL the same notice against two different blocks produced one stamp"
+    }
+
+    // What a poster actually pays, and what a reader pays for every notice on
+    // the board whether it is honest or not. Not assertions — a phone is
+    // slower than this and the numbers are the point of the exercise, so they
+    // get printed rather than pinned.
     val t1 = System.nanoTime()
-    repeat(5) { rentalEncode(notice("Timing $it"), persona, "listing-t$it", board, 1u) }
+    repeat(5) { rentalEncode(notice("Timing $it"), persona, "listing-t$it", board, 1u, height, hash) }
     val each = (System.nanoTime() - t1) / 5.0 / 1e9
     println("BOARD_POW %.2fs per notice here; a full 128-slot cell = %.0fs".format(each, each * 128))
+    // Read the *whole bridge call*, which is what a sweep actually pays —
+    // and most of it is not the stamp. core's own `pow_cost` puts one `open`
+    // at about 5 ms of which 3 ms is Argon2; the rest of what shows up here is
+    // FFI and record marshalling that was being paid before any of this. The
+    // number to watch when tuning the memory parameter is the difference, not
+    // the total.
+    val t2 = System.nanoTime()
+    repeat(20) { rentalDecode(a, board, 3u, noTip) }
+    val read = (System.nanoTime() - t2) / 20.0 / 1e3
+    println(
+        "BOARD_VERIFY %.0fus per notice through the bridge (~3ms of it the stamp); "
+            .format(read) + "a sweep of 18 boards x 8 slots = %.2fs".format(read * 144 / 1e6)
+    )
 
-    println("BOARD_OK slot=bound copy=newauthor refresh=stable tamper=0/${a.size / 7} sweep=ok")
+    println("BOARD_OK slot=bound copy=newauthor refresh=stable tamper=0/${a.size / 7} beacon=bound sweep=ok")
 }

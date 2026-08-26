@@ -443,6 +443,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "bond.check", "slash.check",
         "contact.card", "contact.details", "log.head", "log.ring", "stand.shard", "stand.epoch", "message.chain",
         "message.payment", "hail.notice", "rental.listing", "board.sealed",
+        "board.beacon_window",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -615,15 +616,27 @@ fn contact_vectors_pass() {
                 );
                 let ok = c["expect"]["ok"].as_bool().unwrap_or(true);
                 match got {
-                    Ok((poster, inner)) => {
+                    Ok(o) => {
                         assert!(ok, "{name}: opened a notice the vector refuses");
                         assert_eq!(
-                            hexs(&poster),
+                            hexs(&o.poster),
                             c["expect"]["poster_hex"].as_str().unwrap(), "{name}"
+                        );
+                        // The beacon comes back out, and the vector pins it:
+                        // a reader that dropped it on the floor would have no
+                        // way to judge freshness and would look identical here
+                        // to one that carried it.
+                        assert_eq!(
+                            o.beacon.height,
+                            c["expect"]["beacon_height"].as_u64().unwrap(), "{name}"
+                        );
+                        assert_eq!(
+                            hexs(&o.beacon.hash),
+                            c["expect"]["beacon_hash"].as_str().unwrap(), "{name}"
                         );
                         // And what is left is a listing this implementation
                         // reads, so the seal and the notice really do compose.
-                        RentalNotice::from_value(inner)
+                        RentalNotice::from_value(o.notice)
                             .unwrap_or_else(|e| panic!("{name}: inner listing refused: {e:?}"));
                     }
                     Err(e) => {
@@ -634,6 +647,22 @@ fn contact_vectors_pass() {
                         );
                     }
                 }
+            }
+            // §16.18.1's freshness window. Not `open`'s job — judging a
+            // beacon needs a chain and `open` is a pure function of its
+            // arguments — so what this pins is the *rule a caller applies*:
+            // a tip of zero means this device has no chain view and skips the
+            // test, and anything else is the range test. Both edges, both
+            // sides, because a bound checked from one side is a bound the
+            // next implementation gets to pick.
+            "board.beacon_window" => {
+                let beacon = ducat_core::board::Beacon {
+                    height: c["beacon_height"].as_u64().unwrap(),
+                    hash: [0u8; 32],
+                };
+                let tip = c["tip_height"].as_u64().unwrap();
+                let got = tip == 0 || ducat_core::board::beacon_in_window(&beacon, tip);
+                assert_eq!(got, c["expect"]["ok"].as_bool().unwrap(), "{name}");
             }
             "rental.listing" => {
                 let got = RentalNotice::from_value(

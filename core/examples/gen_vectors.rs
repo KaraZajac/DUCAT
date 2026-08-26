@@ -950,6 +950,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
         "contact" => {
             if obj.contains_key("sealed_hex") {
                 ("contact", "board.sealed")
+            } else if obj.contains_key("tip_height") {
+                ("contact", "board.beacon_window")
             } else if obj.contains_key("messages_hex") {
                 ("contact", "message.chain")
             } else if obj.contains_key("details_hex") {
@@ -2100,21 +2102,112 @@ fn contact_cases() -> Vec<J> {
             let seed = ducat_core::board::listing_seed(b"vector-persona", "listing-1");
             let board = "geo:u33db";
             let subkey = 3u32;
+            // A pinned block, never a real one and never the clock's: §18.9
+            // wants a case decided today to decide the same way in a year, and
+            // a vector that reached for a chain tip would expire.
+            let beacon = ducat_core::board::Beacon {
+                height: 3_210_000,
+                hash: [0x5au8; 32],
+            };
             let ducat_core::cbor::Value::Map(m) = room.to_value() else { unreachable!() };
             let sealed = ducat_core::board::seal(
-                m, ducat_core::board::RENTAL, &seed, board, subkey,
+                m, ducat_core::board::RENTAL, &seed, board, subkey, &beacon,
             );
             let sealed_hex = hex(&sealed.encode());
             v.push(json!({ "name": "listing_sealed",
-                "why": "What a listing looks like on the board: the notice, the listing's own verifying key, a signature over the notice *and the slot*, and a nonce whose SHA-256 shows board::POW_BITS leading zero bits. A board's write key is the cell name hashed, so anyone can write any slot — the signature says who wrote the bytes and the work says it was not free.",
+                "why": "What a listing looks like on the board: the notice, the listing's own verifying key, a signature over the notice, the slot *and the block it was stamped against*, and a nonce whose Argon2id output shows board::POW_BITS leading zero bits. A board's write key is the cell name hashed, so anyone can write any slot — the signature says who wrote the bytes and the work says it was not free.",
                 "sealed_hex": sealed_hex,
                 "board": board, "subkey": subkey,
-                "expect": { "ok": true, "poster_hex": hex(&sealed_poster(&sealed)) } }));
+                "expect": { "ok": true, "poster_hex": hex(&sealed_poster(&sealed)),
+                            "beacon_height": beacon.height,
+                            "beacon_hash": hex(&beacon.hash) } }));
             v.push(json!({ "name": "listing_sealed_wrong_slot",
                 "why": "The same bytes offered as slot 4. The slot is inside the signature, so a valid notice cannot be lifted onto another one — without which an attacker holding the public write key could paper a whole cell with somebody else's signed listing.",
                 "sealed_hex": sealed_hex,
                 "board": board, "subkey": subkey + 1,
                 "expect": { "ok": false, "reject": "MALFORMED", "hint": "signed for another slot" } }));
+
+            // §16.18.1: the beacon is inside the signature, so neither half of
+            // it can be restated after the work is done. Both halves, because
+            // they fail for different reasons to a reader — the hash is what
+            // the work is bound to, and the height is the cheap test a reader
+            // runs before it looks anything up. An implementation that signed
+            // only one would pass a vector for the other.
+            let ducat_core::cbor::Value::Map(base) = sealed.clone() else { unreachable!() };
+            let mut swapped = base.clone();
+            swapped.insert(
+                ducat_core::wire::f::RN_BEACON_HASH,
+                ducat_core::cbor::Value::Bytes(vec![0x11u8; 32]),
+            );
+            v.push(json!({ "name": "listing_sealed_beacon_hash_swapped",
+                "why": "A different block hash against the same work. Without a beacon in the preimage every stamp in the protocol's future is mineable this afternoon — cell, slot, body and signature are all the poster's own and the board epoch is a floor division — so the block is what makes the work perishable, and it has to be as unforgeable as the rest of the notice.",
+                "sealed_hex": hex(&ducat_core::cbor::Value::Map(swapped).encode()),
+                "board": board, "subkey": subkey,
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "signed for another slot" } }));
+
+            let mut moved = base.clone();
+            moved.insert(
+                ducat_core::wire::f::RN_BEACON_HEIGHT,
+                ducat_core::cbor::Value::Uint(9_999_999),
+            );
+            v.push(json!({ "name": "listing_sealed_beacon_height_moved",
+                "why": "The same block hash re-labelled with a newer height. A reader tests the height first because it is free, and looks the hash up only for heights that survive — so a height that could be moved would let one mined notice claim any tip, and the cheap test would be worth nothing.",
+                "sealed_hex": hex(&ducat_core::cbor::Value::Map(moved).encode()),
+                "board": board, "subkey": subkey,
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "signed for another slot" } }));
+
+            let mut short = base.clone();
+            short.insert(
+                ducat_core::wire::f::RN_BEACON_HASH,
+                ducat_core::cbor::Value::Bytes(vec![0x5au8; 31]),
+            );
+            v.push(json!({ "name": "listing_sealed_beacon_hash_short",
+                "why": "Thirty-one bytes where a block hash goes. Pinned because a reader that accepted a short hash would be reading a different preimage from the one the poster signed, and would then disagree with every other implementation about which notices are valid.",
+                "sealed_hex": hex(&ducat_core::cbor::Value::Map(short).encode()),
+                "board": board, "subkey": subkey,
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "a block hash is 32 bytes" } }));
+
+            // §16.18.1's window, pinned at both edges and from both sides.
+            //
+            // A bound tested from one side only is a bound the other
+            // implementation gets to choose — the lesson §18.9 already learned
+            // about enumerations, applied to a range. The freshness test lives
+            // outside `open` because it needs a chain and `open` must not, so
+            // it needs cases of its own or it is agreed by nobody.
+            let tip = 3_210_000u64;
+            for (name, height, tip_height, ok, why) in [
+                ("beacon_window_at_the_tip", tip, tip, true,
+                 "A notice stamped against the reader's own tip. The ordinary case, and the one an implementation cannot get wrong by accident — it is here so the two that follow have something to be one past."),
+                ("beacon_window_oldest_accepted", tip - 720, tip, true,
+                 "Exactly 720 blocks back, which is the oldest block still inside the window: about a day. A day rather than the hour a precomputation argument alone would want, because the limit is the reader — a phone that has been in a drawer would otherwise show an empty marketplace and no reason for it."),
+                ("beacon_window_one_too_old", tip - 721, tip, false,
+                 "One block past the edge. Without this the top of the range is unpinned and a second implementation could pick any number it liked, agreeing with the first on every case anybody wrote down."),
+                ("beacon_window_reader_two_behind", tip + 2, tip, true,
+                 "A poster whose node is two blocks ahead of the reader's. Ordinary — nodes lag — and refusing it would make freshness a race between daemons rather than a property of the notice."),
+                ("beacon_window_ahead_of_the_chain", tip + 3, tip, false,
+                 "Three blocks ahead of the reader's tip: a height nobody could have mined against yet. The other edge of the same range, pinned for the same reason."),
+                ("beacon_window_no_chain_view", tip, 0, true,
+                 "A reader that does not know the height. Zero is a real answer and means *skip the test*, not *everything is stale*: reading a board has never needed a Monero node, and a marketplace that goes dark because a daemon is unreachable is a worse answer than the spam it was avoiding."),
+            ] {
+                v.push(json!({ "name": name, "why": why,
+                    "beacon_height": height, "tip_height": tip_height,
+                    "expect": { "ok": ok } }));
+            }
+
+            for (name, drop, why) in [
+                ("listing_sealed_no_beacon_height", ducat_core::wire::f::RN_BEACON_HEIGHT,
+                 "A notice with no beacon height. There is no unstamped path: a reader that treated a missing beacon as legacy would be offering an attacker the whole of the precomputation back, and a defence with an opt-out is not one."),
+                ("listing_sealed_no_beacon_hash", ducat_core::wire::f::RN_BEACON_HASH,
+                 "A notice with no beacon hash. The same rule from the other side — the hash is what the work is actually bound to."),
+            ] {
+                let mut m = base.clone();
+                m.remove(&drop);
+                v.push(json!({ "name": name, "why": why,
+                    "sealed_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                    "board": board, "subkey": subkey,
+                    "expect": { "ok": false, "reject": "MALFORMED",
+                                "hint": "must name the block it was stamped against" } }));
+            }
         }
 
     }

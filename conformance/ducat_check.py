@@ -990,8 +990,22 @@ RN_QUANTITY = 248
 # flooding paid for.
 RN_POSTER, RN_SIG, RN_POW = 242, 243, 244
 HN_POSTER, HN_SIG, HN_POW = 245, 246, 247
-# Leading zero bits a notice's proof of work must show.
-POW_BITS = 20
+# §16.18.1's freshness beacon: the Monero block a stamp was mined against.
+# Without it every other field in the preimage is either the poster's own or a
+# floor division of the clock, so the whole of next year could be mined this
+# afternoon and the epoch rotation's "paid for again each week" would not be
+# true of anybody who had.
+RN_BEACON_HEIGHT, RN_BEACON_HASH = 249, 250
+HN_BEACON_HEIGHT, HN_BEACON_HASH = 251, 252
+# Leading zero bits a notice's proof of work must show — small, because each
+# attempt is an Argon2id evaluation rather than a SHA-256 one.
+POW_BITS = 8
+# And what one attempt costs. Memory-hard on purpose: SHA-256 gave a GPU some
+# three orders of magnitude over a phone, which is not a price, it is a
+# rounding error.
+POW_MEM_KIB, POW_PASSES, POW_LANES = 4096, 1, 1
+# How far back a beacon may sit, and how far ahead of a reader's own tip.
+BEACON_BLOCKS, BEACON_AHEAD = 720, 2
 GEOHASH_ALPHABET = set("0123456789bcdefghjkmnpqrstuvwxyz")
 MAX_ATTACHMENT_BYTES = 1_048_576 - 64
 MAX_MIME_CHARS, MAX_FILENAME_CHARS = 64, 96
@@ -1386,24 +1400,61 @@ def open_board_notice(buf, board, subkey):
     poster = body_map.pop(RN_POSTER, (None, None))[1]
     sig = body_map.pop(RN_SIG, (None, None))[1]
     nonce = body_map.pop(RN_POW, (None, None))[1]
+    height = body_map.pop(RN_BEACON_HEIGHT, (None, None))[1]
+    bhash = body_map.pop(RN_BEACON_HASH, (None, None))[1]
     if not isinstance(poster, (bytes, bytearray)):
         raise Reject("Malformed", "a board notice must say who wrote it")
     if not isinstance(sig, (bytes, bytearray)) or len(sig) != 64:
         raise Reject("Malformed", "a board notice must be signed")
     if not isinstance(nonce, int):
         raise Reject("Malformed", "a board notice must carry its proof of work")
+    if not isinstance(height, int):
+        raise Reject("Malformed",
+                     "a board notice must name the block it was stamped against")
+    if not isinstance(bhash, (bytes, bytearray)):
+        raise Reject("Malformed",
+                     "a board notice must carry the block hash it was stamped against")
+    if len(bhash) != 32:
+        raise Reject("Malformed", "a block hash is 32 bytes")
 
     body = _reencode_map(sorted(body_map.items()))
+    # The beacon is inside the signature as well as inside the work. Bound to
+    # the work alone, moving it would only force a re-mine; bound to both, a
+    # notice names one block and cannot be made to name another — which is what
+    # the cheap height test leans on.
     signed = (board.encode() + b"\x00" + int(subkey).to_bytes(4, "little")
+              + b"\x00" + int(height).to_bytes(8, "little")
+              + b"\x00" + bytes(bhash)
               + b"\x00" + body)
     verify_sig(1, bytes(poster), bytes(sig), sig_input("BOARD_NOTICE", 1, signed))
 
-    pow_input = b"DUCAT-POW-v0" + b"\x00" + signed + b"\x00" + bytes(sig)
-    if leading_zero_bits(
-        hashlib.sha256(pow_input + nonce.to_bytes(8, "little")).digest()
-    ) < POW_BITS:
+    # Nonce as the password, the notice folded to sixteen bytes as the salt:
+    # Argon2 has no midstate to reuse, so putting the listing through SHA-256
+    # once per notice instead of once per attempt is where the saving has to
+    # come from.
+    salt = hashlib.sha256(
+        b"DUCAT-POW-v1" + b"\x00" + signed + b"\x00" + bytes(sig)
+    ).digest()[:16]
+    from argon2.low_level import hash_secret_raw, Type
+    out = hash_secret_raw(
+        secret=nonce.to_bytes(8, "little"), salt=salt,
+        time_cost=POW_PASSES, memory_cost=POW_MEM_KIB,
+        parallelism=POW_LANES, hash_len=32, type=Type.ID,
+    )
+    if leading_zero_bits(out) < POW_BITS:
         raise Reject("Malformed", "this notice did not pay for its slot")
     return bytes(poster), body
+
+
+def beacon_in_window(height, tip_height):
+    """Is a stamp's block recent enough to have been mined against?
+
+    Height only, and on purpose: it is the free half of the test, run against a
+    number every client already has, so the half that costs a lookup is asked
+    only of the heights that survive this. Passing it is not freshness — a
+    beacon nobody looks up is thirty-two bytes the attacker chose.
+    """
+    return height <= tip_height + BEACON_AHEAD and height + BEACON_BLOCKS >= tip_height
 
 
 def run_board_sealed(cases, r):
@@ -1421,6 +1472,25 @@ def run_board_sealed(cases, r):
             r.passed -= 1
             r.bad("contact", c["name"], c.get("why", ""),
                   f"poster {out.hex()}, expected {want}")
+
+
+def run_beacon_window(cases, r):
+    """§16.18.1's freshness window, as a *caller* applies it.
+
+    Judging a beacon needs a chain, and decoding must not consult one, so the
+    rule lives here rather than inside the notice reader: a tip of zero is a
+    device with no chain view and skips the test entirely — reading a board has
+    never required a Monero node — and anything else is the range.
+    """
+    for c in cases:
+        tip = c["tip_height"]
+        got = tip == 0 or beacon_in_window(c["beacon_height"], tip)
+        want = c["expect"]["ok"]
+        if got != want:
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"window said {got}, expected {want}")
+        else:
+            r.passed += 1
 
 
 def run_listing(cases, r):
@@ -1939,6 +2009,7 @@ BY_KIND = {
     "hail.notice": run_hail_notice,
     "rental.listing": run_listing,
     "board.sealed": run_board_sealed,
+    "board.beacon_window": run_beacon_window,
     "message.payment": run_message_payment,
     "message.chain": run_message_chain,
     "escrow.ceremony": run_escrow_ceremony,

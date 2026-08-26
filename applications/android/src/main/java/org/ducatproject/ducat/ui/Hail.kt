@@ -118,7 +118,7 @@ private fun clearOwnSlot(board: String, subkey: UInt, myCardUri: String): Boolea
     return runCatching {
         val held = standRead(board).firstOrNull { it.subkey == subkey }
             ?: return@runCatching true
-        val notice = runCatching { hailDecode(held.data, board, subkey) }.getOrNull()
+        val notice = runCatching { hailDecode(held.data, board, subkey, 0uL) }.getOrNull()
             ?: return@runCatching true
         if (notice.card != myCardUri) return@runCatching true
         standPost(board, subkey, ByteArray(0))
@@ -126,7 +126,7 @@ private fun clearOwnSlot(board: String, subkey: UInt, myCardUri: String): Boolea
         // primed by the reads above, but the network still referees) — only
         // an empty or foreign read-back counts as cleared.
         standRead(board).firstOrNull { it.subkey == subkey }
-            ?.let { runCatching { hailDecode(it.data, board, subkey) }.getOrNull()?.card != myCardUri }
+            ?.let { runCatching { hailDecode(it.data, board, subkey, 0uL) }.getOrNull()?.card != myCardUri }
             ?: true
     }.getOrDefault(false)
 }
@@ -146,21 +146,29 @@ private fun migrateDown(context: android.content.Context, p: PostedHail): Posted
     // A notice is signed for its slot, so moving one means signing it again
     // for where it is going. Recovered by opening our own copy, which is the
     // only thing here that knows both the bytes and the slot they were for.
-    val info = runCatching { hailDecode(p.notice, p.cell, p.subkey) }.getOrNull() ?: return null
+    val info = runCatching { hailDecode(p.notice, p.cell, p.subkey, 0uL) }.getOrNull() ?: return null
     val persona = org.ducatproject.ducat.PersonaStore(context).secret()
     return runCatching {
         for (shard in 0u until myShard) {
             val name = uniffi.ducat_mobile.standShardName(base, shard)
             val taken = standRead(name).mapNotNull { n ->
-                runCatching { hailDecode(n.data, name, n.subkey) }.getOrNull()
+                runCatching { hailDecode(n.data, name, n.subkey, org.ducatproject.ducat.Beacons.tip(context).toULong()) }.getOrNull()
                     ?.takeIf { it.expiry.toLong() > now }
                     ?.let { n.subkey }
             }.toSet()
             val free = (0u..7u).firstOrNull { it !in taken } ?: continue
             // standPost verifies its own landing; a raced slot throws and the
             // walk simply keeps its current home this round.
+            // Moving a notice means signing and mining it again for where it
+            // is going, so it is stamped against the block that is current
+            // *now* rather than the one the old copy carried — a migration is
+            // a fresh write and pays a fresh write's price.
             val sealed = runCatching {
-                hailEncode(info, persona, p.inboxKey, name, free)
+                val b = org.ducatproject.ducat.Beacons.stampNow(context) ?: return@runCatching null
+                hailEncode(
+                    info, persona, p.inboxKey, name, free,
+                    b.height.toULong(), b.hashHex,
+                )
             }.getOrNull() ?: continue
             if (runCatching { standPost(name, free, sealed) }.isSuccess) {
                 clearOwnSlot(p.cell, p.subkey, p.card)
@@ -1183,7 +1191,7 @@ fun DriveScreen() {
                 // the same function the harness drives, so what a driver sees
                 // and what the test proves cannot drift apart.
                 val got = withContext(Dispatchers.IO) {
-                    org.ducatproject.ducat.Hailing.sweepCell(c, now)
+                    org.ducatproject.ducat.Hailing.sweepCell(context, c, now)
                 }
                         // A cell whose read failed keeps its last good sweep
                         // rather than blinking out; publish() filters by

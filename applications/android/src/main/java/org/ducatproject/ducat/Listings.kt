@@ -317,9 +317,24 @@ object Listings {
         // lost to a race. That is the shape the defence requires: bytes that
         // were good for any slot could be sprayed across all of them.
         //
-        // Seconds of hashing, on the poll thread. See board.rs.
+        // §16.18.1: the block this stamp perishes with. Taken once, before
+        // the ladder starts, so every candidate slot is stamped against the
+        // same block — the search has to be redone per slot, and re-reading
+        // the tip between attempts would only make the earlier ones staler.
+        //
+        // No node, no post. There is nothing honest to put here, and a beacon
+        // the poster invents is exactly the precomputation the field exists to
+        // stop; a listing that went up unstamped would also be refused by
+        // every reader, which is a worse way to find out.
+        val beacon = Beacons.stampNow(context)
+            ?: throw Beacons.NoBlock()
+
+        // Seconds of Argon2, on the poll thread. See board.rs.
         fun seal(board: String, slot: UInt): ByteArray =
-            uniffi.ducat_mobile.rentalEncode(notice, persona, id, board, slot)
+            uniffi.ducat_mobile.rentalEncode(
+                notice, persona, id, board, slot,
+                beacon.height.toULong(), beacon.hashHex,
+            )
 
         // §15.12's overflow ladder, which listings need far more than hails
         // do: a hail is one person for ten minutes, but a five-kilometre
@@ -355,8 +370,11 @@ object Listings {
                 val taken = runCatching { uniffi.ducat_mobile.standRead(name) }
                     .getOrDefault(emptyList())
                     .mapNotNull { n ->
-                        runCatching { uniffi.ducat_mobile.rentalDecode(n.data, name, n.subkey) }
-                            .getOrNull()
+                        runCatching {
+                            uniffi.ducat_mobile.rentalDecode(
+                                n.data, name, n.subkey, Beacons.tip(context).toULong(),
+                            )
+                        }.getOrNull()
                             ?.takeIf { it.expiry.toLong() > now }?.let { n.subkey }
                     }.toSet()
                 for (free in 0u..7u) {
@@ -516,6 +534,9 @@ object Listings {
      * the rest arrives.
      */
     fun search(
+        // §16.18.1: a board read judges each notice's beacon against this
+        // device's own view of the chain, and a view needs a device.
+        context: Context,
         latE7: Long,
         lonE7: Long,
         kind: Int?,
@@ -600,7 +621,7 @@ object Listings {
             fun read(cell: String) {
                 val got = runCatching {
                     readCell(
-                        cell, kind, false,
+                        context, cell, kind, false,
                         onSlots = { slots -> if (slots >= 8) full += cell },
                     )
                 }.getOrNull()
@@ -677,7 +698,7 @@ object Listings {
                     waitAll(
                         crowded.map { cell ->
                             pool.submit {
-                                runCatching { readCell(cell, kind, true, climb = climbPool) }
+                                runCatching { readCell(context, cell, kind, true, climb = climbPool) }
                                     .getOrNull()?.let { absorb(cell, it) }
                             }
                         },
@@ -709,6 +730,7 @@ object Listings {
      * the end of a ladder.
      */
     private fun readShard(
+        context: Context,
         name: String,
         kind: Int?,
         /** How many slots the board held, before expiry and kind filtered
@@ -720,11 +742,18 @@ object Listings {
             .getOrDefault(31L * 24 * 60 * 60)
         val raw = runCatching { uniffi.ducat_mobile.standRead(name) }.getOrNull() ?: return null
         onSlots(raw.size)
+        val tip = Beacons.tip(context).toULong()
         return raw.mapNotNull {
             // The slot is inside the signature, so it is an argument here and
             // not a detail: a notice that verifies for slot 3 is refused at
             // slot 4, which is what stops one signed listing papering a cell.
-            runCatching { uniffi.ducat_mobile.rentalDecode(it.data, name, it.subkey) }.getOrNull()
+            runCatching {
+                uniffi.ducat_mobile.rentalDecode(it.data, name, it.subkey, tip)
+            }.getOrNull()
+                // And the half that costs a lookup, for the notices that got
+                // this far: a height nobody checks is a number the poster
+                // chose, and the work is bound to the *hash* beside it.
+                ?.takeIf { n -> Beacons.agrees(context, n.beaconHeight.toLong(), n.beaconHash) }
         }
             // A reader MUST drop an expired listing unrendered (§16.18) — and
             // one dated past the ceiling too. board.rs prices flooding by
@@ -751,6 +780,7 @@ object Listings {
      * ladder is climbed afterwards, only where shard 0 came back full.
      */
     private fun readCell(
+        context: Context,
         cell: String,
         kind: Int?,
         deep: Boolean,
@@ -769,7 +799,7 @@ object Listings {
         // line later — so a search run before the node had finished attaching
         // read nothing, failed at every board, and told the person with total
         // confidence that there was nothing listed near them.
-        val first = readShard(base, kind, onSlots) ?: return null
+        val first = readShard(context, base, kind, onSlots) ?: return null
         if (!deep) return first
         val out = first.toMutableList()
         val top = runCatching { uniffi.ducat_mobile.maxStandShards() }.getOrDefault(1u)
@@ -795,9 +825,9 @@ object Listings {
                 when {
                     name == null -> null
                     climb == null -> java.util.concurrent.CompletableFuture
-                        .completedFuture(readShard(name, kind))
+                        .completedFuture(readShard(context, name, kind))
                     else -> climb.submit<List<uniffi.ducat_mobile.RentalInfo>?> {
-                        readShard(name, kind)
+                        readShard(context, name, kind)
                     }
                 }
             }

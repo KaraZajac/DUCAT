@@ -195,6 +195,7 @@ private fun RentSearchScreen(
                 val replied = withContext(Dispatchers.IO) {
                     runCatching {
                         Listings.search(
+                            context,
                             // null: everything on the board, in one pass.
                             fix.first, fix.second, null,
                             onFound = { sofar ->

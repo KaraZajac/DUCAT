@@ -67,5 +67,6 @@
     <string name="pay_not_enough">Not enough unlocked — you have %1$s and this needs %2$s with the network fee.</string>
     <string name="pay_offline">Not connected yet — this phone has not finished joining the network. Nothing was sent; try again in a moment.</string>
     <string name="pay_node_unreachable">Could not reach any Monero node. Nothing was sent — check your connection and try again.</string>
+    <string name="board_needs_a_block">Could not reach any Monero node. What goes on a board is stamped against a recent block, so this cannot go up yet — check your connection and try again.</string>
     <string name="pay_already_paid">You have already paid into this escrow. Your money is in; nothing was sent again.</string>
 </resources>

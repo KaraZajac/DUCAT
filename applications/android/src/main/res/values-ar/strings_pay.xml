@@ -65,6 +65,7 @@
     <string name="pay_not_enough">الرصيد المتاح غير كافٍ — لديك %1$s ويلزم %2$s مع رسوم الشبكة.</string>
     <string name="pay_offline">غير متصل بعد — لم ينتهِ هذا الهاتف من الانضمام إلى الشبكة. لم يُرسل شيء؛ حاول مرة أخرى بعد قليل.</string>
     <string name="pay_node_unreachable">تعذّر الوصول إلى أي عقدة مونيرو. لم يُرسل شيء — تحقّق من اتصالك وحاول مرة أخرى.</string>
+    <string name="board_needs_a_block">‏تعذّر الوصول إلى أي عقدة مونيرو. ما يُنشر على اللوحة يحمل ختمًا مرتبطًا بكتلة حديثة، لذا لا يمكن نشر هذا الآن — تحقّق من اتصالك وحاول مرة أخرى.</string>
     <string name="pay_already_paid">لقد دفعت بالفعل في هذا الضمان. أموالك بالداخل؛ لم يُرسل شيء مرة أخرى.</string>
     <string name="pay_rate_line">محوَّل بسعر ‎1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">محوَّل بسعر ‎1 XMR = %1$s %2$s · %3$s</string>

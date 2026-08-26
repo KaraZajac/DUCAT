@@ -921,6 +921,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1006,9 +1008,9 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_geohashneighbors(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_hail_decode(`bytes`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_hail_decode(`bytes`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`tipHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_hail_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`hailId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_hail_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`hailId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`beaconHeight`: Long,`beaconHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_haversinem(`lat1E7`: Long,`lon1E7`: Long,`lat2E7`: Long,`lon2E7`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
@@ -1022,6 +1024,8 @@ internal interface UniffiLib : Library {
     ): Long
     fun uniffi_ducat_mobile_fn_func_maxstandshards(uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_monero_block_ref(`nodeUrl`: RustBuffer.ByValue,`atHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_block_time(`nodeUrl`: RustBuffer.ByValue,`height`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
     fun uniffi_ducat_mobile_fn_func_monero_default_nodes(`ownUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1116,9 +1120,9 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_reconcile_float(`maxExposurePxmr`: Long,`payments`: Int,`typicalPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_rental_decode(`bytes`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_rental_decode(`bytes`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`tipHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`beaconHeight`: Long,`beaconHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1343,6 +1347,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_maxnoticettlsecs(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_maxstandshards(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_block_ref(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_block_time(
     ): Short
@@ -1590,10 +1596,10 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_geohashneighbors() != 18841.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_hail_decode() != 60011.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_hail_decode() != 34700.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_hail_encode() != 47667.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_hail_encode() != 51868.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_haversinem() != 44993.toShort()) {
@@ -1612,6 +1618,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_maxstandshards() != 25679.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_block_ref() != 48437.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_block_time() != 31246.toShort()) {
@@ -1755,10 +1764,10 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_reconcile_float() != 35020.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_rental_decode() != 15632.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_rental_decode() != 5531.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 40307.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 60190.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 2433.toShort()) {
@@ -2279,6 +2288,56 @@ public object FfiConverterTypeBillLine: FfiConverterRustBuffer<BillLine> {
 
 
 /**
+ * The chain's tip height and the hash of one block, for a board stamp
+ * (§16.18.1).
+ *
+ * Two answers in one round trip because a reader wants both together: the
+ * height decides cheaply whether a notice is even worth checking, and the
+ * hash is the half that cannot be forged. `at_height` of zero asks only for
+ * the tip.
+ *
+ * Deliberately not a batch of hashes. A sweep sees a handful of distinct
+ * heights — every honest poster in a cell stamps against roughly the same
+ * block — so a caller that caches by height makes a few calls per lap, and
+ * the alternative (holding a day of hashes against the chance one is wanted)
+ * is a thousand round trips for the same answer.
+ */
+data class BlockRef (
+    var `tipHeight`: kotlin.ULong, 
+    /**
+     * Empty when `at_height` was zero, or is above the tip.
+     */
+    var `hashHex`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeBlockRef: FfiConverterRustBuffer<BlockRef> {
+    override fun read(buf: ByteBuffer): BlockRef {
+        return BlockRef(
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: BlockRef) = (
+            FfiConverterULong.allocationSize(value.`tipHeight`) +
+            FfiConverterString.allocationSize(value.`hashHex`)
+    )
+
+    override fun write(value: BlockRef, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`tipHeight`, buf)
+            FfiConverterString.write(value.`hashHex`, buf)
+    }
+}
+
+
+
+/**
  * One relationship, across the bridge.
  */
 data class ContactBackup (
@@ -2748,7 +2807,21 @@ data class HailInfo (
     var `farePxmr`: kotlin.ULong?, 
     var `expiry`: kotlin.ULong, 
     var `originCell`: kotlin.String?, 
-    var `destCell`: kotlin.String?
+    var `destCell`: kotlin.String?, 
+    /**
+     * The block this notice was stamped against (§16.18.1), read back out so
+     * a caller with a chain view can check that height really has that hash.
+     * Passing the height alone is the cheap test and it is not the whole one:
+     * the height is signed, but the hash beside it is only bytes until
+     * somebody compares it to a block.
+     *
+     * Defaulted, and ignored on the way *out*: the beacon is a parameter of
+     * the encoder, not a field a caller fills in, and every screen that
+     * builds one of these would otherwise have to name two values it has no
+     * opinion about.
+     */
+    var `beaconHeight`: kotlin.ULong = 0uL, 
+    var `beaconHash`: kotlin.String = ""
 ) {
     
     companion object
@@ -2767,6 +2840,8 @@ public object FfiConverterTypeHailInfo: FfiConverterRustBuffer<HailInfo> {
             FfiConverterULong.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
         )
     }
 
@@ -2777,7 +2852,9 @@ public object FfiConverterTypeHailInfo: FfiConverterRustBuffer<HailInfo> {
             FfiConverterOptionalULong.allocationSize(value.`farePxmr`) +
             FfiConverterULong.allocationSize(value.`expiry`) +
             FfiConverterOptionalString.allocationSize(value.`originCell`) +
-            FfiConverterOptionalString.allocationSize(value.`destCell`)
+            FfiConverterOptionalString.allocationSize(value.`destCell`) +
+            FfiConverterULong.allocationSize(value.`beaconHeight`) +
+            FfiConverterString.allocationSize(value.`beaconHash`)
     )
 
     override fun write(value: HailInfo, buf: ByteBuffer) {
@@ -2788,6 +2865,8 @@ public object FfiConverterTypeHailInfo: FfiConverterRustBuffer<HailInfo> {
             FfiConverterULong.write(value.`expiry`, buf)
             FfiConverterOptionalString.write(value.`originCell`, buf)
             FfiConverterOptionalString.write(value.`destCell`, buf)
+            FfiConverterULong.write(value.`beaconHeight`, buf)
+            FfiConverterString.write(value.`beaconHash`, buf)
     }
 }
 
@@ -3811,6 +3890,20 @@ data class RentalInfo (
      * it, and a caller setting it would be claiming something.
      */
     var `poster`: kotlin.String, 
+    /**
+     * The block this notice was stamped against (§16.18.1), read back out so
+     * a caller with a chain view can check that height really has that hash.
+     * Passing the height alone is the cheap test and it is not the whole one:
+     * the height is signed, but the hash beside it is only bytes until
+     * somebody compares it to a block.
+     *
+     * Defaulted, and ignored on the way *out*: the beacon is a parameter of
+     * the encoder, not a field a caller fills in, and every screen that
+     * builds one of these would otherwise have to name two values it has no
+     * opinion about.
+     */
+    var `beaconHeight`: kotlin.ULong = 0uL, 
+    var `beaconHash`: kotlin.String = "", 
     var `card`: kotlin.String, 
     /**
      * 1 = a place to stay, 2 = a vehicle.
@@ -3851,6 +3944,8 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
     override fun read(buf: ByteBuffer): RentalInfo {
         return RentalInfo(
             FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
             FfiConverterString.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterString.read(buf),
@@ -3878,6 +3973,8 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
 
     override fun allocationSize(value: RentalInfo) = (
             FfiConverterString.allocationSize(value.`poster`) +
+            FfiConverterULong.allocationSize(value.`beaconHeight`) +
+            FfiConverterString.allocationSize(value.`beaconHash`) +
             FfiConverterString.allocationSize(value.`card`) +
             FfiConverterULong.allocationSize(value.`kind`) +
             FfiConverterString.allocationSize(value.`title`) +
@@ -3904,6 +4001,8 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
 
     override fun write(value: RentalInfo, buf: ByteBuffer) {
             FfiConverterString.write(value.`poster`, buf)
+            FfiConverterULong.write(value.`beaconHeight`, buf)
+            FfiConverterString.write(value.`beaconHash`, buf)
             FfiConverterString.write(value.`card`, buf)
             FfiConverterULong.write(value.`kind`, buf)
             FfiConverterString.write(value.`title`, buf)
@@ -6414,11 +6513,11 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
         /**
          * The hail's half of the same thing — see [`rental_decode`].
          */
-    @Throws(ContactException::class) fun `hailDecode`(`bytes`: kotlin.ByteArray, `board`: kotlin.String, `subkey`: kotlin.UInt): HailInfo {
+    @Throws(ContactException::class) fun `hailDecode`(`bytes`: kotlin.ByteArray, `board`: kotlin.String, `subkey`: kotlin.UInt, `tipHeight`: kotlin.ULong): HailInfo {
             return FfiConverterTypeHailInfo.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_hail_decode(
-        FfiConverterByteArray.lower(`bytes`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),_status)
+        FfiConverterByteArray.lower(`bytes`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),FfiConverterULong.lower(`tipHeight`),_status)
 }
     )
     }
@@ -6427,11 +6526,11 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
         /**
          * The hail's half of the same thing — see [`rental_encode`].
          */
-    @Throws(ContactException::class) fun `hailEncode`(`info`: HailInfo, `personaSecret`: kotlin.ByteArray, `hailId`: kotlin.String, `board`: kotlin.String, `subkey`: kotlin.UInt): kotlin.ByteArray {
+    @Throws(ContactException::class) fun `hailEncode`(`info`: HailInfo, `personaSecret`: kotlin.ByteArray, `hailId`: kotlin.String, `board`: kotlin.String, `subkey`: kotlin.UInt, `beaconHeight`: kotlin.ULong, `beaconHashHex`: kotlin.String): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_hail_encode(
-        FfiConverterTypeHailInfo.lower(`info`),FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`hailId`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),_status)
+        FfiConverterTypeHailInfo.lower(`info`),FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`hailId`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),FfiConverterULong.lower(`beaconHeight`),FfiConverterString.lower(`beaconHashHex`),_status)
 }
     )
     }
@@ -6515,6 +6614,16 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_maxstandshards(
         _status)
+}
+    )
+    }
+    
+
+    @Throws(MoneroException::class) fun `moneroBlockRef`(`nodeUrl`: kotlin.String, `atHeight`: kotlin.ULong): BlockRef {
+            return FfiConverterTypeBlockRef.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_block_ref(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterULong.lower(`atHeight`),_status)
 }
     )
     }
@@ -7292,17 +7401,32 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
 
         /**
          * Read a listing off a board, refusing anything unsigned, mis-signed, signed
-         * for a different slot, or unpaid for.
+         * for a different slot, unpaid for, or stamped against a block too old to be
+         * the one it claims.
          *
          * The slot has to be passed in because it is inside the signature: a board's
          * write key is public, so without that binding a valid notice could be lifted
          * onto every other slot in the cell.
+         *
+         * **`tip_height` is what this device believes the chain height to be, and
+         * zero means it does not know.** Reading a board has never needed a Monero
+         * node and this does not make it need one: with no chain view the freshness
+         * test is skipped and the notice is judged on its signature and its work
+         * alone, which is what it was judged on before the beacon existed. A
+         * marketplace that goes dark because a daemon is unreachable would be a worse
+         * answer than the spam it was avoiding, and an attacker cannot choose which
+         * readers have a node.
+         *
+         * What passes here is the *cheap* half. The height is inside the signature so
+         * it cannot be moved, but the hash beside it is only bytes until somebody
+         * compares them to a real block — see `board::beacon_in_window`. The returned
+         * `beacon_height`/`beacon_hash` are for the caller that does.
          */
-    @Throws(ContactException::class) fun `rentalDecode`(`bytes`: kotlin.ByteArray, `board`: kotlin.String, `subkey`: kotlin.UInt): RentalInfo {
+    @Throws(ContactException::class) fun `rentalDecode`(`bytes`: kotlin.ByteArray, `board`: kotlin.String, `subkey`: kotlin.UInt, `tipHeight`: kotlin.ULong): RentalInfo {
             return FfiConverterTypeRentalInfo.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_rental_decode(
-        FfiConverterByteArray.lower(`bytes`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),_status)
+        FfiConverterByteArray.lower(`bytes`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),FfiConverterULong.lower(`tipHeight`),_status)
 }
     )
     }
@@ -7320,11 +7444,11 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
          * Blocking for a second or so: that is the proof of work, and it is the
          * point. Call it off the main thread.
          */
-    @Throws(ContactException::class) fun `rentalEncode`(`info`: RentalInfo, `personaSecret`: kotlin.ByteArray, `listingId`: kotlin.String, `board`: kotlin.String, `subkey`: kotlin.UInt): kotlin.ByteArray {
+    @Throws(ContactException::class) fun `rentalEncode`(`info`: RentalInfo, `personaSecret`: kotlin.ByteArray, `listingId`: kotlin.String, `board`: kotlin.String, `subkey`: kotlin.UInt, `beaconHeight`: kotlin.ULong, `beaconHashHex`: kotlin.String): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_rental_encode(
-        FfiConverterTypeRentalInfo.lower(`info`),FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`listingId`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),_status)
+        FfiConverterTypeRentalInfo.lower(`info`),FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`listingId`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),FfiConverterULong.lower(`beaconHeight`),FfiConverterString.lower(`beaconHashHex`),_status)
 }
     )
     }

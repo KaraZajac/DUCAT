@@ -153,8 +153,16 @@ object Hailing {
         // second pin on the containing cell (same author, correctly), and gone
         // when the hail is. The notice is signed for the slot it goes into, so
         // the bytes are built per candidate rather than once — see board.rs.
+        // §16.18.1: the block this stamp perishes with. One reading for the
+        // whole ladder — the search is redone per slot, and a fresher tip
+        // between attempts would only make the earlier candidates staler.
+        val beacon = Beacons.stampNow(context)
+            ?: throw Beacons.NoBlock()
         fun seal(board: String, slot: UInt): ByteArray =
-            uniffi.ducat_mobile.hailEncode(info, persona, card.inboxKey, board, slot)
+            uniffi.ducat_mobile.hailEncode(
+                info, persona, card.inboxKey, board, slot,
+                beacon.height.toULong(), beacon.hashHex,
+            )
         var bytes: ByteArray = ByteArray(0)
         // §15.12's overflow ladder, with a read-back: two riders can race for
         // the same free slot and the DHT keeps whoever wrote last, silently.
@@ -168,7 +176,7 @@ object Hailing {
             val name = uniffi.ducat_mobile.standShardName(base, shard)
             val nowS = System.currentTimeMillis() / 1000
             val taken = standRead(name).mapNotNull { n ->
-                runCatching { hailDecode(n.data, name, n.subkey) }.getOrNull()
+                runCatching { hailDecode(n.data, name, n.subkey, Beacons.tip(context).toULong()) }.getOrNull()
                     ?.takeIf { it.expiry.toLong() > nowS }
                     ?.let { n.subkey }
             }.toSet()
@@ -229,19 +237,24 @@ object Hailing {
         // Recovered by opening our own notice rather than threading the fields
         // through Standing: it is the one place that already knows the bytes
         // and the slot they were sealed for.
-        val info = runCatching { hailDecode(s.notice, s.board, s.subkey) }.getOrNull()
+        val info = runCatching { hailDecode(s.notice, s.board, s.subkey, 0uL) }.getOrNull()
             ?: return null
         val persona = PersonaStore(context).secret()
         val second = runCatching {
             val busy = standRead(wide).mapNotNull { n ->
-                runCatching { hailDecode(n.data, wide, n.subkey) }.getOrNull()
+                runCatching { hailDecode(n.data, wide, n.subkey, Beacons.tip(context).toULong()) }.getOrNull()
                     ?.takeIf { it.expiry.toLong() > System.currentTimeMillis() / 1000 }
                     ?.let { n.subkey }
             }.toSet()
             (0u..7u).firstOrNull { it !in busy }?.let { s2 ->
+                val b = Beacons.stampNow(context)
+                    ?: throw Beacons.NoBlock()
                 standPost(
                     wide, s2,
-                    uniffi.ducat_mobile.hailEncode(info, persona, s.inboxKey, wide, s2),
+                    uniffi.ducat_mobile.hailEncode(
+                        info, persona, s.inboxKey, wide, s2,
+                        b.height.toULong(), b.hashHex,
+                    ),
                 )
                 wide to s2
             }
@@ -272,13 +285,21 @@ object Hailing {
      * an empty board takes tens of seconds to come back empty, that chain
      * *was* the lap: 165 s, then 154 s, over eighteen boards.
      */
-    fun sweepCell(cell: String, nowSecs: Long): List<Seen>? = runCatching {
+    fun sweepCell(context: Context, cell: String, nowSecs: Long): List<Seen>? = runCatching {
         val all = mutableListOf<Seen>()
         var quiet = 0
         for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
             val name = uniffi.ducat_mobile.standShardName(standNow(cell), shard)
             val live = standRead(name).mapNotNull { n ->
-                runCatching { hailDecode(n.data, name, n.subkey) }.getOrNull()?.let { h ->
+                runCatching { hailDecode(n.data, name, n.subkey, Beacons.tip(context).toULong()) }
+                    .getOrNull()
+                    // §16.18.1's expensive half, and the one that matters: the
+                    // height is signed and cheap to test, but an attacker who
+                    // could invent the *hash* beside it could mine a year of
+                    // boards in an afternoon again. Cached per height, and a
+                    // cell's honest posters all name much the same block.
+                    ?.takeIf { Beacons.agrees(context, it.beaconHeight.toLong(), it.beaconHash) }
+                    ?.let { h ->
                     // Expired, or dated so far ahead that it is a squat rather
                     // than a hail — see maxNoticeTtlSecs.
                     val cap = runCatching { uniffi.ducat_mobile.maxNoticeTtlSecs().toLong() }

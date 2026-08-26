@@ -65,6 +65,7 @@
     <string name="pay_not_enough">Số dư khả dụng không đủ — bạn có %1$s và cần %2$s kèm phí mạng.</string>
     <string name="pay_offline">Chưa kết nối — điện thoại này chưa tham gia xong mạng lưới. Chưa gửi gì cả; hãy thử lại sau giây lát.</string>
     <string name="pay_node_unreachable">Không liên hệ được nút Monero nào. Chưa gửi gì cả — hãy kiểm tra kết nối và thử lại.</string>
+    <string name="board_needs_a_block">Không liên hệ được nút Monero nào. Thứ lên bảng tin được đóng dấu theo một khối gần đây, nên hiện chưa thể đăng — hãy kiểm tra kết nối rồi thử lại.</string>
     <string name="pay_already_paid">Bạn đã thanh toán vào ký quỹ này rồi. Tiền đã vào; không gửi lại lần nữa.</string>
     <string name="pay_rate_line">Quy đổi theo 1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">Quy đổi theo 1 XMR = %1$s %2$s · %3$s</string>

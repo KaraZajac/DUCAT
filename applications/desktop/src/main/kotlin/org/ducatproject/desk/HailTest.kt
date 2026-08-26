@@ -117,7 +117,7 @@ fun main() {
         laps++
         val lapAt = System.currentTimeMillis()
         for (c in cells) {
-            seen = Hailing.sweepCell(c, now)?.firstOrNull() ?: continue
+            seen = Hailing.sweepCell(context, c, now)?.firstOrNull() ?: continue
             break
         }
         println(

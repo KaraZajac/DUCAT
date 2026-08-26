@@ -195,7 +195,8 @@
             "message.payment",
             "hail.notice",
             "rental.listing",
-            "board.sealed"
+            "board.sealed",
+            "board.beacon_window"
           ]
         },
         "name": {

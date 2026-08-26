@@ -65,6 +65,7 @@
     <string name="pay_not_enough">Yeterli kullanılabilir bakiye yok — %1$s var, ağ ücretiyle birlikte %2$s gerekiyor.</string>
     <string name="pay_offline">Henüz bağlı değil — bu telefon ağa katılmayı bitirmedi. Hiçbir şey gönderilmedi; birazdan tekrar deneyin.</string>
     <string name="pay_node_unreachable">Hiçbir Monero düğümüne ulaşılamadı. Hiçbir şey gönderilmedi — bağlantını kontrol edip tekrar dene.</string>
+    <string name="board_needs_a_block">Hiçbir Monero düğümüne ulaşılamadı. Panoya çıkan her şey yakın tarihli bir blokla damgalanır, bu yüzden şimdilik yayınlanamıyor — bağlantını kontrol edip yeniden dene.</string>
     <string name="pay_already_paid">Bu emanete zaten ödeme yaptın. Paran içeride; tekrar gönderilmedi.</string>
     <string name="pay_rate_line">1 XMR = %1$s %2$s kuruyla</string>
     <string name="pay_rate_line_source">1 XMR = %1$s %2$s kuruyla · %3$s</string>
