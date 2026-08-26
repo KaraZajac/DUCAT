@@ -2,4 +2,12 @@
 <resources>
     <!-- Sent as a chat message; %1$s is the map link -->
     <string name="location_where_i_am">📍 ฉันอยู่ตรงนี้: %1$s</string>
+    <string name="pos_shared_message">📍 กำลังแชร์ตำแหน่งของฉันสำหรับการเดินทางนี้</string>
+    <string name="pos_share_mine">แชร์ตำแหน่งของฉัน</string>
+    <string name="pos_stop_sharing">หยุดแชร์</string>
+    <string name="pos_sharing_note">ตำแหน่งของคุณถูกแชร์ขณะที่หน้าจอนี้เปิดอยู่ และจะหยุดเมื่อคุณออกไปหรือเมื่อการเดินทางจบลง</string>
+    <string name="pos_waiting">กำลังรอตำแหน่งของ %1$s…</string>
+    <string name="pos_moving">%1$s กำลังแชร์ตำแหน่งอยู่</string>
+    <string name="pos_open_map">เปิดบนแผนที่</string>
+    <string name="pos_last_seen">%1$s — เห็นล่าสุดเมื่อ %2$d วินาทีก่อน</string>
 </resources>

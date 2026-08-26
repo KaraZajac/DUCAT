@@ -2,4 +2,12 @@
 <resources>
     <!-- Inviato come messaggio in chat; %1$s è il link alla mappa -->
     <string name="location_where_i_am">📍 Dove sono: %1$s</string>
+    <string name="pos_shared_message">📍 Condivido la mia posizione per questa corsa.</string>
+    <string name="pos_share_mine">Condividi la mia posizione</string>
+    <string name="pos_stop_sharing">Smetti di condividere</string>
+    <string name="pos_sharing_note">La tua posizione è condivisa finché questa schermata è aperta. Si ferma quando esci e quando la corsa finisce.</string>
+    <string name="pos_waiting">In attesa della posizione di %1$s…</string>
+    <string name="pos_moving">%1$s sta condividendo la propria posizione.</string>
+    <string name="pos_open_map">Apri su una mappa</string>
+    <string name="pos_last_seen">%1$s — visto l’ultima volta %2$d secondi fa.</string>
 </resources>

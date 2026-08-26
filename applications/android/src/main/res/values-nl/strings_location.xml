@@ -2,4 +2,12 @@
 <resources>
     <!-- Sent as a chat message; %1$s is the map link -->
     <string name="location_where_i_am">📍 Waar ik ben: %1$s</string>
+    <string name="pos_shared_message">📍 Ik deel mijn positie voor deze rit.</string>
+    <string name="pos_share_mine">Mijn positie delen</string>
+    <string name="pos_stop_sharing">Stoppen met delen</string>
+    <string name="pos_sharing_note">Je positie wordt gedeeld zolang dit scherm open is. Het stopt als je weggaat, en als de rit eindigt.</string>
+    <string name="pos_waiting">Wachten op de positie van %1$s…</string>
+    <string name="pos_moving">%1$s deelt de eigen positie.</string>
+    <string name="pos_open_map">Openen op een kaart</string>
+    <string name="pos_last_seen">%1$s — laatst gezien %2$d seconden geleden.</string>
 </resources>

@@ -290,6 +290,13 @@ class Poller(private val context: Context) {
                 runCatching { Ceremony.checkSettled(context) }
                     .onFailure { DucatLog.w(TAG, "escrow settled: ${it.message}") }
 
+                // §15.12: a ride that has ended takes its position stream with
+                // it. Here rather than on a screen, because the bound must
+                // hold with the phone in a pocket — which is exactly when a
+                // stream left running would be worst.
+                runCatching { Ceremony.stopFinishedPositions(context) }
+                    .onFailure { DucatLog.w(TAG, "position stop: ${it.message}") }
+
                 // "It will try again on its own": here, so that it does even
                 // when the driver has put the phone away — which, eighteen
                 // minutes into waiting for the chain, is what a driver does.

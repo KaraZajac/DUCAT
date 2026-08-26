@@ -82,6 +82,11 @@ val sharedLogic = listOf(
     // differently from a phone would be a second implementation nobody
     // asked for.
     "org/ducatproject/ducat/Beacons.kt",
+    // §15.12's live-position stream. Shared because Ceremony and Mailbox both
+    // reach into it — the stop rule and the inbound reference — and the desk
+    // compiles both of those verbatim.
+    "org/ducatproject/ducat/Positions.kt",
+    "org/ducatproject/ducat/ui/PositionCard.kt",
     "org/ducatproject/ducat/Enquiries.kt",
     "org/ducatproject/ducat/Stakes.kt",
     "org/ducatproject/ducat/Places.kt",

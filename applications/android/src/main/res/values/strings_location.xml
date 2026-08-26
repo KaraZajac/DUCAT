@@ -2,4 +2,16 @@
 <resources>
     <!-- Sent as a chat message; %1$s is the map link -->
     <string name="location_where_i_am">📍 Where I am: %1$s</string>
+    <!-- §15.12: the body of the kind-11 message that hands over the stream.
+         Never read by anybody — the reader's own phone writes the sentence
+         they see — but core refuses a message of zero characters. -->
+    <string name="pos_shared_message">📍 Sharing my position for this ride.</string>
+    <string name="pos_share_mine">Share my position</string>
+    <string name="pos_stop_sharing">Stop sharing</string>
+    <string name="pos_sharing_note">Sharing your position while this screen is open. It stops when you leave, and when the ride ends.</string>
+    <string name="pos_waiting">Waiting for %1$s\'s position…</string>
+    <string name="pos_moving">%1$s is sharing their position.</string>
+    <!-- Staleness rendered as staleness (§15.12): never a guessed position. -->
+    <string name="pos_open_map">Open on a map</string>
+    <string name="pos_last_seen">%1$s — last seen %2$d seconds ago.</string>
 </resources>

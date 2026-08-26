@@ -1519,6 +1519,27 @@ object Mailbox {
                     }
                 }.onFailure { DucatLog.w(TAG, "ceremony abort: ${it.message}") }
             }
+            // §15.12: a live-position stream offered. **Only after an accept.**
+            //
+            // The decoder cannot enforce this — it sees one message and knows
+            // nothing of the thread — so the gate lives here, where the thread
+            // is. Before a RIDE_ACCEPT the same stream is a stranger-tracking
+            // primitive, which is the thing §5.2.3 exists to refuse; the
+            // message is still recorded above (the thread stays honest about
+            // what arrived), it simply establishes nothing.
+            if (arrived.kind == 11) {
+                opened.position?.let { p ->
+                    val accepted = store.thread(c.personaHex).any { it.kind == 7 }
+                    if (accepted) {
+                        Positions.remember(context, c.personaHex, p.recordKey, p.streamKey)
+                    } else {
+                        DucatLog.w(
+                            TAG,
+                            "position offered by ${c.displayName()} before any accept — ignored",
+                        )
+                    }
+                }
+            }
             // A request carries a fresher address than anything stored (§16.12).
             opened.payto?.let { store.setTheirAddress(c.personaHex, it) }
             if (opened.consumedOneTime) store.burnOneTime(opened.prekeyId.toInt())

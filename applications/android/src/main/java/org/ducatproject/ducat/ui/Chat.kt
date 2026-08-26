@@ -741,6 +741,10 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         // One banner serves rider and driver — the roles come from the
         // ceremony's own frame, and each stage shows its one next action.
         RideBondBanner(c)
+        // §15.12's last rung of the disclosure ladder, gated on the accept
+        // being in this thread — before that the same stream is a
+        // stranger-tracking primitive, which is what §5.2.3 refuses.
+        PositionCard(c, hasAccept = messages.any { it.kind == 7 })
         // And, when the thread began at a board, what it is about. A name at
         // the top of a chat is not a subject: the owner of four cars needs to
         // know which one this stranger read, and the stranger who tapped

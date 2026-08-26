@@ -2,4 +2,12 @@
 <resources>
     <!-- Sent as a chat message; %1$s is the map link -->
     <string name="location_where_i_am">📍 Posisiku: %1$s</string>
+    <string name="pos_shared_message">📍 Saya membagikan posisi saya untuk perjalanan ini.</string>
+    <string name="pos_share_mine">Bagikan posisi saya</string>
+    <string name="pos_stop_sharing">Berhenti berbagi</string>
+    <string name="pos_sharing_note">Posisi Anda dibagikan selama layar ini terbuka. Berhenti saat Anda keluar, dan saat perjalanan selesai.</string>
+    <string name="pos_waiting">Menunggu posisi %1$s…</string>
+    <string name="pos_moving">%1$s sedang membagikan posisinya.</string>
+    <string name="pos_open_map">Buka di peta</string>
+    <string name="pos_last_seen">%1$s — terakhir terlihat %2$d detik lalu.</string>
 </resources>

@@ -1638,6 +1638,32 @@ object Ceremony {
     private fun settle(o: JSONObject, stage: String): JSONObject =
         o.put("stage", stage).put("settledAt", System.currentTimeMillis() / 1000)
 
+    /**
+     * §15.12's bound on live position, enforced from the deal's own state.
+     *
+     * Sharing stops at the receipt, at a retract, or at expiry — whichever is
+     * first. A settled escrow is the receipt in the shape this app actually
+     * has: the ride is over, so the stream that accompanied it is over too,
+     * and the record is blanked and forgotten rather than left running on a
+     * TTL nobody is watching (§18.7). Runs from the poller, so it holds
+     * whether or not anybody has the screen open — the one bound that must not
+     * depend on somebody looking at it.
+     *
+     * The screen stops its own sharing when it closes; this is the backstop
+     * for the case where the ride ended while the phone was in a pocket.
+     */
+    fun stopFinishedPositions(context: Context): Int {
+        var n = 0
+        for (o in all(context)) {
+            if (!isFinished(o)) continue
+            val peer = otherPrincipal(o) ?: continue
+            if (!Positions.sharing(context, peer) && !Positions.watching(context, peer)) continue
+            Positions.stop(context, peer)
+            n += 1
+        }
+        return n
+    }
+
     /** The rider pays the fare into the escrow — an ordinary wallet send to
      *  an address that happens to need two of three keys to leave. */
     /** Nobody has disagreed *yet* — the roster has not all reported. */
