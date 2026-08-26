@@ -334,7 +334,13 @@ counter to a counter the same day — four proposals deep, settled at the
 countered figure (`ba8f17f6`). **Backup and restore ran the whole way on
 2026-08-26** — export, wipe, restore, and the phone came back with its
 persona, contacts, threads, shop and till, then sent and received again —
-which leaves only the OEM file picker as the untested part. A co-signer today
+which leaves only the OEM file picker as the untested part. **Live
+position (§15.12) ran the same day** (`3382f6e3`): offered after the
+accept and nowhere else, read, rendered, aged into "last seen N seconds
+ago" when the sender left the screen, released when the sender stopped,
+and swept off both phones by the poller when the ride settled — with the
+one thing an emulator cannot judge, a dot that actually moves, left to
+the field day, because `adb emu geo fix` reports OK and changes nothing. A co-signer today
 consents to a stated fee, not an itemised destination list — honest consent
 waits on an upstream wallet API making payments readable.
 
