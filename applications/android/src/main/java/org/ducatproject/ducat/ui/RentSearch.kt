@@ -215,11 +215,34 @@ private fun RentSearchScreen(
                                 sofar.forEach {
                                     org.ducatproject.ducat.Posters.seen(context, it.poster, at)
                                 }
+                                // **Not your own.** The board shows what is
+                                // near you and your own posts are near you, so
+                                // a seller browsing found their own record
+                                // player with "Ask about it" under it — and
+                                // tapping it claimed their own card, wrote
+                                // themselves into their own contact list, and
+                                // opened a thread where they asked themselves
+                                // whether the thing was still available. It
+                                // also burned the card's single reply slot,
+                                // destroying the code a real buyer was about
+                                // to scan. Mailbox.claimCard refuses this now
+                                // whichever direction the card arrives from;
+                                // this is so the question never comes up.
+                                //
+                                // Matched on the card rather than the poster
+                                // key: a notice's poster is derived by the
+                                // encoder and never held here, while the card
+                                // in it is one this device issued and still
+                                // has in its own registry.
+                                val ours = org.ducatproject.ducat.ContactStore(context)
+                                    .issuedCards().map { it.uri }.toSet()
                                 // Each board that answers updates the list, so
                                 // what is nearby appears while the ring is
                                 // still being read (an empty board can take a
                                 // minute).
-                                results = sofar.sortedBy { it.pricePxmr }
+                                results = sofar
+                                    .filterNot { it.card in ours }
+                                    .sortedBy { it.pricePxmr }
                             },
                             onProgress = { done, total -> progress = done to total },
                         )

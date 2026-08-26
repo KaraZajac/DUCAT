@@ -67,6 +67,7 @@
     <string name="pay_node_unreachable">किसी भी Monero नोड से संपर्क नहीं हो सका। कुछ नहीं भेजा गया — अपना कनेक्शन जाँचें और फिर कोशिश करें।</string>
     <string name="board_unverified_note">कोई Monero नोड नहीं मिल रहा, इसलिए यहाँ जो दिख रहा है उसे चेन से जाँचा नहीं जा सका। यह अब भी हस्ताक्षरित और भुगतान किया हुआ है — बस इसे उतनी ही सावधानी से लें जितनी बिना जाँचे बोर्ड को देते।</string>
     <string name="board_needs_a_block">किसी भी Monero नोड तक नहीं पहुँच सके। बोर्ड पर जाने वाली हर चीज़ पर हाल के एक ब्लॉक की मुहर लगती है, इसलिए यह अभी नहीं जा सकता — अपना कनेक्शन जाँचें और फिर कोशिश करें।</string>
+    <string name="claim_own_card">यह कार्ड आपका अपना है — यह इसी डिवाइस का है।</string>
     <string name="pay_already_paid">आप इस एस्क्रो में पहले ही भुगतान कर चुके हैं। आपका पैसा अंदर है; दोबारा कुछ नहीं भेजा गया।</string>
     <string name="pay_rate_line">1 XMR = %1$s %2$s की दर से</string>
     <string name="pay_rate_line_source">1 XMR = %1$s %2$s की दर से · %3$s</string>

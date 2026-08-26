@@ -33,6 +33,10 @@ fun claimFailureRes(
     Mailbox.isOffline(t) -> R.string.main_card_link_offline
     t is Mailbox.CardAlreadyUsed -> alreadyUsed
     t is Mailbox.DetailsNotPublished -> R.string.main_card_link_not_ready
+    // Its own sentence, because the fallback below is a list of guesses
+    // ("broken, already claimed, or no longer valid") and none of them is
+    // true here — the card is fine, it is simply this device's.
+    t is Mailbox.OwnCard -> R.string.claim_own_card
     else -> R.string.main_card_link_failed_body
 }
 
@@ -120,6 +124,12 @@ fun moneyFailure(
     // was sent" — nothing was being sent, and a hail is not a payment.
     t is org.ducatproject.ducat.Beacons.NoBlock ->
         context.getString(org.ducatproject.ducat.R.string.board_needs_a_block)
+    // The board shows what is near you, and your own posts are near you. The
+    // browser filters those out, so meeting this means a card reached the
+    // claim some other way — a link sent to yourself, a code scanned off your
+    // own screen — and the only useful thing to say is whose card it is.
+    t is org.ducatproject.ducat.Mailbox.OwnCard ->
+        context.getString(org.ducatproject.ducat.R.string.claim_own_card)
     // Two different answers, deliberately worded apart. One is a wait and the
     // other is an accusation, and a person deciding whether to hand over money
     // needs to know which they are looking at.

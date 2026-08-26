@@ -67,6 +67,7 @@
     <string name="pay_node_unreachable">No se pudo contactar con ningún nodo de Monero. No se envió nada: comprueba tu conexión e inténtalo de nuevo.</string>
     <string name="board_unverified_note">No hay ningún nodo de Monero al alcance, así que lo que se muestra aquí no se ha podido comprobar contra la cadena. Sigue estando firmado y pagado; trátalo solo con el cuidado que darías a un tablón sin verificar.</string>
     <string name="board_needs_a_block">No se pudo contactar con ningún nodo de Monero. Lo que se publica en un tablón lleva el sello de un bloque reciente, así que esto no puede subir todavía: revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="claim_own_card">Esa tarjeta es tuya: pertenece a este dispositivo.</string>
     <string name="pay_already_paid">Ya has pagado en este depósito en garantía. Tu dinero está dentro; no se ha enviado nada más.</string>
     <string name="pay_rate_line">Convertido a 1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">Convertido a 1 XMR = %1$s %2$s · %3$s</string>

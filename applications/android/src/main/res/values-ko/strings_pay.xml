@@ -67,6 +67,7 @@
     <string name="pay_node_unreachable">Monero 노드에 연결하지 못했습니다. 아무것도 보내지 않았습니다 — 연결을 확인하고 다시 시도하세요.</string>
     <string name="board_unverified_note">연결할 수 있는 Monero 노드가 없어 여기 표시된 내용을 체인과 대조하지 못했습니다. 서명과 지불은 그대로입니다 — 다만 검증되지 않은 게시판을 대하듯 주의해서 보세요.</string>
     <string name="board_needs_a_block">Monero 노드에 연결할 수 없습니다. 게시판에 올라가는 것은 최근 블록으로 도장이 찍히므로 아직 올릴 수 없습니다 — 연결을 확인하고 다시 시도하세요.</string>
+    <string name="claim_own_card">그 카드는 본인의 것입니다 — 이 기기의 카드입니다.</string>
     <string name="pay_already_paid">이 에스크로에는 이미 지불했습니다. 돈은 들어가 있으며 다시 보내지 않았습니다.</string>
     <string name="pay_rate_line">1 XMR = %1$s %2$s 환율로 계산</string>
     <string name="pay_rate_line_source">1 XMR = %1$s %2$s 환율로 계산 · %3$s</string>

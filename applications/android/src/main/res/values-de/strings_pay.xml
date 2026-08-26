@@ -67,6 +67,7 @@
     <string name="pay_node_unreachable">Kein Monero-Knoten war erreichbar. Es wurde nichts gesendet – prüfe deine Verbindung und versuche es erneut.</string>
     <string name="board_unverified_note">Kein Monero-Knoten erreichbar, daher konnte das hier Gezeigte nicht gegen die Chain geprüft werden. Es ist weiterhin signiert und bezahlt — begegne ihm nur mit der Vorsicht, die ein ungeprüftes Brett verdient.</string>
     <string name="board_needs_a_block">Kein Monero-Knoten erreichbar. Was auf ein Brett geht, wird gegen einen aktuellen Block gestempelt — das kann also noch nicht hoch. Prüfe deine Verbindung und versuch es erneut.</string>
+    <string name="claim_own_card">Diese Karte ist deine eigene — sie gehört zu diesem Gerät.</string>
     <string name="pay_already_paid">Du hast bereits in diese Treuhand eingezahlt. Dein Geld ist drin; es wurde nichts erneut gesendet.</string>
     <string name="pay_rate_line">Umgerechnet zu 1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">Umgerechnet zu 1 XMR = %1$s %2$s · %3$s</string>

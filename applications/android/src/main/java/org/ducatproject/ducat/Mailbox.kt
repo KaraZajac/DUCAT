@@ -230,6 +230,23 @@ object Mailbox {
             ?: throw DetailsNotPublished()
         val theirs = parseContactDetails(raw)
 
+        // **Not yourself.** Checked here rather than on any one screen,
+        // because a card reaches this from four directions — a scan, a
+        // `ducat:` link, a tap, and the board browser — and the browser is
+        // where it actually happened: your own listings are on the board you
+        // are reading, so "Ask about it" on your own record player claimed
+        // your own card, wrote you into your own contact list, and opened a
+        // thread where you asked yourself whether the thing was still
+        // available, with a "Propose a purchase" button under it. Everything
+        // downstream then had a contact whose persona is this device: an
+        // escrow with one party twice, a payment to your own subaddress.
+        //
+        // Claiming also burns the card's single reply slot, so a seller who
+        // did this destroyed the code a real buyer was about to scan.
+        if (theirs.persona.toHexString() == PersonaStore(context).personaHex()) {
+            throw OwnCard()
+        }
+
         val outbox = createLog(context)
         val prekeys = generatePrekeys(
             ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL,
@@ -1126,6 +1143,15 @@ object Mailbox {
      * language instead of repeating an exception message.
      */
     class CardAlreadyUsed : IllegalStateException("card already claimed")
+
+    /**
+     * The card is this device's own.
+     *
+     * Typed like the others because the screens have to tell it apart: it is
+     * not a broken card and not a network that is not up yet, and the only
+     * useful thing to say about it is that the listing belongs to you.
+     */
+    class OwnCard : IllegalStateException("that card is your own")
 
     /**
      * The card exists but the details behind it have not arrived yet.
