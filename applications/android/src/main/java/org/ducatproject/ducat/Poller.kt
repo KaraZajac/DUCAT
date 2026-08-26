@@ -290,6 +290,12 @@ class Poller(private val context: Context) {
                 runCatching { Ceremony.checkSettled(context) }
                     .onFailure { DucatLog.w(TAG, "escrow settled: ${it.message}") }
 
+                // "It will try again on its own": here, so that it does even
+                // when the driver has put the phone away — which, eighteen
+                // minutes into waiting for the chain, is what a driver does.
+                runCatching { Ceremony.retryRelease(context) }
+                    .onFailure { DucatLog.w(TAG, "release retry: ${it.message}") }
+
                 // The same tenancy, for the store that never had a sweep.
                 runCatching { Ceremony.sweep(context) }
                     .onFailure { DucatLog.w(TAG, "escrow sweep: ${it.message}") }

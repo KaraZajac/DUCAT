@@ -1980,6 +1980,26 @@ object Ceremony {
         // pay a fee out of. The core then refused the release with "the
         // escrow cannot cover the split and the fee", with the money already
         // locked in it. Found by selling a coffee grinder for twelve cents.
+        // **The press outlives the screen.**
+        //
+        // A release proposed against an escrow the chain has not matured
+        // fails, and the banner answers "it will try again on its own — about
+        // eighteen minutes left". It did not: the retry was a LaunchedEffect
+        // on the chat screen, so it stopped the moment the driver navigated
+        // away or pocketed the phone, and eighteen minutes is a long time to
+        // stare at a conversation. Found live 2026-08-25, a funded and mature
+        // escrow sitting untouched because the driver had gone back to Home.
+        //
+        // Recorded before the attempt rather than after the failure, because
+        // the failure is a throw and this has to survive the process too. It
+        // is the *intent*, not a standing instruction: [retryRelease] resends
+        // exactly this number, gives up after an hour, and clears the moment
+        // a proposal lands (just below).
+        mutate(context, idHex) { cur ->
+            if (cur.has("wantRelease")) cur
+            else cur.put("wantRelease", riderBackPxmr)
+                .put("wantReleaseAt", System.currentTimeMillis())
+        }
         val margin = MIN_ESCROW_PXMR
         val flip = total - back < margin && back >= margin
         val prop = if (!flip) {
@@ -2006,6 +2026,10 @@ object Ceremony {
             amountPxmr = back,
         )
         o.put("stage", "releasing")
+        // Asked for, and got there. Whatever [wantRelease] was holding on
+        // behalf of the person who pressed the button is now spent.
+        o.remove("wantRelease")
+        o.remove("wantReleaseAt")
         o.put("cosignerIdx", indexOf(
             o.getJSONArray("roster").let { arr -> (0 until arr.length()).map { arr.getString(it) } },
             peerHex,
@@ -2016,6 +2040,45 @@ object Ceremony {
         ContactStore.bump()
         DucatLog.i(TAG, "ride $idHex: proposed split — $back pXMR back to the rider")
         return prop.payoutPxmr.toLong()
+    }
+
+    /** How long "it will try again on its own" is good for. */
+    private const val RELEASE_PATIENCE_MS = 60L * 60 * 1000
+
+    /**
+     * Finish what the button started, off the screen that started it.
+     *
+     * The only thing that reaches here is a release somebody asked for and
+     * the chain was not ready for — [proposeRideSplit] writes the intent
+     * before it can fail, and clears it the moment a proposal lands. So this
+     * is not a retry nobody wanted: it is the same press, still trying, for
+     * the hour the banner's sentence is worth.
+     *
+     * Proposing moves no money on its own. It needs the counterparty's
+     * signature, which is why proposing was never behind the PIN — and it
+     * re-sends the number that was asked for, never a freshly computed
+     * default, for the reason "Ask again" learned the hard way.
+     */
+    fun retryRelease(context: Context): Int {
+        val now = System.currentTimeMillis()
+        var n = 0
+        for (o in all(context)) {
+            if (o.optString("stage") != "done") continue
+            if (!o.has("wantRelease")) continue
+            val idHex = o.optString("id")
+            if (idHex.isBlank()) continue
+            val asked = o.optLong("wantReleaseAt")
+            if (asked <= 0 || now - asked > RELEASE_PATIENCE_MS) {
+                mutate(context, idHex) { cur ->
+                    cur.remove("wantRelease"); cur.remove("wantReleaseAt"); cur
+                }
+                DucatLog.i(TAG, "escrow $idHex: gave up retrying the release")
+                continue
+            }
+            runCatching { proposeRideSplit(context, idHex, o.optLong("wantRelease")) }
+                .onSuccess { n += 1; DucatLog.i(TAG, "escrow $idHex: release proposed on a retry") }
+        }
+        return n
     }
 
     /** A release that pays this device less than the screen said it would. */
