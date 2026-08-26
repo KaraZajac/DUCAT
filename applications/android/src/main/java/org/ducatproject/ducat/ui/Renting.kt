@@ -439,6 +439,16 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     // deleted, and only when there is something to lose — an empty form
     // discarded is just leaving.
     var confirmDiscard by remember { mutableStateOf(false) }
+    // Putting a listing up is not instant and cannot be given a bar.
+    //
+    // §16.18.1's stamp is a search with a geometric distribution: eight bits
+    // means 256 evaluations *on average*, and a meaningful share of posts take
+    // three or four times that — a few seconds usually, ten or more on an
+    // unlucky phone — before the ladder walk even starts. There is no honest
+    // percentage to show, because the next attempt is as likely to be the last
+    // one as the first was. So it is an indeterminate wait with the button
+    // held, which is the difference between "working" and "nothing happened".
+    var posting by remember { mutableStateOf(false) }
     val started = listOf(
         title, area, price, make, model, year, color, seats, trim,
         rooms, sleeps, sizeM2, tags, details,
@@ -778,7 +788,7 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Row {
             Button(
-                enabled = title.isNotBlank() && pricePxmr > 0 && fix != null,
+                enabled = !posting && title.isNotBlank() && pricePxmr > 0 && fix != null,
                 onClick = {
                     val here = fix ?: return@Button
                     val specs = JSONObject().apply {
@@ -818,15 +828,28 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                         quantity = howMany.toLongOrNull() ?: 1L,
                     )
                     Listings.put(context, draft)
+                    posting = true
                     scope.launch {
                         withContext(Dispatchers.IO) {
                             runCatching { Listings.post(context, draft.optString("id")) }
-                        }.onFailure { DucatLog.w("Renting", "post: ${it.message}") }
+                        }.onFailure {
+                            DucatLog.w("Renting", "post: ${it.message}")
+                            // The listing is saved either way and the poller
+                            // will try again — but a person who cannot post
+                            // because no node is reachable should be told
+                            // that, not left looking at a screen that closed.
+                            error = moneyFailure(context, it, R.string.rent_post_failed)
+                        }
+                        posting = false
                         onDone()
                     }
                 },
                 modifier = Modifier.weight(1f).height(48.dp),
-            ) { Text(stringResource(R.string.rent_post_it)) }
+            ) {
+                if (posting) CircularProgressIndicator(
+                    Modifier.size(18.dp), strokeWidth = 2.dp,
+                ) else Text(stringResource(R.string.rent_post_it))
+            }
             Spacer(Modifier.width(8.dp))
             TextButton(onClick = onDone) { Text(stringResource(R.string.rent_cancel)) }
         }

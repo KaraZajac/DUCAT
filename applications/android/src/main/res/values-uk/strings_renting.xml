@@ -31,6 +31,7 @@
     <string name="rent_private_note">Адреса, місце зустрічі, як з тобою зв\'язатися — нічого з цього не потрапляє на дошку. Надсилаєш у розмові, коли вже домовилися.</string>
     <string name="rent_private_label">Де зустрітись і що треба знати</string>
     <string name="rent_post_it">Розмістити</string>
+    <string name="rent_post_failed">Оголошення збережено, але зараз воно не потрапило на дошку. Воно з’явиться саме, щойно буде мережа.</string>
     <string name="rent_cancel">Скасувати</string>
     <string name="rent_discard_title">Викинути це оголошення?</string>
     <string name="rent_discard_body">Тут нічого не збережено. Усе, що набрано в цій формі, зникне, і чернетки, до якої можна повернутися, немає.</string>

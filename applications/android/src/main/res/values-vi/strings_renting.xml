@@ -31,6 +31,7 @@
     <string name="rent_private_note">Địa chỉ, chỗ gặp, cách liên lạc với bạn — không thứ nào lên bảng tin. Bạn gửi trong cuộc trò chuyện sau khi đã thoả thuận.</string>
     <string name="rent_private_label">Gặp ở đâu, và họ cần biết gì</string>
     <string name="rent_post_it">Đăng lên</string>
+    <string name="rent_post_failed">Tin đăng đã được lưu, nhưng hiện chưa lên được bảng tin. Nó sẽ tự lên ngay khi có mạng.</string>
     <string name="rent_cancel">Huỷ</string>
     <string name="rent_discard_title">Bỏ tin đăng này?</string>
     <string name="rent_discard_body">Ở đây chưa có gì được lưu. Mọi thứ đã nhập vào biểu mẫu này sẽ mất, và không có bản nháp nào để quay lại viết tiếp.</string>

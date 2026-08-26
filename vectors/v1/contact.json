@@ -1727,6 +1727,78 @@
       "why": "A reader that does not know the height. Zero is a real answer and means *skip the test*, not *everything is stale*: reading a board has never needed a Monero node, and a marketplace that goes dark because a daemon is unreachable is a worse answer than the spam it was avoiding."
     },
     {
+      "beacon_hash": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "expect": {
+        "verdict": "show"
+      },
+      "kind": "board.beacon_verdict",
+      "known_hash": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "name": "beacon_verdict_confirmed",
+      "verdict_height": 3210000,
+      "verdict_tip": 3210000,
+      "why": "The height is in the window and carries the hash the notice claims. The only case that may be displayed."
+    },
+    {
+      "beacon_hash": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "expect": {
+        "verdict": "refuse"
+      },
+      "kind": "board.beacon_verdict",
+      "known_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "name": "beacon_verdict_hash_is_not_that_blocks",
+      "verdict_height": 3210000,
+      "verdict_tip": 3210000,
+      "why": "In the window, and that block does not have that hash. This is the case the whole beacon rests on: the work is bound to the hash, so a notice whose hash is invented is a notice mined at leisure — the height beside it proves nothing, since two-minute blocks make a height months away predictable to within a few hundred."
+    },
+    {
+      "beacon_hash": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "expect": {
+        "verdict": "hold"
+      },
+      "kind": "board.beacon_verdict",
+      "known_hash": null,
+      "name": "beacon_verdict_not_yet_knowable",
+      "verdict_height": 3210002,
+      "verdict_tip": 3210000,
+      "why": "Inside the window, two blocks above this reader's tip, so the hash cannot be checked yet. Held, not shown — the forward slack exists to keep an honest notice from being *refused*, and must not become a way to display one nobody has checked. It becomes knowable in minutes."
+    },
+    {
+      "beacon_hash": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "expect": {
+        "verdict": "hold"
+      },
+      "kind": "board.beacon_verdict",
+      "known_hash": null,
+      "name": "beacon_verdict_lookup_unavailable",
+      "verdict_height": 3209900,
+      "verdict_tip": 3210000,
+      "why": "Inside the window and behind the tip, but this reader has no answer for that height — the lookup failed, or its per-board budget was spent. Same answer as above and for the same reason: collapsing \"cannot say\" into \"yes\" is exactly the reader an attacker mines against."
+    },
+    {
+      "beacon_hash": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "expect": {
+        "verdict": "refuse"
+      },
+      "kind": "board.beacon_verdict",
+      "known_hash": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "name": "beacon_verdict_out_of_window",
+      "verdict_height": 3209279,
+      "verdict_tip": 3210000,
+      "why": "Outside the window, so the hash is never consulted — a real block hash from last month is still last month's stamp, and refusing on the cheap test first is what keeps a doctored board from costing every reader a lookup per slot."
+    },
+    {
+      "beacon_hash": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "expect": {
+        "verdict": "show"
+      },
+      "kind": "board.beacon_verdict",
+      "known_hash": null,
+      "name": "beacon_verdict_no_chain_view",
+      "verdict_height": 3210000,
+      "verdict_tip": 0,
+      "why": "A reader with no chain view at all. The one case that skips both tests: reading a board has never needed a Monero node, and a marketplace that goes dark because a daemon is unreachable is a worse answer than the spam it was avoiding. Distinct from *hold* — this device never claimed to be able to check."
+    },
+    {
       "board": "geo:u33db",
       "expect": {
         "hint": "must name the block it was stamped against",

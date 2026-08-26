@@ -31,6 +31,7 @@
     <string name="rent_private_note">ที่อยู่ จุดนัดพบ วิธีติดต่อคุณ — ไม่มีอะไรขึ้นบนกระดาน คุณส่งในแชทหลังตกลงกันแล้ว</string>
     <string name="rent_private_label">นัดเจอที่ไหน และมีอะไรต้องรู้</string>
     <string name="rent_post_it">ลงประกาศ</string>
+    <string name="rent_post_failed">บันทึกประกาศไว้แล้ว แต่ตอนนี้ยังขึ้นบอร์ดไม่ได้ มันจะขึ้นเองเมื่อเชื่อมต่อเครือข่ายได้</string>
     <string name="rent_cancel">ยกเลิก</string>
     <string name="rent_discard_title">ทิ้งประกาศนี้?</string>
     <string name="rent_discard_body">ยังไม่มีอะไรถูกบันทึกไว้ที่นี่ ทุกอย่างที่พิมพ์ลงในแบบฟอร์มนี้จะหายไป และไม่มีฉบับร่างให้กลับมาเขียนต่อ</string>

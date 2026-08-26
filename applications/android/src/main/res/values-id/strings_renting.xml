@@ -31,6 +31,7 @@
     <string name="rent_private_note">Alamat, tempat bertemu, cara menghubungimu — tidak satu pun masuk ke papan. Kamu kirim lewat percakapan setelah ada kesepakatan.</string>
     <string name="rent_private_label">Tempat bertemu, dan yang perlu mereka tahu</string>
     <string name="rent_post_it">Pasang</string>
+    <string name="rent_post_failed">Iklan sudah tersimpan, tapi belum bisa naik ke papan sekarang. Ia akan naik sendiri begitu jaringan bisa dijangkau.</string>
     <string name="rent_cancel">Batal</string>
     <string name="rent_discard_title">Buang iklan ini?</string>
     <string name="rent_discard_body">Belum ada yang tersimpan di sini. Semua yang diketik di formulir ini hilang, dan tidak ada draf untuk kembali.</string>

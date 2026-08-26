@@ -31,6 +31,7 @@
     <string name="rent_private_note">The address, where to meet, how to reach you — this never goes on the board. You send it in the conversation once something is agreed.</string>
     <string name="rent_private_label">Where to meet, and what they need to know</string>
     <string name="rent_post_it">Post it</string>
+    <string name="rent_post_failed">The listing is saved, but it could not go on a board just now. It will go up on its own once the network is reachable.</string>
     <string name="rent_cancel">Cancel</string>
     <string name="rent_discard_title">Discard this listing?</string>
     <string name="rent_discard_body">Nothing here has been saved. Everything typed into this form is thrown away, and there is no draft to come back to.</string>

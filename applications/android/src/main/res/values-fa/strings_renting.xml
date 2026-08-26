@@ -31,6 +31,7 @@
     <string name="rent_private_note">نشانی، محل قرار، راه تماس با تو — هیچ‌کدام روی تابلو نمی‌رود. بعد از توافق، در گفتگو می‌فرستی.</string>
     <string name="rent_private_label">محل قرار و آنچه باید بدانند</string>
     <string name="rent_post_it">آگهی کن</string>
+    <string name="rent_post_failed">‏آگهی ذخیره شد، اما همین حالا نتوانست روی تابلو برود. به‌محض در دسترس بودن شبکه خودش منتشر می‌شود.</string>
     <string name="rent_cancel">انصراف</string>
     <string name="rent_discard_title">این آگهی دور انداخته شود؟</string>
     <string name="rent_discard_body">اینجا هنوز چیزی ذخیره نشده. هر چه در این فرم نوشته شده از بین می‌رود و پیش‌نویسی برای بازگشت وجود ندارد.</string>

@@ -178,6 +178,10 @@ object Hailing {
             // One reading for the board, not one per notice: the tip is
             // cached anyway, and a cache that expired halfway down a board
             // would judge its slots against two different chains.
+            //
+            // Occupancy, so the window is the whole test — see the note in
+            // Listings.post. A slot whose block this device cannot confirm
+            // yet is a slot it must not write over.
             val tip = Beacons.tip(context).toULong()
             val taken = standRead(name).mapNotNull { n ->
                 runCatching { hailDecode(n.data, name, n.subkey, tip) }.getOrNull()
@@ -296,15 +300,23 @@ object Hailing {
         for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
             val name = uniffi.ducat_mobile.standShardName(standNow(cell), shard)
             val tip = Beacons.tip(context).toULong()
+            val budget = Beacons.budget()
             val live = standRead(name).mapNotNull { n ->
                 runCatching { hailDecode(n.data, name, n.subkey, tip) }
                     .getOrNull()
-                    // §16.18.1's expensive half, and the one that matters: the
-                    // height is signed and cheap to test, but an attacker who
-                    // could invent the *hash* beside it could mine a year of
-                    // boards in an afternoon again. Cached per height, and a
-                    // cell's honest posters all name much the same block.
-                    ?.takeIf { Beacons.agrees(context, it.beaconHeight.toLong(), it.beaconHash) }
+                    // §16.18.1's expensive half, and the one that secures it.
+                    // A driver acts on what this returns, so nothing reaches
+                    // them on the height test alone: heights are predictable
+                    // months ahead, so a stamp mined against a hash the
+                    // attacker invented passes every check but this one.
+                    // Unknown is held for the minutes it takes the tip to
+                    // catch up, never shown.
+                    ?.takeIf {
+                        tip == 0uL ||
+                            Beacons.confirm(
+                                context, it.beaconHeight.toLong(), it.beaconHash, budget,
+                            ) == Beacons.Verdict.CONFIRMED
+                    }
                     ?.let { h ->
                     // Expired, or dated so far ahead that it is a squat rather
                     // than a hail — see maxNoticeTtlSecs.

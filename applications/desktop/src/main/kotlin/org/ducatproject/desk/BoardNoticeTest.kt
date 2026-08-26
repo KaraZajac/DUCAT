@@ -1,5 +1,6 @@
 package org.ducatproject.desk
 
+import org.ducatproject.ducat.Beacons
 import org.ducatproject.ducat.Posters
 import uniffi.ducat_mobile.RentalInfo
 import uniffi.ducat_mobile.rentalDecode
@@ -162,6 +163,44 @@ fun main() {
         "BOARD_FAIL a notice stamped ahead of the chain was accepted"
     }
 
+    // ---- and the third answer, which is the one that can be lost quietly ----
+    //
+    // The height test is free and secures nothing on its own: two-minute
+    // blocks make a height months out predictable to within a few hundred, so
+    // an attacker mines a spread of future heights against hashes they
+    // invented. Only the hash check catches that, and only if "I cannot check
+    // that yet" stays distinct from "yes".
+    val known = Beacons.Verdict.CONFIRMED
+    check(known == Beacons.Verdict.CONFIRMED) { "BOARD_FAIL verdict enum" }
+    // A notice two blocks above this reader's tip is inside the window — so
+    // the decoder accepts it — and its hash cannot be looked up yet. That
+    // combination must not reach a screen: it is held until the tip catches
+    // up, minutes at most, which is what stops the forward slack becoming an
+    // exception to the rule.
+    check(runCatching { rentalDecode(a, board, 3u, height - 2uL) }.isSuccess) {
+        "BOARD_FAIL the decoder should still accept two blocks of slack"
+    }
+
+    // ---- a tip you could not refresh is not a tip ----
+    //
+    // The window's day of slack runs backwards. Forwards it is two blocks —
+    // so a reader holding last week's height reads every honest notice as
+    // stamped ahead of the chain and refuses the board. A phone out of a
+    // drawer is exactly that reader, and "no chain view" is the answer that
+    // shows notices rather than the one that hides them.
+    val minute = 60_000L
+    val nowMs = 1_700_000_000_000L
+    check(Beacons.usableTip(3_210_000L, nowMs - minute, nowMs) == 3_210_000L) {
+        "BOARD_FAIL a tip read a minute ago should still be usable"
+    }
+    check(Beacons.usableTip(3_210_000L, nowMs - 10 * minute, nowMs) == 0L) {
+        "BOARD_FAIL a tip ten minutes old was trusted as current"
+    }
+    check(Beacons.usableTip(3_210_000L, 0L, nowMs) == 0L) {
+        "BOARD_FAIL a tip with no reading time was trusted"
+    }
+    check(Beacons.usableTip(0L, nowMs, nowMs) == 0L) { "BOARD_FAIL zero is not a height" }
+
     // The whole point: a stamp cannot be re-labelled with a different block
     // once the work is done. Both halves — the hash is what the work is bound
     // to, the height is the cheap test a reader runs before looking anything
@@ -196,5 +235,5 @@ fun main() {
             .format(read) + "a sweep of 18 boards x 8 slots = %.2fs".format(read * 144 / 1e6)
     )
 
-    println("BOARD_OK slot=bound copy=newauthor refresh=stable tamper=0/${a.size / 7} beacon=bound sweep=ok")
+    println("BOARD_OK slot=bound copy=newauthor refresh=stable tamper=0/${a.size / 7} beacon=bound+held sweep=ok")
 }

@@ -31,6 +31,7 @@
     <string name="rent_private_note">Adres, miejsce spotkania, jak się z tobą skontaktować — nic z tego nie trafia na tablicę. Wysyłasz to w rozmowie, kiedy już się umówicie.</string>
     <string name="rent_private_label">Gdzie się spotkać i co trzeba wiedzieć</string>
     <string name="rent_post_it">Wystaw</string>
+    <string name="rent_post_failed">Ogłoszenie jest zapisane, ale na razie nie trafiło na tablicę. Pojawi się samo, gdy sieć będzie dostępna.</string>
     <string name="rent_cancel">Anuluj</string>
     <string name="rent_discard_title">Odrzucić to ogłoszenie?</string>
     <string name="rent_discard_body">Nic tu nie zostało zapisane. Wszystko, co wpisano w ten formularz, przepada, i nie ma wersji roboczej, do której można wrócić.</string>

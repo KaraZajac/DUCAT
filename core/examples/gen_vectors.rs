@@ -952,6 +952,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "board.sealed")
             } else if obj.contains_key("tip_height") {
                 ("contact", "board.beacon_window")
+            } else if obj.contains_key("verdict_tip") {
+                ("contact", "board.beacon_verdict")
             } else if obj.contains_key("messages_hex") {
                 ("contact", "message.chain")
             } else if obj.contains_key("details_hex") {
@@ -2192,6 +2194,31 @@ fn contact_cases() -> Vec<J> {
                 v.push(json!({ "name": name, "why": why,
                     "beacon_height": height, "tip_height": tip_height,
                     "expect": { "ok": ok } }));
+            }
+
+            // The other half of §16.18.1, and the half a reader can get wrong
+            // in the attacker's favour without noticing. The window says a
+            // height is plausible; only the hash says it is real, and the
+            // answer "cannot say yet" has to stay distinct from "yes".
+            for (name, h, tip_height, known, want, why) in [
+                ("beacon_verdict_confirmed", tip, tip, Some("5a"), "show",
+                 "The height is in the window and carries the hash the notice claims. The only case that may be displayed."),
+                ("beacon_verdict_hash_is_not_that_blocks", tip, tip, Some("11"), "refuse",
+                 "In the window, and that block does not have that hash. This is the case the whole beacon rests on: the work is bound to the hash, so a notice whose hash is invented is a notice mined at leisure — the height beside it proves nothing, since two-minute blocks make a height months away predictable to within a few hundred."),
+                ("beacon_verdict_not_yet_knowable", tip + 2, tip, None, "hold",
+                 "Inside the window, two blocks above this reader's tip, so the hash cannot be checked yet. Held, not shown — the forward slack exists to keep an honest notice from being *refused*, and must not become a way to display one nobody has checked. It becomes knowable in minutes."),
+                ("beacon_verdict_lookup_unavailable", tip - 100, tip, None, "hold",
+                 "Inside the window and behind the tip, but this reader has no answer for that height — the lookup failed, or its per-board budget was spent. Same answer as above and for the same reason: collapsing \"cannot say\" into \"yes\" is exactly the reader an attacker mines against."),
+                ("beacon_verdict_out_of_window", tip - 721, tip, Some("5a"), "refuse",
+                 "Outside the window, so the hash is never consulted — a real block hash from last month is still last month's stamp, and refusing on the cheap test first is what keeps a doctored board from costing every reader a lookup per slot."),
+                ("beacon_verdict_no_chain_view", tip, 0, None, "show",
+                 "A reader with no chain view at all. The one case that skips both tests: reading a board has never needed a Monero node, and a marketplace that goes dark because a daemon is unreachable is a worse answer than the spam it was avoiding. Distinct from *hold* — this device never claimed to be able to check."),
+            ] {
+                v.push(json!({ "name": name, "why": why,
+                    "verdict_height": h, "verdict_tip": tip_height,
+                    "known_hash": known.map(|b: &str| b.repeat(32)),
+                    "beacon_hash": "5a".repeat(32),
+                    "expect": { "verdict": want } }));
             }
 
             for (name, drop, why) in [

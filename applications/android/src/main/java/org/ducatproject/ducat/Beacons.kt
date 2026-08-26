@@ -45,7 +45,55 @@ object Beacons {
     /** How long a tip reading is worth reusing. A block is two minutes. */
     private const val TIP_FRESH_MS = 3L * 60 * 1000
 
-    /** Heights whose hash this device has already asked about. */
+    /**
+     * How many *new* heights one board read may ask the node about.
+     *
+     * A confirmation costs one 119-byte call, and the heights an honest cell
+     * names are few and repeat — but the heights an *attacker* names are
+     * whatever they like, one per slot, and a lookup per notice would make a
+     * doctored board into network amplification pointed at every reader of it.
+     * So a board gets a budget, anything past it is [Verdict.UNKNOWN], and
+     * unknown means held rather than shown.
+     *
+     * **Eight because a board has eight slots.** That is the number that makes
+     * a wholly honest board confirmable in a single pass however its notices
+     * are spread — there is no arrangement of eight slots that names more than
+     * eight heights — so the budget can only ever bite on a board somebody is
+     * doctoring, and then only for the first sweep.
+     *
+     * Nothing honest is lost after that either. A height, once asked about, is
+     * answered for good — including the answer "that is not its hash" — so a
+     * doctored slot costs one lookup ever and the budget goes to real notices
+     * from the next sweep on. The ceiling for a whole session is the window
+     * itself, 720 lookups and 86 KB, and only an attacker pays to reach it.
+     */
+    private const val LOOKUPS_PER_BOARD = 8
+
+    /** What this device can say about a notice's block. */
+    enum class Verdict {
+        /** This height carries this hash. Show it. */
+        CONFIRMED,
+
+        /**
+         * Cannot say yet — the height is above this device's tip, the node
+         * would not answer, or the board's lookup budget is spent.
+         *
+         * **Not a synonym for yes.** §16.18.1's freshness rests on somebody
+         * checking the hash, and Monero's two-minute blocks make heights
+         * predictable months out: an attacker can pre-mine across a spread of
+         * future heights with hashes they invented, and any reader that runs
+         * only the cheap height comparison takes them. Three answers rather
+         * than two is the rule this codebase has learned before — unreachable
+         * settles, unknown defers — and collapsing them here would hand the
+         * whole of the precomputation back.
+         */
+        UNKNOWN,
+
+        /** That height does not carry that hash. Drop it and do not ask again. */
+        WRONG,
+    }
+
+    /** Heights this device has an answer for: the block's real hash. */
     private val hashes = HashMap<Long, String>()
 
     private var tipHeight: Long = 0
@@ -56,28 +104,73 @@ object Beacons {
     /**
      * The chain height this device believes in, or 0 for "no idea".
      *
-     * Zero is a real answer and callers must treat it as one: it means skip the
-     * freshness test, not that every notice is stale.
+     * Zero is a real answer and callers must treat it as one: it means this
+     * device has no chain view at all and skips the beacon tests entirely,
+     * not that every notice is stale. That is the one degradation §16.18.1
+     * allows, and it is not the same thing as [Verdict.UNKNOWN].
      */
     fun tip(context: Context): Long {
         val now = System.currentTimeMillis()
         synchronized(this) {
             if (tipHeight > 0 && now - tipAt < TIP_FRESH_MS) return tipHeight
         }
-        // Persisted across restarts so a phone that has just come back does not
-        // spend its first sweep with no opinion — a height a few minutes old is
-        // well inside the day of slack the window allows.
-        val stored = prefs(context).getLong("beacon_tip", 0L)
-        val url = NodeStore(context).lastGood() ?: return stored
-        val got = runCatching { uniffi.ducat_mobile.moneroBlockRef(url, 0uL) }.getOrNull()
-            ?: return stored
-        synchronized(this) {
-            tipHeight = got.tipHeight.toLong()
-            tipAt = now
+        // **A tip this device could not refresh is not a tip.**
+        //
+        // The window's day of slack runs *backwards* — it forgives a notice
+        // older than the reader's tip. Forwards there are two blocks, and a
+        // stale tip is behind by far more than that: a phone out of a drawer
+        // after a week, holding last week's height, would read every honest
+        // notice on the board as stamped ahead of the chain and refuse the
+        // lot. An empty marketplace with no explanation, which is the exact
+        // failure §16.18.1 gives up the hour-long window to avoid.
+        //
+        // So a height is carried across a restart with the moment it was
+        // read, and honoured only while it is current. Past that, this device
+        // has no chain view — which is a state the rules already describe,
+        // and which shows notices on their signature and their work rather
+        // than refusing them on a number it has no confidence in.
+        val storedAt = prefs(context).getLong("beacon_tip_at", 0L)
+        val stored = usableTip(prefs(context).getLong("beacon_tip", 0L), storedAt, now)
+        if (stored > 0) {
+            synchronized(this) {
+                tipHeight = stored
+                tipAt = storedAt
+            }
+            return stored
         }
-        prefs(context).edit().putLong("beacon_tip", got.tipHeight.toLong()).apply()
-        return got.tipHeight.toLong()
+        val url = NodeStore(context).lastGood() ?: return 0L
+        // The tip's own hash comes back in the same call, so every poll adds
+        // one height to the cache for nothing — and the tip is exactly the
+        // height honest posters are stamping against right now. A reader that
+        // has been running a while has already answered most of what a board
+        // will name before it reads one.
+        val got = runCatching { uniffi.ducat_mobile.moneroBlockRef(url, 0uL) }.getOrNull()
+            ?: return 0L
+        val h = got.tipHeight.toLong()
+        if (h <= 0) return 0L
+        synchronized(this) {
+            tipHeight = h
+            tipAt = now
+            if (got.hashHex.isNotBlank()) remember(h, got.hashHex)
+        }
+        prefs(context).edit()
+            .putLong("beacon_tip", h)
+            .putLong("beacon_tip_at", now)
+            .apply()
+        return h
     }
+
+    /**
+     * A height carried across a restart, or 0 if it is too old to be trusted
+     * as a *current* tip.
+     *
+     * Its own function because the rule is easy to state, easy to get wrong,
+     * and invisible when it is wrong: a reader judging against a stale height
+     * does not crash, it quietly refuses the whole board. Pinned by
+     * `:desktop:boardnotice`.
+     */
+    internal fun usableTip(stored: Long, storedAt: Long, now: Long): Long =
+        if (stored > 0 && storedAt > 0 && now - storedAt < TIP_FRESH_MS) stored else 0L
 
     /** The tip and its hash, for stamping something about to be posted. */
     data class Stamp(val height: Long, val hashHex: String)
@@ -91,49 +184,74 @@ object Beacons {
      */
     fun stampNow(context: Context): Stamp? {
         val url = NodeStore(context).lastGood() ?: return null
-        val tip = runCatching { uniffi.ducat_mobile.moneroBlockRef(url, 0uL) }.getOrNull()
+        // One call: a height of zero means the tip, and the tip's hash comes
+        // back with it. Two calls raced the chain — the second could land a
+        // block later than the first, and a poster would stamp against a
+        // height it had not been given the hash for.
+        val at = runCatching { uniffi.ducat_mobile.moneroBlockRef(url, 0uL) }.getOrNull()
             ?: return null
-        if (tip.tipHeight == 0uL) return null
-        val at = runCatching { uniffi.ducat_mobile.moneroBlockRef(url, tip.tipHeight) }
-            .getOrNull() ?: return null
-        if (at.hashHex.isBlank()) return null
+        val h = at.tipHeight.toLong()
+        if (h <= 0 || at.hashHex.isBlank()) return null
         synchronized(this) {
-            tipHeight = tip.tipHeight.toLong()
+            tipHeight = h
             tipAt = System.currentTimeMillis()
-            hashes[tip.tipHeight.toLong()] = at.hashHex
+            remember(h, at.hashHex)
         }
-        prefs(context).edit().putLong("beacon_tip", tip.tipHeight.toLong()).apply()
-        return Stamp(tip.tipHeight.toLong(), at.hashHex)
+        prefs(context).edit()
+            .putLong("beacon_tip", h)
+            .putLong("beacon_tip_at", System.currentTimeMillis())
+            .apply()
+        return Stamp(h, at.hashHex)
     }
+
+    /**
+     * A budget for one board read. Held by the caller for the length of a
+     * board, so a doctored cell cannot spend the whole sweep's allowance.
+     */
+    class Budget internal constructor(internal var left: Int)
+
+    fun budget() = Budget(LOOKUPS_PER_BOARD)
 
     /**
      * Does this height really carry this hash?
      *
-     * True when it does, and true when this device cannot find out — the same
-     * rule as the height test, for the same reason. False only on a real
-     * disagreement, which is a notice claiming a block that is not the block.
+     * The cheap half of §16.18.1 — is the height inside the window — is done
+     * by the decoder against a tip. This is the half that costs something and
+     * the half that actually secures the stamp: the work is bound to the
+     * *hash*, so a beacon nobody looks up is thirty-two bytes the attacker
+     * chose, and a height they can predict months ahead.
      */
-    fun agrees(context: Context, height: Long, hashHex: String): Boolean {
-        if (height <= 0 || hashHex.isBlank()) return true
-        synchronized(this) { hashes[height] }?.let { return it.equals(hashHex, true) }
-        val url = NodeStore(context).lastGood() ?: return true
-        val got = runCatching { uniffi.ducat_mobile.moneroBlockRef(url, height.toULong()) }
-            .getOrNull() ?: return true
-        if (got.hashHex.isBlank()) return true
+    fun confirm(context: Context, height: Long, hashHex: String, budget: Budget): Verdict {
+        if (height <= 0 || hashHex.isBlank()) return Verdict.UNKNOWN
+        synchronized(this) { hashes[height] }?.let {
+            return if (it.equals(hashHex, true)) Verdict.CONFIRMED else Verdict.WRONG
+        }
+        // Above what this device has seen: unknowable *yet*, and a few minutes
+        // from being knowable. Held rather than refused — the notice is
+        // probably honest and posted by somebody whose node is ahead of ours.
+        if (height > tip(context)) return Verdict.UNKNOWN
+        // The node before the budget: with nothing to ask, spending an
+        // allowance would only shrink what the *next* board gets to check.
+        val url = NodeStore(context).lastGood() ?: return Verdict.UNKNOWN
         synchronized(this) {
-            // Bounded: a sweep sees a handful of distinct heights, but a board
-            // full of notices each naming a different one would otherwise be a
-            // way to make this map grow without limit.
-            if (hashes.size > 256) hashes.clear()
-            hashes[height] = got.hashHex
+            if (budget.left <= 0) return Verdict.UNKNOWN
+            budget.left -= 1
         }
-        val ok = got.hashHex.equals(hashHex, true)
-        if (!ok) {
-            DucatLog.w(
-                TAG,
-                "a notice claims block $height with a hash that block does not have",
-            )
-        }
-        return ok
+        val got = runCatching { uniffi.ducat_mobile.moneroBlockRef(url, height.toULong()) }
+            .getOrNull() ?: return Verdict.UNKNOWN
+        if (got.hashHex.isBlank()) return Verdict.UNKNOWN
+        synchronized(this) { remember(height, got.hashHex) }
+        if (got.hashHex.equals(hashHex, true)) return Verdict.CONFIRMED
+        DucatLog.w(TAG, "a notice claims block $height with a hash that block does not have")
+        return Verdict.WRONG
+    }
+
+    /** Caller already holds the lock. */
+    private fun remember(height: Long, hashHex: String) {
+        // Bounded by the window it serves, with room for the churn either
+        // side of it. Cleared wholesale rather than evicted one at a time:
+        // this is a cache of public facts, and losing it costs lookups.
+        if (hashes.size > 4 * 720) hashes.clear()
+        hashes[height] = hashHex
     }
 }

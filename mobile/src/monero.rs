@@ -763,10 +763,19 @@ pub fn monero_block_time(node_url: String, height: u64) -> Result<u64, MoneroErr
 /// The chain's tip height and the hash of one block, for a board stamp
 /// (§16.18.1).
 ///
-/// Two answers in one round trip because a reader wants both together: the
-/// height decides cheaply whether a notice is even worth checking, and the
-/// hash is the half that cannot be forged. `at_height` of zero asks only for
-/// the tip.
+/// Two answers because a reader wants both together: the height decides
+/// cheaply whether a notice is even worth checking, and the hash is the half
+/// that cannot be forged.
+///
+/// **`at_height` of zero means the tip — and returns the tip's hash.** Not
+/// "the height alone": a reader polls for the tip every few minutes anyway,
+/// and the tip is precisely the block honest posters are stamping against
+/// right now, so answering with its hash banks the height a board is about to
+/// name before the board is read. That is what makes the confirmation rule in
+/// §16.18.1 affordable to make a MUST — and it lets a poster stamp with one
+/// call rather than two. A height above the tip comes back with an empty hash
+/// rather than an error, because "not that I know of" is an answer the caller
+/// has a rule for: hold it.
 ///
 /// Deliberately not a batch of hashes. A sweep sees a handful of distinct
 /// heights — every honest poster in a cell stamps against roughly the same
@@ -799,14 +808,28 @@ pub fn monero_block_ref(node_url: String, at_height: u64) -> Result<BlockRef, Mo
             .latest_block_number()
             .await
             .map_err(|e| MoneroError::Failed(format!("height: {e:?}")))? as u64;
-        let hash_hex = if at_height == 0 || at_height > tip {
+        // `block_hash`, not `block_by_number(..).hash()`. The daemon's
+        // `on_get_block_hash` answers in 119 bytes; pulling the block to take
+        // its hash moves the whole thing to get thirty-two of it.
+        //
+        // Measured against stagenet before choosing: 119 B and 58 ms for one
+        // hash, against 624 KB and 880 ms for `get_block_headers_range` over
+        // the beacon window's 720 blocks. Even a reader forced to ask about
+        // every height in the window spends 86 KB — a seventh of the range
+        // call, which would have paid that in full, every session, mostly for
+        // heights nobody named. The range call is also `#[doc(hidden)]` in the
+        // crate and disclaimed from SemVer, which this is not.
+        let want = if at_height == 0 { tip } else { at_height };
+        let hash_hex = if want == 0 || want > tip {
             String::new()
         } else {
-            let block = rpc
-                .block_by_number(at_height as usize)
-                .await
-                .map_err(|e| MoneroError::Failed(format!("block: {e:?}")))?;
-            hex_of(&block.hash())
+            match rpc.block_hash(want as usize).await {
+                Ok(h) => hex_of(&h),
+                // A height the interface will not answer for is not a failure
+                // of the call: it is an answer of "not that I know of", and
+                // the caller's rule for an unconfirmable beacon is to hold it.
+                Err(_) => String::new(),
+            }
         };
         Ok(BlockRef { tip_height: tip, hash_hex })
     })

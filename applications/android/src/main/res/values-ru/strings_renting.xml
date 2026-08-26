@@ -31,6 +31,7 @@
     <string name="rent_private_note">Адрес, место встречи, как с тобой связаться — ничего из этого не попадает на доску. Отправляешь в переписке, когда договорились.</string>
     <string name="rent_private_label">Где встретиться и что нужно знать</string>
     <string name="rent_post_it">Разместить</string>
+    <string name="rent_post_failed">Объявление сохранено, но сейчас не попало на доску. Оно разместится само, как только появится сеть.</string>
     <string name="rent_cancel">Отмена</string>
     <string name="rent_discard_title">Выбросить это объявление?</string>
     <string name="rent_discard_body">Здесь ничего не сохранено. Всё, что набрано в этой форме, пропадёт, и черновика, к которому можно вернуться, нет.</string>

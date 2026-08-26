@@ -443,7 +443,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "bond.check", "slash.check",
         "contact.card", "contact.details", "log.head", "log.ring", "stand.shard", "stand.epoch", "message.chain",
         "message.payment", "hail.notice", "rental.listing", "board.sealed",
-        "board.beacon_window",
+        "board.beacon_window", "board.beacon_verdict",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -523,14 +523,18 @@ fn contact_vectors_pass() {
 
     for c in cases("contact") {
         let name = c["name"].as_str().unwrap();
-        let want_ok = c["expect"]["ok"].as_bool().unwrap();
+        // Lazy, like `want_code` beside it. Not every case in this file is a
+        // yes/no: `board.beacon_verdict` has three answers, and reading `ok`
+        // eagerly made adding a case with a richer expectation panic in the
+        // *other* cases' setup, which is a confusing way to find out.
+        let want_ok = || c["expect"]["ok"].as_bool().unwrap();
         let want_code = || c["expect"]["reject"].as_str().unwrap().to_string();
         match c["kind"].as_str().unwrap() {
             "contact.card" => {
                 let got = decode(&unhex(c["card_hex"].as_str().unwrap()))
                     .map_err(|e| e.into())
                     .and_then(ContactCard::from_value);
-                assert_eq!(got.is_ok(), want_ok, "{name}: {got:?}");
+                assert_eq!(got.is_ok(), want_ok(), "{name}: {got:?}");
                 match got {
                     Ok(card) => assert_eq!(
                         hexs(&card.to_value().encode()),
@@ -547,7 +551,7 @@ fn contact_vectors_pass() {
                 let got = decode(&unhex(c["details_hex"].as_str().unwrap()))
                     .map_err(|e| e.into())
                     .and_then(ContactDetails::from_value);
-                assert_eq!(got.is_ok(), want_ok, "{name}: {got:?}");
+                assert_eq!(got.is_ok(), want_ok(), "{name}: {got:?}");
                 match got {
                     Ok(d) => assert_eq!(
                         hexs(&d.to_value().encode()),
@@ -664,6 +668,35 @@ fn contact_vectors_pass() {
                 let got = tip == 0 || ducat_core::board::beacon_in_window(&beacon, tip);
                 assert_eq!(got, c["expect"]["ok"].as_bool().unwrap(), "{name}");
             }
+            // §16.18.1's whole freshness rule, three answers and all. The
+            // window above pins the range; this pins what a reader may *do*
+            // with a notice once it has looked — and in particular that "I
+            // cannot check that yet" is its own answer rather than a yes.
+            "board.beacon_verdict" => {
+                let mut hash = [0u8; 32];
+                hash.copy_from_slice(&unhex(c["beacon_hash"].as_str().unwrap()));
+                let beacon = ducat_core::board::Beacon {
+                    height: c["verdict_height"].as_u64().unwrap(),
+                    hash,
+                };
+                let known = c["known_hash"].as_str().map(|h| {
+                    let mut k = [0u8; 32];
+                    k.copy_from_slice(&unhex(h));
+                    k
+                });
+                let got = ducat_core::board::beacon_verdict(
+                    &beacon,
+                    c["verdict_tip"].as_u64().unwrap(),
+                    known.as_ref(),
+                );
+                let want = match c["expect"]["verdict"].as_str().unwrap() {
+                    "show" => ducat_core::board::BeaconVerdict::Show,
+                    "hold" => ducat_core::board::BeaconVerdict::Hold,
+                    "refuse" => ducat_core::board::BeaconVerdict::Refuse,
+                    other => panic!("{name}: unknown verdict {other}"),
+                };
+                assert_eq!(got, want, "{name}");
+            }
             "rental.listing" => {
                 let got = RentalNotice::from_value(
                     decode(&unhex(c["listing_hex"].as_str().unwrap())).unwrap());
@@ -740,7 +773,7 @@ fn contact_vectors_pass() {
                 let got = decode(&unhex(c["payment_hex"].as_str().unwrap()))
                     .map_err(|e| e.into())
                     .and_then(Message::from_value);
-                assert_eq!(got.is_ok(), want_ok, "{name}: {got:?}");
+                assert_eq!(got.is_ok(), want_ok(), "{name}: {got:?}");
                 match got {
                     Ok(m) => assert_eq!(
                         hexs(&m.to_value().encode()),
@@ -764,7 +797,7 @@ fn contact_vectors_pass() {
                         Err(e) => { failed_at = Some((i, format!("{:?}", e.code).to_uppercase())); break }
                     }
                 }
-                match (want_ok, failed_at) {
+                match (want_ok(), failed_at) {
                     (true, None) => {}
                     (true, Some((i, code))) => panic!("{name}: unexpected reject {code} at {i}"),
                     (false, None) => panic!("{name}: expected a reject, chain was accepted"),

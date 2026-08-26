@@ -426,6 +426,17 @@ pub const BEACON_BLOCKS: u64 = 720;
 /// Two blocks: long enough that the ordinary case of a node a minute or two
 /// stale does not refuse a fresh notice, short enough that it is not a window
 /// anybody can post into.
+///
+/// **Its limit, stated rather than discovered.** A reader whose node is more
+/// than two blocks — four minutes — behind the chain refuses fresh notices
+/// outright rather than holding them, because this bound is the *decoder's*
+/// and a decoder has only accept and reject. That is the right shape for
+/// occupancy, where a made-up height must not be allowed to squat a slot, and
+/// it is a real edge for anybody pointed at a node that is itself still
+/// syncing. The severe version of the same failure — a tip carried across a
+/// restart and a week out of date — is handled where it belongs, in the
+/// reader's own state: a height it could not refresh is not treated as a tip
+/// at all, and no-chain-view shows notices rather than hiding them.
 pub const BEACON_AHEAD: u64 = 2;
 
 /// Is a notice's beacon recent enough to have been mined against, given what
@@ -440,6 +451,65 @@ pub const BEACON_AHEAD: u64 = 2;
 pub fn beacon_in_window(beacon: &Beacon, tip_height: u64) -> bool {
     beacon.height <= tip_height.saturating_add(BEACON_AHEAD)
         && beacon.height + BEACON_BLOCKS >= tip_height
+}
+
+/// What a reader may do with a notice, once it has looked at the beacon.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BeaconVerdict {
+    /// Confirmed, or this device has no chain view and never claimed to.
+    Show,
+    /// **Cannot say yet.** Not a synonym for [`BeaconVerdict::Show`].
+    Hold,
+    /// Outside the window, or that height does not carry that hash.
+    Refuse,
+}
+
+/// The whole of §16.18.1's freshness rule, in one place both implementations
+/// can be held to.
+///
+/// It lives here rather than in [`open`] because it needs a chain and `open`
+/// must be a pure function of its arguments — but it is still a *decision the
+/// protocol makes*, not a matter of local taste, so it is written down and
+/// pinned by `board.beacon_verdict` rather than left to each reader's prose.
+///
+/// **Three answers, and the third is the point.** The cheap half — is the
+/// height inside the window — is free and forgeable on its own: Monero aims
+/// at a block every two minutes, so a height months out is predictable to
+/// within a few hundred, and an attacker can mine a spread of future heights
+/// against block hashes they simply invented. Every reader that stops at the
+/// height comparison takes all of them, and precomputation is back in full.
+/// So `known_hash` of `None` — the height is above this reader's tip, or the
+/// lookup failed, or its budget was spent — is [`BeaconVerdict::Hold`], never
+/// `Show`. It becomes knowable in minutes.
+///
+/// `tip_height` of zero is the one case that skips everything: a device with
+/// no chain view at all judges a notice on its signature and its work, which
+/// is what it did before beacons existed. Reading a board has never required
+/// a Monero node, and a marketplace that goes dark because a daemon is
+/// unreachable is a worse answer than the spam it was avoiding.
+///
+/// A reader deciding **occupancy** rather than display — a poster asking
+/// which slots are spoken for — uses [`beacon_in_window`] directly and
+/// deliberately: a notice it merely cannot confirm *yet* is most likely an
+/// honest one from a node slightly ahead, and writing over it would do the
+/// damage this exists to prevent.
+#[must_use]
+pub fn beacon_verdict(
+    beacon: &Beacon,
+    tip_height: u64,
+    known_hash: Option<&[u8; 32]>,
+) -> BeaconVerdict {
+    if tip_height == 0 {
+        return BeaconVerdict::Show;
+    }
+    if !beacon_in_window(beacon, tip_height) {
+        return BeaconVerdict::Refuse;
+    }
+    match known_hash {
+        None => BeaconVerdict::Hold,
+        Some(h) if *h == beacon.hash => BeaconVerdict::Show,
+        Some(_) => BeaconVerdict::Refuse,
+    }
 }
 
 #[cfg(test)]

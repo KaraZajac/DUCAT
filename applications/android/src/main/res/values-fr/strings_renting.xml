@@ -31,6 +31,7 @@
     <string name="rent_private_note">L\'adresse, le lieu de rendez-vous, comment te joindre — rien de tout cela ne va sur le tableau. Tu l\'envoies dans la conversation une fois que c\'est convenu.</string>
     <string name="rent_private_label">Où se retrouver, et ce qu\'il faut savoir</string>
     <string name="rent_post_it">Publier</string>
+    <string name="rent_post_failed">L’annonce est enregistrée, mais elle n’a pas pu aller sur un tableau pour l’instant. Elle y montera d’elle-même dès que le réseau sera joignable.</string>
     <string name="rent_cancel">Annuler</string>
     <string name="rent_discard_title">Jeter cette annonce ?</string>
     <string name="rent_discard_body">Rien n\'est enregistré ici. Tout ce qui a été tapé dans ce formulaire est perdu, et il n\'y a aucun brouillon où revenir.</string>

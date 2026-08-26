@@ -31,6 +31,7 @@
     <string name="rent_private_note">地址、在哪儿碰面、怎么联系你——这些都不会上公告板。谈妥之后，你在对话里发过去。</string>
     <string name="rent_private_label">在哪儿碰面，以及他们需要知道什么</string>
     <string name="rent_post_it">发布</string>
+    <string name="rent_post_failed">信息已保存，但现在还没能贴上板。等网络可用时会自动贴上去。</string>
     <string name="rent_cancel">取消</string>
     <string name="rent_discard_title">放弃这条发布？</string>
     <string name="rent_discard_body">这里还没有保存任何内容。填进这张表单的东西都会丢掉，也没有草稿可以回来接着写。</string>

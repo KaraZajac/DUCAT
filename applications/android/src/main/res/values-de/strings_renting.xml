@@ -31,6 +31,7 @@
     <string name="rent_private_note">Die Adresse, wo ihr euch trefft, wie man dich erreicht — nichts davon kommt aufs Brett. Das schickst du im Gespräch, sobald ihr euch einig seid.</string>
     <string name="rent_private_label">Wo ihr euch trefft, und was sie wissen müssen</string>
     <string name="rent_post_it">Einstellen</string>
+    <string name="rent_post_failed">Das Inserat ist gespeichert, kam aber gerade nicht auf ein Brett. Es geht von selbst hoch, sobald das Netz erreichbar ist.</string>
     <string name="rent_cancel">Abbrechen</string>
     <string name="rent_discard_title">Dieses Inserat verwerfen?</string>
     <string name="rent_discard_body">Hier ist nichts gespeichert. Alles, was in dieses Formular getippt wurde, ist weg, und einen Entwurf zum Zurückkommen gibt es nicht.</string>

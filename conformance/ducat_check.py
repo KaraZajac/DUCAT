@@ -1493,6 +1493,42 @@ def run_beacon_window(cases, r):
             r.passed += 1
 
 
+def beacon_verdict(height, beacon_hash, tip_height, known_hash):
+    """§16.18.1's whole freshness rule — and it has three answers.
+
+    The window is free to check and secures nothing on its own. Monero aims at
+    a block every two minutes, so a height months out is predictable to within
+    a few hundred: an attacker mines a spread of future heights against block
+    hashes they invented, and a reader that stops at the height comparison
+    accepts every one of them. So "I cannot check that yet" is `hold`, never
+    `show`, and it becomes checkable within minutes.
+
+    A tip of zero is the one case that skips everything — a device with no
+    chain view at all, judging the notice on its signature and its work, which
+    is what reading a board has always meant.
+    """
+    if tip_height == 0:
+        return "show"
+    if not beacon_in_window(height, tip_height):
+        return "refuse"
+    if known_hash is None:
+        return "hold"
+    return "show" if known_hash == beacon_hash else "refuse"
+
+
+def run_beacon_verdict(cases, r):
+    for c in cases:
+        got = beacon_verdict(
+            c["verdict_height"], c["beacon_hash"], c["verdict_tip"], c.get("known_hash"),
+        )
+        want = c["expect"]["verdict"]
+        if got != want:
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"verdict {got}, expected {want}")
+        else:
+            r.passed += 1
+
+
 def run_listing(cases, r):
     for c in cases:
         def go(c=c):
@@ -2010,6 +2046,7 @@ BY_KIND = {
     "rental.listing": run_listing,
     "board.sealed": run_board_sealed,
     "board.beacon_window": run_beacon_window,
+    "board.beacon_verdict": run_beacon_verdict,
     "message.payment": run_message_payment,
     "message.chain": run_message_chain,
     "escrow.ceremony": run_escrow_ceremony,

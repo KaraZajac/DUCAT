@@ -2291,10 +2291,19 @@ public object FfiConverterTypeBillLine: FfiConverterRustBuffer<BillLine> {
  * The chain's tip height and the hash of one block, for a board stamp
  * (§16.18.1).
  *
- * Two answers in one round trip because a reader wants both together: the
- * height decides cheaply whether a notice is even worth checking, and the
- * hash is the half that cannot be forged. `at_height` of zero asks only for
- * the tip.
+ * Two answers because a reader wants both together: the height decides
+ * cheaply whether a notice is even worth checking, and the hash is the half
+ * that cannot be forged.
+ *
+ * **`at_height` of zero means the tip — and returns the tip's hash.** Not
+ * "the height alone": a reader polls for the tip every few minutes anyway,
+ * and the tip is precisely the block honest posters are stamping against
+ * right now, so answering with its hash banks the height a board is about to
+ * name before the board is read. That is what makes the confirmation rule in
+ * §16.18.1 affordable to make a MUST — and it lets a poster stamp with one
+ * call rather than two. A height above the tip comes back with an empty hash
+ * rather than an error, because "not that I know of" is an answer the caller
+ * has a rule for: hold it.
  *
  * Deliberately not a batch of hashes. A sweep sees a handful of distinct
  * heights — every honest poster in a cell stamps against roughly the same

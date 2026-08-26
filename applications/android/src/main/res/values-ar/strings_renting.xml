@@ -31,6 +31,7 @@
     <string name="rent_private_note">العنوان، مكان اللقاء، كيفية الوصول إليك — لا شيء من هذا يوضع على اللوحة. ترسله في المحادثة بعد الاتفاق.</string>
     <string name="rent_private_label">مكان اللقاء وما يحتاج معرفته</string>
     <string name="rent_post_it">انشره</string>
+    <string name="rent_post_failed">‏تم حفظ الإعلان، لكن تعذّر نشره على لوحة الآن. سيُنشر تلقائيًا بمجرد توفّر الشبكة.</string>
     <string name="rent_cancel">إلغاء</string>
     <string name="rent_discard_title">أتحذف هذا الإعلان؟</string>
     <string name="rent_discard_body">لم يُحفظ هنا شيء. كل ما كُتب في هذه الاستمارة يضيع، ولا مسودة تعود إليها.</string>

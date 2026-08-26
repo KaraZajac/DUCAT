@@ -31,6 +31,7 @@
     <string name="rent_private_note">Adres, nerede buluşacağınız, sana nasıl ulaşacakları — hiçbiri panoya çıkmaz. Anlaştıktan sonra sohbette gönderirsin.</string>
     <string name="rent_private_label">Nerede buluşacağınız ve bilmeleri gerekenler</string>
     <string name="rent_post_it">Yayınla</string>
+    <string name="rent_post_failed">İlan kaydedildi ama şu anda panoya çıkamadı. Ağa erişilir erişilmez kendiliğinden yayınlanacak.</string>
     <string name="rent_cancel">Vazgeç</string>
     <string name="rent_discard_title">Bu ilan silinsin mi?</string>
     <string name="rent_discard_body">Burada hiçbir şey kaydedilmedi. Bu forma yazılan her şey gider ve dönülecek bir taslak yok.</string>

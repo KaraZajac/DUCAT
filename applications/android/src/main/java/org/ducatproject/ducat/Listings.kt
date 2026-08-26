@@ -369,6 +369,15 @@ object Listings {
                 val name = uniffi.ducat_mobile.standShardName(standNow(boardName(cell)), shard)
                 val taken = runCatching { uniffi.ducat_mobile.standRead(name) }
                     .getOrDefault(emptyList())
+                    // **Occupancy, not display — and deliberately the looser
+                    // test.** This decides which slots are already spoken for
+                    // before this device writes. A notice whose block cannot
+                    // be confirmed *yet* is probably an honest poster whose
+                    // node is a little ahead of ours, and overwriting it would
+                    // do the damage the confirmation exists to prevent. So a
+                    // slot counts as taken on the signature, the work and the
+                    // window; only what is shown to somebody has to be
+                    // confirmed.
                     .mapNotNull { n ->
                         runCatching {
                             uniffi.ducat_mobile.rentalDecode(
@@ -743,6 +752,7 @@ object Listings {
         val raw = runCatching { uniffi.ducat_mobile.standRead(name) }.getOrNull() ?: return null
         onSlots(raw.size)
         val tip = Beacons.tip(context).toULong()
+        val budget = Beacons.budget()
         return raw.mapNotNull {
             // The slot is inside the signature, so it is an argument here and
             // not a detail: a notice that verifies for slot 3 is refused at
@@ -750,10 +760,20 @@ object Listings {
             runCatching {
                 uniffi.ducat_mobile.rentalDecode(it.data, name, it.subkey, tip)
             }.getOrNull()
-                // And the half that costs a lookup, for the notices that got
-                // this far: a height nobody checks is a number the poster
-                // chose, and the work is bound to the *hash* beside it.
-                ?.takeIf { n -> Beacons.agrees(context, n.beaconHeight.toLong(), n.beaconHash) }
+                // And the half that costs a lookup. **This is a display path,
+                // so nothing shows without a confirmed block.** The height
+                // test above is free and forgeable on its own: Monero's
+                // two-minute blocks make a height months away predictable to
+                // within a few hundred, so an attacker mines a spread of
+                // future heights against hashes they invented and every
+                // height-only reader takes them. Unknown is held, not shown —
+                // it becomes knowable within minutes, and a listing is not so
+                // urgent that it is worth showing one nobody has checked.
+                ?.takeIf { n ->
+                    tip == 0uL ||
+                        Beacons.confirm(context, n.beaconHeight.toLong(), n.beaconHash, budget) ==
+                        Beacons.Verdict.CONFIRMED
+                }
         }
             // A reader MUST drop an expired listing unrendered (§16.18) — and
             // one dated past the ceiling too. board.rs prices flooding by

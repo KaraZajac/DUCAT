@@ -31,6 +31,7 @@
     <string name="rent_private_note">주소, 만날 장소, 연락 방법 — 어느 것도 게시판에 올라가지 않습니다. 합의된 뒤에 대화로 보냅니다.</string>
     <string name="rent_private_label">만날 장소와 알아야 할 것</string>
     <string name="rent_post_it">올리기</string>
+    <string name="rent_post_failed">등록 내용은 저장했지만 지금은 게시판에 올리지 못했습니다. 네트워크가 연결되면 알아서 올라갑니다.</string>
     <string name="rent_cancel">취소</string>
     <string name="rent_discard_title">이 게시글을 버릴까요?</string>
     <string name="rent_discard_body">여기에는 아직 아무것도 저장되지 않았어요. 이 양식에 입력한 내용은 모두 사라지고, 돌아올 임시 저장본도 없어요.</string>
