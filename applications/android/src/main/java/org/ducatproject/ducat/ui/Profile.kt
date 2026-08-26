@@ -45,7 +45,20 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
     val store = remember { ContactStore(context) }
-    var c by remember { mutableStateOf(contact) }
+    // Read back from the store on every change rather than holding the
+    // snapshot this screen was opened with.
+    //
+    // It was a one-shot `mutableStateOf(contact)`, refreshed by hand in the
+    // one place that happened to remember to — so **"Accept" on a held
+    // payment address did its work and left the warning on screen**. The store
+    // logged the change, the money would have gone to the new address, and the
+    // red card still said a card wanted to change it, with no way to tell
+    // whether the tap had landed. Anything arriving from the poller while the
+    // screen is open was invisible the same way.
+    val version by ContactStore.changes.collectAsState()
+    val c = remember(version, contact.personaHex) {
+        store.all().firstOrNull { it.personaHex == contact.personaHex } ?: contact
+    }
     var petname by remember { mutableStateOf(contact.petname.orEmpty()) }
     var saved by remember { mutableStateOf(false) }
 
@@ -154,8 +167,9 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
             Spacer(Modifier.height(8.dp))
             Button(
                 onClick = {
+                    // No re-read here: `add` bumps the store and `c` is
+                    // derived from that.
                     store.add(c.copy(petname = petname.trim().ifBlank { null }))
-                    c = store.all().first { it.personaHex == c.personaHex }
                     saved = true
                 },
                 // Only when there is something to save. It was always live, so
