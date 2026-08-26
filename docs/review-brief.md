@@ -25,10 +25,10 @@ threshold escrow (FROST) for bonded rides and reservations.
 
 | What | Where | Why you would read it |
 |---|---|---|
-| The specification | [`ducat-protocol.md`](../ducat-protocol.md) | The normative document. Draft 0.88. Changelog first. |
+| The specification | [`ducat-protocol.md`](../ducat-protocol.md) | The normative document. Draft 0.89. Changelog first. |
 | Reference implementation | [`core/`](../core) | Rust. The vectors are generated from it. |
 | Conformance vectors | [`vectors/v1/`](../vectors/v1) | 305 cases + schema — the published artifact. |
-| Second implementation | [`conformance/ducat_check.py`](../conformance/ducat_check.py) | An independent reading of the spec, in Python. It agrees on all 241. |
+| Second implementation | [`conformance/ducat_check.py`](../conformance/ducat_check.py) | An independent reading of the spec, in Python. It agrees on all 305. |
 | Spec audit | [`conformance/audit_spec.py`](../conformance/audit_spec.py) | Catches prose that stopped describing the code. |
 | Clients | [`applications/`](../applications) | Android + desktop, one shared implementation. |
 | Wire bridge | [`mobile/`](../mobile) | UniFFI wrapper. Adds no logic, by rule. |
@@ -57,11 +57,19 @@ co-signer today sees a fee, **not** an itemised destination list — this is a
 known, stated weakness, see "what we already know" below), a captured arbiter,
 a party who can strand funds rather than merely refuse.
 
-**3. The public boards (§15.12).** A geocell is a DHT record whose address is
-derived from the place itself — anyone can read or write one. Hails are
-claim-once cards; the DHT referees the race. Attack: claim-stealing,
-board flooding, a driver who watches a cell they are nowhere near, correlation
-of a rider across hails, and the ~1.2 km coarseness claim.
+**3. The public boards (§15.12, §16.18.1).** A geocell is a DHT record whose
+address is derived from the place itself — anyone can read or write one. Hails
+and listings are claim-once cards; the DHT referees the race. A notice is
+signed by a per-listing key, carries an Argon2id proof of work, and — since
+0.89 — is stamped against a recent Monero block so the work perishes rather
+than being mineable a year ahead. Attack: claim-stealing, board flooding
+under the memory-hard cost, a driver who watches a cell they are nowhere
+near, correlation of a rider across hails, the ~1.2 km coarseness claim, and
+the beacon specifically — the freshness window (720 blocks back, 2 forward),
+the three-answer verdict (show / hold / refuse, where "cannot say" must never
+show), and the degraded read-only path a node outage forces a reader into.
+This is the newest surface and the least reviewed; the changelog entry for
+0.89 states the whole argument.
 
 **4. Money handling.** Subaddress-per-contact attribution, output-to-person
 matching by key image, the ten-block maturity rule, fee estimation, and the
@@ -95,6 +103,20 @@ Reviewing this list back to us is not useful; breaking something *not* on it is.
   `core/` to build from the document alone. Nobody has.
 - **The latency figures in §8.7.2** are a desktop with an attached node, not a
   handset.
+- **A board reader with no Monero node cannot check freshness** and falls
+  back to signature-and-work alone — marked in the UI, but it means an
+  attacker who can keep a specific reader's node unreachable (and only that
+  reader) downgrades them to a class that accepts stale-but-signed spam. We
+  treat this as an accepted trade, not a hole; tell us if the DoS-then-spam
+  play is worth more than we think.
+- **The board proof of work still does not stop slot *denial*.** A junk
+  write with no valid stamp still occupies a DHT subkey; the stamp prices
+  readable spam, not availability. Weekly board-generation rotation is the
+  only answer, and it costs an attacker only 128 writes a week to defeat.
+- **No sybil cost on identities.** A persona and a per-listing key are both
+  free to mint from a hash, so every board defence is a throughput speed
+  bump, never a wall. The §9.2 reputation weight that would anchor this to
+  proximity is designed but unbuilt.
 - One stated privacy trade: address search, routing and map tiles query
   OpenStreetMap's servers — the single place location leaves the device.
 

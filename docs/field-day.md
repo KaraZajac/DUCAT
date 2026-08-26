@@ -11,7 +11,10 @@ network and stagenet; there is no lab setup to carry.
 
 ## Before leaving the desk
 
-1. Install the release on both phones — phone browser:
+1. **Cut a fresh release first** (`./release.sh` from master) — the latest
+   tag predates draft 0.89, and a 0.88 phone cannot read a 0.89 board at
+   all (the stamp fields are unknown to its strict reader; both directions
+   refuse by design). Then install on both phones — phone browser:
    `https://github.com/KaraZajac/DUCAT/releases/latest/download/app-arm64-v8a-debug.apk`
 2. Onboard both; **name them differently** (two contacts with the same
    display name has burned us — threads get opened on the wrong person).
@@ -51,7 +54,9 @@ these tasks at a mainnet state.
 4. Start the standing arbiter on the laptop and leave it running all day
    (its DKG machines are in-memory — restarting it mid-ceremony strands
    that ceremony):
-   `DUCAT_DESK_STATE=/home/kara/ducat-arbiter ./gradlew :desktop:arbiter`
+   `DUCAT_DESK_STATE=/home/kara/ducat-arbiter ./gradlew :desktop:arbiter --args="--name Marta"`
+   (the name rides its card; an arbiter that says who it is gets flipped
+   on with more confidence)
    Pair BOTH phones to it (`--args="--issue"` prints a card once), and on
    each phone flip the arbiter contact's **Escrow-arbiter** switch.
 5. On each phone, open the other's profile and confirm a payto address is
@@ -82,7 +87,11 @@ The §15 core gesture. Compile-verified only; assume nothing.
 Real GPS at last (the emulator's `geo fix` lied to us; a real phone won't).
 
 1. Phone 1 (rider): hail from where you stand — destination a few blocks
-   away, check the quoted fare against the route.
+   away, check the quoted fare against the route. Since 0.89 the post is
+   **stamped against a recent Monero block**: it needs the node reachable
+   (a clear sentence says so if not), and the stamp itself is a second or
+   two of mining — an unlucky draw is ten; the button holds a spinner, so
+   a pause here is the search, not a hang.
 2. Phone 2 (driver): Drive mode, watch the live map, find the notice,
    read the job card (pickup distance, trip, payout), claim it.
 3. Rider sees the acceptance with the driver's face/car/plate; driver
@@ -98,7 +107,9 @@ accept (arbiter set) → banner builds the escrow → rider funds → both
 sides flip to "fare secured" **by their own scan** → driver Complete →
 rider consent tap → paid. If funding is younger than ten blocks the
 release refuses with "the fare needs N more confirmation(s)" — that is
-maturity, not failure; wait and retry with the banner's retry.
+maturity, not failure, and since 0.89 the phone retries it **by itself,
+pocketed included**, for the hour the banner's sentence is worth. Pocket
+the phone and check back; pressing the banner's retry only hurries it.
 
 ## Pass 4 — 2-of-2 mutual stakes (proven off-hardware; re-run here)
 
@@ -160,7 +171,27 @@ are unchanged; what hardware adds is two independent clocks and two radios.
    deposits. Checkout: guest deposit comes home, rent + host deposit −
    fee to the host. Verify all three numbers on chain.
 
-## Pass 8 — battery (runs all afternoon by itself)
+## Pass 8 — the phone swap (restore on real hardware; run LAST, it wipes)
+
+Proven twice on emulators (2026-08-26), shop and till included — what
+hardware adds is the OEM's own file picker and share sheet, which is where
+a restore meets the real world. **Run it at the end of the day**: it wipes
+a phone, and every pass after it would pay the fresh node's attach.
+
+1. Phone 2: Settings → Backup → passphrase → Export; save the `.ducatbak`
+   somewhere findable (Drive/Files — note where the OEM sheet puts it).
+2. Clear DUCAT's data (or uninstall/reinstall).
+3. Onboard → "I already have a backup" → pick the file → passphrase. The
+   confirm screen shows the restored wallet address — check it.
+4. Expect back: name, contacts, threads (attachments re-fetch), **your
+   listings and till items** (new in 0.89), and the balance after a
+   rescan (~20 min stagenet; the note says it is partial until done).
+5. Messaging resumes when the fresh Veilid identity attaches. If it sits
+   at "Attaching" for more than ~10 min, **cycle airplane mode** — that
+   re-runs network detection, which an app restart does not, and took an
+   emulator from zero to 55 peers in a minute.
+
+## Pass 9 — battery (runs all afternoon by itself)
 
 Note both phones' battery % when you leave the desk and each hour after.
 The poller backgrounds to ~20 sweeps/hour; the claim to verify is that an
@@ -169,8 +200,9 @@ Screen-on time will dominate — note it so the number is honest.
 
 ## What the field day unblocks
 
-- **Live position after the accept** (§15.12): spec'd and waiting for a
-  real ride on real GPS to build against.
+- **Live position after the accept** (§15.12): building now, ahead of the
+  day — so Pass 2's ride can carry it and real GPS judges it, instead of
+  the build waiting on the day and the day waiting on the build.
 - True §8.7.2 latency figures from a handset.
 - The README's "what is not proven" paragraph loses four entries.
 
@@ -185,5 +217,21 @@ Screen-on time will dominate — note it so the number is honest.
   safe to mash.
 - **Same-name contacts** open wrong threads. Name the phones differently
   at onboarding.
-- If a ceremony wedges (a phone died mid-DKG), abandon it and start a
-  fresh ride — ceremonies are cheap; debugging one in the field is not.
+- **A ceremony that stalls now heals itself** (0.89): a lost round is
+  re-sent every three minutes, so give a quiet build five minutes before
+  judging it. What still strands one is a phone *dying* mid-DKG — the
+  machine is in-memory — and for that the building banner now has **Call
+  it off**; press it and start a fresh ride rather than debugging in the
+  field.
+- **Posting needs the Monero node; reading does not.** A phone that
+  cannot reach a node cannot put a hail or listing up (it says so), but
+  boards still read — marked with a small "could not be checked against
+  the chain" note. That note appearing on a healthy afternoon means the
+  node picker is struggling, not that the board is compromised.
+- **A freshly onboarded or restored phone has no exchange rate yet** —
+  fiat-priced posting sits disabled until the first rate fetch, a minute
+  or so after the network attaches. It looks like a dead button and is a
+  cold start.
+- If read receipts are wanted for the day, flip **Send read receipts** on
+  both phones at setup — ✓ is delivered, ✓✓ is read, and the second tick
+  is the §16.16 watermark doing its job across the DHT.

@@ -254,6 +254,12 @@ money. Ordered by what blocks 1.0, not by effort.
 - ~~**"Break a note" card shows on a zero-balance wallet**~~ **Fixed,
   0.88** — the card now fires only when money exists (hasMoney/allLocked
   guards in BalanceCard); an empty wallet says nothing.
+- **The pre-1.0 flow sweeps (2026-08-25/26)** cleared the tail of these
+  as they surfaced: a hail card showing two contradictory statuses, a
+  chat-list preview leaking "ceremony: called off", a consent line
+  promising a 2-of-2 while building a 2-of-3, a driver quoted a fee-less
+  figure, the marketplace's own back-button and dirty-form paths. Each is
+  in git under its own commit; the list is no longer a standing backlog.
 
 ## The counter — modes that take money (0.88, 2026-08-19)
 
@@ -280,13 +286,25 @@ another rail, and neither is a refund. The open question is what the
 customer's Activity should show when money comes back, which is a design
 question before it is a build.
 
-## The local board — marketplace, hire, and any rental (pre-1.0)
+## The local board — marketplace, hire, and any rental (SHIPPED, 0.88–0.89)
 
 One board, several nouns. A room, a car, a kayak, a bike to sell, an
 afternoon of an electrician's time — all the same act: somebody says what
-they have, near where they are, and somebody nearby answers. The listings
-machinery, the geocell boards, claim-once cards, enquiries and the
-reservation escrow already carry most of it.
+they have, near where they are, and somebody nearby answers.
+
+**All five kinds ship and are chain-proven.** Places and vehicles (the
+reservation), gear (`KIND_GEAR`), a sale (`KIND_SALE`), and skills by the
+hour (`KIND_SKILL`) — one board name `local:$cell` carrying a kind field.
+Marketplace sale `284eb311` and gear hire `709f4d38` ran two-client on
+2026-08-25; a full sell→enquire→reserve→settle purchase ran again on
+2026-08-26 (release `34ffbcfd`) as part of the pre-1.0 sweep. A listing
+carries a per-listing quantity (0.88), an Argon2id + Monero-beacon stamp
+(0.89), and survives backup/restore (0.89). What is left for the board is
+the field day (real GPS, real boards) and the adversarial review — the
+beacon surface is the newest and least-reviewed part of it.
+
+The design constraints below held; they are kept as the record of what the
+shape forbids, not as open questions.
 
 **What this is for, and what that forbids.** This is meant to put people
 in front of each other — a village notice board, not a feed. That is a
@@ -310,61 +328,50 @@ minutes at worst, so an endless feed is not available even if somebody
 wanted one. What is available is "what is near me, one board, cached,
 refreshed behind the screen" — which is the thing being aimed at anyway.
 
-- **Any rental — gear (`KIND_GEAR`).** Kayaks, bikes, skis, a pressure
-  washer. Nearly free: `Stakes.Deal.Vehicle`'s own docstring already reads
-  "a vehicle **or equipment**: the asset outlives the rental many times",
-  so the stake, the deposit and the release are the ones that exist. A
-  third button on the form that posts a car, minus year and seats. Do this
-  first; it is proven the same day.
+- ~~**Any rental — gear (`KIND_GEAR`).**~~ **Shipped.** Reused
+  `Stakes.Deal.Vehicle` (its docstring already read "a vehicle **or
+  equipment**"), a third button on the form minus year and seats. Proven
+  `709f4d38`.
 
-- **Local marketplace — selling a thing (`KIND_SALE`).** The one with a
-  genuinely new escrow leg: a sale has **no deposit and nothing comes
-  back**, so the "deposits come home in the split release" logic that
-  makes releasing beat sulking does not apply. Needs its own shape —
-  price plus a stake each side, released on handover — and a new
-  `Stakes.Deal`. What makes it worth building is not the payment: escrow
-  answers the exact fear that makes meeting a stranger to buy a bike
-  miserable in both directions, where every platform answers it with
-  ratings and a support queue.
+- ~~**Local marketplace — selling a thing (`KIND_SALE`).**~~ **Shipped.**
+  The one with a genuinely new escrow leg: a sale has no deposit and
+  nothing comes back, so it got its own shape — price plus a stake each
+  side, released on handover — and its own `Stakes.Deal`. Proven
+  `284eb311`, and again `34ffbcfd` on 2026-08-26.
 
-- **Hire help — skills by the hour (`KIND_SKILL`).** An electrician, a
-  plumber, somebody to help move a sofa. Priced hourly rather than per
-  day; released on both saying the work is done, which is close enough to
-  the ride's split release to reuse it. Worth naming separately from
-  selling because the economics differ: for day labour the platform's cut
-  *is* the margin, so removing the operator is the whole product.
+- ~~**Hire help — skills by the hour (`KIND_SKILL`).**~~ **Shipped.**
+  Priced hourly, released on both saying the work is done, reusing the
+  ride's split release. Skill listings carry no quantity (an hour of one
+  person's time cannot be stocked — core refuses it).
 
 **Decided:** one board name (`local:$cell`) carrying a kind field, not one
 board per noun — every extra board name multiplies the read cost above,
 and the reads are the binding constraint.
 
-**Not decided, and worth settling before building:**
+**Settled in the building:**
 
-- *Categories.* Professions especially: the category **is** the search, so
-  it cannot be free text alone — but a taxonomy is a translation
-  liability across nineteen languages, it dates, and people do not fit it
-  (most tradespeople are the handyman who also does electrics). Leaning
-  towards a small flat set, eight to twelve, plus free text for what
-  somebody actually does, with the categories understood as a coarse
-  filter rather than a directory. Item categories for the marketplace are
-  wide open.
-- *Whether these are modes or listings.* Argued as listings rather than
-  operating modes: a mode answers "what is this device for right now" —
-  a till, a meter, a counter — and "I am a plumber" stays true while its
-  owner is asleep. One place holding everything somebody has put on a
-  board, because a real person rents out a kayak *and* sells a bike *and*
-  wires a socket, and three modes would mean switching between listings
-  that do not conflict.
-- *The sale escrow's abandonment rule.* A rental that is never returned
-  has a deposit to take from. A sale where nobody turns up has neither
-  party at fault and no asset to point at.
+- *Categories.* Landed as a small flat set per noun plus free text —
+  §16.18's `RN_SUBTYPE`, with per-kind tops pinned in the vectors and
+  `audit_spec.py` holding the §16.18 category table to the code. A coarse
+  filter, not a directory, exactly as leaned toward.
+- *Modes or listings.* Listings, as argued — Marketplace/Renting/Hire are
+  browsing shells over one board, and a listing stays true while its owner
+  sleeps. The browsing-vs-shift distinction that fell out of this is its
+  own robustness fix (0.88, the leave-arrow shells).
+- *The sale escrow's abandonment rule.* A sale where nobody turns up has
+  no asset to point at and neither party at fault, so it leans on the same
+  mutual-stake burn as a ride: releasing beats sulking because both stakes
+  are hostage, and an unanswered build goes stale on its own (30 min) with
+  nothing at risk. Still the softest corner of the shape, and named for the
+  reviewer.
 
-**Sequencing note.** Placed before 1.0 by decision (2026-08-19). The
-recorded risk: each is a new surface where money moves, and every money
-surface examined in the 0.88 sweep had a real defect in it. Landing two
-new ones before the adversarial review means the review covers more,
-later. Gear is the cheap one and carries almost none of this; marketplace
-and hire carry most of it.
+**Sequencing note (met).** Placed before 1.0 by decision (2026-08-19), on
+the recorded risk that each new money surface had carried a real defect in
+the 0.88 sweep. That risk paid out exactly as feared and exactly as
+intended: the 2026-08-25/26 sweeps found and fixed a dozen defects across
+these flows (counter role-swaps, the fee attribution, the fare-arrival
+race, the settled-without-us gap, the backup omission) *before* the review
+rather than during it.
 
 ## Validation — before the number says 1.0
 
@@ -378,7 +385,15 @@ and hire carry most of it.
   left is the radio itself, which needs two handsets.
 - **Two-phone field day for dispatch.** Post, sweep, claim, offer/accept,
   drive, geofenced bill-on-arrival, receipt — all phone-to-phone, no
-  harness.
+  harness. (The software half is proven on emulators end to end; what the
+  day adds is real GPS and two radios — see `docs/field-day.md`.)
+- ~~**Backup / restore round trip.**~~ **Proven off-hardware, 0.89
+  (2026-08-26)** — full wipe-and-restore on two emulators: persona,
+  contacts, threads, listings, till, wallet address and post-rescan
+  balance all returned, and the restored phone sent and received once its
+  fresh Veilid identity attached. The hardware re-run is folded into the
+  field day (Pass 8) because the OEM file picker and share sheet are the
+  only untested part.
 - **External adversarial review.** §2.5 still says "no adversarial review
   whatsoever," deliberately. 1.0 is the moment that stops being a
   deferral and becomes a gap. Scope: the spec's crypto ceremonies and the
