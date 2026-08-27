@@ -2643,7 +2643,18 @@ private fun RideBondBanner(contact: Contact) {
             val fareShown = Amounts.show(context, fare).primary
             when {
                 stage == "committed" || stage == "shared" -> {
-                    BondLine(spin = true, text = stringResource(R.string.bond_building, fareShown))
+                    // A build this phone cannot finish is not a build. The
+                    // DKG machine is in memory, so a phone that died between
+                    // the first frame and the last took it with it; Ceremony
+                    // records that when the frames start coming back refused,
+                    // and without this the spinner went on promising
+                    // something already over.
+                    val lost = ride.optBoolean("lostMachine", false)
+                    BondLine(
+                        spin = !lost,
+                        text = if (lost) stringResource(R.string.bond_build_lost)
+                        else stringResource(R.string.bond_building, fareShown),
+                    )
                     // The build has no end of its own either. It normally
                     // takes a minute or two of round trips, and a frame that
                     // never arrives is re-sent by Ceremony.nudge — but a

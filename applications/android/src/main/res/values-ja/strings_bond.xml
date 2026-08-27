@@ -69,6 +69,7 @@
     <string name="bond_will_retry">自動でもう一度試します。</string>
     <string name="bond_release_asked">すでに依頼されています。通るまで自動で試み続けます — アプリを閉じてかまいません。</string>
     <string name="bond_call_off">この取引をやめる</string>
+    <string name="bond_build_lost">この端末は作成中のエスクローを見失いました。完了できません。取り消してやり直してください — まだ何も支払われていません。</string>
     <string name="bond_retry_in">自動でもう一度試します — 残り %1$s。</string>
     <string name="bond_close_ask">ボンドを解消しますか？</string>
     <string name="bond_close_all_to_them">%1$s がボンドを解消し、預り金の全額 %2$s を受け取ろうとしています。あなたには何も戻りません。</string>

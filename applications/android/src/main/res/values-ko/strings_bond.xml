@@ -69,6 +69,7 @@
     <string name="bond_will_retry">자동으로 다시 시도합니다.</string>
     <string name="bond_release_asked">이미 요청하셨습니다. 처리될 때까지 알아서 다시 시도합니다 — 앱을 닫아도 됩니다.</string>
     <string name="bond_call_off">거래 취소</string>
+    <string name="bond_build_lost">이 기기가 생성 중이던 에스크로를 놓쳤습니다. 마칠 수 없습니다. 취소하고 다시 시작하세요 — 지불된 것은 없습니다.</string>
     <string name="bond_retry_in">자동으로 다시 시도합니다 — %1$s 남았습니다.</string>
     <string name="bond_close_ask">본드를 종료할까요?</string>
     <string name="bond_close_all_to_them">%1$s 님이 본드를 종료하고 보증금 전액 %2$s을(를) 가져가려 합니다. 회원님께는 아무것도 돌아오지 않습니다.</string>

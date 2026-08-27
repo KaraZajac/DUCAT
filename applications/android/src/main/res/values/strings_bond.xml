@@ -70,6 +70,7 @@
     <string name="bond_will_retry">It will try again on its own.</string>
     <string name="bond_release_asked">You have asked for this. It keeps trying on its own until it goes through — you can leave the app.</string>
     <string name="bond_call_off">Call it off</string>
+    <string name="bond_build_lost">This phone lost track of the escrow being built — it cannot finish it. Call it off and start again; nothing has been paid.</string>
     <string name="bond_retry_in">It will try again on its own — %1$s left.</string>
     <string name="bond_close_ask">Close the bond?</string>
     <string name="bond_close_all_to_them">%1$s is asking to close the bond and take the whole deposit — %2$s. Nothing comes back to you.</string>

@@ -70,6 +70,7 @@
     <string name="bond_will_retry">यह अपने आप फिर कोशिश करेगा।</string>
     <string name="bond_release_asked">आपने यह माँग लिया है। यह अपने आप कोशिश करता रहेगा जब तक हो न जाए — आप ऐप बंद कर सकते हैं।</string>
     <string name="bond_call_off">सौदा रद्द करें</string>
+    <string name="bond_build_lost">यह फ़ोन बन रहे एस्क्रो का सूत्र खो चुका है और उसे पूरा नहीं कर सकता। रद्द करके फिर से शुरू करें — कुछ भी नहीं चुकाया गया है।</string>
     <string name="bond_retry_in">यह अपने आप फिर कोशिश करेगा — %1$s बाकी।</string>
     <string name="bond_close_ask">बॉन्ड बंद करें?</string>
     <string name="bond_close_all_to_them">%1$s बॉन्ड बंद करके पूरी जमा राशि लेना चाहते हैं — %2$s। आपको कुछ वापस नहीं आएगा।</string>

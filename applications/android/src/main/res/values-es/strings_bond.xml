@@ -70,6 +70,7 @@
     <string name="bond_will_retry">Se volverá a intentar automáticamente.</string>
     <string name="bond_release_asked">Ya lo has pedido. Seguirá intentándolo por su cuenta hasta que salga — puedes salir de la app.</string>
     <string name="bond_call_off">Cancelar el trato</string>
+    <string name="bond_build_lost">Este teléfono ha perdido el hilo del depósito en construcción y no puede terminarlo. Cancélalo y empieza de nuevo: no se ha pagado nada.</string>
     <string name="bond_retry_in">Se volverá a intentar automáticamente: quedan %1$s.</string>
     <string name="bond_close_ask">¿Cerrar el bono?</string>
     <string name="bond_close_all_to_them">%1$s pide cerrar el bono y llevarse todo el depósito: %2$s. A ti no vuelve nada.</string>

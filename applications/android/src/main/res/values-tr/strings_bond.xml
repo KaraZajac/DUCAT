@@ -70,6 +70,7 @@
     <string name="bond_will_retry">Kendiliğinden tekrar deneyecek.</string>
     <string name="bond_release_asked">Bunu zaten istediniz. Geçene kadar kendi kendine denemeye devam eder — uygulamadan çıkabilirsiniz.</string>
     <string name="bond_call_off">Anlaşmayı iptal et</string>
+    <string name="bond_build_lost">Bu telefon kurulmakta olan emanetin izini kaybetti ve tamamlayamıyor. İptal edip yeniden başlayın — hiçbir ödeme yapılmadı.</string>
     <string name="bond_retry_in">Kendiliğinden tekrar deneyecek — %1$s kaldı.</string>
     <string name="bond_close_ask">Teminat kapatılsın mı?</string>
     <string name="bond_close_all_to_them">%1$s teminatı kapatıp tamamını almak istiyor — %2$s. Size hiçbir şey dönmeyecek.</string>

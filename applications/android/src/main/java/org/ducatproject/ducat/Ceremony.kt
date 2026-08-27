@@ -997,6 +997,30 @@ object Ceremony {
         }.onFailure {
             DucatLog.w(TAG, "bond $idHex round $round failed: ${it.message}")
             uniffi.ducat_mobile.ceremonyAbort(id, i.toUShort())
+            // **A build this device can no longer finish, written down.**
+            //
+            // The DKG machine lives in memory (§17.9), so a phone that dies
+            // between the first frame and the last takes it with it — and
+            // every frame that arrives afterwards is refused with "no dkg in
+            // progress for this ceremony". That is terminal: `nudge` can
+            // replay our own stored bytes, but nothing can rebuild a machine
+            // that is gone, so the ceremony will never advance on this side.
+            //
+            // The screen did not know. It went on saying "Securing … —
+            // building the escrow…" for as long as anyone looked at it, a
+            // spinner for something already over, with the retransmit failing
+            // the same way every three minutes underneath. Recorded here so
+            // the banner can say what has happened and point at the way out.
+            //
+            // Only while it is still building: the same refusal is the
+            // ordinary answer to a late duplicate frame for a ceremony that
+            // finished, which is nothing to report.
+            if (it.message?.contains("no dkg in progress") == true &&
+                o.optString("stage") !in setOf("done", "release_pending", "releasing")
+            ) {
+                mutate(context, idHex) { cur -> cur.put("lostMachine", true) }
+                DucatLog.w(TAG, "bond $idHex: this device cannot finish the build")
+            }
         }
     }
 

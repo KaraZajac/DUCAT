@@ -70,6 +70,7 @@
     <string name="bond_will_retry">Het probeert het vanzelf opnieuw.</string>
     <string name="bond_release_asked">Je hebt dit al gevraagd. Het blijft vanzelf proberen tot het lukt — je kunt de app sluiten.</string>
     <string name="bond_call_off">Afblazen</string>
+    <string name="bond_build_lost">Deze telefoon is de draad kwijt van het escrow dat werd opgebouwd en kan het niet afmaken. Blaas het af en begin opnieuw — er is niets betaald.</string>
     <string name="bond_retry_in">Het probeert het vanzelf opnieuw — nog %1$s.</string>
     <string name="bond_close_ask">Borg afsluiten?</string>
     <string name="bond_close_all_to_them">%1$s vraagt de borg af te sluiten en het hele bedrag te nemen — %2$s. Er komt niets naar u terug.</string>
