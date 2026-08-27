@@ -71,6 +71,7 @@
     <string name="bond_release_asked">Já pediu isto. Continua a tentar sozinho até passar — pode sair da aplicação.</string>
     <string name="bond_call_off">Cancelar o acordo</string>
     <string name="bond_build_lost">Este telemóvel perdeu o fio do depósito em construção e não o consegue terminar. Cancele e comece de novo — não foi pago nada.</string>
+    <string name="bond_build_slow">Isto está a demorar mais do que devia. Não foi pago nada — pode cancelar e começar de novo.</string>
     <string name="bond_retry_in">Vai tentar de novo sozinho — faltam %1$s.</string>
     <string name="bond_close_ask">Encerrar o depósito?</string>
     <string name="bond_close_all_to_them">%1$s está pedindo para encerrar o depósito e levar tudo — %2$s. Nada volta para você.</string>

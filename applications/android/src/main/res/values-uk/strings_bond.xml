@@ -73,6 +73,7 @@
     <string name="bond_release_asked">Ви вже це запросили. Застосунок сам продовжить спроби, доки не вдасться — його можна закрити.</string>
     <string name="bond_call_off">Скасувати угоду</string>
     <string name="bond_build_lost">Цей телефон загубив нитку депозиту, що будувався, і не може його завершити. Скасуйте й почніть заново — нічого не сплачено.</string>
+    <string name="bond_build_slow">Це триває довше, ніж мало б. Нічого не сплачено — можна скасувати й почати заново.</string>
     <string name="bond_retry_in">Спробує ще раз саме — лишилося %1$s.</string>
     <string name="bond_close_ask">Закрити заставу?</string>
     <string name="bond_close_all_to_them">%1$s просить закрити заставу й забрати її повністю — %2$s. Вам не повернеться нічого.</string>

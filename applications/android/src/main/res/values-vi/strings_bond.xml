@@ -70,6 +70,7 @@
     <string name="bond_release_asked">Bạn đã yêu cầu rồi. Ứng dụng sẽ tự thử lại cho đến khi xong — bạn có thể thoát.</string>
     <string name="bond_call_off">Hủy giao dịch</string>
     <string name="bond_build_lost">Điện thoại này đã mất dấu khoản ký quỹ đang được tạo và không thể hoàn tất. Hãy huỷ và bắt đầu lại — chưa có khoản nào được trả.</string>
+    <string name="bond_build_slow">Việc này lâu hơn bình thường. Chưa có khoản nào được trả — bạn có thể huỷ và bắt đầu lại.</string>
     <string name="bond_retry_in">Sẽ tự thử lại — còn %1$s.</string>
     <string name="bond_close_ask">Đóng khoản đặt cọc?</string>
     <string name="bond_close_all_to_them">%1$s muốn đóng khoản đặt cọc và lấy toàn bộ — %2$s. Bạn sẽ không nhận lại gì.</string>

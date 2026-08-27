@@ -71,6 +71,7 @@
     <string name="bond_release_asked">Du hast das bereits angefordert. Es versucht es von selbst weiter, bis es klappt — du kannst die App verlassen.</string>
     <string name="bond_call_off">Abbrechen</string>
     <string name="bond_build_lost">Dieses Telefon hat den Faden beim Aufbau des Treuhandkontos verloren und kann ihn nicht zu Ende bringen. Brich ab und fang neu an — es wurde nichts bezahlt.</string>
+    <string name="bond_build_slow">Das dauert länger als es sollte. Es wurde nichts bezahlt — du kannst abbrechen und neu anfangen.</string>
     <string name="bond_retry_in">Es versucht es von selbst erneut – noch %1$s.</string>
     <string name="bond_close_ask">Bond auflösen?</string>
     <string name="bond_close_all_to_them">%1$s möchte den Bond auflösen und die ganze Kaution nehmen — %2$s. An Sie geht nichts zurück.</string>

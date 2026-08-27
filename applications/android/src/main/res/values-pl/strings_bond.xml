@@ -73,6 +73,7 @@
     <string name="bond_release_asked">Już o to poproszono. Będzie próbować samo, aż się uda — możesz zamknąć aplikację.</string>
     <string name="bond_call_off">Odwołaj transakcję</string>
     <string name="bond_build_lost">Ten telefon zgubił wątek tworzonego depozytu i nie może go dokończyć. Odwołaj i zacznij od nowa — nic nie zostało zapłacone.</string>
+    <string name="bond_build_slow">Trwa to dłużej, niż powinno. Nic nie zapłacono — możesz to odwołać i zacząć od nowa.</string>
     <string name="bond_retry_in">Spróbuje ponownie samo — zostało %1$s.</string>
     <string name="bond_close_ask">Zamknąć depozyt?</string>
     <string name="bond_close_all_to_them">%1$s prosi o zamknięcie depozytu i zabranie całej kwoty — %2$s. Do ciebie nic nie wróci.</string>

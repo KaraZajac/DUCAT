@@ -70,6 +70,7 @@
     <string name="bond_release_asked">คุณขอไปแล้ว ระบบจะลองเองเรื่อย ๆ จนกว่าจะสำเร็จ — ปิดแอปได้</string>
     <string name="bond_call_off">ยกเลิกข้อตกลง</string>
     <string name="bond_build_lost">เครื่องนี้ตามการสร้างเอสโครว์ไม่ทันแล้วและทำต่อไม่ได้ ยกเลิกแล้วเริ่มใหม่ — ยังไม่มีการจ่ายเงินใด ๆ</string>
+    <string name="bond_build_slow">ใช้เวลานานกว่าที่ควร ยังไม่มีการจ่ายเงิน — ยกเลิกแล้วเริ่มใหม่ได้</string>
     <string name="bond_retry_in">ระบบจะลองใหม่ให้เอง — เหลืออีก %1$s</string>
     <string name="bond_close_ask">ปิดเงินประกันหรือไม่</string>
     <string name="bond_close_all_to_them">%1$s ขอปิดเงินประกันและรับไปทั้งหมด — %2$s คุณจะไม่ได้รับคืนเลย</string>

@@ -2784,10 +2784,28 @@ private fun RideBondBanner(contact: Contact) {
                     // and without this the spinner went on promising
                     // something already over.
                     val lost = ride.optBoolean("lostMachine", false)
+                    // **A build that has been going too long says so.**
+                    //
+                    // `lostMachine` names the one cause this device can
+                    // recognise. The others it cannot: a party who is not a
+                    // contact and so can never join, an address announcement
+                    // that never landed, a phone that simply went away. All of
+                    // them leave the same spinner turning, and the advice for
+                    // a quiet build is to wait a few minutes — which is
+                    // indistinguishable from the advice for a dead one.
+                    //
+                    // Measured from `created`, not `progressAt`: nudge stamps
+                    // progressAt every time it retransmits, so that clock
+                    // restarts itself and a stuck ceremony looks busy for ever.
+                    val stalled = !lost && ride.optLong("created") > 0 &&
+                        System.currentTimeMillis() - ride.optLong("created") > STUCK_BUILD_MS
                     BondLine(
-                        spin = !lost,
-                        text = if (lost) stringResource(R.string.bond_build_lost)
-                        else stringResource(R.string.bond_building, fareShown),
+                        spin = !lost && !stalled,
+                        text = when {
+                            lost -> stringResource(R.string.bond_build_lost)
+                            stalled -> stringResource(R.string.bond_build_slow)
+                            else -> stringResource(R.string.bond_building, fareShown)
+                        },
                     )
                     // The build has no end of its own either. It normally
                     // takes a minute or two of round trips, and a frame that
@@ -3357,6 +3375,15 @@ private fun trouble(context: android.content.Context, t: Throwable) =
 
 /** Monero aims at a block every two minutes (§8.7). */
 private const val BLOCK_MINUTES = 2
+
+/**
+ * How long a build can run before the screen stops calling it normal.
+ *
+ * A 2-of-2 or 2-of-3 settles in a minute or two of round trips, and the
+ * retransmit fires every three. Eight minutes is two full nudges gone by with
+ * nothing to show, which is past the point where waiting is the right advice.
+ */
+private const val STUCK_BUILD_MS = 8L * 60 * 1000
 
 /**
  * "It keeps trying", with how long that is likely to take.
