@@ -67,6 +67,27 @@ fun QrHub(
 
     BackHandler(onBack = onClose)
 
+    // **Look again when the registry changes.**
+    //
+    // This is the code somebody holds a phone out with, and it is claim-once.
+    // The moment a scanner answers it, collectClaims adopts them and mints the
+    // replacement in the same pass — but the URI here was read once when the
+    // screen opened, so the QR on screen went on being the dead one. Hold the
+    // phone out to a second person and they get "card already claimed", with
+    // nothing on either screen to say why, while a perfectly good replacement
+    // sat in the registry.
+    //
+    // currentCardUri already answers "the newest profile card nobody has
+    // answered", so this only has to ask it again. Only when it has something:
+    // a null means the claim landed and the replacement is a moment behind,
+    // and blanking the screen for that moment would be its own little lie.
+    val cardsV by ContactStore.changes.collectAsState()
+    LaunchedEffect(cardsV) {
+        ContactStore(context).currentCardUri()
+            ?.takeIf { it != uri }
+            ?.let { uri = it }
+    }
+
     // Made without being asked for. A card takes seconds to publish — two DHT
     // records — and the moment someone wants it is the moment they are holding
     // a phone out to somebody. Waiting until then puts the wait in front of the
