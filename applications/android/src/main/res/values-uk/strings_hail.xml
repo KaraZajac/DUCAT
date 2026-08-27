@@ -97,6 +97,9 @@
     <string name="hail_offer_invalid">Пропозиція має бути числом більше нуля — або залиш поле порожнім, щоб попросити ціну.</string>
     <string name="hail_osm_privacy">Пошук, маршрут і мапа використовують сервери OpenStreetMap — єдине місце, куди DUCAT відправляє локацію з пристрою. Водії бачать лише області ~%1$s.</string>
     <string name="hail_post_button">Викликати 🚕</string>
+    <string name="hail_step_slot">Шукаємо місце на дошці…</string>
+    <string name="hail_step_stamp">Ставимо позначку за ланцюжком…</string>
+    <string name="hail_step_card">Створюємо код…</string>
     <string name="hail_search">Пошук</string>
     <string name="hail_clear_place">Очистити</string>
     <string name="hail_joining_network">Підключення до мережі — дошки ще не прочитано.</string>

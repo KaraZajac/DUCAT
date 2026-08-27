@@ -97,6 +97,9 @@
     <string name="hail_offer_invalid">Het bod moet een getal boven nul zijn — of laat het leeg om een prijsvoorstel te vragen.</string>
     <string name="hail_osm_privacy">Zoeken, route en kaart gebruiken de servers van OpenStreetMap — de enige plek waar DUCAT locatie van het apparaat af stuurt. Chauffeurs zien alleen gebieden van ~%1$s.</string>
     <string name="hail_post_button">Roep op 🚕</string>
+    <string name="hail_step_slot">Een plek op het bord zoeken…</string>
+    <string name="hail_step_stamp">Stempelen tegen de keten…</string>
+    <string name="hail_step_card">Code maken…</string>
     <string name="hail_search">Zoeken</string>
     <string name="hail_clear_place">Wissen</string>
     <string name="hail_joining_network">Verbinden met het netwerk — de borden zijn nog niet gelezen.</string>

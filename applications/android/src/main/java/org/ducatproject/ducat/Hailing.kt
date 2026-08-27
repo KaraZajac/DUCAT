@@ -127,6 +127,17 @@ object Hailing {
      * away mid-write. The 5-cell copy is *not* made here — see [wideCopy] for
      * why it happens after the rider has been told they are standing.
      */
+    /**
+     * What posting is doing, for a screen that would otherwise show a spinner.
+     *
+     * Three real steps, not a bar: making the claim-once code, stamping the
+     * notice against a recent block (§16.18.1), and finding a slot — which is
+     * where the proof of work is done and where the seconds go. A rider
+     * watching a plain spinner cannot tell mining from a hang, and the field
+     * notes have had to apologise for exactly that.
+     */
+    enum class Step { CARD, STAMP, SLOT }
+
     fun post(
         context: Context,
         originCell: String,
@@ -134,7 +145,10 @@ object Hailing {
         destText: String,
         farePxmr: ULong?,
         ttlSecs: Long = TTL_SECS,
+        /** Called on the calling thread as each step begins. */
+        onStep: (Step) -> Unit = {},
     ): Standing {
+        onStep(Step.CARD)
         val card = Mailbox.issueCard(
             context, MyProfile(context).name(), (ttlSecs * 2).toULong(), purpose = "hail",
         )
@@ -156,6 +170,7 @@ object Hailing {
         // §16.18.1: the block this stamp perishes with. One reading for the
         // whole ladder — the search is redone per slot, and a fresher tip
         // between attempts would only make the earlier candidates staler.
+        onStep(Step.STAMP)
         val beacon = Beacons.stampNow(context)
             ?: throw Beacons.NoBlock()
         fun seal(board: String, slot: UInt): ByteArray =
@@ -172,6 +187,7 @@ object Hailing {
         var placed: Pair<String, UInt>? = null
         // Who else was on the board we landed on, as the ladder saw it.
         var placedTaken: Set<UInt> = emptySet()
+        onStep(Step.SLOT)
         ladder@ for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
             val name = uniffi.ducat_mobile.standShardName(base, shard)
             val nowS = System.currentTimeMillis() / 1000

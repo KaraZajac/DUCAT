@@ -97,6 +97,9 @@
     <string name="hail_offer_invalid">Oferta musi być liczbą większą od zera — albo zostaw puste, żeby poprosić o wycenę.</string>
     <string name="hail_osm_privacy">Wyszukiwanie, trasa i mapa korzystają z serwerów OpenStreetMap — to jedyne miejsce, gdzie DUCAT wysyła lokalizację poza urządzenie. Kierowcy widzą tylko obszary ~%1$s.</string>
     <string name="hail_post_button">Wezwij 🚕</string>
+    <string name="hail_step_slot">Szukanie miejsca na tablicy…</string>
+    <string name="hail_step_stamp">Stemplowanie względem łańcucha…</string>
+    <string name="hail_step_card">Tworzenie kodu…</string>
     <string name="hail_search">Szukaj</string>
     <string name="hail_clear_place">Wyczyść</string>
     <string name="hail_joining_network">Łączenie z siecią — tablice nie zostały jeszcze odczytane.</string>

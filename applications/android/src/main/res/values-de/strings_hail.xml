@@ -97,6 +97,9 @@
     <string name="hail_offer_invalid">Das Angebot muss eine Zahl über null sein — oder lass es leer und bitte um einen Preis.</string>
     <string name="hail_osm_privacy">Suche, Route und Karte laufen über die Server von OpenStreetMap — die eine Stelle, an der DUCAT den Standort vom Gerät gibt. Fahrer sehen nur Gebiete von ~%1$s.</string>
     <string name="hail_post_button">Rufen 🚕</string>
+    <string name="hail_step_slot">Ein Platz auf der Pinnwand wird gesucht…</string>
+    <string name="hail_step_stamp">Wird gegen die Kette gestempelt…</string>
+    <string name="hail_step_card">Code wird erstellt…</string>
     <string name="hail_search">Suchen</string>
     <string name="hail_clear_place">Löschen</string>
     <string name="hail_joining_network">Verbindet sich mit dem Netz — die Bretter wurden noch nicht gelesen.</string>

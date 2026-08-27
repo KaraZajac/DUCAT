@@ -97,6 +97,9 @@
     <string name="hail_offer_invalid">Teklif sıfırdan büyük bir sayı olmalı — ya da fiyat sormak için boş bırak.</string>
     <string name="hail_osm_privacy">Arama, rota ve harita OpenStreetMap\'in sunucularını kullanır — DUCAT\'ın konumu cihaz dışına gönderdiği tek yer. Sürücüler yalnızca ~%1$s büyüklüğünde bölgeler görür.</string>
     <string name="hail_post_button">Çağır 🚕</string>
+    <string name="hail_step_slot">Panoda yer aranıyor…</string>
+    <string name="hail_step_stamp">Zincire damgalanıyor…</string>
+    <string name="hail_step_card">Kod oluşturuluyor…</string>
     <string name="hail_search">Ara</string>
     <string name="hail_clear_place">Temizle</string>
     <string name="hail_joining_network">Ağa katılıyor — panolar henüz okunmadı.</string>

@@ -1,5 +1,8 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -68,6 +71,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.Color
 
 /**
@@ -2807,6 +2811,30 @@ private fun RideBondBanner(contact: Contact) {
                             else -> stringResource(R.string.bond_building, fareShown)
                         },
                     )
+                    // The rounds, as far as they have got. Real arithmetic over
+                    // frames on disk — see Ceremony.buildProgress — so the bar
+                    // moves when something happens and not when time passes.
+                    // A dead build gets no bar: there is nothing left to
+                    // advance, and a line creeping along under "this phone
+                    // lost track of the escrow" would be arguing with it.
+                    if (!lost) {
+                        org.ducatproject.ducat.Ceremony.buildProgress(ride)?.let { p ->
+                            val eased by animateFloatAsState(
+                                targetValue = p,
+                                animationSpec = tween(700, easing = FastOutSlowInEasing),
+                                label = "build",
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            LinearProgressIndicator(
+                                progress = { eased },
+                                modifier = Modifier.fillMaxWidth().height(3.dp),
+                                trackColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                    .copy(alpha = 0.18f),
+                                strokeCap = StrokeCap.Round,
+                                drawStopIndicator = {},
+                            )
+                        }
+                    }
                     // The build has no end of its own either. It normally
                     // takes a minute or two of round trips, and a frame that
                     // never arrives is re-sent by Ceremony.nudge — but a

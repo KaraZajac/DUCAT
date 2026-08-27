@@ -1989,6 +1989,8 @@ fun HailSheet(
     var fiat by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
     var fareXmr by rememberSaveable { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
+    // Which part of posting is running — see Hailing.Step.
+    var step by remember { mutableStateOf(org.ducatproject.ducat.Hailing.Step.CARD) }
     var error by remember { mutableStateOf<String?>(null) }
 
     val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
@@ -2177,6 +2179,7 @@ fun HailSheet(
                                     fare = pxmr.toULong()
                                 }
                                 busy = true; error = null
+                                step = org.ducatproject.ducat.Hailing.Step.CARD
                                 val f = from!!
                                 val t = to!!
                                 val destText = t.label.take(64)
@@ -2189,7 +2192,7 @@ fun HailSheet(
                                         val dCell = uniffi.ducat_mobile.geohashEncode(t.latE7, t.lonE7, 6u)
                                         val standing = org.ducatproject.ducat.Hailing.post(
                                             context, oCell, dCell, destText, fare,
-                                        )
+                                        ) { s -> step = s }
                                         // The wide copy goes on its own coroutine, **after** the rider
                                         // has been told they are standing: it is two more round trips
                                         // for reach that may not even be needed, and the hail is live
@@ -2215,9 +2218,30 @@ fun HailSheet(
                             enabled = !busy && from != null && to != null,
                             modifier = Modifier.fillMaxWidth().height(52.dp),
                         ) {
-                            if (busy) CircularProgressIndicator(
-                                Modifier.size(18.dp), strokeWidth = 2.dp)
-                            else Text(stringResource(R.string.hail_post_button))
+                            if (busy) {
+                                // Say which part. The slot search is proof of
+                                // work and can run to ten seconds on an
+                                // unlucky draw, and a bare spinner leaves a
+                                // rider unable to tell mining from a hang —
+                                // the same reason the button beside this one
+                                // has always said "getting your location".
+                                CircularProgressIndicator(
+                                    Modifier.size(18.dp), strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    stringResource(
+                                        when (step) {
+                                            org.ducatproject.ducat.Hailing.Step.STAMP ->
+                                                R.string.hail_step_stamp
+                                            org.ducatproject.ducat.Hailing.Step.SLOT ->
+                                                R.string.hail_step_slot
+                                            else -> R.string.hail_step_card
+                                        },
+                                    ),
+                                )
+                            } else Text(stringResource(R.string.hail_post_button))
                         }
                     }
 

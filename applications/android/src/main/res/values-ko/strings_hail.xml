@@ -97,6 +97,9 @@
     <string name="hail_offer_invalid">제안은 0보다 큰 숫자여야 해요 — 비워 두면 견적을 요청해요.</string>
     <string name="hail_osm_privacy">검색·경로·지도는 OpenStreetMap 서버를 써요 — DUCAT이 위치를 기기 밖으로 보내는 유일한 곳이에요. 기사에게는 약 %1$s 구역만 보여요.</string>
     <string name="hail_post_button">호출 🚕</string>
+    <string name="hail_step_slot">게시판의 자리를 찾는 중…</string>
+    <string name="hail_step_stamp">체인에 각인하는 중…</string>
+    <string name="hail_step_card">코드를 만드는 중…</string>
     <string name="hail_search">검색</string>
     <string name="hail_clear_place">지우기</string>
     <string name="hail_joining_network">네트워크에 참여하는 중 — 게시판을 아직 읽지 못했습니다.</string>

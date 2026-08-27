@@ -97,6 +97,9 @@
     <string name="hail_offer_invalid">出价必须是大于零的数字 — 或留空请对方报价。</string>
     <string name="hail_osm_privacy">搜索、路线和地图使用 OpenStreetMap 的服务器 — 这是 DUCAT 唯一把位置发离设备的地方。司机只能看到约 %1$s 的区域。</string>
     <string name="hail_post_button">叫车 🚕</string>
+    <string name="hail_step_slot">正在寻找板上的位置…</string>
+    <string name="hail_step_stamp">正在对链盖戳…</string>
+    <string name="hail_step_card">正在生成代码…</string>
     <string name="hail_search">搜索</string>
     <string name="hail_clear_place">清除</string>
     <string name="hail_joining_network">正在加入网络——还没有读取这些板。</string>

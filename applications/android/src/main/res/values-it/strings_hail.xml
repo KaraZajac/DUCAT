@@ -97,6 +97,9 @@
     <string name="hail_offer_invalid">L\'offerta deve essere un numero sopra lo zero — o lasciala vuota per chiedere un prezzo.</string>
     <string name="hail_osm_privacy">Ricerca, percorso e mappa usano i server di OpenStreetMap — l\'unico punto in cui DUCAT manda la posizione fuori dal dispositivo. Gli autisti vedono solo aree di ~%1$s.</string>
     <string name="hail_post_button">Chiama 🚕</string>
+    <string name="hail_step_slot">Cerco un posto in bacheca…</string>
+    <string name="hail_step_stamp">Timbro sulla catena…</string>
+    <string name="hail_step_card">Creo un codice…</string>
     <string name="hail_search">Cerca</string>
     <string name="hail_clear_place">Cancella</string>
     <string name="hail_joining_network">Connessione alla rete: le bacheche non sono ancora state lette.</string>

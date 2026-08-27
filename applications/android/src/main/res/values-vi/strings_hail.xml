@@ -97,6 +97,9 @@
     <string name="hail_offer_invalid">Mức trả phải là một số lớn hơn 0 — hoặc để trống để nhờ báo giá.</string>
     <string name="hail_osm_privacy">Tìm kiếm, lộ trình và bản đồ dùng máy chủ của OpenStreetMap — nơi duy nhất DUCAT gửi vị trí ra khỏi thiết bị. Tài xế chỉ thấy vùng cỡ ~%1$s.</string>
     <string name="hail_post_button">Vẫy xe 🚕</string>
+    <string name="hail_step_slot">Đang tìm chỗ trên bảng…</string>
+    <string name="hail_step_stamp">Đang đóng dấu theo chuỗi…</string>
+    <string name="hail_step_card">Đang tạo mã…</string>
     <string name="hail_search">Tìm</string>
     <string name="hail_clear_place">Xóa</string>
     <string name="hail_joining_network">Đang tham gia mạng lưới — chưa đọc được các bảng.</string>

@@ -97,6 +97,9 @@
     <string name="hail_offer_invalid">يجب أن يكون العرض رقمًا أكبر من صفر — أو اتركه فارغًا لطلب تسعيرة.</string>
     <string name="hail_osm_privacy">البحث والمسار والخريطة تستخدم خوادم OpenStreetMap — المكان الوحيد الذي يرسل فيه DUCAT الموقع خارج الجهاز. لا يرى السائقون سوى مناطق بعرض ~%1$s.</string>
     <string name="hail_post_button">اطلب 🚕</string>
+    <string name="hail_step_slot">البحث عن مكان على اللوحة…</string>
+    <string name="hail_step_stamp">الختم مقابل السلسلة…</string>
+    <string name="hail_step_card">إنشاء رمز…</string>
     <string name="hail_search">بحث</string>
     <string name="hail_clear_place">مسح</string>
     <string name="hail_joining_network">جارٍ الانضمام إلى الشبكة — لم تُقرأ اللوحات بعد.</string>

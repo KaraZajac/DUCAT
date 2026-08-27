@@ -1723,6 +1723,34 @@ object Ceremony {
         }
     }
 
+    /**
+     * How far a build has actually got, from 0 to 1, or null if it is not one.
+     *
+     * **Counted, not guessed.** A DKG is two rounds and every frame either
+     * side sends is written down as it lands — `commits` and `shares`, keyed by
+     * party — so this is arithmetic over what is on disk rather than a bar
+     * moving because time is passing. The screen showed a spinner, which says
+     * only "something", for a minute of a ceremony that knows exactly how many
+     * of its pieces are in.
+     *
+     * Our own frames count. Reaching `committed` means this device has sent
+     * its commitment, and reaching `shared` means it has sent its share; a
+     * build that sat at zero until the other side answered would be reporting
+     * none of the work it had already done, and looks stopped while it is
+     * anything but. So a two-party build has four steps — my commitment,
+     * theirs, my share, theirs — and a three-party one has six.
+     */
+    fun buildProgress(o: JSONObject): kotlin.Float? {
+        val stage = o.optString("stage")
+        if (stage != "committed" && stage != "shared") return null
+        val n = o.optJSONArray("roster")?.length() ?: return null
+        if (n < 2) return null
+        val commits = o.optJSONObject("commits")?.length() ?: 0
+        val shares = o.optJSONObject("shares")?.length() ?: 0
+        val done = 1 + commits + if (stage == "shared") 1 + shares else 0
+        return (done.toFloat() / (2 * n)).coerceIn(0f, 1f)
+    }
+
     /** Stamp the moment an escrow stopped needing anyone. */
     private fun settle(o: JSONObject, stage: String): JSONObject =
         o.put("stage", stage).put("settledAt", System.currentTimeMillis() / 1000)

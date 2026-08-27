@@ -97,6 +97,9 @@
     <string name="hail_offer_invalid">پیشنهاد باید عددی بزرگ‌تر از صفر باشد — یا خالی بگذار تا قیمت بخواهی.</string>
     <string name="hail_osm_privacy">جستجو، مسیر و نقشه از سرورهای OpenStreetMap استفاده می‌کنند — تنها جایی که DUCAT موقعیت را بیرون از دستگاه می‌فرستد. راننده‌ها فقط محدوده‌هایی حدود %1$s می‌بینند.</string>
     <string name="hail_post_button">تاکسی بگیر 🚕</string>
+    <string name="hail_step_slot">در جست‌وجوی جایی روی تابلو…</string>
+    <string name="hail_step_stamp">در حال مهر زدن روی زنجیره…</string>
+    <string name="hail_step_card">در حال ساخت کد…</string>
     <string name="hail_search">جستجو</string>
     <string name="hail_clear_place">پاک کردن</string>
     <string name="hail_joining_network">در حال پیوستن به شبکه — هنوز تابلوها خوانده نشده‌اند.</string>
