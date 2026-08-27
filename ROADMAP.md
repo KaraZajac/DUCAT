@@ -482,6 +482,28 @@ gear rental that were here have moved above: they are pre-1.0 by decision.
 
 - **Group messaging.** See below; the mechanism is already proven here.
 
+## The everyday-money tail — five features one Ask surfaced (built 2026-08-27)
+
+All client-side, none touched the wire; each earned its shape from a rule
+already in the spec. **Chat search** — bodies and attachment names across
+every thread and group (receipt item lines live in bill bodies, so "where's
+that address / what did I pay for the cortado" both resolve); name matches
+rank first and carry no timestamp — a place, not a moment. **Sales tax** —
+one rate in basis points behind a Settings switch; POS computes the line
+per basket, a standing tab picks it up at settle, rounding DOWN (the till
+may undercharge a piconero, never overcharge). **CSV statement** — the
+settled ledger as a file (ISO-8601 UTC, plain-ASCII decimals, oldest-first
+so the running balance sums; deliberately no fiat column — no historical
+rates are stored and today's rate would print numbers never true on the
+day). **Split a bill** — the group screen mints N ordinary pairwise
+requests plus the sentence announcing the arithmetic; money stays pairwise,
+shares round DOWN (splitter eats the dust), and the asker's bubble flips
+Paid ✓ on the §16.14 reference only — never the amount heuristic, which
+errs safe on a spend button and lies on the asker's screen. **Recurring
+bills** — a schedule, not a mandate: each due date the poller re-mints the
+same powerless kind-1 (§16.13), payer approves every one; cadence advances
+from the old due date, monthly by calendar; store in securePrefs.
+
 ## Group messaging — the roster pattern, generalised (after 1.0)
 
 **Built, 0.90 (2026-08-27) — pulled forward once replies existed.** §16.19:
