@@ -51,6 +51,9 @@
     <string name="chat_delete_note">Hapus hanya menghilangkannya dari ponsel ini. Pihak lain tetap menyimpan salinannya — tidak ada apa pun di sini yang bisa menjangkaunya.</string>
     <string name="chat_copy">Salin</string>
     <string name="chat_delete">Hapus</string>
+    <string name="chat_unsend_note">Mereka diberi tahu bahwa pesan ditarik, dan salinan yang sudah mereka simpan tetap milik mereka.</string>
+    <string name="chat_unsend">Tarik kembali</string>
+    <string name="chat_unsent">Pesan ini ditarik kembali.</string>
     <string name="chat_cancel">Batal</string>
 
     <!-- Conversation settings dialog -->

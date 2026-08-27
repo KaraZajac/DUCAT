@@ -51,6 +51,9 @@
     <string name="chat_delete_note">Видалення прибирає його лише з цього телефона. Інша сторона зберігає свою копію — звідси до неї не дотягнутися.</string>
     <string name="chat_copy">Копіювати</string>
     <string name="chat_delete">Видалити</string>
+    <string name="chat_unsend_note">Їм повідомлять, що повідомлення відкликано; збережена раніше копія залишиться в них.</string>
+    <string name="chat_unsend">Відкликати</string>
+    <string name="chat_unsent">Це повідомлення було відкликано.</string>
     <string name="chat_cancel">Скасувати</string>
 
     <!-- Conversation settings dialog -->

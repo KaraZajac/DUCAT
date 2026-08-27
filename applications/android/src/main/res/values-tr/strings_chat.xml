@@ -51,6 +51,9 @@
     <string name="chat_delete_note">Sil, mesajı yalnızca bu telefondan kaldırır. Karşı taraf kendi kopyasını tutar — buradan ona ulaşmanın yolu yok.</string>
     <string name="chat_copy">Kopyala</string>
     <string name="chat_delete">Sil</string>
+    <string name="chat_unsend_note">Geri çekildiği kendilerine bildirilir; daha önce kaydettikleri bir kopya onlarda kalır.</string>
+    <string name="chat_unsend">Geri çek</string>
+    <string name="chat_unsent">Bu mesaj geri çekildi.</string>
     <string name="chat_cancel">İptal</string>
 
     <!-- Conversation settings dialog -->

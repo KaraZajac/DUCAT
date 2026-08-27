@@ -51,6 +51,9 @@
     <string name="chat_delete_note">삭제는 이 휴대폰에서만 지워요. 상대는 사본을 그대로 갖고 있고, 여기서는 거기에 손댈 수 없어요.</string>
     <string name="chat_copy">복사</string>
     <string name="chat_delete">삭제</string>
+    <string name="chat_unsend_note">회수되었다고 상대에게 알려지며, 이미 저장한 사본은 상대에게 남습니다.</string>
+    <string name="chat_unsend">회수</string>
+    <string name="chat_unsent">이 메시지는 회수되었습니다.</string>
     <string name="chat_cancel">취소</string>
 
     <!-- Conversation settings dialog -->

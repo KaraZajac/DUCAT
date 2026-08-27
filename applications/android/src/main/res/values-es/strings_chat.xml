@@ -51,6 +51,9 @@
     <string name="chat_delete_note">Eliminar lo quita solo de este teléfono. El otro lado conserva su copia — nada desde aquí puede alcanzarla.</string>
     <string name="chat_copy">Copiar</string>
     <string name="chat_delete">Eliminar</string>
+    <string name="chat_unsend_note">Se les dice que fue retirado, y la copia que ya hubieran guardado sigue siendo suya.</string>
+    <string name="chat_unsend">Retirar</string>
+    <string name="chat_unsent">Este mensaje fue retirado.</string>
     <string name="chat_cancel">Cancelar</string>
 
     <!-- Conversation settings dialog -->

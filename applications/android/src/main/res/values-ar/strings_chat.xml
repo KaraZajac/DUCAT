@@ -51,6 +51,9 @@
     <string name="chat_delete_note">الحذف يزيلها من هذا الهاتف فقط. الطرف الآخر يحتفظ بنسخته — ولا شيء هنا يستطيع الوصول إليها.</string>
     <string name="chat_copy">نسخ</string>
     <string name="chat_delete">حذف</string>
+    <string name="chat_unsend_note">سيُبلَّغون بأنها سُحبت، وتبقى لديهم أي نسخة حفظوها بالفعل.</string>
+    <string name="chat_unsend">سحب</string>
+    <string name="chat_unsent">تم سحب هذه الرسالة.</string>
     <string name="chat_cancel">إلغاء</string>
 
     <!-- Conversation settings dialog -->

@@ -51,6 +51,9 @@
     <string name="chat_delete_note">حذف فقط از این گوشی پاکش می‌کند. طرف مقابل نسخهٔ خودش را دارد — از اینجا دست کسی به آن نمی‌رسد.</string>
     <string name="chat_copy">کپی</string>
     <string name="chat_delete">حذف</string>
+    <string name="chat_unsend_note">به آن‌ها گفته می‌شود که پس گرفته شده، و نسخه‌ای که قبلاً ذخیره کرده‌اند نزد خودشان می‌ماند.</string>
+    <string name="chat_unsend">پس گرفتن</string>
+    <string name="chat_unsent">این پیام پس گرفته شد.</string>
     <string name="chat_cancel">لغو</string>
 
     <!-- Conversation settings dialog -->

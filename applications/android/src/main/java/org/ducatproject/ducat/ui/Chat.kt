@@ -162,6 +162,24 @@ internal fun reactionsOn(
 internal data class BillAnswers(
     val withdrawn: Set<Pair<Long, Long>>,
     val refused: Set<Pair<Long, Long>>,
+    /**
+     * Plain messages their sender has taken back, by (seq, timestamp).
+     *
+     * Kept apart from [withdrawn] because the two are read differently: a
+     * withdrawn *bill* greys where it stands, since the amount is still worth
+     * seeing, while an unsent *message* must stop showing its words — leaving
+     * them on screen is not an unsend.
+     */
+    val unsent: Set<Pair<Long, Long>> = emptySet(),
+    /**
+     * The retractions that did the unsending, by their own (seq, timestamp).
+     *
+     * A bill's withdrawal earns a line of its own in the thread, because the
+     * bill stays visible and something has to say it is off. An unsent message
+     * has already changed in place where it stands, so a second announcement
+     * underneath is the same news twice.
+     */
+    val quiet: Set<Pair<Long, Long>> = emptySet(),
 )
 
 /**
@@ -186,6 +204,8 @@ internal data class BillAnswers(
 internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
     val withdrawn = HashSet<Pair<Long, Long>>()
     val refused = HashSet<Pair<Long, Long>>()
+    val unsent = HashSet<Pair<Long, Long>>()
+    val quiet = HashSet<Pair<Long, Long>>()
     for (r in messages) {
         if (r.kind != 5) continue
         val seq = r.reSeq ?: continue
@@ -195,10 +215,20 @@ internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
         val target = messages
             .filter { it.outgoing == side && it.seq == seq && it.timestamp <= r.timestamp }
             .maxByOrNull { it.timestamp } ?: continue
-        if (target.kind != 1) continue
-        (if (r.reOwn) withdrawn else refused) += target.seq to target.timestamp
+        when {
+            target.kind == 1 -> (if (r.reOwn) withdrawn else refused) +=
+                target.seq to target.timestamp
+            // A sender taking back their own words. Only `re_own`: there is no
+            // such thing as refusing somebody else's sentence, and reading a
+            // refusal that way would let either side blank the other's
+            // messages on their screen.
+            target.kind == 0 && r.reOwn -> {
+                unsent += target.seq to target.timestamp
+                quiet += r.seq to r.timestamp
+            }
+        }
     }
-    return BillAnswers(withdrawn, refused)
+    return BillAnswers(withdrawn, refused, unsent, quiet)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -821,6 +851,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     return@itemsIndexed
                 }
                 if (m.kind == 5) {
+                    // Already said, where it happened — see BillAnswers.quiet.
+                    if ((m.seq to m.timestamp) in answers.quiet) return@itemsIndexed
                     // A retraction is a remark about the thread, not a message
                     // in it: one quiet centred line, no bubble and no buttons —
                     // the bill or offer it names greys out where it stands.
@@ -890,6 +922,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             (m.seq to m.timestamp) in answers.withdrawn,
                         declined = m.kind == 1 &&
                             (m.seq to m.timestamp) in answers.refused,
+                        unsent = (m.seq to m.timestamp) in answers.unsent,
                         onLongPress = { confirmDelete = m },
                         onPay = { billView = it },
                     )
@@ -1047,10 +1080,53 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         Spacer(Modifier.height(12.dp))
                     }
                     Text(stringResource(R.string.chat_delete_note))
+                    // Offered only where it can do something: your own words,
+                    // already delivered, not already taken back. A retraction
+                    // names a seq in your own outbox, so there is nothing to
+                    // point at for a message that never left — Delete is the
+                    // answer for that one — and nothing to say twice for one
+                    // already withdrawn.
+                    if (m.outgoing && m.kind == 0 && m.delivered &&
+                        (m.seq to m.timestamp) !in answers.unsent
+                    ) {
+                        Spacer(Modifier.height(12.dp))
+                        Text(stringResource(R.string.chat_unsend_note))
+                    }
                 }
             },
             confirmButton = {
                 Row {
+                    if (m.outgoing && m.kind == 0 && m.delivered &&
+                        (m.seq to m.timestamp) !in answers.unsent
+                    ) {
+                        TextButton(onClick = {
+                            confirmDelete = null
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching {
+                                        // The sentence, not the words being taken
+                                        // back: chat_retract_with_quote exists so a
+                                        // withdrawn *bill* can say which one, and
+                                        // quoting an unsent message back into the
+                                        // thread is the one thing this must not do.
+                                        // A body is required — core refuses an empty
+                                        // one — and this client never shows it (see
+                                        // BillAnswers.quiet), so it is there for a
+                                        // reader that does not know the convention.
+                                        Mailbox.send(
+                                            context, c,
+                                            context.getString(R.string.chat_unsent),
+                                            mine,
+                                            kind = 5, reSeq = m.seq, reOwn = true,
+                                        )
+                                    }.onFailure {
+                                        DucatLog.w("Chat", "unsend: ${it.message}")
+                                    }
+                                }
+                                messages = store.thread(c.personaHex)
+                            }
+                        }) { Text(stringResource(R.string.chat_unsend)) }
+                    }
                     if (m.body.isNotBlank()) {
                         // Copy is how a card, an address, or a link gets passed
                         // along — forwarding by hand until forwarding exists.
@@ -1223,6 +1299,16 @@ private fun Bubble(
      *  issuer taking their own bill back — different party, different
      *  word, and the thread already carries the sentence for each. */
     declined: Boolean = false,
+    /**
+     * The sender took this message back (§16.13's `RETRACT`, `re_own`).
+     *
+     * The words stop being shown, here and on their phone, because a message
+     * that still reads out what it said has not been unsent. What it cannot do
+     * is reach into anybody's memory or their backups — the bytes were
+     * delivered — so the app says a message was withdrawn rather than
+     * pretending it never existed.
+     */
+    unsent: Boolean = false,
     /** Whether to draw the clock and the ticks under this one — see the run
      *  logic in the list. False for every message in a run but its last. */
     showMeta: Boolean = true,
@@ -1253,7 +1339,8 @@ private fun Bubble(
     // round it — a purple picture frame that read as a mistake rather than a
     // choice. Clipped to the same corners instead, with the caption (when
     // there is one) keeping the padding it needs.
-    val bare = m.kind == 0 && m.attHash != null &&
+    // An unsent message is a sentence, never a bare picture — see below.
+    val bare = !unsent && m.kind == 0 && m.attHash != null &&
         (m.attMime ?: "").startsWith("image/") &&
         (m.body.isBlank() || m.body == "📷")
 
@@ -1269,7 +1356,20 @@ private fun Bubble(
                     else Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
                 )
         ) {
-            if (m.kind == 0) {
+            if (unsent) {
+                // Everything the message was — its words, its picture, its
+                // voice memo — stops here. The attachment file is still on
+                // disk and its bytes were delivered; what this changes is that
+                // the app stops putting them in front of anybody, which is the
+                // most an unsend can honestly mean between two phones with no
+                // server in the middle.
+                Text(
+                    stringResource(R.string.chat_unsent),
+                    color = fg.copy(alpha = 0.7f),
+                    fontStyle = FontStyle.Italic,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            } else if (m.kind == 0) {
                 val ctx = LocalContext.current
                 val att = m.attHash
                 if (att != null) {

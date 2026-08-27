@@ -51,6 +51,9 @@
     <string name="chat_delete_note">การลบจะลบจากโทรศัพท์เครื่องนี้เท่านั้น อีกฝ่ายยังเก็บสำเนาของเขาไว้ — ไม่มีอะไรจากตรงนี้ไปถึงมันได้</string>
     <string name="chat_copy">คัดลอก</string>
     <string name="chat_delete">ลบ</string>
+    <string name="chat_unsend_note">อีกฝ่ายจะรู้ว่าถูกเรียกคืน และสำเนาที่เขาบันทึกไว้แล้วยังเป็นของเขา</string>
+    <string name="chat_unsend">เรียกคืน</string>
+    <string name="chat_unsent">ข้อความนี้ถูกเรียกคืนแล้ว</string>
     <string name="chat_cancel">ยกเลิก</string>
 
     <!-- Conversation settings dialog -->

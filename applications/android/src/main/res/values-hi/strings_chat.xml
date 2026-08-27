@@ -51,6 +51,9 @@
     <string name="chat_delete_note">मिटाने से यह सिर्फ़ इस फ़ोन से हटता है। दूसरी तरफ़ उनकी कॉपी रहती है — यहाँ से उस तक कुछ नहीं पहुँच सकता।</string>
     <string name="chat_copy">कॉपी करें</string>
     <string name="chat_delete">मिटाएँ</string>
+    <string name="chat_unsend_note">उन्हें बताया जाता है कि इसे वापस लिया गया, और पहले से सहेजी गई प्रति उनके पास रहती है।</string>
+    <string name="chat_unsend">वापस लें</string>
+    <string name="chat_unsent">यह संदेश वापस ले लिया गया।</string>
     <string name="chat_cancel">रद्द करें</string>
 
     <!-- Conversation settings dialog -->

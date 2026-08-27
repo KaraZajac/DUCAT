@@ -51,6 +51,9 @@
     <string name="chat_delete_note">Apagar remove a mensagem apenas deste telefone. O outro lado mantém a cópia dele — nada aqui pode alcançá-la.</string>
     <string name="chat_copy">Copiar</string>
     <string name="chat_delete">Apagar</string>
+    <string name="chat_unsend_note">São informados de que foi retirada, e uma cópia que já tenham guardado continua a ser deles.</string>
+    <string name="chat_unsend">Retirar</string>
+    <string name="chat_unsent">Esta mensagem foi retirada.</string>
     <string name="chat_cancel">Cancelar</string>
 
     <!-- Diálogo de configurações da conversa -->

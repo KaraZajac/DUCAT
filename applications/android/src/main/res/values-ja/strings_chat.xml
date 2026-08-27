@@ -51,6 +51,9 @@
     <string name="chat_delete_note">削除されるのはこの端末からだけです。相手側のコピーはそのまま残り、ここから消すことはできません。</string>
     <string name="chat_copy">コピー</string>
     <string name="chat_delete">削除</string>
+    <string name="chat_unsend_note">取り消されたことは相手に伝わります。すでに保存された控えは相手のものです。</string>
+    <string name="chat_unsend">取り消す</string>
+    <string name="chat_unsent">このメッセージは取り消されました。</string>
     <string name="chat_cancel">キャンセル</string>
 
     <!-- Conversation settings dialog -->

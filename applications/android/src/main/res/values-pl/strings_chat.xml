@@ -51,6 +51,9 @@
     <string name="chat_delete_note">Usunięcie działa tylko na tym telefonie. Druga strona zachowuje swoją kopię — nic stąd jej nie dosięgnie.</string>
     <string name="chat_copy">Kopiuj</string>
     <string name="chat_delete">Usuń</string>
+    <string name="chat_unsend_note">Zostaną poinformowani, że wiadomość wycofano; zapisana wcześniej kopia zostaje u nich.</string>
+    <string name="chat_unsend">Wycofaj</string>
+    <string name="chat_unsent">Ta wiadomość została wycofana.</string>
     <string name="chat_cancel">Anuluj</string>
 
     <!-- Conversation settings dialog -->

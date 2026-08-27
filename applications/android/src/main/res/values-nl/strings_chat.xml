@@ -51,6 +51,9 @@
     <string name="chat_delete_note">Verwijderen haalt het alleen van deze telefoon. De ander houdt zijn kopie — niets hier kan daarbij.</string>
     <string name="chat_copy">Kopiëren</string>
     <string name="chat_delete">Verwijderen</string>
+    <string name="chat_unsend_note">Ze horen dat het is ingetrokken; een kopie die ze al bewaarden blijft van hen.</string>
+    <string name="chat_unsend">Intrekken</string>
+    <string name="chat_unsent">Dit bericht is ingetrokken.</string>
     <string name="chat_cancel">Annuleren</string>
 
     <!-- Conversation settings dialog -->

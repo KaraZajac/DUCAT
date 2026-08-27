@@ -51,6 +51,9 @@
     <string name="chat_delete_note">Xóa chỉ gỡ tin khỏi điện thoại này. Phía bên kia vẫn giữ bản của họ — không gì ở đây với tới được.</string>
     <string name="chat_copy">Sao chép</string>
     <string name="chat_delete">Xóa</string>
+    <string name="chat_unsend_note">Họ được báo là tin đã bị thu hồi, và bản sao họ đã lưu vẫn là của họ.</string>
+    <string name="chat_unsend">Thu hồi</string>
+    <string name="chat_unsent">Tin nhắn này đã được thu hồi.</string>
     <string name="chat_cancel">Hủy</string>
 
     <!-- Conversation settings dialog -->

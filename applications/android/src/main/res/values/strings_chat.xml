@@ -59,6 +59,9 @@
     <string name="chat_delete_note">Delete removes it from this phone only. The other side keeps their copy — nothing here can reach it.</string>
     <string name="chat_copy">Copy</string>
     <string name="chat_delete">Delete</string>
+    <string name="chat_unsend_note">They are told it was withdrawn, and a copy they already saved stays theirs.</string>
+    <string name="chat_unsend">Unsend</string>
+    <string name="chat_unsent">This message was withdrawn.</string>
     <string name="chat_cancel">Cancel</string>
 
     <!-- Conversation settings dialog -->

@@ -51,6 +51,9 @@
     <string name="chat_delete_note">Löschen entfernt sie nur von diesem Telefon. Die Gegenseite behält ihre Kopie — von hier aus kommt nichts an sie heran.</string>
     <string name="chat_copy">Kopieren</string>
     <string name="chat_delete">Löschen</string>
+    <string name="chat_unsend_note">Sie erfahren, dass sie zurückgezogen wurde; eine bereits gespeicherte Kopie bleibt ihnen.</string>
+    <string name="chat_unsend">Zurückziehen</string>
+    <string name="chat_unsent">Diese Nachricht wurde zurückgezogen.</string>
     <string name="chat_cancel">Abbrechen</string>
 
     <!-- Conversation settings dialog -->

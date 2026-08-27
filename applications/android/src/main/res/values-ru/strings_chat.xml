@@ -51,6 +51,9 @@
     <string name="chat_delete_note">Удаление убирает его только с этого телефона. У собеседника остаётся своя копия — отсюда до неё не дотянуться.</string>
     <string name="chat_copy">Копировать</string>
     <string name="chat_delete">Удалить</string>
+    <string name="chat_unsend_note">Им сообщат, что сообщение отозвано; уже сохранённая копия останется у них.</string>
+    <string name="chat_unsend">Отозвать</string>
+    <string name="chat_unsent">Это сообщение было отозвано.</string>
     <string name="chat_cancel">Отмена</string>
 
     <!-- Conversation settings dialog -->
