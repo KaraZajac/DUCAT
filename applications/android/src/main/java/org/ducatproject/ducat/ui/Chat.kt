@@ -2593,6 +2593,10 @@ private val BANNER_GUTTER = 24.dp
 /** How long an unanswered enquiry stays "probably just slow". */
 private const val QUIET_ENQUIRY_SECS = 10L * 60
 
+// Which (ceremony, stage) full-screen prompts this process has already
+// auto-opened — see stepOpen below. Process-lifetime on purpose.
+private val escrowStepShown = java.util.Collections.synchronizedSet(HashSet<String>())
+
 @Composable
 private fun RideBondBanner(contact: Contact) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -2944,10 +2948,19 @@ private fun RideBondBanner(contact: Contact) {
         }
         else -> null
     }
-    // Shown once per stage: it opens when the stage arrives and closing it
-    // leaves the banner, which reopens it. A prompt that cannot be put down is
-    // a prompt that traps someone mid-conversation.
-    var stepOpen by remember(stage) { mutableStateOf(true) }
+    // Shown once per stage — per *process*, not per visit. `remember(stage)`
+    // alone reset on every entry into the thread, so a stake asked five days
+    // ago filled the screen again on every single open of that conversation:
+    // a prompt with the manners of an alarm clock. The banner below carries
+    // the same buttons and never goes away; the full-screen step is emphasis,
+    // and emphasis repeated on every visit is nagging. Keyed by ceremony id
+    // so a genuinely new ask (new ceremony, or this one moving stage) still
+    // announces itself; an app restart may announce once more, which is the
+    // right side to err on for a prompt about money.
+    val stepKey = "${ride.optString("id")}:$stage"
+    var stepOpen by remember(stepKey) {
+        mutableStateOf(escrowStepShown.add(stepKey))
+    }
     if (step != null && stepOpen && !countering) {
         org.ducatproject.ducat.ui.EscrowStep(
             contact = contact,
