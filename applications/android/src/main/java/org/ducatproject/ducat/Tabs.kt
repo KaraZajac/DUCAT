@@ -454,7 +454,17 @@ class TabStore(private val context: Context) {
                     .filter {
                         !it.outgoing && it.kind == 2 &&
                             it.timestamp * 1000 >= tab.settledAt - 60_000 &&
-                            it.amountPxmr >= tab.settledTotal
+                            it.amountPxmr >= tab.settledTotal &&
+                            // §16.14: a notice that names a bill names *its*
+                            // bill. Found live: two billed tabs for one
+                            // person, and the older swallowed the newer's
+                            // payment because the amount fit its window —
+                            // while the notice was pointing at the other
+                            // bill the whole time. A named notice widens
+                            // only the tab it names; an unnamed one keeps
+                            // the old behaviour.
+                            (it.reSeq == null ||
+                                (!it.reOwn && tab.billSeq > 0 && it.reSeq == tab.billSeq))
                     }
                     .map { it.amountPxmr }.toSet()
                 // The same subaddress rule reconcile applies. It matters more
@@ -518,7 +528,17 @@ class TabStore(private val context: Context) {
                     .filter {
                         !it.outgoing && it.kind == 2 &&
                             it.timestamp * 1000 >= tab.settledAt - 60_000 &&
-                            it.amountPxmr >= tab.settledTotal
+                            it.amountPxmr >= tab.settledTotal &&
+                            // §16.14: a notice that names a bill names *its*
+                            // bill. Found live: two billed tabs for one
+                            // person, and the older swallowed the newer's
+                            // payment because the amount fit its window —
+                            // while the notice was pointing at the other
+                            // bill the whole time. A named notice widens
+                            // only the tab it names; an unnamed one keeps
+                            // the old behaviour.
+                            (it.reSeq == null ||
+                                (!it.reOwn && tab.billSeq > 0 && it.reSeq == tab.billSeq))
                     }
                     .map { it.amountPxmr }
                     .toSet()
