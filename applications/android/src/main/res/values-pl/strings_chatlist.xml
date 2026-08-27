@@ -23,4 +23,5 @@
     <string name="chatlist_time_now">teraz</string>
     <string name="chatlist_time_minutes">%1$d min</string>
     <string name="chatlist_time_hours">%1$d godz.</string>
+    <string name="chatlist_search_hint">Szukaj w wiadomościach</string>
 </resources>

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -103,6 +104,119 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.chatlist_new_chat))
             }
+        }
+        // **Words, found again.** The Activity tab searches what money said;
+        // this searches what people said — every thread and every group, by
+        // body and by attachment name, because "where did she send that
+        // address" has had no answer but scrolling. Local only, like the
+        // threads themselves.
+        var search by rememberSaveable { mutableStateOf("") }
+        OutlinedTextField(
+            value = search,
+            onValueChange = { search = it },
+            singleLine = true,
+            placeholder = { Text(stringResource(R.string.chatlist_search_hint)) },
+            leadingIcon = { Icon(Icons.Filled.Search, null) },
+            trailingIcon = {
+                if (search.isNotEmpty()) {
+                    IconButton(onClick = { search = "" }) {
+                        Icon(Icons.Filled.Close, stringResource(R.string.activity_search_clear))
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        )
+        Spacer(Modifier.height(4.dp))
+        val q = search.trim().lowercase()
+        if (q.isNotEmpty()) {
+            // One row per hit: who, the line it matched, when. Tapping goes to
+            // the conversation it lives in — the row is a pointer, not a copy.
+            data class Hit(
+                val label: String, val snippet: String, val ts: Long?,
+                val open: () -> Unit,
+            )
+            // Names first: someone typing "ladder" wants the ladder-crew
+            // group, whether or not anyone has said the word aloud. These
+            // rows carry no timestamp — they name a place, not a moment.
+            val nameHits = buildList {
+                for (g in groups) {
+                    if (q !in g.name.lowercase()) continue
+                    add(Hit(
+                        g.name,
+                        pluralStringResource(
+                            R.plurals.group_members, g.members.size, g.members.size,
+                        ),
+                        null,
+                    ) { openGroup = g.idHex })
+                }
+                for (c in all) {
+                    if (q !in c.displayName().lowercase()) continue
+                    add(Hit(c.displayName(), "", null) { onOpenChat(c) })
+                }
+            }
+            val bodyHits = remember(q, version) {
+                val out = ArrayList<Hit>()
+                val mine = org.ducatproject.ducat.PersonaStore(context).personaHex()
+                for (c in all) {
+                    for (m in store.thread(c.personaHex)) {
+                        if (m.kind !in setOf(0, 1, 2, 3) || m.groupId != null) continue
+                        val hay = (m.body + " " + (m.attName ?: "")).lowercase()
+                        if (q !in hay) continue
+                        out.add(Hit(c.displayName(), m.body.ifBlank { m.attName ?: "" }, m.timestamp) {
+                            onOpenChat(c)
+                        })
+                    }
+                }
+                for (g in groups) {
+                    for (r in org.ducatproject.ducat.Groups.thread(context, g.idHex)) {
+                        val m = r.message
+                        if (m.kind != 0) continue
+                        if (q !in m.body.lowercase()) continue
+                        out.add(Hit(g.name, m.body, m.timestamp) { openGroup = g.idHex })
+                    }
+                }
+                out.sortedByDescending { it.ts ?: 0L }.take(50)
+            }
+            val hits = nameHits + bodyHits
+            if (hits.isEmpty()) {
+                Text(
+                    stringResource(R.string.activity_search_none, search),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(16.dp),
+                )
+            } else {
+                LazyColumn(Modifier.fillMaxSize()) {
+                    items(hits.size) { i ->
+                        val h = hits[i]
+                        ListItem(
+                            modifier = Modifier.clickable { h.open() },
+                            colors = ListItemDefaults.colors(
+                                containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                            ),
+                            headlineContent = { Text(isolate(h.label)) },
+                            supportingContent = h.snippet.takeIf { it.isNotEmpty() }?.let {
+                                {
+                                    Text(
+                                        isolate(it), maxLines = 2,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                    )
+                                }
+                            },
+                            trailingContent = h.ts?.let {
+                                {
+                                    Text(
+                                        clockTime(context, it),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+            return
         }
         // Groups, each by name with its size. Rendered above the threads they
         // fan into so the two lists cannot be confused for one.

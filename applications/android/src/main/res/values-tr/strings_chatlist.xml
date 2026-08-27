@@ -23,4 +23,5 @@
     <string name="chatlist_time_now">şimdi</string>
     <string name="chatlist_time_minutes">%1$d dk</string>
     <string name="chatlist_time_hours">%1$d sa</string>
+    <string name="chatlist_search_hint">Mesajlarda ara</string>
 </resources>
