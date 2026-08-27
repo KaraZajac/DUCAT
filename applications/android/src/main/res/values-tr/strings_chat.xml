@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 indiriliyor…</string>
     <string name="chat_downloading_audio">🎤 indiriliyor…</string>
     <string name="chat_downloading_file">📎 indiriliyor…</string>
+    <string name="chat_att_stuck">Bu ulaşmadı — artık mevcut olmayabilir. Denemeye devam ediliyor.</string>
+    <string name="chat_att_no_space">Bunu indirmek için bu telefonda yeterli alan yok.</string>
     <string name="chat_picture_desc">Resim</string>
     <string name="chat_could_not_decode">📷 (çözülemedi)</string>
     <string name="chat_you_asked_for">İstedin</string>

@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 डाउनलोड हो रही है…</string>
     <string name="chat_downloading_audio">🎤 डाउनलोड हो रहा है…</string>
     <string name="chat_downloading_file">📎 डाउनलोड हो रही है…</string>
+    <string name="chat_att_stuck">यह नहीं आया — शायद अब उपलब्ध नहीं है। कोशिश जारी है।</string>
+    <string name="chat_att_no_space">इसे डाउनलोड करने के लिए इस फ़ोन में पर्याप्त जगह नहीं है।</string>
     <string name="chat_picture_desc">तस्वीर</string>
     <string name="chat_could_not_decode">📷 (खुल नहीं पाई)</string>
     <string name="chat_you_asked_for">आपने माँगे</string>

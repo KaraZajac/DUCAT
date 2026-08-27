@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 다운로드 중…</string>
     <string name="chat_downloading_audio">🎤 다운로드 중…</string>
     <string name="chat_downloading_file">📎 다운로드 중…</string>
+    <string name="chat_att_stuck">도착하지 않았습니다 — 더 이상 없을 수도 있습니다. 계속 시도 중입니다.</string>
+    <string name="chat_att_no_space">이 기기에 공간이 부족해 내려받을 수 없습니다.</string>
     <string name="chat_picture_desc">사진</string>
     <string name="chat_could_not_decode">📷 (열 수 없음)</string>
     <string name="chat_you_asked_for">내가 요청한 금액</string>

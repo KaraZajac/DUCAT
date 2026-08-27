@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 جارٍ التنزيل…</string>
     <string name="chat_downloading_audio">🎤 جارٍ التنزيل…</string>
     <string name="chat_downloading_file">📎 جارٍ التنزيل…</string>
+    <string name="chat_att_stuck">لم يصل هذا — قد لا يكون متاحًا بعد الآن. ما زالت المحاولة جارية.</string>
+    <string name="chat_att_no_space">لا توجد مساحة كافية على هذا الهاتف لتنزيله.</string>
     <string name="chat_picture_desc">صورة</string>
     <string name="chat_could_not_decode">📷 (تعذّر فك الترميز)</string>
     <string name="chat_you_asked_for">طلبت</string>

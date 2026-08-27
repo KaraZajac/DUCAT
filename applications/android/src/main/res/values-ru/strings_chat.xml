@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 загрузка…</string>
     <string name="chat_downloading_audio">🎤 загрузка…</string>
     <string name="chat_downloading_file">📎 загрузка…</string>
+    <string name="chat_att_stuck">Это не пришло — возможно, его больше нет. Попытки продолжаются.</string>
+    <string name="chat_att_no_space">На этом телефоне не хватает места, чтобы это загрузить.</string>
     <string name="chat_picture_desc">Изображение</string>
     <string name="chat_could_not_decode">📷 (не удалось открыть)</string>
     <string name="chat_you_asked_for">Ты просишь</string>

@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 downloaden…</string>
     <string name="chat_downloading_audio">🎤 downloaden…</string>
     <string name="chat_downloading_file">📎 downloaden…</string>
+    <string name="chat_att_stuck">Dit is niet aangekomen — het bestaat misschien niet meer. Er wordt nog geprobeerd.</string>
+    <string name="chat_att_no_space">Niet genoeg ruimte op deze telefoon om dit te downloaden.</string>
     <string name="chat_picture_desc">Foto</string>
     <string name="chat_could_not_decode">📷 (kon niet decoderen)</string>
     <string name="chat_you_asked_for">Jij vroeg om</string>

@@ -355,6 +355,48 @@ object Mailbox {
     private fun isMissing(e: Exception): Boolean =
         e.message?.contains("Key not found", ignoreCase = true) == true
 
+    /** Marks a fetch this device could not make room for. */
+    const val NO_ROOM = -1
+
+    /** Failures to fetch before the bubble stops saying "downloading". */
+    private const val TRIES_BEFORE_SAYING_SO = 8
+
+    private fun troublePrefs(context: Context) = securePrefs(context, "ducat_contacts")
+
+    /**
+     * Why an attachment is not here yet, in a form a bubble can read.
+     *
+     * The fetch has always known — out of space, a chunk the network no longer
+     * holds, bytes that do not hash to what the message promised — and said so
+     * only to the log, while the thread showed "downloading…" with no end. A
+     * record's TTL runs out, and that sentence becomes untrue for the life of
+     * the conversation.
+     */
+    fun attachmentTrouble(context: Context, hash: String, delta: Int) {
+        val p = troublePrefs(context)
+        val k = "att_trouble_$hash"
+        val now = p.getInt(k, 0)
+        p.edit().putInt(k, if (delta == NO_ROOM) NO_ROOM else (now.coerceAtLeast(0) + delta))
+            .apply()
+        ContactStore.bump()
+    }
+
+    private fun clearAttachmentTrouble(context: Context, hash: String) {
+        troublePrefs(context).edit().remove("att_trouble_$hash").apply()
+    }
+
+    /** What to tell somebody looking at an attachment that has not arrived. */
+    enum class AttachmentState { COMING, NO_SPACE, STUCK }
+
+    fun attachmentState(context: Context, hash: String): AttachmentState {
+        val n = troublePrefs(context).getInt("att_trouble_$hash", 0)
+        return when {
+            n == NO_ROOM -> AttachmentState.NO_SPACE
+            n >= TRIES_BEFORE_SAYING_SO -> AttachmentState.STUCK
+            else -> AttachmentState.COMING
+        }
+    }
+
     fun collectClaims(context: Context): Int {
         val store = ContactStore(context)
         var collected = 0
@@ -826,6 +868,11 @@ object Mailbox {
                             "${used / 1024 / 1024} MiB of pictures, " +
                             "${dir.usableSpace / 1024 / 1024} MiB free",
                     )
+                    // Said on the bubble, not only here. A picture nobody has
+                    // room for showed "downloading…" for ever, and the one
+                    // person who could fix it — by deleting something — was
+                    // the one not being told.
+                    attachmentTrouble(context, hash, NO_ROOM)
                     return false
                 }
                 return runCatching {
@@ -849,10 +896,15 @@ object Mailbox {
                     // an origin for the record that carried them.
                     runCatching { nodeDhtDelete(rec) }
                     DucatLog.i(TAG, "fetched attachment ${hash.take(12)}… (${plain.size} bytes)")
+                    clearAttachmentTrouble(context, hash)
                     ContactStore.bump()
                     true
                 }.getOrElse {
                     DucatLog.w(TAG, "attachment ${hash.take(12)}…: ${it.message}")
+                    // Keep trying — a record can come back with the network —
+                    // but stop promising. Counted rather than timed because
+                    // the poller is the clock here and its interval moves.
+                    attachmentTrouble(context, hash, 1)
                     false
                 }
             }

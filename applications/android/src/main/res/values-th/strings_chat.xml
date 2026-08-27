@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 กำลังดาวน์โหลด…</string>
     <string name="chat_downloading_audio">🎤 กำลังดาวน์โหลด…</string>
     <string name="chat_downloading_file">📎 กำลังดาวน์โหลด…</string>
+    <string name="chat_att_stuck">ยังไม่มาถึง — อาจไม่มีอยู่แล้ว ระบบยังลองอยู่</string>
+    <string name="chat_att_no_space">พื้นที่ในเครื่องนี้ไม่พอสำหรับดาวน์โหลด</string>
     <string name="chat_picture_desc">รูปภาพ</string>
     <string name="chat_could_not_decode">📷 (ถอดรหัสไม่ได้)</string>
     <string name="chat_you_asked_for">คุณขอ</string>

@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 mengunduh…</string>
     <string name="chat_downloading_audio">🎤 mengunduh…</string>
     <string name="chat_downloading_file">📎 mengunduh…</string>
+    <string name="chat_att_stuck">Ini belum sampai — mungkin sudah tidak tersedia. Masih dicoba.</string>
+    <string name="chat_att_no_space">Ruang di ponsel ini tidak cukup untuk mengunduhnya.</string>
     <string name="chat_picture_desc">Gambar</string>
     <string name="chat_could_not_decode">📷 (tidak bisa dibaca)</string>
     <string name="chat_you_asked_for">Kamu meminta</string>

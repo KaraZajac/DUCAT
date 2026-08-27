@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 đang tải…</string>
     <string name="chat_downloading_audio">🎤 đang tải…</string>
     <string name="chat_downloading_file">📎 đang tải…</string>
+    <string name="chat_att_stuck">Thứ này chưa tới — có thể không còn nữa. Vẫn đang thử.</string>
+    <string name="chat_att_no_space">Điện thoại này không đủ dung lượng để tải về.</string>
     <string name="chat_picture_desc">Ảnh</string>
     <string name="chat_could_not_decode">📷 (không giải mã được)</string>
     <string name="chat_you_asked_for">Bạn đã yêu cầu</string>

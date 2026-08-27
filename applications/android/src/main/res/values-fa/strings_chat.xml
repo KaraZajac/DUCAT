@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 در حال دانلود…</string>
     <string name="chat_downloading_audio">🎤 در حال دانلود…</string>
     <string name="chat_downloading_file">📎 در حال دانلود…</string>
+    <string name="chat_att_stuck">این نرسیده است — شاید دیگر در دسترس نباشد. تلاش ادامه دارد.</string>
+    <string name="chat_att_no_space">فضای کافی روی این تلفن برای دانلود آن نیست.</string>
     <string name="chat_picture_desc">عکس</string>
     <string name="chat_could_not_decode">📷 (قابل خواندن نبود)</string>
     <string name="chat_you_asked_for">درخواست کردی</string>

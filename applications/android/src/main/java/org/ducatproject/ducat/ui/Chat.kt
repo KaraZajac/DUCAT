@@ -1376,17 +1376,33 @@ private fun Bubble(
                     val file = remember(att) { Mailbox.attachmentFile(ctx, att) }
                     val mime = m.attMime ?: "application/octet-stream"
                     when {
-                        !file.exists() -> Text(
-                            when {
-                                mime.startsWith("image/") ->
-                                    stringResource(R.string.chat_downloading_image)
-                                mime.startsWith("audio/") ->
-                                    stringResource(R.string.chat_downloading_audio)
-                                else -> stringResource(R.string.chat_downloading_file)
-                            },
-                            color = fg.copy(alpha = 0.8f),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
+                        !file.exists() -> {
+                            // "Downloading" is a promise, and it was the only
+                            // thing this ever said. A phone with no room left,
+                            // or a record whose TTL has run out, keeps that
+                            // sentence on screen for the life of the thread.
+                            val v = ContactStore.changes.collectAsState().value
+                            val state = remember(att, v) {
+                                Mailbox.attachmentState(ctx, att)
+                            }
+                            Text(
+                                when (state) {
+                                    Mailbox.AttachmentState.NO_SPACE ->
+                                        stringResource(R.string.chat_att_no_space)
+                                    Mailbox.AttachmentState.STUCK ->
+                                        stringResource(R.string.chat_att_stuck)
+                                    else -> when {
+                                        mime.startsWith("image/") ->
+                                            stringResource(R.string.chat_downloading_image)
+                                        mime.startsWith("audio/") ->
+                                            stringResource(R.string.chat_downloading_audio)
+                                        else -> stringResource(R.string.chat_downloading_file)
+                                    }
+                                },
+                                color = fg.copy(alpha = 0.8f),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
                         mime.startsWith("image/") -> {
                             val bmp = remember(att) {
                                 // Bounded decode. The protocol capped the

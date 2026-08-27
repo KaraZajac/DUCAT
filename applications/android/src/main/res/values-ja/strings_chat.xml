@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 ダウンロード中…</string>
     <string name="chat_downloading_audio">🎤 ダウンロード中…</string>
     <string name="chat_downloading_file">📎 ダウンロード中…</string>
+    <string name="chat_att_stuck">届いていません。もう残っていないかもしれません。試行は続いています。</string>
+    <string name="chat_att_no_space">この端末に空き容量が足りず、ダウンロードできません。</string>
     <string name="chat_picture_desc">写真</string>
     <string name="chat_could_not_decode">📷（デコードできませんでした）</string>
     <string name="chat_you_asked_for">あなたの請求</string>

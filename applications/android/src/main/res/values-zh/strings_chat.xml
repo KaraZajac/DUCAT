@@ -74,6 +74,8 @@
     <string name="chat_downloading_image">📷 下载中…</string>
     <string name="chat_downloading_audio">🎤 下载中…</string>
     <string name="chat_downloading_file">📎 下载中…</string>
+    <string name="chat_att_stuck">这个没有送达 — 可能已经不在了。仍在尝试。</string>
+    <string name="chat_att_no_space">这台手机空间不足，无法下载。</string>
     <string name="chat_picture_desc">图片</string>
     <string name="chat_could_not_decode">📷（无法解码）</string>
     <string name="chat_you_asked_for">你请求了</string>

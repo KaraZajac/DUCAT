@@ -82,6 +82,8 @@
     <string name="chat_downloading_image">📷 downloading…</string>
     <string name="chat_downloading_audio">🎤 downloading…</string>
     <string name="chat_downloading_file">📎 downloading…</string>
+    <string name="chat_att_stuck">This has not arrived — it may no longer be available. Still trying.</string>
+    <string name="chat_att_no_space">Not enough space on this phone to download this.</string>
     <string name="chat_picture_desc">Picture</string>
     <string name="chat_could_not_decode">📷 (could not decode)</string>
     <string name="chat_you_asked_for">You asked for</string>
