@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.draw.clip
@@ -20,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -2281,6 +2283,7 @@ private fun AddressField(
     hint: String? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
+    val context = LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var query by remember { mutableStateOf("") }
     var hits by remember { mutableStateOf<List<org.ducatproject.ducat.Geo.Hit>>(emptyList()) }
@@ -2353,14 +2356,83 @@ private fun AddressField(
             },
         )
     }
-    hits.forEach { h ->
-        Text(
-            h.label,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.fillMaxWidth()
-                .clickable { onChosen(h); hits = emptyList() }
-                .padding(vertical = 8.dp, horizontal = 4.dp),
+    // **A result is a place, not a sentence.**
+    //
+    // These were one line of small grey text each, so ten branches of the same
+    // chain read as ten near-identical strings and the only way to tell them
+    // apart was to squint at the middle of each. A name people recognise, the
+    // street under it, and how far away it is — which is the question a
+    // destination search is usually asking, and the one thing the list could
+    // answer for free: every hit already carries its coordinates and the
+    // pickup is already known, so it is arithmetic, not another round trip.
+    //
+    // **Nominatim's order is kept.** Sorting by distance is tempting and
+    // wrong: search a city's name from the next town and the nearest match is
+    // a bus stop that happens to share it, while the place actually meant is
+    // second. The geocoder ranks by what the words mean; this only says how
+    // far each one is, and lets the person decide which of those they cared
+    // about. See the note in Geo.metersBetween on why it is the crow's
+    // distance and not the road's.
+    // Laid out, when there is more than one to lay out. See ResultsMap.
+    if (hits.size >= 2) {
+        Spacer(Modifier.height(8.dp))
+        ResultsMap(
+            me = near,
+            results = hits.map { (it.latE7 to it.lonE7) to it.label.substringBefore(" — ") },
+            onPick = { i -> hits.getOrNull(i)?.let { onChosen(it) }; hits = emptyList() },
+            modifier = Modifier.fillMaxWidth().height(200.dp)
+                .clip(RoundedCornerShape(12.dp)),
         )
+        Spacer(Modifier.height(4.dp))
+    }
+    hits.forEach { h ->
+        val cut = h.label.indexOf(" — ")
+        val name = if (cut > 0) h.label.take(cut) else h.label
+        val where = if (cut > 0) h.label.substring(cut + 3) else null
+        val away = near?.let { (la, lo) ->
+            org.ducatproject.ducat.Units.distance(
+                context,
+                org.ducatproject.ducat.Geo.metersBetween(la, lo, h.latE7, h.lonE7),
+            )
+        }
+        Row(
+            Modifier.fillMaxWidth()
+                .clickable { onChosen(h); hits = emptyList() }
+                .padding(vertical = 10.dp, horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.Filled.Place, null,
+                Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.width(10.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    isolate(name),
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
+                where?.let {
+                    Text(
+                        isolate(it),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            away?.let {
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    it,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
 

@@ -97,6 +97,31 @@ fun RouteMap(
 }
 
 /**
+ * Search results, drawn the same way: where each candidate is relative to
+ * here, and to each other. Tapping one picks it, as on the phone.
+ *
+ * Without tiles this is a constellation rather than a map — it says which
+ * results are clustered and which is off on its own, and it cannot say which
+ * side of the river any of them is on. That is the same trade the rest of
+ * this file makes and for the same reason: the desk draws what it was already
+ * told and asks nobody for the world underneath. The distances in the list
+ * beside it are the precise half of the answer.
+ */
+@Composable
+fun ResultsMap(
+    me: Pair<Long, Long>?,
+    results: List<Pair<Pair<Long, Long>, String>>,
+    onPick: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) = DriverMap(
+    me = me,
+    fares = results,
+    onFareTap = onPick,
+    coverage = null,
+    modifier = modifier,
+)
+
+/**
  * The driver's net, drawn the same way: the desk's own position, the fares
  * on the boards it watches, and the outer bounds of that watch. Tapping a
  * fare works here as it does on the phone — the marker is the button.

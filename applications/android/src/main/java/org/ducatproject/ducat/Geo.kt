@@ -90,6 +90,33 @@ object Geo {
         }.getOrElse { emptyList() }
     }
 
+    /**
+     * Straight-line metres between two points.
+     *
+     * **As the crow flies, and only ever offered as that.** A search can turn
+     * up a dozen branches of the same chain and the one thing a person needs
+     * in order to choose is which is nearest — but routing a dozen candidates
+     * is a dozen calls to somebody else's router for answers eleven of which
+     * get thrown away. The driving figure arrives on the next screen, from
+     * [route], where it is one call and where it is what the fare is quoted
+     * from; this is the cheap comparison that happens before that.
+     *
+     * Haversine on a spherical earth. Good to about half a percent, which is
+     * a rounding error against a number shown to one decimal place, and it
+     * needs no projection and no network.
+     */
+    fun metersBetween(aLatE7: Long, aLonE7: Long, bLatE7: Long, bLonE7: Long): Double {
+        val r = 6_371_000.0
+        val la1 = Math.toRadians(aLatE7 / 1e7)
+        val la2 = Math.toRadians(bLatE7 / 1e7)
+        val dLa = la2 - la1
+        val dLo = Math.toRadians((bLonE7 - aLonE7) / 1e7)
+        val h = kotlin.math.sin(dLa / 2).let { it * it } +
+            kotlin.math.cos(la1) * kotlin.math.cos(la2) *
+            kotlin.math.sin(dLo / 2).let { it * it }
+        return 2 * r * kotlin.math.asin(kotlin.math.sqrt(h).coerceAtMost(1.0))
+    }
+
     /** Driving route between two points. Blocking; call from IO. */
     fun route(fromLatE7: Long, fromLonE7: Long, toLatE7: Long, toLonE7: Long): Route? =
         routeVia(listOf(fromLatE7 to fromLonE7, toLatE7 to toLonE7))
