@@ -39,4 +39,7 @@
     <string name="settings_tax_title">Податок з продажу</string>
     <string name="settings_tax_note">Для бізнесу: каса, барний рахунок і кіоск додають цей відсоток до кожного продажу окремим рядком у рахунку й чеку; експорт наводить його за кожною операцією.</string>
     <string name="settings_tax_percent">Відсоток</string>
+    <string name="settings_recur_title">Регулярні рахунки</string>
+    <string name="settings_recur_next">наступний %1$s</string>
+    <string name="settings_recur_stop">Зупинити</string>
 </resources>

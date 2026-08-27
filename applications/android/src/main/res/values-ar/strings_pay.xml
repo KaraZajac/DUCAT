@@ -73,4 +73,8 @@
     <string name="pay_already_paid">لقد دفعت بالفعل في هذا الضمان. أموالك بالداخل؛ لم يُرسل شيء مرة أخرى.</string>
     <string name="pay_rate_line">محوَّل بسعر ‎1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">محوَّل بسعر ‎1 XMR = %1$s %2$s · %3$s</string>
+    <string name="pay_repeat_once">مرة واحدة</string>
+    <string name="pay_repeat_weekly">أسبوعيًا</string>
+    <string name="pay_repeat_monthly">شهريًا</string>
+    <string name="pay_recur_notify">أُرسلت فاتورة دورية — %1$s</string>
 </resources>

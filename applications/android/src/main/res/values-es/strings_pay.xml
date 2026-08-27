@@ -73,4 +73,8 @@
     <string name="pay_already_paid">Ya has pagado en este depósito en garantía. Tu dinero está dentro; no se ha enviado nada más.</string>
     <string name="pay_rate_line">Convertido a 1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">Convertido a 1 XMR = %1$s %2$s · %3$s</string>
+    <string name="pay_repeat_once">Una vez</string>
+    <string name="pay_repeat_weekly">Semanal</string>
+    <string name="pay_repeat_monthly">Mensual</string>
+    <string name="pay_recur_notify">Cuenta recurrente enviada — %1$s</string>
 </resources>

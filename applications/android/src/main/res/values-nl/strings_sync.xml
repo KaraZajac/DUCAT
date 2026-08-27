@@ -33,4 +33,7 @@
     <string name="settings_tax_title">Omzetbelasting</string>
     <string name="settings_tax_note">Voor een zaak: de kassa, de tab en de kiosk tellen dit percentage bij elke verkoop op, uitgesplitst op de rekening en de bon; de export voert het per transactie op.</string>
     <string name="settings_tax_percent">Procent</string>
+    <string name="settings_recur_title">Terugkerende rekeningen</string>
+    <string name="settings_recur_next">volgende op %1$s</string>
+    <string name="settings_recur_stop">Stoppen</string>
 </resources>

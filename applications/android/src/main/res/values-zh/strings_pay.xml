@@ -73,4 +73,8 @@
     <string name="pay_already_paid">你已经向该托管付过款了。钱已存入，没有重复发送。</string>
     <string name="pay_rate_line">按 1 XMR = %1$s %2$s 换算</string>
     <string name="pay_rate_line_source">按 1 XMR = %1$s %2$s 换算 · %3$s</string>
+    <string name="pay_repeat_once">仅一次</string>
+    <string name="pay_repeat_weekly">每周</string>
+    <string name="pay_repeat_monthly">每月</string>
+    <string name="pay_recur_notify">已发送周期账单 — %1$s</string>
 </resources>

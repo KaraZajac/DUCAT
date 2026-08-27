@@ -73,4 +73,8 @@
     <string name="pay_already_paid">이 에스크로에는 이미 지불했습니다. 돈은 들어가 있으며 다시 보내지 않았습니다.</string>
     <string name="pay_rate_line">1 XMR = %1$s %2$s 환율로 계산</string>
     <string name="pay_rate_line_source">1 XMR = %1$s %2$s 환율로 계산 · %3$s</string>
+    <string name="pay_repeat_once">한 번</string>
+    <string name="pay_repeat_weekly">매주</string>
+    <string name="pay_repeat_monthly">매월</string>
+    <string name="pay_recur_notify">정기 청구서를 보냈습니다 — %1$s</string>
 </resources>

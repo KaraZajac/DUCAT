@@ -73,4 +73,8 @@
     <string name="pay_already_paid">شما قبلاً به این امانی پرداخت کرده‌اید. پول شما داخل است؛ چیزی دوباره ارسال نشد.</string>
     <string name="pay_rate_line">تبدیل‌شده با نرخ ‎1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">تبدیل‌شده با نرخ ‎1 XMR = %1$s %2$s · %3$s</string>
+    <string name="pay_repeat_once">یک بار</string>
+    <string name="pay_repeat_weekly">هفتگی</string>
+    <string name="pay_repeat_monthly">ماهانه</string>
+    <string name="pay_recur_notify">صورت‌حساب دوره‌ای ارسال شد — %1$s</string>
 </resources>

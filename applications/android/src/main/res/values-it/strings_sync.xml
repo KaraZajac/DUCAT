@@ -33,4 +33,7 @@
     <string name="settings_tax_title">Imposta sulle vendite</string>
     <string name="settings_tax_note">Per un’attività: cassa, conto del bar e chiosco aggiungono questa percentuale a ogni vendita, voce sul conto e sulla ricevuta; l’esportazione la riporta per transazione.</string>
     <string name="settings_tax_percent">Percentuale</string>
+    <string name="settings_recur_title">Conti ricorrenti</string>
+    <string name="settings_recur_next">prossimo il %1$s</string>
+    <string name="settings_recur_stop">Interrompi</string>
 </resources>

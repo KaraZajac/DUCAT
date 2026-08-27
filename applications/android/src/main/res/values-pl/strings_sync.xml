@@ -39,4 +39,7 @@
     <string name="settings_tax_title">Podatek od sprzedaży</string>
     <string name="settings_tax_note">Dla firmy: kasa, rachunek barowy i kiosk doliczają ten procent do każdej sprzedaży, wykazany na rachunku i paragonie; eksport podaje go dla każdej transakcji.</string>
     <string name="settings_tax_percent">Procent</string>
+    <string name="settings_recur_title">Rachunki cykliczne</string>
+    <string name="settings_recur_next">następny %1$s</string>
+    <string name="settings_recur_stop">Zatrzymaj</string>
 </resources>

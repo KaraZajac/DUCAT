@@ -29,4 +29,7 @@
     <string name="settings_tax_title">Impuesto sobre ventas</string>
     <string name="settings_tax_note">Para un negocio: la caja, la cuenta de bar y el quiosco añaden este porcentaje a cada venta, detallado en la factura y el recibo, y la exportación lo incluye por transacción.</string>
     <string name="settings_tax_percent">Porcentaje</string>
+    <string name="settings_recur_title">Cuentas recurrentes</string>
+    <string name="settings_recur_next">próxima el %1$s</string>
+    <string name="settings_recur_stop">Detener</string>
 </resources>

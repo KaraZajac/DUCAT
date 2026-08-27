@@ -842,6 +842,30 @@ private fun AmountStep(
             Spacer(Modifier.height(12.dp))
         }
 
+        // 0 = once, 1 = weekly, 2 = monthly. What repeats is the *asking* —
+        // each due date mints the same powerless kind-1 this button sends,
+        // and the payer approves every one (§16.13). Scheduling is offered
+        // only where the first request is being written by hand, so a
+        // schedule is always something someone typed, never a side effect.
+        var repeat by rememberSaveable { mutableStateOf(0) }
+        if (asking && target is PayTarget.ToContact) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(
+                    R.string.pay_repeat_once,
+                    R.string.pay_repeat_weekly,
+                    R.string.pay_repeat_monthly,
+                ).forEachIndexed { i, label ->
+                    FilterChip(
+                        selected = repeat == i,
+                        onClick = { repeat = i },
+                        label = { Text(stringResource(label)) },
+                        enabled = done == null,
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (asking && target is PayTarget.ToContact) {
                 Button(
@@ -858,6 +882,18 @@ private fun AmountStep(
                                         kind = 1, amountPxmr = amt,
                                         payto = WalletStore(context)
                                             .addressFor(target.contact.personaHex),
+                                    )
+                                }
+                            }
+                            // Registered only after the first request truly
+                            // went: a schedule whose opening bill failed
+                            // would start the cadence on a debt nobody has
+                            // heard of.
+                            if (r.isSuccess && repeat != 0) {
+                                withContext(Dispatchers.IO) {
+                                    Recurring.add(
+                                        context, target.contact.personaHex,
+                                        amt, note, monthly = repeat == 2,
                                     )
                                 }
                             }

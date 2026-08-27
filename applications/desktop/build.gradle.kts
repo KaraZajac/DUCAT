@@ -94,6 +94,7 @@ val sharedLogic = listOf(
     // The counter's standing tax rate: the shared tills compute from it and
     // the shared export carries it, so the desk must hold the same number.
     "org/ducatproject/ducat/Tax.kt",
+    "org/ducatproject/ducat/Recurring.kt",
     "org/ducatproject/ducat/ui/GroupChat.kt",
     "org/ducatproject/ducat/Enquiries.kt",
     "org/ducatproject/ducat/Stakes.kt",

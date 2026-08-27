@@ -33,4 +33,7 @@
     <string name="settings_tax_title">बिक्री कर</string>
     <string name="settings_tax_note">व्यवसाय के लिए: टिल, बार टैब और कियोस्क हर बिक्री पर यह प्रतिशत जोड़ते हैं; बिल व रसीद में अलग मद के रूप में, और निर्यात में हर लेनदेन के साथ।</string>
     <string name="settings_tax_percent">प्रतिशत</string>
+    <string name="settings_recur_title">आवर्ती बिल</string>
+    <string name="settings_recur_next">अगला %1$s</string>
+    <string name="settings_recur_stop">रोकें</string>
 </resources>

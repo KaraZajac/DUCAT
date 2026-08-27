@@ -29,4 +29,7 @@
     <string name="settings_tax_title">Umsatzsteuer</string>
     <string name="settings_tax_note">Für ein Geschäft: Kasse, Deckel und Kiosk schlagen diesen Prozentsatz auf jeden Verkauf auf, ausgewiesen auf Rechnung und Beleg; der Export führt ihn je Transaktion.</string>
     <string name="settings_tax_percent">Prozent</string>
+    <string name="settings_recur_title">Wiederkehrende Rechnungen</string>
+    <string name="settings_recur_next">nächste am %1$s</string>
+    <string name="settings_recur_stop">Beenden</string>
 </resources>

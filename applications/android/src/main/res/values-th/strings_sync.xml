@@ -30,4 +30,7 @@
     <string name="settings_tax_title">ภาษีขาย</string>
     <string name="settings_tax_note">สำหรับธุรกิจ: เครื่องคิดเงิน บาร์แท็บ และคีออสก์จะบวกเปอร์เซ็นต์นี้ในทุกการขาย แสดงแยกในบิลและใบเสร็จ และการส่งออกบันทึกไว้ต่อรายการ</string>
     <string name="settings_tax_percent">เปอร์เซ็นต์</string>
+    <string name="settings_recur_title">บิลประจำ</string>
+    <string name="settings_recur_next">ครั้งถัดไป %1$s</string>
+    <string name="settings_recur_stop">หยุด</string>
 </resources>

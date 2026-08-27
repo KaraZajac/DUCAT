@@ -73,4 +73,8 @@
     <string name="pay_sending_to">to %1$s</string>
     <string name="claim_own_card">That card is your own — it belongs to this device.</string>
     <string name="pay_already_paid">You have already paid into this escrow. Your money is in; nothing was sent again.</string>
+    <string name="pay_repeat_once">Once</string>
+    <string name="pay_repeat_weekly">Weekly</string>
+    <string name="pay_repeat_monthly">Monthly</string>
+    <string name="pay_recur_notify">Recurring bill sent — %1$s</string>
 </resources>

@@ -33,4 +33,7 @@
     <string name="settings_tax_title">Sales tax</string>
     <string name="settings_tax_note">For a business: the till, the bar tab and the kiosk add this percentage to every sale, itemised on the bill and the receipt, and the export carries it per transaction.</string>
     <string name="settings_tax_percent">Percent</string>
+    <string name="settings_recur_title">Recurring bills</string>
+    <string name="settings_recur_next">next %1$s</string>
+    <string name="settings_recur_stop">Stop</string>
 </resources>

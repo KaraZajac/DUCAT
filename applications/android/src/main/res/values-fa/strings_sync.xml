@@ -33,4 +33,7 @@
     <string name="settings_tax_title">مالیات فروش</string>
     <string name="settings_tax_note">برای کسب‌وکار: صندوق، حساب بار و کیوسک این درصد را به هر فروش می‌افزایند؛ در صورتحساب و رسید جدا نوشته می‌شود و در خروجی برای هر تراکنش می‌آید.</string>
     <string name="settings_tax_percent">درصد</string>
+    <string name="settings_recur_title">صورت‌حساب‌های دوره‌ای</string>
+    <string name="settings_recur_next">بعدی %1$s</string>
+    <string name="settings_recur_stop">توقف</string>
 </resources>

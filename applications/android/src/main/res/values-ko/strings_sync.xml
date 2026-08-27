@@ -30,4 +30,7 @@
     <string name="settings_tax_title">판매세</string>
     <string name="settings_tax_note">사업자용: 계산대·바 탭·키오스크가 모든 판매에 이 비율을 더하고, 청구서와 영수증에 항목으로 표시되며, 내보내기에 거래별로 기록됩니다.</string>
     <string name="settings_tax_percent">퍼센트</string>
+    <string name="settings_recur_title">정기 청구서</string>
+    <string name="settings_recur_next">다음 %1$s</string>
+    <string name="settings_recur_stop">중지</string>
 </resources>

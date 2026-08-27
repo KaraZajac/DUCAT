@@ -73,4 +73,8 @@
     <string name="pay_already_paid">คุณชำระเข้าเอสโครว์นี้ไปแล้ว เงินอยู่ในนั้นแล้ว ไม่ได้ส่งซ้ำ</string>
     <string name="pay_rate_line">คิดที่อัตรา 1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">คิดที่อัตรา 1 XMR = %1$s %2$s · %3$s</string>
+    <string name="pay_repeat_once">ครั้งเดียว</string>
+    <string name="pay_repeat_weekly">รายสัปดาห์</string>
+    <string name="pay_repeat_monthly">รายเดือน</string>
+    <string name="pay_recur_notify">ส่งบิลประจำแล้ว — %1$s</string>
 </resources>

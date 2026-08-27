@@ -29,4 +29,7 @@
     <string name="settings_tax_title">Taxe de vente</string>
     <string name="settings_tax_note">Pour un commerce : la caisse, l’ardoise et le kiosque ajoutent ce pourcentage à chaque vente, détaillé sur la note et le reçu ; l’export le reprend par transaction.</string>
     <string name="settings_tax_percent">Pourcentage</string>
+    <string name="settings_recur_title">Factures récurrentes</string>
+    <string name="settings_recur_next">prochaine le %1$s</string>
+    <string name="settings_recur_stop">Arrêter</string>
 </resources>

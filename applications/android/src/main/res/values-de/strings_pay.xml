@@ -73,4 +73,8 @@
     <string name="pay_already_paid">Du hast bereits in diese Treuhand eingezahlt. Dein Geld ist drin; es wurde nichts erneut gesendet.</string>
     <string name="pay_rate_line">Umgerechnet zu 1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">Umgerechnet zu 1 XMR = %1$s %2$s · %3$s</string>
+    <string name="pay_repeat_once">Einmal</string>
+    <string name="pay_repeat_weekly">Wöchentlich</string>
+    <string name="pay_repeat_monthly">Monatlich</string>
+    <string name="pay_recur_notify">Wiederkehrende Rechnung gesendet — %1$s</string>
 </resources>

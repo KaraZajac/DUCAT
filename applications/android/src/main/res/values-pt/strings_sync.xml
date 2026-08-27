@@ -29,4 +29,7 @@
     <string name="settings_tax_title">Imposto sobre vendas</string>
     <string name="settings_tax_note">Para um negócio: a caixa, a conta do bar e o quiosque somam esta percentagem a cada venda, discriminada na conta e no recibo; a exportação leva-a por transação.</string>
     <string name="settings_tax_percent">Percentagem</string>
+    <string name="settings_recur_title">Contas recorrentes</string>
+    <string name="settings_recur_next">próxima em %1$s</string>
+    <string name="settings_recur_stop">Parar</string>
 </resources>

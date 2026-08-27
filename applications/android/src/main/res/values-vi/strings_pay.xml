@@ -73,4 +73,8 @@
     <string name="pay_already_paid">Bạn đã thanh toán vào ký quỹ này rồi. Tiền đã vào; không gửi lại lần nữa.</string>
     <string name="pay_rate_line">Quy đổi theo 1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">Quy đổi theo 1 XMR = %1$s %2$s · %3$s</string>
+    <string name="pay_repeat_once">Một lần</string>
+    <string name="pay_repeat_weekly">Hàng tuần</string>
+    <string name="pay_repeat_monthly">Hàng tháng</string>
+    <string name="pay_recur_notify">Đã gửi hóa đơn định kỳ — %1$s</string>
 </resources>

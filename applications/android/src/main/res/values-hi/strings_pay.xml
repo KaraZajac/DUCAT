@@ -73,4 +73,8 @@
     <string name="pay_already_paid">आप इस एस्क्रो में पहले ही भुगतान कर चुके हैं। आपका पैसा अंदर है; दोबारा कुछ नहीं भेजा गया।</string>
     <string name="pay_rate_line">1 XMR = %1$s %2$s की दर से</string>
     <string name="pay_rate_line_source">1 XMR = %1$s %2$s की दर से · %3$s</string>
+    <string name="pay_repeat_once">एक बार</string>
+    <string name="pay_repeat_weekly">साप्ताहिक</string>
+    <string name="pay_repeat_monthly">मासिक</string>
+    <string name="pay_recur_notify">आवर्ती बिल भेजा गया — %1$s</string>
 </resources>

@@ -41,4 +41,7 @@
     <string name="settings_tax_title">ضريبة المبيعات</string>
     <string name="settings_tax_note">للأعمال: تضيف الكاشيرة ودفتر الحساب والكشك هذه النسبة إلى كل عملية بيع، مفصّلة في الفاتورة والإيصال، ويحملها التصدير لكل معاملة.</string>
     <string name="settings_tax_percent">النسبة المئوية</string>
+    <string name="settings_recur_title">فواتير دورية</string>
+    <string name="settings_recur_next">التالية %1$s</string>
+    <string name="settings_recur_stop">إيقاف</string>
 </resources>

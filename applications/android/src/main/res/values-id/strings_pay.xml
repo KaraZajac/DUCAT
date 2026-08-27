@@ -73,4 +73,8 @@
     <string name="pay_already_paid">Kamu sudah membayar ke escrow ini. Uangmu sudah masuk; tidak ada yang dikirim lagi.</string>
     <string name="pay_rate_line">Dikonversi pada 1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">Dikonversi pada 1 XMR = %1$s %2$s · %3$s</string>
+    <string name="pay_repeat_once">Sekali</string>
+    <string name="pay_repeat_weekly">Mingguan</string>
+    <string name="pay_repeat_monthly">Bulanan</string>
+    <string name="pay_recur_notify">Tagihan berulang terkirim — %1$s</string>
 </resources>

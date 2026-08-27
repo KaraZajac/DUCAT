@@ -217,6 +217,7 @@ fun SettingsScreen(
         Spacer(Modifier.height(24.dp))
         TaxSetting()
         Spacer(Modifier.height(24.dp))
+        RecurringSetting()
 
         // §16.16, and the default is the privacy stance: when a message was
         // read is behavioural data, and it leaves this device by choice, not by
@@ -1014,5 +1015,60 @@ private fun TaxSetting() {
                 )
             }
         }
+    }
+}
+
+/**
+ * Every standing schedule, in one place. Creation lives on the request
+ * form (where the first bill is typed); this is where they are found
+ * again and stopped — because a cadence someone set in March must not
+ * require remembering in September which thread it was set from.
+ * Renders nothing while nothing recurs.
+ */
+@Composable
+private fun RecurringSetting() {
+    val context = LocalContext.current
+    val version by org.ducatproject.ducat.ContactStore.changes.collectAsState()
+    val bills = remember(version) { org.ducatproject.ducat.Recurring.all(context) }
+    if (bills.isEmpty()) return
+    val contacts = remember(version) { org.ducatproject.ducat.ContactStore(context).all() }
+    Column {
+        Text(
+            stringResource(R.string.settings_recur_title),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Spacer(Modifier.height(4.dp))
+        bills.forEach { b ->
+            val name = contacts.firstOrNull { it.personaHex == b.personaHex }
+                ?.displayName() ?: "${b.personaHex.take(8)}…"
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        isolate(name) + " — " +
+                            org.ducatproject.ducat.Amounts.show(context, b.amountPxmr).primary,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        stringResource(
+                            if (b.monthly) R.string.pay_repeat_monthly
+                            else R.string.pay_repeat_weekly,
+                        ) + " · " + stringResource(
+                            R.string.settings_recur_next,
+                            java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM)
+                                .format(java.util.Date(b.nextAt)),
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                TextButton(onClick = { org.ducatproject.ducat.Recurring.stop(context, b.id) }) {
+                    Text(stringResource(R.string.settings_recur_stop))
+                }
+            }
+        }
+        Spacer(Modifier.height(24.dp))
     }
 }

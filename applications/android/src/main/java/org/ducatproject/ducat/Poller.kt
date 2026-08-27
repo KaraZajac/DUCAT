@@ -299,6 +299,12 @@ class Poller(private val context: Context) {
                 // rather than false forever.
                 runCatching { Groups.retryOutbox(context) }
                     .onFailure { DucatLog.w(TAG, "group retry: ${it.message}") }
+                // Recurring bills: the asking repeats, the paying never does
+                // (§16.13 — a request carries no authority). Here for the
+                // same reason as the rest: rent comes due with the phone in
+                // a drawer.
+                runCatching { Recurring.runDue(context) }
+                    .onFailure { DucatLog.w(TAG, "recurring: ${it.message}") }
                 runCatching { Positions.enforceBounds(context) }
                     .onFailure { DucatLog.w(TAG, "position stop: ${it.message}") }
 

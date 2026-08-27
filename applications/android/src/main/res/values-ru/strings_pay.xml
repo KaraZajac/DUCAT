@@ -73,4 +73,8 @@
     <string name="pay_already_paid">Вы уже внесли средства в этот эскроу. Деньги на месте; повторно ничего не отправлено.</string>
     <string name="pay_rate_line">По курсу 1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">По курсу 1 XMR = %1$s %2$s · %3$s</string>
+    <string name="pay_repeat_once">Один раз</string>
+    <string name="pay_repeat_weekly">Еженедельно</string>
+    <string name="pay_repeat_monthly">Ежемесячно</string>
+    <string name="pay_recur_notify">Регулярный счёт отправлен — %1$s</string>
 </resources>

@@ -73,4 +73,8 @@
     <string name="pay_already_paid">Już wpłaciłeś do tego depozytu. Twoje pieniądze są w środku; nic nie wysłano ponownie.</string>
     <string name="pay_rate_line">Przeliczone po 1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">Przeliczone po 1 XMR = %1$s %2$s · %3$s</string>
+    <string name="pay_repeat_once">Raz</string>
+    <string name="pay_repeat_weekly">Co tydzień</string>
+    <string name="pay_repeat_monthly">Co miesiąc</string>
+    <string name="pay_recur_notify">Wysłano cykliczny rachunek — %1$s</string>
 </resources>

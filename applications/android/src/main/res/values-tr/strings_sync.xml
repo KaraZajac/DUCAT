@@ -33,4 +33,7 @@
     <string name="settings_tax_title">Satış vergisi</string>
     <string name="settings_tax_note">İşletmeler için: kasa, bar hesabı ve kiosk her satışa bu yüzdeyi ekler; fatura ve fişte ayrı satırdır, dışa aktarım işlem başına taşır.</string>
     <string name="settings_tax_percent">Yüzde</string>
+    <string name="settings_recur_title">Yinelenen hesaplar</string>
+    <string name="settings_recur_next">sonraki %1$s</string>
+    <string name="settings_recur_stop">Durdur</string>
 </resources>

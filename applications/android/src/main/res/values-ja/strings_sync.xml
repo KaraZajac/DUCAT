@@ -30,4 +30,7 @@
     <string name="settings_tax_title">消費税</string>
     <string name="settings_tax_note">事業者向け：レジ・ツケ・キオスクが各販売にこの率を加算し、請求書とレシートに明記、エクスポートにも取引ごとに記載されます。</string>
     <string name="settings_tax_percent">パーセント</string>
+    <string name="settings_recur_title">定期請求</string>
+    <string name="settings_recur_next">次回 %1$s</string>
+    <string name="settings_recur_stop">停止</string>
 </resources>

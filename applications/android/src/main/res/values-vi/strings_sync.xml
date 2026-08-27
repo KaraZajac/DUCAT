@@ -30,4 +30,7 @@
     <string name="settings_tax_title">Thuế bán hàng</string>
     <string name="settings_tax_note">Cho doanh nghiệp: quầy thu ngân, tab quầy bar và kiosk cộng phần trăm này vào mỗi lần bán, ghi rõ trên hoá đơn và biên nhận; bản xuất mang nó theo từng giao dịch.</string>
     <string name="settings_tax_percent">Phần trăm</string>
+    <string name="settings_recur_title">Hóa đơn định kỳ</string>
+    <string name="settings_recur_next">lần tới %1$s</string>
+    <string name="settings_recur_stop">Dừng</string>
 </resources>

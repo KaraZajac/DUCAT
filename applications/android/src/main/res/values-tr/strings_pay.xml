@@ -73,4 +73,8 @@
     <string name="pay_already_paid">Bu emanete zaten ödeme yaptın. Paran içeride; tekrar gönderilmedi.</string>
     <string name="pay_rate_line">1 XMR = %1$s %2$s kuruyla</string>
     <string name="pay_rate_line_source">1 XMR = %1$s %2$s kuruyla · %3$s</string>
+    <string name="pay_repeat_once">Bir kez</string>
+    <string name="pay_repeat_weekly">Haftalık</string>
+    <string name="pay_repeat_monthly">Aylık</string>
+    <string name="pay_recur_notify">Yinelenen hesap gönderildi — %1$s</string>
 </resources>

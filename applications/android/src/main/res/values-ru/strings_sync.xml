@@ -39,4 +39,7 @@
     <string name="settings_tax_title">Налог с продаж</string>
     <string name="settings_tax_note">Для бизнеса: касса, барный счёт и киоск добавляют этот процент к каждой продаже, отдельной строкой в счёте и чеке; экспорт указывает его по каждой операции.</string>
     <string name="settings_tax_percent">Процент</string>
+    <string name="settings_recur_title">Регулярные счета</string>
+    <string name="settings_recur_next">следующий %1$s</string>
+    <string name="settings_recur_stop">Остановить</string>
 </resources>

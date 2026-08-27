@@ -73,4 +73,8 @@
     <string name="pay_already_paid">このエスクローにはすでに支払い済みです。資金は入っており、再送信はされていません。</string>
     <string name="pay_rate_line">1 XMR = %1$s %2$s で換算</string>
     <string name="pay_rate_line_source">1 XMR = %1$s %2$s で換算 · %3$s</string>
+    <string name="pay_repeat_once">1回のみ</string>
+    <string name="pay_repeat_weekly">毎週</string>
+    <string name="pay_repeat_monthly">毎月</string>
+    <string name="pay_recur_notify">定期請求を送信しました — %1$s</string>
 </resources>

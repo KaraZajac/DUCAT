@@ -73,4 +73,8 @@
     <string name="pay_already_paid">Ви вже внесли кошти в цей ескроу. Гроші на місці; повторно нічого не надіслано.</string>
     <string name="pay_rate_line">За курсом 1 XMR = %1$s %2$s</string>
     <string name="pay_rate_line_source">За курсом 1 XMR = %1$s %2$s · %3$s</string>
+    <string name="pay_repeat_once">Один раз</string>
+    <string name="pay_repeat_weekly">Щотижня</string>
+    <string name="pay_repeat_monthly">Щомісяця</string>
+    <string name="pay_recur_notify">Регулярний рахунок надіслано — %1$s</string>
 </resources>

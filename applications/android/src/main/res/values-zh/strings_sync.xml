@@ -26,4 +26,7 @@
     <string name="settings_tax_title">销售税</string>
     <string name="settings_tax_note">面向商家：收银台、酒吧账单和自助终端会在每笔销售上加上此百分比，在账单和收据上单列，导出时按笔记录。</string>
     <string name="settings_tax_percent">百分比</string>
+    <string name="settings_recur_title">周期账单</string>
+    <string name="settings_recur_next">下次 %1$s</string>
+    <string name="settings_recur_stop">停止</string>
 </resources>
