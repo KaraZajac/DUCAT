@@ -502,8 +502,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             if (Ledger.billAnswered(thread, m)) continue
             val seen = billPrefs.getLong("billseen_${c.personaHex}", -1L)
             // Fresh only: reinstalls and restores must not replay history as
-            // a stack of surprise take-overs.
-            if (m.seq > seen && now - m.timestamp < 300) {
+            // a stack of surprise take-overs. Both directions — the stamp is
+            // the asker's clock, and a bill stamped ahead of ours (fast
+            // clock, or worse) otherwise counts as "fresh" until its stamp
+            // passes, taking the screen over at every launch until then.
+            if (m.seq > seen && kotlin.math.abs(now - m.timestamp) < 300) {
                 billPrompt = c to m
                 break
             }
