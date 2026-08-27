@@ -23,4 +23,15 @@
         <item quantity="other">‏%1$d أشخاص</item>
     </plurals>
     <string name="group_added_notify">أضافك %1$s</string>
+    <string name="group_split">تقسيم فاتورة</string>
+    <string name="group_split_among">التقسيم بين</string>
+    <string name="group_split_partial">تعذّر الوصول إلى %1$s — انقر مجددًا لإعادة المحاولة.</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">‏%1$d حصة — %2$s لكلٍّ</item>
+        <item quantity="other">‏%1$d حصص — %2$s لكلٍّ</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">إرسال %1$d طلب</item>
+        <item quantity="other">إرسال %1$d طلبات</item>
+    </plurals>
 </resources>

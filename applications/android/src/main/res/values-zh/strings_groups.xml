@@ -23,4 +23,15 @@
         <item quantity="other">%1$d人</item>
     </plurals>
     <string name="group_added_notify">%1$s 把你加入了</string>
+    <string name="group_split">分摊账单</string>
+    <string name="group_split_among">分摊对象</string>
+    <string name="group_split_partial">无法送达 %1$s — 再点一次可重试。</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">%1$d 人分摊 — 每人 %2$s</item>
+        <item quantity="other">%1$d 人分摊 — 每人 %2$s</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">发送 %1$d 条请求</item>
+        <item quantity="other">发送 %1$d 条请求</item>
+    </plurals>
 </resources>

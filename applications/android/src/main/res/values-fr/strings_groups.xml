@@ -23,4 +23,15 @@
         <item quantity="other">%1$d personnes</item>
     </plurals>
     <string name="group_added_notify">%1$s vous a ajouté</string>
+    <string name="group_split">Partager une addition</string>
+    <string name="group_split_among">Partager entre</string>
+    <string name="group_split_partial">Impossible de joindre %1$s — touchez à nouveau pour réessayer.</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">%1$d part — %2$s chacun</item>
+        <item quantity="other">%1$d parts — %2$s chacun</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">Envoyer %1$d demande</item>
+        <item quantity="other">Envoyer %1$d demandes</item>
+    </plurals>
 </resources>

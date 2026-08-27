@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.CallSplit
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -97,6 +98,7 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
     // (sender, groupSeq) of the message being answered, if one is.
     var replyTo by rememberSaveable { mutableStateOf<String?>(null) }
     var addOpen by remember { mutableStateOf(false) }
+    var splitOpen by remember { mutableStateOf(false) }
 
     // The one-time disclosure, before anything else on a fresh group.
     if (!group.disclosed) {
@@ -300,6 +302,16 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
             Modifier.padding(12.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            // Splitting is a kind of speaking: it announces arithmetic to the
+            // group and bills people pairwise, so it sits behind the same mesh
+            // gate as the composer. A split you cannot announce is a set of
+            // bills nobody can check against each other.
+            IconButton(
+                onClick = { splitOpen = true },
+                enabled = missing.isEmpty(),
+            ) {
+                Icon(Icons.Filled.CallSplit, stringResource(R.string.group_split))
+            }
             OutlinedTextField(
                 value = draft,
                 onValueChange = { if (it.length <= 2000) draft = it },
@@ -340,6 +352,9 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
         }
     }
 
+    if (splitOpen) {
+        SplitSheet(idHex = idHex, group = group, onDone = { splitOpen = false })
+    }
     if (addOpen) {
         val candidates = contacts.filter { it.personaHex !in group.members }
         AlertDialog(
@@ -526,6 +541,198 @@ fun GroupCreateScreen(onDone: (String) -> Unit, onCancel: () -> Unit) {
             ) {
                 if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                 else Text(stringResource(R.string.group_create_button))
+            }
+        }
+    }
+}
+
+/**
+ * Split a bill (§16.19's one brush with money — and deliberately not a wire
+ * feature). One person fronted a total; this mints an ordinary pairwise
+ * PaymentRequest to each chosen member for their share, then says the
+ * arithmetic aloud in the group so everyone can check everyone's bill against
+ * the same sentence. Money stays pairwise: the group carries only words.
+ *
+ * The share rounds DOWN. The splitter fronted the bill and eats the dust,
+ * because a split that bills a friend a piconero over their share is wrong in
+ * the direction that matters — same rule as [org.ducatproject.ducat.Tax.on].
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SplitSheet(idHex: String, group: Groups.Group, onDone: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val store = remember { ContactStore(context) }
+    val mine = remember { PersonaStore(context).personaHex() }
+    val contacts = remember { store.all() }
+    val youLabel = stringResource(R.string.group_you)
+    fun nameOf(hex: String): String = when {
+        hex == mine -> youLabel
+        else -> contacts.firstOrNull { it.personaHex == hex }?.displayName()
+            ?: "${hex.take(8)}…"
+    }
+
+    var typed by rememberSaveable { mutableStateOf("") }
+    var fiatEntry by rememberSaveable {
+        mutableStateOf(org.ducatproject.ducat.Amounts.enterFiat(context))
+    }
+    val rate = remember { org.ducatproject.ducat.RateStore(context).cached()?.first }
+    val cur = remember { org.ducatproject.ducat.Amounts.currency(context) }
+    var note by rememberSaveable { mutableStateOf("") }
+    // Who shares the bill — everyone until unchecked, yourself included.
+    // Unchecking yourself is "I didn't eat": the total splits among the rest.
+    val checked = remember { mutableStateListOf<String>().apply { addAll(group.members) } }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    // Debtors already billed. A partial failure retries only the rest —
+    // re-sending a bill someone already has is a duplicate, not a retry.
+    val sent = remember { mutableStateListOf<String>() }
+    val locked = sent.isNotEmpty()
+
+    val pxmr = remember(typed, fiatEntry, rate) {
+        val v = moneyText(typed).toBigDecimalOrNull() ?: return@remember null
+        val xmr = if (fiatEntry && rate != null && rate > 0) {
+            v.divide(java.math.BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
+        } else v
+        xmr.multiply(java.math.BigDecimal(1_000_000_000_000L)).toLong().takeIf { it > 0 }
+    }
+    val share = if (pxmr != null && checked.isNotEmpty()) pxmr / checked.size else null
+    val debtors = checked.filter { it != mine }
+
+    // Resolved here because plurals are composition-only: the sentence the
+    // group hears, e.g. "dinner — USD 20.00 · 3 ways — USD 6.67 each".
+    val announce = if (pxmr != null && share != null) {
+        note.ifBlank { stringResource(R.string.pay_payment_request) } +
+            " — " + org.ducatproject.ducat.Amounts.show(context, pxmr).primary +
+            " · " + pluralStringResource(
+                R.plurals.group_split_ways, checked.size, checked.size,
+                org.ducatproject.ducat.Amounts.show(context, share).primary,
+            )
+    } else ""
+    val defaultNote = stringResource(R.string.pay_payment_request)
+
+    ModalBottomSheet(onDismissRequest = { if (!busy) onDone() }) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
+            Text(stringResource(R.string.group_split), style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = typed,
+                    onValueChange = {
+                        typed = it.filter { c -> org.ducatproject.ducat.Amounts.isNumberChar(c) }
+                    },
+                    placeholder = { Text(stringResource(R.string.pay_amount_placeholder)) },
+                    singleLine = true,
+                    enabled = !locked && !busy,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
+                    ),
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(Modifier.width(10.dp))
+                if (rate != null) {
+                    AssistChip(
+                        onClick = { if (!locked && !busy) { fiatEntry = !fiatEntry; typed = "" } },
+                        label = { Text(if (fiatEntry) cur else "XMR") },
+                    )
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = note,
+                onValueChange = { if (it.length <= 128) note = it },
+                label = { Text(stringResource(R.string.pay_memo_label)) },
+                singleLine = true,
+                enabled = !locked && !busy,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                stringResource(R.string.group_split_among),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            group.members.forEach { hex ->
+                Row(
+                    Modifier.fillMaxWidth().clickable(enabled = !locked && !busy) {
+                        if (hex in checked) checked.remove(hex) else checked.add(hex)
+                    },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        checked = hex in checked,
+                        onCheckedChange = {
+                            if (hex in checked) checked.remove(hex) else checked.add(hex)
+                        },
+                        enabled = !locked && !busy,
+                    )
+                    Text(isolate(nameOf(hex)))
+                }
+            }
+            if (share != null && debtors.isNotEmpty()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    pluralStringResource(
+                        R.plurals.group_split_ways, checked.size, checked.size,
+                        org.ducatproject.ducat.Amounts.show(context, share).primary,
+                    ),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+            error?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
+            Spacer(Modifier.height(12.dp))
+            Button(
+                onClick = {
+                    val shareNow = share ?: return@Button
+                    busy = true; error = null
+                    scope.launch {
+                        val fails = ArrayList<String>()
+                        withContext(Dispatchers.IO) {
+                            for (d in debtors) {
+                                if (d in sent) continue
+                                val c = contacts.firstOrNull { it.personaHex == d }
+                                if (c == null) { fails.add(nameOf(d)); continue }
+                                runCatching {
+                                    org.ducatproject.ducat.Mailbox.send(
+                                        context, c,
+                                        note.ifBlank { defaultNote },
+                                        mine,
+                                        kind = 1, amountPxmr = shareNow,
+                                        payto = org.ducatproject.ducat.WalletStore(context)
+                                            .addressFor(d),
+                                    )
+                                }.onSuccess { sent.add(d) }.onFailure { fails.add(nameOf(d)) }
+                            }
+                            if (fails.isEmpty()) {
+                                // The bills are out; now the sentence everyone
+                                // can audit them against. If this fan-out only
+                                // partially lands, Groups queues the rest —
+                                // that failure mode is already handled below us.
+                                runCatching { Groups.send(context, idHex, announce) }
+                                    .onFailure { fails.add(group.name) }
+                            }
+                        }
+                        busy = false
+                        if (fails.isEmpty()) onDone()
+                        else error = context.getString(
+                            R.string.group_split_partial, fails.joinToString(", "),
+                        )
+                    }
+                },
+                enabled = !busy && share != null && debtors.isNotEmpty(),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                if (busy) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                else Text(
+                    pluralStringResource(
+                        R.plurals.group_split_send,
+                        (debtors.size - sent.size).coerceAtLeast(1),
+                        (debtors.size - sent.size).coerceAtLeast(1),
+                    ),
+                )
             }
         }
     }

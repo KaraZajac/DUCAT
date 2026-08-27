@@ -23,4 +23,15 @@
         <item quantity="other">%1$d осіб</item>
     </plurals>
     <string name="group_added_notify">%1$s додав(-ла) вас</string>
+    <string name="group_split">Розділити рахунок</string>
+    <string name="group_split_among">Розділити між</string>
+    <string name="group_split_partial">Не вдалося зв’язатися з %1$s — торкніться ще раз, щоб повторити.</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">%1$d частка — по %2$s</item>
+        <item quantity="other">%1$d част. — по %2$s</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">Надіслати %1$d запит</item>
+        <item quantity="other">Надіслати запити: %1$d</item>
+    </plurals>
 </resources>

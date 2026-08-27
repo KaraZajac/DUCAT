@@ -968,7 +968,17 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         // the alternative is a live button one tap from paying
                         // twice, but erring is what it does and naming the
                         // target is what stops it.
-                        paid = m.kind == 1 && !m.outgoing && messages.any {
+                        // The asker's own copy flips too, but only on an
+                        // explicit reference — never the amount heuristic.
+                        // Erring toward "paid" is safe where it kills a spend
+                        // button and a lie where it tells the person owed
+                        // money they were paid. An incoming payment naming
+                        // this request (their re_own=false: our log), or our
+                        // own receipt for it (re_own=true), is not a guess.
+                        paid = (m.kind == 1 && m.outgoing && messages.any {
+                            (it.kind == 2 && !it.outgoing && it.reSeq == m.seq && !it.reOwn) ||
+                                (it.kind == 3 && it.outgoing && it.reSeq == m.seq && it.reOwn)
+                        }) || (m.kind == 1 && !m.outgoing && messages.any {
                             val answers = ((it.kind == 2 && it.outgoing) ||
                                 (it.kind == 3 && !it.outgoing))
                             if (!answers) false
@@ -985,7 +995,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 it.amountPxmr >= m.amountPxmr &&
                                     it.timestamp >= m.timestamp
                             }
-                        },
+                        }),
                         // The sender's own retract (kind 5, reOwn) withdraws
                         // the bill, and the payer's refusal is the same
                         // mechanism from the other end. Both are resolved in
@@ -1765,6 +1775,19 @@ private fun Bubble(
                                 color = fg.copy(alpha = 0.7f),
                             )
                         }
+                    }
+                    // The asker's copy: no button (nothing to press — the
+                    // money comes to us), just the settled flag once a
+                    // payment or receipt explicitly names this request.
+                    // Splitting a bill turns one screen into the ledger of
+                    // who has squared up, which is worth a glance.
+                    if (m.kind == 1 && m.outgoing && paid) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            stringResource(R.string.chat_paid),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = fg.copy(alpha = 0.8f),
+                        )
                     }
                 }
             }

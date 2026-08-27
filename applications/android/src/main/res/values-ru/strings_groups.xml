@@ -23,4 +23,15 @@
         <item quantity="other">%1$d чел.</item>
     </plurals>
     <string name="group_added_notify">%1$s добавил(а) вас</string>
+    <string name="group_split">Разделить счёт</string>
+    <string name="group_split_among">Разделить между</string>
+    <string name="group_split_partial">Не удалось связаться с %1$s — нажмите ещё раз, чтобы повторить.</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">%1$d доля — по %2$s</item>
+        <item quantity="other">%1$d дол. — по %2$s</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">Отправить %1$d запрос</item>
+        <item quantity="other">Отправить запросы: %1$d</item>
+    </plurals>
 </resources>

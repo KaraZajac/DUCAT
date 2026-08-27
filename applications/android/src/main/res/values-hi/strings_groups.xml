@@ -23,4 +23,15 @@
         <item quantity="other">%1$d लोग</item>
     </plurals>
     <string name="group_added_notify">%1$s ने आपको जोड़ा</string>
+    <string name="group_split">बिल बाँटें</string>
+    <string name="group_split_among">इनमें बाँटें</string>
+    <string name="group_split_partial">%1$s तक नहीं पहुँच सके — फिर से टैप करके दोबारा कोशिश करें।</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">%1$d हिस्सा — हर एक %2$s</item>
+        <item quantity="other">%1$d हिस्से — हर एक %2$s</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">%1$d अनुरोध भेजें</item>
+        <item quantity="other">%1$d अनुरोध भेजें</item>
+    </plurals>
 </resources>

@@ -23,4 +23,15 @@
         <item quantity="other">%1$d personen</item>
     </plurals>
     <string name="group_added_notify">%1$s heeft je toegevoegd</string>
+    <string name="group_split">Rekening splitsen</string>
+    <string name="group_split_among">Verdelen over</string>
+    <string name="group_split_partial">%1$s niet bereikt — tik nogmaals om het opnieuw te proberen.</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">%1$d deel — %2$s elk</item>
+        <item quantity="other">%1$d delen — %2$s elk</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">%1$d verzoek versturen</item>
+        <item quantity="other">%1$d verzoeken versturen</item>
+    </plurals>
 </resources>

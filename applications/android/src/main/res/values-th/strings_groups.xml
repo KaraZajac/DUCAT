@@ -23,4 +23,15 @@
         <item quantity="other">%1$d คน</item>
     </plurals>
     <string name="group_added_notify">%1$s เพิ่มคุณเข้ามา</string>
+    <string name="group_split">หารบิล</string>
+    <string name="group_split_among">หารระหว่าง</string>
+    <string name="group_split_partial">ติดต่อ %1$s ไม่ได้ — แตะอีกครั้งเพื่อลองใหม่</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">หาร %1$d คน — คนละ %2$s</item>
+        <item quantity="other">หาร %1$d คน — คนละ %2$s</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">ส่งคำขอ %1$d รายการ</item>
+        <item quantity="other">ส่งคำขอ %1$d รายการ</item>
+    </plurals>
 </resources>

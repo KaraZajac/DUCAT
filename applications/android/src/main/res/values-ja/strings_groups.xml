@@ -23,4 +23,15 @@
         <item quantity="other">%1$d人</item>
     </plurals>
     <string name="group_added_notify">%1$sがあなたを追加しました</string>
+    <string name="group_split">割り勘</string>
+    <string name="group_split_among">分ける相手</string>
+    <string name="group_split_partial">%1$sに届きませんでした — もう一度タップして再試行してください。</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">%1$d人で — 各%2$s</item>
+        <item quantity="other">%1$d人で — 各%2$s</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">リクエストを%1$d件送信</item>
+        <item quantity="other">リクエストを%1$d件送信</item>
+    </plurals>
 </resources>

@@ -23,4 +23,15 @@
         <item quantity="other">%1$d kişi</item>
     </plurals>
     <string name="group_added_notify">%1$s seni ekledi</string>
+    <string name="group_split">Hesabı bölüş</string>
+    <string name="group_split_among">Bölüşenler</string>
+    <string name="group_split_partial">Şuraya ulaşılamadı: %1$s — yeniden denemek için tekrar dokunun.</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">%1$d pay — kişi başı %2$s</item>
+        <item quantity="other">%1$d pay — kişi başı %2$s</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">%1$d istek gönder</item>
+        <item quantity="other">%1$d istek gönder</item>
+    </plurals>
 </resources>

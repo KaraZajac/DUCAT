@@ -23,4 +23,15 @@
         <item quantity="other">%1$d نفر</item>
     </plurals>
     <string name="group_added_notify">%1$s شما را افزود</string>
+    <string name="group_split">تقسیم صورت‌حساب</string>
+    <string name="group_split_among">تقسیم بین</string>
+    <string name="group_split_partial">دسترسی به %1$s ممکن نشد — دوباره بزنید تا دوباره تلاش شود.</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">‏%1$d سهم — هر یک %2$s</item>
+        <item quantity="other">‏%1$d سهم — هر یک %2$s</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">ارسال %1$d درخواست</item>
+        <item quantity="other">ارسال %1$d درخواست</item>
+    </plurals>
 </resources>

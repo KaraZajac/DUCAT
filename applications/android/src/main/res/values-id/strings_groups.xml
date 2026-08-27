@@ -23,4 +23,15 @@
         <item quantity="other">%1$d orang</item>
     </plurals>
     <string name="group_added_notify">%1$s menambahkan Anda</string>
+    <string name="group_split">Bagi tagihan</string>
+    <string name="group_split_among">Dibagi antara</string>
+    <string name="group_split_partial">Tidak dapat menghubungi %1$s — ketuk lagi untuk mencoba ulang.</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">%1$d bagian — masing-masing %2$s</item>
+        <item quantity="other">%1$d bagian — masing-masing %2$s</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">Kirim %1$d permintaan</item>
+        <item quantity="other">Kirim %1$d permintaan</item>
+    </plurals>
 </resources>

@@ -23,4 +23,15 @@
         <item quantity="other">%1$d người</item>
     </plurals>
     <string name="group_added_notify">%1$s đã thêm bạn</string>
+    <string name="group_split">Chia hóa đơn</string>
+    <string name="group_split_among">Chia cho</string>
+    <string name="group_split_partial">Không liên lạc được với %1$s — chạm lần nữa để thử lại.</string>
+    <plurals name="group_split_ways">
+        <item quantity="one">Chia %1$d phần — mỗi người %2$s</item>
+        <item quantity="other">Chia %1$d phần — mỗi người %2$s</item>
+    </plurals>
+    <plurals name="group_split_send">
+        <item quantity="one">Gửi %1$d yêu cầu</item>
+        <item quantity="other">Gửi %1$d yêu cầu</item>
+    </plurals>
 </resources>
