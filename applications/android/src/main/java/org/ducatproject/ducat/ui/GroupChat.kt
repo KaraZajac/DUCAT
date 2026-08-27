@@ -53,7 +53,13 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
     val group = remember(version, idHex) { Groups.get(context, idHex) } ?: run {
         onBack(); return
     }
-    val rows = remember(version, idHex) { Groups.thread(context, idHex) }
+    // The merge reads one pairwise thread per member — work that scales
+    // with the group and its history, so it happens off the main thread
+    // (the ledger ANR's lesson). Empty for a beat on first open.
+    var rows by remember(idHex) { mutableStateOf<List<Groups.Row>>(emptyList()) }
+    LaunchedEffect(version, idHex) {
+        rows = withContext(Dispatchers.IO) { Groups.thread(context, idHex) }
+    }
     // Reactions and retracts decorate; only words are bubbles. Same split the
     // pairwise screen makes, with the group reference doing the naming.
     val shownRows = remember(rows) { rows.filter { it.message.kind !in setOf(4, 5) } }

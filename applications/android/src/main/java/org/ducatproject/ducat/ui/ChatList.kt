@@ -13,6 +13,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -76,13 +77,21 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     // Most recent conversation first — the list's order *is* its meaning, and
     // "who did I talk to last" is the question it answers. Threads that have
     // never spoken sink to the bottom together.
-    val shown = remember(all) {
-        all.filter { it.chatVisible }.sortedByDescending { c ->
-            // By the last message a person could have read, not the last one
-            // the protocol wrote. Calling off an escrow sends a kind 10, and
-            // that alone lifted a dormant arbiter to the top of the list
-            // above conversations with actual sentences in them.
-            store.thread(c.personaHex).lastOrNull { it.kind !in CEREMONY_KINDS && it.groupId == null }?.timestamp ?: 0L
+    // The sort decodes every thread to find its last human-visible line —
+    // per contact, per store bump — so it runs on IO and lands as state
+    // (the ledger ANR's lesson). The list is briefly stale, never frozen.
+    var shown by remember { mutableStateOf<List<Contact>>(emptyList()) }
+    LaunchedEffect(all) {
+        shown = withContext(kotlinx.coroutines.Dispatchers.IO) {
+            all.filter { it.chatVisible }.sortedByDescending { c ->
+                // By the last message a person could have read, not the last
+                // one the protocol wrote. Calling off an escrow sends a kind
+                // 10, and that alone lifted a dormant arbiter to the top of
+                // the list above conversations with actual sentences in them.
+                store.thread(c.personaHex)
+                    .lastOrNull { it.kind !in CEREMONY_KINDS && it.groupId == null }
+                    ?.timestamp ?: 0L
+            }
         }
     }
     Column(Modifier.fillMaxSize()) {
@@ -154,9 +163,13 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     add(Hit(c.displayName(), "", null) { onOpenChat(c) })
                 }
             }
-            val bodyHits = remember(q, version) {
+            var bodyHits by remember { mutableStateOf<List<Hit>>(emptyList()) }
+            LaunchedEffect(q, version) {
+                // Restarting on every keystroke is the debounce: the delay
+                // dies with the superseded effect, and only a pause reads.
+                kotlinx.coroutines.delay(120)
+                bodyHits = withContext(kotlinx.coroutines.Dispatchers.IO) {
                 val out = ArrayList<Hit>()
-                val mine = org.ducatproject.ducat.PersonaStore(context).personaHex()
                 for (c in all) {
                     for (m in store.thread(c.personaHex)) {
                         if (m.kind !in setOf(0, 1, 2, 3) || m.groupId != null) continue
@@ -176,6 +189,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     }
                 }
                 out.sortedByDescending { it.ts ?: 0L }.take(50)
+                }
             }
             val hits = nameHits + bodyHits
             if (hits.isEmpty()) {

@@ -265,7 +265,12 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     var c by remember { mutableStateOf(contact) }
     val mine = remember { PersonaStore(context).personaHex() }
-    var messages by remember { mutableStateOf(store.thread(contact.personaHex)) }
+    // Starts empty and fills from IO below: decoding a whole thread is work
+    // that scales with how long two people have known each other, and the
+    // ledger ANR (2026-08-27) established what that costs on the main
+    // thread. The effect keyed on `version` runs at first composition too,
+    // so this is a beat of blank, not a different code path.
+    var messages by remember { mutableStateOf<List<StoredMessage>>(emptyList()) }
     // Reactions decorate their targets rather than being bubbles (§16.14):
     // the message is the unit of rendering, the reaction is a remark upon one.
     // Latest per (sender, target) wins, which is how changing your mind works.
@@ -300,11 +305,15 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     // invisible until the user sent something of their own.
     val version by ContactStore.changes.collectAsState()
     LaunchedEffect(version) {
-        messages = store.thread(c.personaHex)
-        store.all().firstOrNull { it.personaHex == c.personaHex }?.let { c = it }
+        val hex = c.personaHex
+        val (thread, fresh) = withContext(Dispatchers.IO) {
+            store.thread(hex) to store.all().firstOrNull { it.personaHex == hex }
+        }
+        messages = thread
+        fresh?.let { c = it }
         // Looking at the thread is what "seen" means; the dot and the badge
         // clear the moment the eyes arrive, not when a reply goes out.
-        store.setChatSeen(c.personaHex, c.inSeq)
+        withContext(Dispatchers.IO) { store.setChatSeen(c.personaHex, c.inSeq) }
     }
 
     LaunchedEffect(messages.size) {
