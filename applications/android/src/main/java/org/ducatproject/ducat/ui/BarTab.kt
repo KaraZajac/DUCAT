@@ -203,10 +203,34 @@ private fun TabRow(t: RunningTab, onClick: () -> Unit) {
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(name, style = MaterialTheme.typography.titleMedium)
+            // **Declined is not the same news as unpaid.**
+            //
+            // A customer who refuses a bill sends a kind-5 naming it, the chat
+            // has resolved and shown that since bills existed, and this list —
+            // the one a counter actually works from — read it as "billed,
+            // unpaid", indistinguishable from somebody who simply has not got
+            // round to it. One of those wants chasing and the other is over.
+            //
+            // The bill is recovered from the thread the way
+            // cancelTabWithRetract recovers it: the last outgoing bill for the
+            // same total. When it cannot be found this falls through to what
+            // it said before.
+            val version by ContactStore.changes.collectAsState()
+            val refused = remember(t.id, t.state, version) {
+                if (t.state != "settled") false else {
+                    val thread = ContactStore(context).thread(t.personaHex)
+                    thread.lastOrNull {
+                        it.outgoing && it.kind == 1 && it.amountPxmr == t.settledTotal
+                    }?.let { (it.seq to it.timestamp) in billAnswers(thread).refused } ?: false
+                }
+            }
             val status = when (t.state) {
                 "open" -> pluralStringResource(R.plurals.bartab_items, t.lines.size, t.lines.size)
-                "settled" -> if (t.seenTx != null) stringResource(R.string.bartab_state_payment_seen)
-                    else stringResource(R.string.bartab_state_billed_unpaid)
+                "settled" -> when {
+                    t.seenTx != null -> stringResource(R.string.bartab_state_payment_seen)
+                    refused -> stringResource(R.string.bartab_state_declined)
+                    else -> stringResource(R.string.bartab_state_billed_unpaid)
+                }
                 "paid_oob" -> stringResource(R.string.bartab_state_paid_oob)
                 "cancelled" -> stringResource(R.string.bartab_state_cancelled)
                 // A tip is named here for the same reason it is on the till's
@@ -578,8 +602,22 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 }
             }
             "settled" -> Column(Modifier.padding(horizontal = 16.dp)) {
+                // The same news the list carries, on the screen somebody opens
+                // to decide what to do about it. Promising a receipt "when the
+                // payment lands" to a counter whose customer has refused the
+                // bill is the wrong sentence twice over.
+                val v by ContactStore.changes.collectAsState()
+                val wasRefused = remember(tab.id, v) {
+                    val thread = ContactStore(context).thread(tab.personaHex)
+                    thread.lastOrNull {
+                        it.outgoing && it.kind == 1 && it.amountPxmr == tab.settledTotal
+                    }?.let { (it.seq to it.timestamp) in billAnswers(thread).refused } ?: false
+                }
                 Text(
-                    stringResource(R.string.bartab_billed_hint),
+                    stringResource(
+                        if (wasRefused) R.string.bartab_declined_hint
+                        else R.string.bartab_billed_hint,
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 8.dp),

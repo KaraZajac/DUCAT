@@ -15,6 +15,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">pagamento visto — liquidando</string>
     <string name="bartab_state_billed_unpaid">conta enviada, não paga</string>
+    <string name="bartab_state_declined">recusada</string>
     <string name="bartab_state_paid_oob">pago fora do DUCAT ✓</string>
     <string name="bartab_state_cancelled">cancelada</string>
     <string name="bartab_state_paid">pago ✓</string>
@@ -33,6 +34,7 @@
     <string name="bartab_discard_confirm">Descartar</string>
     <string name="bartab_keep_tab">Manter comanda</string>
     <string name="bartab_billed_hint">Conta enviada. O recibo vai para a pessoa sozinho quando o pagamento chegar. Se foi acertado de outro jeito, diga aqui:</string>
+    <string name="bartab_declined_hint">Recusaram esta conta. Não vai chegar nada — cancele-a, ou indique aqui se foi paga de outra forma:</string>
     <string name="bartab_paid_outside_button">Pago fora do DUCAT (dinheiro, cartão)</string>
     <string name="bartab_cancel_bill">Cancelar a conta</string>
     <string name="bartab_cancelled_note">Cancelada — a pessoa foi avisada na conversa.</string>

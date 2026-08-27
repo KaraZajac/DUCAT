@@ -14,6 +14,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">pembayaran terlihat — menyelesaikan</string>
     <string name="bartab_state_billed_unpaid">ditagih, belum dibayar</string>
+    <string name="bartab_state_declined">ditolak</string>
     <string name="bartab_state_paid_oob">dibayar di luar DUCAT ✓</string>
     <string name="bartab_state_cancelled">dibatalkan</string>
     <string name="bartab_state_paid">lunas ✓</string>
@@ -32,6 +33,7 @@
     <string name="bartab_discard_confirm">Buang</string>
     <string name="bartab_keep_tab">Simpan bon</string>
     <string name="bartab_billed_hint">Sudah ditagih. Struk terkirim sendiri ke mereka saat pembayaran masuk. Kalau diselesaikan dengan cara lain, catat di sini:</string>
+    <string name="bartab_declined_hint">Mereka menolak tagihan ini. Tidak ada yang akan masuk — batalkan, atau nyatakan di sini jika sudah dibayar dengan cara lain:</string>
     <string name="bartab_paid_outside_button">Dibayar di luar DUCAT (tunai, kartu)</string>
     <string name="bartab_cancel_bill">Batalkan tagihan</string>
     <string name="bartab_cancelled_note">Dibatalkan — mereka sudah diberi tahu di percakapan.</string>

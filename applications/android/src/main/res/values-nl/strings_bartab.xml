@@ -15,6 +15,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">betaling gezien — wordt afgerond</string>
     <string name="bartab_state_billed_unpaid">rekening gestuurd, onbetaald</string>
+    <string name="bartab_state_declined">geweigerd</string>
     <string name="bartab_state_paid_oob">buiten DUCAT betaald ✓</string>
     <string name="bartab_state_cancelled">geannuleerd</string>
     <string name="bartab_state_paid">betaald ✓</string>
@@ -33,6 +34,7 @@
     <string name="bartab_discard_confirm">Weggooien</string>
     <string name="bartab_keep_tab">Tab houden</string>
     <string name="bartab_billed_hint">Rekening gestuurd. De bon gaat vanzelf naar ze zodra de betaling binnenkomt. Is er op een andere manier afgerekend, geef dat dan hier aan:</string>
+    <string name="bartab_declined_hint">Ze hebben deze rekening geweigerd. Er komt niets — annuleer hem, of geef hier aan dat er anders is afgerekend:</string>
     <string name="bartab_paid_outside_button">Buiten DUCAT betaald (contant, pin)</string>
     <string name="bartab_cancel_bill">Rekening annuleren</string>
     <string name="bartab_cancelled_note">Geannuleerd — ze zijn in het gesprek op de hoogte gebracht.</string>

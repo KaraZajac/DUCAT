@@ -19,6 +19,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">ظهرت الدفعة — قيد التسوية</string>
     <string name="bartab_state_billed_unpaid">صدرت الفاتورة، لم تُدفع</string>
+    <string name="bartab_state_declined">مرفوضة</string>
     <string name="bartab_state_paid_oob">دُفع خارج DUCAT ✓</string>
     <string name="bartab_state_cancelled">أُلغي</string>
     <string name="bartab_state_paid">مدفوع ✓</string>
@@ -37,6 +38,7 @@
     <string name="bartab_discard_confirm">حذف</string>
     <string name="bartab_keep_tab">الإبقاء على الحساب</string>
     <string name="bartab_billed_hint">صدرت الفاتورة. يصلهم الإيصال من تلقاء نفسه عند وصول الدفعة. إن سُوّي الحساب بطريقة أخرى، فقل ذلك هنا:</string>
+    <string name="bartab_declined_hint">لقد رفضوا هذه الفاتورة. لن يصل شيء — ألغِها، أو بيّن هنا إن تمت التسوية بطريقة أخرى:</string>
     <string name="bartab_paid_outside_button">دُفع خارج DUCAT (نقدًا أو ببطاقة)</string>
     <string name="bartab_cancel_bill">إلغاء الفاتورة</string>
     <string name="bartab_cancelled_note">أُلغيت — وقد أُخبروا بذلك في المحادثة.</string>

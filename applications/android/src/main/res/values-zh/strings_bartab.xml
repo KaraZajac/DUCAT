@@ -14,6 +14,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">已看到付款 — 结算中</string>
     <string name="bartab_state_billed_unpaid">已出账，未付</string>
+    <string name="bartab_state_declined">已拒绝</string>
     <string name="bartab_state_paid_oob">在 DUCAT 之外付清 ✓</string>
     <string name="bartab_state_cancelled">已取消</string>
     <string name="bartab_state_paid">已付 ✓</string>
@@ -32,6 +33,7 @@
     <string name="bartab_discard_confirm">丢弃</string>
     <string name="bartab_keep_tab">保留挂账</string>
     <string name="bartab_billed_hint">已出账。付款到账后，收据会自动发给对方。如果已通过其他方式结清，请在这里注明：</string>
+    <string name="bartab_declined_hint">对方拒绝了这张账单。不会有款项到账 — 取消它，或在此说明已用其他方式结清：</string>
     <string name="bartab_paid_outside_button">在 DUCAT 之外付清（现金、刷卡）</string>
     <string name="bartab_cancel_bill">取消账单</string>
     <string name="bartab_cancelled_note">已取消 — 已在对话中告知对方。</string>

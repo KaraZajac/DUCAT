@@ -678,6 +678,13 @@ object Ceremony {
             Enquiries.about(context, contact.personaHex)?.let { a ->
                 put("aboutTitle", a.title)
                 put("aboutKind", a.kind)
+                // And *which* listing, for the same reason the title is here:
+                // the thread's subject moves on, so the only honest moment to
+                // ask is when the deal is struck. Empty on the buyer's side —
+                // they know the notice, not the record behind it — which is
+                // exactly what makes this safe to act on: only the owner of a
+                // listing can match it (see [soldOne]).
+                put("aboutListing", a.listingId)
             }
             put("i", i); put("stage", "committed")
             put("commits", JSONObject()); put("shares", JSONObject())
@@ -816,6 +823,13 @@ object Ceremony {
                 Enquiries.about(context, contact.personaHex)?.let { a ->
                     put("aboutTitle", a.title)
                     put("aboutKind", a.kind)
+                    // And here above all: the paragraph above says the host is
+                    // the party who always joins, and the host is the one
+                    // holding the listing. Recorded on the start path too, but
+                    // that side is the buyer, whose About carries no listing
+                    // id — so [soldOne] would have had nothing to work with if
+                    // this were only written over there.
+                    put("aboutListing", a.listingId)
                 }
                 put("i", i); put("stage", "committed")
                 put("commits", JSONObject()); put("shares", JSONObject())
@@ -1179,6 +1193,7 @@ object Ceremony {
                         id, i.toUShort(), senderIdx.toUShort(), payload, nodeUrl,
                     )
                     settle(o, "released"); o.put("txid", txid)
+                    soldOne(context, o)
                     save(context, idHex, o)
                     ContactStore.bump()
                     DucatLog.i(TAG, "bond $idHex released — txid $txid")
@@ -1672,6 +1687,42 @@ object Ceremony {
         DucatLog.i(TAG, "escrow $idHex: the other side called it off")
     }
 
+    /**
+     * One fewer of whatever this deal was for.
+     *
+     * A settled marketplace sale left its listing exactly as it was: "1 left",
+     * "Live on the board near you", and buyers still finding it and asking.
+     * The app has known which listing since the escrow was built and had no
+     * way to act on it — and a count that says one when the one is gone is not
+     * a display problem, it is the app stating something untrue.
+     *
+     * Only the seller does anything here. `aboutListing` is written from the
+     * owner's side of an enquiry and is empty on the buyer's, and [Listings.get]
+     * answers null for a listing this device does not own, so a buyer's copy of
+     * the same escrow falls through both tests.
+     *
+     * The last one comes down rather than going to zero: a listing is live or
+     * it is not, quantity is at least one by construction, and "take it down"
+     * is the same verb the seller would have used. It stays saved, so putting
+     * it back up is one press if there were more in the cupboard than the app
+     * was told about.
+     */
+    private fun soldOne(context: Context, o: JSONObject) {
+        val id = o.optString("aboutListing").ifBlank { return }
+        val listing = Listings.get(context, id) ?: return
+        val left = Listings.quantityOf(listing)
+        if (left > 1) {
+            Listings.setQuantity(context, id, left - 1)
+            runCatching { Listings.post(context, id) }
+                .onFailure { DucatLog.w(TAG, "restock $id: ${it.message}") }
+            DucatLog.i(TAG, "sold one of ${listing.optString("title")} — ${left - 1} left")
+        } else {
+            runCatching { Listings.unpost(context, id) }
+                .onFailure { DucatLog.w(TAG, "take down $id: ${it.message}") }
+            DucatLog.i(TAG, "sold the last of ${listing.optString("title")} — taken down")
+        }
+    }
+
     /** Stamp the moment an escrow stopped needing anyone. */
     private fun settle(o: JSONObject, stage: String): JSONObject =
         o.put("stage", stage).put("settledAt", System.currentTimeMillis() / 1000)
@@ -1876,6 +1927,7 @@ object Ceremony {
             // node's account of the chain is a claim (§17.5).
             if (!SecondOpinion.settles(context, hit.txHashHex)) continue
             mutate(context, idHex) { cur -> settle(cur, "released").put("txid", hit.txHashHex) }
+            soldOne(context, o)
             ContactStore.bump()
             DucatLog.i(TAG, "escrow $idHex: released without us — txid ${hit.txHashHex}")
             found += 1
@@ -2235,6 +2287,7 @@ object Ceremony {
             kind = 9, round = 1, ceremonyId = id, payload = ans.payload,
         )
         settle(o, "release_cosigned")
+        soldOne(context, o)
         o.remove("pendingPayload")
         o.remove("pendingToMe")
         save(context, idHex, o)

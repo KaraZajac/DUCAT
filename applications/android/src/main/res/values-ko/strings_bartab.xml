@@ -14,6 +14,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">결제 확인 — 정산 중</string>
     <string name="bartab_state_billed_unpaid">계산서 발송, 미결제</string>
+    <string name="bartab_state_declined">거절됨</string>
     <string name="bartab_state_paid_oob">DUCAT 밖에서 결제 ✓</string>
     <string name="bartab_state_cancelled">취소됨</string>
     <string name="bartab_state_paid">결제 완료 ✓</string>
@@ -32,6 +33,7 @@
     <string name="bartab_discard_confirm">버리기</string>
     <string name="bartab_keep_tab">탭 유지</string>
     <string name="bartab_billed_hint">계산서를 보냈어요. 결제가 도착하면 영수증이 저절로 가요. 다른 방법으로 정산했다면 여기서 알려 주세요:</string>
+    <string name="bartab_declined_hint">상대가 이 청구를 거절했습니다. 들어올 것은 없습니다 — 취소하거나, 다른 방법으로 정산했다면 여기에 표시하세요:</string>
     <string name="bartab_paid_outside_button">DUCAT 밖에서 결제됨 (현금, 카드)</string>
     <string name="bartab_cancel_bill">계산서 취소</string>
     <string name="bartab_cancelled_note">취소됨 — 대화에서 상대에게 알렸어요.</string>

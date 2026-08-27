@@ -17,6 +17,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">платёж замечен — закрывается</string>
     <string name="bartab_state_billed_unpaid">выставлен, не оплачен</string>
+    <string name="bartab_state_declined">отклонён</string>
     <string name="bartab_state_paid_oob">оплачен вне DUCAT ✓</string>
     <string name="bartab_state_cancelled">отменён</string>
     <string name="bartab_state_paid">оплачен ✓</string>
@@ -35,6 +36,7 @@
     <string name="bartab_discard_confirm">Выбросить</string>
     <string name="bartab_keep_tab">Оставить счёт</string>
     <string name="bartab_billed_hint">Счёт выставлен. Чек уйдёт гостю сам, когда придёт платёж. Если рассчитались как-то иначе — отметь здесь:</string>
+    <string name="bartab_declined_hint">Этот счёт отклонили. Ничего не поступит — отмените его или отметьте здесь, что рассчитались иначе:</string>
     <string name="bartab_paid_outside_button">Оплачено вне DUCAT (наличные, карта)</string>
     <string name="bartab_cancel_bill">Отменить счёт</string>
     <string name="bartab_cancelled_note">Отменён — гостю сообщили в переписке.</string>

@@ -15,6 +15,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">payment seen — settling</string>
     <string name="bartab_state_billed_unpaid">billed, unpaid</string>
+    <string name="bartab_state_declined">declined</string>
     <string name="bartab_state_paid_oob">paid outside DUCAT ✓</string>
     <string name="bartab_state_cancelled">cancelled</string>
     <string name="bartab_state_paid">paid ✓</string>
@@ -33,6 +34,7 @@
     <string name="bartab_discard_confirm">Discard</string>
     <string name="bartab_keep_tab">Keep tab</string>
     <string name="bartab_billed_hint">Billed. The receipt goes to them by itself when the payment lands. If it was settled some other way, say so here:</string>
+    <string name="bartab_declined_hint">They declined this bill. Nothing is coming — cancel it, or say so here if it was settled another way:</string>
     <string name="bartab_paid_outside_button">Paid outside DUCAT (cash, card)</string>
     <string name="bartab_cancel_bill">Cancel the bill</string>
     <string name="bartab_cancelled_note">Cancelled — they were told in the conversation.</string>

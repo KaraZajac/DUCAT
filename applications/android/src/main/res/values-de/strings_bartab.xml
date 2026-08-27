@@ -15,6 +15,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">Zahlung gesehen — wird beglichen</string>
     <string name="bartab_state_billed_unpaid">abgerechnet, unbezahlt</string>
+    <string name="bartab_state_declined">abgelehnt</string>
     <string name="bartab_state_paid_oob">außerhalb von DUCAT bezahlt ✓</string>
     <string name="bartab_state_cancelled">storniert</string>
     <string name="bartab_state_paid">bezahlt ✓</string>
@@ -33,6 +34,7 @@
     <string name="bartab_discard_confirm">Verwerfen</string>
     <string name="bartab_keep_tab">Deckel behalten</string>
     <string name="bartab_billed_hint">Abgerechnet. Die Quittung geht von selbst raus, sobald die Zahlung eintrifft. Wurde anders beglichen? Dann sag es hier:</string>
+    <string name="bartab_declined_hint">Sie haben diese Rechnung abgelehnt. Es kommt nichts — storniere sie, oder halte hier fest, dass anders bezahlt wurde:</string>
     <string name="bartab_paid_outside_button">Außerhalb von DUCAT bezahlt (bar, Karte)</string>
     <string name="bartab_cancel_bill">Rechnung stornieren</string>
     <string name="bartab_cancelled_note">Storniert — der Gast wurde in der Unterhaltung informiert.</string>

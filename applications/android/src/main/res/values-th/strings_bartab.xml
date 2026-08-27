@@ -14,6 +14,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">เห็นการชำระแล้ว — กำลังปิดยอด</string>
     <string name="bartab_state_billed_unpaid">เรียกเก็บแล้ว ยังไม่ชำระ</string>
+    <string name="bartab_state_declined">ถูกปฏิเสธ</string>
     <string name="bartab_state_paid_oob">ชำระนอก DUCAT ✓</string>
     <string name="bartab_state_cancelled">ยกเลิกแล้ว</string>
     <string name="bartab_state_paid">ชำระแล้ว ✓</string>
@@ -32,6 +33,7 @@
     <string name="bartab_discard_confirm">ทิ้ง</string>
     <string name="bartab_keep_tab">เก็บบิลไว้</string>
     <string name="bartab_billed_hint">เรียกเก็บแล้ว ใบเสร็จจะส่งถึงเขาเองเมื่อเงินเข้า หากชำระด้วยวิธีอื่นไปแล้ว แจ้งไว้ที่นี่:</string>
+    <string name="bartab_declined_hint">อีกฝ่ายปฏิเสธบิลนี้ จะไม่มีเงินเข้ามา — ยกเลิกบิล หรือระบุที่นี่หากชำระด้วยวิธีอื่นแล้ว:</string>
     <string name="bartab_paid_outside_button">ชำระนอก DUCAT (เงินสด, บัตร)</string>
     <string name="bartab_cancel_bill">ยกเลิกบิลเรียกเก็บ</string>
     <string name="bartab_cancelled_note">ยกเลิกแล้ว — แจ้งให้เขาทราบในบทสนทนาแล้ว</string>

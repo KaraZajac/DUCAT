@@ -17,6 +17,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">płatność widoczna — rozliczanie</string>
     <string name="bartab_state_billed_unpaid">rozliczenie wysłane, niezapłacone</string>
+    <string name="bartab_state_declined">odrzucony</string>
     <string name="bartab_state_paid_oob">zapłacone poza DUCAT ✓</string>
     <string name="bartab_state_cancelled">anulowane</string>
     <string name="bartab_state_paid">zapłacone ✓</string>
@@ -35,6 +36,7 @@
     <string name="bartab_discard_confirm">Odrzuć</string>
     <string name="bartab_keep_tab">Zachowaj rachunek</string>
     <string name="bartab_billed_hint">Rozliczenie wysłane. Paragon trafi do nich sam, gdy płatność dojdzie. Jeśli zapłacono inaczej, zaznacz to tutaj:</string>
+    <string name="bartab_declined_hint">Odrzucili ten rachunek. Nic nie wpłynie — anuluj go albo zaznacz tutaj, że rozliczono inaczej:</string>
     <string name="bartab_paid_outside_button">Zapłacone poza DUCAT (gotówka, karta)</string>
     <string name="bartab_cancel_bill">Anuluj rozliczenie</string>
     <string name="bartab_cancelled_note">Anulowane — dostali wiadomość w rozmowie.</string>

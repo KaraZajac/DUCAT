@@ -14,6 +14,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">支払い確認 — 精算中</string>
     <string name="bartab_state_billed_unpaid">請求済み・未払い</string>
+    <string name="bartab_state_declined">辞退されました</string>
     <string name="bartab_state_paid_oob">DUCAT外で支払い ✓</string>
     <string name="bartab_state_cancelled">キャンセル</string>
     <string name="bartab_state_paid">支払い済み ✓</string>
@@ -32,6 +33,7 @@
     <string name="bartab_discard_confirm">破棄</string>
     <string name="bartab_keep_tab">ツケを残す</string>
     <string name="bartab_billed_hint">請求済みです。支払いが着金するとレシートは自動で相手へ届きます。別の方法で精算した場合は、ここで指定してください:</string>
+    <string name="bartab_declined_hint">相手はこの請求を断りました。入金はありません — 取り消すか、別の方法で精算済みならここで記録してください:</string>
     <string name="bartab_paid_outside_button">DUCAT外で支払い（現金・カード）</string>
     <string name="bartab_cancel_bill">請求をキャンセル</string>
     <string name="bartab_cancelled_note">キャンセルしました — 会話で相手に伝えられました。</string>

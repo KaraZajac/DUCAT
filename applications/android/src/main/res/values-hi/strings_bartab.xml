@@ -15,6 +15,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">भुगतान दिखा — चुकता हो रहा है</string>
     <string name="bartab_state_billed_unpaid">बिल भेजा, भुगतान बाकी</string>
+    <string name="bartab_state_declined">अस्वीकृत</string>
     <string name="bartab_state_paid_oob">DUCAT से बाहर चुकाया ✓</string>
     <string name="bartab_state_cancelled">रद्द</string>
     <string name="bartab_state_paid">चुकाया ✓</string>
@@ -33,6 +34,7 @@
     <string name="bartab_discard_confirm">मिटाएँ</string>
     <string name="bartab_keep_tab">टैब रखें</string>
     <string name="bartab_billed_hint">बिल भेज दिया। भुगतान पहुँचते ही रसीद अपने-आप उन तक जाएगी। अगर हिसाब किसी और तरीके से चुकता हुआ हो, तो यहाँ बताएँ:</string>
+    <string name="bartab_declined_hint">उन्होंने यह बिल अस्वीकार कर दिया। अब कुछ नहीं आएगा — इसे रद्द करें, या यहाँ बताएँ कि किसी और तरह चुकाया गया:</string>
     <string name="bartab_paid_outside_button">DUCAT से बाहर चुकाया (नकद, कार्ड)</string>
     <string name="bartab_cancel_bill">बिल रद्द करें</string>
     <string name="bartab_cancelled_note">रद्द — बातचीत में उन्हें बता दिया गया।</string>

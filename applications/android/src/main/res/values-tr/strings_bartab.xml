@@ -15,6 +15,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">ödeme görüldü — kapanıyor</string>
     <string name="bartab_state_billed_unpaid">hesap gönderildi, ödenmedi</string>
+    <string name="bartab_state_declined">reddedildi</string>
     <string name="bartab_state_paid_oob">DUCAT dışında ödendi ✓</string>
     <string name="bartab_state_cancelled">iptal edildi</string>
     <string name="bartab_state_paid">ödendi ✓</string>
@@ -33,6 +34,7 @@
     <string name="bartab_discard_confirm">Sil</string>
     <string name="bartab_keep_tab">Adisyonu tut</string>
     <string name="bartab_billed_hint">Hesap gönderildi. Ödeme düşünce makbuz kendiliğinden onlara gider. Başka bir yolla ödendiyse burada belirt:</string>
+    <string name="bartab_declined_hint">Bu hesabı reddettiler. Hiçbir şey gelmeyecek — iptal edin ya da başka yolla ödendiyse burada belirtin:</string>
     <string name="bartab_paid_outside_button">DUCAT dışında ödendi (nakit, kart)</string>
     <string name="bartab_cancel_bill">Hesabı iptal et</string>
     <string name="bartab_cancelled_note">İptal edildi — sohbette kendilerine bildirildi.</string>

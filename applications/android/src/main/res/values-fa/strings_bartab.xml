@@ -15,6 +15,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">پرداخت دیده شد — در حال تسویه</string>
     <string name="bartab_state_billed_unpaid">صورت‌حساب رفته، پرداخت‌نشده</string>
+    <string name="bartab_state_declined">رد شد</string>
     <string name="bartab_state_paid_oob">بیرون از DUCAT پرداخت شد ✓</string>
     <string name="bartab_state_cancelled">لغو شد</string>
     <string name="bartab_state_paid">پرداخت شد ✓</string>
@@ -33,6 +34,7 @@
     <string name="bartab_discard_confirm">دور بینداز</string>
     <string name="bartab_keep_tab">نگه داشتن حساب</string>
     <string name="bartab_billed_hint">صورت‌حساب رفت. رسید بعد از نشستن پرداخت خودش می‌رود. اگر جور دیگری تسویه شد، همین‌جا بگو:</string>
+    <string name="bartab_declined_hint">آن‌ها این صورت‌حساب را رد کردند. چیزی نمی‌آید — لغوش کنید، یا اگر به شکل دیگری تسویه شد اینجا بگویید:</string>
     <string name="bartab_paid_outside_button">بیرون از DUCAT پرداخت شد (نقد، کارت)</string>
     <string name="bartab_cancel_bill">لغو صورت‌حساب</string>
     <string name="bartab_cancelled_note">لغو شد — در گفتگو به آن‌ها گفته شد.</string>

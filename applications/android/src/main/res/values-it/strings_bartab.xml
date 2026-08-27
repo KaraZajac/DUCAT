@@ -15,6 +15,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">pagamento visto — in liquidazione</string>
     <string name="bartab_state_billed_unpaid">conto presentato, non pagato</string>
+    <string name="bartab_state_declined">rifiutato</string>
     <string name="bartab_state_paid_oob">pagato fuori da DUCAT ✓</string>
     <string name="bartab_state_cancelled">annullato</string>
     <string name="bartab_state_paid">pagato ✓</string>
@@ -33,6 +34,7 @@
     <string name="bartab_discard_confirm">Elimina</string>
     <string name="bartab_keep_tab">Tieni il conto</string>
     <string name="bartab_billed_hint">Conto presentato. La ricevuta gli arriva da sola quando il pagamento va a segno. Se è stato saldato in altro modo, segnalalo qui:</string>
+    <string name="bartab_declined_hint">Hanno rifiutato questo conto. Non arriverà nulla: annullalo, o segnala qui se è stato saldato in altro modo:</string>
     <string name="bartab_paid_outside_button">Pagato fuori da DUCAT (contanti, carta)</string>
     <string name="bartab_cancel_bill">Annulla il conto</string>
     <string name="bartab_cancelled_note">Annullato — glielo abbiamo detto nella conversazione.</string>

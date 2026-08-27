@@ -14,6 +14,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">đã thấy thanh toán — đang tất toán</string>
     <string name="bartab_state_billed_unpaid">đã gửi hóa đơn, chưa trả</string>
+    <string name="bartab_state_declined">đã từ chối</string>
     <string name="bartab_state_paid_oob">trả ngoài DUCAT ✓</string>
     <string name="bartab_state_cancelled">đã hủy</string>
     <string name="bartab_state_paid">đã trả ✓</string>
@@ -32,6 +33,7 @@
     <string name="bartab_discard_confirm">Bỏ</string>
     <string name="bartab_keep_tab">Giữ tab</string>
     <string name="bartab_billed_hint">Đã gửi hóa đơn. Biên nhận sẽ tự gửi cho khách khi tiền về. Nếu đã thanh toán theo cách khác, hãy ghi nhận ở đây:</string>
+    <string name="bartab_declined_hint">Họ đã từ chối hoá đơn này. Sẽ không có gì tới — hãy huỷ, hoặc ghi nhận ở đây nếu đã thanh toán bằng cách khác:</string>
     <string name="bartab_paid_outside_button">Trả ngoài DUCAT (tiền mặt, thẻ)</string>
     <string name="bartab_cancel_bill">Hủy hóa đơn</string>
     <string name="bartab_cancelled_note">Đã hủy — khách đã được báo trong cuộc trò chuyện.</string>

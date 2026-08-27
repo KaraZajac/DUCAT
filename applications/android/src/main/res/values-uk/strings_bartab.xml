@@ -17,6 +17,7 @@
     </plurals>
     <string name="bartab_state_payment_seen">платіж помічено — розраховується</string>
     <string name="bartab_state_billed_unpaid">виставлено, не сплачено</string>
+    <string name="bartab_state_declined">відхилено</string>
     <string name="bartab_state_paid_oob">сплачено поза DUCAT ✓</string>
     <string name="bartab_state_cancelled">скасовано</string>
     <string name="bartab_state_paid">сплачено ✓</string>
@@ -35,6 +36,7 @@
     <string name="bartab_discard_confirm">Викинути</string>
     <string name="bartab_keep_tab">Залишити</string>
     <string name="bartab_billed_hint">Виставлено. Чек надішлеться їм сам, коли платіж надійде. Якщо розрахувалися якось інакше — познач це тут:</string>
+    <string name="bartab_declined_hint">Вони відхилили цей рахунок. Нічого не надійде — скасуйте його або зазначте тут, що розрахувалися інакше:</string>
     <string name="bartab_paid_outside_button">Сплачено поза DUCAT (готівка, картка)</string>
     <string name="bartab_cancel_bill">Скасувати рахунок</string>
     <string name="bartab_cancelled_note">Скасовано — їм повідомлено в розмові.</string>
