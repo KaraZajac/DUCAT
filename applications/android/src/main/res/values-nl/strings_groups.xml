@@ -22,4 +22,5 @@
         <item quantity="one">%1$d persoon</item>
         <item quantity="other">%1$d personen</item>
     </plurals>
+    <string name="group_added_notify">%1$s heeft je toegevoegd</string>
 </resources>

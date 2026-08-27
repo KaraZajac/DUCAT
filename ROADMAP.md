@@ -484,6 +484,22 @@ gear rental that were here have moved above: they are pre-1.0 by decision.
 
 ## Group messaging — the roster pattern, generalised (after 1.0)
 
+**Built, 0.90 (2026-08-27) — pulled forward once replies existed.** §16.19:
+fan-out exactly as sketched below, four wire fields (253–256), kind 12 for
+the roster. The two decisions that made it buildable without an operator:
+the roster is a **grow-only set** (anyone adds, nobody is ever removed —
+removal needs a consensus a p2p group cannot have; a grow-only set
+converges by union in any order), and the **mesh is checked edge by edge**
+(contact edges are mutual, each end checks its own, every local check
+passing *is* the mesh being complete — so receiving is never gated,
+sending refuses while your own mesh has a hole, and partial delivery is
+structurally impossible). Reactions, replies and unsend work in-group via
+the group reference; money stays pairwise; the disclosure states the
+shape plainly once per group per phone. Proven live between the two
+emulators and the desk's shared poll loop. The paragraphs below are the
+original sketch, kept because the reasoning still governs what a group
+must not become.
+
 - **Small groups over pairwise threads.** A ceremony is already a group:
   §17.9's roster of two or three personas, coordinated entirely over
   pairwise threads, with round 0 carrying the roster because "a pairwise

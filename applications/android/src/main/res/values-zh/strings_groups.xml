@@ -22,4 +22,5 @@
         <item quantity="one">%1$d人</item>
         <item quantity="other">%1$d人</item>
     </plurals>
+    <string name="group_added_notify">%1$s 把你加入了</string>
 </resources>

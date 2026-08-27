@@ -145,6 +145,16 @@ object Groups {
             }
             upsert(context, Group(idHex, roster.name, members, 0L, disclosed = false))
             DucatLog.i(TAG, "joined ${roster.name} (${members.size} member(s))")
+            // Being added is the event worth announcing — the roster bytes
+            // themselves are machinery. Named by who did it, because "a group
+            // appeared" invites exactly the suspicion "who put me in this".
+            val adder = ContactStore(context).all()
+                .firstOrNull { it.personaHex == senderHex }?.displayName()
+                ?: "${senderHex.take(8)}…"
+            Notify.post(
+                context, roster.name,
+                context.getString(R.string.group_added_notify, adder),
+            )
             return
         }
         if (senderHex !in known.members) {

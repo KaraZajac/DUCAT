@@ -22,4 +22,5 @@
         <item quantity="one">%1$d kişi</item>
         <item quantity="other">%1$d kişi</item>
     </plurals>
+    <string name="group_added_notify">%1$s seni ekledi</string>
 </resources>

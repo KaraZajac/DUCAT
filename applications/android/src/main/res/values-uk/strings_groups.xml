@@ -22,4 +22,5 @@
         <item quantity="one">%1$d особа</item>
         <item quantity="other">%1$d осіб</item>
     </plurals>
+    <string name="group_added_notify">%1$s додав(-ла) вас</string>
 </resources>

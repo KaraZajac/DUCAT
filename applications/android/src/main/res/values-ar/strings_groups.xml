@@ -22,4 +22,5 @@
         <item quantity="one">شخص %1$d</item>
         <item quantity="other">‏%1$d أشخاص</item>
     </plurals>
+    <string name="group_added_notify">أضافك %1$s</string>
 </resources>

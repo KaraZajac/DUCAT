@@ -1619,7 +1619,19 @@ object Mailbox {
             // announced. Message and cursor land in one commit: a process
             // death between them re-delivered the message on the next poll —
             // a duplicate thread row, and its receipt captured twice.
-            Notify.message(context, c.displayName(), c.personaHex, arrived)
+            // A group message announces itself as the group's, with the
+            // sender inside it — "Sam · ladder crew" — because five people's
+            // messages arriving under five names reads as five conversations.
+            // The separator is punctuation, not language, so it needs no
+            // translation. Roster traffic (kind 12) is machinery and stays
+            // quiet, the way ceremony rounds do.
+            val announceAs = arrived.groupId
+                ?.let { Groups.get(context, it) }
+                ?.let { "${c.displayName()} · ${it.name}" }
+                ?: c.displayName()
+            if (arrived.kind != 12) {
+                Notify.message(context, announceAs, c.personaHex, arrived)
+            }
             store.appendAndAdvance(c.personaHex, arrived, (seq + 1uL).toLong(), opened.link)
             // §17.9: a ceremony round drives the threshold engine, not the
             // chat. The message is recorded above like any other so the

@@ -22,4 +22,5 @@
         <item quantity="one">%1$d نفر</item>
         <item quantity="other">%1$d نفر</item>
     </plurals>
+    <string name="group_added_notify">%1$s شما را افزود</string>
 </resources>

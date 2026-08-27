@@ -53,6 +53,34 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
         onBack(); return
     }
     val rows = remember(version, idHex) { Groups.thread(context, idHex) }
+    // Reactions and retracts decorate; only words are bubbles. Same split the
+    // pairwise screen makes, with the group reference doing the naming.
+    val shownRows = remember(rows) { rows.filter { it.message.kind !in setOf(4, 5) } }
+    // Latest emoji per (target, reactor) — changing your mind works here too.
+    val reactions = remember(rows) {
+        rows.filter { it.message.kind == 4 }
+            .mapNotNull { r ->
+                val rs = r.message.groupReSender ?: return@mapNotNull null
+                val rq = r.message.groupReSeq ?: return@mapNotNull null
+                Triple(rs to rq, r.senderHex, r.message)
+            }
+            .groupBy({ it.first }) { it.second to it.third }
+            .mapValues { (_, list) ->
+                list.groupBy { it.first }
+                    .mapNotNull { (_, per) -> per.maxByOrNull { it.second.timestamp }?.second?.body }
+            }
+    }
+    // A withdrawal counts only from the message's own author: anyone can send
+    // a kind-5 naming anything, and honouring a stranger's would let any
+    // member blank any other's words on every screen but the author's.
+    val unsent = remember(rows) {
+        rows.filter { it.message.kind == 5 }
+            .mapNotNull { r ->
+                val rs = r.message.groupReSender ?: return@mapNotNull null
+                val rq = r.message.groupReSeq ?: return@mapNotNull null
+                if (rs == r.senderHex) rs to rq else null
+            }.toSet()
+    }
     val missing = remember(version, idHex) { Groups.missing(context, idHex) }
     val mine = remember { PersonaStore(context).personaHex() }
     val contacts = remember(version) { ContactStore(context).all() }
@@ -122,26 +150,103 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
             },
         )
 
+        var menuFor by remember { mutableStateOf<Groups.Row?>(null) }
         LazyColumn(Modifier.weight(1f), state = listState) {
-            items(rows, key = { r -> "${r.senderHex}:${r.message.groupSeq}" }) { r ->
+            items(shownRows, key = { r -> "${r.senderHex}:${r.message.groupSeq}" }) { r ->
                 val m = r.message
+                val gone = (r.senderHex to m.groupSeq) in unsent
                 GroupBubble(
                     m = m,
                     own = m.outgoing,
                     senderName = nameOf(r.senderHex),
+                    withdrawn = gone,
+                    reactedWith = reactions[r.senderHex to m.groupSeq].orEmpty(),
                     // The quote is the reader's own copy of the target,
                     // resolved by (sender, counter) — never bytes from the
                     // wire, so an unsend stays an unsend here too.
                     answering = m.groupReSender?.let { rs ->
                         m.groupReSeq?.let { rq ->
-                            rows.firstOrNull { it.senderHex == rs && it.message.groupSeq == rq }
-                                ?.message?.body?.takeIf { b -> b.isNotBlank() }
-                                ?: stringResource(R.string.chat_reply_to_gone)
+                            val t = rows.firstOrNull {
+                                it.senderHex == rs && it.message.groupSeq == rq
+                            }
+                            when {
+                                t == null -> stringResource(R.string.chat_reply_to_gone)
+                                (rs to rq) in unsent -> stringResource(R.string.chat_unsent)
+                                t.message.body.isNotBlank() -> t.message.body
+                                else -> stringResource(R.string.chat_reply_to_message)
+                            }
                         }
                     },
-                    onReply = { replyTo = "${r.senderHex}:${m.groupSeq}" },
+                    onPress = { menuFor = r },
                 )
             }
+        }
+        menuFor?.let { r ->
+            val target = "${r.senderHex}:${r.message.groupSeq}"
+            AlertDialog(
+                onDismissRequest = { menuFor = null },
+                title = { Text(stringResource(R.string.chat_message_title)) },
+                text = {
+                    Column {
+                        Row {
+                            listOf("👍", "❤️", "😂", "😮", "😢", "🔥").forEach { emo ->
+                                Text(
+                                    emo,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    modifier = Modifier
+                                        .clickable {
+                                            menuFor = null
+                                            scope.launch(Dispatchers.IO) {
+                                                runCatching {
+                                                    Groups.send(
+                                                        context, idHex, emo, kind = 4,
+                                                        reSender = r.senderHex,
+                                                        reSeq = r.message.groupSeq,
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        .padding(4.dp),
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    Row {
+                        TextButton(onClick = {
+                            replyTo = target; menuFor = null
+                        }) { Text(stringResource(R.string.chat_reply)) }
+                        // Only the author's own words, and only once: the far
+                        // side honours a withdrawal only from the message's
+                        // sender, so offering it elsewhere would be a button
+                        // that does nothing everywhere but here.
+                        if (r.message.outgoing &&
+                            (r.senderHex to r.message.groupSeq) !in unsent
+                        ) {
+                            TextButton(onClick = {
+                                menuFor = null
+                                scope.launch(Dispatchers.IO) {
+                                    runCatching {
+                                        Groups.send(
+                                            context, idHex,
+                                            context.getString(R.string.chat_unsent),
+                                            kind = 5,
+                                            reSender = r.senderHex,
+                                            reSeq = r.message.groupSeq,
+                                        )
+                                    }
+                                }
+                            }) { Text(stringResource(R.string.chat_unsend)) }
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { menuFor = null }) {
+                        Text(stringResource(R.string.chat_cancel))
+                    }
+                },
+            )
         }
 
         // The mesh gate: who is missing, by name, and nothing to press until
@@ -282,8 +387,10 @@ private fun GroupBubble(
     m: StoredMessage,
     own: Boolean,
     senderName: String,
+    withdrawn: Boolean,
+    reactedWith: List<String>,
     answering: String?,
-    onReply: () -> Unit,
+    onPress: () -> Unit,
 ) {
     val align = if (own) Alignment.End else Alignment.Start
     val bg = if (own) MaterialTheme.colorScheme.primaryContainer
@@ -298,7 +405,7 @@ private fun GroupBubble(
             color = bg,
             shape = RoundedCornerShape(14.dp),
             modifier = Modifier.widthIn(max = 300.dp)
-                .clickable(onClick = onReply),
+                .clickable(onClick = onPress),
         ) {
             Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                 if (!own) {
@@ -324,8 +431,23 @@ private fun GroupBubble(
                         )
                     }
                 }
-                Text(isolate(m.body), color = fg)
+                if (withdrawn) {
+                    Text(
+                        stringResource(R.string.chat_unsent),
+                        color = fg.copy(alpha = 0.7f),
+                        fontStyle = FontStyle.Italic,
+                    )
+                } else {
+                    Text(isolate(m.body), color = fg)
+                }
             }
+        }
+        if (reactedWith.isNotEmpty()) {
+            Text(
+                reactedWith.joinToString(" "),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = 6.dp),
+            )
         }
     }
 }

@@ -22,4 +22,5 @@
         <item quantity="one">%1$d명</item>
         <item quantity="other">%1$d명</item>
     </plurals>
+    <string name="group_added_notify">%1$s님이 나를 추가했습니다</string>
 </resources>

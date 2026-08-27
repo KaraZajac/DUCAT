@@ -118,6 +118,32 @@ val sharedLogic = listOf(
 // are emitted per locale and read at runtime by android/Resources.kt. This
 // is what lets a screen come across verbatim, translations and all, instead
 // of being retyped into a second implementation that drifts.
+// The same guard the phone's build has, for the same failure met the same
+// way: the desk loads target/release/libducat_mobile.so, a change to the
+// Rust under it is invisible to Gradle, and today that surfaced as an
+// UnsatisfiedLinkError at runtime — the arbiter crashing on a symbol the
+// stale library had never heard of — where the phone's guard would have
+// stopped the build with a sentence.
+val deskNativeFreshness = tasks.register("deskNativeFreshness") {
+    val lib = File(rootProject.projectDir.parentFile, "target/release/libducat_mobile.so")
+    val rustDirs = listOf("core/src", "mobile/src")
+        .map { File(rootProject.projectDir.parentFile, it) }
+    doLast {
+        if (!lib.isFile) return@doLast
+        val newest = rustDirs.filter { it.isDirectory }
+            .flatMap { it.walkTopDown().filter { f -> f.isFile }.toList() }
+            .maxByOrNull { it.lastModified() } ?: return@doLast
+        if (newest.lastModified() > lib.lastModified()) {
+            throw GradleException(
+                "the desk's native library is older than the Rust it was built from.\n" +
+                    "  ${newest.name} changed after target/release/libducat_mobile.so was written.\n" +
+                    "  Run: cargo build -p ducat-mobile --release",
+            )
+        }
+    }
+}
+tasks.matching { it.name == "compileKotlin" }.configureEach { dependsOn(deskNativeFreshness) }
+
 val deskResDir = layout.buildDirectory.dir("generated/deskres")
 val generateDeskRes = tasks.register("generateDeskRes") {
     val resRoot = rootProject.file("android/src/main/res")
