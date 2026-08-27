@@ -50,7 +50,13 @@ import org.ducatproject.ducat.Wallet
 fun ActivityScreen() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    val events = remember(version) { Ledger.build(context) }
+    // Off the main thread for the same reason as the home screen's recent
+    // rows: building the ledger costs what the ledger is long, and a tab
+    // that blocks composition while it reads is a frozen app, not a tab.
+    var events by remember { mutableStateOf<List<Ledger.Event>>(emptyList()) }
+    LaunchedEffect(version) {
+        events = withContext(Dispatchers.IO) { Ledger.build(context) }
+    }
     val pending = remember(version) { Ledger.openRequests(context) }
     val tip = remember(version) { Wallet.balances(context).tip }
     var open by remember { mutableStateOf<Ledger.Event?>(null) }

@@ -32,7 +32,9 @@ import org.ducatproject.ducat.ui.ThemePreference
 import org.ducatproject.ducat.ui.ducat
 import org.ducatproject.ducat.ui.BridgeSelfTest
 import androidx.activity.compose.BackHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ui.AccountsScreen
 import org.ducatproject.ducat.ui.ActivityScreen
 import org.ducatproject.ducat.ui.PaySheet
@@ -1093,7 +1095,15 @@ private fun HomeScreen(
 
     // The last few movements, right under the number they explain — the shape
     // every payments app the user knows leads with. Three rows, then the tab.
-    val recent = remember(version) { Ledger.build(context).take(3) }
+    //
+    // Built off the main thread: the ledger reads the wallet, the receipts
+    // and an encrypted prefs table, and doing that inside composition froze
+    // the whole app for as long as the ledger was long (an ANR at ~60 rows).
+    // The rows appearing a beat after the balance is the correct trade.
+    var recent by remember { mutableStateOf<List<Ledger.Event>>(emptyList()) }
+    LaunchedEffect(version) {
+        recent = withContext(Dispatchers.IO) { Ledger.build(context).take(3) }
+    }
     if (recent.isNotEmpty()) {
         Spacer(Modifier.height(16.dp))
         Row(

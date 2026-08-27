@@ -1974,6 +1974,21 @@ class WalletStore(context: Context) {
             }?.removePrefix("sub_minor_")
     }
 
+    /**
+     * The whole minor→owner table in one read.
+     *
+     * `prefs.all` on an encrypted store decrypts every key it holds — an
+     * AES round per entry. [personaForMinor] pays that per *call*, which a
+     * ledger walking its received outputs turned into rows × keys cipher
+     * inits on whatever thread asked (the home screen's, for five seconds:
+     * an ANR in a settings read). One pass, one map, then lookups are free.
+     */
+    fun personaByMinor(): Map<Int, String> =
+        prefs.all.entries
+            .filter { it.key.startsWith("sub_minor_") }
+            .mapNotNull { e -> (e.value as? Int)?.let { it to e.key.removePrefix("sub_minor_") } }
+            .toMap()
+
     // --- what happened, not just what arrived --------------------------------
 
     /**

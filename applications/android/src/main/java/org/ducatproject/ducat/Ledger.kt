@@ -211,10 +211,13 @@ object Ledger {
             c.optString("address").takeIf { it.isNotEmpty() }
                 ?.let { escrowByAddress[it] = title }
         }
+        // One decryption pass for the whole table, not one per output —
+        // see personaByMinor. This lambda runs per row.
+        val personaByMinor = store.personaByMinor()
         fun escrowOf(e: Event): String? = when (e.direction) {
             Direction.Sent -> e.address?.let { escrowByAddress[it] }
             Direction.Received -> e.ours.asSequence()
-                .mapNotNull { store.personaForMinor(it.minor) }
+                .mapNotNull { personaByMinor[it.minor] }
                 .filter { it.startsWith("ride_") }
                 .mapNotNull { escrowTitle[it.removePrefix("ride_")] }
                 .firstOrNull()
