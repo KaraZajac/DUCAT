@@ -27,4 +27,7 @@
     <string name="settings_fares_title">運賃</string>
     <string name="settings_fares_note">目安は、ここのタクシー料金から計算します。</string>
     <string name="settings_fares_unsurveyed">この国の調査がありません。中位の値を使います。メーターでご自分の料金を入力してください。</string>
+    <string name="settings_tax_title">消費税</string>
+    <string name="settings_tax_note">事業者向け：レジ・ツケ・キオスクが各販売にこの率を加算し、請求書とレシートに明記、エクスポートにも取引ごとに記載されます。</string>
+    <string name="settings_tax_percent">パーセント</string>
 </resources>

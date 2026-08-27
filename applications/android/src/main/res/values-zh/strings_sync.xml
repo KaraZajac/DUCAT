@@ -23,4 +23,7 @@
     <string name="settings_fares_title">车费</string>
     <string name="settings_fares_note">建议价格按这里出租车的收费推算。</string>
     <string name="settings_fares_unsurveyed">这个国家没有调查数据，使用了中间值。请在计价器上填写你自己的费率。</string>
+    <string name="settings_tax_title">销售税</string>
+    <string name="settings_tax_note">面向商家：收银台、酒吧账单和自助终端会在每笔销售上加上此百分比，在账单和收据上单列，导出时按笔记录。</string>
+    <string name="settings_tax_percent">百分比</string>
 </resources>

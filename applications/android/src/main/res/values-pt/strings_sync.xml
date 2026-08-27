@@ -26,4 +26,7 @@
     <string name="settings_fares_title">Tarifas</string>
     <string name="settings_fares_note">As sugestões partem do que um táxi cobra aqui.</string>
     <string name="settings_fares_unsurveyed">Sem levantamento para este país — usa-se um valor intermédio. Escreva a sua tarifa no taxímetro.</string>
+    <string name="settings_tax_title">Imposto sobre vendas</string>
+    <string name="settings_tax_note">Para um negócio: a caixa, a conta do bar e o quiosque somam esta percentagem a cada venda, discriminada na conta e no recibo; a exportação leva-a por transação.</string>
+    <string name="settings_tax_percent">Percentagem</string>
 </resources>

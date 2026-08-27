@@ -26,4 +26,7 @@
     <string name="settings_fares_title">Fahrpreise</string>
     <string name="settings_fares_note">Vorschläge richten sich danach, was ein Taxi hier verlangt.</string>
     <string name="settings_fares_unsurveyed">Für dieses Land gibt es keine Erhebung — es wird ein mittlerer Wert benutzt. Gib am Taxameter deinen eigenen Preis ein.</string>
+    <string name="settings_tax_title">Umsatzsteuer</string>
+    <string name="settings_tax_note">Für ein Geschäft: Kasse, Deckel und Kiosk schlagen diesen Prozentsatz auf jeden Verkauf auf, ausgewiesen auf Rechnung und Beleg; der Export führt ihn je Transaktion.</string>
+    <string name="settings_tax_percent">Prozent</string>
 </resources>

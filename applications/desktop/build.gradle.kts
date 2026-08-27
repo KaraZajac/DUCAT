@@ -91,6 +91,9 @@ val sharedLogic = listOf(
     // already share, so the store, the mesh check and the screens cross as
     // one piece — a desk in a group is a member like any other.
     "org/ducatproject/ducat/Groups.kt",
+    // The counter's standing tax rate: the shared tills compute from it and
+    // the shared export carries it, so the desk must hold the same number.
+    "org/ducatproject/ducat/Tax.kt",
     "org/ducatproject/ducat/ui/GroupChat.kt",
     "org/ducatproject/ducat/Enquiries.kt",
     "org/ducatproject/ducat/Stakes.kt",

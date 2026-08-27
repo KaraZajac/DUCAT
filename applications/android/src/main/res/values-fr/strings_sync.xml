@@ -26,4 +26,7 @@
     <string name="settings_fares_title">Tarifs</string>
     <string name="settings_fares_note">Les suggestions partent de ce que demande un taxi ici.</string>
     <string name="settings_fares_unsurveyed">Pas de relevé pour ce pays — une valeur moyenne est utilisée. Saisis ton propre tarif au compteur.</string>
+    <string name="settings_tax_title">Taxe de vente</string>
+    <string name="settings_tax_note">Pour un commerce : la caisse, l’ardoise et le kiosque ajoutent ce pourcentage à chaque vente, détaillé sur la note et le reçu ; l’export le reprend par transaction.</string>
+    <string name="settings_tax_percent">Pourcentage</string>
 </resources>

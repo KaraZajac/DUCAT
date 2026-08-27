@@ -36,4 +36,7 @@
     <string name="settings_fares_title">Тарифы</string>
     <string name="settings_fares_note">Подсказки считаются из того, сколько берёт такси здесь.</string>
     <string name="settings_fares_unsurveyed">Для этой страны нет данных — берётся средняя величина. Впишите свой тариф на счётчике.</string>
+    <string name="settings_tax_title">Налог с продаж</string>
+    <string name="settings_tax_note">Для бизнеса: касса, барный счёт и киоск добавляют этот процент к каждой продаже, отдельной строкой в счёте и чеке; экспорт указывает его по каждой операции.</string>
+    <string name="settings_tax_percent">Процент</string>
 </resources>

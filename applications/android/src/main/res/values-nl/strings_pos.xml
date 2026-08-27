@@ -30,4 +30,5 @@
     <string name="pos_new_sale">Nieuwe verkoop</string>
     <string name="pos_new_sale_settles">Nieuwe verkoop (deze rondt zichzelf af)</string>
     <string name="pos_cancel_sale">Verkoop annuleren</string>
+    <string name="pos_tax_at">Belasting (%1$s%%)</string>
 </resources>

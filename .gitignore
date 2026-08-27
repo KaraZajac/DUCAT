@@ -2,6 +2,7 @@ target/
 **/target/
 applications/local.properties
 applications/.gradle/
+applications/.kotlin/
 applications/build/
 applications/android/build/
 applications/android/src/main/jniLibs/

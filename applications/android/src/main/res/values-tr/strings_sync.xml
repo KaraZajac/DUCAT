@@ -30,4 +30,7 @@
     <string name="settings_fares_title">Ücretler</string>
     <string name="settings_fares_note">Öneriler, buradaki taksi ücretinden hesaplanır.</string>
     <string name="settings_fares_unsurveyed">Bu ülke için veri yok — orta bir değer kullanılıyor. Taksimetrede kendi ücretini yaz.</string>
+    <string name="settings_tax_title">Satış vergisi</string>
+    <string name="settings_tax_note">İşletmeler için: kasa, bar hesabı ve kiosk her satışa bu yüzdeyi ekler; fatura ve fişte ayrı satırdır, dışa aktarım işlem başına taşır.</string>
+    <string name="settings_tax_percent">Yüzde</string>
 </resources>

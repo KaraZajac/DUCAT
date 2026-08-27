@@ -30,4 +30,5 @@
     <string name="pos_new_sale">Nouvelle vente</string>
     <string name="pos_new_sale_settles">Nouvelle vente (celle-ci se règle toute seule)</string>
     <string name="pos_cancel_sale">Annuler la vente</string>
+    <string name="pos_tax_at">Taxe (%1$s %%)</string>
 </resources>

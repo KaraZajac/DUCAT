@@ -30,4 +30,7 @@
     <string name="settings_fares_title">Tariffe</string>
     <string name="settings_fares_note">I suggerimenti partono da quanto chiede un taxi qui.</string>
     <string name="settings_fares_unsurveyed">Nessun rilevamento per questo paese: si usa un valore intermedio. Metti la tua tariffa al tassametro.</string>
+    <string name="settings_tax_title">Imposta sulle vendite</string>
+    <string name="settings_tax_note">Per un’attività: cassa, conto del bar e chiosco aggiungono questa percentuale a ogni vendita, voce sul conto e sulla ricevuta; l’esportazione la riporta per transazione.</string>
+    <string name="settings_tax_percent">Percentuale</string>
 </resources>

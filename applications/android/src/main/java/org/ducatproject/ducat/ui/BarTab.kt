@@ -553,12 +553,25 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         when (tab.state) {
             "open" -> {
+                // A standing rate is applied at the moment of billing — the
+                // one moment the subtotal is final — and the button says the
+                // number it is about to bill, tax in, because a label reading
+                // 6.50 above a bill for 7.04 is the till lying by omission.
+                val standingTax =
+                    if (org.ducatproject.ducat.Tax.enabled(context) && (tab.taxPxmr ?: 0L) <= 0L)
+                        org.ducatproject.ducat.Tax.on(context, tab.lines.sumOf { it.amountPxmr })
+                    else 0L
                 Button(
                     onClick = {
                         busy = true; error = null
                         scope.launch {
                             val r = withContext(Dispatchers.IO) {
-                                runCatching { store.settle(tab) }
+                                runCatching {
+                                    val toSettle = if (standingTax > 0)
+                                        store.mutate(tab.id) { it.copy(taxPxmr = standingTax) }!!
+                                    else tab
+                                    store.settle(toSettle)
+                                }
                             }
                             busy = false
                             r.onFailure { error = moneyFailure(context, it) }
@@ -568,7 +581,7 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(52.dp),
                 ) {
                     if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                    else Text(stringResource(R.string.bartab_settle_bill, Amounts.show(context, tab.totalPxmr).primary))
+                    else Text(stringResource(R.string.bartab_settle_bill, Amounts.show(context, tab.totalPxmr + standingTax).primary))
                 }
                 Text(
                     stringResource(R.string.bartab_settle_hint, name),

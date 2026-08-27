@@ -27,4 +27,7 @@
     <string name="settings_fares_title">요금</string>
     <string name="settings_fares_note">제안 요금은 이곳 택시 요금을 기준으로 계산합니다.</string>
     <string name="settings_fares_unsurveyed">이 나라의 조사 자료가 없어 중간값을 씁니다. 미터기에서 직접 요금을 입력하세요.</string>
+    <string name="settings_tax_title">판매세</string>
+    <string name="settings_tax_note">사업자용: 계산대·바 탭·키오스크가 모든 판매에 이 비율을 더하고, 청구서와 영수증에 항목으로 표시되며, 내보내기에 거래별로 기록됩니다.</string>
+    <string name="settings_tax_percent">퍼센트</string>
 </resources>

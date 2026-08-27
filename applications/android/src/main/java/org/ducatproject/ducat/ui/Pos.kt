@@ -216,7 +216,38 @@ fun PosScreen() {
                         }
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    TaxRow(taxPxmr) { taxPxmr = it }
+                    if (org.ducatproject.ducat.Tax.enabled(context)) {
+                        // A rate is set, so the figure is arithmetic the till
+                        // does in front of the customer — not a field. The
+                        // typed row below stays for phones with no rate: an
+                        // occasional seller quoting one odd levy is a different
+                        // person from a business with a standing percentage.
+                        val subtotal = basket.sumOf { it.amountPxmr }
+                        LaunchedEffect(subtotal) {
+                            taxPxmr = org.ducatproject.ducat.Tax.on(context, subtotal)
+                        }
+                        Row(
+                            Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                stringResource(
+                                    R.string.pos_tax_at,
+                                    org.ducatproject.ducat.Tax.percentText(
+                                        org.ducatproject.ducat.Tax.basisPoints(context),
+                                    ),
+                                ),
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Text(
+                                Amounts.show(context, taxPxmr).primary,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
+                    } else {
+                        TaxRow(taxPxmr) { taxPxmr = it }
+                    }
                 }
             }
 

@@ -30,4 +30,5 @@
     <string name="pos_new_sale">नई बिक्री</string>
     <string name="pos_new_sale_settles">नई बिक्री (यह वाली अपने-आप चुकता होगी)</string>
     <string name="pos_cancel_sale">बिक्री रद्द करें</string>
+    <string name="pos_tax_at">कर (%1$s%%)</string>
 </resources>

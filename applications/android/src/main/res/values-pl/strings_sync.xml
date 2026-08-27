@@ -36,4 +36,7 @@
     <string name="settings_fares_title">Stawki</string>
     <string name="settings_fares_note">Podpowiedzi liczone są z tego, ile bierze tu taksówka.</string>
     <string name="settings_fares_unsurveyed">Brak danych dla tego kraju — używana jest wartość średnia. Wpisz własną stawkę na taksometrze.</string>
+    <string name="settings_tax_title">Podatek od sprzedaży</string>
+    <string name="settings_tax_note">Dla firmy: kasa, rachunek barowy i kiosk doliczają ten procent do każdej sprzedaży, wykazany na rachunku i paragonie; eksport podaje go dla każdej transakcji.</string>
+    <string name="settings_tax_percent">Procent</string>
 </resources>

@@ -30,4 +30,5 @@
     <string name="pos_new_sale">بيع جديد</string>
     <string name="pos_new_sale_settles">بيع جديد (هذه تُسوّى من تلقاء نفسها)</string>
     <string name="pos_cancel_sale">إلغاء البيع</string>
+    <string name="pos_tax_at">الضريبة (%1$s%%)</string>
 </resources>

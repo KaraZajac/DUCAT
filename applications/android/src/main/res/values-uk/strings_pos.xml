@@ -30,4 +30,5 @@
     <string name="pos_new_sale">Новий продаж</string>
     <string name="pos_new_sale_settles">Новий продаж (цей розрахується сам)</string>
     <string name="pos_cancel_sale">Скасувати продаж</string>
+    <string name="pos_tax_at">Податок (%1$s%%)</string>
 </resources>

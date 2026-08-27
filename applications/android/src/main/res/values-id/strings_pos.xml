@@ -30,4 +30,5 @@
     <string name="pos_new_sale">Penjualan baru</string>
     <string name="pos_new_sale_settles">Penjualan baru (yang ini selesai sendiri)</string>
     <string name="pos_cancel_sale">Batalkan penjualan</string>
+    <string name="pos_tax_at">Pajak (%1$s%%)</string>
 </resources>

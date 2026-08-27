@@ -30,4 +30,7 @@
     <string name="settings_fares_title">Fares</string>
     <string name="settings_fares_note">Ride suggestions are priced from what a taxi charges here.</string>
     <string name="settings_fares_unsurveyed">No survey for this country — suggestions use a middling one. Type your own rate at the meter.</string>
+    <string name="settings_tax_title">Sales tax</string>
+    <string name="settings_tax_note">For a business: the till, the bar tab and the kiosk add this percentage to every sale, itemised on the bill and the receipt, and the export carries it per transaction.</string>
+    <string name="settings_tax_percent">Percent</string>
 </resources>

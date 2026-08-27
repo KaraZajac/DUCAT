@@ -38,4 +38,7 @@
     <string name="settings_fares_title">الأجرة</string>
     <string name="settings_fares_note">تُحسب اقتراحات الرحلات مما تتقاضاه سيارة أجرة هنا.</string>
     <string name="settings_fares_unsurveyed">لا يوجد مسح لهذا البلد — تُستخدم قيمة متوسطة. اكتب سعرك في العدّاد.</string>
+    <string name="settings_tax_title">ضريبة المبيعات</string>
+    <string name="settings_tax_note">للأعمال: تضيف الكاشيرة ودفتر الحساب والكشك هذه النسبة إلى كل عملية بيع، مفصّلة في الفاتورة والإيصال، ويحملها التصدير لكل معاملة.</string>
+    <string name="settings_tax_percent">النسبة المئوية</string>
 </resources>

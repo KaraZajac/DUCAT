@@ -30,4 +30,5 @@
     <string name="pos_new_sale">새 판매</string>
     <string name="pos_new_sale_settles">새 판매 (이 건은 알아서 정산돼요)</string>
     <string name="pos_cancel_sale">판매 취소</string>
+    <string name="pos_tax_at">세금(%1$s%%)</string>
 </resources>

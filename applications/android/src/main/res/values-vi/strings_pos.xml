@@ -30,4 +30,5 @@
     <string name="pos_new_sale">Đơn mới</string>
     <string name="pos_new_sale_settles">Đơn mới (đơn này tự tất toán)</string>
     <string name="pos_cancel_sale">Hủy đơn</string>
+    <string name="pos_tax_at">Thuế (%1$s%%)</string>
 </resources>

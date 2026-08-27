@@ -215,6 +215,8 @@ fun SettingsScreen(
 
         FareRegion()
         Spacer(Modifier.height(24.dp))
+        TaxSetting()
+        Spacer(Modifier.height(24.dp))
 
         // §16.16, and the default is the privacy stance: when a message was
         // read is behavioural data, and it leaves this device by choice, not by
@@ -956,5 +958,61 @@ private fun ModeRow(
         }
         Spacer(Modifier.width(12.dp))
         Switch(checked = checked, onCheckedChange = onChange)
+    }
+}
+
+/**
+ * The counter's sales tax (see [org.ducatproject.ducat.Tax]).
+ *
+ * A percentage, once, instead of an amount per sale: the till, the bar tab
+ * and the kiosk compute the figure from the subtotal in front of the
+ * customer, it rides the bill and the receipt as the `tax` line core already
+ * checks the arithmetic of, and the CSV export carries it per transaction —
+ * which is the half a business actually files.
+ */
+@Composable
+private fun TaxSetting() {
+    val context = LocalContext.current
+    var on by remember { mutableStateOf(org.ducatproject.ducat.Tax.enabled(context)) }
+    var pct by remember {
+        mutableStateOf(
+            org.ducatproject.ducat.Tax.basisPoints(context)
+                .takeIf { it > 0 }
+                ?.let { org.ducatproject.ducat.Tax.percentText(it) } ?: "",
+        )
+    }
+    fun push() {
+        org.ducatproject.ducat.Tax.set(
+            context, on, org.ducatproject.ducat.Tax.parsePercent(pct) ?: 0,
+        )
+    }
+    Column {
+        Text(
+            stringResource(R.string.settings_tax_title),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(R.string.settings_tax_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Switch(checked = on, onCheckedChange = { on = it; push() })
+            Spacer(Modifier.width(12.dp))
+            if (on) {
+                OutlinedTextField(
+                    value = pct,
+                    onValueChange = {
+                        pct = it.filter { c -> org.ducatproject.ducat.Amounts.isNumberChar(c) }
+                        push()
+                    },
+                    label = { Text(stringResource(R.string.settings_tax_percent)) },
+                    singleLine = true,
+                    modifier = Modifier.width(140.dp),
+                )
+            }
+        }
     }
 }

@@ -30,4 +30,5 @@
     <string name="pos_new_sale">新的一单</string>
     <string name="pos_new_sale_settles">新的一单（这单会自行结算）</string>
     <string name="pos_cancel_sale">取消这单</string>
+    <string name="pos_tax_at">税（%1$s%%）</string>
 </resources>

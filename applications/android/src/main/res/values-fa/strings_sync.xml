@@ -30,4 +30,7 @@
     <string name="settings_fares_title">کرایه‌ها</string>
     <string name="settings_fares_note">پیشنهاد کرایه بر پایهٔ چیزی است که تاکسی اینجا می‌گیرد.</string>
     <string name="settings_fares_unsurveyed">برای این کشور آماری نیست — از مقداری میانه استفاده می‌شود. نرخ خودت را در کنتور بنویس.</string>
+    <string name="settings_tax_title">مالیات فروش</string>
+    <string name="settings_tax_note">برای کسب‌وکار: صندوق، حساب بار و کیوسک این درصد را به هر فروش می‌افزایند؛ در صورتحساب و رسید جدا نوشته می‌شود و در خروجی برای هر تراکنش می‌آید.</string>
+    <string name="settings_tax_percent">درصد</string>
 </resources>

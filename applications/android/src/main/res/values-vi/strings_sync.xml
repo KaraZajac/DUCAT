@@ -27,4 +27,7 @@
     <string name="settings_fares_title">Giá cước</string>
     <string name="settings_fares_note">Mức gợi ý được tính từ giá taxi ở đây.</string>
     <string name="settings_fares_unsurveyed">Chưa có khảo sát cho nước này — dùng mức trung bình. Hãy tự nhập giá của bạn ở đồng hồ.</string>
+    <string name="settings_tax_title">Thuế bán hàng</string>
+    <string name="settings_tax_note">Cho doanh nghiệp: quầy thu ngân, tab quầy bar và kiosk cộng phần trăm này vào mỗi lần bán, ghi rõ trên hoá đơn và biên nhận; bản xuất mang nó theo từng giao dịch.</string>
+    <string name="settings_tax_percent">Phần trăm</string>
 </resources>
