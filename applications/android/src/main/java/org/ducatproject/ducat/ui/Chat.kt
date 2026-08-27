@@ -205,6 +205,9 @@ internal data class BillAnswers(
  * against every message rather than only bills, so a reaction that answered
  * something else resolves to that something else and leaves the bills alone.
  */
+/** How far apart two honest clocks are allowed to be (§16.14 resolution). */
+private const val CLOCK_SKEW_SECS = 900L
+
 internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
     val withdrawn = HashSet<Pair<Long, Long>>()
     val refused = HashSet<Pair<Long, Long>>()
@@ -216,8 +219,19 @@ internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
         // Whose log the seq belongs to: our own for a retraction, the other
         // side's for a refusal.
         val side = if (r.reOwn) r.outgoing else !r.outgoing
+        // "Preceded it" with a skew allowance. The two timestamps were
+        // stamped by two different clocks, and phones disagree by minutes
+        // as a matter of course — a bill minted by a fast clock and
+        // declined straight away sits *after* its own refusal, and the
+        // refusal resolved to nothing: the payer saw their decline, the
+        // asker's bubble stayed live. Fifteen minutes of grace only
+        // misfires if the same seq is reborn twice within one window,
+        // which a fresh card restarting at zero does not do that fast.
         val target = messages
-            .filter { it.outgoing == side && it.seq == seq && it.timestamp <= r.timestamp }
+            .filter {
+                it.outgoing == side && it.seq == seq &&
+                    it.timestamp <= r.timestamp + CLOCK_SKEW_SECS
+            }
             .maxByOrNull { it.timestamp } ?: continue
         when {
             target.kind == 1 -> (if (r.reOwn) withdrawn else refused) +=
@@ -1777,14 +1791,23 @@ private fun Bubble(
                         }
                     }
                     // The asker's copy: no button (nothing to press — the
-                    // money comes to us), just the settled flag once a
-                    // payment or receipt explicitly names this request.
+                    // money comes to us), just the answer once there is one.
                     // Splitting a bill turns one screen into the ledger of
-                    // who has squared up, which is worth a glance.
-                    if (m.kind == 1 && m.outgoing && paid) {
+                    // who has squared up, which is worth a glance — and a
+                    // refusal is as much an answer as a payment: the decline
+                    // already arrives as its own row, but the bubble the
+                    // asker scans for is this one. Paid wins over declined
+                    // (money talks); withdrawn is the asker's own doing.
+                    if (m.kind == 1 && m.outgoing && (paid || declined || cancelled)) {
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            stringResource(R.string.chat_paid),
+                            stringResource(
+                                when {
+                                    paid -> R.string.chat_paid
+                                    declined -> R.string.chat_declined
+                                    else -> R.string.chat_cancelled
+                                },
+                            ),
                             style = MaterialTheme.typography.labelMedium,
                             color = fg.copy(alpha = 0.8f),
                         )
