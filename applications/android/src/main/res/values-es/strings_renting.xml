@@ -32,6 +32,7 @@
     <string name="rent_private_label">Dónde quedar y qué necesitan saber</string>
     <string name="rent_post_it">Publicarlo</string>
     <string name="rent_post_failed">El anuncio está guardado, pero ahora mismo no ha podido subir a un tablón. Subirá solo en cuanto haya red.</string>
+    <string name="rent_board_full">Ahora mismo todos los sitios del tablón de por aquí están ocupados. Se guarda y se publicará solo cuando quede uno libre.</string>
     <string name="rent_cancel">Cancelar</string>
     <string name="rent_discard_title">¿Descartar este anuncio?</string>
     <string name="rent_discard_body">Aquí no se ha guardado nada. Todo lo escrito en este formulario se pierde, y no hay ningún borrador al que volver.</string>

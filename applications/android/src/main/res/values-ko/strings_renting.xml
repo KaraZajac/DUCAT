@@ -32,6 +32,7 @@
     <string name="rent_private_label">만날 장소와 알아야 할 것</string>
     <string name="rent_post_it">올리기</string>
     <string name="rent_post_failed">등록 내용은 저장했지만 지금은 게시판에 올리지 못했습니다. 네트워크가 연결되면 알아서 올라갑니다.</string>
+    <string name="rent_board_full">이 부근 게시판의 자리가 지금 모두 찼습니다. 저장된 채로 있다가 자리가 나면 알아서 올라갑니다.</string>
     <string name="rent_cancel">취소</string>
     <string name="rent_discard_title">이 게시글을 버릴까요?</string>
     <string name="rent_discard_body">여기에는 아직 아무것도 저장되지 않았어요. 이 양식에 입력한 내용은 모두 사라지고, 돌아올 임시 저장본도 없어요.</string>

@@ -32,6 +32,7 @@
     <string name="rent_private_label">Nerede buluşacağınız ve bilmeleri gerekenler</string>
     <string name="rent_post_it">Yayınla</string>
     <string name="rent_post_failed">İlan kaydedildi ama şu anda panoya çıkamadı. Ağa erişilir erişilmez kendiliğinden yayınlanacak.</string>
+    <string name="rent_board_full">Şu anda buradaki panonun bütün yerleri dolu. Kayıtlı kalır ve bir yer boşalınca kendiliğinden yayınlanır.</string>
     <string name="rent_cancel">Vazgeç</string>
     <string name="rent_discard_title">Bu ilan silinsin mi?</string>
     <string name="rent_discard_body">Burada hiçbir şey kaydedilmedi. Bu forma yazılan her şey gider ve dönülecek bir taslak yok.</string>

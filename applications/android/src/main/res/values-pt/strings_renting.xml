@@ -32,6 +32,7 @@
     <string name="rent_private_label">Onde se encontram e o que precisam de saber</string>
     <string name="rent_post_it">Publicar</string>
     <string name="rent_post_failed">O anúncio ficou guardado, mas não conseguiu ir para um quadro agora. Sobe sozinho assim que a rede estiver acessível.</string>
+    <string name="rent_board_full">Neste momento estão todos os lugares ocupados no quadro aqui à volta. Fica guardado e é publicado sozinho assim que vagar um.</string>
     <string name="rent_cancel">Cancelar</string>
     <string name="rent_discard_title">Descartar este anúncio?</string>
     <string name="rent_discard_body">Nada aqui foi salvo. Tudo o que foi digitado neste formulário se perde, e não há rascunho para onde voltar.</string>

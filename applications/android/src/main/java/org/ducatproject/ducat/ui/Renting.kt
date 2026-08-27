@@ -232,7 +232,18 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
                                 error = null
                                 withContext(Dispatchers.IO) {
                                     runCatching { Listings.post(context, o.optString("id")) }
-                                }.onFailure { error = moneyFailure(context, it) }
+                                }
+                                    // **False is a failure too.** post() throws
+                                    // when it cannot reach a node, and returns
+                                    // false when every shard of the board is
+                                    // taken — and only the throw was being
+                                    // reported. A seller pressed Post on a busy
+                                    // board, nothing appeared, and the listing
+                                    // was not up.
+                                    .onSuccess {
+                                        if (!it) error = context.getString(R.string.rent_board_full)
+                                    }
+                                    .onFailure { error = moneyFailure(context, it) }
                             }
                         },
                         onStop = {
@@ -252,7 +263,11 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
                             if (o.optString("board").isNotBlank()) scope.launch {
                                 withContext(Dispatchers.IO) {
                                     runCatching { Listings.post(context, o.optString("id")) }
-                                }.onFailure { error = moneyFailure(context, it) }
+                                }
+                                    .onSuccess {
+                                        if (!it) error = context.getString(R.string.rent_board_full)
+                                    }
+                                    .onFailure { error = moneyFailure(context, it) }
                             }
                         },
                     )
@@ -832,16 +847,23 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                     scope.launch {
                         withContext(Dispatchers.IO) {
                             runCatching { Listings.post(context, draft.optString("id")) }
-                        }.onFailure {
-                            DucatLog.w("Renting", "post: ${it.message}")
-                            // The listing is saved either way and the poller
-                            // will try again — but a person who cannot post
-                            // because no node is reachable should be told
-                            // that, not left looking at a screen that closed.
-                            error = moneyFailure(context, it, R.string.rent_post_failed)
                         }
+                            // A full board answers false rather than throwing,
+                            // and the screen closed on it as though the thing
+                            // were up.
+                            .onSuccess {
+                                if (!it) error = context.getString(R.string.rent_board_full)
+                            }
+                            .onFailure {
+                                DucatLog.w("Renting", "post: ${it.message}")
+                                // The listing is saved either way and the poller
+                                // will try again — but a person who cannot post
+                                // because no node is reachable should be told
+                                // that, not left looking at a screen that closed.
+                                error = moneyFailure(context, it, R.string.rent_post_failed)
+                            }
                         posting = false
-                        onDone()
+                        if (error == null) onDone()
                     }
                 },
                 modifier = Modifier.weight(1f).height(48.dp),

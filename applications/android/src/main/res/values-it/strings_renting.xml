@@ -32,6 +32,7 @@
     <string name="rent_private_label">Dove vedersi, e cosa devono sapere</string>
     <string name="rent_post_it">Pubblica</string>
     <string name="rent_post_failed">L’annuncio è salvato, ma per ora non è riuscito ad andare su una bacheca. Ci salirà da solo appena la rete sarà raggiungibile.</string>
+    <string name="rent_board_full">Al momento sulla bacheca qui intorno sono occupati tutti i posti. Resta salvato e si pubblica da solo appena se ne libera uno.</string>
     <string name="rent_cancel">Annulla</string>
     <string name="rent_discard_title">Eliminare questo annuncio?</string>
     <string name="rent_discard_body">Qui non è stato salvato nulla. Tutto ciò che è stato scritto in questo modulo va perso, e non c\'è nessuna bozza a cui tornare.</string>

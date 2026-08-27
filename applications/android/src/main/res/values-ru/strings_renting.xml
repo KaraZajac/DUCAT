@@ -32,6 +32,7 @@
     <string name="rent_private_label">Где встретиться и что нужно знать</string>
     <string name="rent_post_it">Разместить</string>
     <string name="rent_post_failed">Объявление сохранено, но сейчас не попало на доску. Оно разместится само, как только появится сеть.</string>
+    <string name="rent_board_full">Сейчас на доске поблизости заняты все места. Объявление сохранится и разместится само, как только освободится место.</string>
     <string name="rent_cancel">Отмена</string>
     <string name="rent_discard_title">Выбросить это объявление?</string>
     <string name="rent_discard_body">Здесь ничего не сохранено. Всё, что набрано в этой форме, пропадёт, и черновика, к которому можно вернуться, нет.</string>

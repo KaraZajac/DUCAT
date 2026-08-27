@@ -32,6 +32,7 @@
     <string name="rent_private_label">Gdzie się spotkać i co trzeba wiedzieć</string>
     <string name="rent_post_it">Wystaw</string>
     <string name="rent_post_failed">Ogłoszenie jest zapisane, ale na razie nie trafiło na tablicę. Pojawi się samo, gdy sieć będzie dostępna.</string>
+    <string name="rent_board_full">Wszystkie miejsca na tablicy w okolicy są teraz zajęte. Ogłoszenie zostaje zapisane i pojawi się samo, gdy jedno się zwolni.</string>
     <string name="rent_cancel">Anuluj</string>
     <string name="rent_discard_title">Odrzucić to ogłoszenie?</string>
     <string name="rent_discard_body">Nic tu nie zostało zapisane. Wszystko, co wpisano w ten formularz, przepada, i nie ma wersji roboczej, do której można wrócić.</string>

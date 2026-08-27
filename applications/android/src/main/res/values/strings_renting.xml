@@ -32,6 +32,7 @@
     <string name="rent_private_label">Where to meet, and what they need to know</string>
     <string name="rent_post_it">Post it</string>
     <string name="rent_post_failed">The listing is saved, but it could not go on a board just now. It will go up on its own once the network is reachable.</string>
+    <string name="rent_board_full">Every spot on the board around here is taken right now. It stays saved and goes up by itself when one frees.</string>
     <string name="rent_cancel">Cancel</string>
     <string name="rent_discard_title">Discard this listing?</string>
     <string name="rent_discard_body">Nothing here has been saved. Everything typed into this form is thrown away, and there is no draft to come back to.</string>

@@ -32,6 +32,7 @@
     <string name="rent_private_label">在哪儿碰面，以及他们需要知道什么</string>
     <string name="rent_post_it">发布</string>
     <string name="rent_post_failed">信息已保存，但现在还没能贴上板。等网络可用时会自动贴上去。</string>
+    <string name="rent_board_full">这附近板上的位置现在都被占了。它会保存下来，等有空位时自动发布。</string>
     <string name="rent_cancel">取消</string>
     <string name="rent_discard_title">放弃这条发布？</string>
     <string name="rent_discard_body">这里还没有保存任何内容。填进这张表单的东西都会丢掉，也没有草稿可以回来接着写。</string>

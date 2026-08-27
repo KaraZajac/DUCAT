@@ -32,6 +32,7 @@
     <string name="rent_private_label">นัดเจอที่ไหน และมีอะไรต้องรู้</string>
     <string name="rent_post_it">ลงประกาศ</string>
     <string name="rent_post_failed">บันทึกประกาศไว้แล้ว แต่ตอนนี้ยังขึ้นบอร์ดไม่ได้ มันจะขึ้นเองเมื่อเชื่อมต่อเครือข่ายได้</string>
+    <string name="rent_board_full">ตอนนี้ที่ว่างบนบอร์ดแถวนี้เต็มหมดแล้ว ประกาศจะถูกเก็บไว้และขึ้นเองเมื่อมีที่ว่าง</string>
     <string name="rent_cancel">ยกเลิก</string>
     <string name="rent_discard_title">ทิ้งประกาศนี้?</string>
     <string name="rent_discard_body">ยังไม่มีอะไรถูกบันทึกไว้ที่นี่ ทุกอย่างที่พิมพ์ลงในแบบฟอร์มนี้จะหายไป และไม่มีฉบับร่างให้กลับมาเขียนต่อ</string>

@@ -32,6 +32,7 @@
     <string name="rent_private_label">कहाँ मिलना है, और उन्हें क्या जानना चाहिए</string>
     <string name="rent_post_it">इसे लगाएँ</string>
     <string name="rent_post_failed">लिस्टिंग सहेज ली गई है, पर अभी बोर्ड पर नहीं जा सकी। नेटवर्क मिलते ही यह अपने आप चली जाएगी।</string>
+    <string name="rent_board_full">यहाँ बोर्ड की सारी जगहें अभी भरी हैं। यह सहेजा रहेगा और जगह खाली होते ही अपने आप चढ़ जाएगा।</string>
     <string name="rent_cancel">रद्द करें</string>
     <string name="rent_discard_title">यह लिस्टिंग मिटा दें?</string>
     <string name="rent_discard_body">यहाँ अभी कुछ भी सहेजा नहीं गया है। इस फ़ॉर्म में लिखी हर चीज़ चली जाएगी, और लौटकर आगे लिखने के लिए कोई ड्राफ़्ट नहीं है।</string>

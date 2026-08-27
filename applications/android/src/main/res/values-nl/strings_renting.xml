@@ -32,6 +32,7 @@
     <string name="rent_private_label">Waar jullie afspreken, en wat ze moeten weten</string>
     <string name="rent_post_it">Plaatsen</string>
     <string name="rent_post_failed">De advertentie is opgeslagen, maar kwam nu niet op een bord. Hij gaat er vanzelf op zodra het netwerk bereikbaar is.</string>
+    <string name="rent_board_full">Alle plekken op het bord hier zijn nu bezet. Het blijft bewaard en gaat vanzelf online zodra er eentje vrijkomt.</string>
     <string name="rent_cancel">Annuleren</string>
     <string name="rent_discard_title">Deze advertentie weggooien?</string>
     <string name="rent_discard_body">Hier is niets opgeslagen. Alles wat in dit formulier is getypt gaat verloren, en er is geen concept om naar terug te keren.</string>
