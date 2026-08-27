@@ -233,9 +233,13 @@ val generateDeskRes = tasks.register("generateDeskRes") {
             appendLine("    }")
             appendLine("    object drawable {")
             drawableNames.forEach { (n, _) -> appendLine("        const val $n = ${artIds[n]}") }
-            // Vector-only drawables still need to resolve; they draw nothing.
-            appendLine("        const val ic_ducat_mono = 299998")
-            appendLine("        const val ic_ducat_coin = 299999")
+            // The notification and themed-icon silhouettes. Only the phone
+            // draws them — a desk has no status bar and no launcher — but the
+            // ids are emitted so the shim keeps mirroring what the phone's
+            // res/ actually holds, which is the one thing that makes a missing
+            // asset here a compile error rather than a blank at runtime.
+            appendLine("        const val ic_cat_mono = 299998")
+            appendLine("        const val ic_cat_notify = 299999")
             appendLine("    }")
             appendLine("    object mipmap {")
             mipmapNames.forEach { (n, _) -> appendLine("        const val $n = ${artIds[n]}") }
@@ -779,8 +783,18 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.Msi, TargetFormat.Dmg)
-            packageName = "ducat-desk"
-            description = "DUCAT Desk — peer-to-peer proximity commerce, no operator"
+            // **One name.** The phone installs as DUCAT and the desktop used
+            // to install as ducat-desk, so the releases page listed two
+            // products and the Linux menu had a second one. It is the same
+            // application on a bigger screen — the desk compiles the phone's
+            // own screens, verbatim, from the list at the top of this file.
+            //
+            // What deliberately does *not* change: bundleID and upgradeUuid
+            // below, and Android's applicationId. Those are identity, not
+            // name — moving one turns an upgrade into a second installation
+            // sitting beside the first.
+            packageName = "DUCAT"
+            description = "DUCAT — peer-to-peer proximity commerce, no operator"
             // Dmg insists MAJOR > 0; the protocol's own versioning lives in the spec.
             packageVersion = "1.0.0"
             // JNA reaches for sun.misc.Unsafe; jlink strips it unless asked.
@@ -793,6 +807,10 @@ compose.desktop {
             linux {
                 iconFile.set(project.file("icons/ducat.png"))
                 menuGroup = "Network"
+                // Debian policy: a package name is lowercase, digits, and
+                // `+-.` only. The *app* is DUCAT; this is the identifier the
+                // archive files it under, and jpackage refuses the capitals.
+                packageName = "ducat"
             }
             windows {
                 iconFile.set(project.file("icons/ducat.ico"))
@@ -804,7 +822,7 @@ compose.desktop {
             macOS {
                 iconFile.set(project.file("icons/ducat.icns"))
                 bundleID = "org.ducatproject.desk"
-                dockName = "DUCAT Desk"
+                dockName = "DUCAT"
             }
         }
     }

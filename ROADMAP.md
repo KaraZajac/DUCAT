@@ -429,7 +429,7 @@ is already cross-platform Rust; the path, cheapest first:
    grew a sink — headless desks stay quiet by construction). Packaging:
    the app image bundles the host Rust library and jdk.unsupported, and
    the distribution's own jars + bundled .so passed the live smoke gate;
-   `ducat-desk-1.0.0-linux-x64.tar.gz` builds today. Deb/Rpm need host
+   `ducat-linux-x64.tar.gz` builds today. Deb/Rpm need host
    tools (`dnf install rpm-build fakeroot dpkg`), Msi/Dmg their own OS or
    CI. The arbiter takes `--name` now. **The UX pass + cross-client till
    run (2026-08-17)**: the window speaks shopkeeper — one status word

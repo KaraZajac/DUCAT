@@ -21,14 +21,14 @@ artifact here. Everything else exists to keep it honest.
 
 Use `armeabi-v7a` only for phones older than about 2016; `x86_64` is for emulators.
 
-**DUCAT Desk**, the desktop client — same protocol, a shopkeeper's window:
+**DUCAT on a desktop** — the same application on a bigger screen, and a shopkeeper's window:
 
 | | |
 |---|---|
-| Linux | [`.deb`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-linux-x64.deb) · [`.rpm`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-linux-x64.rpm) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-linux-x64.tar.gz) |
-| Windows | [`.msi`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-windows-x64.msi) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-windows-x64.zip) |
-| macOS (Apple Silicon) | [`.dmg`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-arm64.dmg) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-arm64.tar.gz) |
-| macOS (Intel) | [`.dmg`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-x64.dmg) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-desk-macos-x64.tar.gz) |
+| Linux | [`.deb`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.deb) · [`.rpm`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.rpm) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.tar.gz) |
+| Windows | [`.msi`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-windows-x64.msi) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-windows-x64.zip) |
+| macOS (Apple Silicon) | [`.dmg`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-arm64.dmg) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-arm64.tar.gz) |
+| macOS (Intel) | [`.dmg`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-x64.dmg) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-x64.tar.gz) |
 
 Each carries its own Rust library and JVM — nothing to install first. They are
 unsigned, so both desktop OSes will warn on first open.

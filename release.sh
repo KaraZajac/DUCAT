@@ -39,9 +39,17 @@ done
 # minutes producing the .deb/.rpm/.msi/.dmg on each OS that can.
 echo "building the desk…"
 (cd applications && ./gradlew :desktop:createDistributable -q >/dev/null)
-DESK=applications/desktop/build/compose/binaries/ducat-desk-linux-x64.tar.gz
-tar czf "$DESK" -C applications/desktop/build/compose/binaries/main/app ducat-desk
-APKS+=("$DESK#DUCAT Desk ${TAG} (Linux x64, portable)")
+# One name across everything the release carries: the desk is DUCAT on a
+# bigger screen, not a second product. jpackage names the built directory
+# after nativeDistributions.packageName, so this follows that rather than
+# guessing — a rename there used to leave this tarring a path that no longer
+# existed, and the release went out desk-less.
+APPDIR=applications/desktop/build/compose/binaries/main/app
+NAME=$(cd "$APPDIR" && ls -1 | head -1)
+[ -n "$NAME" ] || { echo "no desk app directory"; exit 1; }
+DESK=applications/desktop/build/compose/binaries/ducat-linux-x64.tar.gz
+tar czf "$DESK" -C "$APPDIR" "$NAME"
+APKS+=("$DESK#DUCAT ${TAG} (Linux x64, portable)")
 
 NOTES=$(mktemp)
 {
@@ -51,7 +59,7 @@ NOTES=$(mktemp)
   echo
   echo "Install \`arm64-v8a\` unless you know your phone is older."
   echo
-  echo "**DUCAT Desk** (the desktop client) attaches below: the Linux"
+  echo "**The desktop build** attaches below: the Linux"
   echo "portable build immediately, and the .deb/.rpm/.msi/.dmg for each"
   echo "OS as CI finishes building them (~30 min after the tag)."
   echo
