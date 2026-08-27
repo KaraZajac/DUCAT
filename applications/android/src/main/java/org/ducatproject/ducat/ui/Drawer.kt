@@ -972,7 +972,7 @@ private fun ModeRow(
  * which is the half a business actually files.
  */
 @Composable
-private fun TaxSetting() {
+internal fun TaxSetting() {
     val context = LocalContext.current
     var on by remember { mutableStateOf(org.ducatproject.ducat.Tax.enabled(context)) }
     var pct by remember {

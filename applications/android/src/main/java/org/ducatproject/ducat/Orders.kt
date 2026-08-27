@@ -92,6 +92,13 @@ object Orders {
         val lines: List<BillItem>,
         /** Including the noise: this is what the customer is asked for. */
         val totalPxmr: Long,
+        /**
+         * The shop's sales-tax line, already inside [totalPxmr]. Kept apart
+         * so the bill a paired customer receives can carry it in the wire's
+         * own tax field (§16.13) — the same way the till and the bar do —
+         * instead of dissolving it into the goods.
+         */
+        val taxPxmr: Long? = null,
         val address: String,
         val state: State,
         val placedAt: Long,
@@ -151,6 +158,7 @@ object Orders {
                         BillItem(l.optString("d"), l.optLong("a"))
                     },
                     totalPxmr = o.optLong("total"),
+                    taxPxmr = o.optLong("tax", -1L).takeIf { it >= 0 },
                     address = o.optString("address"),
                     state = runCatching { State.valueOf(o.optString("state")) }
                         .getOrDefault(State.Awaiting),
@@ -180,7 +188,8 @@ object Orders {
             arr.put(
                 JSONObject()
                     .put("id", o.id).put("number", o.number).put("lines", lines)
-                    .put("total", o.totalPxmr).put("address", o.address)
+                    .put("total", o.totalPxmr).put("tax", o.taxPxmr ?: -1L)
+                    .put("address", o.address)
                     .put("state", o.state.name).put("at", o.placedAt)
                     .put("seen", o.seenTx ?: "")
                     .put("tab", o.tabId ?: "").put("who", o.personaHex ?: "")
@@ -219,9 +228,9 @@ object Orders {
      * carries its noise, so that when a payment appears there is no question
      * which order it was for.
      */
-    fun place(context: Context, lines: List<BillItem>): Order {
+    fun place(context: Context, lines: List<BillItem>, taxPxmr: Long? = null): Order {
         val id = java.util.UUID.randomUUID().toString()
-        val plain = lines.sumOf { it.amountPxmr }
+        val plain = lines.sumOf { it.amountPxmr } + (taxPxmr ?: 0L)
         val noise = java.security.SecureRandom().nextInt(TAG_RANGE.toInt()).toLong()
         val next = (all(context).maxOfOrNull { it.number } ?: 0) % 999 + 1
         val slot = synchronized(lock) {
@@ -236,6 +245,7 @@ object Orders {
             number = next,
             lines = lines,
             totalPxmr = plain + noise,
+            taxPxmr = taxPxmr?.takeIf { it > 0 },
             address = payto ?: "",
             // The minor of the address this order actually hands out. Checked
             // against `payto` because `addressFor` allocates a minor *before*
@@ -263,12 +273,13 @@ object Orders {
      * to, and it is not supposed to guess. The screen shows a card, somebody
      * claims it, and [bind] turns that into a conversation with a bill in it.
      */
-    fun begin(context: Context, lines: List<BillItem>): Order {
+    fun begin(context: Context, lines: List<BillItem>, taxPxmr: Long? = null): Order {
         val order = Order(
             id = java.util.UUID.randomUUID().toString(),
             number = (all(context).maxOfOrNull { it.number } ?: 0) % 999 + 1,
             lines = lines,
-            totalPxmr = lines.sumOf { it.amountPxmr },
+            totalPxmr = lines.sumOf { it.amountPxmr } + (taxPxmr ?: 0L),
+            taxPxmr = taxPxmr?.takeIf { it > 0 },
             address = "",
             state = State.Awaiting,
             placedAt = System.currentTimeMillis() / 1000,
@@ -291,7 +302,11 @@ object Orders {
     fun bind(context: Context, order: Order, personaHex: String): Order {
         val tabs = TabStore(context)
         val opened = tabs.open(personaHex, ORIGIN)
-        val settled = tabs.settle(tabs.mutate(opened.id) { it.copy(lines = order.lines) }!!)
+        val settled = tabs.settle(
+            tabs.mutate(opened.id) {
+                it.copy(lines = order.lines, taxPxmr = order.taxPxmr)
+            }!!,
+        )
         val bound = order.copy(
             tabId = opened.id,
             personaHex = personaHex,

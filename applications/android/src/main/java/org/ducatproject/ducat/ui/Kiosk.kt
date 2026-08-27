@@ -141,14 +141,20 @@ fun KioskScreen() {
                     // what they agreed to, not a number that is larger than
                     // the things they picked.
                     onOrder = {
-                        val tip = basket.sumOf { it.amountPxmr } * tipPct / 100
+                        val goods = basket.sumOf { it.amountPxmr }
+                        val tip = goods * tipPct / 100
                         val lines =
                             if (tip > 0) {
                                 basket + BillItem(context.getString(R.string.kiosk_tip_line), tip)
                             } else {
                                 basket
                             }
-                        placedId = Orders.begin(context, lines).id
+                        // Tax on the goods, never on the tip — the tip is a
+                        // gift to the shop, not a sale by it.
+                        val tax = if (org.ducatproject.ducat.Tax.enabled(context)) {
+                            org.ducatproject.ducat.Tax.on(context, goods)
+                        } else null
+                        placedId = Orders.begin(context, lines, tax).id
                     },
                 )
             }
@@ -176,7 +182,13 @@ private fun Ordering(
     val context = LocalContext.current
     val lines = basket.sumOf { it.amountPxmr }
     val tip = lines * tipPct / 100
-    val total = lines + tip
+    // The same arithmetic the order will be placed with: a total shown
+    // without the tax the bill will carry is the kiosk lying by omission,
+    // to a customer with nobody to ask.
+    val tax = if (org.ducatproject.ducat.Tax.enabled(context)) {
+        org.ducatproject.ducat.Tax.on(context, lines)
+    } else 0L
+    val total = lines + tip + tax
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Spacer(Modifier.height(8.dp))
         ItemPicker(onPick = onAdd)
@@ -225,6 +237,20 @@ private fun Ordering(
                     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                         Text(stringResource(R.string.kiosk_tip_line), Modifier.weight(1f))
                         Text(Amounts.show(context, tip).primary)
+                    }
+                }
+                if (tax > 0) {
+                    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                        Text(
+                            stringResource(
+                                R.string.pos_tax_at,
+                                org.ducatproject.ducat.Tax.percentText(
+                                    org.ducatproject.ducat.Tax.basisPoints(context),
+                                ),
+                            ),
+                            Modifier.weight(1f),
+                        )
+                        Text(Amounts.show(context, tax).primary)
                     }
                 }
                 HorizontalDivider(Modifier.padding(vertical = 8.dp))
@@ -509,7 +535,7 @@ private fun MoneroFallback(order: Orders.Order, onDone: () -> Unit) {
     // A bare address needs its own order: the noise in the total is how a
     // mempool sighting is told from the next customer's identical coffee, and
     // an unpaired order has none.
-    val anon = remember(order.id) { Orders.place(context, order.lines) }
+    val anon = remember(order.id) { Orders.place(context, order.lines, order.taxPxmr) }
     PayPanelMonero(anon, onDone)
 }
 
@@ -625,7 +651,18 @@ private fun StaffPanel(onClose: () -> Unit, startOn: Int = 0) {
             ItemsScreen()
             return@Column
         }
-        StaffOrders()
+        Box(Modifier.weight(1f)) { StaffOrders() }
+        // The rate, behind the PIN with the rest of the shop work. A kiosk
+        // is set up once and left alone, so the till's own tax switch must
+        // be reachable from inside the locked mode — the customer never
+        // sees this panel, and the operator never has to leave the mode
+        // (through the customer-facing screen) to change a number the law
+        // changed.
+        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            TaxSetting()
+            Spacer(Modifier.height(16.dp))
+        }
     }
 }
 

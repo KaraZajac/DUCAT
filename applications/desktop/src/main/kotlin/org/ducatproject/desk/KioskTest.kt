@@ -84,9 +84,17 @@ private fun shop(context: android.content.Context, node: () -> String?) {
         BillItem("Flat white", 300_000_000L),
         BillItem("Croissant", 200_000_000L),
     )
-    val order = Orders.begin(context, basket)
+    // With the shop's rate on, the way the screen places it: tax computed on
+    // the goods and handed to the order, so the bill a paired customer gets
+    // carries it in the wire's own field — the same rail the bar tab uses.
+    org.ducatproject.ducat.Tax.set(context, true, 825)
+    val goods = basket.sumOf { it.amountPxmr }
+    val order = Orders.begin(context, basket, org.ducatproject.ducat.Tax.on(context, goods))
     println("KIOSK_ORDER #${order.number} ${formatXmr(order.totalPxmr)} XMR")
     check(order.unpaired) { "KIOSK_FAIL a begun order should be unpaired" }
+    check(order.taxPxmr != null && order.totalPxmr == goods + order.taxPxmr!!) {
+        "KIOSK_FAIL the order's total does not include its tax"
+    }
 
     val card = Mailbox.issueCard(
         context, NameStore(context).get(), 7_200uL, purpose = "sale",
@@ -112,6 +120,12 @@ private fun shop(context: android.content.Context, node: () -> String?) {
                 val billed = TabStore(context).get(bound.tabId!!)!!
                 check(billed.lines.size == 2) { "KIOSK_FAIL the bill lost its lines" }
                 check(billed.state == "settled") { "KIOSK_FAIL bill not settled" }
+                check(billed.taxPxmr == order.taxPxmr) {
+                    "KIOSK_FAIL the tab dropped the order's tax"
+                }
+                check(bound.totalPxmr == goods + order.taxPxmr!!) {
+                    "KIOSK_FAIL the billed total is not goods plus tax"
+                }
             }
         }
 
