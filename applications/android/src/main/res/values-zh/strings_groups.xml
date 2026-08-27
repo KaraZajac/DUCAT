@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">群组</string>
+    <string name="group_new">新建群组</string>
+    <string name="group_you">你</string>
+    <string name="group_add">添加</string>
+    <string name="group_add_title">添加成员</string>
+    <string name="group_add_note">只会列出你的联系人 — 群组只能在彼此持有对方的人之间传话。其他人也必须添加此人，之后此人才能参与。</string>
+    <string name="group_add_nobody">你认识的人都已在这个群里。</string>
+    <string name="group_create_title">新建群组</string>
+    <string name="group_create_note">从联系人中选择。群组至少需要三个人（包括你）— 两个人的话，你们已经有一段对话了。</string>
+    <string name="group_name_label">名称</string>
+    <string name="group_create_button">创建</string>
+    <string name="group_mesh_incomplete">你可以读，但不能发：这里还有人不在你的联系人里（%1$s）。互换名片后即可参与。</string>
+    <string name="group_partial_queued">还有副本未送达 — 会自行继续重试。</string>
+    <string name="group_disclosure_title">群组是可信的人</string>
+    <string name="group_disclosure_body">每个人都必须持有其他所有人为联系人 — 在那之前你无法发送。\n\n群里任何人都能添加任何人。没有人能被移除，永远不能。\n\n今天加入的人看不到之前的内容 — 不存在可交给他的共享历史。\n\n消息无法伪造：每一条都逐人封缄传递，没人能冒充别人写话。\n\n退出只是在你的手机上隐藏群组。其他人仍保有它，也仍保有彼此。</string>
+    <string name="group_disclosure_ok">明白</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d人</item>
+        <item quantity="other">%1$d人</item>
+    </plurals>
+</resources>

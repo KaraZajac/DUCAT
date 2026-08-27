@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">그룹</string>
+    <string name="group_new">새 그룹</string>
+    <string name="group_you">나</string>
+    <string name="group_add">추가</string>
+    <string name="group_add_title">사람 추가</string>
+    <string name="group_add_note">연락처만 표시됩니다 — 그룹은 서로를 연락처로 가진 사람들 사이에서만 말을 나릅니다. 참여하려면 다른 모두도 그 사람을 추가해야 합니다.</string>
+    <string name="group_add_nobody">아는 사람 모두가 이미 이 그룹에 있습니다.</string>
+    <string name="group_create_title">새 그룹</string>
+    <string name="group_create_note">연락처에서 고르세요. 그룹은 본인 포함 최소 세 명 — 둘이면 이미 대화가 있습니다.</string>
+    <string name="group_name_label">이름</string>
+    <string name="group_create_button">만들기</string>
+    <string name="group_mesh_incomplete">읽을 수는 있지만 보낼 수 없습니다. 아직 여기 모두가 연락처에 없습니다(%1$s). 카드를 교환하면 참여할 수 있습니다.</string>
+    <string name="group_partial_queued">아직 도착하지 않은 사본이 있습니다 — 알아서 계속 시도합니다.</string>
+    <string name="group_disclosure_title">그룹은 신뢰하는 사람들입니다</string>
+    <string name="group_disclosure_body">모두가 모두를 연락처로 가져야 합니다 — 그전에는 보낼 수 없습니다.\n\n그룹의 누구든 누구든 추가할 수 있습니다. 누구도 제거될 수 없습니다.\n\n오늘 들어온 사람은 이전 것을 보지 못합니다 — 줄 수 있는 공유 기록이 없습니다.\n\n메시지는 위조할 수 없습니다. 한 통씩 봉인되어 사람에서 사람으로 가므로 누구도 남인 척 쓸 수 없습니다.\n\n나가기는 내 폰에서 그룹을 숨길 뿐입니다. 다른 사람들은 그룹도, 서로도 계속 가집니다.</string>
+    <string name="group_disclosure_ok">알겠습니다</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d명</item>
+        <item quantity="other">%1$d명</item>
+    </plurals>
+</resources>

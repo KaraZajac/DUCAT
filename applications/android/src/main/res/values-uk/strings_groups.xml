@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">Групи</string>
+    <string name="group_new">Нова група</string>
+    <string name="group_you">Ви</string>
+    <string name="group_add">Додати</string>
+    <string name="group_add_title">Додати когось</string>
+    <string name="group_add_note">Пропонуються лише ваші контакти — група несе слова тільки між людьми, які мають одне одного. Інші теж мусять додати цю людину, перш ніж вона зможе долучитися.</string>
+    <string name="group_add_nobody">Усі, кого ви знаєте, вже в цій групі.</string>
+    <string name="group_create_title">Нова група</string>
+    <string name="group_create_note">Виберіть із контактів. Групі треба щонайменше троє людей, разом із вами — удвох ви вже маєте розмову.</string>
+    <string name="group_name_label">Назва</string>
+    <string name="group_create_button">Створити</string>
+    <string name="group_mesh_incomplete">Читати можна, надсилати — ні: ви ще не тримаєте всіх тут у контактах (%1$s). Обміняйтеся картками, і зможете долучитися.</string>
+    <string name="group_partial_queued">Деякі копії ще не дійшли — вони самі спробують знову.</string>
+    <string name="group_disclosure_title">Група — це довірені люди</string>
+    <string name="group_disclosure_body">Усі мають тримати всіх у контактах — доти надсилати не можна.\n\nБудь-хто в групі може додати будь-кого. Нікого не можна вилучити, ніколи.\n\nХто доєднався сьогодні, не бачить нічого з раніше — спільної історії, щоб її дати, не існує.\n\nПовідомлення не підробити: кожне йде запечатаним від людини до людини, ніхто не може писати від чужого імені.\n\nВихід лише ховає групу на вашому телефоні. Решта зберігають її — і одне одного.</string>
+    <string name="group_disclosure_ok">Зрозуміло</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d особа</item>
+        <item quantity="other">%1$d осіб</item>
+    </plurals>
+</resources>

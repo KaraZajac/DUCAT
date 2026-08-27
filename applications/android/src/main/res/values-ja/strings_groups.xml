@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">グループ</string>
+    <string name="group_new">新しいグループ</string>
+    <string name="group_you">自分</string>
+    <string name="group_add">追加</string>
+    <string name="group_add_title">メンバーを追加</string>
+    <string name="group_add_note">表示されるのは連絡先だけです。グループは互いを連絡先に持つ人どうしの間でしか言葉を運べません。参加するには、他の全員もその人を追加する必要があります。</string>
+    <string name="group_add_nobody">知っている人は全員すでにこのグループにいます。</string>
+    <string name="group_create_title">新しいグループ</string>
+    <string name="group_create_note">連絡先から選びます。グループは自分を含めて3人以上 — 2人なら、それはもう会話です。</string>
+    <string name="group_name_label">名前</string>
+    <string name="group_create_button">作成</string>
+    <string name="group_mesh_incomplete">読むことはできますが送れません。ここの全員がまだ連絡先ではありません（%1$s）。カードを交換すれば参加できます。</string>
+    <string name="group_partial_queued">まだ届いていないコピーがあります — 自動で再送を続けます。</string>
+    <string name="group_disclosure_title">グループは信頼できる人たち</string>
+    <string name="group_disclosure_body">全員が全員を連絡先に持つ必要があります — それまでは送信できません。\n\nグループの誰でも誰でも追加できます。誰も外すことはできません。\n\n今日入った人は、それ以前を何も見られません — 渡せる共有履歴が存在しないのです。\n\nメッセージは偽造できません。一通ずつ封をして人から人へ渡るため、誰も他人として書けません。\n\n退出はあなたの端末で隠すだけです。他の人はグループも、お互いも持ち続けます。</string>
+    <string name="group_disclosure_ok">了解</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d人</item>
+        <item quantity="other">%1$d人</item>
+    </plurals>
+</resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">گروه‌ها</string>
+    <string name="group_new">گروه تازه</string>
+    <string name="group_you">شما</string>
+    <string name="group_add">افزودن</string>
+    <string name="group_add_title">افزودن کسی</string>
+    <string name="group_add_note">فقط مخاطبان شما پیشنهاد می‌شوند — گروه تنها میان کسانی که یکدیگر را دارند حرف می‌برد. بقیه هم باید او را بیفزایند تا بتواند شرکت کند.</string>
+    <string name="group_add_nobody">همهٔ کسانی که می‌شناسید همین حالا در این گروه‌اند.</string>
+    <string name="group_create_title">گروه تازه</string>
+    <string name="group_create_note">از میان مخاطبان انتخاب کنید. گروه دست‌کم سه نفر می‌خواهد، با خودتان — دو نفر که باشید، همین حالا گفت‌وگویی دارید.</string>
+    <string name="group_name_label">نام</string>
+    <string name="group_create_button">ساختن</string>
+    <string name="group_mesh_incomplete">می‌توانید بخوانید اما نمی‌توانید بفرستید: هنوز همهٔ اینجا در مخاطبان شما نیستند (%1$s). کارت رد و بدل کنید تا بتوانید شرکت کنید.</string>
+    <string name="group_partial_queued">برخی نسخه‌ها هنوز نرسیده‌اند — خودشان به تلاش ادامه می‌دهند.</string>
+    <string name="group_disclosure_title">گروه یعنی آدم‌های مورد اعتماد</string>
+    <string name="group_disclosure_body">همه باید همه را در مخاطبان داشته باشند — تا آن‌وقت نمی‌توانید بفرستید.\n\nهر کس در گروه می‌تواند هر کسی را بیفزاید. هیچ‌کس هرگز حذف نمی‌شود.\n\nکسی که امروز می‌آید چیزی از قبل نمی‌بیند — تاریخچهٔ مشترکی نیست که به او داد.\n\nپیام‌ها جعل‌شدنی نیستند: هر پیام مهروموم‌شده از شخصی به شخصی می‌رود و کسی نمی‌تواند به جای دیگری بنویسد.\n\nترک کردن فقط گروه را روی گوشی شما پنهان می‌کند. بقیه آن را — و یکدیگر را — نگه می‌دارند.</string>
+    <string name="group_disclosure_ok">فهمیدم</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d نفر</item>
+        <item quantity="other">%1$d نفر</item>
+    </plurals>
+</resources>

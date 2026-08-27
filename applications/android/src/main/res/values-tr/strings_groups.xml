@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">Gruplar</string>
+    <string name="group_new">Yeni grup</string>
+    <string name="group_you">Sen</string>
+    <string name="group_add">Ekle</string>
+    <string name="group_add_title">Birini ekle</string>
+    <string name="group_add_note">Yalnızca kişilerin sunulur — bir grup, sözleri ancak birbirini tutan insanlar arasında taşır. Katılabilmesi için diğerlerinin de onu eklemesi gerekir.</string>
+    <string name="group_add_nobody">Tanıdığın herkes zaten bu grupta.</string>
+    <string name="group_create_title">Yeni grup</string>
+    <string name="group_create_note">Kişilerinden seç. Bir grup, sen dahil en az üç kişi ister — iki kişiyle zaten bir konuşmanız var.</string>
+    <string name="group_name_label">Ad</string>
+    <string name="group_create_button">Oluştur</string>
+    <string name="group_mesh_incomplete">Okuyabilirsin ama gönderemezsin: buradaki herkes henüz kişilerinde değil (%1$s). Kart değişin, sonra katılabilirsin.</string>
+    <string name="group_partial_queued">Bazı kopyalar henüz ulaşmadı — kendi kendilerine denemeyi sürdürecekler.</string>
+    <string name="group_disclosure_title">Grup, güvenilen insanlardır</string>
+    <string name="group_disclosure_body">Herkes herkesi kişi olarak tutmalı — o zamana dek gönderemezsin.\n\nGruptaki herkes herkesi ekleyebilir. Kimse asla çıkarılamaz.\n\nBugün katılan, öncesinden hiçbir şey görmez — ona verilecek ortak bir geçmiş yok.\n\nMesajlar sahtelenemez: her biri kişiden kişiye mühürlü gider, kimse başkası adına yazamaz.\n\nAyrılmak grubu yalnızca senin telefonunda gizler. Diğerleri onu da birbirlerini de tutar.</string>
+    <string name="group_disclosure_ok">Anladım</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d kişi</item>
+        <item quantity="other">%1$d kişi</item>
+    </plurals>
+</resources>

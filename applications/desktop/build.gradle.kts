@@ -87,6 +87,11 @@ val sharedLogic = listOf(
     // compiles both of those verbatim.
     "org/ducatproject/ducat/Positions.kt",
     "org/ducatproject/ducat/ui/PositionCard.kt",
+    // §16.19: groups are fan-out over the pairwise threads both clients
+    // already share, so the store, the mesh check and the screens cross as
+    // one piece — a desk in a group is a member like any other.
+    "org/ducatproject/ducat/Groups.kt",
+    "org/ducatproject/ducat/ui/GroupChat.kt",
     "org/ducatproject/ducat/Enquiries.kt",
     "org/ducatproject/ducat/Stakes.kt",
     "org/ducatproject/ducat/Places.kt",

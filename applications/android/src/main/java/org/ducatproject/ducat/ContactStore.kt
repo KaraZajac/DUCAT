@@ -1549,6 +1549,13 @@ data class StoredMessage(
     val oob: Boolean = false,
     /** §15.12: a ride offer's distance-in-time, seconds. */
     val etaSecs: Long? = null,
+    /** §16.19: the group this message belongs to (hex), and its name there —
+     *  (sender, groupSeq). Pairwise views filter on groupId; the group view
+     *  merges across threads and dedupes by that name. */
+    val groupId: String? = null,
+    val groupSeq: Long = 0,
+    val groupReSender: String? = null,
+    val groupReSeq: Long? = null,
     /**
      * A hole the reader wrote, not a message the sender sent.
      *
@@ -1585,6 +1592,9 @@ data class StoredMessage(
         }
         taxPxmr?.let { put("tax", it) }
         etaSecs?.let { put("eta", it) }
+        groupId?.let { put("grp", it); put("gseq", groupSeq) }
+        groupReSender?.let { put("gre_s", it) }
+        groupReSeq?.let { put("gre_q", it) }
         if (deadLetter) put("dead", true)
     }
 
@@ -1623,6 +1633,10 @@ data class StoredMessage(
             } ?: emptyList(),
             taxPxmr = if (o.has("tax")) o.getLong("tax") else null,
             etaSecs = if (o.has("eta")) o.getLong("eta") else null,
+            groupId = o.optString("grp", "").ifBlank { null },
+            groupSeq = o.optLong("gseq", 0L),
+            groupReSender = o.optString("gre_s", "").ifBlank { null },
+            groupReSeq = if (o.has("gre_q")) o.getLong("gre_q") else null,
         )
     }
 }

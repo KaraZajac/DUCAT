@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">Группы</string>
+    <string name="group_new">Новая группа</string>
+    <string name="group_you">Вы</string>
+    <string name="group_add">Добавить</string>
+    <string name="group_add_title">Добавить кого-то</string>
+    <string name="group_add_note">Предлагаются только ваши контакты — группа несёт слова лишь между людьми, у которых есть друг друга. Остальные тоже должны добавить этого человека, прежде чем он сможет участвовать.</string>
+    <string name="group_add_nobody">Все, кого вы знаете, уже в этой группе.</string>
+    <string name="group_create_title">Новая группа</string>
+    <string name="group_create_note">Выберите из контактов. Группе нужно не меньше трёх человек, включая вас — вдвоём у вас уже есть разговор.</string>
+    <string name="group_name_label">Название</string>
+    <string name="group_create_button">Создать</string>
+    <string name="group_mesh_incomplete">Читать можно, отправлять нельзя: у вас ещё не все здесь в контактах (%1$s). Обменяйтесь карточками — и сможете участвовать.</string>
+    <string name="group_partial_queued">Некоторые копии ещё не дошли — они продолжат попытки сами.</string>
+    <string name="group_disclosure_title">Группа — это доверенные люди</string>
+    <string name="group_disclosure_body">Все должны держать всех в контактах — до этого отправлять нельзя.\n\nЛюбой в группе может добавить любого. Удалить никого нельзя, никогда.\n\nКто вошёл сегодня, не видит ничего из прошлого — общей истории, чтобы её дать, не существует.\n\nСообщения нельзя подделать: каждое идёт запечатанным от человека к человеку, никто не может писать от чужого имени.\n\nВыход лишь скрывает группу на вашем телефоне. Остальные сохраняют её — и друг друга.</string>
+    <string name="group_disclosure_ok">Понятно</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d человек</item>
+        <item quantity="other">%1$d чел.</item>
+    </plurals>
+</resources>

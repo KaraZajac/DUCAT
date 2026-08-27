@@ -859,7 +859,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             // reader.
             // Hoisted, because a message needs to know what sits either side
             // of it to know whether it is part of a run.
-            val shown = messages.filter { it.kind !in setOf(4, 8, 9, 10, 11) }
+            // Group traffic lives in the group's own screen: a pairwise view
+            // showing fan-out copies would show every group in every thread.
+            val shown = messages.filter { it.kind !in setOf(4, 8, 9, 10, 11, 12) && it.groupId == null }
             itemsIndexed(shown) { at, m ->
                 // A run is consecutive plain messages from the same side,
                 // close together in time. Only kind 0: a bill, a payment or a

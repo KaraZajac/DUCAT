@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">Grupy</string>
+    <string name="group_new">Nowa grupa</string>
+    <string name="group_you">Ty</string>
+    <string name="group_add">Dodaj</string>
+    <string name="group_add_title">Dodaj kogoś</string>
+    <string name="group_add_note">Oferowane są tylko twoje kontakty — grupa niesie słowa wyłącznie między ludźmi, którzy mają siebie nawzajem. Pozostali też muszą dodać tę osobę, zanim będzie mogła się włączyć.</string>
+    <string name="group_add_nobody">Wszyscy, których znasz, już są w tej grupie.</string>
+    <string name="group_create_title">Nowa grupa</string>
+    <string name="group_create_note">Wybierz z kontaktów. Grupa wymaga co najmniej trojga ludzi, z tobą włącznie — we dwoje macie już rozmowę.</string>
+    <string name="group_name_label">Nazwa</string>
+    <string name="group_create_button">Utwórz</string>
+    <string name="group_mesh_incomplete">Możesz czytać, ale nie wysyłać: nie masz jeszcze wszystkich tutaj w kontaktach (%1$s). Wymieńcie się kartami, wtedy się włączysz.</string>
+    <string name="group_partial_queued">Niektóre kopie jeszcze nie dotarły — będą próbować dalej same.</string>
+    <string name="group_disclosure_title">Grupa to zaufani ludzie</string>
+    <string name="group_disclosure_body">Wszyscy muszą mieć wszystkich w kontaktach — do tego czasu nie wyślesz.\n\nKażdy w grupie może dodać każdego. Nikogo nie da się usunąć, nigdy.\n\nKto dołączył dziś, nie widzi niczego sprzed — nie ma wspólnej historii do przekazania.\n\nWiadomości nie da się podrobić: każda wędruje zapieczętowana od osoby do osoby, nikt nie napisze jako ktoś inny.\n\nWyjście tylko ukrywa grupę na twoim telefonie. Reszta ją zachowuje — i siebie nawzajem.</string>
+    <string name="group_disclosure_ok">Rozumiem</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d osoba</item>
+        <item quantity="other">%1$d osób</item>
+    </plurals>
+</resources>

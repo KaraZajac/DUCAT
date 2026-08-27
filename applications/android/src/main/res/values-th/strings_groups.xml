@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">กลุ่ม</string>
+    <string name="group_new">กลุ่มใหม่</string>
+    <string name="group_you">คุณ</string>
+    <string name="group_add">เพิ่ม</string>
+    <string name="group_add_title">เพิ่มสมาชิก</string>
+    <string name="group_add_note">แสดงเฉพาะรายชื่อติดต่อของคุณ — กลุ่มส่งคำพูดได้เฉพาะระหว่างคนที่มีกันและกัน คนอื่น ๆ ต้องเพิ่มเขาด้วยก่อนเขาจึงจะร่วมได้</string>
+    <string name="group_add_nobody">ทุกคนที่คุณรู้จักอยู่ในกลุ่มนี้แล้ว</string>
+    <string name="group_create_title">กลุ่มใหม่</string>
+    <string name="group_create_note">เลือกจากรายชื่อติดต่อ กลุ่มต้องมีอย่างน้อยสามคนรวมคุณ — สองคนก็คือบทสนทนาอยู่แล้ว</string>
+    <string name="group_name_label">ชื่อ</string>
+    <string name="group_create_button">สร้าง</string>
+    <string name="group_mesh_incomplete">อ่านได้แต่ยังส่งไม่ได้: ยังมีคนที่นี่ที่ไม่อยู่ในรายชื่อติดต่อของคุณ (%1$s) แลกการ์ดกันก่อน แล้วคุณจะร่วมได้</string>
+    <string name="group_partial_queued">บางสำเนายังไปไม่ถึง — ระบบจะลองต่อเอง</string>
+    <string name="group_disclosure_title">กลุ่มคือคนที่ไว้ใจ</string>
+    <string name="group_disclosure_body">ทุกคนต้องมีทุกคนในรายชื่อติดต่อ — ก่อนนั้นคุณส่งไม่ได้\n\nใครในกลุ่มก็เพิ่มใครก็ได้ ไม่มีใครถูกลบได้ ตลอดไป\n\nคนที่เข้าวันนี้ไม่เห็นของก่อนหน้า — ไม่มีประวัติร่วมที่จะมอบให้\n\nข้อความปลอมไม่ได้: แต่ละข้อความถูกผนึกส่งคนถึงคน ไม่มีใครเขียนแทนใครได้\n\nการออกเพียงซ่อนกลุ่มบนเครื่องคุณ คนอื่นยังคงมีกลุ่ม และมีกันและกัน</string>
+    <string name="group_disclosure_ok">เข้าใจแล้ว</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d คน</item>
+        <item quantity="other">%1$d คน</item>
+    </plurals>
+</resources>

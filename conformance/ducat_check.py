@@ -955,6 +955,11 @@ MSG_ATT_RECORD, MSG_ATT_KEY, MSG_ATT_NONCE = 194, 195, 196
 MSG_ATT_LEN, MSG_ATT_HASH, MSG_ATT_MIME, MSG_ATT_NAME = 197, 198, 199, 200
 # §15.12 — the live-position reference (kind 11): record + stream key.
 MSG_POS_RECORD, MSG_POS_STREAM = 218, 219
+# §16.19 — small groups: the group, the sender's own counter in it, and the
+# group reference (target's sender + their counter). The pairwise seq cannot
+# name a group message: the fanned-out copies land at different seqs.
+MSG_GROUP_ID, MSG_GROUP_SEQ = 253, 254
+MSG_GROUP_RE_SENDER, MSG_GROUP_RE_SEQ = 255, 256
 HEAD_BUNDLE = 177
 HEAD_READ, HEAD_RING = 201, 202
 # HAIL_NOTICE (§16.17) — the one object on a public surface.
@@ -1687,7 +1692,7 @@ def parse_message(buf):
             raise Reject("Malformed", "kind is not an integer")
         if kind == 0:
             raise Reject("Malformed", "text is encoded by omitting the kind")
-        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11):
+        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12):
             raise Reject("Malformed", "unknown message kind")
     else:
         kind = 0
@@ -1720,6 +1725,15 @@ def parse_message(buf):
 
     # §16.14 — reactions.
     out["re_seq"] = b.pop(MSG_RE_SEQ, (None, None))[1]
+    # §16.19 — groups.
+    out["group_id"] = b.pop(MSG_GROUP_ID, (None, None))[1]
+    out["group_seq"] = b.pop(MSG_GROUP_SEQ, (None, None))[1]
+    out["group_re_sender"] = b.pop(MSG_GROUP_RE_SENDER, (None, None))[1]
+    out["group_re_seq"] = b.pop(MSG_GROUP_RE_SEQ, (None, None))[1]
+    if out["group_id"] is not None and len(out["group_id"]) != 16:
+        raise Reject("Malformed", "a group id is 16 bytes")
+    if out["group_re_sender"] is not None and len(out["group_re_sender"]) != 32:
+        raise Reject("Malformed", "a group reference names a persona key")
     out["eta"] = b.pop(MSG_ETA, (None, None))[1]
     out["payload"] = b.pop(MSG_PAYLOAD, (None, None))[1]
     out["round"] = b.pop(MSG_ROUND, (None, None))[1]
@@ -1780,7 +1794,7 @@ def parse_message(buf):
     # A FROST round (9) is the exception: a release proposal MAY state the
     # amount the funder gets back — the consent screen shows it beside the
     # signed payload (§15.12's settlement); a statement, not authority.
-    if kind in (0, 4, 5, 8, 10) and out["amount"] is not None:
+    if kind in (0, 4, 5, 8, 10, 12) and out["amount"] is not None:
         raise Reject("Malformed", "this kind must not carry an amount")
     if kind in (1, 2, 3) and out["amount"] is None:
         raise Reject("Malformed", "a payment message must carry an amount")
@@ -1797,8 +1811,31 @@ def parse_message(buf):
     if out["payto"] is not None and kind != 1:
         raise Reject("Malformed", "only a request names where to pay")
 
+    # §16.19: group fields travel together, and only where a group can.
+    if (out["group_id"] is None) != (out["group_seq"] is None):
+        raise Reject("Malformed", "group id and counter travel together")
+    if (out["group_re_sender"] is None) != (out["group_re_seq"] is None):
+        raise Reject("Malformed", "a group reference names a sender and their counter together")
+    if out["group_re_sender"] is not None and out["group_id"] is None:
+        raise Reject("Malformed", "a group reference rides only a group message")
+    if out["group_id"] is not None:
+        # Words, remarks about words, withdrawals of words, and the roster.
+        # Money stays pairwise; the ride and ceremony kinds are two-party by
+        # construction.
+        if kind not in (0, 4, 5, 12):
+            raise Reject("Malformed", "this kind does not travel in a group")
+        # One meaning, one encoding: the pairwise sequence names a slot in one
+        # thread out of the N a group message fans into.
+        if out["re_seq"] is not None or out["re_own"]:
+            raise Reject("Malformed", "a group targets by group reference")
+    if kind == 12:
+        if out["group_id"] is None:
+            raise Reject("Malformed", "a roster names its group")
+        if out["group_re_sender"] is not None:
+            raise Reject("Malformed", "a roster does not target another message")
+
     if kind == 4:
-        if out["re_seq"] is None:
+        if out["re_seq"] is None and out["group_re_seq"] is None:
             raise Reject("Malformed", "a reaction names the message it is about")
         if len(out["body"]) > 16:
             raise Reject("Malformed", "a reaction's body is the emoji, not a message")
@@ -1806,8 +1843,9 @@ def parse_message(buf):
             raise Reject("Malformed", "a reaction carries no money and no attachment")
     elif kind in (5, 7):
         # A retract or an accept names its target; an accept answers the
-        # *counterparty's* offer, never the sender's own.
-        if out["re_seq"] is None:
+        # *counterparty's* offer, never the sender's own. A retract inside a
+        # group names it by group reference instead.
+        if out["re_seq"] is None and out["group_re_seq"] is None:
             raise Reject("Malformed", "a retract or an accept names the message it answers")
         if kind == 7 and out["re_own"]:
             raise Reject("Malformed", "an accept answers the counterparty's offer")
@@ -1853,6 +1891,15 @@ def parse_message(buf):
             raise Reject("Malformed", "an abort names the ceremony it ends")
         if out["payload"] is not None:
             raise Reject("Malformed", "an abort withdraws a ceremony; it carries no round payload")
+    elif kind == 12:
+        # §16.19: the member list rides the payload, bounded like a ceremony
+        # round's; the ceremony's own fields stay off it.
+        if not out["payload"]:
+            raise Reject("Malformed", "a roster carries its member list")
+        if len(out["payload"]) > MAX_ATTACHMENT_BYTES:
+            raise Reject("Malformed", "a roster is bounded like an attachment")
+        if out["round"] is not None or out["ceremony"] is not None:
+            raise Reject("Malformed", "a roster is not a ceremony round")
     elif out["payload"] is not None or out["round"] is not None or out["ceremony"] is not None:
         raise Reject("Malformed", "only a ceremony message carries ceremony fields")
     # Tax only alongside items, so an itemisation is always arithmetic the
@@ -2097,6 +2144,14 @@ def run_message_payment(cases, r):
                 fields.append((MSG_ROUND, ("uint", m["round"])))
             if m.get("ceremony") is not None:
                 fields.append((MSG_CEREMONY, ("bytes", m["ceremony"])))
+            if m.get("group_id") is not None:
+                fields.append((MSG_GROUP_ID, ("bytes", m["group_id"])))
+            if m.get("group_seq") is not None:
+                fields.append((MSG_GROUP_SEQ, ("uint", m["group_seq"])))
+            if m.get("group_re_sender") is not None:
+                fields.append((MSG_GROUP_RE_SENDER, ("bytes", m["group_re_sender"])))
+            if m.get("group_re_seq") is not None:
+                fields.append((MSG_GROUP_RE_SEQ, ("uint", m["group_re_seq"])))
             a = m["attachment"]
             if a is not None:
                 fields.append((MSG_ATT_RECORD, ("text", a["record"])))

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">Groupes</string>
+    <string name="group_new">Nouveau groupe</string>
+    <string name="group_you">Vous</string>
+    <string name="group_add">Ajouter</string>
+    <string name="group_add_title">Ajouter quelqu’un</string>
+    <string name="group_add_note">Seuls vos contacts sont proposés — un groupe ne porte des mots qu’entre des personnes qui se tiennent mutuellement. Les autres doivent aussi l’ajouter avant qu’elle puisse participer.</string>
+    <string name="group_add_nobody">Tous vos contacts sont déjà dans ce groupe.</string>
+    <string name="group_create_title">Nouveau groupe</string>
+    <string name="group_create_note">Choisissez parmi vos contacts. Un groupe demande au moins trois personnes, vous compris — à deux, vous avez déjà une conversation.</string>
+    <string name="group_name_label">Nom</string>
+    <string name="group_create_button">Créer</string>
+    <string name="group_mesh_incomplete">Vous pouvez lire, mais pas envoyer : vous ne tenez pas encore tout le monde ici comme contact (%1$s). Échangez vos cartes, puis vous pourrez participer.</string>
+    <string name="group_partial_queued">Certaines copies ne sont pas encore arrivées — elles réessaieront toutes seules.</string>
+    <string name="group_disclosure_title">Un groupe, ce sont des gens de confiance</string>
+    <string name="group_disclosure_body">Chacun doit tenir chacun comme contact — impossible d’envoyer avant.\n\nN’importe qui dans le groupe peut ajouter n’importe qui. Personne ne peut être retiré, jamais.\n\nQui arrive aujourd’hui ne voit rien d’avant — il n’existe aucun historique commun à lui donner.\n\nLes messages ne peuvent pas être contrefaits : chacun voyage scellé de personne à personne, nul ne peut écrire au nom d’un autre.\n\nPartir ne fait que cacher le groupe sur votre téléphone. Les autres le gardent, et se gardent entre eux.</string>
+    <string name="group_disclosure_ok">Compris</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d personne</item>
+        <item quantity="other">%1$d personnes</item>
+    </plurals>
+</resources>

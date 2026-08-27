@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">Nhóm</string>
+    <string name="group_new">Nhóm mới</string>
+    <string name="group_you">Bạn</string>
+    <string name="group_add">Thêm</string>
+    <string name="group_add_title">Thêm người</string>
+    <string name="group_add_note">Chỉ danh bạ của bạn được đưa ra — nhóm chỉ chuyển lời giữa những người giữ nhau trong danh bạ. Những người khác cũng phải thêm người đó thì họ mới tham gia được.</string>
+    <string name="group_add_nobody">Mọi người bạn quen đều đã ở trong nhóm này.</string>
+    <string name="group_create_title">Nhóm mới</string>
+    <string name="group_create_note">Chọn từ danh bạ. Nhóm cần ít nhất ba người, kể cả bạn — hai người thì đã là một cuộc trò chuyện rồi.</string>
+    <string name="group_name_label">Tên</string>
+    <string name="group_create_button">Tạo</string>
+    <string name="group_mesh_incomplete">Bạn đọc được nhưng chưa gửi được: chưa phải ai ở đây cũng trong danh bạ của bạn (%1$s). Trao đổi thẻ, rồi bạn sẽ tham gia được.</string>
+    <string name="group_partial_queued">Một số bản sao chưa tới — chúng sẽ tự tiếp tục thử.</string>
+    <string name="group_disclosure_title">Nhóm là những người tin cậy</string>
+    <string name="group_disclosure_body">Mọi người phải giữ mọi người trong danh bạ — trước đó bạn không gửi được.\n\nAi trong nhóm cũng thêm được bất kỳ ai. Không ai có thể bị xoá, mãi mãi.\n\nNgười vào hôm nay không thấy gì của trước đó — không tồn tại lịch sử chung để trao.\n\nTin nhắn không thể giả mạo: từng tin đi niêm phong người-tới-người, không ai viết thay được ai.\n\nRời nhóm chỉ ẩn nó trên máy bạn. Những người còn lại vẫn giữ nhóm, và giữ nhau.</string>
+    <string name="group_disclosure_ok">Đã hiểu</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d người</item>
+        <item quantity="other">%1$d người</item>
+    </plurals>
+</resources>

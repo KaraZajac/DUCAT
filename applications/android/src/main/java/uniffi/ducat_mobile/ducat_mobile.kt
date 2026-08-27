@@ -927,6 +927,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1011,6 +1015,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_geohashencode(`latE7`: Long,`lonE7`: Long,`precision`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_geohashneighbors(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_group_roster_decode(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_group_roster_encode(`name`: RustBuffer.ByValue,`members`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_hail_decode(`bytes`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`tipHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1132,7 +1140,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`beaconHeight`: Long,`beaconHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,`positionRecord`: RustBuffer.ByValue,`positionStreamKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,`positionRecord`: RustBuffer.ByValue,`positionStreamKey`: RustBuffer.ByValue,`groupId`: RustBuffer.ByValue,`groupSeq`: RustBuffer.ByValue,`groupReSender`: RustBuffer.ByValue,`groupReSeq`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1339,6 +1347,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_geohashencode(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_geohashneighbors(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_group_roster_decode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_group_roster_encode(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_hail_decode(
     ): Short
@@ -1608,6 +1620,12 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_geohashneighbors() != 18841.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_group_roster_decode() != 7284.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_group_roster_encode() != 61959.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_hail_decode() != 34700.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1788,7 +1806,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 60190.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 18584.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 2630.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
@@ -2817,6 +2835,45 @@ public object FfiConverterTypeFrostProposal: FfiConverterRustBuffer<FrostProposa
 
 
 /**
+ * A group roster as it crosses the bridge (§16.19).
+ */
+data class GroupRosterOut (
+    var `name`: kotlin.String, 
+    /**
+     * Every member's persona key, 32 bytes each. Grow-only: a reader merges
+     * by union and never removes.
+     */
+    var `members`: List<kotlin.ByteArray>
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeGroupRosterOut: FfiConverterRustBuffer<GroupRosterOut> {
+    override fun read(buf: ByteBuffer): GroupRosterOut {
+        return GroupRosterOut(
+            FfiConverterString.read(buf),
+            FfiConverterSequenceByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: GroupRosterOut) = (
+            FfiConverterString.allocationSize(value.`name`) +
+            FfiConverterSequenceByteArray.allocationSize(value.`members`)
+    )
+
+    override fun write(value: GroupRosterOut, buf: ByteBuffer) {
+            FfiConverterString.write(value.`name`, buf)
+            FfiConverterSequenceByteArray.write(value.`members`, buf)
+    }
+}
+
+
+
+/**
  * A hail notice (§16.17), for the app's rider and driver screens.
  */
 data class HailInfo (
@@ -3319,7 +3376,14 @@ data class OpenedMessage (
     /**
      * §15.12: a live-position stream reference. Present only on kind 11.
      */
-    var `position`: PositionRefOut?
+    var `position`: PositionRefOut?, 
+    /**
+     * §16.19: the group this message belongs to, and its name there.
+     */
+    var `groupId`: kotlin.ByteArray?, 
+    var `groupSeq`: kotlin.ULong?, 
+    var `groupReSender`: kotlin.ByteArray?, 
+    var `groupReSeq`: kotlin.ULong?
 ) {
     
     companion object
@@ -3351,6 +3415,10 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalTypePositionRefOut.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalULong.read(buf),
         )
     }
 
@@ -3374,7 +3442,11 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalByteArray.allocationSize(value.`payload`) +
             FfiConverterOptionalULong.allocationSize(value.`round`) +
             FfiConverterOptionalByteArray.allocationSize(value.`ceremonyId`) +
-            FfiConverterOptionalTypePositionRefOut.allocationSize(value.`position`)
+            FfiConverterOptionalTypePositionRefOut.allocationSize(value.`position`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`groupId`) +
+            FfiConverterOptionalULong.allocationSize(value.`groupSeq`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`groupReSender`) +
+            FfiConverterOptionalULong.allocationSize(value.`groupReSeq`)
     )
 
     override fun write(value: OpenedMessage, buf: ByteBuffer) {
@@ -3398,6 +3470,10 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.write(value.`round`, buf)
             FfiConverterOptionalByteArray.write(value.`ceremonyId`, buf)
             FfiConverterOptionalTypePositionRefOut.write(value.`position`, buf)
+            FfiConverterOptionalByteArray.write(value.`groupId`, buf)
+            FfiConverterOptionalULong.write(value.`groupSeq`, buf)
+            FfiConverterOptionalByteArray.write(value.`groupReSender`, buf)
+            FfiConverterOptionalULong.write(value.`groupReSeq`, buf)
     }
 }
 
@@ -6694,6 +6770,35 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     
 
         /**
+         * Decode a roster payload. Strict on shape, tolerant of nothing: a roster
+         * that does not parse is a roster nobody should act on.
+         */
+    @Throws(ContactException::class) fun `groupRosterDecode`(`bytes`: kotlin.ByteArray): GroupRosterOut {
+            return FfiConverterTypeGroupRosterOut.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_group_roster_decode(
+        FfiConverterByteArray.lower(`bytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Encode a roster payload (§16.19): canonical CBOR, one shape both sides of
+         * the wire produce byte-for-byte, which is what lets a future vector pin it.
+         * Field 1 the name, field 2 the members.
+         */
+    @Throws(ContactException::class) fun `groupRosterEncode`(`name`: kotlin.String, `members`: List<kotlin.ByteArray>): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_group_roster_encode(
+        FfiConverterString.lower(`name`),FfiConverterSequenceByteArray.lower(`members`),_status)
+}
+    )
+    }
+    
+
+        /**
          * The hail's half of the same thing — see [`rental_decode`].
          */
     @Throws(ContactException::class) fun `hailDecode`(`bytes`: kotlin.ByteArray, `board`: kotlin.String, `subkey`: kotlin.UInt, `tipHeight`: kotlin.ULong): HailInfo {
@@ -7672,11 +7777,11 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
         /**
          * Seal one message in a thread.
          */
-    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?, `positionRecord`: kotlin.String?, `positionStreamKey`: kotlin.ByteArray?): SealedOut {
+    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?, `positionRecord`: kotlin.String?, `positionStreamKey`: kotlin.ByteArray?, `groupId`: kotlin.ByteArray?, `groupSeq`: kotlin.ULong?, `groupReSender`: kotlin.ByteArray?, `groupReSeq`: kotlin.ULong?): SealedOut {
             return FfiConverterTypeSealedOut.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
-        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),FfiConverterOptionalString.lower(`positionRecord`),FfiConverterOptionalByteArray.lower(`positionStreamKey`),_status)
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),FfiConverterOptionalString.lower(`positionRecord`),FfiConverterOptionalByteArray.lower(`positionStreamKey`),FfiConverterOptionalByteArray.lower(`groupId`),FfiConverterOptionalULong.lower(`groupSeq`),FfiConverterOptionalByteArray.lower(`groupReSender`),FfiConverterOptionalULong.lower(`groupReSeq`),_status)
 }
     )
     }

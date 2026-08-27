@@ -290,6 +290,21 @@ pub mod f {
     pub const HN_BEACON_HEIGHT: u64 = 251;
     pub const HN_BEACON_HASH: u64 = 252;
 
+    // Small groups (§16.19). A group message is identified by its sender and
+    // its own counter, never by a pairwise thread sequence — the same body is
+    // fanned out into N threads and lands at a different seq in each, so the
+    // pairwise number is meaningless the moment a second recipient exists.
+    /// Which group this message belongs to: 16 random bytes, minted at
+    /// creation.
+    pub const MSG_GROUP_ID: u64 = 253;
+    /// The sender's own counter within the group.
+    pub const MSG_GROUP_SEQ: u64 = 254;
+    /// A reference to another group message: the persona of its sender…
+    pub const MSG_GROUP_RE_SENDER: u64 = 255;
+    /// …and that sender's group counter for it. Together they are the one
+    /// name a group message has that every member can resolve.
+    pub const MSG_GROUP_RE_SEQ: u64 = 256;
+
     // PREKEY_BUNDLE (§16.11)
     pub const PKB_SIGNED: u64 = 161;
     pub const PKB_ONETIME: u64 = 162;

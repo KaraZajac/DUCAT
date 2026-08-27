@@ -589,6 +589,13 @@ pub fn seal_message(
     // kind.
     position_record: Option<String>,
     position_stream_key: Option<Vec<u8>>,
+    // §16.19: which group this rides in, the sender's own counter there, and
+    // the group reference for replies/reactions — the pairwise re_seq cannot
+    // name a fanned-out message, so groups target by (sender, counter).
+    group_id: Option<Vec<u8>>,
+    group_seq: Option<u64>,
+    group_re_sender: Option<Vec<u8>>,
+    group_re_seq: Option<u64>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -635,6 +642,7 @@ pub fn seal_message(
             9 => MessageKind::FrostRound,
             10 => MessageKind::CeremonyAbort,
             11 => MessageKind::PositionRef,
+            12 => MessageKind::GroupRoster,
             _ => MessageKind::Text,
         },
         amount_pxmr,
@@ -665,6 +673,10 @@ pub fn seal_message(
             name: a.name,
         }),
         position,
+        group_id,
+        group_seq,
+        group_re_sender,
+        group_re_seq,
     };
     // A message this encoder produces must be one its own decoder accepts —
     // otherwise the malformation ships sealed, and it is the *recipient's*
@@ -799,6 +811,11 @@ pub struct OpenedMessage {
     pub ceremony_id: Option<Vec<u8>>,
     /// §15.12: a live-position stream reference. Present only on kind 11.
     pub position: Option<PositionRefOut>,
+    /// §16.19: the group this message belongs to, and its name there.
+    pub group_id: Option<Vec<u8>>,
+    pub group_seq: Option<u64>,
+    pub group_re_sender: Option<Vec<u8>>,
+    pub group_re_seq: Option<u64>,
 }
 
 /// A live-position stream reference as it crosses the bridge (§15.12).
@@ -806,6 +823,70 @@ pub struct OpenedMessage {
 pub struct PositionRefOut {
     pub record_key: String,
     pub stream_key: Vec<u8>,
+}
+
+/// A group roster as it crosses the bridge (§16.19).
+#[derive(uniffi::Record, Clone)]
+pub struct GroupRosterOut {
+    pub name: String,
+    /// Every member's persona key, 32 bytes each. Grow-only: a reader merges
+    /// by union and never removes.
+    pub members: Vec<Vec<u8>>,
+}
+
+/// Encode a roster payload (§16.19): canonical CBOR, one shape both sides of
+/// the wire produce byte-for-byte, which is what lets a future vector pin it.
+/// Field 1 the name, field 2 the members.
+#[uniffi::export]
+pub fn group_roster_encode(
+    name: String,
+    members: Vec<Vec<u8>>,
+) -> Result<Vec<u8>, ContactError> {
+    use ducat_core::cbor::Value;
+    if members.is_empty() {
+        return Err(ContactError::Refused("a roster with nobody in it is not one".into()));
+    }
+    for m in &members {
+        if m.len() != 32 {
+            return Err(ContactError::Refused("a member is a 32-byte persona key".into()));
+        }
+    }
+    let mut map = std::collections::BTreeMap::new();
+    map.insert(1u64, Value::Text(name));
+    map.insert(
+        2u64,
+        Value::Array(members.into_iter().map(Value::Bytes).collect()),
+    );
+    Ok(Value::Map(map).encode())
+}
+
+/// Decode a roster payload. Strict on shape, tolerant of nothing: a roster
+/// that does not parse is a roster nobody should act on.
+#[uniffi::export]
+pub fn group_roster_decode(bytes: Vec<u8>) -> Result<GroupRosterOut, ContactError> {
+    use ducat_core::cbor::Value;
+    let v = decode(&bytes).map_err(refuse)?;
+    let Value::Map(m) = v else {
+        return Err(ContactError::Refused("a roster is a map".into()));
+    };
+    let name = match m.get(&1) {
+        Some(Value::Text(t)) => t.clone(),
+        _ => return Err(ContactError::Refused("a roster names its group".into())),
+    };
+    let members = match m.get(&2) {
+        Some(Value::Array(a)) => a
+            .iter()
+            .map(|e| match e {
+                Value::Bytes(b) if b.len() == 32 => Ok(b.clone()),
+                _ => Err(ContactError::Refused("a member is a 32-byte persona key".into())),
+            })
+            .collect::<Result<Vec<_>, _>>()?,
+        _ => return Err(ContactError::Refused("a roster carries its member list".into())),
+    };
+    if members.is_empty() {
+        return Err(ContactError::Refused("a roster with nobody in it is not one".into()));
+    }
+    Ok(GroupRosterOut { name, members })
 }
 
 /// Open an inbound sealed message and check it follows the thread.
@@ -893,6 +974,10 @@ pub fn open_message(
             mime: a.mime.clone(),
             name: a.name.clone(),
         }),
+        group_id: msg.group_id.clone(),
+        group_seq: msg.group_seq,
+        group_re_sender: msg.group_re_sender.clone(),
+        group_re_seq: msg.group_re_seq,
         position: msg.position.as_ref().map(|p| PositionRefOut {
             record_key: p.record_key.clone(),
             stream_key: p.stream_key.to_vec(),

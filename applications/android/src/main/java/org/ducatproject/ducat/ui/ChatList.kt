@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,6 +54,23 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     LaunchedEffect(version) { all = store.all() }
     var sheet by remember { mutableStateOf<Sheet?>(null) }
     var confirm by remember { mutableStateOf<Contact?>(null) }
+    // §16.19: the groups, above the pairwise threads they fan into.
+    val groups = remember(version) { org.ducatproject.ducat.Groups.all(context) }
+    var openGroup by rememberSaveable { mutableStateOf<String?>(null) }
+    var newGroup by remember { mutableStateOf(false) }
+
+    val og = openGroup
+    if (og != null) {
+        GroupChatScreen(idHex = og, onBack = { openGroup = null })
+        return
+    }
+    if (newGroup) {
+        GroupCreateScreen(
+            onDone = { made -> newGroup = false; openGroup = made },
+            onCancel = { newGroup = false },
+        )
+        return
+    }
 
     // Most recent conversation first — the list's order *is* its meaning, and
     // "who did I talk to last" is the question it answers. Threads that have
@@ -62,7 +81,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
             // the protocol wrote. Calling off an escrow sends a kind 10, and
             // that alone lifted a dormant arbiter to the top of the list
             // above conversations with actual sentences in them.
-            store.thread(c.personaHex).lastOrNull { it.kind !in CEREMONY_KINDS }?.timestamp ?: 0L
+            store.thread(c.personaHex).lastOrNull { it.kind !in CEREMONY_KINDS && it.groupId == null }?.timestamp ?: 0L
         }
     }
     Column(Modifier.fillMaxSize()) {
@@ -84,6 +103,47 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.chatlist_new_chat))
             }
+        }
+        // Groups, each by name with its size. Rendered above the threads they
+        // fan into so the two lists cannot be confused for one.
+        if (groups.isNotEmpty() || ContactStore(context).all().size >= 2) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    stringResource(R.string.group_section),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.weight(1f))
+                TextButton(onClick = { newGroup = true }) {
+                    Text(stringResource(R.string.group_new))
+                }
+            }
+            groups.forEach { g ->
+                ListItem(
+                    modifier = Modifier.clickable { openGroup = g.idHex },
+                    colors = ListItemDefaults.colors(
+                        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                    ),
+                    leadingContent = { Avatar(g.name, null) },
+                    headlineContent = { Text(isolate(g.name)) },
+                    supportingContent = {
+                        Text(
+                            pluralStringResource(
+                                R.plurals.group_members, g.members.size, g.members.size,
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                )
+            }
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant,
+                modifier = Modifier.padding(vertical = 4.dp),
+            )
         }
 
         if (shown.isEmpty()) {
@@ -120,7 +180,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     // name — the one ceremony message a *person* sends, and
                     // the one that therefore reaches the list.
                     val last = remember(c.personaHex, all) {
-                        store.thread(c.personaHex).lastOrNull { it.kind !in CEREMONY_KINDS }
+                        store.thread(c.personaHex).lastOrNull { it.kind !in CEREMONY_KINDS && it.groupId == null }
                     }
                     val unread = c.inSeq > store.chatSeen(c.personaHex)
                     ListItem(
@@ -375,7 +435,7 @@ internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
  * set out of the thread itself; here it keeps them out of the preview line
  * and out of the order the list is sorted in.
  */
-private val CEREMONY_KINDS = setOf(8, 9, 10, 11)
+private val CEREMONY_KINDS = setOf(8, 9, 10, 11, 12)
 
 /** What one message looks like from a list away (§16.13's kinds included). */
 internal fun previewOf(context: Context, m: StoredMessage): String = when {

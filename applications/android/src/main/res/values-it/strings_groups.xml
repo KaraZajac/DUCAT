@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">Gruppi</string>
+    <string name="group_new">Nuovo gruppo</string>
+    <string name="group_you">Tu</string>
+    <string name="group_add">Aggiungi</string>
+    <string name="group_add_title">Aggiungi qualcuno</string>
+    <string name="group_add_note">Vengono offerti solo i tuoi contatti: un gruppo porta parole solo tra persone che si tengono a vicenda. Anche gli altri devono aggiungerla prima che possa partecipare.</string>
+    <string name="group_add_nobody">Tutti quelli che conosci sono già in questo gruppo.</string>
+    <string name="group_create_title">Nuovo gruppo</string>
+    <string name="group_create_note">Scegli tra i tuoi contatti. Un gruppo richiede almeno tre persone, te compreso: in due, avete già una conversazione.</string>
+    <string name="group_name_label">Nome</string>
+    <string name="group_create_button">Crea</string>
+    <string name="group_mesh_incomplete">Puoi leggere, ma non inviare: non tieni ancora tutti come contatti (%1$s). Scambiatevi le schede, poi potrai partecipare.</string>
+    <string name="group_partial_queued">Alcune copie non sono ancora arrivate: continueranno a riprovare da sole.</string>
+    <string name="group_disclosure_title">Un gruppo è gente fidata</string>
+    <string name="group_disclosure_body">Tutti devono tenere tutti come contatto: fino ad allora non puoi inviare.\n\nChiunque nel gruppo può aggiungere chiunque. Nessuno può essere rimosso, mai.\n\nChi entra oggi non vede nulla di prima: non c’è una storia condivisa da dargli.\n\nI messaggi non si possono falsificare: ognuno viaggia sigillato da persona a persona, nessuno può scrivere come un altro.\n\nUscire nasconde il gruppo solo sul tuo telefono. Gli altri lo conservano, e si conservano a vicenda.</string>
+    <string name="group_disclosure_ok">Capito</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d persona</item>
+        <item quantity="other">%1$d persone</item>
+    </plurals>
+</resources>

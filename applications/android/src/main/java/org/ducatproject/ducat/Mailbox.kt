@@ -605,6 +605,12 @@ object Mailbox {
          *  Both or neither — the bridge refuses a half. */
         positionRecord: String? = null,
         positionStreamKey: ByteArray? = null,
+        /** §16.19: which group this rides in, the sender's own counter there,
+         *  and the group reference — see Groups for who mints these. */
+        groupId: ByteArray? = null,
+        groupSeq: Long? = null,
+        groupReSender: ByteArray? = null,
+        groupReSeq: Long? = null,
     ): Contact {
         val store = ContactStore(context)
         // **The caller's copy of this contact is a snapshot, and counters move.**
@@ -662,6 +668,7 @@ object Mailbox {
             etaSecs?.toULong(),
             payload, round?.toULong(), ceremonyId,
             positionRecord, positionStreamKey,
+            groupId, groupSeq?.toULong(), groupReSender, groupReSeq?.toULong(),
         )
         // Everything local lands before anything remote. The failure orders
         // are not symmetric: a published slot and head with the counter lost
@@ -684,6 +691,10 @@ object Mailbox {
                 attMime = attachment?.mime, attName = attachment?.name,
                 oob = oob,
                 etaSecs = etaSecs,
+                groupId = groupId?.toHexString(),
+                groupSeq = groupSeq ?: 0L,
+                groupReSender = groupReSender?.toHexString(),
+                groupReSeq = groupReSeq,
                 // Not yet. The write is three lines below, and until it lands
                 // this row is a message that has not left the phone — which
                 // looked identical to one that had.
@@ -1598,6 +1609,10 @@ object Mailbox {
                 attHash = opened.attachment?.ctHash?.toHexString(),
                 attMime = opened.attachment?.mime,
                 attName = opened.attachment?.name,
+                groupId = opened.groupId?.toHexString(),
+                groupSeq = opened.groupSeq?.toLong() ?: 0L,
+                groupReSender = opened.groupReSender?.toHexString(),
+                groupReSeq = opened.groupReSeq?.toLong(),
             )
             // The one funnel every arrival passes through, so the notification
             // cannot be forgotten by a new screen: if it was stored, it was
@@ -1640,6 +1655,15 @@ object Mailbox {
                         Ceremony.onAbort(context, it.toHexString(), c.personaHex)
                     }
                 }.onFailure { DucatLog.w(TAG, "ceremony abort: ${it.message}") }
+            }
+            // §16.19: the membership, stated — or grown. Groups.absorbRoster
+            // holds the admission rule (an update to a known group is taken
+            // only from an existing member), so a stranger who learned the id
+            // cannot add themselves by sending us a roster.
+            if (arrived.kind == 12) {
+                runCatching {
+                    Groups.absorbRoster(context, c.personaHex, opened.groupId, opened.payload)
+                }.onFailure { DucatLog.w(TAG, "group roster: ${it.message}") }
             }
             // §15.12: a live-position stream offered. **Only after an accept.**
             //

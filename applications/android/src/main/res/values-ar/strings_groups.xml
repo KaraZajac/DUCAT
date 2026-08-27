@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">المجموعات</string>
+    <string name="group_new">مجموعة جديدة</string>
+    <string name="group_you">أنت</string>
+    <string name="group_add">إضافة</string>
+    <string name="group_add_title">إضافة شخص</string>
+    <string name="group_add_note">لا تُعرض إلا جهات اتصالك — المجموعة لا تحمل الكلام إلا بين أناس يحمل بعضهم بعضًا. وعلى البقية إضافته أيضًا قبل أن يشارك.</string>
+    <string name="group_add_nobody">كل من تعرفهم موجودون في هذه المجموعة.</string>
+    <string name="group_create_title">مجموعة جديدة</string>
+    <string name="group_create_note">اختر من جهات اتصالك. تحتاج المجموعة إلى ثلاثة أشخاص على الأقل بمن فيهم أنت — فباثنين لديك محادثة أصلًا.</string>
+    <string name="group_name_label">الاسم</string>
+    <string name="group_create_button">إنشاء</string>
+    <string name="group_mesh_incomplete">يمكنك القراءة لا الإرسال: لم تُضِف الجميع هنا بعد (%1$s). تبادلوا البطاقات ثم يمكنك المشاركة.</string>
+    <string name="group_partial_queued">بعض النسخ لم تصل بعد — ستواصل المحاولة من تلقاء نفسها.</string>
+    <string name="group_disclosure_title">المجموعة أناس موثوقون</string>
+    <string name="group_disclosure_body">على الجميع أن يحمل الجميع كجهة اتصال — قبل ذلك لا يمكنك الإرسال.\n\nأي عضو يستطيع إضافة أي أحد. ولا يمكن إزالة أحد أبدًا.\n\nمن ينضم اليوم لا يرى شيئًا مما سبق — فلا يوجد سجل مشترك يُعطى له.\n\nلا يمكن تزوير الرسائل: كل رسالة تسافر مختومة من شخص إلى شخص، فلا أحد يكتب باسم غيره.\n\nالمغادرة تخفي المجموعة على هاتفك فقط. الآخرون يحتفظون بها وببعضهم.</string>
+    <string name="group_disclosure_ok">فهمت</string>
+    <plurals name="group_members">
+        <item quantity="one">شخص %1$d</item>
+        <item quantity="other">‏%1$d أشخاص</item>
+    </plurals>
+</resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">Grup</string>
+    <string name="group_new">Grup baru</string>
+    <string name="group_you">Anda</string>
+    <string name="group_add">Tambah</string>
+    <string name="group_add_title">Tambahkan seseorang</string>
+    <string name="group_add_note">Hanya kontak Anda yang ditawarkan — grup hanya membawa kata di antara orang yang saling memegang. Yang lain juga harus menambahkannya sebelum ia bisa ikut.</string>
+    <string name="group_add_nobody">Semua yang Anda kenal sudah ada di grup ini.</string>
+    <string name="group_create_title">Grup baru</string>
+    <string name="group_create_note">Pilih dari kontak. Grup butuh sedikitnya tiga orang, termasuk Anda — berdua, Anda sudah punya percakapan.</string>
+    <string name="group_name_label">Nama</string>
+    <string name="group_create_button">Buat</string>
+    <string name="group_mesh_incomplete">Anda bisa membaca, tapi tidak mengirim: belum semua di sini ada di kontak Anda (%1$s). Bertukarlah kartu, lalu Anda bisa ikut.</string>
+    <string name="group_partial_queued">Sebagian salinan belum sampai — akan terus mencoba sendiri.</string>
+    <string name="group_disclosure_title">Grup adalah orang tepercaya</string>
+    <string name="group_disclosure_body">Semua harus memegang semua sebagai kontak — sebelum itu Anda tak bisa mengirim.\n\nSiapa pun di grup bisa menambahkan siapa pun. Tak seorang pun bisa dikeluarkan, selamanya.\n\nYang masuk hari ini tak melihat apa pun dari sebelumnya — tak ada riwayat bersama untuk diberikan.\n\nPesan tak bisa dipalsukan: tiap pesan berjalan tersegel orang-ke-orang, tak ada yang bisa menulis atas nama orang lain.\n\nKeluar hanya menyembunyikan grup di ponsel Anda. Yang lain tetap memilikinya, dan saling memiliki.</string>
+    <string name="group_disclosure_ok">Mengerti</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d orang</item>
+        <item quantity="other">%1$d orang</item>
+    </plurals>
+</resources>

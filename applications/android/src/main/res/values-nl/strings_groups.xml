@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">Groepen</string>
+    <string name="group_new">Nieuwe groep</string>
+    <string name="group_you">Jij</string>
+    <string name="group_add">Toevoegen</string>
+    <string name="group_add_title">Iemand toevoegen</string>
+    <string name="group_add_note">Alleen je contacten worden aangeboden — een groep draagt woorden alleen tussen mensen die elkaar hebben. De anderen moeten deze persoon ook toevoegen voordat die kan meedoen.</string>
+    <string name="group_add_nobody">Iedereen die je kent zit al in deze groep.</string>
+    <string name="group_create_title">Nieuwe groep</string>
+    <string name="group_create_note">Kies uit je contacten. Een groep vraagt minstens drie mensen, jij meegerekend — met z’n tweeën heb je al een gesprek.</string>
+    <string name="group_name_label">Naam</string>
+    <string name="group_create_button">Aanmaken</string>
+    <string name="group_mesh_incomplete">Je kunt lezen, maar niet sturen: je hebt nog niet iedereen hier als contact (%1$s). Wissel kaarten uit, dan kun je meedoen.</string>
+    <string name="group_partial_queued">Sommige kopieën zijn nog niet geland — ze blijven het vanzelf proberen.</string>
+    <string name="group_disclosure_title">Een groep is vertrouwde mensen</string>
+    <string name="group_disclosure_body">Iedereen moet iedereen als contact hebben — tot die tijd kun je niets sturen.\n\nIedereen in de groep kan iedereen toevoegen. Niemand kan ooit worden verwijderd.\n\nWie vandaag toetreedt ziet niets van eerder — er is geen gedeelde geschiedenis om te geven.\n\nBerichten zijn niet te vervalsen: elk reist verzegeld van persoon tot persoon, niemand kan schrijven als een ander.\n\nVertrekken verbergt de groep alleen op jouw telefoon. De anderen houden hem, en elkaar.</string>
+    <string name="group_disclosure_ok">Begrepen</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d persoon</item>
+        <item quantity="other">%1$d personen</item>
+    </plurals>
+</resources>

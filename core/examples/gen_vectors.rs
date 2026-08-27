@@ -1467,9 +1467,9 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None };
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
         v.push(json!({
@@ -1514,7 +1514,7 @@ fn contact_cases() -> Vec<J> {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1_700_000_000,
         kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
-        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None,
+        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
     };
     money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
     money("payment_sent",
@@ -1681,6 +1681,53 @@ fn contact_cases() -> Vec<J> {
         &Message { kind: MessageKind::RideOffer, amount_pxmr: Some(1), re_seq: Some(1), ..base_pay.clone() },
         Some((RejectCode::Malformed, "this kind does not target another")));
 
+    // §16.19 — small groups over pairwise threads.
+    let in_group = Message {
+        kind: MessageKind::Text, body: "who's bringing the ladder?".into(),
+        amount_pxmr: None,
+        group_id: Some(vec![0xAB; 16]), group_seq: Some(4),
+        ..base_pay.clone()
+    };
+    money("group_text",
+        "A word to the group: the same sealed body fans out into every member's pairwise thread, marked with the group and the sender's own counter — (sender, group_seq) is the one name every member can resolve, because the pairwise sequence differs in every thread the copy lands in.",
+        &in_group, None);
+    money("group_reply",
+        "A reply inside a group names its target by the group reference — the sender's persona and their counter — never by thread sequence, which names a slot in one thread out of N.",
+        &Message { body: "the tall one".into(), group_re_sender: Some(vec![0xCD; 32]), group_re_seq: Some(2), ..in_group.clone() },
+        None);
+    money("group_reaction",
+        "An emoji about a group message, targeted the same way. The pairwise re_seq stays forbidden here: one meaning, one encoding (§18.1).",
+        &Message { kind: MessageKind::Reaction, body: "🔥".into(), group_re_sender: Some(vec![0xCD; 32]), group_re_seq: Some(2), ..in_group.clone() },
+        None);
+    money("group_roster",
+        "The membership, stated: the member list rides the payload, opaque at this layer like a ceremony round's. The creator's first roster is the invitation, and a member who adds someone sends the grown set to everyone — rosters only grow, so every view converges by union in any order.",
+        &Message { kind: MessageKind::GroupRoster, body: "roster".into(), payload: Some(vec![0xEE; 40]), ..in_group.clone() },
+        None);
+    money("group_id_without_counter",
+        "The group and the sender's counter travel together or not at all: a group message with no counter has no name any member can refer to.",
+        &Message { group_seq: None, ..in_group.clone() },
+        Some((RejectCode::Malformed, "group id and counter travel together")));
+    money("group_ref_outside_group",
+        "A group reference on a pairwise message points into a room the thread is not in.",
+        &Message { kind: MessageKind::Text, amount_pxmr: None, group_re_sender: Some(vec![0xCD; 32]), group_re_seq: Some(2), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "a group reference rides only a group message")));
+    money("thread_seq_in_group",
+        "In a group the pairwise sequence is meaningless — the same message sits at a different seq in every thread it fanned into — so carrying one is refused rather than quietly misread.",
+        &Message { re_seq: Some(1), ..in_group.clone() },
+        Some((RejectCode::Malformed, "a group targets by group reference")));
+    money("bill_in_group",
+        "Money stays pairwise: a bill to a group is N debts wearing one number, and every settlement rail — requests, receipts, escrow — is pairwise or a ceremony.",
+        &Message { kind: MessageKind::PaymentRequest, amount_pxmr: Some(120_000_000_000), payto: Some("5ApJU8bf".into()), ..in_group.clone() },
+        Some((RejectCode::Malformed, "this kind does not travel in a group")));
+    money("roster_without_group",
+        "A roster names its group; one that does not is a member list of nowhere.",
+        &Message { kind: MessageKind::GroupRoster, body: "roster".into(), amount_pxmr: None, payload: Some(vec![0xEE; 40]), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "a roster names its group")));
+    money("roster_without_members",
+        "A roster with no payload states no membership at all.",
+        &Message { kind: MessageKind::GroupRoster, body: "roster".into(), payload: None, ..in_group.clone() },
+        Some((RejectCode::Malformed, "a roster carries its member list")));
+
     // §16.15 — attachments.
     let att = Attachment {
         record_key: KEY.into(),
@@ -1803,7 +1850,7 @@ fn contact_cases() -> Vec<J> {
         Some((RejectCode::Malformed, "only a position message carries a stream reference")));
     money("position_kind_without_a_reference",
         "A PositionRef whose reference is absent hands over nothing.",
-        &Message { kind: MessageKind::PositionRef, position: None,
+        &Message { kind: MessageKind::PositionRef, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
                    body: "empty".into(), ..base_pay.clone() },
         Some((RejectCode::Malformed, "a position message carries a reference to the stream")));
     // The half-reference cannot be built from the struct (both fields or none),

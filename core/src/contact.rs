@@ -684,6 +684,13 @@ pub enum MessageKind {
     /// a *now* with no past — so this message only hands over the pointer.
     /// MUST NOT be sent before a `RideAccept` exists in the thread.
     PositionRef = 11,
+    /// A group's member list (§16.19), carried in `payload`: the group id,
+    /// its name, and every member's persona. The creator's first roster *is*
+    /// the invitation; a member adding someone sends the grown set to
+    /// everyone including the newcomer. Rosters only grow — removal would
+    /// need a consensus a peer-to-peer group cannot have, so the set is
+    /// grow-only and every view converges by union, in any order.
+    GroupRoster = 12,
 }
 
 impl MessageKind {
@@ -701,6 +708,7 @@ impl MessageKind {
             9 => MessageKind::FrostRound,
             10 => MessageKind::CeremonyAbort,
             11 => MessageKind::PositionRef,
+            12 => MessageKind::GroupRoster,
             _ => return None,
         })
     }
@@ -824,6 +832,19 @@ pub struct Message {
     /// A live-position stream, by reference (§15.12). Present only on a
     /// `PositionRef`.
     pub position: Option<PositionRef>,
+    /// §16.19: which group this message belongs to — 16 random bytes minted
+    /// at creation. Present with [`Self::group_seq`] or not at all.
+    pub group_id: Option<Vec<u8>>,
+    /// The sender's own counter within the group. (sender, group_seq) is the
+    /// one name a group message has that every member can resolve: the same
+    /// body fans out into N pairwise threads and takes a different thread
+    /// sequence in each, so `seq` stops naming anything shared.
+    pub group_seq: Option<u64>,
+    /// A reference to another group message: its sender's persona…
+    pub group_re_sender: Option<Vec<u8>>,
+    /// …and that sender's group counter. The group's own re_seq — the
+    /// pairwise one is meaningless here (see [`Self::group_seq`]).
+    pub group_re_seq: Option<u64>,
 }
 
 /// The pointer to a live-position stream (§15.12).
@@ -919,6 +940,18 @@ impl Message {
         if let Some(c) = &self.ceremony_id {
             m.insert(f::MSG_CEREMONY, Value::Bytes(c.to_vec()));
         }
+        if let Some(g) = &self.group_id {
+            m.insert(f::MSG_GROUP_ID, Value::Bytes(g.clone()));
+        }
+        if let Some(g) = self.group_seq {
+            m.insert(f::MSG_GROUP_SEQ, Value::Uint(g));
+        }
+        if let Some(g) = &self.group_re_sender {
+            m.insert(f::MSG_GROUP_RE_SENDER, Value::Bytes(g.clone()));
+        }
+        if let Some(g) = self.group_re_seq {
+            m.insert(f::MSG_GROUP_RE_SEQ, Value::Uint(g));
+        }
         if let Some(a) = &self.attachment {
             m.insert(f::MSG_ATT_RECORD, Value::Text(a.record_key.clone()));
             m.insert(f::MSG_ATT_KEY, Value::Bytes(a.key.to_vec()));
@@ -993,6 +1026,12 @@ impl Message {
                     .collect::<Result<Vec<_>, _>>()?,
             },
             tax_pxmr: r.opt_uint(f::MSG_TAX)?,
+            group_id: r.opt_bytes(f::MSG_GROUP_ID, Some(16))?.map(|b| b.to_vec()),
+            group_seq: r.opt_uint(f::MSG_GROUP_SEQ)?,
+            group_re_sender: r
+                .opt_bytes(f::MSG_GROUP_RE_SENDER, Some(32))?
+                .map(|b| b.to_vec()),
+            group_re_seq: r.opt_uint(f::MSG_GROUP_RE_SEQ)?,
             re_seq: r.opt_uint(f::MSG_RE_SEQ)?,
             eta_secs: r.opt_uint(f::MSG_ETA)?,
             payload: r.opt_bytes(f::MSG_PAYLOAD, None)?.map(|b| b.to_vec()),
@@ -1092,7 +1131,8 @@ impl Message {
             (MessageKind::Text, Some(_))
             | (MessageKind::Retract, Some(_))
             | (MessageKind::DkgRound, Some(_))
-            | (MessageKind::CeremonyAbort, Some(_)) => {
+            | (MessageKind::CeremonyAbort, Some(_))
+            | (MessageKind::GroupRoster, Some(_)) => {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "this message kind must not carry an amount",
@@ -1163,9 +1203,72 @@ impl Message {
                 "tax needs items to be tax on",
             ));
         }
+        // §16.19: group fields travel together, and only where a group can.
+        if out.group_id.is_some() != out.group_seq.is_some() {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a group message carries its group and its own counter together",
+            ));
+        }
+        if out.group_re_sender.is_some() != out.group_re_seq.is_some() {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a group reference names a sender and their counter together",
+            ));
+        }
+        if out.group_re_sender.is_some() && out.group_id.is_none() {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a group reference rides only a group message",
+            ));
+        }
+        if out.group_id.is_some() {
+            // Words, remarks about words, withdrawals of words, and the
+            // roster. Money stays pairwise: a bill "to a group" is N debts
+            // wearing one number, and every settlement rail here — requests,
+            // receipts, escrow — is pairwise or a ceremony. RideOffer and the
+            // ceremony kinds are two-party by construction.
+            if !matches!(
+                out.kind,
+                MessageKind::Text
+                    | MessageKind::Reaction
+                    | MessageKind::Retract
+                    | MessageKind::GroupRoster
+            ) {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "this kind of message does not travel in a group",
+                ));
+            }
+            // One meaning, one encoding (§18.1): in a group the target is the
+            // group reference, because the pairwise sequence names a slot in
+            // one thread and the same fanned-out message sits at a different
+            // slot in every other.
+            if out.re_seq.is_some() || out.re_own {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a group message targets by group reference, not thread sequence",
+                ));
+            }
+        }
+        if out.kind == MessageKind::GroupRoster {
+            if out.group_id.is_none() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a roster names its group",
+                ));
+            }
+            // A roster answers nothing; it is the membership, stated.
+            if out.group_re_sender.is_some() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a roster does not target another message",
+                ));
+            }
+        }
         // §16.14: a reaction is an emoji about a message, and nothing else.
         if out.kind == MessageKind::Reaction {
-            if out.re_seq.is_none() {
+            if out.re_seq.is_none() && out.group_re_seq.is_none() {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "a reaction names the message it is about",
@@ -1184,7 +1287,7 @@ impl Message {
                 ));
             }
         } else if matches!(out.kind, MessageKind::Retract | MessageKind::RideAccept) {
-            if out.re_seq.is_none() {
+            if out.re_seq.is_none() && out.group_re_seq.is_none() {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "a retract or an accept names the message it answers",
@@ -1306,6 +1409,30 @@ impl Message {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "an abort withdraws a ceremony; it carries no round payload",
+                ));
+            }
+        } else if out.kind == MessageKind::GroupRoster {
+            // §16.19: the member list rides the payload — it is structure,
+            // not prose — bounded like a ceremony round's, and the ceremony's
+            // own fields stay off it: a roster is not a round.
+            if out.payload.as_ref().map(|p| p.is_empty()).unwrap_or(true) {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a roster carries its member list",
+                ));
+            }
+            if let Some(p) = &out.payload {
+                if p.len() as u64 > MAX_ATTACHMENT_BYTES {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        "a roster is bounded like an attachment",
+                    ));
+                }
+            }
+            if out.round.is_some() || out.ceremony_id.is_some() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a roster is not a ceremony round",
                 ));
             }
         } else if out.payload.is_some() || out.round.is_some() || out.ceremony_id.is_some() {
@@ -2336,6 +2463,8 @@ mod position_ref_tests {
                 record_key: "VLD0:positionrecord".into(),
                 stream_key: [0x5au8; 32],
             }),
+            group_id: None, group_seq: None,
+            group_re_sender: None, group_re_seq: None,
         }
     }
 

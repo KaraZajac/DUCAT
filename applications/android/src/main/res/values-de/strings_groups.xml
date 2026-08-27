@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">Gruppen</string>
+    <string name="group_new">Neue Gruppe</string>
+    <string name="group_you">Du</string>
+    <string name="group_add">Hinzufügen</string>
+    <string name="group_add_title">Jemanden hinzufügen</string>
+    <string name="group_add_note">Angeboten werden nur deine Kontakte — eine Gruppe trägt Worte nur zwischen Menschen, die einander halten. Alle anderen müssen die Person ebenfalls hinzufügen, bevor sie mitreden kann.</string>
+    <string name="group_add_nobody">Alle, die du kennst, sind schon in dieser Gruppe.</string>
+    <string name="group_create_title">Neue Gruppe</string>
+    <string name="group_create_note">Wähle aus deinen Kontakten. Eine Gruppe braucht mindestens drei Personen, dich eingeschlossen — mit zweien hast du bereits ein Gespräch.</string>
+    <string name="group_name_label">Name</string>
+    <string name="group_create_button">Erstellen</string>
+    <string name="group_mesh_incomplete">Du kannst lesen, aber nicht schreiben: du hältst noch nicht alle hier als Kontakt (%1$s). Tauscht Karten, dann kannst du mitreden.</string>
+    <string name="group_partial_queued">Einige Kopien sind noch nicht angekommen — sie versuchen es von selbst weiter.</string>
+    <string name="group_disclosure_title">Eine Gruppe ist Vertrauenssache</string>
+    <string name="group_disclosure_body">Alle müssen alle als Kontakt halten — vorher kannst du nichts senden.\n\nJeder in der Gruppe kann jeden hinzufügen. Niemand kann je entfernt werden.\n\nWer heute dazukommt, sieht nichts von vorher — es gibt keine gemeinsame Geschichte, die man ihm geben könnte.\n\nNachrichten lassen sich nicht fälschen: jede reist versiegelt von Person zu Person, niemand kann als jemand anderes schreiben.\n\nVerlassen versteckt die Gruppe nur auf deinem Telefon. Die anderen behalten sie, und einander.</string>
+    <string name="group_disclosure_ok">Verstanden</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d Person</item>
+        <item quantity="other">%1$d Personen</item>
+    </plurals>
+</resources>

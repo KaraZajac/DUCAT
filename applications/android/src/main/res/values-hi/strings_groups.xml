@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small groups (§16.19): the list rows, the create screen, the mesh
+     gate, and the one-time disclosure of the shape. -->
+<resources>
+    <string name="group_section">समूह</string>
+    <string name="group_new">नया समूह</string>
+    <string name="group_you">आप</string>
+    <string name="group_add">जोड़ें</string>
+    <string name="group_add_title">किसी को जोड़ें</string>
+    <string name="group_add_note">सिर्फ़ आपके संपर्क दिखते हैं — समूह शब्द उन्हीं के बीच ले जाता है जो एक-दूसरे को रखते हैं। बाक़ी सबको भी उसे जोड़ना होगा, तभी वह शामिल हो पाएगा।</string>
+    <string name="group_add_nobody">आपके सारे परिचित पहले से इस समूह में हैं।</string>
+    <string name="group_create_title">नया समूह</string>
+    <string name="group_create_note">संपर्कों में से चुनें। समूह को कम से कम तीन लोग चाहिए, आप समेत — दो में तो बातचीत पहले से है।</string>
+    <string name="group_name_label">नाम</string>
+    <string name="group_create_button">बनाएँ</string>
+    <string name="group_mesh_incomplete">आप पढ़ सकते हैं, भेज नहीं सकते: यहाँ के सब लोग अभी आपके संपर्क में नहीं हैं (%1$s)। कार्ड बदलें, फिर शामिल हो सकेंगे।</string>
+    <string name="group_partial_queued">कुछ प्रतियाँ अभी नहीं पहुँचीं — वे अपने आप कोशिश करती रहेंगी।</string>
+    <string name="group_disclosure_title">समूह भरोसेमंद लोगों का होता है</string>
+    <string name="group_disclosure_body">सबको सबको संपर्क में रखना होगा — तब तक आप भेज नहीं सकते।\n\nसमूह में कोई भी किसी को जोड़ सकता है। किसी को कभी हटाया नहीं जा सकता।\n\nजो आज जुड़ा, उसे पहले का कुछ नहीं दिखता — देने को कोई साझा इतिहास है ही नहीं।\n\nसंदेश जाली नहीं बन सकते: हर संदेश सील होकर आदमी-से-आदमी जाता है, कोई किसी और के नाम से नहीं लिख सकता।\n\nछोड़ना बस आपके फ़ोन पर समूह छिपाता है। बाक़ी उसे भी रखते हैं, एक-दूसरे को भी।</string>
+    <string name="group_disclosure_ok">समझ गया</string>
+    <plurals name="group_members">
+        <item quantity="one">%1$d व्यक्ति</item>
+        <item quantity="other">%1$d लोग</item>
+    </plurals>
+</resources>

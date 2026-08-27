@@ -294,6 +294,11 @@ class Poller(private val context: Context) {
                 // it. Here rather than on a screen, because the bound must
                 // hold with the phone in a pocket — which is exactly when a
                 // stream left running would be worst.
+                // §16.19: group copies that did not land, replayed until they
+                // do — the queue is what makes "reached everyone" true late
+                // rather than false forever.
+                runCatching { Groups.retryOutbox(context) }
+                    .onFailure { DucatLog.w(TAG, "group retry: ${it.message}") }
                 runCatching { Positions.enforceBounds(context) }
                     .onFailure { DucatLog.w(TAG, "position stop: ${it.message}") }
 
