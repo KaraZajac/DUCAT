@@ -67,6 +67,8 @@
     <string name="pay_node_unreachable">无法连接到任何 Monero 节点。什么都没有发送——请检查网络后重试。</string>
     <string name="board_unverified_note">无法连接任何 Monero 节点，所以这里显示的内容未能与链核对。它仍然经过签名并已付费——只是请像对待未经核实的板一样多加留意。</string>
     <string name="board_needs_a_block">无法连接任何 Monero 节点。上板的内容会以一个近期区块盖章，所以现在还发不出去——请检查网络后重试。</string>
+    <string name="pay_sending_why">正在构建交易。大约需要一分钟 — 钱包正在收集用来掩盖哪些币属于你的诱饵。你可以离开这个界面，它不会停下。</string>
+    <string name="pay_sending_to">给 %1$s</string>
     <string name="claim_own_card">那是你自己的名片 — 它属于这台设备。</string>
     <string name="pay_already_paid">你已经向该托管付过款了。钱已存入，没有重复发送。</string>
     <string name="pay_rate_line">按 1 XMR = %1$s %2$s 换算</string>

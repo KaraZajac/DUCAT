@@ -67,6 +67,8 @@
     <string name="pay_node_unreachable">Hiçbir Monero düğümüne ulaşılamadı. Hiçbir şey gönderilmedi — bağlantını kontrol edip tekrar dene.</string>
     <string name="board_unverified_note">Ulaşılabilir bir Monero düğümü yok; burada gösterilenler zincire karşı doğrulanamadı. Yine de imzalı ve bedeli ödenmiş — sadece doğrulanmamış bir panoya gösterdiğin özenle yaklaş.</string>
     <string name="board_needs_a_block">Hiçbir Monero düğümüne ulaşılamadı. Panoya çıkan her şey yakın tarihli bir blokla damgalanır, bu yüzden şimdilik yayınlanamıyor — bağlantını kontrol edip yeniden dene.</string>
+    <string name="pay_sending_why">İşlem oluşturuluyor. Bu yaklaşık bir dakika sürer — cüzdan, hangi paraların sizin olduğunu gizleyen sahte çıktıları topluyor. Bu ekrandan çıkabilirsiniz; işlem durmaz.</string>
+    <string name="pay_sending_to">%1$s adlı kişiye</string>
     <string name="claim_own_card">Bu kart sizin — bu cihaza ait.</string>
     <string name="pay_already_paid">Bu emanete zaten ödeme yaptın. Paran içeride; tekrar gönderilmedi.</string>
     <string name="pay_rate_line">1 XMR = %1$s %2$s kuruyla</string>

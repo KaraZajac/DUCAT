@@ -892,6 +892,15 @@ private fun AmountStep(
             Spacer(Modifier.height(12.dp))
             Text(it, color = MaterialTheme.ducat.settled)
         }
+        // The minute the money is in flight, on the whole screen rather than
+        // inside a button. The paid splash is this same object resolving, so
+        // one becomes the other without the eye losing what it was following.
+        if (busy && pxmr != null && paidPxmr == null) {
+            SendingSplash(
+                amountPxmr = pxmr,
+                toName = (target as? PayTarget.ToContact)?.contact?.displayName(),
+            )
+        }
         paidPxmr?.let { amt ->
             PaidSplash(
                 amountPxmr = amt,

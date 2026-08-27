@@ -67,6 +67,8 @@
     <string name="pay_node_unreachable">Aucun nœud Monero n\'a répondu. Rien n\'a été envoyé — vérifiez votre connexion et réessayez.</string>
     <string name="board_unverified_note">Aucun nœud Monero n’est joignable : ce qui s’affiche ici n’a pas pu être vérifié contre la chaîne. C’est toujours signé et payé — traitez-le simplement avec la prudence due à un tableau non vérifié.</string>
     <string name="board_needs_a_block">Aucun nœud Monero joignable. Ce qui va sur un tableau est estampillé sur un bloc récent : cela ne peut donc pas encore être publié — vérifiez votre connexion et réessayez.</string>
+    <string name="pay_sending_why">Construction de la transaction. Cela prend environ une minute : le portefeuille rassemble les leurres qui cachent quelles pièces sont les vôtres. Vous pouvez quitter cet écran, cela continue.</string>
+    <string name="pay_sending_to">à %1$s</string>
     <string name="claim_own_card">Cette carte est la vôtre — elle appartient à cet appareil.</string>
     <string name="pay_already_paid">Vous avez déjà payé dans ce séquestre. Votre argent y est ; rien n\'a été envoyé de nouveau.</string>
     <string name="pay_rate_line">Converti à 1 XMR = %1$s %2$s</string>

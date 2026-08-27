@@ -67,6 +67,8 @@
     <string name="pay_node_unreachable">Geen enkele Monero-node reageerde. Er is niets verzonden — controleer je verbinding en probeer opnieuw.</string>
     <string name="board_unverified_note">Geen Monero-node bereikbaar, dus wat hier staat kon niet tegen de chain worden gecontroleerd. Het is nog steeds ondertekend en betaald — behandel het alleen met de voorzichtigheid van een ongeverifieerd bord.</string>
     <string name="board_needs_a_block">Geen Monero-node bereikbaar. Wat op een bord komt, wordt gestempeld op een recent blok, dus dit kan er nog niet op — controleer je verbinding en probeer het opnieuw.</string>
+    <string name="pay_sending_why">De transactie wordt opgebouwd. Dit duurt ongeveer een minuut — de portemonnee verzamelt de lokmunten die verbergen welke munten van jou zijn. Je mag dit scherm verlaten; het stopt niet.</string>
+    <string name="pay_sending_to">naar %1$s</string>
     <string name="claim_own_card">Die kaart is je eigen — hij hoort bij dit apparaat.</string>
     <string name="pay_already_paid">Je hebt al in deze escrow betaald. Je geld staat erin; er is niets opnieuw verzonden.</string>
     <string name="pay_rate_line">Omgerekend tegen 1 XMR = %1$s %2$s</string>

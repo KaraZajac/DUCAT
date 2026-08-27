@@ -67,6 +67,8 @@
     <string name="pay_node_unreachable">Không liên hệ được nút Monero nào. Chưa gửi gì cả — hãy kiểm tra kết nối và thử lại.</string>
     <string name="board_unverified_note">Không liên hệ được nút Monero nào, nên nội dung hiển thị ở đây chưa được đối chiếu với chuỗi. Nó vẫn được ký và trả phí — chỉ cần xem xét thận trọng như với một bảng tin chưa xác minh.</string>
     <string name="board_needs_a_block">Không liên hệ được nút Monero nào. Thứ lên bảng tin được đóng dấu theo một khối gần đây, nên hiện chưa thể đăng — hãy kiểm tra kết nối rồi thử lại.</string>
+    <string name="pay_sending_why">Đang dựng giao dịch. Việc này mất khoảng một phút — ví đang thu thập các mồi nhử che giấu đồng nào là của bạn. Bạn có thể rời màn hình này; nó không dừng lại.</string>
+    <string name="pay_sending_to">tới %1$s</string>
     <string name="claim_own_card">Thẻ đó là của chính bạn — nó thuộc về thiết bị này.</string>
     <string name="pay_already_paid">Bạn đã thanh toán vào ký quỹ này rồi. Tiền đã vào; không gửi lại lần nữa.</string>
     <string name="pay_rate_line">Quy đổi theo 1 XMR = %1$s %2$s</string>

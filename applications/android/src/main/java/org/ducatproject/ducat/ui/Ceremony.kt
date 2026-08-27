@@ -1,8 +1,16 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.Spring
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,6 +28,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -160,6 +171,159 @@ fun BillScreen(
                         color = MaterialTheme.colorScheme.outline,
                     )
                 }
+            }
+        }
+    }
+}
+
+/**
+ * The minute the money is in flight.
+ *
+ * Building a Monero transaction is not quick: the wallet pulls decoys for
+ * every input it spends — the better part of ten megabytes — then signs and
+ * broadcasts, and on a phone that is the better part of a minute. All of it
+ * used to happen behind a sixteen-density-pixel spinner inside a button, on
+ * the screen where somebody has just agreed to send money they cannot get
+ * back. The comment beside it said "the few seconds this covers", and it is
+ * not a few seconds.
+ *
+ * So: the same object [PaidSplash] resolves into, held in its unresolved
+ * state. The coin goes round the cat because that is the thing that is
+ * happening, and it is the app's own mark rather than a borrowed spinner.
+ *
+ * **No progress bar, deliberately.** The phases are real — tip, decoys, fee,
+ * sign, publish — but they live inside one FFI call and this side cannot see
+ * them, so any bar drawn here would be a picture of a guess. A screen that
+ * invents its own certainty about money is the exact habit the rest of this
+ * app spends its time removing. It says what is true instead: roughly how
+ * long, why, and that leaving does not stop it.
+ */
+@Composable
+fun SendingSplash(amountPxmr: Long, toName: String?) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val spin = rememberInfiniteTransition(label = "sending")
+    // Slow. A fast orbit reads as agitation, and the honest feeling of this
+    // minute is patience.
+    val angle by spin.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3400, easing = LinearEasing),
+        ),
+        label = "orbit",
+    )
+    // The cat breathes. One moving thing would look mechanical; two moving at
+    // unrelated rates look alive, and nothing here is trying to say anything
+    // by it.
+    val breath by spin.animateFloat(
+        initialValue = 0.97f,
+        targetValue = 1.03f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2100, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "breath",
+    )
+    Dialog(
+        // Not dismissible: the transaction is already being built, and a
+        // screen that can be waved away suggests the thing behind it can be.
+        onDismissRequest = {},
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+        ),
+    ) {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+            Column(
+                Modifier.fillMaxSize().padding(horizontal = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                val track = MaterialTheme.colorScheme.outlineVariant
+                val trail = MaterialTheme.colorScheme.primary
+                Box(Modifier.size(220.dp), contentAlignment = Alignment.Center) {
+                    // The track, and the coin's wake on it.
+                    //
+                    // The track alone was scenery nobody could see, and a coin
+                    // moving against a plain field reads as a dot that has
+                    // been repositioned rather than one that is travelling.
+                    // The wake is what makes it motion: a short arc behind the
+                    // coin, fading out, so a still frame already says which way
+                    // it is going.
+                    Canvas(Modifier.size(180.dp)) {
+                        val w = 3.dp.toPx()
+                        drawArc(
+                            color = track,
+                            startAngle = 0f,
+                            sweepAngle = 360f,
+                            useCenter = false,
+                            style = Stroke(width = 1.dp.toPx()),
+                        )
+                        // Compose measures arcs from three o'clock; the coin
+                        // hangs at twelve. The -90 is that quarter turn.
+                        val head = angle - 90f
+                        val steps = 18
+                        repeat(steps) { k ->
+                            val f = k.toFloat() / steps
+                            drawArc(
+                                color = trail.copy(alpha = 0.30f * f * f),
+                                startAngle = head - 62f + 62f * f,
+                                sweepAngle = 62f / steps + 0.6f,
+                                useCenter = false,
+                                style = Stroke(width = w, cap = StrokeCap.Round),
+                            )
+                        }
+                    }
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        tonalElevation = 3.dp,
+                        modifier = Modifier.size(140.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Image(
+                                painterResource(R.drawable.ducat_cat),
+                                contentDescription = null,
+                                modifier = Modifier.size(104.dp).scale(breath),
+                            )
+                        }
+                    }
+                    // Rotate the whole frame and hang the coin off its edge:
+                    // the coin turns with it, which is what a coin rolling
+                    // round a track would do anyway.
+                    Box(
+                        Modifier
+                            .size(180.dp)
+                            .graphicsLayer { rotationZ = angle },
+                        contentAlignment = Alignment.TopCenter,
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.ic_ducat_coin),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(30.dp).offset(y = (-15).dp),
+                        )
+                    }
+                }
+                Spacer(Modifier.height(28.dp))
+                val shown = Amounts.show(context, amountPxmr)
+                Text(shown.primary, style = MaterialTheme.typography.headlineMedium)
+                toName?.let {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        stringResource(R.string.pay_sending_to, isolate(it)),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.height(20.dp))
+                Text(
+                    stringResource(R.string.pay_sending_why),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
             }
         }
     }

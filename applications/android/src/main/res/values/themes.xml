@@ -28,7 +28,10 @@
     -->
     <style name="Theme.Ducat.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/ic_launcher_background</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/avd_splash</item>
+        <!-- Must match the drawable, or the system cuts it off at its own
+             default and the D never lands. -->
+        <item name="windowSplashScreenAnimationDuration">800</item>
         <item name="postSplashScreenTheme">@style/Theme.Ducat</item>
     </style>
 </resources>
