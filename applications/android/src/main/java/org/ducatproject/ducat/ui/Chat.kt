@@ -219,20 +219,28 @@ internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
         // Whose log the seq belongs to: our own for a retraction, the other
         // side's for a refusal.
         val side = if (r.reOwn) r.outgoing else !r.outgoing
-        // "Preceded it" with a skew allowance. The two timestamps were
-        // stamped by two different clocks, and phones disagree by minutes
-        // as a matter of course — a bill minted by a fast clock and
-        // declined straight away sits *after* its own refusal, and the
-        // refusal resolved to nothing: the payer saw their decline, the
-        // asker's bubble stayed live. Fifteen minutes of grace only
-        // misfires if the same seq is reborn twice within one window,
-        // which a fresh card restarting at zero does not do that fast.
-        val target = messages
-            .filter {
-                it.outgoing == side && it.seq == seq &&
-                    it.timestamp <= r.timestamp + CLOCK_SKEW_SECS
-            }
-            .maxByOrNull { it.timestamp } ?: continue
+        // Positional first, exactly as before: the nearest preceding
+        // message with that seq. Only when nothing precedes may the answer
+        // reach *forward*, and then only within the skew grace — because
+        // the two timestamps were stamped by two different clocks, and a
+        // bill minted by a fast clock and declined straight away sits
+        // "after" its own refusal (found live 2026-08-27; the refusal
+        // resolved to nothing and the asker's bubble stayed live).
+        //
+        // The order matters. A flat grace window re-created the 08-24
+        // failure this function exists to prevent: a seq reborn on a fresh
+        // card ten minutes later fell inside the window, and the refusal
+        // of the old message reached the new one. Preferring the preceding
+        // candidate keeps rebirth resolution untouched; the forward reach
+        // exists only for the case where the old rule found nothing at all.
+        val onSide = messages.filter { it.outgoing == side && it.seq == seq }
+        val target = onSide
+            .filter { it.timestamp <= r.timestamp }
+            .maxByOrNull { it.timestamp }
+            ?: onSide
+                .filter { it.timestamp <= r.timestamp + CLOCK_SKEW_SECS }
+                .minByOrNull { it.timestamp }
+            ?: continue
         when {
             target.kind == 1 -> (if (r.reOwn) withdrawn else refused) +=
                 target.seq to target.timestamp

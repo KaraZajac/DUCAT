@@ -83,9 +83,14 @@ fun main() {
     val d = billAnswers(listOf(firstBill, secondBill, no))
     check(d.refused == setOf(0L to 500L)) { "BILL_FAIL wrong bill of two: ${d.refused}" }
 
-    // A reaction before any bill answers nothing at all.
+    // An answer "before" the only candidate resolves to it when the gap is
+    // clock-skew-sized — you can only refuse what arrived, and the two
+    // stamps come from two different phones (the 08-27 live finding). The
+    // far-forward guard below is what keeps this from answering tomorrow.
     val early = msg(kind = 5, seq = 9, ts = 50, outgoing = true, reSeq = 0)
-    check(billAnswers(listOf(early, firstBill)).refused.isEmpty()) { "BILL_FAIL answered forwards" }
+    check(billAnswers(listOf(early, firstBill)).refused == setOf(0L to 400L)) {
+        "BILL_FAIL a skew-sized gap did not resolve"
+    }
 
     // An emoji reaction (kind 4) is not a refusal.
     val emoji = msg(kind = 4, seq = 9, ts = 410, outgoing = true, reSeq = 0)
@@ -123,6 +128,25 @@ fun main() {
     )
     check(reactionsOn(listOf(theirMsg, first4, second4))[0L to 100L]?.first == "b") {
         "REACT_FAIL latest per side"
+    }
+
+    // ---- two clocks, honestly skewed (found live 2026-08-27) ----
+    // The bill's stamp comes from the asker's clock, the refusal's from the
+    // payer's, and phones disagree by minutes. A bill minted by a fast
+    // clock and declined straight away sits "after" its own refusal; the
+    // positional rule must still resolve it. Ten minutes of skew is inside
+    // the grace; the seq-rebirth case above (ts 100 vs 200+) stays apart
+    // because rebirth is minutes-to-hours later, not seconds.
+    val fastBill = msg(kind = 1, seq = 9, ts = 1000, outgoing = true, pxmr = 700)
+    val quickNo = msg(kind = 5, seq = 2, ts = 1000 - 600, outgoing = false, reSeq = 9)
+    check(billAnswers(listOf(fastBill, quickNo)).refused == setOf(9L to 1000L)) {
+        "BILL_FAIL a ten-minute clock skew lost the refusal"
+    }
+    // And a skew far past the grace still refuses to reach forward: a
+    // refusal cannot answer a bill from tomorrow.
+    val farBill = msg(kind = 1, seq = 9, ts = 1000 + 86_400, outgoing = true, pxmr = 700)
+    check(billAnswers(listOf(farBill, quickNo)).refused.isEmpty()) {
+        "BILL_FAIL an answer reached a bill a day in its future"
     }
 
     println("BILL_OK a refusal answers the message it was sent about")
