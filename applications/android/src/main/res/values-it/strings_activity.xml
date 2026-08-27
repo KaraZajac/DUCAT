@@ -5,6 +5,9 @@
 
     <!-- Richieste in sospeso -->
     <string name="activity_awaiting">In attesa</string>
+    <string name="activity_search_none">Qui non corrisponde nulla a «%1$s».</string>
+    <string name="activity_search_clear">Cancella la ricerca</string>
+    <string name="activity_search_hint">Cerca in ricevute, nomi, note</string>
     <string name="activity_they_ask">%1$s ti chiede</string>
     <string name="activity_you_asked">Hai chiesto a %1$s</string>
     <plurals name="activity_items">

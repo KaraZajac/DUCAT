@@ -5,6 +5,9 @@
 
     <!-- Pending requests -->
     <string name="activity_awaiting">รอดำเนินการ</string>
+    <string name="activity_search_none">ไม่มีอะไรตรงกับ “%1$s”</string>
+    <string name="activity_search_clear">ล้างการค้นหา</string>
+    <string name="activity_search_hint">ค้นหาใบเสร็จ ชื่อ บันทึก</string>
     <string name="activity_they_ask">%1$s ขอ</string>
     <string name="activity_you_asked">คุณขอจาก %1$s</string>
     <plurals name="activity_items">

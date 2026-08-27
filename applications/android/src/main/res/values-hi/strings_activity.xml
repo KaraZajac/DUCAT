@@ -5,6 +5,9 @@
 
     <!-- Pending requests -->
     <string name="activity_awaiting">प्रतीक्षा में</string>
+    <string name="activity_search_none">यहाँ “%1$s” से कुछ मेल नहीं खाता।</string>
+    <string name="activity_search_clear">खोज साफ़ करें</string>
+    <string name="activity_search_hint">रसीदें, नाम, नोट खोजें</string>
     <string name="activity_they_ask">%1$s माँग रहे हैं</string>
     <string name="activity_you_asked">आपने %1$s से माँगे</string>
     <plurals name="activity_items">

@@ -5,6 +5,9 @@
 
     <!-- Pending requests -->
     <string name="activity_awaiting">در انتظار</string>
+    <string name="activity_search_none">چیزی اینجا با «%1$s» مطابقت ندارد.</string>
+    <string name="activity_search_clear">پاک کردن جست‌وجو</string>
+    <string name="activity_search_hint">جست‌وجو در رسیدها، نام‌ها، یادداشت‌ها</string>
     <string name="activity_they_ask">%1$s درخواست می‌کند</string>
     <string name="activity_you_asked">از %1$s درخواست کردی</string>
     <plurals name="activity_items">

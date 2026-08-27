@@ -5,6 +5,9 @@
 
     <!-- Pending requests -->
     <string name="activity_awaiting">대기 중</string>
+    <string name="activity_search_none">“%1$s”와(과) 일치하는 항목이 없습니다.</string>
+    <string name="activity_search_clear">검색 지우기</string>
+    <string name="activity_search_hint">영수증·이름·메모 검색</string>
     <string name="activity_they_ask">%1$s님이 요청한 금액</string>
     <string name="activity_you_asked">%1$s님에게 요청한 금액</string>
     <plurals name="activity_items">

@@ -5,6 +5,9 @@
 
     <!-- Pending requests -->
     <string name="activity_awaiting">В очікуванні</string>
+    <string name="activity_search_none">Тут немає нічого за запитом «%1$s».</string>
+    <string name="activity_search_clear">Очистити пошук</string>
+    <string name="activity_search_hint">Пошук у чеках, іменах, нотатках</string>
     <string name="activity_they_ask">%1$s просить</string>
     <string name="activity_you_asked">Ти просиш у %1$s</string>
     <plurals name="activity_items">

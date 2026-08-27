@@ -5,6 +5,9 @@
 
     <!-- Pending requests -->
     <string name="activity_awaiting">Ausstehend</string>
+    <string name="activity_search_none">Nichts hier passt zu „%1$s“.</string>
+    <string name="activity_search_clear">Suche löschen</string>
+    <string name="activity_search_hint">Belege, Namen, Notizen durchsuchen</string>
     <string name="activity_they_ask">%1$s bittet um</string>
     <string name="activity_you_asked">Du bittest %1$s um</string>
     <plurals name="activity_items">

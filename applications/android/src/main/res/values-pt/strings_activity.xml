@@ -5,6 +5,9 @@
 
     <!-- Pedidos pendentes -->
     <string name="activity_awaiting">Aguardando</string>
+    <string name="activity_search_none">Nada aqui corresponde a “%1$s”.</string>
+    <string name="activity_search_clear">Limpar a procura</string>
+    <string name="activity_search_hint">Procurar recibos, nomes, notas</string>
     <string name="activity_they_ask">%1$s pede</string>
     <string name="activity_you_asked">Você pediu a %1$s</string>
     <plurals name="activity_items">

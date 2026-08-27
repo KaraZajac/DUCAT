@@ -12,6 +12,9 @@ import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -72,6 +75,58 @@ fun ActivityScreen() {
         return
     }
 
+    // **Find it again.** A thread is where a bill was agreed, but this is where
+    // it was *paid*, and until now the only way back to a receipt from six
+    // weeks ago was to scroll until it appeared. What people actually remember
+    // is what they bought — so the lines inside a receipt are searched, not
+    // only the name on the outside of it.
+    var query by rememberSaveable { mutableStateOf("") }
+    val q = query.trim().lowercase()
+
+    // Built once per change to the ledger, not once per keystroke. Formatting
+    // an amount means a rate lookup and a locale pass, and doing that for
+    // every row on every letter typed is how a search box comes to feel
+    // broken on the exact wallet that most needs one.
+    val haystacks = remember(events) {
+        events.map { e ->
+            Triple(
+                e,
+                buildString {
+                    e.counterparty?.let { append(it).append(' ') }
+                    e.note?.let { append(it).append(' ') }
+                    // The receipt's own lines. This is the point of the box.
+                    e.items.forEach { append(it.description).append(' ') }
+                    // What the row *says*, so typing the figure someone is
+                    // looking at finds the row they are looking at — rather
+                    // than the piconero underneath it, which nobody has seen.
+                    append(Amounts.show(context, e.amountPxmr).primary)
+                }.lowercase(),
+                // Identifiers, kept apart because they match differently.
+                buildString {
+                    e.address?.let { append(it).append(' ') }
+                    e.escrow?.let { append(it).append(' ') }
+                    append(e.txid)
+                }.lowercase(),
+            )
+        }
+    }
+    // **Words search words; only a long query searches identifiers.**
+    //
+    // A Monero address is ninety-odd characters of base58 and a txid is
+    // sixty-four of hex, so a short word lands inside one of them by chance —
+    // "flat" pulled up an unrelated payment whose address happened to contain
+    // those four letters next to the receipt it was meant to find. Six
+    // characters is past where that happens by accident and well short of
+    // what somebody pasting part of a txid would type.
+    val ids = q.length >= 6
+    val shownEvents = if (q.isEmpty()) events else haystacks
+        .filter { (_, text, id) -> text.contains(q) || (ids && id.contains(q)) }
+        .map { it.first }
+    val shownPending = if (q.isEmpty()) pending else pending.filter {
+        it.counterparty.lowercase().contains(q) ||
+            Amounts.show(context, it.amountPxmr).primary.lowercase().contains(q)
+    }
+
     if (events.isEmpty()) {
         Column(
             Modifier.fillMaxSize().padding(32.dp),
@@ -94,11 +149,36 @@ fun ActivityScreen() {
         return
     }
 
+    Column(Modifier.fillMaxSize()) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = { query = it },
+        singleLine = true,
+        placeholder = { Text(stringResource(R.string.activity_search_hint)) },
+        leadingIcon = { Icon(Icons.Filled.Search, null) },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { query = "" }) {
+                    Icon(Icons.Filled.Close, stringResource(R.string.activity_search_clear))
+                }
+            }
+        },
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+    )
+    if (q.isNotEmpty() && shownEvents.isEmpty() && shownPending.isEmpty()) {
+        Text(
+            stringResource(R.string.activity_search_none, query),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
+        )
+        return@Column
+    }
     LazyColumn(Modifier.fillMaxSize()) {
         // The uncleared half of the statement: money asked for and not yet
         // moved, in either direction. A bank shows pending card holds for the
         // same reason — the balance alone under-describes the situation.
-        if (pending.isNotEmpty()) {
+        if (shownPending.isNotEmpty()) {
             item {
                 Text(
                     stringResource(R.string.activity_awaiting),
@@ -107,7 +187,7 @@ fun ActivityScreen() {
                     modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 4.dp),
                 )
             }
-            items(pending) { r ->
+            items(shownPending) { r ->
                 val shown = Amounts.show(context, r.amountPxmr)
                 ListItem(
                     modifier = Modifier.clickable {
@@ -153,7 +233,8 @@ fun ActivityScreen() {
                 )
             }
         }
-        items(events) { e -> EventRow(e) { open = e } }
+        items(shownEvents) { e -> EventRow(e) { open = e } }
+    }
     }
 }
 

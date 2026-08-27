@@ -5,6 +5,9 @@
 
     <!-- Pending requests -->
     <string name="activity_awaiting">待機中</string>
+    <string name="activity_search_none">「%1$s」に一致するものはありません。</string>
+    <string name="activity_search_clear">検索をクリア</string>
+    <string name="activity_search_hint">レシート・名前・メモを検索</string>
     <string name="activity_they_ask">%1$sからの請求</string>
     <string name="activity_you_asked">%1$sへの請求</string>
     <plurals name="activity_items">

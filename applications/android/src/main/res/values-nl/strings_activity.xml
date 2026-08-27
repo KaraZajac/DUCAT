@@ -5,6 +5,9 @@
 
     <!-- Pending requests -->
     <string name="activity_awaiting">In afwachting</string>
+    <string name="activity_search_none">Niets hier komt overeen met “%1$s”.</string>
+    <string name="activity_search_clear">Zoekopdracht wissen</string>
+    <string name="activity_search_hint">Zoek bonnen, namen, notities</string>
     <string name="activity_they_ask">%1$s vraagt om</string>
     <string name="activity_you_asked">Jij vroeg %1$s om</string>
     <plurals name="activity_items">

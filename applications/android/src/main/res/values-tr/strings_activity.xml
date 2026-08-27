@@ -5,6 +5,9 @@
 
     <!-- Pending requests -->
     <string name="activity_awaiting">Bekleyen</string>
+    <string name="activity_search_none">Burada “%1$s” ile eşleşen bir şey yok.</string>
+    <string name="activity_search_clear">Aramayı temizle</string>
+    <string name="activity_search_hint">Fişlerde, adlarda, notlarda ara</string>
     <string name="activity_they_ask">%1$s istiyor</string>
     <string name="activity_you_asked">%1$s kişisinden istedin</string>
     <plurals name="activity_items">

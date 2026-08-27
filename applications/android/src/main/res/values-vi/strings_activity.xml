@@ -5,6 +5,9 @@
 
     <!-- Pending requests -->
     <string name="activity_awaiting">Đang chờ</string>
+    <string name="activity_search_none">Không có gì khớp với “%1$s”.</string>
+    <string name="activity_search_clear">Xoá tìm kiếm</string>
+    <string name="activity_search_hint">Tìm biên nhận, tên, ghi chú</string>
     <string name="activity_they_ask">%1$s yêu cầu</string>
     <string name="activity_you_asked">Bạn đã yêu cầu %1$s trả</string>
     <plurals name="activity_items">
