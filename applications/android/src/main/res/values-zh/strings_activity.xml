@@ -35,4 +35,6 @@
     <string name="activity_escrow_in_untitled">存入托管</string>
     <string name="activity_escrow_out">从托管释放——%1$s</string>
     <string name="activity_escrow_out_untitled">从托管释放</string>
+    <string name="activity_export">导出为 CSV</string>
+    <string name="activity_export_share">你的对账单</string>
 </resources>

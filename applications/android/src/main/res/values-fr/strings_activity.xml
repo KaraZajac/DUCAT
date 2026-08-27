@@ -37,4 +37,6 @@
     <string name="activity_escrow_in_untitled">Vers un séquestre</string>
     <string name="activity_escrow_out">Libéré du séquestre — %1$s</string>
     <string name="activity_escrow_out_untitled">Libéré d\'un séquestre</string>
+    <string name="activity_export">Exporter en CSV</string>
+    <string name="activity_export_share">Votre relevé</string>
 </resources>

@@ -37,4 +37,6 @@
     <string name="activity_escrow_in_untitled">एक एस्क्रो में</string>
     <string name="activity_escrow_out">एस्क्रो से जारी — %1$s</string>
     <string name="activity_escrow_out_untitled">एक एस्क्रो से जारी</string>
+    <string name="activity_export">CSV निर्यात करें</string>
+    <string name="activity_export_share">आपका विवरण</string>
 </resources>

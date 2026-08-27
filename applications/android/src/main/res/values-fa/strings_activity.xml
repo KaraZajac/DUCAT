@@ -37,4 +37,6 @@
     <string name="activity_escrow_in_untitled">به یک امانی</string>
     <string name="activity_escrow_out">آزادشده از امانی — %1$s</string>
     <string name="activity_escrow_out_untitled">آزادشده از یک امانی</string>
+    <string name="activity_export">خروجی CSV</string>
+    <string name="activity_export_share">صورتحساب شما</string>
 </resources>

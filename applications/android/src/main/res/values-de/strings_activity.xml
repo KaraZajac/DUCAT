@@ -37,4 +37,6 @@
     <string name="activity_escrow_in_untitled">In eine Treuhand</string>
     <string name="activity_escrow_out">Aus der Treuhand freigegeben — %1$s</string>
     <string name="activity_escrow_out_untitled">Aus einer Treuhand freigegeben</string>
+    <string name="activity_export">Als CSV exportieren</string>
+    <string name="activity_export_share">Dein Kontoauszug</string>
 </resources>

@@ -36,4 +36,6 @@
     <string name="activity_escrow_in_untitled">Ke sebuah escrow</string>
     <string name="activity_escrow_out">Dilepaskan dari escrow — %1$s</string>
     <string name="activity_escrow_out_untitled">Dilepaskan dari sebuah escrow</string>
+    <string name="activity_export">Ekspor sebagai CSV</string>
+    <string name="activity_export_share">Laporan Anda</string>
 </resources>

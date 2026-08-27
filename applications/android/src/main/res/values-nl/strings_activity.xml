@@ -37,4 +37,6 @@
     <string name="activity_escrow_in_untitled">Naar een escrow</string>
     <string name="activity_escrow_out">Vrijgegeven uit de escrow — %1$s</string>
     <string name="activity_escrow_out_untitled">Vrijgegeven uit een escrow</string>
+    <string name="activity_export">Exporteren als CSV</string>
+    <string name="activity_export_share">Je overzicht</string>
 </resources>

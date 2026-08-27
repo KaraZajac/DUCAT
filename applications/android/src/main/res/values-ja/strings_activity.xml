@@ -36,4 +36,6 @@
     <string name="activity_escrow_in_untitled">エスクローへ</string>
     <string name="activity_escrow_out">エスクローから解放 — %1$s</string>
     <string name="activity_escrow_out_untitled">エスクローから解放</string>
+    <string name="activity_export">CSVで書き出す</string>
+    <string name="activity_export_share">取引明細</string>
 </resources>

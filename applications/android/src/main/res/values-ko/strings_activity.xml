@@ -36,4 +36,6 @@
     <string name="activity_escrow_in_untitled">에스크로로</string>
     <string name="activity_escrow_out">에스크로에서 풀림 — %1$s</string>
     <string name="activity_escrow_out_untitled">에스크로에서 풀림</string>
+    <string name="activity_export">CSV로 내보내기</string>
+    <string name="activity_export_share">거래 내역서</string>
 </resources>

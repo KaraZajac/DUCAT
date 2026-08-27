@@ -37,4 +37,6 @@
     <string name="activity_escrow_in_untitled">In un deposito a garanzia</string>
     <string name="activity_escrow_out">Liberato dal deposito a garanzia — %1$s</string>
     <string name="activity_escrow_out_untitled">Liberato da un deposito a garanzia</string>
+    <string name="activity_export">Esporta in CSV</string>
+    <string name="activity_export_share">Il tuo estratto</string>
 </resources>

@@ -15,6 +15,8 @@ import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.filled.IosShare
+import kotlinx.coroutines.launch
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -150,21 +152,64 @@ fun ActivityScreen() {
     }
 
     Column(Modifier.fillMaxSize()) {
-    OutlinedTextField(
-        value = query,
-        onValueChange = { query = it },
-        singleLine = true,
-        placeholder = { Text(stringResource(R.string.activity_search_hint)) },
-        leadingIcon = { Icon(Icons.Filled.Search, null) },
-        trailingIcon = {
-            if (query.isNotEmpty()) {
-                IconButton(onClick = { query = "" }) {
-                    Icon(Icons.Filled.Close, stringResource(R.string.activity_search_clear))
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            singleLine = true,
+            placeholder = { Text(stringResource(R.string.activity_search_hint)) },
+            leadingIcon = { Icon(Icons.Filled.Search, null) },
+            trailingIcon = {
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = { query = "" }) {
+                        Icon(Icons.Filled.Close, stringResource(R.string.activity_search_clear))
+                    }
+                }
+            },
+            modifier = Modifier.weight(1f),
+        )
+        // The statement, out. Everything this screen shows, as CSV through
+        // the share sheet — see Ledger.exportCsv for what a row carries and
+        // why there is deliberately no fiat column.
+        val scope = androidx.compose.runtime.rememberCoroutineScope()
+        IconButton(onClick = {
+            scope.launch {
+                withContext(Dispatchers.IO) {
+                    runCatching {
+                        val csv = Ledger.exportCsv(context)
+                        val dir = java.io.File(context.filesDir, "backups").apply { mkdirs() }
+                        val f = java.io.File(dir, "ducat-statement.csv")
+                        f.writeText(csv)
+                        f
+                    }
+                }.onSuccess { f ->
+                    runCatching {
+                        val uri = androidx.core.content.FileProvider.getUriForFile(
+                            context, "${context.packageName}.backups", f,
+                        )
+                        val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            type = "text/csv"
+                            putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(
+                            android.content.Intent.createChooser(
+                                send, context.getString(R.string.activity_export_share),
+                            ),
+                        )
+                    }
                 }
             }
-        },
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-    )
+        }) {
+            Icon(
+                Icons.Filled.IosShare,
+                stringResource(R.string.activity_export),
+            )
+        }
+    }
     if (q.isNotEmpty() && shownEvents.isEmpty() && shownPending.isEmpty()) {
         Text(
             stringResource(R.string.activity_search_none, query),

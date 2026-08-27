@@ -641,6 +641,59 @@ object Ledger {
         if (changed) ContactStore.bump()
         return changed
     }
+
+    /**
+     * The whole ledger as CSV — the statement this screen never gave back.
+     *
+     * A shop that has taken money through the till all year has had no way to
+     * get its takings out for tax; the app held every figure and returned
+     * none of them. One row per settled event, machine-readable on purpose:
+     *
+     * - Numbers are XMR with a plain ASCII decimal point, never the display
+     *   formatter — `formatXmr` localises its digits, and a CSV in Persian
+     *   numerals with comma decimals is a file no spreadsheet can sum.
+     * - Timestamps are ISO 8601 UTC, because "27/08/26" is three different
+     *   days in three countries and an accountant gets no chance to ask.
+     * - **No fiat column.** Bills are settled in piconero and no historical
+     *   rate is stored; converting at today's rate would print numbers that
+     *   were never true on the day. The XMR figures and the dates are the
+     *   facts; valuation is the accountant's job, with their jurisdiction's
+     *   own rate source.
+     * - Tax is its own column — the till stamps it per sale (see [Tax]) and
+     *   this is the half a business actually files.
+     */
+    fun exportCsv(context: android.content.Context): String {
+        fun xmr(pxmr: Long): String =
+            java.math.BigDecimal(pxmr).movePointLeft(12).toPlainString()
+        fun esc(v: String): String =
+            if (v.any { it == ',' || it == '"' || it == '\n' || it == '\r' })
+                "\"" + v.replace("\"", "\"\"") + "\""
+            else v
+        val fmt = java.time.format.DateTimeFormatter.ISO_INSTANT
+        val sb = StringBuilder()
+        sb.append("date_utc,direction,counterparty,note,items,amount_xmr,fee_xmr,")
+        sb.append("net_xmr,tax_xmr,txid,height,balance_after_xmr\n")
+        // Oldest first: a statement reads forward, and the running balance
+        // column only adds up in the order the money moved.
+        for (e in build(context).asReversed()) {
+            if (e.pending) continue
+            sb.append(esc(fmt.format(java.time.Instant.ofEpochSecond(e.timestamp)))).append(',')
+            sb.append(if (e.direction == Direction.Sent) "out" else "in").append(',')
+            sb.append(esc(e.counterparty ?: "")).append(',')
+            sb.append(esc(e.note ?: "")).append(',')
+            sb.append(esc(e.items.joinToString("; ") {
+                "${it.description} ${xmr(it.amountPxmr)}"
+            })).append(',')
+            sb.append(xmr(e.amountPxmr)).append(',')
+            sb.append(xmr(e.feePxmr)).append(',')
+            sb.append(xmr(e.netPxmr)).append(',')
+            sb.append(xmr(e.taxPxmr ?: 0L)).append(',')
+            sb.append(esc(e.txid)).append(',')
+            sb.append(e.height).append(',')
+            sb.append(xmr(e.balanceAfterPxmr)).append('\n')
+        }
+        return sb.toString()
+    }
 }
 
 /** What the chain says about one transaction. Cached: it never changes. */
@@ -713,4 +766,6 @@ class TxStore(context: Context) {
     fun put(tx: ChainTx) {
         prefs.edit().putString("tx_${tx.txid}", tx.toJson().toString()).apply()
     }
+
+
 }

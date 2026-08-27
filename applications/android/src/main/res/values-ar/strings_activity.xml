@@ -45,4 +45,6 @@
     <string name="activity_escrow_in_untitled">إلى ضمان</string>
     <string name="activity_escrow_out">أُفرج عنه من الضمان — %1$s</string>
     <string name="activity_escrow_out_untitled">أُفرج عنه من ضمان</string>
+    <string name="activity_export">تصدير CSV</string>
+    <string name="activity_export_share">كشف حسابك</string>
 </resources>

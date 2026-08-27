@@ -36,4 +36,6 @@
     <string name="activity_escrow_in_untitled">เข้าเอสโครว์</string>
     <string name="activity_escrow_out">ปล่อยจากเอสโครว์ — %1$s</string>
     <string name="activity_escrow_out_untitled">ปล่อยจากเอสโครว์</string>
+    <string name="activity_export">ส่งออกเป็น CSV</string>
+    <string name="activity_export_share">รายการเดินบัญชีของคุณ</string>
 </resources>

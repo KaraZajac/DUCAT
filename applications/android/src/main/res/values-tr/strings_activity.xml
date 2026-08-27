@@ -37,4 +37,6 @@
     <string name="activity_escrow_in_untitled">Bir emanete</string>
     <string name="activity_escrow_out">Emanetten serbest bırakıldı — %1$s</string>
     <string name="activity_escrow_out_untitled">Bir emanetten serbest bırakıldı</string>
+    <string name="activity_export">CSV olarak dışa aktar</string>
+    <string name="activity_export_share">Hesap dökümün</string>
 </resources>

@@ -41,4 +41,6 @@
     <string name="activity_escrow_in_untitled">В эскроу</string>
     <string name="activity_escrow_out">Выпущено из эскроу — %1$s</string>
     <string name="activity_escrow_out_untitled">Выпущено из эскроу</string>
+    <string name="activity_export">Экспорт в CSV</string>
+    <string name="activity_export_share">Ваша выписка</string>
 </resources>

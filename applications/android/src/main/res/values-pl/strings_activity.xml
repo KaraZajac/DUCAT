@@ -41,4 +41,6 @@
     <string name="activity_escrow_in_untitled">Do depozytu</string>
     <string name="activity_escrow_out">Zwolnione z depozytu — %1$s</string>
     <string name="activity_escrow_out_untitled">Zwolnione z depozytu</string>
+    <string name="activity_export">Eksportuj jako CSV</string>
+    <string name="activity_export_share">Twój wyciąg</string>
 </resources>

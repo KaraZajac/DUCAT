@@ -37,4 +37,6 @@
     <string name="activity_escrow_in_untitled">A un depósito en garantía</string>
     <string name="activity_escrow_out">Liberado del depósito en garantía — %1$s</string>
     <string name="activity_escrow_out_untitled">Liberado de un depósito en garantía</string>
+    <string name="activity_export">Exportar como CSV</string>
+    <string name="activity_export_share">Tu extracto</string>
 </resources>
