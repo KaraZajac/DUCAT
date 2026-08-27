@@ -53,6 +53,14 @@
     <string name="chat_delete">Удалить</string>
     <string name="chat_unsend_note">Им сообщат, что сообщение отозвано; уже сохранённая копия останется у них.</string>
     <string name="chat_unsend">Отозвать</string>
+    <string name="chat_reply_to_attachment">вложение</string>
+    <string name="chat_reply_to_receipt">чек</string>
+    <string name="chat_reply_to_payment">платёж</string>
+    <string name="chat_reply_to_bill">запрос денег</string>
+    <string name="chat_reply_to_message">сообщение</string>
+    <string name="chat_reply_to_gone">сообщение, которого здесь больше нет</string>
+    <string name="chat_reply_cancel">Не отвечать на это</string>
+    <string name="chat_reply">Ответить</string>
     <string name="chat_unsent">Это сообщение было отозвано.</string>
     <string name="chat_cancel">Отмена</string>
 

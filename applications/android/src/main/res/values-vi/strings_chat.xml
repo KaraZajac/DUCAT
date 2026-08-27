@@ -53,6 +53,14 @@
     <string name="chat_delete">Xóa</string>
     <string name="chat_unsend_note">Họ được báo là tin đã bị thu hồi, và bản sao họ đã lưu vẫn là của họ.</string>
     <string name="chat_unsend">Thu hồi</string>
+    <string name="chat_reply_to_attachment">một tệp đính kèm</string>
+    <string name="chat_reply_to_receipt">một biên nhận</string>
+    <string name="chat_reply_to_payment">một khoản thanh toán</string>
+    <string name="chat_reply_to_bill">một yêu cầu tiền</string>
+    <string name="chat_reply_to_message">một tin nhắn</string>
+    <string name="chat_reply_to_gone">một tin nhắn không còn ở đây</string>
+    <string name="chat_reply_cancel">Không trả lời tin đó</string>
+    <string name="chat_reply">Trả lời</string>
     <string name="chat_unsent">Tin nhắn này đã được thu hồi.</string>
     <string name="chat_cancel">Hủy</string>
 

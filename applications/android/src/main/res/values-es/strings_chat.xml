@@ -53,6 +53,14 @@
     <string name="chat_delete">Eliminar</string>
     <string name="chat_unsend_note">Se les dice que fue retirado, y la copia que ya hubieran guardado sigue siendo suya.</string>
     <string name="chat_unsend">Retirar</string>
+    <string name="chat_reply_to_attachment">un archivo adjunto</string>
+    <string name="chat_reply_to_receipt">un recibo</string>
+    <string name="chat_reply_to_payment">un pago</string>
+    <string name="chat_reply_to_bill">una petición de dinero</string>
+    <string name="chat_reply_to_message">un mensaje</string>
+    <string name="chat_reply_to_gone">un mensaje que ya no está aquí</string>
+    <string name="chat_reply_cancel">No responder a eso</string>
+    <string name="chat_reply">Responder</string>
     <string name="chat_unsent">Este mensaje fue retirado.</string>
     <string name="chat_cancel">Cancelar</string>
 

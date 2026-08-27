@@ -53,6 +53,14 @@
     <string name="chat_delete">Usuń</string>
     <string name="chat_unsend_note">Zostaną poinformowani, że wiadomość wycofano; zapisana wcześniej kopia zostaje u nich.</string>
     <string name="chat_unsend">Wycofaj</string>
+    <string name="chat_reply_to_attachment">załącznik</string>
+    <string name="chat_reply_to_receipt">paragon</string>
+    <string name="chat_reply_to_payment">płatność</string>
+    <string name="chat_reply_to_bill">prośba o pieniądze</string>
+    <string name="chat_reply_to_message">wiadomość</string>
+    <string name="chat_reply_to_gone">wiadomość, której już tu nie ma</string>
+    <string name="chat_reply_cancel">Nie odpowiadaj na to</string>
+    <string name="chat_reply">Odpowiedz</string>
     <string name="chat_unsent">Ta wiadomość została wycofana.</string>
     <string name="chat_cancel">Anuluj</string>
 

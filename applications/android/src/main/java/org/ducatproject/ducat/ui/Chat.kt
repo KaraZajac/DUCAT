@@ -253,6 +253,10 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     // A half-typed message survives a rotation. It is the single most
     // common thing to lose, and the least excusable.
     var draft by rememberSaveable { mutableStateOf("") }
+    // What the next message answers, if anything. Saved with the draft: half a
+    // reply is as easy to lose as half a sentence, and as annoying.
+    var replyTo by rememberSaveable { mutableStateOf<Long?>(null) }
+    var replyToOwn by rememberSaveable { mutableStateOf(false) }
     var sending by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
@@ -347,12 +351,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         error = null
                         scope.launch {
                             val result = withContext(Dispatchers.IO) {
-                                runCatching { sendOne(context, c, body, mine) }
+                                runCatching { sendOne(context, c, body, mine, replyTo, replyToOwn) }
                             }
                             sending = false
                             result.onSuccess { updated ->
                                 c = updated
                                 draft = ""
+                                replyTo = null; replyToOwn = false
                                 messages = store.thread(c.personaHex)
                             }.onFailure {
                                 // Mapped, not printed. Sending reaches the
@@ -508,6 +513,42 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
                     ) { ok -> if (ok) sendLocation() }
 
+                    // What this message will answer, above the box it is being
+                    // typed in — so it is visible while the sentence is being
+                    // chosen, and cancellable without deleting the sentence.
+                    replyTo?.let { seq ->
+                        val line = replyLine(messages, seq, replyToOwn, answers)
+                        Row(
+                            Modifier.fillMaxWidth()
+                                .padding(start = 12.dp, end = 12.dp, top = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Box(
+                                Modifier.width(3.dp).height(28.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.primary,
+                                        RoundedCornerShape(2.dp),
+                                    ),
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                line ?: stringResource(R.string.chat_reply_to_gone),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontStyle = if (line == null) FontStyle.Italic else FontStyle.Normal,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f),
+                            )
+                            IconButton(onClick = { replyTo = null; replyToOwn = false }) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    stringResource(R.string.chat_reply_cancel),
+                                    Modifier.size(18.dp),
+                                )
+                            }
+                        }
+                    }
                     Row(
                         Modifier.padding(12.dp).fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -911,11 +952,37 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         //
                         // An identical re-bill still reads as paid, which errs
                         // the safe way for a button that spends.
+                        // **Answered, said rather than guessed.**
+                        //
+                        // A payment now names the request it settles and a
+                        // receipt names the request it receipts (§16.14), so
+                        // the first test is simply whether anything points
+                        // here. The amount rule below it stays for messages
+                        // that predate the reference — and it is worth
+                        // remembering what it got wrong, because that is the
+                        // whole reason the reference exists: two identical
+                        // bills answered by one payment both matched, and both
+                        // read as paid. It errs toward "paid" on purpose, since
+                        // the alternative is a live button one tap from paying
+                        // twice, but erring is what it does and naming the
+                        // target is what stops it.
                         paid = m.kind == 1 && !m.outgoing && messages.any {
-                            ((it.kind == 2 && it.outgoing) ||
-                                (it.kind == 3 && !it.outgoing)) &&
+                            val answers = ((it.kind == 2 && it.outgoing) ||
+                                (it.kind == 3 && !it.outgoing))
+                            if (!answers) false
+                            else if (it.reSeq != null) {
+                                // The bill is theirs, so it lives in their
+                                // outbox — and `re_own` means "the sender's
+                                // own log". Our payment answering it says
+                                // false; their receipt for it says true. Both
+                                // reduce to: the reference points at the log
+                                // the answering message did *not* come from,
+                                // unless they sent both.
+                                it.reSeq == m.seq && it.reOwn == !it.outgoing
+                            } else {
                                 it.amountPxmr >= m.amountPxmr &&
-                                it.timestamp >= m.timestamp
+                                    it.timestamp >= m.timestamp
+                            }
                         },
                         // The sender's own retract (kind 5, reOwn) withdraws
                         // the bill, and the payer's refusal is the same
@@ -927,6 +994,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         declined = m.kind == 1 &&
                             (m.seq to m.timestamp) in answers.refused,
                         unsent = (m.seq to m.timestamp) in answers.unsent,
+                        // Resolved here, where the thread is. A bubble sees one
+                        // message; the target lives in the list around it.
+                        answering = m.reSeq?.let {
+                            replyLine(messages, it, m.reOwn == m.outgoing, answers)
+                        },
+                        answeredGone = m.reSeq != null &&
+                            replyLine(messages, m.reSeq!!, m.reOwn == m.outgoing, answers) == null,
                         onLongPress = { confirmDelete = m },
                         onPay = { billView = it },
                     )
@@ -1015,6 +1089,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         PaySheet(
             prefillContact = c,
             prefillAmountPxmr = r.amountPxmr,
+            // The bill being answered, so the payment can name it rather than
+            // leave the two to be matched on their amounts.
+            answersSeq = r.seq,
         ) { payRequest = null }
     }
 
@@ -1144,6 +1221,14 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             confirmDelete = null
                         }) { Text(stringResource(R.string.chat_copy)) }
                     }
+                    // Any message can be answered, including a bill or a
+                    // receipt — "which of these did you mean" is a question
+                    // asked about money more often than about words.
+                    TextButton(onClick = {
+                        replyTo = m.seq
+                        replyToOwn = m.outgoing
+                        confirmDelete = null
+                    }) { Text(stringResource(R.string.chat_reply)) }
                     TextButton(onClick = {
                         store.deleteMessage(c.personaHex, m.seq, m.outgoing)
                         messages = store.thread(c.personaHex)
@@ -1284,13 +1369,50 @@ private fun ChatSettingsDialog(
  */
 private const val RUN_GAP_SECONDS = 300L
 
+/**
+ * One line standing for a message, for the chrome above a reply.
+ *
+ * Local rendering only. §16.14's reference is a sequence number and nothing of
+ * the target travels, so this is built from the copy the reader already holds
+ * — which is what keeps an unsend an unsend: withdraw a message and the reply
+ * that answered it says so, rather than quoting back the words that were
+ * withdrawn.
+ *
+ * Null when the target is not here at all: deleted on this phone, aged out
+ * under a disappearing setting, or lost to a ring wrap. The caller renders
+ * that as its own sentence rather than hiding the reply, because an answer to
+ * something missing is still an answer and losing it would lose a second
+ * message to the loss of a first.
+ */
+@Composable
+private fun replyLine(
+    messages: List<StoredMessage>,
+    seq: Long,
+    own: Boolean,
+    answers: BillAnswers,
+): String? {
+    val t = messages.lastOrNull { it.outgoing == own && it.seq == seq } ?: return null
+    if ((t.seq to t.timestamp) in answers.unsent) return stringResource(R.string.chat_unsent)
+    return when {
+        t.kind == 1 -> stringResource(R.string.chat_reply_to_bill)
+        t.kind == 2 -> stringResource(R.string.chat_reply_to_payment)
+        t.kind == 3 -> stringResource(R.string.chat_reply_to_receipt)
+        t.attHash != null && t.body.isBlank() -> stringResource(R.string.chat_reply_to_attachment)
+        t.body.isNotBlank() -> t.body
+        else -> stringResource(R.string.chat_reply_to_message)
+    }
+}
+
 /** Seal, chain, append. Fails as a unit — nothing is stored unsent. */
 private fun sendOne(
     context: android.content.Context,
     c: Contact,
     body: String,
     minePersonaHex: String,
-): Contact = Mailbox.send(context, c, body, minePersonaHex)
+    /** §16.14: the message this answers, if it answers one. */
+    reSeq: Long? = null,
+    reOwn: Boolean = false,
+): Contact = Mailbox.send(context, c, body, minePersonaHex, reSeq = reSeq, reOwn = reOwn)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -1313,6 +1435,15 @@ private fun Bubble(
      * pretending it never existed.
      */
     unsent: Boolean = false,
+    /**
+     * The message this one answers, already resolved to a line (§16.14).
+     *
+     * Resolved by the caller because a bubble sees one message and the target
+     * lives in the thread. Null means either "answers nothing" or "answers
+     * something no longer here", which [answeredGone] tells apart.
+     */
+    answering: String? = null,
+    answeredGone: Boolean = false,
     /** Whether to draw the clock and the ticks under this one — see the run
      *  logic in the list. False for every message in a run but its last. */
     showMeta: Boolean = true,
@@ -1360,6 +1491,26 @@ private fun Bubble(
                     else Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
                 )
         ) {
+          Column {
+            if (answering != null || answeredGone) {
+                // The quote lives here, in the reader's own copy — never on
+                // the wire. See replyLine.
+                Row(Modifier.padding(bottom = 6.dp)) {
+                    Box(
+                        Modifier.width(3.dp).height(24.dp)
+                            .background(fg.copy(alpha = 0.5f), RoundedCornerShape(2.dp)),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        answering ?: stringResource(R.string.chat_reply_to_gone),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = fg.copy(alpha = 0.75f),
+                        fontStyle = if (answering == null) FontStyle.Italic else FontStyle.Normal,
+                        maxLines = 2,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                }
+            }
             if (unsent) {
                 // Everything the message was — its words, its picture, its
                 // voice memo — stops here. The attachment file is still on
@@ -1615,6 +1766,7 @@ private fun Bubble(
                     }
                 }
             }
+          }
         }
         if (!showMeta) return@Column
         Row(verticalAlignment = Alignment.CenterVertically) {

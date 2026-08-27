@@ -59,6 +59,16 @@ data class RunningTab(
      */
     val billedMinor: Int? = null,
     /**
+     * The sequence of the bill this tab sent, in our own outbox.
+     *
+     * Recorded because two places used to recover it by searching the thread
+     * for "the last outgoing bill with this total", which is a guess that a
+     * second identical bill makes wrong. The receipt names it (§16.14), and
+     * so do the two screens that need to know whether the customer refused
+     * it. Zero for a tab settled before this was kept.
+     */
+    val billSeq: Long = 0,
+    /**
      * What actually arrived, which is the bill plus whatever was tipped on
      * top of it. Zero until the payment is matched, and on tabs written
      * before this field existed.
@@ -97,6 +107,7 @@ data class RunningTab(
         put("tip_at_bill", tipAtBill)
         put("paid_total", paidPxmr)
         billedMinor?.let { put("billed_minor", it) }
+        if (billSeq > 0) put("bill_seq", billSeq)
     }
 
     companion object {
@@ -123,6 +134,7 @@ data class RunningTab(
             tipAtBill = o.optLong("tip_at_bill", 0),
             paidPxmr = o.optLong("paid_total", 0),
             billedMinor = o.optInt("billed_minor", -1).takeIf { it >= 0 },
+            billSeq = o.optLong("bill_seq", 0L),
         )
     }
 }
@@ -245,9 +257,15 @@ class TabStore(private val context: Context) {
         // has the itemised request in their hand, and a drink poured between
         // that going out and this landing is not on it. The tab must agree with
         // the paper, so the lines and the total travel together.
+        // The bill's own sequence, read back rather than derived: `send`
+        // re-reads the contact and takes the seq it finds, so a counter held
+        // from before the call can be one behind the message it just sent.
+        val billSeq = ContactStore(context).thread(tab.personaHex)
+            .lastOrNull { it.outgoing && it.kind == 1 }?.seq ?: 0L
         val settled = mutate(tab.id) {
             it.copy(
                 state = "settled",
+                billSeq = billSeq,
                 lines = tab.lines,
                 taxPxmr = tab.taxPxmr,
                 settledTotal = total,
@@ -295,6 +313,9 @@ class TabStore(private val context: Context) {
                 context, contact, context.getString(R.string.receipt_note_oob),
                 PersonaStore(context).personaHex(),
                 kind = 3, amountPxmr = tab.settledTotal,
+                // §16.14: the request this receipts. `reOwn`, because the
+                // party issuing a receipt is the party that sent the bill.
+                reSeq = tab.billSeq.takeIf { it > 0 }, reOwn = tab.billSeq > 0,
                 items = tab.lines, taxPxmr = tab.taxPxmr,
                 // The money took another rail; the record must say so, or the
                 // ledger goes looking for a chain event that does not exist.
@@ -542,6 +563,8 @@ class TabStore(private val context: Context) {
                         kind = 3, amountPxmr = hit.amountPxmr,
                         items = receiptLines, taxPxmr = tab.taxPxmr,
                         txidHex = hit.txHashHex.ifEmpty { null },
+                        // §16.14: the bill this settles, ours to name.
+                        reSeq = tab.billSeq.takeIf { it > 0 }, reOwn = tab.billSeq > 0,
                     )
                 }.onSuccess {
                     store.mutate(tab.id) {

@@ -53,6 +53,14 @@
     <string name="chat_delete">मिटाएँ</string>
     <string name="chat_unsend_note">उन्हें बताया जाता है कि इसे वापस लिया गया, और पहले से सहेजी गई प्रति उनके पास रहती है।</string>
     <string name="chat_unsend">वापस लें</string>
+    <string name="chat_reply_to_attachment">एक अनुलग्नक</string>
+    <string name="chat_reply_to_receipt">एक रसीद</string>
+    <string name="chat_reply_to_payment">एक भुगतान</string>
+    <string name="chat_reply_to_bill">पैसे का अनुरोध</string>
+    <string name="chat_reply_to_message">एक संदेश</string>
+    <string name="chat_reply_to_gone">एक संदेश जो अब यहाँ नहीं है</string>
+    <string name="chat_reply_cancel">उस पर उत्तर नहीं</string>
+    <string name="chat_reply">उत्तर दें</string>
     <string name="chat_unsent">यह संदेश वापस ले लिया गया।</string>
     <string name="chat_cancel">रद्द करें</string>
 

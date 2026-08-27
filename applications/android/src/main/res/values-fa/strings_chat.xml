@@ -53,6 +53,14 @@
     <string name="chat_delete">حذف</string>
     <string name="chat_unsend_note">به آن‌ها گفته می‌شود که پس گرفته شده، و نسخه‌ای که قبلاً ذخیره کرده‌اند نزد خودشان می‌ماند.</string>
     <string name="chat_unsend">پس گرفتن</string>
+    <string name="chat_reply_to_attachment">یک پیوست</string>
+    <string name="chat_reply_to_receipt">یک رسید</string>
+    <string name="chat_reply_to_payment">یک پرداخت</string>
+    <string name="chat_reply_to_bill">درخواست پول</string>
+    <string name="chat_reply_to_message">یک پیام</string>
+    <string name="chat_reply_to_gone">پیامی که دیگر اینجا نیست</string>
+    <string name="chat_reply_cancel">پاسخ به آن لغو شود</string>
+    <string name="chat_reply">پاسخ</string>
     <string name="chat_unsent">این پیام پس گرفته شد.</string>
     <string name="chat_cancel">لغو</string>
 

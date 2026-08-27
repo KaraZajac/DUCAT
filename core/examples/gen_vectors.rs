@@ -1658,10 +1658,28 @@ fn contact_cases() -> Vec<J> {
         "A reaction carries no money: an amount on an emoji is a payment nothing will match.",
         &Message { amount_pxmr: Some(1), ..react.clone() },
         Some((RejectCode::Malformed, "reaction carries no money")));
-    money("target_on_a_text",
-        "Only a reaction targets another message.",
-        &Message { kind: MessageKind::Text, amount_pxmr: None, re_seq: Some(1), ..base_pay.clone() },
-        Some((RejectCode::Malformed, "only a reaction targets")));
+    // §16.14's reference, carrying a reply and the two money messages that
+    // answer something.
+    money("reply_to_a_message",
+        "A text naming the message it answers. The field has carried \"this, about that one\" since reactions; a reply is the same claim with words in it. Nothing of the target is quoted — the reader holds the thread and resolves the sequence itself, so an unsend cannot be undone by the reply that followed it.",
+        &Message { kind: MessageKind::Text, body: "the second one".into(), amount_pxmr: None, re_seq: Some(1), ..base_pay.clone() },
+        None);
+    money("reply_to_own_message",
+        "Answering one's own earlier message, flagged the way a reaction flags it. People do this; only an accept forbids it, because accepting your own offer is a soliloquy.",
+        &Message { kind: MessageKind::Text, body: "— meant the blue one".into(), amount_pxmr: None, re_seq: Some(1), re_own: true, ..base_pay.clone() },
+        None);
+    money("payment_names_its_request",
+        "A payment saying which request it settles. Without this the only thread from a payment back to its bill was the amount, so two identical requests answered by one payment both read as paid. Still advisory — §17.5 verifies by finding the output; what the reference settles is which request the sender says it was for, a question the chain has never been able to answer.",
+        &Message { kind: MessageKind::PaymentSent, txid: Some(vec![7u8; 32]), re_seq: Some(3), ..base_pay.clone() },
+        None);
+    money("receipt_names_its_request",
+        "A receipt naming the request it receipts — `re_own`, because the party issuing the receipt is the party that sent the bill. Request, payment and receipt then form a stated chain rather than three messages a reader has to infer a relationship between.",
+        &Message { kind: MessageKind::Receipt, payto: None, re_seq: Some(3), re_own: true, ..base_pay.clone() },
+        None);
+    money("target_on_a_ride_offer",
+        "The allow-list is still an allow-list: a reaction, a retract and an accept must name a target, a reply and the two money messages may, and everything else may not.",
+        &Message { kind: MessageKind::RideOffer, amount_pxmr: Some(1), re_seq: Some(1), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "this kind does not target another")));
 
     // §16.15 — attachments.
     let att = Attachment {

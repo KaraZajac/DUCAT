@@ -53,6 +53,14 @@
     <string name="chat_delete">Hapus</string>
     <string name="chat_unsend_note">Mereka diberi tahu bahwa pesan ditarik, dan salinan yang sudah mereka simpan tetap milik mereka.</string>
     <string name="chat_unsend">Tarik kembali</string>
+    <string name="chat_reply_to_attachment">sebuah lampiran</string>
+    <string name="chat_reply_to_receipt">sebuah struk</string>
+    <string name="chat_reply_to_payment">sebuah pembayaran</string>
+    <string name="chat_reply_to_bill">permintaan uang</string>
+    <string name="chat_reply_to_message">sebuah pesan</string>
+    <string name="chat_reply_to_gone">pesan yang sudah tidak ada di sini</string>
+    <string name="chat_reply_cancel">Batal membalas itu</string>
+    <string name="chat_reply">Balas</string>
     <string name="chat_unsent">Pesan ini ditarik kembali.</string>
     <string name="chat_cancel">Batal</string>
 

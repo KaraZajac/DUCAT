@@ -61,6 +61,14 @@
     <string name="chat_delete">Delete</string>
     <string name="chat_unsend_note">They are told it was withdrawn, and a copy they already saved stays theirs.</string>
     <string name="chat_unsend">Unsend</string>
+    <string name="chat_reply_to_attachment">an attachment</string>
+    <string name="chat_reply_to_receipt">a receipt</string>
+    <string name="chat_reply_to_payment">a payment</string>
+    <string name="chat_reply_to_bill">a request for money</string>
+    <string name="chat_reply_to_message">a message</string>
+    <string name="chat_reply_to_gone">a message that is no longer here</string>
+    <string name="chat_reply_cancel">Not replying to that</string>
+    <string name="chat_reply">Reply</string>
     <string name="chat_unsent">This message was withdrawn.</string>
     <string name="chat_cancel">Cancel</string>
 

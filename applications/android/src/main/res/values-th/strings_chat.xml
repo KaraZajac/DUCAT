@@ -53,6 +53,14 @@
     <string name="chat_delete">ลบ</string>
     <string name="chat_unsend_note">อีกฝ่ายจะรู้ว่าถูกเรียกคืน และสำเนาที่เขาบันทึกไว้แล้วยังเป็นของเขา</string>
     <string name="chat_unsend">เรียกคืน</string>
+    <string name="chat_reply_to_attachment">ไฟล์แนบ</string>
+    <string name="chat_reply_to_receipt">ใบเสร็จ</string>
+    <string name="chat_reply_to_payment">การชำระเงิน</string>
+    <string name="chat_reply_to_bill">คำขอเงิน</string>
+    <string name="chat_reply_to_message">ข้อความหนึ่ง</string>
+    <string name="chat_reply_to_gone">ข้อความที่ไม่อยู่ที่นี่แล้ว</string>
+    <string name="chat_reply_cancel">ไม่ตอบกลับข้อความนั้น</string>
+    <string name="chat_reply">ตอบกลับ</string>
     <string name="chat_unsent">ข้อความนี้ถูกเรียกคืนแล้ว</string>
     <string name="chat_cancel">ยกเลิก</string>
 

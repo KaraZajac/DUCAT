@@ -57,6 +57,15 @@ fun PaySheet(
     prefillAddress: String? = null,
     prefillAmountPxmr: Long = 0,
     prefillContact: Contact? = null,
+    /**
+     * The request this payment answers, if it answers one (§16.14).
+     *
+     * Carried on the wire so the bill knows it was settled by *this* payment
+     * rather than by whichever later payment happened to be large enough —
+     * which is what the amount alone could say, and it said it wrongly when
+     * two identical bills met one payment.
+     */
+    answersSeq: Long? = null,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -145,6 +154,9 @@ fun PaySheet(
                 else -> AmountStep(
                     target = t,
                     prefillAmountPxmr = if (scannedPxmr > 0) scannedPxmr else prefillAmountPxmr,
+                    // Only when the amount came from the bill. A scanned code
+                    // is a different request and answers nothing in the thread.
+                    answersSeq = answersSeq.takeIf { scannedPxmr <= 0 },
                     // With a target chosen for us there is no earlier step to
                     // return to, so back leaves rather than doing nothing.
                     onBack = {
@@ -345,6 +357,7 @@ private fun ChooseTarget(
 private fun AmountStep(
     target: PayTarget,
     prefillAmountPxmr: Long,
+    answersSeq: Long? = null,
     onBack: () -> Unit,
     onDone: () -> Unit,
 ) {
@@ -967,6 +980,10 @@ private fun AmountStep(
                                         note.ifBlank { context.getString(R.string.pay_payment) },
                                         PersonaStore(context).personaHex(),
                                         kind = 2, amountPxmr = amount,
+                                        // Which request this settles. `reOwn`
+                                        // is false: the bill is in *their*
+                                        // outbox, and we are answering it.
+                                        reSeq = answersSeq, reOwn = false,
                                         // Names the transaction, which is what
                                         // lets their wallet put our name on the
                                         // output when it arrives. Monero carries

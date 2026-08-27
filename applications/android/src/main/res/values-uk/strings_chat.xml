@@ -53,6 +53,14 @@
     <string name="chat_delete">Видалити</string>
     <string name="chat_unsend_note">Їм повідомлять, що повідомлення відкликано; збережена раніше копія залишиться в них.</string>
     <string name="chat_unsend">Відкликати</string>
+    <string name="chat_reply_to_attachment">вкладення</string>
+    <string name="chat_reply_to_receipt">чек</string>
+    <string name="chat_reply_to_payment">платіж</string>
+    <string name="chat_reply_to_bill">запит грошей</string>
+    <string name="chat_reply_to_message">повідомлення</string>
+    <string name="chat_reply_to_gone">повідомлення, якого тут більше немає</string>
+    <string name="chat_reply_cancel">Не відповідати на це</string>
+    <string name="chat_reply">Відповісти</string>
     <string name="chat_unsent">Це повідомлення було відкликано.</string>
     <string name="chat_cancel">Скасувати</string>
 

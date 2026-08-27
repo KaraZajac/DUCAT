@@ -1811,8 +1811,18 @@ def parse_message(buf):
             raise Reject("Malformed", "a retract or an accept names the message it answers")
         if kind == 7 and out["re_own"]:
             raise Reject("Malformed", "an accept answers the counterparty's offer")
+    elif kind in (0, 2, 3):
+        # Three kinds *must* name a target (above); three *may* (here); the
+        # rest may not. A reply is a text answering a text; a PaymentSent
+        # naming the PaymentRequest it settles, and a Receipt naming the
+        # request it receipts, state a relationship a reader used to have to
+        # infer from the amount — and inferring it was wrong where two
+        # identical bills were answered by one payment. Advisory like every
+        # other claim in a message: the reference says which request the
+        # sender means, not that the money arrived.
+        pass
     elif out["re_seq"] is not None or out["re_own"]:
-        raise Reject("Malformed", "only a reaction, a retract or an accept targets another message")
+        raise Reject("Malformed", "this kind of message does not target another")
     if out["attachment"] is not None and kind != 0:
         raise Reject("Malformed", "only a text message carries an attachment")
     # A stream reference is a PositionRef's whole content and nothing else's.

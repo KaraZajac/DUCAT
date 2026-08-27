@@ -53,6 +53,14 @@
     <string name="chat_delete">删除</string>
     <string name="chat_unsend_note">对方会被告知消息已撤回，他们此前保存的副本仍归他们所有。</string>
     <string name="chat_unsend">撤回</string>
+    <string name="chat_reply_to_attachment">一个附件</string>
+    <string name="chat_reply_to_receipt">一张收据</string>
+    <string name="chat_reply_to_payment">一笔付款</string>
+    <string name="chat_reply_to_bill">一条付款请求</string>
+    <string name="chat_reply_to_message">一条消息</string>
+    <string name="chat_reply_to_gone">一条已经不在的消息</string>
+    <string name="chat_reply_cancel">不回复那条</string>
+    <string name="chat_reply">回复</string>
     <string name="chat_unsent">这条消息已被撤回。</string>
     <string name="chat_cancel">取消</string>
 

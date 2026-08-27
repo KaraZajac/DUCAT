@@ -53,6 +53,14 @@
     <string name="chat_delete">حذف</string>
     <string name="chat_unsend_note">سيُبلَّغون بأنها سُحبت، وتبقى لديهم أي نسخة حفظوها بالفعل.</string>
     <string name="chat_unsend">سحب</string>
+    <string name="chat_reply_to_attachment">مرفق</string>
+    <string name="chat_reply_to_receipt">إيصال</string>
+    <string name="chat_reply_to_payment">دفعة</string>
+    <string name="chat_reply_to_bill">طلب مال</string>
+    <string name="chat_reply_to_message">رسالة</string>
+    <string name="chat_reply_to_gone">رسالة لم تعد موجودة هنا</string>
+    <string name="chat_reply_cancel">إلغاء الرد على ذلك</string>
+    <string name="chat_reply">رد</string>
     <string name="chat_unsent">تم سحب هذه الرسالة.</string>
     <string name="chat_cancel">إلغاء</string>
 

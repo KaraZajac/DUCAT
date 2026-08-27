@@ -53,6 +53,14 @@
     <string name="chat_delete">Löschen</string>
     <string name="chat_unsend_note">Sie erfahren, dass sie zurückgezogen wurde; eine bereits gespeicherte Kopie bleibt ihnen.</string>
     <string name="chat_unsend">Zurückziehen</string>
+    <string name="chat_reply_to_attachment">ein Anhang</string>
+    <string name="chat_reply_to_receipt">ein Beleg</string>
+    <string name="chat_reply_to_payment">eine Zahlung</string>
+    <string name="chat_reply_to_bill">eine Geldforderung</string>
+    <string name="chat_reply_to_message">eine Nachricht</string>
+    <string name="chat_reply_to_gone">eine Nachricht, die nicht mehr da ist</string>
+    <string name="chat_reply_cancel">Doch nicht darauf antworten</string>
+    <string name="chat_reply">Antworten</string>
     <string name="chat_unsent">Diese Nachricht wurde zurückgezogen.</string>
     <string name="chat_cancel">Abbrechen</string>
 

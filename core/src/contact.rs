@@ -1197,10 +1197,39 @@ impl Message {
                     "an accept answers the counterparty's offer",
                 ));
             }
-        } else if out.re_seq.is_some() || out.re_own {
+        } else if !matches!(
+            out.kind,
+            MessageKind::Text | MessageKind::PaymentSent | MessageKind::Receipt
+        ) && (out.re_seq.is_some() || out.re_own)
+        {
+            // Three kinds *must* name a target (above); three *may* (here);
+            // the rest may not.
+            //
+            // **A reply, and the two money messages that answer something.**
+            // The field has carried "this, about that one" since reactions;
+            // what changed is who is allowed to say it. A text answering a
+            // text is an ordinary reply. A `PaymentSent` naming the
+            // `PaymentRequest` it settles, and a `Receipt` naming the request
+            // it receipts, turn a relationship that used to be *inferred* into
+            // one that is stated — and the inference was wrong in a way that
+            // showed: with no back-reference the only thread from a payment to
+            // its bill was the amount, so two identical bills answered by one
+            // payment both read as paid.
+            //
+            // Still advisory, like every other claim in a message. A payment
+            // naming a request does not make the money arrive; §17.5 verifies
+            // by finding the output. What the reference settles is *which*
+            // request the sender says it was for, which is a question the
+            // chain has never been able to answer.
+            //
+            // Not constrained by direction. `re_own` on a reply is somebody
+            // answering their own earlier message, which people do; on a
+            // payment it is "the £20 I said I would send", naming the sentence
+            // rather than the bill. Only an accept forbids it, because
+            // accepting your own offer is a soliloquy.
             return Err(Reject::with_detail(
                 RejectCode::Malformed,
-                "only a reaction, a retract or an accept targets another message",
+                "this kind of message does not target another",
             ));
         }
         // An eta is a RideOffer's courtesy figure and nothing else's — and a

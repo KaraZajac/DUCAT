@@ -854,14 +854,54 @@
     },
     {
       "expect": {
-        "hint": "only a reaction targets",
+        "ok": true,
+        "reencodes_to_hex": "a8001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e746865207365636f6e64206f6e6518a01a6553f10018c001"
+      },
+      "kind": "message.payment",
+      "name": "reply_to_a_message",
+      "payment_hex": "a8001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e746865207365636f6e64206f6e6518a01a6553f10018c001",
+      "why": "A text naming the message it answers. The field has carried \"this, about that one\" since reactions; a reply is the same claim with words in it. Nothing of the target is quoted — the reader holds the thread and resolves the sequence itself, so an unsend cannot be undone by the reply that followed it."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f76e28094206d65616e742074686520626c7565206f6e6518a01a6553f10018c00118c101"
+      },
+      "kind": "message.payment",
+      "name": "reply_to_own_message",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f76e28094206d65616e742074686520626c7565206f6e6518a01a6553f10018c00118c101",
+      "why": "Answering one's own earlier message, flagged the way a reaction flags it. People do this; only an accept forbids it, because accepting your own offer is a soliloquy."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "ab001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20218b31b00000004e3b2920018b45820070707070707070707070707070707070707070707070707070707070707070718c003"
+      },
+      "kind": "message.payment",
+      "name": "payment_names_its_request",
+      "payment_hex": "ab001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20218b31b00000004e3b2920018b45820070707070707070707070707070707070707070707070707070707070707070718c003",
+      "why": "A payment saying which request it settles. Without this the only thread from a payment back to its bill was the amount, so two identical requests answered by one payment both read as paid. Still advisory — §17.5 verifies by finding the output; what the reference settles is which request the sender says it was for, a question the chain has never been able to answer."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "ab001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20318b31b00000004e3b2920018c00318c101"
+      },
+      "kind": "message.payment",
+      "name": "receipt_names_its_request",
+      "payment_hex": "ab001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20318b31b00000004e3b2920018c00318c101",
+      "why": "A receipt naming the request it receipts — `re_own`, because the party issuing the receipt is the party that sent the bill. Request, payment and receipt then form a stated chain rather than three messages a reader has to infer a relationship between."
+    },
+    {
+      "expect": {
+        "hint": "this kind does not target another",
         "ok": false,
         "reject": "MALFORMED"
       },
       "kind": "message.payment",
-      "name": "target_on_a_text",
-      "payment_hex": "a8001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018c001",
-      "why": "Only a reaction targets another message."
+      "name": "target_on_a_ride_offer",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20618b30118c001",
+      "why": "The allow-list is still an allow-list: a reaction, a retract and an accept must name a target, a reply and the two money messages may, and everything else may not."
     },
     {
       "expect": {

@@ -53,6 +53,14 @@
     <string name="chat_delete">Elimina</string>
     <string name="chat_unsend_note">Viene detto loro che è stato ritirato, e una copia già salvata resta loro.</string>
     <string name="chat_unsend">Ritira</string>
+    <string name="chat_reply_to_attachment">un allegato</string>
+    <string name="chat_reply_to_receipt">una ricevuta</string>
+    <string name="chat_reply_to_payment">un pagamento</string>
+    <string name="chat_reply_to_bill">una richiesta di denaro</string>
+    <string name="chat_reply_to_message">un messaggio</string>
+    <string name="chat_reply_to_gone">un messaggio che non è più qui</string>
+    <string name="chat_reply_cancel">Non rispondere a quello</string>
+    <string name="chat_reply">Rispondi</string>
     <string name="chat_unsent">Questo messaggio è stato ritirato.</string>
     <string name="chat_cancel">Annulla</string>
 

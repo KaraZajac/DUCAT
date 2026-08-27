@@ -53,6 +53,14 @@
     <string name="chat_delete">삭제</string>
     <string name="chat_unsend_note">회수되었다고 상대에게 알려지며, 이미 저장한 사본은 상대에게 남습니다.</string>
     <string name="chat_unsend">회수</string>
+    <string name="chat_reply_to_attachment">첨부 파일</string>
+    <string name="chat_reply_to_receipt">영수증</string>
+    <string name="chat_reply_to_payment">결제</string>
+    <string name="chat_reply_to_bill">결제 요청</string>
+    <string name="chat_reply_to_message">메시지</string>
+    <string name="chat_reply_to_gone">더 이상 여기 없는 메시지</string>
+    <string name="chat_reply_cancel">답장 취소</string>
+    <string name="chat_reply">답장</string>
     <string name="chat_unsent">이 메시지는 회수되었습니다.</string>
     <string name="chat_cancel">취소</string>
 

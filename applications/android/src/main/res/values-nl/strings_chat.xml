@@ -53,6 +53,14 @@
     <string name="chat_delete">Verwijderen</string>
     <string name="chat_unsend_note">Ze horen dat het is ingetrokken; een kopie die ze al bewaarden blijft van hen.</string>
     <string name="chat_unsend">Intrekken</string>
+    <string name="chat_reply_to_attachment">een bijlage</string>
+    <string name="chat_reply_to_receipt">een bon</string>
+    <string name="chat_reply_to_payment">een betaling</string>
+    <string name="chat_reply_to_bill">een verzoek om geld</string>
+    <string name="chat_reply_to_message">een bericht</string>
+    <string name="chat_reply_to_gone">een bericht dat hier niet meer is</string>
+    <string name="chat_reply_cancel">Toch niet daarop antwoorden</string>
+    <string name="chat_reply">Antwoorden</string>
     <string name="chat_unsent">Dit bericht is ingetrokken.</string>
     <string name="chat_cancel">Annuleren</string>
 

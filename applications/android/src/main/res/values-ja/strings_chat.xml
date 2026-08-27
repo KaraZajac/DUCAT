@@ -53,6 +53,14 @@
     <string name="chat_delete">削除</string>
     <string name="chat_unsend_note">取り消されたことは相手に伝わります。すでに保存された控えは相手のものです。</string>
     <string name="chat_unsend">取り消す</string>
+    <string name="chat_reply_to_attachment">添付ファイル</string>
+    <string name="chat_reply_to_receipt">レシート</string>
+    <string name="chat_reply_to_payment">支払い</string>
+    <string name="chat_reply_to_bill">支払いの依頼</string>
+    <string name="chat_reply_to_message">メッセージ</string>
+    <string name="chat_reply_to_gone">もうここにないメッセージ</string>
+    <string name="chat_reply_cancel">返信をやめる</string>
+    <string name="chat_reply">返信</string>
     <string name="chat_unsent">このメッセージは取り消されました。</string>
     <string name="chat_cancel">キャンセル</string>
 
