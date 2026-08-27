@@ -219,8 +219,13 @@ private fun TabRow(t: RunningTab, onClick: () -> Unit) {
             val refused = remember(t.id, t.state, version) {
                 if (t.state != "settled") false else {
                     val thread = ContactStore(context).thread(t.personaHex)
+                    // The tab has known its own bill's seq since settle wrote
+                    // it; matching by amount was the fallback pretending to
+                    // be the rule, and two same-priced tabs made it guess.
                     thread.lastOrNull {
-                        it.outgoing && it.kind == 1 && it.amountPxmr == t.settledTotal
+                        it.outgoing && it.kind == 1 &&
+                            if (t.billSeq > 0) it.seq == t.billSeq
+                            else it.amountPxmr == t.settledTotal
                     }?.let { (it.seq to it.timestamp) in billAnswers(thread).refused } ?: false
                 }
             }
@@ -414,9 +419,12 @@ internal fun cancelTabWithRetract(
 ) {
     val contacts = ContactStore(context)
     val contact = contacts.all().firstOrNull { it.personaHex == tab.personaHex }
-    val billSeq = contacts.thread(tab.personaHex)
-        .lastOrNull { it.outgoing && it.kind == 1 && it.amountPxmr == tab.settledTotal }
-        ?.seq
+    // The stored seq when the tab has one; the amount match only for tabs
+    // billed before settle recorded it.
+    val billSeq = tab.billSeq.takeIf { it > 0 }
+        ?: contacts.thread(tab.personaHex)
+            .lastOrNull { it.outgoing && it.kind == 1 && it.amountPxmr == tab.settledTotal }
+            ?.seq
     if (contact == null || billSeq == null) {
         store.cancel(tab)
         return
@@ -622,8 +630,12 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 val v by ContactStore.changes.collectAsState()
                 val wasRefused = remember(tab.id, v) {
                     val thread = ContactStore(context).thread(tab.personaHex)
+                    // Same preference as the list rows: the seq settle stored,
+                    // amount only for tabs that predate it.
                     thread.lastOrNull {
-                        it.outgoing && it.kind == 1 && it.amountPxmr == tab.settledTotal
+                        it.outgoing && it.kind == 1 &&
+                            if (tab.billSeq > 0) it.seq == tab.billSeq
+                            else it.amountPxmr == tab.settledTotal
                     }?.let { (it.seq to it.timestamp) in billAnswers(thread).refused } ?: false
                 }
                 Text(

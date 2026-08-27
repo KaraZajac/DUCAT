@@ -298,11 +298,27 @@ object Ledger {
     fun billAnswered(thread: List<StoredMessage>, m: StoredMessage): Boolean =
         thread.any { p ->
             p.kind == 2 && p.outgoing != m.outgoing &&
-                p.timestamp >= m.timestamp && p.amountPxmr >= m.amountPxmr
+                // §16.14 first, arithmetic second — the till's rule (see
+                // Tabs' said-sets). A payment that names a bill answers the
+                // bill it names, with no timestamp condition: the two stamps
+                // come from two different clocks, and a named answer sitting
+                // "before" its bill is ordinary skew, not time travel. The
+                // amount-and-time arm stays for notices that predate the
+                // reference — and a named notice must never fall through to
+                // it, or it answers every cheaper bill in the thread too.
+                if (p.reSeq != null) !p.reOwn && p.reSeq == m.seq
+                else p.timestamp >= m.timestamp && p.amountPxmr >= m.amountPxmr
         } || thread.any { p ->
-            // A receipt at or above it also closes it (paid outside).
-            p.kind == 3 && p.timestamp >= m.timestamp &&
-                p.amountPxmr >= m.amountPxmr
+            // A receipt at or above it also closes it (paid outside). Named
+            // receipts are exact the same way: the receipt's re_own says
+            // whose log the bill lives in, which is "the sender's own" only
+            // when receipt and bill come from the same side.
+            p.kind == 3 &&
+                if (p.reSeq != null) {
+                    p.reSeq == m.seq && p.reOwn == (p.outgoing == m.outgoing)
+                } else {
+                    p.timestamp >= m.timestamp && p.amountPxmr >= m.amountPxmr
+                }
         } || thread.any { p ->
             // §16.13's Retract closes it too. Named by sequence rather than
             // matched by amount, so it is exact.
