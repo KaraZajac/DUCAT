@@ -1530,11 +1530,29 @@ private fun Bubble(
                         color = MaterialTheme.colorScheme.error,
                     )
                     Spacer(Modifier.width(4.dp))
-                } else theirReadUpTo?.let { read ->
+                } else {
+                    // **One tick is ours to know; two is theirs to tell.**
+                    //
+                    // The first says the bytes reached the outbox they read
+                    // from — `markDelivered`, after the write lands — which
+                    // this device knows on its own and which is what a single
+                    // tick means in every client anyone has used. It used to
+                    // be drawn only inside `theirReadUpTo?.let`, so it really
+                    // meant "delivered, *and* they have read something older
+                    // than this". A contact who does not send read receipts
+                    // publishes no watermark at all, so a whole conversation
+                    // with them showed no tick ever — indistinguishable, on
+                    // screen, from nothing having sent.
+                    //
+                    // Nothing here leaks: whether our own write succeeded says
+                    // nothing about them, and a message that stays on one tick
+                    // for good is the honest picture of a reader who has not
+                    // told us — not a claim that they have not read it.
+                    val read = theirReadUpTo != null && theirReadUpTo > m.seq
                     Text(
-                        if (read > m.seq) "✓✓" else "✓",
+                        if (read) "✓✓" else "✓",
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (read > m.seq) MaterialTheme.ducat.settled
+                        color = if (read) MaterialTheme.ducat.settled
                         else MaterialTheme.colorScheme.outline,
                     )
                     Spacer(Modifier.width(4.dp))
