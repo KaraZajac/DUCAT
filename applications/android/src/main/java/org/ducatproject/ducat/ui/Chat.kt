@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.Ledger
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.PersonaStore
@@ -1250,6 +1251,39 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 messages = store.thread(c.personaHex)
                             }
                         }) { Text(stringResource(R.string.chat_unsend)) }
+                    }
+                    // Taking back your own bill — the same kind-5 the till
+                    // sends, offered to a person. Until now a shop could
+                    // cancel a bill and a friend could not, so a fat-fingered
+                    // request sat in both threads as a live Pay button with
+                    // no way to say "ignore that". Guarded like Unsend: your
+                    // own, delivered, not already answered or taken back.
+                    if (m.outgoing && m.kind == 1 && m.delivered &&
+                        (m.seq to m.timestamp) !in answers.withdrawn &&
+                        (m.seq to m.timestamp) !in answers.refused &&
+                        !Ledger.billAnswered(messages, m)
+                    ) {
+                        TextButton(onClick = {
+                            confirmDelete = null
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching {
+                                        Mailbox.send(
+                                            context, c,
+                                            context.getString(
+                                                R.string.bartab_bill_cancelled_msg,
+                                                Amounts.show(context, m.amountPxmr).primary,
+                                            ),
+                                            mine,
+                                            kind = 5, reSeq = m.seq, reOwn = true,
+                                        )
+                                    }.onFailure {
+                                        DucatLog.w("Chat", "cancel bill: ${it.message}")
+                                    }
+                                }
+                                messages = withContext(Dispatchers.IO) { store.thread(c.personaHex) }
+                            }
+                        }) { Text(stringResource(R.string.chat_cancel_request)) }
                     }
                     if (m.body.isNotBlank()) {
                         // Copy is how a card, an address, or a link gets passed

@@ -138,4 +138,5 @@
         <item quantity="other">Qui mancano %1$d messaggi</item>
     </plurals>
     <string name="chat_not_sent_yet">non ancora inviato</string>
+    <string name="chat_cancel_request">Annulla richiesta</string>
 </resources>

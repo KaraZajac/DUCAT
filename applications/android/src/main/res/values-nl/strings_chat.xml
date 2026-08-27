@@ -138,4 +138,5 @@
         <item quantity="other">Hier ontbreken %1$d berichten</item>
     </plurals>
     <string name="chat_not_sent_yet">nog niet verzonden</string>
+    <string name="chat_cancel_request">Verzoek intrekken</string>
 </resources>

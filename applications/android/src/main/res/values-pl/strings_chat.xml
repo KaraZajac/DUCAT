@@ -140,4 +140,5 @@
         <item quantity="other">Brakuje tu %1$d wiadomości</item>
     </plurals>
     <string name="chat_not_sent_yet">jeszcze niewysłane</string>
+    <string name="chat_cancel_request">Wycofaj prośbę</string>
 </resources>

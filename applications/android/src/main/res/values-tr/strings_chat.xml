@@ -138,4 +138,5 @@
         <item quantity="other">Burada %1$d mesaj eksik</item>
     </plurals>
     <string name="chat_not_sent_yet">henüz gönderilmedi</string>
+    <string name="chat_cancel_request">İsteği geri çek</string>
 </resources>

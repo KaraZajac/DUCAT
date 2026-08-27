@@ -138,4 +138,5 @@
         <item quantity="other">Hier fehlen %1$d Nachrichten</item>
     </plurals>
     <string name="chat_not_sent_yet">noch nicht gesendet</string>
+    <string name="chat_cancel_request">Anfrage zurückziehen</string>
 </resources>

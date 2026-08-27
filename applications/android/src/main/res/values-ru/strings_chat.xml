@@ -140,4 +140,5 @@
         <item quantity="other">Здесь не хватает %1$d сообщений</item>
     </plurals>
     <string name="chat_not_sent_yet">ещё не отправлено</string>
+    <string name="chat_cancel_request">Отменить запрос</string>
 </resources>

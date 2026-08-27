@@ -137,4 +137,5 @@
         <item quantity="other">Ada %1$d pesan yang hilang di sini</item>
     </plurals>
     <string name="chat_not_sent_yet">belum terkirim</string>
+    <string name="chat_cancel_request">Batalkan permintaan</string>
 </resources>

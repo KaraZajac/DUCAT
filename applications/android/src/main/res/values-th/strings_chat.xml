@@ -137,4 +137,5 @@
         <item quantity="other">ตรงนี้ขาดข้อความอยู่ %1$d ข้อความ</item>
     </plurals>
     <string name="chat_not_sent_yet">ยังไม่ได้ส่ง</string>
+    <string name="chat_cancel_request">ยกเลิกคำขอ</string>
 </resources>
