@@ -2,8 +2,7 @@
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background" />
     <foreground android:drawable="@mipmap/ic_launcher_foreground" />
-    <!-- Themed icons are a single colour: the cat has no legible one-colour
-         form, so the coin stands in. Android only uses this when the user has
-         turned themed icons on. -->
-    <monochrome android:drawable="@drawable/ic_ducat_mono" />
+    <!-- Themed icons are a single colour, so this is the cat drawn for that:
+         see ic_cat_mono. Android only uses it when themed icons are on. -->
+    <monochrome android:drawable="@drawable/ic_cat_mono" />
 </adaptive-icon>

@@ -1,84 +1,45 @@
 <!--
-  The coin being struck.
+  The cat arrives, and the ring closes around it.
 
-  The edge draws itself, the milled rim follows it round, and the D is struck
-  into the face last — which is the order a coin is actually made in, and the
-  reason the animation reads as something being minted rather than a logo
-  being decorated.
+  The ring draws from twelve o'clock all the way round while the cat settles
+  up to size — so the last thing that happens is the circle meeting itself,
+  which is a better ending than a shape simply being present.
 
-  **Under a second, all of it.** The system splash is held only until the
-  first frame is ready (see Theme.Ducat.Splash), and an animation longer than
-  the wait is an animation nobody sees the end of — or worse, one the app
-  waits for, which turns a splash into a delay. 800ms with the strike landing
-  at 600 leaves the last beat for the icon to sit still before it goes.
+  **Under a second, all of it.** The system splash is held only until the first
+  frame is ready (see Theme.Ducat.Splash), and an animation longer than the
+  wait is one nobody sees the end of — or worse, one the app waits for, which
+  turns a splash into a delay.
 
-  The group scale at the end is a settle, not a bounce: this is a coin, and a
-  coin that boings has the wrong weight.
+  The cat settles rather than bounces. It is a coin-holding cat, not a spring.
 -->
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/ic_splash_coin">
+    android:drawable="@drawable/ic_splash_cat">
 
-    <target android:name="edge">
+    <target android:name="ring">
         <aapt:attr xmlns:aapt="http://schemas.android.com/aapt" name="android:animation">
             <objectAnimator
                 android:propertyName="trimPathEnd"
                 android:valueFrom="0"
                 android:valueTo="1"
-                android:duration="520"
+                android:duration="720"
                 android:interpolator="@android:interpolator/fast_out_slow_in" />
         </aapt:attr>
     </target>
 
-    <target android:name="rim">
-        <aapt:attr xmlns:aapt="http://schemas.android.com/aapt" name="android:animation">
-            <objectAnimator
-                android:propertyName="trimPathEnd"
-                android:valueFrom="0"
-                android:valueTo="1"
-                android:startOffset="140"
-                android:duration="460"
-                android:interpolator="@android:interpolator/fast_out_slow_in" />
-        </aapt:attr>
-    </target>
-
-    <target android:name="stem">
-        <aapt:attr xmlns:aapt="http://schemas.android.com/aapt" name="android:animation">
-            <objectAnimator
-                android:propertyName="trimPathEnd"
-                android:valueFrom="0"
-                android:valueTo="1"
-                android:startOffset="380"
-                android:duration="220"
-                android:interpolator="@android:interpolator/fast_out_slow_in" />
-        </aapt:attr>
-    </target>
-
-    <target android:name="bowl">
-        <aapt:attr xmlns:aapt="http://schemas.android.com/aapt" name="android:animation">
-            <objectAnimator
-                android:propertyName="trimPathEnd"
-                android:valueFrom="0"
-                android:valueTo="1"
-                android:startOffset="420"
-                android:duration="260"
-                android:interpolator="@android:interpolator/fast_out_slow_in" />
-        </aapt:attr>
-    </target>
-
-    <target android:name="coin">
+    <target android:name="cat">
         <aapt:attr xmlns:aapt="http://schemas.android.com/aapt" name="android:animation">
             <set>
                 <objectAnimator
                     android:propertyName="scaleX"
-                    android:valueFrom="0.88"
-                    android:valueTo="1"
-                    android:duration="800"
+                    android:valueFrom="0.34"
+                    android:valueTo="0.52"
+                    android:duration="620"
                     android:interpolator="@android:interpolator/fast_out_slow_in" />
                 <objectAnimator
                     android:propertyName="scaleY"
-                    android:valueFrom="0.88"
-                    android:valueTo="1"
-                    android:duration="800"
+                    android:valueFrom="0.34"
+                    android:valueTo="0.52"
+                    android:duration="620"
                     android:interpolator="@android:interpolator/fast_out_slow_in" />
             </set>
         </aapt:attr>

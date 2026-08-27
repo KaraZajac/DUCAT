@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -188,8 +187,8 @@ fun BillScreen(
  * not a few seconds.
  *
  * So: the same object [PaidSplash] resolves into, held in its unresolved
- * state. The coin goes round the cat because that is the thing that is
- * happening, and it is the app's own mark rather than a borrowed spinner.
+ * state — the cat, with a circle going round it, because that is the thing
+ * that is happening.
  *
  * **No progress bar, deliberately.** The phases are real — tip, decoys, fee,
  * sign, publish — but they live inside one FFI call and this side cannot see
@@ -241,18 +240,13 @@ fun SendingSplash(amountPxmr: Long, toName: String?) {
                 verticalArrangement = Arrangement.Center,
             ) {
                 val track = MaterialTheme.colorScheme.outlineVariant
-                val trail = MaterialTheme.colorScheme.primary
+                val sweep = MaterialTheme.colorScheme.primary
                 Box(Modifier.size(220.dp), contentAlignment = Alignment.Center) {
-                    // The track, and the coin's wake on it.
-                    //
-                    // The track alone was scenery nobody could see, and a coin
-                    // moving against a plain field reads as a dot that has
-                    // been repositioned rather than one that is travelling.
-                    // The wake is what makes it motion: a short arc behind the
-                    // coin, fading out, so a still frame already says which way
-                    // it is going.
+                    // A circle going round, drawn as a comet rather than a
+                    // Material spinner: the head is bright and the tail fades
+                    // out behind it, so a still frame already says which way it
+                    // is travelling and roughly how fast.
                     Canvas(Modifier.size(180.dp)) {
-                        val w = 3.dp.toPx()
                         drawArc(
                             color = track,
                             startAngle = 0f,
@@ -260,16 +254,17 @@ fun SendingSplash(amountPxmr: Long, toName: String?) {
                             useCenter = false,
                             style = Stroke(width = 1.dp.toPx()),
                         )
-                        // Compose measures arcs from three o'clock; the coin
-                        // hangs at twelve. The -90 is that quarter turn.
+                        // Compose measures arcs from three o'clock; the head
+                        // rides at twelve. The -90 is that quarter turn.
                         val head = angle - 90f
-                        val steps = 18
+                        val steps = 24
+                        val w = 4.dp.toPx()
                         repeat(steps) { k ->
                             val f = k.toFloat() / steps
                             drawArc(
-                                color = trail.copy(alpha = 0.30f * f * f),
-                                startAngle = head - 62f + 62f * f,
-                                sweepAngle = 62f / steps + 0.6f,
+                                color = sweep.copy(alpha = 0.85f * f * f),
+                                startAngle = head - 96f + 96f * f,
+                                sweepAngle = 96f / steps + 0.8f,
                                 useCenter = false,
                                 style = Stroke(width = w, cap = StrokeCap.Round),
                             )
@@ -288,22 +283,6 @@ fun SendingSplash(amountPxmr: Long, toName: String?) {
                                 modifier = Modifier.size(104.dp).scale(breath),
                             )
                         }
-                    }
-                    // Rotate the whole frame and hang the coin off its edge:
-                    // the coin turns with it, which is what a coin rolling
-                    // round a track would do anyway.
-                    Box(
-                        Modifier
-                            .size(180.dp)
-                            .graphicsLayer { rotationZ = angle },
-                        contentAlignment = Alignment.TopCenter,
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.ic_ducat_coin),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(30.dp).offset(y = (-15).dp),
-                        )
                     }
                 }
                 Spacer(Modifier.height(28.dp))

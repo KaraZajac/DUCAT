@@ -80,7 +80,7 @@ class NodeService : Service() {
         val n: Notification = NotificationCompat.Builder(this, CHANNEL)
             .setContentTitle(getString(R.string.nodeservice_notification_title))
             .setContentText(getString(R.string.nodeservice_notification_text))
-            .setSmallIcon(R.drawable.ic_ducat_mono)
+            .setSmallIcon(R.drawable.ic_cat_notify)
             .setContentIntent(tap)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)

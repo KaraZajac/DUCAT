@@ -1,0 +1,32 @@
+<!--
+  The mark, in one colour.
+
+  Android tints a notification's small icon and a themed launcher icon to a
+  single colour, so whatever is here becomes a silhouette whether it was drawn
+  as one or not. The painted cat has no such form — traced faithfully it
+  reduces to a blob, and simplified until the fur stops being noise it loses
+  the ears, which are the only thing saying "cat" at twenty-four density
+  pixels. So this is the cat *drawn for this size*: pointed ears, the raised
+  paw held clear of the head with a gap wide enough to survive, and the coin
+  punched out of the belly rather than struck onto it.
+
+  The paw stands apart on purpose. Attached, at this size, it closes up into
+  the head and the cat stops beckoning — which is the whole gesture.
+
+  One path, evenOdd, so the coin is a hole rather than a shape that has to be
+  painted a second colour it will not be allowed to keep.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108"
+    android:tint="#FFFFFF">
+    <group
+        android:pivotX="47.5" android:pivotY="50.5"
+        android:scaleX="0.8675" android:scaleY="0.8675"
+        android:translateX="6.5" android:translateY="3.5">
+        <path
+            android:fillColor="#FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M35,32 L30,9 L51,21 C52,20 59,20 60,21 L81,9 L76,32 C80,36 82,41 82,46 C82,50 80,54 77,57 C84,61 88,69 88,78 C88,86 83,92 75,92 L37,92 C29,92 24,86 24,78 C24,70 27,63 32,58 C29,55 27,51 27,46 C27,41 30,36 35,32 Z M16,27 C21,27 24,32 24,38 L24,52 C24,57 20,60 16,60 C11,60 8,56 8,51 L8,37 C8,31 11,27 16,27 Z M56,62 C64,62 71,69 71,77 C71,85 64,92 56,92 C48,92 41,85 41,77 C41,69 48,62 56,62 Z" />
+    </group>
+</vector>
