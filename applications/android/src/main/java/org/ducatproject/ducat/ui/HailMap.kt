@@ -1,5 +1,7 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -24,6 +26,10 @@ fun RouteMap(
     route: List<Pair<Long, Long>>,
     modifier: Modifier = Modifier,
 ) {
+    // Captured out here: `update` runs outside composition and cannot
+    // read the theme, and a pin that hardcoded one palette would be the
+    // wrong colour on the other.
+    val pinArgb = MaterialTheme.colorScheme.primary.toArgb()
     AndroidView(
         modifier = modifier.clipToBounds(),
         factory = { ctx ->
@@ -63,6 +69,7 @@ fun RouteMap(
                 pts += g
                 map.overlays.add(Marker(map).apply {
                     position = g; title = map.context.getString(R.string.hailmap_destination)
+                    icon = placePin(map.context, pinArgb)
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 })
             }
@@ -116,6 +123,10 @@ fun ResultsMap(
     onPick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Captured out here: `update` runs outside composition and cannot
+    // read the theme, and a pin that hardcoded one palette would be the
+    // wrong colour on the other.
+    val pinArgb = MaterialTheme.colorScheme.primary.toArgb()
     AndroidView(
         modifier = modifier.clipToBounds(),
         factory = { ctx ->
@@ -151,6 +162,7 @@ fun ResultsMap(
                 pts += g
                 map.overlays.add(Marker(map).apply {
                     position = g; title = label
+                    icon = placePin(map.context, pinArgb)
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     setOnMarkerClickListener { _, _ -> onPick(i); true }
                 })
@@ -188,6 +200,10 @@ fun DriverMap(
     coverage: LongArray? = null,
     modifier: Modifier = Modifier,
 ) {
+    // Captured out here: `update` runs outside composition and cannot
+    // read the theme, and a pin that hardcoded one palette would be the
+    // wrong colour on the other.
+    val pinArgb = MaterialTheme.colorScheme.primary.toArgb()
     AndroidView(
         modifier = modifier.clipToBounds(),
         factory = { ctx ->
@@ -240,6 +256,7 @@ fun DriverMap(
                 pts += g
                 map.overlays.add(Marker(map).apply {
                     position = g; title = label
+                    icon = placePin(map.context, pinArgb)
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     setOnMarkerClickListener { _, _ -> onFareTap(i); true }
                 })
@@ -274,6 +291,79 @@ fun DriverMap(
  * resources would need its own copy per density and a name in nineteen
  * languages' worth of nothing.
  */
+/**
+ * Where you are *going*: a pin in the app's own colour, with the app's own
+ * mark in it.
+ *
+ * osmdroid ships a green teardrop and it looked like osmdroid's — a stock
+ * marker on a screen where everything else is the same three purples. The
+ * shape stays the idiom every map taught people; only the paint changes, and
+ * the cat rides in the head so a pin belongs to this app the way the
+ * notification icon does.
+ *
+ * **The colour comes from the caller**, not from a constant here, so the pin
+ * follows Latte and Mocha rather than picking one and being wrong on the
+ * other. The white outline is what makes it survive being dropped on a dark
+ * forest or a pale suburb without knowing which it will be.
+ *
+ * Drawn rather than shipped, for the same reason as [hereDot]: it is a path
+ * and a vector, and a drawable in resources would need a copy per density.
+ */
+private fun placePin(
+    context: android.content.Context,
+    argb: Int,
+): android.graphics.drawable.Drawable {
+    val d = context.resources.displayMetrics.density
+    val r = 11f * d
+    val edge = 2f * d
+    val w = ((r + edge) * 2f)
+    val h = r * 3.1f + edge * 2f
+    val bmp = android.graphics.Bitmap.createBitmap(
+        w.toInt().coerceAtLeast(1), h.toInt().coerceAtLeast(1),
+        android.graphics.Bitmap.Config.ARGB_8888,
+    )
+    val canvas = android.graphics.Canvas(bmp)
+    val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    val cx = w / 2f
+    val cy = r + edge
+    val tip = h - edge / 2f
+
+    // The teardrop: a circle, and two curves running from its flanks down to
+    // a point. Drawn as one path so the outline traces the whole silhouette
+    // rather than showing a seam where the head meets the tail.
+    val path = android.graphics.Path().apply {
+        moveTo(cx, tip)
+        cubicTo(cx - r * 0.62f, tip - r * 1.05f, cx - r, cy + r * 0.72f, cx - r, cy)
+        arcTo(android.graphics.RectF(cx - r, cy - r, cx + r, cy + r), 180f, 180f)
+        cubicTo(cx + r, cy + r * 0.72f, cx + r * 0.62f, tip - r * 1.05f, cx, tip)
+        close()
+    }
+    paint.style = android.graphics.Paint.Style.STROKE
+    paint.strokeWidth = edge * 2f
+    paint.color = android.graphics.Color.WHITE
+    canvas.drawPath(path, paint)
+    paint.style = android.graphics.Paint.Style.FILL
+    paint.color = argb
+    canvas.drawPath(path, paint)
+
+    // The mark, in the head. ic_cat_mono already sits inside the adaptive
+    // icon's safe zone, so it fills about two thirds of whatever box it is
+    // given — which is why the box here is the head's full diameter and the
+    // cat still lands inside it with room around.
+    androidx.core.content.res.ResourcesCompat.getDrawable(
+        context.resources, R.drawable.ic_cat_mono, context.theme,
+    )?.let { cat ->
+        val box = (r * 2f).toInt()
+        cat.setBounds(
+            (cx - box / 2f).toInt(), (cy - box / 2f).toInt(),
+            (cx + box / 2f).toInt(), (cy + box / 2f).toInt(),
+        )
+        cat.setTint(android.graphics.Color.WHITE)
+        cat.draw(canvas)
+    }
+    return android.graphics.drawable.BitmapDrawable(context.resources, bmp)
+}
+
 private fun hereDot(context: android.content.Context): android.graphics.drawable.Drawable {
     val d = context.resources.displayMetrics.density
     val r = 7f * d
