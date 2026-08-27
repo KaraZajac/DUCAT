@@ -24,12 +24,14 @@ import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Balances
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.Groups
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.NameStore
 import org.ducatproject.ducat.NodeStore
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.Rates
+import org.ducatproject.ducat.Recurring
 import org.ducatproject.ducat.StoredMessage
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
@@ -285,6 +287,12 @@ private fun runDesk(deskDir: File) = application {
                             Mailbox.collectClaims(context)
                             Mailbox.poll(context)
                         }
+                        // The desk shares the scheduling screens, so it must
+                        // share the firing too — a schedule the till can
+                        // create but never send is a rent reminder that
+                        // works only where nobody runs a till.
+                        runCatching { Groups.retryOutbox(context) }
+                        runCatching { Recurring.runDue(context) }
                         // The wallet keeps pace beside the mailbox: a few
                         // scan windows a tick, so a syncing desk converges
                         // without starving the poll.
