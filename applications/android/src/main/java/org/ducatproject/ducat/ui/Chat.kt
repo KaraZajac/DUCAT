@@ -3564,6 +3564,7 @@ private fun RideBondBanner(contact: Contact) {
                 stage == "released" || stage == "release_cosigned" -> {
                     BondLine(
                         spin = false,
+                        done = true,
                         text = stringResource(
                             if (reservation) R.string.res_released else R.string.bond_released,
                         ),
@@ -3739,16 +3740,21 @@ private fun BondNote(text: String) {
  * instead, which is what a gutter is for.
  */
 @Composable
-private fun BondLine(spin: Boolean, text: String) {
+private fun BondLine(spin: Boolean, text: String, done: Boolean = false) {
     Box(Modifier.fillMaxWidth()) {
         Box(
             Modifier.align(Alignment.CenterStart)
                 .offset(x = -BOND_GUTTER),
         ) {
-            if (spin) {
-                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-            } else {
-                Icon(
+            when {
+                spin -> CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                // The one state somebody is actually watching for — see
+                // SettledMark for why it draws itself in.
+                done -> SettledMark(
+                    Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+                else -> Icon(
                     Icons.Filled.Lock, null, Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSecondaryContainer,
                 )

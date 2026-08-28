@@ -163,6 +163,11 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
             items(shownRows, key = { r -> "${r.senderHex}:${r.message.groupSeq}" }) { r ->
                 val m = r.message
                 val gone = (r.senderHex to m.groupSeq) in unsent
+                // A message arriving takes its place instead of teleporting
+                // into it — five people's fan-out lands out of order by
+                // nature, and the motion is what makes an insertion above
+                // the newest line read as "arrived late", not "appeared".
+                Box(Modifier.animateItem()) {
                 GroupBubble(
                     m = m,
                     own = m.outgoing,
@@ -187,6 +192,7 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
                     },
                     onPress = { menuFor = r },
                 )
+                }
             }
         }
         menuFor?.let { r ->
