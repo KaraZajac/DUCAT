@@ -384,7 +384,12 @@ private fun RentSearchScreen(
                     found == null ||
                         (searching && found.none { it.kind.toInt() == showing }) -> Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                            // The brand's wait, not the platform's — see
+                            // CatSpinner.
+                            CatSpinner(
+                                Modifier.size(22.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 stringResource(R.string.rent_searching),
