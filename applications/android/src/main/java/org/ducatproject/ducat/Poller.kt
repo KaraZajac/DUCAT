@@ -305,6 +305,13 @@ class Poller(private val context: Context) {
                 // a drawer.
                 runCatching { Recurring.runDue(context) }
                     .onFailure { DucatLog.w(TAG, "recurring: ${it.message}") }
+                // §16.12 repair: a write the node accepted with the network
+                // dark stays local for ever, while the head advertising it
+                // travels — wedging the reader on a slot that never comes.
+                // Verify the trailing writes against the network's copy and
+                // re-flood our own bytes where they differ.
+                runCatching { Mailbox.verifyLastWrites(context) }
+                    .onFailure { DucatLog.w(TAG, "slot verify: ${it.message}") }
                 runCatching { Positions.enforceBounds(context) }
                     .onFailure { DucatLog.w(TAG, "position stop: ${it.message}") }
 

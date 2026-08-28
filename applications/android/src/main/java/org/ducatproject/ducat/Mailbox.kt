@@ -101,9 +101,81 @@ object Mailbox {
             if (it.contains("slotseen_$key")) it.getInt("slotseen_$key", 0) else null
         }
 
-    private fun recordSlotSeen(context: Context, key: String, hash: Int) {
-        waitPrefs(context).edit().putInt("slotseen_$key", hash).apply()
+    /**
+     * §16.12 repair: push the trailing writes again, once, so the network
+     * definitely holds them.
+     *
+     * Found live (2026-08-27): a send made while the emulator's network was
+     * dark got a local "accepted" from the node — the value landed in our own
+     * record store — but the flood behind it died and nothing ever pushed it
+     * again. The head advertising the new seq *did* travel, so the reader sat
+     * on "slot still holds its previous tenant — waiting" for ever, with
+     * every later message queued behind the hole: an in-order log wedged by a
+     * write both ends were sure about.
+     *
+     * Verify-by-reading cannot see this — a get, forced or not, answers with
+     * the newest value it knows, and the newest value is ours. So no
+     * detection: re-*set* the local bytes instead. A set of identical bytes
+     * is a fresh signed value the node floods again, re-sealing is never
+     * involved (the bytes come from our own record store, byte-identical
+     * under the published seq), and the whole thing is idempotent. One
+     * contact per pass, trailing window only, and a watermark so each write
+     * is re-pushed exactly once: steady state costs nothing, and every send
+     * gets its insurance flood one poll pass later.
+     */
+    fun verifyLastWrites(context: Context) {
+        val store = ContactStore(context)
+        val c = store.all().firstOrNull { k ->
+            k.outSeq > 0 && k.myOutbox.isNotEmpty() &&
+                k.myOutboxOwnerSecret.isNotEmpty() &&
+                store.lastSlotVerified(k.personaHex) < k.outSeq - 1
+        } ?: return
+        val ring = c.myRing.toUInt()
+        // The whole trailing window, not "since the watermark": the pushes
+        // are idempotent and near-free, and a floor at the watermark once
+        // stranded a known-wedged slot behind a watermark an earlier, wrong
+        // version of this repair had set. Only what the ring can still hold —
+        // older slots were overwritten by design.
+        val from = (c.outSeq - 4).coerceAtLeast(0L)
+        runCatching {
+            nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
+            var pushed = 0
+            for (seq in from until c.outSeq) {
+                val sub = logSubkey(seq.toULong(), ring)
+                // Our own record store; nothing there, nothing to insure.
+                val local = nodeDhtGet(c.myOutbox, sub, false) ?: continue
+                nodeDhtSet(c.myOutbox, sub, local)
+                DucatLog.i(
+                    TAG,
+                    "re-push seq $seq subkey $sub bytes ${local.contentHashCode()}",
+                )
+                pushed++
+            }
+            if (pushed > 0) {
+                DucatLog.i(
+                    TAG,
+                    "re-pushed $pushed trailing slot(s) to ${c.displayName()} " +
+                        "(seq $from..${c.outSeq - 1})",
+                )
+            }
+            store.setLastSlotVerified(c.personaHex, c.outSeq - 1)
+        }.onFailure { DucatLog.w(TAG, "slot re-push: ${it.message}") }
     }
+
+    private fun recordSlotSeen(context: Context, key: String, hash: Int, seq: ULong) {
+        waitPrefs(context).edit()
+            .putInt("slotseen_$key", hash)
+            // The seq beside the hash, so the stale-tenant check can tell
+            // "these bytes are an older message" from "these bytes are the
+            // one I am waiting for, processed once and lost mid-crash".
+            .putLong("slotseenq_$key", seq.toLong())
+            .apply()
+    }
+
+    /** Which seq the recorded bytes were processed as, or -1 for entries
+     *  written before the seq travelled with the hash. */
+    private fun slotSeenSeq(context: Context, key: String): Long =
+        waitPrefs(context).getLong("slotseenq_$key", -1L)
 
     /**
      * Mint a card: an inbox for the handshake, an outbox for what we will say.
@@ -1358,7 +1430,8 @@ object Mailbox {
                     (seq + 1uL).toLong(), null,
                 )
                 recordSlotSeen(
-                    context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode(),
+                    context, "${c.personaHex}:${logSubkey(seq, ring)}",
+                    raw.contentHashCode(), seq,
                 )
                 seq += 1uL
                 prev = null
@@ -1375,13 +1448,50 @@ object Mailbox {
                 val slotKey = "${c.personaHex}:${logSubkey(seq, ring)}"
                 val rawHash = raw.contentHashCode()
                 if (slotSeen(context, slotKey) == rawHash) {
+                    if (slotSeenSeq(context, slotKey) == seq.toLong()) {
+                        // Not a previous tenant at all: these bytes were
+                        // processed once as exactly this sequence, and the
+                        // process died between recording that and keeping the
+                        // message — the seen-hash survived, the append did
+                        // not. Found live (2026-08-27) after a kill mid-poll:
+                        // the reader then refused its own message as stale
+                        // for ever, and the whole in-order log wedged behind
+                        // it. The one-time key was burned in that first
+                        // processing (that is why secrets is empty here), so
+                        // the words are gone; what can be kept honest is the
+                        // thread: an explicit marker, and everything behind
+                        // the hole delivered.
+                        DucatLog.w(
+                            TAG,
+                            "message $seq from ${c.displayName()} was " +
+                                "processed once and lost to a crash — keeping " +
+                                "a marker and moving on",
+                        )
+                        store.appendAndAdvance(
+                            c.personaHex,
+                            StoredMessage(
+                                outgoing = false, seq = seq.toLong(),
+                                body = "[a message arrived here and was lost " +
+                                    "to an interruption before it could be " +
+                                    "kept]",
+                                timestamp = deadLetterTime(store, c.personaHex),
+                                deadLetter = true,
+                            ),
+                            (seq + 1uL).toLong(), null,
+                        )
+                        recordSlotSeen(context, slotKey, rawHash, seq)
+                        seq += 1uL
+                        prev = null
+                        continue
+                    }
                     // The slot's previous tenant — bytes this reader already
                     // processed as an earlier sequence. The real write is still
                     // propagating; wait as long as it takes, no clock.
                     DucatLog.i(
                         TAG,
                         "slot for message $seq from ${c.displayName()} still " +
-                            "holds its previous tenant — waiting",
+                            "holds its previous tenant — waiting " +
+                            "(subkey ${logSubkey(seq, ring)}, bytes $rawHash)",
                     )
                     break
                 }
@@ -1422,11 +1532,6 @@ object Mailbox {
                     TAG,
                     "prekey $id is gone; message $seq from ${c.displayName()} is lost",
                 )
-                // The bytes being given up on become the slot's last-processed
-                // tenant: when the next sequence lands here and these bytes
-                // are still what the network serves, that is propagation lag,
-                // not another loss.
-                recordSlotSeen(context, slotKey, rawHash)
                 store.appendAndAdvance(
                     c.personaHex,
                     StoredMessage(
@@ -1438,6 +1543,14 @@ object Mailbox {
                     ),
                     (seq + 1uL).toLong(), null,
                 )
+                // After the append, never before: the seen-hash outliving a
+                // death that took the message with it is exactly the wedge
+                // the recovery branch above exists for. The bytes given up on
+                // become the slot's last-processed tenant either way — when
+                // the next sequence lands here and these bytes are still what
+                // the network serves, that is propagation lag, not another
+                // loss.
+                recordSlotSeen(context, slotKey, rawHash, seq)
                 seq += 1uL
                 prev = null
                 continue
@@ -1468,7 +1581,7 @@ object Mailbox {
                         (seq + 1uL).toLong(), null,
                     )
                     clearStuck(context, "${c.personaHex}:$seq")
-                    recordSlotSeen(context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode())
+                    recordSlotSeen(context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode(), seq)
                     seq += 1uL
                     prev = null
                     continue
@@ -1536,7 +1649,7 @@ object Mailbox {
                         ),
                         (seq + 1uL).toLong(), null,
                     )
-                    recordSlotSeen(context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode())
+                    recordSlotSeen(context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode(), seq)
                     seq += 1uL
                     prev = null
                     continue
@@ -1571,7 +1684,8 @@ object Mailbox {
                     (seq + 1uL).toLong(), null,
                 )
                 recordSlotSeen(
-                    context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode(),
+                    context, "${c.personaHex}:${logSubkey(seq, ring)}",
+                    raw.contentHashCode(), seq,
                 )
                 seq += 1uL
                 prev = null
@@ -1580,7 +1694,6 @@ object Mailbox {
             // If this seq had been waiting out the patience window, it made
             // it after all — the tracker must not keep growing.
             clearStuck(context, "${c.personaHex}:$seq")
-            recordSlotSeen(context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode())
             DucatLog.i(TAG, "received seq ${opened.seq} from ${c.displayName()}")
             val arrived = StoredMessage(
                 outgoing = false, seq = opened.seq.toLong(),
@@ -1633,6 +1746,19 @@ object Mailbox {
                 Notify.message(context, announceAs, c.personaHex, arrived)
             }
             store.appendAndAdvance(c.personaHex, arrived, (seq + 1uL).toLong(), opened.link)
+            // Only now that the message is kept. Recording "processed" first
+            // meant a death in the gap left a seen-hash pointing at a message
+            // that no longer existed anywhere, and the reader then refused
+            // its own bytes as a stale tenant for ever (found live,
+            // 2026-08-27, killed mid-poll). The reversed gap is survivable:
+            // the append advanced the cursor, so the missing hash matters
+            // only when the ring wraps back to this slot — where the
+            // patience window and the dead-letter path already bound the
+            // damage to a marker, never a wedge.
+            recordSlotSeen(
+                context, "${c.personaHex}:${logSubkey(seq, ring)}",
+                raw.contentHashCode(), seq,
+            )
             // §17.9: a ceremony round drives the threshold engine, not the
             // chat. The message is recorded above like any other so the
             // thread stays honest; the orchestrator acts on it here.

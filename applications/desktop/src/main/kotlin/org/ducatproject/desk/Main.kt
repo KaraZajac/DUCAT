@@ -293,6 +293,7 @@ private fun runDesk(deskDir: File) = application {
                         // works only where nobody runs a till.
                         runCatching { Groups.retryOutbox(context) }
                         runCatching { Recurring.runDue(context) }
+                        runCatching { Mailbox.verifyLastWrites(context) }
                         // The wallet keeps pace beside the mailbox: a few
                         // scan windows a tick, so a syncing desk converges
                         // without starving the poll.

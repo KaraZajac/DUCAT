@@ -267,9 +267,30 @@ class ContactStore(context: Context) {
      * ones exist — leaving them would grow the prefs file by one orphan per
      * forgotten conversation, forever.
      */
+    /** The newest outbound seq whose slot the network has confirmed holding
+     *  (Mailbox.verifyLastWrites). -1 until anything has been. */
+    fun lastSlotVerified(personaHex: String): Long =
+        prefs.getLong("slotok_$personaHex", -1L)
+
+    fun setLastSlotVerified(personaHex: String, seq: Long) {
+        prefs.edit().putLong("slotok_$personaHex", seq).apply()
+    }
+
+    /** Consecutive repair rounds that found the network stale — the give-up
+     *  counter for the same verifier. */
+    fun slotFixTries(personaHex: String): Int =
+        prefs.getInt("slotfix_$personaHex", 0)
+
+    fun setSlotFixTries(personaHex: String, n: Int) {
+        prefs.edit().putInt("slotfix_$personaHex", n).apply()
+    }
+
     fun forget(personaHex: String) { synchronized(lock) {
         val e = prefs.edit()
-        listOf("thread_", "disappear_", "seen_", "usedtheirs_", "billseen_", "pendingslot_")
+        listOf(
+            "thread_", "disappear_", "seen_", "usedtheirs_", "billseen_",
+            "pendingslot_", "slotok_", "slotfix_",
+        )
             .forEach { e.remove(it + personaHex) }
         prefs.all.keys.filter {
             it.startsWith("stuck_$personaHex:") || it.startsWith("slotseen_$personaHex:")
