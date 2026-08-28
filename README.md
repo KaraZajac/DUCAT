@@ -93,7 +93,17 @@ offline.
 
 Those conversations carry commerce, not just text: itemised bills whose lines
 **must** sum to their total or the message is refused, payments, and receipts
-issued by the payee pointing at the transaction they acknowledge. Encryption is
+issued by the payee pointing at the transaction they acknowledge. Replies,
+reactions and unsend work the way you expect; a search box finds what anyone
+said — receipts included, since a bill's items live in its body. Small
+**groups** run as fan-out over the pairwise threads — no group key, no shared
+record, nobody to forge as, and the app states the shape plainly before your
+first one. A group can **split a bill**: one total becomes a pairwise request
+to each person and a sentence in the group everyone can check the arithmetic
+against, and each request flips Paid ✓ as its §16.14 reference lands. A
+standing rent or dues becomes a **recurring bill** — the *asking* repeats on a
+schedule; every payment is still approved by hand, because a request carries
+no authority. Encryption is
 X3DH-shaped with one-time prekeys and forward secrecy — and when the app has to
 fall back to the signed prekey it shows you an open lock rather than hiding it.
 
@@ -124,7 +134,7 @@ off-device. The boards themselves never carry better than ~1.2 km.
 ## Your phone is the whole business
 
 <p align="center">
-  <img src="docs/screenshots/modes.png" width="260" alt="Operating modes: personal, point of sale, bar tab, taxi, donations, renting">
+  <img src="docs/screenshots/modes.png" width="260" alt="Operating modes: personal, point of sale, bar tab, taxi, donations, marketplace, renting, hire help, kiosk">
   &nbsp;
   <img src="docs/screenshots/pos.png" width="260" alt="Point of sale: two items rung up, running total in XMR and USD">
   &nbsp;
@@ -136,16 +146,27 @@ wallet's. A **point of sale** rings up items or takes a typed total and shows
 one code; the bill arrives on the customer's phone the moment they scan it, and
 a receipt goes back when they pay. A **bar tab** pings every drink to the
 customer and closes with one bill they can settle from the bus home. A
-**donation box** is a standing address any Monero wallet can give to, with its
-linkability cost stated on screen.
+**kiosk** faces the other way — customers tap what they want on a screen that
+belongs to them for a minute, staff live behind a PIN — and a **donation box**
+is a standing address any Monero wallet can give to, with its linkability cost
+stated on screen. A shop's sales-tax rate is one number in settings; the till,
+the tab and the kiosk compute the line and the receipts carry it, because a
+business using this has books to keep. **Marketplace** and **hire help** put
+things and hours on the same boards the rentals use — list once, found by
+whoever is nearby, settled through the same stakes.
 
 <p align="center">
   <img src="docs/screenshots/taxi.png" width="300" alt="Taxi mode: watch a stand, choose how wide an area, fares and meter tabs">
 </p>
 
 **Taxi** mode is a driver's whole day: choose how wide an area to watch, take a
-hail, run the meter, and see today's take. Almost none of this needed a new wire
-object — the spec's proudest sentence.
+hail, run the meter, and see today's take. The meter is deliberately
+per-minute, not per-mile — elapsed time is the one figure both people in the
+car can verify, and the bill's line item carries the arithmetic ("6 min 02 s ×
+$0.27/min") so the rider can check it against the rate that landed in the chat
+before the wheels moved. Distance-priced rides are the hail's job, where the
+route is quoted and agreed before anyone commits. Almost none of this needed a
+new wire object — the spec's proudest sentence.
 
 ## Renting out a room or a car
 
@@ -236,7 +257,7 @@ to a banknote.
 ## The repository
 
 ```
-ducat-protocol.md   the spec — draft 0.88, changelog first
+ducat-protocol.md   the spec — draft 0.90, changelog first
 core/               reference implementation (Rust)
 vectors/            328 conformance cases + schema — the published artifact
 conformance/        four checkers: schema, second implementation, spec audit,
@@ -342,7 +363,18 @@ and swept off both phones by the poller when the ride settled — with the
 one thing an emulator cannot judge, a dot that actually moves, left to
 the field day, because `adb emu geo fix` reports OK and changes nothing. A co-signer today
 consents to a stated fee, not an itemised destination list — honest consent
-waits on an upstream wallet API making payments readable.
+waits on an upstream wallet API making payments readable. **On 2026-08-27/28
+every escrow rail ran end-to-end through the UI in one day** — a marketplace
+sale (release `f38e2f89`, the listing selling out and taking itself down), a
+street hail driven rider-to-driver with the live position stream crossing
+phones (`2b6e2252`), a two-day gear rental with the deposits coming home
+beside the rent (`f2638fdf`), and a hire-help job (`446aa13f`) whose first run
+surfaced and fixed a real race: a co-signature crossing a re-proposed release
+round now heals automatically instead of stranding the deal. The same sweep
+walked the metered taxi day — claim-once pickup code, terms into the chat at
+start, the per-minute bill checked to the cent — after the meter itself was
+caught deriving money from the wall clock and moved to the one that only runs
+forward.
 
 A driver's watches did not work for the whole life of the feature, which is
 worth stating plainly because it was invisible: arming one requires the DHT
