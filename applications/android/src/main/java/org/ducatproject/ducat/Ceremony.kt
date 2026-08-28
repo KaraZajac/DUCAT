@@ -1221,7 +1221,18 @@ object Ceremony {
             // press "Ask again". The split is the one already agreed, read
             // back from the record, so this repeats the proposal rather than
             // inventing a new one.
-            val lost = why.message?.contains("no release in progress") == true
+            // Two spellings of the same stranding. "No release in progress"
+            // is the proposer restarted mid-round. InvalidShare is the
+            // co-sign racing a supersede: every retry of the proposal
+            // derives fresh nonces (the in-memory session cannot survive a
+            // restart, so replay is not on offer), and a co-signature built
+            // against round N arrives after round N+1 replaced it. Found
+            // live 2026-08-28 — the co-signer's screen showed nothing wrong,
+            // the proposer's round tore down, and the deal sat until a
+            // manual "Ask again". Both heal the same way: repeat the agreed
+            // proposal, so the co-signer gets a fresh round 0 to answer.
+            val lost = why.message?.contains("no release in progress") == true ||
+                why.message?.contains("InvalidShare") == true
             if (lost && round?.toInt() == 1) {
                 val back = load(context, idHex)?.optLong("myRiderBack") ?: 0L
                 runCatching { proposeRideSplit(context, idHex, back) }
