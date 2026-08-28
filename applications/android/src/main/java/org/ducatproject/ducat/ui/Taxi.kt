@@ -52,17 +52,42 @@ private const val TAG = "Taxi"
 private class RideStore(context: android.content.Context) {
     private val prefs = securePrefs(context, "ducat_contacts")
     fun personaHex(): String? = prefs.getString("ride_persona", null)
-    fun startedAt(): Long = prefs.getLong("ride_started", 0L)
     fun basePxmr(): Long = prefs.getLong("ride_base", 0L)
     fun perMinPxmr(): Long = prefs.getLong("ride_per_min", 0L)
+
+    /**
+     * How long the meter has run, in seconds — from the monotonic clock,
+     * with the wall clock only as the cross-reboot fallback.
+     *
+     * The wall clock steps: NTP corrections, a timezone change, somebody's
+     * hand. Found live (2026-08-28) when a guest clock resumed hours behind
+     * and auto-time snapped it forward mid-ride — six minutes of driving
+     * read 384:00 on the meter and billed a hundred dollars. Money must not
+     * be derived from a clock anyone can move. elapsedRealtime only ever
+     * runs forward, so it survives every step; what it does not survive is
+     * a reboot (it restarts near zero — see Pin's lockout for the same
+     * shape), which the comparison below detects: a stored anchor larger
+     * than the current reading can only mean the clock began again, and
+     * then the wall difference is the honest remainder.
+     */
+    fun elapsedSecs(): Long {
+        val anchorElapsed = prefs.getLong("ride_started_elapsed", 0L)
+        val nowElapsed = android.os.SystemClock.elapsedRealtime()
+        if (anchorElapsed in 1..nowElapsed) return (nowElapsed - anchorElapsed) / 1000
+        return ((System.currentTimeMillis() - prefs.getLong("ride_started", 0L)) / 1000)
+            .coerceAtLeast(0)
+    }
+
     fun start(persona: String, base: Long, perMin: Long) {
         prefs.edit().putString("ride_persona", persona)
             .putLong("ride_started", System.currentTimeMillis())
+            .putLong("ride_started_elapsed", android.os.SystemClock.elapsedRealtime())
             .putLong("ride_base", base).putLong("ride_per_min", perMin).apply()
         org.ducatproject.ducat.ContactStore.bump()
     }
     fun clear() {
         prefs.edit().remove("ride_persona").remove("ride_started")
+            .remove("ride_started_elapsed")
             .remove("ride_base").remove("ride_per_min").apply()
         org.ducatproject.ducat.ContactStore.bump()
     }
@@ -287,8 +312,11 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
     // start time, so a killed process resumes at the right figure.
     LaunchedEffect(Unit) { while (true) { delay(1_000); now = System.currentTimeMillis() } }
 
-    val secs = ((now - rides.startedAt()) / 1000).coerceAtLeast(0)
-    val minutes = secs / 60
+    // `now` only drives recomposition; the figure comes from the store's
+    // monotonic reading — see elapsedSecs for the ride that billed USD 104
+    // when the wall clock stepped under it.
+    @Suppress("UNUSED_EXPRESSION") now
+    val secs = rides.elapsedSecs()
     val metered = rides.perMinPxmr() * secs / 60
     val fare = rides.basePxmr() + metered
 
@@ -327,8 +355,7 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
                 // The figures are frozen at the tap, then billed: base as one
                 // line, the metered time as another whose description carries
                 // the arithmetic — §15.11's checkable meter.
-                val endSecs = ((System.currentTimeMillis() - rides.startedAt()) / 1000)
-                    .coerceAtLeast(0)
+                val endSecs = rides.elapsedSecs()
                 val meteredEnd = rides.perMinPxmr() * endSecs / 60
                 val lines = buildList {
                     if (rides.basePxmr() > 0) add(BillItem(context.getString(R.string.taxi_line_base_fare), rides.basePxmr()))
