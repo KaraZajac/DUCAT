@@ -2613,7 +2613,16 @@ private fun EnquiryLine(
             // wire does not have. The owner's move is to *accept* — funding
             // their own stake is what acceptance is — and the seeker's is to
             // propose.
-            val mineToOffer = about.listingId.isNotEmpty()
+            // The id when the record has one; the title as a fallback for
+            // About records written before the id travelled (real upgrades
+            // carry those). A title collision suppresses a button harmlessly;
+            // the inverse — offering the owner an escrow to buy their own
+            // lamp — is the bug this line exists to prevent.
+            val mineToOffer = about.listingId.isNotEmpty() ||
+                remember(version) {
+                    org.ducatproject.ducat.Listings.all(context)
+                        .any { it.optString("title") == about.title }
+                }
             if (!bonded && !mineToOffer) {
                 TextButton(
                     onClick = onPropose,
