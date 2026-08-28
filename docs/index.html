@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DUCAT — peer-to-peer proximity commerce</title>
+<meta name="description" content="A peer-to-peer proximity commerce protocol: Veilid for transport, Monero for settlement, no operator in between. Pay, sell, hail a ride, rent a room — with no server anywhere.">
+
+<link rel="canonical" href="https://ducatproject.org/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ducatproject.org/">
+<meta property="og:title" content="DUCAT — peer-to-peer proximity commerce">
+<meta property="og:description" content="Veilid for transport, Monero for settlement, no operator in between. Pay, sell, hail a ride, rent a room — with no server anywhere.">
+<meta property="og:image" content="https://ducatproject.org/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DUCAT — peer-to-peer proximity commerce">
+<meta name="twitter:description" content="Veilid for transport, Monero for settlement, no operator in between.">
+<meta name="twitter:image" content="https://ducatproject.org/og.png">
+
+<link rel="icon" type="image/png" href="mascot.png">
+<link rel="apple-touch-icon" href="mascot.png">
+
+<script>
+/* apply the remembered theme before first paint (Mocha is the default) */
+(function () {
+  try {
+    if (localStorage.getItem('ducat-theme') === 'latte') {
+      document.documentElement.setAttribute('data-theme', 'latte');
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="bg-mesh" aria-hidden="true">
+  <div class="mesh-blob mesh-blob-1"></div>
+  <div class="mesh-blob mesh-blob-2"></div>
+  <div class="mesh-blob mesh-blob-3"></div>
+</div>
+
+<!-- ============================ NAV ============================ -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a class="nav-brand" href="#top">
+      <img src="mascot.png" alt="" width="26" height="26">
+      DUCAT
+    </a>
+    <div class="nav-links">
+      <a href="#wallet">Wallet</a>
+      <a href="#commerce">Commerce</a>
+      <a href="#trust">Trust</a>
+      <a href="#spec">Spec</a>
+      <a href="#downloads">Downloads</a>
+      <a class="nav-icon-btn" href="https://github.com/KaraZajac/DUCAT" aria-label="DUCAT on GitHub" title="GitHub">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.5 7.5 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      </a>
+      <button class="nav-icon-btn" id="theme-toggle" aria-label="Toggle light and dark theme" title="Toggle theme">
+        <span class="tt-mocha" aria-hidden="true">☀</span>
+        <span class="tt-latte" aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================ HERO ============================ -->
+<header class="hero" id="top">
+  <div class="container hero-inner">
+    <img class="hero-mascot" src="mascot.png" alt="The DUCAT maneki-neko, holding a Monero coin" width="148" height="148">
+    <div class="hero-eyebrow"><span class="dot dot-pulse"></span> peer-to-peer proximity commerce · spec draft 0.90</div>
+    <h1 class="hero-title"><span class="display-wordmark">DUCAT</span></h1>
+    <p class="hero-tag">
+      <span class="kw">Veilid</span> for transport. <span class="kw">Monero</span> for settlement.
+      <strong>No operator in between.</strong>
+    </p>
+    <p class="hero-sub">
+      There is no DUCAT server anywhere — contacts, messages, bills and receipts are DHT
+      records and end-to-end sealed payloads, and every phone runs a full Veilid node,
+      giving back the routing and storage it takes.
+    </p>
+
+    <div class="stats-row" id="stats-row">
+      <span class="stat-chip stat-hi"><span class="num" data-target="328">0</span> conformance vectors</span>
+      <span class="stat-chip"><span class="num" data-target="2">0</span> independent implementations</span>
+      <span class="stat-chip"><span class="num" data-target="20">0</span> languages</span>
+      <span class="stat-chip stat-hi"><span class="num">0</span> servers</span>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/KaraZajac/DUCAT/releases/latest/download/app-arm64-v8a-debug.apk">⬇ Get it for Android</a>
+      <a class="btn" href="#downloads">Desktop builds</a>
+      <a class="btn btn-ghost" href="https://github.com/KaraZajac/DUCAT/blob/main/ducat-protocol.md">Read the spec →</a>
+    </div>
+
+    <p class="hero-warn"><strong>Debug-signed, stagenet only.</strong> Not for real money — yet.</p>
+  </div>
+</header>
+
+<!-- ============================ TRUST STRIP ============================ -->
+<div class="trust-strip">
+  <div class="container trust-row">
+    <span class="trust-label">Standing on</span>
+    <ul class="trust-items">
+      <li>Veilid</li>
+      <li>Monero</li>
+      <li>monero-oxide</li>
+      <li>Rust core</li>
+      <li>BSD-3-Clause</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================ NO OPERATOR ============================ -->
+<section class="section" id="protocol">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-tag">The idea</span>
+      <h2>Commerce with nobody in the middle</h2>
+      <p class="lead">
+        A ducat was a gold coin accepted from Venice to Vienna to the Levant for six
+        centuries — no issuer relationship, no account behind it, no permission attached.
+        DUCAT is that, for standing in front of someone and doing business.
+      </p>
+    </div>
+    <div class="bento">
+      <div class="bento-card bento-lg reveal">
+        <div class="bento-icon">🐱</div>
+        <h3>No server anywhere</h3>
+        <p>Contacts, bills, payments and receipts travel as <strong>end-to-end sealed
+        payloads over Veilid's DHT</strong>. There is nothing to subpoena, rate-limit,
+        de-platform or shut down, because there is nothing running. Every phone is a full
+        node, giving back the routing and storage it takes.</p>
+      </div>
+      <div class="bento-card reveal">
+        <div class="bento-icon">🔑</div>
+        <h3>Identity is a keypair</h3>
+        <p>Made on the phone. No email, no phone number, nobody to register with —
+        <strong>which is also why nobody can restore it for you</strong>, and the app says
+        that out loud instead of burying it.</p>
+      </div>
+      <div class="bento-card reveal">
+        <div class="bento-icon">🎫</div>
+        <h3>Claim-once cards</h3>
+        <p>You hand someone a card — QR, <code>ducat:</code> link, or an NFC tap — and it
+        is good for <strong>one person</strong>. Once claimed it stops working, so a
+        screenshot that ends up somewhere else is not a way in.</p>
+      </div>
+      <div class="bento-card reveal">
+        <div class="bento-icon">🔒</div>
+        <h3>Sealed conversations</h3>
+        <p>X3DH-shaped encryption with one-time prekeys and forward secrecy. When the app
+        has to fall back to the signed prekey, it shows you an <strong>open lock</strong>
+        rather than hiding it.</p>
+      </div>
+      <div class="bento-card bento-lg reveal">
+        <div class="bento-icon">💬</div>
+        <h3>Conversations that carry money</h3>
+        <p>Mailbox-based threads that work while either side is offline — carrying
+        <strong>itemised bills</strong> whose lines must sum to their total or the message
+        is refused, payments, and receipts issued by the payee pointing at the transaction
+        they acknowledge. Small groups fan out into the same pairwise threads: no group
+        key, no shared record, every thread property unchanged.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ WALLET ============================ -->
+<section class="section section-alt" id="wallet">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-tag">Settlement</span>
+      <h2>Money that is yours</h2>
+      <p class="lead">A self-custodial Monero wallet with fiat conversion throughout,
+      scanned and spent by an embedded monero-oxide engine — no wallet daemon on the phone.</p>
+    </div>
+    <div class="phone-row reveal">
+      <figure class="phone">
+        <img src="screenshots/home.png" alt="Home: balance in XMR and USD, synced, with a low-notes warning" loading="lazy" width="420" height="933">
+        <figcaption><strong>The balance,</strong> and a warning before it bites</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="screenshots/pay.png" alt="Paying: amount, fiat, fee breakdown, what is left after, speed" loading="lazy" width="420" height="933">
+        <figcaption><strong>The whole arithmetic</strong> before you commit</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="screenshots/activity.png" alt="Activity: a statement with counterparty, receipts and running balance" loading="lazy" width="420" height="933">
+        <figcaption><strong>A statement</strong> rebuilt from the chain</figcaption>
+      </figure>
+    </div>
+    <div class="feature-copy reveal" style="max-width:780px;margin:0 auto;">
+      <p>Paying shows the amount, the estimated network fee, the total, <strong>what you
+      have left afterwards</strong>, how many notes it spends and roughly how long it will
+      take — and lets you pick a speed. History is rebuilt from the chain: sends identified
+      by key image, change never shown as income, every row carrying the running balance.</p>
+      <p>Monero spends discrete notes rather than a balance, so a wallet holding one big
+      note can be unable to pay twice in a row. The app counts the notes it can spend and
+      tells you to break one <span class="accent">before</span> you are standing at a
+      counter, rather than failing there.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ COMMERCE ============================ -->
+<section class="section" id="commerce">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-tag">Proximity commerce</span>
+      <h2>Your phone is the whole business</h2>
+      <p class="lead">Pick a mode and the entire app hands over — its own tabs, nothing of
+      the wallet's. Almost none of it needed a new wire object, which is the spec's
+      proudest sentence.</p>
+    </div>
+
+    <div class="phone-row reveal">
+      <figure class="phone">
+        <img src="screenshots/modes.png" alt="Operating modes: personal, point of sale, bar tab, taxi, donations, renting" loading="lazy" width="420" height="933">
+        <figcaption><strong>Six modes,</strong> one protocol</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="screenshots/pos.png" alt="Point of sale: two items rung up, running total in XMR and USD" loading="lazy" width="420" height="933">
+        <figcaption><strong>Point of sale</strong> rings up items</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="screenshots/pos-code.png" alt="One code to scan; the itemised bill arrives on the customer's phone" loading="lazy" width="420" height="933">
+        <figcaption><strong>One code</strong> — the bill lands as they scan</figcaption>
+      </figure>
+    </div>
+
+    <div class="feature-split reveal" style="margin-top:3rem;">
+      <div class="feature-copy">
+        <span class="section-tag">Dispatch</span>
+        <h3>A ride, with nobody dispatching it</h3>
+        <p>Type where you are going. Your phone turns a GPS fix into a <strong>geocell</strong>
+        — a public bulletin board whose address is the place itself — and posts a hail:
+        a claim-once card, a destination, and an offer priced from the real driving route.
+        Drivers watch their cell and its neighbours and claim it; <strong>the DHT referees
+        the race, and no matchmaker exists</strong>.</p>
+        <p>The green line is the point: DUCAT's rates sit about 15% under a rideshare's
+        rider-side rates, <span class="accent">and the driver keeps all of it</span> — the
+        absent platform cut, handed to both of them. Acceptance arrives with a face on it:
+        name, car, colour, plate, ETA.</p>
+        <p>One trade, stated plainly on screen: address search, routing and map tiles query
+        OpenStreetMap — the single place DUCAT sends location off-device. The boards
+        themselves never carry better than ~1.2&nbsp;km.</p>
+      </div>
+      <div class="phone-row" style="margin:0;">
+        <figure class="phone">
+          <img src="screenshots/hail.png" alt="Hail a ride: route on a map, distance, time, price, and what a rideshare would charge" loading="lazy" width="420" height="933">
+          <figcaption><strong>The hail,</strong> priced against the rideshare</figcaption>
+        </figure>
+        <figure class="phone">
+          <img src="screenshots/taxi.png" alt="Taxi mode: watch a stand, choose how wide an area, fares and meter tabs" loading="lazy" width="420" height="933">
+          <figcaption><strong>Taxi mode</strong> is a driver's whole day</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="feature-split flip reveal" style="margin-top:3rem;">
+      <div class="feature-copy">
+        <span class="section-tag">Renting</span>
+        <h3>A room or a car, listed to the neighbourhood</h3>
+        <p>Listings work like hails, on coarser boards — about five kilometres across,
+        because people will travel to collect a set of keys. The form is split in two and
+        the app tells you which half is which: the public part goes on a board anyone
+        nearby can read, and <strong>the address, the keys and the plate never leave your
+        phone until a booking is real</strong>.</p>
+        <p>Searching reads your board and the ring around it, drawing results as each
+        board answers — a car parked near you is on screen in under six seconds.</p>
+      </div>
+      <div class="phone-row" style="margin:0;">
+        <figure class="phone">
+          <img src="screenshots/renting-form.png" alt="Listing a vehicle: the public half that goes on the board" loading="lazy" width="420" height="933">
+          <figcaption><strong>The public half</strong></figcaption>
+        </figure>
+        <figure class="phone">
+          <img src="screenshots/renting-private.png" alt="Only for whoever books it: the address and handover details never go on the board" loading="lazy" width="420" height="933">
+          <figcaption><strong>The private half</strong></figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="phone-row reveal" style="margin-top:3rem;">
+      <figure class="phone">
+        <img src="screenshots/card.png" alt="Share your card: good for one person, QR, copy link, expires in 24 hours" loading="lazy" width="420" height="933">
+        <figcaption><strong>A card,</strong> good for one person</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="screenshots/chat-tab.png" alt="A café conversation: itemised bill marked paid, the payment, the receipt" loading="lazy" width="420" height="933">
+        <figcaption><strong>A conversation</strong> that carried a bill, a payment, a receipt</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="screenshots/profile-privacy.png" alt="Profile: the linkability cost of letting contacts pay you directly, stated in orange" loading="lazy" width="420" height="933">
+        <figcaption><strong>Costs named</strong> at the moment you choose</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TRUST ============================ -->
+<section class="section section-alt" id="trust">
+  <div class="container">
+    <div class="section-head centered reveal">
+      <span class="section-tag">Trust between strangers</span>
+      <h2>You both put up a stake.<br>Finishing gives it back.</h2>
+      <p class="lead">There is no company in the middle to take sides, so DUCAT does
+      something simpler. The money sits in an address only the two of you can open, and
+      the release hands each side their own stake back by name. Nobody can take a stake —
+      including us, because there is no us to pay.</p>
+    </div>
+
+    <div class="stakes reveal">
+      <div class="stake-card">
+        <span class="stake-pct">~10%</span>
+        <span class="stake-what">a ride</span>
+        <span class="stake-why">short, low damage exposure</span>
+      </div>
+      <div class="stake-card">
+        <span class="stake-pct">~20%</span>
+        <span class="stake-what">a place to stay</span>
+        <span class="stake-why">keys to someone's home</span>
+      </div>
+      <div class="stake-card">
+        <span class="stake-pct">~30%</span>
+        <span class="stake-what">a vehicle</span>
+        <span class="stake-why">damage can exceed the price</span>
+      </div>
+    </div>
+
+    <div class="feature-copy reveal" style="max-width:780px;margin:0 auto 2.5rem;">
+      <p>Those numbers are argued rather than guessed — Bisq's 2-of-2 no-custodian model is
+      the closest working precedent, and the dual-deposit literature proves the arrangement
+      cheat-proof at equilibrium. Two bounds fall out: a stake worth less than the fee to
+      return it becomes zero rather than decoration, and none exceeds half the price. The
+      exposed side funds second, so their money never sits alone in a shared address.</p>
+    </div>
+
+    <div class="callout reveal">
+      <div class="callout-mark">⅔</div>
+      <div>
+        <h3>Escrow with no company behind it</h3>
+        <p>When a deal wants more than a bond: rider, driver and a mutually trusted arbiter
+        contact run a <strong>distributed key generation</strong> over the sealed thread —
+        three devices derive one Monero address, each holding only a share, any two able to
+        sign, no dealer anywhere. The happy path is two taps.</p>
+        <p>Anything else is a settlement: either side proposes a split, the other signs or
+        counters. A stranded party asks the arbiter, whose co-signature <em>is</em> the
+        ruling — a captured arbiter can at worst pick between the named parties,
+        <strong>never pay itself</strong>. Chain-proven on stagenet in every shape,
+        including a two-input FROST release.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ HONESTY ============================ -->
+<section class="section" id="honesty">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-tag">Receipts, not promises</span>
+      <h2>What is proven, and what is not</h2>
+      <p class="lead">The README keeps a ledger of what has actually run end-to-end on the
+      live network and live stagenet — and states the gaps rather than burying them.</p>
+    </div>
+
+    <div class="proof-grid reveal">
+      <div class="proof-col proof-yes">
+        <span class="proof-tag">Demonstrated end to end</span>
+        <ul>
+          <li><strong>Two complete dispatched rides</strong> phone↔desktop — geocell hail to on-chain settlement, tip and receipt</li>
+          <li><strong>The full escrow arc</strong> — two phones and a desk arbiter derived one 2-of-3 address independently; fund → release → driver paid</li>
+          <li><strong>A booking</strong> — owner and guest each funding stakes, the pot confirmed by the guest's own scan, split proposed, signed, both sides whole</li>
+          <li><strong>Bar tab</strong> phone-to-desktop, bill to receipt; <strong>ten attacks refused</strong></li>
+          <li><strong>Backup and restore</strong> the whole way — export, wipe, restore, then sent and received again</li>
+          <li><strong>Counter-offers four proposals deep</strong>, settled at the countered figure</li>
+        </ul>
+      </div>
+      <div class="proof-col proof-no">
+        <span class="proof-tag">Stated, not buried</span>
+        <ul>
+          <li><strong>No external adversarial review</strong> — §2.5 is the project's own argument for why that matters</li>
+          <li><strong>No implementer</strong> who has never read <code>core/</code></li>
+          <li><strong>NFC</strong> compile-verified, never field-tested between two phones</li>
+          <li>Latency figures measured on a desktop with an attached node, not a handset on a battery</li>
+          <li>Two radios, two batteries, two independent clocks — <strong>the field day is still owed</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-warn reveal" style="margin-top:2.5rem;">
+      <div class="callout-mark">!</div>
+      <div>
+        <h3>Pre-alpha. Stagenet. Not for real money.</h3>
+        <p>Every build is debug-signed and settles on Monero's stagenet — coins with no
+        value, by design. The spec is <strong>draft 0.90</strong> and says of itself:
+        nothing here is final, and §14 is the real agenda. Try it, break it, read it —
+        just don't fund it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SPEC ============================ -->
+<section class="section section-alt" id="spec">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-tag">The artifact</span>
+      <h2>The spec is the product.<br>Everything else keeps it honest.</h2>
+      <p class="lead"><code>ducat-protocol.md</code> is the primary artifact — five parts,
+      a changelog first, and a conformance suite that a second implementation runs so the
+      document cannot drift from the code silently.</p>
+    </div>
+
+    <div class="feature-split reveal">
+      <pre class="repo-tree"><span class="rt-star">★</span> <span class="rt-dir">ducat-protocol.md</span>   <span class="rt-desc">the spec — draft 0.90, changelog first</span>
+  <span class="rt-dir">core/</span>               <span class="rt-desc">reference implementation (Rust)</span>
+  <span class="rt-dir">vectors/</span>            <span class="rt-desc">328 conformance cases + schema</span>
+  <span class="rt-dir">conformance/</span>        <span class="rt-desc">four checkers, run on every push</span>
+  <span class="rt-dir">harness/</span>            <span class="rt-desc">end-to-end over real Veilid routes</span>
+  <span class="rt-dir">sim/</span>                <span class="rt-desc">offline simulator, market scenarios</span>
+  <span class="rt-dir">applications/</span>       <span class="rt-desc">android/ + desktop/ (same sources)</span>
+  <span class="rt-dir">mobile/</span>             <span class="rt-desc">the Rust bridge: wallet · mailbox · node</span>
+  <span class="rt-dir">research/</span>           <span class="rt-desc">evidence, not product</span></pre>
+      <div class="feature-copy">
+        <h3>Four checkers, every push</h3>
+        <ul class="check-list">
+          <li>Every vector validated against <code>schema.json</code></li>
+          <li>A <strong>second implementation</strong> runs all 328 and must agree</li>
+          <li>The <strong>document audited against the code</strong> — it has caught a normative section referenced three times and never written</li>
+          <li>Nothing imported goes undeclared</li>
+        </ul>
+        <p style="margin-top:1.25rem;">Stewardship is normative, not aspirational: §18.7
+        makes Veilid's ethic a conformance requirement — <strong>no protocol fees, no node
+        payment, ever</strong>. Build anything you like from this code, but a client that
+        monetizes carriage is not DUCAT.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ DOWNLOADS ============================ -->
+<section class="section" id="downloads">
+  <div class="container">
+    <div class="section-head centered reveal">
+      <span class="section-tag">Try it</span>
+      <h2>Five steps, no account,<br>about a minute</h2>
+      <p class="lead">Your identity is a keypair made on the device. The last onboarding
+      step is the backup, because a wallet you cannot restore is the one way a person
+      actually loses money here.</p>
+    </div>
+
+    <div class="dl-grid reveal">
+      <div class="dl-card">
+        <h3><span class="dl-os">🤖</span> Android</h3>
+        <p>Phone browser, newest build, no release page to navigate. <code>armeabi-v7a</code>
+        only for phones older than about 2016; <code>x86_64</code> is for emulators.</p>
+        <div class="dl-links">
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/app-arm64-v8a-debug.apk">arm64-v8a.apk</a>
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/app-armeabi-v7a-debug.apk">armeabi-v7a.apk</a>
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/app-x86_64-debug.apk">x86_64.apk</a>
+        </div>
+      </div>
+      <div class="dl-card">
+        <h3><span class="dl-os">🐧</span> Linux</h3>
+        <p>DUCAT Desk — the same application on a bigger screen, and a shopkeeper's window.
+        Carries its own Rust library and JVM.</p>
+        <div class="dl-links">
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.deb">.deb</a>
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.rpm">.rpm</a>
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.tar.gz">portable .tar.gz</a>
+        </div>
+      </div>
+      <div class="dl-card">
+        <h3><span class="dl-os">🪟</span> Windows</h3>
+        <p>Unsigned — Windows will warn on first open. It has played bar counter, driver,
+        and standing escrow arbiter.</p>
+        <div class="dl-links">
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-windows-x64.msi">.msi</a>
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-windows-x64.zip">portable .zip</a>
+        </div>
+      </div>
+      <div class="dl-card">
+        <h3><span class="dl-os">🍎</span> macOS</h3>
+        <p>Apple Silicon and Intel builds. Unsigned — macOS will warn on first open.</p>
+        <div class="dl-links">
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-arm64.dmg">arm64 .dmg</a>
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-x64.dmg">x64 .dmg</a>
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-arm64.tar.gz">arm64 .tar.gz</a>
+          <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-x64.tar.gz">x64 .tar.gz</a>
+        </div>
+      </div>
+    </div>
+    <p class="dl-note reveal"><strong>Debug-signed, stagenet only — not for real money.</strong>
+    Every screenshot on this page is the app running on a phone, not a mockup.</p>
+  </div>
+</section>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>
+      <span class="footer-brand"><img src="mascot.png" alt="">DUCAT</span>
+      <p class="footer-tag">A peer-to-peer proximity commerce protocol. Veilid for
+      transport, Monero for settlement, no operator in between.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Project</h4>
+      <ul>
+        <li><a href="https://github.com/KaraZajac/DUCAT/blob/main/ducat-protocol.md">The specification</a></li>
+        <li><a href="https://github.com/KaraZajac/DUCAT/blob/main/ROADMAP.md">Roadmap</a></li>
+        <li><a href="https://github.com/KaraZajac/DUCAT">GitHub</a></li>
+        <li><a href="https://github.com/KaraZajac/DUCAT/releases/latest">Releases</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Shoulders</h4>
+      <ul>
+        <li><a href="https://veilid.com">Veilid</a></li>
+        <li><a href="https://www.getmonero.org">Monero</a></li>
+        <li><a href="https://github.com/monero-oxide/monero-oxide">monero-oxide</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>This page</h4>
+      <ul>
+        <li><a href="#wallet">Wallet</a></li>
+        <li><a href="#commerce">Commerce</a></li>
+        <li><a href="#trust">Trust</a></li>
+        <li><a href="#downloads">Downloads</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p><a href="https://github.com/KaraZajac/DUCAT/blob/main/LICENSE">BSD-3-Clause</a> —
+    the same license as Monero. §18.7's obligations are conformance requirements of the
+    protocol, not terms of the license.</p>
+    <p>Canonical home: <strong>ducatproject.org</strong> · getducat.org points here.</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
