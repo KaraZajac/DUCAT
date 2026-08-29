@@ -1993,7 +1993,7 @@ private fun OfferWaitCard(po: DriveOffer, modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(Modifier.height(6.dp))
-            LinearProgressIndicator(Modifier.fillMaxWidth())
+            DucatBar(progress = null)
         }
     }
 }

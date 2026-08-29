@@ -367,7 +367,7 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
             }
             error != null -> Text(error!!, color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall)
-            else -> CircularProgressIndicator()
+            else -> CatSpinner(Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
         }
 
         if (regulars.isNotEmpty()) {
