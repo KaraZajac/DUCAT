@@ -81,5 +81,4 @@
     <string name="split_back_to_them">Voorstel: %1$s terug naar %3$s, %2$s naar jou.</string>
     <string name="split_fee_yours">De netwerkkosten gaan van jouw deel af, dus er komt iets minder binnen.</string>
     <string name="split_fee_theirs">De netwerkkosten gaan van het deel van %1$s af; dat van jou komt precies binnen.</string>
-    <string name="bond_cosigned_stuck">Je hebt getekend, maar het geld is niet verplaatst — het staat nog in de escrow. Hun telefoon is misschien uitgevallen vóór het uitzenden.</string>
 </resources>

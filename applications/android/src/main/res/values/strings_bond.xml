@@ -81,5 +81,4 @@
     <string name="split_back_to_them">Proposed: %1$s back to %3$s, %2$s to you.</string>
     <string name="split_fee_yours">The network fee comes out of your share, so a little less than that arrives.</string>
     <string name="split_fee_theirs">The network fee comes out of %1$s\'s share, so yours arrives exactly.</string>
-    <string name="bond_cosigned_stuck">You signed, but the money has not moved — the escrow still holds it. Their phone may have gone away before broadcasting.</string>
 </resources>

@@ -83,5 +83,4 @@
     <string name="split_back_to_them">Propozycja: %1$s wraca do %3$s, %2$s dla ciebie.</string>
     <string name="split_fee_yours">Opłata sieciowa schodzi z twojej części, więc dotrze nieco mniej.</string>
     <string name="split_fee_theirs">Opłata sieciowa schodzi z części %1$s, więc twoja dotrze co do grosza.</string>
-    <string name="bond_cosigned_stuck">Podpisano, ale pieniądze się nie ruszyły — wciąż są w depozycie. Ich telefon mógł zniknąć przed nadaniem.</string>
 </resources>

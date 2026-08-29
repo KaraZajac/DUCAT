@@ -81,5 +81,4 @@
     <string name="split_back_to_them">प्रस्ताव: %1$s %3$s को वापस, %2$s आपको।</string>
     <string name="split_fee_yours">नेटवर्क शुल्क आपके हिस्से से कटता है, इसलिए उससे थोड़ा कम पहुँचेगा।</string>
     <string name="split_fee_theirs">नेटवर्क शुल्क %1$s के हिस्से से कटता है, इसलिए आपका पूरा पहुँचेगा।</string>
-    <string name="bond_cosigned_stuck">आपने हस्ताक्षर किए, पर पैसा नहीं चला — वह अब भी एस्क्रो में है। शायद प्रसारण से पहले उनका फ़ोन बंद हो गया।</string>
 </resources>

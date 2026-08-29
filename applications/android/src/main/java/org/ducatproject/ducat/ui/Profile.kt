@@ -577,51 +577,8 @@ private fun BondSection(
         }
         "releasing" -> Text(stringResource(R.string.profile_bond_releasing),
             style = MaterialTheme.typography.bodyMedium)
-        "release_cosigned" -> {
-            Text(stringResource(R.string.profile_bond_cosigned),
-                style = MaterialTheme.typography.bodyMedium)
-            // The door the stranded co-signer needs: their proposer may be
-            // gone for good, and proposing again is the designed recovery —
-            // this device's own sweep, their consent screen, whoever signs
-            // ends it. The settle probe retires this branch by itself when
-            // the escrow really did empty.
-            Spacer(Modifier.height(8.dp))
-            Button(
-                enabled = !busy,
-                onClick = {
-                    busy = true; error = null
-                    scope.launch {
-                        val r = withContext(Dispatchers.IO) {
-                            runCatching {
-                                org.ducatproject.ducat.Ceremony.releaseBond(context, c)
-                            }
-                        }
-                        r.onFailure {
-                            // The screen speaks in sentences; the log keeps
-                            // the exception, or the sentence is all anyone
-                            // ever learns.
-                            org.ducatproject.ducat.DucatLog.w(
-                                "Profile",
-                                "release: ${it.javaClass.simpleName}: ${it.message}",
-                            )
-                            error = moneyFailure(context, it)
-                        }
-                        busy = false
-                    }
-                },
-            ) {
-                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                else Text(stringResource(R.string.profile_bond_release))
-            }
-            error?.let {
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    stringResource(R.string.profile_bond_failed, it),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        }
+        "release_cosigned" -> Text(stringResource(R.string.profile_bond_cosigned),
+            style = MaterialTheme.typography.bodyMedium)
         "released" -> {
             Text(stringResource(R.string.profile_bond_released),
                 style = MaterialTheme.typography.bodyMedium,

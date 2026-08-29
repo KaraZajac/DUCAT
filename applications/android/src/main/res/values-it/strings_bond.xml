@@ -81,5 +81,4 @@
     <string name="split_back_to_them">Proposta: %1$s torna a %3$s, %2$s a te.</string>
     <string name="split_fee_yours">La commissione di rete esce dalla tua parte, quindi arriva un po\' meno.</string>
     <string name="split_fee_theirs">La commissione di rete esce dalla parte di %1$s, quindi la tua arriva esatta.</string>
-    <string name="bond_cosigned_stuck">Hai firmato, ma il denaro non si è mosso — è ancora in garanzia. Il loro telefono potrebbe essersi spento prima della trasmissione.</string>
 </resources>

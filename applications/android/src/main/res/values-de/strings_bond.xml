@@ -81,5 +81,4 @@
     <string name="split_back_to_them">Vorschlag: %1$s zurück an %3$s, %2$s an dich.</string>
     <string name="split_fee_yours">Die Netzgebühr geht von deinem Anteil ab, es kommt also etwas weniger an.</string>
     <string name="split_fee_theirs">Die Netzgebühr geht von %1$ss Anteil ab, deiner kommt genau so an.</string>
-    <string name="bond_cosigned_stuck">Du hast unterschrieben, aber das Geld hat sich nicht bewegt — es liegt noch im Treuhandkonto. Ihr Telefon ist vielleicht vor dem Senden verschwunden.</string>
 </resources>

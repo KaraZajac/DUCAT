@@ -1077,17 +1077,7 @@ object Ceremony {
                     it.optInt("kind") == KIND_BOND &&
                     !isArbiter(it)
             }
-            // Any stage a live release can be proposed from — not only
-            // "done". A co-signer whose proposer vanished after taking the
-            // signature sat at release_cosigned over a funded escrow with no
-            // door out: proposing again is the designed recovery
-            // (onFrostRound accepts a fresh round 0 over a co-signed one for
-            // exactly this), and it was reachable from every stage except
-            // the one that needed it. Found live, with 0.0078 XMR parked.
-            .filter {
-                it.optString("stage") in
-                    setOf("done", "releasing", "release_pending", "release_cosigned")
-            }
+            .filter { it.optString("stage") == "done" }
             .maxByOrNull { it.optLong("created") }
             ?.optString("id")
             ?: throw IllegalStateException("no finished bond with this contact")
@@ -1628,18 +1618,8 @@ object Ceremony {
         // `released` one line down is the reasoning here: the party who did
         // not take the action is the one who has to be told.
         "aborted", "released", "release_cosigned" -> {
-            // Signed is only settled while the money agrees. The settle
-            // probe stamps stillFundedAt when a co-signed escrow provably
-            // still holds the pot; while that stands, this is live money
-            // needing a person, not history observing its day of display.
-            if (o.optString("stage") == "release_cosigned" &&
-                o.optLong("stillFundedAt") > 0L
-            ) {
-                true
-            } else {
-                val at = o.optLong("settledAt")
-                at > 0L && System.currentTimeMillis() / 1000 - at < SETTLED_SHOWN_SECS
-            }
+            val at = o.optLong("settledAt")
+            at > 0L && System.currentTimeMillis() / 1000 - at < SETTLED_SHOWN_SECS
         }
         else -> true
     }
@@ -2082,7 +2062,7 @@ object Ceremony {
     /** A released record earns doubt only in a window: after the chain has
      *  had ample time to mine it, and not so long after that history gets
      *  re-scanned forever. */
-    private const val RELEASED_DOUBT_MIN_SECS = 30L * 60
+    private const val RELEASED_DOUBT_MIN_SECS = 2L * 3600
     private const val RELEASED_DOUBT_MAX_SECS = 7L * 24 * 3600
     private const val RELEASED_PROBE_GAP_MS = 6L * 3600 * 1000
 
@@ -2128,29 +2108,29 @@ object Ceremony {
                 }
                 continue
             }
-            // The co-signer's blindness, and the proposer-in-waiting's: at
-            // "release_cosigned" the OTHER side broadcasts, and at
-            // "releasing" they may have superseded and completed their own —
-            // either way nothing this device can scan for ever arrives (a
-            // bond sweeps to the proposer's wallet; a ride pays the driver
-            // at their published address, never our ride minor). The
-            // escrow's own balance is the one witness this side has: money
-            // in a threshold escrow leaves only under the quorum's
-            // signatures, so empty means a signed release happened,
-            // whatever this record still says. Seen live: the release
-            // finished days ago and the co-signing phone read "the release
-            // is theirs to broadcast" for the rest of its life.
+            // What no arm here CAN do, recorded so nobody rebuilds it: a
+            // co-signer at "release_cosigned" has no oracle. escrowBalance
+            // measures what ARRIVED — a multisig output's key image exists
+            // for no single party, so no scan of ours can see the sweep
+            // spend it (ceremony.rs says so in bold), and the other side
+            // broadcast, so no txid was ever ours to ask about. A first
+            // draft read the balance as "what remains" anyway, decided four
+            // finished deals were stranded money, and grew recovery doors
+            // into a fiction. The stage is the co-signer's knowledge and it
+            // ends at "co-signed"; anything more needs the proposer to send
+            // the txid, which is a wire question for another day.
             val stage = o.optString("stage")
+            if (stage == "release_cosigned") continue
             // "Released" is a claim about the chain, and the chain can take
             // it back: a broadcast the node accepted can fall out of the
-            // mempool unmined, and this record then says settled over a pot
-            // that never moved. Seen live — txid recorded, escrow still
-            // holding 0.0078 XMR a day later, and the phone refusing every
-            // fresh proposal because "broadcast money does not renegotiate".
-            // Recent released records get one sanity probe on a slow clock;
-            // a full escrow demotes the record to "releasing" so the
-            // ordinary retry machinery can run again.
+            // mempool unmined. The oracle for that doubt is the recorded
+            // txid asked of OTHER nodes (SecondOpinion) — never the escrow
+            // balance, for the reason above. SecondOpinion's `false` means
+            // "not yet, never never", so demotion also demands real age:
+            // hours past settling, a tx no other node has is gone.
             if (stage == "released") {
+                val txid = o.optString("txid")
+                if (txid.isBlank()) continue
                 val settledAt = o.optLong("settledAt")
                 val ageSecs = System.currentTimeMillis() / 1000 - settledAt
                 if (settledAt <= 0 || ageSecs < RELEASED_DOUBT_MIN_SECS ||
@@ -2159,66 +2139,47 @@ object Ceremony {
                 val now = System.currentTimeMillis()
                 if (now - (settleProbes[idHex] ?: 0L) < RELEASED_PROBE_GAP_MS) continue
                 settleProbes[idHex] = now
-                val keys = hexToBytes(o.optString("keys")) ?: continue
-                val nodeUrl = node(context) ?: continue
-                val from = o.optLong("scanFrom").takeIf { it > 0 }
-                    ?: WalletStore(context).restoreHeight().toLong()
-                val bal = runCatching {
-                    uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
-                }.getOrNull() ?: continue
-                if (bal > 0L) {
+                if (!SecondOpinion.settles(context, txid)) {
                     mutate(context, idHex) { cur ->
                         cur.put("stage", "releasing")
-                        cur.put("stillFundedAt", now)
                         cur.put("wantReleaseAt", System.currentTimeMillis())
                     }
                     ContactStore.bump()
                     DucatLog.w(
                         TAG,
-                        "escrow $idHex: recorded released but still holds " +
-                            "${formatXmr(bal)} XMR — the broadcast never mined; reopening",
+                        "escrow $idHex: release ${txid.take(12)}… unknown to other nodes " +
+                            "long after settling — the broadcast never mined; reopening",
                     )
                     found += 1
                 }
                 continue
             }
-            if (stage == "releasing" || stage == "release_cosigned") {
-                // Polite about the network: an escrow scan per pass per
-                // stuck record adds up, and this state should be rare.
+            // The healing arm, and the demote's undo: a "releasing" record
+            // that carries a txid is one the doubt above reopened (an
+            // ordinary proposer records the txid only at completion, with
+            // the settle). If other nodes confirm that txid, the release was
+            // real all along — settle it back and stop the retries.
+            if (stage == "releasing" && o.optString("txid").isNotBlank()) {
+                val txid = o.optString("txid")
                 val now = System.currentTimeMillis()
-                val last = settleProbes[idHex] ?: 0L
-                if (now - last < SETTLE_PROBE_GAP_MS) continue
+                if (now - (settleProbes[idHex] ?: 0L) < SETTLE_PROBE_GAP_MS) continue
                 settleProbes[idHex] = now
-                val keys = hexToBytes(o.optString("keys")) ?: continue
-                val nodeUrl = node(context) ?: continue
-                val from = o.optLong("scanFrom").takeIf { it > 0 }
-                    ?: WalletStore(context).restoreHeight().toLong()
-                // Every read failure here is otherwise a silent null and the
-                // record stays stuck with nothing in the log to say why.
-                val bal = runCatching {
-                    uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
-                }.onFailure {
-                    DucatLog.w(TAG, "escrow $idHex: settle probe from $from failed — ${it.message}")
-                }.getOrNull() ?: continue
-                DucatLog.i(TAG, "escrow $idHex: settle probe at stage $stage — balance ${formatXmr(bal)} XMR")
-                if (bal == 0L) {
-                    mutate(context, idHex) { cur -> settle(cur, "released") }
-                    soldOne(context, o)
-                    ContactStore.bump()
-                    DucatLog.i(TAG, "escrow $idHex: released by the other side — the empty escrow says so")
-                    found += 1
-                } else if (stage == "release_cosigned") {
-                    // The opposite verdict, written down: this device signed,
-                    // the money never moved, and the screen calling the fare
-                    // released is wrong. The banner reads this stamp and
-                    // grows the way out (propose the agreed split again).
+                if (SecondOpinion.settles(context, txid)) {
                     mutate(context, idHex) { cur ->
-                        cur.put("stillFundedAt", System.currentTimeMillis())
+                        settle(cur, "released")
+                        cur.put("wantReleaseAt", 0L)
+                        cur.put("stillFundedAt", 0L)
                     }
                     ContactStore.bump()
+                    DucatLog.i(
+                        TAG,
+                        "escrow $idHex: release ${txid.take(12)}… confirmed after doubt — settled again",
+                    )
+                    found += 1
                 }
                 continue
             }
+
             if (o.optInt("i") != o.optInt("funderIdx")) continue
             val minor = wallet.minorOf("ride_$idHex") ?: continue
             // Not one of ours: the funding transaction and its change are

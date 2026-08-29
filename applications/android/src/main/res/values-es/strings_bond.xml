@@ -81,5 +81,4 @@
     <string name="split_back_to_them">Propuesta: %1$s de vuelta para %3$s, %2$s para ti.</string>
     <string name="split_fee_yours">La comisión de red sale de tu parte, así que llega un poco menos.</string>
     <string name="split_fee_theirs">La comisión de red sale de la parte de %1$s, así que la tuya llega exacta.</string>
-    <string name="bond_cosigned_stuck">Firmaste, pero el dinero no se ha movido — sigue en el depósito. Puede que su teléfono se apagara antes de emitir.</string>
 </resources>
