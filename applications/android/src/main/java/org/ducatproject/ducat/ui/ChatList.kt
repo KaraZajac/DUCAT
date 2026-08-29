@@ -48,8 +48,12 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     val store = remember { ContactStore(context) }
     var all by remember { mutableStateOf(store.all()) }
     // Recomputed with the list, since adding or renaming a contact is
-    // exactly what makes two of them read the same.
-    val ambiguous = remember(all) { store.ambiguous() }
+    // exactly what makes two of them read the same. Off-main with the rest:
+    // it re-reads the whole book.
+    var ambiguous by remember { mutableStateOf<Set<String>>(emptySet()) }
+    LaunchedEffect(all) {
+        ambiguous = withContext(kotlinx.coroutines.Dispatchers.IO) { store.ambiguous() }
+    }
     // Same reason as the chat screen: a message arriving must move this list,
     // and nothing else tells it one did.
     val version by ContactStore.changes.collectAsState()
@@ -81,18 +85,33 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     // per contact, per store bump — so it runs on IO and lands as state
     // (the ledger ANR's lesson). The list is briefly stale, never frozen.
     var shown by remember { mutableStateOf<List<Contact>>(emptyList()) }
-    LaunchedEffect(all) {
-        shown = withContext(kotlinx.coroutines.Dispatchers.IO) {
-            all.filter { it.chatVisible }.sortedByDescending { c ->
-                // By the last message a person could have read, not the last
-                // one the protocol wrote. Calling off an escrow sends a kind
-                // 10, and that alone lifted a dormant arbiter to the top of
-                // the list above conversations with actual sentences in them.
-                store.thread(c.personaHex)
+    // The same pass that sorts also keeps each row's last line and unread
+    // flag: the rows used to re-decode their thread inside composition (a
+    // full decrypt each, keyed on `all` so every store bump redid all of
+    // them) and read chatSeen — another decrypt — per frame. One walk, on
+    // IO, keyed on version so a read-marker write moves the dots too.
+    var rowLast by remember { mutableStateOf<Map<String, StoredMessage?>>(emptyMap()) }
+    var rowUnread by remember { mutableStateOf<Set<String>>(emptySet()) }
+    LaunchedEffect(version, all) {
+        val (sorted, lasts, unread) = withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val visible = all.filter { it.chatVisible }
+            // By the last message a person could have read, not the last
+            // one the protocol wrote. Calling off an escrow sends a kind
+            // 10, and that alone lifted a dormant arbiter to the top of
+            // the list above conversations with actual sentences in them.
+            val lasts = visible.associate { c ->
+                c.personaHex to store.thread(c.personaHex)
                     .lastOrNull { it.kind !in CEREMONY_KINDS && it.groupId == null }
-                    ?.timestamp ?: 0L
             }
+            val unread = visible
+                .filter { it.inSeq > store.chatSeen(it.personaHex) }
+                .map { it.personaHex }.toSet()
+            Triple(
+                visible.sortedByDescending { lasts[it.personaHex]?.timestamp ?: 0L },
+                lasts, unread,
+            )
         }
+        shown = sorted; rowLast = lasts; rowUnread = unread
     }
     Column(Modifier.fillMaxSize()) {
         Row(
@@ -307,10 +326,8 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     // "You: ceremony: called off" under the other person's
                     // name — the one ceremony message a *person* sends, and
                     // the one that therefore reaches the list.
-                    val last = remember(c.personaHex, all) {
-                        store.thread(c.personaHex).lastOrNull { it.kind !in CEREMONY_KINDS && it.groupId == null }
-                    }
-                    val unread = c.inSeq > store.chatSeen(c.personaHex)
+                    val last = rowLast[c.personaHex]
+                    val unread = c.personaHex in rowUnread
                     ListItem(
                         colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                         headlineContent = {

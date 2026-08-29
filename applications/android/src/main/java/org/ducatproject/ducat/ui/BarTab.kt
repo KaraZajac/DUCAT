@@ -61,6 +61,35 @@ fun BarTabScreen(
     // was billed and then abandoned needs the same two exits (cancel, settled
     // outside), and this list is the only place that manages settlements.
     val tabs = remember(version) { store.all() }
+    // One store pass per change, off the main thread, instead of a
+    // ContactStore.all() and a thread decode inside every row — .all() on
+    // EncryptedSharedPreferences decrypts every entry per call, and a busy
+    // night's tab book was paying that per row per frame.
+    var contactsByHex by remember { mutableStateOf<Map<String, org.ducatproject.ducat.Contact>>(emptyMap()) }
+    var refusedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    LaunchedEffect(version) {
+        val (byHex, refused) = withContext(Dispatchers.IO) {
+            val contacts = ContactStore(context)
+            val byHex = contacts.all().associateBy { it.personaHex }
+            // **Declined is not the same news as unpaid.** A customer who
+            // refuses a bill sends a kind-5 naming it; this list — the one a
+            // counter actually works from — must not read that as "billed,
+            // unpaid", indistinguishable from somebody who has not got round
+            // to it. The bill is found by the seq settle stored; the amount
+            // match only covers tabs billed before it existed.
+            val refused = tabs.filter { it.state == "settled" }.mapNotNull { t ->
+                val thread = contacts.thread(t.personaHex)
+                thread.lastOrNull {
+                    it.outgoing && it.kind == 1 &&
+                        if (t.billSeq > 0) it.seq == t.billSeq
+                        else it.amountPxmr == t.settledTotal
+                }?.takeIf { (it.seq to it.timestamp) in billAnswers(thread).refused }
+                    ?.let { t.id }
+            }.toSet()
+            byHex to refused
+        }
+        contactsByHex = byHex; refusedIds = refused
+    }
     var openId by remember { mutableStateOf<String?>(null) }
     var opening by remember { mutableStateOf(false) }
 
@@ -119,7 +148,7 @@ fun BarTabScreen(
             SectionLabel(stringResource(R.string.bartab_section_running))
             Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Column {
-                    open.forEach { t -> TabRow(t) { openId = t.id } }
+                    open.forEach { t -> TabRow(t, contactsByHex[t.personaHex], t.id in refusedIds) { openId = t.id } }
                 }
             }
         }
@@ -128,7 +157,7 @@ fun BarTabScreen(
             SectionLabel(stringResource(R.string.bartab_section_billed))
             Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Column {
-                    awaiting.forEach { t -> TabRow(t) { openId = t.id } }
+                    awaiting.forEach { t -> TabRow(t, contactsByHex[t.personaHex], t.id in refusedIds) { openId = t.id } }
                 }
             }
             Text(
@@ -153,7 +182,7 @@ fun BarTabScreen(
                 }
             }
             Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                Column { done.forEach { t -> TabRow(t) { openId = t.id } } }
+                Column { done.forEach { t -> TabRow(t, contactsByHex[t.personaHex], t.id in refusedIds) { openId = t.id } } }
             }
         }
 
@@ -188,11 +217,13 @@ private fun SectionLabel(text: String) {
 }
 
 @Composable
-private fun TabRow(t: RunningTab, onClick: () -> Unit) {
+private fun TabRow(
+    t: RunningTab,
+    contact: org.ducatproject.ducat.Contact?,
+    refused: Boolean,
+    onClick: () -> Unit,
+) {
     val context = LocalContext.current
-    val contact = remember(t.personaHex) {
-        ContactStore(context).all().firstOrNull { it.personaHex == t.personaHex }
-    }
     val name = contact?.displayName() ?: "${t.personaHex.take(8)}…"
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onClick)
@@ -203,32 +234,6 @@ private fun TabRow(t: RunningTab, onClick: () -> Unit) {
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(name, style = MaterialTheme.typography.titleMedium)
-            // **Declined is not the same news as unpaid.**
-            //
-            // A customer who refuses a bill sends a kind-5 naming it, the chat
-            // has resolved and shown that since bills existed, and this list —
-            // the one a counter actually works from — read it as "billed,
-            // unpaid", indistinguishable from somebody who simply has not got
-            // round to it. One of those wants chasing and the other is over.
-            //
-            // The bill is recovered from the thread the way
-            // cancelTabWithRetract recovers it: the last outgoing bill for the
-            // same total. When it cannot be found this falls through to what
-            // it said before.
-            val version by ContactStore.changes.collectAsState()
-            val refused = remember(t.id, t.state, version) {
-                if (t.state != "settled") false else {
-                    val thread = ContactStore(context).thread(t.personaHex)
-                    // The tab has known its own bill's seq since settle wrote
-                    // it; matching by amount was the fallback pretending to
-                    // be the rule, and two same-priced tabs made it guess.
-                    thread.lastOrNull {
-                        it.outgoing && it.kind == 1 &&
-                            if (t.billSeq > 0) it.seq == t.billSeq
-                            else it.amountPxmr == t.settledTotal
-                    }?.let { (it.seq to it.timestamp) in billAnswers(thread).refused } ?: false
-                }
-            }
             val status = when (t.state) {
                 "open" -> pluralStringResource(R.plurals.bartab_items, t.lines.size, t.lines.size)
                 "settled" -> when {
@@ -327,17 +332,22 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
     // Keyed: a tab is started against a contact, and the contact you just
     // added is exactly the one you are about to start it for.
     val contactsV by ContactStore.changes.collectAsState()
-    val regulars = remember(contactsV) {
-        ContactStore(context).all().filter { it.theirBundle != null }
-            .sortedBy { it.displayName().lowercase() }
-    }
+    var regulars by remember { mutableStateOf<List<org.ducatproject.ducat.Contact>>(emptyList()) }
     // Which of these names belong to more than one person. Two regulars called
     // Sam are two identical rows, and picking the wrong one bills somebody who
     // is not standing at the bar — the till says "delivered", the customer in
     // front of you never sees it, and nothing about either screen says why.
     // Pay's picker has shown the key on ambiguous rows since it was written;
     // this one is the same question asked at the same moment.
-    val ambiguous = remember(contactsV) { ContactStore(context).ambiguous() }
+    var ambiguous by remember { mutableStateOf<Set<String>>(emptySet()) }
+    LaunchedEffect(contactsV) {
+        val (r, a) = withContext(Dispatchers.IO) {
+            val contacts = ContactStore(context)
+            contacts.all().filter { it.theirBundle != null }
+                .sortedBy { it.displayName().lowercase() } to contacts.ambiguous()
+        }
+        regulars = r; ambiguous = a
+    }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -453,8 +463,11 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     var confirmDiscard by remember { mutableStateOf(false) }
-    val contact = remember(tab.personaHex) {
-        ContactStore(context).all().firstOrNull { it.personaHex == tab.personaHex }
+    // Off the main thread: .all() decrypts the whole contact book per call.
+    val contact by produceState<org.ducatproject.ducat.Contact?>(null, tab.personaHex) {
+        value = withContext(Dispatchers.IO) {
+            ContactStore(context).all().firstOrNull { it.personaHex == tab.personaHex }
+        }
     }
     val name = contact?.displayName() ?: "${tab.personaHex.take(8)}…"
 
@@ -628,15 +641,17 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 // payment lands" to a counter whose customer has refused the
                 // bill is the wrong sentence twice over.
                 val v by ContactStore.changes.collectAsState()
-                val wasRefused = remember(tab.id, v) {
-                    val thread = ContactStore(context).thread(tab.personaHex)
-                    // Same preference as the list rows: the seq settle stored,
-                    // amount only for tabs that predate it.
-                    thread.lastOrNull {
-                        it.outgoing && it.kind == 1 &&
-                            if (tab.billSeq > 0) it.seq == tab.billSeq
-                            else it.amountPxmr == tab.settledTotal
-                    }?.let { (it.seq to it.timestamp) in billAnswers(thread).refused } ?: false
+                val wasRefused by produceState(false, tab.id, v) {
+                    value = withContext(Dispatchers.IO) {
+                        val thread = ContactStore(context).thread(tab.personaHex)
+                        // Same preference as the list rows: the seq settle
+                        // stored, amount only for tabs that predate it.
+                        thread.lastOrNull {
+                            it.outgoing && it.kind == 1 &&
+                                if (tab.billSeq > 0) it.seq == tab.billSeq
+                                else it.amountPxmr == tab.settledTotal
+                        }?.let { (it.seq to it.timestamp) in billAnswers(thread).refused } ?: false
+                    }
                 }
                 Text(
                     stringResource(

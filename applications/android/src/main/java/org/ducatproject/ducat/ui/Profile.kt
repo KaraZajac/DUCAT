@@ -346,12 +346,17 @@ private fun BondSection(
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var choosingArbiter by remember { mutableStateOf(false) }
-    val ceremony = remember(version, busy) {
-        org.ducatproject.ducat.Ceremony.all(context)
-            .filter { it.optString("peer") == c.personaHex }
-            // Newest by its own clock — prefs iteration order is nobody's
-            // promise, and lastOrNull() was betting on it.
-            .maxByOrNull { it.optLong("created") }
+    // produceState on IO, not remember: Ceremony.all decrypts the whole
+    // ceremony store, and this ran on the main thread — keyed on `busy`, so
+    // every button press paid for it twice.
+    val ceremony by produceState<org.json.JSONObject?>(null, version, busy) {
+        value = withContext(Dispatchers.IO) {
+            org.ducatproject.ducat.Ceremony.all(context)
+                .filter { it.optString("peer") == c.personaHex }
+                // Newest by its own clock — prefs iteration order is nobody's
+                // promise, and lastOrNull() was betting on it.
+                .maxByOrNull { it.optLong("created") }
+        }
     }
 
     fun post(arbiter: org.ducatproject.ducat.Contact?) {

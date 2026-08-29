@@ -784,7 +784,15 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             // The one number a messenger owes its bottom bar:
                             // how many conversations are waiting.
                             val unv by ContactStore.changes.collectAsState()
-                            val unread = remember(unv) { ContactStore(context).unreadThreads() }
+                            // IO, not remember: this counts by decrypting the
+                            // whole contact book, and it sat in the nav bar —
+                            // the one composable on screen for every frame of
+                            // the app's life.
+                            val unread by produceState(0, unv) {
+                                value = withContext(Dispatchers.IO) {
+                                    ContactStore(context).unreadThreads()
+                                }
+                            }
                             NavigationBarItem(
                                 selected = tab == Tab.Chat,
                                 onClick = { tab = Tab.Chat },
@@ -879,7 +887,15 @@ private fun HomeScreen(
 ) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    val b = remember(version) { Wallet.balances(context) }
+    // Off the main thread: balances() decrypts every wallet output per call,
+    // and the home screen re-read it in composition on every store bump. The
+    // last loaded figure stays on screen while a fresh one is computed, so
+    // the card never blanks — it is at most one bump stale for a moment.
+    var loaded by remember { mutableStateOf<Balances?>(null) }
+    LaunchedEffect(version) {
+        loaded = withContext(Dispatchers.IO) { Wallet.balances(context) }
+    }
+    val b = loaded ?: return
 
     // The capacity comes from `core::float` across the bridge, so the one number
     // §17.2 forbids overstating is computed by the same code the conformance

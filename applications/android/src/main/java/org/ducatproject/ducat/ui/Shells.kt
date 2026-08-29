@@ -237,48 +237,64 @@ private fun sideLabel(aboutKind: Int, funder: Boolean): Int = when (aboutKind) {
 private fun BookingsList(kinds: List<Int> = Listings.KINDS) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    val rows = remember(version, kinds) {
-        org.ducatproject.ducat.Ceremony.all(context)
-            .filter {
-                it.optInt("kind") == org.ducatproject.ducat.Ceremony.KIND_RESERVATION &&
-                    !org.ducatproject.ducat.Ceremony.isArbiter(it)
-            }
-            // To the mode whose job it was.
-            //
-            // `aboutKind` is the listing kind snapshotted when the escrow was
-            // struck — not the ceremony kind, which only says "reservation".
-            // Escrows older than that snapshot have none, and rather than
-            // vanish from all three modes or appear in all three they stay
-            // where they have always been: Renting, which is the only mode
-            // that had a bookings tab when they were made.
-            .filter { o ->
-                val about = o.optInt("aboutKind", 0)
-                if (about == 0) Listings.KIND_PLACE in kinds else about in kinds
-            }
-            .sortedByDescending { it.optLong("created") }
+    // One pass, off the main thread, per store bump. This screen used to walk
+    // the ceremony store twice in composition (once for the rows, once for
+    // waitingOnMe) and then let every row re-read Enquiries per frame — all
+    // of it decrypting EncryptedSharedPreferences on the main thread.
+    var rows by remember { mutableStateOf<List<org.json.JSONObject>>(emptyList()) }
+    var contacts by remember { mutableStateOf<List<org.ducatproject.ducat.Contact>>(emptyList()) }
+    var mine by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var abouts by remember { mutableStateOf<Map<String, org.ducatproject.ducat.Enquiries.About?>>(emptyMap()) }
+    var loaded by remember { mutableStateOf(false) }
+    LaunchedEffect(version, kinds) {
+        val r = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val rowsIo = org.ducatproject.ducat.Ceremony.all(context)
+                .filter {
+                    it.optInt("kind") == org.ducatproject.ducat.Ceremony.KIND_RESERVATION &&
+                        !org.ducatproject.ducat.Ceremony.isArbiter(it)
+                }
+                // To the mode whose job it was.
+                //
+                // `aboutKind` is the listing kind snapshotted when the escrow
+                // was struck — not the ceremony kind, which only says
+                // "reservation". Escrows older than that snapshot have none,
+                // and rather than vanish from all three modes or appear in
+                // all three they stay where they have always been: Renting,
+                // which is the only mode that had a bookings tab when they
+                // were made.
+                .filter { o ->
+                    val about = o.optInt("aboutKind", 0)
+                    if (about == 0) Listings.KIND_PLACE in kinds else about in kinds
+                }
+                .sortedByDescending { it.optLong("created") }
+            // Which of these are waiting on the reader rather than on the far
+            // side. "Waiting to be funded" is true of both and useful to
+            // neither: it is the same six words whether the host has yet to
+            // accept or the guest has yet to pay, so the one person who can
+            // move the deal along cannot tell from this list that it is them.
+            val mineIo = org.ducatproject.ducat.Ceremony.waitingOnMe(context)
+                .mapNotNull { it.optString("id").takeIf { s -> s.isNotEmpty() } }
+                .toSet()
+            val aboutsIo = rowsIo
+                .mapNotNull { org.ducatproject.ducat.Ceremony.otherPrincipal(it) }
+                .distinct()
+                .associateWith { org.ducatproject.ducat.Enquiries.about(context, it) }
+            Quad(rowsIo, ContactStore(context).all(), mineIo, aboutsIo)
+        }
+        rows = r.a; contacts = r.b; mine = r.c; abouts = r.d
+        loaded = true
     }
     if (rows.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(
-                stringResource(R.string.shells_no_bookings_yet),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        if (loaded) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    stringResource(R.string.shells_no_bookings_yet),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
         return
-    }
-    val contacts = remember(version) { ContactStore(context).all() }
-    // Which of these are waiting on the reader rather than on the far side.
-    //
-    // "Waiting to be funded" is true of both and useful to neither: it is the
-    // same six words whether the host has yet to accept or the guest has yet
-    // to pay, so the one person who can move the deal along cannot tell from
-    // this list that it is them. The home screen says so now, and a host lives
-    // in Renting rather than on the home screen.
-    val mine = remember(version) {
-        org.ducatproject.ducat.Ceremony.waitingOnMe(context)
-            .mapNotNull { it.optString("id").takeIf { s -> s.isNotEmpty() } }
-            .toSet()
     }
     // Which rows may guess their subject from the thread.
     //
@@ -299,7 +315,7 @@ private fun BookingsList(kinds: List<Int> = Listings.KINDS) {
         itemsIndexed(rows) { index, o ->
             val peerHex = org.ducatproject.ducat.Ceremony.otherPrincipal(o)
             val peer = contacts.firstOrNull { it.personaHex == peerHex }
-            val about = peerHex?.let { org.ducatproject.ducat.Enquiries.about(context, it) }
+            val about = peerHex?.let { abouts[it] }
             val need = org.ducatproject.ducat.Ceremony.expectedTotalPxmr(o)
             // Whose turn first, stage second. A settlement parked on this
             // device is `release_pending`, which the stage arm below calls
@@ -491,6 +507,14 @@ private fun SettledList(origin: String, @StringRes emptyTextRes: Int) {
     val version by ContactStore.changes.collectAsState()
     val store = remember { TabStore(context) }
     val mine = remember(version) { store.all().filter { it.origin == origin } }
+    // The names, one decrypting pass off the main thread — each row used to
+    // call ContactStore.all() itself, a full-book decrypt per line of sales.
+    var names by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    LaunchedEffect(version) {
+        names = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            ContactStore(context).all().associate { it.personaHex to it.displayName() }
+        }
+    }
     val waiting = mine.filter { it.state == "settled" }
     val done = mine.filter { it.state == "paid" || it.state == "paid_oob" }
     val today = remember { java.util.Calendar.getInstance().apply {
@@ -519,10 +543,10 @@ private fun SettledList(origin: String, @StringRes emptyTextRes: Int) {
         }
 
         if (waiting.isNotEmpty()) {
-            SettledSection(stringResource(R.string.shells_billed_waiting), waiting)
+            SettledSection(stringResource(R.string.shells_billed_waiting), waiting, names)
         }
         if (done.isNotEmpty()) {
-            SettledSection(stringResource(R.string.shells_settled), done)
+            SettledSection(stringResource(R.string.shells_settled), done, names)
         }
         if (mine.isEmpty()) {
             Text(
@@ -537,7 +561,7 @@ private fun SettledList(origin: String, @StringRes emptyTextRes: Int) {
 }
 
 @Composable
-private fun SettledSection(label: String, tabs: List<RunningTab>) {
+private fun SettledSection(label: String, tabs: List<RunningTab>, names: Map<String, String>) {
     val context = LocalContext.current
     Text(
         label,
@@ -548,11 +572,7 @@ private fun SettledSection(label: String, tabs: List<RunningTab>) {
     Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Column {
             tabs.sortedByDescending { it.settledAt }.forEach { t ->
-                val who = remember(t.personaHex) {
-                    ContactStore(context).all()
-                        .firstOrNull { it.personaHex == t.personaHex }?.displayName()
-                        ?: "${t.personaHex.take(8)}…"
-                }
+                val who = names[t.personaHex] ?: "${t.personaHex.take(8)}…"
                 Row(
                     Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -606,3 +626,6 @@ private fun SettledSection(label: String, tabs: List<RunningTab>) {
         }
     }
 }
+
+/** Four values home from one IO pass — Kotlin stops at Triple. */
+private data class Quad<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)
