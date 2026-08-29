@@ -929,6 +929,15 @@ object Mailbox {
      * message promised — and the file is cached under that hash, so a
      * re-delivered message finds its picture already on disk.
      */
+    /**
+     * The fetch in flight, for the bubble that is waiting on it:
+     * (ciphertext hash, chunks done, chunks total). One at a time by
+     * construction — fetchOneAttachment is the only fetcher — so one cell
+     * is the whole registry. Null between fetches.
+     */
+    val fetchProgress =
+        kotlinx.coroutines.flow.MutableStateFlow<Triple<String, Int, Int>?>(null)
+
     fun fetchOneAttachment(context: Context): Boolean {
         val store = ContactStore(context)
         for (c in store.all()) {
@@ -964,10 +973,12 @@ object Mailbox {
                     val chunks = ((ctLen + 32_767) / 32_768).toInt()
                     val buf = java.io.ByteArrayOutputStream()
                     for (i in 0 until chunks) {
+                        fetchProgress.value = Triple(hash, i, chunks)
                         val part = nodeDhtGet(rec, i.toUInt(), true)
                             ?: throw IllegalStateException("chunk $i missing")
                         buf.write(part)
                     }
+                    fetchProgress.value = Triple(hash, chunks, chunks)
                     val ct = buf.toByteArray()
                     val digest = java.security.MessageDigest.getInstance("SHA-256").digest(ct)
                     if (digest.toHexString() != hash) {
@@ -980,6 +991,7 @@ object Mailbox {
                     runCatching { nodeDhtDelete(rec) }
                     DucatLog.i(TAG, "fetched attachment ${hash.take(12)}… (${plain.size} bytes)")
                     clearAttachmentTrouble(context, hash)
+                    fetchProgress.value = null
                     ContactStore.bump()
                     true
                 }.getOrElse {
@@ -988,6 +1000,7 @@ object Mailbox {
                     // but stop promising. Counted rather than timed because
                     // the poller is the clock here and its interval moves.
                     attachmentTrouble(context, hash, 1)
+                    fetchProgress.value = null
                     false
                 }
             }

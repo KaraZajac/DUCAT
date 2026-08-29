@@ -1674,6 +1674,19 @@ private fun Bubble(
                                 color = fg.copy(alpha = 0.8f),
                                 style = MaterialTheme.typography.bodySmall,
                             )
+                            // The fetch's own count, when the one in flight
+                            // is this bubble's — the sender saw the chunks go
+                            // up, and this is the same arithmetic coming down.
+                            val fp by Mailbox.fetchProgress.collectAsState()
+                            fp?.takeIf { it.first == att }?.let { (_, d, t) ->
+                                Spacer(Modifier.height(4.dp))
+                                DucatBar(
+                                    progress = d.toFloat() / t.coerceAtLeast(1),
+                                    modifier = Modifier.width(160.dp).height(4.dp),
+                                    color = fg,
+                                    track = fg.copy(alpha = 0.25f),
+                                )
+                            }
                         }
                         mime.startsWith("image/") -> {
                             val bmp = remember(att) {
