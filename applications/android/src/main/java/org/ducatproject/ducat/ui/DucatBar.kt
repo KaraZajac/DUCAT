@@ -14,6 +14,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -56,7 +59,13 @@ fun DucatBar(
         animationSpec = infiniteRepeatable(tween(1400, easing = LinearEasing)),
         label = "sweep",
     )
+    // A bar reads in the script's direction: in an RTL locale progress
+    // fills from the right, as Material's own indicator does. The whole
+    // drawing is mirrored rather than each shape re-derived — the gradients
+    // flip with it.
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     Canvas(modifier) {
+        scale(scaleX = if (rtl) -1f else 1f, scaleY = 1f) {
         val r = CornerRadius(size.height / 2f)
         drawRoundRect(color = track, cornerRadius = r)
         if (progress != null) {
@@ -108,6 +117,7 @@ fun DucatBar(
                 size = Size(size.width, size.height),
                 cornerRadius = r,
             )
+        }
         }
     }
 }
