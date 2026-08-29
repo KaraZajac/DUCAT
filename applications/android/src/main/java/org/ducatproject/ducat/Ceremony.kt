@@ -1138,9 +1138,16 @@ object Ceremony {
 
         runCatching {
             when {
+                // Bonds included in the mid-release stages: two phones that
+                // both tapped "Return the deposit" are both at "releasing",
+                // and with bonds carved out here each side threw the other's
+                // proposal away — a polite deadlock nothing on either screen
+                // could break. A bond proposal parks at release_pending like
+                // any other and waits for the PIN, so accepting it costs
+                // nothing a person did not sign for; whoever signs first
+                // ends it, which is the counter-offer rule already below.
                 (stage == "done" ||
-                    (o.optInt("kind") != KIND_BOND &&
-                        stage in listOf("releasing", "release_pending", "release_cosigned"))) &&
+                    stage in listOf("releasing", "release_pending", "release_cosigned")) &&
                     round.toInt() == 0 -> {
                     // The arbiter holds a share, not an opinion — and not a
                     // pen. Rulings are a principal's proposal that the
