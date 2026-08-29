@@ -138,4 +138,5 @@
     </plurals>
     <string name="chat_not_sent_yet">chưa gửi</string>
     <string name="chat_cancel_request">Hủy yêu cầu</string>
+    <string name="chat_copied">Đã sao chép tin nhắn</string>
 </resources>

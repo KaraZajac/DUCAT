@@ -139,4 +139,5 @@
     </plurals>
     <string name="chat_not_sent_yet">هنوز ارسال نشده</string>
     <string name="chat_cancel_request">لغو درخواست</string>
+    <string name="chat_copied">پیام کپی شد</string>
 </resources>

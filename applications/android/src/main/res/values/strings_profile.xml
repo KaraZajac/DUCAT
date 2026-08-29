@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">They proposed a settlement: %1$s back to the funder, the rest to them. Your signature is what releases it.</string>
     <string name="profile_sign_pending_all">They asked for the deposit back. Your signature is what releases it.</string>
     <string name="profile_sign_release">Sign the release</string>
+    <string name="profile_copied">Copied</string>
 </resources>

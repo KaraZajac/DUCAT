@@ -31,4 +31,5 @@
     <string name="accounts_block_height_label">atau tinggi blok</string>
     <string name="accounts_use_that_height">Pakai tinggi itu</string>
     <string name="accounts_cancel">Batal</string>
+    <string name="accounts_copied">Alamat disalin</string>
 </resources>

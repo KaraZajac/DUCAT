@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">Họ đề xuất tất toán: %1$s trả về bên đặt cọc, phần còn lại cho họ. Chữ ký của bạn sẽ giải phóng nó.</string>
     <string name="profile_sign_pending_all">Họ đề nghị hoàn lại tiền cọc. Chữ ký của bạn sẽ giải phóng nó.</string>
     <string name="profile_sign_release">Ký giải phóng</string>
+    <string name="profile_copied">Đã sao chép</string>
 </resources>

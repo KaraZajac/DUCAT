@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">Mereka mengusulkan penyelesaian: %1$s kembali ke penyetor, sisanya untuk mereka. Tanda tangan Anda yang melepaskannya.</string>
     <string name="profile_sign_pending_all">Mereka meminta deposit dikembalikan. Tanda tangan Anda yang melepaskannya.</string>
     <string name="profile_sign_release">Tanda tangani pelepasan</string>
+    <string name="profile_copied">Disalin</string>
 </resources>

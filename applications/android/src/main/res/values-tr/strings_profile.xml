@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">Bir kapanış önerdiler: %1$s yatırana döner, kalanı onlara. İmzanız serbest bırakır.</string>
     <string name="profile_sign_pending_all">Depozitonun iadesini istediler. İmzanız serbest bırakır.</string>
     <string name="profile_sign_release">Serbest bırakmayı imzala</string>
+    <string name="profile_copied">Kopyalandı</string>
 </resources>

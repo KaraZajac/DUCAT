@@ -138,4 +138,5 @@
     </plurals>
     <string name="chat_not_sent_yet">belum terkirim</string>
     <string name="chat_cancel_request">Batalkan permintaan</string>
+    <string name="chat_copied">Pesan disalin</string>
 </resources>

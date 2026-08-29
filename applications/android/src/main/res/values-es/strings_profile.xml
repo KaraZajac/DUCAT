@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">Proponen un cierre: %1$s vuelve a quien depositó, el resto para ellos. Tu firma es lo que lo libera.</string>
     <string name="profile_sign_pending_all">Piden la devolución del depósito. Tu firma es lo que lo libera.</string>
     <string name="profile_sign_release">Firmar la liberación</string>
+    <string name="profile_copied">Copiado</string>
 </resources>

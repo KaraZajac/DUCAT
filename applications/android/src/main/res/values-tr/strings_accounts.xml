@@ -31,4 +31,5 @@
     <string name="accounts_block_height_label">veya bir blok yüksekliği</string>
     <string name="accounts_use_that_height">Bu yüksekliği kullan</string>
     <string name="accounts_cancel">İptal</string>
+    <string name="accounts_copied">Adres kopyalandı</string>
 </resources>

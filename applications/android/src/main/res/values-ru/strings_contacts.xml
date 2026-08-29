@@ -46,4 +46,5 @@
     <string name="name_gate_later">Позже его можно изменить или убрать в профиле.</string>
     <string name="name_gate_use">Использовать это имя</string>
     <string name="name_gate_skip">Остаться анонимным</string>
+    <string name="contacts_copied">Ссылка скопирована</string>
 </resources>

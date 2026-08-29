@@ -46,4 +46,5 @@
     <string name="name_gate_later">आप इसे बाद में प्रोफ़ाइल में बदल या हटा सकते हैं।</string>
     <string name="name_gate_use">यही नाम रखें</string>
     <string name="name_gate_skip">गुमनाम रहें</string>
+    <string name="contacts_copied">लिंक कॉपी हो गया</string>
 </resources>

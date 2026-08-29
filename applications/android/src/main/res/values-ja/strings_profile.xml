@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">清算の提案です。%1$s は預けた側へ戻り、残りは相手へ。あなたの署名で解放されます。</string>
     <string name="profile_sign_pending_all">保証金の返還を求めています。あなたの署名で解放されます。</string>
     <string name="profile_sign_release">解放に署名する</string>
+    <string name="profile_copied">コピーしました</string>
 </resources>

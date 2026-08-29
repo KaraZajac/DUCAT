@@ -1,9 +1,6 @@
 package org.ducatproject.ducat.ui
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -311,7 +308,9 @@ private fun Field(
     val context = LocalContext.current
     Column(
         Modifier.fillMaxWidth()
-            .then(if (copyable) Modifier.clickable { copy(context, label, value) } else Modifier)
+            .then(if (copyable) Modifier.clickable {
+                copyText(context, value, context.getString(R.string.txdetail_copied, label))
+            } else Modifier)
             .padding(vertical = 6.dp),
     ) {
         Row(verticalAlignment = Alignment.Top) {
@@ -338,10 +337,4 @@ private fun Field(
             )
         }
     }
-}
-
-private fun copy(context: Context, label: String, value: String) {
-    val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    cm.setPrimaryClip(ClipData.newPlainText(label, value))
-    Toast.makeText(context, context.getString(R.string.txdetail_copied, label), Toast.LENGTH_SHORT).show()
 }

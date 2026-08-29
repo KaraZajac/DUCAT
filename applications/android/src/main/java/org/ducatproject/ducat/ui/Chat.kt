@@ -1329,12 +1329,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         // Copy is how a card, an address, or a link gets passed
                         // along — forwarding by hand until forwarding exists.
                         TextButton(onClick = {
-                            val cm = context.getSystemService(
-                                android.content.ClipboardManager::class.java
-                            )
-                            cm?.setPrimaryClip(
-                                android.content.ClipData.newPlainText("message", m.body)
-                            )
+                            copyText(context, m.body, context.getString(R.string.chat_copied))
                             confirmDelete = null
                         }) { Text(stringResource(R.string.chat_copy)) }
                     }

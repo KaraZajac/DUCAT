@@ -13,4 +13,5 @@
     <string name="qrhub_tap_or_scan">گوشی‌ها را نزدیک کنید یا اسکن کنید — هر دو، همان کارت است.</string>
     <string name="qrhub_one_per_code">هر کد برای یک نفر. همین که یکی این را بردارد، بعدی خودکار ساخته می‌شود — کاری نداری.</string>
     <string name="qrhub_name_travels">نام و عکست همراهش می‌رود. باقیِ آنچه به اشتراک می‌گذاری بعداً می‌رسد، از روی اتصالی که باز می‌کند.</string>
+    <string name="qrhub_copied">لینک کپی شد</string>
 </resources>

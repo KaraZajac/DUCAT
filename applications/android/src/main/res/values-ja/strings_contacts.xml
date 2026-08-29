@@ -46,4 +46,5 @@
     <string name="name_gate_later">あとでプロフィールから変更・削除できます。</string>
     <string name="name_gate_use">この名前を使う</string>
     <string name="name_gate_skip">匿名のままにする</string>
+    <string name="contacts_copied">リンクをコピーしました</string>
 </resources>

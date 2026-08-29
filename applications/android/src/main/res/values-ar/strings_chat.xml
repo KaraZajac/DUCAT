@@ -143,4 +143,5 @@
     </plurals>
     <string name="chat_not_sent_yet">لم يُرسل بعد</string>
     <string name="chat_cancel_request">إلغاء الطلب</string>
+    <string name="chat_copied">نُسخت الرسالة</string>
 </resources>

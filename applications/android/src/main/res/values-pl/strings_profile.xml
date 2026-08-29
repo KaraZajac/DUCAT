@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">Proponują rozliczenie: %1$s wraca do wpłacającego, reszta dla nich. Twój podpis je uwalnia.</string>
     <string name="profile_sign_pending_all">Proszą o zwrot kaucji. Twój podpis ją uwalnia.</string>
     <string name="profile_sign_release">Podpisz zwolnienie</string>
+    <string name="profile_copied">Skopiowano</string>
 </resources>

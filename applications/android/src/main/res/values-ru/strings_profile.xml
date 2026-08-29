@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">Предложен расчёт: %1$s возвращается внёсшему, остальное им. Ваша подпись выпускает средства.</string>
     <string name="profile_sign_pending_all">Просят вернуть депозит. Ваша подпись выпускает средства.</string>
     <string name="profile_sign_release">Подписать выпуск</string>
+    <string name="profile_copied">Скопировано</string>
 </resources>

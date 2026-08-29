@@ -31,4 +31,5 @@
     <string name="accounts_block_height_label">of een blokhoogte</string>
     <string name="accounts_use_that_height">Gebruik die hoogte</string>
     <string name="accounts_cancel">Annuleren</string>
+    <string name="accounts_copied">Adres gekopieerd</string>
 </resources>

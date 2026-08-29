@@ -13,4 +13,5 @@
     <string name="qrhub_tap_or_scan">폰을 맞대거나 스캔하세요 — 어느 쪽이든 같은 카드예요.</string>
     <string name="qrhub_one_per_code">코드 하나에 한 사람이에요. 누군가 이걸 가져가면 다음 코드가 자동으로 만들어져요 — 할 일이 없어요.</string>
     <string name="qrhub_name_travels">이름과 사진이 함께 가요. 그 밖에 공유하는 것들은 나중에, 카드가 여는 연결을 타고 도착해요.</string>
+    <string name="qrhub_copied">링크를 복사했어요</string>
 </resources>

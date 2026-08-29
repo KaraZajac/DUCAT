@@ -138,4 +138,5 @@
     </plurals>
     <string name="chat_not_sent_yet">ยังไม่ได้ส่ง</string>
     <string name="chat_cancel_request">ยกเลิกคำขอ</string>
+    <string name="chat_copied">คัดลอกข้อความแล้ว</string>
 </resources>

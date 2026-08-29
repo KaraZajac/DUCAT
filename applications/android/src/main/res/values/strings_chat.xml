@@ -142,4 +142,5 @@
     <string name="chat_their_name_support">Only on your phone — they are never told.</string>
     <string name="chat_not_sent_yet">not sent yet</string>
     <string name="chat_cancel_request">Cancel request</string>
+    <string name="chat_copied">Message copied</string>
 </resources>

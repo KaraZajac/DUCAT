@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">تسویه‌ای پیشنهاد شده: %1$s به سپرده‌گذار بازمی‌گردد و بقیه برای آن‌هاست. امضای شما آن را آزاد می‌کند.</string>
     <string name="profile_sign_pending_all">بازگشت سپرده را خواسته‌اند. امضای شما آن را آزاد می‌کند.</string>
     <string name="profile_sign_release">امضای آزادسازی</string>
+    <string name="profile_copied">کپی شد</string>
 </resources>

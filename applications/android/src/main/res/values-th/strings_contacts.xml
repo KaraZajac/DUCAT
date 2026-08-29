@@ -46,4 +46,5 @@
     <string name="name_gate_later">เปลี่ยนหรือลบภายหลังได้ในโปรไฟล์</string>
     <string name="name_gate_use">ใช้ชื่อนี้</string>
     <string name="name_gate_skip">ไม่ระบุชื่อ</string>
+    <string name="contacts_copied">คัดลอกลิงก์แล้ว</string>
 </resources>

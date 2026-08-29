@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">उन्होंने निपटान प्रस्तावित किया: %1$s जमाकर्ता को वापस, बाक़ी उन्हें। आपका हस्ताक्षर ही इसे जारी करता है।</string>
     <string name="profile_sign_pending_all">उन्होंने जमा वापस माँगी है। आपका हस्ताक्षर ही इसे जारी करता है।</string>
     <string name="profile_sign_release">रिलीज़ पर हस्ताक्षर करें</string>
+    <string name="profile_copied">कॉपी हो गया</string>
 </resources>

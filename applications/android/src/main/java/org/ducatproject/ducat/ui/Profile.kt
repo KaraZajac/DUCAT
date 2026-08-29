@@ -11,10 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +41,6 @@ import androidx.compose.foundation.clickable
 fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -> Unit) {
     BackHandler(onBack = onBack)
     val context = LocalContext.current
-    val clipboard = LocalClipboardManager.current
     val store = remember { ContactStore(context) }
     // Read back from the store on every change rather than holding the
     // snapshot this screen was opened with.
@@ -136,7 +133,9 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 told.forEach { (label, value) ->
                     Row(
                         Modifier.fillMaxWidth()
-                            .clickable { clipboard.setText(AnnotatedString(value)) }
+                            .clickable {
+                                copyText(context, value, context.getString(R.string.profile_copied))
+                            }
                             .padding(vertical = 6.dp),
                     ) {
                         Text(
@@ -225,7 +224,7 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
-            Field(stringResource(R.string.profile_persona), c.personaHex, clipboard)
+            Field(stringResource(R.string.profile_persona), c.personaHex)
 
             Spacer(Modifier.height(24.dp))
             Text(stringResource(R.string.profile_told_to_you), style = MaterialTheme.typography.titleMedium)
@@ -240,12 +239,10 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                 // What they call themselves, which is to say what they typed.
                 c.assertedName?.let { isolate(it) }
                     ?: stringResource(R.string.profile_none_given),
-                clipboard,
             )
             Field(
                 stringResource(R.string.profile_monero_address),
                 c.theirAddress ?: stringResource(R.string.profile_not_shared),
-                clipboard,
             )
             // A card asked to move this and was not allowed to. The decision
             // belongs here, beside the address it would replace, and it is
@@ -300,8 +297,8 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
             Spacer(Modifier.height(24.dp))
             Text(stringResource(R.string.profile_where_reached), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
-            Field(stringResource(R.string.profile_their_outbox), c.theirOutbox.ifBlank { "—" }, clipboard)
-            Field(stringResource(R.string.profile_your_outbox), c.myOutbox.ifBlank { "—" }, clipboard)
+            Field(stringResource(R.string.profile_their_outbox), c.theirOutbox.ifBlank { "—" })
+            Field(stringResource(R.string.profile_your_outbox), c.myOutbox.ifBlank { "—" })
 
             Spacer(Modifier.height(24.dp))
             Button(onClick = { onOpenChat(c) }, modifier = Modifier.fillMaxWidth()) {
@@ -309,7 +306,7 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
             }
 
             Spacer(Modifier.height(24.dp))
-            BondSection(c, clipboard)
+            BondSection(c)
 
             Spacer(Modifier.height(28.dp))
             // Named rather than silently absent: a profile screen with no
@@ -336,10 +333,7 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
  * exactly what bumps it.
  */
 @Composable
-private fun BondSection(
-    c: Contact,
-    clipboard: androidx.compose.ui.platform.ClipboardManager,
-) {
+private fun BondSection(c: Contact) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val version by ContactStore.changes.collectAsState()
@@ -460,7 +454,6 @@ private fun BondSection(
             Field(
                 stringResource(R.string.profile_bond_done),
                 ceremony?.optString("address").orEmpty(),
-                clipboard,
             )
             // Name the third keyholder when there is one: a 2-of-3 bond
             // behaves differently (nothing strands) and the screen should
@@ -587,7 +580,6 @@ private fun BondSection(
             Field(
                 stringResource(R.string.profile_bond_txid),
                 ceremony?.optString("txid").orEmpty(),
-                clipboard,
             )
             // A returned deposit is a finished story, not a closed door —
             // the next bond starts from right here.
@@ -615,7 +607,6 @@ private fun BondSection(
         else -> Field(
             stringResource(R.string.profile_bond_done),
             ceremony?.optString("address").orEmpty(),
-            clipboard,
         )
     }
 }
@@ -624,8 +615,8 @@ private fun BondSection(
 private fun Field(
     label: String,
     value: String,
-    clipboard: androidx.compose.ui.platform.ClipboardManager,
 ) {
+    val context = LocalContext.current
     Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
         Text(
             label,
@@ -641,7 +632,9 @@ private fun Field(
                 )
             }
             if (!value.startsWith("—")) {
-                TextButton(onClick = { clipboard.setText(AnnotatedString(value)) }) {
+                TextButton(onClick = {
+                    copyText(context, value, context.getString(R.string.profile_copied))
+                }) {
                     Text(stringResource(R.string.profile_copy), style = MaterialTheme.typography.labelSmall)
                 }
             }

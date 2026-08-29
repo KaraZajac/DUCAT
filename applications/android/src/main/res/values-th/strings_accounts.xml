@@ -31,4 +31,5 @@
     <string name="accounts_block_height_label">หรือระบุความสูงบล็อก</string>
     <string name="accounts_use_that_height">ใช้ความสูงนี้</string>
     <string name="accounts_cancel">ยกเลิก</string>
+    <string name="accounts_copied">คัดลอกที่อยู่แล้ว</string>
 </resources>

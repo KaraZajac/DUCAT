@@ -31,4 +31,5 @@
     <string name="accounts_block_height_label">या कोई ब्लॉक हाइट</string>
     <string name="accounts_use_that_height">यही हाइट लें</string>
     <string name="accounts_cancel">रद्द करें</string>
+    <string name="accounts_copied">पता कॉपी हो गया</string>
 </resources>

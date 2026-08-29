@@ -46,4 +46,5 @@
     <string name="name_gate_later">나중에 프로필에서 바꾸거나 지울 수 있습니다.</string>
     <string name="name_gate_use">이 이름 사용</string>
     <string name="name_gate_skip">익명으로 두기</string>
+    <string name="contacts_copied">링크를 복사했어요</string>
 </resources>

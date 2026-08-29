@@ -94,7 +94,9 @@ fun AccountsScreen() {
                     Spacer(Modifier.height(14.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Button(
-                            onClick = { clipboard.setText(AnnotatedString(address)) },
+                            onClick = {
+                                copyText(context, address, context.getString(R.string.accounts_copied))
+                            },
                             modifier = Modifier.weight(1f),
                         ) {
                             Icon(Icons.Filled.ContentCopy, null, Modifier.size(18.dp))

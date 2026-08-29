@@ -13,4 +13,5 @@
     <string name="qrhub_tap_or_scan">Avvicinate i telefoni, o scansiona — stesso biglietto in ogni caso.</string>
     <string name="qrhub_one_per_code">Una persona per codice. Appena qualcuno prende questo, il prossimo viene creato automaticamente — niente da fare.</string>
     <string name="qrhub_name_travels">Il tuo nome e la tua foto viaggiano con esso. Tutto il resto che condividi arriva dopo, sulla connessione che apre.</string>
+    <string name="qrhub_copied">Link copiato</string>
 </resources>

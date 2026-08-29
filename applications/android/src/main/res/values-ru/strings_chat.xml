@@ -141,4 +141,5 @@
     </plurals>
     <string name="chat_not_sent_yet">ещё не отправлено</string>
     <string name="chat_cancel_request">Отменить запрос</string>
+    <string name="chat_copied">Сообщение скопировано</string>
 </resources>

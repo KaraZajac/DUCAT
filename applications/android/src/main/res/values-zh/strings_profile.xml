@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">对方提议结算：%1$s 退回出资方，其余归对方。您的签名即释放资金。</string>
     <string name="profile_sign_pending_all">对方请求退回押金。您的签名即释放资金。</string>
     <string name="profile_sign_release">签名放款</string>
+    <string name="profile_copied">已复制</string>
 </resources>

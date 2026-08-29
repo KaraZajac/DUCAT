@@ -46,4 +46,5 @@
     <string name="name_gate_later">以后可以在“个人资料”中修改或删除。</string>
     <string name="name_gate_use">使用这个名字</string>
     <string name="name_gate_skip">保持匿名</string>
+    <string name="contacts_copied">已复制链接</string>
 </resources>

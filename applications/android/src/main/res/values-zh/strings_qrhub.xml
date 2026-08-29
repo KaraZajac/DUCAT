@@ -13,4 +13,5 @@
     <string name="qrhub_tap_or_scan">手机碰一碰，或者扫码 — 都是同一张名片。</string>
     <string name="qrhub_one_per_code">一个码只给一个人。一旦有人领取，下一个码会自动生成 — 什么都不用做。</string>
     <string name="qrhub_name_travels">你的名字和照片随它一起送出。其余你分享的内容随后经它打开的连接送达。</string>
+    <string name="qrhub_copied">已复制链接</string>
 </resources>

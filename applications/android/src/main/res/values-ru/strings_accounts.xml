@@ -31,4 +31,5 @@
     <string name="accounts_block_height_label">или высота блока</string>
     <string name="accounts_use_that_height">Использовать эту высоту</string>
     <string name="accounts_cancel">Отмена</string>
+    <string name="accounts_copied">Адрес скопирован</string>
 </resources>

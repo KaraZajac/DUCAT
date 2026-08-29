@@ -46,4 +46,5 @@
     <string name="name_gate_later">Pode alterá-lo ou removê-lo mais tarde, no Perfil.</string>
     <string name="name_gate_use">Usar este nome</string>
     <string name="name_gate_skip">Ficar anónimo</string>
+    <string name="contacts_copied">Link copiado</string>
 </resources>

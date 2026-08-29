@@ -31,4 +31,5 @@
     <string name="accounts_block_height_label">또는 블록 높이 입력</string>
     <string name="accounts_use_that_height">이 높이 사용</string>
     <string name="accounts_cancel">취소</string>
+    <string name="accounts_copied">주소를 복사했어요</string>
 </resources>

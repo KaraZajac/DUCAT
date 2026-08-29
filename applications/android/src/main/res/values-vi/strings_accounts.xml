@@ -31,4 +31,5 @@
     <string name="accounts_block_height_label">hoặc một chiều cao khối</string>
     <string name="accounts_use_that_height">Dùng chiều cao đó</string>
     <string name="accounts_cancel">Hủy</string>
+    <string name="accounts_copied">Đã sao chép địa chỉ</string>
 </resources>

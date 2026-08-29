@@ -138,4 +138,5 @@
     </plurals>
     <string name="chat_not_sent_yet">未送信</string>
     <string name="chat_cancel_request">リクエストを取り消す</string>
+    <string name="chat_copied">メッセージをコピーしました</string>
 </resources>

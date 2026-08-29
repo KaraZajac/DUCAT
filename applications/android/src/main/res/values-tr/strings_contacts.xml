@@ -46,4 +46,5 @@
     <string name="name_gate_later">Sonradan Profil\'den değiştirebilir veya kaldırabilirsin.</string>
     <string name="name_gate_use">Bu ismi kullan</string>
     <string name="name_gate_skip">Anonim kal</string>
+    <string name="contacts_copied">Bağlantı kopyalandı</string>
 </resources>

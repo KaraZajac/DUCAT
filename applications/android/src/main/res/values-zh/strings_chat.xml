@@ -138,4 +138,5 @@
     </plurals>
     <string name="chat_not_sent_yet">尚未发送</string>
     <string name="chat_cancel_request">撤销请求</string>
+    <string name="chat_copied">已复制消息</string>
 </resources>

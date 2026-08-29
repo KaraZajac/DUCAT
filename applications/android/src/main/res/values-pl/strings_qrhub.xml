@@ -13,4 +13,5 @@
     <string name="qrhub_tap_or_scan">Zetknijcie telefony albo zeskanujcie — ta sama wizytówka tak czy tak.</string>
     <string name="qrhub_one_per_code">Jedna osoba na kod. Gdy tylko ktoś weźmie ten, następny powstaje automatycznie — nic nie musisz robić.</string>
     <string name="qrhub_name_travels">Podróżuje z nią twoje imię i zdjęcie. Cała reszta, którą udostępniasz, dociera później, przez połączenie, które otwiera.</string>
+    <string name="qrhub_copied">Skopiowano link</string>
 </resources>

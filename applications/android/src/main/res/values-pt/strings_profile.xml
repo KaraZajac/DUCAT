@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">Propuseram um acerto: %1$s volta a quem depositou, o resto para eles. A sua assinatura é o que o liberta.</string>
     <string name="profile_sign_pending_all">Pedem a devolução do depósito. A sua assinatura é o que o liberta.</string>
     <string name="profile_sign_release">Assinar a libertação</string>
+    <string name="profile_copied">Copiado</string>
 </resources>

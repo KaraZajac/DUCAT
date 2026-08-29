@@ -46,4 +46,5 @@
     <string name="name_gate_later">Bạn có thể đổi hoặc bỏ sau, trong Hồ sơ.</string>
     <string name="name_gate_use">Dùng tên này</string>
     <string name="name_gate_skip">Ẩn danh</string>
+    <string name="contacts_copied">Đã sao chép liên kết</string>
 </resources>

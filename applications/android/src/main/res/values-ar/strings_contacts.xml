@@ -46,4 +46,5 @@
     <string name="name_gate_later">يمكنك تغييره أو إزالته لاحقًا من الملف الشخصي.</string>
     <string name="name_gate_use">استخدام هذا الاسم</string>
     <string name="name_gate_skip">البقاء مجهولًا</string>
+    <string name="contacts_copied">نُسخ الرابط</string>
 </resources>

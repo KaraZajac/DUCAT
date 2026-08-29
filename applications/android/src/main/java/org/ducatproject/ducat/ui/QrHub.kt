@@ -207,7 +207,9 @@ fun QrHub(
                             uri = uri,
                             busy = busy,
                             error = error,
-                            onCopy = { uri?.let { clipboard.setText(AnnotatedString(it)) } },
+                            onCopy = {
+                                uri?.let { copyText(context, it, context.getString(R.string.qrhub_copied)) }
+                            },
                         )
                     }
                 }

@@ -136,7 +136,9 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                 Spacer(Modifier.height(16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
-                        onClick = { clipboard.setText(AnnotatedString(uri!!)) },
+                        onClick = {
+                            copyText(context, uri!!, context.getString(R.string.contacts_copied))
+                        },
                         modifier = Modifier.weight(1f),
                     ) {
                         Icon(Icons.Filled.ContentCopy, null, Modifier.size(18.dp))

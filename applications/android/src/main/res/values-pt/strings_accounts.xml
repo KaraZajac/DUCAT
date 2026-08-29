@@ -31,4 +31,5 @@
     <string name="accounts_block_height_label">ou uma altura de bloco</string>
     <string name="accounts_use_that_height">Usar essa altura</string>
     <string name="accounts_cancel">Cancelar</string>
+    <string name="accounts_copied">Endereço copiado</string>
 </resources>

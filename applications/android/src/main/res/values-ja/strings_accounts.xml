@@ -31,4 +31,5 @@
     <string name="accounts_block_height_label">またはブロック高を指定</string>
     <string name="accounts_use_that_height">この高さを使う</string>
     <string name="accounts_cancel">キャンセル</string>
+    <string name="accounts_copied">アドレスをコピーしました</string>
 </resources>

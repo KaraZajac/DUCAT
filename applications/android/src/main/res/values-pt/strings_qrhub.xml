@@ -13,4 +13,5 @@
     <string name="qrhub_tap_or_scan">Encoste os telefones, ou escaneie — o mesmo cartão de qualquer jeito.</string>
     <string name="qrhub_one_per_code">Uma pessoa por código. Assim que alguém usa este, o próximo é criado automaticamente — nada a fazer.</string>
     <string name="qrhub_name_travels">Seu nome e sua foto viajam com ele. Todo o resto que você compartilha chega depois, pela conexão que ele abre.</string>
+    <string name="qrhub_copied">Link copiado</string>
 </resources>

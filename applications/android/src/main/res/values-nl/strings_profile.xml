@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">Voorgestelde afwikkeling: %1$s terug naar de inlegger, de rest naar hen. Uw handtekening geeft het vrij.</string>
     <string name="profile_sign_pending_all">Ze vragen de borg terug. Uw handtekening geeft die vrij.</string>
     <string name="profile_sign_release">Vrijgave ondertekenen</string>
+    <string name="profile_copied">Gekopieerd</string>
 </resources>

@@ -141,4 +141,5 @@
     </plurals>
     <string name="chat_not_sent_yet">jeszcze niewysłane</string>
     <string name="chat_cancel_request">Wycofaj prośbę</string>
+    <string name="chat_copied">Skopiowano wiadomość</string>
 </resources>

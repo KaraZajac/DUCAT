@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">Règlement proposé : %1$s revient au déposant, le reste à eux. Votre signature le libère.</string>
     <string name="profile_sign_pending_all">Ils demandent le retour du dépôt. Votre signature le libère.</string>
     <string name="profile_sign_release">Signer la libération</string>
+    <string name="profile_copied">Copié</string>
 </resources>

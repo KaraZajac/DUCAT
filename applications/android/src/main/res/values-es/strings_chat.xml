@@ -139,4 +139,5 @@
     </plurals>
     <string name="chat_not_sent_yet">sin enviar aún</string>
     <string name="chat_cancel_request">Cancelar solicitud</string>
+    <string name="chat_copied">Mensaje copiado</string>
 </resources>

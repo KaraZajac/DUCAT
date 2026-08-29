@@ -52,4 +52,5 @@
     <string name="profile_sign_pending_amt">Vorgeschlagene Abwicklung: %1$s zurück an die einzahlende Seite, der Rest an sie. Ihre Unterschrift gibt es frei.</string>
     <string name="profile_sign_pending_all">Sie bitten um die Rückgabe der Kaution. Ihre Unterschrift gibt sie frei.</string>
     <string name="profile_sign_release">Freigabe unterschreiben</string>
+    <string name="profile_copied">Kopiert</string>
 </resources>

@@ -31,4 +31,5 @@
     <string name="accounts_block_height_label">یا یک ارتفاع بلاک</string>
     <string name="accounts_use_that_height">استفاده از همین ارتفاع</string>
     <string name="accounts_cancel">لغو</string>
+    <string name="accounts_copied">نشانی کپی شد</string>
 </resources>
