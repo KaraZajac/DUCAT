@@ -2054,6 +2054,11 @@ object Ceremony {
      * banner can still go stale there, on the one shape where the person
      * reading it is owed no money.
      */
+    /** Last escrow-balance probe per still-open release, so a stuck record
+     *  costs one scan every few minutes rather than one per poller pass. */
+    private val settleProbes = java.util.concurrent.ConcurrentHashMap<String, Long>()
+    private const val SETTLE_PROBE_GAP_MS = 10L * 60 * 1000
+
     fun checkSettled(context: Context): Int {
         val wallet = WalletStore(context)
         val ours by lazy { wallet.ourTxids() }
@@ -2082,6 +2087,42 @@ object Ceremony {
                     soldOne(context, o)
                     ContactStore.bump()
                     DucatLog.i(TAG, "escrow $idHex: our release landed — recovered after a death mid-broadcast")
+                    found += 1
+                }
+                continue
+            }
+            // The co-signer's blindness, and the proposer-in-waiting's: at
+            // "release_cosigned" the OTHER side broadcasts, and at
+            // "releasing" they may have superseded and completed their own —
+            // either way nothing this device can scan for ever arrives (a
+            // bond sweeps to the proposer's wallet; a ride pays the driver
+            // at their published address, never our ride minor). The
+            // escrow's own balance is the one witness this side has: money
+            // in a threshold escrow leaves only under the quorum's
+            // signatures, so empty means a signed release happened,
+            // whatever this record still says. Seen live: the release
+            // finished days ago and the co-signing phone read "the release
+            // is theirs to broadcast" for the rest of its life.
+            val stage = o.optString("stage")
+            if (stage == "releasing" || stage == "release_cosigned") {
+                // Polite about the network: an escrow scan per pass per
+                // stuck record adds up, and this state should be rare.
+                val now = System.currentTimeMillis()
+                val last = settleProbes[idHex] ?: 0L
+                if (now - last < SETTLE_PROBE_GAP_MS) continue
+                settleProbes[idHex] = now
+                val keys = hexToBytes(o.optString("keys")) ?: continue
+                val nodeUrl = node(context) ?: continue
+                val from = o.optLong("scanFrom").takeIf { it > 0 }
+                    ?: WalletStore(context).restoreHeight().toLong()
+                val bal = runCatching {
+                    uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+                }.getOrNull() ?: continue
+                if (bal == 0L) {
+                    mutate(context, idHex) { cur -> settle(cur, "released") }
+                    soldOne(context, o)
+                    ContactStore.bump()
+                    DucatLog.i(TAG, "escrow $idHex: released by the other side — the empty escrow says so")
                     found += 1
                 }
                 continue
