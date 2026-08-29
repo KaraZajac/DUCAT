@@ -40,5 +40,6 @@ theme is the light default unless the name says otherwise.
 | `hail.png` | Hailing a ride: route, distance, time, fare against a rideshare's price |
 | `taxi-drive.png` | The driver's day: watch a stand or an area for hails |
 | `taxi-meter.png` | The meter: rate typed once, a pickup code, terms land in the chat at start |
-| `marketplace.png` | Marketplace browse (empty board state shown honestly) |
-| `rent-search.png` | Finding gear nearby, board by board |
+| `marketplace.png` | Marketplace browse: a listing found on the board, price and stakes, "Ask about it" |
+| `hire-help.png` | Hire help browse: a skill found nearby, priced per hour |
+| `rent-search.png` | Finding gear nearby: a live listing with price per day and stakes |
