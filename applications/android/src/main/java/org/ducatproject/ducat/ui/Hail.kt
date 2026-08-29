@@ -807,6 +807,10 @@ fun DriveScreen() {
     // §16.18.1's accepted degradation, made visible — see RentSearch, which
     // draws the same line for the same reason.
     var unverified by remember { mutableStateOf(false) }
+    // A lap in flight: boards answered so far, boards asked. Null between
+    // laps. The map redraws only when something changes, so without this a
+    // quiet shift looks like a stopped one.
+    var lapProgress by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     var watching by remember {
         mutableStateOf(
             dutyPrefs.getString("drive_watching", null)
@@ -1202,6 +1206,8 @@ fun DriveScreen() {
             // asked — the same distinction the rental search draws, and for
             // the same reason. See the publish below.
             val answered = java.util.concurrent.atomic.AtomicInteger()
+            val finished = java.util.concurrent.atomic.AtomicInteger()
+            lapProgress = 0 to targets.size
             kotlinx.coroutines.supervisorScope {
                 targets.map { c ->
                     async {
@@ -1221,10 +1227,12 @@ fun DriveScreen() {
                             withContext(Dispatchers.Main) { publish() }
                         }
                         }.onFailure { DucatLog.w(TAG, "sweep $c: ${it.message}") }
+                        lapProgress = finished.incrementAndGet() to targets.size
                         Unit
                     }
                 }.awaitAll()
             }
+            lapProgress = null
             // An empty screen is a claim about the boards, and a lap where no
             // board answered has not read them.
             //
@@ -1306,6 +1314,17 @@ fun DriveScreen() {
                 OutlinedButton(onClick = { watching = null; notices = emptyList(); forgetDuty(dutyPrefs) }) {
                     Text(stringResource(R.string.hail_stop))
                 }
+            }
+            // The lap, while one is running: a thin scan line filling as
+            // boards answer, gone between laps. The one question on a quiet
+            // shift is whether anything is still looking, and this is it.
+            lapProgress?.let { (d, t) ->
+                DucatBar(
+                    progress = d.toFloat() / t.coerceAtLeast(1),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 16.dp).height(3.dp),
+                )
+                Spacer(Modifier.height(4.dp))
             }
             if (unverified) {
                 Surface(
