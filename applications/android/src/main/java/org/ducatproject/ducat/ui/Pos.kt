@@ -376,7 +376,10 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
                 },
                 contentPadding = PaddingValues(horizontal = 6.dp),
             ) {
-                Text(if (fiat) "→XMR" else "→$cur", style = MaterialTheme.typography.labelMedium)
+                Text(
+                    stringResource(R.string.pos_in_unit, if (fiat) "XMR" else cur),
+                    style = MaterialTheme.typography.labelMedium,
+                )
             }
         }
         FilledIconButton(

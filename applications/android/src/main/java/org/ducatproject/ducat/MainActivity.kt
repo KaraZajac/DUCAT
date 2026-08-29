@@ -10,6 +10,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -610,7 +612,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             navigationIcon = {
                                 IconButton(onClick = { overlay = Overlay.None }) {
                                     Icon(
-                                        Icons.Filled.ArrowBack,
+                                        Icons.AutoMirrored.Filled.ArrowBack,
                                         contentDescription = androidx.compose.ui.res
                                             .stringResource(R.string.main_back),
                                     )
@@ -1004,7 +1006,7 @@ private fun HomeScreen(
                     }
                     Spacer(Modifier.width(8.dp))
                     Icon(
-                        Icons.Filled.ChevronRight,
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -1074,7 +1076,7 @@ private fun HomeScreen(
                 }
                 Spacer(Modifier.width(8.dp))
                 Icon(
-                    Icons.Filled.ChevronRight,
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -1110,7 +1112,7 @@ private fun HomeScreen(
                 }
                 Spacer(Modifier.width(8.dp))
                 Icon(
-                    Icons.Filled.ChevronRight,
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = androidx.compose.ui.res
                         .stringResource(R.string.main_open_backup_settings),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,

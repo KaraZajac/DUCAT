@@ -5,17 +5,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -49,7 +47,6 @@ fun QrHub(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val clipboard = LocalClipboardManager.current
     var scanning by remember { mutableStateOf(true) }
     var uri by remember { mutableStateOf(ContactStore(context).currentCardUri()) }
     var busy by remember { mutableStateOf(false) }
@@ -122,7 +119,7 @@ fun QrHub(
                                             title = {},
                         navigationIcon = {
                             IconButton(onClick = onClose) {
-                                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.qrhub_close))
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.qrhub_close))
                             }
                         },
                     )

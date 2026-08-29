@@ -120,4 +120,5 @@
     <string name="rent_one_fewer">Bir eksilt</string>
     <string name="rent_one_more">Bir artır</string>
     <string name="rent_posting_board">Yakınınızdaki panoya asılıyor — sakin bir ağda bu bir dakika sürebilir.</string>
+    <string name="rent_in_unit">%1$s ile</string>
 </resources>

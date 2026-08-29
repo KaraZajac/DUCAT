@@ -31,4 +31,5 @@
     <string name="pos_new_sale_settles">Yeni satış (bu satış kendi kendine kapanır)</string>
     <string name="pos_cancel_sale">Satışı iptal et</string>
     <string name="pos_tax_at">Vergi (%%%1$s)</string>
+    <string name="pos_in_unit">%1$s ile</string>
 </resources>

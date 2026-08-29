@@ -120,4 +120,5 @@
     <string name="rent_one_fewer">Eins weniger</string>
     <string name="rent_one_more">Eins mehr</string>
     <string name="rent_posting_board">Wird am Brett in deiner Nähe angeschlagen — in einem ruhigen Netz kann das eine Minute dauern.</string>
+    <string name="rent_in_unit">in %1$s</string>
 </resources>

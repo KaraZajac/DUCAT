@@ -120,4 +120,5 @@
     <string name="rent_one_fewer">На одну менше</string>
     <string name="rent_one_more">На одну більше</string>
     <string name="rent_posting_board">Розміщується на дошці поруч із вами — у тихій мережі це може зайняти хвилину.</string>
+    <string name="rent_in_unit">в %1$s</string>
 </resources>

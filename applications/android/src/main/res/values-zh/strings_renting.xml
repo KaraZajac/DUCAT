@@ -120,4 +120,5 @@
     <string name="rent_one_fewer">少一件</string>
     <string name="rent_one_more">多一件</string>
     <string name="rent_posting_board">正在贴到你附近的板上 — 在冷清的网络上可能需要一分钟。</string>
+    <string name="rent_in_unit">改用 %1$s</string>
 </resources>

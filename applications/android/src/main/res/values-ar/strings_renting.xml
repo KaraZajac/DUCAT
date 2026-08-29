@@ -120,4 +120,5 @@
     <string name="rent_one_fewer">واحد أقل</string>
     <string name="rent_one_more">واحد أكثر</string>
     <string name="rent_posting_board">يُنشر الآن على اللوحة القريبة منك — قد يستغرق هذا دقيقة على شبكة هادئة.</string>
+    <string name="rent_in_unit">بـ %1$s</string>
 </resources>

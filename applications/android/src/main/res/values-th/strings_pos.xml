@@ -31,4 +31,5 @@
     <string name="pos_new_sale_settles">การขายใหม่ (รายการนี้จะปิดยอดเอง)</string>
     <string name="pos_cancel_sale">ยกเลิกการขาย</string>
     <string name="pos_tax_at">ภาษี (%1$s%%)</string>
+    <string name="pos_in_unit">เป็น %1$s</string>
 </resources>

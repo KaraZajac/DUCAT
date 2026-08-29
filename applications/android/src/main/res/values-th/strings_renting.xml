@@ -120,4 +120,5 @@
     <string name="rent_one_fewer">ลดหนึ่ง</string>
     <string name="rent_one_more">เพิ่มหนึ่ง</string>
     <string name="rent_posting_board">กำลังติดประกาศบนบอร์ดใกล้คุณ — ในเครือข่ายที่เงียบอาจใช้เวลาราวหนึ่งนาที</string>
+    <string name="rent_in_unit">เป็น %1$s</string>
 </resources>

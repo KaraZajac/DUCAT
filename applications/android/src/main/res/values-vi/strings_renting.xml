@@ -120,4 +120,5 @@
     <string name="rent_one_fewer">Bớt một</string>
     <string name="rent_one_more">Thêm một</string>
     <string name="rent_posting_board">Đang đăng lên bảng gần bạn — trên mạng vắng có thể mất một phút.</string>
+    <string name="rent_in_unit">bằng %1$s</string>
 </resources>

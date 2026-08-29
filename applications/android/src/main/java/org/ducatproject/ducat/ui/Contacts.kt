@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,7 +56,6 @@ import uniffi.ducat_mobile.readContactCard
 @Composable
 internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     var name by remember { mutableStateOf(NameStore(context).get() ?: "") }
     var uri by remember { mutableStateOf<String?>(null) }
@@ -149,7 +148,7 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                         onClick = { shareText(context, uri!!) },
                         modifier = Modifier.weight(1f),
                     ) {
-                        Icon(Icons.Filled.Send, null, Modifier.size(18.dp))
+                        Icon(Icons.AutoMirrored.Filled.Send, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
                         Text(stringResource(R.string.contacts_send))
                     }

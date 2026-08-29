@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -68,7 +68,7 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
                     },
                     navigationIcon = {
                         IconButton(onClick = onClose) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.txdetail_back))
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.txdetail_back))
                         }
                     },
                 )

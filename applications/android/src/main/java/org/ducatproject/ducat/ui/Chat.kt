@@ -15,14 +15,14 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.RequestQuote
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -65,7 +65,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PlayArrow
@@ -359,7 +359,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             title = { Text(c.displayName()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, stringResource(R.string.chat_back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.chat_back))
                     }
                 },
                 actions = {
@@ -753,7 +753,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 if (sending) {
                                     CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                                 } else {
-                                    Icon(Icons.Filled.Send, stringResource(R.string.chat_send))
+                                    Icon(Icons.AutoMirrored.Filled.Send, stringResource(R.string.chat_send))
                                 }
                             }
                         }
@@ -771,7 +771,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 trayOpen = false; pickImage.launch("image/*")
                             }
                             TrayItem(
-                                Icons.Filled.InsertDriveFile, stringResource(R.string.chat_file),
+                                Icons.AutoMirrored.Filled.InsertDriveFile, stringResource(R.string.chat_file),
                                 enabled = !sending,
                             ) {
                                 trayOpen = false; pickFile.launch("*/*")
@@ -2123,7 +2123,7 @@ private fun FileBubble(
         },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Icons.Filled.InsertDriveFile, null, Modifier.size(28.dp), tint = fg)
+        Icon(Icons.AutoMirrored.Filled.InsertDriveFile, null, Modifier.size(28.dp), tint = fg)
         Spacer(Modifier.width(8.dp))
         Column {
             Text(name, color = fg, style = MaterialTheme.typography.bodyMedium)

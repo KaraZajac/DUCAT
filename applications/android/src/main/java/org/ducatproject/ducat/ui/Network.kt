@@ -192,8 +192,10 @@ private fun startupNote(context: android.content.Context, raw: String): String {
 @Composable
 private fun Line(label: String, value: String, ok: Boolean) {
     Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(if (ok) "✓ " else "· ", color = if (ok) MaterialTheme.ducat.settled else MaterialTheme.colorScheme.onSurfaceVariant)
-        Text("$label  ", fontWeight = FontWeight.Medium, style = MaterialTheme.typography.bodyMedium)
+        Text(if (ok) "✓" else "·", color = if (ok) MaterialTheme.ducat.settled else MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.width(6.dp))
+        Text(label, fontWeight = FontWeight.Medium, style = MaterialTheme.typography.bodyMedium)
+        Spacer(Modifier.width(10.dp))
         Text(value, style = MaterialTheme.typography.bodySmall)
     }
 }

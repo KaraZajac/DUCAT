@@ -120,4 +120,5 @@
     <string name="rent_one_fewer">Uno in meno</string>
     <string name="rent_one_more">Uno in più</string>
     <string name="rent_posting_board">Pubblicazione sulla bacheca vicino a te — su una rete tranquilla può richiedere un minuto.</string>
+    <string name="rent_in_unit">in %1$s</string>
 </resources>

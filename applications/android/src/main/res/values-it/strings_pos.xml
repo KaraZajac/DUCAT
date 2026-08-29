@@ -31,4 +31,5 @@
     <string name="pos_new_sale_settles">Nuova vendita (questa si liquida da sola)</string>
     <string name="pos_cancel_sale">Annulla la vendita</string>
     <string name="pos_tax_at">Imposta (%1$s%%)</string>
+    <string name="pos_in_unit">in %1$s</string>
 </resources>

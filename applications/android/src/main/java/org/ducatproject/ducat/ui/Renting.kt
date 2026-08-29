@@ -589,7 +589,7 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                     contentPadding = PaddingValues(horizontal = 6.dp),
                 ) {
                     Text(
-                        if (fiat) "\u2192XMR" else "\u2192$cur",
+                        stringResource(R.string.rent_in_unit, if (fiat) "XMR" else cur),
                         style = MaterialTheme.typography.labelMedium,
                     )
                 }

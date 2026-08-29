@@ -31,4 +31,5 @@
     <string name="pos_new_sale_settles">新しい会計（この会計は自動で精算されます）</string>
     <string name="pos_cancel_sale">会計をキャンセル</string>
     <string name="pos_tax_at">税（%1$s%%）</string>
+    <string name="pos_in_unit">%1$sで</string>
 </resources>

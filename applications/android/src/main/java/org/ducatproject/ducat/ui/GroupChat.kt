@@ -10,7 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.CallSplit
+import androidx.compose.material.icons.automirrored.filled.CallSplit
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -322,7 +322,7 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
                 onClick = { splitOpen = true },
                 enabled = missing.isEmpty(),
             ) {
-                Icon(Icons.Filled.CallSplit, stringResource(R.string.group_split))
+                Icon(Icons.AutoMirrored.Filled.CallSplit, stringResource(R.string.group_split))
             }
             OutlinedTextField(
                 value = draft,

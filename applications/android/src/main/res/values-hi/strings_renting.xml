@@ -120,4 +120,5 @@
     <string name="rent_one_fewer">एक कम</string>
     <string name="rent_one_more">एक और</string>
     <string name="rent_posting_board">आपके पास के बोर्ड पर लगाया जा रहा है — शांत नेटवर्क पर इसमें एक मिनट लग सकता है।</string>
+    <string name="rent_in_unit">%1$s में</string>
 </resources>

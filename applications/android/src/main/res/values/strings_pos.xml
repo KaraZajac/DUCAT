@@ -31,4 +31,5 @@
     <string name="pos_new_sale_settles">New sale (this one settles by itself)</string>
     <string name="pos_cancel_sale">Cancel sale</string>
     <string name="pos_tax_at">Tax (%1$s%%)</string>
+    <string name="pos_in_unit">in %1$s</string>
 </resources>

@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -512,7 +513,7 @@ private fun AmountStep(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(top = 12.dp),
         ) {
-            IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, stringResource(R.string.pay_back)) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.pay_back)) }
             Spacer(Modifier.width(4.dp))
             when (target) {
                 is PayTarget.ToContact -> {

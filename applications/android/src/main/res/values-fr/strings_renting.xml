@@ -120,4 +120,5 @@
     <string name="rent_one_fewer">Un de moins</string>
     <string name="rent_one_more">Un de plus</string>
     <string name="rent_posting_board">Mise en ligne sur le tableau près de vous — cela peut prendre une minute sur un réseau calme.</string>
+    <string name="rent_in_unit">en %1$s</string>
 </resources>

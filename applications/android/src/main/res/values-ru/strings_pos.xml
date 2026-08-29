@@ -31,4 +31,5 @@
     <string name="pos_new_sale_settles">Новая продажа (эта закроется сама)</string>
     <string name="pos_cancel_sale">Отменить продажу</string>
     <string name="pos_tax_at">Налог (%1$s%%)</string>
+    <string name="pos_in_unit">в %1$s</string>
 </resources>

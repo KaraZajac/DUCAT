@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Schedule
@@ -352,7 +352,7 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
             Icon(
                 when {
                     e.pending -> Icons.Filled.Schedule
-                    e.unexplained -> Icons.Filled.HelpOutline
+                    e.unexplained -> Icons.AutoMirrored.Filled.HelpOutline
                     sent -> Icons.Filled.ArrowUpward
                     e.locked -> Icons.Filled.Lock
                     else -> Icons.Filled.ArrowDownward

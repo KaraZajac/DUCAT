@@ -31,4 +31,5 @@
     <string name="pos_new_sale_settles">فروش جدید (این یکی خودش تسویه می‌شود)</string>
     <string name="pos_cancel_sale">لغو فروش</string>
     <string name="pos_tax_at">مالیات (%1$s%%)</string>
+    <string name="pos_in_unit">به %1$s</string>
 </resources>
