@@ -85,8 +85,22 @@ fun DonateScreen() {
     }
     LaunchedEffect(cardInbox) {
         val inbox = cardInbox ?: return@LaunchedEffect
+        // The boot clock, because this measures a duration: a box standing
+        // through a wall-clock change must not think its card younger or
+        // older than it is.
+        val cutAt = android.os.SystemClock.elapsedRealtime()
         while (true) {
             kotlinx.coroutines.delay(2_000)
+            // A card burns two ways and both must recut it. Claimed is the
+            // ordinary one. Expired is the donation box's own: the card is
+            // cut for twelve hours and this is the one mode whose screen
+            // plausibly stands longer than that — without this, a box left
+            // up overnight showed a dead code and did not know. Recut an
+            // hour early, so no donor ever scans the last minutes of one.
+            if (android.os.SystemClock.elapsedRealtime() - cutAt > CARD_RECUT_MS) {
+                cardUri = null; cardInbox = null
+                break
+            }
             val claimed = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                 runCatching {
                     org.ducatproject.ducat.Mailbox.collectClaims(context)
@@ -216,3 +230,6 @@ fun DonateScreen() {
         }
     }
 }
+
+/** Recut the standing card an hour before its 12-hour validity runs out. */
+private const val CARD_RECUT_MS = 11L * 60 * 60 * 1000
