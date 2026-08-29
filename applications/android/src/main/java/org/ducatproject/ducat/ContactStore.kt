@@ -842,6 +842,15 @@ class ContactStore(context: Context) {
             ?.let { o.put("listings_raw", it) }
         securePrefs(appContext, "ducat_catalogue").getString("items", null)
             ?.let { o.put("catalogue_raw", it) }
+        // Groups, for the same reason as the ceremony shares above: they
+        // live in their own store, which is exactly how things come to be
+        // left out of the one this is assembled from. Found by restoring a
+        // live phone and watching every group vanish — the pairwise threads
+        // came back and the rooms they fanned out from did not, so group
+        // messages arriving after the restore named an id the phone no
+        // longer knew.
+        securePrefs(appContext, "ducat_groups").getString("groups", null)
+            ?.let { o.put("groups_raw", it) }
         return o.toString().toByteArray(Charsets.UTF_8)
     }
 
@@ -896,6 +905,10 @@ class ContactStore(context: Context) {
                 o.optString("catalogue_raw").takeIf { it.isNotEmpty() }?.let {
                     securePrefs(appContext, "ducat_catalogue").edit()
                         .putString("items", it).apply()
+                }
+                o.optString("groups_raw").takeIf { it.isNotEmpty() }?.let {
+                    securePrefs(appContext, "ducat_groups").edit()
+                        .putString("groups", it).apply()
                 }
                 appStateKeys.forEach { k ->
                     if (o.has(k)) when (val v = o.get(k)) {
