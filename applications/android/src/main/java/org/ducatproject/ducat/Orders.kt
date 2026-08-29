@@ -302,6 +302,18 @@ object Orders {
     fun bind(context: Context, order: Order, personaHex: String): Order {
         val tabs = TabStore(context)
         val opened = tabs.open(personaHex, ORIGIN)
+        // The order learns its tab BEFORE the bill leaves. The other way
+        // round, a death between the send and this write left an order with
+        // no tabId at all: expire() read it as unpaired and abandoned it
+        // half an hour later, while the customer paid the very real bill —
+        // money taken, receipt issued by the tab's reconciler, and the
+        // kiosk telling staff there was nothing to hand over. Committing
+        // the link first costs only a re-billable open tab on the same
+        // death, which the next tap settles.
+        update(
+            context,
+            order.copy(tabId = opened.id, personaHex = personaHex, state = State.Awaiting),
+        )
         val settled = tabs.settle(
             tabs.mutate(opened.id) {
                 it.copy(lines = order.lines, taxPxmr = order.taxPxmr)
@@ -510,7 +522,16 @@ object Orders {
             }
         }
 
-        val waiting = everything.filter { it.state == State.Awaiting }
+        // Unpaired orders only — the same filter the sighting and expiry
+        // use, for the reason their docstring states: a bound order's money
+        // is the tab's business, identified by the transaction the
+        // customer's notice names. Without it, a bound order's plain,
+        // un-noised total matched any output of that amount on any
+        // subaddress — another customer's bar bill confirmed kiosk order #7
+        // and the goods left the counter.
+        val waiting = everything.filter {
+            it.state == State.Awaiting && it.tabId == null && it.address.isNotEmpty()
+        }
         if (waiting.isEmpty()) return
         val ours = wallet.ourTxids()
         // One transaction settles one order, and an order that already has its

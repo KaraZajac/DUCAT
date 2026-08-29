@@ -478,7 +478,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     var billPrompt by remember {
         mutableStateOf<Pair<Contact, StoredMessage>?>(null)
     }
-    var billPay by remember { mutableStateOf<Pair<Contact, Long>?>(null) }
+    var billPay by remember { mutableStateOf<Triple<Contact, Long, Long>?>(null) }
     val billPrefs = remember {
         securePrefs(context, "ducat_contacts")
     }
@@ -520,7 +520,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         org.ducatproject.ducat.ui.BillScreen(
             m = m,
             contact = c,
-            onPay = { markSeen(); billPay = c to m.amountPxmr },
+            // The seq rides along: a payment that names its bill is the
+            // whole of §16.14's attribution, and this prompt is the path
+            // most payments take — dropping it here silently re-opened the
+            // two-identical-bills ambiguity everywhere downstream.
+            onPay = { markSeen(); billPay = Triple(c, m.amountPxmr, m.seq) },
             onDecline = {
                 markSeen()
                 val mine = PersonaStore(context).personaHex()
@@ -565,8 +569,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             onClose = markSeen,
         )
     }
-    billPay?.let { (c, amt) ->
-        PaySheet(prefillContact = c, prefillAmountPxmr = amt) { billPay = null }
+    billPay?.let { (c, amt, seq) ->
+        PaySheet(
+            prefillContact = c, prefillAmountPxmr = amt,
+            answersSeq = seq,
+        ) { billPay = null }
     }
 
     // Picking a mode should land you *in* it, not leave the picker on top.

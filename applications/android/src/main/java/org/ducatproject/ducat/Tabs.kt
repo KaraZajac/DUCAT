@@ -216,6 +216,33 @@ class TabStore(private val context: Context) {
     }
 
     /**
+     * Paid-state and the claimed key image, one commit.
+     *
+     * As two writes, a death between them left the output covered only by
+     * the tab's own paidKi — and deleting that paid tab then released a
+     * spent output back into the matching pool, the exact leak the claimed
+     * set's docstring forbids. One editor closes the gap for good.
+     */
+    fun markPaid(id: String, ki: String, paidPxmr: Long): RunningTab? = guarded {
+        val cur = all()
+        val i = cur.indexOfFirst { it.id == id }
+        if (i < 0) return@guarded null
+        val next = cur[i].copy(state = "paid", paidKi = ki, paidPxmr = paidPxmr)
+        prefs.edit()
+            .putString(
+                "tabs_v1",
+                org.json.JSONArray().also { a ->
+                    cur.mapIndexed { j, t -> if (j == i) next else t }
+                        .forEach { a.put(it.toJson()) }
+                }.toString(),
+            )
+            .putStringSet("claimed_kis_v1", claimedKis() + ki)
+            .apply()
+        ContactStore.bump()
+        next
+    }
+
+    /**
      * Bill the tab: one itemised request into the thread, then wait for chain.
      *
      * The wallet's current key images are snapshotted here so reconciliation
@@ -229,6 +256,25 @@ class TabStore(private val context: Context) {
         // Held, because what the bill names is what the tab has to be settled
         // by, and the two must not be derived separately.
         val payto = wallet.addressFor(tab.personaHex)
+        // Settled BEFORE the bill leaves — markPaidOutside's rule, applied
+        // here at last. Bill-first meant a death in the gap left a customer
+        // holding a real bill against a tab still reading "open": both
+        // reconcilers filter on settled, so their payment could never match,
+        // and the bartender's natural next tap billed the drinks again. The
+        // bill's own seq cannot exist yet, so it lands in a second write
+        // just after the send; a death between the two costs only the seq
+        // (the amount-match fallback still finds the bill), never the state.
+        mutate(tab.id) {
+            it.copy(
+                state = "settled",
+                lines = tab.lines,
+                taxPxmr = tab.taxPxmr,
+                settledTotal = total,
+                settledAt = System.currentTimeMillis(),
+                knownKis = wallet.entries().map { e -> e.keyImage },
+                tipAtBill = wallet.tip(),
+            )
+        } ?: throw IllegalStateException("that tab is gone")
         Mailbox.send(
             context, contact,
             // The shop's own language, not the reader's. This line is the
@@ -264,14 +310,7 @@ class TabStore(private val context: Context) {
             .lastOrNull { it.outgoing && it.kind == 1 }?.seq ?: 0L
         val settled = mutate(tab.id) {
             it.copy(
-                state = "settled",
                 billSeq = billSeq,
-                lines = tab.lines,
-                taxPxmr = tab.taxPxmr,
-                settledTotal = total,
-                settledAt = System.currentTimeMillis(),
-                knownKis = wallet.entries().map { it.keyImage },
-                tipAtBill = wallet.tip(),
                 // The minor of the address the bill above **actually named** —
                 // not the one allocation happened to reserve.
                 //
@@ -284,6 +323,8 @@ class TabStore(private val context: Context) {
                 // leave a bill demanding payment at an address that was never
                 // on it, unsettleable for ever. Null then, which is the
                 // permissive rule, and correct: minor 0 is where it will land.
+                // The settle state itself was committed before the send; this
+                // second write adds only what the send could tell us.
                 billedMinor = wallet.minorOf(tab.personaHex)
                     ?.takeIf { payto != null && payto != wallet.address() },
             )
@@ -543,18 +584,42 @@ class TabStore(private val context: Context) {
                     .map { it.amountPxmr }
                     .toSet()
 
-                val hit = entries.firstOrNull {
-                    it.keyImage.isNotEmpty() &&
-                        it.keyImage !in tab.knownKis &&
-                        it.keyImage !in claimed &&
+                // Amounts whose notice names a DIFFERENT bill: that money is
+                // spoken for. The exact-amount arm below used to claim any
+                // output of the right size even while the only notice in the
+                // thread pointed at another obligation on the same
+                // subaddress — a recurring bill, a split share — closing two
+                // debts with one payment and shorting the shop the other.
+                val namedElsewhere = contacts.thread(tab.personaHex)
+                    .filter {
+                        !it.outgoing && it.kind == 2 && it.reSeq != null &&
+                            !it.reOwn &&
+                            !(tab.billSeq > 0 && it.reSeq == tab.billSeq) &&
+                            it.timestamp * 1000 >= tab.settledAt - 60_000
+                    }
+                    .map { it.amountPxmr }.toSet()
+                fun matches(e: org.ducatproject.ducat.WalletEntry): Boolean =
+                    e.keyImage.isNotEmpty() &&
+                        e.keyImage !in tab.knownKis &&
+                        e.keyImage !in claimed &&
                         // Mined after the bill, not merely scanned after it: a
                         // wallet catching up surfaces old outputs the key-image
                         // snapshot never saw, and an exact-amount coincidence
                         // from last week must not settle tonight's tab.
-                        (tab.tipAtBill == 0L || it.height > tab.tipAtBill) &&
-                        paidWhereBilled(tab, wantMinor, it.minor) &&
-                        (it.amountPxmr == tab.settledTotal || it.amountPxmr in said)
-                } ?: continue
+                        (tab.tipAtBill == 0L || e.height > tab.tipAtBill) &&
+                        paidWhereBilled(tab, wantMinor, e.minor) &&
+                        ((e.amountPxmr == tab.settledTotal &&
+                            e.amountPxmr !in namedElsewhere) ||
+                            e.amountPxmr in said)
+                // The sighting already learned which transaction this was —
+                // matching on the amount again would be guessing twice about
+                // something known (Orders' rule, adopted). The arithmetic
+                // remains for tabs that were never sighted.
+                val hit = entries.firstOrNull {
+                    tab.seenTx != null &&
+                        it.txHashHex.equals(tab.seenTx, ignoreCase = true) &&
+                        matches(it)
+                } ?: entries.firstOrNull { matches(it) } ?: continue
                 // Everything above this line trusted one node's account of the
                 // chain. Amount, subaddress and height all matched — but they
                 // matched against blocks that node handed us, and no part of
@@ -576,6 +641,14 @@ class TabStore(private val context: Context) {
                 val tip = hit.amountPxmr - tab.settledTotal
                 val receiptLines =
                     if (tip > 0) tab.lines + BillItem("Tip — thank you", tip) else tab.lines
+                // The mark first, the receipt second — markPaidOutside's own
+                // rule, finally applied here too. Receipt-first meant a death
+                // in between left the tab settled and the key image
+                // unclaimed, so the next pass matched the same output again
+                // and sent a second receipt for one payment. The mark and
+                // the claim ride one commit (markPaid) for the same reason.
+                store.markPaid(tab.id, hit.keyImage, hit.amountPxmr)
+                    ?: continue
                 runCatching {
                     Mailbox.send(
                         context, contact, context.getString(R.string.receipt_note),
@@ -587,15 +660,6 @@ class TabStore(private val context: Context) {
                         reSeq = tab.billSeq.takeIf { it > 0 }, reOwn = tab.billSeq > 0,
                     )
                 }.onSuccess {
-                    store.mutate(tab.id) {
-                        it.copy(
-                            state = "paid", paidKi = hit.keyImage,
-                            // What landed, tip and all. The receipt above
-                            // already says it; the till's own books did not.
-                            paidPxmr = hit.amountPxmr,
-                        )
-                    }
-                    store.addClaimedKi(hit.keyImage)
                     Notify.post(
                         context,
                         context.getString(
@@ -621,9 +685,11 @@ class TabStore(private val context: Context) {
                             " — receipt sent",
                     )
                 }.onFailure {
-                    // The payment is real either way; the receipt retries on the
-                    // next poll rather than marking paid and losing it.
-                    DucatLog.w(TAG, "receipt failed, will retry: ${it.message}")
+                    // The payment is real and now recorded; a receipt that
+                    // failed to leave is logged rather than blocking — the
+                    // same trade markPaidOutside documents. (Retrying it here
+                    // would mean matching the paid output a second time.)
+                    DucatLog.w(TAG, "receipt failed after mark: ${it.message}")
                 }
             }
         }
