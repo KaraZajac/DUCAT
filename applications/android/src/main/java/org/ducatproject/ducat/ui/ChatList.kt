@@ -678,7 +678,14 @@ internal fun shortWhen(context: Context, epochSecs: Long): String {
         d < 86_400 -> context.getString(R.string.chatlist_time_hours, d / 3600)
         d < 7 * 86_400 -> java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault())
             .format(java.util.Date(epochSecs * 1000))
-        else -> java.text.SimpleDateFormat("d MMM", java.util.Locale.getDefault())
-            .format(java.util.Date(epochSecs * 1000))
+        // Not a pinned "d MMM": day-before-month is an English order, and
+        // Japanese, Chinese and Korean put the month first. The skeleton asks
+        // the locale which way round it writes them — the same lesson as
+        // clockTime above, one line up from where it was ignored.
+        else -> java.text.SimpleDateFormat(
+            android.text.format.DateFormat.getBestDateTimePattern(
+                java.util.Locale.getDefault(), "dMMM"),
+            java.util.Locale.getDefault(),
+        ).format(java.util.Date(epochSecs * 1000))
     }
 }

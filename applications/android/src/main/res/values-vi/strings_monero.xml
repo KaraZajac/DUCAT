@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">khứ hồi</string>
     <string name="monero_synced_yes">rồi</string>
     <string name="monero_synced_no">chưa — số dư sẽ bị cũ</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">không có node</string>
     <string name="monero_change_your_node">Đổi node</string>
     <string name="monero_use_own_node">Dùng node của riêng bạn</string>
@@ -42,4 +42,5 @@
     <string name="monero_rescan_hint">Ví này đang quét từ đầu chuỗi, lâu hơn cần thiết rất nhiều nếu nó mới được tạo gần đây.</string>
     <string name="monero_skip_ahead">Nhảy tới</string>
     <string name="monero_trust_plaintext">Nút này được kết nối không mã hoá, nên bất kỳ ai trên đường truyền cũng làm được điều tương tự: đọc, hoặc sửa.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

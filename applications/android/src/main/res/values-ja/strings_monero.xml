@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">往復時間</string>
     <string name="monero_synced_yes">はい</string>
     <string name="monero_synced_no">いいえ — 残高が古い可能性があります</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">ノードなし</string>
     <string name="monero_change_your_node">ノードを変更</string>
     <string name="monero_use_own_node">自分のノードを使う</string>
@@ -42,4 +42,5 @@
     <string name="monero_rescan_hint">このウォレットはチェーンの最初からスキャンしています。最近作られたものなら、必要以上に時間がかかっています。</string>
     <string name="monero_skip_ahead">先へ飛ばす</string>
     <string name="monero_trust_plaintext">これは暗号化なしで接続しているので、途中のネットワークにいる誰でも同じことができます — 読むことも、書き換えることも。</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

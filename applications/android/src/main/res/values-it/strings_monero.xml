@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">andata e ritorno</string>
     <string name="monero_synced_yes">sì</string>
     <string name="monero_synced_no">no — i saldi sarebbero vecchi</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">nessun nodo</string>
     <string name="monero_change_your_node">Cambia il tuo nodo</string>
     <string name="monero_use_own_node">Usa il tuo nodo</string>
@@ -43,4 +43,5 @@
     <string name="monero_rescan_hint">Questo portafoglio sta scansionando dall\'inizio della catena, il che richiede molto più tempo del necessario se è stato creato di recente.</string>
     <string name="monero_skip_ahead">Salta avanti</string>
     <string name="monero_trust_plaintext">A questo si arriva senza cifratura, quindi chiunque sulla rete in mezzo può fare lo stesso: leggere, o modificare.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

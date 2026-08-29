@@ -12,7 +12,7 @@
     <string name="net_yes">بله</string>
     <string name="net_not_yet_routes">هنوز نه — تا این نشود مسیری نیست</string>
     <string name="net_line_peers">همتاها</string>
-    <string name="net_peers_value">%1$s زنده، %2$s قابل‌اتکا</string>
+    <string name="net_peers_value">%1$d زنده، %2$d قابل‌اتکا</string>
     <string name="net_waiting">%1$d ثانیه در انتظار — نود باید اول بفهمد چطور در دسترس است تا بتواند مسیری بسازد</string>
 
     <string name="net_starting">در حال شروع…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">توقف</string>
     <string name="net_testing">در حال آزمایش…</string>
     <string name="net_test_route">آزمایش مسیر</string>
-    <string name="net_route_ok">مسیر ساخته شد — بستهٔ %1$s بایتی</string>
+    <string name="net_route_ok">مسیر ساخته شد — بستهٔ %1$d بایتی</string>
     <string name="net_route_failed">مسیر ناموفق: %1$s</string>
     <string name="net_keystore_failed">انبار کلید اندروید باز نشد، بنابراین انتقال نمی‌تواند شروع شود. کیف پول و مخاطبان شما جداگانه نگهداری می‌شوند و آسیبی ندیده‌اند. اگر DUCAT را دستی نصب کرده‌ای، بررسی کن نسخه‌ای که دانلود کرده‌ای با پردازندهٔ گوشی‌ات بخواند — نسخهٔ اشتباه دقیقاً همین‌طور شکست می‌خورد.</string>
 </resources>

@@ -734,7 +734,10 @@ object Rates {
         val xmr = pxmr.toDouble() / 1_000_000_000_000.0
         val amount = xmr * rate
         return FiatView(
-            text = "%s %.2f".format(store.currency(), amount),
+            // Same shape as Amounts.show — the grouping flag included, so the
+            // desk's top bar and the phone's screens write a thousand the
+            // same way.
+            text = "%s %,.2f".format(store.currency(), amount),
             notional = stagenet,
             stale = store.isStale(),
         )

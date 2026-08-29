@@ -121,4 +121,6 @@
     <string name="rent_one_more">На одну більше</string>
     <string name="rent_posting_board">Розміщується на дошці поруч із вами — у тихій мережі це може зайняти хвилину.</string>
     <string name="rent_in_unit">в %1$s</string>
+    <string name="board_chip_count">%1$s %2$d</string>
+    <string name="rent_size_m2">%1$d м²</string>
 </resources>

@@ -33,4 +33,5 @@
     <string name="settings_recur_title">정기 청구서</string>
     <string name="settings_recur_next">다음 %1$s</string>
     <string name="settings_recur_stop">중지</string>
+    <string name="sync_percent">%1$d%%</string>
 </resources>

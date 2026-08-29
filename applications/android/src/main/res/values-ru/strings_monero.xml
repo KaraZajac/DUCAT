@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">задержка</string>
     <string name="monero_synced_yes">да</string>
     <string name="monero_synced_no">нет — балансы были бы устаревшими</string>
-    <string name="monero_round_trip_ms">%1$s мс</string>
+    <string name="monero_round_trip_ms">%1$d мс</string>
     <string name="monero_no_node">нет узла</string>
     <string name="monero_change_your_node">Сменить узел</string>
     <string name="monero_use_own_node">Использовать свой узел</string>
@@ -45,4 +45,5 @@
     <string name="monero_rescan_hint">Кошелёк сканирует цепочку с самого начала — если он создан недавно, это куда дольше, чем нужно.</string>
     <string name="monero_skip_ahead">Перемотать вперёд</string>
     <string name="monero_trust_plaintext">К этому узлу подключение без шифрования, так что любой в сети по пути может сделать то же самое — прочитать или подменить.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">затримка</string>
     <string name="monero_synced_yes">так</string>
     <string name="monero_synced_no">ні — баланси були б застарілі</string>
-    <string name="monero_round_trip_ms">%1$s мс</string>
+    <string name="monero_round_trip_ms">%1$d мс</string>
     <string name="monero_no_node">немає вузла</string>
     <string name="monero_change_your_node">Змінити вузол</string>
     <string name="monero_use_own_node">Використати власний вузол</string>
@@ -45,4 +45,5 @@
     <string name="monero_rescan_hint">Цей гаманець сканує з самого початку ланцюга — це набагато довше, ніж треба, якщо його створено нещодавно.</string>
     <string name="monero_skip_ahead">Перескочити вперед</string>
     <string name="monero_trust_plaintext">До цього вузла з’єднання без шифрування, тож будь-хто в мережі по дорозі може те саме — прочитати або підмінити.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

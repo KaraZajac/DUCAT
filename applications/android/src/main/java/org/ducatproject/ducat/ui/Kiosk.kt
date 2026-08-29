@@ -288,7 +288,7 @@ private fun Ordering(
                     label = {
                         Text(
                             if (pct == 0) stringResource(R.string.kiosk_tip_none)
-                            else "$pct%",
+                            else stringResource(R.string.kiosk_tip_pct, pct),
                         )
                     },
                 )

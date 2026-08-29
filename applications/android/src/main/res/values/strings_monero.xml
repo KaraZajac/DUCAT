@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">round trip</string>
     <string name="monero_synced_yes">yes</string>
     <string name="monero_synced_no">no — balances would be stale</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">no node</string>
     <string name="monero_change_your_node">Change your node</string>
     <string name="monero_use_own_node">Use your own node</string>
@@ -43,4 +43,5 @@
     <string name="monero_last_window_failed">Last window failed: %1$s</string>
     <string name="monero_rescan_hint">This wallet is scanning from the beginning of the chain, which takes far longer than it needs to if it was made recently.</string>
     <string name="monero_skip_ahead">Skip ahead</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

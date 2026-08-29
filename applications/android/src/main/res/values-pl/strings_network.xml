@@ -12,7 +12,7 @@
     <string name="net_yes">tak</string>
     <string name="net_not_yet_routes">jeszcze nie — bez tego nie ma tras</string>
     <string name="net_line_peers">peery</string>
-    <string name="net_peers_value">%1$s aktywnych, %2$s niezawodnych</string>
+    <string name="net_peers_value">%1$d aktywnych, %2$d niezawodnych</string>
     <string name="net_waiting">czekanie %1$ds — węzeł musi ustalić, jak jest osiągalny, zanim zbuduje trasę</string>
 
     <string name="net_starting">Uruchamianie…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">Zatrzymaj</string>
     <string name="net_testing">Testowanie…</string>
     <string name="net_test_route">Przetestuj trasę</string>
-    <string name="net_route_ok">trasa przydzielona — blob %1$s B</string>
+    <string name="net_route_ok">trasa przydzielona — blob %1$d B</string>
     <string name="net_route_failed">trasa nie powiodła się: %1$s</string>
     <string name="net_keystore_failed">Magazyn kluczy Androida nie otworzył się, więc transport nie może wystartować. Portfel i kontakty są trzymane osobno i nic im nie jest. Jeśli instalowałeś DUCAT-a ręcznie, sprawdź, czy pobrana wersja pasuje do procesora twojego telefonu — zła psuje się dokładnie tak.</string>
 </resources>

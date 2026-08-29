@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">aller-retour</string>
     <string name="monero_synced_yes">oui</string>
     <string name="monero_synced_no">non — les soldes seraient périmés</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">aucun nœud</string>
     <string name="monero_change_your_node">Changer de nœud</string>
     <string name="monero_use_own_node">Utiliser ton propre nœud</string>
@@ -43,4 +43,5 @@
     <string name="monero_rescan_hint">Ce portefeuille lit la chaîne depuis le début, ce qui prend bien plus longtemps que nécessaire s\'il a été créé récemment.</string>
     <string name="monero_skip_ahead">Sauter en avant</string>
     <string name="monero_trust_plaintext">Celui-ci est joint sans chiffrement : n’importe qui sur le réseau entre ici et lui peut en faire autant — lire, ou modifier.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

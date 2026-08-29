@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">往返时延</string>
     <string name="monero_synced_yes">是</string>
     <string name="monero_synced_no">否 — 余额会是过时的</string>
-    <string name="monero_round_trip_ms">%1$s 毫秒</string>
+    <string name="monero_round_trip_ms">%1$d 毫秒</string>
     <string name="monero_no_node">无节点</string>
     <string name="monero_change_your_node">更换节点</string>
     <string name="monero_use_own_node">使用你自己的节点</string>
@@ -42,4 +42,5 @@
     <string name="monero_rescan_hint">这个钱包正从链的起点扫描；如果它是最近创建的，这比实际需要的时间长得多。</string>
     <string name="monero_skip_ahead">跳过一段</string>
     <string name="monero_trust_plaintext">连到这一个没有加密，所以中间网络上的任何人都能做同样的事：读取，或者篡改。</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

@@ -121,4 +121,6 @@
     <string name="rent_one_more">Bir artır</string>
     <string name="rent_posting_board">Yakınınızdaki panoya asılıyor — sakin bir ağda bu bir dakika sürebilir.</string>
     <string name="rent_in_unit">%1$s ile</string>
+    <string name="board_chip_count">%1$s %2$d</string>
+    <string name="rent_size_m2">%1$d m²</string>
 </resources>

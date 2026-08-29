@@ -443,7 +443,7 @@ private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
                 onSet(toPxmr(text))
             },
             label = { Text(if (fiat) cur else "XMR") },
-            placeholder = { Text("0") },
+            placeholder = { Text(Amounts.count(0)) },
             singleLine = true,
             modifier = Modifier.width(150.dp),
         )

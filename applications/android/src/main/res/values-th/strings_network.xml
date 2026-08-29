@@ -12,7 +12,7 @@
     <string name="net_yes">ใช่</string>
     <string name="net_not_yet_routes">ยังไม่ได้ — จะไม่มีเส้นทางจนกว่าจะถึงขั้นนี้</string>
     <string name="net_line_peers">เพียร์</string>
-    <string name="net_peers_value">ออนไลน์ %1$s, เชื่อถือได้ %2$s</string>
+    <string name="net_peers_value">ออนไลน์ %1$d, เชื่อถือได้ %2$d</string>
     <string name="net_waiting">รอมาแล้ว %1$d วินาที — โหนดต้องรู้ก่อนว่าตัวเองถูกเข้าถึงได้อย่างไร จึงจะสร้างเส้นทางได้</string>
 
     <string name="net_starting">กำลังเริ่ม…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">หยุด</string>
     <string name="net_testing">กำลังทดสอบ…</string>
     <string name="net_test_route">ทดสอบเส้นทาง</string>
-    <string name="net_route_ok">จัดสรรเส้นทางแล้ว — บล็อบ %1$s ไบต์</string>
+    <string name="net_route_ok">จัดสรรเส้นทางแล้ว — บล็อบ %1$d ไบต์</string>
     <string name="net_route_failed">เส้นทางล้มเหลว: %1$s</string>
     <string name="net_keystore_failed">ที่เก็บกุญแจของ Android เปิดไม่ได้ ระบบขนส่งจึงเริ่มไม่ได้ กระเป๋าเงินและรายชื่อผู้ติดต่อของคุณเก็บแยกไว้และไม่ได้รับผลกระทบ ถ้าคุณติดตั้ง DUCAT เอง ลองตรวจว่าไฟล์ที่ดาวน์โหลดตรงกับหน่วยประมวลผลของเครื่องไหม — ผิดรุ่นจะพังแบบนี้พอดี</string>
 </resources>

@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">bolak-balik</string>
     <string name="monero_synced_yes">ya</string>
     <string name="monero_synced_no">tidak — saldo bisa basi</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">tidak ada node</string>
     <string name="monero_change_your_node">Ganti node-mu</string>
     <string name="monero_use_own_node">Pakai node sendiri</string>
@@ -42,4 +42,5 @@
     <string name="monero_rescan_hint">Dompet ini memindai dari awal blockchain, yang jauh lebih lama dari seharusnya kalau dompet dibuat baru-baru ini.</string>
     <string name="monero_skip_ahead">Lompati</string>
     <string name="monero_trust_plaintext">Yang ini dijangkau tanpa enkripsi, jadi siapa pun di jaringan di antaranya bisa melakukan hal yang sama: membaca, atau mengubah.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

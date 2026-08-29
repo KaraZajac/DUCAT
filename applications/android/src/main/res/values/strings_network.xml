@@ -12,7 +12,7 @@
     <string name="net_yes">yes</string>
     <string name="net_not_yet_routes">not yet — no routes until this</string>
     <string name="net_line_peers">peers</string>
-    <string name="net_peers_value">%1$s live, %2$s reliable</string>
+    <string name="net_peers_value">%1$d live, %2$d reliable</string>
     <string name="net_waiting">waiting %1$ds — a node has to work out how it is reachable before it can build a route</string>
 
     <string name="net_starting">Starting…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">Stop</string>
     <string name="net_testing">Testing…</string>
     <string name="net_test_route">Test a route</string>
-    <string name="net_route_ok">route allocated — %1$s byte blob</string>
+    <string name="net_route_ok">route allocated — %1$d byte blob</string>
     <string name="net_route_failed">route failed: %1$s</string>
     <string name="net_keystore_failed">Android’s key store would not open, so the transport cannot start. Your wallet and contacts are kept separately and are unaffected. If you installed DUCAT by hand, check that the download matches your phone’s processor — the wrong build fails in exactly this way.</string>
 </resources>

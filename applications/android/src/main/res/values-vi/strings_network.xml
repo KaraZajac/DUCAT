@@ -12,7 +12,7 @@
     <string name="net_yes">rồi</string>
     <string name="net_not_yet_routes">chưa — chưa có tuyến nào cho tới khi xong phần này</string>
     <string name="net_line_peers">peer</string>
-    <string name="net_peers_value">%1$s trực tuyến, %2$s đáng tin</string>
+    <string name="net_peers_value">%1$d trực tuyến, %2$d đáng tin</string>
     <string name="net_waiting">chờ %1$d giây — node phải tự tìm ra cách nó được liên lạc tới trước khi dựng được tuyến</string>
 
     <string name="net_starting">Đang khởi động…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">Dừng</string>
     <string name="net_testing">Đang thử…</string>
     <string name="net_test_route">Thử một tuyến</string>
-    <string name="net_route_ok">đã cấp tuyến — khối dữ liệu %1$s byte</string>
+    <string name="net_route_ok">đã cấp tuyến — khối dữ liệu %1$d byte</string>
     <string name="net_route_failed">tuyến thất bại: %1$s</string>
     <string name="net_keystore_failed">Kho khoá của Android không mở được nên phần truyền tải không khởi động được. Ví và danh bạ của bạn được lưu riêng và không bị ảnh hưởng. Nếu bạn tự cài DUCAT, hãy kiểm tra bản tải về có khớp với bộ xử lý của máy không — sai bản thì hỏng đúng kiểu này.</string>
 </resources>

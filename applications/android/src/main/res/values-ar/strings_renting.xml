@@ -121,4 +121,6 @@
     <string name="rent_one_more">واحد أكثر</string>
     <string name="rent_posting_board">يُنشر الآن على اللوحة القريبة منك — قد يستغرق هذا دقيقة على شبكة هادئة.</string>
     <string name="rent_in_unit">بـ %1$s</string>
+    <string name="board_chip_count">%1$s %2$d</string>
+    <string name="rent_size_m2">%1$d م²</string>
 </resources>

@@ -12,7 +12,7 @@
     <string name="net_yes">हाँ</string>
     <string name="net_not_yet_routes">अभी नहीं — इसके बिना कोई रूट नहीं</string>
     <string name="net_line_peers">पीयर</string>
-    <string name="net_peers_value">%1$s सक्रिय, %2$s भरोसेमंद</string>
+    <string name="net_peers_value">%1$d सक्रिय, %2$d भरोसेमंद</string>
     <string name="net_waiting">%1$d सेकंड से प्रतीक्षा — रूट बनाने से पहले नोड को समझना होता है कि उस तक कैसे पहुँचा जा सकता है</string>
 
     <string name="net_starting">शुरू हो रहा है…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">रोकें</string>
     <string name="net_testing">परख जारी…</string>
     <string name="net_test_route">रूट परखें</string>
-    <string name="net_route_ok">रूट मिल गया — %1$s बाइट का ब्लॉब</string>
+    <string name="net_route_ok">रूट मिल गया — %1$d बाइट का ब्लॉब</string>
     <string name="net_route_failed">रूट विफल: %1$s</string>
     <string name="net_keystore_failed">एंड्रॉइड का की-स्टोर नहीं खुला, इसलिए ट्रांसपोर्ट शुरू नहीं हो सकता। तुम्हारा वॉलेट और संपर्क अलग रखे जाते हैं और उन पर कोई असर नहीं पड़ा। अगर तुमने DUCAT हाथ से इंस्टॉल किया है, तो देखो कि डाउनलोड तुम्हारे फ़ोन के प्रोसेसर से मेल खाता है या नहीं — ग़लत वाला ठीक इसी तरह नाकाम होता है।</string>
 </resources>

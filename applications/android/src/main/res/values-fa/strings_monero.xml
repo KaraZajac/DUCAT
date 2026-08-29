@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">رفت‌وبرگشت</string>
     <string name="monero_synced_yes">بله</string>
     <string name="monero_synced_no">نه — موجودی‌ها کهنه خواهند بود</string>
-    <string name="monero_round_trip_ms">%1$s میلی‌ثانیه</string>
+    <string name="monero_round_trip_ms">%1$d میلی‌ثانیه</string>
     <string name="monero_no_node">بدون نود</string>
     <string name="monero_change_your_node">تغییر نود</string>
     <string name="monero_use_own_node">از نود خودت استفاده کن</string>
@@ -43,4 +43,5 @@
     <string name="monero_rescan_hint">این کیف پول از ابتدای زنجیره اسکن می‌کند؛ اگر تازه ساخته شده باشد، این خیلی بیشتر از حد لازم طول می‌کشد.</string>
     <string name="monero_skip_ahead">پرش به جلو</string>
     <string name="monero_trust_plaintext">به این یکی بدون رمزگذاری وصل می‌شوی، پس هرکسی در شبکهٔ میان راه هم می‌تواند همان کار را بکند: بخواند یا تغییر دهد.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

@@ -39,6 +39,12 @@ data class Money(val minorUnits: Long, val symbol: String = "$", val exponent: I
      * hundredths of itself. It also rendered -150 as "$-1.-50", because the
      * remainder of a negative is negative. A refund is a negative amount and
      * would have shipped looking like that.
+     *
+     * The decimal mark asks the locale, same as [formatXmr] and for the same
+     * scar: `%,d` localises the digits and the grouping, so a literal `.`
+     * between the two conversions was the half-localised number again — the
+     * home card's "on the way" line disagreeing with the headline figure
+     * right above it about what a decimal point is.
      */
     override fun toString(): String {
         var scale = 1L
@@ -49,7 +55,8 @@ data class Money(val minorUnits: Long, val symbol: String = "$", val exponent: I
         val sign = if (negative) "-" else ""
         if (exponent == 0) return "$sign$symbol%,d".format(whole)
         val frac = abs % scale
-        return "$sign$symbol%,d.%0${exponent}d".format(whole, frac)
+        val dot = java.text.DecimalFormatSymbols.getInstance().decimalSeparator
+        return "$sign$symbol%,d$dot%0${exponent}d".format(whole, frac)
     }
 }
 

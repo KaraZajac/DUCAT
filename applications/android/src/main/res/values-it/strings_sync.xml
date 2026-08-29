@@ -36,4 +36,5 @@
     <string name="settings_recur_title">Conti ricorrenti</string>
     <string name="settings_recur_next">prossimo il %1$s</string>
     <string name="settings_recur_stop">Interrompi</string>
+    <string name="sync_percent">%1$d%%</string>
 </resources>

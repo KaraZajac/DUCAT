@@ -12,7 +12,7 @@
     <string name="net_yes">sì</string>
     <string name="net_not_yet_routes">non ancora — niente rotte finché manca questo</string>
     <string name="net_line_peers">peer</string>
-    <string name="net_peers_value">%1$s attivi, %2$s affidabili</string>
+    <string name="net_peers_value">%1$d attivi, %2$d affidabili</string>
     <string name="net_waiting">attesa di %1$ds — un nodo deve capire come è raggiungibile prima di poter costruire una rotta</string>
 
     <string name="net_starting">Avvio…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">Ferma</string>
     <string name="net_testing">Test in corso…</string>
     <string name="net_test_route">Prova una rotta</string>
-    <string name="net_route_ok">rotta allocata — blob da %1$s byte</string>
+    <string name="net_route_ok">rotta allocata — blob da %1$d byte</string>
     <string name="net_route_failed">rotta non riuscita: %1$s</string>
     <string name="net_keystore_failed">L’archivio chiavi di Android non si è aperto, quindi il trasporto non può partire. Il portafoglio e i contatti sono conservati a parte e non sono stati toccati. Se hai installato DUCAT a mano, controlla che il download corrisponda al processore del tuo telefono: quello sbagliato fallisce esattamente così.</string>
 </resources>

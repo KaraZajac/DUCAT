@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">ida y vuelta</string>
     <string name="monero_synced_yes">sí</string>
     <string name="monero_synced_no">no — los saldos estarían desactualizados</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">sin nodo</string>
     <string name="monero_change_your_node">Cambiar de nodo</string>
     <string name="monero_use_own_node">Usa tu propio nodo</string>
@@ -43,4 +43,5 @@
     <string name="monero_rescan_hint">Esta billetera está escaneando desde el principio de la cadena, lo que toma mucho más tiempo del necesario si se creó hace poco.</string>
     <string name="monero_skip_ahead">Saltar adelante</string>
     <string name="monero_trust_plaintext">A este se llega sin cifrado, así que cualquiera en la red entre tú y él puede hacer lo mismo: leerlo, o cambiarlo.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

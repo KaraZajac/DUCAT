@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">Antwortzeit</string>
     <string name="monero_synced_yes">ja</string>
     <string name="monero_synced_no">nein — Guthaben wären veraltet</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">kein Node</string>
     <string name="monero_change_your_node">Node wechseln</string>
     <string name="monero_use_own_node">Eigenen Node verwenden</string>
@@ -43,4 +43,5 @@
     <string name="monero_rescan_hint">Diese Wallet liest vom Anfang der Blockchain — das dauert weit länger als nötig, falls sie erst kürzlich angelegt wurde.</string>
     <string name="monero_skip_ahead">Vorspringen</string>
     <string name="monero_trust_plaintext">Dieser wird unverschlüsselt erreicht, also kann jeder im Netz dazwischen dasselbe tun: mitlesen oder verändern.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

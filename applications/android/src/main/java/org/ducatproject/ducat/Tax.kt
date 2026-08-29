@@ -47,8 +47,20 @@ object Tax {
         return v.movePointRight(2).setScale(0, RoundingMode.HALF_UP).toInt()
     }
 
-    fun percentText(bp: Int): String =
-        BigDecimal(bp).movePointLeft(2).stripTrailingZeros().toPlainString()
+    /**
+     * The rate the way the till's locale writes numbers — a German till that
+     * was fed 8,25 must not read back "8.25". `toPlainString` is ASCII by
+     * contract; NumberFormat gives the locale's digits and decimal mark, and
+     * [parsePercent] already folds both back, so the round trip holds.
+     */
+    fun percentText(bp: Int): String {
+        val v = BigDecimal(bp).movePointLeft(2).stripTrailingZeros()
+        val nf = java.text.NumberFormat.getInstance()
+        nf.isGroupingUsed = false
+        nf.minimumFractionDigits = 0
+        nf.maximumFractionDigits = 2
+        return nf.format(v)
+    }
 
     /**
      * The tax on a subtotal, in piconero.

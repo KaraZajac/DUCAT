@@ -12,7 +12,7 @@
     <string name="net_yes">نعم</string>
     <string name="net_not_yet_routes">ليس بعد — لا مسارات قبل هذا</string>
     <string name="net_line_peers">النظراء</string>
-    <string name="net_peers_value">%1$s نشط، %2$s موثوق</string>
+    <string name="net_peers_value">%1$d نشط، %2$d موثوق</string>
     <string name="net_waiting">انتظار %1$d ث — على العقدة أن تعرف كيف يمكن الوصول إليها قبل أن تستطيع بناء مسار</string>
 
     <string name="net_starting">جارٍ البدء…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">إيقاف</string>
     <string name="net_testing">جارٍ الاختبار…</string>
     <string name="net_test_route">اختبر مسارًا</string>
-    <string name="net_route_ok">خُصص مسار — حزمة بحجم %1$s بايت</string>
+    <string name="net_route_ok">خُصص مسار — حزمة بحجم %1$d بايت</string>
     <string name="net_route_failed">فشل المسار: %1$s</string>
     <string name="net_keystore_failed">لم يُفتح مخزن مفاتيح أندرويد، لذا يتعذّر تشغيل النقل. محفظتك وجهات اتصالك محفوظة بشكل منفصل ولم تتأثر. إن كنت ثبّتّ DUCAT يدويًا، فتحقّق من أن النسخة التي نزّلتها تناسب معالج هاتفك — النسخة الخاطئة تفشل بهذه الطريقة تمامًا.</string>
 </resources>

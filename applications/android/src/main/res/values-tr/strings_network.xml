@@ -12,7 +12,7 @@
     <string name="net_yes">evet</string>
     <string name="net_not_yet_routes">henüz değil — bu olmadan rota yok</string>
     <string name="net_line_peers">eşler</string>
-    <string name="net_peers_value">%1$s canlı, %2$s güvenilir</string>
+    <string name="net_peers_value">%1$d canlı, %2$d güvenilir</string>
     <string name="net_waiting">%1$d sn bekleniyor — bir düğümün rota kurabilmesi için önce kendisine nasıl ulaşılabildiğini çözmesi gerekir</string>
 
     <string name="net_starting">Başlatılıyor…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">Durdur</string>
     <string name="net_testing">Sınanıyor…</string>
     <string name="net_test_route">Rota dene</string>
-    <string name="net_route_ok">rota ayrıldı — %1$s baytlık öbek</string>
+    <string name="net_route_ok">rota ayrıldı — %1$d baytlık öbek</string>
     <string name="net_route_failed">rota başarısız: %1$s</string>
     <string name="net_keystore_failed">Android’in anahtar deposu açılmadı, bu yüzden taşıma başlatılamıyor. Cüzdanın ve kişilerin ayrı tutuluyor ve etkilenmedi. DUCAT’ı elle kurduysan, indirdiğin sürümün telefonunun işlemcisine uyduğunu kontrol et — yanlışı tam olarak böyle hata veriyor.</string>
 </resources>

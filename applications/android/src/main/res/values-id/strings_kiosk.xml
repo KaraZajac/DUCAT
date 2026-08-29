@@ -42,4 +42,5 @@
     <string name="kiosk_tip_line">Tip</string>
     <string name="kiosk_no_menu">Menu masih kosong. Tambahkan yang kamu jual di balik gembok.</string>
     <string name="kiosk_all_off">Semuanya sedang tidak tersedia.</string>
+    <string name="kiosk_tip_pct">%1$d%%</string>
 </resources>

@@ -12,4 +12,21 @@ object DateFormat {
     @JvmStatic
     fun getTimeFormat(context: android.content.Context?): java.text.DateFormat =
         java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT)
+
+    /**
+     * Android asks ICU for the locale's arrangement of a field skeleton; the
+     * JVM has no skeleton API, so the desk answers from a table of the one
+     * skeleton the app uses. The languages that put the month first are the
+     * distinction that matters; everyone else reads day-first as today.
+     */
+    @JvmStatic
+    fun getBestDateTimePattern(locale: java.util.Locale, skeleton: String): String =
+        when (skeleton) {
+            "dMMM" -> when (locale.language) {
+                "ja", "zh" -> "M月d日"
+                "ko" -> "M월 d일"
+                else -> "d MMM"
+            }
+            else -> skeleton
+        }
 }

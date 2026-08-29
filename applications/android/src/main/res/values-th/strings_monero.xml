@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">เวลาไป-กลับ</string>
     <string name="monero_synced_yes">ใช่</string>
     <string name="monero_synced_no">ไม่ — ยอดคงเหลือจะไม่เป็นปัจจุบัน</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">ไม่มีโหนด</string>
     <string name="monero_change_your_node">เปลี่ยนโหนดของคุณ</string>
     <string name="monero_use_own_node">ใช้โหนดของคุณเอง</string>
@@ -42,4 +42,5 @@
     <string name="monero_rescan_hint">กระเป๋านี้กำลังสแกนตั้งแต่ต้นเชน ซึ่งนานเกินจำเป็นมากหากมันเพิ่งถูกสร้างไม่นาน</string>
     <string name="monero_skip_ahead">ข้ามไปข้างหน้า</string>
     <string name="monero_trust_plaintext">ตัวนี้เชื่อมต่อโดยไม่เข้ารหัส ใครก็ตามบนเครือข่ายระหว่างทางจึงทำแบบเดียวกันได้ — อ่าน หรือแก้</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

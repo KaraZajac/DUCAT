@@ -521,7 +521,10 @@ internal fun who(context: Context, e: Ledger.Event): String {
 internal fun whenText(context: Context, epochSecs: Long): String {
     if (epochSecs <= 0) return context.getString(R.string.txdetail_time_unknown)
     val d = java.util.Date(epochSecs * 1000)
-    // Date from the locale, time from the phone's own 12/24-hour setting.
-    return java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.getDefault()).format(d) +
+    // Date from the locale — getDateInstance, not a "d MMM yyyy" pattern,
+    // because the field order is the locale's to decide: Japanese and
+    // Chinese write year first, and a pinned pattern gave everyone the
+    // English order. Time from the phone's own 12/24-hour setting.
+    return java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(d) +
         ", " + android.text.format.DateFormat.getTimeFormat(context).format(d)
 }

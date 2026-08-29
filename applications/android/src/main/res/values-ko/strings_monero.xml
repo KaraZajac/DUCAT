@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">왕복 시간</string>
     <string name="monero_synced_yes">예</string>
     <string name="monero_synced_no">아니요 — 잔액이 오래된 값일 수 있어요</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">노드 없음</string>
     <string name="monero_change_your_node">노드 바꾸기</string>
     <string name="monero_use_own_node">내 노드 사용</string>
@@ -42,4 +42,5 @@
     <string name="monero_rescan_hint">이 지갑은 체인 처음부터 스캔하고 있어요. 최근에 만든 지갑이라면 그럴 필요가 없는데도 훨씬 오래 걸리는 중이에요.</string>
     <string name="monero_skip_ahead">건너뛰기</string>
     <string name="monero_trust_plaintext">이건 암호화 없이 연결돼서, 중간 네트워크에 있는 누구든 똑같이 할 수 있어 — 읽거나, 바꾸거나.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

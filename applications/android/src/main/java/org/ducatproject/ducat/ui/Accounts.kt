@@ -186,7 +186,7 @@ fun AccountsScreen() {
                         }
                         Spacer(Modifier.height(6.dp))
                     }
-                    BalanceRow(stringResource(R.string.accounts_notes), "${b.spendableOutputs}")
+                    BalanceRow(stringResource(R.string.accounts_notes), Amounts.count(b.spendableOutputs.toLong()))
                     BalanceRow(stringResource(R.string.accounts_bond), stringResource(R.string.accounts_bond_none))
                     // A wallet whose restore height is zero is scanning from
                     // genesis, which looks exactly like having no money for the

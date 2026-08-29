@@ -12,7 +12,7 @@
     <string name="net_yes">예</string>
     <string name="net_not_yet_routes">아직 — 이게 되기 전엔 경로가 없어요</string>
     <string name="net_line_peers">피어</string>
-    <string name="net_peers_value">활성 %1$s, 신뢰 %2$s</string>
+    <string name="net_peers_value">활성 %1$d, 신뢰 %2$d</string>
     <string name="net_waiting">%1$d초 대기 중 — 노드는 자기가 어떻게 도달 가능한지 알아내야 경로를 만들 수 있어요</string>
 
     <string name="net_starting">시작하는 중…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">정지</string>
     <string name="net_testing">테스트 중…</string>
     <string name="net_test_route">경로 테스트</string>
-    <string name="net_route_ok">경로 할당됨 — %1$s바이트 블롭</string>
+    <string name="net_route_ok">경로 할당됨 — %1$d바이트 블롭</string>
     <string name="net_route_failed">경로 실패: %1$s</string>
     <string name="net_keystore_failed">안드로이드 키 저장소가 열리지 않아 전송을 시작할 수 없어. 지갑과 연락처는 따로 저장되어 있어서 영향은 없어. DUCAT을 직접 설치했다면 받은 파일이 폰의 프로세서에 맞는지 확인해 봐 — 안 맞는 걸 깔면 딱 이렇게 실패해.</string>
 </resources>

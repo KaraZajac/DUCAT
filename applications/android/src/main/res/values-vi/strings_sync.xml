@@ -33,4 +33,5 @@
     <string name="settings_recur_title">Hóa đơn định kỳ</string>
     <string name="settings_recur_next">lần tới %1$s</string>
     <string name="settings_recur_stop">Dừng</string>
+    <string name="sync_percent">%1$d%%</string>
 </resources>

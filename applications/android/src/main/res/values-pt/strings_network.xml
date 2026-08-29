@@ -12,7 +12,7 @@
     <string name="net_yes">sim</string>
     <string name="net_not_yet_routes">ainda não — sem rotas até isto</string>
     <string name="net_line_peers">pares</string>
-    <string name="net_peers_value">%1$s ativos, %2$s confiáveis</string>
+    <string name="net_peers_value">%1$d ativos, %2$d confiáveis</string>
     <string name="net_waiting">aguardando %1$ds — um nó precisa descobrir como está acessível antes de poder montar uma rota</string>
 
     <string name="net_starting">Iniciando…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">Parar</string>
     <string name="net_testing">Testando…</string>
     <string name="net_test_route">Testar uma rota</string>
-    <string name="net_route_ok">rota alocada — blob de %1$s bytes</string>
+    <string name="net_route_ok">rota alocada — blob de %1$d bytes</string>
     <string name="net_route_failed">rota falhou: %1$s</string>
     <string name="net_keystore_failed">O armazenamento de chaves do Android não abriu, então o transporte não consegue iniciar. Sua carteira e seus contatos ficam à parte e não foram afetados. Se você instalou o DUCAT na mão, confira se o download corresponde ao processador do seu telefone — a versão errada falha exatamente assim.</string>
 </resources>

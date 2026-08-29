@@ -121,4 +121,6 @@
     <string name="rent_one_more">Eén meer</string>
     <string name="rent_posting_board">Wordt op het bord bij jou in de buurt gehangen — op een rustig netwerk kan dit een minuut duren.</string>
     <string name="rent_in_unit">in %1$s</string>
+    <string name="board_chip_count">%1$s %2$d</string>
+    <string name="rent_size_m2">%1$d m²</string>
 </resources>

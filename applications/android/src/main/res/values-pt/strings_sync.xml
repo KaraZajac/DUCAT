@@ -32,4 +32,5 @@
     <string name="settings_recur_title">Contas recorrentes</string>
     <string name="settings_recur_next">próxima em %1$s</string>
     <string name="settings_recur_stop">Parar</string>
+    <string name="sync_percent">%1$d%%</string>
 </resources>

@@ -25,6 +25,15 @@ data class Shown(
 
 object Amounts {
 
+    /**
+     * A bare count in the locale's own digits — block heights, confirmations,
+     * badge numbers. Kotlin's `"$n"` is `Locale.ROOT` forever, which puts
+     * ASCII digits inside Arabic sentences; this asks the locale, grouping
+     * included, and is for *display only* — anything parsed back or compared
+     * by value keeps interpolating.
+     */
+    fun count(n: Long): String = java.text.NumberFormat.getInstance().format(n)
+
     /** Whether amounts lead with the user's currency rather than XMR. */
     fun preferFiat(context: Context): Boolean = RateStore(context).preferFiat()
 

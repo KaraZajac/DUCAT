@@ -42,4 +42,5 @@
     <string name="kiosk_tip_line">إكرامية</string>
     <string name="kiosk_no_menu">لا شيء في القائمة بعد. أضف ما تبيعه من خلف القفل.</string>
     <string name="kiosk_all_off">كل شيء خارج القائمة حالياً.</string>
+    <string name="kiosk_tip_pct">%1$d%%</string>
 </resources>

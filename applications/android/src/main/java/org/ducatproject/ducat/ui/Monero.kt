@@ -103,7 +103,7 @@ fun MoneroPanel() {
                              style = MaterialTheme.typography.bodySmall)
                     }
                     Spacer(Modifier.height(8.dp))
-                    Line(stringResource(R.string.monero_line_height), "${s.height}")
+                    Line(stringResource(R.string.monero_line_height), org.ducatproject.ducat.Amounts.count(s.height.toLong()))
                     Line(
                         stringResource(R.string.monero_line_synced),
                         if (s.synced) stringResource(R.string.monero_synced_yes)
@@ -112,7 +112,7 @@ fun MoneroPanel() {
                     Line(stringResource(R.string.monero_line_network), s.nettype)
                     Line(
                         stringResource(R.string.monero_line_round_trip),
-                        stringResource(R.string.monero_round_trip_ms, "${s.rttMs}"),
+                        stringResource(R.string.monero_round_trip_ms, s.rttMs.toLong()),
                     )
                     Spacer(Modifier.height(10.dp))
                     TrustNote(trustOf(store.ownUrl(), s.url), s.url)
@@ -312,7 +312,7 @@ private fun WalletSync(nodeHeight: Long) {
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
-                    "${(b.progress * 100).toInt()}%",
+                    stringResource(R.string.monero_percent, (b.progress * 100).toInt()),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }

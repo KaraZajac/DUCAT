@@ -121,4 +121,6 @@
     <string name="rent_one_more">Tambah satu</string>
     <string name="rent_posting_board">Sedang dipasang di papan dekat Anda — di jaringan yang sepi ini bisa memakan waktu satu menit.</string>
     <string name="rent_in_unit">dalam %1$s</string>
+    <string name="board_chip_count">%1$s %2$d</string>
+    <string name="rent_size_m2">%1$d m²</string>
 </resources>

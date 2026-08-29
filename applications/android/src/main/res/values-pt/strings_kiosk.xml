@@ -42,4 +42,5 @@
     <string name="kiosk_tip_line">Gorjeta</string>
     <string name="kiosk_no_menu">Ainda nada no menu. Adicione o que vende atrás do cadeado.</string>
     <string name="kiosk_all_off">De momento não há nada disponível.</string>
+    <string name="kiosk_tip_pct">%1$d%%</string>
 </resources>

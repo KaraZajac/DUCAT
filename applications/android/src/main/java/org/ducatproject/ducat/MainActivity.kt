@@ -800,7 +800,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                                 onClick = { tab = Tab.Chat },
                                 icon = {
                                     BadgedBox(badge = {
-                                        if (unread > 0) Badge { Text("$unread") }
+                                        if (unread > 0) Badge { Text(org.ducatproject.ducat.Amounts.count(unread.toLong())) }
                                     }) {
                                         Icon(Icons.Filled.ChatBubble, contentDescription =
                                             androidx.compose.ui.res.stringResource(Tab.Chat.labelRes))

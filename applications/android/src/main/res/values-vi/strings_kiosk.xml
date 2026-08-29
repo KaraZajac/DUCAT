@@ -42,4 +42,5 @@
     <string name="kiosk_tip_line">Tiền boa</string>
     <string name="kiosk_no_menu">Thực đơn còn trống. Thêm thứ bạn bán ở sau ổ khoá.</string>
     <string name="kiosk_all_off">Hiện tại đã hết hàng.</string>
+    <string name="kiosk_tip_pct">%1$d%%</string>
 </resources>

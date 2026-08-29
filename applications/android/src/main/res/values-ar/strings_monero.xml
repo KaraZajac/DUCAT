@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">زمن الذهاب والإياب</string>
     <string name="monero_synced_yes">نعم</string>
     <string name="monero_synced_no">لا — ستكون الأرصدة قديمة</string>
-    <string name="monero_round_trip_ms">%1$s م.ث</string>
+    <string name="monero_round_trip_ms">%1$d م.ث</string>
     <string name="monero_no_node">لا عقدة</string>
     <string name="monero_change_your_node">غيّر عقدتك</string>
     <string name="monero_use_own_node">استخدم عقدتك الخاصة</string>
@@ -47,4 +47,5 @@
     <string name="monero_rescan_hint">هذه المحفظة تفحص من بداية السلسلة، وهو ما يستغرق أطول بكثير مما يلزم إن كانت حديثة الإنشاء.</string>
     <string name="monero_skip_ahead">تجاوز إلى الأمام</string>
     <string name="monero_trust_plaintext">يجري الوصول إلى هذه دون تشفير، فأي جهة على الشبكة بينك وبينها تستطيع الشيء نفسه: القراءة أو التغيير.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

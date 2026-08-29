@@ -337,7 +337,7 @@ private fun RentSearchScreen(
                             FilterChip(
                                 selected = showing == k,
                                 onClick = { showing = k },
-                                label = { Text("${stringResource(boardChipLabel(k))} $n") },
+                                label = { Text(stringResource(R.string.board_chip_count, stringResource(boardChipLabel(k)), n)) },
                             )
                         }
                     }
@@ -666,7 +666,7 @@ internal fun ListingCardsPreview() {
                 FilterChip(
                     selected = false,
                     onClick = {},
-                    label = { Text("${stringResource(boardChipLabel(k))} 1") },
+                    label = { Text(stringResource(R.string.board_chip_count, stringResource(boardChipLabel(k)), 1)) },
                 )
             }
         }
@@ -792,11 +792,11 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                         }))
                     }
                     info.trim?.let { add(it) }
-                    info.seats?.let { add("$it") }
+                    info.seats?.let { add(Amounts.count(it.toLong())) }
                 } else if (place) {
-                    info.rooms?.let { add("$it") }
-                    info.sleeps?.let { add("$it") }
-                    info.sizeM2?.let { add("$it m²") }
+                    info.rooms?.let { add(Amounts.count(it.toLong())) }
+                    info.sleeps?.let { add(Amounts.count(it.toLong())) }
+                    info.sizeM2?.let { add(stringResource(R.string.rent_size_m2, it.toInt())) }
                     info.subtype?.let {
                         add(stringResource(
                             if (it.toInt() == 2) R.string.rent_private_room

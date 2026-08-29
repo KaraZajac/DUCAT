@@ -33,4 +33,5 @@
     <string name="settings_recur_title">定期請求</string>
     <string name="settings_recur_next">次回 %1$s</string>
     <string name="settings_recur_stop">停止</string>
+    <string name="sync_percent">%1$d%%</string>
 </resources>

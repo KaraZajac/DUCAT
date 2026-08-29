@@ -121,4 +121,6 @@
     <string name="rent_one_more">一つ増やす</string>
     <string name="rent_posting_board">近くの掲示板に掲載しています — 静かなネットワークでは1分ほどかかることがあります。</string>
     <string name="rent_in_unit">%1$sで</string>
+    <string name="board_chip_count">%1$s %2$d</string>
+    <string name="rent_size_m2">%1$d㎡</string>
 </resources>

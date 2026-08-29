@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">czas odpowiedzi</string>
     <string name="monero_synced_yes">tak</string>
     <string name="monero_synced_no">nie — salda byłyby nieaktualne</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">brak węzła</string>
     <string name="monero_change_your_node">Zmień węzeł</string>
     <string name="monero_use_own_node">Użyj własnego węzła</string>
@@ -45,4 +45,5 @@
     <string name="monero_rescan_hint">Ten portfel skanuje od początku łańcucha, co trwa o wiele dłużej, niż musi, jeśli powstał niedawno.</string>
     <string name="monero_skip_ahead">Przeskocz dalej</string>
     <string name="monero_trust_plaintext">Do tego łączysz się bez szyfrowania, więc każdy w sieci po drodze może to samo: przeczytać albo zmienić.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

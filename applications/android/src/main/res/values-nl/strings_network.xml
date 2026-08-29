@@ -12,7 +12,7 @@
     <string name="net_yes">ja</string>
     <string name="net_not_yet_routes">nog niet — geen routes tot dit er is</string>
     <string name="net_line_peers">peers</string>
-    <string name="net_peers_value">%1$s live, %2$s betrouwbaar</string>
+    <string name="net_peers_value">%1$d live, %2$d betrouwbaar</string>
     <string name="net_waiting">wacht %1$ds — een node moet eerst uitzoeken hoe hij bereikbaar is voordat hij een route kan bouwen</string>
 
     <string name="net_starting">Starten…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">Stop</string>
     <string name="net_testing">Testen…</string>
     <string name="net_test_route">Test een route</string>
-    <string name="net_route_ok">route toegewezen — blob van %1$s bytes</string>
+    <string name="net_route_ok">route toegewezen — blob van %1$d bytes</string>
     <string name="net_route_failed">route mislukt: %1$s</string>
     <string name="net_keystore_failed">Androids sleutelopslag ging niet open, dus het transport kan niet starten. Je portemonnee en contacten staan apart en zijn ongemoeid. Als je DUCAT met de hand hebt geïnstalleerd, kijk dan of de download bij de processor van je telefoon past — de verkeerde faalt precies zo.</string>
 </resources>

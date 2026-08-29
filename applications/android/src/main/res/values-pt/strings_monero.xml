@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">ida e volta</string>
     <string name="monero_synced_yes">sim</string>
     <string name="monero_synced_no">não — os saldos ficariam defasados</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">sem nó</string>
     <string name="monero_change_your_node">Trocar de nó</string>
     <string name="monero_use_own_node">Usar seu próprio nó</string>
@@ -43,4 +43,5 @@
     <string name="monero_rescan_hint">Esta carteira está lendo desde o início da cadeia, o que leva bem mais tempo que o necessário se ela foi criada há pouco.</string>
     <string name="monero_skip_ahead">Pular adiante</string>
     <string name="monero_trust_plaintext">Este é alcançado sem criptografia, então qualquer um na rede entre você e ele pode fazer o mesmo: ler, ou alterar.</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

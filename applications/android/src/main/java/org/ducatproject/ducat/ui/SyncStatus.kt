@@ -55,9 +55,10 @@ fun SyncStatus(b: Balances, modifier: Modifier = Modifier) {
                 color = MaterialTheme.ducat.changePending,
             )
             Spacer(Modifier.weight(1f))
+            val pctText = stringResource(R.string.sync_percent, (b.progress * 100).toInt())
             Text(
                 buildString {
-                    append("${(b.progress * 100).toInt()}%")
+                    append(pctText)
                     b.secondsLeft?.let { append(" · ${humanDuration(context, it)}") }
                 },
                 style = MaterialTheme.typography.labelMedium,

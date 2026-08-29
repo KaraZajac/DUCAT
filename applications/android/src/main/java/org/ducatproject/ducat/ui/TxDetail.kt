@@ -167,9 +167,9 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
             }
             Field(
                 stringResource(R.string.txdetail_block),
-                if (e.height > 0) "${e.height}" else stringResource(R.string.txdetail_not_in_block),
+                if (e.height > 0) Amounts.count(e.height) else stringResource(R.string.txdetail_not_in_block),
             )
-            Field(stringResource(R.string.txdetail_confirmations), if (confirmations > 0) "$confirmations" else "0")
+            Field(stringResource(R.string.txdetail_confirmations), Amounts.count(confirmations.coerceAtLeast(0)))
             val c = e.chain
             if (c != null) {
                 Field(
@@ -177,7 +177,7 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
                     stringResource(R.string.txdetail_format_ringct, c.version) +
                         if (c.coinbase) stringResource(R.string.txdetail_format_coinbase_suffix) else "",
                 )
-                Field(stringResource(R.string.txdetail_ring_size), "${c.ringSize}",
+                Field(stringResource(R.string.txdetail_ring_size), Amounts.count(c.ringSize.toLong()),
                     note = stringResource(R.string.txdetail_ring_size_note, c.ringSize))
                 Field(
                     stringResource(R.string.txdetail_inputs_outputs),
@@ -189,7 +189,7 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
                     pluralStringResource(R.plurals.txdetail_extra_bytes, c.extraLen, c.extraLen),
                     note = stringResource(R.string.txdetail_extra_field_note))
                 if (c.additionalTimelock > 0) {
-                    Field(stringResource(R.string.txdetail_extra_timelock), "${c.additionalTimelock}")
+                    Field(stringResource(R.string.txdetail_extra_timelock), Amounts.count(c.additionalTimelock))
                 }
             } else if (!e.pending) {
                 Field(

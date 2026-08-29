@@ -42,4 +42,5 @@
     <string name="kiosk_tip_line">小费</string>
     <string name="kiosk_no_menu">菜单还是空的。在锁后面添加你要卖的东西。</string>
     <string name="kiosk_all_off">现在都下架了。</string>
+    <string name="kiosk_tip_pct">%1$d%%</string>
 </resources>

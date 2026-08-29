@@ -42,4 +42,5 @@
     <string name="settings_recur_title">Регулярні рахунки</string>
     <string name="settings_recur_next">наступний %1$s</string>
     <string name="settings_recur_stop">Зупинити</string>
+    <string name="sync_percent">%1$d%%</string>
 </resources>

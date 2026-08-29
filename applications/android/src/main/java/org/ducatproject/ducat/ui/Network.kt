@@ -91,7 +91,7 @@ fun NetworkPanel(storageDir: String) {
             Line(
                 stringResource(R.string.net_line_peers),
                 stringResource(R.string.net_peers_value,
-                    status.peers.toString(), status.reliablePeers.toString()),
+                    status.peers.toLong(), status.reliablePeers.toLong()),
                 status.peers > 0u,
             )
             if (status.running && !status.publicInternetReady) {
@@ -164,7 +164,7 @@ fun NetworkPanel(storageDir: String) {
         if (routeResult != "…") return@LaunchedEffect
         routeResult = withContext(Dispatchers.IO) {
             runCatching {
-                context.getString(R.string.net_route_ok, nodeTestRoute().toString())
+                context.getString(R.string.net_route_ok, nodeTestRoute().toLong())
             }.getOrElse { context.getString(R.string.net_route_failed, it.saidWhy() ?: "?") }
         }
     }

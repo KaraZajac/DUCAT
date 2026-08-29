@@ -12,7 +12,7 @@
     <string name="net_yes">ya</string>
     <string name="net_not_yet_routes">belum — tidak ada rute sebelum ini</string>
     <string name="net_line_peers">peer</string>
-    <string name="net_peers_value">%1$s aktif, %2$s andal</string>
+    <string name="net_peers_value">%1$d aktif, %2$d andal</string>
     <string name="net_waiting">menunggu %1$d dtk — node harus mencari tahu cara ia dijangkau sebelum bisa membangun rute</string>
 
     <string name="net_starting">Memulai…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">Berhenti</string>
     <string name="net_testing">Menguji…</string>
     <string name="net_test_route">Uji rute</string>
-    <string name="net_route_ok">rute dialokasikan — blob %1$s byte</string>
+    <string name="net_route_ok">rute dialokasikan — blob %1$d byte</string>
     <string name="net_route_failed">rute gagal: %1$s</string>
     <string name="net_keystore_failed">Penyimpanan kunci Android tidak dapat dibuka, jadi transport tidak bisa dimulai. Dompet dan kontakmu disimpan terpisah dan tidak terpengaruh. Kalau kamu memasang DUCAT sendiri, cek apakah unduhannya cocok dengan prosesor ponselmu — yang salah gagal persis seperti ini.</string>
 </resources>

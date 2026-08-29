@@ -121,4 +121,6 @@
     <string name="rent_one_more">하나 늘리기</string>
     <string name="rent_posting_board">근처 게시판에 올리는 중 — 한산한 네트워크에서는 1분 정도 걸릴 수 있습니다.</string>
     <string name="rent_in_unit">%1$s로</string>
+    <string name="board_chip_count">%1$s %2$d</string>
+    <string name="rent_size_m2">%1$d㎡</string>
 </resources>

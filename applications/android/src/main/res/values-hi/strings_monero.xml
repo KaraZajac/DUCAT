@@ -11,7 +11,7 @@
     <string name="monero_line_round_trip">राउंड ट्रिप</string>
     <string name="monero_synced_yes">हाँ</string>
     <string name="monero_synced_no">नहीं — बैलेंस बासी रहेंगे</string>
-    <string name="monero_round_trip_ms">%1$s ms</string>
+    <string name="monero_round_trip_ms">%1$d ms</string>
     <string name="monero_no_node">कोई नोड नहीं</string>
     <string name="monero_change_your_node">अपना नोड बदलें</string>
     <string name="monero_use_own_node">अपना खुद का नोड इस्तेमाल करें</string>
@@ -43,4 +43,5 @@
     <string name="monero_rescan_hint">यह वॉलेट चेन की शुरुआत से स्कैन कर रहा है — हाल में बने वॉलेट के लिए यह ज़रूरत से कहीं ज़्यादा लंबा है।</string>
     <string name="monero_skip_ahead">आगे कूदें</string>
     <string name="monero_trust_plaintext">इस तक बिना एन्क्रिप्शन के पहुँचा जाता है, तो बीच के नेटवर्क पर मौजूद कोई भी यही कर सकता है — पढ़ना, या बदलना।</string>
+    <string name="monero_percent">%1$d%%</string>
 </resources>

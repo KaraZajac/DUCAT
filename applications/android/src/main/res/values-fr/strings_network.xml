@@ -12,7 +12,7 @@
     <string name="net_yes">oui</string>
     <string name="net_not_yet_routes">pas encore — aucune route avant ça</string>
     <string name="net_line_peers">pairs</string>
-    <string name="net_peers_value">%1$s actifs, %2$s fiables</string>
+    <string name="net_peers_value">%1$d actifs, %2$d fiables</string>
     <string name="net_waiting">attente %1$ds — un nœud doit comprendre comment il est joignable avant de pouvoir construire une route</string>
 
     <string name="net_starting">Démarrage…</string>
@@ -20,7 +20,7 @@
     <string name="net_stop">Arrêter</string>
     <string name="net_testing">Test…</string>
     <string name="net_test_route">Tester une route</string>
-    <string name="net_route_ok">route allouée — blob de %1$s octets</string>
+    <string name="net_route_ok">route allouée — blob de %1$d octets</string>
     <string name="net_route_failed">échec de la route : %1$s</string>
     <string name="net_keystore_failed">Le magasin de clés d’Android n’a pas pu s’ouvrir, le transport ne peut donc pas démarrer. Ton portefeuille et tes contacts sont stockés à part et sont intacts. Si tu as installé DUCAT à la main, vérifie que le téléchargement correspond au processeur de ton téléphone : la mauvaise version échoue exactement comme ça.</string>
 </resources>
