@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">فقط نامت می‌رود. بقیه روی همین دستگاه می‌ماند.</string>
     <string name="myprofile_saved">ذخیره شد</string>
     <string name="myprofile_save">ذخیره</string>
+    <string name="myprofile_email_too_long">این از حداکثر طول یک نشانی ایمیل بلندتر است.</string>
+    <string name="myprofile_email_shape">این به شکل یک نشانی ایمیل نیست.</string>
+    <string name="myprofile_phone_digits">فقط رقم — بدون +، فاصله یا پرانتز. کد کشور هم رقم است.</string>
+    <string name="myprofile_phone_too_long">شماره تلفن حداکثر ۱۵ رقم است.</string>
+    <string name="myprofile_signal_too_long">این از حداکثر طول یک نام کاربری Signal بلندتر است.</string>
+    <string name="myprofile_signal_shape">نام کاربری Signal شبیه name.12 است — یک نام، یک نقطه، سپس رقم‌ها.</string>
 </resources>

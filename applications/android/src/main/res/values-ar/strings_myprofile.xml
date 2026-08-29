@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">اسمك وحده هو ما يسافر. والبقية تبقى على هذا الجهاز.</string>
     <string name="myprofile_saved">حُفظ</string>
     <string name="myprofile_save">حفظ</string>
+    <string name="myprofile_email_too_long">هذا أطول مما يمكن أن يكون عليه عنوان بريد إلكتروني.</string>
+    <string name="myprofile_email_shape">هذا ليس على هيئة عنوان بريد إلكتروني.</string>
+    <string name="myprofile_phone_digits">أرقام فقط — دون + أو مسافات أو أقواس. رمز البلد أرقام أيضًا.</string>
+    <string name="myprofile_phone_too_long">رقم الهاتف 15 رقمًا على الأكثر.</string>
+    <string name="myprofile_signal_too_long">هذا أطول مما يمكن أن يكون عليه اسم مستخدم Signal.</string>
+    <string name="myprofile_signal_shape">اسم مستخدم Signal يبدو مثل name.12 — اسم، ثم نقطة، ثم أرقام.</string>
 </resources>

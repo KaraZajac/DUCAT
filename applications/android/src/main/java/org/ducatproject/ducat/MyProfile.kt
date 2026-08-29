@@ -117,37 +117,39 @@ class MyProfile(context: Context) {
          * The same rules `core` enforces, so a person is corrected while typing
          * rather than after publishing.
          *
-         * Returns null when the value is acceptable, or the reason it is not.
-         * Kept beside each other on purpose: two copies of a rule drift, and
-         * these are checked against the vectors on the other side of the bridge.
+         * Returns null when the value is acceptable, or the string resource
+         * naming the reason it is not — an id rather than a sentence, because
+         * these were the last English sentences hardcoded on a translated
+         * screen. Kept beside each other on purpose: two copies of a rule
+         * drift, and these are checked against the vectors on the other side
+         * of the bridge.
          */
-        fun emailProblem(v: String): String? {
+        fun emailProblem(v: String): Int? {
             if (v.isBlank()) return null
             val ok = Regex("^[A-Za-z0-9._%+\\-']+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$")
             return when {
-                v.length > 254 -> "That is longer than an email address can be."
-                !ok.matches(v) -> "That is not the shape of an email address."
-                v.contains("..") -> "That is not the shape of an email address."
+                v.length > 254 -> R.string.myprofile_email_too_long
+                !ok.matches(v) -> R.string.myprofile_email_shape
+                v.contains("..") -> R.string.myprofile_email_shape
                 else -> null
             }
         }
 
-        fun phoneProblem(v: String): String? {
+        fun phoneProblem(v: String): Int? {
             if (v.isBlank()) return null
             return when {
-                !v.all { it.isDigit() } ->
-                    "Digits only — no +, spaces or brackets. The country code is digits too."
-                v.length > 15 -> "A phone number is at most 15 digits."
+                !v.all { it.isDigit() } -> R.string.myprofile_phone_digits
+                v.length > 15 -> R.string.myprofile_phone_too_long
                 else -> null
             }
         }
 
-        fun signalProblem(v: String): String? {
+        fun signalProblem(v: String): Int? {
             if (v.isBlank()) return null
             val ok = Regex("^[A-Za-z_][A-Za-z0-9_]{2,}\\.[0-9]{2,}$")
             return when {
-                v.length > 48 -> "That is longer than a Signal username can be."
-                !ok.matches(v) -> "A Signal username looks like name.12 — a name, a dot, then digits."
+                v.length > 48 -> R.string.myprofile_signal_too_long
+                !ok.matches(v) -> R.string.myprofile_signal_shape
                 else -> null
             }
         }

@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">सिर्फ़ आपका नाम जाता है। बाकी इसी डिवाइस पर रहता है।</string>
     <string name="myprofile_saved">सहेज लिया</string>
     <string name="myprofile_save">सहेजें</string>
+    <string name="myprofile_email_too_long">यह ईमेल पते की अधिकतम लंबाई से ज़्यादा है।</string>
+    <string name="myprofile_email_shape">यह ईमेल पते के रूप में नहीं है।</string>
+    <string name="myprofile_phone_digits">सिर्फ़ अंक — +, स्पेस या कोष्ठक नहीं। देश कोड भी अंकों में।</string>
+    <string name="myprofile_phone_too_long">फ़ोन नंबर अधिकतम 15 अंकों का होता है।</string>
+    <string name="myprofile_signal_too_long">यह Signal उपयोगकर्ता नाम की अधिकतम लंबाई से ज़्यादा है।</string>
+    <string name="myprofile_signal_shape">Signal उपयोगकर्ता नाम name.12 जैसा दिखता है — एक नाम, एक बिंदु, फिर अंक।</string>
 </resources>

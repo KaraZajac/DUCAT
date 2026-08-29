@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">Hanya namamu yang terkirim. Sisanya tetap di perangkat ini.</string>
     <string name="myprofile_saved">Tersimpan</string>
     <string name="myprofile_save">Simpan</string>
+    <string name="myprofile_email_too_long">Itu lebih panjang dari yang mungkin untuk alamat email.</string>
+    <string name="myprofile_email_shape">Itu bukan bentuk alamat email.</string>
+    <string name="myprofile_phone_digits">Angka saja — tanpa +, spasi, atau tanda kurung. Kode negara juga angka.</string>
+    <string name="myprofile_phone_too_long">Nomor telepon paling banyak 15 digit.</string>
+    <string name="myprofile_signal_too_long">Itu lebih panjang dari yang mungkin untuk nama pengguna Signal.</string>
+    <string name="myprofile_signal_shape">Nama pengguna Signal terlihat seperti nama.12 — nama, titik, lalu angka.</string>
 </resources>

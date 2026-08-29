@@ -640,7 +640,13 @@ class TabStore(private val context: Context) {
                 // which is also simply the truth of what was paid for.
                 val tip = hit.amountPxmr - tab.settledTotal
                 val receiptLines =
-                    if (tip > 0) tab.lines + BillItem("Tip — thank you", tip) else tab.lines
+                    if (tip > 0) {
+                        tab.lines + BillItem(
+                            context.getString(R.string.bartab_tip_line), tip,
+                        )
+                    } else {
+                        tab.lines
+                    }
                 // The mark first, the receipt second — markPaidOutside's own
                 // rule, finally applied here too. Receipt-first meant a death
                 // in between left the tab settled and the key image

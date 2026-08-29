@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">Seul ton nom voyage. Le reste ne quitte pas cet appareil.</string>
     <string name="myprofile_saved">Enregistré</string>
     <string name="myprofile_save">Enregistrer</string>
+    <string name="myprofile_email_too_long">C\'est plus long qu\'une adresse e-mail ne peut l\'être.</string>
+    <string name="myprofile_email_shape">Cela n\'a pas la forme d\'une adresse e-mail.</string>
+    <string name="myprofile_phone_digits">Chiffres uniquement — pas de +, d\'espaces ni de parenthèses. L\'indicatif du pays aussi est en chiffres.</string>
+    <string name="myprofile_phone_too_long">Un numéro de téléphone compte au plus 15 chiffres.</string>
+    <string name="myprofile_signal_too_long">C\'est plus long qu\'un nom d\'utilisateur Signal ne peut l\'être.</string>
+    <string name="myprofile_signal_shape">Un nom d\'utilisateur Signal ressemble à nom.12 — un nom, un point, puis des chiffres.</string>
 </resources>

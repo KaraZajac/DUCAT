@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">มีเพียงชื่อของคุณที่ถูกส่ง ที่เหลืออยู่บนเครื่องนี้</string>
     <string name="myprofile_saved">บันทึกแล้ว</string>
     <string name="myprofile_save">บันทึก</string>
+    <string name="myprofile_email_too_long">ยาวเกินกว่าที่อยู่อีเมลจะเป็นได้</string>
+    <string name="myprofile_email_shape">รูปแบบไม่ใช่ที่อยู่อีเมล</string>
+    <string name="myprofile_phone_digits">ตัวเลขเท่านั้น — ไม่มี + เว้นวรรค หรือวงเล็บ รหัสประเทศก็เป็นตัวเลขเช่นกัน</string>
+    <string name="myprofile_phone_too_long">หมายเลขโทรศัพท์มีได้ไม่เกิน 15 หลัก</string>
+    <string name="myprofile_signal_too_long">ยาวเกินกว่าชื่อผู้ใช้ Signal จะเป็นได้</string>
+    <string name="myprofile_signal_shape">ชื่อผู้ใช้ Signal มีรูปแบบ name.12 — ชื่อ จุด แล้วตามด้วยตัวเลข</string>
 </resources>

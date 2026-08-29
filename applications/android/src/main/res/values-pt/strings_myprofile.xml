@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">Só o seu nome viaja. O resto fica neste aparelho.</string>
     <string name="myprofile_saved">Salvo</string>
     <string name="myprofile_save">Salvar</string>
+    <string name="myprofile_email_too_long">Isso é mais longo do que um endereço de e-mail pode ser.</string>
+    <string name="myprofile_email_shape">Isso não tem a forma de um endereço de e-mail.</string>
+    <string name="myprofile_phone_digits">Só dígitos — sem +, espaços ou parênteses. O código do país também é em dígitos.</string>
+    <string name="myprofile_phone_too_long">Um número de telefone tem no máximo 15 dígitos.</string>
+    <string name="myprofile_signal_too_long">Isso é mais longo do que um nome de usuário do Signal pode ser.</string>
+    <string name="myprofile_signal_shape">Um nome de usuário do Signal se parece com nome.12 — um nome, um ponto e depois dígitos.</string>
 </resources>

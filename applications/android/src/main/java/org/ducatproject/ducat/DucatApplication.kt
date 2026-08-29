@@ -47,6 +47,13 @@ class DucatApplication : Application() {
         // First, so everything after it — including a crash in the next
         // line — is on the record.
         DucatLog.init(this)
+        // Here as well as in MainActivity: a poller wake or a notification
+        // can run in a process no activity has ever started, and until the
+        // activity's assignment lands the fallback name stayed English on a
+        // translated phone. attachBaseContext above has already applied the
+        // chosen language; the activity's copy still refreshes it after an
+        // in-app language change, which recreates the activity but not this.
+        ContactNaming.unnamed = getString(R.string.contact_unnamed)
         // Started-activity count → foreground flag. Config changes pass
         // through as stop+start of different instances; the count holds.
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {

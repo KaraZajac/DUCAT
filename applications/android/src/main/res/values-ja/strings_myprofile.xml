@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">渡るのは名前だけです。残りはこの端末に留まります。</string>
     <string name="myprofile_saved">保存しました</string>
     <string name="myprofile_save">保存</string>
+    <string name="myprofile_email_too_long">メールアドレスとして長すぎます。</string>
+    <string name="myprofile_email_shape">メールアドレスの形になっていません。</string>
+    <string name="myprofile_phone_digits">数字のみ — +・スペース・かっこは不要です。国番号も数字で入力します。</string>
+    <string name="myprofile_phone_too_long">電話番号は最大15桁です。</string>
+    <string name="myprofile_signal_too_long">Signalのユーザー名として長すぎます。</string>
+    <string name="myprofile_signal_shape">Signalのユーザー名は name.12 の形です — 名前、ドット、そして数字。</string>
 </resources>

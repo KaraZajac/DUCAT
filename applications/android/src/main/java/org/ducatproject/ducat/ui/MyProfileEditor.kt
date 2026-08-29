@@ -187,10 +187,13 @@ fun MyProfileEditor() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(6.dp))
-        Field(stringResource(R.string.myprofile_email), email, MyProfile.emailProblem(email)) { email = it; saved = false }
-        Field(stringResource(R.string.myprofile_phone), phone, MyProfile.phoneProblem(phone),
+        Field(stringResource(R.string.myprofile_email), email,
+            MyProfile.emailProblem(email)?.let { stringResource(it) }) { email = it; saved = false }
+        Field(stringResource(R.string.myprofile_phone), phone,
+            MyProfile.phoneProblem(phone)?.let { stringResource(it) },
             hint = stringResource(R.string.myprofile_phone_hint)) { phone = it; saved = false }
-        Field(stringResource(R.string.myprofile_signal), signal, MyProfile.signalProblem(signal),
+        Field(stringResource(R.string.myprofile_signal), signal,
+            MyProfile.signalProblem(signal)?.let { stringResource(it) },
             hint = stringResource(R.string.myprofile_signal_hint)) { signal = it; saved = false }
 
         Spacer(Modifier.height(10.dp))

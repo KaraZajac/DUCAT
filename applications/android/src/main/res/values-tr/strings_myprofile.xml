@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">Yalnızca adın gider. Gerisi bu cihazda kalır.</string>
     <string name="myprofile_saved">Kaydedildi</string>
     <string name="myprofile_save">Kaydet</string>
+    <string name="myprofile_email_too_long">Bu, bir e-posta adresinin olabileceğinden daha uzun.</string>
+    <string name="myprofile_email_shape">Bu, bir e-posta adresi biçiminde değil.</string>
+    <string name="myprofile_phone_digits">Yalnızca rakam — +, boşluk veya ayraç yok. Ülke kodu da rakamlardan oluşur.</string>
+    <string name="myprofile_phone_too_long">Bir telefon numarası en fazla 15 rakamdır.</string>
+    <string name="myprofile_signal_too_long">Bu, bir Signal kullanıcı adının olabileceğinden daha uzun.</string>
+    <string name="myprofile_signal_shape">Bir Signal kullanıcı adı ad.12 gibi görünür — bir ad, bir nokta, sonra rakamlar.</string>
 </resources>

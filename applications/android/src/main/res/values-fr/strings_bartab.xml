@@ -54,4 +54,5 @@
     <string name="receipt_note_oob">Reçu — réglé hors DUCAT. Merci</string>
     <string name="bill_note_cancelled">L\'addition de %1$s est annulée — rien à payer.</string>
     <string name="bill_note_sale">Votre ticket</string>
+    <string name="bartab_tip_line">Pourboire — merci</string>
 </resources>

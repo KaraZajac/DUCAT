@@ -54,4 +54,5 @@
     <string name="receipt_note_oob">Beleg — außerhalb von DUCAT bezahlt. Danke</string>
     <string name="bill_note_cancelled">Die Rechnung über %1$s ist storniert — nichts zu zahlen.</string>
     <string name="bill_note_sale">Deine Rechnung</string>
+    <string name="bartab_tip_line">Trinkgeld — danke</string>
 </resources>

@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">只发出你的名字。其余留在这台设备上。</string>
     <string name="myprofile_saved">已保存</string>
     <string name="myprofile_save">保存</string>
+    <string name="myprofile_email_too_long">这超过了电子邮件地址的最大长度。</string>
+    <string name="myprofile_email_shape">这不是电子邮件地址的格式。</string>
+    <string name="myprofile_phone_digits">只能是数字——不要 +、空格或括号。国家代码也是数字。</string>
+    <string name="myprofile_phone_too_long">电话号码最多 15 位数字。</string>
+    <string name="myprofile_signal_too_long">这超过了 Signal 用户名的最大长度。</string>
+    <string name="myprofile_signal_shape">Signal 用户名形如 name.12——名字、一个点，然后是数字。</string>
 </resources>

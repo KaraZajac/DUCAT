@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">Chỉ tên bạn được gửi đi. Phần còn lại ở lại thiết bị này.</string>
     <string name="myprofile_saved">Đã lưu</string>
     <string name="myprofile_save">Lưu</string>
+    <string name="myprofile_email_too_long">Chuỗi này dài hơn mức một địa chỉ email có thể có.</string>
+    <string name="myprofile_email_shape">Chuỗi này không có dạng của một địa chỉ email.</string>
+    <string name="myprofile_phone_digits">Chỉ chữ số — không có +, dấu cách hay ngoặc. Mã quốc gia cũng là chữ số.</string>
+    <string name="myprofile_phone_too_long">Số điện thoại có nhiều nhất 15 chữ số.</string>
+    <string name="myprofile_signal_too_long">Chuỗi này dài hơn mức một tên người dùng Signal có thể có.</string>
+    <string name="myprofile_signal_shape">Tên người dùng Signal có dạng ten.12 — một cái tên, một dấu chấm, rồi các chữ số.</string>
 </resources>

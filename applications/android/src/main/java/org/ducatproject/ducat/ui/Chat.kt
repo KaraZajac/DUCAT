@@ -2431,13 +2431,18 @@ private sealed interface Take {
  * reachability they chose to publish — not a connection ticket: a card is
  * claim-once and minting one for a third party is not this device's to do.
  * The persona key is the durable part; everything else is introduction.
+ *
+ * Labels are emoji (and the one brand name) rather than words, because the
+ * sender cannot know what language the receiver reads — the same reasoning
+ * as the 📷/🎤/📎 bodies. "DUCAT persona:" was the one English label left in
+ * the card.
  */
 private fun contactCard(c: Contact): String = buildString {
     append("👤 ${c.displayName()}\n")
     c.email?.let { append("✉ $it\n") }
     c.phone?.let { append("☎ $it\n") }
     c.signal?.let { append("Signal: $it\n") }
-    append("DUCAT persona: ${c.personaHex}")
+    append("🔑 ${c.personaHex}")
 }
 
 @Composable

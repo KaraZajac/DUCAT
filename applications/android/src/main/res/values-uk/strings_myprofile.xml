@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">Їде лише твоє ім\'я. Решта лишається на цьому пристрої.</string>
     <string name="myprofile_saved">Збережено</string>
     <string name="myprofile_save">Зберегти</string>
+    <string name="myprofile_email_too_long">Це довше, ніж може бути адреса пошти.</string>
+    <string name="myprofile_email_shape">Це не схоже на адресу пошти.</string>
+    <string name="myprofile_phone_digits">Лише цифри — без +, пробілів і дужок. Код країни теж цифрами.</string>
+    <string name="myprofile_phone_too_long">У телефонному номері щонайбільше 15 цифр.</string>
+    <string name="myprofile_signal_too_long">Це довше, ніж може бути ім\'я користувача Signal.</string>
+    <string name="myprofile_signal_shape">Ім\'я користувача Signal має вигляд name.12 — ім\'я, крапка, потім цифри.</string>
 </resources>

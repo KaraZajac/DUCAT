@@ -54,4 +54,5 @@
     <string name="receipt_note_oob">Receipt — settled outside DUCAT. Thank you</string>
     <string name="bill_note_cancelled">That bill for %1$s is cancelled — nothing to pay.</string>
     <string name="bill_note_sale">Your bill</string>
+    <string name="bartab_tip_line">Tip — thank you</string>
 </resources>

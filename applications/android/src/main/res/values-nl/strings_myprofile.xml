@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">Alleen je naam reist mee. De rest blijft op dit apparaat.</string>
     <string name="myprofile_saved">Opgeslagen</string>
     <string name="myprofile_save">Opslaan</string>
+    <string name="myprofile_email_too_long">Dat is langer dan een e-mailadres kan zijn.</string>
+    <string name="myprofile_email_shape">Dat heeft niet de vorm van een e-mailadres.</string>
+    <string name="myprofile_phone_digits">Alleen cijfers — geen +, spaties of haakjes. De landcode bestaat ook uit cijfers.</string>
+    <string name="myprofile_phone_too_long">Een telefoonnummer telt hoogstens 15 cijfers.</string>
+    <string name="myprofile_signal_too_long">Dat is langer dan een Signal-gebruikersnaam kan zijn.</string>
+    <string name="myprofile_signal_shape">Een Signal-gebruikersnaam ziet eruit als naam.12 — een naam, een punt, dan cijfers.</string>
 </resources>

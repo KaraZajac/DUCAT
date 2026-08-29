@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">이름만 전달돼요. 나머지는 이 기기에 남아요.</string>
     <string name="myprofile_saved">저장됨</string>
     <string name="myprofile_save">저장</string>
+    <string name="myprofile_email_too_long">이메일 주소로는 너무 길어요.</string>
+    <string name="myprofile_email_shape">이메일 주소 모양이 아니에요.</string>
+    <string name="myprofile_phone_digits">숫자만 입력해요 — +, 공백, 괄호는 빼고요. 국가 번호도 숫자예요.</string>
+    <string name="myprofile_phone_too_long">전화번호는 최대 15자리예요.</string>
+    <string name="myprofile_signal_too_long">Signal 사용자 이름으로는 너무 길어요.</string>
+    <string name="myprofile_signal_shape">Signal 사용자 이름은 name.12 모양이에요 — 이름, 점, 그다음 숫자.</string>
 </resources>

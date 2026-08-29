@@ -53,4 +53,5 @@
     <string name="receipt_note_oob">ใบเสร็จ — ชำระนอก DUCAT ขอบคุณ</string>
     <string name="bill_note_cancelled">บิล %1$s ถูกยกเลิกแล้ว ไม่ต้องชำระ</string>
     <string name="bill_note_sale">บิลของคุณ</string>
+    <string name="bartab_tip_line">ทิป — ขอบคุณ</string>
 </resources>

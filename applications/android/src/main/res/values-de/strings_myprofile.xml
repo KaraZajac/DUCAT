@@ -26,4 +26,10 @@
     <string name="myprofile_share_off_note">Nur dein Name reist mit. Der Rest bleibt auf diesem Gerät.</string>
     <string name="myprofile_saved">Gespeichert</string>
     <string name="myprofile_save">Speichern</string>
+    <string name="myprofile_email_too_long">Das ist länger, als eine E-Mail-Adresse sein kann.</string>
+    <string name="myprofile_email_shape">Das hat nicht die Form einer E-Mail-Adresse.</string>
+    <string name="myprofile_phone_digits">Nur Ziffern — kein +, keine Leerzeichen oder Klammern. Auch die Ländervorwahl besteht aus Ziffern.</string>
+    <string name="myprofile_phone_too_long">Eine Telefonnummer hat höchstens 15 Ziffern.</string>
+    <string name="myprofile_signal_too_long">Das ist länger, als ein Signal-Benutzername sein kann.</string>
+    <string name="myprofile_signal_shape">Ein Signal-Benutzername sieht aus wie name.12 — ein Name, ein Punkt, dann Ziffern.</string>
 </resources>

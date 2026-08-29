@@ -54,4 +54,5 @@
     <string name="receipt_note_oob">Ricevuta — saldato fuori da DUCAT. Grazie</string>
     <string name="bill_note_cancelled">Il conto da %1$s è annullato — non c\'è nulla da pagare.</string>
     <string name="bill_note_sale">Il tuo conto</string>
+    <string name="bartab_tip_line">Mancia — grazie</string>
 </resources>
